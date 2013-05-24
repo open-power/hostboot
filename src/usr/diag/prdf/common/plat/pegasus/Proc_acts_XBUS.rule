@@ -66,9 +66,9 @@ group gXbusChipletFir filter singlebit
     (XbusChipletFir, bit(8)) ? analyze(gIoxFir_3);
 
     /** XbusChipletFir[9]
-     *  Attention from PSIFIR (Venice only)
+     *  Attention from PSIXBUSFIR
      */
-    (XbusChipletFir, bit(9)) ? analyze(gXbusPsiFir);
+    (XbusChipletFir, bit(9)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -937,31 +937,6 @@ group gIoxFir_3 filter singlebit
      *  FIR_SCOMFIR_ERROR_CLONE
      */
     (IoxFir_3, bit(49)) ? defaultMaskedError;
-};
-
-################################################################################
-# XBUS Chiplet PSIFIR
-################################################################################
-
-rule XbusPsiFir
-{
-  CHECK_STOP:
-     XBUS_PSIFIR & ~XBUS_PSIFIR_MASK & ~XBUS_PSIFIR_ACT0 & ~XBUS_PSIFIR_ACT1;
-  RECOVERABLE:
-     XBUS_PSIFIR & ~XBUS_PSIFIR_MASK & ~XBUS_PSIFIR_ACT0 &  XBUS_PSIFIR_ACT1;
-};
-
-group gXbusPsiFir filter singlebit
-{
-    /** XBUS_PSIFIR[5]
-     *  INTERNAL_SCOM_ERROR
-     */
-    (XbusPsiFir, bit(5)) ? defaultMaskedError;
-
-    /** XBUS_PSIFIR[6]
-     *  INTERNAL_SCOM_ERROR_CLONE
-     */
-    (XbusPsiFir, bit(6)) ? defaultMaskedError;
 };
 
 ################################################################################

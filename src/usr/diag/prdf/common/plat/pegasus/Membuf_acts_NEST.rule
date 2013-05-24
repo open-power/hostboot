@@ -70,12 +70,12 @@ group gNestChipletFir filter singlebit
     /** NEST_CHIPLET_FIR[12]
      *  Attention from NESTFBISTFIR
      */
-    (NestChipletFir, bit(12))? analyze(gNestFbistFir);
+    (NestChipletFir, bit(12))? defaultMaskedError;
 
     /** NEST_CHIPLET_FIR[13]
-     *  Attention from SENSORCACHEFIR
+     *  Attention from SCACFIR
      */
-    (NestChipletFir, bit(13)) ? analyze(gSensorCacheFir);
+    (NestChipletFir, bit(13)) ? analyze(gScacFir);
 
     /** NEST_CHIPLET_FIR[14]
      *  Attention from MBS secure FIR
@@ -312,163 +312,157 @@ group gDmiFir filter singlebit
 };
 
 ################################################################################
-#  NEST Chiplet SensorCacheFir
+#  NEST Chiplet ScacFir
 ################################################################################
 
-rule SensorCacheFir
+rule ScacFir
 {
-    CHECK_STOP:
-        SENSORCACHEFIR       & ~SENSORCACHEFIR_MASK &
-        ~SENSORCACHEFIR_ACT0 & ~SENSORCACHEFIR_ACT1;
-    UNIT_CS:
-        SENSORCACHEFIR       & ~SENSORCACHEFIR_MASK &
-        ~SENSORCACHEFIR_ACT0 & ~SENSORCACHEFIR_ACT1;
-    RECOVERABLE:
-        SENSORCACHEFIR       & ~SENSORCACHEFIR_MASK &
-        ~SENSORCACHEFIR_ACT0 &  SENSORCACHEFIR_ACT1;
+    CHECK_STOP:  SCACFIR & ~SCACFIR_MASK & ~SCACFIR_ACT0 & ~SCACFIR_ACT1;
+    UNIT_CS:     SCACFIR & ~SCACFIR_MASK & ~SCACFIR_ACT0 & ~SCACFIR_ACT1;
+    RECOVERABLE: SCACFIR & ~SCACFIR_MASK & ~SCACFIR_ACT0 &  SCACFIR_ACT1;
 };
 
-group gSensorCacheFir filter singlebit
+group gScacFir filter singlebit
 {
-    /** SENSORCACHEFIR[0]
+    /** SCACFIR[0]
      *  SCAC_LFIR_I2CMINVADDR
      */
-    (SensorCacheFir, bit(0)) ? TBDDefaultCallout;
+    (ScacFir, bit(0)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[1]
+    /** SCACFIR[1]
      *  SCAC_LFIR_I2CMINVWRITE
      */
-    (SensorCacheFir, bit(1)) ? TBDDefaultCallout;
+    (ScacFir, bit(1)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[2]
+    /** SCACFIR[2]
      *  SCAC_LFIR_I2CMINVREAD
      */
-    (SensorCacheFir, bit(2)) ? TBDDefaultCallout;
+    (ScacFir, bit(2)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[3]
+    /** SCACFIR[3]
      *  SCAC_LFIR_I2CMAPAR
      */
-    (SensorCacheFir, bit(3)) ? TBDDefaultCallout;
+    (ScacFir, bit(3)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[4]
+    /** SCACFIR[4]
      *  SCAC_LFIR_I2CMPAR
      */
-    (SensorCacheFir, bit(4)) ? TBDDefaultCallout;
+    (ScacFir, bit(4)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[5]
+    /** SCACFIR[5]
      *  SCAC_LFIR_I2CMLBPAR
      */
-    (SensorCacheFir, bit(5)) ? TBDDefaultCallout;
+    (ScacFir, bit(5)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[10]
+    /** SCACFIR[10]
      *  SCAC_LFIR_I2CMINVCMD
      */
-    (SensorCacheFir, bit(10)) ? TBDDefaultCallout;
+    (ScacFir, bit(10)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[11]
+    /** SCACFIR[11]
      *  SCAC_LFIR_I2CMPERR
      */
-    (SensorCacheFir, bit(11)) ? TBDDefaultCallout;
+    (ScacFir, bit(11)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[12]
+    /** SCACFIR[12]
      *  SCAC_LFIR_I2CMOVERRUN
      */
-    (SensorCacheFir, bit(12)) ? TBDDefaultCallout;
+    (ScacFir, bit(12)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[13]
+    /** SCACFIR[13]
      *  SCAC_LFIR_I2CMACCESS
      */
-    (SensorCacheFir, bit(13)) ? TBDDefaultCallout;
+    (ScacFir, bit(13)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[14]
+    /** SCACFIR[14]
      *  SCAC_LFIR_I2CMARB
      */
-    (SensorCacheFir, bit(14)) ? TBDDefaultCallout;
+    (ScacFir, bit(14)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[15]
+    /** SCACFIR[15]
      *  SCAC_LFIR_I2CMNACK
      */
-    (SensorCacheFir, bit(15)) ? TBDDefaultCallout;
+    (ScacFir, bit(15)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[16]
+    /** SCACFIR[16]
      *  SCAC_LFIR_I2CMSTOP
      */
-    (SensorCacheFir, bit(16)) ? TBDDefaultCallout;
+    (ScacFir, bit(16)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[17]
+    /** SCACFIR[17]
      *  SCAC_LFIR_LOCALPIB1
      */
-    (SensorCacheFir, bit(17)) ? TBDDefaultCallout;
+    (ScacFir, bit(17)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[18]
+    /** SCACFIR[18]
      *  SCAC_LFIR_LOCALPIB2
      */
-    (SensorCacheFir, bit(18)) ? TBDDefaultCallout;
+    (ScacFir, bit(18)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[19]
+    /** SCACFIR[19]
      *  SCAC_LFIR_LOCALPIB3
      */
-    (SensorCacheFir, bit(19)) ? TBDDefaultCallout;
+    (ScacFir, bit(19)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[20]
+    /** SCACFIR[20]
      *  SCAC_LFIR_LOCALPIB4
      */
-    (SensorCacheFir, bit(20)) ? TBDDefaultCallout;
+    (ScacFir, bit(20)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[21]
+    /** SCACFIR[21]
      *  SCAC_LFIR_LOCALPIB5
      */
-    (SensorCacheFir, bit(21)) ? TBDDefaultCallout;
+    (ScacFir, bit(21)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[22]
+    /** SCACFIR[22]
      *  SCAC_LFIR_LOCALPIB6
      */
-    (SensorCacheFir, bit(22)) ? TBDDefaultCallout;
+    (ScacFir, bit(22)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[23]
+    /** SCACFIR[23]
      *  SCAC_LFIR_LOCALPIB7
      */
-    (SensorCacheFir, bit(23)) ? TBDDefaultCallout;
+    (ScacFir, bit(23)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[24]
+    /** SCACFIR[24]
      *  SCAC_LFIR_STALLERROR
      */
-    (SensorCacheFir, bit(24)) ? TBDDefaultCallout;
+    (ScacFir, bit(24)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[25]
+    /** SCACFIR[25]
      *  SCAC_LFIR_REGPARERR
      */
-    (SensorCacheFir, bit(25)) ? TBDDefaultCallout;
+    (ScacFir, bit(25)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[26]
+    /** SCACFIR[26]
      *  SCAC_LFIR_REGPARERRX
      */
-    (SensorCacheFir, bit(26)) ? TBDDefaultCallout;
+    (ScacFir, bit(26)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[32]
+    /** SCACFIR[32]
      *  SCAC_LFIR_SMERR
      */
-    (SensorCacheFir, bit(32)) ? TBDDefaultCallout;
+    (ScacFir, bit(32)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[33]
+    /** SCACFIR[33]
      *  SCAC_LFIR_REGACCERR
      */
-    (SensorCacheFir, bit(33)) ? TBDDefaultCallout;
+    (ScacFir, bit(33)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[34]
+    /** SCACFIR[34]
      *  SCAC_LFIR_RESETERR
      */
-    (SensorCacheFir, bit(34)) ? TBDDefaultCallout;
+    (ScacFir, bit(34)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[35]
+    /** SCACFIR[35]
      *  SCAC_LFIR_INTERNAL_SCOM_ERROR
      */
-    (SensorCacheFir, bit(35)) ? TBDDefaultCallout;
+    (ScacFir, bit(35)) ? TBDDefaultCallout;
 
-    /** SENSORCACHEFIR[36]
+    /** SCACFIR[36]
      *  SCAC_LFIR_INTERNAL_SCOM_ERROR_CLONE
      */
-    (SensorCacheFir, bit(36)) ? TBDDefaultCallout;
+    (ScacFir, bit(36)) ? TBDDefaultCallout;
 };
 
 ################################################################################
@@ -1081,73 +1075,6 @@ group gMcbistFir filter singlebit
      *  MBSFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
     (Mcbist23Fir, bit(16)) ? TBDDefaultCallout;
-};
-
-################################################################################
-#  NEST Chiplet NESTFBISTFIR
-################################################################################
-
-rule NestFbistFir
-{
-  CHECK_STOP:
-    NESTFBISTFIR & ~NESTFBISTFIR_MASK & ~NESTFBISTFIR_ACT0 & ~NESTFBISTFIR_ACT1;
-  UNIT_CS:
-    NESTFBISTFIR & ~NESTFBISTFIR_MASK & ~NESTFBISTFIR_ACT0 & ~NESTFBISTFIR_ACT1;
-  RECOVERABLE:
-    NESTFBISTFIR & ~NESTFBISTFIR_MASK & ~NESTFBISTFIR_ACT0 &  NESTFBISTFIR_ACT1;
-};
-
-group gNestFbistFir filter singlebit
-{
-    /** NESTFBISTFIR[0]
-     *  FBN_FIR_REG_FBN_SCOM_UE
-     */
-    (NestFbistFir, bit(0)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[1]
-     *  FBN_FIR_REG_FBN_USCHK_1HOT
-     */
-    (NestFbistFir, bit(1)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[2]
-     *  FBN_FIR_REG_FBN_USCHK_DATA_DROP
-     */
-    (NestFbistFir, bit(2)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[3]
-     *  FBN_FIR_REG_FBN_DGEN_1HOT
-     */
-    (NestFbistFir, bit(3)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[4]
-     *  FBN_FIR_REG_FBN_CMD_1HOT
-     */
-    (NestFbistFir, bit(4)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[5]
-     *  FBN_FIR_REG_FBN_CMD_EARLY_RESPONSE
-     */
-    (NestFbistFir, bit(5)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[6]
-     *  FBN_FIR_REG_FBN_FBIST_FAIL
-     */
-    (NestFbistFir, bit(6)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[7]
-     *  FBN_FIR_REG_FBN_US_CRC_ERR
-     */
-    (NestFbistFir, bit(7)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[15]
-     *  FBN_FIR_REG_INTERNAL_SCOM_ERROR
-     */
-    (NestFbistFir, bit(15)) ? TBDDefaultCallout;
-
-    /** NESTFBISTFIR[16]
-     *  FBN_FIR_REG_INTERNAL_SCOM_ERROR_CLONE
-     */
-    (NestFbistFir, bit(16)) ? TBDDefaultCallout;
 };
 
 ################################################################################

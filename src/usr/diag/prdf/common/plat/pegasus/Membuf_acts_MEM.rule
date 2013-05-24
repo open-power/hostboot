@@ -75,7 +75,7 @@ group gMemChipletFir filter singlebit
     /** MEM_CHIPLET_FIR[11]
      *  Attention from MEMFBISTFIR
      */
-    (MemChipletFir, bit(11)) ? analyze(gMemFbistFir);
+    (MemChipletFir, bit(11)) ? defaultMaskedError;
 
     /** MEM_CHIPLET_FIR[12]
      *  Attention from MBASECUREFIR (MBA 01)
@@ -168,58 +168,6 @@ group gMemLFir filter singlebit
      *  Local errors from Trace Array ( error)
      */
     (MemLFir, bit(10|11)) ? TBDDefaultCallout;
-};
-
-################################################################################
-#  MEM Chiplet MEMFBISTFIR
-################################################################################
-
-rule MemFbistFir
-{
-  CHECK_STOP:
-    MEMFBISTFIR & ~MEMFBISTFIR_MASK & ~MEMFBISTFIR_ACT0 & ~MEMFBISTFIR_ACT1;
-  UNIT_CS:
-    MEMFBISTFIR & ~MEMFBISTFIR_MASK & ~MEMFBISTFIR_ACT0 & ~MEMFBISTFIR_ACT1;
-  RECOVERABLE:
-    MEMFBISTFIR & ~MEMFBISTFIR_MASK & ~MEMFBISTFIR_ACT0 &  MEMFBISTFIR_ACT1;
-};
-
-group gMemFbistFir filter singlebit
-{
-    /** MBAFBISTFIR[0]
-     *  FBM_FIR_REG_FBM_SCOM_UE
-     */
-    (MemFbistFir, bit(0)) ? TBDDefaultCallout;
-
-    /** MBAFBISTFIR[1]
-     *  FBM_FIR_REG_FBM_CMD_CHK_1HOT
-     */
-    (MemFbistFir, bit(1)) ? TBDDefaultCallout;
-
-    /** MBAFBISTFIR[2]
-     *  FBM_FIR_REG_FBM_DS_DATA_DROP
-     */
-    (MemFbistFir, bit(2)) ? TBDDefaultCallout;
-
-    /** MBAFBISTFIR[3]
-     *  FBM_FIR_REG_FBM_DGEN_1HOT
-     */
-    (MemFbistFir, bit(3)) ? TBDDefaultCallout;
-
-    /** MBAFBISTFIR[4]
-     *  FBM_FIR_REG_FBM_DGEN_RD_DATA_DROP
-     */
-    (MemFbistFir, bit(4)) ? TBDDefaultCallout;
-
-    /** MBAFBISTFIR[15]
-     *  FBM_FIR_REG_INTERNAL_SCOM_ERROR
-     */
-    (MemFbistFir, bit(15)) ? TBDDefaultCallout;
-
-    /** MBAFBISTFIR[16]
-     *  FBM_FIR_REG_INTERNAL_SCOM_ERROR_CLONE
-     */
-    (MemFbistFir, bit(16)) ? TBDDefaultCallout;
 };
 
 ################################################################################

@@ -414,10 +414,10 @@
     };
 
     ############################################################################
-    # PB Chiplet PSIFIR
+    # PB Chiplet PSIHBFIR
     ############################################################################
 
-    register PSIFIR
+    register PSIHBFIR
     {
         name        "EN.TPC.PSIHB.PSIHB_FIR_REG";
         scomaddr    0x02010900;
@@ -426,7 +426,7 @@
         capture     group default;
     };
 
-    register PSIFIR_MASK
+    register PSIHBFIR_MASK
     {
         name        "EN.TPC.PSIHB.PSIHB_FIR_MASK_REG";
         scomaddr    0x02010903;
@@ -434,7 +434,7 @@
         capture     group default;
     };
 
-    register PSIFIR_ACT0
+    register PSIHBFIR_ACT0
     {
         name        "EN.TPC.PSIHB.PSIHB_FIR_ACTION0_REG";
         scomaddr    0x02010906;
@@ -442,7 +442,7 @@
         capture     group default;
     };
 
-    register PSIFIR_ACT1
+    register PSIHBFIR_ACT1
     {
         name        "EN.TPC.PSIHB.PSIHB_FIR_ACTION1_REG";
         scomaddr    0x02010907;

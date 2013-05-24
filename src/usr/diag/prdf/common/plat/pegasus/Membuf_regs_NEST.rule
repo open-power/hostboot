@@ -382,48 +382,21 @@
     # NEST Chiplet NESTFBISTFIR
     ############################################################################
 
+    # FIR not used. Capture for FFDC only.
+
     register NESTFBISTFIR
     {
         name        "FBIST.FBN.FBN_FIR_REG";
         scomaddr    0x02010880;
-        reset       (&, 0x02010881);
-        mask        (|, 0x02010885);
-        capture     group default;
-        capture     group FirRegs;
-    };
-
-    register NESTFBISTFIR_MASK
-    {
-        name        "FBIST.FBN.FBN_FIR_MASK_REG";
-        scomaddr    0x02010883;
-        capture     type secondary;
-        capture     group default;
-        capture     group FirRegs;
-    };
-
-    register NESTFBISTFIR_ACT0
-    {
-        name        "FBIST.FBN.FBN_FIR_ACTION0_REG";
-        scomaddr    0x02010886;
-        capture     type secondary;
-        capture     group default;
-        capture     group FirRegs;
-    };
-
-    register NESTFBISTFIR_ACT1
-    {
-        name        "FBIST.FBN.FBN_FIR_ACTION1_REG";
-        scomaddr    0x02010887;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
 
     ############################################################################
-    # NEST Chiplet SENSORCACHEFIR
+    # NEST Chiplet SCACFIR
     ############################################################################
 
-    register SENSORCACHEFIR
+    register SCACFIR
     {
         name        "SCAC.SCAC_LFIR";
         scomaddr    0x020115c0;
@@ -433,7 +406,7 @@
         capture     group FirRegs;
     };
 
-    register SENSORCACHEFIR_MASK
+    register SCACFIR_MASK
     {
         name        "SCAC.SCAC_FIRMASK";
         scomaddr    0x020115c3;
@@ -442,7 +415,7 @@
         capture     group FirRegs;
     };
 
-    register SENSORCACHEFIR_ACT0
+    register SCACFIR_ACT0
     {
         name        "SCAC.SCAC_FIRACTION0";
         scomaddr    0x020115c6;
@@ -451,7 +424,7 @@
         capture     group FirRegs;
     };
 
-    register SENSORCACHEFIR_ACT1
+    register SCACFIR_ACT1
     {
         name        "SCAC.SCAC_FIRACTION1";
         scomaddr    0x020115c7;

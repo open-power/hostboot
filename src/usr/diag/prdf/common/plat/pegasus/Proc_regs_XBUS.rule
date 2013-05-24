@@ -270,39 +270,18 @@
     };
 
     ############################################################################
-    # XBUS Chiplet XBUS_PSIFIR (Venice only)
+    # XBUS Chiplet PSIXBUSFIR
     ############################################################################
 
-    register XBUS_PSIFIR
+    # All bits in this FIR are reserved so PRD is not expected to analyze this
+    # FIR. Capture the FIR for FFDC, just in case.
+
+    register PSIXBUSFIR
     {
         name        "PSI.PSI_MAC.PSI_SCOM.FIR_REG";
         scomaddr    0x04012400;
         reset       (&, 0x04012401);
         mask        (|, 0x04012405);
-        capture     group never; #FIXME: RTC 67200
-    };
-
-    register XBUS_PSIFIR_MASK
-    {
-        name        "PSI.PSI_MAC.PSI_SCOM.FIR_MASK_REG";
-        scomaddr    0x04012403;
-        capture     type secondary;
-        capture     group never; #FIXME: RTC 67200
-    };
-
-    register XBUS_PSIFIR_ACT0
-    {
-        name        "PSI.PSI_MAC.PSI_SCOM.FIR_ACTION0_REG";
-        scomaddr    0x04012406;
-        capture     type secondary;
-        capture     group never; #FIXME: RTC 67200
-    };
-
-    register XBUS_PSIFIR_ACT1
-    {
-        name        "PSI.PSI_MAC.PSI_SCOM.FIR_ACTION1_REG";
-        scomaddr    0x04012407;
-        capture     type secondary;
-        capture     group never; #FIXME: RTC 67200
+        capture     group default;
     };
 

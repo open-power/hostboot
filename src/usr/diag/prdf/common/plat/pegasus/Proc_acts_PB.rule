@@ -66,9 +66,9 @@ group gPbChipletFir filter singlebit
     (PbChipletFir, bit(8)) ? analyze(gPbCentFir);
 
     /** PB_CHIPLET_FIR[11]
-     *  Attention from PSIFIR
+     *  Attention from PSIHBFIR
      */
-    (PbChipletFir, bit(11)) ? analyze(gPsiFir);
+    (PbChipletFir, bit(11)) ? analyze(gPsiHbFir);
 
     /** PB_CHIPLET_FIR[12]
      *  Attention from ICPFIR
@@ -1450,141 +1450,141 @@ group gPbCentFir filter singlebit
 };
 
 ################################################################################
-# PB Chiplet PSIFIR
+# PB Chiplet PSIHBFIR
 ################################################################################
 
-rule PsiFir
+rule PsiHbFir
 {
-    CHECK_STOP:  PSIFIR & ~PSIFIR_MASK & ~PSIFIR_ACT0 & ~PSIFIR_ACT1;
-    RECOVERABLE: PSIFIR & ~PSIFIR_MASK & ~PSIFIR_ACT0 &  PSIFIR_ACT1;
+    CHECK_STOP:  PSIHBFIR & ~PSIHBFIR_MASK & ~PSIHBFIR_ACT0 & ~PSIHBFIR_ACT1;
+    RECOVERABLE: PSIHBFIR & ~PSIHBFIR_MASK & ~PSIHBFIR_ACT0 &  PSIHBFIR_ACT1;
 };
 
-group gPsiFir filter singlebit
+group gPsiHbFir filter singlebit
 {
-    /** PSIFIR[0]
+    /** PSIHBFIR[0]
      *  PB_ECC_ERR_CE
      */
-    (PsiFir, bit(0)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(0)) ? TBDDefaultCallout;
 
-    /** PSIFIR[1]
+    /** PSIHBFIR[1]
      *  PB_ECC_ERR_UE
      */
-    (PsiFir, bit(1)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(1)) ? TBDDefaultCallout;
 
-    /** PSIFIR[2]
+    /** PSIHBFIR[2]
      *  PB_ECC_ERR_SUE
      */
-    (PsiFir, bit(2)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(2)) ? TBDDefaultCallout;
 
-    /** PSIFIR[3]
+    /** PSIHBFIR[3]
      *  INTERRUPT_FROM_ERROR
      */
-    (PsiFir, bit(3)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(3)) ? TBDDefaultCallout;
 
-    /** PSIFIR[4]
+    /** PSIHBFIR[4]
      *  INTERRUPT_FROM_FSP
      */
-    (PsiFir, bit(4)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(4)) ? TBDDefaultCallout;
 
-    /** PSIFIR[5]
+    /** PSIHBFIR[5]
      *  FSP_ECC_ERR_CE
      */
-    (PsiFir, bit(5)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(5)) ? TBDDefaultCallout;
 
-    /** PSIFIR[6]
+    /** PSIHBFIR[6]
      *  FSP_ECC_ERR_UE
      */
-    (PsiFir, bit(6)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(6)) ? TBDDefaultCallout;
 
-    /** PSIFIR[7]
+    /** PSIHBFIR[7]
      *  ERROR_STATE
      */
-    (PsiFir, bit(7)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(7)) ? TBDDefaultCallout;
 
-    /** PSIFIR[8]
+    /** PSIHBFIR[8]
      *  INVALID_TTYPE
      */
-    (PsiFir, bit(8)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(8)) ? TBDDefaultCallout;
 
-    /** PSIFIR[9]
+    /** PSIHBFIR[9]
      *  INVALID_CRESP
      */
-    (PsiFir, bit(9)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(9)) ? TBDDefaultCallout;
 
-    /** PSIFIR[10]
+    /** PSIHBFIR[10]
      *  PB_DATA_TIME_OUT
      */
-    (PsiFir, bit(10)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(10)) ? TBDDefaultCallout;
 
-    /** PSIFIR[11]
+    /** PSIHBFIR[11]
      *  PB_PARITY_ERROR
      */
-    (PsiFir, bit(11)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(11)) ? TBDDefaultCallout;
 
-    /** PSIFIR[12]
+    /** PSIHBFIR[12]
      *  FSP_ACCESS_TRUSTED_SPACE
      */
-    (PsiFir, bit(12)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(12)) ? TBDDefaultCallout;
 
-    /** PSIFIR[13]
+    /** PSIHBFIR[13]
      *  UNEXPECTED_PB
      */
-    (PsiFir, bit(13)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(13)) ? TBDDefaultCallout;
 
-    /** PSIFIR[14]
+    /** PSIHBFIR[14]
      *  INTERRUPT_REG_CHANGE_WHILE_ACTIVE
      */
-    (PsiFir, bit(14)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(14)) ? TBDDefaultCallout;
 
-    /** PSIFIR[15]
+    /** PSIHBFIR[15]
      *  INTERRUPT0_ADDRESS_ERROR
      */
-    (PsiFir, bit(15)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(15)) ? TBDDefaultCallout;
 
-    /** PSIFIR[16]
+    /** PSIHBFIR[16]
      *  INTERRUPT1_ADDRESS_ERROR
      */
-    (PsiFir, bit(16)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(16)) ? TBDDefaultCallout;
 
-    /** PSIFIR[17]
+    /** PSIHBFIR[17]
      *  INTERRUPT2_ADDRESS_ERROR
      */
-    (PsiFir, bit(17)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(17)) ? TBDDefaultCallout;
 
-    /** PSIFIR[18]
+    /** PSIHBFIR[18]
      *  INTERRUPT3_ADDRESS_ERROR
      */
-    (PsiFir, bit(18)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(18)) ? TBDDefaultCallout;
 
-    /** PSIFIR[19]
+    /** PSIHBFIR[19]
      *  INTERRUPT4_ADDRESS_ERROR
      */
-    (PsiFir, bit(19)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(19)) ? TBDDefaultCallout;
 
-    /** PSIFIR[20]
+    /** PSIHBFIR[20]
      *  INTERRUPT5_ADDRESS_ERROR
      */
-    (PsiFir, bit(20)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(20)) ? TBDDefaultCallout;
 
-    /** PSIFIR[21]
+    /** PSIHBFIR[21]
      *  TCBR_TP_PSI_GLB_ERR_0
      */
-    (PsiFir, bit(21)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(21)) ? TBDDefaultCallout;
 
-    /** PSIFIR[22]
+    /** PSIHBFIR[22]
      *  TCBR_TP_PSI_GLB_ERR_1
      */
-    (PsiFir, bit(22)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(22)) ? TBDDefaultCallout;
 
-    /** PSIFIR[23]
+    /** PSIHBFIR[23]
      *  SCOM_ERROR
      */
-    (PsiFir, bit(23)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(23)) ? TBDDefaultCallout;
 
-    /** PSIFIR[24]
+    /** PSIHBFIR[24]
      *  FIR_PARITY_ERROR
      */
-    (PsiFir, bit(24)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(24)) ? TBDDefaultCallout;
 };
 
 ################################################################################
