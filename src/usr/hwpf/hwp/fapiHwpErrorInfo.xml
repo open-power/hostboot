@@ -52,6 +52,13 @@
         <procedure>LVL_SUPPORT</procedure>
         <priority>MEDIUM</priority>
     </callout>
+    <!-- Callout a bus - in reality, the two targets would be different -->
+    <!-- Commented out to avoid actually calling out a bus in UT
+        <callout>
+            <bus>UNIT_TEST_FFDC_MASTER_CHIP_TARGET,UNIT_TEST_FFDC_MASTER_CHIP_TARGET</bus>
+            <priority>MEDIUM</priority>
+        </callout>
+    -->
     <!-- Callout MASTER_CHIP HIGH -->
     <!-- Commented out to avoid actually calling out a chip in UT
         <callout>

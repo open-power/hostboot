@@ -49,6 +49,7 @@
  *                          mjjones     08/14/2012  Use new ErrorInfo structure
  *                          mjjones     09/19/2012  Add FFDC ID to error info
  *                          mjjones     03/22/2013  Support Procedure Callouts
+ *                          mjjones     05/20/2013  Support Bus Callouts
  */
 
 #include <fapiReturnCode.H>
@@ -231,22 +232,19 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
 {
     for (uint32_t i = 0; i < i_count; i++)
     {
-        // Figure out the object that this ErrorInfo refers to
-        const void * l_pObject = i_pObjects[i_pEntries[i].iv_object];
+        ErrorInfoType l_type = static_cast<ErrorInfoType>(
+            i_pEntries[i].iv_type);
 
-        if (i_pEntries[i].iv_type == EI_TYPE_FFDC)
+        if (l_type == EI_TYPE_FFDC)
         {
-            // Get the size of the object to add as FFDC
-            int8_t l_size = i_pEntries[i].iv_data1;
-            uint32_t l_ffdcId = i_pEntries[i].iv_data2;
+            uint8_t l_objIndex = i_pEntries[i].ffdc.iv_ffdcObjIndex;
+            uint16_t l_size = i_pEntries[i].ffdc.iv_ffdcSize;
+            uint32_t l_ffdcId = i_pEntries[i].ffdc.iv_ffdcId;
 
-            if (l_size > 0)
-            {
-                // This is a regular FFDC data object that can be directly
-                // memcopied
-                addEIFfdc(l_ffdcId, l_pObject, l_size);
-            }
-            else if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_ECMDDB)
+            // Get the object to add as FFDC
+            const void * l_pObject = i_pObjects[l_objIndex];
+
+            if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_ECMDDB)
             {
                 // The FFDC is a ecmdDataBufferBase
                 const ecmdDataBufferBase * l_pDb =
@@ -275,57 +273,65 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
             }
             else
             {
-                 FAPI_ERR("addErrorInfo: Unrecognized FFDC data: %d", l_size);
+                // This is a regular FFDC data object that can be directly
+                // memcopied
+                addEIFfdc(l_ffdcId, l_pObject, l_size);
             }
         }
-        else if (i_pEntries[i].iv_type == EI_TYPE_PROCEDURE_CALLOUT)
+        else if (l_type == EI_TYPE_PROCEDURE_CALLOUT)
         {
             ProcedureCallouts::ProcedureCallout l_proc =
-                static_cast<ProcedureCallouts::ProcedureCallout>
-                    (i_pEntries[i].iv_data2);
+                static_cast<ProcedureCallouts::ProcedureCallout>(
+                    i_pEntries[i].proc_callout.iv_procedure);
             CalloutPriorities::CalloutPriority l_pri =
-                static_cast<CalloutPriorities::CalloutPriority>
-                    (i_pEntries[i].iv_data1);
+                static_cast<CalloutPriorities::CalloutPriority>(
+                    i_pEntries[i].proc_callout.iv_calloutPriority);
 
             // Add the ErrorInfo
             FAPI_ERR("addErrorInfo: Adding proc callout, proc: %d, pri: %d",
                      l_proc, l_pri);
             addEIProcedureCallout(l_proc, l_pri);
         }
-        else if (i_pEntries[i].iv_type == EI_TYPE_CALLOUT)
+        else if (l_type == EI_TYPE_BUS_CALLOUT)
         {
-            // Get a pointer to the Target to callout and the priority
-            const Target * l_pTarget = static_cast<const Target *>(l_pObject);
+            uint8_t l_ep1Index = i_pEntries[i].bus_callout.iv_endpoint1ObjIndex;
+            uint8_t l_ep2Index = i_pEntries[i].bus_callout.iv_endpoint2ObjIndex;
             CalloutPriorities::CalloutPriority l_pri =
-                static_cast<CalloutPriorities::CalloutPriority>
-                    (i_pEntries[i].iv_data1);
+                static_cast<CalloutPriorities::CalloutPriority>(
+                    i_pEntries[i].bus_callout.iv_calloutPriority);
+
+            // Get the endpoint Targets for the bus to callout
+            const Target * l_pTarget1 = static_cast<const Target *>(
+                i_pObjects[l_ep1Index]);
+            const Target * l_pTarget2 = static_cast<const Target *>(
+                i_pObjects[l_ep2Index]);
 
             // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding target callout, pri: %d", l_pri);
-            addEICallout(*l_pTarget, l_pri);
+            FAPI_ERR("addErrorInfo: Adding bus callout, pri: %d", l_pri);
+            addEIBusCallout(*l_pTarget1, *l_pTarget2, l_pri);
         }
-        else if (i_pEntries[i].iv_type == EI_TYPE_DECONF)
+        else if (l_type == EI_TYPE_CDG)
         {
-            // Get a pointer to the Target to deconfigure
-            const Target * l_pTarget = static_cast<const Target *>(l_pObject);
+            uint8_t l_targIndex = i_pEntries[i].target_cdg.iv_targetObjIndex;
+            uint8_t l_callout = i_pEntries[i].target_cdg.iv_callout;
+            uint8_t l_deconf = i_pEntries[i].target_cdg.iv_deconfigure;
+            uint8_t l_gard = i_pEntries[i].target_cdg.iv_gard;
+            CalloutPriorities::CalloutPriority l_pri =
+                static_cast<CalloutPriorities::CalloutPriority>(
+                    i_pEntries[i].target_cdg.iv_calloutPriority);
+
+            // Get the Target to cdg
+            const Target * l_pTarget = static_cast<const Target *>(
+                i_pObjects[l_targIndex]);
 
             // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding deconfigure");
-            addEIDeconfigure(*l_pTarget);
-        }
-        else if (i_pEntries[i].iv_type == EI_TYPE_GARD)
-        {
-            // Get a pointer to the Target to create a GARD record for
-            const Target * l_pTarget = static_cast<const Target *>(l_pObject);
-
-            // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding GARD");
-            addEIGard(*l_pTarget);
+            FAPI_ERR("addErrorInfo: Adding target cdg (%d%d%d), pri: %d",
+                     l_callout, l_deconf, l_gard, l_pri);
+            addEICdg(*l_pTarget, l_callout, l_deconf, l_gard, l_pri);
         }
         else
         {
-            FAPI_ERR("addErrorInfo: Unrecognized EI type: %d",
-                     i_pEntries[i].iv_type);
+            FAPI_ERR("addErrorInfo: Unrecognized EI type: %d", l_type);
         }
     }
 }
@@ -425,44 +431,35 @@ void ReturnCode::addEIProcedureCallout(
 }
 
 //******************************************************************************
-// addEICallout function
+// addEIBusCallout function
 //******************************************************************************
-void ReturnCode::addEICallout(
-    const Target & i_target,
+void ReturnCode::addEIBusCallout(
+    const Target & i_target1,
+    const Target & i_target2,
     const CalloutPriorities::CalloutPriority i_priority)
 {
-    // Get/Create a ErrorInfoCDG object for the target and update the callout
-    ErrorInfoCDG & l_errorInfoCdg = getCreateReturnCodeDataRef().
-        getCreateErrorInfo().getCreateErrorInfoCDG(i_target);
-    l_errorInfoCdg.iv_callout = true;
-
-    // If the same target is called out multiple times, use the highest priority
-    if (i_priority > l_errorInfoCdg.iv_calloutPriority)
-    {
-        l_errorInfoCdg.iv_calloutPriority = i_priority;
-    }
+    // Create an ErrorInfoBusCallout object and add it to the Error Information
+    ErrorInfoBusCallout * l_pCallout = new ErrorInfoBusCallout(
+        i_target1, i_target2, i_priority);
+    getCreateReturnCodeDataRef().getCreateErrorInfo().
+        iv_busCallouts.push_back(l_pCallout);
 }
 
 //******************************************************************************
-// addEIDeconfigure function
+// addEICdg function
 //******************************************************************************
-void ReturnCode::addEIDeconfigure(const Target & i_target)
+void ReturnCode::addEICdg(
+    const Target & i_target,
+    const bool i_callout,
+    const bool i_deconfigure,
+    const bool i_gard,
+    const CalloutPriorities::CalloutPriority i_priority)
 {
-    // Get/Create a ErrorInfoCDG object for the target and update the deconfig
-    ErrorInfoCDG & l_errorInfoCdg = getCreateReturnCodeDataRef().
-        getCreateErrorInfo().getCreateErrorInfoCDG(i_target);
-    l_errorInfoCdg.iv_deconfigure = true;
-}
-
-//******************************************************************************
-// addEIGard function
-//******************************************************************************
-void ReturnCode::addEIGard(const Target & i_target)
-{
-    // Get/Create a ErrorInfoCDG object for the target and update the GARD
-    ErrorInfoCDG & l_errorInfoCdg = getCreateReturnCodeDataRef().
-        getCreateErrorInfo().getCreateErrorInfoCDG(i_target);
-    l_errorInfoCdg.iv_gard = true;
+    // Create an ErrorInfoCDG object and add it to the Error Information
+    ErrorInfoCDG * l_pCdg = new ErrorInfoCDG(i_target, i_callout, i_deconfigure,
+        i_gard, i_priority);
+    getCreateReturnCodeDataRef().getCreateErrorInfo().
+        iv_CDGs.push_back(l_pCdg);
 }
 
 }

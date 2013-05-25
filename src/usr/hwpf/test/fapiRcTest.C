@@ -606,25 +606,39 @@ uint32_t rcTest12()
     ReturnCode l_rc;
     l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
 
-    // Create a DIMM target
+    // Create fake targets
     uint32_t l_targetHandle = 3;
     Target l_target(TARGET_TYPE_DIMM, &l_targetHandle);
+    uint32_t l_target2Handle = 4;
+    Target l_target2(TARGET_TYPE_PROC_CHIP, &l_target2Handle);
     
     // Create some FFDC
     uint8_t l_ffdc = 0x12;
 
-    // Add error information to the ReturnCode
-    const void * l_objects[] = {&l_ffdc, &l_target};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
-        {{fapi::ReturnCode::EI_TYPE_FFDC, 0,
-          fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc)},
-         {fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT, 0,
-          fapi::CalloutPriorities::HIGH, fapi::ProcedureCallouts::CODE},
-         {fapi::ReturnCode::EI_TYPE_CALLOUT, 1,
-          fapi::CalloutPriorities::MEDIUM},
-         {fapi::ReturnCode::EI_TYPE_DECONF, 1},
-         {fapi::ReturnCode::EI_TYPE_GARD, 1}};
-    l_rc.addErrorInfo(l_objects, l_entries, 5);
+    // Add error information to the ReturnCode, the data is the same as that
+    // produced by the fapiParseErrorInfo.pl script in fapiHwpErrorInfo.H
+    const void * l_objects[] = {&l_ffdc, &l_target, &l_target2};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[4];
+    l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_FFDC;
+    l_entries[0].ffdc.iv_ffdcObjIndex = 0;
+    l_entries[0].ffdc.iv_ffdcId = 0x22334455;
+    l_entries[0].ffdc.iv_ffdcSize =
+        fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc);
+    l_entries[1].iv_type = fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT;
+    l_entries[1].proc_callout.iv_procedure = fapi::ProcedureCallouts::CODE;
+    l_entries[1].proc_callout.iv_calloutPriority = fapi::CalloutPriorities::MEDIUM;
+    l_entries[2].iv_type = fapi::ReturnCode::EI_TYPE_BUS_CALLOUT;
+    l_entries[2].bus_callout.iv_endpoint1ObjIndex = 1;
+    l_entries[2].bus_callout.iv_endpoint2ObjIndex = 2;
+    l_entries[2].bus_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
+    l_entries[3].iv_type = fapi::ReturnCode::EI_TYPE_CDG;
+    l_entries[3].target_cdg.iv_targetObjIndex = 1;
+    l_entries[3].target_cdg.iv_callout = 1;
+    l_entries[3].target_cdg.iv_deconfigure = 1;
+    l_entries[3].target_cdg.iv_gard = 0;
+    l_entries[3].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::HIGH;
+
+    l_rc.addErrorInfo(l_objects, l_entries, 4);
 
     do
     {
@@ -690,9 +704,9 @@ uint32_t rcTest12()
         }
 
         if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority !=
-            CalloutPriorities::MEDIUM)
+            CalloutPriorities::HIGH)
         {
-            FAPI_ERR("rcTest12. callout priority mismatch (%d)",
+            FAPI_ERR("rcTest12. CDG callout priority mismatch (%d)",
                      l_pErrInfo->iv_CDGs[0]->iv_calloutPriority);
             l_result = 8;
             break;
@@ -705,9 +719,9 @@ uint32_t rcTest12()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_gard != true)
+        if (l_pErrInfo->iv_CDGs[0]->iv_gard != false)
         {
-            FAPI_ERR("rcTest12. GARD not set");
+            FAPI_ERR("rcTest12. GARD set");
             l_result = 10;
             break;
         }
@@ -730,13 +744,45 @@ uint32_t rcTest12()
         }
 
         if (l_pErrInfo->iv_procedureCallouts[0]->iv_calloutPriority !=
-            CalloutPriorities::HIGH)
+            CalloutPriorities::MEDIUM)
         {
             FAPI_ERR("rcTest12. procedure callout priority mismatch (%d)",
                      l_pErrInfo->iv_procedureCallouts[0]->iv_calloutPriority);
             l_result = 13;
             break;
         }
+
+        if (l_pErrInfo->iv_busCallouts.size() != 1)
+        {
+            FAPI_ERR("rcTest12. %d bus-callouts",
+                     l_pErrInfo->iv_busCallouts.size());
+            l_result = 14;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[0]->iv_target1 != l_target)
+        {
+            FAPI_ERR("rcTest12. bus target mismatch 1");
+            l_result = 15;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[0]->iv_target2 != l_target2)
+        {
+            FAPI_ERR("rcTest12. bus target mismatch 2");
+            l_result = 16;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[0]->iv_calloutPriority !=
+            CalloutPriorities::LOW)
+        {
+            FAPI_ERR("rcTest12. bus callout priority mismatch (%d)",
+                     l_pErrInfo->iv_busCallouts[0]->iv_calloutPriority);
+            l_result = 17;
+            break;
+        }
+
 
         FAPI_INF("rcTest12. Success!");
     }
@@ -762,8 +808,14 @@ uint32_t rcTest13()
 
     // Add error information to the ReturnCode
     const void * l_objects[] = {&l_target};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
-        {{fapi::ReturnCode::EI_TYPE_GARD, 0}};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[1];
+    l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_CDG;
+    l_entries[0].target_cdg.iv_targetObjIndex = 0;
+    l_entries[0].target_cdg.iv_callout = 0;
+    l_entries[0].target_cdg.iv_deconfigure = 0;
+    l_entries[0].target_cdg.iv_gard = 1;
+    l_entries[0].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::LOW;
+
     l_rc.addErrorInfo(l_objects, l_entries, 1);
 
     // Create a ReturnCode using the copy constructor
@@ -846,8 +898,14 @@ uint32_t rcTest14()
 
     // Add error information to the ReturnCode
     const void * l_objects[] = {&l_target};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
-        {{fapi::ReturnCode::EI_TYPE_GARD, 0}};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[1];
+    l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_CDG;
+    l_entries[0].target_cdg.iv_targetObjIndex = 0;
+    l_entries[0].target_cdg.iv_callout = 0;
+    l_entries[0].target_cdg.iv_deconfigure = 0;
+    l_entries[0].target_cdg.iv_gard = 1;
+    l_entries[0].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::LOW;
+
     l_rc.addErrorInfo(l_objects, l_entries, 1);
 
     // Create a ReturnCode using the assignment operator
@@ -931,8 +989,14 @@ uint32_t rcTest15()
 
     // Add error information to the ReturnCode
     const void * l_objects[] = {&l_target};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
-        {{fapi::ReturnCode::EI_TYPE_GARD, 0}};
+    fapi::ReturnCode::ErrorInfoEntry l_entries[1];
+    l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_CDG;
+    l_entries[0].target_cdg.iv_targetObjIndex = 0;
+    l_entries[0].target_cdg.iv_callout = 0;
+    l_entries[0].target_cdg.iv_deconfigure = 0;
+    l_entries[0].target_cdg.iv_gard = 1;
+    l_entries[0].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::LOW;
+
     l_rc.addErrorInfo(l_objects, l_entries, 1);
 
     // Set the ReturnCode to success
@@ -980,21 +1044,45 @@ uint32_t rcTest16()
 
     // Add error information to the ReturnCode
     const void * l_objects[] = {&l_ffdc, &l_ffdc2, &l_target, &l_target2};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[] =
-        {{fapi::ReturnCode::EI_TYPE_FFDC, 0,
-          fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc)},
-         {fapi::ReturnCode::EI_TYPE_FFDC, 1,
-          fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc2)},
-         {fapi::ReturnCode::EI_TYPE_CALLOUT, 2, fapi::CalloutPriorities::HIGH},
-         {fapi::ReturnCode::EI_TYPE_CALLOUT, 3, fapi::CalloutPriorities::LOW},
-         {fapi::ReturnCode::EI_TYPE_DECONF, 2},
-         {fapi::ReturnCode::EI_TYPE_DECONF, 3},
-         {fapi::ReturnCode::EI_TYPE_GARD, 2},
-         {fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT, 0,
-          fapi::CalloutPriorities::HIGH, fapi::ProcedureCallouts::CODE},
-         {fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT, 0,
-          fapi::CalloutPriorities::MEDIUM, fapi::ProcedureCallouts::LVL_SUPPORT}};
-    l_rc.addErrorInfo(l_objects, l_entries, 9);
+    fapi::ReturnCode::ErrorInfoEntry l_entries[8];
+    l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_FFDC;
+    l_entries[0].ffdc.iv_ffdcObjIndex = 0;
+    l_entries[0].ffdc.iv_ffdcId = 0x22334455;
+    l_entries[0].ffdc.iv_ffdcSize =
+        fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc);
+    l_entries[1].iv_type = fapi::ReturnCode::EI_TYPE_FFDC;
+    l_entries[1].ffdc.iv_ffdcObjIndex = 1;
+    l_entries[1].ffdc.iv_ffdcId = 0x33445566;
+    l_entries[1].ffdc.iv_ffdcSize =
+        fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc2);
+    l_entries[2].iv_type = fapi::ReturnCode::EI_TYPE_CDG;
+    l_entries[2].target_cdg.iv_targetObjIndex = 2;
+    l_entries[2].target_cdg.iv_callout = 0;
+    l_entries[2].target_cdg.iv_deconfigure = 1;
+    l_entries[2].target_cdg.iv_gard = 0;
+    l_entries[2].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::HIGH;
+    l_entries[3].iv_type = fapi::ReturnCode::EI_TYPE_CDG;
+    l_entries[3].target_cdg.iv_targetObjIndex = 3;
+    l_entries[3].target_cdg.iv_callout = 0;
+    l_entries[3].target_cdg.iv_deconfigure = 0;
+    l_entries[3].target_cdg.iv_gard = 1;
+    l_entries[3].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::MEDIUM;
+    l_entries[4].iv_type = fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT;
+    l_entries[4].proc_callout.iv_procedure = fapi::ProcedureCallouts::CODE; 
+    l_entries[4].proc_callout.iv_calloutPriority = fapi::CalloutPriorities::MEDIUM;
+    l_entries[5].iv_type = fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT;
+    l_entries[5].proc_callout.iv_procedure = fapi::ProcedureCallouts::LVL_SUPPORT;
+    l_entries[5].proc_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
+    l_entries[6].iv_type = fapi::ReturnCode::EI_TYPE_BUS_CALLOUT;
+    l_entries[6].bus_callout.iv_endpoint1ObjIndex = 2;
+    l_entries[6].bus_callout.iv_endpoint2ObjIndex = 3;
+    l_entries[6].bus_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
+    l_entries[7].iv_type = fapi::ReturnCode::EI_TYPE_BUS_CALLOUT;
+    l_entries[7].bus_callout.iv_endpoint1ObjIndex = 2;
+    l_entries[7].bus_callout.iv_endpoint2ObjIndex = 3;
+    l_entries[7].bus_callout.iv_calloutPriority = fapi::CalloutPriorities::HIGH;
+
+    l_rc.addErrorInfo(l_objects, l_entries, 8);
 
     do
     {
@@ -1069,54 +1157,68 @@ uint32_t rcTest16()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority !=
-                CalloutPriorities::HIGH)
+        if (l_pErrInfo->iv_CDGs[0]->iv_callout != false)
         {
-            FAPI_ERR("rcTest16. CDG[0] callout priority mismatch");
+            FAPI_ERR("rcTest16. CDG[0] callout set");
             l_result = 9;
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_deconfigure == false)
+        if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority !=
+                CalloutPriorities::HIGH)
         {
-            FAPI_ERR("rcTest16. CDG[0] deconfigure not set");
+            FAPI_ERR("rcTest16. CDG[0] callout priority mismatch");
             l_result = 10;
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_gard == false)
+        if (l_pErrInfo->iv_CDGs[0]->iv_deconfigure != true)
         {
-            FAPI_ERR("rcTest16. CDG[0] gard not set");
+            FAPI_ERR("rcTest16. CDG[0] deconfigure not set");
             l_result = 11;
+            break;
+        }
+
+        if (l_pErrInfo->iv_CDGs[0]->iv_gard != false)
+        {
+            FAPI_ERR("rcTest16. CDG[0] gard set");
+            l_result = 12;
             break;
         }
 
         if (l_pErrInfo->iv_CDGs[1]->iv_target != l_target2)
         {
             FAPI_ERR("rcTest16. CDG[1] target mismatch");
-            l_result = 12;
-            break;
-        }
-
-        if (l_pErrInfo->iv_CDGs[1]->iv_calloutPriority !=
-            CalloutPriorities::LOW)
-        {
-            FAPI_ERR("rcTest16. CDG[1] callout priority mismatch");
             l_result = 13;
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[1]->iv_deconfigure == false)
+        if (l_pErrInfo->iv_CDGs[1]->iv_callout != false)
         {
-            FAPI_ERR("rcTest16. CDG[1] deconfigure not set");
+            FAPI_ERR("rcTest16. CDG[0] callout set");
             l_result = 14;
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[1]->iv_gard == true)
+        if (l_pErrInfo->iv_CDGs[1]->iv_calloutPriority !=
+            CalloutPriorities::MEDIUM)
         {
-            FAPI_ERR("rcTest16. CDG[1] gard set");
+            FAPI_ERR("rcTest16. CDG[1] callout priority mismatch");
             l_result = 15;
+            break;
+        }
+
+        if (l_pErrInfo->iv_CDGs[1]->iv_deconfigure != false)
+        {
+            FAPI_ERR("rcTest16. CDG[1] deconfigure set");
+            l_result = 16;
+            break;
+        }
+
+        if (l_pErrInfo->iv_CDGs[1]->iv_gard != true)
+        {
+            FAPI_ERR("rcTest16. CDG[1] gard not set");
+            l_result = 17;
             break;
         }
 
@@ -1124,7 +1226,7 @@ uint32_t rcTest16()
         {
             FAPI_ERR("rcTest16. %d proc-callouts",
                      l_pErrInfo->iv_procedureCallouts.size());
-            l_result = 16;
+            l_result = 18;
             break;
         }
 
@@ -1133,16 +1235,16 @@ uint32_t rcTest16()
         {
             FAPI_ERR("rcTest16. procedure[0] callout mismatch (%d)",
                      l_pErrInfo->iv_procedureCallouts[0]->iv_procedure);
-            l_result = 17;
+            l_result = 19;
             break;
         }
 
         if (l_pErrInfo->iv_procedureCallouts[0]->iv_calloutPriority !=
-            CalloutPriorities::HIGH)
+            CalloutPriorities::MEDIUM)
         {
             FAPI_ERR("rcTest16. procedure[0] callout priority mismatch (%d)",
                      l_pErrInfo->iv_procedureCallouts[0]->iv_calloutPriority);
-            l_result = 18;
+            l_result = 20;
             break;
         }
 
@@ -1151,16 +1253,70 @@ uint32_t rcTest16()
         {
             FAPI_ERR("rcTest16. procedure[1] callout mismatch (%d)",
                      l_pErrInfo->iv_procedureCallouts[1]->iv_procedure);
-            l_result = 19;
+            l_result = 21;
             break;
         }
 
         if (l_pErrInfo->iv_procedureCallouts[1]->iv_calloutPriority !=
-            CalloutPriorities::MEDIUM)
+            CalloutPriorities::LOW)
         {
             FAPI_ERR("rcTest16. procedure[1] callout priority mismatch (%d)",
                      l_pErrInfo->iv_procedureCallouts[1]->iv_calloutPriority);
-            l_result = 20;
+            l_result = 22;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts.size() != 2)
+        {
+            FAPI_ERR("rcTest16. %d bus-callouts",
+                     l_pErrInfo->iv_busCallouts.size());
+            l_result = 23;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[0]->iv_target1 != l_target)
+        {
+            FAPI_ERR("rcTest12. bus target mismatch 1");
+            l_result = 24;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[0]->iv_target2 != l_target2)
+        {
+            FAPI_ERR("rcTest12. bus target mismatch 2");
+            l_result = 25;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[0]->iv_calloutPriority !=
+            CalloutPriorities::LOW)
+        {
+            FAPI_ERR("rcTest12. bus callout priority mismatch 1 (%d)",
+                     l_pErrInfo->iv_busCallouts[0]->iv_calloutPriority);
+            l_result = 26;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[1]->iv_target1 != l_target)
+        {
+            FAPI_ERR("rcTest12. bus target mismatch 3");
+            l_result = 27;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[1]->iv_target2 != l_target2)
+        {
+            FAPI_ERR("rcTest12. bus target mismatch 4");
+            l_result = 28;
+            break;
+        }
+
+        if (l_pErrInfo->iv_busCallouts[1]->iv_calloutPriority !=
+            CalloutPriorities::HIGH)
+        {
+            FAPI_ERR("rcTest12. bus callout priority mismatch 2 (%d)",
+                     l_pErrInfo->iv_busCallouts[1]->iv_calloutPriority);
+            l_result = 29;
             break;
         }
 

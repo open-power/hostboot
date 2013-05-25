@@ -54,6 +54,7 @@
 #                  mjjones   03/22/13  Support Procedure Callouts
 #                  mjjones   04/25/13  Allow multiple register ffdc ids in a
 #                                      collectRegisterFfdc element
+#                  mjjones   05/20/13  Support Bus Callouts
 #
 # End Change Log ******************************************************
 
@@ -189,10 +190,10 @@ sub setErrorEnumValue
 }
 
 #------------------------------------------------------------------------------
-# Subroutine that figures out an FFDC enum value from an FFDC name and stores
-# it in global hashes
+# Subroutine that figures out an FFDC ID value from an FFDC name and stores it
+# in global hashes for use when creating the enumeration of FFDC IDs
 #------------------------------------------------------------------------------
-sub setFfdcEnumValue
+sub setFfdcIdValue
 {
     my $name = $_[0];
 
@@ -445,72 +446,86 @@ foreach my $argnum (1 .. $#ARGV)
         my @eiObjects;
 
         my $eiObjectStr = "const void * l_objects[] = {";
-        my $eiEntryStr = "fapi::ReturnCode::ErrorInfoEntry l_entries[] = {";
+        my $eiEntryStr = "";
         my $eiEntryCount = 0;
+        my %cdgHash; # Records the callout/deconfigure/gards for each Target
 
         # Local FFDC
         foreach my $ffdc (@{$err->{ffdc}})
         {
-            # Set the FFDC enum value in a global hash. The name is <rc>_<ffdc>
+            # Set the FFDC ID value in a global hash. The name is <rc>_<ffdc>
             my $ffdcName = $err->{rc} . "_";
             $ffdcName = $ffdcName . $ffdc;
-            setFfdcEnumValue($ffdcName);
+            setFfdcIdValue($ffdcName);
 
             # Add the FFDC data to the EI Object array if it doesn't already exist
             my $objNum = addEntryToArray(\@eiObjects, $ffdc);
 
-            # Add an EI entry to eiEntryStr.
-            if ($eiEntryCount > 0)
-            {
-                $eiEntryStr .= ", ";
-            }
-            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_FFDC, $objNum, fapi::ReturnCodeFfdc::getErrorInfoFfdcSize($ffdc), fapi::$ffdcName}";
+            # Add an EI entry to eiEntryStr
+            $eiEntryStr .= "  l_entries[$eiEntryCount].iv_type = fapi::ReturnCode::EI_TYPE_FFDC; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].ffdc.iv_ffdcObjIndex = $objNum; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].ffdc.iv_ffdcId = fapi::$ffdcName; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].ffdc.iv_ffdcSize = fapi::ReturnCodeFfdc::getErrorInfoFfdcSize($ffdc); \\\n";
             $eiEntryCount++;
         }
 
-        # Procedure/Target callouts
+        # Procedure/Target/Bus callouts
         foreach my $callout (@{$err->{callout}})
         {
-            if ((! exists $callout->{target}) && (! exists $callout->{procedure}))
-            {
-                print ("fapiParseErrorInfo.pl ERROR. Callout procedure/target missing\n");
-                exit(1);
-            }
-
             if (! exists $callout->{priority})
             {
                 print ("fapiParseErrorInfo.pl ERROR. Callout priority missing\n");
                 exit(1);
             }
 
-            my $objNum = 0;
-            if (exists $callout->{target})
+            if (exists $callout->{procedure})
             {
-                # Check the type
-                print EIFILE
-                    "fapi::fapiCheckType<const fapi::Target *>(&$callout->{target}); ";
-
-                # Add the Target to the objectlist if it doesn't already exist
-                $objNum = addEntryToArray(\@eiObjects, $callout->{target});
+                # Procedure Callout
+                # Add an EI entry to eiEntryStr
+                $eiEntryStr .= "  l_entries[$eiEntryCount].iv_type = fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT; \\\n";
+                $eiEntryStr .= "  l_entries[$eiEntryCount].proc_callout.iv_procedure = fapi::ProcedureCallouts::$callout->{procedure}; \\\n";
+                $eiEntryStr .= "  l_entries[$eiEntryCount].proc_callout.iv_calloutPriority = fapi::CalloutPriorities::$callout->{priority}; \\\n";
+                $eiEntryCount++;
             }
-
-            # Add an EI entry to eiEntryStr
-            if ($eiEntryCount > 0)
+            elsif (exists $callout->{bus})
             {
-                $eiEntryStr .= ", ";
+                # A Bus Callout consists of two targets separated by
+                # commas/spaces
+                my @targets = split(/\s*,\s*|\s+/, $callout->{bus});
+
+                if (scalar @targets != 2)
+                {
+                    print ("fapiParseErrorInfo.pl ERROR. did not find two targets in bus callout\n");
+                    exit(1);
+                }
+
+                # Check the type of the Targets
+                print EIFILE "fapi::fapiCheckType<const fapi::Target *>(&$targets[0]); \\\n";
+                print EIFILE "fapi::fapiCheckType<const fapi::Target *>(&$targets[1]); \\\n";
+
+                # Add the Targets to the objectlist if they don't already exist
+                my $objNum1 = addEntryToArray(\@eiObjects, $targets[0]);
+                my $objNum2 = addEntryToArray(\@eiObjects, $targets[1]);
+
+                # Add an EI entry to eiEntryStr
+                $eiEntryStr .= "  l_entries[$eiEntryCount].iv_type = fapi::ReturnCode::EI_TYPE_BUS_CALLOUT; \\\n";
+                $eiEntryStr .= "  l_entries[$eiEntryCount].bus_callout.iv_endpoint1ObjIndex = $objNum1; \\\n";
+                $eiEntryStr .= "  l_entries[$eiEntryCount].bus_callout.iv_endpoint2ObjIndex = $objNum2; \\\n";
+                $eiEntryStr .= "  l_entries[$eiEntryCount].bus_callout.iv_calloutPriority = fapi::CalloutPriorities::$callout->{priority}; \\\n";
+                $eiEntryCount++;
             }
-
-            if (exists $callout->{target})
+            elsif (exists $callout->{target})
             {
-                $eiEntryStr .=
-                    "{fapi::ReturnCode::EI_TYPE_CALLOUT, $objNum, fapi::CalloutPriorities::$callout->{priority}, 0}";
+                # Add the Target to cdgHash to be processed with any
+                # deconfigure and GARD requests
+                $cdgHash{$callout->{target}}{callout} = 1;
+                $cdgHash{$callout->{target}}{priority} = $callout->{priority};
             }
             else
             {
-                $eiEntryStr .=
-                    "{fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT, 0, fapi::CalloutPriorities::$callout->{priority}, fapi::ProcedureCallouts::$callout->{procedure}}";
+                print ("fapiParseErrorInfo.pl ERROR. Callout procedure/target/bus missing\n");
+                exit(1);
             }
-            $eiEntryCount++;
         }
 
         # Target deconfigures
@@ -522,19 +537,9 @@ foreach my $argnum (1 .. $#ARGV)
                 exit(1);
             }
 
-            # Check the type
-            print EIFILE "fapi::fapiCheckType<const fapi::Target *>(&$deconfigure->{target}); ";
-
-            # Add the Target to the objectlist if it doesn't already exist
-            my $objNum = addEntryToArray(\@eiObjects, $deconfigure->{target});
-
-            # Add an EI entry to eiEntryStr
-            if ($eiEntryCount > 0)
-            {
-                $eiEntryStr .= ", ";
-            }
-            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_DECONF, $objNum, 0, 0}";
-            $eiEntryCount++;
+            # Add the Target to cdgHash to be processed with any
+            # callout and gard requests
+            $cdgHash{$deconfigure->{target}}{deconf} = 1;
         }
 
         # Target Gards
@@ -546,23 +551,51 @@ foreach my $argnum (1 .. $#ARGV)
                 exit(1);
             }
 
-            # Check the type
-            print EIFILE "fapi::fapiCheckType<const fapi::Target *>(&$gard->{target}); ";
-
-            # Add the Target to the objectlist if it doesn't already exist
-            my $objNum = addEntryToArray(\@eiObjects, $gard->{target});
-
-            # Add an EI entry to eiEntryStr
-            if ($eiEntryCount > 0)
-            {
-                $eiEntryStr .= ", ";
-            }
-            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_GARD, $objNum, 0, 0}";
-            $eiEntryCount++;
+            # Add the Target to cdgHash (this target may also have
+            # callout and deconfigure requests
+            $cdgHash{$gard->{target}}{gard} = 1;
         }
 
-        # Complete $eiEntryStr
-        $eiEntryStr .= "};";
+        # Process the callout, deconfigures and GARDs for each Target
+        foreach my $cdg (keys %cdgHash)
+        {
+            # Check the type
+            print EIFILE "fapi::fapiCheckType<const fapi::Target *>(&$cdg); \\\n";
+
+            my $callout = 0;
+            my $priority = 'LOW';
+            my $deconf = 0;
+            my $gard = 0;
+
+            if (exists $cdgHash{$cdg}->{callout})
+            {
+                $callout = 1;
+            }
+            if (exists $cdgHash{$cdg}->{priority})
+            {
+                $priority = $cdgHash{$cdg}->{priority};
+            }
+            if (exists $cdgHash{$cdg}->{deconf})
+            {
+                $deconf = 1;
+            }
+            if (exists $cdgHash{$cdg}->{gard})
+            {
+                $gard = 1;
+            }
+
+            # Add the Target to the objectlist if it doesn't already exist
+            my $objNum = addEntryToArray(\@eiObjects, $cdg);
+
+            # Add an EI entry to eiEntryStr
+            $eiEntryStr .= "  l_entries[$eiEntryCount].iv_type = fapi::ReturnCode::EI_TYPE_CDG; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].target_cdg.iv_targetObjIndex = $objNum; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].target_cdg.iv_callout = $callout; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].target_cdg.iv_deconfigure = $deconf; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].target_cdg.iv_gard = $gard; \\\n";
+            $eiEntryStr .= "  l_entries[$eiEntryCount].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::$priority; \\\n";
+            $eiEntryCount++;
+        }
 
         # Add all objects to $eiObjectStr
         my $objCount = 0;
@@ -581,8 +614,10 @@ foreach my $argnum (1 .. $#ARGV)
         # Print info to file
         if ($eiEntryCount > 0)
         {
-            print EIFILE "{$eiObjectStr $eiEntryStr ";
-            print EIFILE "RC.addErrorInfo(l_objects, l_entries, $eiEntryCount);}";
+            print EIFILE "\\\n{ \\\n  $eiObjectStr \\\n";
+            print EIFILE "  fapi::ReturnCode::ErrorInfoEntry l_entries[$eiEntryCount]; \\\n";
+            print EIFILE "$eiEntryStr";
+            print EIFILE "  RC.addErrorInfo(l_objects, l_entries, $eiEntryCount); \\\n}";
         }
         print EIFILE "\n\n";
     }
@@ -608,9 +643,9 @@ foreach my $argnum (1 .. $#ARGV)
         }
 
         #----------------------------------------------------------------------
-        # Set the FFDC enum value in a global hash
+        # Set the FFDC ID value in a global hash
         #----------------------------------------------------------------------
-        setFfdcEnumValue($registerFfdc->{id}[0]);
+        setFfdcIdValue($registerFfdc->{id}[0]);
 
         #----------------------------------------------------------------------
         # Generate code to capture the registers in fapiCollectRegFfdc.C

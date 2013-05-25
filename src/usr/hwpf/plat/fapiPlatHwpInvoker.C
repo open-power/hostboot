@@ -60,8 +60,7 @@ HWAS::callOutPriority xlateCalloutPriority(
     }
     else
     {
-        FAPI_ERR(
-            "fapi::xlateCalloutPriority: Unknown priority 0x%x, assuming HIGH",
+        FAPI_ERR("fapi::xlateCalloutPriority: Unknown priority 0x%x, assuming HIGH",
             i_fapiPri);
     }
   
@@ -93,8 +92,7 @@ HWAS::epubProcedureID xlateProcedureCallout(
     }
     else
     {
-        FAPI_ERR(
-            "fapi::xlateProcedureCallout: Unknown proc 0x%x, assuming CODE",
+        FAPI_ERR("fapi::xlateProcedureCallout: Unknown proc 0x%x, assuming CODE",
             i_fapiProc);
     }
  
@@ -154,6 +152,62 @@ void processEIProcCallouts(const ErrorInfo & i_errInfo,
             xlateCalloutPriority((*l_itr)->iv_calloutPriority);
 
         io_pError->addProcedureCallout(l_procedure, l_priority);
+    }
+}
+
+void processEIBusCallouts(const ErrorInfo & i_errInfo,
+                          errlHndl_t io_pError)
+{
+    // Iterate through the bus callout requests, adding each to the error log
+    for (ErrorInfo::ErrorInfoBusCalloutCItr_t l_itr =
+             i_errInfo.iv_busCallouts.begin();
+         l_itr != i_errInfo.iv_busCallouts.end(); ++l_itr)
+    {
+        TARGETING::Target * l_pTarget1 =
+            reinterpret_cast<TARGETING::Target*>((*l_itr)->iv_target1.get());
+
+        TARGETING::Target * l_pTarget2 =
+            reinterpret_cast<TARGETING::Target*>((*l_itr)->iv_target1.get());
+
+// Issue 72257. Uncomment the following lines to add a bus callout to
+// the error log, the addBusCallout enums and interfaces are not in place yet
+//        HWAS::callOutPriority l_priority =
+//            xlateCalloutPriority((*l_itr)->iv_calloutPriority);
+
+        bool l_busTypeValid = true;
+//        HWAS::busTypeEnum l_busType = HWAS::FSI_BUS_TYPE;
+        TARGETING::TYPE l_type1 = l_pTarget1->getAttr<TARGETING::ATTR_TYPE>();
+        TARGETING::TYPE l_type2 = l_pTarget2->getAttr<TARGETING::ATTR_TYPE>();
+
+        if ( ((l_type1 == TARGETING::TYPE_MCS) &&
+              (l_type2 == TARGETING::TYPE_MEMBUF)) ||
+             ((l_type1 == TARGETING::TYPE_MEMBUF) &&
+              (l_type2 == TARGETING::TYPE_MCS)) )
+        {
+//            l_busType = HWAS::DMI_BUS_TYPE;
+        }
+        else if ((l_type1 == TARGETING::TYPE_ABUS) &&
+                 (l_type2 == TARGETING::TYPE_ABUS))
+        {
+//            l_busType = HWAS::A_BUS_TYPE;
+        }
+        else if ((l_type1 == TARGETING::TYPE_XBUS) &&
+                 (l_type2 == TARGETING::TYPE_XBUS))
+        {
+//            l_busType = HWAS::X_BUS_TYPE;
+        }
+        else
+        {
+            FAPI_ERR("processEIBusCallouts: Bus between target types not known (0x%08x:0x%08x)",
+                     l_type1, l_type2);
+            l_busTypeValid = false;
+        }
+
+        if (l_busTypeValid)
+        {
+//            io_pError->addBusCallout(l_pTarget1, l_pTarget2, l_busType,
+//            l_priority);
+        }
     }
 }
 
@@ -251,6 +305,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
                 // There is error information associated with the ReturnCode
                 processEIFfdcs(*l_pErrorInfo, l_pError);
                 processEIProcCallouts(*l_pErrorInfo, l_pError);
+                processEIBusCallouts(*l_pErrorInfo, l_pError);
                 processEICDGs(*l_pErrorInfo, l_pError);
             }
             else
@@ -283,6 +338,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
             {
                 processEIFfdcs(*l_pErrorInfo, l_pError);
                 processEIProcCallouts(*l_pErrorInfo, l_pError);
+                processEIBusCallouts(*l_pErrorInfo, l_pError);
                 processEICDGs(*l_pErrorInfo, l_pError);
             }
         }

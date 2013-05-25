@@ -39,6 +39,7 @@
  *                                                  structures into one
  *                          mjjones     09/19/2012  Replace FFDC type with ID
  *                          mjjones     03/22/2013  Support Procedure Callouts
+ *                          mjjones     05/20/2013  Support Bus Callouts
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -164,7 +165,37 @@ struct ErrorInfoProcedureCallout
         const ProcedureCallouts::ProcedureCallout i_procedure,
         const CalloutPriorities::CalloutPriority i_calloutPriority);
 
+    // The procedure to callout
     ProcedureCallouts::ProcedureCallout iv_procedure;
+
+    // The callout priority
+    CalloutPriorities::CalloutPriority iv_calloutPriority;
+};
+
+/**
+ * @struct ErrorInfoBusCallout
+ *
+ * This struct contains a bus to callout
+ */
+struct ErrorInfoBusCallout
+{
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] i_target1          Reference to target on one end of the bus
+     * @param[in] i_target2          Reference to target on other end of the bus
+     * @param[in] i_calloutPriority  Priority of callout
+     */
+    ErrorInfoBusCallout(
+        const Target & i_target1,
+        const Target & i_target2,
+        const CalloutPriorities::CalloutPriority i_calloutPriority);
+
+    // The targets on each end of the bus to callout
+    Target iv_target1;
+    Target iv_target2;
+
+    // The callout priority
     CalloutPriorities::CalloutPriority iv_calloutPriority;
 };
 
@@ -179,8 +210,16 @@ struct ErrorInfoCDG
      * @brief Constructor.
      *
      * @param[in] i_target Reference to the target to callout/deconfigure/GARD
+     * @param[in] i_callout     True if Target should be called out
+     * @param[in] i_deconfigure True if Target should be deconfigured
+     * @param[in] i_gard        True if Target should be GARDed
+     * @param[in] i_priority    The priority of any callout
      */
-    ErrorInfoCDG(const Target & i_target);
+    ErrorInfoCDG(const Target & i_target,
+                 const bool i_callout,
+                 const bool i_deconfigure,
+                 const bool i_gard,
+                 const CalloutPriorities::CalloutPriority i_priority);
 
     // The target to callout/deconfigure/GARD
     Target iv_target;
@@ -196,7 +235,6 @@ struct ErrorInfoCDG
     bool iv_gard;
 };
 
-
 /**
  * @struct ErrorInfo
  *
@@ -210,16 +248,6 @@ struct ErrorInfo
      */
     ~ErrorInfo();
 
-    /**
-     * @brief Get a reference to the ErrorInfoCDG structure for the specified
-     *        Target. If there is no existing structure then one is created
-     *
-     * @param[in] i_target Reference to Target to get the information for
-     *
-     * @return Reference to ErrorInfoCDG
-     */
-    ErrorInfoCDG & getCreateErrorInfoCDG(const Target & i_target);
-
     // Vector of FFDC Data
     std::vector<ErrorInfoFfdc *> iv_ffdcs;
     typedef std::vector<ErrorInfoFfdc *>::iterator ErrorInfoFfdcItr_t;
@@ -231,6 +259,13 @@ struct ErrorInfo
         ErrorInfoProcedureCalloutItr_t;
     typedef std::vector<ErrorInfoProcedureCallout *>::const_iterator
         ErrorInfoProcedureCalloutCItr_t;
+
+    // Vector of buses to callout
+    std::vector<ErrorInfoBusCallout *> iv_busCallouts;
+    typedef std::vector<ErrorInfoBusCallout *>::iterator
+        ErrorInfoBusCalloutItr_t;
+    typedef std::vector<ErrorInfoBusCallout *>::const_iterator
+        ErrorInfoBusCalloutCItr_t;
 
     // Vector of targets to callout/deconfigure/GARD
     std::vector<ErrorInfoCDG *> iv_CDGs;

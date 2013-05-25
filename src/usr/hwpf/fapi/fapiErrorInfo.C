@@ -39,6 +39,7 @@
  *                                                  structures into one
  *                          mjjones     09/19/2012  Replace FFDC type with ID
  *                          mjjones     03/22/2013  Support Procedure Callouts
+ *                          mjjones     05/20/2013  Support Bus Callouts
  */
 
 #include <fapiErrorInfo.H>
@@ -89,12 +90,28 @@ ErrorInfoProcedureCallout::ErrorInfoProcedureCallout(
 }
 
 //******************************************************************************
+// ErrorInfoProcedureCallout Constructor
+//******************************************************************************
+ErrorInfoBusCallout::ErrorInfoBusCallout(
+    const Target & i_target1,
+    const Target & i_target2,
+    const CalloutPriorities::CalloutPriority i_calloutPriority)
+: iv_target1(i_target1), iv_target2(i_target2),
+  iv_calloutPriority(i_calloutPriority)
+{
+
+}
+
+//******************************************************************************
 // ErrorInfoCDG Constructor
 //******************************************************************************
-ErrorInfoCDG::ErrorInfoCDG(const Target & i_target)
-: iv_target(i_target), iv_callout(false),
-  iv_calloutPriority(CalloutPriorities::LOW), iv_deconfigure(false),
-  iv_gard(false)
+ErrorInfoCDG::ErrorInfoCDG(const Target & i_target,
+                           const bool i_callout,
+                           const bool i_deconfigure,
+                           const bool i_gard,
+                           const CalloutPriorities::CalloutPriority i_priority)
+: iv_target(i_target), iv_callout(i_callout), iv_calloutPriority(i_priority),
+  iv_deconfigure(i_deconfigure), iv_gard(i_gard)
 {
 
 }
@@ -125,32 +142,6 @@ ErrorInfo::~ErrorInfo()
         delete (*l_itr);
         (*l_itr) = NULL;
     }
-}
-
-//******************************************************************************
-// ErrorInfo getCreateErrorInfoCDG
-//******************************************************************************
-ErrorInfoCDG & ErrorInfo::getCreateErrorInfoCDG(const Target & i_target)
-{
-    ErrorInfoCDG * l_pInfo = NULL;
-
-    for (ErrorInfo::ErrorInfoCDGCItr_t l_itr = iv_CDGs.begin();
-         l_itr != iv_CDGs.end(); ++l_itr)
-    {
-        if ((*l_itr)->iv_target == i_target)
-        {
-            l_pInfo = (*l_itr);
-            break;
-        }
-    }
-
-    if (l_pInfo == NULL)
-    {
-        l_pInfo = new ErrorInfoCDG(i_target);
-        iv_CDGs.push_back(l_pInfo);
-    }
-
-    return *l_pInfo;
 }
 
 }
