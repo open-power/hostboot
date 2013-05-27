@@ -170,7 +170,7 @@ const   TaskInfo    g_istep11[]  =   {
                 }
         },
         {
-                ISTEPNAME(11,08,"dmi_post_trainadv"),       // substep name
+                ISTEPNAME(11,09,"dmi_post_trainadv"),       // substep name
                 DMI_TRAINING::call_dmi_post_trainadv,       // pointer to fn
                 {
                         START_FN,                           // task type
