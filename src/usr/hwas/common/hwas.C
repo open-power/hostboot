@@ -508,19 +508,24 @@ errlHndl_t discoverTargets()
                 // now cycle thru the procs
                 for (uint32_t i = 0;i < vpdCopies;i++)
                 {
-                    // if we are done with this list of ex/core units
+                    // if we have EX units still to process
                     //  from this processor
-                    if (pEX_it[i] == pEXList[i].end())
+                    if (pEX_it[i] != pEXList[i].end())
                     {
-                        procs_remaining--;
-                        continue;
-                    }
+                        // got a present EX
+                        goodEXs++;
+                        HWAS_DBG("pEX   %.8X - is good %d!",
+                            (*(pEX_it[i]))->getAttr<ATTR_HUID>(), goodEXs);
 
-                    // got a present EX
-                    HWAS_DBG("pEX   %.8X - is good!",
-                            (*(pEX_it[i]))->getAttr<ATTR_HUID>());
-                    (pEX_it[i])++; // next ex/core in this proc's list
-                    goodEXs++;
+                        (pEX_it[i])++; // next ex/core in this proc's list
+
+                        // check to see if we just hit the end of the list
+                        if (pEX_it[i] == pEXList[i].end())
+                        {
+                            procs_remaining--;
+                            continue;
+                        }
+                    }
                 } // for
             }
             while ((goodEXs < maxEXs) && (procs_remaining != 0));
