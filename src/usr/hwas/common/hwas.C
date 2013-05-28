@@ -483,19 +483,27 @@ errlHndl_t discoverTargets()
                 targetService().getAssociated( pEXList[i], pProc,
                         TargetService::CHILD, TargetService::ALL, &exCheckExpr);
 
-                // sort the list by ATTR_HUID to ensure that we
-                //  start at the same place each time
-                std::sort(pEXList[i].begin(), pEXList[i].end(),
-                            compareTargetHUID);
+                if (!pEXList[i].empty())
+                {
+                    // sort the list by ATTR_HUID to ensure that we
+                    //  start at the same place each time
+                    std::sort(pEXList[i].begin(), pEXList[i].end(),
+                                compareTargetHUID);
 
-                // keep a pointer into that list
-                pEX_it[i] = pEXList[i].begin();
+                    // keep a pointer into that list
+                    pEX_it[i] = pEXList[i].begin();
+                }
+                else
+                {
+                    // this one is bad, so decrement the counters
+                    vpdCopies--;
+                    i--;
+                }
 
                 // advance the outer loop as well since we're doing these
                 //  procs together
                 ++procIdx;
             } // for
-            HWAS_DBG("procIdx %d, vpdCopies %d", procIdx, vpdCopies);
 
             // now need to find EX units that stay function, going
             //  across the list of units for each proc we have, until
@@ -503,6 +511,7 @@ errlHndl_t discoverTargets()
             uint8_t procs_remaining = vpdCopies;
             uint32_t maxEXs = avgNum * vpdCopies;
             uint32_t goodEXs = 0;
+            HWAS_DBG("vpdCopies %d maxEXs %d", vpdCopies, maxEXs);
             do
             {
                 // now cycle thru the procs
