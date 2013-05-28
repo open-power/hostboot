@@ -30,8 +30,11 @@ use Cwd;
 # Variables
 my $DEBUG = 0;
 my @outputFnVn;
+my @foundFn;
 my $baseDir = ".";
+my $basePath;
 my @searchFiles;
+my @searchDirs;
 
 my $SHOW_INFO = 0;
 # a bit for each:
@@ -48,6 +51,9 @@ my @dirList = (
     "src/usr/hwpf/hwp",             # hostboot
     "src/usr/pore/poreve/model",    # hostboot
     "src/hwsv/server/hwpf/hwp",     # fsp, should be full tree
+    "src/base.pgm/HostServices/hwpf/hwp",       # hostservices
+    "src/base.pgm/HostServices/hwpf/shared_hwp",# hostservices
+    "src/base.pgm/Hypervisor/Slw",              # hostservices
     ) ;
 
 # set defaults
@@ -64,7 +70,7 @@ while( $ARGV = shift )
     {
         if ( $baseDir = shift )
         {
-            print("Using directory: $baseDir\n");
+            print("Using directory(s): $baseDir\n");
         }
         else
         {
@@ -203,18 +209,25 @@ if ($SHOW_INFO & SHOW_IMAGEID)
 # if baseDir - recurse into directories
 if ($baseDir)
 {
-    # make sure we're in the correct place
-    chdir "$baseDir";
+    # there may be multiple base directories
+    @searchDirs = split(/:/, $baseDir);
 
-    # do the work - for each directory, check the files...
-    foreach( @dirList )
+    foreach( @searchDirs )
     {
-        @outputFnVn = ();
-        checkDirs( $_ );
+        # make sure we're in the correct place
+        chdir "$_";
+        $basePath = $_;
 
-        if (scalar(@outputFnVn) > 0)
+        # do the work - for each directory, check the files...
+        foreach( @dirList )
         {
-            outputFileInfo($_, @outputFnVn);
+            @outputFnVn = ();
+            checkDirs( $_ );
+
+            if (scalar(@outputFnVn) > 0)
+            {
+                outputFileInfo($_, @outputFnVn);
+            }
         }
     }
 }
@@ -273,7 +286,7 @@ sub outputFileInfo
 
     if ($SHOW_INFO & SHOW_HTML)
     {
-        print("<h2>HWP files in $dir</h2>\n");
+        print("<h2>HWP files in $basePath/$dir</h2>\n");
     }
     else
     {
@@ -329,7 +342,7 @@ sub findIdVersion
         next;
     }
 
-    # look for 
+    # look for
     # $Id: - means this IS an hwp - print version and continue
     # else - missing!
     if ($data =~ /\$Id: (.*),v ([0-9.]*) .* \$/mgo )
@@ -337,6 +350,7 @@ sub findIdVersion
         my $fn = $1; # filename
         my $vn = $2; # version
         my $display_name;
+        my $redundant = 0;
         if ($SHOW_INFO & SHOW_FULLPATH)
         {
             $display_name = $l_file;
@@ -345,18 +359,23 @@ sub findIdVersion
         {
             $display_name = $fn;
         }
-        debugMsg( "File: $display_name  Version: $vn" );
-        if ($SHOW_INFO & SHOW_VERSION)
+        $redundant = grep { m/$fn/ } @foundFn;
+        if ( !$redundant )
         {
-            push( @outputFnVn, "File: $display_name  Version: $vn" );
-        }
-        elsif ($SHOW_INFO & SHOW_SHORT)
-        {
-            push( @outputFnVn, "$display_name,$vn" );
-        }
-        elsif ($SHOW_INFO & SHOW_HTML)
-        {
-            push( @outputFnVn, "<tr><td>$display_name</td><td>$vn</td></tr>" );
+            push( @foundFn, $display_name );
+            debugMsg( "File: $display_name  Version: $vn" );
+            if ($SHOW_INFO & SHOW_VERSION)
+            {
+                push( @outputFnVn, "File: $display_name  Version: $vn" );
+            }
+            elsif ($SHOW_INFO & SHOW_SHORT)
+            {
+                push( @outputFnVn, "$display_name,$vn" );
+            }
+            elsif ($SHOW_INFO & SHOW_HTML)
+            {
+                push( @outputFnVn, "<tr><td>$display_name</td><td>$vn</td></tr>" );
+            }
         }
     }
     else
@@ -386,7 +405,8 @@ sub findIdVersion
 
 ################################################################################
 #
-# checkDirs - find *.[hHcC] and *.initfile files that are hwp files
+# checkDirs - find hwp files that should contain $Id:
+#  filetypes .C .c .H .h .xml .define .initfile
 # and prints out their filename and version from the $Id: string.
 # This recursively searches the input directory passed in for all files.
 #
@@ -399,7 +419,7 @@ sub checkDirs
     debugMsg( "Getting Files for dir: $l_input_dir" );
 
     # Open the directory and read all entry names.
-            
+
     local *DH;
     opendir(DH, $l_input_dir) ;#or die("Cannot open $l_input_dir: $!");
     # skip the dots
@@ -415,6 +435,8 @@ sub checkDirs
 
         # if this is valid file:
         if (($l_entry =~ /\.[H|h|C|c]$/) ||
+            ($l_entry =~ /\.xml$/) ||
+            ($l_entry =~ /\.define$/) ||
             ($l_entry =~ /\.initfile$/))
         {
             findIdVersion($full_path);
@@ -440,7 +462,7 @@ sub usage
     print "Usage: $0 <option> [-F <files>]\n";
     print "\n";
     print "Default - show name and version for hwp files with \$Id string.\n";
-    print "-D dir    Use dir as top of build.\n";
+    print "-D dirs   Use dir as top of build, may be ':' separated list.\n";
     print "-d        Enable Debug messages.\n";
     print "-f        Show full pathname of all files.\n";
     print "-F files  Search listed full-path files. Must be last parameter.\n";
