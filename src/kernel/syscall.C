@@ -535,7 +535,11 @@ namespace Systemcalls
         uint64_t devDataSize = ALIGN_PAGE(TASK_GETARG1(t));
         bool cacheable = (0 != TASK_GETARG2(t));
 
-        if (devDataSize > THIRTYTWO_GB)
+        if (TASK_GETARG0(t) & (PAGESIZE - 1)) // ensure address page alignment.
+        {
+            TASK_SETRTN(t, NULL);
+        }
+        else if (devDataSize > THIRTYTWO_GB)
         {
             TASK_SETRTN(t, NULL);
         }
@@ -764,7 +768,14 @@ namespace Systemcalls
         void* va = (void*)TASK_GETARG1(t);
         uint64_t size = (uint64_t)TASK_GETARG2(t);
 
-        TASK_SETRTN(t, VmmManager::mmAllocBlock(mq,va,size));
+        if (TASK_GETARG1(t) & (PAGESIZE - 1)) // ensure address page alignment.
+        {
+            TASK_SETRTN(t, NULL);
+        }
+        else
+        {
+            TASK_SETRTN(t, VmmManager::mmAllocBlock(mq,va,size));
+        }
     }
 
     /**
