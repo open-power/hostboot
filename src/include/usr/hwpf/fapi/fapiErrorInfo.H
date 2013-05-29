@@ -133,6 +133,25 @@ public:
      */
     uint32_t getFfdcId() {return iv_ffdcId;}
 
+#ifdef FAPI_CUSTOM_MALLOC
+    /**
+     * @brief Overload new operator to use platform-specific allocator
+     *
+     * @param[in] i_sz  Size of memory to allocate in bytes
+     *
+     * @return  Pointer to allocated memory
+    */
+    static void * operator new(size_t i_sz);
+
+    /**
+     * @brief Overload delete operator to use platform-specific deallocator
+     *
+     * @param[in] i_ptr Pointer to memory previously allocated with new
+     */
+    static void operator delete(void * i_ptr);
+#endif
+
+
 private:
 
     // FFDC Identifier
@@ -165,6 +184,24 @@ struct ErrorInfoProcedureCallout
     ErrorInfoProcedureCallout(
         const ProcedureCallouts::ProcedureCallout i_procedure,
         const CalloutPriorities::CalloutPriority i_calloutPriority);
+
+#ifdef FAPI_CUSTOM_MALLOC
+    /**
+     * @brief Overload new operator to use platform-specific allocator
+     *
+     * @param[in] i_sz  Size of memory to allocate in bytes
+     *
+     * @return  Pointer to allocated memory
+     */
+    static void * operator new(size_t i_sz);
+
+    /**
+     * @brief Overload delete operator to use platform-specific deallocator
+     *
+     * @param[in] i_ptr Pointer to memory previously allocated with new
+     */
+    static void operator delete(void * i_ptr);
+#endif
 
     // The procedure to callout
     ProcedureCallouts::ProcedureCallout iv_procedure;
@@ -221,6 +258,24 @@ struct ErrorInfoCDG
                  const bool i_deconfigure,
                  const bool i_gard,
                  const CalloutPriorities::CalloutPriority i_priority);
+
+#ifdef FAPI_CUSTOM_MALLOC
+    /**
+     * @brief Overload new operator to use platform-specific allocator
+     *
+     * @param[in] i_sz  Size of memory to allocate in bytes
+     *
+     * @return  Pointer to allocated memory
+     */
+    static void * operator new(size_t i_sz);
+
+    /**
+     * @brief Overload delete operator to use platform-specific deallocator
+     *
+     * @param[in] i_ptr Pointer to memory previously allocated with new
+     */
+    static void operator delete(void * i_ptr);
+#endif
 
     // The target to callout/deconfigure/GARD
     Target iv_target;
@@ -289,6 +344,24 @@ struct ErrorInfo
      * @brief Destructor.
      */
     ~ErrorInfo();
+
+#ifdef FAPI_CUSTOM_MALLOC
+    /**
+     * @brief Overload new operator to use platform-specific allocator
+     *
+     * @param[in] i_sz  Size of memory to allocate in bytes
+     *
+     * @return  Pointer to allocated memory
+     */
+    static void * operator new(size_t i_sz);
+
+    /**
+     * @brief Overload delete operator to use platform-specific deallocator
+     *
+     * @param[in] i_ptr Pointer to memory previously allocated with new
+     */
+    static void operator delete(void * i_ptr);
+#endif
 
     // Vector of FFDC Data
     std::vector<ErrorInfoFfdc *> iv_ffdcs;

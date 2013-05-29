@@ -137,7 +137,7 @@ ReturnCode fapiGetInitFileAttr(const AttributeId i_id,
  * This is called by FAPI code to check at compile time that a FAPI attribute
  * access is using the correct data type and a valid AttributeId
  */
-template<typename T> void fapiCheckIdType(AttributeId, T &) {}
+template<typename T> inline void fapiCheckIdType(AttributeId, T &) {}
 
 /**
  * @brief Fail if attribute privileged

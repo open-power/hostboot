@@ -39,6 +39,7 @@
 #define FAPIPLATUTIL_H_
 
 #include <endian.h>
+#include <stdlib.h>
 
 // defines for endian conversion
 #define FAPI_PLAT_BE16TOH(x) be16toh(x)
@@ -56,5 +57,7 @@
 #define FAPI_PLAT_HTOBE64(x) htobe64(x)
 #define FAPI_PLAT_HTOLE64(x) htole64(x)
 
+#define fapiPlatMalloc(s) malloc(s)
+#define fapiPlatFree(p) free(p)
 
 #endif // FAPIPLATUTIL_H_

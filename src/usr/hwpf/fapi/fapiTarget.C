@@ -40,6 +40,7 @@
  */
 
 #include <fapiTarget.H>
+#include <fapiUtil.H>
 
 namespace fapi
 {
@@ -78,7 +79,7 @@ Target::Target(const Target & i_right) :
 Target::~Target()
 {
     (void) deleteHandle();
-    delete [] iv_pEcmdString;
+    fapiFree(iv_pEcmdString);
 }
 
 //******************************************************************************
@@ -91,7 +92,7 @@ Target & Target::operator=(const Target & i_right)
     {
         iv_type = i_right.iv_type;
         (void) copyHandle(i_right);
-        delete [] iv_pEcmdString;
+        fapiFree(iv_pEcmdString);
         iv_pEcmdString = NULL;
     }
     return *this;
@@ -127,7 +128,7 @@ bool Target::operator!=(const Target & i_right) const
 void Target::set(void * i_pHandle)
 {
     iv_pHandle = i_pHandle;
-    delete [] iv_pEcmdString;
+    fapiFree(iv_pEcmdString);
     iv_pEcmdString = NULL;
 }
 
@@ -150,23 +151,6 @@ bool Target::isChiplet() const
                         TARGET_TYPE_XBUS_ENDPOINT |
                         TARGET_TYPE_ABUS_ENDPOINT |
                         TARGET_TYPE_L4 )) != 0);
-}
-
-//******************************************************************************
-// Get the ecmd-format string
-//******************************************************************************
-const char * Target::toEcmdString() const
-{
-    if (iv_pEcmdString == NULL)
-    {
-        iv_pEcmdString = new char[fapi::MAX_ECMD_STRING_LEN];
-        char (&l_ecmdString)[fapi::MAX_ECMD_STRING_LEN] =
-            *(reinterpret_cast<char(*)[fapi::MAX_ECMD_STRING_LEN]>
-                (iv_pEcmdString));
-        toString(l_ecmdString);
-    }
-
-    return iv_pEcmdString;
 }
 
 }

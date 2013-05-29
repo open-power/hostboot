@@ -45,6 +45,7 @@
 
 #include <fapiErrorInfo.H>
 #include <string.h>
+#include <fapiUtil.H>
 
 namespace fapi
 {
@@ -57,8 +58,16 @@ ErrorInfoFfdc::ErrorInfoFfdc(const uint32_t i_ffdcId,
                              const uint32_t i_size)
 : iv_ffdcId(i_ffdcId), iv_size(i_size)
 {
-    iv_pFfdc = new uint8_t[i_size];
-    memcpy(iv_pFfdc, i_pFfdc, i_size);
+    iv_pFfdc = reinterpret_cast<uint8_t *>(fapiMalloc(i_size));
+    if(iv_pFfdc != NULL)
+    {
+        memcpy(iv_pFfdc, i_pFfdc, i_size);
+    }
+    else
+    {
+        FAPI_ERR("ErrorInfoFfdc - could not allocate storage");
+        iv_size = 0;
+    }
 }
 
 //******************************************************************************
@@ -66,7 +75,7 @@ ErrorInfoFfdc::ErrorInfoFfdc(const uint32_t i_ffdcId,
 //******************************************************************************
 ErrorInfoFfdc::~ErrorInfoFfdc()
 {
-    delete [] iv_pFfdc;
+    fapiFree(iv_pFfdc);
     iv_pFfdc = NULL;
 }
 
@@ -78,6 +87,26 @@ const void * ErrorInfoFfdc::getData(uint32_t & o_size) const
     o_size = iv_size;
     return iv_pFfdc;
 }
+
+//******************************************************************************
+// ErrorInfoFfdc new Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void * ErrorInfoFfdc::operator new(size_t i_sz)
+{
+    return fapiMalloc(i_sz);
+}
+#endif
+
+//******************************************************************************
+// ErrorInfoFfdc delete Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void ErrorInfoFfdc::operator delete(void * i_ptr)
+{
+    fapiFree(i_ptr);
+}
+#endif
 
 //******************************************************************************
 // ErrorInfoProcedureCallout Constructor
@@ -100,8 +129,27 @@ ErrorInfoBusCallout::ErrorInfoBusCallout(
 : iv_target1(i_target1), iv_target2(i_target2),
   iv_calloutPriority(i_calloutPriority)
 {
-
 }
+
+//******************************************************************************
+// ErrorInfoProcedureCallout new Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void * ErrorInfoProcedureCallout::operator new(size_t i_sz)
+{
+    return fapiMalloc(i_sz);
+}
+#endif
+
+//******************************************************************************
+// ErrorInfoProcedureCallout delete Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void ErrorInfoProcedureCallout::operator delete(void * i_ptr)
+{
+    fapiFree(i_ptr);
+}
+#endif
 
 //******************************************************************************
 // ErrorInfoCDG Constructor
@@ -116,6 +164,26 @@ ErrorInfoCDG::ErrorInfoCDG(const Target & i_target,
 {
 
 }
+
+//******************************************************************************
+// ErrorInfoCDG new Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void * ErrorInfoCDG::operator new(size_t i_sz)
+{
+    return fapiMalloc(i_sz);
+}
+#endif
+
+//******************************************************************************
+// ErrorInfoCDG delete Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void ErrorInfoCDG::operator delete(void * i_ptr)
+{
+    fapiFree(i_ptr);
+}
+#endif
 
 //******************************************************************************
 // ErrorInfoChildrenCDG Constructor
@@ -160,5 +228,25 @@ ErrorInfo::~ErrorInfo()
         (*l_itr) = NULL;
     }
 }
+
+//******************************************************************************
+// ErrorInfo new Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void * ErrorInfo::operator new(size_t i_sz)
+{
+    return fapiMalloc(i_sz);
+}
+#endif
+
+//******************************************************************************
+// ErrorInfo delete Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void ErrorInfo::operator delete(void * i_ptr)
+{
+    fapiFree(i_ptr);
+}
+#endif
 
 }

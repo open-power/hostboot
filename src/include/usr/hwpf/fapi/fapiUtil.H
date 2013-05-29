@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -69,6 +69,10 @@
 #define FAPI_LE64TOH(x) FAPI_PLAT_LE64TOH(x)
 #define FAPI_HTOBE64(x) FAPI_PLAT_HTOBE64(x)
 #define FAPI_HTOLE64(x) FAPI_PLAT_HTOLE64(x)
+
+// Defines for platform-specific memory allocation
+#define fapiMalloc(s) fapiPlatMalloc(s)
+#define fapiFree(p) fapiPlatFree(p)
 
 // It is an eCMD requirement that these functions have a "C" symbol
 // because they may be used from a dynamically linked shared library

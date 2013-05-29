@@ -38,6 +38,7 @@
 
 #include <fapiTarget.H>
 #include <fapiPlatTrace.H>
+#include <fapiUtil.H>
 #include <targeting/common/attributes.H>
 #include <string.h>
 
@@ -70,6 +71,24 @@ void Target::copyHandle(const Target & i_right)
 void Target::deleteHandle()
 {
     // Intentionally does nothing. The component must not be deleted
+}
+
+//******************************************************************************
+// Get the ecmd-format string
+//******************************************************************************
+const char * Target::toEcmdString() const
+{
+    if (iv_pEcmdString == NULL)
+    {
+        iv_pEcmdString = reinterpret_cast<char(*)>(
+                fapiMalloc(fapi::MAX_ECMD_STRING_LEN * sizeof(char)));
+        char (&l_ecmdString)[fapi::MAX_ECMD_STRING_LEN] =
+            *(reinterpret_cast<char(*)[fapi::MAX_ECMD_STRING_LEN]>
+                (iv_pEcmdString));
+        toString(l_ecmdString);
+    }
+
+    return iv_pEcmdString;
 }
 
 //******************************************************************************

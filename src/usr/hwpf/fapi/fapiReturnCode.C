@@ -57,6 +57,7 @@
 #include <fapiReturnCodeDataRef.H>
 #include <fapiPlatTrace.H>
 #include <fapiTarget.H>
+#include <fapiUtil.H>
 
 namespace fapi
 {
@@ -251,7 +252,9 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 const ecmdDataBufferBase * l_pDb =
                     static_cast<const ecmdDataBufferBase *>(l_pObject);
                     
-                uint32_t * l_pData = new uint32_t[l_pDb->getWordLength()];
+                size_t byteLength = l_pDb->getWordLength() * sizeof(uint32_t);
+                uint32_t * l_pData =
+                        reinterpret_cast<uint32_t*>(fapiMalloc(byteLength));
 
                 // getWordLength rounds up to the next 32bit boundary, ensure
                 // that after extracting, any unset bits are zero
@@ -261,7 +264,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 l_pDb->extract(l_pData, 0, l_pDb->getBitLength());
                 addEIFfdc(l_ffdcId, l_pData, (l_pDb->getWordLength() * 4));
                 
-                delete [] l_pData;
+                fapiFree(l_pData);
             }
             else if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_TARGET)
             {
@@ -371,6 +374,8 @@ void ReturnCode::addEIFfdc(const uint32_t i_ffdcId,
     ErrorInfoFfdc * l_pFfdc = new ErrorInfoFfdc(i_ffdcId, i_pFfdc, i_size);
     getCreateReturnCodeDataRef().getCreateErrorInfo().
         iv_ffdcs.push_back(l_pFfdc);
+
+    // Note: This gets deallocated in ~ErrorInfo()
 }
 
 

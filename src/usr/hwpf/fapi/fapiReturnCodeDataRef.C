@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/fapi/fapiReturnCodeDataRef.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/fapi/fapiReturnCodeDataRef.C $                   */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiReturnCodeDataRef.C
  *
@@ -154,5 +153,25 @@ ErrorInfo & ReturnCodeDataRef::getCreateErrorInfo()
 
     return *iv_pErrorInfo;
 }
+
+//******************************************************************************
+// Overload Operator new function
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void * ReturnCodeDataRef::operator new(size_t i_sz)
+{
+    return fapiMalloc(i_sz);
+}
+#endif
+
+//******************************************************************************
+// Overload Operator delete function
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void ReturnCodeDataRef::operator delete(void * i_ptr)
+{
+    fapiFree(i_ptr);
+}
+#endif
 
 }

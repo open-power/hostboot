@@ -534,7 +534,7 @@ namespace ReturnCodeFfdc
      * @return uint16_t. Size of the FFDC data
      */
     template<typename T>
-    uint16_t getErrorInfoFfdcSize(const T &)
+    inline uint16_t getErrorInfoFfdcSize(const T &)
     {
         checkFfdcSize<(sizeof(T) > EI_FFDC_MAX_SIZE)>();
         return sizeof(T);
@@ -568,7 +568,7 @@ namespace ReturnCodeFfdc
      */
     class Error_PtrPassedToGetErrorInfoFfdcSize;
     template<typename T>
-    int16_t getErrorInfoFfdcSize(const T *)
+    inline int16_t getErrorInfoFfdcSize(const T *)
     {
         Error_PtrPassedToGetErrorInfoFfdcSize();
         return 0;
