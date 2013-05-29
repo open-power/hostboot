@@ -55,6 +55,7 @@
 #include <errl/errlud.H>
 #include <hbotcompid.H>
 #include <targeting/common/target.H>
+#include <attributeenums.H>
 
 
 namespace ERRORLOG
@@ -267,7 +268,9 @@ public:
      */
     void setSubSys(const epubSubSystem_t i_subSys)
     {
+        // hb has ssid defined in two places
         iv_User.iv_ssid = i_subSys;
+        iv_Src.iv_ssid  = i_subSys;
     }
 
 
@@ -450,10 +453,32 @@ public:
 
 private:
 
-#if 0
-    //@todo: Need to set EPUB_Sub system based on highest
-    // priority call out FRU
+     /**
+     *  @brief Set the failing subsystem ID in the error log
+     *         based on the highest priority callout.
+     *
+     */
+    void setSubSystemIdBasedOnCallouts();
 
+    /**
+     *  @brief maps the target type to corresponding subsystem ID
+     *
+     *  @param[in]  i_target   Target Type.
+     *
+     *  @return     subsystem ID
+     */
+    epubSubSystem_t getSubSystem( TARGETING::TYPE );
+
+    /**
+     *  @brief maps the procedure to a corresponding subsystem ID
+     *
+     *  @param[in]  i_procedureId   procedure.
+     *
+     *  @return     subsystem ID
+     */
+    epubSubSystem_t getSubSystem( HWAS::epubProcedureID i_procedureId );
+
+#if 0
     /**
      *  @brief Adds a software section to the log which is
      *         mostly used as a stack call indicator

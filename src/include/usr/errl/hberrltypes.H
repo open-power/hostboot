@@ -218,23 +218,66 @@ enum srcType_t
 };
 
 
-
-
 /**
  * @brief Sub system definitions
  * Needs to fit into 1 byte for flattening purposes.
  * This represents the byte in an SRC in position
  * ..XX....  such as 81 in B181F00B.
  *
- * Refer to errentry.H and this setter:
- * void ErrlEntry::setSubSys(const epubSubSystem_t i_subSys);
+ * Refer to errentry.H and src/epub/fsp/epub_service_codes.H
+ * in fips code.
  */
 enum epubSubSystem_t
 {
-    EPUB_RESERVED_0          = 0x00,
-    EPUB_FIRMWARE_SUBSYS     = 0x80,
-    EPUB_FIRMWARE_SP         = 0x81,
-    EPUB_UNKNOWN             = 0xFF,
+    EPUB_RESERVED_0                 = 0x00,
+
+    // Processor subsystem
+    EPUB_PROCESSOR_SUBSYS           = 0x10,
+    EPUB_PROCESSOR_FRU              = 0x11,
+    EPUB_PROCESSOR_CHIP_CACHE       = 0x12,
+    EPUB_PROCESSOR_UNIT             = 0x13,
+    EPUB_PROCESSOR_BUS_CTL          = 0x14,
+
+    // Memory subsystem
+    EPUB_MEMORY_SUBSYS              = 0x20,
+    EPUB_MEMORY_CONTROLLER          = 0x21,
+    EPUB_MEMORY_BUS                 = 0x22,
+    EPUB_MEMORY_DIMM                = 0x23,
+    EPUB_MEMORY_FRU                 = 0x24,
+    EPUB_EXTERNAL_CACHE             = 0x25,
+
+    // I/O Subsystem: hub
+    EPUB_IO_HUB                     = 0x31,
+
+    // CEC Hardware
+    EPUB_CEC_HDW_SUBSYS             = 0x50,
+    EPUB_CEC_HDW_VPD_INTF           = 0x55,
+    EPUB_CEC_HDW_I2C_DEVS           = 0x56,
+    EPUB_CEC_HDW_JTAG               = 0x57,
+    EPUB_CEC_HDW_CHIP_INTF          = 0x57,  // includes JTAG, FSI, etc.
+    EPUB_CEC_HDW_CLK_CTL            = 0x58,
+    EPUB_CEC_HDW_OP_PANEL           = 0x59,
+    EPUB_CEC_HDW_TOD_HDW            = 0x5A,
+    EPUB_CEC_HDW_SP_PHYP_INTF       = 0x5C,
+
+    // Power/Cooling subsystem
+    EPUB_POWER_SUBSYS               = 0x60,
+
+    // Others
+    EPUB_MISC_SUBSYS                = 0x70,
+    EPUB_MISC_TEST_TOOL             = 0x72,
+    EPUB_MISC_MULTIPLE_SUBSYS       = 0x74,
+    EPUB_MISC_UNKNOWN               = 0x75,
+    EPUB_MISC_INFORMATIONAL         = 0x76,
+
+    // Platform Firmware
+    EPUB_FIRMWARE_SUBSYS            = 0x80,
+    EPUB_FIRMWARE_SP                = 0x81,
+    EPUB_FIRMWARE_PHYP              = 0x82,
+
+    EPUB_FIRMWARE_HOSTBOOT          = 0x8A,
+    EPUB_FIRMWARE_OCC               = 0x8B,
+    EPUB_UNKNOWN                    = 0xFF,
 };
 
 

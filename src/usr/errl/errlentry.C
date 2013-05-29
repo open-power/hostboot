@@ -44,6 +44,59 @@
 #include <hwas/common/deconfigGard.H>
 #include <targeting/common/targetservice.H>
 
+using namespace ERRORLOG;
+using namespace HWAS;
+
+struct epubProcToSub_t
+{
+    epubProcedureID xProc;
+    epubSubSystem_t xSubSys;
+
+};
+
+// Procedure to subsystem table.
+static const epubProcToSub_t PROCEDURE_TO_SUBSYS_TABLE[] =
+{
+    { EPUB_PRC_FIND_DECONFIGURED_PART , EPUB_CEC_HDW_SUBSYS         },
+    { EPUB_PRC_SP_CODE                , EPUB_FIRMWARE_SP            },
+    { EPUB_PRC_PHYP_CODE              , EPUB_FIRMWARE_PHYP          },
+    { EPUB_PRC_ALL_PROCS              , EPUB_PROCESSOR_SUBSYS       },
+    { EPUB_PRC_ALL_MEMCRDS            , EPUB_MEMORY_SUBSYS          },
+    { EPUB_PRC_INVALID_PART           , EPUB_CEC_HDW_SUBSYS         },
+    { EPUB_PRC_LVL_SUPP               , EPUB_MISC_SUBSYS            },
+    { EPUB_PRC_PROCPATH               , EPUB_CEC_HDW_SUBSYS         },
+    { EPUB_PRC_NO_VPD_FOR_FRU         , EPUB_CEC_HDW_VPD_INTF       },
+    { EPUB_PRC_MEMORY_PLUGGING_ERROR  , EPUB_MEMORY_SUBSYS          },
+    { EPUB_PRC_FSI_PATH               , EPUB_CEC_HDW_SUBSYS         },
+    { EPUB_PRC_PROC_AB_BUS            , EPUB_PROCESSOR_BUS_CTL      },
+    { EPUB_PRC_PROC_XYZ_BUS           , EPUB_PROCESSOR_BUS_CTL      },
+    { EPUB_PRC_MEMBUS_ERROR           , EPUB_MEMORY_SUBSYS          },
+    { EPUB_PRC_EIBUS_ERROR            , EPUB_CEC_HDW_SUBSYS         },
+    { EPUB_PRC_POWER_ERROR            , EPUB_POWER_SUBSYS           },
+    { EPUB_PRC_PERFORMANCE_DEGRADED   , EPUB_MISC_SUBSYS            },
+    { EPUB_PRC_HB_CODE                , EPUB_FIRMWARE_HOSTBOOT      },
+};
+
+struct epubTargetTypeToSub_t
+{
+    TARGETING::TYPE     xType;
+    epubSubSystem_t     xSubSys;
+};
+// Target type to subsystem table.
+static const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
+{
+    { TARGETING::TYPE_DIMM             , EPUB_MEMORY_DIMM          },
+    { TARGETING::TYPE_MEMBUF           , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_PROC             , EPUB_PROCESSOR_SUBSYS     },
+    { TARGETING::TYPE_EX               , EPUB_PROCESSOR_UNIT       },
+    { TARGETING::TYPE_L4               , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_MCS              , EPUB_MEMORY_CONTROLLER    },
+    { TARGETING::TYPE_MBA              , EPUB_MEMORY_CONTROLLER    },
+    { TARGETING::TYPE_XBUS             , EPUB_PROCESSOR_BUS_CTL    },
+    { TARGETING::TYPE_ABUS             , EPUB_PROCESSOR_SUBSYS     },
+};
+
+
 namespace ERRORLOG
 {
 
@@ -308,6 +361,8 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // User header contains the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );
 
+    setSubSystemIdBasedOnCallouts();
+
     // Add the captured backtrace to the error log
     if (iv_pBackTrace)
     {
@@ -316,6 +371,213 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         iv_pBackTrace = NULL;
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Function to set the correct subsystem ID based on callout priorities
+void ErrlEntry::setSubSystemIdBasedOnCallouts()
+{
+    TRACFCOMP(g_trac_errl, INFO_MRK
+            "ErrlEntry::getSubSystemIdBasedOnCallouts()");
+
+    HWAS::callout_ud_t *    pData = NULL;
+
+    HWAS::callout_ud_t *  highestPriorityCallout = NULL;
+
+    // look thru the errlog for any Callout UserDetail sections
+    for( std::vector<ErrlUD*>::iterator it = iv_SectionVector.begin();
+            it != iv_SectionVector.end();
+            it++ )
+    {
+        // look for a CALLOUT section
+        if ((ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
+                (1                == (*it)->iv_header.iv_ver) &&
+                (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
+        {
+            // its a callout, grab the priority
+            pData = reinterpret_cast<HWAS::callout_ud_t *>
+                ( (*it)->iv_pData );
+
+            // figure out the highest priority callout, just grab
+            // the first one if there are several with the same
+            // priority.
+            if( highestPriorityCallout == NULL ||
+                  ( pData->priority > highestPriorityCallout->priority) )
+            {
+                highestPriorityCallout = pData;
+            }
+        }
+    } // for each SectionVector
+
+    // if this pointer is not null it will be pointing to the
+    // highest priority entry
+    if( highestPriorityCallout == NULL  )
+    {
+        // no callouts in log, add default callout for hb code and
+        // add trace
+        TRACFCOMP(g_trac_errl, "WRN>> No callouts in elog 0x%.8X", eid());
+        TRACFCOMP(g_trac_errl, "Adding default callout EPUB_PRC_HB_CODE ");
+        addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                             HWAS::SRCI_PRIORITY_LOW);
+
+        iv_User.setSubSys( EPUB_FIRMWARE_HOSTBOOT );
+
+    }
+    else
+    {
+        pData = highestPriorityCallout;
+
+        if( pData->type ==  HWAS::HW_CALLOUT )
+        {
+            // rebuild the target from the entity path, then use
+            // the target type to determine the ssid
+            if (*((uint8_t *)(pData + 1)) != TARGET_IS_SENTINEL)
+            {
+                // copy the entity path from the data buffer
+                TARGETING::EntityPath ep;
+                memcpy(&ep, ( pData + 1), sizeof(ep));
+
+                // convert the EntityPath to a Target pointer
+                TARGETING::Target *pTarget =
+                            TARGETING::targetService().toTarget(ep);
+
+                TRACFCOMP(g_trac_errl, INFO_MRK
+                        "mapping highest priority target 0x%x "
+                        "callout to determine SSID",
+                        pTarget->getAttr<TARGETING::ATTR_TYPE>() );
+
+                // use the target type to get the failing ssid.
+                iv_User.setSubSys( getSubSystem(
+                        pTarget->getAttr<TARGETING::ATTR_TYPE>()));
+            }
+            else
+            {
+                // it was the sentinel -- so just use the proc ssid
+                iv_User.setSubSys( EPUB_PROCESSOR_SUBSYS );
+            }
+        }
+        else //  ( pData->type == HWAS::PROCEDURE_CALLOUT )
+        {
+            // for procedures, map the procedure to a subsystem
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                    "mapping highest priority procedure 0x%x "
+                    "callout to determine SSID",  pData->procedure);
+
+            iv_User.setSubSys(getSubSystem( pData->procedure));
+
+        }
+
+        // $TODO RTC72950 need to add support for HWAS::BUS_CALLOUT also
+    }
+    // add ssid to the SRC too, it is defined in the ErrlUH in FSP land
+    // in hb code it has been defined in both places and is also used
+    // in both places.
+    iv_Src.setSubSys( iv_User.getSubSys() );
+
+    TRACFCOMP(g_trac_errl, INFO_MRK
+                "ErrlEntry::setSubSystemIdBasedOnCallouts() "
+                "ssid selected 0x%X", iv_Src.getSubSys() );
+
+}
+///////////////////////////////////////////////////////////////////////////////
+// Map the target type to correct subsystem ID using a binary search
+epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_target )
+{
+
+    TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem()"
+            " i_target = 0x%x", i_target );
+
+    // local variables
+    epubSubSystem_t subsystem = EPUB_MISC_UNKNOWN;
+
+    uint32_t TARGET_TO_SUBSYS_TABLE_ENTRIES =
+                    sizeof(TARGET_TO_SUBSYS_TABLE)/
+                    sizeof(TARGET_TO_SUBSYS_TABLE[0]);
+
+    uint32_t low = 0;
+    uint32_t high = TARGET_TO_SUBSYS_TABLE_ENTRIES - 1;
+    uint32_t mid  = 0;
+
+    while( low <= high )
+    {
+        mid = low + (( high - low)/2);
+
+        if ( TARGET_TO_SUBSYS_TABLE[mid].xType > i_target )
+        {
+            high = mid -1;
+        }
+        else if ( TARGET_TO_SUBSYS_TABLE[mid].xType < i_target )
+        {
+            low = mid + 1;
+        }
+        else
+        {
+            // found it
+           subsystem = TARGET_TO_SUBSYS_TABLE[mid].xSubSys;
+           break;
+        }
+    }
+
+    if( subsystem == EPUB_MISC_UNKNOWN )
+    {
+        TRACFCOMP(g_trac_errl,"WRN>> Failed to find subsystem ID for "
+                               "target type 0x%x", i_target);
+    }
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem()  ssid  0x%x", subsystem );
+
+    return (subsystem);
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Map the procedure type to correct subsystem ID using a binary search
+epubSubSystem_t ErrlEntry::getSubSystem( epubProcedureID i_procedure  )
+{
+    TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem()"
+                " from procedure  0x%x", i_procedure );
+
+    // local variables
+    epubSubSystem_t subsystem = EPUB_MISC_UNKNOWN;
+
+    uint32_t PROCEDURE_TO_SUBSYS_TABLE_ENTRIES =
+                        sizeof(PROCEDURE_TO_SUBSYS_TABLE)/
+                        sizeof(PROCEDURE_TO_SUBSYS_TABLE[0]);
+
+    uint32_t low = 0;
+    uint32_t high = PROCEDURE_TO_SUBSYS_TABLE_ENTRIES -1;
+    uint32_t mid  = 0;
+
+    while( low <= high )
+    {
+        mid = low + (( high - low)/2);
+
+        if ( PROCEDURE_TO_SUBSYS_TABLE[mid].xProc > i_procedure )
+        {
+            high = mid -1;
+        }
+        else if ( PROCEDURE_TO_SUBSYS_TABLE[mid].xProc < i_procedure )
+        {
+            low = mid + 1;
+        }
+        else
+        {
+           subsystem = PROCEDURE_TO_SUBSYS_TABLE[mid].xSubSys;
+           break;
+        }
+    }
+
+    if( subsystem == EPUB_MISC_UNKNOWN )
+    {
+        TRACFCOMP(g_trac_errl,"WRN>> Failed to find subsystem ID for "
+                               "procedure 0x%x", i_procedure);
+    }
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem()"
+                " ssid  0x%x", subsystem );
+
+    return (subsystem);
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -481,6 +743,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
 
     return l_flatCount;
 }
+
 
 
 

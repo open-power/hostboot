@@ -478,6 +478,143 @@ public:
         while(0);
 #endif
     }
+
+    /**
+     * @brief Test callouts
+     */
+    void testErrl4(void)
+    {
+        TS_TRACE( "test testErrl4");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+        do
+        {
+            // find a proc target
+            TARGETING::PredicateCTM procChipFilter(
+                    TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC);
+            TARGETING::TargetRangeFilter pProc(
+                    TARGETING::targetService().begin(),
+                    TARGETING::targetService().end(),
+                    &procChipFilter);
+
+            // find a membuf target
+            TARGETING::PredicateCTM membufChipFilter(
+                    TARGETING::CLASS_CHIP,TARGETING::TYPE_MEMBUF);
+            TARGETING::TargetRangeFilter pMembuf(
+                    TARGETING::targetService().begin(),
+                    TARGETING::targetService().end(),
+                    &membufChipFilter);
+
+            // Create an error log
+            errlHndl_t errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE);
+
+            // test the different callout types
+            TS_TRACE( "test callout pProc %p", *pProc);
+            ERRORLOG::ErrlUserDetailsTarget(*pProc).addToLog(errl);
+
+            errl->addHwCallout(*pMembuf,
+                    HWAS::SRCI_PRIORITY_MED,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_NULL);
+
+            errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                    HWAS::SRCI_PRIORITY_HIGH,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_NULL);
+
+            errl->addProcedureCallout(
+                    HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
+                    HWAS::SRCI_PRIORITY_HIGH);
+
+            errlCommit(errl, CXXTEST_COMP_ID);
+
+            TS_TRACE( "testErrl4 done");
+
+        }
+        while(0);
+#endif
+    }
+
+    /**
+     * @brief Test callouts
+     */
+    void testErrlr5(void)
+    {
+        TS_TRACE( "test testErrl5");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+        do
+        {
+            // find a proc target
+            TARGETING::PredicateCTM procChipFilter(
+                    TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC);
+            TARGETING::TargetRangeFilter pProc(
+                    TARGETING::targetService().begin(),
+                    TARGETING::targetService().end(),
+                    &procChipFilter);
+
+            // find a membuf target
+            TARGETING::PredicateCTM membufChipFilter(
+                    TARGETING::CLASS_CHIP,TARGETING::TYPE_MEMBUF);
+            TARGETING::TargetRangeFilter pMembuf(
+                    TARGETING::targetService().begin(),
+                    TARGETING::targetService().end(),
+                    &membufChipFilter);
+
+            // Create an error log
+            errlHndl_t errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE);
+
+            // test the different callout types
+            TS_TRACE( "test callout pProc %p", *pProc);
+            ERRORLOG::ErrlUserDetailsTarget(*pProc).addToLog(errl);
+
+            errl->addHwCallout(*pMembuf,
+                    HWAS::SRCI_PRIORITY_HIGH,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_NULL);
+
+            errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                    HWAS::SRCI_PRIORITY_LOW,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_NULL);
+
+            errl->addProcedureCallout(
+                    HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
+                    HWAS::SRCI_PRIORITY_MED );
+
+            errlCommit(errl, CXXTEST_COMP_ID);
+
+            TS_TRACE( "testErrl5 done");
+
+        }
+        while(0);
+#endif
+    }
+
 };
 
 #endif

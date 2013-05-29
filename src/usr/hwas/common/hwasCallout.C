@@ -112,7 +112,7 @@ void processCallout(errlHndl_t i_errl,
         case (PROCEDURE_CALLOUT):
         {
             HWAS_INF("Procedure callout; proc 0x%x priority 0x%x",
-                pCalloutUD->type, pCalloutUD->type);
+                pCalloutUD->procedure, pCalloutUD->priority);
 
             errlHndl_t errl = platHandleProcedureCallout(i_errl,
                             pCalloutUD->procedure, pCalloutUD->priority);

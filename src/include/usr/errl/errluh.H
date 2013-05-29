@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/errl/errluh.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/errl/errluh.H $                               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef ERRLUH_H
 #define ERRLUH_H
 
@@ -92,6 +92,21 @@ private:
      */
     uint64_t flatten(  void * io_pBuffer, const uint64_t i_cbBuffer );
 
+    /**
+     *  @brief return the failing subsystem id value
+     *
+     *  @return  Failing subsystem ID
+     *
+     */
+    epubSubSystem_t getSubSys()const { return iv_ssid; };
+
+    /**
+     *  @brief set the failing subsystem id value in the SRC object
+     *
+     *
+     */
+    void setSubSys( epubSubSystem_t i_ssid ){ iv_ssid = i_ssid; };
+
 
     /**  @brief Set the component ID into the user header.
      *   Only should be called from ErrlEntry instance.
@@ -102,9 +117,6 @@ private:
      */
     void setComponentId( compId_t i_compId );
 
-
-
-
     // Instance variables
     // SctnHdr for 'UH' section
     ErrlSctnHdr        iv_header;
@@ -113,20 +125,17 @@ private:
     errlSeverity_t     iv_severity;
     errlEventType_t    iv_etype;
 
-
-    // TODO may need getters/setters for these fields. Presently,
-    // they are defaulted at object creation time, and not set
-    // or gotten by anyone.
+    // failing sub system ID
     epubSubSystem_t    iv_ssid;
+
+    // these are defaulted at object creation
+    // no setters/getters are provided currently
     errlDomain_t       iv_domain;
     errlVector_t       iv_vector;
     uint16_t           iv_actions;
     errlScope_t        iv_scope;
 
 };
-
-
-
 
 
 /*****************************************************************************/
