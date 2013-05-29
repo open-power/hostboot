@@ -12039,4 +12039,163 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
 </attribute>
 
+<attribute>
+    <id>PROC_HTM_BAR_SIZE</id>
+    <description>Desired HTM trace memory size value
+      creator: platform
+      firmware notes:
+        set by platform to request size of per-chip area reserved
+        for HTM trace memory
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_HTM_BAR_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_OCC_SANDBOX_SIZE</id>
+    <description>Desired size of OCC sandbox memory region
+      creator: platform
+      firmware notes:
+        set by platform to request size of per-chip area reserved
+        for OCC sandbox function
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_OCC_SANDBOX_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_HTM_BAR_BASE_ADDR</id>
+    <description>HTM trace memory base address allocated
+    </description>
+    <simpleType><uint64_t></uint64_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_HTM_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_OCC_SANDBOX_BASE_ADDR</id>
+    <description>OCC sandbox base address allocated
+    </description>
+    <simpleType><uint64_t></uint64_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_OCC_SANDBOX_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEM_MIRROR_PLACEMENT_POLICY</id>
+    <description>Define placement policy/scheme for non-mirrored/mirrored memory
+                 layout
+      creator: platform
+      consumer: opt_memmap
+      firmware notes:
+        NORMAL  = non-mirrored start: 0, mirrored start: 512TB
+        FLIPPED = mirrored start: 0, non-mirrored start: 512TB
+        SELECTIVE = non-mirrored/mirrored start (interleaved): 0
+    </description>
+    <simpleType>
+      <uint8_t>
+            <!-- Normal -->
+            <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AS_MMIO_BAR_BASE_ADDR</id>
+    <description>AS MMIO BAR base address value
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes:
+        64-bit address representing BAR RA
+        NOTE: BAR register covers RA 14:51
+    </description>
+    <simpleType>
+       <uint64_t>
+           <default>0</default>
+       </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AS_MMIO_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AS_MMIO_BAR_ENABLE</id>
+    <description>AS MMIO BAR enable
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+            <!-- Disabled -->
+            <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AS_MMIO_BAR_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AS_MMIO_BAR_SIZE</id>
+    <description>AS MMIO BAR size value
+      creator: platform
+      consumer: proc_setup_bars
+      firmware notes: none
+    </description>
+    <simpleType>
+       <uint64_t>
+           <!-- 2_MB -->
+           <default>0x0000000000200000</default>
+       </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AS_MMIO_BAR_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

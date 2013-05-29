@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.H,v 1.6 2013/04/27 21:49:01 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.8 2013/05/09 04:03:27 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -98,6 +98,7 @@
 #include <map>
 #include <fapi.H>
 #include "proc_fab_smp.H"
+#include "opt_memmap.H"
 #include "p8_scom_addresses.H"
 
 
@@ -332,6 +333,7 @@ struct proc_setup_bars_smp_chip
     proc_setup_bars_addr_range fsp_mmio_mask_range;
     proc_setup_bars_addr_range intp_range;
     proc_setup_bars_addr_range nx_mmio_range;
+    proc_setup_bars_addr_range as_mmio_range;
     proc_setup_bars_addr_range pcie_ranges[PROC_SETUP_BARS_PCIE_NUM_UNITS][PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT];
 };
 
@@ -465,6 +467,21 @@ struct proc_setup_bars_nx_mmio_bar_size
         m[PROC_SETUP_BARS_SIZE_1_MB]  = 0x3;
         m[PROC_SETUP_BARS_SIZE_64_KB] = 0x1;
         m[PROC_SETUP_BARS_SIZE_4_KB]  = 0x0;
+        return m;
+    }
+    static const std::map<uint64_t, uint64_t> xlate_map;
+};
+
+// define set of AS MMIO mask sizes
+struct proc_setup_bars_as_mmio_bar_size
+{
+    static std::map<uint64_t, uint64_t> create_map()
+    {
+        std::map<uint64_t, uint64_t> m;
+        m[PROC_SETUP_BARS_SIZE_2_MB]   = 0x3;
+        m[PROC_SETUP_BARS_SIZE_1_MB]   = 0x2;
+        m[PROC_SETUP_BARS_SIZE_512_KB] = 0x1;
+        m[PROC_SETUP_BARS_SIZE_256_KB] = 0x0;
         return m;
     }
     static const std::map<uint64_t, uint64_t> xlate_map;
@@ -844,6 +861,32 @@ const proc_setup_bars_bar_reg_def nx_mmio_bar_reg_def =
     0x0ULL
 };
 
+// AS MMIO BAR constants
+const proc_setup_bars_bar_def as_mmio_bar_def =
+{
+    0xFFFC000000000FFFULL,         // base: RA 14:51
+    PROC_SETUP_BARS_SIZE_4_KB,     // size (min): 4 KB
+    PROC_SETUP_BARS_SIZE_16_GB,    // size (max): 16 GB
+    true
+};
+
+const proc_setup_bars_bar_reg_def as_mmio_bar_reg_def =
+{
+    true,                          // base: bits 14:51
+    PROC_SETUP_BARS_SHIFT_NONE,
+    0,
+    14,
+    51,
+    true,                          // enable: bit 52
+    52,
+    true,                          // size: bits 53:55
+    53,
+    55,
+    &proc_setup_bars_as_mmio_bar_size::xlate_map,
+    0x0ULL,
+    0x0ULL
+};
+
 // MCD Configuration Register constants
 const proc_setup_bars_bar_def mcd_bar_def =
 {
@@ -1159,6 +1202,8 @@ extern "C"
 //          RC_PROC_SETUP_BARS_INTP_BAR_ATTR_ERR if chip INTP range
 //              attribute content violates expected behavior,
 //          RC_PROC_SETUP_BARS_NX_MMIO_BAR_ATTR_ERR if chip NX MMIO range
+//              attribute content violates expected behavior,
+//          RC_PROC_SETUP_BARS_NX_MMIO_BAR_ATTR_ERR if chip AS MMIO range
 //              attribute content violates expected behavior,
 //          RC_PROC_SETUP_BARS_PCIE_BAR_ATTR_ERR if individual chip PCIe IO
 //              range attribute content violates expected behavior,

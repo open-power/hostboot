@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,24 +20,25 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.25 2012/12/04 14:47:59 bellows Exp $
+// $Id: mss_setup_bars.C,v 1.27 2013/05/06 15:02:09 jmcgill Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
+// *!
 // *! TITLE       : mss_setup_bars.C
-// *! DESCRIPTION : see additional comments below
+// *! DESCRIPTION : Program MCS base address registers (BARs) (FAPI)
+// *!
+// *! OWNER NAME  : Girisankar Paulraj      Email: gpaulraj@in.ibm.com
+// *! OWNER NAME  : Mark Bellows            Email: bellows@us.ibm.com
+// *!
 //------------------------------------------------------------------------------
-// Don't forget to create CVS comments when you check in your changes!
-//------------------------------------------------------------------------------
-//Owner :- Girisankar paulraj
-//Back-up owner :- Mark bellows
-//
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.26   | jmcgill  | 04/22/13| rewrite to line up with attribute changes
 //  1.23   | bellows  | 12/04/12| more updates
 //  1.22   | gpaulraj | 10/03/12| review updates
 //  1.21   | gpaulraj | 10/02/12| review updates
@@ -47,282 +48,442 @@
 //  1.16   | bellows  | 08/29/12| remove compile error, use 32bit group info
 //         |          |         | as a temporary fix
 //  1.10   | bellows  | 07/16/12| added in Id tag
-//  1.4    | bellows  | 06-05-12| Updates to Match First Configuration, work for P8 and Murano
+//  1.4    | bellows  | 06-05-12| Updates to Match First Configuration, work for
+//         |          |         | P8 and Murano
 //  1.3    | gpaulraj | 05-22-12| 2MCS/group supported for 128GB CDIMM
 //  1.2    | gpaulraj | 05-07-12| 256 group configuration in
 //  1.1    | gpaulraj | 03-19-12| First drop for centaur
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
 //  Includes
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include <mss_setup_bars.H>
 
+
+//------------------------------------------------------------------------------
+//  Function definitions
+//------------------------------------------------------------------------------
+
 extern "C" {
 
-  fapi::ReturnCode mss_setup_bars(
-                                  const fapi::Target& i_chip_target)
-  {
+
+//------------------------------------------------------------------------------
+// function: write non-mirrored BAR registers (MCFGP/MCFGPA) for a single MCS
+// parameters: i_mcs_target      => MCS chiplet target
+//             i_pri_valid       => true if MCS primary non-mirrored BAR
+//                                  should be marked valid
+//             i_group_member_id => group member ID (only valid if
+//                                  i_pri_valid=true)
+//             i_group_data      => MSS_MCS_GROUP_32 attribute data
+//                                  for member group (only valid if
+//                                  i_pri_valid=true)
+// returns: FAPI_RC_SUCCESS if all register writes are successful,
+//          else failing return code
+//------------------------------------------------------------------------------
+fapi::ReturnCode mss_setup_bars_init_nm_bars(
+    const fapi::Target& i_mcs_target,
+    bool i_pri_valid,
+    uint32_t i_group_member_id,
+    uint32_t i_group_data[])
+{
     fapi::ReturnCode rc;
-    std::vector<fapi::Target> l_mcs_chiplets;
-    ecmdDataBufferBase MCFGP_data(64);
-    ecmdDataBufferBase MCFGPM_data(64);
-    ecmdDataBufferBase MCFGPA_data(64);
-    ecmdDataBufferBase MCFGPMA_data(64);
-//    uint64_t mem_base;
-//    uint64_t mirror_base;
-    uint64_t mem_bases[8];
-    uint64_t l_memory_sizes[8];
-    uint64_t mirror_bases[4];
-    uint64_t l_mirror_sizes[4];
-//    uint64_t alter_mem_base;
-//    uint64_t alter_mirror_base;
-    uint32_t groupID[16][16];
-    uint8_t groups[8];
+    uint32_t rc_ecmd = 0;
+
+    ecmdDataBufferBase MCFGP(64);
+    ecmdDataBufferBase MCFGPA(64);
+
     do
     {
-      rc = FAPI_ATTR_GET(ATTR_MSS_MCS_GROUP_32, &i_chip_target, groupID);
-      if (!rc.ok())
-      {
-        FAPI_ERR("Error reading ATTR_MSS_MCS_GROUP_32");
-        break;
-      }
-      rc = FAPI_ATTR_GET(ATTR_PROC_MEM_SIZES, &i_chip_target, l_memory_sizes);
-      if (!rc.ok())
-      {
-        FAPI_ERR("Error reading ATTR_PROC_MEM_SIZES");
-        break;
-      }
-      rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASES, &i_chip_target, mem_bases);
-      if (!rc.ok())
-      {
-        FAPI_ERR("Error reading ATTR_PROC_MEM_BASES");
-        break;
-      }
-        //base addresses for distinct non-mirrored ranges
+        // establish base content for MCFGP register
+        rc_ecmd |= MCFGP.setBit(MCFGP_ENABLE_RCMD0_BIT);
+        rc_ecmd |= MCFGP.setBit(MCFGP_ENABLE_RCMD1_BIT);
+        rc_ecmd |= MCFGP.setBit(MCFGP_RSVD_1_BIT);
+        rc_ecmd |= MCFGP.setBit(MCFGP_ENABLE_FASTPATH_BIT);
 
-        //
-        // process non-mirrored ranges
-        //
+        if (i_pri_valid)
+        {
+            // MCFGPQ_VALID
+            rc_ecmd |= MCFGP.setBit(MCFGP_VALID_BIT);
+            // MCFGPQ_MCS_UNITS_PER_GROUP
+            rc_ecmd |= MCFGP.insertFromRight(
+                i_group_data[MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX] / 2,
+                MCFGP_MCS_UNITS_PER_GROUP_START_BIT,
+                (MCFGP_MCS_UNITS_PER_GROUP_END_BIT-
+                 MCFGP_MCS_UNITS_PER_GROUP_START_BIT)+1);
+            // MCFGPQ_GROUP_MEMBER_IDENTIFICATION
+            rc_ecmd |= MCFGP.insertFromRight(
+                i_group_member_id,
+                MCFGP_GROUP_MEMBER_ID_START_BIT,
+                (MCFGP_GROUP_MEMBER_ID_END_BIT-
+                 MCFGP_GROUP_MEMBER_ID_START_BIT)+1);
+            // MCFGPQ_GROUP_SIZE
+            rc_ecmd |= MCFGP.insertFromRight(
+                (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/4)-1,
+                MCFGP_GROUP_SIZE_START_BIT,
+                (MCFGP_GROUP_SIZE_END_BIT-
+                 MCFGP_GROUP_SIZE_START_BIT)+1);
 
-        // read chip base address attribute
-        //
-        // process mirrored ranges
-        //
+            // MCFGPQ_BASE_ADDRESS_OF_GROUP
+            rc_ecmd |= MCFGP.insertFromRight(
+                i_group_data[MSS_MCS_GROUP_32_BASE_INDEX] >> 2,
+                MCFGP_BASE_ADDRESS_START_BIT,
+                (MCFGP_BASE_ADDRESS_END_BIT-
+                 MCFGP_BASE_ADDRESS_START_BIT)+1);
 
-      rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASES, &i_chip_target, mirror_bases);
-      if (!rc.ok())
-      {
-        FAPI_ERR("Error reading ATTR_PROC_MIRROR_BASES");
-        break;
-      }
-      rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_SIZES, &i_chip_target, l_mirror_sizes);
-      if (!rc.ok())
-      {
-        FAPI_ERR("Error  reading ATTR_PROC_MIRROR_SIZES");
-        break;
-      }
-      rc = FAPI_ATTR_GET(ATTR_MSS_MEM_MC_IN_GROUP, &i_chip_target, groups);
-      if (!rc.ok())
-      {
-        FAPI_ERR("Error  reading ATTR_MSS_MEM_MC_IN_GROUP");
-        break;
-      }
+            // check buffer manipulation return codes
+            if (rc_ecmd)
+            {
+                FAPI_ERR("mss_setup_bars_init_nm_bars: Error 0x%X setting up MCFGP data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
 
-        //
-        // write HW registers
-        //
+            bool alt_valid = i_group_data[MSS_MCS_GROUP_32_ALT_VALID_INDEX];
+            if (alt_valid)
+            {
+                // MCFGPAQ_VALID
+                rc_ecmd |= MCFGPA.setBit(MCFGPA_VALID_BIT);
+
+                // MCFGPAQ_GROUP_SIZE
+                rc_ecmd |= MCFGPA.insertFromRight(
+                    (i_group_data[MSS_MCS_GROUP_32_ALT_SIZE_INDEX]/4)-1,
+                    MCFGPA_GROUP_SIZE_START_BIT,
+                    (MCFGPA_GROUP_SIZE_END_BIT-
+                     MCFGPA_GROUP_SIZE_START_BIT)+1);
+
+                // MCFGPAQ_BASE_ADDRESS_OF_GROUP
+                rc_ecmd |= MCFGPA.insertFromRight(
+                    i_group_data[MSS_MCS_GROUP_32_ALT_BASE_INDEX] >> 2,
+                    MCFGPA_BASE_ADDRESS_START_BIT,
+                    (MCFGPA_BASE_ADDRESS_END_BIT-
+                     MCFGPA_BASE_ADDRESS_START_BIT)+1);
+
+                if (i_group_data[MSS_MCS_GROUP_32_ALT_BASE_INDEX] !=
+                    (i_group_data[MSS_MCS_GROUP_32_BASE_INDEX] +
+                     (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/2)))
+                {
+                    FAPI_ERR("Invalid non-mirrored alternate BAR configuration");
+                    FAPI_SET_HWP_ERROR(rc,
+                                       RC_MSS_SETUP_BARS_NM_ALT_BAR_ERR);
+                    break;
+                }
+            }
+
+            // check buffer manipulation return codes
+            if (rc_ecmd)
+            {
+                FAPI_ERR("mss_setup_bars_init_nm_bars: Error 0x%X setting up MCFGPA data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+        }
+
+        // write registers
+        rc = fapiPutScom(i_mcs_target, MCS_MCFGP_0x02011800, MCFGP);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error from fapiPutScom (MCS_MCFGP_0x02011800)");
+            break;
+        }
+
+        rc = fapiPutScom(i_mcs_target, MCS_MCFGPA_0x02011814, MCFGPA);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error from fapiPutScom (MCS_MCFGPA_0x02011814)");
+            break;
+        }
+    } while(0);
+
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
+// function: write mirrored BAR registers (MCFGPM/MCFGPMA) for a single MCS
+// parameters: i_mcs_target => MCS chiplet target
+//             i_pri_valid  => true if MCS primary mirrored BAR
+//                             should be marked valid
+//             i_group_data => MSS_MCS_GROUP_32 attribute data
+//                             for member group (only valid if
+//                             i_pri_valid=true)
+// returns: FAPI_RC_SUCCESS if all register writes are successful,
+//          else failing return code
+//------------------------------------------------------------------------------
+fapi::ReturnCode mss_setup_bars_init_m_bars(
+    const fapi::Target& i_mcs_target,
+    bool i_pri_valid,
+    uint32_t i_group_data[])
+{
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
+
+    ecmdDataBufferBase MCFGPM(64);
+    ecmdDataBufferBase MCFGPMA(64);
+
+    do
+    {
+        if (i_pri_valid)
+        {
+            // MCFGPMQ_VALID
+            rc_ecmd |= MCFGPM.setBit(MCFGPM_VALID_BIT);
+            // MCFGPMQ_GROUP_SIZE
+            rc_ecmd |= MCFGPM.insertFromRight(
+                (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/4)-1,
+                MCFGPM_GROUP_SIZE_START_BIT,
+                (MCFGPM_GROUP_SIZE_END_BIT-
+                 MCFGPM_GROUP_SIZE_START_BIT)+1);
+
+            // MCFGPMQ_BASE_ADDRESS_OF_GROUP
+            rc_ecmd |= MCFGPM.insertFromRight(
+                i_group_data[MSS_MCS_GROUP_32_BASE_INDEX] >> 2,
+                MCFGPM_BASE_ADDRESS_START_BIT,
+                (MCFGPM_BASE_ADDRESS_END_BIT-
+                 MCFGPM_BASE_ADDRESS_START_BIT)+1);
+
+            // check buffer manipulation return codes
+            if (rc_ecmd)
+            {
+                FAPI_ERR("mss_setup_bars_init_m_bars: Error 0x%X setting up MCFGPM data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            bool alt_valid = i_group_data[MSS_MCS_GROUP_32_ALT_VALID_INDEX];
+            if (alt_valid)
+            {
+                // MCFGPMAQ_VALID
+                rc_ecmd |= MCFGPMA.setBit(MCFGPMA_VALID_BIT);
+
+                // MCFGPMAQ_GROUP_SIZE
+                rc_ecmd |= MCFGPMA.insertFromRight(
+                    (i_group_data[MSS_MCS_GROUP_32_ALT_SIZE_INDEX]/4)-1,
+                    MCFGPMA_GROUP_SIZE_START_BIT,
+                    (MCFGPMA_GROUP_SIZE_END_BIT-
+                     MCFGPMA_GROUP_SIZE_START_BIT)+1);
+
+                // MCFGPMAQ_BASE_ADDRESS_OF_GROUP
+                rc_ecmd |= MCFGPMA.insertFromRight(
+                    i_group_data[MSS_MCS_GROUP_32_ALT_BASE_INDEX] >> 2,
+                    MCFGPMA_BASE_ADDRESS_START_BIT,
+                    (MCFGPMA_BASE_ADDRESS_END_BIT-
+                     MCFGPMA_BASE_ADDRESS_START_BIT)+1);
+
+                if (i_group_data[MSS_MCS_GROUP_32_ALT_BASE_INDEX] !=
+                    (i_group_data[MSS_MCS_GROUP_32_BASE_INDEX] +
+                     (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/2)))
+                {
+                    FAPI_ERR("Invalid mirrored alternate BAR configuration");
+                    FAPI_SET_HWP_ERROR(rc,
+                                       RC_MSS_SETUP_BARS_M_ALT_BAR_ERR);
+                    break;
+                }
+            }
+
+            // check buffer manipulation return codes
+            if (rc_ecmd)
+            {
+                FAPI_ERR("mss_setup_bars_init_m_bars: Error 0x%X setting up MCFGPMA data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+        }
+
+        // write registers
+        rc = fapiPutScom(i_mcs_target, MCS_MCFGPM_0x02011801, MCFGPM);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error from fapiPutScom (MCS_MCFGPM_0x02011801)");
+            break;
+        }
+        rc = fapiPutScom(i_mcs_target, MCS_MCFGPMA_0x02011815, MCFGPMA);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error from fapiPutScom (MCS_MCFGPMA_0x02011815");
+            break;
+        }
+    } while(0);
+
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
+// function: mss_setup_bars HWP entry point
+//           NOTE: see comments above function prototype in header
+//------------------------------------------------------------------------------
+fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
+{
+    fapi::ReturnCode rc;
+    std::vector<fapi::Target> l_mcs_chiplets;
+    uint32_t group_data[16][16];
+
+    do
+    {
+        // obtain group configuration attribute for this chip
+        rc = FAPI_ATTR_GET(ATTR_MSS_MCS_GROUP_32, &i_pu_target, group_data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error reading ATTR_MSS_MCS_GROUP_32");
+            break;
+        }
 
         // get child MCS chiplets
-      rc = fapiGetChildChiplets(i_chip_target,
-                                fapi::TARGET_TYPE_MCS_CHIPLET,
-                                l_mcs_chiplets,
-                                fapi::TARGET_STATE_FUNCTIONAL);
-      if (!rc.ok())
-      {
-        FAPI_ERR("Error from fapiGetChildChiplets");
-        break;
-      }
-
-        // loop through & set configuration of each child
-      for (std::vector<fapi::Target>::iterator iter = l_mcs_chiplets.begin();
-           iter != l_mcs_chiplets.end() && rc.ok();
-           iter++)
-      {
-        uint8_t mcs_pos = 0x0;
-        rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*iter), mcs_pos);
+        rc = fapiGetChildChiplets(i_pu_target,
+                                  fapi::TARGET_TYPE_MCS_CHIPLET,
+                                  l_mcs_chiplets,
+                                  fapi::TARGET_STATE_FUNCTIONAL);
         if (!rc.ok())
         {
-          FAPI_ERR("Error reading ATTR_CHIP_UNIT_POS");
-          break;
+            FAPI_ERR("Error from fapiGetChildChiplets");
+            break;
         }
 
-        MCFGP_data.flushTo0();
-        MCFGPM_data.flushTo0();
-        MCFGPA_data.flushTo0();
-        MCFGPMA_data.flushTo0();
-        rc = fapiGetScom(*iter, MCS_MCFGP_0x02011800, MCFGP_data);
-        if (!rc.ok())
+        // loop through & set configuration of each MCS chiplet
+        for (std::vector<fapi::Target>::iterator iter = l_mcs_chiplets.begin();
+             iter != l_mcs_chiplets.end() && rc.ok();
+             iter++)
         {
-          FAPI_ERR("Error Reading  MCS_MCFGP_0x02011800");
-          break;
-        }
-        MCFGP_data.setBit(9);
-        MCFGP_data.setBit(10);
-        MCFGP_data.setBit(24);
-        rc = fapiPutScom(*iter, MCS_MCFGP_0x02011800, MCFGP_data);
-        if (!rc.ok())
-        {
-          FAPI_ERR("Error writing  MCS_MCFGP_0x02011800");
-          break;
-        }
-        rc = fapiGetScom(*iter, MCS_MCFGPM_0x02011801, MCFGPM_data);
-        if (!rc.ok())
-        {
-          FAPI_ERR("Error Reading  MCS_MCFGPM_0x02011801");
-          break;
-        }	       	
-        for(uint8_t i=0; (i<16)&&(rc.ok()); i++)
-        {
-          uint32_t temp=0;
-          temp = groupID[i][1];
-          uint32_t b=0;
-          for(uint32_t j=4;(j<temp+4)&&(rc.ok());j++)
-          {
-            if(groupID[i][j]==mcs_pos)
+            // obtain MCS chip unit number
+            uint8_t mcs_pos = 0x0;
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*iter), mcs_pos);
+            if (!rc.ok())
             {
-              FAPI_INF(" Group ID of no MCS %d is %d MCS_POS  ID  found for %d as %d ",temp, i,mcs_pos,(j-4));
-                        //temp =(temp/2;
-              MCFGP_data.insertFromRight(temp/2,1,3);
-              MCFGP_data.insertFromRight((j-4),4,5);
-
-              b = ((l_memory_sizes[i]>>30) / 4) - 1;
-              MCFGP_data.insertFromRight(b,11,13);
-              b = mem_bases[i]>>32;
-              MCFGP_data.insertFromRight(b,26,18);
-              MCFGP_data.setBit(25);
-              rc = fapiPutScom(*iter, MCS_MCFGP_0x02011800, MCFGP_data);
-              if (!rc.ok())
-              {
-                FAPI_ERR("Error writing  MCS_MCFGP_0x02011800");
+                FAPI_ERR("Error reading ATTR_CHIP_UNIT_POS");
                 break;
-              }		
-              rc = fapiGetScom(*iter, MCS_MCFGP_0x02011800, MCFGP_data);
-              if (!rc.ok())
-              {
-                FAPI_ERR("Error Reading  MCS_MCFGP_0x02011800");
-                break;
-              }			
-              MCFGP_data.setBit(0);  //  Read registers value and set Zero bit as per register specification
-              FAPI_DBG("Writing MCS %d MCFGP = 0x%llx",mcs_pos, MCFGP_data.getDoubleWord(0));
-              rc = fapiPutScom(*iter, MCS_MCFGP_0x02011800, MCFGP_data);
-              if (!rc.ok())
-              {
-                FAPI_ERR("Error from fapiPutScom MCS_MCFGP_0x02011800");
-                break;
-              }
-
-             if(temp>1)
-             {
-
-                //setting the MCFGPM register
-                  b = ((l_mirror_sizes[i]>>30) / 4) - 1;
-                  MCFGPM_data.insertFromRight(b,11,13);
-                  b = mirror_bases[i]>>32;
-                  MCFGPM_data.insertFromRight(b,26,18);
-                  rc = fapiPutScom(*iter, MCS_MCFGPM_0x02011801, MCFGPM_data);
-                  if (!rc.ok())
-                  {
-                     FAPI_ERR("Error writing  MCS_MCFGPM_0x02011801");
-                     break;
-                  }		       		
-                  rc = fapiGetScom(*iter, MCS_MCFGPM_0x02011801, MCFGPM_data);
-                  if (!rc.ok())
-                  {
-                    FAPI_ERR("Error reading  MCS_MCFGPM_0x02011801");
-                    break;
-                  }
-
-                  MCFGPM_data.setBit(0);
-                  FAPI_DBG("Writing MCS %d MCFGPM = 0x%llx",mcs_pos, MCFGPM_data.getDoubleWord(0));
-                  rc = fapiPutScom(*iter, MCS_MCFGPM_0x02011801, MCFGPM_data);
-                  if (!rc.ok())
-                  {
-                     FAPI_ERR("Error from fapiPutScom MCS_MCFGPM_0x02011801");
-                     break;
-                  }
-              }
-
-              if(groupID[i][12])
-
-              {
-
-                b = (groupID[i][13] / 4) - 1;
-                MCFGPA_data.insertFromRight(b,11,13);
-                b = groupID[i][14]>>2;
-                MCFGPA_data.insertFromRight(b,26,18);
-                rc = fapiPutScom(*iter, MCS_MCFGPA_0x02011814, MCFGPA_data);
-                if (!rc.ok())
-                {
-                  FAPI_ERR("Error writing  MCS_MCFGPA_0x02011814");
-                  break;
-                }		       		
-                rc = fapiGetScom(*iter, MCS_MCFGPA_0x02011814, MCFGPA_data);
-                if (!rc.ok())
-                {
-                  FAPI_ERR("Error reading  MCS_MCFGPA_0x02011814");
-                  break;
-                }					
-                MCFGPA_data.setBit(0);  //  Read registers value and set Zero bit as per register specification
-                FAPI_DBG("Writing MCS %d MCFGPA = 0x%llx",mcs_pos, MCFGPA_data.getDoubleWord(0));
-                rc = fapiPutScom(*iter, MCS_MCFGPA_0x02011814, MCFGPA_data);
-                if (!rc.ok())
-                {
-                  FAPI_ERR("Error writing  MCS_MCFGPA_0x02011814");
-                  break;
-                }		       		
-
-                if(temp>1)
-                {
-                   //setting MCFGPMA
-                   b = (groupID[i+8][13]/ 4) - 1;
-                   MCFGPMA_data.insertFromRight(b,11,13);
-                   b = groupID[i+8][14]>>2;
-                   MCFGPMA_data.insertFromRight(b,26,18);
-                   rc = fapiPutScom(*iter, MCS_MCFGPMA_0x02011815, MCFGPMA_data);
-                   if (!rc.ok())
-                   {
-                     FAPI_ERR("Error writing  MCS_MCFpGPMA_0x02011815");
-                     break;
-                   }		       		
-                   rc = fapiGetScom(*iter, MCS_MCFGPMA_0x02011815, MCFGPMA_data);
-                   if (!rc.ok())
-                   {
-                     FAPI_ERR("Error reading  MCS_MCFGPMA_0x02011815");
-                     break;
-                   }					
-                   MCFGPMA_data.setBit(0);  //  Read registers value and set Zero bit as per register specification
-                   FAPI_DBG("Writing MCS %d MCFGPMA = 0x%llx",mcs_pos, MCFGPMA_data.getDoubleWord(0));
-                   rc = fapiPutScom(*iter, MCS_MCFGPMA_0x02011815, MCFGPMA_data);
-                   if (!rc.ok())
-                   {
-                     FAPI_ERR("Error writing  MCS_MCFGPMA_0x02011815");
-                     break;
-                   }
-                 }
-              }
             }
-          }
+
+            // determine non-mirrored member group
+            bool nm_bar_valid = false;
+            uint8_t nm_bar_group_index = 0x0;
+            uint8_t nm_bar_group_member_id = 0x0;
+            for (size_t i = MSS_MCS_GROUP_32_NM_START_INDEX;
+                 (i <= MSS_MCS_GROUP_32_NM_END_INDEX) && rc.ok();
+                 i++)
+            {
+                // only process valid groups
+                if (group_data[i][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
+                {
+                    continue;
+                }
+
+                uint32_t mcs_in_group = group_data[i][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
+                for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
+                     (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group) &&
+                     (rc.ok());
+                     j++)
+                {
+                    if (mcs_pos == group_data[i][j])
+                    {
+                        if (nm_bar_valid)
+                        {
+                            const uint8_t& MCS_POS = mcs_pos;
+                            const uint8_t& GROUP_INDEX_A = nm_bar_group_index;
+                            const uint8_t& GROUP_INDEX_B = i;
+                            FAPI_ERR("MCS %d is listed as a member in multiple non-mirrored groups",
+                                     mcs_pos);
+                            FAPI_SET_HWP_ERROR(
+                                rc,
+                                RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR);
+                            break;
+                        }
+                        nm_bar_valid = true;
+                        nm_bar_group_index = i;
+                        nm_bar_group_member_id =
+                            j-MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
+                    }
+                }
+            }
+            if (!rc.ok())
+            {
+                break;
+            }
+
+            // write non-mirrored BARs based on group configuration
+            rc = mss_setup_bars_init_nm_bars(
+                *iter,
+                nm_bar_valid,
+                nm_bar_group_member_id,
+                group_data[nm_bar_group_index]);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error from mss_setup_bars_init_nm_bars");
+                break;
+            }
+
+            // determine mirrored member group
+            bool m_bar_valid = false;
+            uint8_t m_bar_group_index = 0x0;
+            for (size_t i = MSS_MCS_GROUP_32_M_START_INDEX;
+                 (i <= MSS_MCS_GROUP_32_M_END_INDEX) && rc.ok();
+                 i++)
+            {
+                // only process valid groups
+                if (group_data[i][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
+                {
+                    continue;
+                }
+
+                uint32_t mcs_in_group = group_data[i][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
+                for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
+                     (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group) &&
+                     (rc.ok());
+                     j++)
+                {
+                    if (mcs_pos == group_data[i][j])
+                    {
+                        if (m_bar_valid)
+                        {
+                            const uint8_t& MCS_POS = mcs_pos;
+                            const uint8_t& GROUP_INDEX_A = m_bar_group_index;
+                            const uint8_t& GROUP_INDEX_B = i;
+                            FAPI_ERR("MCS %d is listed as a member in multiple mirrored groups",
+                                     mcs_pos);
+                            FAPI_SET_HWP_ERROR(
+                                rc,
+                                RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR);
+                            break;
+                        }
+                        m_bar_valid = true;
+                        m_bar_group_index = i;
+                    }
+                }
+            }
+            if (!rc.ok())
+            {
+                break;
+            }
+
+            // write non-mirrored BARs based on group configuration
+            rc = mss_setup_bars_init_m_bars(
+                *iter,
+                m_bar_valid,
+                group_data[m_bar_group_index]);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error from mss_setup_bars_init_m_bars");
+                break;
+            }
+
+            // write attribute signifying BARs are valid & MSS inits are finished
+            uint8_t final = 1;
+            rc = FAPI_ATTR_SET(ATTR_MSS_MEM_IPL_COMPLETE, &i_pu_target, final);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error from FAPI_ATTR_SET (ATTR_MSS_MEM_IPL_COMPLETE)");
+                break;
+            }
         }
-      }
-       uint8_t final=1;
-       rc=FAPI_ATTR_SET( ATTR_MSS_MEM_IPL_COMPLETE, &i_chip_target ,final);
-       if (!rc.ok())
-       {
-           FAPI_ERR("Error writing  TARGET_TYPE_PROC_CHIP");
-           break;
-        }
-    }while(0);
+    } while(0);
+
     return rc;
-  }
+}
+
 
 } // extern "C"

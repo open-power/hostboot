@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.10 2013/04/27 21:48:59 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.13 2013/05/09 04:03:25 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -60,6 +60,9 @@ const std::map<uint64_t, uint64_t> proc_setup_bars_fsp_mmio_mask_size::xlate_map
 
 const std::map<uint64_t, uint64_t> proc_setup_bars_nx_mmio_bar_size::xlate_map =
     proc_setup_bars_nx_mmio_bar_size::create_map();
+
+const std::map<uint64_t, uint64_t> proc_setup_bars_as_mmio_bar_size::xlate_map =
+    proc_setup_bars_as_mmio_bar_size::create_map();
 
 const std::map<uint64_t, uint64_t> proc_setup_bars_mcd_bar_size::xlate_map =
     proc_setup_bars_mcd_bar_size::create_map();
@@ -195,8 +198,7 @@ fapi::ReturnCode proc_setup_bars_memory_get_non_mirrored_attrs(
     // return code
     fapi::ReturnCode rc;
     // temporary attribute storage used to build procedure data structures
-    uint64_t non_mirrored_base_attrs[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
-    uint64_t non_mirrored_size_attrs[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
+    uint32_t mss_mcs_group_32[OPT_MEMMAP_GROUP_32_DIM1][OPT_MEMMAP_GROUP_32_DIM2];
     proc_setup_bars_addr_range non_mirrored_ranges[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
 
     // mark function entry
@@ -205,20 +207,12 @@ fapi::ReturnCode proc_setup_bars_memory_get_non_mirrored_attrs(
     do
     {
         // retrieve non-mirrored memory base address/size attributes
-        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASES,
+        rc = FAPI_ATTR_GET(ATTR_MSS_MCS_GROUP_32,
                            i_target,
-                           non_mirrored_base_attrs);
+                           mss_mcs_group_32);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error querying ATTR_PROC_MEM_BASES");
-            break;
-        }
-        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_SIZES,
-                           i_target,
-                           non_mirrored_size_attrs);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error querying ATTR_PROC_MEM_SIZES");
+            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error querying ATTR_MSS_MCS_GROUP_32");
             break;
         }
 
@@ -226,10 +220,12 @@ fapi::ReturnCode proc_setup_bars_memory_get_non_mirrored_attrs(
         for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES; r++)
         {
             // build range content
-            non_mirrored_ranges[r].base_addr = non_mirrored_base_attrs[r];
-            non_mirrored_ranges[r].size = non_mirrored_size_attrs[r];
+            non_mirrored_ranges[r].base_addr =
+                (mss_mcs_group_32[OPT_MEMMAP_GROUP_32_NM_START_INDEX+r][OPT_MEMMAP_GROUP_32_BASE_INDEX])*OPT_MEMMAP_GB;
+            non_mirrored_ranges[r].size =
+                (mss_mcs_group_32[OPT_MEMMAP_GROUP_32_NM_START_INDEX+r][OPT_MEMMAP_GROUP_32_SIZE_INDEX])*OPT_MEMMAP_GB;
             // consider range enabled if size is non-zero
-            non_mirrored_ranges[r].enabled = (non_mirrored_size_attrs[r] != 0x0);
+            non_mirrored_ranges[r].enabled = (non_mirrored_ranges[r].size != 0x0);
             // check attribute content
             FAPI_DBG("proc_setup_bars_memory_get_non_mirrored_attrs: Range %d", r);
             if (proc_setup_bars_common_check_bar(
@@ -319,8 +315,7 @@ fapi::ReturnCode proc_setup_bars_memory_get_mirrored_attrs(
     // return code
     fapi::ReturnCode rc;
     // temporary attribute storage used to build procedure data structures
-    uint64_t mirrored_base_attrs[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
-    uint64_t mirrored_size_attrs[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
+    uint32_t mss_mcs_group_32[OPT_MEMMAP_GROUP_32_DIM1][OPT_MEMMAP_GROUP_32_DIM2];
     proc_setup_bars_addr_range mirrored_ranges[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
 
     // mark function entry
@@ -329,20 +324,12 @@ fapi::ReturnCode proc_setup_bars_memory_get_mirrored_attrs(
     do
     {
         // retrieve mirrored memory base address/size attributes
-        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASES,
+        rc = FAPI_ATTR_GET(ATTR_MSS_MCS_GROUP_32,
                            i_target,
-                           mirrored_base_attrs);
+                           mss_mcs_group_32);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error querying ATTR_PROC_MIRROR_BASE");
-            break;
-        }
-        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_SIZES,
-                           i_target,
-                           mirrored_size_attrs);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error querying ATTR_PROC_MIRROR_SIZE");
+            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error querying ATTR_MSS_MCS_GROUP_32");
             break;
         }
 
@@ -350,10 +337,12 @@ fapi::ReturnCode proc_setup_bars_memory_get_mirrored_attrs(
         for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_MIRRORED_RANGES; r++)
         {
             // build range content
-            mirrored_ranges[r].base_addr = mirrored_base_attrs[r];
-            mirrored_ranges[r].size = mirrored_size_attrs[r];
+            mirrored_ranges[r].base_addr =
+                (mss_mcs_group_32[OPT_MEMMAP_GROUP_32_M_START_INDEX+r][OPT_MEMMAP_GROUP_32_BASE_INDEX])*OPT_MEMMAP_GB;
+            mirrored_ranges[r].size =
+                (mss_mcs_group_32[OPT_MEMMAP_GROUP_32_M_START_INDEX+r][OPT_MEMMAP_GROUP_32_SIZE_INDEX])*OPT_MEMMAP_GB;
             // consider range enabled if size is non-zero
-            mirrored_ranges[r].enabled = (mirrored_size_attrs[r] != 0x0);
+            mirrored_ranges[r].enabled = (mirrored_ranges[r].size != 0x0);
             // check attribute content
             FAPI_DBG("proc_setup_bars_memory_get_mirrored_attrs: Range %d", r);
             if (proc_setup_bars_common_check_bar(
@@ -899,6 +888,78 @@ fapi::ReturnCode proc_setup_bars_nx_get_mmio_bar_attrs(
 
 
 //------------------------------------------------------------------------------
+// function: retrieve attributes defining AS MMIO BAR programming
+// parameters: i_target      => pointer to chip target
+//             io_addr_range => address range structure encapsulating
+//                              attribute values
+// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
+//              are valid,
+//          RC_PROC_SETUP_BARS_AS_MMIO_BAR_ATTR_ERR if chip AS MMIO range
+//              attribute content violates expected behavior,
+//          else FAPI_ATTR_GET return code
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_setup_bars_as_get_mmio_bar_attrs(
+    const fapi::Target* i_target,
+    proc_setup_bars_addr_range& io_addr_range)
+{
+    // return code
+    fapi::ReturnCode rc;
+    uint8_t bar_enabled;
+
+    FAPI_DBG("proc_setup_bars_as_get_mmio_bar_attrs: Start");
+    do
+    {
+        // BAR base address
+        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_BASE_ADDR,
+                           i_target,
+                           io_addr_range.base_addr);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_as_get_mmio_bar_attrs: Error querying ATTR_PROC_AS_MMIO_BAR_BASE_ADDR");
+            break;
+        }
+
+        // BAR enable
+        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_ENABLE,
+                           i_target,
+                           bar_enabled);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_as_get_mmio_bar_attrs: Error querying ATTR_PROC_AS_MMIO_BAR_ENABLE");
+            break;
+        }
+        io_addr_range.enabled = (bar_enabled == 0x1);
+
+        // BAR size
+        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_SIZE,
+                           i_target,
+                           io_addr_range.size);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_as_get_mmio_bar_attrs: Error querying ATTR_PROC_AS_MMIO_BAR_SIZE");
+            break;
+        }
+
+        // check BAR attribute content
+        if (proc_setup_bars_common_check_bar(
+                as_mmio_bar_def,
+                io_addr_range) != false)
+        {
+            FAPI_ERR("proc_setup_bars_as_get_mmio_bar_attrs: Error from proc_setup_bars_common_check_bar");
+            const uint64_t& BASE_ADDR = io_addr_range.base_addr;
+            const uint64_t& SIZE = io_addr_range.size;
+            FAPI_SET_HWP_ERROR(rc,
+               RC_PROC_SETUP_BARS_AS_MMIO_BAR_ATTR_ERR);
+            break;
+        }
+    } while(0);
+
+    FAPI_DBG("proc_setup_bars_as_get_mmio_bar_attrs: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
 // function: retrieve attributes defining PCIe IO BAR programming
 // parameters: i_target       => pointer to chip target
 //             io_addr_ranges => 2D array of address range structures
@@ -1099,6 +1160,16 @@ fapi::ReturnCode proc_setup_bars_get_bar_attrs(
         rc = proc_setup_bars_nx_get_mmio_bar_attrs(
             &(io_smp_chip.chip->this_chip),
             io_smp_chip.nx_mmio_range);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_intp_get_bar_attrs");
+            break;
+        }
+
+        FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for AS MMIO address range");
+        rc = proc_setup_bars_as_get_mmio_bar_attrs(
+            &(io_smp_chip.chip->this_chip),
+            io_smp_chip.as_mmio_range);
         if (!rc.ok())
         {
             FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_intp_get_bar_attrs");
@@ -2357,6 +2428,18 @@ proc_setup_bars_write_local_chip_region_bars(
                 NX_MMIO_BAR_0x0201308D,
                 nx_mmio_bar_reg_def,
                 i_smp_chip.nx_mmio_range);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                break;
+            }
+
+            FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing AS MMIO BAR register");
+            rc = proc_setup_bars_common_write_bar_reg(
+                i_smp_chip.chip->this_chip,
+                NX_AS_MMIO_BAR_0x0201309E,
+                as_mmio_bar_reg_def,
+                i_smp_chip.as_mmio_range);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");

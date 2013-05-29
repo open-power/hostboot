@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -22,6 +22,28 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- proc_setup_bars_memory_attributes.xml -->
 <attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Define placement policy/scheme for non-mirrored/mirrored memory
+                 layout
+      creator: platform
+      consumer: opt_memmap
+      firmware notes:
+        NORMAL  = non-mirrored start: 0, mirrored start: 512TB
+        FLIPPED = mirrored start: 0, non-mirrored start: 512TB
+        SELECTIVE = non-mirrored/mirrored start (interleaved): 0
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      NORMAL    = 0x0,
+      FLIPPED   = 0x1,
+      SELECTIVE = 0x2
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_MEM_BASE</id>
@@ -222,4 +244,87 @@
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_HTM_BAR_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Desired HTM trace memory size value
+      creator: platform
+      firmware notes:
+        set by platform to request size of per-chip area reserved
+        for HTM trace memory
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+      256_GB = 0x0000004000000000,
+      128_GB = 0x0000002000000000,
+       64_GB = 0x0000001000000000,
+       32_GB = 0x0000000800000000,
+       16_GB = 0x0000000400000000,
+        8_GB = 0x0000000200000000,
+        4_GB = 0x0000000100000000,
+        2_GB = 0x0000000080000000,
+        1_GB = 0x0000000040000000,
+      512_MB = 0x0000000020000000,
+      256_MB = 0x0000000010000000,
+      128_MB = 0x0000000008000000,
+       64_MB = 0x0000000004000000,
+       32_MB = 0x0000000002000000,
+       16_MB = 0x0000000001000000,
+        ZERO = 0x0000000000000000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_HTM_BAR_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>HTM trace memory base address allocated
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_OCC_SANDBOX_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Desired size of OCC sandbox memory region
+      creator: platform
+      firmware notes:
+        set by platform to request size of per-chip area reserved
+        for OCC sandbox function
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+      256_GB = 0x0000004000000000,
+      128_GB = 0x0000002000000000,
+       64_GB = 0x0000001000000000,
+       32_GB = 0x0000000800000000,
+       16_GB = 0x0000000400000000,
+        8_GB = 0x0000000200000000,
+        4_GB = 0x0000000100000000,
+        2_GB = 0x0000000080000000,
+        1_GB = 0x0000000040000000,
+      512_MB = 0x0000000020000000,
+      256_MB = 0x0000000010000000,
+      128_MB = 0x0000000008000000,
+       64_MB = 0x0000000004000000,
+       32_MB = 0x0000000002000000,
+       16_MB = 0x0000000001000000,
+        ZERO = 0x0000000000000000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_OCC_SANDBOX_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>OCC sandbox base address allocated
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
 </attributes>

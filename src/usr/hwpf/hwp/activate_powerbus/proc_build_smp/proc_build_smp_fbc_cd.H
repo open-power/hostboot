@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.H,v 1.5 2013/03/04 14:53:56 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.H,v 1.6 2013/05/07 22:10:24 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -404,6 +404,54 @@ const bool    PB_SCONFIG_WE1_FP_I2C_SPARE_MODE = false;                // off
 const uint8_t PB_SCONFIG_WE1_FP_C2I_DVAL_LAUNCH = 0x0;                 // wc_p1
 const bool    PB_SCONFIG_WE1_FP_C2I_HSHAKE = false;                    // off
 const bool    PB_SCONFIG_WE1_FP_C2I_SPARE_MODE = false;                // spare
+
+
+//
+// PBH_DAT_ARB_EM (east/west, chain #5) field/bit definitions
+//
+
+const proc_build_smp_sconfig_def PB_SCONFIG_WE5_DEF = { 0x5, 51, false, { true, false, true } };
+
+const uint32_t PB_SCONFIG_WE5_LOCK_ON_LINKS_BIT = 13;
+const uint32_t PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_START_BIT = 14;
+const uint32_t PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_END_BIT = 17;
+const uint32_t PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_START_BIT = 18;
+const uint32_t PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_END_BIT = 21;
+const uint32_t PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_START_BIT = 22;
+const uint32_t PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_END_BIT = 25;
+const uint32_t PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_START_BIT = 26;
+const uint32_t PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_END_BIT = 29;
+const uint32_t PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_START_BIT = 30;
+const uint32_t PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_END_BIT = 33;
+const uint32_t PB_SCONFIG_WE5_PASSTHRU_ENABLE_BIT = 34;
+const uint32_t PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_START_BIT = 35;
+const uint32_t PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_END_BIT = 42;
+const uint32_t PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_START_BIT = 43;
+const uint32_t PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_END_BIT = 50;
+const uint32_t PB_SCONFIG_WE5_A_TOK_INIT_START_BIT = 51;
+const uint32_t PB_SCONFIG_WE5_A_TOK_INIT_END_BIT = 54;
+const uint32_t PB_SCONFIG_WE5_F_TOK_INIT_START_BIT = 55;
+const uint32_t PB_SCONFIG_WE5_F_TOK_INIT_END_BIT = 58;
+const uint32_t PB_SCONFIG_WE5_EM_FP_ENABLE_BIT = 59;
+const uint32_t PB_SCONFIG_WE5_SPARE_START_BIT = 60;
+const uint32_t PB_SCONFIG_WE5_SPARE_END_BIT = 61;
+const uint32_t PB_SCONFIG_WE5_MEM_STV_PRIORITY_START_BIT = 62;
+const uint32_t PB_SCONFIG_WE5_MEM_STV_PRIORITY_END_BIT = 63;
+
+const bool    PB_SCONFIG_WE5_LOCK_ON_LINKS = true;                   // lock
+const uint8_t PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD = 0x4;      // cnt_4
+const uint8_t PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD = 0x4;     // cnt_4
+const uint8_t PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD = 0x4;         // cnt_4
+const uint8_t PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD = 0x0;         // cnt_0
+const uint8_t PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD = 0x0;         // cnt_0
+const bool    PB_SCONFIG_WE5_PASSTHRU_ENABLE = true;                 // enable
+const uint8_t PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY = 0xFE;             // cnt_7to1
+const uint8_t PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY = 0xFE;             // cnt_7to1
+const uint8_t PB_SCONFIG_WE5_A_TOK_INIT = 0x8;                       // cnt_8
+const uint8_t PB_SCONFIG_WE5_F_TOK_INIT = 0x4;                       // cnt_4
+const bool    PB_SCONFIG_WE5_EM_FP_ENABLE = true;                    // enable
+const uint8_t PB_SCONFIG_WE5_SPARE = 0x0;                            // spare
+const uint8_t PB_SCONFIG_WE5_MEM_STV_PRIORITY = 0x2;                 // stv
 
 
 extern "C"

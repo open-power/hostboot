@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.C,v 1.7 2013/03/04 14:53:51 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.C,v 1.8 2013/05/07 22:10:20 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1252,6 +1252,142 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we1(
 }
 
 
+//------------------------------------------------------------------------------
+// function: program PB serial SCOM chain (west/east #5)
+// parameters: i_smp_chip => structure encapsulating SMP chip
+//             i_smp      => structure encapsulating SMP
+// returns: FAPI_RC_SUCCESS if register programming is successful,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_set_sconfig_we5(
+    const proc_build_smp_chip& i_smp_chip,
+    const proc_build_smp_system& i_smp)
+{
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0x0;
+    ecmdDataBufferBase data(64);
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_set_sconfig_we5: Start");
+
+    do
+    {
+        // build register content
+        // pb_cfg_lock_on_links
+        rc_ecmd |= data.writeBit(
+            PB_SCONFIG_WE5_LOCK_ON_LINKS_BIT,
+            PB_SCONFIG_WE5_LOCK_ON_LINKS?1:0);
+
+        // pb_cfg_x_on_link_tok_agg_threshold
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD,
+            PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_START_BIT,
+            (PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_END_BIT-
+             PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_START_BIT+1));
+
+        // pb_cfg_x_off_link_tok_agg_threshold
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD,
+            PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_START_BIT,
+            (PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_END_BIT-
+             PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_START_BIT+1));
+
+        // pb_cfg_x_a_link_tok_agg_threshold
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD,
+            PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_START_BIT,
+            (PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_END_BIT-
+             PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_START_BIT+1));
+
+        // pb_cfg_x_f_link_tok_agg_threshold
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD,
+            PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_START_BIT,
+            (PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_END_BIT-
+             PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_START_BIT+1));
+
+        // pb_cfg_x_a_link_tok_ind_threshold
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD,
+            PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_START_BIT,
+            (PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_END_BIT-
+             PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_START_BIT+1));
+
+        // pb_cfg_passthru_enable
+        rc_ecmd |= data.writeBit(
+            PB_SCONFIG_WE5_PASSTHRU_ENABLE_BIT,
+            PB_SCONFIG_WE5_PASSTHRU_ENABLE?1:0);
+
+        // pb_cfg_passthru_x_priority
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY,
+            PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_START_BIT,
+            (PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_END_BIT-
+             PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_START_BIT+1));
+
+        // pb_cfg_passthru_a_priority
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY,
+            PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_START_BIT,
+            (PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_END_BIT-
+             PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_START_BIT+1));
+
+        // pb_cfg_a_tok_init
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_A_TOK_INIT,
+            PB_SCONFIG_WE5_A_TOK_INIT_START_BIT,
+            (PB_SCONFIG_WE5_A_TOK_INIT_END_BIT-
+             PB_SCONFIG_WE5_A_TOK_INIT_START_BIT+1));
+
+        // pb_cfg_f_tok_init
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_F_TOK_INIT,
+            PB_SCONFIG_WE5_F_TOK_INIT_START_BIT,
+            (PB_SCONFIG_WE5_F_TOK_INIT_END_BIT-
+             PB_SCONFIG_WE5_F_TOK_INIT_START_BIT+1));
+
+        // pb_cfg_em_fp_enable
+        rc_ecmd |= data.writeBit(
+            PB_SCONFIG_WE5_EM_FP_ENABLE_BIT,
+            PB_SCONFIG_WE5_EM_FP_ENABLE?1:0);
+
+        // spare
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_SPARE,
+            PB_SCONFIG_WE5_SPARE_START_BIT,
+            (PB_SCONFIG_WE5_SPARE_END_BIT-
+             PB_SCONFIG_WE5_SPARE_START_BIT+1));
+
+        // pb_cfg_mem_stv_priority
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_WE5_MEM_STV_PRIORITY,
+            PB_SCONFIG_WE5_MEM_STV_PRIORITY_START_BIT,
+            (PB_SCONFIG_WE5_MEM_STV_PRIORITY_END_BIT-
+             PB_SCONFIG_WE5_MEM_STV_PRIORITY_START_BIT+1));
+
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_we5: Error 0x%x setting up PB Serial Configuration load register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        // call common routine to program chain
+        rc = proc_build_smp_set_sconfig(i_smp_chip, PB_SCONFIG_WE5_DEF, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_we5: Error from proc_build_smp_set_sconfig");
+            break;
+        }
+    } while(0);
+
+    // mark function exit
+    FAPI_DBG("proc_build_smp_set_sconfig_we5: End");
+    return rc;
+}
+
+
 // NOTE: see comments above function prototype in header
 fapi::ReturnCode proc_build_smp_set_fbc_cd(
     proc_build_smp_system& i_smp)
@@ -1340,6 +1476,13 @@ fapi::ReturnCode proc_build_smp_set_fbc_cd(
             if (!rc.ok())
             {
                 FAPI_ERR("proc_build_smp_set_fbc_cd: Error from proc_build_smp_set_sconfig_we1");
+                break;
+            }
+
+            rc = proc_build_smp_set_sconfig_we5(p_iter->second, i_smp);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_set_fbc_cd: Error from proc_build_smp_set_sconfig_we5");
                 break;
             }
 

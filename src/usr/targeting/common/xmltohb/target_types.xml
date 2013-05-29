@@ -183,6 +183,7 @@
     <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
     <attribute><id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id></attribute>
     <attribute><id>DUMMY_PERSISTENCY</id></attribute>
+    <attribute><id>MEM_MIRROR_PLACEMENT_POLICY</id></attribute>
 </targetType>
 
 <targetType>
@@ -452,6 +453,15 @@
     <attribute><id>PROC_EX_FUNC_L3_DELTA_DATA</id></attribute>
     <attribute><id>PROC_EX_FUNC_L3_LENGTH</id></attribute>
     <attribute><id>ECID</id></attribute>
+
+    <attribute><id>PROC_HTM_BAR_SIZE</id></attribute>
+    <attribute><id>PROC_OCC_SANDBOX_SIZE</id></attribute>
+    <attribute><id>PROC_HTM_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_OCC_SANDBOX_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_AS_MMIO_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_AS_MMIO_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_AS_MMIO_BAR_SIZE</id></attribute>
+
 </targetType>
 
 <targetType>

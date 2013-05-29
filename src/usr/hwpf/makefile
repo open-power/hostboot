@@ -82,7 +82,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dmi_training/proc_dmi_scominit_errors.xml \
     hwp/dmi_training/cen_dmi_scominit_errors.xml \
     hwp/sbe_centaur_init/cen_xip_customize_errors.xml \
-    hwp/tod_init/proc_tod_utils/proc_tod_utils.xml
+    hwp/tod_init/proc_tod_utils/proc_tod_utils.xml \
+    hwp/mc_config/mss_eff_config/opt_memmap_errors.xml
     
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
