@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -52,7 +52,21 @@ typedef uint64_t XSComBase_t;
 namespace XSCOM
 {
 
+ enum CpuType
+ {
+    CurThreadCpu,
+    TargetCpu
+ };
+
+
+struct XscomAddrType_t
+{
+  uint32_t addr;
+  CpuType target_type;
+};
+
 #define     XSCOM_BUFFER_SIZE   8   // 8 bytes
+
 
 /**
  * @brief Performs an XSCom access operation
@@ -122,20 +136,6 @@ public:
         return mRegister = val;
     }
 
-    /**
-     * @brief XSCom status values
-     */
-    enum XSComStatus
-    {
-        XSCOM_GOOD = 0,
-        XSCOM_BLOCKED = 1,
-        XSCOM_OFFLINE = 2,
-        XSCOM_PARTIAL = 3,
-        XSCOM_BAD_ADDRESS = 4,
-        XSCOM_CLOCK_ERROR = 5,
-        XSCOM_PARITY_ERROR = 6,
-        XSCOM_TIMEOUT= 7,
-    };
 
     // Layout of HMER register parts
     union

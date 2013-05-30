@@ -43,6 +43,7 @@
 #include "xscom.H"
 #include <assert.h>
 #include <errl/errludlogregister.H>
+#include <xscom/piberror.H>
 
 //@fixme-RTC:67295 Only log the error once
 bool MULTICAST_ERROR_LOGGED_ONCE = false;
@@ -119,13 +120,11 @@ bool XSComRetry(const HMER i_hmer)
     bool l_retry = false;
     switch (i_hmer.mXSComStatus)
     {
-        // Should retry if parity or timeout error.
-        case HMER::XSCOM_PARITY_ERROR:
-        case HMER::XSCOM_TIMEOUT:
-             l_retry = true;
-             break;
-        default:
-             break;
+          case PIB::PIB_RESOURCE_OCCUPIED:
+            l_retry = true;
+            break;
+          default:
+            break;
     }
     return l_retry;
 }
@@ -348,7 +347,10 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
 
             // Get the virtual addr value of the chip from the virtual address
             // attribute
-            o_virtAddr =  reinterpret_cast<uint64_t*>(i_target->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>());
+            o_virtAddr =
+              reinterpret_cast<uint64_t*>(
+                i_target->getAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>());
+
 
             // If the virtual address equals NULL(default) then this is the
             // first XSCOM to this target so we need to calculate
@@ -399,6 +401,8 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                     (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
                       THIRTYTWO_GB));
 
+                TRACDCOMP(g_trac_xscom, "xscomPerformOp: o_Virtual Address   =  0x%llX\n",o_virtAddr);
+
                 // Implemented the virtual address attribute..
 
                 // Leaving the comments as a discussion point...
@@ -415,7 +419,8 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                 // this case.
 
                 // Save the virtual address attribute.
-                i_target->setAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>(reinterpret_cast<uint64_t>(o_virtAddr));
+                i_target->setAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>(
+                                        reinterpret_cast<uint64_t>(o_virtAddr));
 
             }
         }
@@ -463,6 +468,9 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
     // Keep MMIO access until XSCOM successfully done or error
     uint64_t l_data = 0;
 
+    // retry counter.
+    uint32_t l_retryCtr = 0;
+
     errlHndl_t l_err = NULL;
 
     do
@@ -488,17 +496,22 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
         // Check for error or done
         io_hmer = waitForHMERStatus();
 
-    } while (io_hmer.mXSComStatus == HMER::XSCOM_BLOCKED);
+        l_retryCtr++;
+
+        // If the retry counter is a multiple of 128
+        if (l_retryCtr % 128 == 0)
+        {
+            // print a trace message.. for debug purposes
+            // incase we are stuck in a retry loop.
+            TRACFCOMP(g_trac_xscom,"xscomPerformOp - RESOUCE OCCUPIED LOOP Cntr = %d: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX", l_retryCtr, static_cast<uint64_t>(i_opType),i_xscomAddr,static_cast<uint64_t>(l_mmioAddr));
+
+        }
+    } while (io_hmer.mXSComStatus == PIB::PIB_RESOURCE_OCCUPIED);
 
 
-    TRACDCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX",
-              static_cast<uint64_t>(i_opType),
-              i_xscomAddr,
-              static_cast<uint64_t>(l_mmioAddr));
-    TRACDCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; i_virtAddr+l_offset %p",
-              l_offset,
-              i_virtAddr,
-              i_virtAddr + l_offset);
+    TRACDCOMP(g_trac_xscom,"xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX" static_cast<uint64_t>(i_opType),i_xscomAddr,static_cast<uint64_t>(l_mmioAddr));
+
+    TRACDCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; i_virtAddr+l_offset %p",l_offset,i_virtAddr,i_virtAddr + l_offset);
 
     if (i_opType == DeviceFW::READ)
     {
@@ -512,12 +525,12 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
     do
     {
         // Handle error
-        if (io_hmer.mXSComStatus != HMER::XSCOM_GOOD)
+        if (io_hmer.mXSComStatus != PIB::PIB_NO_ERROR)
         {
 
             //@fixme-RTC:67295 remove these hacks, make log UNRECOVERABLE again
             if( ((i_xscomAddr & 0xFF000000) == 0x57000000)
-                && (io_hmer.mXSComStatus == HMER::XSCOM_BAD_ADDRESS) )
+                && (io_hmer.mXSComStatus == PIB::PIB_INVALID_ADDRESS) )
             {
                 if( MULTICAST_ERROR_LOGGED_ONCE )
                 {
@@ -531,7 +544,8 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
             }
 
             uint64_t l_hmerVal = io_hmer;
-            TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM status error HMER: %.16llx, XSComStatus %llx, Addr=%llx",l_hmerVal, io_hmer.mXSComStatus, i_xscomAddr );
+
+            TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM status error HMER: %.16llx ,XSComStatus = %llx ,Addr=%llx",l_hmerVal,io_hmer.mXSComStatus, i_xscomAddr );
             /*@
              * @errortype
              * @moduleid     XSCOM_DO_OP
@@ -572,6 +586,13 @@ uint64_t* getCpuIdVirtualAddress()
     uint32_t chipId = (cpuid & 0x0380)>>7;
     uint32_t nodeId = (cpuid & 0x1C00)>>10;
 
+    // Can change the above hardcoded values to either a macro or use
+    // the info below to do the masking and shifting.
+    // uint64_t max_threads = cpu_thread_count();
+    // for the number of Chips  - use  g_xscomMaxChipsPerNode instead..
+    // For the number of Procs.. MAX_PROCS_RSV = P8_MAX_PROCS*2
+    // P8_MAX_PROCS = 8 -- space left for 2* that.
+
     XSComBase_t l_systemBaseAddr = MASTER_PROC_XSCOM_BASE_ADDR;
 
     // Target's XSCOM Base address
@@ -584,8 +605,7 @@ uint64_t* getCpuIdVirtualAddress()
       (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
                     THIRTYTWO_GB));
 
-    TRACDCOMP(g_trac_xscom, "getCpuIdVirtualAddress: o_Virtual Address   =  0x%llX\n",
-              o_virtAddr);
+    TRACDCOMP(g_trac_xscom, "getCpuIdVirtualAddress: o_Virtual Address   =  0x%llX\n",o_virtAddr);
 
     return o_virtAddr;
 
@@ -610,18 +630,18 @@ void resetScomEngine(TARGETING::Target* i_target,
     uint64_t* l_virtAddr = 0;
 
     // xscom registers that need to be set.
-    uint32_t XscomAddr[3] = {0x0202000F,
-                             0x02020007,
-                             0x02020009};
+    XscomAddrType_t XscomAddr[] = { {0x0202000F, CurThreadCpu},
+                                    {0x02020007, TargetCpu},
+                                    {0x02020009, TargetCpu},};
 
-    TRACFCOMP(g_trac_xscom,"XSCOM RESET INITIATED");
+    TRACFCOMP(g_trac_xscom,"resetScomEngine: XSCOM RESET INTIATED");
 
     // Loop through the registers you want to write to 0
     for (int i = 0; i<3; i++)
     {
         // First address we need to read is for the Cpu that this thread is
         // running on.  Need to find the virtAddr for that CPU.
-        if (i==0)
+        if (XscomAddr[i].target_type == CurThreadCpu)
         {
             l_virtAddr =  getCpuIdVirtualAddress();
         }
@@ -636,7 +656,7 @@ void resetScomEngine(TARGETING::Target* i_target,
         //*********************************************************
         l_err = xScomDoOp(DeviceFW::WRITE,
                           l_virtAddr,
-                          XscomAddr[i],
+                          XscomAddr[i].addr,
                           &io_buffer,
                           io_buflen,
                           l_hmer);
@@ -652,7 +672,7 @@ void resetScomEngine(TARGETING::Target* i_target,
         }
 
         // unmap the device now that we are done with the scom to that area.
-        if (i==0)
+        if (XscomAddr[i].target_type == CurThreadCpu)
         {
             mmio_dev_unmap(reinterpret_cast<void*>(l_virtAddr));
         }
@@ -681,20 +701,21 @@ void collectXscomFFDC(TARGETING::Target* i_target,
     size_t io_buflen = XSCOM_BUFFER_SIZE;
     uint64_t* l_virtAddr = 0;
 
-    uint32_t XscomAddr[4] = {0x0202000F,
-                             0x02020004,
-                             0x02020007,
-                             0x02020009};
+    // xscom registers that need to be set.
+    XscomAddrType_t XscomAddr[4] = { {0x0202000F, CurThreadCpu},
+                                     {0x02020004, TargetCpu},
+                                     {0x02020007, TargetCpu},
+                                     {0x02020009, TargetCpu},};
 
 
-    TRACFCOMP(g_trac_xscom,"XSCOM COLLECT FFDC STARTED");
+    TRACFCOMP(g_trac_xscom,"collectXscomFFDC: XSCOM COLLECT FFDC STARTED");
 
     // Loop through the addresses you want to collect.
     for (int i = 0; i<4; i++)
     {
 
         // If collecting first address, need to collect from Source Chip
-        if (i==0)
+        if (XscomAddr[i].target_type == CurThreadCpu)
         {
             l_virtAddr =  getCpuIdVirtualAddress();
         }
@@ -706,10 +727,9 @@ void collectXscomFFDC(TARGETING::Target* i_target,
         //*********************************************************
         // READ SCOM ADDR
         //*********************************************************
-
         l_err = xScomDoOp(DeviceFW::READ,
                           l_virtAddr,
-                          XscomAddr[i],
+                          XscomAddr[i].addr,
                           &io_buffer,
                           io_buflen,
                           l_hmer);
@@ -722,7 +742,7 @@ void collectXscomFFDC(TARGETING::Target* i_target,
         ERRORLOG::ErrlUserDetailsLogRegister l_logReg(i_target);
 
         l_logReg.addDataBuffer(&io_buffer, sizeof(io_buffer),
-                               DEVICE_XSCOM_ADDRESS(XscomAddr[i]));
+                               DEVICE_XSCOM_ADDRESS(XscomAddr[i].addr));
 
 
         // If not successful
@@ -739,6 +759,13 @@ void collectXscomFFDC(TARGETING::Target* i_target,
             // all the time?  And can we log to more than one errorlog?
             l_logReg.addToLog(io_errl);
         }
+
+        // unmap the device now that we are done with the scom to that area.
+        if (XscomAddr[i].target_type == CurThreadCpu)
+        {
+            mmio_dev_unmap(reinterpret_cast<void*>(l_virtAddr));
+        }
+
     }
 
     return;
@@ -759,9 +786,6 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
     mutex_t* l_XSComMutex = NULL;
     uint64_t l_addr = va_arg(i_args,uint64_t);
 
-    // Retry loop
-    bool l_retry = false;
-    uint8_t l_retryCtr = 0;
     do
     {
         // XSCOM operation sanity check
@@ -774,9 +798,6 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
         // Set to buffer len to 0 until successfully access
         io_buflen = 0;
-
-        // Re-init l_retry for loop
-        l_retry = false;
 
         // Get the target chip's virtual address
         uint64_t* l_virtAddr = NULL;
@@ -806,6 +827,12 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // If we got a scom error.
         if (l_err)
         {
+
+            // Add Callouts to the errorlog
+            PIB::addFruCallouts(i_target,
+                                l_hmer.mXSComStatus,
+                                l_err);
+
             // Call XscomCollectFFDC..
             collectXscomFFDC(i_target,
                              l_virtAddr,
@@ -818,19 +845,6 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
             // Add traces to errorlog..
             l_err->collectTrace("XSCOM",1024);
 
-            // Retry
-            if (l_retryCtr <= MAX_XSCOM_RETRY)
-            {
-                l_retryCtr++;
-                // If retry is possible, commit error as informational.
-                l_retry = XSComRetry(l_hmer);
-                if (l_retry == true)
-                {
-                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    // Commit/delete error
-                    errlCommit(l_err,XSCOM_COMP_ID);
-                }
-            }
         }
         else
         {
@@ -846,7 +860,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         // Done, un-pin
         task_affinity_unpin();
 
-    } while (l_retry == true); // End retry loop
+    } while (0);
 
     return l_err;
 }
