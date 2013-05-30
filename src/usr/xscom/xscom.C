@@ -387,13 +387,17 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                     ( ( (g_xscomMaxChipsPerNode * xscomNodeId) +
                             xscomChipId ) * THIRTYTWO_GB);
 
+                TRACFCOMP(g_trac_xscom,
+                          "Target %.8X :: Node:%d Chip:%d :: XscomBase:0x%llX",
+                          TARGETING::get_huid(i_target),
+                          xscomNodeId,
+                          xscomChipId,
+                          l_XSComBaseAddr);
+
                 // Target's virtual address
                 o_virtAddr = static_cast<uint64_t*>
                     (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
                       THIRTYTWO_GB));
-
-                TRACDCOMP(g_trac_xscom, "xscomPerformOp: o_Virtual Address   =  0x%llX\n",
-                 o_virtAddr);
 
                 // Implemented the virtual address attribute..
 
@@ -565,7 +569,7 @@ uint64_t* getCpuIdVirtualAddress()
 
     //NNNCCCPPPPTTT format fot the cpuid..
     //  N = node, C = chip, P = proc, T = thread
-    uint32_t chipId = (cpuid & 0x0480)>>7;
+    uint32_t chipId = (cpuid & 0x0380)>>7;
     uint32_t nodeId = (cpuid & 0x1C00)>>10;
 
     XSComBase_t l_systemBaseAddr = MASTER_PROC_XSCOM_BASE_ADDR;
@@ -610,7 +614,7 @@ void resetScomEngine(TARGETING::Target* i_target,
                              0x02020007,
                              0x02020009};
 
-    TRACFCOMP(g_trac_xscom,"XSCOM RESET INTIATED");
+    TRACFCOMP(g_trac_xscom,"XSCOM RESET INITIATED");
 
     // Loop through the registers you want to write to 0
     for (int i = 0; i<3; i++)

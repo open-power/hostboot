@@ -347,7 +347,7 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
                  *              bytes 2-3: reason code of first error
                  * @userdata2   bytes 0-1: total number of elogs included
                  *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_io_run_training has failed
+                 * @devdesc     call to fabric_io_dccal has failed
                  *              see error log in the user details section for
                  *              additional details.
                  */
@@ -381,7 +381,7 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
                  *              bytes 2-3: reason code of first error
                  * @userdata2   bytes 0-1: total number of elogs included
                  *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_io_run_training has failed
+                 * @devdesc     call to fabric_io_dccal has failed
                  *              see error log in the user details section for
                  *              additional details.
                  */

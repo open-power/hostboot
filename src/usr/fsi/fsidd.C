@@ -56,7 +56,6 @@ TRAC_INIT(&g_trac_fsir, "FSIR", KILOBYTE); //1K
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-
 namespace FSI
 {
 
@@ -1006,7 +1005,21 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
             ERRORLOG::ErrlUserDetailsLogRegister
                     l_eud_fsiT(i_addrInfo.fsiTarg);
 
-            l_err2 = read( 0x31D0, &data );
+            // Read some error regs from scom
+            ERRORLOG::ErrlUserDetailsLogRegister
+                    l_scom_data(iv_master);
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020000ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020001ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020002ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020005ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020006ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020007ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020008ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020009ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0002000Aull));
+            l_scom_data.addToLog(l_err);
+
+            l_err2 = read( i_addrInfo.opbTarg, 0x31D0, &data );
             if( l_err2 )
             {
                 delete l_err2;
@@ -1019,7 +1032,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
 
             }
 
-            l_err2 = read( 0x31D4, &data );
+            l_err2 = read( i_addrInfo.opbTarg, 0x31D4, &data );
             if( l_err2 )
             {
                 delete l_err2;
@@ -1031,7 +1044,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                                          DEVICE_FSI_ADDRESS(0x31D4ull));
             }
 
-            l_err2 = read( 0x31D8, &data );
+            l_err2 = read( i_addrInfo.opbTarg, 0x31D8, &data );
             if( l_err2 )
             {
                 delete l_err2;
@@ -1043,7 +1056,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                                          DEVICE_FSI_ADDRESS(0x31D8ull));
             }
 
-            l_err2 = read( 0x31DC, &data );
+            l_err2 = read( i_addrInfo.opbTarg, 0x31DC, &data );
             if( l_err2 )
             {
                 delete l_err2;
@@ -1123,8 +1136,7 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                 break;
             }
 
-            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
-            //nanosleep( 0, 10,000 ); //sleep for 10,000 ns
+            nanosleep( 0,10000 ); //sleep for 10,000 ns
             elapsed_time_ns += 10000;
         } while( elapsed_time_ns <= MAX_OPB_TIMEOUT_NS ); // hardware has 1ms limit
         if( l_err ) { break; }
@@ -1161,8 +1173,23 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                     i_addrInfo.opbTarg
                 ).addToLog(l_err);
 
+            // Read some error regs from scom
+            ERRORLOG::ErrlUserDetailsLogRegister
+                    l_scom_data(i_addrInfo.opbTarg);
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020000ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020001ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020002ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020005ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020006ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020007ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020008ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020009ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0002000Aull));
+            l_scom_data.addToLog(l_err);
+
             l_err->collectTrace("FSI");
             l_err->collectTrace("FSIR");
+
             break;
         }
 
@@ -1433,7 +1460,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         //  before we run
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
-        TARGETING::SpFunctions spfuncs;
+        TARGETING::SpFunctions spfuncs = TARGETING::SpFunctions();
         if( sys
             && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
             && spfuncs.fsiSlaveInit )
@@ -1496,11 +1523,11 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         //   resets everything to that window
         if( TARGETING::FSI_MASTER_TYPE_CMFSI == i_fsiInfo.type )
         {
-            slave_offset |= CMFSI_SLAVE_3;
+            slave_offset |= CMFSI_SLAVE_0;
         }
         else if( TARGETING::FSI_MASTER_TYPE_MFSI == i_fsiInfo.type )
         {
-            slave_offset |= MFSI_SLAVE_3;
+            slave_offset |= MFSI_SLAVE_0;
         }
 
         //Setup the FSI slave to enable HW recovery, lbus ratio

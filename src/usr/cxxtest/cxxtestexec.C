@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -82,7 +82,7 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
 
     //  start executing the CxxTest modules
 
-    TRACDCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalmodules=%d.",
+    TRACFCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalmodules=%d.",
             module_list.size());
     printkd( "\n Begin CxxTest...\n");
 
@@ -111,7 +111,7 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         }
 
         tidrc = task_exec( *i, NULL );
-        TRACDCOMP( g_trac_cxxtest, "Launched task: %s tidrc=%d",
+        TRACFCOMP( g_trac_cxxtest, "Launched task: %s tidrc=%d",
                    *i, tidrc );
         tasks.push_back(tidrc);
     }
@@ -130,6 +130,10 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
         {
             TRACFCOMP( g_trac_cxxtest, "Task %d crashed.", *t );
             __sync_add_and_fetch(&CxxTest::g_FailedTests, 1);
+        }
+        else
+        {
+            TRACFCOMP( g_trac_cxxtest, "Task %d finished.", *t );
         }
     }
 

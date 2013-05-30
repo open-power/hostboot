@@ -66,7 +66,7 @@ class FsiDD
     errlHndl_t initializeHardware();
 
     /**
-     * @brief Performs an FSI Read Operation to an absolute address
+     * @brief Performs an FSI Read Operation
      *
      * @param[in] i_target  Chip target of FSI operation
      * @param[in] i_address  Address to read (relative to target)
@@ -393,11 +393,11 @@ class FsiDD
         OPB_STAT_BUSY       = 0x00010000, /**< Bit 15 is the Busy bit */
         OPB_STAT_READ_VALID = 0x00020000, /**< Bit 14 is the Valid Read bit */
         OPB_STAT_ERR_OPB    = 0x09F00000, /**< 4,7-11 are OPB errors */
-
-        //TODO RTC 65922 tmp err mask for BU -- SW190814 why Any err always on 
         OPB_STAT_ERR_CMFSI  = 0x00007C00, /**< 16-21 are cMFSI errors */
         OPB_STAT_ERR_MFSI   = 0x0000007C, /**< 24-29 are MFSI errors */
-        OPB_STAT_ERR_ANY    = OPB_STAT_ERR_OPB|OPB_STAT_ERR_CMFSI|OPB_STAT_ERR_MFSI,
+        OPB_STAT_ERR_ANY    = (OPB_STAT_ERR_OPB |
+                               OPB_STAT_ERR_CMFSI |
+                               OPB_STAT_ERR_MFSI),
     };
 
     /**

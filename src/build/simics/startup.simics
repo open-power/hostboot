@@ -9,6 +9,7 @@ python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 
 
 # Setup some common vars to use across machine types
+echo "Note: Error messages for cecdrawer0_XXX are expected for non-Brazos machines"
 $hb_masterproc = ""
 try {
     # Attempt to use the Brazos name
