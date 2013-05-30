@@ -339,18 +339,19 @@ struct conn_t
         {
             case TYPE_SYS:    order =  0; break;
             case TYPE_NODE:   order =  1; break;
-            case TYPE_PROC:   order =  2; break;
-            case TYPE_OCC:    order =  3; break;
-            case TYPE_PSI:    order =  4; break;
-            case TYPE_EX:     order =  5; break;
-            case TYPE_XBUS:   order =  6; break;
-            case TYPE_ABUS:   order =  7; break;
-            case TYPE_PCI:    order =  8; break;
-            case TYPE_MCS:    order =  9; break;
-            case TYPE_MEMBUF: order = 10; break;
-            case TYPE_L4:     order = 11; break;
-            case TYPE_MBA:    order = 12; break;
-            case TYPE_DIMM:   order = 13; break;
+            case TYPE_OSC:    order =  2; break;
+            case TYPE_PROC:   order =  3; break;
+            case TYPE_OCC:    order =  4; break;
+            case TYPE_PSI:    order =  5; break;
+            case TYPE_EX:     order =  6; break;
+            case TYPE_XBUS:   order =  7; break;
+            case TYPE_ABUS:   order =  8; break;
+            case TYPE_PCI:    order =  9; break;
+            case TYPE_MCS:    order = 10; break;
+            case TYPE_MEMBUF: order = 11; break;
+            case TYPE_L4:     order = 12; break;
+            case TYPE_MBA:    order = 13; break;
+            case TYPE_DIMM:   order = 14; break;
             default: ;
         }
 
@@ -383,6 +384,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         // This table must be sorted based on the < operator of struct conn_t.
         { TYPE_SYS,    TYPE_NODE,   TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_SYS,    TargetService::PARENT_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_OSC,    TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_PROC,   TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_OCC,    TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_PSI,    TargetService::CHILD_BY_AFFINITY },
@@ -395,6 +397,8 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_NODE,   TYPE_L4,     TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_MBA,    TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY },
+
+        { TYPE_OSC,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
 
         { TYPE_PROC,   TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
         { TYPE_PROC,   TYPE_OCC,    TargetService::CHILD_BY_AFFINITY  },
@@ -668,7 +672,6 @@ TargetHandle_t getConnectedPeerTarget( TargetHandle_t i_target )
             case TYPE_PSI:
 
                 o_target = i_target->getAttr<ATTR_PEER_TARGET>();
-
                 break;
 
             default:
@@ -849,6 +852,7 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
             switch ( l_type )
             {
                 case TYPE_PROC:
+                case TYPE_OSC:
                 {
                     uint16_t tmpPos = 0;
                     if ( !i_target->tryGetAttr<ATTR_POSITION>(tmpPos) )

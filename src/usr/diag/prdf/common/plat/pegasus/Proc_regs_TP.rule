@@ -228,3 +228,91 @@
         capture     req nonzero("PMCFIR");
     };
 
+################################################################################
+# TOD Register
+################################################################################
+
+    register TOD_MPCR
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_M_PATH_CTRL_REG";
+        scomaddr    0x00040000;
+        capture     group TODReg;
+    };
+
+    register TOD_PCRP0
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_PRI_PORT_0_CTRL_REG";
+        scomaddr    0x00040001;
+        capture     group TODReg;
+    };
+
+    register TOD_PCRP1
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_PRI_PORT_1_CTRL_REG";
+        scomaddr    0x00040002;
+        capture     group TODReg;
+    };
+
+    register TOD_SCRP0
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_SEC_PORT_0_CTRL_REG";
+        scomaddr    0x00040003;
+        capture     group TODReg;
+    };
+
+    register TOD_SCRP1
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_SEC_PORT_1_CTRL_REG";
+        scomaddr    0x00040004;
+        capture     group TODReg;
+    };
+
+    register TOD_SPCR
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_S_PATH_CTRL_REG";
+        scomaddr    0x00040005;
+        capture     group TODReg;
+    };
+
+    register TOD_IPCR
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_I_PATH_CTRL_REG";
+        scomaddr    0x00040006;
+        capture     group TODReg;
+    };
+
+    register TOD_PSMSCR
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_PSS_MSS_CTRL_REG";
+        scomaddr    0x00040007;
+        capture     group TODReg;
+    };
+
+    register TOD_STATUSREGISTER
+    {
+        name       "EH.TPCHIP.PIB.TOD.TOD_PSS_MSS_STATUS_REG";
+        scomaddr    0x00040008;
+        capture     group TODReg;
+    };
+
+    register TOD_ERRORREGISTER
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_ERROR_REG";
+        scomaddr    0x00040030;
+        capture     group TODReg;
+        reset       (^, 0x40030);
+    };
+
+    register TOD_ERRORMASK
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_ERROR_MASK_REG";
+        scomaddr    0x40032;
+        capture     group TODReg;
+    };
+
+    register TOD_ERRORACTION
+    {
+        name        "EH.TPCHIP.PIB.TOD.TOD_ERROR_ROUTING_REG";
+        scomaddr    0x00040033;
+        capture     group TODReg;
+    };

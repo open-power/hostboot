@@ -143,7 +143,7 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
         if ( i->callout == mru )
         {
             found = true;
-            if ( priority < i->priority )
+            if ( priority > i->priority )
             {
                 i->priority = priority;
             }

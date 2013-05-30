@@ -250,21 +250,19 @@ group gTpLFir filter singlebit
     (TpLFir, bit(15)) ? defaultMaskedError;
 
     /** TP_LFIR[16]
-     *  Local errors from TOD ( error) Error in backup topology
+     *  Error in TOD backup topology
      */
-    (TpLFir, bit(16)) ? defaultMaskedError;
+    (TpLFir, bit(16)) ? TodReportByRegister;
 
-    #FIXME RTC 23127 "First Instance" need clarification
     /** TP_LFIR[17]
-     *  Local errors from TOD ( error)
+     *  TOD PIB Errors
      */
-    (TpLFir, bit(17)) ? defaultMaskedError;
+    (TpLFir, bit(17)) ? SelfHighThr1;
 
     /** TP_LFIR[18]
-     *  Local errors from TOD ( error)
+     *  PHYP detected TOD Error
      */
-    #FIXME RTC 23127 Shall be handled in TOD Activity
-    (TpLFir, bit(18)) ? TBDDefaultCallout;
+    (TpLFir, bit(18)) ? TodReportByPHYP;
 
     /** TP_LFIR[19]
      *  Processor PLL error
@@ -810,6 +808,293 @@ group gPmcFir filter singlebit
     (PmcFir, bit(47|48)) ? defaultMaskedError;
 };
 
+########################################################################
+#
+#  TOD Rules and Groups
+#
+########################################################################
+
+rule TodErrors
+{
+    TOD_ERRORREGISTER & (~TOD_ERRORMASK) & (~TOD_ERRORACTION);
+};
+
+
+group gTodErrors filter singlebit
+{
+    /** TOD_ERRORREGISTER[0]
+     *  M_PATH_CONTROL_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(0)) ? todRestoreMPCRAndPSMSCR;
+
+    /** TOD_ERRORREGISTER[1]
+     *  M_PATH_0_PARITY_ERROR
+     */
+    (TodErrors,bit(1)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[2]
+     *  M_PATH_1_PARITY_ERROR
+     */
+    (TodErrors,bit(2)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[3]
+     *  PCRP0_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(3)) ? todRestorePCRP0;
+
+    /** TOD_ERRORREGISTER[4]
+     *  PCRP1_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(4)) ? todRestorePCRP1;
+
+    /** TOD_ERRORREGISTER[5]
+     *  SCRP0_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(5)) ? todRestoreSCRP0;
+
+    /** TOD_ERRORREGISTER[6]
+     *  SCRP1_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(6)) ? todRestoreSCRP1;
+
+    /** TOD_ERRORREGISTER[7]
+     *  SPCR_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(7)) ? todRestoreSPCR;
+
+    /** TOD_ERRORREGISTER[8]
+     *  IPCR_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(8)) ? todRestoreIPCR;
+
+    /** TOD_ERRORREGISTER[9]
+     *  PSMSCR_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(9)) ? todRestoreMISC;
+
+    /** TOD_ERRORREGISTER[10]
+     *  S_PATH_0_PARITY_ERROr
+     */
+    (TodErrors,bit(10)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[11]
+     *  REG_0X08_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(11)) ? selfCaptThr32;
+
+
+    /** TOD_ERRORREGISTER[12]
+     *  M_PATH_STATUS_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(12)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[13]
+     *  S_PATH_STATUS_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(13)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[14]
+     *  M_PATH_0_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(14)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[15]
+     *  M_PATH_1_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(15)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[16]
+     *  S_PATH_0_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(16)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[17]
+     *  I_PATH_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(17)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[18]
+     *  PSS HAMMING DISTANCE
+     */
+    (TodErrors,bit(18)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[19]
+     *  MISC_RESET_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(19)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[20]
+     *  S_PATH_0_PARITY_ERROR
+     */
+    (TodErrors,bit(20)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[21]
+     *  S_PATH_1_STEP_CHECK_ERROR
+     */
+    (TodErrors,bit(21)) ? analyzeStepCheckErr;
+
+    /** TOD_ERRORREGISTER[22]
+     *  I_PATH_DELAY_STEP_CHECK_PARITY_ERROR
+     */
+    (TodErrors,bit(22)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[23]
+     *  REG_0X0C DATA_PARITY ERROR
+     */
+    (TodErrors,bit(23)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[24]
+     *  REG_0X11_0X12_0X13_0X14_0X15_0X16_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(24)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[25]
+     * REG_0X17_0X18_0X21_0X22_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(25)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[26]
+     *  REG_0X1D_0X1E_0X1F_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(26)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[27]
+     *  TIMER_VALUE_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(27)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[28]
+     *  LOW_ORDER_STEP_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(28)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[29]
+     *  FSM_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(29)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[30]
+     *  RX_TTYPE_CONTROL_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(30)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[31]
+     *  REG_0X30_0X31_0X32_0X33_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(31)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[32]
+     *  CHIP_CONTROL_REG_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(32)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[33]
+     *  I_PATH_SYNC_CHECK_ERROR
+     */
+    (TodErrors,bit(33)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[34]
+     *  I_PATH_FSM_STATE_PARITY_ERROR
+     */
+    (TodErrors,bit(34)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[35]
+     *  I_PATH_TIME_REG_PARITY_ERROR
+     */
+    (TodErrors,bit(35)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[36]
+     *  I_PATH_TIME_REG_OVERFLOW
+     */
+    (TodErrors,bit(36)) ? maskTodError;
+
+    /** TOD_ERRORREGISTER[37]
+     *  WOF_LOW_ORDER_STEP_COUNTER_PARITY_ERROR
+     */
+    (TodErrors,bit(37)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[38|39|40|41|42|43]
+     *  RX_TTYPE_1
+     */
+    (TodErrors,bit(38|39|40|41|42|43)) ? defaultMaskedError;
+
+    # For firmware all the TOD-PIB errors are informational by nature.So,
+    # not doing any special analysis.
+    /** TOD_ERRORREGISTER[44]
+     *  PIB_SLAVE_ADDR_INVALID_ERROR
+     */
+    (TodErrors,bit(44)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[45]
+     *  PIB_SLAVE_WRITE_INVALID_ERROR
+     */
+    (TodErrors,bit(45)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[46]
+     *  PIB_SLAVE_READ_INVALID_ERROR
+     */
+    (TodErrors,bit(46)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[47]
+     *  PIB_SLAVE_ADDR_PARITY_ERROR
+     */
+    (TodErrors,bit(47)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[48]
+     *  PIB_SLAVE_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(48)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[49]
+     *  TTYPE_CONTROL_REG_DATA_PARITY_ERROR
+     */
+    #FIXME RTC 80278 TTYPE_CONTROL Register need to be modeled by HWSV to let
+    #PRDF restoring it.
+    (TodErrors,bit(49)) ? TBDDefaultCallout;
+
+    /** TOD_ERRORREGISTER[50|51|52]
+     *  PIB_MASTER_RSP_INFO_ERROR
+     */
+    #ignoring TOD-PIB errors for any special analysis.Since erros are
+    #informational by nature.
+    (TodErrors,bit( 50|51|52 )) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[53]
+     *  RX_TTYPE_INVALID_ERROR
+     */
+    (TodErrors,bit(53 )) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[54]
+     *  RX_TTYPE_4_DATA_PARITY_ERROR
+     */
+    (TodErrors,bit(54)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[55]
+     *  PIB_MASTER_REQUEST_ERROR
+     */
+    (TodErrors,bit(55)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[56]
+     *  PIB_RESET_DURING_PIB_ACCESS_ERROR
+     */
+    (TodErrors,bit(56)) ? selfCaptThr32;
+
+    /** TOD_ERRORREGISTER[57]
+     *  EXTERNAL_XSTOP_ERROR
+     */
+    #bit tells us that TOD has received an external check stop
+    #purpose is to merely provide an information. Hence not doing any
+    #analysis.
+    (TodErrors,bit(57)) ? defaultMaskedError;
+
+    #bit[58:63] not implemented
+    /** TOD_ERRORREGISTER[58|59|60|61|62|63]
+     *  SPARE_ERROR
+     */
+    (TodErrors,bit(58|59|60|61|62|63)) ? defaultMaskedError;
+
+};
+
 ################################################################################
 # Actions specific to TP chiplet
 ################################################################################
@@ -875,4 +1160,170 @@ actionclass calloutConnectedOccThr1
 {
    threshold1;
    callout ( connected(TYPE_OCC, 0), MRU_MED );
+};
+
+# TOD Actions:
+#   * Get SH Content for all TOD errors.
+#   * Capture at least this chip TOD registers.
+#
+#   * Threshold normal TOD errors (TOD error register) at 32/day.
+#
+#   * Network Errors : Step Check Fault or "PHYP Failed Topology"
+#    - PHYP Failed Topology must be visible and "Request new Topology".
+#        - May have PHYP failure on another chip.
+#    - Capture TOD registers for whole system.
+#    - Isolate both topologies and make callout.
+
+/**
+ * Analyze TOD Register.
+ */
+actionclass TodReportByRegister
+{
+    dump(DUMP_CONTENT_SH);
+    try(analyze(gTodErrors),TodRegisterAnalyzeFail);
+};
+
+actionclass TodRegisterAnalyzeFail
+{
+    capture(TODReg);
+    SelfHighThr1;
+};
+
+/**
+ * PHYP Network fault.
+ */
+actionclass TodReportByPHYP
+{
+    dump(DUMP_CONTENT_SH);
+    threshold1;
+    funccall("todStepCheckFault");
+};
+
+/**
+ * TOD Step Check Fault - Isolate topology.
+ */
+actionclass analyzeStepCheckErr
+{
+    threshold32pday;
+    funccall("todStepCheckFault");
+};
+
+/** action for tod errors which do not need any specific ananlysis */
+
+actionclass selfCaptThr32
+{
+    calloutSelfHigh;
+    capture(TODReg);
+    threshold32pday;
+};
+
+/**
+ *  Mask indication from PHYP due to all cores evacuated.
+ *    - Mask TOD errors from this chip.
+ *    - Not visible unless xstp.
+ *    - Request new topology if chip is MDMT.
+ */
+actionclass maskTodError
+{
+    threshold1;
+    calloutSelfHigh;
+    capture(TODReg);
+    funccall("clearServiceCallFlag");
+    funccall("todNewTopologyIfBackupMDMT");
+};
+
+/**
+ *  Tod Error, Restore PCRP0 register.
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestorePCRP0
+{
+    selfCaptThr32;
+    funccall("todRestorePCRP0");
+};
+
+/**
+ *  Tod Error, Restore PCRP1 register.
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestorePCRP1
+{
+    selfCaptThr32;
+    funccall("todRestorePCRP1");
+};
+
+/**
+ *  Tod Error, Restore SCRP0 register.
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestoreSCRP0
+{
+    selfCaptThr32;
+    funccall("todRestoreSCRP0");
+};
+
+/**
+ *  Tod Error, Restore SCRP1 register.
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestoreSCRP1
+{
+    selfCaptThr32;
+    funccall("todRestoreSCRP1");
+};
+
+/** restores initial contents of MPCR and PSMCR register
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestoreMPCRAndPSMSCR
+{
+    todRestoreMPCR;
+    todRestorePSMSCR;
+};
+
+/** restores initial contents of MPCR register
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestoreMPCR
+{
+    selfCaptThr32;
+    funccall("todRestoreMPCR");
+};
+
+/** restores initial contents of MISC register
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestorePSMSCR
+{
+ # this action is used along with other actions where thresholds are set.
+ # So, we need not set any threshold here.
+
+    funccall("todRestorePSMSCR");
+};
+
+/** restores initial contents of IPCR register
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestoreIPCR
+{
+    selfCaptThr32;
+    funccall("todRestoreIPCR");
+};
+
+/** restores initial contents of SPCR register
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestoreSPCR
+{
+    selfCaptThr32;
+    funccall("todRestoreSPCR");
+};
+
+/** restores initial contents of MISC register
+ *  threshold 32 for lab and field and 1 for mnfg
+ */
+actionclass todRestoreMISC
+{
+    selfCaptThr32;
+    todRestorePSMSCR;
 };
