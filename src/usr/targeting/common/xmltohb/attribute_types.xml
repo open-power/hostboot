@@ -8158,22 +8158,6 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
-    <id>MSS_MCA_HASH_MODE</id>
-    <description>sets up the centaur hash mode policy. Mode values are 0, 1, and 2.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MCA_HASH_MODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
     <description>sets the Centaur address bits used to interleave addresses between MBA01 and MBA23. valid values are 23 through 32.</description>
     <simpleType>
@@ -10286,6 +10270,91 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>MCBIST_PRINTING_DISABLE</id>
+    <description>MCBIST support for printing</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MCBIST_PRINTING_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MCBIST_DATA_ENABLE</id>
+    <description>MCBIST support for enabling data</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MCBIST_DATA_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MCBIST_USER_RANK</id>
+    <description>MCBIST support for rank selection</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MCBIST_USER_RANK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MCBIST_USER_BANK</id>
+    <description>MCBIST support for bank selection</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MCBIST_USER_BANK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCHMOO_MULTIPLE_SETUP_CALL</id>
+    <description>MCBIST for multiple setup</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCHMOO_MULTIPLE_SETUP_CALL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MCBIST_ADDR_MODES</id>
     <description>Can choose mcbist address mode for full,half or quarter addressing mode.</description>
     <simpleType>
@@ -12221,6 +12290,229 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_RISK_LEVEL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_FREQ_BIAS_PERCENTAGE</id>
+    <description>
+        Percentage to increase/decrease MEM frequency. two's complement number.
+        Measured in 100's.  So the value of 100 is one percent increase.
+        This frequency change comes from changing multipliers and dividers to
+        get the desired frequency. The supported frequencies come from
+        Tim Diemoz.
+        Creator: platform set this to 0.  Users can set this to a valid value.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_FREQ_BIAS_PERCENTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_NEST_FREQ</id>
+    <description>
+        Frequency of the Centaur NEST PLL in MHz.
+        consumer:  cen_mem_pll_initf
+        firmware notes:  Platforms should initialize the attribute to the
+        correct value for the system.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_NEST_FREQ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CDIMM_SENSOR_MAP_PRIMARY</id>
+    <description>
+        Custom DIMM Sensor Map for Primary I2C Port (1 byte of data):
+            0x00 No sensors attached
+            0x01 DIMM sensor 0 attached
+            0x02 DIMM sensor 1 attached
+            0x04 DIMM sensor 2 attached
+            0x08 DIMM sensor 3 attached
+            0x10 DIMM sensor 4 attached
+            0x20 DIMM sensor 5 attached
+            0x40 DIMM sensor 6 attached
+            0x80 DIMM sensor 7 attached
+            Comes from the VPD MW Keyword
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CDIMM_SENSOR_MAP_PRIMARY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CDIMM_SENSOR_MAP_SECONDARY</id>
+    <description>
+        Custom DIMM Sensor Map for Secondary I2C Port (1 byte of data):
+            0x00 No sensors attached
+            0x01 DIMM sensor 0 attached
+            0x02 DIMM sensor 1 attached
+            0x04 DIMM sensor 2 attached
+            0x08 DIMM sensor 3 attached
+            0x10 DIMM sensor 4 attached
+            0x20 DIMM sensor 5 attached
+            0x40 DIMM sensor 6 attached
+            0x80 DIMM sensor 7 attached
+            Comes from the VPD MW Keyword
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CDIMM_SENSOR_MAP_SECONDARY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CDIMM_VPD_MASTER_POWER_SLOPE</id>
+    <description>
+        Master Power Slope that comes from the VPD MW Keyword
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CDIMM_VPD_MASTER_POWER_SLOPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CDIMM_VPD_MASTER_POWER_INTERCEPT</id>
+    <description>
+        Master Power Intercept that comes from the VPD MW Keyword
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CDIMM_VPD_SUPPLIER_POWER_SLOPE</id>
+    <description>
+        Supplier Power Slope that comes from the VPD the MV Keyword
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CDIMM_VPD_SUPPLIER_POWER_INTERCEPT</id>
+    <description>
+        Supplier Power Intercept that comes from MV Keyword
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_ADDRESS_MIRRORING</id>
+    <description>
+        Address mirroring on the DIMM by rank, up to 4 ranks.
+            0x08 means rank 0 is mirrored
+            0x04 means rank 1 is mirrored
+            0x02 means rank 2 is mirrored
+            0x01 means rank 3 is mirrored
+        Comes from EFF config reading the VPD_DRAM_ADDRESS_MIRRORING from the
+        AM keyword of the VPD.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        <array>2, 2</array>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_ADDRESS_MIRRORING</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_BLUEWATERFALL_BROKEN</id>
+    <description>
+        Set by the platform depending on DD1.0X vs DD1.03 or newer. If true,
+        then draminit_train will modify dqs_clk_ps and gate to work around the
+        issue. Set in get ecid which determines if we are at 1.03
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_BLUEWATERFALL_BROKEN</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

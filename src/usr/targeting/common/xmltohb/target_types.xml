@@ -103,7 +103,6 @@
     <attribute><id>PAYLOAD_BASE</id></attribute>
     <attribute><id>PAYLOAD_ENTRY</id></attribute>
     <attribute><id>HB_HRMOR_NODAL_BASE</id></attribute>
-    <attribute><id>MSS_MCA_HASH_MODE</id></attribute>
     <attribute><id>MSS_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
     <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
     <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
@@ -936,6 +935,11 @@
     <attribute><id>MCBIST_ADDR_SLAVE_RANK_ON</id></attribute>
     <attribute><id>MCBIST_ADDR_STR_MAP</id></attribute>
     <attribute><id>MCBIST_ADDR_RAND</id></attribute>
+    <attribute><id>MCBIST_PRINTING_DISABLE</id></attribute>
+    <attribute><id>MCBIST_DATA_ENABLE</id></attribute>
+    <attribute><id>MCBIST_USER_RANK</id></attribute>
+    <attribute><id>MCBIST_USER_BANK</id></attribute>
+    <attribute><id>SCHMOO_MULTIPLE_SETUP_CALL</id></attribute>
     <attribute><id>EFF_DRAM_LPASR</id></attribute>
     <attribute><id>EFF_MPR_PAGE</id></attribute>
     <attribute><id>EFF_GEARDOWN_MODE</id></attribute>
@@ -967,6 +971,7 @@
     <attribute><id>TCCD_L</id></attribute>
     <attribute><id>EFF_WRITE_CRC</id></attribute>
     <attribute><id>EFF_DRAM_2N_MODE_ENABLED</id></attribute>
+    <attribute><id>EFF_DRAM_ADDRESS_MIRRORING</id></attribute>
 </targetType>
 
 <targetType>
@@ -1127,6 +1132,15 @@
     <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH</id></attribute>
     <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id></attribute>
     <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH</id></attribute>
+    <attribute><id>MSS_FREQ_BIAS_PERCENTAGE</id></attribute>
+    <attribute><id>MEMB_NEST_FREQ</id></attribute>
+    <attribute><id>CDIMM_SENSOR_MAP_PRIMARY</id></attribute>
+    <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>
+    <attribute><id>CDIMM_VPD_MASTER_POWER_SLOPE</id></attribute>
+    <attribute><id>CDIMM_VPD_MASTER_POWER_INTERCEPT</id></attribute>
+    <attribute><id>CDIMM_VPD_SUPPLIER_POWER_SLOPE</id></attribute>
+    <attribute><id>CDIMM_VPD_SUPPLIER_POWER_INTERCEPT</id></attribute>
+    <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
 </targetType>
 
 <!-- Centaur MBS -->

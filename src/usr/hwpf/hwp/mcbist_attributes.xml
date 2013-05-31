@@ -21,24 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
-
-<attribute>
-    <id>ATTR_MCBIST_PATTERN</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Enables mcbist data pattern selection.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_MCBIST_TEST_TYPE</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Enables mcbist test type selection.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-</attribute>
+  <!-- $Id: mcbist_attributes.xml,v 1.4 2013/05/21 18:51:21 bellows Exp $ -->
 
 <attribute>
     <id>ATTR_MCBIST_ADDR_MODES</id>

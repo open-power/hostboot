@@ -143,8 +143,6 @@ foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
                        $i->{mss_mba_addr_interleave_bit},
                        "MSS_MBA_CACHELINE_INTERLEAVE_MODE",
                        $i->{mss_mba_cacheline_interleave_mode},
-                       "MSS_MCA_HASH_MODE",
-                       $i->{mss_mca_hash_mode},
                        "MSS_PREFETCH_ENABLE",
                        $i->{mss_prefetch_enable},
                        "PROC_EPS_TABLE_TYPE",
@@ -1467,10 +1465,6 @@ sub generate_sys
     <attribute>
         <id>PAYLOAD_ENTRY</id>
         <default>0x180</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MCA_HASH_MODE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
