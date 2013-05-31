@@ -253,7 +253,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     bool pldCheck = false;  // Default to not do the PLD check. Set it to true for  Machine Check
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
     size_t  sz_uint8    = sizeof(uint8_t);
-    HWSV::homTermEnum termFlag = HWSV::HOM_SYS_NO_TERMINATE;
+    HWSV::hwsvTermEnum termFlag = HWSV::HWSV_SYS_NO_TERMINATE;
     HWSV::hwsvDeconfigSchedule deconfigSched = HWSV::HWSV_DECONFIG_IMMEDIATE;
     uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for sdc flatten
     errlSeverity severityParm = ERRL_SEV_RECOVERED;
@@ -280,9 +280,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     sdc = i_sdc;
 
     GardResolution::ErrorType prdGardErrType;
-    HWSV::homGardEnum gardState;  // homGardEnum in src/hwsv/server/hwsvTypes.H
+    HWSV::hwsvGardEnum gardState;  // defined in src/hwsv/server/hwsvTypes.H
     GARD_ErrorType gardErrType = GARD_NULL;
-    HWSV::homDeconfigEnum deconfigState = HWSV::HOM_NO_DECONFIG;
+    HWSV::hwsvDeconfigEnum deconfigState = HWSV::HWSV_NO_DECONFIG;
 
     bool ReturnELog = false;
     bool ForceTerminate = false;
@@ -313,7 +313,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         if (terminateOnCheckstop)
         {
             //Also need to return error log for machine check condition
-            termFlag = HWSV::HOM_SYS_TERMINATE_HW_CHECKSTOP;
+            termFlag = HWSV::HWSV_SYS_TERMINATE_HW_CHECKSTOP;
         }
 
         ReturnELog = true;
@@ -479,7 +479,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     // Set Gard Error Type and state
     //**************************************************************
 
-    gardState = HWSV::HOM_DECONFIG_GARD;
+    gardState = HWSV::HWSV_DECONFIG_GARD;
 
     // If gardErrType was determined during latent/UE/SUE processing for Check Stop,
     // use that and not determine gardErrType from the sdc values.
@@ -489,7 +489,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         switch (prdGardErrType)
         {
             case GardResolution::NoGard:
-                gardState =  HWSV::HOM_NO_GARD;
+                gardState =  HWSV::HWSV_NO_GARD;
                 gardErrType = GARD_NULL;
                 break;
             case GardResolution::Predictive:
@@ -513,16 +513,16 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                 }
                 else
                 {
-                    gardState =  HWSV::HOM_NO_GARD;
+                    gardState =  HWSV::HWSV_NO_GARD;
                     gardErrType = GARD_NULL;
                 }
                 break;
             case GardResolution::DeconfigNoGard:
-                gardState =  HWSV::HOM_NO_GARD;
+                gardState =  HWSV::HWSV_NO_GARD;
                 gardErrType = GARD_NULL;
                 break;
             default:
-                gardState =  HWSV::HOM_NO_GARD;
+                gardState =  HWSV::HWSV_NO_GARD;
                 gardErrType = GARD_NULL;
                 PRDF_DTRAC( PRDF_FUNC"Unknown prdGardErrType" );
                 break;
@@ -534,7 +534,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         // If NoGard was specified in this switched sdc, then keep the NoGard
         if ( sdc.QueryGard() == GardResolution::NoGard )
         {
-            gardState = HWSV::HOM_NO_GARD;
+            gardState = HWSV::HWSV_NO_GARD;
             gardErrType = GARD_NULL;
             prdGardErrType = GardResolution::NoGard;
         }
@@ -546,7 +546,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 
     if (sdc.IsThermalEvent() && (MACHINE_CHECK != attn_type) )
     {  //Force No Gard
-        gardState = HWSV::HOM_NO_GARD;
+        gardState = HWSV::HWSV_NO_GARD;
         gardErrType = GARD_NULL;
     }
 
@@ -599,7 +599,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             HW = true; //hardware callout
 
             // If we are in Concurrent Maintenance Mode, we will need to disable
-            // the Deferred Deconfig, if the callouts are not HOM_CM_FUNCTIONAL.
+            // Deferred Deconfig, if the callouts are not HWSV_CM_FUNCTIONAL.
 
             /* FIXME: RTC 50063 PlatServices::inCMMode() not available yet
             if (PlatServices::inCMMode())
@@ -638,7 +638,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 
             // If we are in Concurrent Maintenance Mode,
             // we will need to disable the
-            // Deferred Deconfig, if the callouts are not HOM_CM_FUNCTIONAL.
+            // Deferred Deconfig, if the callouts are not HWSV_CM_FUNCTIONAL.
             // FIXME PlatServices::inCMMode() not avaialble yet
             #if 0
             if (PlatServices::inCMMode())
@@ -704,11 +704,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         iplDiagMode = true;
         if ( (MACHINE_CHECK != attn_type || !terminateOnCheckstop) &&
               myCM_FUNCTIONAL             &&
-              (HOM_NO_GARD != gardState ||
+              (HWSV_NO_GARD != gardState ||
                GardResolution::DeconfigNoGard == prdGardErrType )  ) //Allow Deferred Deconfig for IPL Diag when No Gard action is needed
         {
             deferDeconfig = true;
-            deconfigState = HOM_DECONFIG;
+            deconfigState = HWSV_DECONFIG;
             deconfigSched = HWSV::HWSV_DECONFIG_DEFER;
         }
 
@@ -772,25 +772,25 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             TargetHandle_t target = thiscallout.getTarget();
             // Don't deconfig a Memory Controller for Bus Errors (Mc and SuperNova
             // both in Callouts) for Mem Diag. Note still deconfg the SuperNova.
-            HWSV::homDeconfigEnum thisDeconfigState = deconfigState;
+            HWSV::hwsvDeconfigEnum thisDeconfigState = deconfigState;
             TYPE l_targetType = PlatServices::getTargetType(target);
-            if ( HWSV::HOM_DECONFIG == deconfigState  &&
+            if ( HWSV::HWSV_DECONFIG == deconfigState  &&
                  l_memBuffInCallouts            &&
-                 (l_targetType  ==  TYPE_MCS)) //InP8 only 1:1 connection between Mem Buf and Mem ctrl
+                 (l_targetType  ==  TYPE_MCS))
+                 //In P8 only 1:1 connection between Mem Buf and Mem ctrl
             {
-                thisDeconfigState = HWSV::HOM_NO_DECONFIG;
+                thisDeconfigState = HWSV::HWSV_NO_DECONFIG;
             }
 
             #ifdef __HOSTBOOT_MODULE
             // FIXME: this will change once mdia mode support is in
             if(true == iplDiagMode)
             {
-              thisDeconfigState = HWSV::HOM_DEFER_DECONFIG; // DELAYED_DECONFIG;
+              thisDeconfigState = HWSV::HWSV_DEFER_DECONFIG;
             }
             #endif
 
-            PRDF_HW_ADD_CALLOUT(ForceTerminate,
-                                target,
+            PRDF_HW_ADD_CALLOUT(target,
                                 thispriority,
                                 thisDeconfigState,
                                 gardState,
@@ -809,8 +809,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             for ( TargetHandleList::iterator it = partList.begin();
                   it != partList.end(); it++ )
             {
-                PRDF_HW_ADD_CALLOUT( ForceTerminate,
-                                     *it,
+                PRDF_HW_ADD_CALLOUT( *it,
                                      thispriority,
                                      deconfigState,
                                      gardState,

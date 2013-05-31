@@ -199,7 +199,7 @@
 /**
  * @brief Error log interface to add a HW callout to an existing error log.
  */
-#define PRDF_HW_ADD_CALLOUT(io_sysTerm, i_target, i_priority,         \
+#define PRDF_HW_ADD_CALLOUT(i_target, i_priority,         \
                             i_deconfigState, i_gardState,             \
                             io_errl, i_writeVpd,                      \
                             i_gardErrType, i_severity, i_hcdb_update) \

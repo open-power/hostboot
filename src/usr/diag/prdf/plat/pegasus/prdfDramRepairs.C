@@ -52,13 +52,12 @@ bool validSymbol(uint8_t i_symbol)
     return i_symbol != INVALID_SYMBOL;
 }
 
-bool commitRestoreCallout( bool (*i_func)(errlHndl_t &, void *), void * i_data,
+void commitRestoreCallout( void (*i_func)(errlHndl_t &, void *), void * i_data,
                            TargetHandle_t i_mba )
 {
     PRDF_DENTER("commitRestoreCallout");
 
     errlHndl_t err = NULL;
-    bool o_term = false;
 
     PRDF_HW_CREATE_ERRL(
             err,
@@ -70,15 +69,12 @@ bool commitRestoreCallout( bool (*i_func)(errlHndl_t &, void *), void * i_data,
             FSP_DEFAULT_REFCODE,
             PRDF_DETECTED_FAIL_HARDWARE_PROBABLE,
             0, 0, 0, 0, // user data
-            HOM_SYS_NO_TERMINATE,
+            HWSV_SYS_NO_TERMINATE,
             false); // no pld check
 
     // add the callout
 
-    if((*i_func)(err, i_data))
-    {
-        o_term = true;
-    }
+    (*i_func)(err, i_data);
 
     bool term = false;
 
@@ -89,7 +85,7 @@ bool commitRestoreCallout( bool (*i_func)(errlHndl_t &, void *), void * i_data,
             err,
             HWSV::HWSV_DECONFIG_DEFER,
             ERRL_ACTION_REPORT,
-            HOM_CONTINUE);
+            HWSV_CONTINUE);
 
     if(term)
     {
@@ -98,15 +94,11 @@ bool commitRestoreCallout( bool (*i_func)(errlHndl_t &, void *), void * i_data,
 
         PRDF_COMMIT_ERRL(err, ERRL_ACTION_REPORT);
     }
-
-    return o_term;
 }
 
-bool addMemMruCallout(errlHndl_t & io_log, void * i_memMru)
+void addMemMruCallout(errlHndl_t & io_log, void * i_memMru)
 {
     PRDF_DENTER("addMemMruCallout");
-
-    bool o_term = false;
 
     if ( NULL != i_memMru )
     {
@@ -117,11 +109,10 @@ bool addMemMruCallout(errlHndl_t & io_log, void * i_memMru)
               it != partList.end(); it++ )
         {
             PRDF_HW_ADD_CALLOUT(
-                        o_term,
                         *it,
                         SRCI_PRIORITY_HIGH,
-                        HWSV::HOM_DECONFIG,
-                        HWSV::HOM_DECONFIG_GARD,
+                        HWSV::HWSV_DECONFIG,
+                        HWSV::HWSV_DECONFIG_GARD,
                         io_log,
                         false, // don't write src to vpd
                         GARD_Predictive,
@@ -129,29 +120,22 @@ bool addMemMruCallout(errlHndl_t & io_log, void * i_memMru)
                         false); // don't update hcdb
         }
     }
-
-    return o_term;
 }
 
-bool addDimmCallout(errlHndl_t & io_log, void * i_dimm)
+void addDimmCallout(errlHndl_t & io_log, void * i_dimm)
 {
     PRDF_DENTER("addDimmCallout");
 
-    bool o_term = false;
-
     PRDF_HW_ADD_CALLOUT(
-            o_term,
             static_cast<TargetHandle_t>(i_dimm),
             SRCI_PRIORITY_HIGH,
-            HWSV::HOM_DECONFIG,
-            HWSV::HOM_DECONFIG_GARD,
+            HWSV::HWSV_DECONFIG,
+            HWSV::HWSV_DECONFIG_GARD,
             io_log,
             false, // don't write src to vpd
             GARD_Predictive,
             ERRL_SEV_PREDICTIVE,
             false); // don't update hcdb
-
-    return o_term;
 }
 
 bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )

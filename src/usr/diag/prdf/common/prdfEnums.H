@@ -36,12 +36,12 @@
     {
         enum
         {
-            // homDeconfigEnum
+            // hwsvDeconfigEnum
             // mapping from HWSV enums to HB ones
             // eventually these HWAS will make it way to fips
-            HOM_NO_DECONFIG    = HWAS::NO_DECONFIG,
-            HOM_DECONFIG       = HWAS::DECONFIG,
-            HOM_DEFER_DECONFIG = HWAS::DELAYED_DECONFIG
+            HWSV_NO_DECONFIG    = HWAS::NO_DECONFIG,
+            HWSV_DECONFIG       = HWAS::DECONFIG,
+            HWSV_DEFER_DECONFIG = HWAS::DELAYED_DECONFIG
         };
     };
 
@@ -99,23 +99,23 @@
     namespace HWSV
     {
         typedef uint32_t hwsvHCDBUpdate;
-        typedef uint32_t homTermEnum;
-        typedef uint32_t homGardEnum;
-        typedef uint32_t homDeconfigEnum;
+        typedef uint32_t hwsvTermEnum;
+        typedef uint32_t hwsvGardEnum;
+        typedef uint32_t hwsvDeconfigEnum;
         typedef uint32_t hwsvDeconfigSchedule;
 
         enum
         {
-            // homTermEnum
-            HOM_SYS_NO_TERMINATE = 0,
+            // hwsvTermEnum
+            HWSV_SYS_NO_TERMINATE = 0,
 
             // hwsvHCDBUpdate
             HWSV_HCDB_DO_UPDATE = 0,
             HWSV_HCDB_OVERRIDE,
 
-            // homGardEnum
-            HOM_NO_GARD = 0,
-            HOM_DECONFIG_GARD,
+            // hwsvGardEnum
+            HWSV_NO_GARD = 0,
+            HWSV_DECONFIG_GARD,
 
             //hwsvDeconfigSchedule
             HWSV_DECONFIG_IMMEDIATE = 0,
