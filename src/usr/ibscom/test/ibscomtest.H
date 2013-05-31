@@ -233,7 +233,7 @@ class IBscomTest: public CxxTest::TestSuite
         return;
     }
 
-    //TODO RTC: 68733: Add error path test cases when simics support
+    //TODO RTC: 72594: Add error path test cases when simics support
     //is available
 
 };

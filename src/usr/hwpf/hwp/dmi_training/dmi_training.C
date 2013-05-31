@@ -1134,7 +1134,6 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
             break;
         }
 
-/* TODO enable with RTC: 68733
         //Now enable Inband SCOM for all membuf chips.
         TARGETING::TargetHandleList membufChips;
         getAllChips(membufChips, TYPE_MEMBUF, true);
@@ -1142,8 +1141,9 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
         for(uint32_t i=0; i<membufChips.size(); i++)
         {
             // If the membuf chip supports IBSCOM..
-            if (membufChips[i]->getAttr<ATTR_PRIMARY_CAPABILITIES>()
-                .supportsInbandScom)
+            if ((membufChips[i]->getAttr<ATTR_PRIMARY_CAPABILITIES>()
+                .supportsInbandScom) &&
+                (membufChips[i]->getAttr<TARGETING::ATTR_EC>() >= 0x20))
             {
                 ScomSwitches l_switches =
                   membufChips[i]->getAttr<ATTR_SCOM_SWITCHES>();
@@ -1165,7 +1165,7 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
                 }
             }
         }
-*/
+
     }while(0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
