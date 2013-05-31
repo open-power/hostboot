@@ -1,4 +1,4 @@
-#-- $Id: p8.fbc.scom.initfile,v 1.9 2013/04/27 21:49:42 jmcgill Exp $
+#-- $Id: p8.fbc.scom.initfile,v 1.11 2013/05/15 04:26:50 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -68,6 +68,27 @@ scom 0x02010C50 {
     pmucnt_sel,                 0b11;                                                     #-- PMU counter select = rcmd 0 OR rcmd 1
 }
 
+#-- FBC EXTFIR
+#-- NOTE: init to all bits masked, proc_fab_iovalid will unmask bits for active links
+
+#-- PB EXTFIR Mask Register (EXTFIR_MASK_REG / 0x02010C71)
+scom 0x02010C71 {
+    bits,                       scom_data;
+    0:63,                       0xFF00000000000000;
+}
+
+#-- PB EXTFIR Action0 Register (EXTFIR_ACTION0_REG / 0x02010C74)
+scom 0x02010C74 {
+    bits,                       scom_data;
+    0:63,                       0x0000000000000000;
+}
+
+#-- PB EXTFIR Action1 Register (EXTFIR_ACTION1_REG / 0x02010C75)
+scom 0x02010C75 {
+    bits,                       scom_data;
+    0:63,                       0x0000000000000000;
+}
+
 #-- MCD FIR Mask Register (MCDCTL.FIR_MASK_REG / 0x02013403)
 #-- NOTE: init to all bits masked, proc_setup_bars will unmask if MCD is enabled on this chip
 scom 0x02013403 {
@@ -87,6 +108,7 @@ scom 0x02013407 {
     0:63,                       0xC800000000000000;
 }
 
+
 #-- MCD Even/Odd Recovery Control Registers (MCD_REC_[EVEN_ODD] / 0x0201341[01])
 #-- NOTE: set base configuration, proc_setup_bars will enable recovery for
 #--       valid configuration registers based on memory configuration of this chip
@@ -96,6 +118,12 @@ scom 0x0201341(0,1) {
     mcd_recov_pace_delay,       0x040;                                                    #-- 1024 cycle wait between probes
     mcd_recov_recov_all,        0b0;                                                      #-- disable recover all function
     mcd_recov_granule_count,    0x3FFFF;                                                  #-- set granule count
+}
+
+#-- MCD Recovery Pre Epsilon Configuration Register (MCD_PRE / 0x0201340B)
+scom 0x0201340B {
+    bits,                       scom_data;
+    mcd_retry_count,            0b1111;                                                   #-- retry count of 15
 }
 
 #-- MCD Debug Configuration Register (MCD_DBG / 0x02013416)

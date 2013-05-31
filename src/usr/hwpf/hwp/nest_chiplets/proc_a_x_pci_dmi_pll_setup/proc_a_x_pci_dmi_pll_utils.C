@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.1 2013/04/17 22:36:32 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.2 2013/05/06 20:58:08 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -436,6 +436,7 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_release_pll(
                      !data.isBitSet(PLL_LOCK_REG_LOCK_START_BIT,
                                     (PLL_LOCK_REG_LOCK_END_BIT-
                                      PLL_LOCK_REG_LOCK_START_BIT+1)));
+
             if (rc)
             {
                 break;
@@ -454,7 +455,7 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_release_pll(
                 }
                 else if (i_chiplet_base_scom_addr == PCIE_CHIPLET_0x09000000)
                 {
-                    FAPI_SET_HWP_ERROR(rc, RC_PROC_A_X_PCI_DMI_PLL_SETUP_ABUS_PLL_NO_LOCK);
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_A_X_PCI_DMI_PLL_SETUP_PCIE_PLL_NO_LOCK);
                 }
                 break;
             }

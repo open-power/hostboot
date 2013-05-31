@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_shmoo.C,v 1.2 2013/03/27 15:15:07 lapietra Exp $
+// $Id: mss_eff_config_shmoo.C,v 1.5 2013/05/20 08:43:21 sauchadh Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_shmoo.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,7 +42,9 @@
 //---------|----------|---------|-----------------------------------------------
 //   1.1   | sauchadh |26-Feb-13| Added MCBIST related attributes
 //   1.2   | sauchadh |13-Mar-13| Added Schmoo related attributes from mss_eff_config.C 
-
+//   1.3   | sauchadh |17-Apr-13| Changed mcbist_addr_modes value to 1
+//   1.4   | sauchadh |10-May-13| Fixed FW comments
+//   1.5   | sauchadh |15-May-13| Fixed FW comments  
 
 //----------------------------------------------------------------------
 //  My Includes
@@ -63,14 +65,14 @@ extern "C" {
 //******************************************************************************
 //* name=mss_eff_config_shmoo, param=i_target_mba, return=ReturnCode
 //******************************************************************************
-fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target i_target_mba) {
-   fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
+fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target & i_target_mba) {
+   fapi::ReturnCode rc; 
    const char * const PROCEDURE_NAME = "mss_eff_config_shmoo";
    FAPI_INF("*** Running %s on %s ... ***", PROCEDURE_NAME, i_target_mba.toEcmdString());
 
    uint32_t datapattern=8;
    uint32_t testtype=1;
-   uint8_t  addr_modes=0;
+   uint8_t addr_modes=1;
    uint8_t  rank=0;
    uint64_t start_addr=0;
    uint64_t end_addr=0;
@@ -96,43 +98,19 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target i_target_mba) {
    uint8_t dqs_clk_min_margin=0x8c;
    uint8_t rd_gate_min_margin=0x64;
    uint8_t adr_cmd_min_margin=0x8c;
-   uint32_t cen_rd_vref_shmoo[2];
-   cen_rd_vref_shmoo[0]=0x00000000;
-   cen_rd_vref_shmoo[1]=0x00000000;
-   uint32_t dram_wr_vref_schmoo[2];
-   dram_wr_vref_schmoo[0]=0x00000000;
-   dram_wr_vref_schmoo[1]=0x00000000;
-   uint32_t cen_rcv_imp_dq_dqs_schmoo[2];
-   cen_rcv_imp_dq_dqs_schmoo[0]=0x00000000;
-   cen_rcv_imp_dq_dqs_schmoo[1]=0x00000000;
-   uint32_t cen_drv_imp_dq_dqs_schmoo[2];
-   cen_drv_imp_dq_dqs_schmoo[0]=0x00000000;
-   cen_drv_imp_dq_dqs_schmoo[1]=0x00000000;
-   uint8_t cen_drv_imp_cntl_schmoo[2];
-   cen_drv_imp_cntl_schmoo[0]=0x00;
-   cen_drv_imp_cntl_schmoo[1]=0x00;
-   uint8_t cen_drv_imp_clk_schmoo[2];
-   cen_drv_imp_clk_schmoo[0]=0x00;
-   cen_drv_imp_clk_schmoo[1]=0x00;
-   uint8_t cen_drv_imp_spcke_schmoo[2];
-   cen_drv_imp_spcke_schmoo[0]=0x00;
-   cen_drv_imp_spcke_schmoo[1]=0x00;
-   uint8_t cen_slew_rate_dq_dqs_schmoo[2];
-   cen_slew_rate_dq_dqs_schmoo[0]=0x00;
-   cen_slew_rate_dq_dqs_schmoo[1]=0x00;
-   uint8_t cen_slew_rate_cntl_schmoo[2];
-   cen_slew_rate_cntl_schmoo[0]=0x00;
-   cen_slew_rate_cntl_schmoo[1]=0x00;
-   uint8_t cen_slew_rate_addr_schmoo[2];
-   cen_slew_rate_addr_schmoo[0]=0x00;
-   cen_slew_rate_addr_schmoo[1]=0x00;
-   uint8_t cen_slew_rate_clk_schmoo[2];
-   cen_slew_rate_clk_schmoo[0]=0x00;
-   cen_slew_rate_clk_schmoo[1]=0x00;
-   uint8_t cen_slew_rate_spcke_schmoo[2];
-   cen_slew_rate_spcke_schmoo[0]=0x00;
-   cen_slew_rate_spcke_schmoo[1]=0x00;
-   
+   uint32_t cen_rd_vref_shmoo[2] = { 0x00000000, 0x00000000 };
+   uint32_t dram_wr_vref_schmoo[2]= { 0x00000000 ,0x00000000 };
+   uint32_t cen_rcv_imp_dq_dqs_schmoo[2]= { 0x00000000, 0x00000000 };
+   uint32_t cen_drv_imp_dq_dqs_schmoo[2]= { 0x00000000, 0x00000000 };
+   uint8_t cen_drv_imp_cntl_schmoo[2] = { 0x00, 0x00 };
+   uint8_t cen_drv_imp_clk_schmoo[2] =  { 0x00, 0x00 };
+   uint8_t cen_drv_imp_spcke_schmoo[2] = { 0x00, 0x00 }; 
+   uint8_t cen_slew_rate_dq_dqs_schmoo[2] = { 0x00, 0x00 }; 
+   uint8_t cen_slew_rate_cntl_schmoo[2] = { 0x00, 0x00 };
+   uint8_t cen_slew_rate_addr_schmoo[2] = { 0x00, 0x00 };
+   uint8_t cen_slew_rate_clk_schmoo[2] = { 0x00, 0x00 };
+   uint8_t cen_slew_rate_spcke_schmoo[2] = { 0x00, 0x00 }; 
+      
    rc = FAPI_ATTR_SET(ATTR_MCBIST_PATTERN, &i_target_mba, datapattern); if(rc) return rc; 
    rc = FAPI_ATTR_SET(ATTR_MCBIST_TEST_TYPE, &i_target_mba, testtype); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_MCBIST_ADDR_MODES, &i_target_mba, addr_modes); if(rc) return rc;
@@ -172,7 +150,7 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target i_target_mba) {
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_CNTL_SCHMOO, &i_target_mba, cen_slew_rate_cntl_schmoo); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_ADDR_SCHMOO, &i_target_mba, cen_slew_rate_addr_schmoo); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_CLK_SCHMOO, &i_target_mba, cen_slew_rate_clk_schmoo); if(rc) return rc;
-   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO, &i_target_mba, cen_slew_rate_spcke_schmoo); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO, &i_target_mba, cen_slew_rate_spcke_schmoo); if(rc) return rc; 
        
    FAPI_INF("%s on %s COMPLETE", PROCEDURE_NAME, i_target_mba.toEcmdString());
    return rc;

@@ -25,7 +25,7 @@
 
 #define __PGAS__
 
-// $Id: pgas.h,v 1.19 2013/01/09 23:01:38 bcbrock Exp $
+// $Id: pgas.h,v 1.20 2013/05/04 13:02:11 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area, the hardware procedure area,   **
@@ -184,6 +184,16 @@
 #define PORE_CC_V   0x0400
 #define PORE_CC_N   0x0200
 #define PORE_CC_Z   0x0100
+
+
+// Memory Spaces
+
+#define PORE_SPACE_UNDEFINED 0xffff
+#define PORE_SPACE_OCI       0x8000
+#define PORE_SPACE_PNOR      0x800b
+#define PORE_SPACE_OTPROM    0x0001
+#define PORE_SPACE_SEEPROM   0x800c
+#define PORE_SPACE_PIBMEM    0x0008             
 
 
 #ifdef __ASSEMBLER__
@@ -518,13 +528,6 @@
 	// program.  Note that code assembled for PNOR will also work in the
 	// OCI space in the Sleep/Winkle engine.
 
-        .set    PORE_SPACE_UNDEFINED, 0xffff
-        .set    PORE_SPACE_OCI,       0x8000
-        .set    PORE_SPACE_PNOR,      0x800b
-        .set    PORE_SPACE_OTPROM,    0x0001
-	.set	PORE_SPACE_SEEPROM,   0x800c
-	.set	PORE_SPACE_PIBMEM,    0x0008             
-
         .macro  ..set_default_space, s
 	..check_u16 (\s)
         .set    _PGAS_DEFAULT_SPACE, (\s)
@@ -556,7 +559,11 @@
 
 	.macro	.pibmem
 	..set_default_space PORE_SPACE_PIBMEM
+#ifndef PGAS_PPC
 	.pibmem_port (PORE_SPACE_PIBMEM & 0xf)
+#else
+        // NB: PGAS_PPC does not support relocatable PIBMEM addressing
+#endif
 	.endm
 
 

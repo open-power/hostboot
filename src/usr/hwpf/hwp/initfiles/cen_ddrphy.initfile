@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.23 2013/04/10 01:59:41 mwuu Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.25 2013/05/09 00:33:41 mwuu Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,8 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.25|mwuu    |05/08/13|Fixed change in DDR4/DDR3 DIMM type
+#--     1.24|mwuu    |04/19/13|Changed to use ATTR_EFF_DIMM_SPARE instead of CDIMM
 #--     1.23|mwuu    |04/09/13|Fixed typo ENUM for 2N mode.
 #--     1.22|mwuu    |04/04/13|Updated tODTL definition when AL=0, added 2N support
 #		  					  |changed for LRDIMM: RLO=6, WLO=-1; DDR4 UDIMM mem type
@@ -92,12 +94,19 @@ define def_is_sim		=	(SYS.ATTR_IS_SIMULATION == 1)	;
 define def_FAST_SIM_PC	=	1	;
 
 # for real HW uncomment,  !!FIX once ATTR_EFF_DIMM_SPARE available [2][4][4] port, dimm, rank
-define def_has_spare	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)	;	# CDIMM
-define def_no_spare		=	(ATTR_EFF_DIMM_TYPE != ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)	;	# others, ISDIMMs, LRDIMM, etc.
+define def_p0_has_spare_full	=	(ATTR_EFF_DIMM_SPARE[0][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE)	;	# spare byte
+define def_p0_has_spare_upper	=	(ATTR_EFF_DIMM_SPARE[0][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE)	;	# upper nibble
+define def_p0_has_spare_lower	=	(ATTR_EFF_DIMM_SPARE[0][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE)	;	# lower nibble
+define def_p0_no_spare			=	(ATTR_EFF_DIMM_SPARE[0][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE)		;	# no spare
+
+define def_p1_has_spare_full	=	(ATTR_EFF_DIMM_SPARE[1][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE)	;	# spare byte
+define def_p1_has_spare_upper	=	(ATTR_EFF_DIMM_SPARE[1][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE)	;	# upper nibble
+define def_p1_has_spare_lower	=	(ATTR_EFF_DIMM_SPARE[1][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE)	;	# lower nibble
+define def_p1_no_spare			=	(ATTR_EFF_DIMM_SPARE[1][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE)		;	# no spare
 
 # ports 0,1 must have functional dimms to be valid
-define def_valid_p0		=	(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR >> 4);
-define def_valid_p1		=	(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR & 0x0F);
+define def_valid_p0		=	(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR >> 4);		# ((def_is_mba01) || (def_is_mba23)) &&
+define def_valid_p1		=	(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR & 0x0F);	
 
 # short test for MBA01 or MBA23
 define def_is_mba01		=	(ATTR_CHIP_UNIT_POS == 0)	;	# MBA01
@@ -154,7 +163,6 @@ define def_is_ddr4	=	(ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_DDR4)	;	# DDR4
 define def_not_ddr4	=	(ATTR_EFF_DRAM_GEN != ENUM_ATTR_EFF_DRAM_GEN_DDR4)	;	# not DDR4, (GEN != 2)
 
 # shorter test for DIMM type
-define def_is_cdimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)	;	# CDIMM = 0
 define def_is_rdimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)	;	# RDIMM = 1
 #define def_is_udimm	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)	;	# UDIMM = 2
 define def_is_lrdimm	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)	;	# LRDIMM = 3
@@ -274,9 +282,14 @@ define def_cdi_spcke_ohm40_p1	=	(ATTR_EFF_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_EFF_
 # define for glacier1(1), glacier2=normal(0)
 define def_is_type1	=	((ATTR_MSS_DQS_SWIZZLE_TYPE == 1) && (ATTR_EFF_DIMM_TYPE != ENUM_ATTR_EFF_DIMM_TYPE_CDIMM))	;
 
+define def_is_custom = (ATTR_EFF_CUSTOM_DIMM == ENUM_ATTR_EFF_CUSTOM_DIMM_YES);
+
 # define for 2 cycle addressing mode (2N)
 define def_2N_mode	= (ATTR_EFF_DRAM_2N_MODE_ENABLED == ENUM_ATTR_EFF_DRAM_2N_MODE_ENABLED_TRUE) ;
 
+# fix phase rotators due to NWELL issue
+define def_CL_adj = (CEN.ATTR_MSS_NWELL_MISPLACEMENT * 0x7F);
+define def_PR_adj = (CEN.ATTR_MSS_NWELL_MISPLACEMENT * 32);
 
 # SIMPLIFY
 # ================================================================================
@@ -409,16 +422,17 @@ scom 0x800(0,1)C00D0301143F {
  	48:51	,	0xF			,	(def_is_lrdimm)						;	# LRDIMM  set WLO=-1
  	48:51	,	0x0			,	any									;	# WLO=WRITE_LATENCY_OFFSET (2's complement -8 to 7)
 # 	# 9.4.12.2	RLO = READ_LATENCY_OFFSET (2's complement -8 to 7) {0=CDIMM, 1=RDIMM, 2=LRDIMM}
- 	52:55	,	0x0			,	(def_is_cdimm)						;	# CDIMM
  	52:55	,	0x1			,	(def_is_rdimm)						;	# RDIMM
  	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM
+ 	52:55	,	0x0			,	any									;	# CDIMM/UDIMM
  	56		,	0b0			,	any									;	# MEMCTL_CIC_FAST
  	57		,	0b0			,	any									;	# MEMCTL_CTRN_IGNORE
  	58		,	0b0			,	any									;	# DISABLE_MEMCTL_CAL
 # 	Memory Type
 # 	# 59:61 , 000=DDR3/DDR4 CDIMM, DDR3 (001=RDIMM, 011=LRDIMM), DDR4 (101=RDIMM, 111=LRDIMM)
+	59		,	0b0			,	(def_is_custom)						;	# special for CDIMM
 	59		,	0b1			,	(def_is_ddr4)						;	# DDR4
-	59		,	0b0			,	any									;	# DDR3
+	59		,	0b0			,	any									;	# DDR3 or custom
 
 	60		,	0b1			,	(def_is_lrdimm)						;	# LRDIMM
 	60		,	0b0			,	any									;	# not LRDIMM
@@ -653,8 +667,8 @@ scom 0x800(0,1)3C770301143F {	# CONFIG1_P[0:1] broadcast [0:4]
 # PHYW.PHYX.GEN_DP#1.DPX.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_IO_TX_CONFIG0_L2
 #scom 0x8000(00,04,08,0C,10)750301143F {	# CONFIG0_P0_[0:4]
 scom 0x80003C750301143F {				# CONFIG0_P0 broadcast [0:4]
-	bits	,	scom_data	,	expr									;
-#	0:47	,	0x000000000000,	any										;	# reserved
+	bits	,	scom_data	,	expr			;
+#	0:47	,	0x000000000000,	any				;	# reserved
 	# INTERP_SIG_SLEW for phase rotator
 # 	48:51	,	0b1100		,	((def_is_sim) && (CEN.ATTR_MSS_FREQ <= 1200))				;	# 1066
 # 	48:51	,	0b0010		,	((def_is_sim) && (CEN.ATTR_MSS_FREQ > 1200) && (CEN.ATTR_MSS_FREQ <= 1460))	;	# 1333
@@ -670,11 +684,11 @@ scom 0x80003C750301143F {				# CONFIG0_P0 broadcast [0:4]
  	48:51	,	0b1100		,	((CEN.ATTR_MSS_FREQ > 1732) && (CEN.ATTR_MSS_FREQ <= 1993))	;	# 1866
 
 	# Post Cursor, tap coefficient for FFE, 0=no equalization
-	52:55	,	0b0001		,	(def_ffe1_p0)							;
-	52:55	,	0b0011		,	(def_ffe2_p0)							;
-	52:55	,	0b0111		,	(def_ffe3_p0)							;
-	52:55	,	0b1111		,	(def_ffe4_p0)							;
-	52:55	,	0b0000		,	any										;
+	52:55	,	0b0001		,	(def_ffe1_p0)	;	# enable 1 FFE slice
+	52:55	,	0b0011		,	(def_ffe2_p0)	;	# enable 2 FFE slices
+	52:55	,	0b0111		,	(def_ffe3_p0)	;	# enable 3 FFE slices
+	52:55	,	0b1111		,	(def_ffe4_p0)	;	# enable 4 FFE slices
+	52:55	,	0b0000		,	any				;	# enable 0 FFE slices
 
 	# Slew rate set in ddrphy_reset procedure via slew FN call
 #	56:59	,	0b0000		,	(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS == 0)	;	# SLEW_CTL, slowest
@@ -683,8 +697,8 @@ scom 0x80003C750301143F {				# CONFIG0_P0 broadcast [0:4]
 
 # DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_0		0x075	0x800100750301143f
 scom 0x80013C750301143F {				# CONFIG0_P1 broadcast [0:4]
-	bits	,	scom_data	,	expr									;
-#	0:47	,	0x000000000000,	any										;	# reserved
+	bits	,	scom_data	,	expr			;
+#	0:47	,	0x000000000000,	any				;	# reserved
 	# INTERP_SIG_SLEW for phase rotator
 # 	48:51	,	0b1100		,	((def_is_sim) && (CEN.ATTR_MSS_FREQ <= 1200))				;	# 1066
 # 	48:51	,	0b0010		,	((def_is_sim) && (CEN.ATTR_MSS_FREQ > 1200) && (CEN.ATTR_MSS_FREQ <= 1460))	;	# 1333
@@ -700,11 +714,11 @@ scom 0x80013C750301143F {				# CONFIG0_P1 broadcast [0:4]
  	48:51	,	0b1100		,	((CEN.ATTR_MSS_FREQ > 1732) && (CEN.ATTR_MSS_FREQ <= 1993))	;	# 1866
 	
 	# Post Cursor, tap coefficient for FFE, 0=no equalization
-	52:55	,	0b0001		,	(def_ffe1_p1)							;
-	52:55	,	0b0011		,	(def_ffe2_p1)							;
-	52:55	,	0b0111		,	(def_ffe3_p1)							;
-	52:55	,	0b1111		,	(def_ffe4_p1)							;
-	52:55	,	0b0000		,	any										;
+	52:55	,	0b0001		,	(def_ffe1_p1)	;	# enable 1 FFE slice
+	52:55	,	0b0011		,	(def_ffe2_p1)	;	# enable 2 FFE slices
+	52:55	,	0b0111		,	(def_ffe3_p1)	;	# enable 3 FFE slices
+	52:55	,	0b1111		,	(def_ffe4_p1)	;	# enable 4 FFE slices
+	52:55	,	0b0000		,	any				;	# enable 0 FFE slices
 	# Slew rate set in ddrphy_reset procedure via slew FN call
 #	56:59	,	0b0000		,	any										;
 #	60:63	,	0b0000		,	any										;	# reserved
@@ -4195,8 +4209,10 @@ scom 0x800010000301143f {
 #	0:47	,	0x000000000000,	any													;	# reserved
 	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p0))					;	# enable DATA_BIT_ENABLE_0_15
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P2_4		0x800010000301183f
-	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p0) && (def_has_spare))	;	# enable DATA_BIT_ENABLE_0_15
-	48:63	,	0xFF00		,	((def_is_mba23) && (def_valid_p0) && (def_no_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p0) && (def_p0_has_spare_full))	;	# PortC DATA_BIT_ENABLE_0_15
+	48:63	,	0xFF0F		,	((def_is_mba23) && (def_valid_p0) && (def_p0_has_spare_upper))	;	# PortC disable lower dq0:3
+	48:63	,	0xFFF0		,	((def_is_mba23) && (def_valid_p0) && (def_p0_has_spare_lower))	;	# PortC disable upper dq4:7
+	48:63	,	0xFF00		,	((def_is_mba23) && (def_valid_p0) && (def_p0_no_spare))			;	# PortC disable spare byte
 	48:63	,	0x0000		,	any													;
 }
 
@@ -4206,8 +4222,10 @@ scom 0x800104000301143f {
 #	0:47	,	0x000000000000,	any													;	# reserved
 	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p1))					;	# enable DATA_BIT_ENABLE_0_15
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P3_1		0x800104000301183f
-	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p1) && (def_has_spare))	;	# enable DATA_BIT_ENABLE_0_15
-	48:63	,	0xFF00		,	((def_is_mba23) && (def_valid_p1) && (def_no_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p1) && (def_p1_has_spare_full))	;	# PortD DATA_BIT_ENABLE_0_15
+	48:63	,	0xFF0F		,	((def_is_mba23) && (def_valid_p1) && (def_p1_has_spare_upper))	;	# PortD disable lower dq0:3
+	48:63	,	0xFFF0		,	((def_is_mba23) && (def_valid_p1) && (def_p1_has_spare_lower))	;	# PortD disable upper dq4:7
+	48:63	,	0xFF00		,	((def_is_mba23) && (def_valid_p1) && (def_p1_no_spare))			;	# PortD disable spare byte
 	48:63	,	0x0000		,	any													;
 }
 
@@ -4215,8 +4233,10 @@ scom 0x800104000301143f {
 scom 0x800004000301143f {
 	bits	,	scom_data	,	expr												;
 #	0:47	,	0x000000000000,	any													;	# reserved
-	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p0) && (def_has_spare))	;	# enable DATA_BIT_ENABLE_0_15
-	48:63	,	0xFF00		,	((def_is_mba01) && (def_valid_p0) && (def_no_spare))	;	# enable DATA_BIT_ENABLE_0_15
+	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p0) && (def_p0_has_spare_full))	;	# PortA DATA_BIT_ENABLE_0_15
+	48:63	,	0xFF0F		,	((def_is_mba01) && (def_valid_p0) && (def_p0_has_spare_upper))	;	# PortA disable lower dq0:3
+	48:63	,	0xFFF0		,	((def_is_mba01) && (def_valid_p0) && (def_p0_has_spare_lower))	;	# PortA disable upper dq4:7
+	48:63	,	0xFF00		,	((def_is_mba01) && (def_valid_p0) && (def_p0_no_spare))			;	# PortA disable spare byte
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P2_1		0x800004000301183f
 	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p0))					;	# enable DATA_BIT_ENABLE_0_15
 	48:63	,	0x0000		,	any													;
@@ -4226,8 +4246,10 @@ scom 0x800004000301143f {
 scom 0x800108000301143f {
 	bits	,	scom_data	,	expr												;	# spare = 8_15
 #	0:47	,	0x000000000000,	any													;	# reserved
-	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p1) && (def_has_spare))	;	# P1_2, enable spare if CDIMM
-	48:63	,	0xFF00		,	((def_is_mba01) && (def_valid_p1) && (def_no_spare))	;	# P1_2, disable spare
+	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p1) && (def_p1_has_spare_full))	;	# PortB DATA_BIT_ENABLE_0_15
+	48:63	,	0xFFF0		,	((def_is_mba01) && (def_valid_p1) && (def_p1_has_spare_upper))	;	# PortB disable lower dq0:3*
+	48:63	,	0xFF0F		,	((def_is_mba01) && (def_valid_p1) && (def_p1_has_spare_lower))	;	# PortB disable upper dq4:7*
+	48:63	,	0xFF00		,	((def_is_mba01) && (def_valid_p1) && (def_p1_no_spare))			;	# PortB disable spare byte
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P3_2		0x800108000301183f
 	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p1))					;	# P3_2
 	48:63	,	0x0000		,	any													;
@@ -4424,7 +4446,8 @@ scom 0x800048040301143F {	# DPHY01_DDRPHY_ADR_DELAY0_P0_ADR2
 	bits	,	scom_data			,	expr									;
 #	0:47	,	0x000000000000		,	any										;	# reserved
 	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12[0])		,	(def_is_mba01)	;	# P0 L0	, A_A12
-	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0[0])		,	(def_is_mba01)	;	# P0 L1	, A_A0
+	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0[0])		,	(def_is_mba01)	;	# P0 L1	, A_A0	centerlane
+#	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0[0] | (def_CL_adj))		,	(def_is_mba01)	;	# P0 L1	, A_A0	centerlane
 	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1[0])		,	(def_is_mba23)	;	# P2 L0	, C_A1
 	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6[0])		,	(def_is_mba23)	;	# P2 L1	, C_A6
 }
@@ -5091,12 +5114,14 @@ scom 0x8000008(4,5)0301143F {	# _RP[0:3] via broadcast bit
 # DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_1				0x800004850301143F
 scom 0x8000048(4,5)0301143F {	# _RP[0:3] via broadcast bit
 # P0_1
-	bits	,	scom_data	,	expr												;
-#	0:47	,	0x000000000000,	any													;	# reserved
-	48:63	,	0x8580		,	((def_is_mba01) && (def_has_spare) && (def_is_x4))	;	# x4 spare swizzle quad2/3
-	48:63	,	0x8400		,	((def_is_mba01) && (def_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
-	48:63	,	0x0CC0		,	((def_is_mba01) && (def_has_spare) && (def_is_x8))	;	# x8 swizzle quad0/1 & 2/3
-	48:63	,	0x0C00		,	((def_is_mba01) && (def_no_spare) && (def_is_x8))	;	# x8 swizzle quad0/1
+	bits	,	scom_data	,	expr														;
+#	0:47	,	0x000000000000,	any															;	# reserved
+	48:63	,	0x8580		,	((def_is_mba01) && (def_p0_has_spare_full) && (def_is_x4))	;	# x4 spare swizzle quad2/3
+	48:63	,	0x8500		,	((def_is_mba01) && (def_p0_has_spare_upper) && (def_is_x4))	;	# disable lower dqs
+	48:63	,	0x8480		,	((def_is_mba01) && (def_p0_has_spare_lower) && (def_is_x4))	;	# disable upper dqs
+	48:63	,	0x8400		,	((def_is_mba01) && (def_p0_no_spare) && (def_is_x4))		;	# x4 no-spare no swizzle
+	48:63	,	0x0CC0		,	((def_is_mba01) && (def_p0_has_spare_full) && (def_is_x8))	;	# x8 swizzle quad0/1 & 2/3
+	48:63	,	0x0C00		,	((def_is_mba01) && (def_p0_no_spare) && (def_is_x8))		;	# x8 swizzle quad0/1
 # P2_1
 	48:63	,	0x8580		,	((def_is_mba23) && (def_is_x4))					;	# x4 swizzle quad2/3
 	48:63	,	0xC300		,	((def_is_mba23) && (def_is_x8))					;	# x8 no swizzle
@@ -5144,10 +5169,12 @@ scom 0x8000108(4,5)0301143F {	# _RP[0:3] via broadcast bit
 	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4))					;	# x4 no swizzle
 	48:63	,	0x0F00		,	((def_is_mba01) && (def_is_x8))					;	# x8 swizzle quad0/1
 # P2_4
-	48:63	,	0x8640		,	((def_is_mba23) && (def_has_spare) && (def_is_x4))	;	# x4 spare no swizzle
-	48:63	,	0x8400		,	((def_is_mba23) && (def_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
-	48:63	,	0x0F00		,	((def_is_mba23) && (def_has_spare) && (def_is_x8))	;	# x8 swizzle quad0/1
-	48:63	,	0x0C00		,	((def_is_mba23) && (def_no_spare) && (def_is_x8))	;	# x8 swizzle quad0/1
+	48:63	,	0x8640		,	((def_is_mba23) && (def_p0_has_spare_full) && (def_is_x4))	;	# x4 spare no swizzle
+	48:63	,	0x8440		,	((def_is_mba23) && (def_p0_has_spare_upper) && (def_is_x4))	;	# disable lower dqs
+	48:63	,	0x8600		,	((def_is_mba23) && (def_p0_has_spare_lower) && (def_is_x4))	;	# disable upper dqs
+	48:63	,	0x8400		,	((def_is_mba23) && (def_p0_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
+	48:63	,	0x0F00		,	((def_is_mba23) && (def_p0_has_spare_full) && (def_is_x8))	;	# x8 swizzle quad0/1
+	48:63	,	0x0C00		,	((def_is_mba23) && (def_p0_no_spare) && (def_is_x8))	;	# x8 swizzle quad0/1
 	48:63	,	0x0000		,	any													;
 }
 
@@ -5178,10 +5205,12 @@ scom 0x8001048(4,5)0301143F {	# _RP[0:3] via broadcast bit
 	48:63	,	0x4A40		,	((def_is_mba01) && (def_is_x4))						;	# x4 swizzle quad0/1
 	48:63	,	0xC300		,	((def_is_mba01) && (def_is_x8))						;	# x8 no swizzle
 # P3_1
-	48:63	,	0x8640		,	((def_is_mba23) && (def_has_spare) && (def_is_x4))	;	# x4 spare no swizzle
-	48:63	,	0x8400		,	((def_is_mba23) && (def_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
-	48:63	,	0xC300		,	((def_is_mba23) && (def_has_spare) && (def_is_x8))	;	# x8 no swizzle
-	48:63	,	0xC000		,	((def_is_mba23) && (def_no_spare) && (def_is_x8))	;	# x8 no swizzle
+	48:63	,	0x8640		,	((def_is_mba23) && (def_p1_has_spare_full) && (def_is_x4))	;	# x4 spare no swizzle
+	48:63	,	0x8440		,	((def_is_mba23) && (def_p1_has_spare_upper) && (def_is_x4))	;	# disable lower dqs
+	48:63	,	0x8600		,	((def_is_mba23) && (def_p1_has_spare_lower) && (def_is_x4))	;	# disable upper dqs
+	48:63	,	0x8400		,	((def_is_mba23) && (def_p1_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
+	48:63	,	0xC300		,	((def_is_mba23) && (def_p1_has_spare_full) && (def_is_x8))	;	# x8 no swizzle
+	48:63	,	0xC000		,	((def_is_mba23) && (def_p1_no_spare) && (def_is_x8))	;	# x8 no swizzle
 	48:63	,	0x0000		,	any													;
 }
 
@@ -5192,10 +5221,12 @@ scom 0x8001088(4,5)0301143F {	# _RP[0:3] via broadcast bit
 # P1_2
 	bits	,	scom_data	,	expr											;
 #	0:47	,	0x000000000000,	any												;	# reserved
-	48:63	,	0x8640		,	((def_is_mba01) && (def_has_spare) && (def_is_x4))	;	# x4 spare no swizzle
-	48:63	,	0x8400		,	((def_is_mba01) && (def_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
-	48:63	,	0x0CC0		,	((def_is_mba01) && (def_has_spare) && (def_is_x8))	;	# x8 swizzle quad0/1 & 2/3
-	48:63	,	0x0C00		,	((def_is_mba01) && (def_no_spare) && (def_is_x8))	;	# x8 swizzle quad0/1
+	48:63	,	0x8640		,	((def_is_mba01) && (def_p1_has_spare_full) && (def_is_x4))	;	# x4 spare no swizzle
+	48:63	,	0x8600		,	((def_is_mba01) && (def_p1_has_spare_upper) && (def_is_x4))	;	# disable lower dqs
+	48:63	,	0x8440		,	((def_is_mba01) && (def_p1_has_spare_lower) && (def_is_x4))	;	# disable upper dqs
+	48:63	,	0x8400		,	((def_is_mba01) && (def_p1_no_spare) && (def_is_x4))		;	# x4 no-spare no swizzle
+	48:63	,	0x0CC0		,	((def_is_mba01) && (def_p1_has_spare_full) && (def_is_x8))	;	# x8 swizzle quad0/1 & 2/3
+	48:63	,	0x0C00		,	((def_is_mba01) && (def_p1_no_spare) && (def_is_x8))		;	# x8 swizzle quad0/1
 # P3_2
 	48:63	,	0x8580		,	((def_is_mba23) && (def_is_x4))					;	# x4 swizzle quad2/3
 	48:63	,	0x0F00		,	((def_is_mba23) && (def_is_x8))					;	# x8 swizzle quad0/1

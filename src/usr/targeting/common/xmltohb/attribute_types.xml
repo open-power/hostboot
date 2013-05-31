@@ -12198,4 +12198,21 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>RISK_LEVEL</id>
+    <description>
+        Defines risk level to consider for initialization values applied during IPL.
+        Risk level 0 should contain solutions for all known errata, and may sacrifice performance to avoid data integrity issue/error checking cases.
+        Risk level 0x100 may introduce data integrity/error scenarios to provide full performance or visibility to state space/coverage behind known issues.
+    </description>
+    <simpleType><uint32_t><default>0x00</default></uint32_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_RISK_LEVEL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

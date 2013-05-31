@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.41 2013/04/01 17:30:50 cmolsen Exp $
+// $Id: p8_xip_customize.C,v 1.45 2013/05/29 22:51:06 jeshua Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -45,7 +45,6 @@
 //
 /*------------------------------------------------------------------------------*/
 #include <p8_pore_api_custom.h>
-#include <HvPlicModule.H>
 #include <getMvpdRing.H>
 #include <fapiMvpdAccess.H>
 #include <p8_xip_customize.H>
@@ -104,6 +103,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   uint32_t   sizeImageTmp;
   uint64_t   ptrTmp1, ptrTmp2;
   uint32_t   dataTmp1, dataTmp2, dataTmp3;
+  bool       largeSeeprom = false;
+  uint8_t    seepromAddrBytes = 0;
 
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
@@ -114,6 +115,17 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   if (rc)  {
     FAPI_ERR("FAPI_ATTR_GET_PRIVILEGED() failed w/rc=%i and ddLevel=0x%02x",(uint32_t)rc,attrDdLevel);
     return rc;
+  }
+
+	// Check I2C address size to see if we need to use large seeprom support
+  rc = FAPI_ATTR_GET(ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES, &i_target, seepromAddrBytes);
+  if (rc)  {
+    FAPI_ERR("FAPI_ATTR_GET failed w/rc=%i and seepromAddrBytes=0x%02x",(uint32_t)rc,seepromAddrBytes);
+    return rc;
+  }
+  if(seepromAddrBytes > 0x02) {
+    FAPI_INF("Using large seeprom support when building seeprom image. This image will not work with real SBE");
+    largeSeeprom = true;
   }
 
   // ==========================================================================
@@ -130,8 +142,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_INTERNAL_IMAGE_ERR);
     return rc;
   }
-  FAPI_INF("Input image:\n  location=0x%016llx\n  size=%i\n",
-     (uint64_t)i_imageIn, sizeImageIn);
+  FAPI_INF("Input image:\n  location=0x%016llx\n  size=%i=0x%x\n",
+     (uint64_t)i_imageIn, sizeImageIn, sizeImageIn);
 
   // Second, if IPL phase, check image and buffer sizes and copy input image to 
   //   output mainstore [work] location.
@@ -285,6 +297,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // System phase:      IPL sysPhase.
   // Note: TBD
   // ==========================================================================
+
 	if (i_sysPhase==0)  {
 	  uint64_t   attrSecuritySetupVec=0;
 		void       *hostSecuritySetupVec;
@@ -309,6 +322,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	  *(uint64_t*)hostSecuritySetupVec = myRev64(attrSecuritySetupVec);
 	  FAPI_DBG(" After =0x%016llX\n",*(uint64_t*)hostSecuritySetupVec);
 	}
+
 
 #ifndef IMGBUILD_PPD_IGNORE_VPD_FIELD
   void     *hostPibmemRepairVec, *hostNestSkewAdjVec;
@@ -658,7 +672,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                                        0,
                                        0,
                                        0,
-                                       MAX_SEEPROM_IMAGE_SIZE, // OK, since sysPhase=0.
+                                       largeSeeprom? sizeImageOutMax:MAX_SEEPROM_IMAGE_SIZE, // OK, since sysPhase=0.
                                        SBE_XIP_SECTION_RINGS,
 																			 i_buf2,
 																			 i_sizeBuf2);
@@ -738,7 +752,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       ringId = (ring_id_list+iRing)->ringId;
       bRingAlreadyAdded = 0;
       for ( chipletId=(ring_id_list+iRing)->chipIdMin; 
-           (chipletId>=(ring_id_list+iRing)->chipIdMin && chipletId<=(ring_id_list+iRing)->chipIdMax); 
+            (chipletId>=(ring_id_list+iRing)->chipIdMin && chipletId<=(ring_id_list+iRing)->chipIdMax); 
             chipletId++)  {
         FAPI_INF("(iRing,ringId,chipletId) = (%i,0x%02X,0x%02x)",iRing,ringId,chipletId);
         bValidChipletId = 0;
@@ -774,23 +788,23 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
           if ((ring_id_list+iRing)->vpdKeyword==VPD_KEYWORD_PDG) 
             mvpd_keyword = MVPD_KEYWORD_PDG;
           else
-          if ((ring_id_list+iRing)->vpdKeyword==VPD_KEYWORD_PDR)
-            mvpd_keyword = MVPD_KEYWORD_PDR;
-          else  {
-            FAPI_ERR("Unable to resolve VPD keyword from ring list table.");
-            uint8_t & DATA_RING_LIST_VPD_KEYWORD = (ring_id_list+iRing)->vpdKeyword;
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_VPD_KEYWORD_RESOLVE_ERROR);
-            return rc;
-          }
+            if ((ring_id_list+iRing)->vpdKeyword==VPD_KEYWORD_PDR)
+              mvpd_keyword = MVPD_KEYWORD_PDR;
+            else  {
+              FAPI_ERR("Unable to resolve VPD keyword from ring list table.");
+              uint8_t & DATA_RING_LIST_VPD_KEYWORD = (ring_id_list+iRing)->vpdKeyword;
+              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_VPD_KEYWORD_RESOLVE_ERROR);
+              return rc;
+            }
           rcFapi = FAPI_RC_SUCCESS;
           FAPI_EXEC_HWP(rcFapi, getMvpdRing,
-                                MVPD_RECORD_CP00,
-                                mvpd_keyword,
-                                i_target,
-                                chipletId,
-                                ringId,
-                                bufVpdRing,
-                                sizeVpdRing);
+                        MVPD_RECORD_CP00,
+                        mvpd_keyword,
+                        i_target,
+                        chipletId,
+                        ringId,
+                        bufVpdRing,
+                        sizeVpdRing);
           FAPI_DBG("XIPC: Mvpd rings: rcFapi=0x%08x",(uint32_t)rcFapi);
           if (rcFapi==RC_REPAIR_RING_NOT_FOUND)  {
             // No match, do nothing. Next (chipletId,ringId)-pair.
@@ -819,16 +833,16 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
               uint32_t sizeBuf1=(uint32_t)i_sizeBuf1;
               uint32_t & DATA_RING_SIZE_REQ = sizeVpdRing;
               uint32_t & DATA_RING_SIZE_MAX = sizeBuf1;
-               switch (iVpdType)  {
-                case 0:
+              switch (iVpdType)  {
+              case 0:
                 FAPI_ERR("#G ring too large.");
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PG_RING_TOO_LARGE);
                 break;
-                case 1:
+              case 1:
                 FAPI_ERR("#R ring too large.");
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PR_RING_TOO_LARGE);
                 break;
-                default:
+              default:
                 uint8_t & DATA_VPD_TYPE = iVpdType;
                 FAPI_ERR("#Invalid VPD type.");
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_INVALID_VPD_TYPE);
@@ -837,56 +851,56 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
               return rc;
             }
             else  {
-							// Enforce flush optimization for Mvpd rings.
-							((CompressedScanData*)bufVpdRing)->iv_flushOptimization = 1;
-							// Do datacare, if needed.
-    					if ( xipSectionDcrings.iv_offset!=0 )  {
-								FAPI_INF("Calling check_and_perform_ring_datacare()\n");
+              // Enforce flush optimization for Mvpd rings.
+              ((CompressedScanData*)bufVpdRing)->iv_flushOptimization = 1;
+              // Do datacare, if needed.
+              if ( xipSectionDcrings.iv_offset!=0 )  {
+                FAPI_INF("Calling check_and_perform_ring_datacare()\n");
                 rcLoc = check_and_perform_ring_datacare( 
-																					i_imageIn,
-																					(void*)bufVpdRing,  //HB buf1
-																					attrDdLevel,        //Playing it safe.
-																					i_sysPhase,
-																					(char*)(ring_id_list+iRing)->ringNameImg,
-																					(void*)i_buf2,			//HB buf2
-																					i_sizeBuf2);
-								if (rcLoc)  {
-								  FAPI_ERR("check_and_perform_ring_datacare() failed w/rc=%i  ",rcLoc);
-									uint32_t & RC_LOCAL = rcLoc;
+                                                        i_imageIn,
+                                                        (void*)bufVpdRing,  //HB buf1
+                                                        attrDdLevel,        //Playing it safe.
+                                                        i_sysPhase,
+                                                        (char*)(ring_id_list+iRing)->ringNameImg,
+                                                        (void*)i_buf2,			//HB buf2
+                                                        i_sizeBuf2);
+                if (rcLoc)  {
+                  FAPI_ERR("check_and_perform_ring_datacare() failed w/rc=%i  ",rcLoc);
+                  uint32_t & RC_LOCAL = rcLoc;
                   FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PERFORM_RING_DATACARE_ERROR);
                   return rc;
-								}
-							}
+                }
+              }
               // Add VPD ring to image.
               if (!bRingAlreadyAdded)  {
                 rcLoc = 0;
                 if (i_sysPhase==0)  {
-                  sizeImageOut = MAX_SEEPROM_IMAGE_SIZE;
+                  sizeImageOut = largeSeeprom? sizeImageOutMax:MAX_SEEPROM_IMAGE_SIZE;
                   // Add VPD ring to --->>> IPL <<<--- image
                   rcLoc = write_vpd_ring_to_ipl_image(
-                                          o_imageOut,
-                                          sizeImageOut,
-                                          (CompressedScanData*)bufVpdRing, //HB buf1
-                                          ddLevel,
-                                          i_sysPhase,
-                                          (char*)(ring_id_list+iRing)->ringNameImg,
-                                          (void*)i_buf2,                   //HB buf2
-                                          i_sizeBuf2,
-                                          SBE_XIP_SECTION_RINGS);
+                                                      o_imageOut,
+                                                      sizeImageOut,
+                                                      (CompressedScanData*)bufVpdRing, //HB buf1
+                                                      ddLevel,
+                                                      i_sysPhase,
+                                                      (char*)(ring_id_list+iRing)->ringNameImg,
+                                                      (void*)i_buf2,                   //HB buf2
+                                                      i_sizeBuf2,
+                                                      SBE_XIP_SECTION_RINGS);
                 }
                 else  {
                   sizeImageOut = sizeImageOutMax;
                   // Add VPD ring to --->>> SLW <<<--- image
                   rcLoc = write_vpd_ring_to_slw_image(
-                                          o_imageOut,
-                                          sizeImageOut,
-                                          (CompressedScanData*)bufVpdRing, //HB buf1
-                                          ddLevel,
-                                          i_sysPhase,
-                                          (char*)(ring_id_list+iRing)->ringNameImg,
-                                          (void*)i_buf2,                   //HB buf2
-                                          i_sizeBuf2,
-                                          (ring_id_list+iRing)->bWcSpace);
+                                                      o_imageOut,
+                                                      sizeImageOut,
+                                                      (CompressedScanData*)bufVpdRing, //HB buf1
+                                                      ddLevel,
+                                                      i_sysPhase,
+                                                      (char*)(ring_id_list+iRing)->ringNameImg,
+                                                      (void*)i_buf2,                   //HB buf2
+                                                      i_sizeBuf2,
+                                                      (ring_id_list+iRing)->bWcSpace);
                 }
                 if (rcLoc)  {
                   if (i_sysPhase==0)  {
@@ -901,26 +915,26 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                 }
                 if (chipletIdVpd==0xFF)
                   bRingAlreadyAdded = 1;
-              }
-            }
-          }
-        }
-      }
+              } //if not already added
+            } //no buffer overflow
+          } //ring found in VPD
+        } //if valid chiplet
+      } //loop on chiplets
+    } //loop on ring names
+  } //loop on VPD types
+	
+  // Now, we can safely remove the .dcrings section from the output image. Though, no
+  //   need to do it for SLW which was wiped clean in slw_build().
+  //
+  if (i_sysPhase==0)  {
+    rcLoc = sbe_xip_delete_section(o_imageOut, SBE_XIP_SECTION_DCRINGS);
+    if (rcLoc)  {
+      MY_ERR("_delete_section(.dcrings...) failed w/rc=%i  ",rcLoc);
+      uint32_t & RC_LOCAL = rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_XIP_DELETE_SECTION_ERROR);
+      return rc;
     }
   }
-	
-	// Now, we can safely remove the .dcrings section from the output image. Though, no
-	//   need to do it for SLW which was wiped clean in slw_build().
-	//
-	if (i_sysPhase==0)  {
-	  rcLoc = sbe_xip_delete_section(o_imageOut, SBE_XIP_SECTION_DCRINGS);
-	  if (rcLoc)  {
-	    MY_ERR("_delete_section(.dcrings...) failed w/rc=%i  ",rcLoc);
-			uint32_t & RC_LOCAL = rcLoc;
-	    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_XIP_DELETE_SECTION_ERROR);
-	    return rc;
-	  }
-	}
 #endif
 
 
@@ -1057,7 +1071,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                       1,        // Repl first matching Scom addr,if any, or add to EOT.
                       0);       // Put in general Scom section.
       if (rcLoc)  {
-        FAPI_ERR("\tUpdating SCOM NC table w/L2 Epsilon data unsuccessful.\n");
+        FAPI_ERR("Updating SCOM NC table w/L2 Epsilon data unsuccessful (rcLoc=%i)\n",rcLoc);
         uint32_t & RC_LOCAL = rcLoc;
         FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_SCOM_ERROR); 
         return rc;
@@ -1283,7 +1297,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   sbe_xip_image_size( o_imageOut, &io_sizeImageOut);
   
   if (i_sysPhase==0)
-    sizeImageMax = MAX_SEEPROM_IMAGE_SIZE;
+    sizeImageMax = largeSeeprom? sizeImageOutMax:MAX_SEEPROM_IMAGE_SIZE;
   else
     sizeImageMax = sizeImageOutMax;
   

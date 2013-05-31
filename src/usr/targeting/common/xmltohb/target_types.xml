@@ -184,6 +184,7 @@
     <attribute><id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id></attribute>
     <attribute><id>DUMMY_PERSISTENCY</id></attribute>
     <attribute><id>MEM_MIRROR_PLACEMENT_POLICY</id></attribute>
+    <attribute><id>RISK_LEVEL</id></attribute>
 </targetType>
 
 <targetType>

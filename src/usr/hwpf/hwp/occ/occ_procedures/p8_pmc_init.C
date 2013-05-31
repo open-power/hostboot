@@ -20,14 +20,14 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_init.C,v 1.30 2013/04/30 11:20:22 pchatnah Exp $
-// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.C,v $
+// $Id: p8_pmc_init.C,v 1.33 2013/05/24 10:53:38 pchatnah Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! OWNER NAME: Joe Procwriter         Email: asmartpersion@xx.ibm.com
+// *! OWNER NAME: Pradeep CN         Email: pradeepcn@in.ibm.com
 // *!
 // *! General Description:
 // *!
@@ -201,26 +201,23 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
     //  ecmdDataBufferBase mask(64);
     uint32_t e_rc = 0;
     uint32_t count = 0 ;
-    bool is_stopped ;
-    bool is_spivid_stopped ;
-    bool is_not_ongoing ;
+    bool is_stopped = false ;
+    bool is_spivid_stopped = false ;
+    bool is_not_ongoing = false ;
 
-    //  bool fw_pstate_mode ;
-    bool is_pstate_error_stopped ;
-    bool is_intchp_error_stopped;
-    bool master_enable_pstate_voltage_changes ;
-    bool master_is_MasterPMC;
-    bool master_enable_fw_pstate_mode;
-    bool master_is_enable_interchip_interface;
+    //  bool fw_pstate_mode = false ;
+    bool is_pstate_error_stopped = false ;
+    bool is_intchp_error_stopped= false ;
+    bool master_enable_pstate_voltage_changes = false ;
+    bool master_is_MasterPMC= false ;
+    bool master_enable_fw_pstate_mode= false ;
+    bool master_is_enable_interchip_interface= false ;
 
 
-    //TODO RTC: 71328 - explicit default - could be uninitialized on line 1084
-    bool slave_enable_pstate_voltage_changes = false;
-    bool slave_is_MasterPMC;
-    //TODO RTC: 71328 - explicit default - could be uninitialized on line 1075
-    bool slave_enable_fw_pstate_mode = false;
-    //TODO RTC: 71328 - explicit default - could be uninitialized on line 1374
-    bool slave_is_enable_interchip_interface = false;
+    bool slave_enable_pstate_voltage_changes = false ;
+    bool slave_is_MasterPMC= false ;
+    bool slave_enable_fw_pstate_mode= false ;
+    bool slave_is_enable_interchip_interface= false ;
 
 
     fapi::Target master_target;
@@ -661,15 +658,13 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             }
 
 
-            //TODO RTC: 71328 - make priorities explicit with paranthesis
-            if ((master_is_enable_interchip_interface ==1) & (slave_is_enable_interchip_interface == 0))
+            if ((master_is_enable_interchip_interface ==1) && (slave_is_enable_interchip_interface == 0))
             {
               FAPI_ERR (" Configuration Error : Master is enabled with interchip interface but slave is not ");
 
             }
 
-            //TODO RTC: 71328 - make priorities explicit with paranthesis
-            if ( (master_enable_fw_pstate_mode == 1)  & (slave_enable_fw_pstate_mode == 0))
+            if ( (master_enable_fw_pstate_mode == 1)  &&  (slave_enable_fw_pstate_mode == 0))
             {
               FAPI_ERR (" Configuration Error : Master is enabled with FW pstate mode but slave is not ");
 
@@ -1709,10 +1704,10 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         uint16_t o2s_clk_divider = attr_pm_spivid_clock_divider;
         //spivid_freq =  attr_pm_spivid_frequency;
         uint8_t   o2s_in_count2        = o2s_frame_size ;
-        uint8_t   o2s_out_count2          = o2s_frame_size ;
+        uint8_t   o2s_out_count2          = 0 ;
         uint8_t   o2s_bridge_enable = 0x1 ;
         uint8_t   o2s_nr_of_frames        = 2 ;
-        uint8_t   o2s_in_count1        = o2s_frame_size ;
+        uint8_t   o2s_in_count1        = 0 ;
         uint8_t   o2s_out_count1        = o2s_frame_size ;
         uint8_t   hangpulse_predivider = 1;
         uint8_t   gpsa_timeout_value   = 100;
@@ -2413,6 +2408,15 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pmc_init.C,v $
+Revision 1.33  2013/05/24 10:53:38  pchatnah
+Assigning boolean variables to false by default
+
+Revision 1.32  2013/05/16 11:41:16  pchatnah
+fixing gerrit comments
+
+Revision 1.31  2013/05/09 10:26:33  pchatnah
+fixing gerrot comments
+
 Revision 1.30  2013/04/30 11:20:22  pchatnah
 fixing memory fault issue for scm
 

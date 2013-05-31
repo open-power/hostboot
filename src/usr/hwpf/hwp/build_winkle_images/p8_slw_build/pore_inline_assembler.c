@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pore_inline_assembler.c,v 1.18 2013/02/06 17:41:51 bcbrock Exp $
+// $Id: pore_inline_assembler.c,v 1.20 2013/05/23 21:33:40 dcrowell Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -367,10 +367,6 @@
 /// PORE_INLINE_DISASSEMBLE_UNKNOWN then putative data embedded in a text
 /// section will be disassembled as data.  For complete information see the
 /// documentation for pore_inline_disassemble().
-
-#ifdef PPC_HYP
-#include <HvPlicModule.H>
-#endif
 
 #define __PORE_INLINE_ASSEMBLER_C__
 #include "pore_inline.h"
@@ -747,7 +743,6 @@ pore_inline_context_create(PoreInlineContext *ctx,
     if ((ctx == 0) || ((memory == 0) && (size != 0)) || 
 	((options & ~valid_options) != 0)) {
 	rc = PORE_INLINE_INVALID_PARAMETER;
-        ctx->size = 0;          /* Effectively prevents using the ctx */
     } else {
 	rc = 0;
 	ctx->memory = (unsigned long)memory;
@@ -757,7 +752,13 @@ pore_inline_context_create(PoreInlineContext *ctx,
 	pore_inline_context_reset(ctx);
     }
 
-    ctx->error = rc;
+    if (ctx != 0) {
+        ctx->error = rc;
+        if (rc) {
+            ctx->size = 0;      /* Effectively prevents using the ctx */
+        }
+    }
+
     return rc;
 }
 	

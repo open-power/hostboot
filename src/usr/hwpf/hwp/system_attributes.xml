@@ -253,5 +253,21 @@
     <readable/>
     <writeable/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_RISK_LEVEL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Defines risk level to consider for initialization values applied during IPL.
+        Risk level 0 should contain solutions for all known errata, and may sacrifice performance to avoid data integrity issue/error checking cases.
+        Risk level 0x100 may introduce data integrity/error scenarios to provide full performance or visibility to state space/coverage behind known issues.
+    </description>
+    <valueType>uint32</valueType>
+    <enum>
+        RL0 = 0x000,
+        RL100 = 0x100  
+    </enum>
+    <platInit/>
+  </attribute>
 
 </attributes>

@@ -1,22 +1,23 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.9 2013/05/06 00:52:59 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.10 2013/05/08 13:14:33 jmcgill Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
-#--     1.90|baysah  |05/05/13|- Disabled MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS and MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL.
+#--     1.10|jmcgill |05/07/13|- Qualify ECC bypass disable by risk level
+#--      1.9|baysah  |05/05/13|- Disabled MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS and MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL.
 #--         |        |        |
-#--     1.70|baysah  |04/26/13|- Disabled MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP per firmware request for MPIPL.
+#--      1.7|baysah  |04/26/13|- Disabled MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP per firmware request for MPIPL.
 #--         |        |        |
-#--     1.60|baysah  |04/25/13|- Fix problem with incorrectly setting mcmode0 bit 1 which is marked as reserved, but its actually used to
+#--      1.6|baysah  |04/25/13|- Fix problem with incorrectly setting mcmode0 bit 1 which is marked as reserved, but its actually used to
 #--         |        |        |- reset MCS channel fail.
 #--         |        |        |
-#--     1.41|baysah  |04/23/13|- Disable MCS bypass for dd1 less than 2.0 for defect HW247907
+#--      1.4|baysah  |04/23/13|- Disable MCS bypass for dd1 less than 2.0 for defect HW247907
 #--         |        |        |
-#--     1.30|baysah  |04/04/13|- Set MCI Replay timeout value to 2ms.
+#--      1.3|baysah  |04/04/13|- Set MCI Replay timeout value to 2ms.
 #--         |        |        |- Disable MCS arbiter blocking after checkstop.
 #--         |        |        |
 #-- --------|--------|--------|--------------------------------------------------
-#--     1.00|baysah  |08/12/12|Created MCS init file
+#--      1.0|baysah  |08/12/12|Created MCS init file
 #-- --------|--------|--------|--------------------------------------------------
 #--------------------------------------------------------------------------------
 # End of revision history
@@ -26,6 +27,14 @@
 #--<Attribute Definition Location>
 
 SyntaxVersion = 1
+
+#--------------------------------------------------------------------------------
+#-- Defines
+#--------------------------------------------------------------------------------
+
+# disable ECC bypass if instructed to by EC feature attribute AND
+# running risk level 0
+define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0) && (SYS.ATTR_RISK_LEVEL == ENUM_ATTR_RISK_LEVEL_RL0));
 
 
 #--******************************************************************************
@@ -47,8 +56,6 @@ SyntaxVersion = 1
      32:35,                    0x0           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_HA_ASSIST
      36   ,                    0b1           ,     any                 ;              # MCMODE0Q_MCFGRP_19_IS_HO_BIT
      37   ,                    0b0           ,     any                 ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
-  #   37   ,                    0b1           ,  (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE == 0x0) ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
-  #   37   ,                    0b0           ,  (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0) ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
      38   ,                    0b0           ,     any                 ;              # MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP
      39:43,                    0b00000       ,     any                 ;              # MCMODE0Q_RESERVED_39_43 Reserved
      44:52,                    0b001100010   ,     any                 ;              # MCMODE0Q_ADDRESS_COLLISION_MODES
@@ -74,8 +81,7 @@ SyntaxVersion = 1
      0    ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_ADDRESS_SELECT_LFSR_MODE
      1    ,                    0b0                 ,     any              ;    # MCMODE1Q_NODAL_SCOPE_MCD_VALID
      2:6  ,                    0b00000             ,     any              ;    # MCMODE1Q_DISABLE_HIGH_PRIORITY
-     7:9  ,                    0b000               , (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE == 0x0)     ;    # MCMODE1Q_DISABLE_CRC_ECC_BYPASS
-     7:9  ,                    0b111               , (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0)     ;    # MCMODE1Q_DISABLE_CRC_ECC_BYPASS
+     7:9  ,                    0b111               , (ecc_bypass_disable) ;    # MCMODE1Q_DISABLE_CRC_ECC_BYPASS
      10:15,                    0b000000            ,     any              ;    # MCMODE1Q_DISABLE_READ_ALLOCATION_TO_CACHE
      16   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_READ_ALLOCATION_TO_CACHE_FOR_FASTPATH_OP
      17   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_CRC_ECC_BYPASS_NODAL_SCOPE_ONLY
@@ -90,11 +96,9 @@ SyntaxVersion = 1
      60   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_DISABLE_SPEC_READ_FOR_NONDMA_GROUP_PUMP_LOCAL_READ
      61   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_DISABLE_SPEC_READ_FOR_NONDMA_SYSTEM_PUMP_LOCAL_READ
      62   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_FASTPATH_MCS_COMMAND_BYPASS
-     63   ,                    0b0                 , (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE == 0x0)     ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
-     63   ,                    0b1                 , (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0)     ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
+     63   ,                    0b1                 , (ecc_bypass_disable) ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
 
  }
-
 
 
 #--******************************************************************************
