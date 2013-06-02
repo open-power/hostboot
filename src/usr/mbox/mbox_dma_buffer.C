@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -26,7 +26,8 @@
 #include <util/align.H>
 #include <trace/interface.H>
 #include <kernel/pagemgr.H>
-
+#include <kernel/misc.H>
+#include <targeting/common/targetservice.H>
 
 #define ALIGN_DMAPAGE(u) (((u) + (VmmManager::MBOX_DMA_PAGESIZE-1)) & \
                           ~(VmmManager::MBOX_DMA_PAGESIZE-1))
@@ -41,7 +42,7 @@ DmaBuffer::DmaBuffer() :
     iv_dir(makeMask(VmmManager::MBOX_DMA_PAGES))
 {
     iv_head = reinterpret_cast<void*>(VmmManager::MBOX_DMA_ADDR);
-    iv_phys_head = mm_virt_to_phys(iv_head);
+    initPhysicalArea(iv_head, iv_phys_head);
 }
 
 
@@ -51,16 +52,16 @@ DmaBuffer::~DmaBuffer()
 
 void DmaBuffer::release(void * i_buffer, size_t i_size)
 {
-    if(!i_buffer) 
+    if(!i_buffer)
     {
         return;
     }
 
     // Make sure this buffer falls inside the DMA space
     // If not then it's not a DMA buffer - exit.
-    if(i_buffer < iv_head || 
-       i_buffer >= (static_cast<uint8_t*>(iv_head) + 
-                    (VmmManager::MBOX_DMA_PAGES * 
+    if(i_buffer < iv_head ||
+       i_buffer >= (static_cast<uint8_t*>(iv_head) +
+                    (VmmManager::MBOX_DMA_PAGES *
                      VmmManager::MBOX_DMA_PAGESIZE)))
     {
         TRACDCOMP(g_trac_mbox,
@@ -100,7 +101,7 @@ void * DmaBuffer::getBuffer(uint64_t & io_size)
     // make a mask for the requested size. Instead, getBuffer will just return
     // NULL if the requested size is larger than the total possible DMA buffer
     // space.
-    if(io_size == 0 || 
+    if(io_size == 0 ||
        io_size > (VmmManager::MBOX_DMA_PAGES * VmmManager::MBOX_DMA_PAGESIZE))
     {
         io_size = 0;
@@ -146,7 +147,7 @@ uint64_t DmaBuffer::makeMask(uint64_t i_size)
     assert(i_size <= MAX_MASK_SIZE);
     uint64_t mask = 0;
 
-    // For some reason (1ul << 64) returns 1, not zero 
+    // For some reason (1ul << 64) returns 1, not zero
     // The math function pow() converts things to float then back again - bad
     if(i_size < MAX_MASK_SIZE)
     {
@@ -157,5 +158,41 @@ uint64_t DmaBuffer::makeMask(uint64_t i_size)
     mask <<= MAX_MASK_SIZE - i_size;
 
     return mask;
+}
+
+void DmaBuffer::initPhysicalArea(void*& io_addr, uint64_t& o_phys)
+{
+    // Get the original physical address (includes HRMOR).
+    o_phys = mm_virt_to_phys(io_addr);
+
+    // Remove original address from VMM maps.
+    mm_set_permission(io_addr, VmmManager::MBOX_DMA_SIZE, NO_ACCESS);
+
+    // Find the amount of the node offset.
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+    uint64_t hrmor_base =
+        sys->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
+
+    // Move the physical address to the start of the node (unsecure) and
+    // add on the DMA buffer offset inside the node.
+    o_phys &= ~(hrmor_base-1);
+    o_phys += VmmManager::MBOX_DMA_ADDR;
+
+    // Allocate a new VMM block for the buffer.
+    io_addr = mm_block_map(reinterpret_cast<void*>(o_phys),
+                           VmmManager::MBOX_DMA_SIZE);
+        // Note: We do not plan on deleting this block, even when the buffer
+        //       is destructed, because we have fundamentally changed the
+        //       underlying memory by populating the addresses in a different
+        //       physical location (see populate_cache_lines call below).
+
+    // Populate cache lines in unsecure memory.
+    KernelMisc::populate_cache_lines(
+        reinterpret_cast<uint64_t*>(io_addr),
+        reinterpret_cast<uint64_t*>(VmmManager::MBOX_DMA_SIZE +
+            reinterpret_cast<uint64_t>(io_addr)));
+
 }
 

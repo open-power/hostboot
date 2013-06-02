@@ -150,10 +150,6 @@
         <default>NONE</default>
     </attribute>
     <attribute>
-        <id>HB_HRMOR_NODAL_BASE</id>
-        <default>0x4000000</default>
-    </attribute>
-    <attribute>
         <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
         <default>24</default>
     </attribute>

@@ -211,11 +211,6 @@ void PageManager::_initialize()
 
         uint64_t endBlock = ALIGN_MEGABYTE_DOWN(currentBlock) + 512*KILOBYTE;
 
-        // Populate L3 cache lines for this chunk.
-        KernelMisc::populate_cache_lines(
-            reinterpret_cast<uint64_t*>(currentBlock),
-            reinterpret_cast<uint64_t*>(endBlock));
-
         // Adjust address to compensate for reserved hole and add to
         // heap...
 
@@ -246,15 +241,26 @@ void PageManager::_initialize()
             // Hole is in the middle... yuck.
             else
             {
-                uint64_t pages =
-                    (VmmManager::FIRST_RESERVED_PAGE - currentBlock) / PAGESIZE;
+                uint64_t hole_end =
+                    (VmmManager::FIRST_RESERVED_PAGE - currentBlock);
 
-                iv_heap.addMemory(currentBlock, pages);
-                totalPages += pages;
+                // Populate L3 for the first part of the chunk.
+                KernelMisc::populate_cache_lines(
+                    reinterpret_cast<uint64_t*>(currentBlock),
+                    reinterpret_cast<uint64_t*>(hole_end));
+
+                // Add it to the heap.
+                iv_heap.addMemory(currentBlock, hole_end / PAGESIZE);
+                totalPages += (hole_end / PAGESIZE);
 
                 currentBlock = VmmManager::END_RESERVED_PAGE;
             }
         }
+
+        // Populate L3 cache lines for this chunk.
+        KernelMisc::populate_cache_lines(
+            reinterpret_cast<uint64_t*>(currentBlock),
+            reinterpret_cast<uint64_t*>(endBlock));
 
         uint64_t pages = (endBlock - currentBlock) / PAGESIZE;
 
@@ -264,6 +270,12 @@ void PageManager::_initialize()
         currentBlock = ALIGN_MEGABYTE(endBlock);
 
     } while (reinterpret_cast<page_t*>(currentBlock) != endAddr);
+
+    // Ensure HW page table area is erased / populated.
+    KernelMisc::populate_cache_lines(
+        reinterpret_cast<uint64_t*>(VmmManager::INITIAL_PT_OFFSET),
+        reinterpret_cast<uint64_t*>(VmmManager::INITIAL_PT_OFFSET +
+                                    VmmManager::PTSIZE));
 
     printk("%ld pages.\n", totalPages);
 
