@@ -702,38 +702,42 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                         break;
                     }
 
-                    eRepairPowerBus l_fabricBus;
+                    eRepairPowerBus *l_fabricBus = 
+                             reinterpret_cast<eRepairPowerBus *>(l_vpdDataPtr);
 
-                    l_fabricBus.device.processor_id = 0;
-                    l_fabricBus.device.fabricBus    = l_busNum;
-                    l_fabricBus.failBit             = l_repairLane;
+                    l_fabricBus->device.processor_id = 0;
+                    l_fabricBus->device.fabricBus    = l_busNum;
+                    l_fabricBus->failBit             = l_repairLane;
 
                     if(i_interface == DRIVE)
                     {
-                        l_fabricBus.interface = PBUS_DRIVER;
+                        l_fabricBus->interface = PBUS_DRIVER;
                     }
                     else if(i_interface == RECEIVE)
                     {
-                        l_fabricBus.interface = PBUS_RECEIVER;
+                        l_fabricBus->interface = PBUS_RECEIVER;
                     }
 
                     if(l_tgtType == TARGET_TYPE_XBUS_ENDPOINT)
                     {
-                        l_fabricBus.type = PROCESSOR_EI4;
+                        l_fabricBus->type = PROCESSOR_EI4;
                     }
                     else if(l_tgtType == TARGET_TYPE_ABUS_ENDPOINT)
                     {
-                        l_fabricBus.type = PROCESSOR_EDI;
+                        l_fabricBus->type = PROCESSOR_EDI;
                     }
 
-                    // TODO: RTC task 71260
-                    // Investigate if there is an Endianess issue with
-                    // the memcpy and fix it.
-                    memcpy(l_vpdDataPtr, &l_fabricBus, l_repairDataSz);
                     l_newNumRepairs++;
 
                     // Increment the count of parsed bytes
                     l_bytesParsed += l_repairDataSz;
+#ifndef _BIG_ENDIAN
+                    // We are on a Little Endian system.
+                    // Need to swap the nibbles of structure - eRepairPowerBus
+
+                    l_vpdDataPtr[2] = ((l_vpdDataPtr[2] >> 4) |
+                                       (l_vpdDataPtr[2] << 4));
+#endif
                 }
                 else if((l_tgtType == TARGET_TYPE_MCS_CHIPLET) ||
                         (l_tgtType == TARGET_TYPE_MEMBUF_CHIP) )
@@ -746,44 +750,48 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                         break;
                     }
 
-                    eRepairMemBus l_memBus;
+                    eRepairMemBus *l_memBus =
+                                reinterpret_cast<eRepairMemBus *>(l_vpdDataPtr);
 
-                    l_memBus.device.proc_centaur_id = 0;
-                    l_memBus.device.memChannel      = l_busNum;
-                    l_memBus.type                   = MEMORY_EDI;
-                    l_memBus.failBit                = l_repairLane;
+                    l_memBus->device.proc_centaur_id = 0;
+                    l_memBus->device.memChannel      = l_busNum;
+                    l_memBus->type                   = MEMORY_EDI;
+                    l_memBus->failBit                = l_repairLane;
 
                     if(i_interface == DRIVE)
                     {
                         if(l_tgtType == TARGET_TYPE_MCS_CHIPLET)
                         {
-                            l_memBus.interface = DMI_MCS_DRIVE;
+                            l_memBus->interface = DMI_MCS_DRIVE;
                         }
                         else if(l_tgtType == TARGET_TYPE_MEMBUF_CHIP)
                         {
-                            l_memBus.interface = DMI_MEMBUF_DRIVE;
+                            l_memBus->interface = DMI_MEMBUF_DRIVE;
                         }
                     }
                     else if(i_interface == RECEIVE)
                     {
                         if(l_tgtType == TARGET_TYPE_MCS_CHIPLET)
                         {
-                            l_memBus.interface = DMI_MCS_RECEIVE;
+                            l_memBus->interface = DMI_MCS_RECEIVE;
                         }
                         else if(l_tgtType == TARGET_TYPE_MEMBUF_CHIP)
                         {
-                            l_memBus.interface = DMI_MEMBUF_RECEIVE;
+                            l_memBus->interface = DMI_MEMBUF_RECEIVE;
                         }
                     }
 
-                    // TODO: RTC task 71260
-                    // Investigate if there is an Endianess issue with
-                    // the memcpy and fix it.
-                    memcpy(l_vpdDataPtr, &l_memBus, l_repairDataSz);
                     l_newNumRepairs++;
 
                     // Increment the count of parsed bytes
                     l_bytesParsed += l_repairDataSz;
+#ifndef _BIG_ENDIAN
+                    // We are on a Little Endian system.
+                    // Need to swap the nibbles of structure - eRepairMemBus
+
+                    l_vpdDataPtr[2] = ((l_vpdDataPtr[2] >> 4) |
+                                       (l_vpdDataPtr[2] << 4));
+#endif 
                 }
             } // end of if(l_overWrite == false)
         } // end of for(failLanes)

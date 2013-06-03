@@ -318,7 +318,7 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
         if((l_tgtType == fapi::TARGET_TYPE_XBUS_ENDPOINT) ||
            (l_tgtType == fapi::TARGET_TYPE_ABUS_ENDPOINT))
         {
-            eRepairPowerBus l_fabricBus;
+            eRepairPowerBus *l_fabricBus;
 
             // Read Power bus eRepair data and get the failed lane numbers
             for(l_loop = 0;
@@ -332,19 +332,24 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                     break;
                 }
 
-                // TODO: RTC task 71260
-                // Investigate if there is an Endianess issue with
-                // the memcpy and fix it.
-                memcpy(&l_fabricBus, l_vpdPtr, l_fabricRepairDataSz);
+                l_fabricBus = reinterpret_cast<eRepairPowerBus *>(l_vpdPtr);
 
+#ifndef _BIG_ENDIAN
+                // We are on a Little Endian system.
+                // Need to swap the nibbles of the structure - eRepairPowerBus
+
+                uint8_t l_temp = l_vpdPtr[2];
+                l_fabricBus->type = (l_temp >> 4);
+                l_fabricBus->interface = (l_temp & 0x0F);
+#endif
                 // Check if we have the correct Processor ID
                 // Get the MRU ID of the passed processor target and
                 // match with l_fabricBus.device.processor_id.
                 // Note: This is currently not required.
 
                 // Check if we have the matching the Fabric Bus types
-                if((l_fabricBus.type != EREPAIR::PROCESSOR_EI4) &&
-                   (l_fabricBus.type != EREPAIR::PROCESSOR_EDI))
+                if((l_fabricBus->type != EREPAIR::PROCESSOR_EI4) &&
+                   (l_fabricBus->type != EREPAIR::PROCESSOR_EDI))
                 {
                     continue;
                 }
@@ -358,25 +363,25 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                     break;
                 }
 
-                if(l_fabricBus.device.fabricBus != l_busNum)
+                if(l_fabricBus->device.fabricBus != l_busNum)
                 {
                     continue;
                 }
 
                 // Check if we have valid fail lane numbers
-                if(l_fabricBus.failBit == EREPAIR::INVALID_FAIL_LANE_NUMBER)
+                if(l_fabricBus->failBit == EREPAIR::INVALID_FAIL_LANE_NUMBER)
                 {
                     continue;
                 }
 
                 // Copy the fail lane numbers in the vectors
-                if(l_fabricBus.interface == EREPAIR::PBUS_DRIVER)
+                if(l_fabricBus->interface == EREPAIR::PBUS_DRIVER)
                 {
-                    o_txFailLanes.push_back(l_fabricBus.failBit);
+                    o_txFailLanes.push_back(l_fabricBus->failBit);
                 }
-                else if(l_fabricBus.interface == EREPAIR::PBUS_RECEIVER)
+                else if(l_fabricBus->interface == EREPAIR::PBUS_RECEIVER)
                 {
-                    o_rxFailLanes.push_back(l_fabricBus.failBit);
+                    o_rxFailLanes.push_back(l_fabricBus->failBit);
                 }
             } // end of for loop
         } // end of if(l_tgtType is XBus or ABus)
@@ -384,7 +389,7 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                 (l_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP))
         {
             // Parse for Memory bus data
-            eRepairMemBus l_memBus;
+            eRepairMemBus *l_memBus;
             l_tgtHandle = i_tgtHandle;
 
             if(l_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP)
@@ -416,10 +421,16 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                     break;
                 }
 
-                // TODO: RTC task 71260
-                // Investigate if there is an Endianess issue with
-                // the memcpy and fix it.
-                memcpy(&l_memBus, l_vpdPtr, l_memRepairDataSz);
+                l_memBus = reinterpret_cast<eRepairMemBus *>(l_vpdPtr);
+
+#ifndef _BIG_ENDIAN
+                // We are on a Little Endian system.
+                // Need to swap the nibbles of the structure - eRepairMemBus
+
+                uint8_t l_temp = l_vpdPtr[2];
+                l_memBus->type = (l_temp >> 4);
+                l_memBus->interface = (l_temp & 0x0F);
+#endif
 
                 // Check if we have the correct Processor ID
                 // Get the MRU ID of the passed processor target and
@@ -427,7 +438,7 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                 // Note: This is currently not required.
 
                 // Check if we have the matching the Memory Bus types
-                if(l_memBus.type != EREPAIR::MEMORY_EDI)
+                if(l_memBus->type != EREPAIR::MEMORY_EDI)
                 {
                     continue;
                 }
@@ -441,13 +452,13 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                     break;
                 }
 
-                if(l_memBus.device.memChannel != l_busNum)
+                if(l_memBus->device.memChannel != l_busNum)
                 {
                     continue;
                 }
 
                 // Check if we have valid fail lane numbers
-                if(l_memBus.failBit == EREPAIR::INVALID_FAIL_LANE_NUMBER)
+                if(l_memBus->failBit == EREPAIR::INVALID_FAIL_LANE_NUMBER)
                 {
                     continue;
                 }
@@ -455,24 +466,24 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
                 // Copy the fail lane numbers in the vectors
                 if(l_tgtType == fapi::TARGET_TYPE_MCS_CHIPLET)
                 {
-                   if(l_memBus.interface == EREPAIR::DMI_MCS_DRIVE)
+                   if(l_memBus->interface == EREPAIR::DMI_MCS_DRIVE)
                    {
-                       o_txFailLanes.push_back(l_memBus.failBit);
+                       o_txFailLanes.push_back(l_memBus->failBit);
                    }
-                   else if(l_memBus.interface == EREPAIR::DMI_MCS_RECEIVE)
+                   else if(l_memBus->interface == EREPAIR::DMI_MCS_RECEIVE)
                    {
-                       o_rxFailLanes.push_back(l_memBus.failBit);
+                       o_rxFailLanes.push_back(l_memBus->failBit);
                    }
                 }
                 else if(l_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP)
                 {
-                   if(l_memBus.interface == EREPAIR::DMI_MEMBUF_DRIVE)
+                   if(l_memBus->interface == EREPAIR::DMI_MEMBUF_DRIVE)
                    {
-                       o_txFailLanes.push_back(l_memBus.failBit);
+                       o_txFailLanes.push_back(l_memBus->failBit);
                    }
-                   else if(l_memBus.interface == EREPAIR::DMI_MEMBUF_RECEIVE)
+                   else if(l_memBus->interface == EREPAIR::DMI_MEMBUF_RECEIVE)
                    {
-                       o_rxFailLanes.push_back(l_memBus.failBit);
+                       o_rxFailLanes.push_back(l_memBus->failBit);
                    }
                 }
             } // end of for loop
