@@ -125,6 +125,13 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
     HWAS_MUTEX_LOCK(iv_mutex);
     do
     {
+        GardAddress l_GardAddress(l_pErr);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from l_GardAddress");
+            break;
+        }
+
         // For each GARD Record
         for (uint32_t i = 0; i < iv_maxGardRecords; i++)
         {
@@ -155,27 +162,13 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                 continue;
             }
 
-{
-    // TODO: RTC: 70468 add flush method to GardAddress; move this to outside
-    // for loop scope, and add flush after the writeRecord below.
-        bool l_gardEnabled = false;
-        GardAddress l_GardAddress(l_gardEnabled);
-
-        if (!l_gardEnabled)
-        {
-            // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
-            HWAS_ERR("Error from l_GardAddress");
-            break;
-        }
-
             // Clear the gard record
             HWAS_INF("clearing GARD for %.8X, recordId %d",
                         TARGETING::get_huid(l_pTarget),
                         iv_pGardRecords[i].iv_recordId);
             iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
             l_GardAddress.writeRecord(&iv_pGardRecords[i]);
-    // for now, this will force a flush to PNOR
-}
+            l_GardAddress.flush();
 
             // now clear our 'changed' bit
             TARGETING::clear_hwas_changed_bit(
@@ -686,12 +679,9 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
             break;
         }
 
-        bool l_gardEnabled = false;
-        GardAddress l_GardAddress(l_gardEnabled);
-
-        if (!l_gardEnabled)
+        GardAddress l_GardAddress(l_pErr);
+        if (l_pErr)
         {
-            // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
             HWAS_ERR("Error from l_GardAddress");
             break;
         }
@@ -752,10 +742,8 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
 {
     errlHndl_t l_pErr = NULL;
 
-    bool l_gardEnabled = false;
-    GardAddress l_GardAddress(l_gardEnabled);
-
-    if (l_gardEnabled)
+    GardAddress l_GardAddress(l_pErr);
+    if (!l_pErr)
     {
         if (i_recordId == CLEAR_ALL_GARD_RECORDS)
         {
@@ -795,7 +783,6 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
     }
     else
     {
-        // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
         HWAS_ERR("Error from l_GardAddress");
     }
 
@@ -808,10 +795,8 @@ errlHndl_t DeconfigGard::_clearGardRecords(
 {
     errlHndl_t l_pErr = NULL;
 
-    bool l_gardEnabled = false;
-    GardAddress l_GardAddress(l_gardEnabled);
-
-    if (l_gardEnabled)
+    GardAddress l_GardAddress(l_pErr);
+    if (!l_pErr)
     {
         bool l_gardRecordsCleared = false;
 
@@ -836,7 +821,6 @@ errlHndl_t DeconfigGard::_clearGardRecords(
     }
     else
     {
-        // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
         HWAS_ERR("Error from l_GardAddress");
     }
 
@@ -850,10 +834,8 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
     errlHndl_t l_pErr = NULL;
     o_records.clear();
 
-    bool l_gardEnabled = false;
-    GardAddress l_GardAddress(l_gardEnabled);
-
-    if (l_gardEnabled)
+    GardAddress l_GardAddress(l_pErr);
+    if (!l_pErr)
     {
         if (i_recordId == GET_ALL_GARD_RECORDS)
         {
@@ -884,7 +866,6 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
     }
     else
     {
-        // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
         HWAS_ERR("Error from l_GardAddress");
     }
 
@@ -899,10 +880,8 @@ errlHndl_t DeconfigGard::_getGardRecords(
     errlHndl_t l_pErr = NULL;
     o_records.clear();
 
-    bool l_gardEnabled = false;
-    GardAddress l_GardAddress(l_gardEnabled);
-
-    if (l_gardEnabled)
+    GardAddress l_GardAddress(l_pErr);
+    if (!l_pErr)
     {
         for (uint32_t i = 0; i < iv_maxGardRecords; i++)
         {
@@ -922,7 +901,6 @@ errlHndl_t DeconfigGard::_getGardRecords(
     }
     else
     {
-        // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
         HWAS_ERR("Error from l_GardAddress");
     }
 

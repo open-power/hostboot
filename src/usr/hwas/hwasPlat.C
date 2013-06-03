@@ -355,54 +355,50 @@ errlHndl_t hwasChangeDetection()
 } // hwasChangeDetection
 
 
-GardAddress::GardAddress(bool &o_gardEnabled)
+GardAddress::GardAddress(errlHndl_t &o_errl)
 {
     DeconfigGard::GardRecord *l_addr = HWAS::theDeconfigGard().iv_pGardRecords;
     HWAS_INF("GardAddress ctor: iv_pGardRecords %p", l_addr);
-    o_gardEnabled = true;
 
-    // if this is the first time thru here, get the PNOR address.
-    if (l_addr == NULL)
+    do
     {
-        PNOR::SectionInfo_t l_section;
-        errlHndl_t errl;
-        errl = PNOR::getSectionInfo(PNOR::GUARD_DATA, PNOR::CURRENT_SIDE,
-                        l_section);
-        if (errl)
+        // if this is the first time thru here, get the PNOR address.
+        if (l_addr == NULL)
         {
-            HWAS_ERR("PNOR::getSectionInfo failed!!!");
-            // no support for GARD in this configuration.
-            // Commit the log as unrecoverable and keep going.
-            errlCommit(errl, HWAS_COMP_ID);
-            // errl is now NULL
+            PNOR::SectionInfo_t l_section;
+            o_errl = PNOR::getSectionInfo(PNOR::GUARD_DATA, PNOR::CURRENT_SIDE,
+                            l_section);
+            if (o_errl)
+            {
+                HWAS_ERR("PNOR::getSectionInfo failed!!!");
+                // no support for GARD in this configuration.
+                break;
+            }
 
-            // set flag so that we don't continue to try to write GARD records
-            o_gardEnabled = false;
-        }
-        else
-        {
             l_addr = reinterpret_cast<DeconfigGard::GardRecord *>
                         (l_section.vaddr);
-            HWAS_DBG("PNOR vaddr=%p size=%d", l_section.vaddr, l_section.size);
+            HWAS_DBG("PNOR vaddr=%p size=%d",
+                    l_section.vaddr, l_section.size);
 
             // tell the DeconfigGard what the address
             HWAS::theDeconfigGard().iv_pGardRecords = l_addr;
 
             // and let him compute and save maxRecords and nextRecordId
             HWAS::theDeconfigGard()._GardRecordIdSetup(l_section.size);
-        }
 
-        HWAS_INF("GardAddress iv_pGardRecords=%p", l_addr);
+            HWAS_INF("GardAddress iv_pGardRecords=%p", l_addr);
+        }
     }
+    while (0);
 }
 
 
-GardAddress::~GardAddress()
+void GardAddress::flush()
 {
     // flush PNOR iff we wrote
-    if (iv_addr.size() > 0)
+    if (!iv_addr.empty())
     {
-        for (std::vector<void *>::iterator iter = iv_addr.begin();
+        for (std::vector<void *>::const_iterator iter = iv_addr.begin();
                 iter != iv_addr.end();
                 ++iter)
         {
@@ -419,6 +415,12 @@ GardAddress::~GardAddress()
         // all done - just get rid of them all
         iv_addr.clear();
     }
+}
+
+
+GardAddress::~GardAddress()
+{
+    flush();
 }
 
 } // namespace HWAS

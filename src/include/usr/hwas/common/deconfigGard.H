@@ -487,17 +487,21 @@ public:
      * @brief Constructor.
      *  PLATFORM must implement this function
      *
-     * @param[in]  o_gardEnabled  boolean returned:
-     *                  true - reading/writing of gard records is enabled;
-     *                  false - not enabled
+     * @param[in]  o_errl  errlHndl_t set if there was an error
      */
-    GardAddress(bool &o_gardEnabled);
+    GardAddress(errlHndl_t &o_errl);
 
     /**
      * @brief Destructor.
      *  PLATFORM must implement this function
      */
     ~GardAddress();
+
+    /**
+     * @brief flush. flush all of the waiting addresses out
+     *
+     */
+    void flush();
 
     /**
      * @brief writeRecord. Add the indicated address to a vector, so
