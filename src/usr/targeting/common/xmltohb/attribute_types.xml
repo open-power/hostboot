@@ -1542,10 +1542,7 @@
     <description>
         System attribute.
         The frequency of the processor refclock in MHz.
-        Provided by the Machine Readable Workbook.
-        The corresponding HWPF attribute:
-        - Is read by the set_ref_clock HWP to find out the desired frequency.
-        - Can be overridden to adjust the refclock frequency.
+        Provided by the MRW.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
@@ -1561,10 +1558,7 @@
     <description>
         System attribute.
         The frequency of the memory refclock in MHz.
-        Provided by the Machine Readable Workbook.
-        The corresponding HWPF attribute:
-        - Is read by the set_ref_clock HWP to find out the desired frequency.
-        - Can be overridden to adjust the refclock frequency.
+        Provided by the MRW.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
@@ -1581,9 +1575,7 @@
         System attribute.
         The lowest frequency that a core can be set to in MHz.
         This is the same for all cores in the system.
-        TODO Provided by TBD. Current thinking is MRW or MVPD.
-          If MRW then this attribute will stay here.
-          If MVPD then this attribute will be deleted.
+        Provided by the MRW.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
@@ -1600,14 +1592,11 @@
         System attribute.
         The frequency of a processor's PB chiplet in MHz.
         This is the same for all PB chiplets in the system.
-        The corresponding HWPF attribute:
-        - Is set by a HWP that runs after SBE HWPs setup the PB PLL. It
-          reads ATTR_FREQ_PROC_REFCLOCK and the PB PLL settings.
+        Provided by the MRW.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_PB</id>
         <macro>DIRECT</macro>
@@ -1620,13 +1609,11 @@
         System attribute.
         The frequency of a processor's A-bus chiplet in MHz.
         This is the same for all A-bus chiplets in the system.
-        The corresponding HWPF attribute:
-        - Is set by the HWP that sets up the A-bus PLL.
+        Provided by the MRW.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_A</id>
         <macro>DIRECT</macro>
@@ -1639,13 +1626,11 @@
         System attribute.
         The frequency of a processor's X-bus chiplet in MHz.
         This is the same for all X-bus chiplets in the system.
-        The corresponding HWPF attribute:
-        - Is set by the HWP that sets up the X-bus PLL.
+        Provided by the MRW.
     </description>
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_X</id>
         <macro>DIRECT</macro>
@@ -2586,12 +2571,11 @@
   <description>
     The frequency of a processor's PCI-e bus in MHz.
     This is the same for all PCI-e busses in the system.
-    This is set by the HWP that sets up the PCI-e PLL.
+    Provided by the MRW.
   </description>
   <simpleType><uint32_t></uint32_t></simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <writeable/>
   <hwpfToHbAttrMap>
       <id>ATTR_FREQ_PCIE</id>
       <macro>DIRECT</macro>
