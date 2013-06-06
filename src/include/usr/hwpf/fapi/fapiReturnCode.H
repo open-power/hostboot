@@ -47,6 +47,7 @@
  *                          mjjones     09/19/2012  Add FFDC ID to error info
  *                          mjjones     03/22/2013  Support Procedure Callouts
  *                          mjjones     05/20/2013  Support Bus Callouts
+ *                          mjjones     06/06/2013  Check FFDC size at compile time
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -471,7 +472,23 @@ namespace ReturnCodeFfdc
     {
         EI_FFDC_SIZE_ECMDDB = 0xffff,   // ecmdDataBufferBase
         EI_FFDC_SIZE_TARGET = 0xfffe,   // fapi::Target
+        EI_FFDC_MAX_SIZE    = 0x1000,   // Limit regular FFDC capture to 4kb
     };
+
+    /**
+     * @brief Compile error if caller tries to add too much FFDC to a ReturnCode
+     *
+     * If the unspecialized function template is instantiated, the compile will
+     * fail due to the construction of an undefined class. If the specialized
+     * function template is instantiated (done if the FFDC size is not too big),
+     * the function does nothing and is optimized out
+     */
+    class Error_FfdcTooLargeToCapture;
+    template<const bool TOO_BIG> void checkFfdcSize()
+    {
+        Error_FfdcTooLargeToCapture();
+    }
+    template <> inline void checkFfdcSize<false>() {}
 
     /**
      * @brief Get FFDC Size
@@ -486,6 +503,7 @@ namespace ReturnCodeFfdc
     template<typename T>
     uint16_t getErrorInfoFfdcSize(const T &)
     {
+        checkFfdcSize<(sizeof(T) > EI_FFDC_MAX_SIZE)>();
         return sizeof(T);
     }
 
