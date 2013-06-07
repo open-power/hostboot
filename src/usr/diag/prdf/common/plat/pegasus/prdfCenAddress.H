@@ -300,15 +300,15 @@ class CenAddr
 
 typedef const char * const CenReadAddrReg;
 
-extern CenReadAddrReg READ_NCE_ADDR_0; ///< For the MBNCER_0 register
-extern CenReadAddrReg READ_RCE_ADDR_0; ///< For the MBRCER_0 register
-extern CenReadAddrReg READ_MPE_ADDR_0; ///< For the MBMPER_0 register
-extern CenReadAddrReg READ_UE_ADDR_0;  ///< For the MBUER_0 register
+extern CenReadAddrReg READ_NCE_ADDR_0; ///< For the MBA0_MBNCER register
+extern CenReadAddrReg READ_RCE_ADDR_0; ///< For the MBA0_MBRCER register
+extern CenReadAddrReg READ_MPE_ADDR_0; ///< For the MBA0_MBMPER register
+extern CenReadAddrReg READ_UE_ADDR_0;  ///< For the MBA0_MBUER register
 
-extern CenReadAddrReg READ_NCE_ADDR_1; ///< For the MBNCER_1 register
-extern CenReadAddrReg READ_RCE_ADDR_1; ///< For the MBRCER_1 register
-extern CenReadAddrReg READ_MPE_ADDR_1; ///< For the MBMPER_1 register
-extern CenReadAddrReg READ_UE_ADDR_1;  ///< For the MBUER_1 register
+extern CenReadAddrReg READ_NCE_ADDR_1; ///< For the MBA1_MBNCER register
+extern CenReadAddrReg READ_RCE_ADDR_1; ///< For the MBA1_MBRCER register
+extern CenReadAddrReg READ_MPE_ADDR_1; ///< For the MBA1_MBMPER register
+extern CenReadAddrReg READ_UE_ADDR_1;  ///< For the MBA1_MBUER register
 
 /**
  * @brief  Reads the specified mainline memory read address from hardware.

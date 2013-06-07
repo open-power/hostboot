@@ -43,15 +43,15 @@ using namespace PlatServices;
 //                       MBS Address Registers
 //------------------------------------------------------------------------------
 
-CenReadAddrReg READ_NCE_ADDR_0 = "MBNCER_0";
-CenReadAddrReg READ_RCE_ADDR_0 = "MBRCER_0";
-CenReadAddrReg READ_MPE_ADDR_0 = "MBMPER_0";
-CenReadAddrReg READ_UE_ADDR_0  = "MBUER_0";
+CenReadAddrReg READ_NCE_ADDR_0 = "MBA0_MBNCER";
+CenReadAddrReg READ_RCE_ADDR_0 = "MBA0_MBRCER";
+CenReadAddrReg READ_MPE_ADDR_0 = "MBA0_MBMPER";
+CenReadAddrReg READ_UE_ADDR_0  = "MBA0_MBUER";
 
-CenReadAddrReg READ_NCE_ADDR_1 = "MBNCER_1";
-CenReadAddrReg READ_RCE_ADDR_1 = "MBRCER_1";
-CenReadAddrReg READ_MPE_ADDR_1 = "MBMPER_1";
-CenReadAddrReg READ_UE_ADDR_1  = "MBUER_1";
+CenReadAddrReg READ_NCE_ADDR_1 = "MBA1_MBNCER";
+CenReadAddrReg READ_RCE_ADDR_1 = "MBA1_MBRCER";
+CenReadAddrReg READ_MPE_ADDR_1 = "MBA1_MBMPER";
+CenReadAddrReg READ_UE_ADDR_1  = "MBA1_MBUER";
 
 //------------------------------------------------------------------------------
 

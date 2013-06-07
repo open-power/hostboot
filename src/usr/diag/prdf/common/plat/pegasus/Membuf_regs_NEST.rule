@@ -215,10 +215,10 @@
     };
 
     ############################################################################
-    # NEST Chiplet MBSECC01FIR
+    # NEST Chiplet MBA0_MBSECCFIR
     ############################################################################
 
-    register MBSECC01FIR
+    register MBA0_MBSECCFIR
     {
         name        "MBU.MBS.ECC01.MBECCFIR";
         scomaddr    0x02011440;
@@ -228,14 +228,14 @@
         capture     group FirRegs;
     };
 
-    register MBSECC01FIR_AND
+    register MBA0_MBSECCFIR_AND
     {
         name        "MBU.MBS.ECC01.MBECCFIR_AND";
         scomaddr    0x02011441;
         capture     group never;
     };
 
-    register MBSECC01FIR_MASK
+    register MBA0_MBSECCFIR_MASK
     {
         name        "MBU.MBS.ECC01.MBECCFIR_MASK";
         scomaddr    0x02011443;
@@ -244,7 +244,7 @@
         capture     group FirRegs;
     };
 
-    register MBSECC01FIR_ACT0
+    register MBA0_MBSECCFIR_ACT0
     {
         name        "MBU.MBS.ECC01.MBECCFIR_ACTION0";
         scomaddr    0x02011446;
@@ -253,7 +253,7 @@
         capture     group FirRegs;
     };
 
-    register MBSECC01FIR_ACT1
+    register MBA0_MBSECCFIR_ACT1
     {
         name        "MBU.MBS.ECC01.MBECCFIR_ACTION1";
         scomaddr    0x02011447;
@@ -263,10 +263,10 @@
     };
 
     ############################################################################
-    # NEST Chiplet MBSECC23FIR
+    # NEST Chiplet MBA1_MBSECCFIR
     ############################################################################
 
-    register MBSECC23FIR
+    register MBA1_MBSECCFIR
     {
         name        "MBU.MBS.ECC23.MBECCFIR";
         scomaddr    0x02011480;
@@ -276,14 +276,14 @@
         capture     group FirRegs;
     };
 
-    register MBSECC23FIR_AND
+    register MBA1_MBSECCFIR_AND
     {
         name        "MBU.MBS.ECC23.MBECCFIR_AND";
         scomaddr    0x02011481;
         capture     group never;
     };
 
-    register MBSECC23FIR_MASK
+    register MBA1_MBSECCFIR_MASK
     {
         name        "MBU.MBS.ECC23.MBECCFIR_MASK";
         scomaddr    0x02011483;
@@ -292,7 +292,7 @@
         capture     group FirRegs;
     };
 
-    register MBSECC23FIR_ACT0
+    register MBA1_MBSECCFIR_ACT0
     {
         name        "MBU.MBS.ECC23.MBECCFIR_ACTION0";
         scomaddr    0x02011486;
@@ -301,7 +301,7 @@
         capture     group FirRegs;
     };
 
-    register MBSECC23FIR_ACT1
+    register MBA1_MBSECCFIR_ACT1
     {
         name        "MBU.MBS.ECC23.MBECCFIR_ACTION0";
         scomaddr    0x02011487;
@@ -311,10 +311,10 @@
     };
 
     ############################################################################
-    # NEST Chiplet MCBIST01FIR
+    # NEST Chiplet MBA0_MCBISTFIR
     ############################################################################
 
-    register MCBIST01FIR
+    register MBA0_MCBISTFIR
     {
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSFIRQ";
         scomaddr    0x02011600;
@@ -324,7 +324,7 @@
         capture     group FirRegs;
     };
 
-    register MCBIST01FIR_MASK
+    register MBA0_MCBISTFIR_MASK
     {
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSFIRMASK";
         scomaddr    0x02011603;
@@ -333,7 +333,7 @@
         capture     group FirRegs;
     };
 
-    register MCBIST01FIR_ACT0
+    register MBA0_MCBISTFIR_ACT0
     {
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSFIRACTION0";
         scomaddr    0x02011606;
@@ -342,7 +342,7 @@
         capture     group FirRegs;
     };
 
-    register MCBIST01FIR_ACT1
+    register MBA0_MCBISTFIR_ACT1
     {
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSFIRACTION1";
         scomaddr    0x02011607;
@@ -352,10 +352,10 @@
     };
 
     ############################################################################
-    # NEST Chiplet MCBIST23FIR
+    # NEST Chiplet MBA1_MCBISTFIR
     ############################################################################
 
-    register MCBIST23FIR
+    register MBA1_MCBISTFIR
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSFIRQ";
         scomaddr    0x02011700;
@@ -365,7 +365,7 @@
         capture     group FirRegs;
     };
 
-    register MCBIST23FIR_MASK
+    register MBA1_MCBISTFIR_MASK
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSFIRMASK";
         scomaddr    0x02011703;
@@ -374,7 +374,7 @@
         capture     group FirRegs;
     };
 
-    register MCBIST23FIR_ACT0
+    register MBA1_MCBISTFIR_ACT0
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSFIRACTION0";
         scomaddr    0x02011706;
@@ -383,7 +383,7 @@
         capture     group FirRegs;
     };
 
-    register MCBIST23FIR_ACT1
+    register MBA1_MCBISTFIR_ACT1
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSFIRACTION1";
         scomaddr    0x02011707;
@@ -498,7 +498,7 @@
         capture     group CerrRegs;
     };
 
-    register MBSECC01ERRPT_0
+    register MBA0_MBSECCERRPT_0
     {
         name        "MBU.MBS.ECC01.MBSECCERR0";
         scomaddr    0x02011466;
@@ -506,14 +506,14 @@
         capture     group CerrRegs;
     };
 
-    register MBSECC01ERRPT_1
+    register MBA0_MBSECCERRPT_1
     {
         name        "MBU.MBS.ECC01.MBSECCERR1";
         scomaddr    0x02011467;
         capture     group default;
         capture     group CerrRegs;
     };
-    register MBSECC23ERRPT_0
+    register MBA1_MBSECCERRPT_0
     {
         name        "MBU.MBS.ECC23.MBSECCERR0";
         scomaddr    0x020114A6;
@@ -521,7 +521,7 @@
         capture     group CerrRegs;
     };
 
-    register MBSECC23ERRPT_1
+    register MBA1_MBSECCERRPT_1
     {
         name        "MBU.MBS.ECC23.MBSECCERR1";
         scomaddr    0x020114A7;
@@ -529,7 +529,7 @@
         capture     group CerrRegs;
     };
 
-    register MBXERRSTAT_0
+    register MBA0_MBXERRSTAT
     {
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBXERRSTATQ";
         scomaddr    0x0201168f;
@@ -537,7 +537,7 @@
         capture     group CerrRegs;
     };
 
-    register MBXERRSTAT_1
+    register MBA1_MBXERRSTAT
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBXERRSTATQ";
         scomaddr    0x0201178f;
@@ -557,74 +557,74 @@
     # Memory ECC Error Address Registers
     ############################################################################
 
-    register MBNCER_0
+    register MBA0_MBNCER
     {
-        name        "MBS Memory NCE Error Address 0 Register";
+        name        "MBA0: MBS Memory NCE Error Address Register";
         scomaddr    0x02011660;
         capture     group default;
     };
 
-    register MBRCER_0
+    register MBA0_MBRCER
     {
-        name        "MBS Memory RCE Error Address 0 Register";
+        name        "MBA0: MBS Memory RCE Error Address Register";
         scomaddr    0x02011661;
         capture     group default;
     };
 
-    register MBMPER_0
+    register MBA0_MBMPER
     {
-        name        "MBS Memory MPE Error Address 0 Register";
+        name        "MBA0: MBS Memory MPE Error Address Register";
         scomaddr    0x02011662;
         capture     group default;
     };
 
-    register MBUER_0
+    register MBA0_MBUER
     {
-        name        "MBS Memory UE Error Address 0 Register";
+        name        "MBA0: MBS Memory UE Error Address Register";
         scomaddr    0x02011663;
         capture     group default;
     };
 
-    register MBNCER_1
+    register MBA1_MBNCER
     {
-        name        "MBS Memory NCE Error Address 1 Register";
+        name        "MBA1: MBS Memory NCE Error Address Register";
         scomaddr    0x02011760;
         capture     group default;
     };
 
-    register MBRCER_1
+    register MBA1_MBRCER
     {
-        name        "MBS Memory RCE Error Address 1 Register";
+        name        "MBA1: MBS Memory RCE Error Address Register";
         scomaddr    0x02011761;
         capture     group default;
     };
 
-    register MBMPER_1
+    register MBA1_MBMPER
     {
-        name        "MBS Memory MPE Error Address 1 Register";
+        name        "MBA1: MBS Memory MPE Error Address Register";
         scomaddr    0x02011762;
         capture     group default;
     };
 
-    register MBUER_1
+    register MBA1_MBUER
     {
-        name        "MBS Memory UE Error Address 1 Register";
+        name        "MBA1: MBS Memory UE Error Address Register";
         scomaddr    0x02011763;
         capture     group default;
     };
 
     ############################################################################
-    # NEST Chiplet memory scrub/read threshold register
+    # NEST Chiplet memory maintenance threshold control registers
     ############################################################################
 
-    register MBSTR_0
+    register MBA0_MBSTR
     {
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSTRQ";
         scomaddr    0x02011655;
         capture     group default;
     };
 
-    register MBSTR_1
+    register MBA1_MBSTR
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSTRQ";
         scomaddr    0x02011755;
