@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.150 2013/05/15 04:22:35 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.153 2013/05/31 18:02:44 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -608,6 +608,18 @@ CONST_UINT64_T( PORE_SBE_I2C_E1_PARAM_0x000E0018      , ULL(0x000E0018) );
 CONST_UINT64_T( PORE_SBE_I2C_E2_PARAM_0x000E0019      , ULL(0x000E0019) );
 
 //------------------------------------------------------------------------------
+//      LPC
+//------------------------------------------------------------------------------
+CONST_UINT64_T( LPC_FIR_0x01010C00                    , ULL(0x01010C00) );
+CONST_UINT64_T( LPC_FIR_AND_0x01010C01                , ULL(0x01010C01) );
+CONST_UINT64_T( LPC_FIR_OR_0x01010C02                 , ULL(0x01010C02) );
+CONST_UINT64_T( LPC_FIR_MASK_0x01010C03               , ULL(0x01010C03) );
+CONST_UINT64_T( LPC_FIR_MASK_AND_0x01010C04           , ULL(0x01010C04) );
+CONST_UINT64_T( LPC_FIR_MASK_OR_0x01010C05            , ULL(0x01010C05) );
+CONST_UINT64_T( LPC_FIR_ACTION0_0x01010C06            , ULL(0x01010C06) );
+CONST_UINT64_T( LPC_FIR_ACTION1_0x01010C07            , ULL(0x01010C07) );
+
+//------------------------------------------------------------------------------
 //      TP Chiplet PCB slave
 //------------------------------------------------------------------------------
 CONST_UINT64_T( HANG_PULSE_0_REG_0x010F0020           , ULL(0x010F0020) );
@@ -916,6 +928,7 @@ CONST_UINT64_T( CAPP_CXA_SNOOP_CTL_0x0201301B         , ULL(0x0201301B) );
 CONST_UINT64_T( MCS_MCFGP_0x02011800                  , ULL(0x02011800) );
 CONST_UINT64_T( MCS_MCFGPM_0x02011801                 , ULL(0x02011801) );
 CONST_UINT64_T( MCS_MCFGPR_0x02011802                 , ULL(0x02011802) );
+CONST_UINT64_T( MCS_MCSMODE0_0x02011807               , ULL(0x02011807) );
 CONST_UINT64_T( MCS_MCSMODE1_0x02011808               , ULL(0x02011808) );
 CONST_UINT64_T( MCS_MCSMODE4_0x0201181A               , ULL(0x0201181A) );
 CONST_UINT64_T( MCS_MCFGPA_0x02011814                 , ULL(0x02011814) );
@@ -1113,16 +1126,9 @@ CONST_UINT64_T( X_TRACE_DATA_LO_T1_0x04010801         , ULL(0x04010801) );
 //------------------------------------------------------------------------------
 //      X-BUS PBEN
 //------------------------------------------------------------------------------
-CONST_UINT64_T( PB_X_FIR_0x04010C00                   , ULL(0x04010C00) );
-CONST_UINT64_T( PB_X_FIR_AND_0x04010C01               , ULL(0x04010C01) );
-CONST_UINT64_T( PB_X_FIR_OR_0x04010C02                , ULL(0x04010C02) );
-CONST_UINT64_T( PB_X_FIR_MASK_0x04010803              , ULL(0x04010C03) );
-CONST_UINT64_T( PB_X_FIR_MASK_AND_0x04010804          , ULL(0x04010C04) );
-CONST_UINT64_T( PB_X_FIR_MASK_OR_0x04010805           , ULL(0x04010C05) );
-CONST_UINT64_T( PB_X_FIR_ACTION0_0x04010806           , ULL(0x04010C06) );
-CONST_UINT64_T( PB_X_FIR_ACTION1_0x04010807           , ULL(0x04010C07) );
-
 CONST_UINT64_T( PB_X_MODE_0x04010C0A                  , ULL(0x04010C0A) );
+
+CONST_UINT64_T( X_PBEN_MISC_FIR_AND_0x04010C01       , ULL(0x04010C01) );
 
 //------------------------------------------------------------------------------
 //      X-BUS IOPSI
@@ -1290,15 +1296,6 @@ CONST_UINT64_T( A_HANG_PRE_0x080F0028                 , ULL(0x080F0028) ); // AB
 //------------------------------------------------------------------------------
 //      A-BUS PBES
 //------------------------------------------------------------------------------
-CONST_UINT64_T( PB_A_FIR_0x08010800                   , ULL(0x08010800) );
-CONST_UINT64_T( PB_A_FIR_AND_0x08010801               , ULL(0x08010801) );
-CONST_UINT64_T( PB_A_FIR_OR_0x08010802                , ULL(0x08010802) );
-CONST_UINT64_T( PB_A_FIR_MASK_0x08010803              , ULL(0x08010803) );
-CONST_UINT64_T( PB_A_FIR_MASK_AND_0x08010804          , ULL(0x08010804) );
-CONST_UINT64_T( PB_A_FIR_MASK_OR_0x08010805           , ULL(0x08010805) );
-CONST_UINT64_T( PB_A_FIR_ACTION0_0x08010806           , ULL(0x08010806) );
-CONST_UINT64_T( PB_A_FIR_ACTION1_0x08010807           , ULL(0x08010807) );
-
 CONST_UINT64_T( PB_A_MODE_0x0801080A                  , ULL(0x0801080A) );
 CONST_UINT64_T( PB_A_TRACE_0x08010812                 , ULL(0x08010812) );
 CONST_UINT64_T( PB_A_FMR_CFG_0x08010813               , ULL(0x08010813) );
@@ -1396,25 +1393,8 @@ CONST_UINT64_T( PCIE_PERV_LFIR_ACT1_0x09040011        , ULL(0x09040011) );
 
 CONST_UINT64_T( ES_PBES_WRAP_TOP_FIR_AND_0x09010801   , ULL(0x09010801) );
 
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_0x09011400          , ULL(0x09011400) );
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_AND_0x09011401      , ULL(0x09011401) );
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_OR_0x09011402       , ULL(0x09011402) );
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_MASK_0x09011403     , ULL(0x09011403) );
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_MASK_AND_0x09011404 , ULL(0x09011404) );
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_MASK_OR_0x09011405  , ULL(0x09011405) );
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_ACTION0_0x09011406  , ULL(0x09011406) );
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_ACTION1_0x09011407  , ULL(0x09011407) );
-CONST_UINT64_T( PCIE_IOP0_PLL_FIR_WOF_0x09011408      , ULL(0x09011408) );
-
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_0x09011840          , ULL(0x09011840) );
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_AND_0x09011841      , ULL(0x09011841) );
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_OR_0x09011842       , ULL(0x09011842) );
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_MASK_0x09011843     , ULL(0x09011843) );
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_MASK_AND_0x09011844 , ULL(0x09011844) );
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_MASK_OR_0x09011845  , ULL(0x09011845) );
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_ACTION0_0x09011846  , ULL(0x09011846) );
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_ACTION1_0x09011847  , ULL(0x09011847) );
-CONST_UINT64_T( PCIE_IOP1_PLL_FIR_WOF_0x09011848      , ULL(0x09011848) );
+CONST_UINT64_T( PCIE_PLL_CNTL_FIR_AND_0x09011401      , ULL(0x09011401) );
+CONST_UINT64_T( PCIE_PLL1_CNTL_FIR_AND_0x09011841     , ULL(0x09011841) );
 
 //------------------------------------------------------------------------------
 //      PLL LOCK
@@ -1925,6 +1905,15 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.153  2013/05/31 18:02:44  jmcgill
+add LPC addresses
+
+Revision 1.152  2013/05/30 13:13:45  jmcgill
+add MCSMODE0 register
+
+Revision 1.151  2013/05/23 19:49:59  jmcgill
+add PSI addresses, fix PB X bus FIR constant names per FW review
+
 Revision 1.150  2013/05/15 04:22:35  jmcgill
 add PB X/A, PCI IOP PLL FIR register addresses
 
