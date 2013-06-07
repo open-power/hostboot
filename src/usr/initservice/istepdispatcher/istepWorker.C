@@ -237,6 +237,11 @@ void iStepWorkerThread ( void * i_msgQ )
         }
         else
         {
+#if 1
+            TRACFCOMP( g_trac_initsvc,
+                       "istepWorker: Empty Istep, nothing to do!" );
+#else
+            //  @TODO reopen issue 70657
             //  Invalid istep sent from FSP or spless, return error.
             TRACFCOMP( g_trac_initsvc,
                        "istepWorker: ERROR: "
@@ -266,6 +271,8 @@ void iStepWorkerThread ( void * i_msgQ )
                        istep,
                        substep,
                        err->plid()  );
+#endif
+
         }
 
 

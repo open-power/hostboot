@@ -299,11 +299,15 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
              istep < MaxISteps;
              istep++ )
         {
+            // Run until num items +1, to be sure we know the last step
+            // finished
             for( size_t substep = 0;
-                 substep < g_isteps[istep].numitems ;
+                 substep < (g_isteps[istep].numitems+1) ;
                  substep++ )
             {
 
+#if 0
+                //  @TODO reopen issue 70657
                 //  Check to see if this is a valid istep, if not, don't
                 //  send it to istepWorker.  IstepWorker treats invalid
                 //  isteps as an error.
@@ -315,6 +319,7 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                                istep, substep );
                     continue;
                 }
+#endif
 
                 // Before we can do anything, we need to be sure that
                 //  the worker thread is ready to start
@@ -331,6 +336,15 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                     // We didn't really do anything for this substep
                     substep--;
                     continue;
+                }
+
+                // If we just got the msg that the last step finished, break
+                // out
+                if( substep == (g_isteps[istep].numitems + 1) )
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                               INFO_MRK"Last Step, exit" );
+                    break;
                 }
 
                 // Look for an errlog in extra_data
