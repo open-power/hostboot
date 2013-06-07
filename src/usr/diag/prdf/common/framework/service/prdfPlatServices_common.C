@@ -193,8 +193,8 @@ int32_t getVpdFailedLanes(TargetHandle_t i_rxBusTgt,
     PRD_FAPI_TO_ERRL(err,
                      erepairGetFailedLanes,
                      getFapiTarget(i_rxBusTgt),
-                     o_rxFailLanes,
-                     o_txFailLanes);
+                     o_txFailLanes,
+                     o_rxFailLanes);
 
     if(NULL != err)
     {
