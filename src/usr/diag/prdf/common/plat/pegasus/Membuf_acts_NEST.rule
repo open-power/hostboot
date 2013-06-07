@@ -812,16 +812,14 @@ rule Mba1_MbsEccFir
 group gMbsEccFir filter singlebit
 {
     /** MBA0_MBSECCFIR[0:7]
-     *  MBECCFIR_MEMORY_MPE_RANK_0_7
+     *  Memory MPE
      */
-    #TODO via RTC 22866 ( Chip Mark Verification )
-    (Mba0_MbsEccFir, bit(0|1|2|3|4|5|6|7)) ? TBDDefaultCallout;
+    (Mba0_MbsEccFir, bit(0|1|2|3|4|5|6|7)) ? analyzeFetchMpe0;
 
     /** MBA1_MBSECCFIR[0:7]
-     *  MBECCFIR_MEMORY_MPE_RANK_0_7
+     *  Memory MPE
      */
-    #TODO via RTC 22866 ( Chip Mark Verification )
-    (Mba1_MbsEccFir, bit(0|1|2|3|4|5|6|7)) ? TBDDefaultCallout;
+    (Mba1_MbsEccFir, bit(0|1|2|3|4|5|6|7)) ? analyzeFetchMpe1;
 
     /** MBA0_MBSECCFIR[8:15]
      *  Reserved
@@ -834,73 +832,64 @@ group gMbsEccFir filter singlebit
     (Mba1_MbsEccFir, bit(8|9|10|11|12|13|14|15)) ? defaultMaskedError;
 
     /** MBA0_MBSECCFIR[16]
-     *  MBECCFIR_MEMORY_NCE
+     *  Memory NCE
      */
-    #TODO via RTC 47289 ( CE/UE isolation )
-    (Mba0_MbsEccFir, bit(16)) ? TBDDefaultCallout;
+    (Mba0_MbsEccFir, bit(16)) ? analyzeFetchNce0;
 
     /** MBA1_MBSECCFIR[16]
-     *  MBECCFIR_MEMORY_NCE
+     *  Memory NCE
      */
-    #TODO via RTC 47289 ( CE/UE isolation )
-    (Mba1_MbsEccFir, bit(16)) ? TBDDefaultCallout;
+    (Mba1_MbsEccFir, bit(16)) ? analyzeFetchNce1;
 
     /** MBA0_MBSECCFIR[17]
-     *  MBECCFIR_MEMORY_RCE
+     *  Memory RCE
      */
-    # TODO via RTC 23125. How to do this. In RAS spreadsheet action is RCE
-    # In description, Threshold per rank 8/24 make a callout of DIMM pair
-    # Needs discussion
-    (Mba0_MbsEccFir, bit(17)) ? TBDDefaultCallout;
+    (Mba0_MbsEccFir, bit(17)) ? analyzeFetchRce0;
 
     /** MBA1_MBSECCFIR[17]
-     *  MBECCFIR_MEMORY_RCE
+     *  Memory RCE
      */
-    (Mba1_MbsEccFir, bit(17)) ? TBDDefaultCallout;
+    (Mba1_MbsEccFir, bit(17)) ? analyzeFetchRce1;
 
     /** MBA0_MBSECCFIR[18]
-     *  MBECCFIR_MEMORY_SUE
+     *  Memory SUE
      */
     (Mba0_MbsEccFir, bit(18)) ? defaultMaskedError;
 
     /** MBA1_MBSECCFIR[18]
-     *  MBECCFIR_MEMORY_SUE
+     *  Memory SUE
      */
     (Mba1_MbsEccFir, bit(18)) ? defaultMaskedError;
 
     /** MBA0_MBSECCFIR[19]
-     *  MBECCFIR_MEMORY_UE
+     *  Memory UE
      */
-    #TODO via RTC 47289 ( CE/UE isolation )
-    (Mba0_MbsEccFir, bit(19)) ? TBDDefaultCallout;
+    (Mba0_MbsEccFir, bit(19)) ? analyzeFetchUe0;
 
     /** MBA1_MBSECCFIR[19]
-     *  MBECCFIR_MEMORY_UE
+     *  Memory UE
      */
-    #TODO via RTC 47289 ( CE/UE isolation )
-    (Mba1_MbsEccFir, bit(19)) ? TBDDefaultCallout;
+    (Mba1_MbsEccFir, bit(19)) ? analyzeFetchUe1;
 
     /** MBA0_MBSECCFIR[20:27]
      *  MBECCFIR_MAINT_MPE_RANK_0_7
      */
-    #TODO via RTC 22866 ( Chip Mark Verification )
-    (Mba0_MbsEccFir, bit(20|21|22|23|24|25|26|27)) ? TBDDefaultCallout;
+    (Mba0_MbsEccFir, bit(20|21|22|23|24|25|26|27)) ? analyzeMaintMpe0;
 
     /** MBA1_MBSECCFIR[20:27]
      *  MBECCFIR_MAINT_MPE_RANK_0_7
      */
-    #TODO via RTC 22866 ( Chip Mark Verification )
-    (Mba1_MbsEccFir, bit(20|21|22|23|24|25|26|27)) ? TBDDefaultCallout;
+    (Mba1_MbsEccFir, bit(20|21|22|23|24|25|26|27)) ? analyzeMaintMpe1;
 
     /** MBA0_MBSECCFIR[28:35]
      *  Reserved
      */
-    (Mba0_MbsEccFir, bit(28|29|30|31|32|33|34|35)) ? TBDDefaultCallout;
+    (Mba0_MbsEccFir, bit(28|29|30|31|32|33|34|35)) ? defaultMaskedError;
 
     /** MBA1_MBSECCFIR[28:35]
      *  Reserved
      */
-    (Mba1_MbsEccFir, bit(28|29|30|31|32|33|34|35)) ? TBDDefaultCallout;
+    (Mba1_MbsEccFir, bit(28|29|30|31|32|33|34|35)) ? defaultMaskedError;
 
     /** MBA0_MBSECCFIR[36]
      *  MBECCFIR_MAINTENANCE_NCE
@@ -955,14 +944,12 @@ group gMbsEccFir filter singlebit
     /** MBA0_MBSECCFIR[41]
      *  MBECCFIR_MAINTENANCE_UE
      */
-    #TODO via RTC 47289 ( CE/UE isolation )
-    (Mba0_MbsEccFir, bit(41)) ? TBDDefaultCallout;
+    (Mba0_MbsEccFir, bit(41)) ? analyzeMaintUe0;
 
     /** MBA1_MBSECCFIR[41]
      *  MBECCFIR_MAINTENANCE_UE
      */
-    #TODO via RTC 47289 ( CE/UE isolation )
-    (Mba1_MbsEccFir, bit(41)) ? TBDDefaultCallout;
+    (Mba1_MbsEccFir, bit(41)) ? analyzeMaintUe1;
 
     /** MBA0_MBSECCFIR[42]
      *  MBECCFIR_MPE_DURING_USE_MAINTENANCE_MARK_MODE
@@ -1239,4 +1226,43 @@ actionclass analyzeSpareBitAndThr
 {
     try( funccall("checkSpareBit"), calloutDmiBusTh2pday );
 };
+
+/** Analyze a fetch MPE on MBA0 */
+actionclass analyzeFetchMpe0 { funccall("AnalyzeFetchMpe0"); };
+
+/** Analyze a fetch MPE on MBA1 */
+actionclass analyzeFetchMpe1 { funccall("AnalyzeFetchMpe1"); };
+
+/** Analyze a fetch NCE on MBA0 */
+actionclass analyzeFetchNce0 { funccall("AnalyzeFetchNce0"); threshold32pday; };
+
+/** Analyze a fetch NCE on MBA1 */
+actionclass analyzeFetchNce1 { funccall("AnalyzeFetchNce1"); threshold32pday; };
+
+# TODO: RTC 23125 The RAS spreadsheet action is RCE is: "Threshold per rank 8/24
+#       make a callout of DIMM pair". Needs discussion.
+
+/** Analyze a fetch RCE on MBA0 */
+actionclass analyzeFetchRce0 { funccall("AnalyzeFetchRce0"); threshold32pday; };
+
+/** Analyze a fetch RCE on MBA1 */
+actionclass analyzeFetchRce1 { funccall("AnalyzeFetchRce1"); threshold32pday; };
+
+/** Analyze a fetch UE on MBA0 */
+actionclass analyzeFetchUe0 { funccall("AnalyzeFetchUe0"); threshold1; };
+
+/** Analyze a fetch UE on MBA1 */
+actionclass analyzeFetchUe1 { funccall("AnalyzeFetchUe1"); threshold1; };
+
+/** Analyze a maintenance MPE on MBA0 */
+actionclass analyzeMaintMpe0 { funccall("AnalyzeMaintMpe0"); };
+
+/** Analyze a maintenance MPE on MBA1 */
+actionclass analyzeMaintMpe1 { funccall("AnalyzeMaintMpe1"); };
+
+/** Analyze a maintenance UE on MBA0 */
+actionclass analyzeMaintUe0 { funccall("AnalyzeMaintUe0"); threshold1; };
+
+/** Analyze a maintenance UE on MBA1 */
+actionclass analyzeMaintUe1 { funccall("AnalyzeMaintUe1"); threshold1; };
 

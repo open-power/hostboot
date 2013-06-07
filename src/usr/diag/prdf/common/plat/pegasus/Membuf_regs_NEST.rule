@@ -604,6 +604,38 @@
     };
 
     ############################################################################
+    # NEST Chiplet memory maintenance error count registers
+    ############################################################################
+
+    register MBA0_MBSEC0
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSEC0Q";
+        scomaddr    0x02011653;
+        capture     group default;
+    };
+
+    register MBA0_MBSEC1
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSEC1Q";
+        scomaddr    0x02011654;
+        capture     group default;
+    };
+
+    register MBA1_MBSEC0
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSEC0Q";
+        scomaddr    0x02011753;
+        capture     group default;
+    };
+
+    register MBA1_MBSEC1
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSEC1Q";
+        scomaddr    0x02011754;
+        capture     group default;
+    };
+
+    ############################################################################
     # NEST Chiplet memory maintenance threshold control registers
     ############################################################################
 
@@ -618,6 +650,154 @@
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSTRQ";
         scomaddr    0x02011755;
+        capture     group default;
+    };
+
+    ############################################################################
+    # NEST Chiplet memory maintenance symbol error control registers
+    ############################################################################
+
+    register MBA0_MBSSYMEC0
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC0Q";
+        scomaddr    0x02011656;
+        capture     group default;
+    };
+
+    register MBA0_MBSSYMEC1
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC1Q";
+        scomaddr    0x02011657;
+        capture     group default;
+    };
+
+    register MBA0_MBSSYMEC2
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC2Q";
+        scomaddr    0x02011658;
+        capture     group default;
+    };
+
+    register MBA0_MBSSYMEC3
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC3Q";
+        scomaddr    0x02011659;
+        capture     group default;
+    };
+
+    register MBA0_MBSSYMEC4
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC4Q";
+        scomaddr    0x0201165a;
+        capture     group default;
+    };
+
+    register MBA0_MBSSYMEC5
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC5Q";
+        scomaddr    0x0201165b;
+        capture     group default;
+    };
+
+    register MBA0_MBSSYMEC6
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC6Q";
+        scomaddr    0x0201165c;
+        capture     group default;
+    };
+
+    register MBA0_MBSSYMEC7
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC7Q";
+        scomaddr    0x0201165d;
+        capture     group default;
+    };
+
+    register MBA0_MBSSYMEC8
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC8Q";
+        scomaddr    0x0201165e;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC0
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC0Q";
+        scomaddr    0x02011756;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC1
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC1Q";
+        scomaddr    0x02011757;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC2
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC2Q";
+        scomaddr    0x02011758;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC3
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC3Q";
+        scomaddr    0x02011759;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC4
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC4Q";
+        scomaddr    0x0201175a;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC5
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC5Q";
+        scomaddr    0x0201175b;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC6
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC6Q";
+        scomaddr    0x0201175c;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC7
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC7Q";
+        scomaddr    0x0201175d;
+        capture     group default;
+    };
+
+    register MBA1_MBSSYMEC8
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC8Q";
+        scomaddr    0x0201175e;
+        capture     group default;
+    };
+
+    ############################################################################
+    # NEST Chiplet memory fetch error vector registers
+    ############################################################################
+
+    register MBA0_MBSEVR
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSEVRQ";
+        scomaddr    0x0201165f;
+        capture     group default;
+    };
+
+    register MBA1_MBSEVR
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSEVRQ";
+        scomaddr    0x0201175f;
         capture     group default;
     };
 
