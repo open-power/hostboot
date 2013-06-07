@@ -464,6 +464,11 @@ namespace INTR
             errlHndl_t hw_disableIntrMpIpl();
 
             /**
+             * cleanCheck - verify there are no active interrupts
+             */
+            void cleanCheck();
+
+            /**
              * Shutdown procedure
              */
             void shutDown();

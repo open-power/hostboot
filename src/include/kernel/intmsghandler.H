@@ -66,6 +66,8 @@ class InterruptMsgHdlr : public MessageHandler
             P8_IP_NODEID_LSL   = (22-10),
             XIRR_ADDR_OFFSET   = 4,
             MFRR_ADDR_OFFSET   = 12,
+
+            INTP_BAR_VALUE     = 0xFFFFE000,    // upper 32 bits of IPCBAR 
         };
 
         /**

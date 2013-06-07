@@ -108,19 +108,38 @@ void InterruptMsgHdlr::handleInterrupt()
             cv_instance->iv_lock.unlock();
         }
     }
-
-    if(cv_ipc_base_address == 0 || cv_instance == NULL)
+    else
     {
-        static bool hit = false;
+        printk("InterrurptMsgHdlr got called before IPC was setup\n");
 
-        // print the message once
-        if(!hit)
-        {
-            printk("InterrurptMsgHdlr got called before IPC was setup\n");
-            hit = true;
-        }
+        // The INTR mmio base address is not yet available via the attributes.
+        // If we get here during an MPIPL then the BAR value could be read
+        // from the ICP BAR SCOM register, however, since this value will
+        // never change unless PHYP changes its memory map, it is deemed
+        // sufficient to hard code the value.  If this is not an MPIPL then
+        // there is a serious problem elsewhere. 
+
+        cv_ipc_base_address = (uint64_t)(INTP_BAR_VALUE) << 32; // val in BAR
+        cv_ipc_base_address >>= 14;                 // convert to base address
+
+        uint64_t xirrAddress =
+            cv_ipc_base_address + mmio_offset(pir) + XIRR_ADDR_OFFSET;
+
+        // Ignore HRMOR setting
+        xirrAddress |= 0x8000000000000000ul;
+
+        uint32_t xirr = 0;
+
+        asm volatile("lwzcix %0, 0, %1"
+                     : "=r" (xirr)
+                     : "r" (xirrAddress)
+                     : );
+
+        // There should not be any more interrupts until an eoi is sent
+        // by writing the xirr back with the value read.
+
+        printk("XIRR @ %lx = %x\n",xirrAddress,xirr);
     }
-
 }
 
 void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
