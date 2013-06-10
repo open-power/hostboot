@@ -75,7 +75,6 @@ namespace PRDF
 PRDF_SYM_CALLOUT_MAP_BEGIN
 
 PRDF_SYM_CALLOUT_ALIAS( AllProcessors,                EPUB_PRC_ALL_PROCS      )
-PRDF_SYM_CALLOUT_ALIAS( PRD_Code_ENUM,                EPUB_PRC_SP_CODE        )
 PRDF_SYM_CALLOUT_ALIAS( SP_CODE,                      EPUB_PRC_SP_CODE        )
 PRDF_SYM_CALLOUT_ALIAS( SystemSW_Code_ENUM,           EPUB_PRC_PHYP_CODE      )
 PRDF_SYM_CALLOUT_ALIAS( NextLevelSupport_ENUM,        EPUB_PRC_LVL_SUPP       )
