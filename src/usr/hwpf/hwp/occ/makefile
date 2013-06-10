@@ -66,6 +66,12 @@ OBJS =  occ.o \
         p8_pm_pmc_firinit.o \
         p8_cpu_special_wakeup.o
 
+#These procedures are included per Stradale's request so
+#they can implement OCC Reset.
+OBJS+=  p8_pm_prep_for_reset.o \
+        proc_cpu_special_wakeup.o \
+        p8_pmc_force_vsafe.o
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/occ/<HWP_dir>
