@@ -5583,11 +5583,11 @@ firmware notes: Used as override attribute for pstate procedure
 <id>PIB_I2C_REFCLOCK</id>
 <description>
     i2c reference clock for the system.
-    default is 0x8 => I2C speed = ~250 kHz per Andreas Koenig
+    default is 0x4 => I2C speed = ~1Mhz per Andreas Koenig
 </description>
     <simpleType>
         <uint32_t>
-            <default>0x8</default>
+            <default>0x4</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
@@ -5622,12 +5622,12 @@ firmware notes: Used as override attribute for pstate procedure
 <id>PIB_I2C_NEST_PLL</id>
 <description>
     i2c pll for the system
-    default is 0x96 (For PIB @500 MHz (2 GHz nest)) for
-    I2C speed = ~250 kHz per Andreas Koenig.
+    default is 0x26 (For PIB @500 MHz (2 GHz nest)) for
+    I2C speed = ~1Mhz per Andreas Koenig.
 </description>
     <simpleType>
         <uint32_t>
-            <default>0x096</default>
+            <default>0x026</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
