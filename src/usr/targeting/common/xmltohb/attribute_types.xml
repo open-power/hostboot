@@ -12474,8 +12474,8 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t>
             <default>0</default>
-        <array>2, 2</array>
         </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
