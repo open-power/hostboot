@@ -216,4 +216,17 @@
     <writeable/>
     <hbOnly/>
 </attribute>
+
+<attribute>
+    <id>IBSCOM_ENABLE_OVERRIDE</id>
+    <description>Used to force IBSCOM enabled for lab testing</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hbOnly/>
+</attribute>
 </attributes>
