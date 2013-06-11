@@ -495,16 +495,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             case GardResolution::Predictive:
                 gardErrType = GARD_Predictive;
                 break;
-            case GardResolution::Uncorrectable:
-                gardErrType = GARD_Unrecoverable;
-                break;
             case GardResolution::Fatal:
                 gardErrType = GARD_Func;
-                break;
-            case GardResolution::Pending:
-                gardErrType = GARD_Pending;
-                // Do not set Call Home for Array Gard (Pending)
-                actionFlag &= ~ERRL_ACTION_CALL_HOME;
                 break;
             case GardResolution::CheckStopOnlyGard:
                 if  (MACHINE_CHECK == attn_type)
@@ -1429,12 +1421,8 @@ will also be removed. Need to confirm if this code is required anymore.
                 PRDF_DTRAC( "PRDTRACE:   NoGard" );            break;
             case GardResolution::Predictive:
                 PRDF_DTRAC( "PRDTRACE:   Predictive" );        break;
-            case GardResolution::Uncorrectable:
-                PRDF_DTRAC( "PRDTRACE:   Uncorrectable" );     break;
             case GardResolution::Fatal:
                 PRDF_DTRAC( "PRDTRACE:   Fatal" );             break;
-            case GardResolution::Pending:
-                PRDF_DTRAC( "PRDTRACE:   Pending" );           break;
             case GardResolution::CheckStopOnlyGard:
                 PRDF_DTRAC( "PRDTRACE:   CheckStopOnlyGard" ); break;
             case GardResolution::DeconfigNoGard:

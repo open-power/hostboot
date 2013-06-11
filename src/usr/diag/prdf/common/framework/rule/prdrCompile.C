@@ -48,6 +48,7 @@
 #include <prdrCommon.H>
 #include <prdrToken.H>
 #include <UtilHash.H>
+#include <xspprdGardResolution.h>
 
 using namespace PRDR_COMPILER;
 
@@ -455,6 +456,7 @@ std::map<std::string, uint32_t> g_ActionArgMap;
 uint32_t prdrActionArgMap(const std::string & i_arg)
 {
     using namespace PRDF;
+    using namespace std;
 
     static bool l_initialized = false;
 
@@ -496,14 +498,25 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         #include <iipServiceDataCollector.h>
 
         // Initialize Gard values.
-        // TODO: Map these from xspprdGardResolution.h
-        g_ActionArgMap["NoGard"] = 0;
-        g_ActionArgMap["Predictive"] = 1;
-        g_ActionArgMap["Uncorrectable"] = 2;
-        g_ActionArgMap["Fatal"] = 3;
-        g_ActionArgMap["Pending"] = 4;
-        g_ActionArgMap["CheckStopOnlyGard"] = 5;
-        g_ActionArgMap["DeconfigNoGard"] = 6;   //mp01
+        GardResolution::ErrorType errType = GardResolution::NoGard;
+        string tmpStr = string(GardResolution::ToString(errType));
+        g_ActionArgMap[tmpStr] = errType;
+
+        errType = GardResolution::Predictive;
+        tmpStr = string(GardResolution::ToString(errType));
+        g_ActionArgMap[tmpStr] = errType;
+
+        errType = GardResolution::Fatal;
+        tmpStr = string(GardResolution::ToString(errType));
+        g_ActionArgMap[tmpStr] = errType;
+
+        errType = GardResolution::CheckStopOnlyGard;
+        tmpStr = string(GardResolution::ToString(errType));
+        g_ActionArgMap[tmpStr] = errType;
+
+        errType = GardResolution::DeconfigNoGard;
+        tmpStr = string(GardResolution::ToString(errType));
+        g_ActionArgMap[tmpStr] = errType;
 
 #ifdef __HOSTBOOT_MODULE
         // FIXME: Hostboot currently does not support dump contents. This is a

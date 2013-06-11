@@ -61,18 +61,26 @@ public:
     NoGard        = 0,
     // Recovered error at threshold
     Predictive    = 1,
-    // An uncorrectable error occurred, but the machine continues to run
-    Uncorrectable = 2,
     // Checkstop, failing resources can be removed to prevent future occurances
-    Fatal         = 3,
-    // Resource has spares that could be used to fix the problem via bist on the next IPL.
-    Pending       = 4,
+    Fatal         = 2,
     // This is NoGard unless attn type is CheckStop, then it is Fatal (Func)
-    CheckStopOnlyGard = 5,       //mp01
+    CheckStopOnlyGard = 3,
     //This is to allow Deferred Deconfig, with No Garding
-    DeconfigNoGard = 6           //mp02
+    DeconfigNoGard = 4
   };
 
+  inline static const char* ToString(ErrorType i_type)
+  {
+      switch (i_type)
+      {
+          case NoGard:              return "NoGard";
+          case Predictive:          return "Predictive";
+          case Fatal:               return "Fatal";
+          case CheckStopOnlyGard:   return "CheckStopOnlyGard";
+          case DeconfigNoGard:      return "DeconfigNoGard";
+          default:                  return "Unknown_ErrorType";
+      }
+  }
 
   /**
    * @brief     Constructor
