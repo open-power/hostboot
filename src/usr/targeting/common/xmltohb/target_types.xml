@@ -375,6 +375,9 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000005</default> <!-- GARD, PSIDIAG -->
     </attribute>
+<!-- TODO RTC 62291. This next attribute moves to hostboot only
+     with this story  -->
+    <attribute><id>PROC_SECURITY_SETUP_VECTOR</id></attribute>
 </targetType>
 
 <targetType>
