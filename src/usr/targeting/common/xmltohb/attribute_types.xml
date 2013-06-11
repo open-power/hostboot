@@ -12507,4 +12507,64 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>CDM_POLICIES</id>
+    <description>Cec Degraded Mode Policies</description>
+    <enumerator>
+        <name>FUNCTIONAL</name>
+        <value>0x00000001</value>
+    </enumerator>
+    <enumerator>
+        <name>MANUFACTORING</name>
+        <value>0x00000002</value>
+    </enumerator>
+    <enumerator>
+        <name>PREDICTIVE</name>
+        <value>0x00000004</value>
+    </enumerator>
+    <default>NONE</default>
+ </enumerationType>
+
+<attribute>
+    <id>CDM_POLICIES</id>
+    <description>Cec Degraded Mode Policies</description>
+    <complexType>
+        <description>Three boolean values</description>
+        <field>
+            <name>functional</name>
+            <description>
+             0b0: Functional policy is disabled
+             0b1: Functional policy is enabled
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>manufacturing</name>
+            <description>
+             0b0: Manufacturing policy enabled
+             0b1: Manufacturing policy disabled
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>predictive</name>
+            <description>
+             0b0: predictive policy is enabled;
+             0b1: predictive policy is disabled
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
 </attributes>
