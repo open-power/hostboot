@@ -25,6 +25,11 @@
 
 #include "settings.H"
 
+// SECUREBOOT : General driver traces
+trace_desc_t* g_trac_secure = NULL;
+TRAC_INIT(&g_trac_secure, "SECURE", KILOBYTE); //1K
+
+
 namespace SECUREBOOT
 {
     const uint64_t Settings::SECURITY_SWITCH_REGISTER = 0x00010005;

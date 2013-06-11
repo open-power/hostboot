@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/secureboot/base/makefile $
+# $Source: src/usr/secureboot/base/test/makefile $
 #
 # IBM CONFIDENTIAL
 #
@@ -20,11 +20,12 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
-MODULE = secureboot_base
-SUBDIRS = test.d
+ROOTPATH = ../../../../..
 
-OBJS = service.o settings.o header.o purge.o securerom.o rom_entry.o
+MODULE = testsecureboot
+TESTS = *.H
 
-CFLAGS += -iquote ../
+BINARY_FILES = $(IMGDIR)/test_signed_container:d0be6f0399eee8ecdc3ded896ecccd2551a439f3
+
 include ${ROOTPATH}/config.mk
+

@@ -56,6 +56,15 @@ namespace SECUREBOOT
             //   to post-secureboot state.  Major coding bug, so just assert.
             assert(0 == mm_extend(MM_EXTEND_POST_SECUREBOOT));
 
+
+            // Initialize the Secure ROM
+            l_errl = initializeSecureROM();
+            if (l_errl)
+            {
+                break;
+            }
+
+
         } while(0);
 
         return l_errl;

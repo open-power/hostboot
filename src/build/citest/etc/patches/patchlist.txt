@@ -19,3 +19,14 @@ Add action for L3 purge register.
 -CMVC: 876083
 -Files: p8_ex_l3purge.act
 -Coreq: None
+
+Add POR setting for TBROM scom register
+-RTC: 72729
+-CMVC: 885548, 885681, 886545, 887736
+-Files
+  src/build/citest/etc/workarounds.postsimsetup
+  src/build/citest/etc/patches/patchlist.txt
+  src/build/citest/etc/patches/p8_master.por
+  Indirectly: p8_slave.por, s1_master.por, s1_slave.por
+-Coreq: None
+

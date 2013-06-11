@@ -31,12 +31,20 @@ namespace SECUREBOOT
     {
         MOD_SECURE_INVALID              = 0x00,
         MOD_SECURE_BLINDPURGE           = 0x01,
-    };
+        MOD_SECURE_ROM_INIT             = 0x02,
+        MOD_SECURE_ROM_VERIFY           = 0x03,
+        MOD_SECURE_ROM_CLEANUP          = 0x04,
+   };
 
     enum SECUREReasonCode
     {
         RC_PURGEOP_PENDING              = SECURE_COMP_ID | 0x01,
         RC_PURGEOP_FAIL_COMPLETE        = SECURE_COMP_ID | 0x02,
+        RC_DEV_MAP_FAIL                 = SECURE_COMP_ID | 0x03,
+        RC_PAGE_ALLOC_FAIL              = SECURE_COMP_ID | 0x04,
+        RC_SET_PERMISSION_FAIL_EXE      = SECURE_COMP_ID | 0x05,
+        RC_SET_PERMISSION_FAIL_WRITE    = SECURE_COMP_ID | 0x06,
+        RC_ROM_VERIFY                   = SECURE_COMP_ID | 0x07,
     };
 }
 

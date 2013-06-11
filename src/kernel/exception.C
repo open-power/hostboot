@@ -158,6 +158,12 @@ void kernel_execute_hype_emu_assist()
     TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
+const uint32_t EXCEPTION_BRANCH_INSTR_MASK     = 0xFC000000;
+const uint32_t EXCEPTION_BRANCH_INSTR          = 0x48000000;
+const uint32_t EXCEPTION_MFSPR_CFAR_INSTR_MASK = 0xFC1FFFFE;
+const uint32_t EXCEPTION_MFSPR_CFAR_INSTR      = 0x7C1C02A6;
+const uint32_t EXCEPTION_MFSPR_GFR_NAME_MASK   = 0x03E00000;
+
 namespace ExceptionHandles
 {
     bool PrivInstr(task_t* t)
@@ -176,8 +182,50 @@ namespace ExceptionHandles
             {
                 printk("Error: Nap executed with lowered permissions on %d\n",
                        t->tid);
-                t->context.nip = static_cast<void*>(instruction + 1);
+                t->context.nip = reinterpret_cast<void *> (
+                       (reinterpret_cast<uint64_t>(t->context.nip)) + 4);
                 return true;
+            }
+
+
+            // Check for 'mfspr r*, CFAR' instructions (from MFSPR RT,SPR)
+            // and handle the setting of the specific r* register
+            if (( *instruction & EXCEPTION_MFSPR_CFAR_INSTR_MASK)
+                  == EXCEPTION_MFSPR_CFAR_INSTR )
+            {
+
+                // check to make sure previous instruction was a branch
+                //  if not, then we don't want to handle ths exception
+                uint32_t* previous_instr =
+                          (reinterpret_cast<uint32_t*>(phys_addr)) - 1;
+                if ( (*previous_instr & EXCEPTION_BRANCH_INSTR_MASK)
+                      == EXCEPTION_BRANCH_INSTR )
+                {
+                    uint32_t gpr_name = 0;
+
+                    // GPR register in bits 6:10 of mfspr instruction
+                    gpr_name = (*instruction & EXCEPTION_MFSPR_GFR_NAME_MASK)
+                                >> 21;
+
+                    // Move contents of previous instruction address to r*
+                    t->context.gprs[gpr_name] =
+                       (reinterpret_cast<uint64_t>(t->context.nip)) - 4;
+
+                    // move instruction stream to next instruction
+                    t->context.nip = reinterpret_cast<void *> (
+                       (reinterpret_cast<uint64_t>(t->context.nip)) + 4);
+
+                    printkd("mfsr r%d to CFAR handled, nip=%p\n",
+                            gpr_name, t->context.nip  );
+
+                    return true;
+                }
+                else
+                {
+                    printk("Error: mfspr r* to CFAR found, but previous "
+                           "inst not a branch\n");
+                    return false;
+                }
             }
         }
 

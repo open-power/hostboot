@@ -40,3 +40,23 @@ cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_ex_l3purge.act >> \
     $sb/simu/data/cec-chip/p8_ex.act
 cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_ex_l3purge.act >> \
     $sb/simu/data/cec-chip/s1_ex.act
+
+
+echo "+++ Updating POR files for Secure ROM Support (removed with RTC 72729)"
+mkdir -p $sb/simu/data/cec-chip/
+grep -v 0x02020017 $BACKING_BUILD/src/simu/data/cec-chip/p8_master.por > \
+                   $sb/simu/data/cec-chip/p8_master.por
+grep -v 0x02020017 $BACKING_BUILD/src/simu/data/cec-chip/p8_slave.por > \
+                   $sb/simu/data/cec-chip/p8_slave.por
+grep -v 0x02020017 $BACKING_BUILD/src/simu/data/cec-chip/s1_master.por > \
+                   $sb/simu/data/cec-chip/s1_master.por
+grep -v 0x02020017 $BACKING_BUILD/src/simu/data/cec-chip/s1_slave.por > \
+                   $sb/simu/data/cec-chip/s1_slave.por
+cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_master.por >> \
+    $sb/simu/data/cec-chip/p8_master.por
+cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_master.por >> \
+    $sb/simu/data/cec-chip/p8_slave.por
+cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_master.por >> \
+    $sb/simu/data/cec-chip/s1_master.por
+cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_master.por >> \
+    $sb/simu/data/cec-chip/s1_slave.por

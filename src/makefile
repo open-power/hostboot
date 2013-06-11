@@ -64,7 +64,7 @@ TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testvpd \
                    testpore testutil testmbox testmdia testprdf testattn \
-                   testscan testruntime testibscom testdump
+                   testscan testruntime testibscom testdump testsecureboot
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
@@ -93,7 +93,8 @@ hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
 hbicore_test_OBJECTS = ${hbicore_OBJECTS}
 hbicore_test_MODULES = ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES = ${hbicore_EXTENDED_MODULES} ${TESTCASE_MODULES}
-hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata
+hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata \
+                            test_signed_container
 
 IMAGE_PASS_POST += buildpnor imgsizecheck
 

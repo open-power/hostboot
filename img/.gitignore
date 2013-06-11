@@ -16,3 +16,4 @@ errlparser
 *.pnor
 *.dat
 *.prf
+test_signed_container
