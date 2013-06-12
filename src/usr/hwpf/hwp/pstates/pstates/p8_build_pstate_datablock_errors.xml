@@ -1,0 +1,63 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/pstates/pstates/p8_build_pstate_datablock_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.5 2013/05/03 16:10:11 jimyac Exp $ -->
+<!-- Error definitions for p8_build_pstate_datablock procedure -->
+<hwpErrors>
+ <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_MVPD_BUFFER_SIZE_ERROR</rc>
+    <description>MVPD Buffer returned is wrong size</description>
+  </hwpError> 
+ <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL</rc>
+    <description>MVPD Bucket Frequency was not equal per chiplet</description>
+  </hwpError>   
+ <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_FREQ_BIAS_ERROR</rc>
+    <description>Cannot have both up and down bias set</description>
+  </hwpError>   
+ <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_EXT_VOLTAGE_BIAS_ERROR</rc>
+    <description>Cannot have both up and down bias set</description>
+  </hwpError>     
+ <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_INT_VOLTAGE_BIAS_ERROR</rc>
+    <description>Cannot have both up and down bias set</description>
+  </hwpError>         
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_CHIP_CHARACTERIZE_ERROR</rc>
+    <description>Procedure chip_characterization_create() returned an error</description>
+    <ffdc>RETURN_CODE</ffdc>    
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ERROR</rc>
+    <description>Procedure gpst_create() returned an error</description>
+    <ffdc>RETURN_CODE</ffdc>
+  </hwpError>  
+</hwpErrors>
