@@ -75,7 +75,6 @@ chip Mba
     {
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRMASK";
         scomaddr    0x03010603;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -83,7 +82,6 @@ chip Mba
     {
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
         scomaddr    0x03010606;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -91,7 +89,6 @@ chip Mba
     {
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT1";
         scomaddr    0x03010607;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -133,7 +130,6 @@ chip Mba
     {
         name        "DPHY01.PHY01_DDRPHY_FIR_MASK_REG";
         scomaddr    0x800200930301143F;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -141,7 +137,6 @@ chip Mba
     {
         name        "DPHY01.PHY01_DDRPHY_FIR_ACTION0_REG";
         scomaddr    0x800200960301143F;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -149,7 +144,6 @@ chip Mba
     {
         name        "DPHY01.PHY01_DDRPHY_FIR_ACTION1_REG";
         scomaddr    0x800200970301143F;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -170,7 +164,6 @@ chip Mba
     {
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_MASK";
         scomaddr    0x03010403;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -178,7 +171,6 @@ chip Mba
     {
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION0";
         scomaddr    0x03010406;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -186,7 +178,6 @@ chip Mba
     {
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION1";
         scomaddr    0x03010407;
-        capture     type secondary;
         capture     group FirRegs;
     };
 
@@ -214,7 +205,6 @@ chip Mba
     {
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAMSKQ";
         scomaddr    0x03010614;
-        capture     type secondary;
         capture     group FirRegs;
     };
 

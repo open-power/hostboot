@@ -91,7 +91,6 @@ chip Ex
     {
         name        "EX00.TP.ECO_DOM.FIR_MASK";
         scomaddr    0x10040002;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -122,7 +121,6 @@ chip Ex
     {
         name        "EX00.TP.ECO_DOM.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x1004000d;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -159,7 +157,6 @@ chip Ex
     {
         name        "EX00.EC.PC.PC_NE.FIR.CORE_FIRMASK";
         scomaddr    0x10013103;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -196,7 +193,6 @@ chip Ex
     {
         name        "EX00.L2.L2MISC.L2CERRS.FIR_MASK_REG";
         scomaddr    0x10012803;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -233,7 +229,6 @@ chip Ex
     {
         name        "EX00.L3.L3_MISC.L3CERRS.FIR_MASK_REG";
         scomaddr    0x10010803;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -270,7 +265,6 @@ chip Ex
     {
         name        "EX00.NC.NCMISC.NCSCOMS.FIR_MASK_REG";
         scomaddr    0x10010c03;
-        capture     type secondary;
         capture     group default;
     };
 

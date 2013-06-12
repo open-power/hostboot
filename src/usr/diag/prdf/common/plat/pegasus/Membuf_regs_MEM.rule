@@ -45,7 +45,6 @@
     {
         name        "TCM.FIR_MASK";
         scomaddr    0x03040002;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -62,7 +61,6 @@
     {
         name        "TCM.EPS.FIR.SPA_MASK";
         scomaddr    0x03040007;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -85,7 +83,6 @@
     {
         name        "TCM.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0304000d;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };

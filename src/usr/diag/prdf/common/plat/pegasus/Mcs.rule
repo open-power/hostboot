@@ -88,7 +88,6 @@ chip Mcs
     {
         name        "MC0.MCS0.RIGHT.MCI.SCOMFIR.MCIFIRMASK";
         scomaddr    0x02011843;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };

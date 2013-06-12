@@ -43,7 +43,6 @@
     {
         name        "ES.PBES_WRAP_TOP.TPC.FIR_MASK";
         scomaddr    0x08040002;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -64,7 +63,6 @@
     {
         name        "ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0804000d;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -101,7 +99,6 @@
     {
         name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IO.SCOM.PB_IOA_FIR_MASK_REG";
         scomaddr    0x08010803;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -138,7 +135,6 @@
     {
         name        "ABUS.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x08010c03;
-        capture     type secondary;
         capture     group default;
     };
 

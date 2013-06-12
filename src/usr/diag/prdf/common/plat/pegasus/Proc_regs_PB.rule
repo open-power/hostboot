@@ -43,7 +43,6 @@
     {
         name        "EH.TPC.FIR_MASK";
         scomaddr    0x02040002;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -58,7 +57,6 @@
     {
         name        "EH.TPC.EPS.FIR.SPA_MASK";
         scomaddr    0x02040007;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -79,7 +77,6 @@
     {
         name        "EH.TPC.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0204000d;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -116,7 +113,6 @@
     {
         name        "EN.NX.DBG.NX_DMA_ENG_FIR_MASK";
         scomaddr    0x02013103;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -153,7 +149,6 @@
     {
         name        "EN.NX.PBI.CQ_WRAP.NXCQ_SCOM.NX_CQ_FIR_MASK_REG";
         scomaddr    0x02013083;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -190,7 +185,6 @@
     {
         name        "EN.NX.AS.FIR_MASK_REG";
         scomaddr    0x020130c3;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -227,7 +221,6 @@
     {
         name        "EN.NX.CXA.CXA_XPT.XPT_SCOMFIR.FIR_MASK_REG";
         scomaddr    0x02013003;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -264,7 +257,6 @@
     {
         name        "EH.PB.MCD.MCDCTL.FIR_MASK_REG";
         scomaddr    0x02013403;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -301,7 +293,6 @@
     {
         name        "EH.PB.MISC.PB_WEST_FIR_MASK_REG";
         scomaddr    0x02010c03;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -338,7 +329,6 @@
     {
         name        "EH.PB.MISC.PB_CENT_FIR_MASK_REG";
         scomaddr    0x02010c43;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -375,7 +365,6 @@
     {
         name        "EH.PB.MISC.PB_EAST_FIR_MASK_REG";
         scomaddr    0x02010c83;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -430,7 +419,6 @@
     {
         name        "EN.TPC.PSIHB.PSIHB_FIR_MASK_REG";
         scomaddr    0x02010903;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -467,7 +455,6 @@
     {
         name        "EN.TPC.INTP.SYNC_FIR_MASK_REG";
         scomaddr    0x020109c3;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -504,7 +491,6 @@
     {
         name        "EN.TPC.PBA.PBAFIRMASK";
         scomaddr    0x02010843;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -541,7 +527,6 @@
     {
         name        "EH.TPC.HCA.EHHCA_FIR_MASK_REG";
         scomaddr    0x02010983;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -578,7 +563,6 @@
     {
         name        "EN.TPC.BRIDGE.HCA.ENHCA_FIR_MASK_REG";
         scomaddr    0x02010943;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -615,7 +599,6 @@
     {
         name        "ES.PE_WRAP_TOP.PE0.PEPBCQ.PBCQ.FIR_MASK_REG";
         scomaddr    0x02012003;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -652,7 +635,6 @@
     {
         name        "ES.PE_WRAP_TOP.PE1.PEPBCQ.PBCQ.FIR_MASK_REG";
         scomaddr    0x02012403;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -689,7 +671,6 @@
     {
         name        "ES.PE_WRAP_TOP.PE2.PEPBCQ.PBCQ.FIR_MASK_REG";
         scomaddr    0x02012803;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -732,7 +713,6 @@
     {
         name        "IOMC1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x02011E03;
-        capture     type secondary;
         capture     group default;
     };
 

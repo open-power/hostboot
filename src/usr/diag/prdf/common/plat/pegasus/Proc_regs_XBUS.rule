@@ -43,7 +43,6 @@
     {
         name        "EN.PB.TPC.FIR_MASK";
         scomaddr    0x04040002;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -64,7 +63,6 @@
     {
         name        "EN.PB.TPC.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0404000d;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -101,7 +99,6 @@
     {
         name        "EN.PB.PBEN.MISC_IO.SCOM.FIR_MASK_REG";
         scomaddr    0x04010c03;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -138,7 +135,6 @@
     {
         name        "XBUS01.X0.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011003;
-        capture     type secondary;
         capture     group never; #FIXME: RTC 67200
     };
 
@@ -175,7 +171,6 @@
     {
         name        "XBUS01.X1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011403;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -212,7 +207,6 @@
     {
         name        "XBUS23.X0.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011803;
-        capture     type secondary;
         capture     group never; #FIXME: RTC 67200
     };
 
@@ -249,7 +243,6 @@
     {
         name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011c03;
-        capture     type secondary;
         capture     group never; #FIXME: RTC 67200
     };
 

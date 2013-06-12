@@ -45,7 +45,6 @@
     {
         name        "TCN.FIR_MASK";
         scomaddr    0x02040002;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -68,7 +67,6 @@
     {
         name        "TCN.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0204000d;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -109,7 +107,6 @@
     {
         name        "DMI.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x02010403;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -150,7 +147,6 @@
     {
         name        "MBU.MBI.MBI.SCOMFIR.MBIFIRMASK";
         scomaddr    0x02010803;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -191,7 +187,6 @@
     {
         name        "MBU.MBS.MBS_FIR_MASK_REG";
         scomaddr    0x02011403;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -239,7 +234,6 @@
     {
         name        "MBU.MBS.ECC01.MBECCFIR_MASK";
         scomaddr    0x02011443;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -287,7 +281,6 @@
     {
         name        "MBU.MBS.ECC23.MBECCFIR_MASK";
         scomaddr    0x02011483;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -328,7 +321,6 @@
     {
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSFIRMASK";
         scomaddr    0x02011603;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -369,7 +361,6 @@
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSFIRMASK";
         scomaddr    0x02011703;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -424,7 +415,6 @@
     {
         name        "SCAC.SCAC_FIRMASK";
         scomaddr    0x020115c3;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };

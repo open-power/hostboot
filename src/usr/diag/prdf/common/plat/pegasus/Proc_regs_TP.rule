@@ -43,7 +43,6 @@
     {
         name        "EH.TPCHIP.TPC.FIR_MASK";
         scomaddr    0x01040002;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -58,7 +57,6 @@
     {
         name        "EH.TPCHIP.TPC.EPS.FIR.SPA_MASK";
         scomaddr    0x01040007;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -79,7 +77,6 @@
     {
         name        "EH.TPCHIP.TPC.LOCAL_FIR_AND";
         scomaddr    0x0104000b;
-        capture     type secondary;
         capture     group never;
     };
 
@@ -87,15 +84,7 @@
     {
         name        "EH.TPCHIP.TPC.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0104000d;
-        capture     type secondary;
         capture     group default;
-    };
-
-    register TP_LFIR_MASK_AND
-    {
-        name        "EH.TPCHIP.TPC.EPS.FIR.LOCAL_FIR_MASK_AND";
-        scomaddr    0x0104000e;
-        capture     group never;
     };
 
     register TP_LFIR_MASK_OR
@@ -138,7 +127,6 @@
     {
         name        "EH.TPCHIP.OCC.OCI.SCOM.OCC_SCOM_OCCLFIRMASK";
         scomaddr    0x01010803;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -175,7 +163,6 @@
     {
         name        "EH.TPCHIP.PIB.LPCM.LPC.SYNC_FIR_MASK_REG";
         scomaddr    0x01010c03;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -212,7 +199,6 @@
     {
         name        "EH.TPCHIP.OCC.PMC.PMC_LFIR_ERR_MASK_REG";
         scomaddr    0x01010843;
-        capture     type secondary;
         capture     group default;
     };
 

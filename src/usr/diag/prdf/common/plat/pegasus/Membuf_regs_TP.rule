@@ -45,7 +45,6 @@
     {
         name        "TPTOP.TPC.FIR_MASK";
         scomaddr    0x01040002;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
     };
@@ -68,7 +67,6 @@
     {
         name        "TPTOP.TPC.LOCAL_FIR_AND";
         scomaddr    0x0104000b;
-        capture     type secondary;
         capture     group never;
     };
 
@@ -76,16 +74,8 @@
     {
         name        "TPTOP.TPC.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0104000d;
-        capture     type secondary;
         capture     group default;
         capture     group FirRegs;
-    };
-
-    register TP_LFIR_MASK_AND
-    {
-        name        "TPTOP.TPC.EPS.FIR.LOCAL_FIR_MASK_AND";
-        scomaddr    0x0104000e;
-        capture     group never;
     };
 
     register TP_LFIR_MASK_OR
