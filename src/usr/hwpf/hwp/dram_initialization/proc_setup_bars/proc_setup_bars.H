@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.H,v 1.8 2013/05/09 04:03:27 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.9 2013/06/13 13:21:37 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -487,6 +487,26 @@ struct proc_setup_bars_as_mmio_bar_size
     static const std::map<uint64_t, uint64_t> xlate_map;
 };
 
+// define set of HCA BAR sizes
+struct proc_setup_bars_hca_nm_bar_size
+{
+    static std::map<uint64_t, uint64_t> create_map()
+    {
+        std::map<uint64_t, uint64_t> m;
+        m[PROC_SETUP_BARS_SIZE_1_TB]   = 0xFFULL;
+        m[PROC_SETUP_BARS_SIZE_512_GB] = 0x7FULL;
+        m[PROC_SETUP_BARS_SIZE_256_GB] = 0x3FULL;
+        m[PROC_SETUP_BARS_SIZE_128_GB] = 0x1FULL;
+        m[PROC_SETUP_BARS_SIZE_64_GB]  = 0x0FULL;
+        m[PROC_SETUP_BARS_SIZE_32_GB]  = 0x07ULL;
+        m[PROC_SETUP_BARS_SIZE_16_GB]  = 0x03ULL;
+        m[PROC_SETUP_BARS_SIZE_8_GB]   = 0x01ULL;
+        m[PROC_SETUP_BARS_SIZE_4_GB]   = 0x00ULL;
+        return m;
+    }
+    static const std::map<uint64_t, uint64_t> xlate_map;
+};
+
 // define set of MCD BAR sizes
 struct proc_setup_bars_mcd_bar_size
 {
@@ -887,15 +907,43 @@ const proc_setup_bars_bar_reg_def as_mmio_bar_reg_def =
     0x0ULL
 };
 
-// MCD Configuration Register constants
-const proc_setup_bars_bar_def mcd_bar_def =
+// HCA BAR and Range register constants
+const proc_setup_bars_bar_reg_def hca_nm_bar_reg_def =
 {
-    0xFFFC000000FFFFFFULL,         // base: RA 14:39
-    PROC_SETUP_BARS_SIZE_16_MB,    // size (min): 16 MB
-    PROC_SETUP_BARS_SIZE_32_TB,    // size (max): 32 TB
-    true
+    true,                          // base: bits 14:31
+    PROC_SETUP_BARS_SHIFT_NONE,
+    0,
+    14,
+    31,
+    true,                          // enable: bit 63
+    63,
+    true,                          // size: bits 33:40
+    33,
+    40,
+    &proc_setup_bars_hca_nm_bar_size::xlate_map,
+    0x0ULL,
+    0x0ULL
 };
 
+// HCA Mirror BAR and Range register constants
+const proc_setup_bars_bar_reg_def hca_m_bar_reg_def =
+{
+    true,                          // base: bits 14:32
+    PROC_SETUP_BARS_SHIFT_NONE,
+    0,
+    14,
+    32,
+    true,                          // enable: bit 63
+    63,
+    false,                         // size: other reg
+    0,
+    0,
+    NULL,
+    0x0ULL,
+    0x0ULL
+};
+
+// MCD Configuration Register constants
 const proc_setup_bars_bar_reg_def mcd_nf_bar_reg_def =
 {
     true,                          // base: bits 30:55
