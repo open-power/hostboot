@@ -31,5 +31,6 @@ OBJS += getMvpdRing.o \
         getMvpdExL2SingleMemberEnable.o \
         getMBvpdPhaseRotatorData.o \
         getMBvpdAddrMirrorData.o \
-        getMBvpdTermData.o
+        getMBvpdTermData.o \
+        getMBvpdSlopeInterceptData.o
 

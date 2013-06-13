@@ -45,6 +45,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdPhaseRotatorData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdAddrMirrorData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -1304,6 +1305,19 @@ fapi::ReturnCode fapiPlatGetTermData (
                         *i_pTarget, i_attr, o_pVal, i_valSize);
     return l_rc;
 }
+
+fapi::ReturnCode fapiPlatGetSlopeInterceptData (
+             const fapi::Target * i_pTarget,
+             const fapi::MBvpdSlopeIntercept i_attr,
+             uint32_t  & o_Val)
+{
+    // Call a VPD Accessor HWP to get the data
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getMBvpdSlopeInterceptData,
+                        *i_pTarget, i_attr, o_Val);
+    return l_rc;
+}
+
 
 fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,
      const fapi::Target * i_pFapiTarget, uint8_t & o_enable )

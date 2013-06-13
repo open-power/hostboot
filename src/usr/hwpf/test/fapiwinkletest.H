@@ -49,6 +49,7 @@
 #include    <mvpd_accessors/getMBvpdPhaseRotatorData.H>
 #include    <mvpd_accessors/getMBvpdAddrMirrorData.H>
 #include    <mvpd_accessors/getMBvpdTermData.H>
+#include    <mvpd_accessors/getMBvpdSlopeInterceptData.H>
 
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
@@ -289,6 +290,116 @@ public:
         }
 
         TS_TRACE( "testGetMBvpd exit" );
+
+    }
+
+    /**
+     * @brief call getMBvpdSlopeInterceptData to fetch power slope and intercept
+     *        attributes from the MW and MV keywords
+     *
+     */
+    void    testGetSlopeInterceptData()
+    {
+        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        getMBvpdSlopeInterceptData_FP_t (l_getMBvpdSlopeInterceptData)
+                              = &getMBvpdSlopeInterceptData;
+        uint32_t l_val = 0xFFFFFFFF;
+
+        TS_TRACE( "testGetSlopeInterceptData entry" );
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        TS_TRACE( "testGetSlopeInterceptData l_memBufList.size()=%d",
+                                      l_memBufList.size() );
+        // loop thru memory buffers
+#if UNITTESTfwt
+        uint8_t l_mbNum = 0;    // check them all in unit test
+#else
+        uint8_t l_mbNum = (l_memBufList.size() > 0) ? l_memBufList.size()-1 : 0;
+#endif
+        for (; l_mbNum < l_memBufList.size(); l_mbNum++ )
+        {
+            //  make a local copy of the memory buffer target
+            TARGETING::Target*  l_mb_target = l_memBufList[l_mbNum];
+
+            //  dump physical path to target
+            EntityPath l_path;
+            l_path  =   l_mb_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // cast OUR type of target to a FAPI type of target.
+            fapi::Target l_fapi_mb_target(
+                                          TARGET_TYPE_MEMBUF_CHIP,
+                   (const_cast<TARGETING::Target*>(l_mb_target)) );
+
+            // MASTER_POWER_SLOPE
+            l_fapirc = (*l_getMBvpdSlopeInterceptData)(l_fapi_mb_target,
+                fapi::MASTER_POWER_SLOPE, l_val);
+            if (l_fapirc) break;
+                TS_TRACE( "testSlopeInterceptData accessor "
+                "MASTER_POWER_SLOPE=0x%08x", l_val);
+#if UNITTESTfwt
+
+            // MASTER_POWER_INTERCEPT
+            l_fapirc = (*l_getMBvpdSlopeInterceptData)(l_fapi_mb_target,
+                fapi::MASTER_POWER_INTERCEPT, l_val);
+            if (l_fapirc) break;
+                TS_TRACE( "testSlopeInterceptData accessor "
+                "MASTER_POWER_INTERCEPT=0x%08x", l_val);
+
+            // SUPPLIER_POWER_SLOPE
+            l_fapirc = (*l_getMBvpdSlopeInterceptData)(l_fapi_mb_target,
+                fapi::SUPPLIER_POWER_SLOPE, l_val);
+            if (l_fapirc) break;
+                TS_TRACE( "testSlopeInterceptData accessor "
+                "SUPPLIER_POWER_SLOPE=0x%08x", l_val);
+#endif
+            // SUPPLIER_POWER_INTERCEPT
+            l_fapirc = (*l_getMBvpdSlopeInterceptData)(l_fapi_mb_target,
+                fapi::SUPPLIER_POWER_INTERCEPT, l_val);
+            if (l_fapirc) break;
+                TS_TRACE( "testSlopeInterceptData accessor "
+                "SUPPLIER_POWER_INTERCEPT=0x%08x", l_val);
+
+            // MASTER_POWER_SLOPE
+            l_fapirc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_SLOPE,
+                &l_fapi_mb_target, l_val);
+            if (l_fapirc) break;
+            TS_TRACE( "testSlopeInterceptData attr "
+                "MASTER_POWER_SLOPE=0x%08x", l_val);
+#if UNITTESTfwt
+            // MASTER_POWER_INTERCEPT
+            l_fapirc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT,
+                &l_fapi_mb_target, l_val);
+            if (l_fapirc) break;
+            TS_TRACE( "testSlopeInterceptData attr "
+                "MASTER_POWER_INTERCEPT=0x%08x", l_val);
+
+            // SUPPLIER_POWER_SLOPE
+            l_fapirc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE,
+                &l_fapi_mb_target, l_val);
+            if (l_fapirc) break;
+            TS_TRACE( "testSlopeInterceptData attr "
+                "SUPPLIER_POWER_SLOPE=0x%08x", l_val);
+
+#endif
+            // SUPPLIER_POWER_INTERCEPT
+            l_fapirc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT,
+                &l_fapi_mb_target, l_val);
+            if (l_fapirc) break;
+            TS_TRACE( "testSlopeInterceptData attr "
+                "SUPPLIER_POWER_INTERCEPT=0x%08x", l_val);
+        }
+
+        if (l_fapirc)
+        {
+           TS_FAIL( "fapiGetSlopeInterceptData: FAPI_ATTR_GET fail rc=0x%x",
+                 static_cast<uint32_t>(l_fapirc) );
+           fapiLogError(l_fapirc);
+        }
+
+        TS_TRACE( "testGetSlopeInterceptData exit" );
 
     }
 

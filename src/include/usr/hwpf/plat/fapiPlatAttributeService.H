@@ -56,6 +56,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdPhaseRotatorData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdAddrMirrorData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include <vpd/spdenums.H>
 #include <dimmConsts.H>
 #include <util/singleton.H>
@@ -474,9 +475,9 @@ fapi::ReturnCode fapiPlatGetAddrMirrorData (
  * It should not be called directly.
  *
  *  @param[in]  i_pTarget   Target pointer
- *  @param i_attr           Termination Data attribute enumerator
- *  @param o_pVal           Pointer to variable typed output values
- *  @param i_valSize        Size of output variable
+ *  @param[in]  i_attr      Termination Data attribute enumerator
+ *  @param[out] o_pVal      Pointer to variable typed output values
+ *  @param[in]  i_valSize   Size of output variable
  *  @return     ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiPlatGetTermData (
@@ -484,6 +485,20 @@ fapi::ReturnCode fapiPlatGetTermData (
                               const fapi::MBvpdTermData i_attr,
                               void  * o_pVal,
                               const uint32_t i_valSize);
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the Slope Intercept Data attributes
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target pointer
+ *  @param[in]  i_attr      Slope Intercept Data attribute enumerator
+ *  @param[out] o_Val       Slope Intercept Data
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetSlopeInterceptData (
+                              const fapi::Target * i_pTarget,
+                              const fapi::MBvpdSlopeIntercept i_attr,
+                              uint32_t  & o_Val);
 } // namespace platAttrSvc
 
 } // namespace fapi
@@ -1270,5 +1285,28 @@ fapi::ReturnCode fapiPlatGetTermData (
         fapi::FAPI_RC_SUCCESS
 #endif
 
+//------------------------------------------------------------------------------
+//  MACROS to support MBVPD Slope Intercept attributes
+//------------------------------------------------------------------------------
+#define ATTR_CDIMM_VPD_MASTER_POWER_SLOPE_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS :\
+    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
+        (PTARGET, fapi::MASTER_POWER_SLOPE , VAL)
+#define ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS :\
+    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
+        (PTARGET, fapi::MASTER_POWER_INTERCEPT , VAL)
+#define ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS :\
+    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
+        (PTARGET, fapi::SUPPLIER_POWER_SLOPE , VAL)
+#define ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS :\
+    fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
+        (PTARGET, fapi::SUPPLIER_POWER_INTERCEPT , VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

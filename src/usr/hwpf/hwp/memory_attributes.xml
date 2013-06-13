@@ -3217,7 +3217,6 @@ Comes from the VPD MW Keyword</description>
     <description>Master Power Slope that comes from the VPD MW Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <writeable/>
     <odmVisable/>
     <odmChangeable/>
     <persistRuntime/>
@@ -3229,7 +3228,6 @@ Comes from the VPD MW Keyword</description>
     <description>Master Power Intercept that comes from the VPD MW Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <writeable/>
     <odmVisable/>
     <odmChangeable/>
     <persistRuntime/>
@@ -3241,7 +3239,6 @@ Comes from the VPD MW Keyword</description>
     <description>Supplier Power Slope that comes from the VPD the MV Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <writeable/>
     <odmVisable/>
     <odmChangeable/>
     <persistRuntime/>
@@ -3253,7 +3250,6 @@ Comes from the VPD MW Keyword</description>
     <description>Supplier Power Intercept that comes from MV Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <writeable/>
     <odmVisable/>
     <odmChangeable/>
     <persistRuntime/>

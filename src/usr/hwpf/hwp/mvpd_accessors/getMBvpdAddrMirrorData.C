@@ -57,17 +57,18 @@ fapi::ReturnCode getMBvpdAddrMirrorData(
     {
         port_attributes mba_port[NUM_PORTS];
     };
-    struct ma_keyword
+    struct am_keyword
     {
         mba_attributes mb_mba[NUM_MBAS];
+        uint8_t        spare[8]; //VPD data CCIN_31E1_v.5.3.ods
     };
-    const uint32_t AM_KEYWORD_SIZE = sizeof(ma_keyword);  // keyword size
+    const uint32_t AM_KEYWORD_SIZE = sizeof(am_keyword);  // keyword size
 
     fapi::ReturnCode l_fapirc;
     fapi::Target l_mbTarget;
     uint8_t l_mbaPos = NUM_MBAS; //initialize to out of range value (+1)
-    ma_keyword * l_pMaBuffer = NULL; // MBvpd MT keyword buffer
-    uint32_t  l_MaBufsize = sizeof(ma_keyword);
+    am_keyword * l_pMaBuffer = NULL; // MBvpd MT keyword buffer
+    uint32_t  l_MaBufsize = sizeof(am_keyword);
 
     FAPI_DBG("getMBvpdAddrMirrorData: entry ");
 
@@ -95,7 +96,7 @@ fapi::ReturnCode getMBvpdAddrMirrorData(
              l_mbTarget.toEcmdString()  );
 
         // Read the AM keyword field
-        l_pMaBuffer = new ma_keyword;
+        l_pMaBuffer = new am_keyword;
 
         l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VSPD,
                                      fapi::MBVPD_KEYWORD_AM,

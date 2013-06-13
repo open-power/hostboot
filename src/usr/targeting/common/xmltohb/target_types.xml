@@ -1127,10 +1127,6 @@
     <attribute><id>MEMB_NEST_FREQ</id></attribute>
     <attribute><id>CDIMM_SENSOR_MAP_PRIMARY</id></attribute>
     <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>
-    <attribute><id>CDIMM_VPD_MASTER_POWER_SLOPE</id></attribute>
-    <attribute><id>CDIMM_VPD_MASTER_POWER_INTERCEPT</id></attribute>
-    <attribute><id>CDIMM_VPD_SUPPLIER_POWER_SLOPE</id></attribute>
-    <attribute><id>CDIMM_VPD_SUPPLIER_POWER_INTERCEPT</id></attribute>
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
 </targetType>
 

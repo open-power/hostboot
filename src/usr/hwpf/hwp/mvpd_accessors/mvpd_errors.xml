@@ -108,4 +108,12 @@
     <ffdc>KEYWORD</ffdc>
     <ffdc>RETURNED_SIZE</ffdc>
   </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_SUPPLIER_ID_NOT_IN_MV_VPD</rc>
+    <description>
+        The Module ID in the #I keyword is not in the list of supplier provided entries in the MV keyword.
+    </description>
+    <ffdc>MODULE_ID</ffdc>
+  </hwpError>
 </hwpErrors>
