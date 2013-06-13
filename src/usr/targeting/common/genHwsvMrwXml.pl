@@ -1387,6 +1387,16 @@ sub byVmemNodePos($$)
 
 sub generate_sys
 {
+    my $plat = 0;
+    if ($build eq "fsp")
+    {
+        $plat = 2;
+    }
+    elsif ($build eq "hb")
+    {
+        $plat = 1;
+    }
+
     my $proc_refclk = $policy->{'required-policy-settings'}->
                                {'processor-refclock-frequency'}->{content};
     my $mem_refclk = $policy->{'required-policy-settings'}->
@@ -1409,6 +1419,10 @@ sub generate_sys
     <attribute>
         <id>FREQ_PROC_REFCLOCK</id>
         <default>$proc_refclk</default>
+    </attribute>
+    <attribute>
+        <id>EXECUTION_PLATFORM</id>
+        <default>$plat</default>
     </attribute>
     <attribute>
         <id>FREQ_MEM_REFCLOCK</id>
