@@ -43,25 +43,20 @@ RegDataCache::~RegDataCache()
 
 //------------------------------------------------------------------------------
 
-BIT_STRING_CLASS & RegDataCache::read(
-                                ExtensibleChip* i_pChip,
-                                const SCAN_COMM_REGISTER_CLASS * i_pRegister,
-                                bool & o_readStat )
+BIT_STRING_CLASS & RegDataCache::read( ExtensibleChip * i_chip,
+                                       const SCAN_COMM_REGISTER_CLASS * i_reg )
 {
-    ScomRegisterAccess l_scomAccessKey ( *i_pRegister,i_pChip );
+    ScomRegisterAccess l_scomAccessKey ( *i_reg, i_chip );
     BIT_STRING_CLASS * l_pBitString = queryCache( l_scomAccessKey );
-    o_readStat = false;
-    if( NULL == l_pBitString )
+
+    if ( NULL == l_pBitString )
     {
         // Creating new entry
-        l_pBitString = new BitStringBuffer( i_pRegister->GetBitLength( ) );
+        l_pBitString = new BitStringBuffer( i_reg->GetBitLength() );
         // Adding register in the cache
         iv_cachedRead[l_scomAccessKey] = l_pBitString;
     }
-    else
-    {
-        o_readStat = true;
-    }
+
     return *l_pBitString;
 }
 

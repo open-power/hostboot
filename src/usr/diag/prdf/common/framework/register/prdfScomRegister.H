@@ -37,6 +37,7 @@
 #include <iipscr.h>
 #include <iipbits.h>
 #include <iipMopRegisterAccess.h>
+#include <prdfTrace.H>
 
 namespace PRDF
 {
@@ -46,11 +47,9 @@ class CHIP_CLASS;
 class MopsRegisterAccess;
 class ExtensibleChip;
 
-
-
 class ScomRegister : public SCAN_COMM_REGISTER_CLASS
 {
-public:
+  public:
 
     /**
      * @brief     constructor
@@ -58,25 +57,26 @@ public:
      * @param     i_bitLength      bit length of register
      * @param     i_targetType     target type associated with register
      */
-    ScomRegister( uint64_t i_address ,uint32_t i_bitLength,TARGETING::TYPE
-                    i_targetType ) :
+    ScomRegister( uint64_t i_address, uint32_t i_bitLength,
+                  TARGETING::TYPE i_targetType, AccessLevel i_access ) :
         SCAN_COMM_REGISTER_CLASS(),
         iv_bitLength( i_bitLength ),
         iv_chipType( i_targetType ),
-        iv_scomAddress( i_address )
-    { }
+        iv_scomAddress( i_address ),
+        iv_operationType( i_access )
+    {}
 
     /**
      * @brief     constructor .Added this because we save object of this type in
      * @          FlyweightS
      */
     ScomRegister():
-        SCAN_COMM_REGISTER_CLASS( ),
-        iv_bitLength(0),
-        iv_chipType(TARGETING::TYPE_NA),iv_scomAddress(0)
-    { }
-
-
+        SCAN_COMM_REGISTER_CLASS(),
+        iv_bitLength( 0 ),
+        iv_chipType( TARGETING::TYPE_NA ),
+        iv_scomAddress( 0 ),
+        iv_operationType( ACCESS_NONE )
+    {}
 
     /**
      * @brief     Returns the pointer to bit string
@@ -165,19 +165,26 @@ public:
     */
    bool operator >= ( const ScomRegister & i_rightRegister  ) const;
 
-    protected: // Functions
+    /** @return The register access level (see enum AccessLevel). */
+    virtual AccessLevel getAccessLevel() const { return iv_operationType; }
+
+    /** @brief Sets the register access level (see enum AccessLevel). */
+    virtual void setAccessLevel( AccessLevel i_op ) { iv_operationType = i_op; }
+
+  protected: // Functions
+
     /**
      * @brief     copy constructor
      * @param     i_scomRegister   scomRegister instance to be copied
      */
     ScomRegister( const SCAN_COMM_REGISTER_CLASS & i_scomRegister ):
         SCAN_COMM_REGISTER_CLASS(),
-        iv_bitLength( i_scomRegister.GetBitLength() ),
-        iv_shortId( i_scomRegister.GetId()           ),
-        iv_chipType( i_scomRegister.getChipType()    ),
-        iv_scomAddress( i_scomRegister.GetAddress()  )
-    { }
-
+        iv_bitLength(     i_scomRegister.GetBitLength()   ),
+        iv_shortId(       i_scomRegister.GetId()          ),
+        iv_chipType(      i_scomRegister.getChipType()    ),
+        iv_scomAddress(   i_scomRegister.GetAddress()     ),
+        iv_operationType( i_scomRegister.getAccessLevel() )
+    {}
 
    /**
     * @brief    Returns reference to bit string associated with register
@@ -193,37 +200,41 @@ public:
      */
     uint32_t Access( BIT_STRING_CLASS & bs,
                      MopRegisterAccess::Operation op )const;
-   /**
-    * @brief    Returns rulechip poiner associated with the register
-    * @return   Refer to function description
-   */
 
-    virtual ExtensibleChip* getChip( )const ;
-
+    /**
+     * @brief  Returns rulechip pointer associated with the register
+     * @return Refer to function description
+     */
+    virtual ExtensibleChip * getChip() const;
 
 private: // functions
 
   friend class CaptureData;
+
+    /** @return TRUE if entry for this register exist in this cache. */
+    bool queryCache() const;
+
     /**
-     * @brief     Reads register contents from cache
-     * @param     reference to bool .Expected to be set to true if entry in
-     *            cache already exist  and false if it is a  newly created
-     *            entry.
-     * @return    Reference to bit string buffer maintained in cache
+     * @brief  Reads register contents from cache.
+     * @return Reference to bit string buffer maintained in cache.
      */
-  BIT_STRING_CLASS & readCache( bool & o_existingEntry ) const;
+    BIT_STRING_CLASS & readCache() const;
+
     /**
      * @brief     Deletes one or all entry in the cache
      * @param     RuleChip pointer associated with register
      * @return    Nil
      */
-  void flushCache( ExtensibleChip *i_pChip = NULL ) const ;
+    void flushCache( ExtensibleChip *i_pChip = NULL ) const;
 
-private: // Data
-    uint32_t iv_bitLength;           // bit length of scom
-    uint16_t iv_shortId;              // unique hash id of register
-    TARGETING::TYPE iv_chipType ;     // type of target associated with register
-    uint64_t iv_scomAddress;          // scom address associated with regiser
+  private: // Data
+
+    uint32_t        iv_bitLength;     // bit length of scom
+    uint16_t        iv_shortId;       // unique hash id of register
+    TARGETING::TYPE iv_chipType;      // type of target associated with register
+    uint64_t        iv_scomAddress;   // scom address associated with regiser
+    AccessLevel     iv_operationType; // Operation supported (RO, WO, or RW)
+
 };
 
 }//namespace PRDF ends

@@ -117,6 +117,10 @@ using namespace PRDR_COMPILER;
 %token PRDR_NAME_KW
 %token PRDR_SCOMADDR
 %token PRDR_SCOMLEN
+%token PRDR_REGISTER_ACCESS
+%token PRDR_REGISTER_READ_ACCESS
+%token PRDR_REGISTER_WRITE_ACCESS
+%token PRDR_REGISTER_NO_ACCESS
 %token PRDR_RESET_ADDR
 %token PRDR_MASK_ADDR
 %token PRDR_BIT_KW
@@ -430,6 +434,21 @@ regline:    { $$ = NULL; }
         tmp.str = *$5;
 
         $$->cv_captures.push_back(tmp);
+    }
+        | PRDR_REGISTER_ACCESS PRDR_REGISTER_READ_ACCESS
+    {
+        $$ = new Register();
+        $$->cv_flags |= Prdr::PRDR_REGISTER_READ;
+    }
+        | PRDR_REGISTER_ACCESS PRDR_REGISTER_WRITE_ACCESS
+    {
+        $$ = new Register();
+        $$->cv_flags |= Prdr::PRDR_REGISTER_WRITE;
+    }
+        | PRDR_REGISTER_ACCESS PRDR_REGISTER_NO_ACCESS
+    {
+        $$ = new Register();
+        $$->cv_flags |= Prdr::PRDR_REGISTER_ACCESS_NIL;
     }
 ;
 

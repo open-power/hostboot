@@ -60,14 +60,13 @@ namespace Prdr
      */
     enum RegisterFlags
     {
-            /** Non-default scomlen */
-        PRDR_REGISTER_SCOMLEN = 0x1,
-            /** Resets defined */
-        PRDR_REGISTER_RESETS = 0x2,
-            /** Masks defined */
-        PRDR_REGISTER_MASKS = 0x4,
-            /** Capture requirements */
-        PRDR_REGISTER_CAPTURE = 0x8,
+        PRDR_REGISTER_SCOMLEN       = 0x01, ///< Non-default scomlen
+        PRDR_REGISTER_RESETS        = 0x02, ///< Resets defined
+        PRDR_REGISTER_MASKS         = 0x04, ///< Masks defined
+        PRDR_REGISTER_CAPTURE       = 0x08, ///< Capture requirements
+        PRDR_REGISTER_ACCESS_NIL    = 0x10, ///< FFDC only register
+        PRDR_REGISTER_READ          = 0x20, ///< Read only register
+        PRDR_REGISTER_WRITE         = 0x40, ///< Write only register
     };
 
     /**

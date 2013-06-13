@@ -107,7 +107,7 @@ chip Proc
     {
         name        "Bit map 0-63 of failed lanes read from VPD";
         scomaddr    0xFFFF0001;
-
+        access      no_access;
         capture     group never;
     };
 
@@ -115,7 +115,7 @@ chip Proc
     {
         name        "Bit map 64-127 of failed lanes read from VPD";
         scomaddr    0xFFFF0002;
-
+        access      no_access;
         capture     group never;
     };
 
@@ -123,7 +123,7 @@ chip Proc
     {
         name        "Bit map 0-63 of failed lanes from io_read_erepair";
         scomaddr    0xFFFF0003;
-
+        access      no_access;
         capture     group never;
     };
 
@@ -131,7 +131,7 @@ chip Proc
     {
         name        "Bit map 64-127 of failed lanes from io_read_erepair";
         scomaddr    0xFFFF0004;
-
+        access      no_access;
         capture     group never;
     };
 

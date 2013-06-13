@@ -101,6 +101,10 @@ register    { return PRDR_REGISTER; }
 name        { return PRDR_NAME_KW; }
 scomaddr    { return PRDR_SCOMADDR; }
 scomlen     { return PRDR_SCOMLEN; }
+access      { return PRDR_REGISTER_ACCESS; }
+read_only   { return PRDR_REGISTER_READ_ACCESS; }
+write_only  { return PRDR_REGISTER_WRITE_ACCESS; }
+no_access   { return PRDR_REGISTER_NO_ACCESS; }
 bit         { return PRDR_BIT_KW; }
 reset       { return PRDR_RESET_ADDR; }
 mask        { return PRDR_MASK_ADDR; }

@@ -176,16 +176,26 @@ class Register
 
     static void merge(Register * i_l, Register * i_r)
     {
-        if (NULL != i_r->cv_sname)
+        if ( NULL != i_r->cv_sname )
+        {
             i_l->cv_sname = i_r->cv_sname;
-        if (&i_r->cv_name_default != i_r->cv_name)
+        }
+        if ( &i_r->cv_name_default != i_r->cv_name )
+        {
             i_l->cv_name = i_r->cv_name;
-        if (0 != i_r->cv_flags)
-            i_l->cv_flags = i_r->cv_flags;
-        if (0 != i_r->cv_scomaddr)
+        }
+        if ( 0 != i_r->cv_flags )
+        {
+            i_l->cv_flags |= i_r->cv_flags;
+        }
+        if ( 0 != i_r->cv_scomaddr )
+        {
             i_l->cv_scomaddr = i_r->cv_scomaddr;
-        if (0 != i_r->cv_scomlen)
+        }
+        if ( 0 != i_r->cv_scomlen )
+        {
             i_l->cv_scomlen = i_r->cv_scomlen;
+        }
         if (0 != i_r->cv_resets.size())
         {
             std::copy( i_r->cv_resets.begin(),
@@ -214,7 +224,20 @@ class Register
         cout << "\tLong Name: " << *cv_name << endl;
         cout << "\tScom Addr: " << cv_scomaddr << endl;
         cout << "\tScom Len:  " << cv_scomlen << endl;
-    };
+        cout << "\tAccess:    ";
+        uint32_t accessLevels =
+                        Prdr::PRDR_REGISTER_WRITE |
+                        Prdr::PRDR_REGISTER_READ |
+                        Prdr::PRDR_REGISTER_ACCESS_NIL;
+
+        switch( cv_flags & accessLevels )
+        {
+            case Prdr::PRDR_REGISTER_ACCESS_NIL:    cout << "No access";  break;
+            case Prdr::PRDR_REGISTER_WRITE:         cout << "Write only"; break;
+            case Prdr::PRDR_REGISTER_READ:          cout << "Read only";  break;
+            default:                                cout << "Read/Write";
+        }
+    }
 
     int output( FILE * l_file, uint16_t i_sigOff )
     {
@@ -246,6 +269,17 @@ class Register
             cv_flags |= Prdr::PRDR_REGISTER_MASKS;
         if (0 != cv_captures.size())
             cv_flags |= Prdr::PRDR_REGISTER_CAPTURE;
+
+        uint32_t readWriteAccess =
+                            Prdr::PRDR_REGISTER_WRITE |
+                            Prdr::PRDR_REGISTER_READ  |
+                            Prdr::PRDR_REGISTER_ACCESS_NIL;
+
+        if ( 0 == (readWriteAccess & cv_flags) )
+        {
+            // No access has been specified so default to Read/Write access.
+            cv_flags |= readWriteAccess;
+        }
 
         // output data
         uint32_t l_temp;

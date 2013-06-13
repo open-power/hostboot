@@ -40,6 +40,7 @@
 #include <utilfile.H>  // for UtilFile
 #include <UtilHash.H> // for Util::hashString
 #include <prdfPfa5Data.h>
+#include <prdrCommon.H>
 
 namespace PRDF
 {
@@ -61,12 +62,27 @@ struct ResetAndMaskTransformer
     virtual ResetAndMaskErrorRegister::ResetRegisterStruct
         operator()( const Prdr::Register::ResetOrMaskStruct & i )
     {
-        ResetAndMaskErrorRegister::ResetRegisterStruct o;
-        o.read = & cv_scanFactory.GetScanCommRegister( i.addr_r ,cv_scomlen,
-                                                        iv_chipType );
+        /*
+          These reset and mask registers, which are associated with a FIR, are
+          created along with the FIR. They are needed to clear/mask FIR bits at
+          the end of analysis. Let us call it scenario X.
 
-        o.write = & cv_scanFactory.GetScanCommRegister( i.addr_w ,cv_scomlen ,
-                                                        iv_chipType );
+          There are situations where we need a separate instance of an AND
+          register. These are used in plugins to do some special analysis which
+          is not possible through framework code. Let us call it scenario Y.
+
+          Since, factory actually doesn't use operations (e.g. READ or WRITE)
+          supported to determine whether a register instance is new or already
+          available it shall return us the AND register instance created in
+          scenario X.
+
+          AND registers are write only. If we don't specify WRITE here, even in
+          scenario Y, we shall get object created during scenario X, which may
+          not be write-only.
+        */
+        ResetAndMaskErrorRegister::ResetRegisterStruct o;
+        SCAN_COMM_REGISTER_CLASS::AccessLevel l_readRegAccess =
+                                            SCAN_COMM_REGISTER_CLASS::ACCESS_WO;
 
 
         switch ( i.op )
@@ -81,6 +97,7 @@ struct ResetAndMaskTransformer
 
             case Prdr::XOR:
                 o.op = getStaticResetOperator<XorOperator<Type> >();
+                l_readRegAccess = SCAN_COMM_REGISTER_CLASS::ACCESS_RW;
                 break;
 
             case Prdr::NOT:
@@ -91,6 +108,14 @@ struct ResetAndMaskTransformer
                 o.op = NULL; // TODO: ERROR!  Assert...
                 break;
         }
+
+        o.read = & cv_scanFactory.GetScanCommRegister( i.addr_r, cv_scomlen,
+                                        iv_chipType,
+                                        l_readRegAccess );
+
+        o.write = & cv_scanFactory.GetScanCommRegister( i.addr_w, cv_scomlen,
+                                        iv_chipType,
+                                        SCAN_COMM_REGISTER_CLASS::ACCESS_WO );
 
         return o;
     };
@@ -169,12 +194,37 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
         for (int i = 0; i < l_chip->cv_regCount; i++)
         {
             uint16_t hashId = l_chip->cv_registers[i].cv_name;
+            SCAN_COMM_REGISTER_CLASS::AccessLevel l_regAccess;
 
+            uint32_t l_accessLvls =
+                        Prdr::PRDR_REGISTER_READ |
+                        Prdr::PRDR_REGISTER_WRITE |
+                        Prdr::PRDR_REGISTER_ACCESS_NIL;
+
+            uint32_t l_accessType =
+                        l_chip->cv_registers[i].cv_flags & l_accessLvls;
+
+            switch( l_accessType )
+            {
+                case Prdr::PRDR_REGISTER_ACCESS_NIL:
+                    l_regAccess = SCAN_COMM_REGISTER_CLASS::ACCESS_NONE;
+                    break;
+                case Prdr::PRDR_REGISTER_WRITE:
+                    l_regAccess = SCAN_COMM_REGISTER_CLASS::ACCESS_WO;
+                    break;
+                case Prdr::PRDR_REGISTER_READ:
+                    l_regAccess = SCAN_COMM_REGISTER_CLASS::ACCESS_RO;
+                    break;
+                default:
+                    l_regAccess = SCAN_COMM_REGISTER_CLASS::ACCESS_RW;
+            }
+            //If more operations are incorporated in register, it can be
+            //specified in same way as above.
             l_regMap[l_id] = cv_hwRegs[hashId]
                                 = &i_scanFactory.GetScanCommRegister(
                                         l_chip->cv_registers[i].cv_scomAddr,
                                         l_chip->cv_registers[i].cv_scomLen,
-                                        i_type );
+                                        i_type, l_regAccess );
             l_regMap[l_id]->SetId(hashId);
 
             // Copy reset registers.

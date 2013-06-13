@@ -70,11 +70,23 @@ ScanFacility & ScanFacility::Access(void)
   return sf;
 }
 //-----------------------------------------------------------------------------
-SCAN_COMM_REGISTER_CLASS & ScanFacility::GetScanCommRegister(
-    uint64_t address , uint32_t i_scomLength,TARGETING::TYPE i_type  )
+SCAN_COMM_REGISTER_CLASS & ScanFacility::GetScanCommRegister( uint64_t address,
+                                uint32_t i_scomLength, TARGETING::TYPE i_type,
+                                SCAN_COMM_REGISTER_CLASS::AccessLevel i_regOp )
 {
-  ScomRegister scrKey(address ,i_scomLength ,i_type );
-  return iv_scomRegFw.get(scrKey);
+    /* i_regOp is not used to determine uniqueness of the object for following
+      reason -
+      There can not be two registers in hardware with same address and target
+      type supporting different operations say one supports only write and
+      other both read and write.
+      */
+
+    ScomRegister scrKey( address, i_scomLength, i_type, i_regOp );
+    // in case we get a object with different default operation, we shall reset
+    // it to what it should be as per rule file.
+    ScomRegister &regCreated = iv_scomRegFw.get(scrKey);
+    regCreated.setAccessLevel( i_regOp );
+    return regCreated;
 }
 //------------------------------------------------------------------------------
 

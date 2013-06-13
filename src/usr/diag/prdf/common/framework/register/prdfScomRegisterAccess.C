@@ -29,25 +29,11 @@ namespace PRDF
 {
 
 ScomRegisterAccess::ScomRegisterAccess(
-                    const SCAN_COMM_REGISTER_CLASS  &i_pRegister ,
-                    ExtensibleChip* i_pRuleChip
-                    )
-                    :ScomRegister( i_pRegister ),
-                     iv_containerChip( i_pRuleChip )
-{
-}
-
-//----------------------------------------------------------------------
-
-ScomRegisterAccess::ScomRegisterAccess( uint64_t i_scomAddress,
-                                        uint32_t i_bitLength,
-                                        ExtensibleChip* i_pRuleChip ):
-    ScomRegister( i_scomAddress ,i_bitLength,
-                  PlatServices::getTargetType( i_pRuleChip->GetChipHandle())),
+                    const SCAN_COMM_REGISTER_CLASS & i_pRegister,
+                    ExtensibleChip * i_pRuleChip ) :
+    ScomRegister( i_pRegister ),
     iv_containerChip( i_pRuleChip )
-{
-}
-
+{}
 
 //----------------------------------------------------------------------
 

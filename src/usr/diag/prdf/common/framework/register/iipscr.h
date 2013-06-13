@@ -42,11 +42,14 @@
 //----------------------------------------------------------------------
 
 #include <iipbits.h>
+#include <iipconst.h>
 #include <iipsdbug.h>
 #include <prdfMain.H>
+#include <prdfTrace.H>
 
 namespace PRDF
 {
+
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
@@ -125,7 +128,18 @@ namespace PRDF
  */
 class SCAN_COMM_REGISTER_CLASS
 {
-public:
+  public: // enums, structs, typedefs
+
+    /** The register access level */
+    enum AccessLevel
+    {
+        ACCESS_NONE = 0x0, ///< No access
+        ACCESS_RO   = 0x1, ///< Read-only access
+        ACCESS_WO   = 0x2, ///< Write-only access
+        ACCESS_RW   = 0x3, ///< Read/Write access
+    };
+
+  public: // functions
 
   /**
    Destructor
@@ -143,7 +157,7 @@ public:
    <br><b>Sideaffects: </b> Value guarenteed to be read from hardware.
    <br><b>Exceptions:  </b> None.
    <br><b>Notes:       </b> Default is to call Read().  If a child class cannot
-                            guarentee hardware access everytime Read() is called
+                            guarantee hardware access everytime Read() is called
                             then the function ForceRead() should be overridden.
    </ul><br>
    */
@@ -359,12 +373,19 @@ public:
    */
   bool BitStringIsZero()
   { return GetBitString()->IsZero(); }
+
    /**
     *@brief    Returns TYPE_NA as type of Target associated with register.Actual
     *          implementation is expected in derived class
      *@return   TYPE_NA
    */
   virtual TARGETING::TYPE getChipType(void)const { return TARGETING::TYPE_NA; }
+
+    /** @return The register access level (see enum AccessLevel). */
+    virtual AccessLevel getAccessLevel() const { return ACCESS_RW; }
+
+    /** @brief Sets the register access level (see enum AccessLevel). */
+    virtual void setAccessLevel( AccessLevel i_op ) {}
 
 protected:
 

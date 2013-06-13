@@ -80,91 +80,132 @@ void ScomRegister::SetBitString( const BIT_STRING_CLASS *bs )
 }
 
 
-// ---------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-const BIT_STRING_CLASS *ScomRegister::GetBitString( ATTENTION_TYPE i_type )const
+const BIT_STRING_CLASS * ScomRegister::GetBitString(ATTENTION_TYPE i_type) const
 {
-    BIT_STRING_CLASS * l_pString = NULL;
-    bool l_readStat = false;
-    //Expectation is, caller shall first call Read( ) and then GetBitString.
-    //This leaves an opportunity of mistake. One may call GetBitString without
-    //calling Read() first. As a result, a stray entry in cache gets created
-    //which  shall never be in sync with hardware.
-
-    //As a solution, first cache is queried.If the given entry exist, bitString
-    //pointer is returned else a new entry is created. This new entry is
-    //synchronized with hardware and then pointer to bit string is returned to
-    //caller.
-    RegDataCache & regDump = RegDataCache::getCachedRegisters();
-    l_pString = regDump.queryCache( getChip( ), this );
-
-    if( NULL == l_pString )
+    // Calling Read() will ensure that an entry exists in the cache and the
+    // entry has at been synched with hardware at least once. Note that we
+    // cannot read hardware for write-only registers. In this case, an entry
+    // will be created in the cache, if it does not exist, when readCache() is
+    // called below.
+    if ( ( ACCESS_NONE != iv_operationType ) &&
+            ( ACCESS_WO != iv_operationType ) )
     {
-        ForceRead( );
-        //if ForceRead fails, a dummy entry is returned that way analysis shall
-        //fail gracefully else we return a new entry which is in sync with
-        //hardware
-        l_pString = &( readCache( l_readStat ) );
-
+        Read();
     }
-    return l_pString;
+    return &(readCache());
 }
-// ---------------------------------------------------------------------
-BIT_STRING_CLASS & ScomRegister::AccessBitString( )
-{
-    bool l_readStat = false;
-    //FIXME RTC 51455 We need to find a way to make AccessBitString independent
-    //of Read. Calling Read inside this function shall make it read even
-    //write only registers. This operation shall fail on actual hardware.
-    return ( readCache( l_readStat ) );
 
+//------------------------------------------------------------------------------
+
+BIT_STRING_CLASS & ScomRegister::AccessBitString()
+{
+    // Calling Read() will ensure that an entry exists in the cache and the
+    // entry has at been synched with hardware at least once. Note that we
+    // cannot read hardware for write-only registers. In this case, an entry
+    // will be created in the cache, if it does not exist, when readCache() is
+    // called below.
+    if ( ( ACCESS_NONE != iv_operationType ) &&
+            ( ACCESS_WO != iv_operationType ) )
+    {
+        Read();
+    }
+
+    return readCache();
 }
 
 //------------------------------------------------------------------------------
 
 uint32_t ScomRegister::Read() const
 {
-    int32_t rc = SUCCESS;
-    bool l_readStat = false;
-    readCache( l_readStat );
-    if( false == l_readStat )
+    uint32_t o_rc = SUCCESS;
+
+    // First query the cache for an existing entry.
+    if ( !queryCache() )
     {
-        //updating cache by reading hardware .So next read  need not access
-        //hardware
-        rc = ForceRead();
+        // There was not a previous entry in the cache, so do a ForceRead() to
+        // sync the cache with hardware.
+        o_rc = ForceRead();
     }
 
-    return(rc);
+    return o_rc;
 }
 
 //------------------------------------------------------------------------------
 
 uint32_t ScomRegister::ForceRead() const
 {
-    int32_t rc = SUCCESS;
-    bool l_readStat = false;
-    BIT_STRING_CLASS & bs = readCache( l_readStat );
-    rc = Access( bs,MopRegisterAccess::READ );
-    if( SUCCESS != rc )
-    {
-        ExtensibleChip* l_pChip = getChip( );
-        flushCache( l_pChip );
-    }
+    #define PRDF_FUNC "[ScomRegister::ForceRead] "
 
-    return rc;
+    uint32_t o_rc = FAIL;
+
+    do
+    {
+        // No read allowed if register access attribute is write-only or no
+        // access.
+        if ( ( ACCESS_NONE == iv_operationType ) &&
+                ( ACCESS_WO == iv_operationType ) )
+        {
+            PRDF_ERR( PRDF_FUNC"Write-only register: 0x%08x 0x%016llx",
+                      getChip()->GetId(), iv_scomAddress );
+            break;
+        }
+
+        // Read hardware.
+        o_rc = Access( readCache(), MopRegisterAccess::READ );
+        if ( SUCCESS != o_rc )
+        {
+            // The read failed. Remove the entry from the cache so a subsequent
+            // Read() will attempt to read from hardware again.
+            flushCache( getChip() );
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
 uint32_t ScomRegister::Write()
 {
-    uint32_t rc = FAIL;
-    bool l_entryBeforeWrite = false;
-    BIT_STRING_CLASS & bs = readCache( l_entryBeforeWrite );
-    PRDF_ASSERT( true == l_entryBeforeWrite );
-    rc = Access( bs, MopRegisterAccess::WRITE );
+    #define PRDF_FUNC "[ScomRegister::Write] "
 
-    return(rc);
+    uint32_t o_rc = FAIL;
+
+    do
+    {
+        // No write allowed if register access attribute is read-only or no
+        // access.
+        if ( ( ACCESS_NONE == iv_operationType ) &&
+                 ( ACCESS_RO == iv_operationType ) )
+        {
+            PRDF_ERR( PRDF_FUNC"Read-only register: 0x%08x 0x%016llx",
+                      getChip()->GetId(), iv_scomAddress );
+            break;
+        }
+
+        // Query the cache for an existing entry.
+        if ( !queryCache() )
+        {
+            // Something bad happened and there was nothing in the cache to
+            // write to hardware.
+            PRDF_ERR( PRDF_FUNC"No entry found in cache: 0x%08x 0x%016llx",
+                      getChip()->GetId(), iv_scomAddress );
+            break;
+        }
+
+        // Write hardware.
+        o_rc = Access( readCache(), MopRegisterAccess::WRITE );
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -188,15 +229,25 @@ ExtensibleChip* ScomRegister::getChip( )const
     PRDF_ASSERT( iv_chipType == l_type )
     return l_pchip;
 }
-//-----------------------------------------------------------------------------
-BIT_STRING_CLASS & ScomRegister::readCache( bool & o_existingEntry ) const
-{
-    ExtensibleChip* l_pChip = getChip( );
-    RegDataCache & regDump = RegDataCache::getCachedRegisters();
-    return  regDump.read( l_pChip,this,o_existingEntry );
 
+//------------------------------------------------------------------------------
+
+bool ScomRegister::queryCache() const
+{
+    RegDataCache & cache = RegDataCache::getCachedRegisters();
+    BIT_STRING_CLASS * bs = cache.queryCache( getChip(), this );
+    return ( NULL != bs );
 }
-//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+
+BIT_STRING_CLASS & ScomRegister::readCache() const
+{
+    RegDataCache & cache = RegDataCache::getCachedRegisters();
+    return cache.read( getChip(), this );
+}
+
+//------------------------------------------------------------------------------
 
 void ScomRegister::flushCache( ExtensibleChip *i_pChip ) const
 {

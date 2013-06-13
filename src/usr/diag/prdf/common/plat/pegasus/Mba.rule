@@ -126,6 +126,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_REG_AND";
         scomaddr    0x800200910301143F;
         capture     group never;
+        access      write_only;
     };
 
     register MBADDRPHYFIR_MASK
@@ -205,6 +206,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAQ_AND";
         scomaddr    0x03010612;
         capture     group never;
+        access      write_only;
     };
 
     register MBASPA_MASK

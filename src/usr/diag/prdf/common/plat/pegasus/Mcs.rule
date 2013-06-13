@@ -82,6 +82,7 @@ chip Mcs
         name        "MC0.MCS0.RIGHT.MCI.SCOMFIR.MCIFIRQ AND";
         scomaddr    0x02011841;
         capture     group never;
+        access      write_only;
     };
 
     register MCIFIR_MASK

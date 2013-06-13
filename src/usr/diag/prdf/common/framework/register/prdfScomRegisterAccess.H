@@ -58,20 +58,12 @@ class ScomRegisterAccess : public ScomRegister
      * @brief     constructor
      * @param     i_Register     Reference to flyweight register
      * @param     i_pchip        RuleChip associated with register
-    */
+     */
     ScomRegisterAccess( const SCAN_COMM_REGISTER_CLASS & i_Register,
                         ExtensibleChip* i_pchip );
     /**
      * @brief     constructor
-     * @param     i_scomAddress   scom address of register
-     * @param     i_bitLength     scom length
-     * @param     i_pchip         RuleChip to which register belongs
-    */
-    ScomRegisterAccess( uint64_t i_scomAddress,uint32_t i_bitLength,
-                        ExtensibleChip* i_pchip );
-    /**
-     * @brief     constructor
-    */
+     */
     ScomRegisterAccess():ScomRegister( ),iv_containerChip ( NULL ){ };
 
     /**

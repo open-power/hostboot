@@ -72,18 +72,12 @@ class RegDataCache
 
     /**
      * @brief Returns the data buffer for the given target and address.
-     * @param i_pChip       The target associated with the register.
-     * @param i_pRegister   pointer to register to be read.
-     * @param o_readStat    Returns true if the register does not exist in
-     *                      cache. In this case, the function will create and
-     *                      add an empty BIT_STRING_CLASS to the cache.It is
-     *                      the responsibilty of the user to update the data
-     *                      buffer by reading from hardware.
+     * @param i_chip The target associated with the register.
+     * @param i_reg  Pointer to register to be read.
      * @return A reference to the data buffer associated with the register.
      */
-     BIT_STRING_CLASS & read( ExtensibleChip* i_pChip,
-                              const SCAN_COMM_REGISTER_CLASS * i_pRegister,
-                              bool & o_readStat );
+    BIT_STRING_CLASS & read( ExtensibleChip * i_chip,
+                             const SCAN_COMM_REGISTER_CLASS * i_reg );
 
     /**
      * @brief Flushes entire contents from cache.

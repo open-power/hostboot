@@ -83,11 +83,12 @@ public:
     * @param     i_address        address of the register
     * @param     i_scomLength     length of the bit string
     * @param     i_type           type of target associated with register
+    * @param     i_regOp          operations supported for given register
     * @return   returns reference to flyweight object from factory
     */
-   SCAN_COMM_REGISTER_CLASS & GetScanCommRegister(
-                    uint64_t address ,uint32_t i_scomLength,
-                    TARGETING::TYPE i_type );
+   SCAN_COMM_REGISTER_CLASS & GetScanCommRegister( uint64_t address,
+                                uint32_t i_scomLength, TARGETING::TYPE i_type,
+                                SCAN_COMM_REGISTER_CLASS::AccessLevel i_regOp );
 
   /**
    Get a scan ring register

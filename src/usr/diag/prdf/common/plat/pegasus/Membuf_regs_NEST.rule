@@ -236,6 +236,7 @@
         name        "MBU.MBS.ECC01.MBECCFIR_AND";
         scomaddr    0x02011441;
         capture     group never;
+        access      write_only;
     };
 
     register MBA0_MBSECCFIR_MASK
@@ -285,6 +286,7 @@
         name        "MBU.MBS.ECC23.MBECCFIR_AND";
         scomaddr    0x02011481;
         capture     group never;
+        access      write_only;
     };
 
     register MBA1_MBSECCFIR_MASK
