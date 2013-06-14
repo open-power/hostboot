@@ -162,7 +162,7 @@ group gPbesFir filter singlebit
     /** PBESFIR[6]
      *  A0LINK_PSR_COR_ERR
      */
-    (PbesFir, bit(6)) ? calloutAbus0AndProcThr5;
+    (PbesFir, bit(6)) ? calloutAbus0InterfaceTh5;
 
     /** PBESFIR[7]
      *  A0LINK_PSR_DERR_ERR
@@ -172,12 +172,12 @@ group gPbesFir filter singlebit
     /** PBESFIR[8]
      *  A0LINK_PSR_UNC_ERR
      */
-    (PbesFir, bit(8)) ? calloutAbus0AndProcThr1;
+    (PbesFir, bit(8)) ? calloutAbus0InterfaceTh1;
 
     /** PBESFIR[9]
      *  A1LINK_PSR_COR_ERR
      */
-    (PbesFir, bit(9)) ? calloutAbus1AndProcThr5;
+    (PbesFir, bit(9)) ? calloutAbus1InterfaceTh5;
 
     /** PBESFIR[10]
      *  A1LINK_PSR_DERR_ERR
@@ -187,12 +187,12 @@ group gPbesFir filter singlebit
     /** PBESFIR[11]
      *  A1LINK_PSR_UNC_ERR
      */
-    (PbesFir, bit(11)) ? calloutAbus1AndProcThr1;
+    (PbesFir, bit(11)) ? calloutAbus1InterfaceTh1;
 
     /** PBESFIR[12]
      *  A2LINK_PSR_COR_ERR
      */
-    (PbesFir, bit(12)) ? calloutAbus2AndProcThr5;
+    (PbesFir, bit(12)) ? calloutAbus2InterfaceTh5;
 
     /** PBESFIR[13]
      *  A2LINK_PSR_DERR_ERR
@@ -202,7 +202,7 @@ group gPbesFir filter singlebit
     /** PBESFIR[14]
      *  NK_PSR_UNC_ERR
      */
-    (PbesFir, bit(14)) ? calloutAbus2AndProcThr1;
+    (PbesFir, bit(14)) ? calloutAbus2InterfaceTh1;
 
     /** PBESFIR[15]
      *  A0LINK_FMR_COR_ERR_HI
@@ -335,291 +335,213 @@ group gIoaFir filter singlebit
     /** IOAFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoaFir, bit(0)) ? TBDDefaultCallout;
+    (IoaFir, bit(0)) ? defaultMaskedError;
 
     /** IOAFIR[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoaFir, bit(1)) ? TBDDefaultCallout;
+    (IoaFir, bit(1)) ? defaultMaskedError;
 
     /** IOAFIR[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (IoaFir, bit(2)) ? TBDDefaultCallout;
+    (IoaFir, bit(2)) ? SelfHighThr1;
 
-    /** IOAFIR[3|4|5|6|7]
+    /** IOAFIR[3:7]
      *  Reserved
      */
     (IoaFir, bit(3|4|5|6|7)) ? defaultMaskedError;
 
-    /** IOAFIR[8]
-     *  FIR_RX_BUS0_TRAINING_ERROR
+    /** IOAFIR[8:15]
+     *  FIR_RX_BUS0 unused
      */
-    (IoaFir, bit(8)) ? TBDDefaultCallout;
-
-    /** IOAFIR[9]
-     *  FIR_RX_BUS0_SPARE_DEPLOYED
-     */
-    (IoaFir, bit(9)) ? abus0SpareDeployed;
-
-    /** IOAFIR[10]
-     *  FIR_RX_BUS0_MAX_SPARES_EXCEEDED
-     */
-    (IoaFir, bit(10)) ? abus0MaxSparesExceeded;
-
-    /** IOAFIR[11]
-     *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
-     */
-    (IoaFir, bit(11)) ? TBDDefaultCallout;
-
-    /** IOAFIR[12]
-     *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
-     */
-    (IoaFir, bit(12)) ? abus0TooManyBusErrors;
-
-    /** IOAFIR[13|14|15]
-     *  Reserved
-     */
-    (IoaFir, bit(13|14|15)) ? defaultMaskedError;
+    (IoaFir, bit(8|9|10|11|12|13|14|15)) ? defaultMaskedError;
 
     /** IOAFIR[16]
-     *  FIR_RX_BUS1_TRAINING_ERROR
+     *  ABUS0 Training Error
      */
-    (IoaFir, bit(16)) ? TBDDefaultCallout;
+    (IoaFir, bit(16)) ? defaultMaskedError;
 
     /** IOAFIR[17]
-     *  FIR_RX_BUS1_SPARE_DEPLOYED
+     *  ABUS0 Spare Deployed
      */
-    (IoaFir, bit(17)) ? abus1SpareDeployed;
+    (IoaFir, bit(17)) ? spareDeployed_abus0;
 
     /** IOAFIR[18]
-     *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
+     *  ABUS0 Max Spares Exceeded
      */
-    (IoaFir, bit(18)) ? abus1MaxSparesExceeded;
+    (IoaFir, bit(18)) ? maxSparesExceeded_abus0;
 
     /** IOAFIR[19]
-     *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
+     *  ABUS0 Recalibration or Dynamic Repair Error
      */
-    (IoaFir, bit(19)) ? TBDDefaultCallout;
+    (IoaFir, bit(19)) ? calloutAbus0InterfaceTh1;
 
     /** IOAFIR[20]
-     *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
+     *  ABUS0 Too Many Bus Errors
      */
-    (IoaFir, bit(20)) ? abus1TooManyBusErrors;
+    (IoaFir, bit(20)) ? tooManyBusErrors_abus0;
 
-    /** IOAFIR[21|22|23]
+    /** IOAFIR[21:23]
      *  Reserved
      */
     (IoaFir, bit(21|22|23)) ? defaultMaskedError;
 
     /** IOAFIR[24]
-     *  FIR_RX_BUS2_TRAINING_ERROR
+     *  ABUS1 Training Error
      */
-    (IoaFir, bit(24)) ? TBDDefaultCallout;
+    (IoaFir, bit(24)) ? defaultMaskedError;
 
     /** IOAFIR[25]
-     *  FIR_RX_BUS2_SPARE_DEPLOYED
+     *  ABUS1 Spare Deployed
      */
-    (IoaFir, bit(25)) ? abus2SpareDeployed;
+    (IoaFir, bit(25)) ? spareDeployed_abus1;
 
     /** IOAFIR[26]
-     *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
+     *  ABUS1 Max Spares Exceeded
      */
-    (IoaFir, bit(26)) ? abus2MaxSparesExceeded;
+    (IoaFir, bit(26)) ? maxSparesExceeded_abus1;
 
     /** IOAFIR[27]
-     *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
+     *  ABUS1 Recalibration or Dynamic Repair Error
      */
-    (IoaFir, bit(27)) ? TBDDefaultCallout;
+    (IoaFir, bit(27)) ? calloutAbus1InterfaceTh1;
 
     /** IOAFIR[28]
-     *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
+     *  ABUS1 Too Many Bus Errors
      */
-    (IoaFir, bit(28)) ? abus2TooManyBusErrors;
+    (IoaFir, bit(28)) ? tooManyBusErrors_abus1;
 
-    /** IOAFIR[29|30|31]
+    /** IOAFIR[29:31]
      *  Reserved
      */
     (IoaFir, bit(29|30|31)) ? defaultMaskedError;
 
     /** IOAFIR[32]
-     *  FIR_RX_BUS3_TRAINING_ERROR
+     *  ABUS2 Training Error
      */
-    (IoaFir, bit(32)) ? TBDDefaultCallout;
+    (IoaFir, bit(32)) ? defaultMaskedError;
 
     /** IOAFIR[33]
-     *  FIR_RX_BUS3_SPARE_DEPLOYED
+     *  ABUS2 Spare Deployed
      */
-    (IoaFir, bit(33)) ? TBDDefaultCallout;
+    (IoaFir, bit(33)) ? spareDeployed_abus2;
 
     /** IOAFIR[34]
-     *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
+     *  ABUS2 Max Spares Exceeded
      */
-    (IoaFir, bit(34)) ? TBDDefaultCallout;
+    (IoaFir, bit(34)) ? maxSparesExceeded_abus2;
 
     /** IOAFIR[35]
-     *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
+     *  ABUS2 Recalibration or Dynamic Repair Error
      */
-    (IoaFir, bit(35)) ? TBDDefaultCallout;
+    (IoaFir, bit(35)) ? calloutAbus2InterfaceTh1;
 
     /** IOAFIR[36]
-     *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
+     *  ABUS2 Too Many Bus Errors
      */
-    (IoaFir, bit(36)) ? TBDDefaultCallout;
+    (IoaFir, bit(36)) ? tooManyBusErrors_abus2;
 
-    /** IOAFIR[37|38|39]
+    /** IOAFIR[37:39]
      *  Reserved
      */
     (IoaFir, bit(37|38|39)) ? defaultMaskedError;
 
-    /** IOAFIR[40]
-     *  FIR_RX_BUS4_TRAINING_ERROR
+    /** IOAFIR[40:47]
+     *  FIR_RX_BUS4 unused
      */
-    (IoaFir, bit(40)) ? TBDDefaultCallout;
-
-    /** IOAFIR[41]
-     *  FIR_RX_BUS4_SPARE_DEPLOYED
-     */
-    (IoaFir, bit(41)) ? TBDDefaultCallout;
-
-    /** IOAFIR[42]
-     *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
-     */
-    (IoaFir, bit(42)) ? TBDDefaultCallout;
-
-    /** IOAFIR[43]
-     *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
-     */
-    (IoaFir, bit(43)) ? TBDDefaultCallout;
-
-    /** IOAFIR[44]
-     *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
-     */
-    (IoaFir, bit(44)) ? TBDDefaultCallout;
-
-    /** IOAFIR[45|46|47]
-     *  Reserved
-     */
-    (IoaFir, bit(45|46|47)) ? TBDDefaultCallout;
+    (IoaFir, bit(40|41|42|43|44|45|46|47)) ? defaultMaskedError;
 
     /** IOAFIR[48]
      *  FIR_SCOMFIR_ERROR
      */
-    (IoaFir, bit(48)) ? TBDDefaultCallout;
+    (IoaFir, bit(48)) ? defaultMaskedError;
 
     /** IOAFIR[49]
      *  FIR_SCOMFIR_ERROR_CLONE
      */
-    (IoaFir, bit(49)) ? TBDDefaultCallout;
+    (IoaFir, bit(49)) ? defaultMaskedError;
 };
 
 ################################################################################
 # Actions specific to ABUS chiplet
 ################################################################################
 
-# A Bus 0-2 Spare Deployed
-actionclass abus0SpareDeployed
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus0SpareDeployed");
-};
-
-actionclass abus1SpareDeployed
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus1SpareDeployed");
-};
-
-actionclass abus2SpareDeployed
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus2SpareDeployed");
-};
-
-# A Bus 0-2 Spares Exceeded
-actionclass abus0MaxSparesExceeded
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus0SparesExceeded");
-    threshold1;
-};
-
-actionclass abus1MaxSparesExceeded
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus1SparesExceeded");
-    threshold1;
-};
-
-actionclass abus2MaxSparesExceeded
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus2SparesExceeded");
-    threshold1;
-};
-
-# A bus 0-2 Too Many bus errors
-actionclass abus0TooManyBusErrors
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus0TooManyErrors");
-    threshold1;
-};
-
-actionclass abus1TooManyBusErrors
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus1TooManyErrors");
-    threshold1;
-};
-
-actionclass abus2TooManyBusErrors
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
-    funccall("abus2TooManyErrors");
-    threshold1;
-};
-
-actionclass calloutAbus0AndProcThr5
+/** Callout the ABUS 0 interface */
+actionclass calloutAbus0Interface
 {
     callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
-    funccall("calloutProcsConnectedToAbus0");
-    threshold5pday;
+    callout(connected(TYPE_ABUS, 0), MRU_MEDA);
+    funccall("calloutPeerBus_abus0");
 };
 
-
-actionclass calloutAbus1AndProcThr5
+/** Callout the ABUS 1 interface */
+actionclass calloutAbus1Interface
 {
     callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
-    funccall("calloutProcsConnectedToAbus1");
-    threshold5pday;
+    callout(connected(TYPE_ABUS, 1), MRU_MEDA);
+    funccall("calloutPeerBus_abus1");
 };
 
-actionclass calloutAbus2AndProcThr5
+/** Callout the ABUS 2 interface */
+actionclass calloutAbus2Interface
 {
     callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
-    funccall("calloutProcsConnectedToAbus2");
-    threshold5pday;
+    callout(connected(TYPE_ABUS, 2), MRU_MEDA);
+    funccall("calloutPeerBus_abus2");
 };
 
-actionclass calloutAbus0AndProcThr1
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
-    funccall("calloutProcsConnectedToAbus0");
-    threshold1;
-};
+/** Callout the ABUS 0 interface, threshold 1 */
+actionclass calloutAbus0InterfaceTh1 { calloutAbus0Interface; threshold1; };
 
+/** Callout the ABUS 1 interface, threshold 1 */
+actionclass calloutAbus1InterfaceTh1 { calloutAbus1Interface; threshold1; };
 
-actionclass calloutAbus1AndProcThr1
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
-    funccall("calloutProcsConnectedToAbus1");
-    threshold1;
-};
+/** Callout the ABUS 2 interface, threshold 1 */
+actionclass calloutAbus2InterfaceTh1 { calloutAbus2Interface; threshold1; };
 
-actionclass calloutAbus2AndProcThr1
-{
-    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
-    funccall("calloutProcsConnectedToAbus2");
-    threshold1;
-};
+/** Callout the ABUS 0 interface, threshold 5 per day */
+actionclass calloutAbus0InterfaceTh5 { calloutAbus0Interface; threshold5pday; };
+
+/** Callout the ABUS 1 interface, threshold 5 per day */
+actionclass calloutAbus1InterfaceTh5 { calloutAbus1Interface; threshold5pday; };
+
+/** Callout the ABUS 2 interface, threshold 5 per day */
+actionclass calloutAbus2InterfaceTh5 { calloutAbus2Interface; threshold5pday; };
+
+/** Lane Repair: spare deployed - ABUS 0 */
+actionclass spareDeployed_abus0
+{ calloutAbus0Interface; funccall("spareDeployed_abus0"); };
+
+/** Lane Repair: spare deployed - ABUS 1 */
+actionclass spareDeployed_abus1
+{ calloutAbus1Interface; funccall("spareDeployed_abus1"); };
+
+/** Lane Repair: spare deployed - ABUS 2 */
+actionclass spareDeployed_abus2
+{ calloutAbus2Interface; funccall("spareDeployed_abus2"); };
+
+/** Lane Repair: max spares exceeded - ABUS 0 */
+actionclass maxSparesExceeded_abus0
+{ calloutAbus0InterfaceTh1; funccall("maxSparesExceeded_abus0"); };
+
+/** Lane Repair: max spares exceeded - ABUS 1 */
+actionclass maxSparesExceeded_abus1
+{ calloutAbus1InterfaceTh1; funccall("maxSparesExceeded_abus1"); };
+
+/** Lane Repair: max spares exceeded - ABUS 1 */
+actionclass maxSparesExceeded_abus2
+{ calloutAbus2InterfaceTh1; funccall("maxSparesExceeded_abus2"); };
+
+/** Lane Repair: too many bus errors - ABUS 0 */
+actionclass tooManyBusErrors_abus0
+{ calloutAbus0InterfaceTh1; funccall("tooManyBusErrors_abus0"); };
+
+/** Lane Repair: too many bus errors - ABUS 1 */
+actionclass tooManyBusErrors_abus1
+{ calloutAbus1InterfaceTh1; funccall("tooManyBusErrors_abus1"); };
+
+/** Lane Repair: too many bus errors - ABUS 2 */
+actionclass tooManyBusErrors_abus2
+{ calloutAbus2InterfaceTh1; funccall("tooManyBusErrors_abus2"); };
+

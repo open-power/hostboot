@@ -456,7 +456,7 @@ actionclass calloutDmiBus
 {
     calloutSelfMedA;
     callout(connected(TYPE_MEMBUF), MRU_MEDA);
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    calloutDmiBusSymFru;
 };
 
 /** Callout the DMI bus (MEDA), threshold 1 */

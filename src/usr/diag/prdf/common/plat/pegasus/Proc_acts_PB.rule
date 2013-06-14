@@ -2800,172 +2800,148 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_1, bit(0)) ? SelfHighThr1;
+    (IomcFir_1, bit(0)) ? defaultMaskedError;
 
     /** IOMCFIR_1[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_1, bit(1)) ? SelfHighThr1;
+    (IomcFir_1, bit(1)) ? defaultMaskedError;
 
     /** IOMCFIR_1[2]
      *  FIR_GCR_HANG_ERROR
      */
     (IomcFir_1, bit(2)) ? SelfHighThr1;
 
-    /** IOMCFIR_1[3|4|5|6|7]
+    /** IOMCFIR_1[3:7]
      *  Reserved
      */
     (IomcFir_1, bit(3|4|5|6|7)) ? defaultMaskedError;
 
     /** IOMCFIR_1[8]
-     *  FIR_RX_BUS0_TRAINING_ERROR
+     *  MCS4 Training Error
      */
     (IomcFir_1, bit(8)) ? defaultMaskedError;
 
     /** IOMCFIR_1[9]
-     *  FIR_RX_BUS0_SPARE_DEPLOYED
+     *  MCS4 Spare Deployed
      */
-    (IomcFir_1, bit(9)) ? dmiBus0SpareDeployed;
+    (IomcFir_1, bit(9)) ? spareDeployed_dmiBus4;
 
     /** IOMCFIR_1[10]
-     *  FIR_RX_BUS0_MAX_SPARES_EXCEEDED
+     *  MCS4 Max Spares Exceeded
      */
-    (IomcFir_1, bit(10)) ? dmiBus0MaxSparesExceeded;
+    (IomcFir_1, bit(10)) ? maxSparesExceeded_dmiBus4;
 
     /** IOMCFIR_1[11]
-     *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
+     *  MCS4 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_1, bit(11)) ? calloutDmiBus4Thr1;
+    (IomcFir_1, bit(11)) ? calloutDmiBus4Th1;
 
     /** IOMCFIR_1[12]
-     *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
+     *  MCS4 Too Many Bus Errors
      */
     (IomcFir_1, bit(12)) ? defaultMaskedError;
 
-    /** IOMCFIR_1[13|14|15]
+    /** IOMCFIR_1[13:15]
      *  Reserved
      */
     (IomcFir_1, bit(13|14|15)) ? defaultMaskedError;
 
     /** IOMCFIR_1[16]
-     *  FIR_RX_BUS1_TRAINING_ERROR
+     *  MCS5 Training Error
      */
     (IomcFir_1, bit(16)) ? defaultMaskedError;
 
     /** IOMCFIR_1[17]
-     *  FIR_RX_BUS1_SPARE_DEPLOYED
+     *  MCS5 Spare Deployed
      */
-    (IomcFir_1, bit(17)) ? dmiBus1SpareDeployed;
+    (IomcFir_1, bit(17)) ? spareDeployed_dmiBus5;
 
     /** IOMCFIR_1[18]
-     *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
+     *  MCS5 Max Spares Exceeded
      */
-    (IomcFir_1, bit(18)) ? dmiBus1MaxSparesExceeded;
+    (IomcFir_1, bit(18)) ? maxSparesExceeded_dmiBus5;
 
     /** IOMCFIR_1[19]
-     *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
+     *  MCS5 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_1, bit(19)) ? calloutDmiBus5Thr1;
+    (IomcFir_1, bit(19)) ? calloutDmiBus5Th1;
 
     /** IOMCFIR_1[20]
-     *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
+     *  MCS5 Too Many Bus Errors
      */
     (IomcFir_1, bit(20)) ? defaultMaskedError;
 
-    /** IOMCFIR_1[21|22|23]
+    /** IOMCFIR_1[21:23]
      *  Reserved
      */
     (IomcFir_1, bit(21|22|23)) ? defaultMaskedError;
 
     /** IOMCFIR_1[24]
-     *  FIR_RX_BUS2_TRAINING_ERROR
+     *  MCS6 Training Error
      */
     (IomcFir_1, bit(24)) ? defaultMaskedError;
 
     /** IOMCFIR_1[25]
-     *  FIR_RX_BUS2_SPARE_DEPLOYED
+     *  MCS6 Spare Deployed
      */
-    (IomcFir_1, bit(25)) ? dmiBus2SpareDeployed;
+    (IomcFir_1, bit(25)) ? spareDeployed_dmiBus6;
 
     /** IOMCFIR_1[26]
-     *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
+     *  MCS6 Max Spares Exceeded
      */
-    (IomcFir_1, bit(26)) ? dmiBus2MaxSparesExceeded;
+    (IomcFir_1, bit(26)) ? maxSparesExceeded_dmiBus6;
 
     /** IOMCFIR_1[27]
-     *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
+     *  MCS6 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_1, bit(27)) ? calloutDmiBus6Thr1;
+    (IomcFir_1, bit(27)) ? calloutDmiBus6Th1;
 
     /** IOMCFIR_1[28]
-     *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
+     *  MCS6 Too Many Bus Errors
      */
     (IomcFir_1, bit(28)) ? defaultMaskedError;
 
-    /** IOMCFIR_1[29|30|31]
+    /** IOMCFIR_1[29:31]
      *  Reserved
      */
     (IomcFir_1, bit(29|30|31)) ? defaultMaskedError;
 
     /** IOMCFIR_1[32]
-     *  FIR_RX_BUS3_TRAINING_ERROR
+     *  MCS7 Training Error
      */
     (IomcFir_1, bit(32)) ? defaultMaskedError;
 
     /** IOMCFIR_1[33]
-     *  FIR_RX_BUS3_SPARE_DEPLOYED
+     *  MCS7 Spare Deployed
      */
-    (IomcFir_1, bit(33)) ? dmiBus3SpareDeployed;
+    (IomcFir_1, bit(33)) ? spareDeployed_dmiBus7;
 
     /** IOMCFIR_1[34]
-     *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
+     *  MCS7 Max Spares Exceeded
      */
-    (IomcFir_1, bit(34)) ? dmiBus3MaxSparesExceeded;
+    (IomcFir_1, bit(34)) ? maxSparesExceeded_dmiBus7;
 
     /** IOMCFIR_1[35]
-     *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
+     *  MCS7 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_1, bit(35)) ? calloutDmiBus7Thr1;
+    (IomcFir_1, bit(35)) ? calloutDmiBus7Th1;
 
     /** IOMCFIR_1[36]
-     *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
+     *  MCS7 Too Many Bus Errors
      */
     (IomcFir_1, bit(36)) ? defaultMaskedError;
 
-    /** IOMCFIR_1[37|38|39]
+    /** IOMCFIR_1[37:39]
      *  Reserved
      */
     (IomcFir_1, bit(37|38|39)) ? defaultMaskedError;
 
-    /** IOMCFIR_1[40]
-     *  FIR_RX_BUS4_TRAINING_ERROR
+    /** IOMCFIR_1[40:47]
+     *  FIR_RX_BUS4 unused
      */
-    (IomcFir_1, bit(40)) ? defaultMaskedError;
+    (IomcFir_1, bit(40|41|42|43|44|45|46|47)) ? defaultMaskedError;
 
-    /** IOMCFIR_1[41]
-     *  FIR_RX_BUS4_SPARE_DEPLOYED
-     */
-    (IomcFir_1, bit(41)) ? defaultMaskedError;
-
-    /** IOMCFIR_1[42]
-     *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
-     */
-    (IomcFir_1, bit(42)) ? defaultMaskedError;
-
-    /** IOMCFIR_1[43]
-     *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
-     */
-    (IomcFir_1, bit(43)) ? defaultMaskedError;
-
-    /** IOMCFIR_1[44]
-     *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
-     */
-    (IomcFir_1, bit(44)) ? defaultMaskedError;
-
-    /** IOMCFIR_1[45|46|47]
-     *  Reserved
-     */
-    (IomcFir_1, bit(45|46|47)) ? defaultMaskedError;
     /** IOMCFIR_1[48]
      *  FIR_SCOMFIR_ERROR
      */
@@ -2989,60 +2965,6 @@ actionclass analyzeMpIPL
 {
     TBDDefaultCallout;
     funccall("analyzeMpIPL");
-};
-
-# DMI Bus 0-3 Spare Deployed
-actionclass dmiBus0SpareDeployed
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus0SpareDeployed");
-};
-
-actionclass dmiBus1SpareDeployed
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus1SpareDeployed");
-};
-
-actionclass dmiBus2SpareDeployed
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus2SpareDeployed");
-};
-
-actionclass dmiBus3SpareDeployed
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus3SpareDeployed");
-};
-
-# DMI Bus 0-3 Spares Exceeded
-actionclass dmiBus0MaxSparesExceeded
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus0SparesExceeded");
-    threshold1;
-};
-
-actionclass dmiBus1MaxSparesExceeded
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus1SparesExceeded");
-    threshold1;
-};
-
-actionclass dmiBus2MaxSparesExceeded
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus2SparesExceeded");
-    threshold1;
-};
-
-actionclass dmiBus3MaxSparesExceeded
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus3SparesExceeded");
-    threshold1;
 };
 
 /** Callout the connected PCI 0 controller. */
@@ -3093,42 +3015,79 @@ actionclass calloutConnPci2AndIsolatePathTh1
     calloutConnPci2Th1;
 };
 
-/** Callout MEMBUS_ERROR_ENUM procedure , threshold 1 */
-actionclass calloutMemErrProceThr1
+/** Callout the DMI bus 4 */
+actionclass calloutDmiBus4
 {
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    threshold1;
-};
-
-/** Callout the DMI bus4 (MEDA), threshold 1 */
-actionclass calloutDmiBus4Thr1
-{
-    callout(connected(TYPE_MCS, 4), MRU_MEDA);
+    callout(connected(TYPE_MCS,    4), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 4), MRU_MEDA);
-    calloutMemErrProceThr1;
+    calloutDmiBusSymFru;
 };
 
-/** Callout the DMI bus5 (MEDA), threshold 1 */
-actionclass calloutDmiBus5Thr1
+/** Callout the DMI bus 5 */
+actionclass calloutDmiBus5
 {
-    callout(connected(TYPE_MCS, 5), MRU_MEDA);
+    callout(connected(TYPE_MCS,    5), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 5), MRU_MEDA);
-    calloutMemErrProceThr1;
+    calloutDmiBusSymFru;
 };
 
-/** Callout the DMI bus6 (MEDA), threshold 1 */
-actionclass calloutDmiBus6Thr1
+/** Callout the DMI bus 6 */
+actionclass calloutDmiBus6
 {
-    callout(connected(TYPE_MCS, 6), MRU_MEDA);
+    callout(connected(TYPE_MCS,    6), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 6), MRU_MEDA);
-    calloutMemErrProceThr1;
+    calloutDmiBusSymFru;
 };
 
-/** Callout the DMI bus7 (MEDA), threshold 1 */
-actionclass calloutDmiBus7Thr1
+/** Callout the DMI bus 7 */
+actionclass calloutDmiBus7
 {
-    callout(connected(TYPE_MCS, 7), MRU_MEDA);
+    callout(connected(TYPE_MCS,    7), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 7), MRU_MEDA);
-    calloutMemErrProceThr1;
+    calloutDmiBusSymFru;
 };
+
+/** Callout the DMI bus 4, threshold 1 */
+actionclass calloutDmiBus4Th1 { calloutDmiBus4; threshold1; };
+
+/** Callout the DMI bus 5, threshold 1 */
+actionclass calloutDmiBus5Th1 { calloutDmiBus5; threshold1; };
+
+/** Callout the DMI bus 6, threshold 1 */
+actionclass calloutDmiBus6Th1 { calloutDmiBus6; threshold1; };
+
+/** Callout the DMI bus 7, threshold 1 */
+actionclass calloutDmiBus7Th1 { calloutDmiBus7; threshold1; };
+
+/** Lane Repair: spare deployed - DMI bus 4 */
+actionclass spareDeployed_dmiBus4
+{ calloutDmiBus4; funccall("spareDeployed_dmiBus4"); };
+
+/** Lane Repair: spare deployed - DMI bus 5 */
+actionclass spareDeployed_dmiBus5
+{ calloutDmiBus5; funccall("spareDeployed_dmiBus5"); };
+
+/** Lane Repair: spare deployed - DMI bus 6 */
+actionclass spareDeployed_dmiBus6
+{ calloutDmiBus6; funccall("spareDeployed_dmiBus6"); };
+
+/** Lane Repair: spare deployed - DMI bus 7 */
+actionclass spareDeployed_dmiBus7
+{ calloutDmiBus7; funccall("spareDeployed_dmiBus7"); };
+
+/** Lane Repair: max spares exceeded - DMI bus 4 */
+actionclass maxSparesExceeded_dmiBus4
+{ calloutDmiBus4Th1; funccall("maxSparesExceeded_dmiBus4"); };
+
+/** Lane Repair: max spares exceeded - DMI bus 5 */
+actionclass maxSparesExceeded_dmiBus5
+{ calloutDmiBus5Th1; funccall("maxSparesExceeded_dmiBus5"); };
+
+/** Lane Repair: max spares exceeded - DMI bus 6 */
+actionclass maxSparesExceeded_dmiBus6
+{ calloutDmiBus6Th1; funccall("maxSparesExceeded_dmiBus6"); };
+
+/** Lane Repair: max spares exceeded - DMI bus 7 */
+actionclass maxSparesExceeded_dmiBus7
+{ calloutDmiBus7Th1; funccall("maxSparesExceeded_dmiBus7"); };
 

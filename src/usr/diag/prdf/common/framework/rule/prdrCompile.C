@@ -474,10 +474,13 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         // Initialize target types.
         g_ActionArgMap["TYPE_PROC"]     = TARGETING::TYPE_PROC;
         g_ActionArgMap["TYPE_EX"]       = TARGETING::TYPE_EX;
+        g_ActionArgMap["TYPE_XBUS"]     = TARGETING::TYPE_XBUS;
+        g_ActionArgMap["TYPE_ABUS"]     = TARGETING::TYPE_ABUS;
+        g_ActionArgMap["TYPE_PCI"]      = TARGETING::TYPE_PCI;
         g_ActionArgMap["TYPE_MCS"]      = TARGETING::TYPE_MCS;
         g_ActionArgMap["TYPE_MEMBUF"]   = TARGETING::TYPE_MEMBUF;
+        g_ActionArgMap["TYPE_L4"]       = TARGETING::TYPE_L4;
         g_ActionArgMap["TYPE_MBA"]      = TARGETING::TYPE_MBA;
-        g_ActionArgMap["TYPE_PCI"]      = TARGETING::TYPE_PCI;
 
         // Initialize symbolic callouts.
         for ( SymCallout_t * i = symCalloutArray; NULL != i->str; i++ )

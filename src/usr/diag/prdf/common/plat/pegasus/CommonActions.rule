@@ -111,7 +111,6 @@ actionclass SUEGenerationPoint
 # Callout self
 actionclass calloutSelfHigh { callout(MRU_HIGH); };
 actionclass calloutSelfMed  { callout(MRU_MED);  };
-actionclass calloutSelfHigh  { callout(MRU_HIGH);  };
 actionclass calloutSelfMedA { callout(MRU_MEDA); };
 actionclass calloutSelfLow  { callout(MRU_LOW);  };
 
@@ -121,6 +120,10 @@ actionclass callout2ndLvlMed
 
 actionclass callout2ndLvlLow
 { callout(procedure(NextLevelSupport_ENUM), MRU_LOW); };
+
+/** Callout the DMI bus symbolic FRU */
+actionclass calloutDmiBusSymFru
+{ callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW); };
 
 ################################################################################
 #                           Callouts with thresholds                           #

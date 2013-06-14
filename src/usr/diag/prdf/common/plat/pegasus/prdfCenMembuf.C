@@ -320,48 +320,32 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
 PRDF_PLUGIN_DEFINE( Membuf, PostAnalysis );
 
 /**
- * @brief Handle DMI Bus 0-1 spare deployed
- * @param i_chip Mem Buf chip
- * @param i_sc   The step code data struct
- * @returns Failure or Success
+ * @brief Handle lane repair spare deployed
+ * @param  i_membChip A Centaur chip.
+ * @param  i_sc       The step code data struct
+ * @return SUCCESS
  */
-int32_t dmiBus0SpareDeployed(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
+int32_t spareDeployed( ExtensibleChip * i_membChip,
+                       STEP_CODE_DATA_STRUCT & i_sc )
 {
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 0, i_sc,
-                                             true);
+    return LaneRepair::handleLaneRepairEvent( i_membChip, TYPE_MEMBUF, 0, i_sc,
+                                              true );
 }
-PRDF_PLUGIN_DEFINE( Membuf, dmiBus0SpareDeployed );
-
-int32_t dmiBus1SpareDeployed(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 1, i_sc,
-                                             true);
-}
-PRDF_PLUGIN_DEFINE( Membuf, dmiBus1SpareDeployed );
+PRDF_PLUGIN_DEFINE( Membuf, spareDeployed );
 
 /**
- * @brief Handle DMI Bus 0-1 spares exceeded
- * @param i_chip Mem Buf chip
- * @param i_sc   The step code data struct
- * @returns Failure or Success
+ * @brief  Handle lane repair max spares exceeded
+ * @param  i_membChip A Centaur chip.
+ * @param  i_sc       The step code data struct
+ * @return SUCCESS
  */
-int32_t dmiBus0SparesExceeded(  ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & i_sc )
+int32_t maxSparesExceeded( ExtensibleChip * i_membChip,
+                           STEP_CODE_DATA_STRUCT & i_sc )
 {
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 0, i_sc,
-                                             false);
+    return LaneRepair::handleLaneRepairEvent( i_membChip, TYPE_MEMBUF, 0, i_sc,
+                                              false );
 }
-PRDF_PLUGIN_DEFINE( Membuf, dmiBus0SparesExceeded );
-
-int32_t dmiBus1SparesExceeded(  ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 1, i_sc,
-                                             false);
-}
-PRDF_PLUGIN_DEFINE( Membuf, dmiBus1SparesExceeded );
+PRDF_PLUGIN_DEFINE( Membuf, maxSparesExceeded );
 
 /**
  * @brief  Checks if spare deployed bit for DMI bus is set.
@@ -387,4 +371,5 @@ int32_t checkSpareBit( ExtensibleChip * i_mbChip,
 PRDF_PLUGIN_DEFINE( Membuf, checkSpareBit );
 
 } // end namespace Membuf
+
 } // end namespace PRDF

@@ -89,35 +89,6 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
             break;
         }
 
-        // Add callout for RX target
-        i_sc.service_data->SetCallout( rxBusTgt, MRU_MEDA );
-
-        // Get TX bus target
-        if (i_busType == TYPE_XBUS || i_busType == TYPE_ABUS)
-        {
-            txBusTgt = getConnectedPeerTarget(rxBusTgt);
-        }
-        else if (i_busType == TYPE_MEMBUF)
-        {
-            txBusTgt = getConnectedParent(rxBusTgt, TYPE_MCS);
-        }
-        else if (i_busType == TYPE_MCS)
-        {
-            txBusTgt = getConnectedChild(rxBusTgt, TYPE_MEMBUF, 0);
-        }
-
-        if ( NULL == txBusTgt )
-        {
-            PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] i_chip: 0x%08x "
-                      "rxBusTgt: 0x%08x. Couldn't find TX connected bus",
-                      getHuid(i_chip->GetChipHandle()),
-                      getHuid(rxBusTgt));
-            break;
-        }
-
-        // Add callout for TX target
-        i_sc.service_data->SetCallout( txBusTgt, MRU_MEDA );
-
         // Call io_read_erepair
         l_rc = readErepair(rxBusTgt, rx_lanes);
         if (SUCCESS != l_rc)
@@ -192,6 +163,29 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
                                                  l_vpdLaneMap64to127);
             if (i_spareDeployed)
             {
+                // Get TX bus target
+                if (i_busType == TYPE_XBUS || i_busType == TYPE_ABUS)
+                {
+                    txBusTgt = getConnectedPeerTarget(rxBusTgt);
+                }
+                else if (i_busType == TYPE_MEMBUF)
+                {
+                    txBusTgt = getConnectedParent(rxBusTgt, TYPE_MCS);
+                }
+                else if (i_busType == TYPE_MCS)
+                {
+                    txBusTgt = getConnectedChild(rxBusTgt, TYPE_MEMBUF, 0);
+                }
+
+                if ( NULL == txBusTgt )
+                {
+                    PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] i_chip: "
+                              "0x%08x rxBusTgt: 0x%08x. Couldn't find TX "
+                              "connected bus", getHuid(i_chip->GetChipHandle()),
+                              getHuid(rxBusTgt));
+                    break;
+                }
+
                 // Call Erepair to update VPD
                 l_rc = setVpdFailedLanes(rxBusTgt, txBusTgt,
                                          rx_lanes, thrExceeded);

@@ -35,6 +35,9 @@ using namespace TARGETING;
 
 namespace PRDF
 {
+
+using namespace PlatServices;
+
 namespace Proc
 {
 
@@ -276,8 +279,6 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
                           TargetHandleList & o_externalChips,
                           uint64_t & o_wofValue )
 {
-    using namespace PlatServices;
-
     // Clear parameters.
     o_wasInternal = false;
     o_externalChips.erase(o_externalChips.begin(), o_externalChips.end());
@@ -410,194 +411,53 @@ int32_t analyzeMpIPL( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( Proc, analyzeMpIPL );
 
+//------------------------------------------------------------------------------
+// Lane Repair plugins
+//------------------------------------------------------------------------------
 
-/**
- * @brief Handle XBUS 1 spare deployed
- * @param i_chip P8 chip
- * @param i_sc   The step code data struct
- * @returns Failure or Success
- */
-int32_t xbus1SpareDeployed(  ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_XBUS, 1, i_sc, true);
-}
-PRDF_PLUGIN_DEFINE( Proc, xbus1SpareDeployed );
+#define PLUGIN_LANE_REPAIR( BUS, TYPE, POS ) \
+int32_t spareDeployed_##BUS##POS( ExtensibleChip * i_chip, \
+                                  STEP_CODE_DATA_STRUCT & i_sc ) \
+{ return LaneRepair::handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, true); } \
+PRDF_PLUGIN_DEFINE( Proc, spareDeployed_##BUS##POS ); \
+ \
+int32_t maxSparesExceeded_##BUS##POS( ExtensibleChip * i_chip, \
+                                      STEP_CODE_DATA_STRUCT & i_sc ) \
+{ return LaneRepair::handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
+PRDF_PLUGIN_DEFINE( Proc, maxSparesExceeded_##BUS##POS );
 
-/**
- * @brief Handle XBUS 1 spares exceeded
- * @param i_chip P8 chip
- * @param i_sc   The step code data struct
- * @returns Failure or Success
- */
-int32_t xbus1SparesExceeded(  ExtensibleChip * i_chip,
-                              STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_XBUS, 1, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, xbus1SparesExceeded );
+PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 1 )
 
-/**
- * @brief Handle XBUS 1 Too Many Bus Errors
- * @param i_chip P8 chip
- * @param i_sc   The step code data struct
- * @returns Failure or Success
- */
-int32_t xbus1TooManyErrors(  ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_XBUS, 1, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, xbus1TooManyErrors );
+PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 0 )
+PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 1 )
+PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 2 )
 
-/**
- * @brief Handle ABUS 0-2 spare deployed
- * @param i_chip P8 chip
- * @param i_sc The step code data struct
- * @returns Failure or Success
- */
-int32_t abus0SpareDeployed(  ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 0, i_sc, true);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus0SpareDeployed );
+PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 4 )
+PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 5 )
+PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 6 )
+PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 7 )
 
-int32_t abus1SpareDeployed(  ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 1, i_sc, true);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus1SpareDeployed );
+#undef PLUGIN_LANE_REPAIR
 
-int32_t abus2SpareDeployed(  ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 2, i_sc, true);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus2SpareDeployed );
+#define PLUGIN_LANE_REPAIR( BUS, TYPE, POS ) \
+int32_t tooManyBusErrors_##BUS##POS( ExtensibleChip * i_chip, \
+                                     STEP_CODE_DATA_STRUCT & i_sc ) \
+{ return LaneRepair::handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
+PRDF_PLUGIN_DEFINE( Proc, tooManyBusErrors_##BUS##POS );
 
-/**
- * @brief Handle ABUS 0-2 spares exceeded
- * @param i_chip P8 chip
- * @param i_sc The step code data struct
- * @returns Failure or Success
- */
-int32_t abus0SparesExceeded(  ExtensibleChip * i_chip,
-                              STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 0, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus0SparesExceeded );
+PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 1 )
 
-int32_t abus1SparesExceeded(  ExtensibleChip * i_chip,
-                              STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 1, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus1SparesExceeded );
+PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 0 )
+PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 1 )
+PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 2 )
 
-int32_t abus2SparesExceeded(  ExtensibleChip * i_chip,
-                              STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 2, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus2SparesExceeded );
+// Plugin not used for DMI buses
 
-/**
- * @brief Handle ABUS 0-2 too many bus errors
- * @param i_chip P8 chip
- * @param i_sc The step code data struct
- * @returns Failure or Success
- */
-int32_t abus0TooManyErrors(  ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 0, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus0TooManyErrors );
+#undef PLUGIN_LANE_REPAIR
 
-int32_t abus1TooManyErrors(  ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 1, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus1TooManyErrors );
-
-int32_t abus2TooManyErrors(  ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 2, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, abus2TooManyErrors );
-
-/**
- * @brief Handle DMI bus 0-3 spare deployed
- * @param i_chip P8 chip
- * @param i_sc   The step code data struct
- * @returns Failure or Success
- */
-int32_t dmiBus0SpareDeployed(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 4, i_sc, true);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus0SpareDeployed );
-
-int32_t dmiBus1SpareDeployed(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 5, i_sc, true);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus1SpareDeployed );
-
-int32_t dmiBus2SpareDeployed(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 6, i_sc, true);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus2SpareDeployed );
-
-int32_t dmiBus3SpareDeployed(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 7, i_sc, true);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus3SpareDeployed );
-
-/**
- * @brief Handle DMI Bus 0-3 spares exceeded
- * @param i_chip P8 chip
- * @param i_sc The step code data struct
- * @returns Failure or Success
- */
-int32_t dmiBus0SparesExceeded(  ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 4, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus0SparesExceeded );
-
-int32_t dmiBus1SparesExceeded(  ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 5, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus1SparesExceeded );
-
-int32_t dmiBus2SparesExceeded(  ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 6, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus2SparesExceeded );
-
-int32_t dmiBus3SparesExceeded(  ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 7, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus3SparesExceeded );
+//------------------------------------------------------------------------------
+// Centaur CS plugins
+//------------------------------------------------------------------------------
 
 /**
  * @brief Mask attentions from MCIFIR after Centaur Unit checkstop
@@ -709,82 +569,65 @@ int32_t MaskMCS31IfCentaurCheckstop( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( Proc, MaskMCS31IfCentaurCheckstop );
 
+//------------------------------------------------------------------------------
+// Callout plugins
+//------------------------------------------------------------------------------
+
 /**
- * @brief Calls out chip connected on both ends of the a given bus
- * @param i_chip P8 chip
- * @param i_sc   The step code data struct
- * @param i_type type of bus in question
- * @param i_pos  position asociated with bus target
- * @returns Success
+ * @brief  Callout the peer end point on the given bus (priority MRU_MEDA).
+ * @param  i_chip A P8 chip.
+ * @param  i_sc   The step code data struct.
+ * @param  i_type Bus type (TYPE_XBUS or TYPE_ABUS).
+ * @param  i_pos  Bus position.
+ * @return SUCCESS
  */
-
-int32_t calloutChip( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & i_sc,
-                    TYPE i_type, uint32_t i_pos )
+int32_t calloutPeerBus( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & i_sc,
+                        TYPE i_type, uint32_t i_pos )
 {
-    //FIXME RTC 72645 Once connection type is supported in getconnected, we
-    //shall no longer need these plugins using this function.Callout connected
-    //resolution shall be enough for us to callout connected peer proc.
+    #define PRDF_FUNC "[Proc::calloutPeerBus] "
 
-    TargetHandle_t l_srcProcTgt = i_chip->GetChipHandle( );
-    TargetHandle_t l_desPeerProc = PlatServices::getConnectedPeerProc(
-                                                    l_srcProcTgt,i_type,i_pos );
-    PRDpriority l_priority = MRU_MEDA;
-    if( NULL == l_desPeerProc )
+    // FIXME RTC 72645 Can removed plugins once callout(connected()) is fixed.
+
+    do
     {
-        PRDF_ERR("proc::calloutChip failed to get peer proc ");
-    }
-    else
-    {
-        //FIXME RTC 23127 If Ras Team agrees,we shall just callout A-Bus here
-        //and not entire Proc chips on both ends of A-Bus.
-        i_sc.service_data->SetCallout( l_desPeerProc,l_priority );
-    }
-    i_sc.service_data->SetCallout( l_srcProcTgt,l_priority );
+        TargetHandle_t srcEndPoint = getConnectedChild( i_chip->GetChipHandle(),
+                                                        i_type, i_pos );
+        if ( NULL == srcEndPoint )
+        {
+            PRDF_ERR( PRDF_FUNC"getConnectedChild(0x%08x,%d,%d) failed",
+                      i_chip->GetId(), i_type, i_pos );
+            break;
+        }
+
+        TargetHandle_t destEndPoint = getConnectedPeerTarget( srcEndPoint );
+        if ( NULL == destEndPoint )
+        {
+            PRDF_ERR( PRDF_FUNC"getConnectedPeerTarget(0x%08x) failed",
+                      getHuid(srcEndPoint) );
+            break;
+        }
+
+        i_sc.service_data->SetCallout( destEndPoint, MRU_MEDA );
+
+    } while (0);
+
     return SUCCESS;
 }
 
-/**
- * @brief Called when there is an error on ABus0 connecting two PB chiplet
- * @param i_chip P8 chip
- * @param i_sc   The step code data struct
- * @returns Success
- */
+#define PLUGIN_CALLOUT_PEER_BUS( BUS, TYPE, POS ) \
+int32_t calloutPeerBus_##BUS##POS( ExtensibleChip * i_chip, \
+                                   STEP_CODE_DATA_STRUCT & i_sc ) \
+{ return calloutPeerBus( i_chip, i_sc, TYPE, POS ); } \
+PRDF_PLUGIN_DEFINE( Proc, calloutPeerBus_##BUS##POS );
 
-int32_t calloutProcsConnectedToAbus0(  ExtensibleChip * i_chip,
-                                        STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return calloutChip( i_chip,i_sc,TYPE_ABUS,0 );
-}
-PRDF_PLUGIN_DEFINE( Proc,calloutProcsConnectedToAbus0 );
+PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 1 )
 
+PLUGIN_CALLOUT_PEER_BUS( abus, TYPE_ABUS, 0 )
+PLUGIN_CALLOUT_PEER_BUS( abus, TYPE_ABUS, 1 )
+PLUGIN_CALLOUT_PEER_BUS( abus, TYPE_ABUS, 2 )
 
-/**
- * @brief Called when there is an error on ABus1 connecting two PB chiplet
- * @param i_chip P8 chip
- * @param i_sc   The step code data struct
- * @returns Success
- */
-
-int32_t calloutProcsConnectedToAbus1(  ExtensibleChip * i_chip,
-                                        STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return calloutChip( i_chip,i_sc,TYPE_ABUS,1 );
-}
-PRDF_PLUGIN_DEFINE( Proc,calloutProcsConnectedToAbus1 );
-
-/**
- * @brief Called when there is an error on ABus2 connecting two PB chiplet
- * @param i_chip P8 chip
- * @param i_sc   The step code data struct
- * @returns Success
- */
-
-int32_t calloutProcsConnectedToAbus2(  ExtensibleChip * i_chip,
-                                        STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return calloutChip( i_chip,i_sc,TYPE_ABUS,2 );
-}
-PRDF_PLUGIN_DEFINE( Proc,calloutProcsConnectedToAbus2 );
+#undef PLUGIN_CALLOUT_PEER_BUS
 
 } // end namespace Proc
+
 } // end namespace PRDF
