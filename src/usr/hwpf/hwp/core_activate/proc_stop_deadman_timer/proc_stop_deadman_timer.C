@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_stop_deadman_timer.C,v 1.7 2012/10/24 22:23:37 jmcgill Exp $
+// $Id: proc_stop_deadman_timer.C,v 1.8 2013/06/05 14:40:54 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_stop_deadman_timer.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -180,6 +180,23 @@ extern "C"
                 }
             }
 
+            // Reset the SBE so it can be used for MPIPL if needed
+            rc_ecmd |= data.flushTo0();
+            rc_ecmd |= data.setBit(0);
+
+            if(rc_ecmd)
+            {
+                FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            rc = fapiPutScom(i_target, PORE_SBE_RESET_0x000E0002, data);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Scom error resetting SBE\n");
+                break;
+            }
+            
         } while (0);
 
         // mark function exit

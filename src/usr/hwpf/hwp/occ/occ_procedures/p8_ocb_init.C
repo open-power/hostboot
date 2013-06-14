@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_ocb_init.C,v 1.5 2013/04/23 16:30:58 jimyac Exp $
+// $Id: p8_ocb_init.C,v 1.7 2013/06/05 17:39:01 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_ocb_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -242,7 +242,7 @@ ReturnCode proc_ocb_setup(const Target& i_target,  const uint8_t  i_ocb_chan,
   //    bit 4 => ocb_stream_mode        (0=disabled 1=enabled)
   //    bit 5 => ocb_stream_type        (0=linear   1=circular)
   // --------------------------------------------------------------------
-  l_ecmdRc |= mask_or.flushTo0();
+  l_ecmdRc |= mask_or.flushTo0();  
   l_ecmdRc |= mask_and.flushTo1();
 
   if (i_ocb_type == OCB_TYPE_LIN) {                    // linear non-streaming
@@ -585,7 +585,9 @@ ReturnCode proc_ocb_reset(const Target& i_target) {
   // Set Interrupt Source Mask Registers 0 & 1 
   // OIMR0/1 @ 0X0006A006 & 0X0006A016
   // -----------------------------------------
-  l_ecmdRc = data.flushTo1();
+  l_ecmdRc  = data.flushTo0();
+  l_ecmdRc |= data.setWord(0, 0xFFFFFFFF);  // keep word1 0's for simics
+    
   if (l_ecmdRc) {
     FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", l_ecmdRc);
     rc.setEcmdError(l_ecmdRc);
@@ -729,3 +731,16 @@ ReturnCode proc_ocb_reset(const Target& i_target) {
 
 } //end extern C
 
+/*
+*************** Do not edit this area ***************
+This section is automatically updated by CVS when you check in this file.
+Be sure to create CVS comments when you commit so that they can be included here.
+
+$Log: p8_ocb_init.C,v $
+Revision 1.7  2013/06/05 17:39:01  jimyac
+fixed SW207126 - simics issue of writing non-zero value to reserved bits
+
+
+
+
+*/

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.13 2013/04/28 05:48:24 baysah Exp $
+/// $Id: proc_cen_framelock.C,v 1.16 2013/06/05 18:15:39 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -2007,7 +2007,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
     }
 
 
-    // Return bad code from while loops here, before the get overwritten by the procedure EXIT scoms below
+    // Return bad code from while loops here, before it gets overwritten by the procedure EXIT scoms below
     if (l_rc)
     {
         //FAPI_DBG(" HELLO...THIS IS A BAD RETURN CODE");
@@ -2043,14 +2043,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MCI FIR actions",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-            // return l_rc;
+            return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_pu_mci_firact0_reg(i_pu_target, mci_data, mci_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Fir Action0 Register");
-            // return l_rc;
+            return l_rc;
         }
 
 
@@ -2069,24 +2069,25 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         l_ecmdRc |= mci_data.setBit(20);    //Scom Register parity error
         l_ecmdRc |= mci_data.setBit(22);    //mcicfgq parity error
         l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
+        l_ecmdRc |= mci_data.setBit(24);    //MCIFIRQ_MCS_RECOVERABLE_ERROR
         l_ecmdRc |= mci_data.setBit(27);    //MCS Command List Timeout due to PowerBus
         l_ecmdRc |= mci_data.setBit(35);    //PowerBus Write Data Buffer CE
         l_ecmdRc |= mci_data.setBit(36);    //PowerBus Write Data Buffer UE
-        l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error
+        //l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error (On 5/06/2013 changed this fir to xstop, have to re-eval for Murano dd2)
         l_ecmdRc |= mci_data.copy(mci_mask);
         if (l_ecmdRc)
         {
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MCI FIR actions",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-            //return l_rc;
+            return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_pu_mci_firact1_reg(i_pu_target, mci_data, mci_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Fir Action1 Register");
-            //return l_rc;
+            return l_rc;
         }
 
 
@@ -2106,14 +2107,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MCS Mode4 Register",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-            //return l_rc;
+            return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_pu_mcs_mode4_reg(i_pu_target, mci_data, mci_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing P8 MCS Mode4 Register");
-            //return l_rc;
+            return l_rc;
         }
 
 
@@ -2180,14 +2181,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to mask MCI FIRs",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-            // return l_rc;
+            return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_pu_mci_firmask_reg(i_pu_target, mci_data, mci_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Fir Mask Register");
-            //return l_rc;
+            return l_rc;
         }
 
 
@@ -2210,14 +2211,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MBI FIR actions",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-            //return l_rc;
+            return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_cen_mbi_firact1_reg(i_mem_target, mbi_data, mbi_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Fir Action1 Register");
-            //return l_rc;
+            return l_rc;
         }
 
 
@@ -2251,14 +2252,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to mask MBI FIRs",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-            // return l_rc;
+            return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_cen_mbi_firmask_reg(i_mem_target, mbi_data, mbi_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Fir Mask Register");
-            //return l_rc;
+            return l_rc;
         }
 
 
