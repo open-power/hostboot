@@ -1228,6 +1228,383 @@ public:
         }
 #endif
     }
+
+    /**
+     *  @brief Test CDM modes to restrict createing GARD records
+     */
+    void testGard9()
+    {
+        TS_TRACE(INFO_MRK "testGard9: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+
+        errlHndl_t l_pErr = NULL;
+        DeconfigGard::GardRecords_t l_records;
+
+        do
+        {
+            // find a core that we can play with
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predCore).push(&predFunctional).And();
+            TargetHandleList pCoreList;
+            targetService().getAssociated( pCoreList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pCoreList.empty())
+            {
+                TS_FAIL("testGard9: empty pCoreList");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pCoreList.begin();
+
+            EntityPath l_id = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+
+            // Get any existing GARD Records for the target
+            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard9: Error from getGardRecords");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_TRACE(INFO_MRK "testGard9: target has %d existing Gard Records, skipping test",
+                         l_records.size());
+                break;
+            }
+
+            // set Manufacturing policy to disabled,
+            //  test that gard record is not created
+            ATTR_CDM_POLICIES_type l_policies =
+                pSys->getAttr<ATTR_CDM_POLICIES>();
+            l_policies = CDM_POLICIES_MANUFACTURING_DISABLED;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
+            // (try to) Create a GARD Record for the target.
+            l_pErr = theDeconfigGard().
+                    createGardRecord(*l_pTarget, 0x12, GARD_Fatal);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard9: Error from createGardRecord");
+                break;
+            }
+
+            // Get the GARD Records for the target - shouldn't be any
+            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard9: Error from getGardRecords (2)");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard9: %d records for target, expected 0",
+                        l_records.size());
+                break;
+            }
+
+            // set Predictive policy to disabled
+            //  test that gard record isn't created
+            l_policies = CDM_POLICIES_PREDICTIVE_DISABLED;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
+            // (try to) Create a GARD Record for the target.
+            l_pErr = theDeconfigGard().
+                    createGardRecord(*l_pTarget, 0x12, GARD_Predictive);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard9: Error from createGardRecord");
+                break;
+            }
+
+            // Get the GARD Records for the target - shouldn't be any
+            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard9: Error from getGardRecords (2)");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard9: %d records for target, expected 0",
+                        l_records.size());
+                break;
+            }
+
+            // set Functional policy to disabled
+            //  test that gard record isn't created
+            l_policies = CDM_POLICIES_FUNCTIONAL_DISABLED;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
+            // (try to) Create a GARD Record for the target.
+            l_pErr = theDeconfigGard().
+                    createGardRecord(*l_pTarget, 0x12, GARD_Func);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard9: Error from createGardRecord");
+                break;
+            }
+
+            // Get the GARD Records for the target - shouldn't be any
+            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard9: Error from getGardRecords (2)");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard9: %d records for target, expected 0",
+                        l_records.size());
+                break;
+            }
+
+            // restore
+            l_policies = 0;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+            TS_TRACE(INFO_MRK "testGard9: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+#endif
+    }
+
+    /**
+     *  @brief Test CDM modes to restrict processing GARD records
+     */
+    void testGard10()
+    {
+        TS_TRACE(INFO_MRK "testGard10: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+        errlHndl_t l_pErr = NULL;
+        DeconfigGard::GardRecords_t l_records;
+
+        do
+        {
+            l_pErr = theDeconfigGard().getGardRecords(
+                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard10: Error from getGardRecords");
+                break;
+            }
+
+            if (l_records.size() > 0)
+            {
+                TS_FAIL("testGard10: already GARD records here. %d records",
+                        l_records.size());
+                break;
+            }
+
+            // find a core that we can play with
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predCore).push(&predFunctional).And();
+
+            TargetHandleList pCoreList;
+            targetService().getAssociated( pCoreList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pCoreList.empty())
+            {
+                TS_FAIL("testGard10: empty pCoreList");
+                break;
+            }
+
+            TargetHandle_t l_target = *pCoreList.begin();
+
+            // create GARD record, set Policy, call 'doGard' step and confirm
+            //  target is NOT deconfigured
+            l_pErr = theDeconfigGard().
+                    createGardRecord( *l_target, 0x12, GARD_Predictive);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard10: Error from createGardRecord");
+                break;
+            }
+
+            l_pErr = theDeconfigGard().getGardRecords(
+                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard10: Error from getGardRecords");
+                break;
+            }
+            if (l_records.size() != 1)
+            {
+                TS_FAIL("testGard10: should be 1 record; instead %d records",
+                        l_records.size());
+                break;
+            }
+
+            // set Manufacturing policy to disabled,
+            //  test that gard record is not created
+            ATTR_CDM_POLICIES_type l_policies =
+                pSys->getAttr<ATTR_CDM_POLICIES>();
+            l_policies = CDM_POLICIES_MANUFACTURING_DISABLED;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
+            l_pErr = collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard10: Error from collectGard");
+                break;
+            }
+
+            HwasState l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testGard10: target NOT functional");
+                break;
+            }
+
+            // set Predictive policy to disabled,
+            //  test that gard record is not created
+            l_policies = CDM_POLICIES_PREDICTIVE_DISABLED;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
+            l_pErr = collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard10: Error from collectGard");
+                break;
+            }
+
+            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testGard10: target NOT functional");
+                break;
+            }
+
+            // Clear all GARD Records
+            l_pErr = theDeconfigGard().
+                    clearGardRecords(DeconfigGard::CLEAR_ALL_GARD_RECORDS);
+
+            l_pErr = theDeconfigGard().getGardRecords(
+                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard10: Error from getGardRecords");
+                break;
+            }
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard10: should be 0 records; instead %d records",
+                        l_records.size());
+                break;
+            }
+
+            // create GARD record, set Policy, call 'doGard' step and confirm
+            //  target is NOT deconfigured
+            l_pErr = theDeconfigGard().
+                    createGardRecord( *l_target, 0x12, GARD_Func);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard10: Error from createGardRecord");
+                break;
+            }
+
+            l_pErr = theDeconfigGard().getGardRecords(
+                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard10: Error from getGardRecords");
+                break;
+            }
+            if (l_records.size() != 1)
+            {
+                TS_FAIL("testGard10: should be 1 records; instead %d records",
+                        l_records.size());
+                break;
+            }
+
+            // set Functional policy to disabled,
+            //  test that gard record is not created
+            l_policies = CDM_POLICIES_FUNCTIONAL_DISABLED;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
+            l_pErr = collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard10: Error from collectGard");
+                break;
+            }
+
+            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testGard10: target NOT functional");
+                break;
+            }
+
+            // Clear all GARD Records
+            l_pErr = theDeconfigGard().
+                    clearGardRecords(DeconfigGard::CLEAR_ALL_GARD_RECORDS);
+
+            // restore
+            l_policies = 0;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+            TS_TRACE(INFO_MRK "testGard10: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+#endif
+    }
+
 };
 
 #endif

@@ -198,6 +198,22 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
     HWAS_MUTEX_LOCK(iv_mutex);
     do
     {
+        TARGETING::Target* pSys;
+        TARGETING::targetService().getTopLevelTarget(pSys);
+        HWAS_ASSERT(pSys,
+                "HWAS _createGardRecord: no system TopLevelTarget found");
+
+        // check for system CDM Policy
+        const TARGETING::ATTR_CDM_POLICIES_type l_sys_policy =
+                pSys->getAttr<TARGETING::ATTR_CDM_POLICIES>();
+        if (l_sys_policy & TARGETING::CDM_POLICIES_MANUFACTURING_DISABLED)
+        {
+            // manufacturing records are disabled
+            //  - don't process
+            HWAS_INF("Manufacturing policy: disabled - skipping GARD Records");
+            break;
+        }
+
         // Get all GARD Records
         l_pErr = _getGardRecords(GET_ALL_GARD_RECORDS, l_gardRecords);
         if (l_pErr)
@@ -218,6 +234,24 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
              l_itr != l_gardRecords.end();
              ++l_itr)
         {
+            if ((l_sys_policy & TARGETING::CDM_POLICIES_PREDICTIVE_DISABLED) &&
+                ((*l_itr).iv_errorType == GARD_Predictive))
+            {
+                // predictive records are disabled AND gard record is predictive
+                //  - don't process
+                HWAS_INF("Predictive policy: disabled - skipping GARD Record");
+                continue;
+            }
+
+            if ((l_sys_policy & TARGETING::CDM_POLICIES_FUNCTIONAL_DISABLED) &&
+                ((*l_itr).iv_errorType == GARD_Func))
+            {
+                // functional records are disabled AND gard record is Functional
+                //  - don't process
+                HWAS_INF("Functional policy: disabled - skipping GARD Record");
+                continue;
+            }
+
             // Find the associated Target
             TARGETING::Target * l_pTarget =
                 TARGETING::targetService().toTarget((*l_itr).iv_targetId);
@@ -676,6 +710,40 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
                 HWAS::RC_TARGET_NOT_GARDABLE,
                 userdata1,
                 userdata2);
+            break;
+        }
+
+        TARGETING::Target* pSys;
+        TARGETING::targetService().getTopLevelTarget(pSys);
+        HWAS_ASSERT(pSys,
+                "HWAS _createGardRecord: no system TopLevelTarget found");
+
+        // check for system CDM Policy
+        const TARGETING::ATTR_CDM_POLICIES_type l_sys_policy =
+                pSys->getAttr<TARGETING::ATTR_CDM_POLICIES>();
+        if (l_sys_policy & TARGETING::CDM_POLICIES_MANUFACTURING_DISABLED)
+        {
+            // manufacturing records are disabled
+            //  - don't process
+            HWAS_INF("Manufacturing policy: disabled - skipping GARD Record");
+            break;
+        }
+
+        if ((l_sys_policy & TARGETING::CDM_POLICIES_PREDICTIVE_DISABLED) &&
+            (i_errorType == GARD_Predictive))
+        {
+            // predictive records are disabled AND gard record is predictive
+            //  - don't process
+            HWAS_INF("Predictive policy: disabled - skipping GARD Record");
+            break;
+        }
+
+        if ((l_sys_policy & TARGETING::CDM_POLICIES_FUNCTIONAL_DISABLED) &&
+            (i_errorType == GARD_Func))
+        {
+            // functional records are disabled AND gard record is Functional
+            //  - don't process
+            HWAS_INF("Functional policy: disabled - skipping GARD Record");
             break;
         }
 
