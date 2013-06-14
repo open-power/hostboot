@@ -101,15 +101,10 @@ public:
     {
         uint32_t              iv_recordId;
         TARGETING::EntityPath iv_targetId;
-        union
-        {
-            char iv_cardMruSn[12]; // TODO is there a SN type?
-            uint32_t iv_chipMruEcid; // TODO is there an ECID type?
-        };
         uint32_t              iv_errlogPlid;
-        uint8_t               iv_errorType; // Value from GARD_ErrorType
-        uint8_t               iv_padding[3];
-        uint32_t              iv_gardTime;
+        uint8_t               iv_errorType; //from hwasCallout.H GARD_ErrorType
+        uint8_t               iv_ResourceRecovery;
+        uint8_t               iv_padding[6];
     };
 
     typedef std::vector<GardRecord> GardRecords_t;

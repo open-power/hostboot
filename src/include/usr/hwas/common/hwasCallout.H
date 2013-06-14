@@ -47,38 +47,15 @@ enum DeconfigEnum
     DELAYED_DECONFIG,
 };
 
-// from gard/fsp/GardExtIntData.H
 typedef enum {
     GARD_NULL                   = 0x00,
-    GARD_Pending                = 0xE1,
-    GARD_PendingCmplt           = 0xEE,
-    GARD_Unrecoverable          = 0xE2,
-    GARD_Fatal                  = 0xE3,
-    GARD_Fabric                 = 0xE4,
-    GARD_Computation            = 0xE5,
-    GARD_ComputationCmplt       = 0xEC,
-    GARD_Predictive             = 0xE6,
-    GARD_PredictiveCmplt        = 0xE9,
-    GARD_ByAssociation          = 0xE8,
-    GARD_ResourceRecovery       = 0xEA,
-    GARD_Cmplt                  = 0xEF,
-    GARD_Func                   = 0xE7,
-    GARD_FuncCmplt              = 0xEB,
-    GARD_DmaRecoverable         = 0xE0,
-    GARD_DmaUnrecoverable       = 0xED,
-    GARD_Tod                    = 0xD0,
-    GARD_TodCmplt               = 0xD1,
-    GARD_Slb                    = 0xD2,
-    GARD_SlbCmplt               = 0xD3,
-    GARD_ProcRecoverable        = 0xD4,
-    GARD_ProcRecoverableCmplt   = 0xD5,
-    GARD_TimeFac                = 0xD6,
-    GARD_TimeFacCmplt           = 0xD7,
-    GARD_GxBusError             = 0xD8,
-    GARD_PowerBusError          = 0xDA,
-    GARD_Withheld               = 0xD9,
-    GARD_PoreError              = 0xDC,
-    GARD_NxError                = 0xDB,
+    GARD_User_Manual            = 0xD2, //Manual Guard.
+    GARD_Unrecoverable          = 0xE2, //TODO:RTC-76814
+    GARD_Fatal                  = 0xE3, //IPL Failures, and others.
+    GARD_Predictive             = 0xE6, //Policy flag to disable.
+    GARD_Func                   = 0xE7, //Policy flag to disable.
+    GARD_Power                  = 0xE9, //Needed since PLID is NOT passed in.
+    GARD_PHYP                   = 0xEA, //Needed since PLID is NOT passed in.
     GARD_Void                   = 0xFF
 } GARD_ErrorType;
 

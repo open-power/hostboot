@@ -790,13 +790,15 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
 
         l_pRecord->iv_recordId = iv_nextGardRecordId++;
         l_pRecord->iv_targetId = i_target.getAttr<TARGETING::ATTR_PHYS_PATH>();
-        // TODO Setup iv_cardMruSn or iv_chipMruEcid
         l_pRecord->iv_errlogPlid = i_errlPlid;
         l_pRecord->iv_errorType = i_errorType;
-        l_pRecord->iv_padding[0] = 0;
-        l_pRecord->iv_padding[1] = 0;
-        l_pRecord->iv_padding[2] = 0;
-        l_pRecord->iv_gardTime = 0; // TODO Get epoch time
+        l_pRecord->iv_ResourceRecovery = 0;  //Finished by Story 35114 & 62392.
+        l_pRecord->iv_padding[0] = 0xff;
+        l_pRecord->iv_padding[1] = 0xff;
+        l_pRecord->iv_padding[2] = 0xff;
+        l_pRecord->iv_padding[3] = 0xff;
+        l_pRecord->iv_padding[4] = 0xff;
+        l_pRecord->iv_padding[5] = 0xff;
 
         l_GardAddress.writeRecord((void *)l_pRecord);
     }
