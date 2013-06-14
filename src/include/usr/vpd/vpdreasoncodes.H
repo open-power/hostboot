@@ -59,11 +59,14 @@ enum vpdModuleId
     VPD_SPD_READ_BINARY_FILE                = 0x64,
     VPD_SPD_WRITE_KEYWORD_VALUE             = 0x65,
     VPD_SPD_SPECIAL_CASES                   = 0x66,
-    VPD_SPD_PRESENCE_DETECT                 = 0x67,
-    VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD   = 0x68,
-    VPD_SPD_WRITE_VALUE                     = 0x69,
-    VPD_SPD_GET_KEYWORD_ENTRY               = 0x6A,
-    VPD_SPD_WRITE_DATA                      = 0x6B,
+    VPD_SPD_DDR3_SPECIAL_CASES              = 0x67,
+    VPD_SPD_DDR4_SPECIAL_CASES              = 0x68,
+    VPD_SPD_PRESENCE_DETECT                 = 0x69,
+    VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD   = 0x6A,
+    VPD_SPD_WRITE_VALUE                     = 0x6B,
+    VPD_SPD_GET_KEYWORD_ENTRY               = 0x6C,
+    VPD_SPD_WRITE_DATA                      = 0x6D,
+    VPD_SPD_GET_MOD_TYPE                    = 0x6E,
 
     // Centaur FRU VPD
 

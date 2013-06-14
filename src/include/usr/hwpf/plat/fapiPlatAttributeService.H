@@ -693,6 +693,138 @@ fapi::ReturnCode fapiPlatGetSlopeInterceptData (
 #define ATTR_SPD_BAD_DQ_DATA_SETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::setAttrActionsFunc(fapi::ID, PTARGET, sizeof(VAL), &(VAL)), \
     fapi::platAttrSvc::fapiPlatSetSpdAttr( PTARGET, SPD::DIMM_BAD_DQ_DATA, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_ADDR_MIRRORING_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_MIRRORING, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F0RC3_F0RC2_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F0RC3_FORC2, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F0RC5_F0RC4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F0RC5_FORC4, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F1RC11_F1RC8_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F1RC11_F1RC8, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F1RC13_F1RC12_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F1RC13_F1RC12, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F1RC15_F1RC14_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F1RC15_F1RC14, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F3RC9_F3RC8_FOR_800_1066_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F3RC9_F3RC8_800_1066, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F34RC11_F34RC10_FOR_800_1066_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F34RC11_F34RC10_800_1066, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F56RC11_F56RC10_FOR_800_1066_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F56RC11_F56RC10_800_1066, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F78RC11_F78RC10_FOR_800_1066_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F78RC11_F78RC10_800_1066, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F910RC11_F910RC10_FOR_800_1066_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F910RC11_F910RC10_800_1066, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_MR12_FOR_800_1066_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_MR12_800_1066, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F3RC9_F3RC8_FOR_1333_1600_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F3RC9_F3RC8_1333_1600, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F34RC11_F34RC10_FOR_1333_1600_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F34RC11_F34RC10_1333_1600, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F56RC11_F56RC10_FOR_1333_1600_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F56RC11_F56RC10_1333_1600, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F78RC11_F78RC10_FOR_1333_1600_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F78RC11_F78RC10_1333_1600, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F910RC11_F910RC10_FOR_1333_1600_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F910RC11_F910RC10_1333_1600, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_MR12_FOR_1333_1600_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_MR12_1333_1600, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F3RC9_F3RC8_FOR_1866_2133_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F3RC9_F3RC8_1866_2133, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F34RC11_F34RC10_FOR_1866_2133_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F34RC11_F34RC10_1866_2133, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F56RC11_F56RC10_FOR_1866_2133_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F56RC11_F56RC10_1866_2133, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F78RC11_F78RC10_FOR_1866_2133_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F78RC11_F78RC10_1866_2133, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_F910RC11_F910RC10_FOR_1866_2133_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F910RC11_F910RC10_1866_2133, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_LR_MR12_FOR_1866_2133_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_MR12_FOR_1866_2133, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_SDRAM_BANKGROUPS_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::BANK_GROUP_BITS, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_SDRAM_BANKS_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::BANK_ADDRESS_BITS_DDR4, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_MODULE_NOMINAL_VOLTAGE_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_NOMINAL_VOLTAGE_DDR4, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TIMEBASE_MTB_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TIMEBASES_MTB, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TIMEBASE_FTB_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TIMEBASES_FTB, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TCKMAX_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TCK_MAX, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_CAS_LATENCIES_SUPPORTED_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::CAS_LATENCIES_SUPPORTED_DDR4, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TRFC1MIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRFC1_MIN, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TRFC2MIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRFC2_MIN, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TRFC4MIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRFC4_MIN, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TRRDSMIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRRDS_MIN, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TRRDLMIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRRDL_MIN, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_TCCDLMIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TCCDL_MIN, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_FINE_OFFSET_TCCDLMIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TCCDL_FINE_OFFSET, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_FINE_OFFSET_TRRDLMIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRRDL_FINE_OFFSET, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_FINE_OFFSET_TRRDSMIN_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRRDS_FINE_OFFSET, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_FINE_OFFSET_TCKMAX_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TCKMAX_FINE_OFFSET, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_CRC_BASE_CONFIG_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::BASE_CONFIG_CRC, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_DRAM_STEPPING_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::DRAM_STEPPING, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_CRC_MNFG_SEC_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MANUFACTURING_SECTION_CRC, &(VAL), sizeof(VAL) )
 
 //------------------------------------------------------------------------------
 // MACROs to route ATTR Base Address accesses to the correct Hostboot function

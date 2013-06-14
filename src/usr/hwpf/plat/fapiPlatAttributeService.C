@@ -237,62 +237,6 @@ fapi::ReturnCode setTargetingAttr(const fapi::Target * i_pFapiTarget,
 }
 
 //******************************************************************************
-// platUpdateAttrValue function reformats the Attribute value if needed based
-// on the format documented in the HWPF attributei xml file.
-//******************************************************************************
-static void platUpdateAttrValue( const uint16_t i_keyword, void * o_data )
-{
-    FAPI_DBG(ENTER_MRK "platUpdateAttrValue");
-
-    uint32_t l_word = 0;
-    uint8_t *l_byte = static_cast<uint8_t *>(o_data);
-    bool l_update = true;
-
-    switch( i_keyword )
-    {
-        // These attributes are 4-byte uint32_t values. The DD returns 2-byte
-        // left-aligned value. Need to move it to right-aligned format.
-        case SPD::CAS_LATENCIES_SUPPORTED:
-        case SPD::TRAS_MIN:
-        case SPD::TRC_MIN:
-        case SPD::TRFC_MIN:
-        case SPD::TFAW_MIN:
-        case SPD::MODULE_MANUFACTURING_DATE:
-        case SPD::MODULE_MANUFACTURER_ID:
-            l_word |= (*l_byte++ << 8);
-            l_word |= (*l_byte);
-            break;
-        // These attributes are 4-bytes uint32_t values. The DD returns 2-byte
-        // left-aligned and byte-swapped value. Need to move it to right-aligned
-        // and reverse the bytes
-        case SPD::MODULE_CRC:
-        case SPD::MODULE_REVISION_CODE:
-            l_word |= (*l_byte++);
-            l_word |= (*l_byte << 8);
-            break;
-        // This attribute are 4-bytes uint32_t. The DD returns in big-endian
-        // format. Need to change to little endian
-        case SPD::MODULE_SERIAL_NUMBER:
-            l_word |= (*l_byte++);
-            l_word |= (*l_byte++ << 8);
-            l_word |= (*l_byte++ << 16);
-            l_word |= (*l_byte << 24);
-            break;
-        default:
-            l_update = false;
-            break;
-    }
-
-    if (l_update)
-    {
-        memcpy( o_data, &l_word, sizeof(l_word) );
-    }
-
-    FAPI_DBG(EXIT_MRK "platUpdateAttrValue");
-
-}
-
-//******************************************************************************
 // fapiPlatGetSpdAttr function.
 // Call SPD device driver to retrieve the SPD attribute
 //******************************************************************************
@@ -326,7 +270,13 @@ fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_pFapiTarget,
         }
         else
         {
-            platUpdateAttrValue(i_keyword, o_data);
+            if ((i_len == sizeof(uint32_t)) && (l_len == sizeof(uint16_t)))
+            {
+                // This is a uint16_t attribute written to a uint32_t type.
+                // This is because FAPI attributes can only be uint8/32/64
+                // Shift the data to be right aligned
+                *(static_cast<uint32_t *>(o_data)) >>= 16;
+            }
         }
     }
 

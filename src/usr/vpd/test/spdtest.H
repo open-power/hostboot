@@ -40,6 +40,7 @@
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/spdenums.H>
 #include "../spdDDR3.H"
+#include "../spdDDR4.H"
 #include "../spd.H"
 
 extern trace_desc_t* g_trac_spd;
@@ -125,7 +126,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 for( uint64_t keyword = SPD::SPD_FIRST_NORM_KEYWORD;
-                     keyword < SPD::SPD_LAST_NORM_KEYWORD; keyword++ )
+                     keyword <= SPD::SPD_LAST_NORM_KEYWORD; keyword++ )
                 {
                     cmds++;
                     if( NULL != theData )
@@ -149,19 +150,25 @@ class SPDTest: public CxxTest::TestSuite
                             }
                         }
                     }
-                    else
+                    else if( SPD_DDR4 == memType )
                     {
-                        // Nothing else supported yet!
-                        // Not really a fail, just not supported
-                        cmds--;
-                        continue;
+                        for( entry = 0;
+                             entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                             entry++ )
+                        {
+                            if( keyword == ddr4Data[entry].keyword )
+                            {
+                                theSize = ddr4Data[entry].length;
+                                break;
+                            }
+                        }
                     }
 
-                    if( 0x0 == theSize )
+                    if( 0 == theSize )
                     {
-                        fails++;
-                        TS_FAIL( "testSpdRead - Keyword (0x%04x) size = 0x0",
-                                 entry );
+                        // memType not supported or Keyword not supported on
+                        // this memType
+                        cmds--;
                         continue;
                     }
 
@@ -183,10 +190,36 @@ class SPDTest: public CxxTest::TestSuite
                         continue;
                     }
 
-                    // Read was successful, print out first byte of data read
-                    TRACFCOMP( g_trac_spd,
-                               "testSpdRead - kwd: 0x%04x, val: %02x, size: %d",
-                               keyword, theData[0], theSize );
+                    // Read was successful, print out the data read
+                    if (theSize == 1)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdRead - kwd: 0x%04x, val: 0x%02x, size: 1",
+                                   keyword, theData[0] );
+                    }
+                    else if (theSize == 2)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdRead - kwd: 0x%04x, val: 0x%04x, size: 2",
+                                   keyword,
+                                   reinterpret_cast<uint16_t *>(theData)[0] );
+                    }
+                    else if (theSize == 3)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdRead - kwd: 0x%04x, val: 0x%02x%02x%02x, size: 3",
+                                   keyword, theData[0], theData[1], theData[2],
+                                   theSize );
+                    }
+                    else
+                    {
+                        // For 4 bytes or larger, just print the first 4 bytes
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdRead - kwd: 0x%04x, val: 0x%08x, size: %d",
+                                   keyword,
+                                   reinterpret_cast<uint32_t *>(theData)[0],
+                                   theSize );
+                    }
 
                     if( NULL != theData )
                     {
@@ -277,6 +310,19 @@ class SPDTest: public CxxTest::TestSuite
                         if( SPD::DIMM_BAD_DQ_DATA == ddr3Data[entry].keyword )
                         {
                             theSize = ddr3Data[entry].length;
+                            break;
+                        }
+                    }
+                }
+                else if( SPD_DDR4 == memType )
+                {
+                    for( uint32_t entry = 0;
+                         entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                         entry++ )
+                    {
+                        if( SPD::DIMM_BAD_DQ_DATA == ddr4Data[entry].keyword )
+                        {
+                            theSize = ddr4Data[entry].length;
                             break;
                         }
                     }
@@ -462,12 +508,30 @@ class SPDTest: public CxxTest::TestSuite
                          entry++ )
                     {
                         if( ddr3Data[entry].writable
-                            && ddr3Data[entry].useBitMask )
+                            && ddr3Data[entry].bitMask )
                         {
                             theSize = ddr3Data[entry].length;
                             theKeyword = ddr3Data[entry].keyword;
                             TRACFCOMP( g_trac_spd,
-                                       "testSpdWriteSmall - Using keyword 0x%04x",
+                                       "testSpdWriteSmall - Using DDR3 keyword 0x%04x",
+                                       theKeyword );
+                            break;
+                        }
+                    }
+                }
+                else if( SPD_DDR4 == memType )
+                {
+                    for( uint32_t entry = 0;
+                         entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                         entry++ )
+                    {
+                        if( ddr4Data[entry].writable
+                            && ddr4Data[entry].bitMask )
+                        {
+                            theSize = ddr4Data[entry].length;
+                            theKeyword = ddr4Data[entry].keyword;
+                            TRACFCOMP( g_trac_spd,
+                                       "testSpdWriteSmall - Using DDR4 keyword 0x%04x",
                                        theKeyword );
                             break;
                         }
@@ -761,17 +825,16 @@ class SPDTest: public CxxTest::TestSuite
         /**
          * @brief This test will test reading the Module specific keywords.
          */
-        void testspdDDR3ModSpecKwds( void )
+        void testspdModSpecKwds( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
             uint8_t memType = 0x0;
-            uint8_t modType = 0x0;
             uint8_t * theData = NULL;
 
             TRACFCOMP( g_trac_spd,
-                       ENTER_MRK"testspdDDR3ModSpecKwds()" );
+                       ENTER_MRK"testspdModSpecKwds()" );
 
             do
             {
@@ -785,7 +848,7 @@ class SPDTest: public CxxTest::TestSuite
                     ( NULL == dimmList[0] ) )
                 {
                     TRACFCOMP( g_trac_spd,
-                               "testspdDDR3ModSpecKwds - No DIMMs found!" );
+                               "testspdModSpecKwds - No DIMMs found!" );
                     break;
                 }
 
@@ -804,24 +867,8 @@ class SPDTest: public CxxTest::TestSuite
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testspdDDR3ModSpecKwds- Failure reading Basic "
+                    TS_FAIL( "testspdModSpecKwds- Failure reading Basic "
                              "memory type!" );
-                    errlCommit( err,
-                                VPD_COMP_ID );
-                    break;
-                }
-
-                // Get the Module Type
-                err = deviceRead( theTarget,
-                                  &modType,
-                                  tmpSize,
-                                  DEVICE_SPD_ADDRESS( SPD::MODULE_TYPE ) );
-
-                if( err )
-                {
-                    fails++;
-                    TS_FAIL( "testspdDDR3ModSpecKwds - Failure reading Module "
-                             "type" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
@@ -829,7 +876,7 @@ class SPDTest: public CxxTest::TestSuite
 
                 // The real Keyword read testing
                 for( uint64_t keyword = SPD::SPD_FIRST_MOD_SPEC;
-                     keyword < SPD::SPD_LAST_MOD_SPEC; keyword++ )
+                     keyword <= SPD::SPD_LAST_MOD_SPEC; keyword++ )
                 {
                     cmds++;
                     if( NULL != theData )
@@ -854,40 +901,44 @@ class SPDTest: public CxxTest::TestSuite
                                 break;
                             }
                         }
-
-                        // Check type of module.
-                        TRACFCOMP( g_trac_spd,
-                                   INFO_MRK"SPD Error traces will follow!!!  "
-                                   "Not all module specific keywords will be "
-                                   "valid for all types of modules.  IGNORE!!" );
-                        err = checkModSpecificKeyword( kwdData,
-                                                       memType,
-                                                       theTarget );
-
-                        if( err )
+                    }
+                    else if( SPD_DDR4 == memType )
+                    {
+                        for( entry = 0;
+                             entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                             entry++ )
                         {
-                            // This keyword isn't supported with this module
-                            // type
-                            cmds--;
-                            delete err;
-                            err = NULL;
-                            continue;
+                            if( keyword == ddr4Data[entry].keyword )
+                            {
+                                kwdData = ddr4Data[entry];
+                                theSize = ddr4Data[entry].length;
+                                break;
+                            }
                         }
                     }
-                    else
+
+                    if( 0 == theSize )
                     {
-                        // Nothing else supported yet!
-                        // Not really a fail, just not supported
+                        // memType not supported or Keyword not supported on
+                        // this memType
                         cmds--;
                         continue;
                     }
 
-                    if( 0x0 == theSize )
+                    // Check that the module type supports this keyword
+                    TRACFCOMP( g_trac_spd,
+                               INFO_MRK"SPD Error traces will follow!!!  "
+                               "Not all module specific keywords will be "
+                               "valid for all types of modules.  IGNORE!!" );
+                    err = checkModSpecificKeyword( kwdData,
+                                                   memType,
+                                                   theTarget );
+                    if( err )
                     {
-                        fails++;
-                        TS_FAIL( "testspdDDR3ModSpecKwds - Keyword (0x%04x) "
-                                 "size = 0x0",
-                                 entry );
+                        // This keyword isn't supported with this module type
+                        cmds--;
+                        delete err;
+                        err = NULL;
                         continue;
                     }
 
@@ -901,19 +952,43 @@ class SPDTest: public CxxTest::TestSuite
                     if( err )
                     {
                         fails++;
-                        TS_FAIL( "testspdDDR3ModSpecKwds - Failure on keyword"
-                                 "d: %04x",
+                        TS_FAIL( "testspdModSpecKwds - Failure on keyword: %04x",
                                  keyword );
                         errlCommit( err,
                                     VPD_COMP_ID );
                         continue;
                     }
 
-                    // Read was successful, print out first 2 bytes of data read
-                    TRACFCOMP( g_trac_spd,
-                               "testspdDDR3ModSpecKwds - kwd: 0x%04x, val: "
-                               "%02x, size: %d",
-                               keyword, theData[0], theSize );
+                    // Read was successful, print out the data read
+                    if (theSize == 1)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testspdModSpecKwds - kwd: 0x%04x, val: 0x%02x, size: 1",
+                                   keyword, theData[0] );
+                    }
+                    else if (theSize == 2)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testspdModSpecKwds - kwd: 0x%04x, val: 0x%04x, size: 2",
+                                   keyword,
+                                   reinterpret_cast<uint16_t *>(theData)[0] );
+                    }
+                    else if (theSize == 3)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                                   "testspdModSpecKwds - kwd: 0x%04x, val: 0x%02x%02x%02x, size: 3",
+                                   keyword, theData[0], theData[1], theData[2],
+                                   theSize );
+                    }
+                    else
+                    {
+                        // For 4 bytes or larger, just print the first 4 bytes
+                        TRACFCOMP( g_trac_spd,
+                                   "testspdModSpecKwds - kwd: 0x%04x, val: 0x%08x, size: %d",
+                                   keyword,
+                                   reinterpret_cast<uint32_t *>(theData)[0],
+                                   theSize );
+                    }
 
                     if( NULL != theData )
                     {
@@ -930,7 +1005,7 @@ class SPDTest: public CxxTest::TestSuite
             }
 
             TRACFCOMP( g_trac_spd,
-                       "testspdDDR3ModSpecKwds - %d/%d fails",
+                       "testspdModSpecKwds - %d/%d fails",
                        fails, cmds );
         }
 
@@ -968,7 +1043,38 @@ class SPDTest: public CxxTest::TestSuite
                        fails );
         }
 
+        /**
+         * @brief This test will ensure that the DDR4 lookup table is in a
+         *        sorted order, according to the keyword enumeration, to enable
+         *        the search algorithm to work correctly.
+         */
+        void testspdDDR4TableOrder ( void )
+        {
+            uint64_t prevKeyword = 0x0;
+            uint64_t fails = 0x0;
 
+            TRACFCOMP( g_trac_spd,
+                       ENTER_MRK"testspdDDR4TableOrder()" );
+
+            for( uint32_t entry = 0;
+                 entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                 entry++ )
+            {
+                if( !(ddr4Data[entry].keyword >= prevKeyword) )
+                {
+                    fails++;
+                    TS_FAIL( "testspdDDR4TableOrder - DDR4 table out of order!  Cur kwd: "
+                             "0x%04x, Pre kwd: 0x%04x",
+                             ddr4Data[entry].keyword,
+                             prevKeyword );
+                }
+                prevKeyword = ddr4Data[entry].keyword;
+            }
+
+            TRACFCOMP( g_trac_spd,
+                       EXIT_MRK"testspdDDR4TableOrder() - fails: %d",
+                       fails );
+        }
 };
 
 #endif

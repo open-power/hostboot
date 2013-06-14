@@ -44,15 +44,34 @@ namespace SPD
 */
 enum
 {
-    MEM_TYPE_ADDR = 0x2,        // DIMM Basic Memory Type address
-    MEM_TYPE_ADDR_SZ = 0x1,     // DIMM Basic Memory Type address size
+    // Memory Type address/size/constants for both DDR3 and DDR4
+    MEM_TYPE_ADDR = 0x2,
+    MEM_TYPE_SZ = 0x1,
+    SPD_DDR3 = 0xB,
+    SPD_DDR4 = 0xC,
+
+    // Module Type address/size/mask/constants for both DDR3 and DDR4
+    MOD_TYPE_ADDR            = 0x03,
+    MOD_TYPE_SZ              = 0x01,
+    MOD_TYPE_MASK            = 0x0f,
+    MOD_TYPE_DDR3_RDIMM      = 0x01,
+    MOD_TYPE_DDR3_UDIMM      = 0x02,
+    MOD_TYPE_DDR3_SO_DIMM    = 0x03,
+    MOD_TYPE_DDR3_MICRO_DIMM = 0x04,
+    MOD_TYPE_DDR3_MINI_RDIMM = 0x05,
+    MOD_TYPE_DDR3_MINI_UDIMM = 0x06,
+    MOD_TYPE_DDR3_MINI_CDIMM = 0x07,
+    MOD_TYPE_DDR3_SO_UDIMM   = 0x08,
+    MOD_TYPE_DDR3_SO_RDIMM   = 0x09,
+    MOD_TYPE_DDR3_SO_CDIMM   = 0x0a,
+    MOD_TYPE_DDR3_LRDIMM     = 0x0b,
+    MOD_TYPE_DDR4_RDIMM      = 0x01,
+    MOD_TYPE_DDR4_UDIMM      = 0x02,
+    MOD_TYPE_DDR4_SO_DIMM    = 0x03,
+    MOD_TYPE_DDR4_LRDIMM     = 0x04,
 
     DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
     DIMM_SPD_MAX_SECTIONS = 512,    // Maximum number of sections
-
-    // Basic Memory Type Enumerations
-    SPD_DDR3 = 0xB,
-    SPD_DDR4 = 0xC,  // @todo - Proposed value from draft Spec. (RTC:61138)
 };
 
 /**
@@ -61,10 +80,10 @@ enum
 typedef enum
 {
     NA      = 0x00,
-    UMM     = 0x01,
-    RMM     = 0x02,
-    CMM     = 0x04,
-    LRMM    = 0x08,
+    UMM     = 0x01, // Unbuffered Memory Modules
+    RMM     = 0x02, // Registered Memory Modules
+    CMM     = 0x04, // Clocked Memory Modules
+    LRMM    = 0x08, // Load Reduction Memory Modules
     ALL     = 0xFFFF,
 } modSpecTypes_t;
 
@@ -76,11 +95,10 @@ typedef enum
 struct KeywordData
 {
     uint16_t keyword;   // SPD keyword this data corresponds to
-    uint8_t offset;     // Byte offset in the SPD data
+    uint16_t offset;    // Byte offset in the SPD data
     uint8_t length;     // Number of bytes to retrieve
-    bool useBitMask;    // Use the bitmask to mask off bits, if true, length must be
-                        //      l byte, unless it is a "special" case
-    uint8_t bitMask;    // Bit mask
+    uint8_t bitMask;    // Bit mask, if non-zero it is used to mask off bits.
+                        // This applies to only byte0 in a non special case
     uint8_t shift;      // Used for fields < 1 byte to right justify all values.
     bool isSpecialCase; // Whether or not this entry is a special case.
     bool writable;      // Whether this keyword can be written to.
@@ -258,17 +276,13 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
  * @param[in/out] io_buffer - The buffer that will contain the data
  *      read from the SPD data.
  *
- * @param[in/out] io_buflen - The requested number of bytes to read.
- *      The actual number of bytes read will be returned.
- *
  * @param[in] i_target - The target DIMM to access the data for.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
+errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
                              void * io_buffer,
-                             size_t & io_buflen,
                              TARGETING::Target * i_target,
                              uint64_t i_DDRRev );
 

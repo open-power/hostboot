@@ -1,0 +1,168 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/vpd/spdDDR4.H $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+#ifndef __SPDDDR4_H
+#define __SPDDDR4_H
+
+/**
+ * @file spdDDR4.H
+ *
+ * @brief Provides the DDR4 field information
+ *
+ */
+
+// ----------------------------------------------
+// Includes
+// ----------------------------------------------
+#include "spd.H"
+
+namespace SPD
+{
+
+/**
+ * @brief Pre-defined lookup table for DDR4 keywords and the
+ *      information needed to read that data from the SPD data.
+ */
+const KeywordData ddr4Data[] =
+{
+    // ----------------------------------------------------------------------------------
+    // NOTE: This list must remain an ordered list! The Keyword must be in numerical 
+    //       order (values defined in spdenums.H) to allow efficient searching, a unit
+    //       test enforces this.
+    // ----------------------------------------------------------------------------------
+    // Bit order for each byte is [7:0] as defined by the JEDEC spec (little endian)
+    //
+    // For multi-byte fields, the offset specifies the byte that is placed at offset 0 in
+    // the output buffer.
+    // - If SpecialCase=false then the next byte in SPD is placed at the next offset in
+    //   the output buffer until complete. Any bitmask/shift only affects the byte at
+    //   offset 0
+    // - If SpecialCase=true then spd.C handles the field in a custom way (e.g. working
+    //   backwards through SPD bytes).
+    // Typically for a 2-byte field consisting of (LSB,MSB), the offset points to MSB and
+    // it is a SpecialCase where spd.C first copies the MSB to the output buffer then
+    // copies the previous byte (LSB) to the output buffer (big endian).
+    // ------------------------------------------------------------------------------------------
+    // Keyword                          offset  size    Bitmsk  Shift  Spec  Writ-  Mod
+    //                                                          Number Case  able   Spec
+    // ------------------------------------------------------------------------------------------
+    // Normal fields supported on both DDR3 and DDR4
+    { CRC_EXCLUDE,                      0x00,   0x01,   0x80,   0x07, false, false, NA },
+    { SPD_BYTES_TOTAL,                  0x00,   0x01,   0x70,   0x04, false, false, NA },
+    { SPD_BYTES_USED,                   0x00,   0x01,   0x0F,   0x00, false, false, NA },
+    { SPD_MAJOR_REVISION,               0x01,   0x01,   0xF0,   0x04, false, false, NA },
+    { SPD_MINOR_REVISION,               0x01,   0x01,   0x0F,   0x00, false, false, NA },
+    { BASIC_MEMORY_TYPE,                0x02,   0x01,   0x00,   0x00, false, false, NA },
+    { CUSTOM,                           0x03,   0x01,   0x80,   0x07, false, false, NA },
+    { MODULE_TYPE,                      0x03,   0x01,   0x0F,   0x00, false, false, NA },
+    { DENSITY,                          0x04,   0x01,   0x0F,   0x00, false, false, NA },
+    { ROW_ADDRESS,                      0x05,   0x01,   0x38,   0x03, false, false, NA },
+    { COL_ADDRESS,                      0x05,   0x01,   0x07,   0x00, false, false, NA },
+    { MODULE_RANKS,                     0x0c,   0x01,   0x38,   0x03, false, false, NA },
+    { MODULE_DRAM_WIDTH,                0x0c,   0x01,   0x07,   0x00, false, false, NA },
+    { MODULE_MEMORY_BUS_WIDTH,          0x0d,   0x01,   0x1f,   0x00, false, false, NA },
+    { MODULE_MEMORY_BUS_WIDTH_EXT,      0x0d,   0x01,   0x18,   0x03, false, false, NA },
+    { MODULE_MEMORY_BUS_WIDTH_PRI,      0x0d,   0x01,   0x07,   0x00, false, false, NA },
+    { TCK_MIN,                          0x12,   0x01,   0x00,   0x00, false, false, NA },
+    { MIN_CAS_LATENCY,                  0x18,   0x01,   0x00,   0x00, false, false, NA },
+    { TRCD_MIN,                         0x19,   0x01,   0x00,   0x00, false, false, NA },
+    { TRP_MIN,                          0x1a,   0x01,   0x00,   0x00, false, false, NA },
+    { TRC_MIN,                          0x1b,   0x02,   0xF0,   0x04, true,  false, NA },
+    { TRAS_MIN,                         0x1b,   0x02,   0x0F,   0x00, false, false, NA },
+    { TFAW_MIN,                         0x24,   0x02,   0x0F,   0x00, false, false, NA },
+    { SDRAM_OPTIONAL_FEATURES,          0x07,   0x01,   0x00,   0x00, false, false, NA },
+    { SDRAM_THERMAL_REFRESH_OPTIONS,    0x08,   0x01,   0x00,   0x00, false, false, NA },
+    { MODULE_THERMAL_SENSOR,            0x0e,   0x01,   0x00,   0x00, false, false, NA },
+    { THERMAL_SENSOR_PRESENT,           0x0e,   0x01,   0x80,   0x07, false, false, NA },
+    { THERMAL_SENSOR_ACCURACY,          0x0e,   0x01,   0x7F,   0x00, false, false, NA },
+    { SDRAM_DEVICE_TYPE       ,         0x06,   0x01,   0x80,   0x07, false, false, NA },
+    { SDRAM_DIE_COUNT,                  0x06,   0x01,   0x70,   0x04, false, false, NA },
+    { SDRAM_DEVICE_TYPE_SIGNAL_LOADING, 0x06,   0x01,   0x03,   0x00, false, false, NA },
+    { TCKMIN_FINE_OFFSET,               0x7d,   0x01,   0x00,   0x00, false, false, NA },
+    { TAAMIN_FINE_OFFSET,               0x7b,   0x01,   0x00,   0x00, false, false, NA },
+    { TRCDMIN_FINE_OFFSET,              0x7a,   0x01,   0x00,   0x00, false, false, NA },
+    { TRPMIN_FINE_OFFSET,               0x79,   0x01,   0x00,   0x00, false, false, NA },
+    { TRCMIN_FINE_OFFSET,               0x78,   0x01,   0x00,   0x00, false, false, NA },
+    { MODULE_TYPE_SPECIFIC_SECTION,     0x80,   0x80,   0x00,   0x00, false, false, NA },
+    { MODULE_MANUFACTURER_ID,           0x141,  0x02,   0x00,   0x00, true,  false, NA },
+    { MODULE_MANUFACTURING_LOCATION,    0x142,  0x01,   0x00,   0x00, false, false, NA },
+    { MODULE_MANUFACTURING_DATE,        0x143,  0x02,   0x00,   0x00, false, false, NA },
+    { MODULE_SERIAL_NUMBER,             0x145,  0x04,   0x00,   0x00, false, false, NA },
+    { MODULE_PART_NUMBER,               0x149,  0x14,   0x00,   0x00, false, false, NA },
+    { MODULE_REVISION_CODE,             0x15d,  0x01,   0x00,   0x00, true,  false, NA },
+    { DRAM_MANUFACTURER_ID,             0x15f,  0x02,   0x00,   0x00, true,  false, NA },
+    { MANUFACTURER_SPECIFIC_DATA,       0x161,  0x1d,   0x00,   0x00, false, false, NA },
+    { DIMM_BAD_DQ_DATA,                 0x180,  0x50,   0x00,   0x00, false, true,  NA },
+    // Normal fields supported on DDR4 only
+    { BANK_GROUP_BITS,                  0x04,   0x01,   0xC0,   0x06, false, false, NA },
+    { BANK_ADDRESS_BITS_DDR4,           0x04,   0x01,   0x30,   0x04, false, false, NA },
+    { MODULE_NOMINAL_VOLTAGE_DDR4,      0x0b,   0x01,   0x3F,   0x00, false, false, NA },
+    { TIMEBASES_MTB     ,               0x11,   0x01,   0x0C,   0x02, false, false, NA },
+    { TIMEBASES_FTB,                    0x11,   0x01,   0x03,   0x00, false, false, NA },
+    { TCK_MAX,                          0x13,   0x01,   0x00,   0x00, false, false, NA },
+    { CAS_LATENCIES_SUPPORTED_DDR4,     0x17,   0x04,   0x00,   0x00, true,  false, NA },
+    { TRFC1_MIN,                        0x1f,   0x02,   0x00,   0x00, true,  false, NA },
+    { TRFC2_MIN,                        0x21,   0x02,   0x00,   0x00, true,  false, NA },
+    { TRFC4_MIN,                        0x23,   0x02,   0x00,   0x00, true,  false, NA },
+    { TRRDS_MIN,                        0x26,   0x01,   0x00,   0x00, false, false, NA },
+    { TRRDL_MIN,                        0x27,   0x01,   0x00,   0x00, false, false, NA },
+    { TCCDL_MIN,                        0x28,   0x01,   0x00,   0x00, false, false, NA },
+    { CONNECTOR_SDRAM_MAP,              0x3C,   0x12,   0x00,   0x00, false, false, NA },
+    { TCCDL_FINE_OFFSET,                0x75,   0x01,   0x00,   0x00, false, false, NA },
+    { TRRDL_FINE_OFFSET,                0x76,   0x01,   0x00,   0x00, false, false, NA },
+    { TRRDS_FINE_OFFSET,                0x77,   0x01,   0x00,   0x00, false, false, NA },
+    { TCKMAX_FINE_OFFSET,               0x7c,   0x01,   0x00,   0x00, false, false, NA },
+    { BASE_CONFIG_CRC,                  0x7f,   0x02,   0x00,   0x00, true,  false, NA },
+    { DRAM_STEPPING,                    0x160,  0x01,   0x00,   0x00, false, false, NA },
+    { MANUFACTURING_SECTION_CRC,        0x17f,  0x02,   0x00,   0x00, true,  false, NA },
+    // Module Specific fields supported on both DDR3 and DDR4
+    { MODSPEC_COM_NOM_HEIGHT_MAX,       0x80,   0x01,   0x1f,   0x00, false, false, ALL },
+    { MODSPEC_COM_MAX_THICK_BACK,       0x81,   0x01,   0xf0,   0x04, false, false, ALL },
+    { MODSPEC_COM_MAX_THICK_FRONT,      0x81,   0x01,   0x0f,   0x00, false, false, ALL },
+    { MODSPEC_COM_REF_RAW_CARD_EXT,     0x82,   0x01,   0x80,   0x07, false, false, ALL },
+    { MODSPEC_COM_REF_RAW_CARD_REV,     0x82,   0x01,   0x60,   0x05, false, false, ALL },
+    { MODSPEC_COM_REF_RAW_CARD,         0x82,   0x01,   0x1f,   0x00, false, false, ALL },
+    { UMM_ADDR_MAPPING,                 0x83,   0x01,   0x01,   0x00, false, false, UMM },
+    { RMM_ROWS_RDIMM,                   0x83,   0x01,   0x0c,   0x02, false, false, RMM },
+    { RMM_REGS_RDIMM,                   0x83,   0x01,   0x03,   0x00, false, false, RMM },
+    { RMM_HEAT_SP,                      0x84,   0x01,   0x80,   0x07, false, false, RMM },
+    { RMM_HEAT_SP_CHARS,                0x84,   0x01,   0x7F,   0x00, false, false, RMM },
+    { RMM_MFR_ID_CODE,                  0x86,   0x02,   0x00,   0x00, true,  false, RMM },
+    { RMM_REG_REV_NUM,                  0x87,   0x01,   0x00,   0x00, false, false, RMM },
+    { LRMM_HEAT_SP,                     0x83,   0x01,   0x80,   0x07, false, false, LRMM },
+    { LRMM_NUM_ROWS,                    0x83,   0x01,   0x0c,   0x02, false, false, LRMM },
+    { LRMM_MIRRORING,                   0x83,   0x01,   0x03,   0x00, false, false, LRMM },
+    { LRMM_REVISION_NUM,                0x84,   0x01,   0x00,   0x00, false, false, LRMM },
+    { LRMM_MFR_ID_CODE,                 0x86,   0x02,   0x00,   0x00, true,  false, LRMM },
+    // Module Specific fields supported on DDR4 only
+    { MODSPEC_COM_RAW_CARD_EXT,         0x80,   0x01,   0xe0,   0x05, false, false, ALL },
+    { UMM_CRC,                          0xff,   0x02,   0x00,   0x00, true,  false, UMM },
+    { RMM_ADDR_MAPPING,                 0x88,   0x01,   0x01,   0x00, false, false, RMM },
+    { RMM_CRC,                          0xff,   0x02,   0x00,   0x00, true,  false, RMM },
+    { LRMM_CRC,                         0xff,   0x02,   0x00,   0x00, true,  false, LRMM },
+    //---------------------------------------------------------------------------------------
+};
+
+
+}; // end SPD namespace
+
+#endif  // __SPDDDR4_H
