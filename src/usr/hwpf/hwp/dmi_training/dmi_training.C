@@ -258,7 +258,15 @@ void*    call_mss_getecid( void *io_pArgs )
             // Firmware does not support HALF-enabled, it is treated like OFF.
             // If the L4 cache is not ON then the L4 Target is deconfigured.
             // The ATTR_MSS_CACHE_ENABLE attribute is set to either ON/OFF
-            if (l_cache_enable != fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON)
+
+            // TODO SW209633
+            // This will provide a new version of mss_get_cen_ecid that will
+            // potentially report some different cache status values. For all
+            // values, if the value is not ON then firmware will treat the cache
+            // as OFF. Until the new mss_get_cen_ecid is available always treat
+            // the cache as OFF to workaround a problem in manufacturing. As
+            // part of SW209633, uncomment the following line.
+            //if (l_cache_enable != fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "mss_get_cen_ecid returned L4 not-on (0x%02x)",
