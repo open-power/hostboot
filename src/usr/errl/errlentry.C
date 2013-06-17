@@ -788,20 +788,88 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
 
 
         // flatten the optional user-defined sections
+        // Flattens in the following order: 1. Hardware Callouts
+        //                                  2. Other UD sections (non-trace)
+        //                                  3. Traces
+        // When the user-defined sections exceed 16kB, FSP ERRL discards
+        // any remaining user-defined sections.  Therefore this order
+        // preserves the callouts, and then gives priority to other
+        // non-trace sections.
         std::vector<ErrlUD*>::iterator it;
         for(it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++)
         {
-            l_cb = (*it)->flatten( pBuffer, i_bufsize );
-            if( 0 == l_cb )
+            // If UD section is a hardware callout.
+            if( (ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
+                (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst) )
             {
-                // Rare.
-                TRACFCOMP( g_trac_errl, ERR_MRK"ud.flatten error");
-                l_flatCount = 0;
-                break;
+                l_cb = (*it)->flatten( pBuffer, i_bufsize );
+                if( 0 == l_cb )
+                {
+                    // Rare.
+                    TRACFCOMP( g_trac_errl, ERR_MRK"ud.flatten error");
+                    l_flatCount = 0;
+                    break;
+                }
+                pBuffer += l_cb;
+                i_bufsize -= l_cb;
             }
-            pBuffer += l_cb;
-            i_bufsize -= l_cb;
         }
+
+        if( 0 == l_flatCount )
+        {
+          break;
+        }
+
+        for(it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++)
+        {
+            // If UD section is not a hardware callout and not a trace.
+            if( !(((ERRL_COMP_ID        == (*it)->iv_header.iv_compId) &&
+                   (ERRL_UDT_CALLOUT    == (*it)->iv_header.iv_sst)) ||
+                  ((FIPS_ERRL_COMP_ID   == (*it)->iv_header.iv_compId) &&
+                   (FIPS_ERRL_UDT_TRACE == (*it)->iv_header.iv_sst))) )
+            {
+                l_cb = (*it)->flatten( pBuffer, i_bufsize );
+                if( 0 == l_cb )
+                {
+                    // Rare.
+                    TRACFCOMP( g_trac_errl, ERR_MRK"ud.flatten error");
+                    l_flatCount = 0;
+                    break;
+                }
+                pBuffer += l_cb;
+                i_bufsize -= l_cb;
+            }
+        }
+
+        if( 0 == l_flatCount )
+        {
+          break;
+        }
+
+        for(it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++)
+        {
+            // If UD section is a trace.
+            if( (FIPS_ERRL_COMP_ID   == (*it)->iv_header.iv_compId) &&
+                (FIPS_ERRL_UDT_TRACE == (*it)->iv_header.iv_sst) )
+            {
+                l_cb = (*it)->flatten( pBuffer, i_bufsize );
+                if( 0 == l_cb )
+                {
+                    // Rare.
+                    TRACFCOMP( g_trac_errl, ERR_MRK"ud.flatten error");
+                    l_flatCount = 0;
+                    break;
+                }
+                pBuffer += l_cb;
+                i_bufsize -= l_cb;
+            }
+        }
+
+        if( 0 == l_flatCount )
+        {
+          break;
+        }
+
     }
     while( 0 );
 
