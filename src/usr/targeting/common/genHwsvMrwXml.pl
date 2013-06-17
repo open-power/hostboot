@@ -2236,13 +2236,17 @@ sub generate_ax_buses
         <id>PEER_TARGET</id>
         <default>physical:sys-$sys/node-$p_node/proc-$p_proc/"
             . "${type}bus-$p_port</default>
-    </attribute>
+    </attribute>";
+            if ($type eq "a")
+            {
+                print "
     <attribute>
         <id>PEER_PATH</id>
         <default>physical:sys-$sys/node-$p_node/proc-$p_proc/"
             . "${type}bus-$p_port</default>
     </attribute>";
-            if (($node != $p_node) && ($type eq "A"))
+            }
+            if (($node != $p_node) && ($type eq "a"))
             {
                print "
     <attribute>
@@ -2253,11 +2257,14 @@ sub generate_ax_buses
         }
         else
         {
-            print "
+            if ($type eq "a")
+            {
+                print "
     <attribute>
         <id>PEER_PATH</id>
         <default>physical:na</default>
     </attribute>";
+            }
         }
 
         # call to do any fsp per-axbus attributes
