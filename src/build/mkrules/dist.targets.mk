@@ -139,6 +139,8 @@ simics.tar_CONTENTS = \
     src/build/simics/standalone.simics \
     src/build/simics/combined.simics \
     src/build/simics/hb-simdebug.py \
+    src/build/debug/hb-dump-debug \
+    src/build/debug/ecmd-debug-framework.pl \
     src/build/debug/simics-debug-framework.py \
     src/build/debug/simics-debug-framework.pl \
     $(addsuffix :Hostboot/, \
