@@ -78,7 +78,10 @@ errlHndl_t getMbaDiagnosticMode(
     return 0;
 }
 
-errlHndl_t getMbaWorkFlow(DiagMode i_mode, WorkFlow & o_wf)
+errlHndl_t getMbaWorkFlow(
+                DiagMode i_mode,
+                WorkFlow & o_wf,
+                const Globals & i_globals)
 {
     // add the correct sequences for the mba based
     // on the mode
@@ -135,9 +138,14 @@ errlHndl_t getMbaWorkFlow(DiagMode i_mode, WorkFlow & o_wf)
             break;
     }
 
+    if(MNFG_FLAG_BIT_MNFG_IPL_MEMORY_CE_CHECKINGE
+            & i_globals.mfgPolicy)
+    {
+        o_wf.push_back(ANALYZE_IPL_MNFG_CE_STATS);
+    }
+
     // clear HW changed state attribute
     o_wf.push_back(CLEAR_HW_CHANGED_STATE);
-
     return 0;
 }
 

@@ -86,7 +86,7 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
             break;
         }
 
-        err = getMbaWorkFlow(mode, list[*tit]);
+        err = getMbaWorkFlow(mode, list[*tit], globals);
 
         if(err)
         {

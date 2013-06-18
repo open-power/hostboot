@@ -56,6 +56,7 @@ enum WorkFlowPhase
     RESTORE_DRAM_REPAIRS,
     START_SCRUB,
     CLEAR_HW_CHANGED_STATE,
+    ANALYZE_IPL_MNFG_CE_STATS,
 };
 
 /**

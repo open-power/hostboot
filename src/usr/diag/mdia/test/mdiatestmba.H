@@ -112,7 +112,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
             expected.push_back(START_PATTERN_0);
             expected.push_back(CLEAR_HW_CHANGED_STATE);
 
-            err = getMbaWorkFlow(mode, wf);
+            err = getMbaWorkFlow(mode, wf, globals);
 
             if(err)
             {

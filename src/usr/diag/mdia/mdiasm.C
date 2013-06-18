@@ -152,6 +152,59 @@ void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
         }
     }
 }
+// Do the setup for CE thresholds
+errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
+{
+    errlHndl_t err = NULL;
+    ecmdDataBufferBase buffer(64);
+
+    do
+    {
+        // get the parent membuf
+        TargetHandle_t membuf = const_cast<TargetHandle_t >(getParentChip(
+                                            i_mba));
+        uint64_t addr = ( ( 0 == i_mba->getAttr<TARGETING::ATTR_CHIP_UNIT>()) ?
+                       MEM_MBA0_MBSTR : MEM_MBA1_MBSTR );
+
+        fapi::Target fapiMb(TARGET_TYPE_MEMBUF_CHIP, membuf);
+        ReturnCode fapirc = fapiGetScom( fapiMb, addr , buffer);
+
+        err = fapiRcToErrl(fapirc);
+
+        if(err)
+        {
+            MDIA_FAST("ceErrorSetup: fapiGetScom on 0x%08X failed HUID:0x%08X",
+                      addr, get_huid(membuf));
+            break;
+        }
+
+        // Enable soft, intermittent, hard and Retry CE threshold attention
+        buffer.setBit(0, 4);
+
+        buffer.clearBit(4,48);
+        // Set error thresold to 1
+        buffer.setBit(15);
+        buffer.setBit(27);
+        buffer.setBit(39);
+        buffer.setBit(51);
+
+        //  Enable per-symbol error counters to count soft, intermittent
+        //  and hard CEs
+        buffer.setBit(55,3);
+
+        fapirc = fapiPutScom( fapiMb, addr , buffer);
+        err = fapiRcToErrl(fapirc);
+
+        if(err)
+        {
+            MDIA_FAST("ceErrorSetup: fapiPutScom on 0x%08X failed HUID:0x%08X",
+                      addr, get_huid(i_mba));
+            break;
+        }
+    } while(0);
+
+    return err;
+}
 
 void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 {
@@ -481,6 +534,7 @@ bool StateMachine::workItemIsAsync(WorkFlowProperties & i_wfp)
         case RESTORE_DRAM_REPAIRS:
         case DUMMY_SYNC_PHASE:
         case CLEAR_HW_CHANGED_STATE:
+        case ANALYZE_IPL_MNFG_CE_STATS:
 
             // no attention associated with these so
             // schedule the next work item now
@@ -554,6 +608,25 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
                 mutex_unlock(&iv_mutex);
 
+            case ANALYZE_IPL_MNFG_CE_STATS:
+            {
+                MDIA_FAST("Executing analyzeIplCEStats");
+                bool calloutMade = false;
+                TargetHandle_t mba = getTarget( *i_wfp);
+                rc = PRDF::analyzeIplCEStats( mba,
+                                              calloutMade);
+                if( rc)
+                {
+                    MDIA_FAST("executeWorkItem: PRDF::analyzeIplCEStats failed "
+                      "rc:%d HUID:0x%08X", rc, get_huid(mba));
+                }
+                if( calloutMade )
+                {
+                    // TODO via RTC 38371.
+                    // Update HCDB
+                }
+
+            }
                 break;
 
             default:
@@ -622,14 +695,38 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     mutex_unlock(&iv_mutex);
 
-    fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, targetMba);
 
-    do {
+    do
+    {
+        fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, targetMba);
+        ReturnCode fapirc;
+        TargetHandle_t top = NULL;
+        targetService().getTopLevelTarget(top);
+        uint64_t mfgPolicy = 0;
+        if( top )
+        {
+            mfgPolicy = top->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+        }
 
+        // We will always do ce setup though CE calculation
+        // is only done during MNFG. This will give use better ffdc.
+        err = ceErrorSetup( targetMba );
+        if( NULL != err)
+        {
+            MDIA_FAST("sm: ceErrorSetup failed for mba. HUID:0x%08X",
+                            get_huid(targetMba));
+            break;
+        }
+
+        if( TARGETING::MNFG_FLAG_BIT_MNFG_IPL_MEMORY_CE_CHECKINGE & mfgPolicy )
+        {
+            // For MNFG mode, check CE also
+            stopCondition |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
+        }
         // setup the address range.
         // assume the full range for now
 
-        ReturnCode fapirc = mss_get_address_range(
+        fapirc = mss_get_address_range(
                 fapiMba,
                 MSS_ALL_RANKS,
                 startAddr,
@@ -742,7 +839,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                     MDIA_FAST("sm: scrub %p on: %x", cmd,
                             get_huid(targetMba));
                     break;
-
                 case START_PATTERN_0:
                 case START_PATTERN_1:
                 case START_PATTERN_2:

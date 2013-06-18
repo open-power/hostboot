@@ -77,6 +77,8 @@ enum
     // mem chiplet regs
     MEM_SPA_FIR = 0x03040004,
     MEM_SPA_FIR_MASK = 0x03040007,
+    MEM_MBA0_MBSTR = 0x02011655,
+    MEM_MBA1_MBSTR = 0x02011755,
 
     // mba unit regs
     MBA01_SPA = 0X03010611,
@@ -170,13 +172,15 @@ errlHndl_t getMbaDiagnosticMode(
  *
  * @param[in] i_mode the diagnostic mode for the target
  * @param[out] o_wf the workflow for the mba target
+ * @param[in] i_globals policy flags needed to determine MNFG status
  *
  * @retval 0 no error
  * @retval !0 unexpected error occurred
  */
 errlHndl_t getMbaWorkFlow(
         DiagMode i_mode,
-        WorkFlow & o_wf);
+        WorkFlow & o_wf,
+        const Globals & i_globals);
 
 /**
  * @brief doStepCleanup shut down threads and pools on step exit
