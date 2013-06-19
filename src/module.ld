@@ -23,36 +23,46 @@
 SECTIONS
 {
     .text : {
-	*(.text)
-	*(.text._*)
+        *(.text)
         *(.text.*)
-	*(.rodata)
-	*(.rodata.*)
-	*(.glink)
+        *(.text.unlikely.*)
+        *(.glink)
     }
-    
-    .data ALIGN(0x1000): {
-	*(.data)
-	*(.data.*)
-	*(.branch_lt)
 
-        . = ALIGN(0x8);
-	ctor_start_address = .;
-	*(.ctors)
-	ctor_end_address = .;
-	*(.toc)
-	*(.opd)
-	*(.got)
-	*(.plt)
-	*(.bss)
-	*(.bss.*)
+    .rodata ALIGN(0x8): {
+        __minimum_data_start_addr = ALIGN(0x1000);
+        ctor_start_address = .;
+        *(.ctors)
+        ctor_end_address = .;
+        *(.rodata)
+        *(.rodata.*)
+        *(.toc)
+        *(.opd)
+        *(.got)
+        *(.plt)
+        *(.data.rel.ro.*)
+        *(.data.*traceData_codeInfo*)
+        . = __minimum_data_start_addr > . ? __minimum_data_start_addr : .;
+    }
+
+    .data ALIGN(0x8): {
+        *(.data)
+        *(.data.*)
+        *(.bss)
+        *(.bss.*)
     }
 
     .rela : {
-	*(.rela.*)
+        *(.rela.*)
     }
 
+    .dynsym : { *(.dynsym) }
+    .dynstr : { *(.dynstr) }
+    .hash : { *(.hash) }
+    .gnu.hash : { *(.gnu.hash) }
+    .eh_frame : { *(.eh_frame) }
+
     /DISCARD/ : {
-	*(.dtors)
+        *(.dtors)
     }
 }

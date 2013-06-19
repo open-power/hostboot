@@ -33,29 +33,29 @@ sub add_image_subdir
 
 sub find_symbol_name
 {
-    my ($offset, $require_function, $symbol_addrs, 
+    my ($offset, $require_function, $symbol_addrs,
         $symbol_sorted_addrs, $symbol_funcs) = @_;
 
     if (defined $symbol_addrs->{$offset})
     {
-	for my $sym (@{$symbol_addrs->{$offset}})
-	{
-	    if ($symbol_funcs->{$sym})
-	    {
-		return $sym;
-	    }
-	}
-	if ($require_function)
-	{
-	    return 0;
-	}
-	return @{$symbol_addrs->{$offset}}[0];
+        for my $sym (@{$symbol_addrs->{$offset}})
+        {
+            if ($symbol_funcs->{$sym})
+            {
+                return $sym;
+            }
+        }
+        if ($require_function)
+        {
+            return 0;
+        }
+        return @{$symbol_addrs->{$offset}}[0];
     }
     if ($require_function)
     {
-	return 0;
+        return 0;
     }
-    
+
     my $prevoffset = -1;
     my $search_first = 0;
     my $search_last = $#$symbol_sorted_addrs;
@@ -86,18 +86,18 @@ sub find_symbol_name
     {
         $prevoffset = @$symbol_sorted_addrs[$search_first];
     }
-    
+
     if (defined $symbol_addrs->{$prevoffset})
     {
-	for my $sym (@{$symbol_addrs->{$prevoffset}})
-	{
-	    if ($symbol_funcs->{$sym})
-	    {
-		return sprintf "%s+0x%x", $sym, ($offset - $prevoffset);
-	    }
-	}
-	return sprintf "%s+0x%x", @{$symbol_addrs->{$prevoffset}}[0], 
-			($offset - $prevoffset);
+        for my $sym (@{$symbol_addrs->{$prevoffset}})
+        {
+            if ($symbol_funcs->{$sym})
+            {
+                return sprintf "%s+0x%x", $sym, ($offset - $prevoffset);
+            }
+        }
+        return sprintf "%s+0x%x", @{$symbol_addrs->{$prevoffset}}[0],
+                        ($offset - $prevoffset);
     }
     return sprintf "Unknown @ 0x%x", $offset;
 }
@@ -137,7 +137,7 @@ while (my $modline = <MODINFO>)
     $module_offsets{@splitline[0]} = (hex @splitline[1]) + $image_offset;
     if ($all_modules)
     {
-	push @modules, @splitline[0];
+        push @modules, @splitline[0];
     }
 }
 
@@ -151,7 +151,7 @@ while (my $line = <GENSYMS>)
 {
     chomp $line;
     my ($is_func,$code_addr,$addr,$function);
-    
+
     $line =~ m/(.*?),(.*?),(.*?),(.*?),(.*)/;
     $is_func = "F" eq $1;
     $addr = hex $2;
@@ -159,7 +159,7 @@ while (my $line = <GENSYMS>)
 
     if (not defined $symbol_address{$addr})
     {
-	$symbol_address{$addr} = ();
+        $symbol_address{$addr} = ();
     }
     push @{$symbol_address{$addr}}, $function;
     $symbol_isfunc{$function} = $is_func;
@@ -181,58 +181,61 @@ foreach my $module (@modules)
     my $enabled = 0;
     my $sections = 0;
     my $PREFIX = $ENV{'CROSS_PREFIX'};
-    open OBJDUMP, ("${PREFIX}objdump -DCS ".add_image_subdir($module)."|");
+    open OBJDUMP, ("${PREFIX}objdump -dCS -j .text -j .data -j .rodata ".
+                   add_image_subdir($module)."|");
     while (my $line = <OBJDUMP>)
     {
-        if (!$enabled && ($sections >= 2)) 
-        { 
-            close OBJDUMP; 
+        if (!$enabled && ($sections >= 3))
+        {
+            close OBJDUMP;
         }
 
-	if (($line =~ m/Disassembly/) && ($line =~ m/Disassembly of section/))
-	{
-	    if (($line =~ m/.text/) || ($line =~ m/.data/))
-	    {
-		$enabled = 1;
+        if (($line =~ m/Disassembly/) && ($line =~ m/Disassembly of section/))
+        {
+            if (($line =~ m/.text/) ||
+                ($line =~ m/.rodata/) ||
+                ($line =~ m/.data/))
+            {
+                $enabled = 1;
                 $sections = $sections + 1;
-	    }
-	    else
-	    {
-		$enabled = 0;
-	    }
-	}
-	elsif ($enabled)
-	{
-	    if ($line =~ s/(^[\s]*)([0-9a-f]+)(:)/$1__HEXVALUE__$3/)
-	    {
-		my $value = hex $2;
-		my $offset = $value + $module_offsets{$module};
-		my $format = sprintf "%x\t%08x", $value, $offset;
-		$line =~ s/__HEXVALUE__/$format/;
-		
-		my $symname = find_symbol_name($offset, 1, \%symbol_address,
+            }
+            else
+            {
+                $enabled = 0;
+            }
+        }
+        elsif ($enabled)
+        {
+            if ($line =~ s/(^[\s]*)([0-9a-f]+)(:)/$1__HEXVALUE__$3/)
+            {
+                my $value = hex $2;
+                my $offset = $value + $module_offsets{$module};
+                my $format = sprintf "%x\t%08x", $value, $offset;
+                $line =~ s/__HEXVALUE__/$format/;
+
+                my $symname = find_symbol_name($offset, 1, \%symbol_address,
                                                \@symbol_sorted_addrs,
-					       \%symbol_isfunc);
-		if ($symname)
-		{
-		    printf "%016x <%s>:\n", $offset, $symname;
-		}
+                                               \%symbol_isfunc);
+                if ($symname)
+                {
+                    printf "%016x <%s>:\n", $offset, $symname;
+                }
 
-		if ($line =~ s/(b[a-z]*[+-]*[\s]*(.*,){0,1})([0-9a-f]+)([\s]*<)(.*)(>)/$1__HEXVALUE__$4__FUNCREF__$6/)
-		{
-		    $value = hex $3;
-		    $offset = $value + $module_offsets{$module};
-		    $format = sprintf "%x", $offset;
-		    $line =~ s/__HEXVALUE__/$format/;
+                if ($line =~ s/(b[a-z]*[+-]*[\s]*(.*,){0,1})([0-9a-f]+)([\s]*<)(.*)(>)/$1__HEXVALUE__$4__FUNCREF__$6/)
+                {
+                    $value = hex $3;
+                    $offset = $value + $module_offsets{$module};
+                    $format = sprintf "%x", $offset;
+                    $line =~ s/__HEXVALUE__/$format/;
 
-		    my $refname = find_symbol_name($offset, 0, 
-					\%symbol_address, \@symbol_sorted_addrs,
+                    my $refname = find_symbol_name($offset, 0,
+                                        \%symbol_address, \@symbol_sorted_addrs,
                                         \%symbol_isfunc);
-		    $line =~ s/__FUNCREF__/$refname/
-		}
-	    }
-	    print $line;
-	}
+                    $line =~ s/__FUNCREF__/$refname/
+                }
+            }
+            print $line;
+        }
     }
     close OBJDUMP;
     print "\n";

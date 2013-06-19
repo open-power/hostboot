@@ -112,6 +112,7 @@ struct Object
         string name;                    //!< full path name of file
         bfd* image;                     //!< bfd image of object
         Section text;                   //!< text section of binary
+        Section rodata;                 //!< rodata section of binary
         Section data;                   //!< data section of binary
         map<string, Symbol> symbols;    //!< symbol map
         vector<Symbol> relocs;          //!< relocations
@@ -181,7 +182,8 @@ struct Object
         /**
          * CTOR default
          */
-        Object() : image(NULL), offset(0), base_addr(0), iv_output(NULL) {}
+        Object() : image(NULL), offset(0), base_addr(0), iv_output(NULL),
+                   text(), rodata(), data() {}
 
         /**
          * CTOR
@@ -189,7 +191,8 @@ struct Object
          * @param[in] i_out : output FILE handle
          */
         Object(unsigned long i_baseAddr, FILE* i_out)
-            : image(NULL), offset(0), base_addr(i_baseAddr), iv_output(i_out) {}
+            : image(NULL), offset(0), base_addr(i_baseAddr), iv_output(i_out),
+              text(), rodata(), data() {}
 };
 
 inline bool Object::isELF()
@@ -500,7 +503,13 @@ bool Object::read_object(const char* i_file)
             {
                 s = &this->text;
             }
-            if (string(".data") == bfd_get_section_name(image, image_section))
+            else if (string(".rodata") ==
+                     bfd_get_section_name(image, image_section))
+            {
+                s = &this->rodata;
+            }
+            else if (string(".data") ==
+                     bfd_get_section_name(image, image_section))
             {
                 s = &this->data;
             }
@@ -543,6 +552,16 @@ bool Object::write_object()
         {
             int error = errno;
             cout << "Error writing to output." << endl;
+            cout << strerror(error) << endl;
+        }
+
+        // Output RODATA section.
+        fseek(iv_output, offset + rodata.vma_offset, SEEK_SET);
+        if ((0 != rodata.size) &&
+            (rodata.size != fwrite(rodata.data, 1, rodata.size, iv_output)))
+        {
+            int error = errno;
+            cout << "Error writing to output for rodata." << endl;
             cout << strerror(error) << endl;
         }
 
@@ -707,7 +726,8 @@ bool Object::read_relocation()
             s.type = Symbol::UNRESOLVED;
         }
 
-        if (loc[i]->howto->name == string("R_PPC64_ADDR64"))
+        if ((loc[i]->howto->name == string("R_PPC64_ADDR64")) ||
+            (loc[i]->howto->name == string("R_PPC64_UADDR64")))
         {
             s.type |= Symbol::VARIABLE;
         }
@@ -719,7 +739,7 @@ bool Object::read_relocation()
 
         cout << "\tSymbol: " << loc[i]->sym_ptr_ptr[0]->name;
         cout << "\tAddress: " << std::hex << loc[i]->address << ", "
-            << loc[i]->addend << endl;
+            << loc[i]->addend << ", " << loc[i]->howto->name << endl;
     }
 
 cleanup:
@@ -754,7 +774,7 @@ bool Object::perform_local_relocations()
         fread(data, sizeof(uint64_t), 1, iv_output);
 
         address = bfd_getb64(data);
-        if (address != i->addend)
+        if ((address != i->addend) && (address != 0))
         {
             ostringstream oss;
             oss << "Expected " << i->addend << " found " << address
@@ -902,7 +922,7 @@ uint64_t Object::find_init_symbol()
         return 0;
 
     return symbols[VFS_TOSTRING(VFS_SYMBOL_INIT)].address +
-        offset + base_addr + data.vma_offset;
+        offset + base_addr + rodata.vma_offset;
 }
 
 //-----------------------------------------------------------------------------
@@ -913,7 +933,7 @@ uint64_t Object::find_start_symbol()
         return 0;
 
     return symbols[VFS_TOSTRING(VFS_SYMBOL_START)].address +
-        offset + base_addr + data.vma_offset;
+        offset + base_addr + rodata.vma_offset;
 }
 
 //-----------------------------------------------------------------------------
@@ -924,7 +944,7 @@ uint64_t Object::find_fini_symbol()
         return 0;
 
     return symbols[VFS_TOSTRING(VFS_SYMBOL_FINI)].address +
-        offset + base_addr + data.vma_offset;
+        offset + base_addr + rodata.vma_offset;
 }
 
 
@@ -991,7 +1011,8 @@ void ModuleTable::write_table(vector<Object> & i_objects)
             start_symbol = i->find_start_symbol();
             fini_symbol  = i->find_fini_symbol();
             text_offset  = i->text.vma_offset + i->offset + i->base_addr;
-            data_offset  = i->data.vma_offset + i->offset + i->base_addr;
+            data_offset  = (i->data.vma_offset + i->offset + i->base_addr) &
+                           (~(0xfff));
             module_size  = i->data.vma_offset + i->data.size;
             module_size  = page_align(module_size);
         }

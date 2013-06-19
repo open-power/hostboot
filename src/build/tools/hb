@@ -402,16 +402,17 @@ hb_objsizes()
 {
     [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
 
-    echo "Object,Text Size,Data Size"
+    echo "Object,Text Size,RO Data Size,Data Size"
 
     objdump -h ${HOSTBOOTROOT}/img/*.elf ${HOSTBOOTROOT}/img/*.so | \
-    grep -e ".elf" -e ".so:" -e ".text " -e ".data " | \
+    grep -e ".elf" -e ".so:" -e ".text " -e ".rodata" -e ".data " | \
     sed "s/.so:.*/.so/" | \
     sed "s/.elf:.*/.elf/" | \
     sed 's/.*\.text *\([0-9a-f]*\).*/,0x\1/' | \
-    sed "s/.*\.data *\([0-9a-f]*\).*/,0x\1/" | \
-    sed "N ; N ; s/\n//g" | \
-    xargs -n1 perl -e 'printf "%s,%d,%d\n", map { 0 == hex $_ ? $_ : hex $_ } split /\,/,shift;' | \
+    sed 's/.*\.rodata *\([0-9a-f]*\).*/,0x\1/' | \
+    sed 's/.*\.data *\([0-9a-f]*\).*/,0x\1/' | \
+    sed "N ; N ; N ; s/\n//g" | \
+    xargs -n1 perl -e 'printf "%s,%d,%d,%d\n", map { 0 == hex $_ ? $_ : hex $_ } split /\,/,shift;' | \
     sed "s/.*\///"
 }
 
