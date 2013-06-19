@@ -41,6 +41,7 @@
 #include <sys/mm.h>
 #include <dump/dumpif.H>
 #include <vfs/vfs.H>
+#include "../dumpCollect.H"
 
 extern trace_desc_t* g_trac_dump;
 
@@ -91,28 +92,33 @@ class DumpTest: public CxxTest::TestSuite
 
         errlHndl_t l_err = NULL;
 
-        uint64_t srcTableAddr = 0;
         uint64_t srcTableSize = 0;
-
-        uint64_t dstTableAddr = 0;
         uint64_t dstTableSize = 0;
-
-        uint64_t resultsTableAddr = 0;
         uint64_t resultsTableSize = 0;
 
-        DUMP::dumpEntry *srcTableEntry = NULL;
-        DUMP::dumpEntry *destTableEntry = NULL;
-        DUMP::resultsEntry *resultsTableEntry = NULL;
+        DUMP::dumpEntry *srcTable = NULL;
+        DUMP::dumpEntry *destTable = NULL;
+        DUMP::resultsEntry *resultsTable = NULL;
 
         // For testing I am using my own data pointers and setting it up
         // to look like PHYP would have to test the copy function.
-        srcTableAddr = DUMP_TEST_SRC_MEM_ADDR;
-        srcTableSize = DUMP_TEST_SRC_MEM_SIZE;
-        dstTableAddr = DUMP_TEST_DST_MEM_ADDR;
-        dstTableSize = DUMP_TEST_DST_MEM_SIZE;
-        resultsTableAddr = DUMP_TEST_RESULTS_MEM_ADDR;
-        resultsTableSize = DUMP_TEST_RESULTS_MEM_SIZE;
+        l_err = DUMP::getHostDataPtrs(srcTable, srcTableSize,
+                                      destTable, dstTableSize,
+                                      resultsTable, resultsTableSize);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest:test_DumpCollect> error getting getHostDataPtrs: RC=%X"
+                      ,l_err->reasonCode() );
+            TS_FAIL( "DumpTest::CollectDump ERROR : Failed getHostDataPtrs" );
+            errlCommit(l_err,DUMP_COMP_ID);
+            return;
+        }
 
+        // Point to the location of the src Data pointer.
+        // Point to the location of the dest Data pointer.
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTable);
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(destTable);
+        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTable);
 
         uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA, 64,  // 450000
                                 DUMP_TEST_SRC_DATA_AREA + 64, 64,
@@ -125,14 +131,6 @@ class DumpTest: public CxxTest::TestSuite
                                 DUMP_TEST_DST_DATA_AREA + 128, 64,
                                 DUMP_TEST_DST_DATA_AREA + 192, 64};
 
-
-        // Point to the location of the src Data pointer.
-        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr);
-
-       // Point to the location of the dest Data pointer.
-        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr);
-
-        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
 
         // Put the src addresses defined above into the MDST
         memcpy(srcTablePtr, src_data, sizeof(src_data));
@@ -210,15 +208,7 @@ class DumpTest: public CxxTest::TestSuite
             index+=2;
         }
 
-
-            srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
-            destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
-            resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
-
-
-        l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
-                                    destTableEntry,dstTableSize,
-                                    resultsTableEntry,resultsTableSize);
+        l_err = DUMP::doDumpCollect();
 
         if( l_err )
         {
@@ -309,25 +299,31 @@ class DumpTest: public CxxTest::TestSuite
 
         TRACFCOMP( g_trac_dump, "DumpTest::DumpCollectUnevenDest START" );
         errlHndl_t l_err = NULL;
-        uint64_t srcTableAddr = 0;
         uint64_t srcTableSize = 0;
-        uint64_t dstTableAddr = 0;
         uint64_t dstTableSize = 0;
-        uint64_t resultsTableAddr = 0;
         uint64_t resultsTableSize = 0;
 
-        DUMP::dumpEntry *srcTableEntry = NULL;
-        DUMP::dumpEntry *destTableEntry = NULL;
-        DUMP::resultsEntry *resultsTableEntry = NULL;
+        DUMP::dumpEntry *srcTable = NULL;
+        DUMP::dumpEntry *destTable = NULL;
+        DUMP::resultsEntry *resultsTable = NULL;
 
-        // Setting up TESt version of the MDST, MDDT and MDRT.
-        srcTableAddr = DUMP_TEST_SRC_MEM_ADDR;
-        srcTableSize = DUMP_TEST_SRC_MEM_SIZE;
-        dstTableAddr = DUMP_TEST_DST_MEM_ADDR;
-        dstTableSize = DUMP_TEST_DST_MEM_SIZE;
-        resultsTableAddr = DUMP_TEST_RESULTS_MEM_ADDR;
-        resultsTableSize = DUMP_TEST_RESULTS_MEM_SIZE;
+        // For testing I am using my own data pointers and setting it up
+        // to look like PHYP would have to test the copy function.
+        l_err = DUMP::getHostDataPtrs(srcTable, srcTableSize,
+                                      destTable, dstTableSize,
+                                      resultsTable, resultsTableSize);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest:test_DumpCollect> error getting getHostDataPtrs: RC=%X"
+                      ,l_err->reasonCode() );
+            TS_FAIL( "DumpTest::CollectDump ERROR : Failed getHostDataPtrs" );
+            errlCommit(l_err,DUMP_COMP_ID);
+            return;
+        }
 
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTable);
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(destTable);
+        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTable);
 
         uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA+256, 64,      // 4500100
                                 DUMP_TEST_SRC_DATA_AREA+256 + 64,64,  // 4500140
@@ -338,10 +334,6 @@ class DumpTest: public CxxTest::TestSuite
                                 DUMP_TEST_DST_DATA_AREA+1024 + 64, 32, // 4600440
                                 DUMP_TEST_DST_DATA_AREA+1024 + 96, 32, // 4600480
                                 DUMP_TEST_DST_DATA_AREA+1024+ 128, 128}; // 46004C0
-
-        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr);
-        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr);
-        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
 
         memcpy(srcTablePtr, src_data, sizeof(src_data));
         memcpy(dstTablePtr, dst_data, sizeof(dst_data));
@@ -417,15 +409,7 @@ class DumpTest: public CxxTest::TestSuite
             index+=2;
         }
 
-            srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
-            destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
-            resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
-
-
-        l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
-                                    destTableEntry,dstTableSize,
-                                    resultsTableEntry,resultsTableSize);
-
+        l_err = DUMP::doDumpCollect();
 
         if( l_err )
         {
@@ -612,28 +596,32 @@ class DumpTest: public CxxTest::TestSuite
 
         errlHndl_t l_err = NULL;
 
-        uint64_t srcTableAddr = 0;
         uint64_t srcTableSize = 0;
-
-        uint64_t dstTableAddr = 0;
         uint64_t dstTableSize = 0;
-
-        uint64_t resultsTableAddr = 0;
         uint64_t resultsTableSize = 0;
-
         uint64_t offset = 0;
 
-        DUMP::dumpEntry *srcTableEntry = NULL;
-        DUMP::dumpEntry *destTableEntry = NULL;
-        DUMP::resultsEntry *resultsTableEntry = NULL;
+        DUMP::dumpEntry *srcTable = NULL;
+        DUMP::dumpEntry *destTable = NULL;
+        DUMP::resultsEntry *resultsTable = NULL;
 
-        // Setting up TESt version of the MDST, MDDT and MDRT.
-        srcTableAddr = DUMP_TEST_SRC_MEM_ADDR;
-        srcTableSize = DUMP_TEST_SRC_MEM_SIZE;
-        dstTableAddr = DUMP_TEST_DST_MEM_ADDR;
-        dstTableSize = DUMP_TEST_DST_MEM_SIZE;
-        resultsTableAddr = DUMP_TEST_RESULTS_MEM_ADDR;
-        resultsTableSize = DUMP_TEST_RESULTS_MEM_SIZE;
+        // For testing I am using my own data pointers and setting it up
+        // to look like PHYP would have to test the copy function.
+        l_err = DUMP::getHostDataPtrs(srcTable, srcTableSize,
+                                      destTable, dstTableSize,
+                                      resultsTable, resultsTableSize);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest:test_DumpCollect> error getting getHostDataPtrs: RC=%X"
+                      ,l_err->reasonCode() );
+            TS_FAIL( "DumpTest::CollectDump ERROR : Failed getHostDataPtrs" );
+            errlCommit(l_err,DUMP_COMP_ID);
+            return;
+        }
+
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTable);
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(destTable);
+        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTable);
 
         uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA+1024, 16,   // 4500400
                                 DUMP_TEST_SRC_DATA_AREA+2048, 48,   // 4500800
@@ -645,11 +633,6 @@ class DumpTest: public CxxTest::TestSuite
                                 DUMP_TEST_DST_DATA_AREA+2048+128, 32,  // 4600880
                                 DUMP_TEST_DST_DATA_AREA+3072,     32,  // 4600C00
                                 DUMP_TEST_DST_DATA_AREA+3072+64,  128}; // 4600C40
-
-
-        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr);
-        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr);
-        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
 
         memcpy(srcTablePtr, src_data, sizeof(src_data));
         memcpy(dstTablePtr, dst_data, sizeof(dst_data));
@@ -797,15 +780,7 @@ class DumpTest: public CxxTest::TestSuite
             }
         }while(0);
 
-
-            srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
-            destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
-            resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
-
-
-        l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
-                                    destTableEntry,dstTableSize,
-                                    resultsTableEntry,resultsTableSize);
+        l_err = DUMP::doDumpCollect();
 
         if( l_err )
         {
@@ -1106,26 +1081,30 @@ class DumpTest: public CxxTest::TestSuite
 
         errlHndl_t l_err = NULL;
 
-        uint64_t srcTableAddr = 0;
         uint64_t srcTableSize = 0;
-
-        uint64_t dstTableAddr = 0;
         uint64_t dstTableSize = 0;
-
-        uint64_t resultsTableAddr = 0;
         uint64_t resultsTableSize = 0;
 
-        DUMP::dumpEntry *srcTableEntry = NULL;
-        DUMP::dumpEntry *destTableEntry = NULL;
-        DUMP::resultsEntry *resultsTableEntry = NULL;
+        DUMP::dumpEntry *srcTable = NULL;
+        DUMP::dumpEntry *destTable = NULL;
+        DUMP::resultsEntry *resultsTable = NULL;
 
-        // Test locations of the MDST, MDDT, MDRT
-        srcTableAddr = DUMP_TEST_SRC_MEM_ADDR;
-        srcTableSize = DUMP_TEST_SRC_MEM_SIZE;
-        dstTableAddr = DUMP_TEST_DST_MEM_ADDR;
-        dstTableSize = DUMP_TEST_DST_MEM_SIZE;
-        resultsTableAddr = DUMP_TEST_RESULTS_MEM_ADDR;
-        resultsTableSize = DUMP_TEST_RESULTS_MEM_SIZE;
+        // For testing I am using my own data pointers and setting it up
+        // to look like PHYP would have to test the copy function.
+        l_err = DUMP::getHostDataPtrs(srcTable, srcTableSize,
+                                      destTable, dstTableSize,
+                                      resultsTable, resultsTableSize);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest:test_DumpCollect> error getting getHostDataPtrs: RC=%X"
+                      ,l_err->reasonCode() );
+            TS_FAIL( "DumpTest::CollectDump ERROR : Failed getHostDataPtrs" );
+            errlCommit(l_err,DUMP_COMP_ID);
+            return;
+        }
+
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTable);
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(destTable);
 
         uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA, 64,  // 450000
                                 DUMP_TEST_SRC_DATA_AREA + 64, 64,
@@ -1138,12 +1117,6 @@ class DumpTest: public CxxTest::TestSuite
                                 DUMP_TEST_DST_DATA_AREA + 4096 + 128, 64,
                                 DUMP_TEST_DST_DATA_AREA + 4096 + 192, 32};  // NOTE>> TOO SMALL of a space..
 
-
-        // Point to the location of the src Data pointer.
-        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr);
-
-        // Point to the location of the dest Data pointer.
-        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr);
 
         // Put the src addresses defined above into the MDST
         memcpy(srcTablePtr, src_data, sizeof(src_data));
@@ -1224,13 +1197,7 @@ class DumpTest: public CxxTest::TestSuite
             errlCommit(l_err,DUMP_COMP_ID);
         }
 
-        srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
-        destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
-        resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
-
-        l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
-                                    destTableEntry,dstTableSize,
-                                    resultsTableEntry,resultsTableSize);
+        l_err = DUMP::doDumpCollect();
 
         // this testcase expects an error returned.
         if( l_err )

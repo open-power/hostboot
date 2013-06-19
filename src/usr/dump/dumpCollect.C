@@ -51,52 +51,52 @@ namespace DUMP
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-    errlHndl_t doDumpCollect(void)
+errlHndl_t doDumpCollect(void)
+{
+    TRACFCOMP(g_trac_dump, "doDumpCollect - start ");
+
+    errlHndl_t l_err = NULL;
+
+    // Table Sizes
+    uint64_t srcTableSize = 0;
+    uint64_t destTableSize = 0;
+    uint64_t resultsTableSize = 0;
+
+    // Dump table struct pointers
+    dumpEntry *srcTableEntry = NULL;
+    dumpEntry *destTableEntry = NULL;
+    resultsEntry *resultsTableEntry = NULL;
+
+    do
     {
-        TRACFCOMP(g_trac_dump, "doDumpCollect - start ");
+        // Get the Data pointers to the locations we need from HDAT
+        //     MS_DUMP_SRC_TBL, < MDST: Memory Dump Source Table
+        //     MS_DUMP_DST_TBL, < MDDT: Memory Dump Destination Table
+        //     MS_DUMP_RESULTS_TBL,  <MDRT:Memory Dump Results Table
+        l_err = getHostDataPtrs(srcTableEntry, srcTableSize,
+                                destTableEntry, destTableSize,
+                                resultsTableEntry, resultsTableSize);
 
-        errlHndl_t l_err = NULL;
-
-        // Table Sizes
-        uint64_t srcTableSize = 0;
-        uint64_t destTableSize = 0;
-        uint64_t resultsTableSize = 0;
-
-        // Dump table struct pointers
-        dumpEntry *srcTableEntry = NULL;
-        dumpEntry *destTableEntry = NULL;
-        resultsEntry *resultsTableEntry = NULL;
-
-        do
+        if (l_err)
         {
-            // Get the Data pointers to the locations we need from HDAT
-            //     MS_DUMP_SRC_TBL, < MDST: Memory Dump Source Table
-            //     MS_DUMP_DST_TBL, < MDDT: Memory Dump Destination Table
-            //     MS_DUMP_RESULTS_TBL,  <MDRT:Memory Dump Results Table
-            l_err = getHostDataPtrs(srcTableEntry, srcTableSize,
-                                    destTableEntry, destTableSize,
-                                    resultsTableEntry, resultsTableSize);
+            TRACFCOMP(g_trac_dump, "doDumpCollect: Got an error back from getHostDataPtrs");
+            break;
+        }
 
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_dump, "doDumpCollect: Got an error back from getHostDataPtrs");
-                break;
-            }
+        l_err = copySrcToDest(srcTableEntry,srcTableSize,
+                              destTableEntry,destTableSize,
+                              resultsTableEntry,resultsTableSize);
 
-            l_err = copySrcToDest(srcTableEntry,srcTableSize,
-                                  destTableEntry,destTableSize,
-                                  resultsTableEntry,resultsTableSize);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_dump, "doDumpCollect: Got an error back from copySrcToDest");
+            break;
+        }
 
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_dump, "doDumpCollect: Got an error back from copySrcToDest");
-                break;
-            }
+    }while (0);
 
-        }while (0);
-
-       return (l_err);
-    }
+    return (l_err);
+}
 
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -423,7 +423,7 @@ namespace DUMP
 
 
                 // Determine how much to copy..
-                 sizeToCopy = std::min(bytesLeftInSrc, bytesLeftInDest);
+                sizeToCopy = std::min(bytesLeftInSrc, bytesLeftInDest);
 
                 // Do the copy of the data from the source to the destination
                 mm_tolerate_ue(1);
@@ -537,9 +537,12 @@ namespace DUMP
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    errlHndl_t getHostDataPtrs(dumpEntry *srcTableEntry, uint64_t &srcTableSize,
-                               dumpEntry *destTableEntry, uint64_t &destTableSize,
-                               resultsEntry *resultsTableEntry,uint64_t &resultsTableSize)
+    errlHndl_t getHostDataPtrs(dumpEntry *&srcTableEntry,
+                               uint64_t &srcTableSize,
+                               dumpEntry *&destTableEntry,
+                               uint64_t &destTableSize,
+                               resultsEntry *&resultsTableEntry,
+                               uint64_t &resultsTableSize)
 
     {
 
@@ -655,7 +658,7 @@ namespace DUMP
 
             TRACFCOMP(g_trac_dump,
                       "gethostDataPtrs SrcTableAddr = %.16x, DestTableAddr = %.16X, resultTableAddr = %.16X",
-                       srcTableAddr, destTableAddr, resultsTableAddr);
+                      srcTableAddr, destTableAddr, resultsTableAddr);
 
         }while(0);
 

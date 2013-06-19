@@ -48,9 +48,12 @@ namespace DUMP
 
       * @return  errlHndl_t
       */
-     errlHndl_t getHostDataPtrs(dumpEntry *srcTableEntry, uint64_t &srcTableSize,
-                                dumpEntry *destTableEntry, uint64_t &destTableSize,
-                                resultsEntry *resultsTableEntry,uint64_t &resultsTableSize);
+     errlHndl_t getHostDataPtrs(dumpEntry *&srcTableEntry,
+                                uint64_t &srcTableSize,
+                                dumpEntry *&destTableEntry,
+                                uint64_t &destTableSize,
+                                resultsEntry *&resultsTableEntry,
+                                uint64_t &resultsTableSize);
 
 
 }; // end of namespace

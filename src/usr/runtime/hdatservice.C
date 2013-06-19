@@ -32,11 +32,14 @@
 #include "hdatstructs.H"
 #include "fakepayload.H"
 #include <dump/dumpif.H>
+#include "hdatservice.H"
 
 extern trace_desc_t* g_trac_runtime;
 
 #define TRACUCOMP TRACDCOMP
 
+namespace RUNTIME
+{
 
 /********************
  Local Constants used for sanity checks
@@ -225,49 +228,40 @@ errlHndl_t check_tuple( uint64_t i_base,
 }
 
 
-/**
- * @brief Retrieve hardcoded section addresses for standalone mode
- *
- * This is here to allow us to manually generate attribute data for
- *  the HostServices code without requiring a full FipS/PHYP boot.
- *
- * @param[in] i_section  Chunk of data to find
- * @param[in] i_instance  Instance of section when there are multiple entries
- * @param[out] o_dataAddr  Physical memory address of data
- * @param[out] o_dataSize  Size of data in bytes, 0 on error, DATA_SIZE_UNKNOWN if unknown
- *
- * @return errlHndl_t  NULL on success
- */
-errlHndl_t get_standalone_section( RUNTIME::SectionId i_section,
-                                   uint64_t i_instance,
-                                   uint64_t& o_dataAddr,
-                                   size_t& o_dataSize )
+errlHndl_t hdatService::get_standalone_section(
+                                               RUNTIME::SectionId i_section,
+                                               uint64_t i_instance,
+                                               uint64_t& o_dataAddr,
+                                               size_t& o_dataSize )
 {
     errlHndl_t errhdl = NULL;
+    uint64_t v_baseAddr = reinterpret_cast<uint64_t>(iv_payload_addr);
+    uint64_t v_dumpAddr = reinterpret_cast<uint64_t>(iv_dumptest_addr);
 
     if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
     {
-        o_dataAddr = HSVC_TEST_MEMORY_ADDR;
+        o_dataAddr = v_baseAddr;
         o_dataSize = 512*KILOBYTE;
     }
     else if( RUNTIME::HSVC_NODE_DATA == i_section )
     {
-        o_dataAddr = HSVC_TEST_MEMORY_ADDR + 512*KILOBYTE;
+        o_dataAddr = v_baseAddr + 512*KILOBYTE;
         o_dataSize = HSVC_TEST_MEMORY_SIZE - 512*KILOBYTE;
     }
     else if( RUNTIME::MS_DUMP_SRC_TBL == i_section )
     {
-        o_dataAddr = DUMP_TEST_SRC_MEM_ADDR;
+        o_dataAddr = v_dumpAddr;
         o_dataSize = DUMP_TEST_SRC_MEM_SIZE;
     }
     else if( RUNTIME::MS_DUMP_DST_TBL == i_section )
     {
-        o_dataAddr = DUMP_TEST_DST_MEM_ADDR;
+        o_dataAddr = v_dumpAddr + DUMP_TEST_SRC_MEM_SIZE;
         o_dataSize = DUMP_TEST_DST_MEM_SIZE;
     }
     else if( RUNTIME::MS_DUMP_RESULTS_TBL == i_section )
     {
-        o_dataAddr = DUMP_TEST_RESULTS_MEM_ADDR;
+        o_dataAddr = v_dumpAddr + DUMP_TEST_SRC_MEM_SIZE +
+                     DUMP_TEST_DST_MEM_SIZE;
         o_dataSize = DUMP_TEST_RESULTS_MEM_SIZE;
     }
     else
@@ -292,20 +286,38 @@ errlHndl_t get_standalone_section( RUNTIME::SectionId i_section,
     return errhdl;
 }
 
+hdatService::hdatService(void)
+:iv_payload_addr(NULL), iv_dumptest_addr(NULL)
+{
+}
 
-/********************
- Public Methods
- ********************/
+hdatService::~hdatService(void)
+{
+    if(iv_payload_addr)
+    {
+        mm_block_unmap(iv_payload_addr);
+        iv_payload_addr = NULL;
+    }
 
-/**
- * @brief  Add the host data mainstore location to VMM
- */
-errlHndl_t RUNTIME::load_host_data( void )
+    if(iv_dumptest_addr)
+    {
+        mm_block_unmap(iv_dumptest_addr);
+        iv_dumptest_addr = NULL;
+    }
+}
+
+errlHndl_t hdatService::loadHostData(void)
 {
     errlHndl_t errhdl = NULL;
 
     do
     {
+        //Check to see if already mapped, if so just return
+        if (iv_payload_addr != NULL)
+        {
+            break;
+        }
+
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
@@ -346,11 +358,12 @@ errlHndl_t RUNTIME::load_host_data( void )
             hdat_size = ALIGN_PAGE(hdat_size); //round up
 
             TRACFCOMP( g_trac_runtime, "load_host_data> PHYP: Mapping in 0x%X-0x%X (%d MB)", hdat_start, hdat_start+hdat_size, hdat_size );
-            int rc = mm_linear_map( reinterpret_cast<void*>(hdat_start),
+            iv_payload_addr = mm_block_map( reinterpret_cast<void*>(hdat_start),
                                     hdat_size );
-            if (rc != 0)
+            if (NULL == iv_payload_addr)
             {
-                TRACFCOMP( g_trac_runtime, "Failure calling mm_linear_map : rc=%d", rc );
+                TRACFCOMP( g_trac_runtime, "Failure calling mm_block_map : iv_payload_addr=%p",
+                           iv_payload_addr );
                 /*@
                  * @errortype
                  * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
@@ -375,13 +388,15 @@ errlHndl_t RUNTIME::load_host_data( void )
             FakePayload::load();
 
             // Map in some arbitrary memory for the HostServices code to use
-            TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", HSVC_TEST_MEMORY_ADDR, HSVC_TEST_MEMORY_ADDR+HSVC_TEST_MEMORY_SIZE, HSVC_TEST_MEMORY_SIZE );
-            int rc = mm_linear_map(
-                        reinterpret_cast<void*>(HSVC_TEST_MEMORY_ADDR),
-                        HSVC_TEST_MEMORY_SIZE );
-            if (rc != 0)
+            TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", HSVC_TEST_MEMORY_ADDR,                                     HSVC_TEST_MEMORY_ADDR+HSVC_TEST_MEMORY_SIZE,
+                HSVC_TEST_MEMORY_SIZE);
+            iv_payload_addr = mm_block_map(
+                                reinterpret_cast<void*>(HSVC_TEST_MEMORY_ADDR),
+                                HSVC_TEST_MEMORY_SIZE);
+            if (NULL == iv_payload_addr)
             {
-                TRACFCOMP( g_trac_runtime, "Failure calling mm_linear_map : rc=%d", rc );
+                TRACFCOMP( g_trac_runtime, "Failure calling mm_block_map : iv_payload_addr=%p",
+                           iv_payload_addr );
                 /*@
                  * @errortype
                  * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
@@ -400,36 +415,34 @@ errlHndl_t RUNTIME::load_host_data( void )
                 break;
             }
 
-            // Map in some memory for the DumpCollect code to use
-            TRACFCOMP( g_trac_runtime,
-                       "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", DUMP_TEST_TABLE_START, DUMP_TEST_TABLE_END, DUMP_TEST_TABLE_SIZE);
-
-            rc = mm_linear_map(
-                        reinterpret_cast<void*>(DUMP_TEST_SRC_MEM_ADDR),
-
-                                   DUMP_TEST_SRC_MEM_SIZE+DUMP_TEST_DST_MEM_SIZE+DUMP_TEST_RESULTS_MEM_SIZE);
-
-            if (rc != 0)
+            // Map in some arbitrary memory for the DumpTest code to use
+            TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", DUMP_TEST_MEMORY_ADDR,
+                DUMP_TEST_MEMORY_ADDR+DUMP_TEST_MEMORY_SIZE,
+                DUMP_TEST_MEMORY_SIZE);
+            iv_dumptest_addr = mm_block_map(
+                                reinterpret_cast<void*>(DUMP_TEST_MEMORY_ADDR),
+                                DUMP_TEST_MEMORY_SIZE );
+            if (NULL == iv_dumptest_addr)
             {
-                TRACFCOMP( g_trac_runtime, "Failure calling mm_linear_map : rc=%d", rc );
+                TRACFCOMP( g_trac_runtime, "Failure calling mm_block_map : iv_dumptest_addr=%p",
+                           iv_dumptest_addr );
                 /*@
                  * @errortype
                  * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
                  * @reasoncode   RUNTIME::RC_CANNOT_MAP_MEMORY3
                  * @userdata1    Starting Address
                  * @userdata2    Size
-                 * @devdesc      Error mapping in standalone DUMP memory
+                 * @devdesc      Error mapping in standalone memory
                  */
                 errhdl = new ERRORLOG::ErrlEntry(
                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                    RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA,
                                    RUNTIME::RC_CANNOT_MAP_MEMORY3,
-                                   DUMP_TEST_SRC_MEM_ADDR,
-                                   DUMP_TEST_TABLE_SIZE);
+                                   DUMP_TEST_MEMORY_ADDR,
+                                   DUMP_TEST_MEMORY_SIZE );
                 errhdl->collectTrace("RUNTIME",1024);
                 break;
             }
-
         }
         else
         {
@@ -443,14 +456,10 @@ errlHndl_t RUNTIME::load_host_data( void )
     return errhdl;
 }
 
-/**
- * @brief  Get a pointer to the beginning of a particular section of
- *         the host data memory.
- */
-errlHndl_t RUNTIME::get_host_data_section( SectionId i_section,
-                                           uint64_t i_instance,
-                                           uint64_t& o_dataAddr,
-                                           size_t& o_dataSize )
+errlHndl_t hdatService::getHostDataSection( SectionId i_section,
+                                            uint64_t i_instance,
+                                            uint64_t& o_dataAddr,
+                                            size_t& o_dataSize )
 {
     errlHndl_t errhdl = NULL;
     TRACFCOMP( g_trac_runtime, "RUNTIME::get_host_data_section( i_section=%d, i_instance=%d )", i_section, i_instance );
@@ -459,6 +468,13 @@ errlHndl_t RUNTIME::get_host_data_section( SectionId i_section,
     {
         // Force the answer to zero in case of failure
         o_dataAddr = 0;
+
+        //Always force a load (mapping)
+        errhdl = loadHostData();
+        if(errhdl)
+        {
+            break;
+        }
 
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
@@ -498,9 +514,7 @@ errlHndl_t RUNTIME::get_host_data_section( SectionId i_section,
         }
 
         // Go fetch the relative zero address that PHYP uses
-        TARGETING::ATTR_PAYLOAD_BASE_type payload_base
-          = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
-        payload_base = payload_base*MEGABYTE;
+        uint64_t payload_base = reinterpret_cast<uint64_t>(iv_payload_addr);
 
         // Everything starts at the NACA
         //   The NACA is part of the platform dependent LID which
@@ -823,6 +837,33 @@ errlHndl_t RUNTIME::get_host_data_section( SectionId i_section,
     return errhdl;
 }
 
+/********************
+ Public Methods
+ ********************/
+
+/**
+ * @brief  Add the host data mainstore location to VMM
+ */
+errlHndl_t load_host_data( void )
+{
+    return Singleton<hdatService>::instance().loadHostData();
+}
+
+
+/**
+ * @brief  Get a pointer to the beginning of a particular section of
+ *         the host data memory.
+ */
+errlHndl_t get_host_data_section( SectionId i_section,
+                                  uint64_t i_instance,
+                                  uint64_t& o_dataAddr,
+                                  size_t& o_dataSize )
+{
+    return Singleton<hdatService>::instance().
+      getHostDataSection(i_section,i_instance, o_dataAddr, o_dataSize);
+}
+
+};
 
 /********************
  Private/Protected Methods
