@@ -169,13 +169,11 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
         TARGETING::Target * l_pTarget2 =
             reinterpret_cast<TARGETING::Target*>((*l_itr)->iv_target1.get());
 
-// Issue 72257. Uncomment the following lines to add a bus callout to
-// the error log, the addBusCallout enums and interfaces are not in place yet
-//        HWAS::callOutPriority l_priority =
-//            xlateCalloutPriority((*l_itr)->iv_calloutPriority);
+        HWAS::callOutPriority l_priority =
+            xlateCalloutPriority((*l_itr)->iv_calloutPriority);
 
         bool l_busTypeValid = true;
-//        HWAS::busTypeEnum l_busType = HWAS::FSI_BUS_TYPE;
+        HWAS::busTypeEnum l_busType = HWAS::FSI_BUS_TYPE;
         TARGETING::TYPE l_type1 = l_pTarget1->getAttr<TARGETING::ATTR_TYPE>();
         TARGETING::TYPE l_type2 = l_pTarget2->getAttr<TARGETING::ATTR_TYPE>();
 
@@ -184,17 +182,17 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
              ((l_type1 == TARGETING::TYPE_MEMBUF) &&
               (l_type2 == TARGETING::TYPE_MCS)) )
         {
-//            l_busType = HWAS::DMI_BUS_TYPE;
+            l_busType = HWAS::DMI_BUS_TYPE;
         }
         else if ((l_type1 == TARGETING::TYPE_ABUS) &&
                  (l_type2 == TARGETING::TYPE_ABUS))
         {
-//            l_busType = HWAS::A_BUS_TYPE;
+            l_busType = HWAS::A_BUS_TYPE;
         }
         else if ((l_type1 == TARGETING::TYPE_XBUS) &&
                  (l_type2 == TARGETING::TYPE_XBUS))
         {
-//            l_busType = HWAS::X_BUS_TYPE;
+            l_busType = HWAS::X_BUS_TYPE;
         }
         else
         {
@@ -205,8 +203,8 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
 
         if (l_busTypeValid)
         {
-//            io_pError->addBusCallout(l_pTarget1, l_pTarget2, l_busType,
-//            l_priority);
+            io_pError->addBusCallout(l_pTarget1, l_pTarget2, l_busType,
+                                     l_priority);
         }
     }
 }
@@ -221,11 +219,6 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
 void processEICDGs(const ErrorInfo & i_errInfo,
                    errlHndl_t io_pError)
 {
-    // TODO: RTC issue 47147
-    // Need to figure out how connections are called out. Assuming this is done
-    // by calling out Target pairs, then the HWAS::SRCI_PRIORITY will need to
-    // be a 'grouping' priority (MEDA/B/C)
-
     // Iterate through the CGD requests, adding each to the error log
     for (ErrorInfo::ErrorInfoCDGCItr_t l_itr = i_errInfo.iv_CDGs.begin();
          l_itr != i_errInfo.iv_CDGs.end(); ++l_itr)
