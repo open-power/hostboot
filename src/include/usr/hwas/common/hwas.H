@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -39,6 +39,7 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
+#include <targeting/common/commontargeting.H>
 #include <hwas/common/hwasError.H>
 
 namespace HWAS
@@ -75,6 +76,34 @@ errlHndl_t initHardware();
  *                          NULL if no errors;
  */
 errlHndl_t discoverTargets();
+
+/**
+ * @brief   restrictEXunits   Internal HWAS function to restrict the EXs
+ *
+ *  This routine will walk through the procs in the list, and turn EX
+ *  units to not functional if the number of units is larger than the max
+ *  given. This is used for PR keyword and Field Core Override (FCO)
+ *  processing.
+ *
+ * @param[in] i_procRestrict   vector of procRestrict entries
+ * @param[in] i_present    boolean for 'present' HWAS value for restricted
+ *                          EX units
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+
+// structure used to store proc information for EX restrict processing
+typedef struct {
+    TARGETING::TargetHandle_t target;      // proc target
+    uint32_t group;             // uniq id for this group - ie: FRUID, node
+    uint32_t maxEXs;            // max EX units for this group
+    uint8_t procs;              // number of procs in the group
+} procRestrict_t;
+
+errlHndl_t restrictEXunits(
+    std::vector <procRestrict_t> &i_procRestrict,
+    bool i_present);
 
 };   // end namespace
 

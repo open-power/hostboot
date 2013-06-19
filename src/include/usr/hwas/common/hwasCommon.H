@@ -170,6 +170,19 @@ const uint32_t VPD_VINI_PR_B2_SHIFT         = 4;
 //   average them out as specified in byte 2 above.
 const uint32_t VPD_VINI_PR_B7_MASK          = 0x3F; // bits 2-7
 
+/**
+ * @brief platform specific code to read the Field Core Override
+ *
+ * @param[in]   i_node      node target, where the FCO is stored
+ * @param[out]  o_fco       field core override value
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t platGetFCO(
+        const TARGETING::TargetHandle_t &i_node,
+        uint32_t &o_fco);
+
 
 /**
  * @brief platform specific code to get the address in PNOR to read

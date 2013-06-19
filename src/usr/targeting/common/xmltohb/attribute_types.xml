@@ -12605,4 +12605,25 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </enumerator>
 </enumerationType>
 
+<attribute>
+    <id>FIELD_CORE_OVERRIDE</id>
+    <description>Field Core Override (FCO) is the override value for the
+    number of functional cores allowed on the system.
+    FCO is used when customers order a system with N cores but they only want
+    to enable less than N cores to lower software license costs. A field in the
+    anchor VPD is set by manufacturing to specify the maximum number of cores
+    to enable. The number is maintained, even if some cores are garded out due
+    to error.
+    A value of 0 means all cores allowed;
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

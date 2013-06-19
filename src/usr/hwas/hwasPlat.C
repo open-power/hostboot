@@ -77,8 +77,8 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
     // using SCOM path.  We must use FSI path to read the IDEC values.
     // For master proc, use scom
     // For everything else, use FSI(0x1028)
-    TARGETING::Target* l_pMasterProcChip = NULL;
-    TARGETING::targetService(). masterProcChipTargetHandle(l_pMasterProcChip);
+    Target* l_pMasterProcChip = NULL;
+    targetService().masterProcChipTargetHandle(l_pMasterProcChip);
 
     if (i_target == l_pMasterProcChip)
     {
@@ -161,11 +161,19 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
             // skip past the header
             uint16_t *pgData = reinterpret_cast <uint16_t *>(&pgRaw[VPD_CP00_PG_HDR_LENGTH]);
             if (i_target->getAttr<ATTR_HUID>() == 0x50000)
-            {   // 1st proc - let it go thru ok.
+            {   // 1st proc
+                pgData[VPD_CP00_PG_EX0_INDEX+4] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+5] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0x9300; // off
+                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0x9300; // off
+                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0x9300; // off
+                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0x9300; // off
             }
             else
             if (i_target->getAttr<ATTR_HUID>() == 0x50001)
-            {
+            {   // 2nd proc
+                pgData[VPD_CP00_PG_EX0_INDEX+4] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+5] = 0xF300;
                 pgData[VPD_CP00_PG_EX0_INDEX+6] = 0xF300;
                 pgData[VPD_CP00_PG_EX0_INDEX+12] = 0xF300;
                 pgData[VPD_CP00_PG_EX0_INDEX+13] = 0xF300;
@@ -178,17 +186,22 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
                 ////  should be marked present and NOT functional
                 ////pgData[VPD_CP00_PG_PERVASIVE_INDEX] = 0;
 
-                //pgData[VPD_CP00_PG_EX0_INDEX+12] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+4] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+5] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0x9300; // off
+                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0x9300; // off
                 pgData[VPD_CP00_PG_EX0_INDEX+13] = 0xF300;
                 pgData[VPD_CP00_PG_EX0_INDEX+14] = 0xF300;
             }
             else
             if (i_target->getAttr<ATTR_HUID>() == 0x50003)
             {   // 4th proc -  EX13 and EX14 are good
-                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0xF300;
-                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+4] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+5] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0x9300; // off
+                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0x9300; // off
+                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0x9300; // off
+                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0x9300; // off
             }
         }
 #endif
@@ -234,7 +247,7 @@ errlHndl_t platReadPR(const TargetHandle_t &i_target,
             if (i_target->getAttr<ATTR_HUID>() == 0x50000)
             {   // 1st proc - let it go thru ok.
                 prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
-                prData[7] = 0; // 2 procs
+                prData[7] = 1; // 2 procs
                 //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
                 //prData[7] = 3; // 4 cores
             }
@@ -249,16 +262,16 @@ errlHndl_t platReadPR(const TargetHandle_t &i_target,
             else
             if (i_target->getAttr<ATTR_HUID>() == 0x50002)
             {   // 3rd proc -
-                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
-                prData[7] = 0; // 2 procs
+                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*1 = 3 cores
+                prData[7] = 0; // 1 procs
                 //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
                 //prData[7] = 3; // 4 cores
             }
             else
             if (i_target->getAttr<ATTR_HUID>() == 0x50003)
             {   // 4th proc -
-                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
-                prData[7] = 0; // 2 procs
+                prData[2] = 4 << VPD_VINI_PR_B2_SHIFT; // 4*1 = 4 cores
+                prData[7] = 0; // 1 procs
                 //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
                 //prData[7] = 3; // 4 cores
             }
@@ -272,6 +285,21 @@ errlHndl_t platReadPR(const TargetHandle_t &i_target,
 
     return errl;
 } // platReadPR
+
+//******************************************************************************
+// platGetFCO function
+//******************************************************************************
+errlHndl_t platGetFCO(const TargetHandle_t &i_node,
+            uint32_t &o_fco)
+{
+    errlHndl_t errl = NULL;
+
+    o_fco = i_node->getAttr<ATTR_FIELD_CORE_OVERRIDE>();
+
+    HWAS_INF("FCO returned: %d", o_fco);
+
+    return errl;
+} // platGetFCO
 
 //******************************************************************************
 // platPresenceDetect function

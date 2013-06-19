@@ -36,6 +36,7 @@
 #include <algorithm>
 
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
 
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
@@ -59,22 +60,19 @@ TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 #endif
 
-// structure used to store proc information for PR keyword processing
-typedef struct {
-    TargetHandle_t target;
-    ATTR_FRU_ID_type fruid;
-    uint8_t avgNum;
-    uint8_t vpdCopies;
-} procPR_t;
-
 // SORT functions that we'll use for PR keyword processing
 bool compareTargetHUID(TargetHandle_t t1, TargetHandle_t t2)
 {
     return (t1->getAttr<ATTR_HUID>() < t2->getAttr<ATTR_HUID>());
 }
-bool compareProcFRUID(procPR_t t1, procPR_t t2)
+bool compareProcGroup(procRestrict_t t1, procRestrict_t t2)
 {
-    return (t1.fruid < t2.fruid);
+    if (t1.group == t2.group)
+    {
+        return (t1.target->getAttr<ATTR_HUID>() <
+                    t2.target->getAttr<ATTR_HUID>());
+    }
+    return (t1.group < t2.group);
 }
 
 /**
@@ -173,10 +171,14 @@ errlHndl_t discoverTargets()
         //  and read and store values from the PR keyword
 
         // list of procs and data that we'll need to look at the PR keyword
-        procPR_t l_procEntry;
-        std::vector <procPR_t> l_procPRList;
+        procRestrict_t l_procEntry;
+        std::vector <procRestrict_t> l_procPRList;
 
-        for (TargetHandleList::iterator pTarget_it = pCheckPres.begin();
+        // sort the list by ATTR_HUID to ensure that we
+        //  start at the same place each time
+        std::sort(pCheckPres.begin(), pCheckPres.end(),
+                compareTargetHUID);
+        for (TargetHandleList::const_iterator pTarget_it = pCheckPres.begin();
                 pTarget_it != pCheckPres.end();
                 ++pTarget_it
             )
@@ -291,12 +293,12 @@ errlHndl_t discoverTargets()
                                 pTarget->getAttr<ATTR_HUID>(),
                                 pTarget->getAttr<ATTR_FRU_ID>());
                             l_procEntry.target = pTarget;
-                            l_procEntry.fruid = pTarget->getAttr<ATTR_FRU_ID>();
-                            l_procEntry.avgNum =
+                            l_procEntry.group = pTarget->getAttr<ATTR_FRU_ID>();
+                            l_procEntry.procs =
+                                        (prData[7] & VPD_VINI_PR_B7_MASK) + 1;
+                            l_procEntry.maxEXs = l_procEntry.procs *
                                         (prData[2] & VPD_VINI_PR_B2_MASK)
                                             >> VPD_VINI_PR_B2_SHIFT;
-                            l_procEntry.vpdCopies =
-                                        (prData[7] & VPD_VINI_PR_B7_MASK) + 1;
                             l_procPRList.push_back(l_procEntry);
                         }
                     }
@@ -312,7 +314,7 @@ errlHndl_t discoverTargets()
             TargetHandleList pDescList;
             targetService().getAssociated( pDescList, pTarget,
                 TargetService::CHILD, TargetService::ALL);
-            for (TargetHandleList::iterator pDesc_it = pDescList.begin();
+            for (TargetHandleList::const_iterator pDesc_it = pDescList.begin();
                     pDesc_it != pDescList.end();
                     ++pDesc_it)
             {
@@ -419,156 +421,187 @@ errlHndl_t discoverTargets()
 
         // PR keyword processing - potentially reduce the number of ex/core
         //  units that are functional based on what's in the PR keyword.
-
-        // predicate to find present EX units
-        PredicateCTM predEX(CLASS_UNIT, TYPE_EX);
-        PredicateHwas predPresent;
-        predPresent.present(true);
-        PredicatePostfixExpr exCheckExpr;
-        exCheckExpr.push(&predEX).push(&predPresent).And();
-
-        // predicate to find CORE units
-        PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
-        PredicatePostfixExpr coreCheckExpr;
-        coreCheckExpr.push(&predCore);
-
-        // sort by ATTR_FRU_ID so PROC# are in the right groupings.
-        std::sort(l_procPRList.begin(), l_procPRList.end(),
-                    compareProcFRUID);
-
-        // AFTER all targets have been tested, loop thru procs to handle PR
-        const uint32_t l_PRProcCount = l_procPRList.size();
-        for (uint32_t procIdx = 0;
-                procIdx < l_PRProcCount;
-                // the increment will happen in the loop to handle
-                //  PR records covering more than 1 proc target
-            )
-        {
-            // determine the number of procs we should enable
-            uint8_t avgNum = l_procPRList[procIdx].avgNum;
-            uint8_t vpdCopies = l_procPRList[procIdx].vpdCopies;
-
-            // this procs FRU_ID, used to determine groupings
-            ATTR_FRU_ID_type thisFruId = l_procPRList[procIdx].fruid;
-
-            HWAS_INF("procPRList[%d] - PR avg units %d, VPDs %d, FRU_ID %d",
-                    procIdx, avgNum, vpdCopies, thisFruId);
-
-            // exs and iters for each proc in this vpd set
-            TargetHandleList pEXList[vpdCopies];
-            TargetHandleList::iterator pEX_it[vpdCopies];
-
-            // find the proc's that we think are in this group
-            for (uint32_t i = 0; i < vpdCopies; i++)
-            {
-                TargetHandle_t pProc = l_procPRList[procIdx].target;
-
-                // if this proc is past the last of the proc count
-                //  OR is NOT in the same FRU_ID
-                if ((procIdx >= l_PRProcCount) ||
-                    (thisFruId != pProc->getAttr<ATTR_FRU_ID>()))
-                {
-                    HWAS_DBG("procPRList[%d] - not in FRU_ID %d group",
-                            i, thisFruId);
-
-                    // change this to be how many we actually have here
-                    vpdCopies = i;
-
-                    // we're done - break so that we use procIdx as the
-                    //  start index next time
-                    break;
-                }
-
-                // get this proc's (CHILD) present EX units
-                targetService().getAssociated( pEXList[i], pProc,
-                        TargetService::CHILD, TargetService::ALL, &exCheckExpr);
-
-                if (!pEXList[i].empty())
-                {
-                    // sort the list by ATTR_HUID to ensure that we
-                    //  start at the same place each time
-                    std::sort(pEXList[i].begin(), pEXList[i].end(),
-                                compareTargetHUID);
-
-                    // keep a pointer into that list
-                    pEX_it[i] = pEXList[i].begin();
-                }
-                else
-                {
-                    // this one is bad, so decrement the counters
-                    vpdCopies--;
-                    i--;
-                }
-
-                // advance the outer loop as well since we're doing these
-                //  procs together
-                ++procIdx;
-            } // for
-
-            // now need to find EX units that stay function, going
-            //  across the list of units for each proc we have, until
-            //  we get to the max or run out of EXs.
-            uint8_t procs_remaining = vpdCopies;
-            uint32_t maxEXs = avgNum * vpdCopies;
-            uint32_t goodEXs = 0;
-            HWAS_DBG("vpdCopies %d maxEXs %d", vpdCopies, maxEXs);
-            do
-            {
-                // now cycle thru the procs
-                for (uint32_t i = 0;i < vpdCopies;i++)
-                {
-                    // if we have EX units still to process
-                    //  from this processor
-                    if (pEX_it[i] != pEXList[i].end())
-                    {
-                        // got a present EX
-                        goodEXs++;
-                        HWAS_DBG("pEX   %.8X - is good %d!",
-                            (*(pEX_it[i]))->getAttr<ATTR_HUID>(), goodEXs);
-
-                        (pEX_it[i])++; // next ex/core in this proc's list
-
-                        // check to see if we just hit the end of the list
-                        if (pEX_it[i] == pEXList[i].end())
-                        {
-                            procs_remaining--;
-                            continue;
-                        }
-                    }
-                } // for
-            }
-            while ((goodEXs < maxEXs) && (procs_remaining != 0));
-
-            // now mark the rest of the EXs as non-present/non-functional
-            for (uint32_t i = 0;i < vpdCopies;i++)
-            {
-                // walk thru the rest of the EX list
-                while (pEX_it[i] != pEXList[i].end())
-                {
-                    TargetHandle_t l_pEX = *(pEX_it[i]);
-                    enableHwasState(l_pEX, false, false, 0);
-                    HWAS_INF("pEX   %.8X - marked NOT present, NOT functional (PR)",
-                            l_pEX->getAttr<ATTR_HUID>());
-
-                    // now need to mark the child CORE
-                    TargetHandleList pCoreList;
-                    targetService().getAssociated(
-                        pCoreList, l_pEX,
-                        TargetService::CHILD, TargetService::ALL,
-                        &coreCheckExpr );
-                    enableHwasState(pCoreList[0], false, false, 0);
-                    HWAS_INF("pCore %.8X - marked NOT present, NOT functional (PR)",
-                            pCoreList[0]->getAttr<ATTR_HUID>());
-                    (pEX_it[i])++; // next ex/core in this proc's list
-                }
-            } // for making remaining non-present/non-functional
-        } // for procIdx < l_PRProcCount
+        //  call to restrict EX units, marking bad units as present=false;
+        errl = restrictEXunits(l_procPRList, false);
 
     } while (0);
 
-    HWAS_INF("discoverTargets returning errl %p", errl);
+    if (errl)
+    {
+        HWAS_INF("discoverTargets failed (plid 0x%X)", errl->plid());
+    }
+    else
+    {
+        HWAS_INF("discoverTargets completed successfully");
+    }
     return errl;
 } // discoverTargets
+
+
+errlHndl_t restrictEXunits(
+    std::vector <procRestrict_t> &i_procList,
+    bool i_present)
+{
+    HWAS_INF("restrictEXunits entry, %d elements", i_procList.size());
+    errlHndl_t errl = NULL;
+
+    // sort by group so PROC# are in the right groupings.
+    std::sort(i_procList.begin(), i_procList.end(),
+                compareProcGroup);
+
+    // loop thru procs to handle restrict
+    const uint32_t l_ProcCount = i_procList.size();
+    for (uint32_t procIdx = 0;
+            procIdx < l_ProcCount;
+            // the increment will happen in the loop to handle
+            //  groups covering more than 1 proc target
+        )
+    {
+        // determine the number of procs we should enable
+        uint8_t procs = i_procList[procIdx].procs;
+        uint32_t maxEXs = i_procList[procIdx].maxEXs;
+
+        // this procs number, used to determine groupings
+        uint32_t thisGroup = i_procList[procIdx].group;
+
+        HWAS_INF("procRestrictList[%d] - maxEXs %d, procs %d, group %d",
+                procIdx, maxEXs, procs, thisGroup);
+
+        // exs and iters for each proc in this vpd set
+        TargetHandleList pEXList[procs];
+        TargetHandleList::const_iterator pEX_it[procs];
+
+        // find the proc's that we think are in this group
+        uint32_t currentEXs = 0;
+        for (uint32_t i = 0; i < procs; ) // increment in loop
+        {
+            TargetHandle_t pProc = i_procList[procIdx].target;
+
+            // if this proc is past the last of the proc count
+            //  OR is NOT in the same group
+            if ((procIdx >= l_ProcCount) ||
+                (thisGroup != i_procList[procIdx].group))
+            {
+                HWAS_DBG("procRestrictList[%d] - group %d not in group %d",
+                        i, i_procList[procIdx].group, thisGroup);
+
+                // change this to be how many we actually have here
+                procs = i;
+
+                // we're done - break so that we use procIdx as the
+                //  start index next time
+                break;
+            }
+
+            // get this proc's (CHILD) functional EX units
+            getChildChiplets(pEXList[i], pProc, TYPE_EX, true);
+
+            if (!pEXList[i].empty())
+            {
+                // sort the list by ATTR_HUID to ensure that we
+                //  start at the same place each time
+                std::sort(pEXList[i].begin(), pEXList[i].end(),
+                            compareTargetHUID);
+
+                // keep a pointer into that list
+                pEX_it[i] = pEXList[i].begin();
+
+                // keep local count of current functional EX units
+                currentEXs += pEXList[i].size();
+
+                // go to next proc
+                i++;
+            }
+            else
+            {
+                // this one is bad, stay on this i but lower the end count
+                procs--;
+            }
+
+            // advance the outer loop as well since we're doing these
+            //  procs together
+            ++procIdx;
+        } // for
+
+        if (currentEXs <= maxEXs)
+        {
+            // we don't need to restrict - we're done with this group.
+            HWAS_DBG("currentEXs %d <= maxEXs %d -- done",
+                    currentEXs, maxEXs);
+            continue;
+        }
+
+        HWAS_DBG("currentEXs %d > maxEXs %d -- restricting!",
+                currentEXs, maxEXs);
+
+        // now need to find EX units that stay function, going
+        //  across the list of units for each proc we have, until
+        //  we get to the max or run out of EXs.
+        uint8_t procs_remaining = procs;
+        uint32_t goodEXs = 0;
+        HWAS_DBG("procs %d maxEXs %d", procs, maxEXs);
+        do
+        {
+            // now cycle thru the procs, stopping when we either hit
+            //  the end, or when we hit our maxEXs limit
+            for (uint32_t i = 0;(i < procs) && (goodEXs < maxEXs);i++)
+            {
+                // if we have EX units still to process
+                //  from this processor
+                if (pEX_it[i] != pEXList[i].end())
+                {
+                    // got a functional EX
+                    goodEXs++;
+                    HWAS_DBG("pEX   %.8X - is good %d!",
+                        (*(pEX_it[i]))->getAttr<ATTR_HUID>(), goodEXs);
+
+                    (pEX_it[i])++; // next ex/core in this proc's list
+
+                    // check to see if we just hit the end of the list
+                    if (pEX_it[i] == pEXList[i].end())
+                    {
+                        procs_remaining--;
+                        continue;
+                    }
+                }
+            } // for
+        }
+        while ((goodEXs < maxEXs) && (procs_remaining != 0));
+
+        // now mark the rest of the EXs as non-functional
+        for (uint32_t i = 0;i < procs;i++)
+        {
+            // walk thru the rest of the EX list
+            while (pEX_it[i] != pEXList[i].end())
+            {
+                TargetHandle_t l_pEX = *(pEX_it[i]);
+                enableHwasState(l_pEX, i_present, false, 0);
+                HWAS_INF("pEX   %.8X - marked %spresent, NOT functional",
+                        l_pEX->getAttr<ATTR_HUID>(),
+                        i_present ? "" : "NOT ");
+
+                // now need to mark the child CORE
+                TargetHandleList pCoreList;
+                getChildChiplets(pCoreList, l_pEX, TYPE_CORE, true);
+                enableHwasState(pCoreList[0], i_present, false, 0);
+                HWAS_INF("pCore %.8X - marked %spresent, NOT functional",
+                        l_pEX->getAttr<ATTR_HUID>(),
+                        i_present ? "" : "NOT ");
+                (pEX_it[i])++; // next ex/core in this proc's list
+            }
+        } // for making remaining non-functional
+    } // for procIdx < l_ProcCount
+
+    if (errl)
+    {
+        HWAS_INF("restrictEXunits failed (plid 0x%X)", errl->plid());
+    }
+    else
+    {
+        HWAS_INF("restrictEXunits completed successfully");
+    }
+    return errl;
+} // restrictEXunits
 
 };   // end namespace
 

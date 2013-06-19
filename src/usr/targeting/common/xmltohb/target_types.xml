@@ -651,6 +651,7 @@
         <id>MODEL</id>
         <default>POWER8</default>
     </attribute>
+    <attribute><id>FIELD_CORE_OVERRIDE</id></attribute>
 </targetType>
 
 <targetType>

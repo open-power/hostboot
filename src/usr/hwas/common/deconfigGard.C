@@ -26,10 +26,13 @@
  *  @brief Implements the DeconfigGard class
  */
 #include <stdint.h>
+#include <algorithm>
 
+#include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
+#include <targeting/common/utilFilter.H>
 
 // Trace definition
 #define __COMP_TD__ g_trac_deconf
@@ -65,26 +68,42 @@ bool processDeferredDeconfig()
 errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate)
 {
     HWAS_INF("collectGard entry" );
+    errlHndl_t errl = NULL;
 
-    errlHndl_t errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
+    do
+    {
 
-    if (errl)
-    {
-        HWAS_ERR("ERROR: collectGard failed to clear GARD Records for replaced Targets");
-    }
-    else
-    {
+        errl = theDeconfigGard().clearGardRecordsForReplacedTargets();
+        if (errl)
+        {
+            HWAS_ERR("ERROR: collectGard failed to clear GARD Records for replaced Targets");
+            break;
+        }
+
         errl = theDeconfigGard().
                     deconfigureTargetsFromGardRecordsForIpl(i_pPredicate);
-
         if (errl)
         {
             HWAS_ERR("ERROR: collectGard failed to deconfigure Targets from GARD Records for IPL");
+            break;
         }
-        else
+
+        errl = theDeconfigGard().processFieldCoreOverride();
+        if (errl)
         {
-            HWAS_INF("collectGard completed successfully");
+            HWAS_ERR("ERROR: collectGard failed to process Field Core Override");
+            break;
         }
+    }
+    while(0);
+
+    if (errl)
+    {
+        HWAS_INF("collectGard failed (plid 0x%X)", errl->plid());
+    }
+    else
+    {
+        HWAS_INF("collectGard completed successfully");
     }
     return errl;
 }
@@ -296,6 +315,118 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
     return l_pErr;
 }
 
+bool compareTargetHuid(TARGETING::TargetHandle_t t1,
+        TARGETING::TargetHandle_t t2)
+{
+    return (t1->getAttr<TARGETING::ATTR_HUID>() <
+                t2->getAttr<TARGETING::ATTR_HUID>());
+}
+
+//******************************************************************************
+errlHndl_t DeconfigGard::processFieldCoreOverride()
+{
+    HWAS_INF("Process Field Core Override FCO");
+    errlHndl_t l_pErr = NULL;
+
+    do
+    {
+        // otherwise, process and reduce cores.
+        // find all functional NODE targets
+        TARGETING::Target* pSys;
+        TARGETING::targetService().getTopLevelTarget(pSys);
+        TARGETING::PredicateCTM predNode(TARGETING::CLASS_ENC,
+                                        TARGETING::TYPE_NODE);
+        TARGETING::PredicateHwas predFunctional;
+        predFunctional.functional(true);
+        TARGETING::PredicatePostfixExpr nodeCheckExpr;
+        nodeCheckExpr.push(&predNode).push(&predFunctional).And();
+
+        TARGETING::TargetHandleList pNodeList;
+        TARGETING::targetService().getAssociated(pNodeList, pSys,
+                        TARGETING::TargetService::CHILD,
+                        TARGETING::TargetService::ALL,
+                        &nodeCheckExpr);
+
+        // sort the list by ATTR_HUID to ensure that we
+        //  start at the same place each time
+        std::sort(pNodeList.begin(), pNodeList.end(),
+                    compareTargetHuid);
+
+        // for each of the nodes
+        for (TARGETING::TargetHandleList::const_iterator
+                pNode_it = pNodeList.begin();
+                pNode_it != pNodeList.end();
+                ++pNode_it
+            )
+        {
+            const TARGETING::TargetHandle_t pNode = *pNode_it;
+
+            // Get FCO value
+            uint32_t l_fco = 0;
+            l_pErr = platGetFCO(pNode, l_fco);
+            if (l_pErr)
+            {
+                HWAS_ERR("Error from platGetFCO");
+                break;
+            }
+
+            // FCO of 0 means no overrides for this node
+            if (l_fco == 0)
+            {
+                HWAS_INF("FCO: node %.8X: no overrides, done.",
+                        TARGETING::get_huid(pNode));
+                continue; // next node
+            }
+
+            HWAS_INF("FCO: node %.8X: value %d",
+                TARGETING::get_huid(pNode), l_fco);
+
+            // find all functional child PROC targets
+            TARGETING::TargetHandleList pProcList;
+            TARGETING::getChildAffinityTargets(pProcList, pNode,
+                    TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC,
+                    true);
+
+            // sort the list by ATTR_HUID to ensure that we
+            //  start at the same place each time
+            std::sort(pProcList.begin(), pProcList.end(),
+                    compareTargetHuid);
+
+            // create list for restrictEXunits() function
+            procRestrict_t l_procEntry;
+            std::vector <procRestrict_t> l_procRestrictList;
+            for (TARGETING::TargetHandleList::const_iterator
+                    pProc_it = pProcList.begin();
+                    pProc_it != pProcList.end();
+                    ++pProc_it
+                )
+            {
+                const TARGETING::TargetHandle_t pProc = *pProc_it;
+
+                // save info so that we can
+                //  restrict the number of EX units
+                HWAS_INF("pProc %.8X - pushing to proclist",
+                    TARGETING::get_huid(pProc));
+                l_procEntry.target = pProc;
+                l_procEntry.group = 0;
+                l_procEntry.procs = pProcList.size();
+                l_procEntry.maxEXs = l_fco;
+                l_procRestrictList.push_back(l_procEntry);
+            } // for pProc_it
+
+            // restrict the EX units; units turned off are marked
+            //  present=true, functional=false
+            HWAS_INF("FCO: calling restrictEXunits with %d entries",
+                    l_procRestrictList.size());
+            l_pErr = restrictEXunits(l_procRestrictList, true);
+            break;
+        } // for pNode_it
+    }
+    while (0);
+
+    return l_pErr;
+}
+
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
                                            const uint32_t i_errlPlid,
@@ -500,7 +631,8 @@ void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
         TARGETING::TargetService::CHILD,
         TARGETING::TargetService::ALL,
         &hwasPredicate);
-    for (TARGETING::TargetHandleList::iterator pChild_it = pChildList.begin();
+    for (TARGETING::TargetHandleList::const_iterator
+            pChild_it = pChildList.begin();
             pChild_it != pChildList.end();
             ++pChild_it)
     {
@@ -516,7 +648,8 @@ void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
         TARGETING::TargetService::CHILD_BY_AFFINITY,
         TARGETING::TargetService::ALL,
         &hwasPredicate);
-    for (TARGETING::TargetHandleList::iterator pChild_it = pChildList.begin();
+    for (TARGETING::TargetHandleList::const_iterator
+            pChild_it = pChildList.begin();
             pChild_it != pChildList.end();
             ++pChild_it)
     {

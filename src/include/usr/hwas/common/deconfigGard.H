@@ -160,6 +160,19 @@ public:
                 const TARGETING::PredicateBase *i_pPredicate = NULL);
 
     /**
+     * @brief Processes the Field Core Override attribute
+     *
+     * Called by HWAS as part of initial IPL steps.
+     *
+     * if the Field Core Override is non-zero, then functional cores will
+     * be made non-functional, until the number of functional cores is equal
+     * to the FCO value;
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t processFieldCoreOverride();
+
+    /**
      * @brief Deconfigures a Target.
      *
      * Called from processCallout, which is called
