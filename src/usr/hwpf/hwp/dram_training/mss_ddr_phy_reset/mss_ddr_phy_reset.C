@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr_phy_reset.C,v 1.18 2013/03/18 19:38:48 mfred Exp $
+// $Id: mss_ddr_phy_reset.C,v 1.25 2013/06/26 17:40:56 mwuu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -70,6 +70,7 @@ using namespace fapi;
 // prototypes of functions called in phy reset
 ReturnCode mss_deassert_force_mclk_low (const Target& i_target); 
 ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target);
+ReturnCode mss_ddr_phy_flush(const fapi::Target & i_target);
 
 fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
 {
@@ -78,6 +79,7 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
 
     fapi::ReturnCode rc;
     fapi::ReturnCode slewcal_rc;
+    fapi::ReturnCode phyflush_rc;
 
     rc = mss_ddr_phy_reset_cloned(i_target);
 
@@ -92,7 +94,7 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
         FAPI_ERR(" mss_slew_cal failed!   rc = 0x%08X (creator = %d)", uint32_t(slewcal_rc), slewcal_rc.getCreator());
         fapiLogError(slewcal_rc);
     }
-     else if (slewcal_rc)
+    else if (slewcal_rc)
     {
         rc = slewcal_rc;
     }
@@ -102,6 +104,17 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
     // Else if mss_unmask_ddrphy_errors runs clean,
     // it will just return the passed in rc.
     rc = mss_unmask_ddrphy_errors(i_target, rc);
+
+	phyflush_rc = mss_ddr_phy_flush(i_target);
+
+	if ((phyflush_rc) && (rc))
+	{
+		FAPI_ERR(" mss_ddr_phy_flush failed!  rc = 0x%08X (creator = %d)", uint32_t(phyflush_rc), phyflush_rc.getCreator());
+	}
+	else if (phyflush_rc)
+	{
+		rc = phyflush_rc;
+	}
 
     return rc;
 }
@@ -124,21 +137,21 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
     uint8_t l_dqBitmap[DIMM_DQ_RANK_BITMAP_SIZE]; // 10 byte array of bad bits
     uint8_t valid_dimms  = 0;
     uint8_t valid_dimm[2][2];
-    uint8_t num_ranks_per_dimm[2][2];
+    uint8_t num_mranks_per_dimm[2][2];
     uint8_t l_port       = 0;
     uint8_t l_dimm       = 0;
     uint8_t l_rank       = 0;
-    uint8_t new_error    = 0;
-    uint8_t P0_DP0_reg_error = 0;
-    uint8_t P0_DP1_reg_error = 0;
-    uint8_t P0_DP2_reg_error = 0;
-    uint8_t P0_DP3_reg_error = 0;
-    uint8_t P0_DP4_reg_error = 0;
-    uint8_t P1_DP0_reg_error = 0;
-    uint8_t P1_DP1_reg_error = 0;
-    uint8_t P1_DP2_reg_error = 0;
-    uint8_t P1_DP3_reg_error = 0;
-    uint8_t P1_DP4_reg_error = 0;
+    bool new_error        = false;
+    bool P0_DP0_reg_error = false;
+    bool P0_DP1_reg_error = false;
+    bool P0_DP2_reg_error = false;
+    bool P0_DP3_reg_error = false;
+    bool P0_DP4_reg_error = false;
+    bool P1_DP0_reg_error = false;
+    bool P1_DP1_reg_error = false;
+    bool P1_DP2_reg_error = false;
+    bool P1_DP3_reg_error = false;
+    bool P1_DP4_reg_error = false;
     fapi::Target l_centaurTarget;
     uint8_t      continue_on_dp18_pll_lock_failure = 0;
 
@@ -407,54 +420,53 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 FAPI_ERR("Error getting Centaur parent target from the input MBA");
                 break;
             }
-            else
+            rc = FAPI_ATTR_GET( ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL, &l_centaurTarget, continue_on_dp18_pll_lock_failure);
+            if (rc)
             {
-                rc = FAPI_ATTR_GET( ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL, &l_centaurTarget, continue_on_dp18_pll_lock_failure);
-                if (rc)
-                {
-                    FAPI_ERR("Failed to get attribute: ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL.");
-                    break;
-                }
-                else
-                {
-                    FAPI_DBG("Got attribute ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL:  value=%X.\n", continue_on_dp18_pll_lock_failure);
-                }
+                FAPI_ERR("Failed to get attribute: ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL.");
+                break;
             }
+            FAPI_DBG("Got attribute ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL:  value=%X.\n", continue_on_dp18_pll_lock_failure);
+
             //-------------------------------
             // 8b - Check Port 0 DP lock bits
             if ( dp_p0_lock_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS )
             {
-                FAPI_ERR("One or more DP18 port 0 (0x0C000) PLL failed to lock!   Lock Status = %04X",dp_p0_lock_data.getHalfWord(3));
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_0_PLL_FAILED_TO_LOCK);
-                if ( dp_p0_lock_data.isBitClear(48) ) { FAPI_ERR("Port 0 DP 0 PLL failed to lock!");}
-                if ( dp_p0_lock_data.isBitClear(49) ) { FAPI_ERR("Port 0 DP 1 PLL failed to lock!");}
-                if ( dp_p0_lock_data.isBitClear(50) ) { FAPI_ERR("Port 0 DP 2 PLL failed to lock!");}
-                if ( dp_p0_lock_data.isBitClear(51) ) { FAPI_ERR("Port 0 DP 3 PLL failed to lock!");}
-                if ( dp_p0_lock_data.isBitClear(52) ) { FAPI_ERR("Port 0 DP 4 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(48) ) { FAPI_INF("Port 0 DP 0 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(49) ) { FAPI_INF("Port 0 DP 1 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(50) ) { FAPI_INF("Port 0 DP 2 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(51) ) { FAPI_INF("Port 0 DP 3 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(52) ) { FAPI_INF("Port 0 DP 4 PLL failed to lock!");}
                 if (!continue_on_dp18_pll_lock_failure)
                 {
+                    FAPI_ERR("One or more DP18 port 0 (0x0C000) PLL failed to lock!   Lock Status = %04X",dp_p0_lock_data.getHalfWord(3));
                     FAPI_ERR("DP18 PLL lock failed and this chip does not have the known DP18 lock bug.");
+                    FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_0_PLL_FAILED_TO_LOCK);
                     break;
                 }
                 // for DD1 parts that have the DP18 lock bug - keep going to initialize any other channels that might be good.
+                FAPI_INF("One or more DP18 port 0 (0x0C000) PLL failed to lock!   Lock Status = %04X",dp_p0_lock_data.getHalfWord(3));
+                FAPI_INF("Continuing anyway to initialize any other channels that might be good...");
             }
             //-------------------------------
             // 8c - Check Port 1 DP lock bits
             if ( dp_p1_lock_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS )
             {
-                FAPI_ERR("One or more DP18 port 1 (0x1C000) PLL failed to lock!   Lock Status = %04X",dp_p1_lock_data.getHalfWord(3));
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_1_PLL_FAILED_TO_LOCK);
-                if ( dp_p1_lock_data.isBitClear(48) ) { FAPI_ERR("Port 1 DP 0 PLL failed to lock!");}
-                if ( dp_p1_lock_data.isBitClear(49) ) { FAPI_ERR("Port 1 DP 1 PLL failed to lock!");}
-                if ( dp_p1_lock_data.isBitClear(50) ) { FAPI_ERR("Port 1 DP 2 PLL failed to lock!");}
-                if ( dp_p1_lock_data.isBitClear(51) ) { FAPI_ERR("Port 1 DP 3 PLL failed to lock!");}
-                if ( dp_p1_lock_data.isBitClear(52) ) { FAPI_ERR("Port 1 DP 4 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(48) ) { FAPI_INF("Port 1 DP 0 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(49) ) { FAPI_INF("Port 1 DP 1 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(50) ) { FAPI_INF("Port 1 DP 2 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(51) ) { FAPI_INF("Port 1 DP 3 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(52) ) { FAPI_INF("Port 1 DP 4 PLL failed to lock!");}
                 if (!continue_on_dp18_pll_lock_failure)
                 {
+                    FAPI_ERR("One or more DP18 port 1 (0x1C000) PLL failed to lock!   Lock Status = %04X",dp_p1_lock_data.getHalfWord(3));
                     FAPI_ERR("DP18 PLL lock failed and this chip does not have the known DP18 lock bug.");
+                    FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_1_PLL_FAILED_TO_LOCK);
                     break;
                 }
                 // for DD1 parts that have the DP18 lock bug - keep going to initialize any other channels that might be good.
+                FAPI_INF("One or more DP18 port 1 (0x1C000) PLL failed to lock!   Lock Status = %04X",dp_p1_lock_data.getHalfWord(3));
+                FAPI_INF("Continuing anyway to initialize any other channels that might be good...");
             }
             //-------------------------------
             // 8d - Check Port 0 AD lock bits
@@ -528,61 +540,61 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
-            P0_DP0_reg_error = 1;
+            P0_DP0_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
-            P1_DP0_reg_error = 1;
+            P1_DP0_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
-            P0_DP1_reg_error = 1;
+            P0_DP1_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
-            P1_DP1_reg_error = 1;
+            P1_DP1_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
-            P0_DP2_reg_error = 1;
+            P0_DP2_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
-            P1_DP2_reg_error = 1;
+            P1_DP2_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
-            P0_DP3_reg_error = 1;
+            P0_DP3_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
-            P1_DP3_reg_error = 1;
+            P1_DP3_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
-            P0_DP4_reg_error = 1;
+            P0_DP4_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
-            P1_DP4_reg_error = 1;
+            P1_DP4_reg_error = true;
         }
 
 
@@ -673,61 +685,61 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
-            P0_DP0_reg_error = 1;
+            P0_DP0_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
-            P1_DP0_reg_error = 1;
+            P1_DP0_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
-            P0_DP1_reg_error = 1;
+            P0_DP1_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
-            P1_DP1_reg_error = 1;
+            P1_DP1_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
-            P0_DP2_reg_error = 1;
+            P0_DP2_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
-            P1_DP2_reg_error = 1;
+            P1_DP2_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
-            P0_DP3_reg_error = 1;
+            P0_DP3_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
-            P1_DP3_reg_error = 1;
+            P1_DP3_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
-            P0_DP4_reg_error = 1;
+            P0_DP4_reg_error = true;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
-            P1_DP4_reg_error = 1;
+            P1_DP4_reg_error = true;
         }
 
 
@@ -781,61 +793,61 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
-                P0_DP0_reg_error = 1;
+                P0_DP0_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
-                P1_DP0_reg_error = 1;
+                P1_DP0_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
-                P0_DP1_reg_error = 1;
+                P0_DP1_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
-                P1_DP1_reg_error = 1;
+                P1_DP1_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
-                P0_DP2_reg_error = 1;
+                P0_DP2_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
-                P1_DP2_reg_error = 1;
+                P1_DP2_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
-                P0_DP3_reg_error = 1;
+                P0_DP3_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
-                P1_DP3_reg_error = 1;
+                P1_DP3_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
-                P0_DP4_reg_error = 1;
+                P0_DP4_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
-                P1_DP4_reg_error = 1;
+                P1_DP4_reg_error = true;
             }
 
 
@@ -878,61 +890,61 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
-                P0_DP0_reg_error = 1;
+                P0_DP0_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
-                P1_DP0_reg_error = 1;
+                P1_DP0_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
-                P0_DP1_reg_error = 1;
+                P0_DP1_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
-                P1_DP1_reg_error = 1;
+                P1_DP1_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
-                P0_DP2_reg_error = 1;
+                P0_DP2_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
-                P1_DP2_reg_error = 1;
+                P1_DP2_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
-                P0_DP3_reg_error = 1;
+                P0_DP3_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
-                P1_DP3_reg_error = 1;
+                P1_DP3_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
-                P0_DP4_reg_error = 1;
+                P0_DP4_reg_error = true;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
-                P1_DP4_reg_error = 1;
+                P1_DP4_reg_error = true;
             }
         }
 
@@ -1003,7 +1015,7 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
         valid_dimm[1][1] = (valid_dimms & 0x04);
 
         // Find out how many ranks are on each dimm
-        rc = FAPI_ATTR_GET( ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_per_dimm);
+        rc = FAPI_ATTR_GET( ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_mranks_per_dimm);
         if (rc)
         {
             FAPI_ERR("Failed to get attribute: ATTR_EFF_NUM_RANKS_PER_DIMM.");
@@ -1020,7 +1032,7 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 if (valid_dimm[l_port][l_dimm])
                 {
                     // Ok, this DIMM is functional. So loop through the RANKs of this dimm.
-                    for(l_rank=0; l_rank<num_ranks_per_dimm[l_port][l_dimm]; l_rank++ )
+                    for(l_rank=0; l_rank<num_mranks_per_dimm[l_port][l_dimm]; l_rank++ )
                     {
                         // Get the bad DQ Bitmap for l_port, l_dimm, l_rank
                         rc = dimmGetBadDqBitmap(i_target,
@@ -1035,24 +1047,24 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                         }
             
                         // Mark the bad bits for each register that had problems or PLL that did not lock
-                        new_error = 0;
+                        new_error = false;
                         if ( l_port == 0 )
                         {
-                            if (( P0_DP0_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(48) )) { l_dqBitmap[0] = 0xff; l_dqBitmap[1] = 0xff; new_error = 1; }
-                            if (( P0_DP1_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(49) )) { l_dqBitmap[2] = 0xff; l_dqBitmap[3] = 0xff; new_error = 1; }
-                            if (( P0_DP2_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(50) )) { l_dqBitmap[4] = 0xff; l_dqBitmap[5] = 0xff; new_error = 1; }
-                            if (( P0_DP3_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(51) )) { l_dqBitmap[6] = 0xff; l_dqBitmap[7] = 0xff; new_error = 1; }
-                            if (( P0_DP4_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(52) )) { l_dqBitmap[8] = 0xff; l_dqBitmap[9] = 0xff; new_error = 1; }
+                            if (( P0_DP0_reg_error ) || ( dp_p0_lock_data.isBitClear(48) )) { l_dqBitmap[0] = 0xff; l_dqBitmap[1] = 0xff; new_error = true; }
+                            if (( P0_DP1_reg_error ) || ( dp_p0_lock_data.isBitClear(49) )) { l_dqBitmap[2] = 0xff; l_dqBitmap[3] = 0xff; new_error = true; }
+                            if (( P0_DP2_reg_error ) || ( dp_p0_lock_data.isBitClear(50) )) { l_dqBitmap[4] = 0xff; l_dqBitmap[5] = 0xff; new_error = true; }
+                            if (( P0_DP3_reg_error ) || ( dp_p0_lock_data.isBitClear(51) )) { l_dqBitmap[6] = 0xff; l_dqBitmap[7] = 0xff; new_error = true; }
+                            if (( P0_DP4_reg_error ) || ( dp_p0_lock_data.isBitClear(52) )) { l_dqBitmap[8] = 0xff; l_dqBitmap[9] = 0xff; new_error = true; }
                         } else {
-                            if (( P1_DP0_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(48) )) { l_dqBitmap[0] = 0xff; l_dqBitmap[1] = 0xff; new_error = 1; }
-                            if (( P1_DP1_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(49) )) { l_dqBitmap[2] = 0xff; l_dqBitmap[3] = 0xff; new_error = 1; }
-                            if (( P1_DP2_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(50) )) { l_dqBitmap[4] = 0xff; l_dqBitmap[5] = 0xff; new_error = 1; }
-                            if (( P1_DP3_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(51) )) { l_dqBitmap[6] = 0xff; l_dqBitmap[7] = 0xff; new_error = 1; }
-                            if (( P1_DP4_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(52) )) { l_dqBitmap[8] = 0xff; l_dqBitmap[9] = 0xff; new_error = 1; }
+                            if (( P1_DP0_reg_error ) || ( dp_p1_lock_data.isBitClear(48) )) { l_dqBitmap[0] = 0xff; l_dqBitmap[1] = 0xff; new_error = true; }
+                            if (( P1_DP1_reg_error ) || ( dp_p1_lock_data.isBitClear(49) )) { l_dqBitmap[2] = 0xff; l_dqBitmap[3] = 0xff; new_error = true; }
+                            if (( P1_DP2_reg_error ) || ( dp_p1_lock_data.isBitClear(50) )) { l_dqBitmap[4] = 0xff; l_dqBitmap[5] = 0xff; new_error = true; }
+                            if (( P1_DP3_reg_error ) || ( dp_p1_lock_data.isBitClear(51) )) { l_dqBitmap[6] = 0xff; l_dqBitmap[7] = 0xff; new_error = true; }
+                            if (( P1_DP4_reg_error ) || ( dp_p1_lock_data.isBitClear(52) )) { l_dqBitmap[8] = 0xff; l_dqBitmap[9] = 0xff; new_error = true; }
                         }
             
                         // If there are new errors, write back the bad DQ Bitmap for l_port, l_dimm, l_rank
-                        if ( new_error == 1 )
+                        if ( new_error )
                         {
                             rc = dimmSetBadDqBitmap(i_target,
                                                     l_port,
@@ -1102,11 +1114,60 @@ ReturnCode mss_deassert_force_mclk_low (const Target& i_target)
     return rc;
 }
 
+fapi::ReturnCode mss_ddr_phy_flush(const fapi::Target & i_target)
+{
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
+    ecmdDataBufferBase i_data(64);
+    ecmdDataBufferBase l_mask(64);
+	
+	FAPI_INF(" Performing mss_ddr_phy_flush routine");
+
+	FAPI_INF("ADR/DP18 FLUSH: 1) set PC_POWERDOWN_1 register, powerdown enable(48), flush bit(58)");
+	rc_ecmd = i_data.flushTo0();		// clear data buffer
+	rc_ecmd |= i_data.setBit(48);		// set MASTER_PD_CNTL bit
+	rc_ecmd |= i_data.setBit(58);		// set WR_FIFO_STAB bit
+
+	rc_ecmd |= l_mask.flushTo0();		// clear mask buffer
+	rc_ecmd |= l_mask.setBit(48);		// set MASTER_PD_CNTL bit
+	rc_ecmd |= l_mask.setBit(58);		// set WR_FIFO_STAB mask bit
+	if (rc_ecmd)
+	{
+		rc.setEcmdError(rc_ecmd);
+		return rc;
+	}
+
+	rc = fapiPutScomUnderMask(i_target, DPHY01_DDRPHY_PC_POWERDOWN_1_P0_0x8000C0100301143F, i_data, l_mask);
+	if(rc) return rc;
+
+	rc = fapiPutScomUnderMask(i_target, DPHY01_DDRPHY_PC_POWERDOWN_1_P1_0x8001C0100301143F, i_data, l_mask);
+	if(rc) return rc;
+
+	rc = fapiDelay(DELAY_100NS, DELAY_2000SIMCYCLES); // wait 2000 simcycles (in sim mode) OR 100 nS (in hw mode)
+	if(rc) return rc;
+	
+	FAPI_INF("ADR/DP18 FLUSH: 2) clear PC_POWERDOWN_1 register, powerdown enable(48), flush bit(58)");
+	rc_ecmd = i_data.flushTo0();		// clear data buffer
+
+	rc_ecmd |= l_mask.flushTo0();		// clear mask buffer
+	rc_ecmd |= l_mask.setBit(48);		// set MASTER_PD_CNTL bit
+	rc_ecmd |= l_mask.setBit(58);		// set WR_FIFO_STAB mask bit
+	if (rc_ecmd)
+	{
+		rc.setEcmdError(rc_ecmd);
+		return rc;
+	}
+
+	rc = fapiPutScomUnderMask(i_target, DPHY01_DDRPHY_PC_POWERDOWN_1_P0_0x8000C0100301143F, i_data, l_mask);
+	if(rc) return rc;
+
+	rc = fapiPutScomUnderMask(i_target, DPHY01_DDRPHY_PC_POWERDOWN_1_P1_0x8001C0100301143F, i_data, l_mask);
+	if(rc) return rc;
+
+	return rc;
+}
 
 } //end extern C
-
-
-
 
 
 /*
@@ -1115,6 +1176,24 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: mss_ddr_phy_reset.C,v $
+Revision 1.25  2013/06/26 17:40:56  mwuu
+Submitting Mark Fredrickson's clean up from FW review.
+
+Revision 1.24  2013/06/19 20:07:53  mwuu
+Implemented new ADR flush procedure via powerdown1 register.
+
+Revision 1.22  2013/06/14 17:44:49  mwuu
+Backed out the ADR flush workaround.
+
+Revision 1.21  2013/06/12 23:17:19  mwuu
+Removed DP18 flush section, fixed ADR toggle flush loop.
+
+Revision 1.20  2013/06/12 20:58:17  mwuu
+Fixed loop control structure for toggling the 0,1,0 in ADR block of flush FN.
+
+Revision 1.19  2013/06/11 19:05:27  mwuu
+Update to use master ranks for bad bitmap, and added flush function for ADR/DP18 workaround.
+
 Revision 1.18  2013/03/18 19:38:48  mfred
 Update to not continue if DP18 PLL fails to lock and EC is DD2.
 

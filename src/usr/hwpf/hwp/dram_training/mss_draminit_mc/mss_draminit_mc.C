@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.36 2013/04/15 13:07:51 lapietra Exp $
+// $Id: mss_draminit_mc.C,v 1.39 2013/06/21 21:51:58 lapietra Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.39   | dcadiga  |21-JUN-13| Fixed Code Review Comments
+//  1.38   | dcadiga  |10-JUN-13| Removed Local Edit Info, added version comment
+//  1.37   | dcadiga  |10-JUN-13| Added Periodic Cal for 1.1
 //  1.36   | dcadiga  |03-APR-13| Fixed compile warning
 //  1.35   | dcadiga  |01-APR-13| Temp Fix For Parity Error on 32GB
 //  1.34   | dcadiga  |12-MAR-13| Added spare cke disable as step 0
@@ -128,20 +131,19 @@ ReturnCode mss_spare_cke_disable(Target& i_target);
 ReturnCode mss_draminit_mc(Target& i_target)
 {
     // Target is centaur.mba
-    
     fapi::ReturnCode l_rc;
    //Commented back in by dcadiga 
     l_rc = mss_draminit_mc_cloned(i_target);
     //FAPI_INF("DID NOT RUN DRAMINIT MC\n");
 	// If mss_unmask_maint_errors gets it's own bad rc,
 	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
-	// Else if mss_unmask_maint_errors runs clean, 
+	// Else if mss_unmask_maint_errors runs clean,
 	// it will just return the passed in rc.
 	l_rc = mss_unmask_maint_errors(i_target, l_rc);
 
 	// If mss_unmask_inband_errors gets it's own bad rc,
 	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
-	// Else if mss_unmask_inband_errors runs clean, 
+	// Else if mss_unmask_inband_errors runs clean,
 	// it will just return the passed in rc.
 	l_rc = mss_unmask_inband_errors(i_target, l_rc);
 
@@ -162,6 +164,10 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     rc=fapiGetChildChiplets(i_target, fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
     if (rc) return rc;
 
+
+
+
+
     // Step Zero: Turn Off Spare CKE - This needs to be off before IML complete
     FAPI_INF("+++ Disabling Spare CKE FIX +++");
     for (uint32_t i=0; i < l_mbaChiplets.size(); i++)
@@ -172,8 +178,6 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
           FAPI_ERR("---Error During Spare CKE Disable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
           return rc;
        }
-       
-
 
     }
 
@@ -187,16 +191,21 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
        return rc;
     }
     //Temp Fix For Scom Parity
-    ecmdDataBufferBase parity_tmp_data_buffer_64(64); 
+    ecmdDataBufferBase parity_tmp_data_buffer_64(64);
     rc = fapiGetScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
+    if(rc) return rc;
     rc_num = rc_num | parity_tmp_data_buffer_64.clearBit(8);
+    if(rc_num)
+    {
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
     rc = fapiPutScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
     if(rc)
     {
        FAPI_ERR("---Error During Clear Parity Bit rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
        return rc;
     }
-    
 
 
     // Loop through the 2 MBA's
@@ -220,6 +229,11 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
 	if(rc) return rc;
 	//Bit 0 is enable		   
 	rc_num = rc_num | mba01_ref0q_data_buffer_64.setBit(0);
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
 	rc = fapiPutScom(l_mbaChiplets[i], MBA01_REF0Q_0x03010432, mba01_ref0q_data_buffer_64);
         if(rc)
         {
@@ -274,6 +288,14 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     ReturnCode rc;
     ReturnCode rc_buff;
     uint32_t rc_num  = 0;
+    uint8_t bluewaterfall_broken = 0;
+    uint8_t nwell_misplacement = 0;
+
+    //Find Parent chip for EC check
+    fapi::Target l_target_centaur;
+    rc = fapiGetParentChip(i_target, l_target_centaur);
+    if(rc) return rc;
+
 
  
     ecmdDataBufferBase mba01_data_buffer_64_p0(64);
@@ -284,16 +306,32 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     uint32_t memcal_iterval; //  00 = Disable
     rc = FAPI_ATTR_GET(ATTR_EFF_MEMCAL_INTERVAL, &i_target, memcal_iterval);
     if(rc) return rc;
-    //dcadigan workaround for rd phase select issue.  Hardcoded until we have an attribute for chip EC
-    FAPI_INF("+++ RD Phase Select Workaround, DISABLING MEMCAL VIA HARDCODE +++");
-    memcal_iterval = 0;
+    //Determine what type of Centaur this is
+    rc = FAPI_ATTR_GET(ATTR_MSS_BLUEWATERFALL_BROKEN, &l_target_centaur, bluewaterfall_broken);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_MSS_NWELL_MISPLACEMENT, &l_target_centaur, nwell_misplacement);
+    if(rc) return rc;
 
+
+
+    if((bluewaterfall_broken == 0) && (nwell_misplacement == 0)){
+       FAPI_INF("+++ Centaur is DD1.1 or later, enabling MEMCAL +++");
+    }
+    else{
+       FAPI_INF("+++ RD Phase Select Workaround, DISABLING MEMCAL VIA HARDCODE +++");
+       memcal_iterval = 0;
+    }
 
     uint32_t zq_cal_iterval; //  00 = Disable
     rc = FAPI_ATTR_GET(ATTR_EFF_ZQCAL_INTERVAL, &i_target, zq_cal_iterval);
     if(rc) return rc;
 
     rc_num = rc_num | data_buffer_64.flushTo0();
+    if(rc_num)
+    {
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
     rc = fapiGetScom(i_target, MBA01_MBA_CAL0Q_0x0301040F, data_buffer_64);
     if(rc) return rc;
 
@@ -303,31 +341,96 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     {
         //ZQ Cal Enabled
 	rc_num = rc_num | data_buffer_64.setBit(0);
-	FAPI_INF("+++ Periodic Calibration: ZQ Cal Enabled p0+++");
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+	FAPI_INF("+++ Periodic Calibration: ZQ Cal Enabled +++");
     }
     else
     {
         //ZQ Cal Disabled
 	rc_num = rc_num | data_buffer_64.clearBit(0);
-	FAPI_INF("+++ Periodic Calibration: ZQ Cal Disabled p0+++");
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+	FAPI_INF("+++ Periodic Calibration: ZQ Cal Disabled +++");
     }
 
     rc = fapiPutScom(i_target, MBA01_MBA_CAL0Q_0x0301040F, data_buffer_64);
     if(rc) return rc;
 
-    rc_num = rc_num | data_buffer_64.flushTo0();
-    rc = fapiGetScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
+
     if (memcal_iterval != 0)
     {
+        //Phase Select Fix for DD1.1
+        rc_num = rc_num | data_buffer_64.flushTo0();
+        rc_num = rc_num | data_buffer_64.setBit(52);
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_0_0x800000120301143F,data_buffer_64);
+        if(rc) return rc;
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_1_0x800004120301143F,data_buffer_64);
+        if(rc) return rc;
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_2_0x800008120301143F,data_buffer_64);
+        if(rc) return rc;
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_3_0x80000C120301143F,data_buffer_64);
+        if(rc) return rc;
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_4_0x800010120301143F,data_buffer_64);
+        if(rc) return rc;
+
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_0_0x800100120301143F,data_buffer_64);
+        if(rc) return rc;
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_1_0x800104120301143F,data_buffer_64);
+        if(rc) return rc;
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_2_0x800108120301143F,data_buffer_64);
+        if(rc) return rc;
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_3_0x80010C120301143F,data_buffer_64);
+        if(rc) return rc;
+        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_4_0x800110120301143F,data_buffer_64);
+        if(rc) return rc;
+
         //Mem Cal Enabled
+        rc_num = rc_num | data_buffer_64.flushTo0();
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+        rc = fapiGetScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
+        if(rc) return rc;
 	rc_num = rc_num | data_buffer_64.setBit(0);
-	FAPI_INF("+++ Periodic Calibration: Mem Cal Enabled p0+++");
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+	FAPI_INF("+++ Periodic Calibration: Mem Cal Enabled +++");
     }
     else
     {
         //Mem Cal Disabled
+        rc_num = rc_num | data_buffer_64.flushTo0();
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+        rc = fapiGetScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
+        if(rc) return rc;
 	rc_num = rc_num | data_buffer_64.clearBit(0);
-	FAPI_INF("+++ Periodic Calibration: Mem Cal Disabled p0+++");
+        if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+	FAPI_INF("+++ Periodic Calibration: Mem Cal Disabled +++");
     }
     rc = fapiPutScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
     if(rc) return rc;
@@ -491,7 +594,6 @@ ReturnCode mss_spare_cke_disable (Target& i_target)
     //Selects address data from the mainline
     //Variables
     ReturnCode rc;
-    ReturnCode rc_buff;
     uint32_t rc_num  = 0;
     ecmdDataBufferBase spare_cke_data_buffer_64(64);
 
@@ -499,6 +601,12 @@ ReturnCode mss_spare_cke_disable (Target& i_target)
     rc = fapiGetScom(i_target, MBA01_MBARPC0Q_0x03010434, spare_cke_data_buffer_64);
     if(rc) return rc;
     rc_num = rc_num | spare_cke_data_buffer_64.clearBit(42);
+    if(rc_num)
+    {
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
+
     rc = fapiPutScom(i_target, MBA01_MBARPC0Q_0x03010434, spare_cke_data_buffer_64);
     if(rc) return rc;
 
