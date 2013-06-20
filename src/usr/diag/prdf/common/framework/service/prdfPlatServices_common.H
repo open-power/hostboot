@@ -197,12 +197,15 @@ int32_t erepairFirIsolation(TARGETING::TargetHandle_t i_rxBusTgt);
 /**
  * @brief  Reads the bad DQ bitmap attribute for both ports of the target rank.
  * @param  i_mbaTarget A MBA target.
- * @param  i_rank   Target rank.
- * @param  o_bitmap DQ bitmap container.
+ * @param  i_rank        Target rank.
+ * @param  o_bitmap      DQ bitmap container.
+ * @param  i_allowNoDimm TRUE ignores rc from hardware procedure indicating no
+ *                       DIMM is attached. This is useful when iterating all
+ *                       possible ranks. Default is FALSE.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-                        CenDqBitmap & o_bitmap );
+                        CenDqBitmap & o_bitmap, bool i_allowNoDimm = false );
 
 /**
  * @brief  Writes the bad DQ bitmap attribute for both ports of the target rank.

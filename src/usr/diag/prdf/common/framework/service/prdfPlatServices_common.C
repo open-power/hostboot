@@ -254,7 +254,7 @@ int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
 //##############################################################################
 
 int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
-                        CenDqBitmap & o_bitmap )
+                        CenDqBitmap & o_bitmap, bool i_allowNoDimm )
 {
     #define PRDF_FUNC "[PlatServices::getBadDqBitmap] "
 
@@ -264,17 +264,26 @@ int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
     for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
     {
-        errlHndl_t errl = NULL;
-        PRD_FAPI_TO_ERRL( errl, dimmGetBadDqBitmap, getFapiTarget(i_mba),
-                          ps, i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                          data[ps] );
-        if ( NULL != errl )
+        fapi::ReturnCode l_rc = dimmGetBadDqBitmap( getFapiTarget(i_mba),
+                                                    ps, i_rank.getDimmSlct(),
+                                                    i_rank.getRankSlct(),
+                                                    data[ps] );
+
+        if ( i_allowNoDimm && (fapi::RC_BAD_DQ_DIMM_NOT_FOUND == l_rc) )
         {
-            PRDF_ERR( PRDF_FUNC"dimmGetBadDqBitmap() failed: MBA=0x%08x "
-                      "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
-                      i_rank.getDimmSlct(), i_rank.getRankSlct() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
+            memset( &data[ps], 0x00, DIMM_DQ_RANK_BITMAP_SIZE );
+        }
+        else
+        {
+            errlHndl_t errl = fapi::fapiRcToErrl(l_rc);
+            if ( NULL != errl )
+            {
+                PRDF_ERR( PRDF_FUNC"dimmGetBadDqBitmap() failed: MBA=0x%08x "
+                          "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
+                          i_rank.getDimmSlct(), i_rank.getRankSlct() );
+                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL; break;
+            }
         }
     }
 

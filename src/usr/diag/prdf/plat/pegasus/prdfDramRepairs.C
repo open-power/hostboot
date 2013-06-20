@@ -291,7 +291,7 @@ bool processDq(TargetHandle_t i_mba)
         CenRank rank ( r );
         CenDqBitmap bitmap;
 
-        if ( SUCCESS != getBadDqBitmap(i_mba, rank, bitmap) )
+        if ( SUCCESS != getBadDqBitmap(i_mba, rank, bitmap, true) )
         {
             continue; // skip this rank
         }
