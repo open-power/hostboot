@@ -23,7 +23,7 @@
 #ifndef __VSBE_PORE_H
 #define __VSBE_PORE_H
 
-// $Id: pore.H,v 1.16 2013/01/07 16:35:18 bcbrock Exp $
+// $Id: pore.H,v 1.17 2013/04/05 19:33:28 jeshua Exp $
 
 /// \file pore.H
 /// \brief The implementation of the PoreInterface for the PoreVe environment
@@ -231,6 +231,13 @@ public:
     void
     dump();
 
+    /// Call dump() if it hasn't been called yet
+    ///
+    /// If iv_dumpDone is false, then dump() will be called. Otherwise it
+    /// will just return without doing anything.
+    void
+    dumpOnce();
+
 
     ////////////////////////// Implementation ////////////////////////////
 
@@ -254,6 +261,12 @@ protected:
     /// The Pore object holds this pointer for use as an argument to hook
     /// routines. 
     fapi::Target* iv_target;
+
+    /// Keeps track of whether or not a dump has been printed
+    ///
+    /// This will be set to true on the first dump so that subsequent dumps
+    /// could be skipped
+    bool iv_dumpDone;
 
 
     ///////////////////////////// Safety //////////////////////////////////

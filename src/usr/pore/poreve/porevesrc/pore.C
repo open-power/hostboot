@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pore.C,v 1.17 2013/01/07 16:35:18 bcbrock Exp $
+// $Id: pore.C,v 1.18 2013/04/05 19:34:28 jeshua Exp $
 
 /// \file pore.C
 /// \brief The implementation of the PoreInterface for the PoreVe environment
@@ -249,7 +249,8 @@ Pore::operation(Transaction& io_transaction)
 Pore::Pore(PoreIbufId i_id) :
     PoreInterface(i_id),
     iv_pib(0),
-    iv_oci(0)
+    iv_oci(0),
+    iv_dumpDone(false)
 {
 }
 
@@ -269,6 +270,7 @@ Pore::configure(fapi::Target* i_target, Bus* i_pib, Bus* i_oci,
     iv_target = i_target;
     iv_pib = i_pib;
     iv_oci = i_oci;
+    iv_dumpDone = false;
     PibSlave::configure(i_target, i_dataBuffer,
                         i_base, i_size, i_permissions);
 }
@@ -300,6 +302,7 @@ Pore::dump()
     extractState(state);
 
     FAPI_ERR(SEPARATOR);
+    FAPI_ERR("Target %s", iv_target->toEcmdString());
     FAPI_ERR("PORE dump after %llu instructions.", 
              getInstructions());
     FAPI_ERR(SEPARATOR);
@@ -350,9 +353,17 @@ Pore::dump()
     FAPI_ERR(SEPARATOR);
 
 #undef SEPARATOR
+    iv_dumpDone = true;
 }
 
-    
-    
+// Calls the dump() routine if iv_dumpDone is false
+
+void
+Pore::dumpOnce()
+{
+  if (!iv_dumpDone) {
+    dump();
+  }
+}
 
         

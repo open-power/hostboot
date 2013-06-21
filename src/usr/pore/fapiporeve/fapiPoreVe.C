@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: fapiPoreVe.C,v 1.29 2012/09/05 20:11:16 jeshua Exp $
+// $Id: fapiPoreVe.C,v 1.32 2013/04/05 19:35:32 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/poreve/working/fapiporeve/fapiPoreVe.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -74,7 +74,6 @@ extern "C" {
 using namespace vsbe;
 
 const uint32_t MBOX_SBEVITAL_0x0005001C = 0x0005001C;
-
 
 //******************************************************************************
 // fapiPoreVe function
@@ -309,7 +308,8 @@ fapi::ReturnCode fapiPoreVe(
             FapiPoreVeHooksArg *thisArg = (FapiPoreVeHooksArg *)arg;
 
             //Load hooks (note: this must be done after poreve is created)
-            void *handle = dlopen( thisArg->iv_filename, RTLD_NOW);
+            void *handle = 
+                    HookManager::dlopen( thisArg->iv_filename, RTLD_NOW);
             if (handle == 0)
             {
                 FAPI_ERR( "dlopen() failed; See dlerror() string below\n%s\n",
@@ -635,6 +635,7 @@ fapi::ReturnCode fapiPoreVe(
                             uint32_t & ERROR = haltcode;
                             FAPI_SET_HWP_ERROR(rc,
                                               RC_FAPIPOREVE_HALTED_WITH_ERROR);
+                            poreve->iv_pore.dumpOnce();
                         }
                         else
                         {
@@ -664,7 +665,7 @@ fapi::ReturnCode fapiPoreVe(
                 FAPI_ERR( "PORE is stopped due to an architected error\n");
                 runStatus &= ~PORE_STATUS_ERROR_HALT;
                 FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ARCHITECTED_ERROR);
-                poreve->iv_pore.dump();
+                poreve->iv_pore.dumpOnce();
             }
             if( runStatus & PORE_STATUS_HARDWARE_STOP )
             {
@@ -686,7 +687,7 @@ fapi::ReturnCode fapiPoreVe(
                 FAPI_ERR( "PORE is stopped due to a modeling error\n");
                 runStatus &= ~PORE_STATUS_MODEL_ERROR;
                 FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_MODELING_ERROR);
-                poreve->iv_pore.dump();
+                poreve->iv_pore.dumpOnce();
             }
             if( runStatus & PORE_STATUS_DEBUG_STOP )
             {
@@ -823,9 +824,13 @@ fapi::ReturnCode fapiPoreVe(
     } //if extract state
 
     //----------------------------------------------------------------------
-    // Destroy PoreVe
+    // Destroy PoreVe and HookManager
     //----------------------------------------------------------------------
     delete poreve;
+
+#ifndef __HOSTBOOT_MODULE
+    HookManager::destroy();
+#endif
 
     return rc;
 } //end function
@@ -840,6 +845,17 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they are included here.
 
 $Log: fapiPoreVe.C,v $
+Revision 1.32  2013/04/05 19:35:32  jeshua
+Use dumpOnce() instead of trying to track it ourselves
+
+Revision 1.31  2013/03/27 19:02:48  jeshua
+Dump SBE state when SBE executed an unexpected halt instruction
+
+Revision 1.30  2013/02/05 16:14:29  bcbrock
+Added the HookManager::dlopen() and ::destroy() APIs to allow the HookManager
+to be deleted and all hook DLLs to be unloaded.  This suports the case that
+both P8 and Centaur runs of PoreVe need to be made in the same process.
+
 Revision 1.29  2012/09/05 20:11:16  jeshua
 More robust return code handling
 Cosmetic updates for things like line length
