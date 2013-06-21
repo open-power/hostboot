@@ -6,6 +6,7 @@
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2011,2014
+# [+] Google Inc.
 # [+] International Business Machines Corp.
 #
 #
@@ -96,6 +97,7 @@ clean:
 	rm -f ${GENDIR}/comps.C
 	rm -f ${IMGDIR}/errlparser
 	rm -fr ${OBJDIR}
+	rm -f ${GENDIR}/errldisplaydata.C
 
 debug:
 	ls -l 	${GENDIR}

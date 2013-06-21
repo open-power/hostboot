@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,16 +35,18 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
+#include <config.h>
 #include <util/singleton.H>
 #include <errl/errlentry.H>
+#include <errldisplay/errldisplay.H>
 #include <sys/sync.h>
 #include <kernel/timemgr.H>
 #include <hbotcompid.H>
 #include <hwas/common/hwasCallout.H>
 #include <mbox/mbox_queues.H>
 #include <mbox/mboxif.H>
+#include <utility>
 #include <list>
-
 
 namespace ERRORLOG
 {
@@ -77,6 +80,7 @@ enum errlManagerNeeds
     PNOR,
     TARG,
     MBOX,
+    ERRLDISP,
 } ;
 
 
@@ -216,6 +220,7 @@ private:
         ERRLOG_ACCESS_PNOR_TYPE            = 0x00000034 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_ACCESS_MBOX_TYPE            = 0x00000035 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_ACCESS_TARG_TYPE            = 0x00000036 | MBOX::FIRST_SECURE_MSG,
+        ERRLOG_ACCESS_ERRLDISP_TYPE        = 0x00000037 | MBOX::FIRST_SECURE_MSG,
     };
 
     /**
@@ -293,11 +298,9 @@ private:
      * @brief Create a mailbox message with the error log and send it to Fsp.
      *
      * @param[in,out] io_err Error log handle to be committed
-     * @return        msg_t pointer - NULL if msg sent, allocated msg if
-     *                  couldn't send
      *
      */
-    msg_t *sendErrLogToMbox ( errlHndl_t& io_err );
+    void sendErrLogToMbox ( errlHndl_t& io_err );
 
     /**
      * @brief Create a mailbox message with the error log and send it to Fsp.
@@ -438,13 +441,117 @@ private:
     char *iv_pnorAddr;          // HBEL section in PNOR
     uint32_t iv_maxErrlInPnor;  // max number of errorlogs that will fit
     uint32_t iv_pnorOpenSlot;   // current open slot available for an errorlog
-    std::list<errlHndl_t> iv_errlToSave;   // errlogs still to be saved to PNOR
-
     bool iv_isSpBaseServices;           // do we need to send to FSP
     bool iv_isMboxEnabled;              // are we able to send to FSP
-    std::list<msg_t *> iv_errlToSend;   // msgs still to be sent to FSP
-
     bool iv_nonInfoCommitted;   //< Keeps track of any non-informational logs.
+    bool iv_isErrlDisplayEnabled;     // are we able to use the errorDisplay
+
+    // Errl flags which represent processing needed by the errl
+    // represented as a bit field (8 bits)
+    // Note: When adding a new flag, add to the trace in errlogShutdown()
+    enum ERRLOG_FLAGS
+    {
+        PNOR_FLAG      = 0x01,
+        MBOX_FLAG      = 0x02,
+        ERRLDISP_FLAG  = 0x04,
+    #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
+        ALL_FLAGS      = PNOR_FLAG | MBOX_FLAG | ERRLDISP_FLAG,
+    #else
+        ALL_FLAGS      = PNOR_FLAG | MBOX_FLAG,
+    #endif
+    };
+
+    // List of messages errl manager needs to handle
+    // The unint8_t is a bit field to indiciate what needs to be done
+    std::list<std::pair<errlHndl_t, uint8_t> > iv_errlList;
+
+    typedef std::list<std::pair<errlHndl_t, uint8_t> >::iterator ErrlListItr_t;
+
+    /**
+     * @brief checks if the pnor flag is set
+     *
+     * @param[in]   i_pair - pair of errl and bitfield of flags
+     * @return      True if PNOR flag is set
+     *
+     */
+    static bool _isPnorFlagSet(const std::pair<errlHndl_t, uint8_t> &i_pair)
+    {
+        return (i_pair.second & PNOR_FLAG);
+    }
+
+    /**
+     * @brief checks if the mbox flag is set
+     *
+     * @param[in]   i_pair - pair of errl and bitfield of flagst
+     * @return      True if mbox flag is set
+     *
+     */
+    static bool _isMboxFlagSet(const std::pair<errlHndl_t, uint8_t> &i_pair)
+    {
+        return (i_pair.second & MBOX_FLAG);
+    }
+
+    /**
+     * @brief checks if the errldisp flag is set
+     *
+     * @param[in]   i_pair - pair of errl and bitfield of flags
+     * @return      True if errldisp flag is set
+     *
+     */
+    static bool _isErrlDispFlagSet(const std::pair<errlHndl_t, uint8_t> &i_pair)
+    {
+        return (i_pair.second & ERRLDISP_FLAG);
+    }
+
+    /**
+     * @brief clears the pnor flag, indicating complete
+     *
+     * @param[in/out]   io_pair - pair of errl and bitfield of flags
+     * @return          NA
+     *
+     */
+    static void _clearPnorFlag(std::pair<errlHndl_t, uint8_t> &io_pair)
+    {
+        io_pair.second &= ~PNOR_FLAG;
+    }
+
+    /**
+     * @brief clears the mbox flag, indicating complete
+     *
+     * @param[in/out]   io_pair - pair of errl and bitfield of flags
+     * @return          NA
+     *
+     */
+    static void _clearMboxFlag(std::pair<errlHndl_t, uint8_t> &io_pair)
+    {
+        io_pair.second &= ~MBOX_FLAG;
+    }
+
+    /**
+     * @brief clears the errldisp flag, indicating complete
+     *
+     * @param[in/out]   io_pair - pair of errl and bitfield of flags
+     * @return          NA
+     *
+     */
+    static void _clearErrlDispFlag(std::pair<errlHndl_t, uint8_t> &io_pair)
+    {
+        io_pair.second &= ~ERRLDISP_FLAG;
+    }
+
+    /**
+     * @brief Checks if all flags are cleared for a errlhndl.
+     *        If so deletes and NULLs the errl and removes from errl list.
+     *        It then updates the iterator accordingly, done in this function
+     *        to properly handle when a list.erase() happens
+     *
+     * @param[in/out]   io_it - iterator for the iv_errlList
+     * @return          True if an erase occurred, otherwise false
+     *
+     */
+    bool _updateErrlListIter(std::list< std::pair<errlHndl_t, uint8_t> >
+                                          ::iterator & io_it);
+
 };
 
 } // End namespace

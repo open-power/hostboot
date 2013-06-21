@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +47,10 @@
 #include <pnor/pnorif.H>
 #include <sys/mm.h>
 #include <intr/interrupt.H>
+#include <errldisplay/errldisplay.H>
+#include <console/consoleif.H>
+#include <config.h>
+#include <functional>
 
 namespace ERRORLOG
 {
@@ -87,6 +92,13 @@ const uint32_t PNOR_ERROR_LENGTH = 4096;
 const uint32_t EMPTY_ERRLOG_IN_PNOR = 0xFFFFFFFF;
 const uint32_t FIRST_BYTE_ERRLOG = 0xF0000000;
 
+// Comparator function to check if a eid and a plid are equal
+bool compareEidToPlid(const uint32_t i_plid,
+                      const std::pair<errlHndl_t, uint8_t> i_pair)
+{
+    return (i_pair.first->eid() == i_plid);
+}
+
 class AtLoadFunctions
 {
     public:
@@ -109,7 +121,8 @@ ErrlManager::ErrlManager() :
     iv_pnorOpenSlot(0),
     iv_isSpBaseServices(true),  // queue msgs for fsp until we find we shouldnt
     iv_isMboxEnabled(false),    // but mbox isn't ready yet..
-    iv_nonInfoCommitted(false)
+    iv_nonInfoCommitted(false),
+    iv_isErrlDisplayEnabled(false)
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
 
@@ -258,15 +271,15 @@ void ErrlManager::errlogMsgHndlr ()
                     {
                         iv_isSpBaseServices = false;
 
-                        // if there are queued msgs, delete them
-                        while (!iv_errlToSend.empty())
+                        // if there are queued msgs, delete the errors that
+                        // have been fully processed
+                        ErrlListItr_t it = iv_errlList.begin();
+                        while(it != iv_errlList.end())
                         {
-                            msg_t * msg = iv_errlToSend.front();
-                            free( msg->extra_data );
-                            msg_free( msg );
-                            // delete from the list
-                            iv_errlToSend.pop_front();
-                        } // while items on iv_errlToSend list
+                            // Mark MBOX processing complete
+                            _clearMboxFlag(*it);
+                            _updateErrlListIter(it);
+                        }
                     }
 
                     //We are done with the msg
@@ -313,38 +326,29 @@ void ErrlManager::errlogMsgHndlr ()
 
                         // if error(s) came in before MBOX was ready,
                         // the msg(s) would be on this list. send it now.
-                        while (!iv_errlToSend.empty())
+                        ErrlListItr_t it = iv_errlList.begin();
+                        while(it != iv_errlList.end())
                         {
-                            msg_t * msg = iv_errlToSend.front();
-
-                            l_err = MBOX::send( MBOX::FSP_ERROR_MSGQ, msg );
-                            if( l_err )
+                            // Check if MBOX processing is needed
+                            if (_isMboxFlagSet(*it))
                             {
-                               TRACFCOMP(g_trac_errl, ERR_MRK "Failed sending error log to FSP");
-
-                               //Free the extra data due to the error
-                               free( msg->extra_data );
-                               msg_free( msg );
-
-                               delete l_err;
-                               l_err = NULL;
+                                // Mark MBOX processing complete
+                                sendErrLogToMbox(it->first);
+                                _clearMboxFlag(*it);
                             }
-
-                            // delete from the list
-                            iv_errlToSend.pop_front();
-                        } // while items on list
+                            _updateErrlListIter(it);
+                        }
                     }
                     else
                     {
-                        // if there are queued msgs, delete them
-                        while (!iv_errlToSend.empty())
+                        // Delete errors that have been completely processed
+                        ErrlListItr_t it = iv_errlList.begin();
+                        while(it != iv_errlList.end())
                         {
-                            msg_t * msg = iv_errlToSend.front();
-                            free( msg->extra_data );
-                            msg_free( msg );
-                            // delete from the list
-                            iv_errlToSend.pop_front();
-                        } // while items on iv_errlToSend list
+                            // Mark MBOX processing complete
+                            _clearMboxFlag(*it);
+                            _updateErrlListIter(it);
+                        }
                     }
 
                     //We are done with the msg
@@ -353,9 +357,37 @@ void ErrlManager::errlogMsgHndlr ()
                     // go back and wait for a next msg
                     break;
                 }
+            case ERRLOG_ACCESS_ERRLDISP_TYPE:
+                {
+#ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
+                    // Errldisplay now ready
+                    iv_isErrlDisplayEnabled = true;
+
+                    CONSOLE::displayf("ERRL",
+                        "Dumping errors reported prior to registration\n");
+
+                    // Display errlogs to errldisplay
+                    ErrlListItr_t it = iv_errlList.begin();
+                    while(it != iv_errlList.end())
+                    {
+                        // Check if ERRLDISP processing is needed
+                        if (_isErrlDispFlagSet(*it))
+                        {
+                            ERRORLOGDISPLAY::errLogDisplay().msgDisplay
+                                        (it->first,
+                                        ((it->first->reasonCode()) & 0xFF00));
+                            // Mark ERRLDISP processing complete
+                            _clearErrlDispFlag(*it);
+                        }
+                        _updateErrlListIter(it);
+                    }
+#endif
+                    //We are done with the msg
+                    msg_free(theMsg);
+                }
             case ERRLOG_NEEDS_TO_BE_COMMITTED_TYPE:
                 {
-                    //Extract error log handle from the message. We need the
+                    // Extract error log handle from the message. We need the
                     // error log handle to pass along to saveErrLogEntry and
                     // sendErrLogToMbox
                     errlHndl_t l_err = (errlHndl_t) theMsg->extra_data;
@@ -363,8 +395,29 @@ void ErrlManager::errlogMsgHndlr ()
                     //Ask the ErrlEntry to assign commit component, commit time
                     l_err->commit( (compId_t) theMsg->data[0] );
 
+                    // Pair with all flags set to add to the errlList
+                    std::pair<errlHndl_t, uint8_t> l_pair(l_err, ALL_FLAGS);
+
+                    // Display errl to errldisplay
+#ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
+                    if (iv_isErrlDisplayEnabled)
+                    {
+                        ERRORLOGDISPLAY::errLogDisplay().msgDisplay
+                                            (l_err,
+                                            ( (l_err->reasonCode()) & 0xFF00));
+                        // Mark ERRLDISP processing complete on this error
+                        _clearErrlDispFlag(l_pair);
+                    }
+#endif
                     //Save the error log to PNOR
                     bool l_savedToPnor = saveErrLogToPnor(l_err);
+
+                    // Check if we actually saved the msg to PNOR
+                    if (l_savedToPnor)
+                    {
+                        // Mark PNOR processing complete on this error
+                        _clearPnorFlag(l_pair);
+                    }
 
 #ifdef STORE_ERRL_IN_L3
                     //Write the error log to L3 memory
@@ -372,16 +425,17 @@ void ErrlManager::errlogMsgHndlr ()
                     saveErrLogEntry ( l_err );
 #endif
 
-                    //Try to send the error log if someone is there to receive
-                    if (iv_isSpBaseServices)
+                    // Try to send the error log if someone is there to receive
+                    if (!iv_isSpBaseServices)
                     {
-                        msg_t *l_sentToMbox = sendErrLogToMbox ( l_err );
-                        if (l_sentToMbox != NULL)
-                        {
-                            // we were supposed to send it and couldn't;
-                            // save it on the queue.
-                            iv_errlToSend.push_back(l_sentToMbox);
-                        }
+                        // Mark MBOX processing complete on this error
+                        _clearMboxFlag(l_pair);
+                    }
+                    else if (iv_isSpBaseServices && iv_isMboxEnabled)
+                    {
+                        sendErrLogToMbox(l_err);
+                        // Mark MBOX processing complete on this error
+                        _clearMboxFlag(l_pair);
                     }
 
                     //Ask the ErrlEntry to process any callouts
@@ -400,17 +454,16 @@ void ErrlManager::errlogMsgHndlr ()
                                 INFO_MRK"shutdown in progress" );
                     }
 
-                    // check if we actually saved the msg to PNOR
-                    if (l_savedToPnor)
+                    // If l_errl has not been fully proccessed delete it
+                    // otherwise add to list
+                    if (l_pair.second == 0)
                     {
-                        //done with the error log handle so delete it.
                         delete l_err;
                         l_err = NULL;
                     }
                     else
-                    {   // save didn't work - push into a list to do when
-                        //  the next ACK gets processed.
-                        iv_errlToSave.push_back(l_err);
+                    {
+                        iv_errlList.push_back(l_pair);
                     }
 
                     //We are done with the msg
@@ -427,53 +480,43 @@ void ErrlManager::errlogMsgHndlr ()
                     TRACFCOMP( g_trac_errl, INFO_MRK"ack: %.8x", l_tmpPlid);
 
                     bool didAck = ackErrLogInPnor(l_tmpPlid);
-
                     if (!didAck)
                     {
                         // couldn't find that errlog in PNOR, look in our
-                        // ToSave list - maybe it's there waiting
-                        for (std::list<errlHndl_t>::iterator
-                            it = iv_errlToSave.begin();
-                            it != iv_errlToSave.end();
-                            it++)
+                        // errlMsgList - maybe it's there waiting
+                        ErrlListItr_t it = std::find_if(iv_errlList.begin(),
+                                        iv_errlList.end(),
+                                        std::bind1st(ptr_fun(&compareEidToPlid)
+                                                             ,l_tmpPlid));
+                        // Check if such errl was found
+                        if (it != iv_errlList.end())
                         {
-                            errlHndl_t l_err = *it;
-                            if (l_err->eid() == l_tmpPlid)
-                            {
-                                // we found it
-                                // done with the error log handle so delete it.
-                                delete l_err;
-                                l_err = NULL;
-
-                                // delete from the list
-                                iv_errlToSave.erase(it);
-
-                                // break out of the for loop - we're done
-                                break;
-                            }
-                        } // for
+                            // We found the errlog
+                            // Mark PNOR processing complete
+                            _clearPnorFlag(*it);
+                            _updateErrlListIter(it);
+                        }
                     }
 
                     msg_free(theMsg);
 
-                    if (!iv_errlToSave.empty())
-                    {
-                        //we didn't have room before in PNOR to save an
-                        // error log, so try now since we just ACKed one.
-                        errlHndl_t l_err = iv_errlToSave.front();
+                    // We didn't have room before in PNOR to save an
+                    // error log, so try now since we just ACKed one.
+                    ErrlListItr_t it = std::find_if(iv_errlList.begin(),
+                                                    iv_errlList.end(),
+                                             _isPnorFlagSet);
 
-                        bool l_savedToPnor = saveErrLogToPnor(l_err);
+                    // Check if such errl was found
+                    if (it != iv_errlList.end())
+                    {
+                        bool l_savedToPnor = saveErrLogToPnor(it->first);
 
                         // check if we actually saved the msg to PNOR
                         if (l_savedToPnor)
-                        {   // if so, we're done - clean up
-
-                            //done with the error log handle so delete it.
-                            delete l_err;
-                            l_err = NULL;
-
-                            // delete from the list
-                            iv_errlToSave.pop_front();
+                        {
+                            // Mark PNOR processing complete
+                            _clearPnorFlag(*it);
+                            _updateErrlListIter(it);
                         }
                         // else, still couldn't save it (for some reason) so
                         // it's still on the list.
@@ -513,7 +556,7 @@ void ErrlManager::errlogMsgHndlr ()
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::sendErrLogToMbox()
 ///////////////////////////////////////////////////////////////////////////////
-msg_t *ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
+void ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
 {
     msg_t *msg = NULL;
 
@@ -532,50 +575,35 @@ msg_t *ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
         msg->data[0] = io_err->eid();
         msg->data[1] = l_msgSize;
 
-        void * temp_buff = NULL;
-        if( iv_isMboxEnabled )
-        {
-            temp_buff = MBOX::allocate( l_msgSize );
-        }
-        else
-        {
-            temp_buff = malloc( l_msgSize );
-        }
+        void * temp_buff = MBOX::allocate( l_msgSize );
 
         io_err->flatten ( temp_buff, l_msgSize );
         msg->extra_data = temp_buff;
 
         TRACDCOMP( g_trac_errl, INFO_MRK"Send msg to FSP for errlogId %.8x",
                                                                io_err->eid() );
-
-        if (iv_isMboxEnabled)
+        errlHndl_t l_err = MBOX::send( MBOX::FSP_ERROR_MSGQ, msg );
+        if( !l_err )
         {
-            errlHndl_t l_err = MBOX::send( MBOX::FSP_ERROR_MSGQ, msg );
-            if( !l_err )
-            {
-                // clear this - we're done with the message;
-                // the receiver will free the storage when it's done
-                msg = NULL;
-            }
-            else
-            {
-               TRACFCOMP(g_trac_errl, ERR_MRK"Failed sending error log to FSP");
-
-               //Free the extra data due to the error
-               MBOX::deallocate( msg->extra_data );
-               msg_free( msg );
-               msg = NULL;
-
-               delete l_err;
-               l_err = NULL;
-            }
+            // clear this - we're done with the message;
+            // the receiver will free the storage when it's done
+            msg = NULL;
         }
-        // else, we created the msg, but couldn't send it - return it so that
-        // it can be saved and sent later when the MBOX is up.
+        else
+        {
+           TRACFCOMP(g_trac_errl, ERR_MRK"Failed sending error log to FSP");
+
+           //Free the extra data due to the error
+           MBOX::deallocate( msg->extra_data );
+           msg_free( msg );
+           msg = NULL;
+
+           delete l_err;
+           l_err = NULL;
+        }
     } while (0);
 
-    TRACFCOMP( g_trac_errl, EXIT_MRK"sendErrLogToMbox() returning %p", msg);
-    return msg;
+    TRACFCOMP( g_trac_errl, EXIT_MRK"ErrlManager::sendErrLogToMbox" );
 } // sendErrLogToMbox
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -695,7 +723,6 @@ void errlCommit(errlHndl_t& io_err, compId_t i_committerComp )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 // Global function (not a method on an object) to commit the error log.
 void ErrlManager::errlResourceReady(errlManagerNeeds i_needs)
 {
@@ -720,6 +747,9 @@ void ErrlManager::sendResourcesMsg(errlManagerNeeds i_needs)
             break;
         case MBOX:
             msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_MBOX_TYPE;
+            break;
+        case ERRLDISP:
+            msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_ERRLDISP_TYPE;
             break;
         default:
         {
@@ -797,30 +827,22 @@ void ErrlManager::sendErrlogToMessageQueue ( errlHndl_t& io_err,
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::errlogShutdown()
 {
-    // if there are errorlogs that didn't get sent via the MBOX to FSP,
-    //  trace them and clean up
-    while (!iv_errlToSend.empty())
+    // if there are errorlogs that didn't get fully processed, trace them
+    // and clean up
+    while (!iv_errlList.empty())
     {
-        msg_t * msg = iv_errlToSend.front();
-        TRACDCOMP(g_trac_errl, INFO_MRK "Failed to send to FSP: eid %.8x",
-                msg->data[0]);
-        free( msg->extra_data );
-        msg_free( msg );
-        // delete from the list
-        iv_errlToSend.pop_front();
-    } // while items on iv_errlToSend list
+        // Get errl and its flags
+        std::pair<errlHndl_t, uint8_t> l_pair = iv_errlList.front();
+        // If still true that means it was not processed
 
-    // if there are errorlogs that didn't get stored in PNOR,
-    //  trace them and clean up
-    while (!iv_errlToSave.empty())
-    {
-        errlHndl_t l_err = iv_errlToSave.front();
-        TRACFCOMP(g_trac_errl, ERR_MRK "Failed to store to PNOR: eid %.8x",
-                l_err->eid());
-        delete l_err;
+        TRACFCOMP(g_trac_errl, INFO_MRK "Failed to fully process Errl(eid %.8x) - Errl Flags Bitfield = 0x%X",
+                    l_pair.second);
+
+        delete l_pair.first;
+        l_pair.first = NULL;
         // delete from the list
-        iv_errlToSave.pop_front();
-    } // while items on iv_errlToSave list
+        iv_errlList.pop_front();
+    } // while items on iv_errlList list
 
     // Ensure that all the error logs are pushed out to PNOR
     // prior to the PNOR resource provider shutting down.
@@ -928,32 +950,34 @@ void ErrlManager::setupPnorInfo()
 
         // if error(s) came in before PNOR was ready,
         // the error log(s) would be on this list. save now.
-        while (!iv_errlToSave.empty())
+        ErrlListItr_t it = iv_errlList.begin();
+        while(it != iv_errlList.end())
         {
-            errlHndl_t l_err = iv_errlToSave.front();
+            // Check if PNOR processing is needed
+            if (_isPnorFlagSet(*it))
+            {
+                //ACK it if no one is there to receive
+                bool l_savedToPnor = saveErrLogToPnor(it->first);
 
-            //ACK it if no one is there to receive
-            bool l_savedToPnor = saveErrLogToPnor(l_err);
-
-            // check if we actually saved the msg to PNOR
-            if (l_savedToPnor)
-            {   // if so, we're done - clean up
-
-                //done with the error log handle so delete it.
-                delete l_err;
-                l_err = NULL;
-
-                // delete from the list
-                iv_errlToSave.pop_front();
+                // check if we actually saved the msg to PNOR
+                if (l_savedToPnor)
+                {
+                    // Mark PNOR processing complete
+                    _clearPnorFlag(*it);
+                    _updateErrlListIter(it);
+                }
+                else
+                {
+                    // still couldn't save it (PNOR maybe full) so
+                    // it's still on the list.
+                    break; // get out of this while loop.
+                }
             }
             else
             {
-                // still couldn't save it (PNOR maybe full) so
-                // it's still on the list.
-                break; // get out of this while loop.
+                ++it;
             }
-        } // while entries on list
-
+        }
     } while (0);
 
     TRACFCOMP( g_trac_errl, EXIT_MRK"setupPnorInfo");
@@ -985,8 +1009,8 @@ bool ErrlManager::incrementPnorOpenSlot()
 ///////////////////////////////////////////////////////////////////////////////
 bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
 {
-    TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor eid=%.8x", io_err->eid());
     bool rc = false;
+    TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor eid=%.8x", io_err->eid());
 
     // actually, if it's an INFORMATIONAL log, we don't want to waste the write
     // cycles, so we'll just 'say' that we saved it and go on.
@@ -1041,9 +1065,8 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
         }
         // else no open slot - return false
     }
-
     TRACFCOMP( g_trac_errl, EXIT_MRK"saveErrLogToPnor returning %s",
-            rc ?  "true" : "false");
+        rc ? "true" : "false");
     return rc;
 } // saveErrLogToPnor
 
@@ -1153,6 +1176,25 @@ void ErrlManager::setACKInFlattened(uint32_t i_position)
         (pSRC->word5 & ErrlSrc::ACK_BIT) ? "not ACKed" : "ACKed");
 
     return;
+}
+
+bool ErrlManager::_updateErrlListIter(ErrlListItr_t & io_it)
+{
+    bool l_removed = false;
+    // Delete if this error has been fully processed (flags cleared)
+    if (io_it->second == 0)
+    {
+        // Delete errl
+        delete io_it->first;
+        io_it->first = NULL;
+        io_it = iv_errlList.erase(io_it);
+        l_removed = true;
+    }
+    else
+    {
+        ++io_it;
+    }
+    return l_removed;
 }
 
 } // End namespace

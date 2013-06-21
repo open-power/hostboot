@@ -211,7 +211,7 @@ my %resident_modules = (
     "libgpio.so"           => '1',
     "liblpc.so"            => '1',
     "libconsole.so"        => '1',
-
+    "liberrldisplay.so"    => '1',
 );
 
 # has with library to istep list file were the DepMod array is kept

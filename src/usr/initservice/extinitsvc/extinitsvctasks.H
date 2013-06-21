@@ -120,6 +120,23 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+#ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
+        /**
+         * @brief Human readable error log display
+         * Note: Because of dependencies, this must come after libmbox.so
+         *       or hostboot will hang with an Inst Storage exception
+         *       (the ErrlManager constructor tries to talk to MBOX.)
+         */
+        {
+            "liberrldisplay.so",                        // taskname
+            NULL,                                       // no ptr to fnct
+            {
+                START_TASK,                             // task type
+                EXT_IMAGE,                              // Extended Module
+            }
+        },
+#endif
+
         /**
          * @brief Trace daemon
          */

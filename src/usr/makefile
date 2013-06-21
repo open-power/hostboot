@@ -62,5 +62,6 @@ SUBDIRS += sbe.d
 SUBDIRS += gpio.d
 SUBDIRS += lpc.d
 SUBDIRS += console.d
+SUBDIRS += errldisplay.d
 
 include ${ROOTPATH}/config.mk
