@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.H,v 1.4 2013/04/26 13:57:03 jmcgill Exp $
+// $Id: mss_setup_bars.H,v 1.5 2013/05/23 23:32:23 jmcgill Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -101,16 +101,13 @@ const uint8_t MSS_MCS_GROUP_32_M_START_INDEX  = 8;
 const uint8_t MSS_MCS_GROUP_32_M_END_INDEX    = 15;
 
 // second array dimension (group definition)
-const uint8_t MSS_MCS_GROUP_32_MCS_SIZE_INDEX      = 0;
 const uint8_t MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX  = 1;
 const uint8_t MSS_MCS_GROUP_32_SIZE_INDEX          = 2;
 const uint8_t MSS_MCS_GROUP_32_BASE_INDEX          = 3;
 const uint8_t MSS_MCS_GROUP_32_MEMBERS_START_INDEX = 4;
-const uint8_t MSS_MCS_GROUP_32_MEMBERS_END_INDEX   = 11;
 const uint8_t MSS_MCS_GROUP_32_ALT_VALID_INDEX     = 12;
 const uint8_t MSS_MCS_GROUP_32_ALT_SIZE_INDEX      = 13;
 const uint8_t MSS_MCS_GROUP_32_ALT_BASE_INDEX      = 14;
-const uint8_t MSS_MCS_GROUP_32_LARGEST_MBA_INDEX   = 15;
 
 
 //------------------------------------------------------------------------------

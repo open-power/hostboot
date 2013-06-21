@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.27 2013/05/06 15:02:09 jmcgill Exp $
+// $Id: mss_setup_bars.C,v 1.28 2013/05/23 14:54:28 jmcgill Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.27   | jmcgill  | 05/21/13| address FW review issues
 //  1.26   | jmcgill  | 04/22/13| rewrite to line up with attribute changes
 //  1.23   | bellows  | 12/04/12| more updates
 //  1.22   | gpaulraj | 10/03/12| review updates
@@ -103,6 +104,15 @@ fapi::ReturnCode mss_setup_bars_init_nm_bars(
         rc_ecmd |= MCFGP.setBit(MCFGP_RSVD_1_BIT);
         rc_ecmd |= MCFGP.setBit(MCFGP_ENABLE_FASTPATH_BIT);
 
+        // check buffer manipulation return codes
+        if (rc_ecmd)
+        {
+            FAPI_ERR("mss_setup_bars_init_nm_bars: Error 0x%X setting up MCFGP base data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
         if (i_pri_valid)
         {
             // MCFGPQ_VALID
@@ -145,6 +155,16 @@ fapi::ReturnCode mss_setup_bars_init_nm_bars(
             bool alt_valid = i_group_data[MSS_MCS_GROUP_32_ALT_VALID_INDEX];
             if (alt_valid)
             {
+                if (i_group_data[MSS_MCS_GROUP_32_ALT_BASE_INDEX] !=
+                    (i_group_data[MSS_MCS_GROUP_32_BASE_INDEX] +
+                     (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/2)))
+                {
+                    FAPI_ERR("mss_setup_bars_init_nm_bars: Invalid non-mirrored alternate BAR configuration");
+                    FAPI_SET_HWP_ERROR(rc,
+                                       RC_MSS_SETUP_BARS_NM_ALT_BAR_ERR);
+                    break;
+                }
+
                 // MCFGPAQ_VALID
                 rc_ecmd |= MCFGPA.setBit(MCFGPA_VALID_BIT);
 
@@ -162,24 +182,14 @@ fapi::ReturnCode mss_setup_bars_init_nm_bars(
                     (MCFGPA_BASE_ADDRESS_END_BIT-
                      MCFGPA_BASE_ADDRESS_START_BIT)+1);
 
-                if (i_group_data[MSS_MCS_GROUP_32_ALT_BASE_INDEX] !=
-                    (i_group_data[MSS_MCS_GROUP_32_BASE_INDEX] +
-                     (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/2)))
+                // check buffer manipulation return codes
+                if (rc_ecmd)
                 {
-                    FAPI_ERR("Invalid non-mirrored alternate BAR configuration");
-                    FAPI_SET_HWP_ERROR(rc,
-                                       RC_MSS_SETUP_BARS_NM_ALT_BAR_ERR);
+                    FAPI_ERR("mss_setup_bars_init_nm_bars: Error 0x%X setting up MCFGPA data buffer",
+                             rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
                     break;
                 }
-            }
-
-            // check buffer manipulation return codes
-            if (rc_ecmd)
-            {
-                FAPI_ERR("mss_setup_bars_init_nm_bars: Error 0x%X setting up MCFGPA data buffer",
-                         rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
             }
         }
 
@@ -187,14 +197,14 @@ fapi::ReturnCode mss_setup_bars_init_nm_bars(
         rc = fapiPutScom(i_mcs_target, MCS_MCFGP_0x02011800, MCFGP);
         if (!rc.ok())
         {
-            FAPI_ERR("Error from fapiPutScom (MCS_MCFGP_0x02011800)");
+            FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiPutScom (MCS_MCFGP_0x02011800)");
             break;
         }
 
         rc = fapiPutScom(i_mcs_target, MCS_MCFGPA_0x02011814, MCFGPA);
         if (!rc.ok())
         {
-            FAPI_ERR("Error from fapiPutScom (MCS_MCFGPA_0x02011814)");
+            FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiPutScom (MCS_MCFGPA_0x02011814)");
             break;
         }
     } while(0);
@@ -278,7 +288,7 @@ fapi::ReturnCode mss_setup_bars_init_m_bars(
                     (i_group_data[MSS_MCS_GROUP_32_BASE_INDEX] +
                      (i_group_data[MSS_MCS_GROUP_32_SIZE_INDEX]/2)))
                 {
-                    FAPI_ERR("Invalid mirrored alternate BAR configuration");
+                    FAPI_ERR("mss_setup_bars_init_m_bars: Invalid mirrored alternate BAR configuration");
                     FAPI_SET_HWP_ERROR(rc,
                                        RC_MSS_SETUP_BARS_M_ALT_BAR_ERR);
                     break;
@@ -299,13 +309,13 @@ fapi::ReturnCode mss_setup_bars_init_m_bars(
         rc = fapiPutScom(i_mcs_target, MCS_MCFGPM_0x02011801, MCFGPM);
         if (!rc.ok())
         {
-            FAPI_ERR("Error from fapiPutScom (MCS_MCFGPM_0x02011801)");
+            FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiPutScom (MCS_MCFGPM_0x02011801)");
             break;
         }
         rc = fapiPutScom(i_mcs_target, MCS_MCFGPMA_0x02011815, MCFGPMA);
         if (!rc.ok())
         {
-            FAPI_ERR("Error from fapiPutScom (MCS_MCFGPMA_0x02011815");
+            FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiPutScom (MCS_MCFGPMA_0x02011815");
             break;
         }
     } while(0);
@@ -330,7 +340,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
         rc = FAPI_ATTR_GET(ATTR_MSS_MCS_GROUP_32, &i_pu_target, group_data);
         if (!rc.ok())
         {
-            FAPI_ERR("Error reading ATTR_MSS_MCS_GROUP_32");
+            FAPI_ERR("mss_setup_bars: Error reading ATTR_MSS_MCS_GROUP_32");
             break;
         }
 
@@ -341,7 +351,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
                                   fapi::TARGET_STATE_FUNCTIONAL);
         if (!rc.ok())
         {
-            FAPI_ERR("Error from fapiGetChildChiplets");
+            FAPI_ERR("mss_setup_bars: Error from fapiGetChildChiplets");
             break;
         }
 
@@ -355,7 +365,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
             rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*iter), mcs_pos);
             if (!rc.ok())
             {
-                FAPI_ERR("Error reading ATTR_CHIP_UNIT_POS");
+                FAPI_ERR("mss_setup_bars: Error reading ATTR_CHIP_UNIT_POS");
                 break;
             }
 
@@ -386,7 +396,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
                             const uint8_t& MCS_POS = mcs_pos;
                             const uint8_t& GROUP_INDEX_A = nm_bar_group_index;
                             const uint8_t& GROUP_INDEX_B = i;
-                            FAPI_ERR("MCS %d is listed as a member in multiple non-mirrored groups",
+                            FAPI_ERR("mss_setup_bars: MCS %d is listed as a member in multiple non-mirrored groups",
                                      mcs_pos);
                             FAPI_SET_HWP_ERROR(
                                 rc,
@@ -413,7 +423,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
                 group_data[nm_bar_group_index]);
             if (!rc.ok())
             {
-                FAPI_ERR("Error from mss_setup_bars_init_nm_bars");
+                FAPI_ERR("mss_setup_bars: Error from mss_setup_bars_init_nm_bars");
                 break;
             }
 
@@ -443,7 +453,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
                             const uint8_t& MCS_POS = mcs_pos;
                             const uint8_t& GROUP_INDEX_A = m_bar_group_index;
                             const uint8_t& GROUP_INDEX_B = i;
-                            FAPI_ERR("MCS %d is listed as a member in multiple mirrored groups",
+                            FAPI_ERR("mss_setup_bars: MCS %d is listed as a member in multiple mirrored groups",
                                      mcs_pos);
                             FAPI_SET_HWP_ERROR(
                                 rc,
@@ -460,14 +470,14 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
                 break;
             }
 
-            // write non-mirrored BARs based on group configuration
+            // write mirrored BARs based on group configuration
             rc = mss_setup_bars_init_m_bars(
                 *iter,
                 m_bar_valid,
                 group_data[m_bar_group_index]);
             if (!rc.ok())
             {
-                FAPI_ERR("Error from mss_setup_bars_init_m_bars");
+                FAPI_ERR("mss_setup_bars: Error from mss_setup_bars_init_m_bars");
                 break;
             }
 
@@ -476,7 +486,7 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
             rc = FAPI_ATTR_SET(ATTR_MSS_MEM_IPL_COMPLETE, &i_pu_target, final);
             if (!rc.ok())
             {
-                FAPI_ERR("Error from FAPI_ATTR_SET (ATTR_MSS_MEM_IPL_COMPLETE)");
+                FAPI_ERR("mss_setup_bars: Error from FAPI_ATTR_SET (ATTR_MSS_MEM_IPL_COMPLETE)");
                 break;
             }
         }

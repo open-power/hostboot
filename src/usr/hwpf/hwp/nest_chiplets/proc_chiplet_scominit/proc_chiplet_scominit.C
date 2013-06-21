@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.13 2013/05/02 16:33:30 jmcgill Exp $
+// $Id: proc_chiplet_scominit.C,v 1.16 2013/07/31 21:10:31 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 #include <fapiHwpExecInitFile.H>
 #include <proc_chiplet_scominit.H>
+#include "p8_scom_addresses.H"
 
 extern "C" {
 
@@ -53,9 +54,17 @@ extern "C" {
 fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
 {
     fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
+
     fapi::TargetType target_type;
     std::vector<fapi::Target> initfile_targets;
     uint8_t nx_enabled;
+    uint8_t mcs_pos;
+    uint8_t master_mcs_pos = 0xFF;
+    fapi::Target master_mcs;
+
+    ecmdDataBufferBase data(64);
+    ecmdDataBufferBase mask(64);
 
     // mark HWP entry
     FAPI_INF("proc_chiplet_scominit: Start");
@@ -184,6 +193,22 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                          PROC_CHIPLET_SCOMINIT_NX_IF, PROC_CHIPLET_SCOMINIT_AS_IF);
             }
 
+            // execute A/X/PCI/DMI FIR init SCOM initfile
+            FAPI_INF("proc_chiplet_scominit: Executing %s on %s",
+                     PROC_CHIPLET_SCOMINIT_A_X_PCI_DMI_IF, i_target.toEcmdString());
+            FAPI_EXEC_HWP(
+                rc,
+                fapiHwpExecInitFile,
+                initfile_targets,
+                PROC_CHIPLET_SCOMINIT_A_X_PCI_DMI_IF);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s on %s",
+                         PROC_CHIPLET_SCOMINIT_A_X_PCI_DMI_IF,
+                         i_target.toEcmdString());
+                break;
+            }
+
             // determine set of functional MCS chiplets
             std::vector<fapi::Target> mcs_targets;
             rc = fapiGetChildChiplets(i_target,
@@ -219,6 +244,70 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                              i->toEcmdString());
                     break;
                 }
+
+                // determine MCS position
+                rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*i), mcs_pos);
+
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error from FAPI_ATTR_GET (ATTR_POS)");
+                    break;
+                }
+
+                if (mcs_pos < master_mcs_pos)
+                {
+                    fapi::Target cen_target_unused;
+                    rc = fapiGetOtherSideOfMemChannel(*i,
+                                                      cen_target_unused,
+                                                      fapi::TARGET_STATE_FUNCTIONAL);
+                    // use return code only to indicate presence of connected Centaur,
+                    // do not propogate/emit error if not connected
+                    if (rc.ok())
+                    {
+                        FAPI_DBG("Updating master_mcs_pos to %d", mcs_pos);
+                        FAPI_DBG("  Target: %s", cen_target_unused.toEcmdString());
+                        master_mcs = *i;
+                        master_mcs_pos = mcs_pos;
+                    }
+                    else
+                    {
+                        rc = fapi::FAPI_RC_SUCCESS;
+                    }
+                }
+
+            }
+            if (!rc.ok())
+            {
+                break;
+            }
+
+            if (master_mcs.getType() == fapi::TARGET_TYPE_MCS_CHIPLET)
+            {
+                // set MCMODE0Q_ENABLE_CENTAUR_SYNC on first target only
+                // (this bit is required to be set on at most one MCS/chip)
+                rc_ecmd |= data.setBit(MCSMODE0_EN_CENTAUR_SYNC_BIT);
+                rc_ecmd |= mask.setBit(MCSMODE0_EN_CENTAUR_SYNC_BIT);
+
+                // check buffer manipulation return codes
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error 0x%X setting up MCSMODE0 data buffer",
+                             rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+
+                // write register with updated content
+                rc = fapiPutScomUnderMask(master_mcs,
+                                          MCS_MCSMODE0_0x02011807,
+                                          data,
+                                          mask);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: fapiPutScomUnderMask error (MCS_MCSMODE0_0x02011807)");
+                    break;
+                }
+
             }
             if (!rc.ok())
             {

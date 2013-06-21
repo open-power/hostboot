@@ -1,0 +1,262 @@
+#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.1 2013/05/15 04:27:09 jmcgill Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- *** IBM Confidential ***
+#--
+#-- TITLE       : p8.a_x_pci_dmi_fir.scom.initfile
+#-- DESCRIPTION : Perform base A/X/DMI/PCI base FIR configuration
+#--
+#-- OWNER NAME  : Joe McGill              Email: jmcgill@us.ibm.com
+#--
+#--------------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+
+#--------------------------------------------------------------------------------
+#-- Defines
+#--------------------------------------------------------------------------------
+
+define mcl_enabled =  ((ATTR_CHIP_REGIONS_TO_ENABLE[2] & 0x0080000000000000) != 0);
+define mcr_enabled =  ((ATTR_CHIP_REGIONS_TO_ENABLE[2] & 0x0040000000000000) != 0);
+define xbus_enabled = (ATTR_PROC_X_ENABLE == ENUM_ATTR_PROC_X_ENABLE_ENABLE);
+define abus_enabled = (ATTR_PROC_A_ENABLE == ENUM_ATTR_PROC_A_ENABLE_ENABLE);
+define pcie_enabled = (ATTR_PROC_PCIE_ENABLE == ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
+
+
+#--------------------------------------------------------------------------------
+#-- SCOM initializations
+#--------------------------------------------------------------------------------
+
+
+#-- IOMC# (DMI)
+#-- set base configuration for IOMC FIR, leaving link specific FIR bits *masked*
+#-- (will be unmasked by IO training procedure)
+#-- IOMC0.BUSCTL.SCOM.FIR_ACTION0_REG
+scom 0x02011A06 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (mcl_enabled);
+}
+
+#-- IOMC0.BUSCTL.SCOM.FIR_ACTION1_REG
+scom 0x02011A07 {
+    bits, scom_data,          expr;
+    0:63, 0xE07070707000C000, (mcl_enabled);
+}
+
+#-- IOMC0.BUSCTL.SCOM.FIR_MASK_REG
+scom 0x02011A03 {
+    bits, scom_data,          expr;
+    0:63, 0x1FFFFFFFFFFF0000, (mcl_enabled);
+}
+
+#-- IOMC1.BUSCTL.SCOM.FIR_ACTION0_REG
+scom 0x02011E06 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (mcr_enabled);
+}
+
+#-- IOMC1.BUSCTL.SCOM.FIR_ACTION1_REG
+scom 0x02011E07 {
+    bits, scom_data,          expr;
+    0:63, 0xE07070707000C000, (mcr_enabled);
+}
+
+#-- IOMC1.BUSCTL.SCOM.FIR_MASK_REG
+scom 0x02011E03 {
+    bits, scom_data,          expr;
+    0:63, 0x1FFFFFFFFFFF0000, (mcr_enabled);
+}
+
+
+
+#-- XBUS IO (EI4)
+#-- set base configuration for FIR, leaving link specific FIR bits *masked*
+#-- (will be unmasked by IO training procedure)
+#-- XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG
+scom 0x04011406 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (xbus_enabled);
+}
+
+#-- XBUS1.BUSCTL.SCOM.FIR_ACTION1_REG
+scom 0x04011407 {
+    bits, scom_data,          expr;
+    0:63, 0xE07070707070C000, (xbus_enabled);
+}
+
+#-- XBUS1.BUSCTL.SCOM.FIR_MASK_REG
+scom 0x04011403 {
+    bits, scom_data,          expr;
+    0:63, 0x1FFFFFFFFFFF0000, (xbus_enabled);
+}
+
+#-- XBUS PB (PBEN)
+#-- set base configuration for FIR, leaving link specific FIR bits *masked*
+#-- (will be unmasked by iovalid procedure)
+#-- EN.PB.PBEN.MISC_IO.SCOM.FIR_REG_ACTION0
+scom 0x04010C06 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (xbus_enabled);
+}
+
+#-- EN.PB.PBEN.MISC_IO.SCOM.FIR_REG_ACTION1
+scom 0x04010C07 {
+    bits, scom_data,          expr;
+    0:63, 0x9248000000000000, (xbus_enabled);
+}
+
+#-- EN.PB.PBEN.MISC_IO.SCOM.FIR_MASK_REG
+scom 0x04010C03 {
+    bits, scom_data,          expr;
+    0:63, 0xFFF4F7FFFC000000, (xbus_enabled);
+}
+
+#-- XBUS pervasive LFIR
+#-- EN.PB.TPC.EPS.FIR.LOCAL_FIR_ACTION0
+scom 0x04040010 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (xbus_enabled);
+}
+
+#-- EN.PB.TPC.EPS.FIR.LOCAL_FIR_ACTION1
+scom 0x04040011 {
+    bits, scom_data,          expr;
+    0:63, 0xFFFE000000000000, (xbus_enabled);
+}
+
+#-- EN.PB.TPC.EPS.FIR.LOCAL_FIR_MASK
+scom 0x0404000D {
+    bits, scom_data,          expr;
+    0:63, 0x0001FFFFFF800000, (xbus_enabled);
+}
+
+#-- XBUS chiplet XFIR
+#-- EN.PB.TPC.FIR_MASK
+scom 0x04040002 {
+    bits, scom_data,          expr;
+    0:63, 0x203FFFE000000000, (xbus_enabled);
+}
+
+
+
+#-- ABUS IO (EDI)
+#-- set base configuration for FIR, leaving link specific FIR bits *masked*
+#-- (will be unsmaked by IO training procedure)
+#-- ABUS.BUSCTL.SCOM.FIR_ACTION0_REG
+scom 0x08010C06 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (abus_enabled);
+}
+
+#-- ABUS.BUSCTL.SCOM.FIR_ACTION1_REG
+scom 0x08010C07 {
+    bits, scom_data,          expr;
+    0:63, 0xE07070707070C000, (abus_enabled);
+}
+
+#-- ABUS.BUSCTL.SCOM.FIR_MASK_REG
+scom 0x08010C03 {
+    bits, scom_data,          expr;
+    0:63, 0x1FFFFFFFFFFF0000, (abus_enabled);
+}
+
+#-- ABUS PB (PBES)
+#-- set base configuration for FIR, leaving link specific FIR bits *masked*
+#-- (will be unmasked by iovalid procedure)
+#-- ES.PBES_WRAP_TOP.PBES_TOP.MISC_IO.SCOM.PB_IOA_FIR_ACTION0_REG
+scom 0x08010806 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (abus_enabled);
+}
+
+#-- ES.PBES_WRAP_TOP.PBES_TOP.MISC_IO.SCOM.PB_IOA_FIR_ACTION1_REG
+scom 0x08010807 {
+    bits, scom_data,          expr;
+    0:63, 0x0249861800000000, (abus_enabled);
+}
+
+#-- ES.PBES_WRAP_TOP.PBES_TOP.MISC_IO.SCOM.PB_IOA_FIR_MASK_REG
+scom 0x08010803 {
+    bits, scom_data,          expr;
+    0:63, 0xFFFFFFFFFC000000, (abus_enabled);
+}
+
+#-- ABUS pervasive LFIR
+#-- ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION0
+scom 0x08040010 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (abus_enabled);
+}
+
+#-- ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION1
+scom 0x08040011 {
+    bits, scom_data,          expr;
+    0:63, 0xFFF0000000000000, (abus_enabled);
+}
+
+#-- ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_MASK
+scom 0x0804000D {
+    bits, scom_data,          expr;
+    0:63, 0x000FFFFFFF800000, (abus_enabled);
+}
+
+#-- ABUS chiplet XFIR
+#-- ES.PBES_WRAP_TOP.TPC.FIR_MASK
+scom 0x08040002 {
+    bits, scom_data,          expr;
+    0:63, 0x23FFFFE000000000, (abus_enabled);
+}
+
+
+#-- PCI IOP FIR
+#-- set base configuration for 
+
+
+#-- FBUS PB
+#-- set base configuration for FIR, leaving link specific FIR bits *masked*
+#-- ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_ACTION0_REG
+scom 0x09010806 {
+    bits, scom_data,          expr;
+    0:63, 0xFE082030FE082030, (pcie_enabled);
+}
+
+#-- ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_ACTION1_REG
+scom 0x09010807 {
+    bits, scom_data,          expr;
+    0:63, 0x01D7DFCC01D7DFCC, (pcie_enabled);
+}
+
+#-- ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_MASK_REG
+scom 0x09010803 {
+    bits, scom_data,          expr;
+    0:63, 0xFFFFFFFFFFFFFFFF, (pcie_enabled);
+}
+
+#-- PCIE pervasive LFIR
+#-- ES.PE_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION0
+scom 0x09040010 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, (pcie_enabled);
+}
+
+#-- ES.PE_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION1
+scom 0x09040011 {
+    bits, scom_data,          expr;
+    0:63, 0xFFF0000000000000, (pcie_enabled);
+}
+
+#-- ES.PE_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_MASK
+scom 0x0904000D {
+    bits, scom_data,          expr;
+    0:63, 0x000FFFFFFF800000, (pcie_enabled);
+}
+
+#-- PCIE chiplet XFIR
+#-- ES.PE_WRAP_TOP.TPC.FIR_MASK
+scom 0x09040002 {
+    bits, scom_data,          expr;
+    0:63, 0x211FFFE000000000, (pcie_enabled);
+}

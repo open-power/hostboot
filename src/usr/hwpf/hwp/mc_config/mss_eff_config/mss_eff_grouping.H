@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.H,v 1.5 2012/09/25 16:22:25 bellows Exp $
+// $Id: mss_eff_grouping.H,v 1.6 2013/05/23 11:19:17 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -41,17 +41,41 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.6    | gpaulraj | 05/22/13| added constants for debugging purpose
 //  1.5    | bellows  | 09/25/12| review updates made
 //  1.4    | bellows  | 08/31/12| object updated, call updated
 //  1.3    | bellows  | 07/27/12| updated for setup_bars full function
 //  1.2    | bellows  | 07/16/12| added in Id tag
 //  1.1    | gpaulraj | 03/19/12| Updated
 
+
 #ifndef MSS_EFF_GROUPINGHWPB_H_
 #define MSS_EFF_GROUPINGHWPB_H_
-
+//------------------------------------------------------------------------------
+//  Header file include Constant definitions
+//------------------------------------------------------------------------------
 
 #include <fapi.H>
+
+//------------------------------------------------------------------------------
+//  Constant definitions
+//------------------------------------------------------------------------------
+
+const uint8_t MCS_SIZE         = 0;
+const uint8_t MCS_IN_GROUP     = 1;
+const uint8_t GROUP_SIZE       = 2;
+const uint8_t BASE_ADDR        = 3;
+const uint8_t MEMBERS_START_ID = 4;
+const uint8_t MEMBERS_END      = 11;
+const uint8_t ALT_VALID        = 12;
+const uint8_t ALT_SIZE         = 13;
+const uint8_t ALT_BASE_ADDR    = 14;
+const uint8_t LARGEST_MBA_SIZE = 15;
+
+//------------------------------------------------------------------------------
+// Class declaration
+//------------------------------------------------------------------------------
+
 
 class target_vector {
    public: std::vector<fapi::Target> t;
@@ -68,6 +92,10 @@ public:
   uint32_t groupID[MBA_GROUP_SIZE][MBA_GROUP_DATA];
   uint32_t MCS_size[MBA_SIZE_MCS];
 };
+
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
 
 typedef fapi::ReturnCode (*mss_eff_grouping_FP_t)(const fapi::Target&, std::vector<fapi::Target> & i_associated_centaurs );
 
