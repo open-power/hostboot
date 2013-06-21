@@ -1595,6 +1595,67 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
             ctl_reg += getPortOffset(TARGETING::FSI_MASTER_TYPE_MFSI,m_info.port);
         }
 
+        //Always clear out any pending errors before we start anything
+        uint32_t scom_data[2] = {};
+        size_t scom_size = sizeof(scom_data);
+
+        for( uint64_t scomaddr = 0x00020000;
+             scomaddr <= 0x0002000A;
+             ++scomaddr )
+        {
+            if( (scomaddr == 0x00020003)
+                || (scomaddr == 0x00020004) )
+            {
+                continue;
+            }
+
+            scom_size = sizeof(scom_data);
+            l_err = deviceOp( DeviceFW::READ,
+                              iv_master,
+                              scom_data,
+                              scom_size,
+                              DEVICE_XSCOM_ADDRESS(scomaddr) );
+            if( l_err ) { break; }
+
+            TRACFCOMP( g_trac_fsi,
+                       "Scom %0.8X = %0.8X %0.8X",
+                       scomaddr,
+                       scom_data[0],
+                       scom_data[1] );
+        }
+        if( l_err ) { break; }
+
+        scom_data[0] = 0; scom_data[1] = 0;
+        scom_size = sizeof(scom_data);
+        l_err = deviceOp( DeviceFW::WRITE,
+                          iv_master,
+                          scom_data,
+                          scom_size,
+                          DEVICE_XSCOM_ADDRESS(FSI2OPB_OFFSET_0|OPB_REG_RES) );
+        if( l_err ) { break; }
+
+        scom_data[0] = 0; scom_data[1] = 0;
+        scom_size = sizeof(scom_data);
+        l_err = deviceOp( DeviceFW::WRITE,
+                          iv_master,
+                          scom_data,
+                          scom_size,
+                          DEVICE_XSCOM_ADDRESS(FSI2OPB_OFFSET_0|OPB_REG_STAT) );
+        if( l_err ) { break; }
+
+        scom_size = sizeof(scom_data);
+        l_err = deviceOp( DeviceFW::READ,
+                          iv_master,
+                          scom_data,
+                          scom_size,
+                          DEVICE_XSCOM_ADDRESS(FSI2OPB_OFFSET_0|OPB_REG_STAT) );
+        if( l_err ) { break; }
+        TRACFCOMP(g_trac_fsi,"Scom %0.8X = %0.8X %0.8X",
+                  FSI2OPB_OFFSET_0|OPB_REG_STAT,
+                  scom_data[0],
+                  scom_data[1]);
+
+
         if( !fsp_master_init && !is_mpipl )
         {
             //Clear fsi port errors and general reset on all ports
