@@ -588,61 +588,38 @@ use constant FSI_TARGET_FIELD => 2;
 use constant FSI_MASTER_FIELD => 3;
 use constant FSI_TARGET_TYPE  => 4;
 my @Fsis;
-my @rawFSPTargets;
-foreach my $i (@{$fsiBus->{'fsi-bus'}})
+
+# Build all the FSP chip targets / attributes
+my %FSPs = ();
+foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
 {
-    if (lc($i->{master}->{type}) eq "fsp master")
+    # FSP always has master type of FSP master; Add unique ones
+    my $instancePathKey = $fsiBus->{master}->{'instance-path'};
+    if (    (lc($fsiBus->{master}->{type}) eq "fsp master")
+        && !(exists($FSPs{$instancePathKey})))
     {
-        # The condition to identify a FSP:
-        # On a non-brazos system : FSP and a processor are in the same node
-        # On highend system : one FSI link to something in its own node 
-        #
-        if (($i->{slave}->{target}->{node} eq $i->{master}->{target}->{node})
-            && (($i->{slave}->{target}->{name} eq "pu") ||
-                ($i->{slave}->{target}->{name} eq "cfam-s")))
-        {
-            my $fspnode = $i->{master}->{target}->{node};
-            $fspnode =~ s/n(.*):p.*/$1/;
-            push @rawFSPTargets, [ $fspnode, 0, 0,
-                                $i->{master}->{'instance-path'} ];
-        }
+        my $node = $fsiBus->{master}->{target}->{node};
+        my $position = $fsiBus->{master}->{target}->{position};
+        my $huid = sprintf("0x%02X15%04X",$node,$position);
+        my $rid = sprintf("0x%08X", 0x200 + $position);
+        my $sys = "0";
+        $FSPs{$instancePathKey} = {
+            'sys'         => $sys,
+            'node'        => $node,
+            'position'    => $position,
+            'ordinalId'   => $position,
+            'instancePath'=> $fsiBus->{master}->{'instance-path'},
+            'huid'        => $huid,
+            'rid'         => $rid,
+        };
     }
 
-    push @Fsis, [ $i->{master}->{type}, $i->{master}->{link},
-        "n$i->{slave}->{target}->{node}:p$i->{slave}->{target}->{position}",
-        "n$i->{master}->{target}->{node}:p$i->{master}->{target}->{position}",
-                  $i->{slave}->{target}->{name} ];
-}
-
-# eliminate any duplicate FSP entries
-use constant FSP_NODE_FIELD => 0;
-use constant FSP_FLAG_FIELD => 1;
-use constant FSP_ORD_FIELD  => 2;
-use constant FSP_IPATH_FIELD  => 3;
-our @FSPTargets;
-my $fspcount = 0;
-for my $i (0 .. $#rawFSPTargets)
-{
-    my $duplicate = 0;
-    if ($i != 0)
-    {
-        my $ipath = $rawFSPTargets[$i][FSP_IPATH_FIELD];
-        for my $j (0 .. $#FSPTargets)
-        {
-            if ($ipath eq $FSPTargets[$j][FSP_IPATH_FIELD])
-            {
-                $duplicate = 1;
-                last;
-            }
-        }
-    }
-
-    if ($duplicate == 0)
-    {
-        push @FSPTargets, [ $rawFSPTargets[$i][FSP_NODE_FIELD],
-             0, $fspcount, $rawFSPTargets[$i][FSP_IPATH_FIELD] ];
-        $fspcount++;
-    }
+    push @Fsis, [ $fsiBus->{master}->{type}, $fsiBus->{master}->{link},
+        "n$fsiBus->{slave}->{target}->{node}:"
+        . "p$fsiBus->{slave}->{target}->{position}",
+        "n$fsiBus->{master}->{target}->{node}:"
+         . "p$fsiBus->{master}->{target}->{position}",
+        $fsiBus->{slave}->{target}->{name} ];
 }
 
 open (FH, "<$mrwdir/${sysname}-psi-busses.xml") ||
@@ -857,18 +834,13 @@ for my $i ( 0 .. $#Fsis )
 
 generate_system_node();
 
-# Third generate the FSP chip
-for my $fsp ( 0 .. $#FSPTargets )
+# Third, generate the FSP chip(s)
+foreach my $fsp ( keys %FSPs )
 {
-    if (($FSPTargets[$fsp][FSP_NODE_FIELD] eq $node) &&
-        ($FSPTargets[$fsp][FSP_FLAG_FIELD] == 0))
+    if( $FSPs{$fsp}{node} eq $node )
     {
-        my $instanceId = $FSPTargets[$fsp][FSP_IPATH_FIELD];
-        $instanceId = chop($instanceId);
-        do_plugin('fsp_chip', $node,
-                   $instanceId, $FSPTargets[$fsp][FSP_ORD_FIELD]);
-        # set flag to indicate the target already instatiated
-        $FSPTargets[$fsp][FSP_FLAG_FIELD] = 1;
+        my $fspChipHashRef = (\%FSPs)->{$fsp};
+        do_plugin('fsp_chip', $fspChipHashRef);
     }
 }
 
