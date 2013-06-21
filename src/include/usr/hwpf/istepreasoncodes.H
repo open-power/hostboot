@@ -178,6 +178,7 @@ enum istepReasonCode
     ISTEP_PROC_GETECID_FAILED                   = ISTEP_COMP_ID | 0x2F,
     ISTEP_TOP_LEVEL_TARGET_NULL                 = ISTEP_COMP_ID | 0x30,
     ISTEP_DECONFIGURE_MBA_FAILED                = ISTEP_COMP_ID | 0x31,
+    ISTEP_DECONFIGURE_L4_FAILED                 = ISTEP_COMP_ID | 0x32,
 };  // end ISTEP
 
 }

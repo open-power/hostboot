@@ -1930,9 +1930,9 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_MSS_CACHE_ENABLE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Value of on or off.  Determines if the L4 is enabled or not. See chapter 6 of the Centaur Workbook.  On means the full cache is enabled.  HALF_A (EVEN) means only A is enabled and HALF_B (ODD) means only B is enabled. This value is set by the platform which can get the chips value by running the mss_cen_get_ecid function.</description>
+    <description>Reflects the functionality of the L4 Cache.  Determines if the L4 is enabled or not. See chapter 6 of the Centaur Workbook.  On means the full cache is enabled.  HALF_A (EVEN) means only A is enabled and HALF_B (ODD) means only B is enabled. For DD1X, the values of UNK_OFF, UNK_ON, UNK_HALF_A and UNK_HALFB were added because early parts did not have the fuses blown correctly, so the cache repairs may not have worked. This value is set by the platform which can get the chips value by running the mss_cen_get_ecid function.</description>
     <valueType>uint8</valueType>
-    <enum>OFF = 0, ON = 1, HALF_A = 3, HALF_B = 5</enum>
+    <enum>OFF = 0, ON = 1, HALF_A = 3, HALF_B = 5, UNK_OFF = 8, UNK_ON = 9, UNK_HALF_A = 0xB, UNK_HALF_B = 0xD</enum>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>

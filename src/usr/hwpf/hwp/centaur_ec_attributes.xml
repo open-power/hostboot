@@ -22,6 +22,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
+  <!-- $Id: centaur_ec_attributes.xml,v 1.5 2013/06/18 22:04:09 mjjones Exp $ -->
   <attribute>
     <id>ATTR_CENTAUR_EC_WRITE_FIR_MASK_FEATURE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -40,7 +41,7 @@
     </chipEcFeature>
   </attribute>
 
- <attribute>
+  <attribute>
     <id>ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
@@ -57,10 +58,13 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
     </chipEcFeature>
   </attribute>
 
-<attribute>
+  <attribute>
     <id>ATTR_CENTAUR_EC_MSS_READ_PHASE_SELECT_RESET</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Set by the platform depending on DD1 vs DD2.  If true, then training and periodic training needs to make adjustments to the read phase select.  In DD2, we expect this to be fixed.</description>
+    <description>
+      If true, then training and periodic training needs to make adjustments to the read phase select.
+      In DD2, this is expected to be fixed.
+    </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_CENTAUR</name>
@@ -70,6 +74,26 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
         </ec>
       </chip>
     </chipEcFeature>
-</attribute>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CENTAUR_EC_CHECK_L4_CACHE_ENABLE_UNKNOWN</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+      If true then mss_get_cen_ecid needs to read an ECBIT from the ECID in
+      order to determine if the L4 Cache Enable data in the ECID is in an
+      unknown state.
+      This is true for Centaur 1.*
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
 
 </attributes>

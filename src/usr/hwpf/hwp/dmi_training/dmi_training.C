@@ -255,49 +255,104 @@ void*    call_mss_getecid( void *io_pArgs )
             // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON
             // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A
             // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B
-            // Firmware does not support HALF-enabled, it is treated like OFF.
-            // If the L4 cache is not ON then the L4 Target is deconfigured.
-            // The ATTR_MSS_CACHE_ENABLE attribute is set to either ON/OFF
-
-            // TODO SW209633
-            // This will provide a new version of mss_get_cen_ecid that will
-            // potentially report some different cache status values. For all
-            // values, if the value is not ON then firmware will treat the cache
-            // as OFF. Until the new mss_get_cen_ecid is available always treat
-            // the cache as OFF to workaround a problem in manufacturing. As
-            // part of SW209633, uncomment the following line.
-            //if (l_cache_enable != fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON)
+            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_OFF
+            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_ON
+            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_A
+            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_B
+            // The UNK values are for DD1.* Centaur chips where the fuses were
+            // not blown correctly so the cache may not be in the correct state.
+            //
+            // Firmware does not normally support HALF enabled
+            // If ON then ATTR_MSS_CACHE_ENABLE is set to ON
+            // Else ATTR_MSS_CACHE_ENABLE is set to OFF and the L4 Target is
+            //   deconfigured
+            //
+            // However, an engineer can override ATTR_MSS_CACHE_ENABLE. If they
+            // override it to HALF_A or HALF_B then
+            // - ATTR_MSS_CACHE_ENABLE is set to HALF_X
+            // - The L4 Target is not deconfigured
+            if (l_cache_enable != fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "mss_get_cen_ecid returned L4 not-on (0x%02x)",
+                    "call_mss_getecid: mss_get_cen_ecid returned L4 not-on (0x%02x)",
                     l_cache_enable);
                 l_cache_enable = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
+            }
 
+            // Set the ATTR_MSS_CACHE_ENABLE attribute
+            l_pCentaur->setAttr<TARGETING::ATTR_MSS_CACHE_ENABLE>(
+                l_cache_enable);
+
+            // Read the ATTR_MSS_CACHE_ENABLE back to pick up any override
+            uint8_t l_cache_enable_attr =
+                l_pCentaur->getAttr<TARGETING::ATTR_MSS_CACHE_ENABLE>();
+
+            if (l_cache_enable != l_cache_enable_attr)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_mss_getecid: ATTR_MSS_CACHE_ENABLE override (0x%02x)",
+                    l_cache_enable_attr);
+            }
+
+            // At this point HALF_A/HALF_B are only possible due to override
+            if ((l_cache_enable_attr !=
+                 fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON) &&
+                (l_cache_enable_attr !=
+                 fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A) &&
+                (l_cache_enable_attr !=
+                 fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B))
+            {
+                // Deconfigure the L4 Cache Targets (there should be 1)
                 TargetHandleList l_list;
-                getChildChiplets(l_list,
-                                 l_pCentaur,
-                                 TYPE_L4, false );
+                getChildChiplets(l_list, l_pCentaur, TYPE_L4, false);
 
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "deconfigure %d -  L4s assocated with this centaur "
-                        "huid = 0x%.8X", l_list.size(), get_huid(l_pCentaur));
+                    "call_mss_getecid: deconfiguring %d L4s (Centaur huid: 0x%.8X)",
+                    l_list.size(), get_huid(l_pCentaur));
 
                 for (TargetHandleList::const_iterator
                         l_l4_iter = l_list.begin();
                         l_l4_iter != l_list.end();
                         ++l_l4_iter)
                 {
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                "deconfigure L4 0x%.8X", get_huid( *l_l4_iter));
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_mss_getecid: deconfiguring L4 (huid: 0x%.8X)",
+                        get_huid( *l_l4_iter));
 
-                    // call HWAS to deconfigure
                     l_err = HWAS::theDeconfigGard().
-                                        deconfigureTarget( **l_l4_iter , 0);
+                        deconfigureTarget(**l_l4_iter , 0);
+
+                    if (l_err)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "ERROR: error deconfiguring Centaur L4");
+
+                        /*@
+                         * @errortype
+                         * @reasoncode  ISTEP_DECONFIGURE_L4_FAILED
+                         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                         * @moduleid    ISTEP_MSS_GETECID
+                         * @userdata1   bytes 0-1: plid identifying first error
+                         *              bytes 2-3: reason code of first error
+                         * @userdata2   bytes 0-1: total number of elogs included
+                         *              bytes 2-3: N/A
+                         * @devdesc     call to deconfigure Centaur L4 failed
+                         *              see error log in the user details section for
+                         *              additional details.
+                         */
+                        l_StepError.addErrorDetails(ISTEP_DECONFIGURE_L4_FAILED,
+                                                    ISTEP_MSS_GETECID,
+                                                    l_err);
+                        errlCommit(l_err, HWPF_COMP_ID);
+                        break;
+                    }
                 }
             }
-
-            l_pCentaur->setAttr<TARGETING::ATTR_MSS_CACHE_ENABLE>(
-                                                                l_cache_enable);
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_mss_getecid: Centaur L4 good, not deconfiguring");
+            }
         }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

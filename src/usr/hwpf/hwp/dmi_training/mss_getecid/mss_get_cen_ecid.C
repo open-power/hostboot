@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.C,v 1.18 2013/03/27 13:20:55 bellows Exp $
+// $Id: mss_get_cen_ecid.C,v 1.22 2013/06/18 22:03:57 mjjones Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,6 +39,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.21  | bellows  |14-JUN-13| ECBIT added for case when we can trust the cache enable
+//   1.20  | bellows  |22-MAY-13| Bluewaterfall matching actual ECID definition
+//   1.19  | bellows  |15-MAY-13| Added Bluewaterfall handling
 //   1.18  | bellows  |27-MAR-13| Fixes to rc handling from reviewer comments
 //   1.17  | bellows  |26-MAR-13| Additional reviewer comments
 //   1.16  | bellows  |26-MAR-13| Cleanup because of Firmware Gerrit Review Comments
@@ -77,130 +80,207 @@ fapi::ReturnCode mss_get_cen_ecid(
     )
 {
     // return code
-    fapi::ReturnCode rc;
-    uint64_t data[2];
-    uint32_t rc_ecmd;
+  fapi::ReturnCode rc;
+  uint64_t data[2];
+  uint32_t rc_ecmd;
     // mark HWP entry
 
-    ecmdDataBufferBase scom(64);
-    FAPI_IMP("Entering mss_get_cen_ecid....");
-    rc = fapiGetScom( i_target, ECID_PART_0_0x00010000, scom );
-    if (rc)
-    {
-        FAPI_ERR("mss_get_cen_ecid: could not read scom address 0x00010000" );
-        return rc;
-    }
-    scom.reverse();
-    data[0] = scom.getDoubleWord(0);
+  ecmdDataBufferBase scom(64);
+  FAPI_IMP("Entering mss_get_cen_ecid....");
+  rc = fapiGetScom( i_target, ECID_PART_0_0x00010000, scom );
+  if (rc)
+  {
+    FAPI_ERR("mss_get_cen_ecid: could not read scom address 0x00010000" );
+    return rc;
+  }
+  scom.reverse();
+  data[0] = scom.getDoubleWord(0);
     //gets the second part of the ecid and sets the attribute
-    rc = fapiGetScom( i_target, ECID_PART_1_0x00010001, scom );
-    if (rc)
-    {
-        FAPI_ERR("mss_get_cen_ecid: could not read scom address 0x00010001" );
-        return rc;
-    }
-    scom.reverse();
-    data[1] = scom.getDoubleWord(0);
-    rc = FAPI_ATTR_SET(ATTR_ECID, &i_target, data);
-    if (rc)
-    {
-        FAPI_ERR("mss_get_cen_ecid: set ATTR_ECID" );
-        return rc;
-    }
+  rc = fapiGetScom( i_target, ECID_PART_1_0x00010001, scom );
+  if (rc)
+  {
+    FAPI_ERR("mss_get_cen_ecid: could not read scom address 0x00010001" );
+    return rc;
+  }
+  scom.reverse();
+  data[1] = scom.getDoubleWord(0);
+  rc = FAPI_ATTR_SET(ATTR_ECID, &i_target, data);
+  if (rc)
+  {
+    FAPI_ERR("mss_get_cen_ecid: set ATTR_ECID" );
+    return rc;
+  }
 
     //get bit128
-    uint8_t bit128=0;
-    rc_ecmd = scom.extract(&bit128,63,1);
-    bit128 = bit128 >> 7;
+  uint8_t bit128=0;
+  rc_ecmd = scom.extract(&bit128,63,1);
+  bit128 = bit128 >> 7;
+  if(rc_ecmd) {
+    FAPI_ERR("mss_get_cen_ecid: could not extract cache data_valid bit" );
+    rc.setEcmdError(rc_ecmd);
+    return rc;
+  }
+
+  if(bit128 == 1) { // Cache enable bit is valid
+
+    //gets bits 113 and 114 to determine the state of the cache
+    uint8_t bit113_114=0;
+    rc_ecmd = scom.extract(&bit113_114,48,2);
+    bit113_114 = bit113_114 >> 6;
+    uint8_t t;
     if(rc_ecmd) {
-      FAPI_ERR("mss_get_cen_ecid: could not extract cache data_valid bit" );
+      FAPI_ERR("mss_get_cen_ecid: could not extract cache data" );
       rc.setEcmdError(rc_ecmd);
       return rc;
     }
+    //determines the state of the cache
+    if(bit113_114 == 0) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON;
+    else if(bit113_114 == 1) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A;
+    else if(bit113_114 == 2) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B;
+    else t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
 
-    if(bit128 == 1) { // Cache enable bit is valid
+    // Centaur DD1.X chips have an ECBIT in bit127, if this is zero then the
+    // cache enable bits are in an unknown state. DD2.X chips and higher do not
+    // have an ECBIT. The decision to look at the ECBIT is done with a Chip EC
+    // Feature Attribute - the attribute XML can be easily tweaked if it is
+    // found that other DD levels also have an ECBIT.
+    // Centaur | DataValid | ECBIT  | Return Value   | Firmware Action | Cronus Action**|
+    // 1.*     | 0         | 0 or 1 | DIS            | DIS             | DIS            |
+    // 1.*     | 1         | 0      | Unk ENA/DIS/A/B| DIS             | ENA/DIS/A/B    |
+    // 1.*     | 1         | 1      | ENA/DIS/A/B    | ENA/DIS*        | ENA/DIS/A/B    |
+    // != 1.*  | 0         | N/A    | DIS            | DIS             | DIS            |
+    // != 1.*  | 1         | N/A    | ENA/DIS/A/B    | ENA/DIS         | ENA/DIS/A/B    |
+    // 
+    // * firmware can suport paritial cache if it wants to for DD1.* (e.g. DD1.0 DD1.01, DD1.1 etc)
+    //    However, if it chooses to, it should still make all Unk ones disabled
+    // ** Cronus Action - cronus and all fapi procedures only support the original defintion of ENA/DIS/A/B
+    //    Cronus actually uses its config file for the 4 values and checks the hardware via the get_cen_ecid
+    //    procedure during step 11 to make sure the end user does not enable a disable cache
+    //    Under cronus, the Unk information is only printed to the screen
+    uint8_t l_checkL4CacheEnableUnknown = 0;
+    rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_CHECK_L4_CACHE_ENABLE_UNKNOWN,
+                       &i_target, l_checkL4CacheEnableUnknown);
+    if (!rc.ok()) {
+      FAPI_ERR("mss_get_cen_ecid: could not get CHECK_L4_CACHE_ENABLE_VALIDITY attr" );
+      return rc;
+    }
 
-    //gets bits 113 and 114 to determine the state of the cache
-      uint8_t bit113_114=0;
-      rc_ecmd = scom.extract(&bit113_114,48,2);
-      bit113_114 = bit113_114 >> 6;
-      uint8_t t;
+    if (l_checkL4CacheEnableUnknown)
+    {
+      uint8_t bit127 = 0;
+      rc_ecmd = scom.extract(&bit127,62,1);
+      bit127 = bit127 >> 7;
       if(rc_ecmd) {
-        FAPI_ERR("mss_get_cen_ecid: could not extract cache data" );
+        FAPI_ERR("mss_get_cen_ecid: could not extract ECBIT bit" );
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
-    //determines the state of the cache
-      if(bit113_114 == 0) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON;
-      else if(bit113_114 == 1) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A;
-      else if(bit113_114 == 2) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B;
-      else t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
-      o_cache_enable = t;
+      if(bit127 == 0) {
+        FAPI_INF("mss_get_cen_ecid: Cache Enable Bits are in Unknown State");
+        if(bit113_114 == 0) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_ON;
+        else if(bit113_114 == 1) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_A;
+        else if(bit113_114 == 2) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_B;
+        else t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_OFF;
+      }
+      else
+      {
+        FAPI_INF("mss_get_cen_ecid: Cache Enable Bits are in Known State");
+      }
     }
-    else {
-      FAPI_INF("Cache Dissbled because eDRAM data bits are assumed to be bad");
-      o_cache_enable = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
-    }
+
+    o_cache_enable = t;
+  }
+  else {
+    FAPI_INF("Cache Disbled because eDRAM data bits are assumed to be bad");
+    o_cache_enable = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
+  }
 
     //reads in the ECID info for whether a DDR port side is good or bad
-    rc_ecmd = scom.extract(&o_ddr_port_status,50,2);
-    o_ddr_port_status = o_ddr_port_status >> 6;
-    if(rc_ecmd) {
-       FAPI_ERR("mss_get_cen_ecid: could not extract DDR status data" );
-       rc.setEcmdError(rc_ecmd);
-       return rc;
-    }
+  rc_ecmd = scom.extract(&o_ddr_port_status,50,2);
+  o_ddr_port_status = o_ddr_port_status >> 6;
+  if(rc_ecmd) {
+    FAPI_ERR("mss_get_cen_ecid: could not extract DDR status data" );
+    rc.setEcmdError(rc_ecmd);
+    return rc;
+  }
 
      //116..123         average PSRO from 85C wafer test
-    uint8_t bit117_124=0;
-    rc_ecmd = scom.extract(&bit117_124,52,8);
-    if(rc_ecmd) {
-       FAPI_ERR("mss_get_cen_ecid: could not extract PSRO" );
-       rc.setEcmdError(rc_ecmd);
-       return rc;
-    }
-    rc = FAPI_ATTR_SET(ATTR_MSS_PSRO, &i_target, bit117_124);
-    if (!rc.ok()) {
-       FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_PSRO" );
-       return rc;
-    }
+  uint8_t bit117_124=0;
+  rc_ecmd = scom.extract(&bit117_124,52,8);
+  if(rc_ecmd) {
+    FAPI_ERR("mss_get_cen_ecid: could not extract PSRO" );
+    rc.setEcmdError(rc_ecmd);
+    return rc;
+  }
+  rc = FAPI_ATTR_SET(ATTR_MSS_PSRO, &i_target, bit117_124);
+  if (!rc.ok()) {
+    FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_PSRO" );
+    return rc;
+  }
 
     // read the bit in the ecid to see if we are a DD1.01
    // Bit 124 DD1.01  Indicator Bit. Set to '1' for DD1.01 devices
-    uint8_t bit125 =0;
-    rc_ecmd = scom.extract(&bit125,60,1);
-    bit125 = bit125 >> 7;
-    if(rc_ecmd) {
-       FAPI_ERR("mss_get_cen_ecid: could not extract dd1.01 indicator bit" );
-       rc.setEcmdError(rc_ecmd);
-       return rc;
-    }
-    o_centaur_sub_revision=bit125;
+  uint8_t bit125 =0;
+  rc_ecmd = scom.extract(&bit125,60,1);
+  bit125 = bit125 >> 7;
+  if(rc_ecmd) {
+    FAPI_ERR("mss_get_cen_ecid: could not extract dd1.01 indicator bit" );
+    rc.setEcmdError(rc_ecmd);
+    return rc;
+  }
+  o_centaur_sub_revision=bit125;
     // The ecid contains the chip's subrevision, changes in the subrevision should not
     // change firmware behavior but for the exceptions, update attributes to indicate
     // those behaviors
-    uint8_t ec;
-    uint8_t l_nwell_misplacement = 0;
-    rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, ec);
-    if (!rc.ok()) {
-       FAPI_ERR("mss_get_cen_ecid: could not GET PRIVILEGED ATTR_EC" );
-       return rc;
-    }
-    if ((ec == 0x10) && (o_centaur_sub_revision < 1))
-    {
+  uint8_t ec;
+  uint8_t l_nwell_misplacement = 0;
+  rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, ec);
+  if (!rc.ok()) {
+    FAPI_ERR("mss_get_cen_ecid: could not GET PRIVILEGED ATTR_EC" );
+    return rc;
+  }
+  if ((ec == 0x10) && (o_centaur_sub_revision < 1))
+  {
   // For DD1.00, the transistor misplaced in the nwell needs some setting adjustments to get it to function
   // after DD1.00, we no longer need to make that adjustment
-       l_nwell_misplacement = 1;
+    l_nwell_misplacement = 1;
+  }
+
+  uint8_t bit126 =0;
+  rc_ecmd = scom.extract(&bit126,61,1);
+  bit126 = bit126 >> 7;
+  if(rc_ecmd) {
+    FAPI_ERR("mss_get_cen_ecid: could not extract dd1.03 indicator bit" );
+    rc.setEcmdError(rc_ecmd);
+    return rc;
+  }
+  uint8_t l_bluewaterfall_broken = 0;
+  if (ec == 0x10) {
+    if(bit126 == 0)
+    {
+  // on and after DD1.03, we no longer need to make adjustments due to the bluewaterfall - this is before
+      l_bluewaterfall_broken = 1;
     }
-    rc = FAPI_ATTR_SET(ATTR_MSS_NWELL_MISPLACEMENT, &i_target, l_nwell_misplacement);
-    if (!rc.ok()) {
-       FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_NWELL_MISPLACEMENT" );
-       return rc;
+    else {
+      l_nwell_misplacement = 0; // Assume if the bluewaterfall is fixed, then the nwell is also fixed
     }
+  }
+  rc = FAPI_ATTR_SET(ATTR_MSS_BLUEWATERFALL_BROKEN, &i_target, l_bluewaterfall_broken);
+  if (!rc.ok()) {
+    FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_BLUEWATERFALL_BROKEN" );
+    return rc;
+  }
+
+  // we have to look at both the bluewaterfall and the n-well misplacement to determine the proper valuse of the n-well
+  rc = FAPI_ATTR_SET(ATTR_MSS_NWELL_MISPLACEMENT, &i_target, l_nwell_misplacement);
+  if (!rc.ok()) {
+    FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_NWELL_MISPLACEMENT" );
+    return rc;
+  }
 
    // mark HWP exit
-    FAPI_IMP("Exiting mss_get_cen_ecid....");
-    return rc;
+  FAPI_IMP("Exiting mss_get_cen_ecid....");
+  return rc;
 }
 
 } // extern "C"
