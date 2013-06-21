@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.155 2013/06/13 13:22:10 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.157 2013/06/21 15:17:24 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -797,13 +797,14 @@ CONST_UINT64_T( PSI_HB_FIR_OR_0x02010902              , ULL(0x02010902) );
 //------------------------------------------------------------------------------
 //      HCA
 //------------------------------------------------------------------------------
-
 CONST_UINT64_T( HCA_EN_FIR_AND_0x02010941             , ULL(0x02010941) );
+CONST_UINT64_T( HCA_EN_BAR_0x0201094A                 , ULL(0x0201094A) );
+CONST_UINT64_T( HCA_EN_MIRROR_BAR_0x02010953          , ULL(0x02010953) );
 CONST_UINT64_T( HCA_MODE_0x0201094F                   , ULL(0x0201094F) );
 
 CONST_UINT64_T( HCA_EN_EHHCA_FIR_AND_0x02010981       , ULL(0x02010981) );
-CONST_UINT64_T( HCA_BAR_0x0201098A                    , ULL(0x0201098A) );
-CONST_UINT64_T( HCA_MIRROR_BAR_0x02010993             , ULL(0x02010993) );
+CONST_UINT64_T( HCA_EH_BAR_0x0201098A                 , ULL(0x0201098A) );
+CONST_UINT64_T( HCA_EH_MIRROR_BAR_0x02010993          , ULL(0x02010993) );
 
 //------------------------------------------------------------------------------
 //     INTERRUPT CONTROL PRESENTER  (ICP)
@@ -1733,6 +1734,10 @@ CONST_UINT64_T( EX_THERM_CONTROL_REG_0x10050012       , ULL(0x10050012) );
 CONST_UINT64_T( EX_THERM_ERR_STATUS_REG_0x10050013    , ULL(0x10050013) ); 
 CONST_UINT64_T( EX_CPM_CONFIG_WRITE_REG0_0x10050000   , ULL(0x10050000) );
 CONST_UINT64_T( EX_CPM_CONFIG_WRITE_REG1_0x10050001   , ULL(0x10050001) );
+CONST_UINT64_T( EX_CPM_RAW_RESULT0_10050005           , ULL(0x10050005) );
+CONST_UINT64_T( EX_CPM_RAW_RESULT1_10050006           , ULL(0x10050006) );
+CONST_UINT64_T( EX_CPM_ENCODED_RESULT0_10050008       , ULL(0x10050008) );
+CONST_UINT64_T( EX_CPM_ENCODED_RESULT1_10050009       , ULL(0x10050009) );
 
 //------------------------------------------------------------------------------
 //      EX Security
@@ -1898,6 +1903,7 @@ CONST_UINT64_T( EX_PCBS_PSTATE_TABLE_CTRL_REG_0x100F015E                        
 CONST_UINT64_T( EX_PCBS_PSTATE_TABLE_REG_0x100F015F                                 , ULL(0x100F015F) );
 CONST_UINT64_T( EX_PCBS_Pstate_Step_Target_Register_0x100F0160                      , ULL(0x100F0160) );
 CONST_UINT64_T( EX_PCBS_iVRM_VID_Control_Reg0_0x100F0162                            , ULL(0x100F0162) );
+CONST_UINT64_T( EX_PCBS_DPLL_STATUS_REG_100F0161                                    , ULL(0x100F0161) );
 CONST_UINT64_T( EX_PCBS_iVRM_VID_Control_Reg1_0x100F0163                            , ULL(0x100F0163) );
 CONST_UINT64_T( EX_PCBS_OCC_Heartbeat_Reg_0x100F0164                                , ULL(0x100F0164) );
 CONST_UINT64_T( EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165                      , ULL(0x100F0165) );
@@ -1949,6 +1955,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.157  2013/06/21 15:17:24  jmcgill
+support HCA EN/EH BAR and Range registers
+
+Revision 1.156  2013/06/20 16:10:16  campisan
+Added SCOM addresses for CPM calibration code not previously defined.
+
 Revision 1.155  2013/06/13 13:22:10  jmcgill
 add HCA BAR and Range registers
 

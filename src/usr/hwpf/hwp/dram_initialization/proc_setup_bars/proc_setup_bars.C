@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.14 2013/06/13 13:21:40 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.15 2013/06/21 15:13:44 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -2292,8 +2292,10 @@ fapi::ReturnCode proc_setup_bars_pcie_write_io_bar_regs(
 //   NX Nodal Mirrored BAR                    (NX_NODAL_BAR1_0x02013096)
 //
 // HCA
-//   HCA BAR and Range Register               (HCA_BAR_0x0201098A)
-//   HCA Mirror BAR and Range Register        (HCA_MIRROR_BAR_0x02010993)
+//   HCA EN BAR and Range Register            (HCA_EN_BAR_0x0201094A)
+//   HCA EN Mirror BAR and Range Register     (HCA_EN_MIRROR_BAR_0x02010953)
+//   HCA EH BAR and Range Register            (HCA_EH_BAR_0x0201098A)
+//   HCA EH Mirror BAR and Range Register     (HCA_EH_MIRROR_BAR_0x02010993)
 //
 // MCD
 //   MCD Configuration 0 (Non-Mirrored)       (MCD_CN00_0x0201340C)
@@ -2513,10 +2515,22 @@ proc_setup_bars_write_local_chip_region_bars(
         // HCA (non-mirrored)
         if (i_smp_chip.non_mirrored_range.enabled)
         {
-            FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing HCA BAR and Range (Non-Mirrored) register");
+            FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing HCA EN BAR and Range (Non-Mirrored) register");
             rc = proc_setup_bars_common_write_bar_reg(
                 i_smp_chip.chip->this_chip,
-                HCA_BAR_0x0201098A,
+                HCA_EN_BAR_0x0201094A,
+                hca_nm_bar_reg_def,
+                i_smp_chip.non_mirrored_range);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                break;
+            }
+
+            FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing HCA EH BAR and Range (Non-Mirrored) register");
+            rc = proc_setup_bars_common_write_bar_reg(
+                i_smp_chip.chip->this_chip,
+                HCA_EH_BAR_0x0201098A,
                 hca_nm_bar_reg_def,
                 i_smp_chip.non_mirrored_range);
             if (!rc.ok())
@@ -2529,10 +2543,22 @@ proc_setup_bars_write_local_chip_region_bars(
         // HCA (mirrored)
         if (i_smp_chip.mirrored_range.enabled)
         {
-            FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing HCA Mirror BAR and Range (Mirrored) register");
+            FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing HCA EN Mirror BAR and Range (Mirrored) register");
             rc = proc_setup_bars_common_write_bar_reg(
                 i_smp_chip.chip->this_chip,
-                HCA_MIRROR_BAR_0x02010993,
+                HCA_EN_MIRROR_BAR_0x02010953,
+                hca_m_bar_reg_def,
+                i_smp_chip.mirrored_range);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                break;
+            }
+
+            FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing HCA EH Mirror BAR and Range (Mirrored) register");
+            rc = proc_setup_bars_common_write_bar_reg(
+                i_smp_chip.chip->this_chip,
+                HCA_EH_MIRROR_BAR_0x02010993,
                 hca_m_bar_reg_def,
                 i_smp_chip.mirrored_range);
             if (!rc.ok())
