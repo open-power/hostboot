@@ -46,9 +46,9 @@ VALID_TARGETS = fsp vpo tools
 # Format is <source file>:<comma separated targets>
 #
 COPY_FILES = \
-    src/build/tools/hb-parsedump.pl:tools,vpo \
     src/build/debug/hb-dump-debug:tools,vpo \
     src/build/debug/vpo-debug-framework.pl:vpo \
+    src/build/debug/fsp-memdump.sh:tools,vpo \
     src/build/vpo/hb-dump:vpo \
     src/build/vpo/hb-istep:vpo \
     src/build/vpo/hb-virtdebug.pl:vpo \
@@ -199,7 +199,8 @@ fsp.tar_CONTENTS = \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/hbfwSrcParse*.C)) \
     $(addsuffix :plugins/,\
-        $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*))
+        $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*)) \
+    src/build/debug/fsp-memdump.sh:src/build/debug/
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

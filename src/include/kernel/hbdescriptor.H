@@ -28,6 +28,8 @@
 #ifndef __KERNEL_HBDESCRIPTOR_H
 #define __KERNEL_HBDESCRIPTOR_H
 
+#include <stdint.h>
+
 struct HB_TI_DataArea;
 
 namespace KernelIpc { struct ipc_data_area_t; };
@@ -36,6 +38,7 @@ struct HB_Descriptor
 {
      HB_TI_DataArea *TI_DataAreaPtr;  // ptr to the TI data area structure
      KernelIpc::ipc_data_area_t *IPC_DataAreaPtr; // ptr to the IPC data area
+     uint64_t kernelMemoryState;
 };
 
 #endif /* __KERNEL_HBDESCRIPTOR_H */

@@ -35,10 +35,12 @@
 #include <kernel/vmmmgr.H>              // INITIAL_MEM_SIZE
 #include <kernel/memstate.H>
 #include <kernel/intmsghandler.H>
+#include <kernel/hbdescriptor.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t) NO_RETURN;
 
+extern HB_Descriptor kernel_hbDescriptor;
 
 namespace KernelMisc
 {
@@ -438,7 +440,6 @@ namespace KernelMisc
 
 namespace KernelMemState
 {
-
     void setMemScratchReg(MemLocation i_location,
                          MemSize i_size)
     {
@@ -448,11 +449,12 @@ namespace KernelMemState
         l_MemData.reserved = 0;
         l_MemData.memSize = i_size;
 
+        isync();
+        kernel_hbDescriptor.kernelMemoryState = l_MemData.Scratch6Data;
         KernelMisc::updateScratchReg(MMIO_SCRATCH_MEMORY_STATE,
                                    l_MemData.Scratch6Data);
+        lwsync();
 
     }
-
-
 
 };

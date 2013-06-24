@@ -41,7 +41,8 @@ HB_TI_DataArea kernel_TIDataArea;
 HB_Descriptor kernel_hbDescriptor =
 {
     &kernel_TIDataArea,
-    &KernelIpc::ipc_data_area
+    &KernelIpc::ipc_data_area,
+    0
 };
 
 

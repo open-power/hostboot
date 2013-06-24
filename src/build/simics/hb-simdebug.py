@@ -29,39 +29,6 @@ import datetime
 import commands     ## getoutput, getstatusoutput
 import random
 
-#------------------------------------------------------------------------------
-# Function to dump L3
-#------------------------------------------------------------------------------
-def dumpL3():
-
-    # "constants"
-    L3_SIZE = 0x800000
-    FULL_MEM_SIZE = 32*1024*1024  # 32 MB
-
-    print
-
-    # Get a timestamp on when dump was collected
-    t = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-
-    # Get memory object.
-    mem = conf.system_cmp0.phys_mem.map[0][1];
-    if 'l3_cache_ram' in mem.name:
-        offset = 0
-        size = L3_SIZE
-    else:
-        offset = getHRMOR()
-        size = FULL_MEM_SIZE
-
-    #dump L3 to hbdump.<timestamp>
-    string = "(system_cmp0.phys_mem)->map[0][1]->image.save hbdump.%s 0x%x 0x%x"%(t, offset, size)
-    #print string
-    result = run_command(string)
-    #print result
-
-    print "HostBoot dump saved to %s/hbdump.%s"%(os.getcwd(),t)
-
-    return
-
 #===============================================================================
 #   HOSTBOOT Commands
 #===============================================================================
@@ -117,17 +84,13 @@ Examples: \n
 
 #------------------------------------------------
 #------------------------------------------------
-def hb_dump():
-    dumpL3()
-    return None
-
 new_command("hb-dump",
-    hb_dump,
+    lambda: run_hb_debug_framework("Dump", outputFile = "hb-dump.output"),
     #alias = "hbt",
     type = ["hostboot-commands"],
     #see_also = ["hb-trace"],
     see_also = [ ],
-    short = "Dumps L3 to hbdump.<timestamp>",
+    short = "Dumps HB memory to hbdump.<timestamp>",
     doc = """
 Parameters: \n
 

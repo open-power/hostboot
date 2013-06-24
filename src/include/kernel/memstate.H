@@ -53,6 +53,7 @@ namespace KernelMemState
           MEM_CONTAINED_MS  = 0x40,
     };
 
+    // This constants must be kept in sync with the Dump.pm debug tool.
     enum MemSize
     {
           NO_MEM          =  0x0,
@@ -74,7 +75,7 @@ namespace KernelMemState
                 uint64_t memSize:32;    /**< Size of the memory */
             };
             uint64_t Scratch6Data;      /**< Full double word */
-        }; 
+        };
    };
 
     /** @fn set

@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -577,7 +577,7 @@ if ($dumpAll)
     if (-s "$hbDumpFile")
     {
         print "\nHostBoot dump saved to $hbDumpFile.\n";
-        print "Use hb-parsedump.pl program to parse the dump.\n";
+        print "Use the hb-dump-debug program to parse the dump.\n";
     }
     else
     {
@@ -799,7 +799,7 @@ sub printUsage()
     print ("                  [-k#] [-n#] [-s#] [-p#] [-c#]\n\n");
     print ("  This program retrieves the user requested data from L3.\n");
     print ("  If no options are specified, this program will dump the entire L3 to a file.\n");
-    print ("  Use the hb-parsedump.pl program to expand and view data in the file.\n\n");
+    print ("  Use the hb-dump-debug program to expand and view data in the file.\n\n");
     print ("  User should copy the relevant .syms file, hbotStringFile & errlparser\n");
     print ("  to the current directory or set the env variable HB_IMGDIR to the path\n");
     print ("  of the files.\n\n");

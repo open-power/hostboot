@@ -356,7 +356,7 @@ $(TARGET_DIR)/$(1)$(call __ODE_REMAKE_TARGET, $(2)) : \
 	@$$(call EXECUTE_IN_SANDBOX,\
 	    mkdir -p $(firstword $(subst :, ,$(2))) && \
 	    cd $(firstword $(subst :, ,$(2))) && \
-	    mk -O1 -a $(subst NOTARGET,,$(word 2, $(subst :, ,$(2)))),\
+	    mk -O1 -j8 -a $(subst NOTARGET,,$(word 2, $(subst :, ,$(2)))),\
 	    $(word 3, $(subst :, ,$(2))))
 	@touch $$@
 endef
