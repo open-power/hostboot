@@ -334,18 +334,18 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     "both have the same 1 path element");
         }
 
-        l_defaultPath.addLast(TYPE_MBA,1).addLast(TYPE_MBS,2);
+        l_defaultPath.addLast(TYPE_MBA,1).addLast(TYPE_L4,2);
         if(l_defaultPath.size() != 3)
         {
             TARG_TS_FAIL("Default entity path should have had two path elements"
-                    "after adding MBA1 and MBS2");
+                    "after adding MBA1 and L4");
         }
 
         if( (l_defaultPath[0].type != TYPE_PROC)
             || (l_defaultPath[0].instance != 0)
             || (l_defaultPath[1].type != TYPE_MBA)
             || (l_defaultPath[1].instance != 1)
-            || (l_defaultPath[2].type != TYPE_MBS)
+            || (l_defaultPath[2].type != TYPE_L4)
             || (l_defaultPath[2].instance != 2))
         {
             TARG_TS_FAIL("Default entity path should have had correct 3 path "
@@ -356,7 +356,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         if(l_defaultPath.size() != 2)
         {
             TARG_TS_FAIL("Default entity path should have had two path elements"
-                    "after removing MBS2");
+                    "after removing L4");
         }
 
         if( (l_defaultPath[0].type != TYPE_PROC)
@@ -368,10 +368,11 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     "elements");
         }
 
-        l_nonDefaultPath.addLast(TYPE_MBA,1).addLast(TYPE_MBS,2);
+
+        l_nonDefaultPath.addLast(TYPE_MBA,1).addLast(TYPE_L4,2);
 
         // Default now has proc/mba/
-        // Non-default now has proc/mba/mbs
+        // Non-default now has proc/mba/l4
         if(l_defaultPath == l_nonDefaultPath)
         {
             TARG_TS_FAIL("Default entity path should NOT have been equal to "
@@ -1565,7 +1566,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             targetService().end(),
             &l_procChip);
 
-        PredicateCTM l_mbs(CLASS_UNIT,TYPE_MBS);
+        PredicateCTM l_memBuf(CLASS_UNIT,TYPE_MEMBUF);
         uint32_t l_count = 0;
         uint32_t l_procs = 0;
 
@@ -1580,7 +1581,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                 *l_filter,
                 TARGETING::TargetService::CHILD_BY_AFFINITY,
                 TARGETING::TargetService::ALL,
-                &l_mbs);
+                &l_memBuf);
             l_count += l_list.size();
         }
 

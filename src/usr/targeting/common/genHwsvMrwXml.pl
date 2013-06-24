@@ -2383,18 +2383,18 @@ sub generate_mba
 
     print "
 <targetInstance>
-    <id>sys${sys}node${node}membuf${ctaur}mbs0mba$mba</id>
+    <id>sys${sys}node${node}membuf${ctaur}mba$mba</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/membuf-$ctaur/mbs-0/"
+        <default>physical:sys-$sys/node-$node/membuf-$ctaur/"
             . "mba-$mba</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$ctaur/mbs-0/mba-$mba</default>
+            . "membuf-$ctaur/mba-$mba</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2468,7 +2468,7 @@ sub generate_dimm
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$pos/mbs-0/mba-$x/dimm-$zz</default>
+            . "membuf-$pos/mba-$x/dimm-$zz</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>

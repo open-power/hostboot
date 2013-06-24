@@ -55,11 +55,6 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
-                      TARGETING::TYPE_MBS,
-                      scomTranslate);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                      DeviceFW::SCOM,
                       TARGETING::TYPE_MBA,
                       scomTranslate);
 
@@ -411,20 +406,6 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                 l_invalidAddr = true;
             }
 
-
-        }
-        else if (l_type == TARGETING::TYPE_MBS)
-        {
-            // MBS
-            //  Mask 		: NA
-            //  Range 1	: 0x02010000 - 0x0201FFFF
-            //  default>physical:sys-0/node-0/membuf-10/mbs-0</default>
-
-            // NO address shifting required.. no mask..
-            // just get parent.
-            l_err = scomfindParentTarget(epath,
-                                         TARGETING::TYPE_MEMBUF,
-                                         i_target);
 
         }
         else if (l_type == TARGETING::TYPE_MBA)

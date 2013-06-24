@@ -95,8 +95,6 @@ const epath_array EPATH_ARRAY_MAP[] =
     {"MEMBUF{5}", {TYPE_MEMBUF, 5}},
     {"MEMBUF{6}", {TYPE_MEMBUF, 6}},
     {"MEMBUF{7}", {TYPE_MEMBUF, 7}},
-    {"MBS{0}", {TYPE_MBS, 0}},
-    {"MBS{1}", {TYPE_MBS, 1}},
     {"MBA{0}", {TYPE_MBA, 0}},
     {"MBA{1}", {TYPE_MBA, 1}},
 };

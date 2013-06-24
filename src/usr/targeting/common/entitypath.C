@@ -312,8 +312,6 @@ const char* EntityPath::pathElementTypeAsString(
             return "L2";
         case TYPE_MCS:
             return "MCS";
-        case TYPE_MBS:
-            return "MBS";
         case TYPE_MBA:
             return "MBA";
         case TYPE_L3:

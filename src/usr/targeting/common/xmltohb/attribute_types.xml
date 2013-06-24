@@ -127,10 +127,6 @@
         <value>11</value>
     </enumerator>
     <enumerator>
-        <name>MBS</name>
-        <value>12</value>
-    </enumerator>
-    <enumerator>
         <name>MBA</name>
         <value>13</value>
     </enumerator>

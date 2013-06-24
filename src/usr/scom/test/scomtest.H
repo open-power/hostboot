@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -1089,7 +1089,6 @@ public:
       // Setup some targets to use
       enum {
           myMembuf0,
-          myMBS,
           myMBA0,
           myMBA1,
           NUM_TARGETS
@@ -1121,15 +1120,12 @@ public:
 
       if(scom_targets[myMembuf0] != NULL)
       {
-          // add MBS target.
-          epath.addLast(TARGETING::TYPE_MBS,0);
-          scom_targets[myMBS] = TARGETING::targetService().toTarget(epath);
 
           // add MBA0 target.
           epath.addLast(TARGETING::TYPE_MBA,0);
           scom_targets[myMBA0] = TARGETING::targetService().toTarget(epath);
 
-          // remote MBA0 target (off of sys-0/node-0/membuf-0/MBS-0/MBA0)
+          // remote MBA0 target (off of sys-0/node-0/membuf-0/MBA0)
           epath.removeLast();
 
           // Add MBA1 to the path and  create new target
@@ -1148,9 +1144,8 @@ public:
           { scom_targets[myMBA1], 0x03010655, 0x333333334444EEEE},
           { scom_targets[myMBA0], 0x8000C0140301143F,0x1111111111111212},
           { scom_targets[myMBA1], 0x8000C0140301143F, 0x333333334444abcd},
-          { scom_targets[myMBS],  0x02011417, 0x123123123123FFFF},
           { scom_targets[myMBA0], 0x8000C0140301183F,0x111111111111ccee}, // invalid non zero indirect address
-	  { scom_targets[myMBA0], 0x03010E55, 0x010101010101CCCC},  // invalid passing in a non-0 unit address
+	      { scom_targets[myMBA0], 0x03010E55, 0x010101010101CCCC},  // invalid passing in a non-0 unit address
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
