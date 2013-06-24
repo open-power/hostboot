@@ -57,11 +57,11 @@ bool retrieveTarget(uint8_t * & io_uData,
     {
         // convert the EntityPath to a Target pointer
         TARGETING::EntityPath ep, *ep_ptr;
-        uint32_t size;
         ep_ptr = (TARGETING::EntityPath *)io_uData;
-        size = TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep_ptr->size();
-        size *= sizeof(TARGETING::EntityPath::PathElement);
-        size = sizeof(ep) - size;
+        // size is total EntityPath size minus unused path elements
+        uint32_t size = sizeof(*ep_ptr) -
+                (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep_ptr->size()) *
+                    sizeof(TARGETING::EntityPath::PathElement);
         memcpy(&ep, io_uData, size);
         o_pTarget = TARGETING::targetService().toTarget(ep);
         io_uData += size;

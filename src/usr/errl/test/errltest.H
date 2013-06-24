@@ -344,21 +344,27 @@ public:
 #else
         do
         {
-            // find a proc target
-            TARGETING::PredicateCTM procChipFilter(
-                    TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC);
-            TARGETING::TargetRangeFilter pProc(
-                    TARGETING::targetService().begin(),
-                    TARGETING::targetService().end(),
-                    &procChipFilter);
+            // find some cores that we can play with
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
 
-            // find a membuf target
-            TARGETING::PredicateCTM membufChipFilter(
-                    TARGETING::CLASS_CHIP,TARGETING::TYPE_MEMBUF);
-            TARGETING::TargetRangeFilter pMembuf(
-                    TARGETING::targetService().begin(),
-                    TARGETING::targetService().end(),
-                    &membufChipFilter);
+            TARGETING::PredicateCTM predCore(TARGETING::CLASS_UNIT,
+                                                TARGETING::TYPE_CORE);
+            TARGETING::PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            TARGETING::PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predCore).push(&predFunctional).And();
+            TARGETING::TargetHandleList pCoreList;
+            TARGETING::targetService().getAssociated( pCoreList, pSys,
+                TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
+                &checkExpr );
+
+            if (pCoreList.empty())
+            {
+                TS_FAIL("testErrl3: empty pCoreList");
+                break;
+            }
+            TARGETING::TargetHandle_t pTarget = *pCoreList.begin();
 
             errlHndl_t gard_errl = NULL;
             HWAS::DeconfigGard::DeconfigureRecords_t l_deconfigRecords;
@@ -404,21 +410,20 @@ public:
                                     ERRL_TEST_REASON_CODE);
 
             // test the different callout types
-            TS_TRACE( "test callout pProc %p", *pProc);
-            ERRORLOG::ErrlUserDetailsTarget(*pProc).addToLog(errl);
+            TS_TRACE("test callout target %.8X", TARGETING::get_huid(pTarget));
+            ERRORLOG::ErrlUserDetailsTarget(pTarget).addToLog(errl);
 
-            errl->addHwCallout(*pProc,
+            errl->addHwCallout(pTarget,
                     HWAS::SRCI_PRIORITY_LOW,
                     HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_Fatal);
             deconfigCount++;
             gardCount++;
 
-            errl->addHwCallout(*pMembuf,
+            errl->addHwCallout(pTarget,
                     HWAS::SRCI_PRIORITY_MED,
                     HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_NULL);
-            deconfigCount++;
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_LOW,
@@ -430,12 +435,20 @@ public:
                     HWAS::SRCI_PRIORITY_MED,
                     HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_NULL);
-            // pProc is the same, so this doesn't get incremented.
-            // deconfigCount++;
+            deconfigCount++;
 
             errl->addProcedureCallout(
                     HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
                     HWAS::SRCI_PRIORITY_HIGH);
+
+            if (pCoreList.size() > 1)
+            {
+                errl->addBusCallout(
+                    pCoreList[0],
+                    pCoreList[1],
+                    HWAS::A_BUS_TYPE,
+                    HWAS::SRCI_PRIORITY_LOW);
+            }
 
             errlCommit(errl, CXXTEST_COMP_ID);
 

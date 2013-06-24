@@ -320,9 +320,10 @@ void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
     {   // we got a non MASTER_SENTINEL target, therefore the targeting
         // module is loaded, therefore we can make this call.
         ep1 = i_target_endp1->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        size1 = TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep1.size();
-        size1 *= sizeof(TARGETING::EntityPath::PathElement);
-        size1 = sizeof(ep1) - size1;
+        // size is total EntityPath size minus unused path elements
+        size1 = sizeof(ep1) -
+                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep1.size()) *
+                        sizeof(TARGETING::EntityPath::PathElement);
         pData1 = &ep1;
     }
 
@@ -335,9 +336,10 @@ void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
     {   // we got a non MASTER_SENTINEL target, therefore the targeting
         // module is loaded, therefore we can make this call.
         ep2 = i_target_endp2->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        size2 = TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep2.size();
-        size2 *= sizeof(TARGETING::EntityPath::PathElement);
-        size2 = sizeof(ep2) - size2;
+        // size is total EntityPath size minus unused path elements
+        size2 = sizeof(ep2) -
+                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep2.size()) *
+                        sizeof(TARGETING::EntityPath::PathElement);
         pData2 = &ep2;
     }
 
@@ -370,10 +372,14 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         TRACFCOMP(g_trac_errl, ENTER_MRK"addHwCallout(0x%.8x 0x%x 0x%x 0x%x)",
                 get_huid(i_target), i_priority,
                 i_deconfigState, i_gardErrorType);
-        TARGETING::EntityPath ep;
-        ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        TARGETING::EntityPath ep =
+                i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        // size is total EntityPath size minus unused path elements
+        uint32_t size1 = sizeof(ep) -
+                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep.size()) *
+                        sizeof(TARGETING::EntityPath::PathElement);
 
-        ErrlUserDetailsCallout(&ep, sizeof(ep),
+        ErrlUserDetailsCallout(&ep, size1,
                 i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
     }
 } // addHwCallout
@@ -384,7 +390,7 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
 void ErrlEntry::addProcedureCallout(const HWAS::epubProcedureID i_procedure,
                             const HWAS::callOutPriority i_priority)
 {
-    TRACDCOMP( g_trac_errl, ENTER_MRK"addProcedureCallout(0x%x, 0x%x)",
+    TRACFCOMP( g_trac_errl, ENTER_MRK"addProcedureCallout(0x%x, 0x%x)",
                 i_procedure, i_priority);
 
     ErrlUserDetailsCallout(i_procedure, i_priority).addToLog(this);

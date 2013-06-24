@@ -539,19 +539,37 @@ public:
                         HWAS::SRCI_PRIORITY_MED,
                         HWAS::DELAYED_DECONFIG,
                         HWAS::GARD_NULL).addToLog(errl);
-            deconfigCount++;
 
-            // find a proc target
-            PredicateCTM procChipFilter(CLASS_CHIP,TYPE_PROC);
-            TargetRangeFilter pProc(
-                targetService().begin(), targetService().end(),
-                &procChipFilter);
+            // find some cores that we can play with
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predCore).push(&predFunctional).And();
+            TargetHandleList pCoreList;
+            targetService().getAssociated( pCoreList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pCoreList.empty())
+            {
+                TS_FAIL("testCallout: empty pCoreList");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pCoreList.begin();
+
             TARGETING::EntityPath ep;
-            ep = pProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+            ep = l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
+            // size is total EntityPath size minus unused path elements
+            uint32_t ep_size = sizeof(ep) -
+                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep.size()) *
+                        sizeof(TARGETING::EntityPath::PathElement);
 
             ErrlUserDetailsCallout(
                         &ep,
-                        sizeof(ep),
+                        ep_size,
                         HWAS::SRCI_PRIORITY_LOW,
                         HWAS::DELAYED_DECONFIG,
                         HWAS::GARD_Fatal).addToLog(errl);
@@ -562,9 +580,28 @@ public:
                         HWAS::EPUB_PRC_FSI_PATH,
                         HWAS::SRCI_PRIORITY_HIGH).addToLog(errl);
 
+            if (pCoreList.size() > 1)
+            {
+                TARGETING::EntityPath ep2;
+                ep2 = pCoreList[1]->getAttr<TARGETING::ATTR_PHYS_PATH>();
+                // size is total EntityPath size minus unused path elements
+                uint32_t ep2_size = sizeof(ep2) -
+                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep2.size()) *
+                        sizeof(TARGETING::EntityPath::PathElement);
+
+                ErrlUserDetailsCallout(
+                            &ep,
+                            ep_size,
+                            &ep2,
+                            ep2_size,
+                            HWAS::A_BUS_TYPE,
+                            HWAS::SRCI_PRIORITY_LOW).addToLog(errl);
+            }
+
             // commit the errorlog
             errlCommit(errl, CXXTEST_COMP_ID);
 
+#if 0  // GARD records are created asynchronously, so can't really test this
             // confirm there are the correct number of deconfig and gard records
             gard_errl = HWAS::theDeconfigGard().getGardRecords(
                     HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_gardRecords);
@@ -578,6 +615,7 @@ public:
                 TS_FAIL("testCallout: %d GARD Records, expected %d",
                             l_gardRecords.size(), gardCount);
             }
+#endif
 
             gard_errl = HWAS::theDeconfigGard()._getDeconfigureRecords(NULL,
                     l_deconfigRecords);
