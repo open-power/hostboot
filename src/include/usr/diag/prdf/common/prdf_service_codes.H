@@ -50,7 +50,6 @@ namespace PRDF
 enum ModuleId
 {
     PRDF_MAIN                     = 0x01,
-    PRDF_HOM_HOM_TYPE             = 0x02, // FIXME: May be deprecated
     PRDF_HOM_SCOM                 = 0x03,
     PRDF_HOM_SCAN                 = 0x04,
     PRDF_SDBUG_INIT               = 0x05,

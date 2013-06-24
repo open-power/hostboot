@@ -132,7 +132,6 @@ public:
    */
   virtual ~SCAN_COMM_REGISTER_CLASS(void);
 
-  // dg00 start
   /**
    Read hardware register (virtual)
    <ul>
@@ -148,8 +147,7 @@ public:
                             then the function ForceRead() should be overridden.
    </ul><br>
    */
-  virtual uint32_t ForceRead(void) { return Read(); };
-  // dg00 end
+  virtual uint32_t ForceRead(void) const { return Read(); }
 
   /**
    Read hardware register (pure virtual)
@@ -164,7 +162,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  virtual uint32_t Read(void) = 0;
+  virtual uint32_t Read(void) const = 0;
 
   /**
    Read hardware register and apply a mask

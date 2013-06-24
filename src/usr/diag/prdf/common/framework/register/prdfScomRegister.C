@@ -120,9 +120,9 @@ BIT_STRING_CLASS & ScomRegister::AccessBitString( )
 
 }
 
-//---------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-uint32_t ScomRegister::Read( )
+uint32_t ScomRegister::Read() const
 {
     int32_t rc = SUCCESS;
     bool l_readStat = false;
@@ -137,7 +137,8 @@ uint32_t ScomRegister::Read( )
     return(rc);
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
 uint32_t ScomRegister::ForceRead() const
 {
     int32_t rc = SUCCESS;
@@ -152,6 +153,7 @@ uint32_t ScomRegister::ForceRead() const
 
     return rc;
 }
+
 //------------------------------------------------------------------------------
 
 uint32_t ScomRegister::Write()
@@ -164,7 +166,9 @@ uint32_t ScomRegister::Write()
 
     return(rc);
 }
+
 //------------------------------------------------------------------------------
+
 uint32_t ScomRegister::Access( BIT_STRING_CLASS & bs,
                                MopRegisterAccess::Operation op ) const
 {

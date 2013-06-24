@@ -56,8 +56,8 @@ class NotRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()  { return iv_child->Read();  }
-    virtual uint32_t Write() { return iv_child->Write(); }
+    virtual uint32_t Read() const { return iv_child->Read();  }
+    virtual uint32_t Write()      { return iv_child->Write(); }
 
     const BIT_STRING_CLASS * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
@@ -114,8 +114,8 @@ class LeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()  { return iv_child->Read();  }
-    virtual uint32_t Write() { return iv_child->Write(); }
+    virtual uint32_t Read() const { return iv_child->Read();  }
+    virtual uint32_t Write()      { return iv_child->Write(); }
 
     const BIT_STRING_CLASS * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
@@ -181,8 +181,8 @@ class RightShiftRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()  { return iv_child->Read();  }
-    virtual uint32_t Write() { return iv_child->Write(); }
+    virtual uint32_t Read() const { return iv_child->Read();  }
+    virtual uint32_t Write()      { return iv_child->Write(); }
 
     const BIT_STRING_CLASS * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
@@ -251,7 +251,7 @@ class AndRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()
+    virtual uint32_t Read() const
     {
         return iv_left->Read() | iv_right->Read();
     }
@@ -333,7 +333,7 @@ class OrRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()
+    virtual uint32_t Read() const
     {
         return iv_left->Read() | iv_right->Read();
     }
@@ -401,8 +401,8 @@ class NullRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read() { return 0; }
-    virtual uint32_t Write() { return 0; }
+    virtual uint32_t Read() const { return 0; }
+    virtual uint32_t Write()      { return 0; }
 
     const BIT_STRING_CLASS * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
@@ -466,7 +466,7 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()
+    virtual uint32_t Read() const
     {
         return iv_check->Read()   | iv_recov->Read() |
                iv_special->Read() | iv_proccs->Read();
@@ -558,8 +558,8 @@ class ConstantRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()   { return SUCCESS; }
-    virtual uint32_t Write() { return SUCCESS; }
+    virtual uint32_t Read() const { return SUCCESS; }
+    virtual uint32_t Write()      { return SUCCESS; }
 
     const BIT_STRING_CLASS * GetBitString(
                     ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const

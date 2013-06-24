@@ -372,7 +372,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
                             TARGETING::TYPE i_connType,
                             TARGETING::TargetService::ASSOCIATION_TYPE & o_type)
 {
-    #define PRDF_FUNC "PlatServices::getAssociationType] "
+    #define PRDF_FUNC "[PlatServices::getAssociationType] "
 
     int32_t o_rc = SUCCESS;
 
@@ -739,7 +739,7 @@ TARGETING::TargetHandle_t getParentChip( TARGETING::TargetHandle_t i_target )
             PredicateCTM l_predClass( CLASS_CHIP );
             targetService().getAssociated( l_list, i_target,
                                            TargetService::PARENT,
-                                           TargetService::IMMEDIATE,
+                                           TargetService::ALL,
                                            &l_predClass );
             if ( 1 == l_list.size() )
             {
@@ -816,7 +816,7 @@ bool checkLastFuncCore( TARGETING::TargetHandle_t i_coreTarget )
 
 uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
 {
-    #define FUNC "[getTargetPosition] "
+    #define PRDF_FUNC "[PlatServices::getTargetPosition] "
 
     uint32_t o_pos = INVALID_POSITION_BOUND;
 
@@ -832,7 +832,7 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
                 {
                     uint16_t tmpPos = 0;
                     if ( !i_target->tryGetAttr<ATTR_POSITION>(tmpPos) )
-                        PRDF_ERR( FUNC"Failed to get ATTR_POSITION" );
+                        PRDF_ERR( PRDF_FUNC"Failed to get ATTR_POSITION" );
                     else
                         o_pos = (uint32_t)tmpPos;
                     break;
@@ -843,7 +843,7 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
                     break;
 
                 default:
-                    PRDF_ERR( FUNC"Unsupported type: %d", l_type );
+                    PRDF_ERR( PRDF_FUNC"Unsupported type: %d", l_type );
             }
             break;
         }
@@ -852,7 +852,7 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
         {
             uint8_t tmpPos = 0;
             if ( !i_target->tryGetAttr<ATTR_CHIP_UNIT>(tmpPos) )
-                PRDF_ERR( FUNC"Failed to get ATTR_CHIP_UNIT" );
+                PRDF_ERR( PRDF_FUNC"Failed to get ATTR_CHIP_UNIT" );
             else
                 o_pos = (uint32_t)tmpPos;
             break;
@@ -863,15 +863,15 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
             break;
 
         default:
-            PRDF_ERR( FUNC"Unsupported class: %d", l_class );
+            PRDF_ERR( PRDF_FUNC"Unsupported class: %d", l_class );
     }
 
     if ( INVALID_POSITION_BOUND == o_pos )
     {
-        PRDF_ERR( FUNC"Failed: target=0x%08x", getHuid(i_target) );
+        PRDF_ERR( PRDF_FUNC"Failed: target=0x%08x", getHuid(i_target) );
     }
 
-    #undef FUNC
+    #undef PRDF_FUNC
 
     return o_pos;
 }
@@ -945,15 +945,14 @@ int32_t getMasterRanks( TargetHandle_t i_memTarget,
         uint8_t rankInfo[MAX_PORT_PER_MBA][MAX_DIMM_PER_PORT];
         if( !mbaTarget->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(rankInfo) )
         {
-            PRDF_ERR( "[getMasterRanks] Failed to get attribute" );
+            PRDF_ERR( PRDF_FUNC"Failed to get attribute" );
             break;
         }
 
         uint8_t rankMask = rankInfo[i_portSlct][i_dimmSlct];
         if ( 0 == (rankMask & 0xf0) )
         {
-            PRDF_ERR( "[getMasterRanks] Attribute value invalid: 0x%02x",
-                      rankMask );
+            PRDF_ERR( PRDF_FUNC"Attribute value invalid: 0x%02x", rankMask );
             break;
         }
 
@@ -971,18 +970,22 @@ int32_t getMasterRanks( TargetHandle_t i_memTarget,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( "[getMasterRanks] Failed: i_memTarget=0x%08x i_portSlct=%d "
+        PRDF_ERR( PRDF_FUNC"Failed: i_memTarget=0x%08x i_portSlct=%d "
                   "i_dimmSlct=%d",
                   getHuid(i_memTarget), i_portSlct, i_dimmSlct );
     }
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
 uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
 {
+    #define PRDF_FUNC "[PlatServices::getMemChnl] "
+
     uint32_t o_chnl = INVALID_POSITION_BOUND; // Intentially set to
                                               // INVALID_POSITION_BOUND for call
                                               // from getTargetPosition().
@@ -1004,11 +1007,13 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
 
     if ( MAX_MCS_PER_PROC <= o_chnl ) // Real MCS position check.
     {
-        PRDF_ERR( "[getMemChnl] Failed: i_memTarget=0x%08x",
+        PRDF_ERR( PRDF_FUNC"Failed: i_memTarget=0x%08x",
                   getHuid(i_memTarget) );
     }
 
     return o_chnl;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -1048,16 +1053,26 @@ int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget,
     return o_rc;
 }
 
+//------------------------------------------------------------------------------
+
 int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port )
 {
-    using namespace TARGETING;
     return i_dimmTarget->tryGetAttr<ATTR_MBA_PORT>(o_port) ? SUCCESS : FAIL;
 }
 
+//------------------------------------------------------------------------------
+
 int32_t getMbaDimm( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm )
 {
-    using namespace TARGETING;
     return i_dimmTarget->tryGetAttr<ATTR_MBA_DIMM>(o_dimm) ? SUCCESS : FAIL;
+}
+
+//------------------------------------------------------------------------------
+
+bool isDramWidthX4( TargetHandle_t i_mba )
+{
+    return ( fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4 ==
+             i_mba->getAttr<ATTR_EFF_DRAM_WIDTH>() );
 }
 
 //##############################################################################
@@ -1164,7 +1179,6 @@ TARGETING::TargetHandle_t getClockMux(TARGETING::TargetHandle_t
 // Helper function to access the state of manufacturing policy flags.
 bool isMnfgFlagSet( uint32_t i_flag )
 {
-    using namespace TARGETING;
     bool o_rc = false;
     ATTR_MNFG_FLAGS_type l_attrValue = 0;
     TargetHandle_t l_pTopTarget= NULL;
@@ -1198,19 +1212,6 @@ bool mnfgTerminate()
 
 bool areDramRepairsDisabled()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_DISABLE_DRAM_REPAIRS ); }
-
-bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget)
-{
-    using namespace TARGETING;
-    bool isDramWidthX4 = false;
-
-    if ( fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4 ==
-                        i_mbaTarget->getAttr<ATTR_EFF_DRAM_WIDTH>())
-    {
-        isDramWidthX4 = true;
-    }
-    return isDramWidthX4;
-}
 
 bool mnfgSpareDramDeploy()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_TEST_DRAM_REPAIRS ); }

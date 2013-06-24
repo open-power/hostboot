@@ -93,27 +93,32 @@ public:
      */
 
     virtual void SetBitString(const BIT_STRING_CLASS * i_bs) ;
+
     /**
      * @brief     Returns length of the bits string associated with register
      * @return    length of bit string
      */
     uint32_t GetBitLength(void) const { return iv_bitLength ;}
+
     /**
      * @brief     Directly reads from hardware register
      * @return    SUCCESS|FAIL
      */
-    virtual uint32_t ForceRead() const ;
+    virtual uint32_t ForceRead() const;
+
     /**
      * @brief     Returns contents of register.If entry does not exist in cache
      *            a  fresh entry is created and hardware is read.
      * @return    SUCCESS|FAIL
     */
-    virtual uint32_t Read( ) ;
+    virtual uint32_t Read() const;
+
     /**
      * @brief     Writes cache contents to register.
      * @return    SUCCESS|FAIL
      */
-    virtual uint32_t Write( );
+    virtual uint32_t Write();
+
     /**
      * @brief     Returns the hash id of register
      * @return    returns  hash id of register
@@ -122,12 +127,14 @@ public:
      * @note
      */
     virtual uint16_t GetId(void) const { return iv_shortId; };
+
     /**
      * @brief     Sets the hash id of register
      * @param     i_id     hash id of register
      * @return    Nil
      */
     virtual void SetId(uint16_t i_id) { iv_shortId = i_id; };
+
    /**
     * @brief    Returns type of Target associated with register.
     * @return   Refer to function description
