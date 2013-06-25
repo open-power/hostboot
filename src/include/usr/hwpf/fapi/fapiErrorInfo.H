@@ -40,6 +40,7 @@
  *                          mjjones     09/19/2012  Replace FFDC type with ID
  *                          mjjones     03/22/2013  Support Procedure Callouts
  *                          mjjones     05/20/2013  Support Bus Callouts
+ *                          mjjones     06/24/2013  Support Children CDGs
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -209,7 +210,7 @@ struct ErrorInfoCDG
     /**
      * @brief Constructor.
      *
-     * @param[in] i_target Reference to the target to callout/deconfigure/GARD
+     * @param[in] i_target      Reference to the target to c/d/g
      * @param[in] i_callout     True if Target should be called out
      * @param[in] i_deconfigure True if Target should be deconfigured
      * @param[in] i_gard        True if Target should be GARDed
@@ -223,6 +224,47 @@ struct ErrorInfoCDG
 
     // The target to callout/deconfigure/GARD
     Target iv_target;
+
+    // Callout Information
+    bool iv_callout;
+    CalloutPriorities::CalloutPriority iv_calloutPriority;
+
+    // Deconfigure Information
+    bool iv_deconfigure;
+
+    // GARD Information
+    bool iv_gard;
+};
+
+/**
+ * @struct ErrorInfoChildrenCDG
+ *
+ * This struct contains children targets to callout/deconfigure/GARD
+ */
+struct ErrorInfoChildrenCDG
+{
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] i_parentChip  Reference to the parent chip
+     * @oaram[in] i_childType   Child target types to c/d/g
+     * @param[in] i_callout     True if Target should be called out
+     * @param[in] i_deconfigure True if Target should be deconfigured
+     * @param[in] i_gard        True if Target should be GARDed
+     * @param[in] i_priority    The priority of any callout
+     */
+    ErrorInfoChildrenCDG(const Target & i_parentChip,
+                         const TargetType i_childType,
+                         const bool i_callout,
+                         const bool i_deconfigure,
+                         const bool i_gard,
+                         const CalloutPriorities::CalloutPriority i_priority);
+
+    // The parent chip
+    Target iv_parentChip;
+
+    // The child target types to c/d/g
+    TargetType iv_childType;
 
     // Callout Information
     bool iv_callout;
@@ -271,6 +313,13 @@ struct ErrorInfo
     std::vector<ErrorInfoCDG *> iv_CDGs;
     typedef std::vector<ErrorInfoCDG *>::iterator ErrorInfoCDGItr_t;
     typedef std::vector<ErrorInfoCDG *>::const_iterator ErrorInfoCDGCItr_t;
+
+    // Vector of children targets to callout/deconfigure/GARD
+    std::vector<ErrorInfoChildrenCDG *> iv_childrenCDGs;
+    typedef std::vector<ErrorInfoChildrenCDG *>::iterator
+        ErrorInfoChildrenCDGItr_t;
+    typedef std::vector<ErrorInfoChildrenCDG *>::const_iterator
+        ErrorInfoChildrenCDGCItr_t;
 };
 
 }

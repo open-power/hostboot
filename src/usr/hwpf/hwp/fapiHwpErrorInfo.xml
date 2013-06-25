@@ -78,6 +78,25 @@
             <target>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</target>
         </gard>
     -->
+    <!-- Callout MASTER_CHIP's EX chiplets MEDIUM -->
+    <!-- Commented out to avoid actually calling out chiplets in UT
+        <callout>
+            <childTargets>
+                <parent>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</parent>
+                <childType>TARGET_TYPE_EX_CHIPLET</childType>
+            </childTargets>
+            <priority>MEDIUM</priority>
+        </callout>
+    -->
+    <!-- Deconfigure MASTER_CHIP's ABUS endpoints -->
+    <!-- Commented out to avoid actually deconfiguring chiplets in UT
+        <deconfigure>
+            <childTargets>
+                <parent>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</parent>
+                <childType>TARGET_TYPE_ABUS_ENDPOINT</childType>
+            </childTargets>
+        </deconfigure>
+    -->
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

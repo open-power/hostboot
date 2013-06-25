@@ -50,6 +50,7 @@
  *                          mjjones     09/19/2012  Add FFDC ID to error info
  *                          mjjones     03/22/2013  Support Procedure Callouts
  *                          mjjones     05/20/2013  Support Bus Callouts
+ *                          mjjones     06/24/2013  Support Children CDGs
  */
 
 #include <fapiReturnCode.H>
@@ -325,9 +326,32 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 i_pObjects[l_targIndex]);
 
             // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding target cdg (%d%d%d), pri: %d",
+            FAPI_ERR("addErrorInfo: Adding target cdg (%d:%d:%d), pri: %d",
                      l_callout, l_deconf, l_gard, l_pri);
             addEICdg(*l_pTarget, l_callout, l_deconf, l_gard, l_pri);
+        }
+        else if (l_type == EI_TYPE_CHILDREN_CDG)
+        {
+            uint8_t l_parentChipIndex =
+                i_pEntries[i].children_cdg.iv_parentChipObjIndex;
+            TargetType l_childType = static_cast<TargetType>(
+                i_pEntries[i].children_cdg.iv_childType);
+            uint8_t l_callout = i_pEntries[i].children_cdg.iv_callout;
+            uint8_t l_deconf = i_pEntries[i].children_cdg.iv_deconfigure;
+            uint8_t l_gard = i_pEntries[i].children_cdg.iv_gard;
+            CalloutPriorities::CalloutPriority l_pri =
+                static_cast<CalloutPriorities::CalloutPriority>(
+                    i_pEntries[i].children_cdg.iv_calloutPriority);
+
+            // Get the Parent Target of the children to cdg
+            const Target * l_pParentChip = static_cast<const Target *>(
+                i_pObjects[l_parentChipIndex]);
+
+            // Add the ErrorInfo
+            FAPI_ERR("addErrorInfo: Adding children cdg (%d:%d:%d), type: 0x%08x, pri: %d",
+                     l_callout, l_deconf, l_gard, l_childType, l_pri);
+            addEIChildrenCdg(*l_pParentChip, l_childType, l_callout, l_deconf,
+                             l_gard, l_pri);
         }
         else
         {
@@ -460,6 +484,24 @@ void ReturnCode::addEICdg(
         i_gard, i_priority);
     getCreateReturnCodeDataRef().getCreateErrorInfo().
         iv_CDGs.push_back(l_pCdg);
+}
+
+//******************************************************************************
+// addEIChildrenCdg function
+//******************************************************************************
+void ReturnCode::addEIChildrenCdg(
+    const Target & i_parentChip,
+    const TargetType i_childType,
+    const bool i_callout,
+    const bool i_deconfigure,
+    const bool i_gard,
+    const CalloutPriorities::CalloutPriority i_priority)
+{
+    // Create an ErrorInfoChildrenCDG object and add it to the Error Information
+    ErrorInfoChildrenCDG * l_pCdg = new ErrorInfoChildrenCDG(i_parentChip,
+        i_childType, i_callout, i_deconfigure, i_gard, i_priority);
+    getCreateReturnCodeDataRef().getCreateErrorInfo().
+        iv_childrenCDGs.push_back(l_pCdg);
 }
 
 }

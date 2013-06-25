@@ -211,24 +211,24 @@ foreach my $argnum (1 .. $#ARGV)
 
         foreach my $cfamRegister (@{$registerFfdc->{cfamRegister}})
         {
-            print TGFILE "        l_buflen -= CFAM_DATA_LEN;\n";
-            print TGFILE "        if (l_buflen)\n";
+            print TGFILE "        if (l_buflen >= CFAM_DATA_LEN)\n";
             print TGFILE "        {\n";
             print TGFILE "            i_parser.PrintString(NULL, \"$cfamRegister\");\n";
             print TGFILE "            i_parser.PrintHexDump(l_pBuffer, CFAM_DATA_LEN);\n";
             print TGFILE "        }\n";
             print TGFILE "        l_pBuffer+= CFAM_DATA_LEN;\n";
+            print TGFILE "        l_buflen -= CFAM_DATA_LEN;\n";
         }
 
         foreach my $scomRegister (@{$registerFfdc->{scomRegister}})
         {
-            print TGFILE "        l_buflen -= SCOM_DATA_LEN;\n";
-            print TGFILE "        if (l_buflen)\n";
+            print TGFILE "        if (l_buflen >= SCOM_DATA_LEN)\n";
             print TGFILE "        {\n";
             print TGFILE "            i_parser.PrintString(NULL, \"$scomRegister\");\n";
             print TGFILE "            i_parser.PrintHexDump(l_pBuffer, SCOM_DATA_LEN);\n";
             print TGFILE "        }\n";
             print TGFILE "        l_pBuffer+= SCOM_DATA_LEN;\n";
+            print TGFILE "        l_buflen -= SCOM_DATA_LEN;\n";
         }
 
         print TGFILE "        break;\n";

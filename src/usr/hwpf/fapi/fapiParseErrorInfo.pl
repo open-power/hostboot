@@ -55,6 +55,7 @@
 #                  mjjones   04/25/13  Allow multiple register ffdc ids in a
 #                                      collectRegisterFfdc element
 #                  mjjones   05/20/13  Support Bus Callouts
+#                  mjjones   06/24/13  Support Children CDGs
 #
 # End Change Log ******************************************************
 
@@ -448,7 +449,8 @@ foreach my $argnum (1 .. $#ARGV)
         my $eiObjectStr = "const void * l_objects[] = {";
         my $eiEntryStr = "";
         my $eiEntryCount = 0;
-        my %cdgHash; # Records the callout/deconfigure/gards for each Target
+        my %cdgTargetHash; # Records the callout/deconfigure/gards for Targets
+        my %cdgChildHash;  # Records the callout/deconfigure/gards for Children
 
         # Local FFDC
         foreach my $ffdc (@{$err->{ffdc}})
@@ -469,7 +471,7 @@ foreach my $argnum (1 .. $#ARGV)
             $eiEntryCount++;
         }
 
-        # Procedure/Target/Bus callouts
+        # Procedure/Target/Bus/Child callouts
         foreach my $callout (@{$err->{callout}})
         {
             if (! exists $callout->{priority})
@@ -516,48 +518,115 @@ foreach my $argnum (1 .. $#ARGV)
             }
             elsif (exists $callout->{target})
             {
-                # Add the Target to cdgHash to be processed with any
+                # Add the Target to cdgTargetHash to be processed with any
                 # deconfigure and GARD requests
-                $cdgHash{$callout->{target}}{callout} = 1;
-                $cdgHash{$callout->{target}}{priority} = $callout->{priority};
+                $cdgTargetHash{$callout->{target}}{callout} = 1;
+                $cdgTargetHash{$callout->{target}}{priority} =
+                    $callout->{priority};
+            }
+            elsif (exists $callout->{childTargets})
+            {
+                # Check that the parent and childType subelements exist
+                if (! exists $callout->{childTargets}->{parent})
+                {
+                    print ("fapiParseErrorInfo.pl ERROR. Child Callout parent missing\n");
+                    exit(1);
+                }
+                if (! exists $callout->{childTargets}->{childType})
+                {
+                    print ("fapiParseErrorInfo.pl ERROR. Child Callout childType missing\n");
+                    exit(1);
+                }
+
+                # Add the child info to cdgChildHash to be processed with
+                # any deconfigure and GARD requests
+                my $parent = $callout->{childTargets}->{parent};
+                my $childType = $callout->{childTargets}->{childType};
+                $cdgChildHash{$parent}{$childType}{callout} = 1;
+                $cdgChildHash{$parent}{$childType}{priority} =
+                    $callout->{priority};
             }
             else
             {
-                print ("fapiParseErrorInfo.pl ERROR. Callout procedure/target/bus missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. Callout incomplete\n");
                 exit(1);
             }
         }
 
-        # Target deconfigures
+        # Target/Child deconfigures
         foreach my $deconfigure (@{$err->{deconfigure}})
         {
-            if (! exists $deconfigure->{target})
+            if (exists $deconfigure->{target})
             {
-                print ("fapiParseErrorInfo.pl ERROR. Deconfigure target missing\n");
+                # Add the Target to cdgTargetHash to be processed with any
+                # callout and GARD requests
+                $cdgTargetHash{$deconfigure->{target}}{deconf} = 1;
+            }
+            elsif (exists $deconfigure->{childTargets})
+            {
+                # Check that the parent and childType subelements exist
+                if (! exists $deconfigure->{childTargets}->{parent})
+                {
+                    print ("fapiParseErrorInfo.pl ERROR. Child Deconfigure parent missing\n");
+                    exit(1);
+                }
+                if (! exists $deconfigure->{childTargets}->{childType})
+                {
+                    print ("fapiParseErrorInfo.pl ERROR. Child Deconfigure childType missing\n");
+                    exit(1);
+                }
+
+                # Add the child info to cdgChildHash to be processed with
+                # any callout and GARD requests
+                my $parent = $deconfigure->{childTargets}->{parent};
+                my $childType = $deconfigure->{childTargets}->{childType};
+                $cdgChildHash{$parent}{$childType}{deconf} = 1;
+            }
+            else
+            {
+                print ("fapiParseErrorInfo.pl ERROR. Deconfigure incomplete\n");
                 exit(1);
             }
-
-            # Add the Target to cdgHash to be processed with any
-            # callout and gard requests
-            $cdgHash{$deconfigure->{target}}{deconf} = 1;
         }
 
-        # Target Gards
+        # Target/Child Gards
         foreach my $gard (@{$err->{gard}})
         {
-            if (! exists $gard->{target})
+            if (exists $gard->{target})
             {
-                print ("fapiParseErrorInfo.pl ERROR. Gard target missing\n");
+                # Add the Target to cdgTargetHash to be processed with any
+                # callout and deconfigure requests
+                $cdgTargetHash{$gard->{target}}{deconf} = 1;
+            }
+            elsif (exists $gard->{childTargets})
+            {
+                # Check that the parent and childType subelements exist
+                if (! exists $gard->{childTargets}->{parent})
+                {
+                    print ("fapiParseErrorInfo.pl ERROR. Child GARD parent missing\n");
+                    exit(1);
+                }
+                if (! exists $gard->{childTargets}->{childType})
+                {
+                    print ("fapiParseErrorInfo.pl ERROR. Child GARD childType missing\n");
+                    exit(1);
+                }
+
+                # Add the child info to cdgChildHash to be processed with
+                # any callout and deconfigure requests
+                my $parent = $gard->{childTargets}->{parent};
+                my $childType = $gard->{childTargets}->{childType};
+                $cdgChildHash{$parent}{$childType}{gard} = 1;
+            }
+            else
+            {
+                print ("fapiParseErrorInfo.pl ERROR. GARD incomplete\n");
                 exit(1);
             }
-
-            # Add the Target to cdgHash (this target may also have
-            # callout and deconfigure requests
-            $cdgHash{$gard->{target}}{gard} = 1;
         }
 
         # Process the callout, deconfigures and GARDs for each Target
-        foreach my $cdg (keys %cdgHash)
+        foreach my $cdg (keys %cdgTargetHash)
         {
             # Check the type
             print EIFILE "fapi::fapiCheckType<const fapi::Target *>(&$cdg); \\\n";
@@ -567,19 +636,19 @@ foreach my $argnum (1 .. $#ARGV)
             my $deconf = 0;
             my $gard = 0;
 
-            if (exists $cdgHash{$cdg}->{callout})
+            if (exists $cdgTargetHash{$cdg}->{callout})
             {
                 $callout = 1;
             }
-            if (exists $cdgHash{$cdg}->{priority})
+            if (exists $cdgTargetHash{$cdg}->{priority})
             {
-                $priority = $cdgHash{$cdg}->{priority};
+                $priority = $cdgTargetHash{$cdg}->{priority};
             }
-            if (exists $cdgHash{$cdg}->{deconf})
+            if (exists $cdgTargetHash{$cdg}->{deconf})
             {
                 $deconf = 1;
             }
-            if (exists $cdgHash{$cdg}->{gard})
+            if (exists $cdgTargetHash{$cdg}->{gard})
             {
                 $gard = 1;
             }
@@ -595,6 +664,59 @@ foreach my $argnum (1 .. $#ARGV)
             $eiEntryStr .= "  l_entries[$eiEntryCount].target_cdg.iv_gard = $gard; \\\n";
             $eiEntryStr .= "  l_entries[$eiEntryCount].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::$priority; \\\n";
             $eiEntryCount++;
+        }
+
+        # Process the callout, deconfigures and GARDs for Child Targets
+        foreach my $parent (keys %cdgChildHash)
+        {
+            # Check the type
+            print EIFILE "fapi::fapiCheckType<const fapi::Target *>(&$parent); \\\n";
+
+            foreach my $childType (keys %{$cdgChildHash{$parent}})
+            {
+                my $callout = 0;
+                my $priority = 'LOW';
+                my $deconf = 0;
+                my $gard = 0;
+
+                if (exists $cdgChildHash{$parent}{$childType}->{callout})
+                {
+                    $callout = 1;
+                }
+                if (exists $cdgChildHash{$parent}->{$childType}->{priority})
+                {
+                    $priority =
+                        $cdgChildHash{$parent}->{$childType}->{priority};
+                }
+                if (exists $cdgChildHash{$parent}->{$childType}->{deconf})
+                {
+                    $deconf = 1;
+                }
+                if (exists $cdgChildHash{$parent}->{$childType}->{gard})
+                {
+                    $gard = 1;
+                }
+
+                # Add the Target to the objectlist if it doesn't already exist
+                my $objNum = addEntryToArray(\@eiObjects, $parent);
+
+                # Add an EI entry to eiEntryStr
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].iv_type = fapi::ReturnCode::EI_TYPE_CHILDREN_CDG; \\\n";
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].children_cdg.iv_parentChipObjIndex = $objNum; \\\n";
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].children_cdg.iv_callout = $callout; \\\n";
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].children_cdg.iv_deconfigure = $deconf; \\\n";
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].children_cdg.iv_childType = fapi::$childType; \\\n";
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].children_cdg.iv_gard = $gard; \\\n";
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].children_cdg.iv_calloutPriority = fapi::CalloutPriorities::$priority; \\\n";
+                $eiEntryCount++;
+            }
         }
 
         # Add all objects to $eiObjectStr

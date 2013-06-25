@@ -32,6 +32,7 @@
 #include <fapiErrorInfo.H>
 #include <hwpf/hwpf_reasoncodes.H>
 #include <errl/errlentry.H>
+#include <targeting/common/utilFilter.H>
 
 namespace fapi
 {
@@ -100,11 +101,63 @@ HWAS::epubProcedureID xlateProcedureCallout(
 }
 
 /**
+ * @brief Translates a FAPI target type to a Targeting target type
+ *
+ * @param[i] i_fapiProc FAPI procedure callout
+ *
+ * @return HWAS procedure callout
+ */
+TARGETING::TYPE xlateTargetType(
+    const fapi::TargetType i_targetType)
+{
+    TARGETING::TYPE l_type = TARGETING::TYPE_NA;
+
+    switch (i_targetType)
+    {
+    case fapi::TARGET_TYPE_SYSTEM:
+        l_type = TARGETING::TYPE_SYS;
+        break;
+    case fapi::TARGET_TYPE_DIMM:
+        l_type = TARGETING::TYPE_DIMM;
+        break;
+    case fapi::TARGET_TYPE_PROC_CHIP:
+        l_type = TARGETING::TYPE_PROC;
+        break;
+    case fapi::TARGET_TYPE_MEMBUF_CHIP:
+        l_type = TARGETING::TYPE_MEMBUF;
+        break;
+    case fapi::TARGET_TYPE_EX_CHIPLET:
+        l_type = TARGETING::TYPE_EX;
+        break;
+    case fapi::TARGET_TYPE_MBA_CHIPLET:
+        l_type = TARGETING::TYPE_MBA;
+        break;
+    case fapi::TARGET_TYPE_MCS_CHIPLET:
+        l_type = TARGETING::TYPE_MCS;
+        break;
+    case fapi::TARGET_TYPE_XBUS_ENDPOINT:
+        l_type = TARGETING::TYPE_XBUS;
+        break;
+    case fapi::TARGET_TYPE_ABUS_ENDPOINT:
+        l_type = TARGETING::TYPE_ABUS;
+        break;
+    case fapi::TARGET_TYPE_L4:
+        l_type = TARGETING::TYPE_L4;
+        break;
+    default:
+        l_type = TARGETING::TYPE_NA;
+        break;
+    }
+
+    return l_type;
+}
+
+/**
  * @brief Processes any FFDC in the ReturnCode Error Information and adds them
  *        to the error log
  *
  * @param[i] i_errInfo  Reference to ReturnCode Error Information
- * @param[io] io_pError Errorlog  Handle
+ * @param[io] io_pError Errorlog Handle
  */
 void processEIFfdcs(const ErrorInfo & i_errInfo,
                     errlHndl_t io_pError)
@@ -119,6 +172,8 @@ void processEIFfdcs(const ErrorInfo & i_errInfo,
         uint32_t l_ffdcId = (*l_itr)->getFfdcId();
 
         // Add the FFDC ID as the first word, then the FFDC data
+        FAPI_ERR("processEIFfdcs: Adding %d bytes of FFDC (id:0x%08x)", l_size,
+                 l_ffdcId);
         ERRORLOG::ErrlUD * l_pUD = io_pError->addFFDC(
             HWPF_COMP_ID, &l_ffdcId, sizeof(l_ffdcId), 1, HWPF_UDT_HWP_FFDC);
 
@@ -134,7 +189,7 @@ void processEIFfdcs(const ErrorInfo & i_errInfo,
  *        Information and adds them to the error log
  *
  * @param[i] i_errInfo  Reference to ReturnCode Error Information
- * @param[io] io_pError Errorlog  Handle
+ * @param[io] io_pError Errorlog Handle
  */
 void processEIProcCallouts(const ErrorInfo & i_errInfo,
                            errlHndl_t io_pError)
@@ -151,10 +206,19 @@ void processEIProcCallouts(const ErrorInfo & i_errInfo,
         HWAS::callOutPriority l_priority =
             xlateCalloutPriority((*l_itr)->iv_calloutPriority);
 
+        FAPI_ERR("processEIProcCallouts: Adding proc-callout (proc:0x%02x, pri:%d)",
+                 l_procedure, l_priority);
         io_pError->addProcedureCallout(l_procedure, l_priority);
     }
 }
 
+/**
+ * @brief Processes any Bus callouts requests in the ReturnCode Error
+ *        Information and adds them to the error log
+ *
+ * @param[i] i_errInfo  Reference to ReturnCode Error Information
+ * @param[io] io_pError Errorlog Handle
+ */
 void processEIBusCallouts(const ErrorInfo & i_errInfo,
                           errlHndl_t io_pError)
 {
@@ -203,6 +267,8 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
 
         if (l_busTypeValid)
         {
+            FAPI_ERR("processEIBusCallouts: Adding bus-callout (bus:%d, pri:%d)",
+                     l_busType, l_priority);
             io_pError->addBusCallout(l_pTarget1, l_pTarget2, l_busType,
                                      l_priority);
         }
@@ -214,7 +280,7 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
  *        Information and adds them to the error log
  *
  * @param[i] i_errInfo  Reference to ReturnCode Error Information
- * @param[io] io_pError Errorlog  Handle
+ * @param[io] io_pError Errorlog Handle
  */
 void processEICDGs(const ErrorInfo & i_errInfo,
                    errlHndl_t io_pError)
@@ -241,7 +307,70 @@ void processEICDGs(const ErrorInfo & i_errInfo,
             l_gard = HWAS::GARD_Unrecoverable;
         }
 
+        FAPI_ERR("processEICDGs: Calling out target (pri:%d, deconf:%d, gard:%d)",
+                 l_priority, l_deconfig, l_gard);
         io_pError->addHwCallout(l_pTarget, l_priority, l_deconfig, l_gard);
+    }
+}
+
+/**
+ * @brief Processes any Children Callout/Deconfigure/GARD requests in the
+ *        ReturnCode Error Information and adds them to the error log
+ *
+ * @param[i] i_errInfo  Reference to ReturnCode Error Information
+ * @param[io] io_pError Errorlog Handle
+ */
+void processEIChildrenCDGs(const ErrorInfo & i_errInfo,
+                           errlHndl_t io_pError)
+{
+    // Iterate through the Child CGD requests, adding each to the error log
+    for (ErrorInfo::ErrorInfoChildrenCDGCItr_t l_itr =
+             i_errInfo.iv_childrenCDGs.begin();
+         l_itr != i_errInfo.iv_childrenCDGs.end(); ++l_itr)
+    {
+        TARGETING::TYPE l_childType =
+            xlateTargetType((*l_itr)->iv_childType);
+
+        if (l_childType == TARGETING::TYPE_NA)
+        {
+            FAPI_ERR("processEIChildrenCDGs: Could not xlate child type (0x%08x)",
+                     (*l_itr)->iv_childType);
+        }
+        else
+        {
+            TARGETING::Target * l_pParentChip =
+                reinterpret_cast<TARGETING::Target*>(
+                    (*l_itr)->iv_parentChip.get());
+
+            HWAS::callOutPriority l_priority =
+                xlateCalloutPriority((*l_itr)->iv_calloutPriority);
+
+            HWAS::DeconfigEnum l_deconfig = HWAS::NO_DECONFIG;
+            if ((*l_itr)->iv_deconfigure)
+            {
+                l_deconfig = HWAS::DELAYED_DECONFIG;
+            }
+
+            HWAS::GARD_ErrorType l_gard = HWAS::GARD_NULL;
+            if ((*l_itr)->iv_gard)
+            {
+                l_gard = HWAS::GARD_Unrecoverable;
+            }
+
+            // Get a list of functional children
+            TARGETING::TargetHandleList l_children;
+            TARGETING::getChildChiplets(l_children, l_pParentChip, l_childType);
+
+            // Callout/Deconfigure/GARD each child as appropriate
+            for (TARGETING::TargetHandleList::const_iterator
+                    l_itr = l_children.begin();
+                 l_itr != l_children.end(); ++l_itr)
+            {
+                FAPI_ERR("processEIChildrenCDGs: Calling out target (type: 0x%02x, pri:%d, deconf:%d, gard:%d)",
+                         l_childType, l_priority, l_deconfig, l_gard);
+                io_pError->addHwCallout(*l_itr, l_priority, l_deconfig, l_gard);
+            }
+        }
     }
 }
 
@@ -261,7 +390,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
         if (l_creator == ReturnCode::CREATOR_PLAT)
         {
             // PLAT error. Release the errlHndl_t
-            FAPI_ERR("fapiRcToErrl: PLAT error: 0x%x",
+            FAPI_ERR("fapiRcToErrl: PLAT error: 0x%08x",
                      static_cast<uint32_t>(io_rc));
             l_pError = reinterpret_cast<errlHndl_t> (io_rc.releasePlatData());
         }
@@ -269,7 +398,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
         {
             // HWP Error. Create an error log
             uint32_t l_rcValue = static_cast<uint32_t>(io_rc);
-            FAPI_ERR("fapiRcToErrl: HWP error: 0x%x", l_rcValue);
+            FAPI_ERR("fapiRcToErrl: HWP error: 0x%08x", l_rcValue);
 
             // TODO What should the severity be? Should it be in the error info?
 
@@ -300,6 +429,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
                 processEIProcCallouts(*l_pErrorInfo, l_pError);
                 processEIBusCallouts(*l_pErrorInfo, l_pError);
                 processEICDGs(*l_pErrorInfo, l_pError);
+                processEIChildrenCDGs(*l_pErrorInfo, l_pError);
             }
             else
             {
@@ -309,7 +439,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
         else
         {
             // FAPI error. Create an error log
-            FAPI_ERR("fapiRcToErrl: FAPI error: 0x%x",
+            FAPI_ERR("fapiRcToErrl: FAPI error: 0x%08x",
                      static_cast<uint32_t>(io_rc));
 
             // The errlog reason code is the HWPF compID and the rcValue LSB
@@ -333,6 +463,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
                 processEIProcCallouts(*l_pErrorInfo, l_pError);
                 processEIBusCallouts(*l_pErrorInfo, l_pError);
                 processEICDGs(*l_pErrorInfo, l_pError);
+                processEIChildrenCDGs(*l_pErrorInfo, l_pError);
             }
         }
 
@@ -346,7 +477,6 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
         l_pError->collectTrace(FAPI_SCAN_TRACE_NAME, 256 );
 
     }
-
 
     return l_pError;
 }

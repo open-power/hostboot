@@ -40,6 +40,7 @@
  *                          mjjones     09/19/2012  Replace FFDC type with ID
  *                          mjjones     03/22/2013  Support Procedure Callouts
  *                          mjjones     05/20/2013  Support Bus Callouts
+ *                          mjjones     06/24/2013  Support Children CDGs
  */
 
 #include <fapiErrorInfo.H>
@@ -112,6 +113,22 @@ ErrorInfoCDG::ErrorInfoCDG(const Target & i_target,
                            const CalloutPriorities::CalloutPriority i_priority)
 : iv_target(i_target), iv_callout(i_callout), iv_calloutPriority(i_priority),
   iv_deconfigure(i_deconfigure), iv_gard(i_gard)
+{
+
+}
+
+//******************************************************************************
+// ErrorInfoChildrenCDG Constructor
+//******************************************************************************
+ErrorInfoChildrenCDG::ErrorInfoChildrenCDG(
+    const Target & i_parentChip,
+    const TargetType i_childType,
+    const bool i_callout,
+    const bool i_deconfigure,
+    const bool i_gard,
+    const CalloutPriorities::CalloutPriority i_priority)
+: iv_parentChip(i_parentChip), iv_childType(i_childType), iv_callout(i_callout),
+  iv_calloutPriority(i_priority), iv_deconfigure(i_deconfigure), iv_gard(i_gard)
 {
 
 }

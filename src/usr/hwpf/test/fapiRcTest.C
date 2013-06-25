@@ -36,6 +36,7 @@
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  *                          mjjones     08/14/2012  Use new ErrorInfo structures
  *                          mjjones     03/28/2013  Added proc-callout tests
+ *                          mjjones     03/28/2013  Added children-cdg tests
  */
 
 #include <fapi.H>
@@ -618,7 +619,7 @@ uint32_t rcTest12()
     // Add error information to the ReturnCode, the data is the same as that
     // produced by the fapiParseErrorInfo.pl script in fapiHwpErrorInfo.H
     const void * l_objects[] = {&l_ffdc, &l_target, &l_target2};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[4];
+    fapi::ReturnCode::ErrorInfoEntry l_entries[5];
     l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_FFDC;
     l_entries[0].ffdc.iv_ffdcObjIndex = 0;
     l_entries[0].ffdc.iv_ffdcId = 0x22334455;
@@ -626,7 +627,8 @@ uint32_t rcTest12()
         fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc);
     l_entries[1].iv_type = fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT;
     l_entries[1].proc_callout.iv_procedure = fapi::ProcedureCallouts::CODE;
-    l_entries[1].proc_callout.iv_calloutPriority = fapi::CalloutPriorities::MEDIUM;
+    l_entries[1].proc_callout.iv_calloutPriority =
+        fapi::CalloutPriorities::MEDIUM;
     l_entries[2].iv_type = fapi::ReturnCode::EI_TYPE_BUS_CALLOUT;
     l_entries[2].bus_callout.iv_endpoint1ObjIndex = 1;
     l_entries[2].bus_callout.iv_endpoint2ObjIndex = 2;
@@ -637,8 +639,16 @@ uint32_t rcTest12()
     l_entries[3].target_cdg.iv_deconfigure = 1;
     l_entries[3].target_cdg.iv_gard = 0;
     l_entries[3].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::HIGH;
+    l_entries[4].iv_type = fapi::ReturnCode::EI_TYPE_CHILDREN_CDG;
+    l_entries[4].children_cdg.iv_parentChipObjIndex = 1;
+    l_entries[4].children_cdg.iv_callout = 0;
+    l_entries[4].children_cdg.iv_deconfigure = 1;
+    l_entries[4].children_cdg.iv_childType = fapi::TARGET_TYPE_ABUS_ENDPOINT;
+    l_entries[4].children_cdg.iv_gard = 0;
+    l_entries[4].children_cdg.iv_calloutPriority =
+        fapi::CalloutPriorities::HIGH;
 
-    l_rc.addErrorInfo(l_objects, l_entries, 4);
+    l_rc.addErrorInfo(l_objects, l_entries, 5);
 
     do
     {
@@ -783,6 +793,59 @@ uint32_t rcTest12()
             break;
         }
 
+        if (l_pErrInfo->iv_childrenCDGs.size() != 1)
+        {
+            FAPI_ERR("rcTest12. %d children-cdgs",
+                     l_pErrInfo->iv_childrenCDGs.size());
+            l_result = 18;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_parentChip != l_target)
+        {
+            FAPI_ERR("rcTest12. parent chip mismatch");
+            l_result = 19;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_childType !=
+            fapi::TARGET_TYPE_ABUS_ENDPOINT)
+        {
+            FAPI_ERR("rcTest12. child type mismatch (0x%08x)",
+                     l_pErrInfo->iv_childrenCDGs[0]->iv_childType);
+            l_result = 20;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_calloutPriority !=
+            CalloutPriorities::HIGH)
+        {
+            FAPI_ERR("rcTest12. child cdg priority mismatch (%d)",
+                     l_pErrInfo->iv_childrenCDGs[0]->iv_calloutPriority);
+            l_result = 21;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_callout != false)
+        {
+            FAPI_ERR("rcTest12. child cdg callout set");
+            l_result = 22;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_deconfigure != true)
+        {
+            FAPI_ERR("rcTest12. child cdg deconfigure not set");
+            l_result = 23;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_gard != false)
+        {
+            FAPI_ERR("rcTest12. child cdg GARD set");
+            l_result = 24;
+            break;
+        }
 
         FAPI_INF("rcTest12. Success!");
     }
@@ -1044,7 +1107,7 @@ uint32_t rcTest16()
 
     // Add error information to the ReturnCode
     const void * l_objects[] = {&l_ffdc, &l_ffdc2, &l_target, &l_target2};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[8];
+    fapi::ReturnCode::ErrorInfoEntry l_entries[10];
     l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_FFDC;
     l_entries[0].ffdc.iv_ffdcObjIndex = 0;
     l_entries[0].ffdc.iv_ffdcId = 0x22334455;
@@ -1081,8 +1144,24 @@ uint32_t rcTest16()
     l_entries[7].bus_callout.iv_endpoint1ObjIndex = 2;
     l_entries[7].bus_callout.iv_endpoint2ObjIndex = 3;
     l_entries[7].bus_callout.iv_calloutPriority = fapi::CalloutPriorities::HIGH;
+    l_entries[8].iv_type = fapi::ReturnCode::EI_TYPE_CHILDREN_CDG;
+    l_entries[8].children_cdg.iv_parentChipObjIndex = 2;
+    l_entries[8].children_cdg.iv_callout = 1;
+    l_entries[8].children_cdg.iv_deconfigure = 1;
+    l_entries[8].children_cdg.iv_childType = fapi::TARGET_TYPE_ABUS_ENDPOINT;
+    l_entries[8].children_cdg.iv_gard = 0;
+    l_entries[8].children_cdg.iv_calloutPriority =
+        fapi::CalloutPriorities::HIGH;
+    l_entries[9].iv_type = fapi::ReturnCode::EI_TYPE_CHILDREN_CDG;
+    l_entries[9].children_cdg.iv_parentChipObjIndex = 3;
+    l_entries[9].children_cdg.iv_callout = 1;
+    l_entries[9].children_cdg.iv_deconfigure = 0;
+    l_entries[9].children_cdg.iv_childType = fapi::TARGET_TYPE_MBA_CHIPLET;
+    l_entries[9].children_cdg.iv_gard = 1;
+    l_entries[9].children_cdg.iv_calloutPriority =
+        fapi::CalloutPriorities::MEDIUM;
 
-    l_rc.addErrorInfo(l_objects, l_entries, 8);
+    l_rc.addErrorInfo(l_objects, l_entries, 10);
 
     do
     {
@@ -1276,14 +1355,14 @@ uint32_t rcTest16()
 
         if (l_pErrInfo->iv_busCallouts[0]->iv_target1 != l_target)
         {
-            FAPI_ERR("rcTest12. bus target mismatch 1");
+            FAPI_ERR("rcTest16. bus target mismatch 1");
             l_result = 24;
             break;
         }
 
         if (l_pErrInfo->iv_busCallouts[0]->iv_target2 != l_target2)
         {
-            FAPI_ERR("rcTest12. bus target mismatch 2");
+            FAPI_ERR("rcTest16. bus target mismatch 2");
             l_result = 25;
             break;
         }
@@ -1291,7 +1370,7 @@ uint32_t rcTest16()
         if (l_pErrInfo->iv_busCallouts[0]->iv_calloutPriority !=
             CalloutPriorities::LOW)
         {
-            FAPI_ERR("rcTest12. bus callout priority mismatch 1 (%d)",
+            FAPI_ERR("rcTest16. bus callout priority mismatch 1 (%d)",
                      l_pErrInfo->iv_busCallouts[0]->iv_calloutPriority);
             l_result = 26;
             break;
@@ -1299,14 +1378,14 @@ uint32_t rcTest16()
 
         if (l_pErrInfo->iv_busCallouts[1]->iv_target1 != l_target)
         {
-            FAPI_ERR("rcTest12. bus target mismatch 3");
+            FAPI_ERR("rcTest16. bus target mismatch 3");
             l_result = 27;
             break;
         }
 
         if (l_pErrInfo->iv_busCallouts[1]->iv_target2 != l_target2)
         {
-            FAPI_ERR("rcTest12. bus target mismatch 4");
+            FAPI_ERR("rcTest16. bus target mismatch 4");
             l_result = 28;
             break;
         }
@@ -1314,9 +1393,102 @@ uint32_t rcTest16()
         if (l_pErrInfo->iv_busCallouts[1]->iv_calloutPriority !=
             CalloutPriorities::HIGH)
         {
-            FAPI_ERR("rcTest12. bus callout priority mismatch 2 (%d)",
+            FAPI_ERR("rcTest16. bus callout priority mismatch 2 (%d)",
                      l_pErrInfo->iv_busCallouts[1]->iv_calloutPriority);
             l_result = 29;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs.size() != 2)
+        {
+            FAPI_ERR("rcTest16. %d children-cdgs",
+                     l_pErrInfo->iv_childrenCDGs.size());
+            l_result = 30;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_parentChip != l_target)
+        {
+            FAPI_ERR("rcTest16. parent chip mismatch 1");
+            l_result = 31;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_childType !=
+            fapi::TARGET_TYPE_ABUS_ENDPOINT)
+        {
+            FAPI_ERR("rcTest16. child type mismatch 1 (0x%08x)",
+                     l_pErrInfo->iv_childrenCDGs[0]->iv_childType);
+            l_result = 32;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_calloutPriority !=
+            CalloutPriorities::HIGH)
+        {
+            FAPI_ERR("rcTest16. child cdg priority mismatch 1 (%d)",
+                     l_pErrInfo->iv_childrenCDGs[0]->iv_calloutPriority);
+            l_result = 33;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_callout != true)
+        {
+            FAPI_ERR("rcTest16. child cdg callout not set 1");
+            l_result = 34;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_deconfigure != true)
+        {
+            FAPI_ERR("rcTest16. child cdg deconfigure not set 1");
+            l_result = 35;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_gard != false)
+        {
+            FAPI_ERR("rcTest16. child cdg GARD set 1");
+            l_result = 36;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[1]->iv_childType !=
+            fapi::TARGET_TYPE_MBA_CHIPLET)
+        {
+            FAPI_ERR("rcTest16. child type mismatch 2 (0x%08x)",
+                     l_pErrInfo->iv_childrenCDGs[1]->iv_childType);
+            l_result = 37;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[1]->iv_calloutPriority !=
+            CalloutPriorities::MEDIUM)
+        {
+            FAPI_ERR("rcTest16. child cdg priority mismatch 2 (%d)",
+                     l_pErrInfo->iv_childrenCDGs[1]->iv_calloutPriority);
+            l_result = 38;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[1]->iv_callout != true)
+        {
+            FAPI_ERR("rcTest16. child cdg callout not set 2");
+            l_result = 39;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[1]->iv_deconfigure != false)
+        {
+            FAPI_ERR("rcTest16. child cdg deconfigure set 2");
+            l_result = 40;
+            break;
+        }
+
+        if (l_pErrInfo->iv_childrenCDGs[1]->iv_gard != true)
+        {
+            FAPI_ERR("rcTest16. child cdg GARD not set 2");
+            l_result = 41;
             break;
         }
 

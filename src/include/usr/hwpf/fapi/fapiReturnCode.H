@@ -48,6 +48,7 @@
  *                          mjjones     03/22/2013  Support Procedure Callouts
  *                          mjjones     05/20/2013  Support Bus Callouts
  *                          mjjones     06/06/2013  Check FFDC size at compile time
+ *                          mjjones     06/24/2013  Support Children CDGs
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -284,6 +285,7 @@ public:
         EI_TYPE_PROCEDURE_CALLOUT = 2,
         EI_TYPE_BUS_CALLOUT       = 3,
         EI_TYPE_CDG               = 4, // Target Callout/Deconfig/GARD
+        EI_TYPE_CHILDREN_CDG      = 5, // Children Callout/Deconfig/GARD
     };
 
     /**
@@ -325,6 +327,16 @@ public:
                 uint8_t iv_gard;
                 uint8_t iv_calloutPriority;
             } target_cdg;
+
+            struct
+            {
+                uint8_t  iv_parentChipObjIndex;
+                uint8_t  iv_callout;
+                uint8_t  iv_deconfigure;
+                uint32_t iv_childType;
+                uint8_t  iv_gard;
+                uint8_t  iv_calloutPriority;
+            } children_cdg;
         };
     };
 
@@ -447,6 +459,27 @@ private:
          const bool i_deconfigure,
          const bool i_gard,
          const CalloutPriorities::CalloutPriority i_priority);
+
+     /**
+      * @brief Add children target callout/deconfigure/GARDs to the ErrorInfo
+      *
+      * This is called by addErrorInfo to c/d/g all child Targets of a specified
+      * type.
+      *
+      * @param[in] i_parentChip  Reference to the parent chip
+      * @param[in] i_childType   Child target types to c/d/g
+      * @param[in] i_callout     True if Target should be called out
+      * @param[in] i_deconfigure True if Target should be deconfigured
+      * @param[in] i_gard        True if Target should be GARDed
+      * @param[in] i_priority    The priority of any callout
+      */
+      void addEIChildrenCdg(
+          const Target & i_parentChip,
+          const TargetType i_childType,
+          const bool i_callout,
+          const bool i_deconfigure,
+          const bool i_gard,
+          const CalloutPriorities::CalloutPriority i_priority);
 
     // The rcValue
     uint32_t iv_rcValue;
