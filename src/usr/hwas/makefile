@@ -34,7 +34,9 @@ MODULE = hwas
 OBJS =  hwas.o hwasCallout.o deconfigGard.o
 
 # files in this directory
-OBJS +=  hwasPlat.o hostbootIstep.o hwasPlatError.o hwasPlatCallout.o
+OBJS +=  hwasPlat.o hostbootIstep.o \
+            hwasPlatError.o hwasPlatCallout.o \
+            hwasPlatDeconfigGard.o
 
 SUBDIRS = test.d
 

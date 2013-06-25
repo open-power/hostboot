@@ -429,76 +429,6 @@ errlHndl_t hwasChangeDetection()
     return errl;
 } // hwasChangeDetection
 
-
-GardAddress::GardAddress(errlHndl_t &o_errl)
-{
-    DeconfigGard::GardRecord *l_addr = HWAS::theDeconfigGard().iv_pGardRecords;
-    HWAS_INF("GardAddress ctor: iv_pGardRecords %p", l_addr);
-
-    do
-    {
-        // if this is the first time thru here, get the PNOR address.
-        if (l_addr == NULL)
-        {
-            PNOR::SectionInfo_t l_section;
-            o_errl = PNOR::getSectionInfo(PNOR::GUARD_DATA, PNOR::CURRENT_SIDE,
-                            l_section);
-            if (o_errl)
-            {
-                HWAS_ERR("PNOR::getSectionInfo failed!!!");
-                // no support for GARD in this configuration.
-                break;
-            }
-
-            l_addr = reinterpret_cast<DeconfigGard::GardRecord *>
-                        (l_section.vaddr);
-            HWAS_DBG("PNOR vaddr=%p size=%d",
-                    l_section.vaddr, l_section.size);
-
-            // tell the DeconfigGard what the address
-            HWAS::theDeconfigGard().iv_pGardRecords = l_addr;
-
-            // and let him compute and save maxRecords and nextRecordId
-            HWAS::theDeconfigGard()._GardRecordIdSetup(l_section.size);
-
-            HWAS_INF("GardAddress iv_pGardRecords=%p", l_addr);
-        }
-    }
-    while (0);
-}
-
-
-void GardAddress::flush()
-{
-    // flush PNOR iff we wrote
-    if (!iv_addr.empty())
-    {
-        for (std::vector<void *>::const_iterator iter = iv_addr.begin();
-                iter != iv_addr.end();
-                ++iter)
-        {
-            HWAS_DBG("flushing GARD in PNOR: addr=%p", *iter);
-            int l_rc = mm_remove_pages(FLUSH, (void *) *iter,
-                        sizeof(DeconfigGard::GardRecord));
-            if (l_rc)
-            {
-                HWAS_ERR("mm_remove_pages(FLUSH,%p,%d) returned %d",
-                        *iter, sizeof(DeconfigGard::GardRecord),l_rc);
-            }
-        }
-
-        // all done - just get rid of them all
-        iv_addr.clear();
-    }
-}
-
-
-GardAddress::~GardAddress()
-{
-    flush();
-}
-
-
 //******************************************************************************
 //  platCheckMinimumHardware()
 //      Don't forget to add a procedure callout and update the common plid
@@ -508,5 +438,6 @@ void platCheckMinimumHardware(uint32_t & io_plid)
 {
     //  nothing to do yet...
 }
+
 
 } // namespace HWAS

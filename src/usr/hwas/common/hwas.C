@@ -658,7 +658,7 @@ errlHndl_t  checkMinimumHardware()
         //  check for functional cores
         TargetHandleList l_cores;
         getAllChiplets(l_cores, TYPE_CORE, true );
-        HWAS_DBG( "platCheckMinimumHardware: %d functional cores",
+        HWAS_DBG( "checkMinimumHardware: %d functional cores",
                   l_cores.size() );
         if ( l_cores.empty() )
         {
@@ -700,7 +700,7 @@ errlHndl_t  checkMinimumHardware()
         //  check here for functional dimms
         TargetHandleList l_dimms;
         getAllLogicalCards(l_dimms, TYPE_DIMM, true );
-        HWAS_DBG( "platCheckMinimumHardware: %d functional dimms",
+        HWAS_DBG( "checkMinimumHardware: %d functional dimms",
                   l_dimms.size() );
         if ( l_dimms.empty() )
         {

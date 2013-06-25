@@ -79,9 +79,6 @@ DeconfigGard & theDeconfigGard();
 class DeconfigGard
 {
 
-    // allow GardAddress to access private methods.
-    friend class GardAddress;
-
 public:
 
     enum
@@ -237,34 +234,33 @@ public:
      *
      * Any error creating the GARD Record will be returned to the user.
      *
-     * @param[in] i_target   Reference to Target to create GARD Record for.
+     * @param[in] i_pTarget   Pointer to Target to create GARD Record for.
      * @param[in] i_errlPlid Error log PLID to store in GARD Record.
      * @param[in] i_errorType error type of the GARD Record.
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t createGardRecord(const TARGETING::Target & i_target,
+    errlHndl_t createGardRecord(const TARGETING::Target * const i_pTarget,
                                 const uint32_t i_errlPlid,
                                 const GARD_ErrorType i_errorType);
 
     /**
-     * @brief Clears the specified GARD Records.
+     * @brief Platform specific function that
+     *          Creates a GARD Record for a Target.
      *
-     * Called by an administrator to clear GARD records manually.
-     *
-     * If the specified record does not exist then no error is returned. The
-     * only errors returned are usage errors and errors accessing the GARD
-     * Records.
-     *
-     * @param[in] i_recordId RecordId to clear. If zero (CLEAR_ALL_GARD_RECORDS)
-     *                          then all GARD Records cleared.
+     * @param[in] i_pTarget  Pointer to Target to create GARD Record for.
+     * @param[in] i_errlPlid Error log PLID to store in GARD Record.
+     * @param[in] i_errorType error type of the GARD Record.
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t clearGardRecords(const uint32_t i_recordId);
+    errlHndl_t platCreateGardRecord(const TARGETING::Target * const i_pTarget,
+                                const uint32_t i_errlPlid,
+                                const GARD_ErrorType i_errorType);
 
     /**
-     * @brief Clears all GARD Records for the specified Target.
+     * @brief Clears GARD Record for the specified Target, or ALL GARD
+     *          records.
      *
      * Called by an administrator to clear GARD records manually.
      *
@@ -272,30 +268,23 @@ public:
      * only errors returned are usage errors and errors accessing the GARD
      * Records.
      *
-     * @param[in] i_targetId Reference to Target ID to clear GARD Records for.
+     * @param[in] i_pTarget Pointer to Target to clear GARD record for.
+     *              If NULL, then ALL GARD Records will be cleared.
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t clearGardRecords(const TARGETING::EntityPath & i_targetId);
+    errlHndl_t clearGardRecords(const TARGETING::Target * const i_pTarget);
 
     /**
-     * @brief Gets the specified GARD Records.
+     * @brief Platform specific function that
+     *          Clears Record for the specified Target.
      *
-     * Called by an administrator to view GARD Records.
-     *
-     * If the specified record does not exist then no error is returned. The
-     * only errors returned are usage errors and errors accessing the GARD
-     * Records.
-     *
-     * @param[in]  i_recordId RecordId to get. If zero then all GARD Records are
-     *                        retrieved.
-     * @param[out] o_records  Reference to vector of GardRecords that is cleared
-     *                        then filled in with records.
+     * @param[in] i_pTarget Pointer to Target to clear GARD record for.
+     *              If NULL, then ALL GARD Records will be cleared.
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t getGardRecords(const uint32_t i_recordId,
-                              GardRecords_t & o_records);
+    errlHndl_t platClearGardRecords(const TARGETING::Target * const i_pTarget);
 
     /**
      * @brief Gets all GARD Records for the specified Target.
@@ -306,13 +295,26 @@ public:
      * only errors returned are usage errors and errors accessing the GARD
      * Records.
      *
-     * @param[in]  i_targetId Reference to Target ID to get GARD Records for.
+     * @param[in]  i_pTarget  Pointer to Sys or Node Target
      * @param[out] o_records  Reference to vector of GardRecords that is cleared
      *                        then filled in with records.
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t getGardRecords(const TARGETING::EntityPath & i_targetId,
+    errlHndl_t getGardRecords(const TARGETING::Target * const i_pTarget,
+                              GardRecords_t & o_records);
+
+    /**
+     * @brief Platform specific function that
+     *          Gets all GARD Records for the specified Target.
+     *
+     * @param[in]  i_pTarget  Pointer to Sys or Node Target
+     * @param[out] o_records  Reference to vector of GardRecords that is cleared
+     *                        then filled in with records.
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t platGetGardRecords(const TARGETING::Target * const i_pTarget,
                               GardRecords_t & o_records);
 
 protected:
@@ -390,7 +392,7 @@ public:
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t _getDeconfigureRecords(const TARGETING::Target * i_pTarget,
+    errlHndl_t _getDeconfigureRecords(const TARGETING::Target * const i_pTarget,
                                      DeconfigureRecords_t & o_records);
 
     /**
@@ -400,7 +402,7 @@ public:
      *                        Records for. If NULL then all Deconfigure Records
      *                        are cleared.
      */
-    void clearDeconfigureRecords(const TARGETING::Target * i_pTarget);
+    void clearDeconfigureRecords(const TARGETING::Target * const i_pTarget);
 
 
     /**
@@ -414,135 +416,20 @@ public:
 
 private:
 
-    /**
-     * @brief Creates a GARD Record for a Target.
-     *
-     * @param[in] i_target   Reference to Target to create GARD Record for.
-     * @param[in] i_errlPlid Error log PLID to store in GARD Record.
-     * @param[in] i_errorType Error Type of the GARD Record.
-     *
-     * @return errlHndl_t. Error log handle.
-     */
-    errlHndl_t _createGardRecord(const TARGETING::Target & i_target,
-                                 const uint32_t i_errlPlid,
-                                 const GARD_ErrorType i_errorType);
-
-    /**
-     * @brief Clears the specified GARD Records.
-     *
-     * @param[in] i_recordId RecordId to clear. If CLEAR_ALL_GARD_RECORDS
-     *                          then all GARD Records cleared.
-     *
-     * @return errlHndl_t. Error log handle.
-     */
-    errlHndl_t _clearGardRecords(const uint32_t i_recordId);
-
-    /**
-     * @brief Clears all GARD Records for the specified Target.
-     *
-     * @param[in] i_targetId Reference to Target ID to clear GARD Records for.
-     *
-     * @return errlHndl_t. Error log handle.
-     */
-    errlHndl_t _clearGardRecords(const TARGETING::EntityPath & i_targetId);
-
-    /**
-     * @brief Gets the specified GARD Records.
-     *
-     * @param[in]  i_recordId RecordId to get. If zero then all GARD Records are
-     *                        retrieved.
-     * @param[out] o_records  Reference to vector of GardRecords that is cleared
-     *                        then filled in with records.
-     *
-     * @return errlHndl_t. Error log handle.
-     */
-    errlHndl_t _getGardRecords(const uint32_t i_recordId,
-                               GardRecords_t & o_records);
-
-    /**
-     * @brief Gets all GARD Records for the specified Target.
-     *
-     *
-     * @param[in]  i_targetId Reference to Target ID to get GARD Records for.
-     * @param[out] o_records  Reference to vector of GardRecords that is cleared
-     *                        then filled in with records.
-     *
-     * @return errlHndl_t. Error log handle.
-     */
-    errlHndl_t _getGardRecords(const TARGETING::EntityPath & i_targetId,
-                               GardRecords_t & o_records);
-
-    /**
-     * @brief sets the maxGardRecords and nextGardRecordId variables
-     *
-     * @param[in]  i_size size of GARD area in PNOR/memory
-     */
-    void _GardRecordIdSetup(uint32_t i_size);
-
     // Mutex for thread safety
     HWAS_MUTEX_TYPE iv_mutex;
-
-    // GARD Record Data
-    uint32_t iv_nextGardRecordId;   // Next GARD Record ID to use
-    uint32_t iv_maxGardRecords;     // Maximum number of GARD Records
-    GardRecord * iv_pGardRecords;   // Pointer to the GARD Records in PNOR
 
     // The Deconfigure Records
     DeconfigureRecords_t iv_deconfigureRecords;
 
+    // pointer to plat specific data
+    // platform functions can malloc space here if needed;
+    // deconfigGard dtor will free()
+    void *iv_platDeconfigGard;
+
 }; // DeconfigGard
 HWAS_DECLARE_SINGLETON(HWAS::DeconfigGard,theDeconfigGardSingleton);
 
-// The HWAS Common code needs to allow for the fact that the platforms
-//  may need to know when the DeconfigGard functions are done using the
-//  PNOR area for GARD record access. To this end, GardAddress is an
-//  object that the common code will create when it needs to use the
-//  address to the GARD records data (iv_pGardRecords). When this object
-//  goes out of scope, the destructor will get called, and the platform
-//  code will know that access to the PNOR area is complete.
-class GardAddress
-{
-public:
-
-    /**
-     * @brief Constructor.
-     *  PLATFORM must implement this function
-     *
-     * @param[in]  o_errl  errlHndl_t set if there was an error
-     */
-    GardAddress(errlHndl_t &o_errl);
-
-    /**
-     * @brief Destructor.
-     *  PLATFORM must implement this function
-     */
-    ~GardAddress();
-
-    /**
-     * @brief flush. flush all of the waiting addresses out
-     *
-     */
-    void flush();
-
-    /**
-     * @brief writeRecord. Add the indicated address to a vector, so
-     *  that the destructor knows which GARD records were updated.
-     *
-     * @param[in]  i_addr  address of GARD record that was updated.
-     */
-    void writeRecord(void *i_addr)
-    {
-        if (i_addr !=NULL)
-        {
-            iv_addr.push_back(i_addr);
-        }
-    }
-
-protected:
-
-    std::vector<void *>iv_addr;
-
-}; // GardAddress
 }
 
 #endif

@@ -53,5 +53,17 @@
 #define HWAS_GET_SINGLETON(__TYPE__) \
     __TYPE__::instance()
 
+namespace HWAS
+{
+
+struct HBDeconfigGard
+{
+    // GARD Record Data
+    uint32_t iv_nextGardRecordId;   // Next GARD Record ID to use
+    uint32_t iv_maxGardRecords;     // Maximum number of GARD Records
+    void *iv_pGardRecords;          // Pointer to the GARD Records in PNOR
+};
+
+} // namespace HWAS
 
 #endif // HWASPLATDECONFIGGARD_H_

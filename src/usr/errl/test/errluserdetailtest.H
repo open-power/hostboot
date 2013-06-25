@@ -490,7 +490,7 @@ public:
             }
 
             gard_errl = HWAS::theDeconfigGard().getGardRecords(
-                    HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_gardRecords);
+                    NULL, l_gardRecords);
             if (gard_errl)
             {
                 TS_FAIL("testCallout: Error from getGardRecords");
@@ -540,25 +540,25 @@ public:
                         HWAS::DELAYED_DECONFIG,
                         HWAS::GARD_NULL).addToLog(errl);
 
-            // find some cores that we can play with
+            // find some ex units that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testCallout: empty pCoreList");
+                TS_FAIL("testCallout: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             TARGETING::EntityPath ep;
             ep = l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
@@ -580,10 +580,10 @@ public:
                         HWAS::EPUB_PRC_FSI_PATH,
                         HWAS::SRCI_PRIORITY_HIGH).addToLog(errl);
 
-            if (pCoreList.size() > 1)
+            if (pExList.size() > 1)
             {
                 TARGETING::EntityPath ep2;
-                ep2 = pCoreList[1]->getAttr<TARGETING::ATTR_PHYS_PATH>();
+                ep2 = pExList[1]->getAttr<TARGETING::ATTR_PHYS_PATH>();
                 // size is total EntityPath size minus unused path elements
                 uint32_t ep2_size = sizeof(ep2) -
                     (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep2.size()) *
@@ -604,7 +604,7 @@ public:
 #if 0  // GARD records are created asynchronously, so can't really test this
             // confirm there are the correct number of deconfig and gard records
             gard_errl = HWAS::theDeconfigGard().getGardRecords(
-                    HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_gardRecords);
+                    NULL, l_gardRecords);
             if (gard_errl)
             {
                 TS_FAIL("testCallout: Error from getGardRecords");
@@ -632,7 +632,7 @@ public:
 
             // delete these deconfigure and gard records
             HWAS::theDeconfigGard().clearDeconfigureRecords(NULL);
-            gard_errl = HWAS::theDeconfigGard().clearGardRecords(0);
+            gard_errl = HWAS::theDeconfigGard().clearGardRecords(NULL);
             if (gard_errl)
             {
                 errlCommit(gard_errl,HWAS_COMP_ID);

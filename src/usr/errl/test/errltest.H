@@ -344,27 +344,27 @@ public:
 #else
         do
         {
-            // find some cores that we can play with
+            // find some ex units that we can play with
             TARGETING::Target * pSys;
             TARGETING::targetService().getTopLevelTarget(pSys);
 
-            TARGETING::PredicateCTM predCore(TARGETING::CLASS_UNIT,
-                                                TARGETING::TYPE_CORE);
+            TARGETING::PredicateCTM predEx(TARGETING::CLASS_UNIT,
+                                                TARGETING::TYPE_EX);
             TARGETING::PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             TARGETING::PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TARGETING::TargetHandleList pCoreList;
-            TARGETING::targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TARGETING::TargetHandleList pExList;
+            TARGETING::targetService().getAssociated( pExList, pSys,
                 TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
                 &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testErrl3: empty pCoreList");
+                TS_FAIL("testErrl3: empty pExList");
                 break;
             }
-            TARGETING::TargetHandle_t pTarget = *pCoreList.begin();
+            TARGETING::TargetHandle_t pTarget = *pExList.begin();
 
             errlHndl_t gard_errl = NULL;
             HWAS::DeconfigGard::DeconfigureRecords_t l_deconfigRecords;
@@ -389,7 +389,7 @@ public:
             }
 
             gard_errl = HWAS::theDeconfigGard().getGardRecords(
-                    HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_gardRecords);
+                    NULL, l_gardRecords);
             if (gard_errl)
             {
                 TS_FAIL("testErrl3: Error from getGardRecords");
@@ -441,11 +441,11 @@ public:
                     HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
                     HWAS::SRCI_PRIORITY_HIGH);
 
-            if (pCoreList.size() > 1)
+            if (pExList.size() > 1)
             {
                 errl->addBusCallout(
-                    pCoreList[0],
-                    pCoreList[1],
+                    pExList[0],
+                    pExList[1],
                     HWAS::A_BUS_TYPE,
                     HWAS::SRCI_PRIORITY_LOW);
             }
@@ -454,7 +454,7 @@ public:
 
             // confirm there are the correct number of deconfig and gard records
             gard_errl = HWAS::theDeconfigGard().getGardRecords(
-                    HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_gardRecords);
+                    NULL, l_gardRecords);
             if (gard_errl)
             {
                 TS_FAIL("testCallout: Error from getGardRecords");
@@ -481,7 +481,7 @@ public:
 
             // delete these deconfigure and gard records
             HWAS::theDeconfigGard().clearDeconfigureRecords(NULL);
-            gard_errl = HWAS::theDeconfigGard().clearGardRecords(0);
+            gard_errl = HWAS::theDeconfigGard().clearGardRecords(NULL);
             if (gard_errl)
             {
                 errlCommit(gard_errl,HWAS_COMP_ID);
@@ -513,13 +513,29 @@ public:
 #else
         do
         {
-            // find a proc target
-            TARGETING::PredicateCTM procChipFilter(
-                    TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC);
-            TARGETING::TargetRangeFilter pProc(
-                    TARGETING::targetService().begin(),
-                    TARGETING::targetService().end(),
-                    &procChipFilter);
+            // find a ex unit that we can play with
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
+
+            TARGETING::PredicateCTM predEx(TARGETING::CLASS_UNIT,
+                                            TARGETING::TYPE_EX);
+            TARGETING::PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            TARGETING::PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predEx).push(&predFunctional).And();
+
+            TARGETING::TargetHandleList pExList;
+            TARGETING::targetService().getAssociated( pExList, pSys,
+                TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
+                &checkExpr );
+
+            if (pExList.empty())
+            {
+                TS_FAIL("test callout: empty pExList");
+                break;
+            }
+
+            TARGETING::TargetHandle_t l_target = *pExList.begin();
 
             TARGETING::PredicateCTM l_L4s(TARGETING::CLASS_UNIT,
                                           TARGETING::TYPE_L4);
@@ -535,11 +551,9 @@ public:
                                     ERRL_TEST_MOD_ID,
                                     ERRL_TEST_REASON_CODE);
 
-            printk("\n\nelog = 0x%X\n\n", errl->eid() );
-
             // test the different callout types
-            TS_TRACE( "test callout pProc %p", *pProc);
-            ERRORLOG::ErrlUserDetailsTarget(*pProc).addToLog(errl);
+            TS_TRACE( "test callout pEx %p", l_target);
+            ERRORLOG::ErrlUserDetailsTarget(l_target).addToLog(errl);
 
             errl->addHwCallout(*pL4,
                     HWAS::SRCI_PRIORITY_HIGH,
@@ -548,7 +562,7 @@ public:
 
             // make this one high too - should end up with B120 src
             // as the first high priority callout is mem subsys
-            errl->addHwCallout( *pProc,
+            errl->addHwCallout( l_target,
                     HWAS::SRCI_PRIORITY_HIGH,
                     HWAS::DECONFIG,
                     HWAS::GARD_NULL);
@@ -585,13 +599,29 @@ public:
 #else
         do
         {
-            // find a proc target
-            TARGETING::PredicateCTM procChipFilter(
-                    TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC);
-            TARGETING::TargetRangeFilter pProc(
-                    TARGETING::targetService().begin(),
-                    TARGETING::targetService().end(),
-                    &procChipFilter);
+            // find a ex unit that we can play with
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
+
+            TARGETING::PredicateCTM predEx(TARGETING::CLASS_UNIT,
+                                            TARGETING::TYPE_EX);
+            TARGETING::PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            TARGETING::PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predEx).push(&predFunctional).And();
+
+            TARGETING::TargetHandleList pExList;
+            TARGETING::targetService().getAssociated( pExList, pSys,
+                TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
+                &checkExpr );
+
+            if (pExList.empty())
+            {
+                TS_FAIL("test callout: empty pExList");
+                break;
+            }
+
+            TARGETING::TargetHandle_t l_target = *pExList.begin();
 
             // find a membuf target
             TARGETING::PredicateCTM membufChipFilter(
@@ -608,8 +638,8 @@ public:
                                     ERRL_TEST_REASON_CODE);
 
             // test the different callout types
-            TS_TRACE( "test callout pProc %p", *pProc);
-            ERRORLOG::ErrlUserDetailsTarget(*pProc).addToLog(errl);
+            TS_TRACE( "test callout pEx %p", l_target);
+            ERRORLOG::ErrlUserDetailsTarget(l_target).addToLog(errl);
 
             errl->addHwCallout(*pMembuf,
                     HWAS::SRCI_PRIORITY_HIGH,

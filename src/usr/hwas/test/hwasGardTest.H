@@ -76,25 +76,25 @@ public:
                  break;
             }
 
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testDeconfigure3a: empty pCoreList");
+                TS_FAIL("testDeconfigure3a: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // create a deconfigure record
             theDeconfigGard().
@@ -165,25 +165,25 @@ public:
 
         do
         {
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testDeconfigure3: empty pCoreList");
+                TS_FAIL("testDeconfigure3: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // Get the original HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
@@ -242,25 +242,25 @@ public:
 
         do
         {
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testDeconfigure4: empty pCoreList");
+                TS_FAIL("testDeconfigure4: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // Get the current HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
@@ -647,25 +647,25 @@ public:
 
         do
         {
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testDefDeconfig1: empty pCoreList");
+                TS_FAIL("testDefDeconfig1: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // Get any existing Deconfigure Record for the target
             l_pErr = theDeconfigGard().
@@ -748,101 +748,18 @@ public:
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
 
-        l_pErr = theDeconfigGard().getGardRecords(
-                    DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+        l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
 
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
-            TS_FAIL("testGard1: Error from getGardRecords");
+            TS_FAIL("testGard1: Error from getGardRecords(NULL)");
         }
         else
         {
-            TS_TRACE(INFO_MRK "testGard1: Success. %d records",
+            TS_TRACE(INFO_MRK "testGard1: get(NULL) Success. %d records",
                      l_records.size());
         }
-    }
-
-    /**
-     *  @brief Test getting GARD Records with a bad record ID).
-     */
-    void testGard2()
-    {
-        TS_TRACE(INFO_MRK "testGard2: Started");
-
-        errlHndl_t l_pErr = NULL;
-        DeconfigGard::GardRecords_t l_records;
-
-        l_pErr = theDeconfigGard().getGardRecords(0x12345678, l_records);
-
-        if (l_pErr)
-        {
-            errlCommit(l_pErr,HWAS_COMP_ID);
-            TS_FAIL("testGard2: Error from getGardRecords");
-        }
-        else
-        {
-            if (l_records.size())
-            {
-                TS_FAIL("testGard2: %d records found for bad ID",
-                        l_records.size());
-            }
-            else
-            {
-                TS_TRACE(INFO_MRK "testGard2: Success");
-            }
-        }
-    }
-
-    /**
-     *  @brief Test getting GARD Records for a specific target
-     */
-    void testGard3()
-    {
-        TS_TRACE(INFO_MRK "testGard3: Started");
-
-        errlHndl_t l_pErr = NULL;
-        DeconfigGard::GardRecords_t l_records;
-
-        do
-        {
-            // find a core that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
-
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
-            PredicateHwas predFunctional;
-            predFunctional.poweredOn(true).present(true).functional(true);
-            PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
-                TargetService::CHILD, TargetService::ALL, &checkExpr );
-
-            if (pCoreList.empty())
-            {
-                TS_FAIL("testGard3: empty pCoreList");
-                break;
-            }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
-
-            EntityPath l_id = l_pTarget->getAttr<ATTR_PHYS_PATH>();
-
-            // Get all GARD Records for the Target
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
-
-            if (l_pErr)
-            {
-                errlCommit(l_pErr,HWAS_COMP_ID);
-                TS_FAIL("testGard3: Error from getGardRecords");
-            }
-            else
-            {
-                TS_TRACE(INFO_MRK "testGard3: Success. %d records",
-                         l_records.size());
-            }
-        }
-        while (0);
     }
 
     /**
@@ -869,31 +786,28 @@ public:
 
         do
         {
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testGard4: empty pCoreList");
+                TS_FAIL("testGard4: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
-
-            EntityPath l_id = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // Get any existing GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
-
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
             if (l_pErr)
             {
                 TS_FAIL("testGard4: Error from getGardRecords");
@@ -909,7 +823,7 @@ public:
 
             // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0x12, GARD_Predictive);
+                    createGardRecord(l_pTarget, 0x12, GARD_Predictive);
 
             if (l_pErr)
             {
@@ -918,7 +832,7 @@ public:
             }
 
             // Get the GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -941,7 +855,7 @@ public:
             }
 
             // Clear the GARD Records for the target
-            l_pErr = theDeconfigGard().clearGardRecords(l_id);
+            l_pErr = theDeconfigGard().clearGardRecords(l_pTarget);
 
             if (l_pErr)
             {
@@ -952,7 +866,7 @@ public:
             // Get the GARD Records for the target
             l_records.clear();
 
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1001,30 +915,28 @@ public:
 
         do
         {
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testGard5: empty pCoreList");
+                TS_FAIL("testGard5: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
-
-            EntityPath l_id = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // Get any existing GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1041,7 +953,7 @@ public:
 
             // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0x23, GARD_Predictive);
+                    createGardRecord(l_pTarget, 0x23, GARD_Predictive);
 
             if (l_pErr)
             {
@@ -1051,7 +963,7 @@ public:
 
             // Create another GARD Record for the target
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0x45, GARD_Fatal);
+                    createGardRecord(l_pTarget, 0x45, GARD_Fatal);
 
             if (l_pErr)
             {
@@ -1060,7 +972,7 @@ public:
             }
 
             // Get the GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1068,15 +980,15 @@ public:
                 break;
             }
 
-            if (l_records.size() != 2)
+            if (l_records.size() != 1)
             {
-                TS_FAIL("testGard5: %d records for target, expected 2",
+                TS_FAIL("testGard5: %d records for target, expected 1",
                         l_records.size());
                 break;
             }
 
-            // Clear the GARD Records for the target
-            l_pErr = theDeconfigGard().clearGardRecords(l_id);
+            // Clear the GARD Record for the target
+            l_pErr = theDeconfigGard().clearGardRecords(l_pTarget);
 
             if (l_pErr)
             {
@@ -1087,7 +999,7 @@ public:
             // Get the GARD Records for the target
             l_records.clear();
 
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1114,7 +1026,7 @@ public:
     }
 
     /**
-     *  @brief Test getting and clearing GARD Records by recordID
+     *  @brief Test creating a 2nd GARD Record overwrites manual gard
      */
     void testGard6()
     {
@@ -1136,30 +1048,28 @@ public:
 
         do
         {
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testGard6: empty pCoreList");
+                TS_FAIL("testGard6: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
-
-            EntityPath l_id = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // Get any existing GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1174,10 +1084,9 @@ public:
                 break;
             }
 
-            // Create a GARD Record for the target. Production code will pass a
-            // valid PLID
+            // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0, GARD_Predictive);
+                    createGardRecord(l_pTarget, 0x23, GARD_User_Manual);
 
             if (l_pErr)
             {
@@ -1185,9 +1094,9 @@ public:
                 break;
             }
 
-            // Create another GARD Record for the target
+            // Create another GARD Record for the target - should overwrite
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0, GARD_Fatal);
+                    createGardRecord(l_pTarget, 0x46, GARD_Fatal);
 
             if (l_pErr)
             {
@@ -1196,31 +1105,11 @@ public:
             }
 
             // Get the GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from getGardRecords (2)");
-                break;
-            }
-
-            if (l_records.size() != 2)
-            {
-                TS_FAIL("testGard6: %d records for target, expected 2",
-                        l_records.size());
-                break;
-            }
-
-            // Get the first GARD Record for the target by Record ID
-            uint32_t l_recordID = l_records[0].iv_recordId;
-            l_records.clear();
-
-            l_pErr = theDeconfigGard().
-                    getGardRecords(l_recordID, l_records);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard6: Error from getGardRecords (3)");
                 break;
             }
 
@@ -1231,8 +1120,16 @@ public:
                 break;
             }
 
-            // Clear the first GARD Record for the target by Record ID
-            l_pErr = theDeconfigGard().clearGardRecords(l_recordID);
+            if ((l_records[0].iv_errlogPlid != 0x46) ||
+                (l_records[0].iv_errorType != GARD_Fatal))
+            {
+                TS_FAIL("testGard6: unexpected data - errl 0x%X type %x",
+                    l_records[0].iv_errlogPlid, l_records[0].iv_errorType);
+                break;
+            }
+
+            // Clear the GARD Record for the target
+            l_pErr = theDeconfigGard().clearGardRecords(l_pTarget);
 
             if (l_pErr)
             {
@@ -1243,27 +1140,18 @@ public:
             // Get the GARD Records for the target
             l_records.clear();
 
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard6: Error from getGardRecords (4)");
+                TS_FAIL("testGard6: Error from getGardRecords (3)");
                 break;
             }
 
-            if (l_records.size() != 1)
+            if (l_records.size() != 0)
             {
-                TS_FAIL("testGard6: %d records for target, expected 1 (2)",
+                TS_FAIL("testGard6: %d records for target, expected 0",
                         l_records.size());
-                break;
-            }
-
-            // Clear the GARD Records for the target
-            l_pErr = theDeconfigGard().clearGardRecords(l_id);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard6: Error from clearGardRecords");
                 break;
             }
 
@@ -1301,29 +1189,28 @@ public:
 
         do
         {
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testGard7: empty pCoreList");
+                TS_FAIL("testGard7: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // Get all existing GARD Records
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
 
             if (l_pErr)
             {
@@ -1338,10 +1225,9 @@ public:
                 break;
             }
 
-            // Create a GARD Record for the target. Production code will pass a
-            // valid PLID
+            // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0, GARD_Predictive);
+                    createGardRecord(l_pTarget, 0x71, GARD_Predictive);
 
             if (l_pErr)
             {
@@ -1349,31 +1235,19 @@ public:
                 break;
             }
 
-            // Create another GARD Record for the target
-            l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0, GARD_Fatal);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard7: Error from createGardRecord (2)");
-                break;
-            }
-
             // Clear all GARD Records
-            l_pErr = theDeconfigGard().
-                    clearGardRecords(DeconfigGard::CLEAR_ALL_GARD_RECORDS);
+            l_pErr = theDeconfigGard().clearGardRecords(NULL);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard7: Error from clearGardRecords");
+                TS_FAIL("testGard7: Error from clearGardRecords(NULL)");
                 break;
             }
 
             // Get the GARD Records
             l_records.clear();
 
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
 
             if (l_pErr)
             {
@@ -1423,8 +1297,7 @@ public:
 
         do
         {
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
             if (l_pErr)
             {
                 errlCommit(l_pErr,HWAS_COMP_ID);
@@ -1439,40 +1312,39 @@ public:
                 break;
             }
 
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
+            checkExpr.push(&predEx).push(&predFunctional).And();
 
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testGard8: empty pCoreList");
+                TS_FAIL("testGard8: empty pExList");
                 break;
             }
 
-            TargetHandle_t l_target = *pCoreList.begin();
+            TargetHandle_t l_target = *pExList.begin();
 
             // create GARD record, call 'doGard' step and confirm target is
             //  deconfigured
             l_pErr = theDeconfigGard().
-                    createGardRecord( *l_target, 0x12, GARD_User_Manual);
+                    createGardRecord(l_target, 0x12, GARD_User_Manual);
             if (l_pErr)
             {
                 TS_FAIL("testGard8: Error from createGardRecord");
                 break;
             }
 
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
             if (l_pErr)
             {
                 errlCommit(l_pErr,HWAS_COMP_ID);
@@ -1514,8 +1386,7 @@ public:
                 break;
             }
 
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
             if (l_pErr)
             {
                 errlCommit(l_pErr,HWAS_COMP_ID);
@@ -1570,30 +1441,28 @@ public:
 
         do
         {
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            checkExpr.push(&predEx).push(&predFunctional).And();
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testGard9: empty pCoreList");
+                TS_FAIL("testGard9: empty pExList");
                 break;
             }
-            TargetHandle_t l_pTarget = *pCoreList.begin();
-
-            EntityPath l_id = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+            TargetHandle_t l_pTarget = *pExList.begin();
 
             // Get any existing GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1617,7 +1486,7 @@ public:
 
             // (try to) Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0x12, GARD_Fatal);
+                    createGardRecord(l_pTarget, 0x12, GARD_Fatal);
 
             if (l_pErr)
             {
@@ -1626,7 +1495,7 @@ public:
             }
 
             // Get the GARD Records for the target - shouldn't be any
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1648,7 +1517,7 @@ public:
 
             // (try to) Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0x12, GARD_Predictive);
+                    createGardRecord(l_pTarget, 0x12, GARD_Predictive);
 
             if (l_pErr)
             {
@@ -1657,7 +1526,7 @@ public:
             }
 
             // Get the GARD Records for the target - shouldn't be any
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1679,7 +1548,7 @@ public:
 
             // (try to) Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(*l_pTarget, 0x12, GARD_Func);
+                    createGardRecord(l_pTarget, 0x12, GARD_Func);
 
             if (l_pErr)
             {
@@ -1688,7 +1557,7 @@ public:
             }
 
             // Get the GARD Records for the target - shouldn't be any
-            l_pErr = theDeconfigGard().getGardRecords(l_id, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -1739,8 +1608,7 @@ public:
 
         do
         {
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
             if (l_pErr)
             {
                 errlCommit(l_pErr,HWAS_COMP_ID);
@@ -1755,40 +1623,39 @@ public:
                 break;
             }
 
-            // find a core that we can play with
+            // find a ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
-            PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predCore).push(&predFunctional).And();
+            checkExpr.push(&predEx).push(&predFunctional).And();
 
-            TargetHandleList pCoreList;
-            targetService().getAssociated( pCoreList, pSys,
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-            if (pCoreList.empty())
+            if (pExList.empty())
             {
-                TS_FAIL("testGard10: empty pCoreList");
+                TS_FAIL("testGard10: empty pExList");
                 break;
             }
 
-            TargetHandle_t l_target = *pCoreList.begin();
+            TargetHandle_t l_target = *pExList.begin();
 
             // create GARD record, set Policy, call 'doGard' step and confirm
             //  target is NOT deconfigured
             l_pErr = theDeconfigGard().
-                    createGardRecord( *l_target, 0x12, GARD_Predictive);
+                    createGardRecord(l_target, 0x12, GARD_Predictive);
             if (l_pErr)
             {
                 TS_FAIL("testGard10: Error from createGardRecord");
                 break;
             }
 
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
             if (l_pErr)
             {
                 errlCommit(l_pErr,HWAS_COMP_ID);
@@ -1843,11 +1710,14 @@ public:
             }
 
             // Clear all GARD Records
-            l_pErr = theDeconfigGard().
-                    clearGardRecords(DeconfigGard::CLEAR_ALL_GARD_RECORDS);
+            l_pErr = theDeconfigGard().clearGardRecords(NULL);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard7: Error from clearGardRecords(NULL)");
+                break;
+            }
 
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
             if (l_pErr)
             {
                 errlCommit(l_pErr,HWAS_COMP_ID);
@@ -1864,15 +1734,14 @@ public:
             // create GARD record, set Policy, call 'doGard' step and confirm
             //  target is NOT deconfigured
             l_pErr = theDeconfigGard().
-                    createGardRecord( *l_target, 0x12, GARD_Func);
+                    createGardRecord(l_target, 0x12, GARD_Func);
             if (l_pErr)
             {
                 TS_FAIL("testGard10: Error from createGardRecord");
                 break;
             }
 
-            l_pErr = theDeconfigGard().getGardRecords(
-                        DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
             if (l_pErr)
             {
                 errlCommit(l_pErr,HWAS_COMP_ID);
@@ -1906,8 +1775,12 @@ public:
             }
 
             // Clear all GARD Records
-            l_pErr = theDeconfigGard().
-                    clearGardRecords(DeconfigGard::CLEAR_ALL_GARD_RECORDS);
+            l_pErr = theDeconfigGard().clearGardRecords(NULL);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard7: Error from clearGardRecords(NULL)");
+                break;
+            }
 
             // restore
             l_policies = 0;
