@@ -68,6 +68,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_PROC,
                       xscomPerformOp);
 
+uint64_t* getCpuIdVirtualAddress();
 /**
  * @brief Internal routine that reset XSCOM status bits
  *        of HMER register before an XSCOM operation
@@ -305,10 +306,7 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
             if (__sync_bool_compare_and_swap(&g_masterProcVirtAddr,
                                      NULL, NULL))
             {
-                l_XSComBaseAddr = MASTER_PROC_XSCOM_BASE_ADDR;
-                uint64_t* l_tempVirtAddr =  static_cast<uint64_t*>
-                    (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
-                    THIRTYTWO_GB));
+                uint64_t* l_tempVirtAddr = getCpuIdVirtualAddress();
                 if (!__sync_bool_compare_and_swap(&g_masterProcVirtAddr,
                                          NULL, l_tempVirtAddr))
                 {

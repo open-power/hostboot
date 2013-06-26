@@ -5,15 +5,20 @@
 ($hb_masterproc).proc_fsi2host_mbox->responder_enable=1
 
 # Preload VPD in PNOR
-try {
-    run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
-    ($hb_pnor).sfc_master_mem.load-file ./sysmvpd.dat 0x3E0A000
-    ($hb_pnor).sfc_master_mem.load-file ./sysspd.dat 0x3DCA000
-    ($hb_pnor).sfc_master_mem.load-file ./syscvpd.dat 0x3E8A000
-} except { echo "ERROR: Failed to preload VPD into PNOR." }
+foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
+    try {
+        run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
+            ($pnor).sfc_master_mem.load-file ./sysmvpd.dat 0x3E0A000
+            ($pnor).sfc_master_mem.load-file ./sysspd.dat 0x3DCA000
+            ($pnor).sfc_master_mem.load-file ./syscvpd.dat 0x3E8A000
+    } except { echo "ERROR: Failed to preload VPD into PNOR." }
+}
 
 #Write the PNOR MMIO addr into Scratch 2, 0x283A 
-($hb_masterproc).proc_lbus_map.write 0x28e8 0xFFEF0000  #HB PNOR addr
+#($hb_masterproc).proc_lbus_map.write 0x28e8 0xFFEF0000  #HB PNOR addr
+foreach $cc in (get-object-list p8_proc) {
+    ($cc).proc_lbus_map.write 0x28e8 0xFFEF0000
+}
 
 # Loop through every processor chip
 foreach $cc in (get-object-list p8_proc) {
@@ -37,19 +42,22 @@ foreach $cc in (get-object-list p8_proc) {
 ###################################
 echo "Configure SFC"
 
-#Direct Read window config
-($hb_pnor).sfc_master->regs_OADRNB = 0xC000000
-($hb_pnor).sfc_master->regs_ADRCBF = 0x0
-($hb_pnor).sfc_master->regs_ADRCMF = 0xF
+foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
+    echo $pnor
+    #Direct Read window config
+    ($pnor).sfc_master->regs_OADRNB = 0xC000000
+    ($pnor).sfc_master->regs_ADRCBF = 0x0
+    ($pnor).sfc_master->regs_ADRCMF = 0xF
 
-#Direct Access Cache Disable 
-($hb_pnor).sfc_master->regs_CONF = 0x00000002
+    #Direct Access Cache Disable 
+    ($pnor).sfc_master->regs_CONF = 0x00000002
 
-#Small Erase op code
-($hb_pnor).sfc_master->regs_CONF4 = 0x00000020
-#Erase Size
-($hb_pnor).sfc_master->regs_CONF5 = 0x1000
+    #Small Erase op code
+    ($pnor).sfc_master->regs_CONF4 = 0x00000020
+    #Erase Size
+    ($pnor).sfc_master->regs_CONF5 = 0x1000
 
-#Enable 4 byte address mode - must write via memory to trigger 
-#model behavior
-($hb_pnor).fsi_local_lbus_map.write 0xC40 0x00006E00
+    #Enable 4 byte address mode - must write via memory to trigger 
+    #model behavior
+    ($pnor).fsi_local_lbus_map.write 0xC40 0x00006E00
+}
