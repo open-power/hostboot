@@ -121,7 +121,7 @@ public:
                          l_records.size());
 
             // now delete it.
-            theDeconfigGard()._clearDeconfigureRecords(l_pTarget);
+            theDeconfigGard().clearDeconfigureRecords(l_pTarget);
 
             // confirm that there aren't any deconfigure records - if so exit
             l_pErr = theDeconfigGard().

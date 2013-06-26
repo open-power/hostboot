@@ -30,6 +30,7 @@
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
+#include <hwas/hwasPlat.H>
 #include <initservice/initserviceif.H>
 
 namespace HWAS
@@ -63,58 +64,66 @@ errlHndl_t platHandleHWCallout(
 
     HWAS_INF("HW callout; pTarget %p gardErrorType %x deconfigState %x",
             i_pTarget, i_gardErrorType, i_deconfigState);
-    switch (i_gardErrorType)
-    {
-        case (GARD_NULL):
-        {   // means no GARD operations
-            break;
-        }
-        default:
-        {
-            errl = HWAS::theDeconfigGard().createGardRecord(*i_pTarget,
-                    i_errl->plid(),
-                    i_gardErrorType);
-            break;
-        }
-    } // switch i_gardErrorType
 
-    switch (i_deconfigState)
+    if (hwasPLDDetection())
     {
-        case (NO_DECONFIG):
-        {
-            break;
-        }
-        case (DECONFIG):
-        {
-            // call HWAS common function
-            errl = HWAS::theDeconfigGard().deconfigureTarget(*i_pTarget,
-                        i_errl->plid());
-            break;
-        }
-        case (DELAYED_DECONFIG):
-        {
-            // do nothing -- the deconfig information was already
-            // put on a queue and will be processed separately,
-            // when the time is right.
-            break;
-        }
-    } // switch i_deconfigState
-
-    // check to see if this target is the master processor
-    //  and if it's been deconfigured.
-    TARGETING::Target *l_masterProc;
-    TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
-    if (i_pTarget == l_masterProc)
-    {
-        const TARGETING::HwasState hwasState =
-                l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>();
-        if (!hwasState.functional)
-        {
-            HWAS_ERR("master proc deconfigured - Shutdown due to plid 0x%X",
-                    i_errl->plid());
-            INITSERVICE::doShutdown(i_errl->plid());
-        }
+        HWAS_INF("hwasPLDDetection return true - skipping callouts");
     }
+    else
+    {
+        switch (i_gardErrorType)
+        {
+            case (GARD_NULL):
+            {   // means no GARD operations
+                break;
+            }
+            default:
+            {
+                errl = HWAS::theDeconfigGard().createGardRecord(*i_pTarget,
+                        i_errl->plid(),
+                        i_gardErrorType);
+                break;
+            }
+        } // switch i_gardErrorType
+
+        switch (i_deconfigState)
+        {
+            case (NO_DECONFIG):
+            {
+                break;
+            }
+            case (DECONFIG):
+            {
+                // call HWAS common function
+                errl = HWAS::theDeconfigGard().deconfigureTarget(*i_pTarget,
+                            i_errl->plid());
+                break;
+            }
+            case (DELAYED_DECONFIG):
+            {
+                // do nothing -- the deconfig information was already
+                // put on a queue and will be processed separately,
+                // when the time is right.
+                break;
+            }
+        } // switch i_deconfigState
+
+        // check to see if this target is the master processor
+        //  and if it's been deconfigured.
+        TARGETING::Target *l_masterProc;
+        TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+        if (i_pTarget == l_masterProc)
+        {
+            const TARGETING::HwasState hwasState =
+                    l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            if (!hwasState.functional)
+            {
+                HWAS_ERR("master proc deconfigured - Shutdown due to plid 0x%X",
+                        i_errl->plid());
+                INITSERVICE::doShutdown(i_errl->plid());
+            }
+        }
+    } // PLD
 
     return errl;
 }

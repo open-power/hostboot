@@ -44,6 +44,18 @@ namespace HWAS
  */
 errlHndl_t hwasChangeDetection();
 
+/**
+ * @brief   hwasPLDDetection   hostboot function
+ *
+ *  This routine will do 'what is needed' to see if there were any
+ *      Power Line Disturbance (PLD) issues
+ *
+ * @param  none
+ *
+ * @return bool     true if there were PLD issues, false otherwise
+ */
+bool hwasPLDDetection();
+
 }
 
 #endif // __HWAS_PLAT_H

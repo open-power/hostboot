@@ -41,7 +41,8 @@
 
 #include <isteps/istepmasterlist.H>
 #include <hwpf/istepreasoncodes.H>
-#include    <hwas/common/deconfigGard.H>
+#include <hwas/common/deconfigGard.H>
+#include <hwas/hwasPlat.H>
 
 #include    "../baseinitsvc/initservice.H"
 
@@ -210,9 +211,20 @@ void iStepWorkerThread ( void * i_msgQ )
                 }
             }
 
+            bool callouts = false;
             // check to see if there were any deferred deconfigure callouts
-            // call HWAS to have this processed
-            bool callouts = HWAS::processDeferredDeconfig();
+            // IF there wasn't a PLD detected.
+            if (HWAS::hwasPLDDetection())
+            {
+                TRACFCOMP(g_trac_initsvc,
+                    "hwasPLDDetection return true - clear deconfig records");
+                HWAS::theDeconfigGard().clearDeconfigureRecords(NULL);
+            }
+            else
+            {
+                // call HWAS to have this processed
+                callouts = HWAS::processDeferredDeconfig();
+            }
 
             // force a TI if there were callouts
             if (callouts)

@@ -380,14 +380,11 @@ public:
     /**
      * @brief Clears the specified Deconfigure Records.
      *
-     * @note Provided for unit test only. Production code should not be
-     *       clearing Deconfigure Records.
-     *
      * @param[in] i_pTargetId Pointer to the Target ID to clear Deconfigure
      *                        Records for. If NULL then all Deconfigure Records
      *                        are cleared.
      */
-    void _clearDeconfigureRecords(const TARGETING::Target * i_pTarget);
+    void clearDeconfigureRecords(const TARGETING::Target * i_pTarget);
 
 
     /**

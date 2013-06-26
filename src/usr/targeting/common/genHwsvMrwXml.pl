@@ -1428,6 +1428,7 @@ sub generate_sys
             <field><id>mailboxEnabled</id><value>1</value></field>
             <field><id>fsiMasterInit</id><value>1</value></field>
             <field><id>hardwareChangeDetection</id><value>1</value></field>
+            <field><id>powerLineDisturbance</id><value>1</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>

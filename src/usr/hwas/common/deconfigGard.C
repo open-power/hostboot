@@ -756,7 +756,7 @@ void DeconfigGard::_createDeconfigureRecord(
 }
 
 //******************************************************************************
-void DeconfigGard::_clearDeconfigureRecords(
+void DeconfigGard::clearDeconfigureRecords(
         const TARGETING::Target * i_pTarget)
 {
     if (i_pTarget == NULL)

@@ -631,7 +631,7 @@ public:
             }
 
             // delete these deconfigure and gard records
-            HWAS::theDeconfigGard()._clearDeconfigureRecords(NULL);
+            HWAS::theDeconfigGard().clearDeconfigureRecords(NULL);
             gard_errl = HWAS::theDeconfigGard().clearGardRecords(0);
             if (gard_errl)
             {

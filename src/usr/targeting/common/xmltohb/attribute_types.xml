@@ -1807,10 +1807,20 @@
             <default>1</default>
         </field>
         <field>
+            <name>powerLineDisturbance</name>
+            <description>
+             0b0: SP does not perform Power Line Disturbance (PLD) detection, Hostboot must;
+             0b1: SP does perform Power Line Disturbance (PLD) detection so Hostboot should not
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>1</default>
+        </field>
+        <field>
             <name>reserved</name>
             <description>Reserved for future use</description>
             <type>uint8_t</type>
-            <bits>4</bits>
+            <bits>3</bits>
             <default>0</default>
         </field>
         </complexType>

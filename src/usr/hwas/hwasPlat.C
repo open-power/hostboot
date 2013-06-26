@@ -373,6 +373,35 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 } // platPresenceDetect
 
 //******************************************************************************
+// hwasPLDDetection function
+//******************************************************************************
+bool hwasPLDDetection()
+{
+    bool rc = false;
+
+    // TODO: RTC: 76459
+    HWAS_INF("hwasPLDDetection");
+
+    Target *l_pTopLevel = NULL;
+    targetService().getTopLevelTarget( l_pTopLevel );
+
+    // check if SP doesn't support this,
+    if (l_pTopLevel->getAttr<ATTR_SP_FUNCTIONS>().powerLineDisturbance)
+    {
+        // SP supports this - return false as this will get handled later.
+        rc = false;
+    }
+    else
+    {
+        // TBD - detect power fault
+        rc = false;
+    }
+
+    return rc;
+} // hwasPLDDetection
+
+
+//******************************************************************************
 // hwasChangeDetection function
 //******************************************************************************
 errlHndl_t hwasChangeDetection()
