@@ -47,7 +47,6 @@ OBJS =  slave_sbe.o \
         proc_check_slave_sbe_seeprom_complete.o \
         proc_extract_sbe_rc.o   \
         proc_read_seeprom.o \
-        proc_sbe_error.o    \
         proc_getecid.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP

@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.6 2013/02/06 04:14:57 jmcgill Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.7 2013/06/21 14:24:28 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -302,7 +302,8 @@ extern "C"
                     istep_num,
                     substep_num);
                 //Get the error code from the SBE code
-                FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target);
+                //JDS TODO - how do I get the pointer to the SEEPROM?
+                FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target, NULL, SBE);
                 break;
             }
             //Halt code was success

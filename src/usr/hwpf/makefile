@@ -59,7 +59,6 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_check_slave_sbe_seeprom_complete_errors.xml \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_sbe_rc_errors.xml \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_read_seeprom_errors.xml    \
-    hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_sbe_error_errors.xml   \
     hwp/proc_sbe_registers.xml \
     hwp/runtime_errors/p8_ocb_init_errors.xml \
     hwp/runtime_errors/p8_occ_control_errors.xml \
@@ -85,8 +84,11 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/tod_init/proc_tod_utils/proc_tod_utils.xml \
     hwp/mc_config/mss_eff_config/opt_memmap_errors.xml \
     hwp/pstates/pstates/p8_build_pstate_datablock_errors.xml \
-    hwp/pstates/pstates/proc_get_voltage_errors.xml
-    
+    hwp/pstates/pstates/proc_get_voltage_errors.xml \
+    hwp/proc_cfam_registers.xml \
+    hwp/proc_slw_registers.xml \
+    hwp/proc_sbe_select_ex_errors.xml
+
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/L2_L3_attributes.xml \

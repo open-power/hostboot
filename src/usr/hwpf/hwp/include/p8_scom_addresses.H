@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.157 2013/06/21 15:17:24 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.158 2013/06/21 18:23:33 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1922,6 +1922,9 @@ CONST_UINT64_T( EX_WRITE_ALL_EX_PMGP1_REG_0_WORx690F0105                        
 CONST_UINT64_T( EX_WRITE_ALL_PCBSPM_MODE_REG_0x690F0156                             , ULL(0x690F0156) );       // PCBSLV Mode Multicast Group1
 CONST_UINT64_T( EX_WRITE_ALL_PCBS_Power_Management_Bounds_Reg_0x690F015D            , ULL(0x690F015D) );       // PCBSLV PM Bounds Multicast Group1
 
+CONST_UINT64_T( EX_PARTIAL_GOOD_0x520F0012            , ULL(0x520F0012) );       // EX GP3 bit 0s
+
+
 //******************************************************************************/
 //*********  ADDRESS PREFIXES FOR SUBROUTINE SCAN0_MODULE CALLS ****************/
 //******************************************************************************/
@@ -1955,6 +1958,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.158  2013/06/21 18:23:33  jeshua
+Added EX_PARTIAL_GOOD_0x520F0012 for FFDC
+
 Revision 1.157  2013/06/21 15:17:24  jmcgill
 support HCA EN/EH BAR and Range registers
 

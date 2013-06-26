@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_sbe_rc.H,v 1.2 2012/10/18 19:19:03 jeshua Exp $
+// $Id: proc_extract_sbe_rc.H,v 1.3 2013/06/21 14:23:33 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -44,17 +44,24 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
+#include "p8_scom_addresses.H"
 
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
 
-// function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*proc_extract_sbe_rc_FP_t)(const fapi::Target &);
+//------------------------------------------------------------------------------
+// Enum definitions
+//------------------------------------------------------------------------------
+enum por_engine_t {
+  SBE = PORE_SBE_0x000E0000,
+  SLW = PORE_SLW_0x00068000
+};
 
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
+// function pointer typedef definition for HWP call support
+typedef fapi::ReturnCode (*proc_extract_sbe_rc_FP_t)(const fapi::Target &,
+                                                     void *,
+                                                     const por_engine_t);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -69,10 +76,16 @@ extern "C"
  *
  * @param[in] i_target         Reference to processor target containing the SBE
  *
- * @return ReturnCode          The error code at the SBE PC, or an error
- *                             while trying to extract the SBE PC
+ * @param[in] i_pSEEPROM       Pointer to a memory-mapped SEEPROM image (or NULL) 
+ *
+ * @param[in] i_engine         The POR engine type (SBE/SLW)
+ *
+ * @return ReturnCode          The error code the SBE hit, or the error hit
+ *                             while trying to get the error code
  */
-  fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target);
+  fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
+                                       void               * i_pSEEPROM,
+                                       const por_engine_t   i_engine);
 
 } // extern "C"
 

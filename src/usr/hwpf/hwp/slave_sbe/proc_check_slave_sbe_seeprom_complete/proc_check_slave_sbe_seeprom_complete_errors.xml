@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,47 +20,63 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_check_slave_sbe_seeprom_complete_errors.xml,v 1.4 2012/10/29 22:15:04 jeshua Exp $ -->
+<!-- $Id: proc_check_slave_sbe_seeprom_complete_errors.xml,v 1.5 2013/04/25 22:03:52 jeshua Exp $ -->
 <!-- Error definitions for proc_check_slave_sbe_seeprom_complete procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_STOPPED_AT_BREAKPOINT</rc>
-    <description>The SBE is stopped at a breakpoint</description>
+    <description>
+      Procedure: proc_check_slave_sbe_seeprom_complete
+      The slave SBE is stopped at a breakpoint
+    </description>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_STILL_RUNNING</rc>
-    <description>The SBE is still running</description>
+    <description>
+      Procedure: proc_check_slave_sbe_seeprom_complete
+      The slave SBE is still running
+    </description>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_BAD_ISTEP_NUM</rc>
-    <description>The SBE is not at the correct istep number</description>
+    <description>
+      Procedure: proc_check_slave_sbe_seeprom_complete
+      The slave SBE is not at the correct istep number
+    </description>
     <ffdc>ISTEP_NUM</ffdc>
     <ffdc>SUBSTEP_NUM</ffdc>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_BAD_SUBSTEP_NUM</rc>
-    <description>The SBE is not at the correct substep number</description>
+    <description>
+      Procedure: proc_check_slave_sbe_seeprom_complete
+      The slave SBE is not at the correct substep number
+    </description>
     <ffdc>ISTEP_NUM</ffdc>
     <ffdc>SUBSTEP_NUM</ffdc>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
   </hwpError>
 </hwpErrors>

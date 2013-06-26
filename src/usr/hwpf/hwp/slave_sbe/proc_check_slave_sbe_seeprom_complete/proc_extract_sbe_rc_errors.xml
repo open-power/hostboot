@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,37 +20,238 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.3 2012/10/29 22:17:36 jeshua Exp $ -->
+<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.6 2013/07/09 21:47:22 rjknight Exp $ -->
 <!-- Error definitions for proc_extract_sbe_rc procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_UNALIGNED</rc>
-    <description>The SBE stop address isn't properly aligned</description>
-    <ffdc>SBE_ADDRESS</ffdc>
+    <rc>RC_PROC_EXTRACT_SBE_RC_IMAGE_POINTER_NULL</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Can't extract an error from a NULL SEEPROM image
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>CHIP_IN_ERROR</ffdc>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED</rc>
-    <description>The SBE stop address isn't in a memory we know how to read</description>
+    <rc>RC_PROC_EXTRACT_SBE_RC_BAD_CHIP_TYPE</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      OTPROM code didn't recognize this chip as a Murano or Venice chip
+    </description>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SEEPROM_MAGIC_NUMBER_MISMATCH</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      The magic number read out of the SEEPROM doesn't match SBE SEPM
+    </description>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      The branch into the SEEPROM didn't happen
+    </description>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      The OTPROM code halted at an unexpected location
+    </description>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SCOM_ERROR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Got a scom error when trying to extract the SBE error
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>ERROR</ffdc>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_MODEL_ERROR_GETTING_SCOM</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Got a model error when trying to extract the SBE error
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>ERROR</ffdc>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_MODEL_ERRROR_SETTING_SEEPROM_ADDR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Got a model error when trying to set the SEEPROM address to extract
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>ERROR</ffdc>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_MODEL_ERRROR_READING_SEEPROM</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Got a model error when trying to read the SEEPROM address containing the RC
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>ERROR</ffdc>
+    <ffdc>CHIP_IN_ERROR</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_UNKNOWN_ENGINE</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Tried to extract error from unknown engine type
+    </description>
+    <ffdc>ENGINE</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_UNALIGNED_SBE</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      The SBE stop address isn't properly aligned
+    </description>
     <ffdc>SBE_ADDRESS</ffdc>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_UNALIGNED_SLW</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      The SLW stop address isn't properly aligned
+    </description>
+    <ffdc>SBE_ADDRESS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED_SBE</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      The SBE stop address isn't in a memory we know how to read
+    </description>
+    <ffdc>SBE_ADDRESS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED_SLW</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      The SLW stop address isn't in a memory we know how to read
+    </description>
+    <ffdc>SBE_ADDRESS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_FROM_ADDR_CODE_BUG</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Extract RC from address subroutine tried to return SUCCESS, which isn't allowed
+    </description>
+    <ffdc>SBE_ADDRESS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_GENERIC_SBE_HW_ERROR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      An error bit is set in the SBE debug registers.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_GENERIC_SLW_HW_ERROR</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      An error bit is set in the SLW debug registers.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_EXTRACT_SBE_RC_CODE_BUG</rc>
-    <description>SBE rc extract code tried to return SUCCESS</description>
-    <ffdc>SBE_ADDRESS</ffdc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      SBE rc extract code tried to return SUCCESS, which isn't allowed
+    </description>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
   </hwpError>
 </hwpErrors>
