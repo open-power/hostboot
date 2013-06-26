@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/mnfgtools/prdfMfgThresholdFile.H $          */
+/* $Source: src/usr/diag/prdf/mnfgtools/prdfMfgThresholdFile.C $          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,41 +21,62 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDF_PRDFMFGTHRESHOLDFILE_H
-#define __PRDF_PRDFMFGTHRESHOLDFILE_H
 
-#include <prdfMfgThresholdFile_common.H>
+#include <prdfMfgThresholdFile.H>
+#include <prdfGlobal.H>
+#include <prdfAssert.h>
+#include <prdfMfgThresholdSync.H>
+#include <prdfErrlUtil.H>
+#include <prdfPlatServices.H>
+#include <prdfTrace.H>
 
 namespace PRDF
 {
 
-class MfgThresholdFile : public MfgThresholdFileCommon
+void MfgThresholdFile::setup()
 {
-    public:
+    syncFromFsp();
+}
 
-        /**
-         *  @brief configure MfgThresholdFile
-        */
-        virtual void setup();
+void MfgThresholdFile::syncFromFsp()
+{
+    #define FUNC "[MfgThresholdFile::syncFromFsp]"
+    PRDF_ENTER(FUNC);
 
-        /**
-         * @brief serialize threshold data into data buffer
-         * @param[in/out] o_buffer - data buffer
-         * @param[in] i_sizeOfBuf - size of buffer
-         */
-        virtual void packThresholdDataIntoBuffer(
-                                    uint8_t* & o_buffer,
-                                    uint32_t i_sizeOfBuf);
+    do
+    {
+        if ( !PlatServices::mfgMode() )
+        {
+            PRDF_TRAC(" no-op since not in MFG mode");
+            break;
+        }
 
-    private:
+        MfgThresholdSync l_syncer;
 
-        /**
-         *  @brief sync MFG thresholds from FSP
-        */
-        void syncFromFsp();
+        errlHndl_t l_err = l_syncer.syncMfgThresholdFromFsp();
+        if (l_err)
+        {
+            PRDF_ERR(FUNC" failed to sync from the FSP");
+            PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
+            break;
+        }
 
-};
+    } while(0);
+
+    PRDF_EXIT(FUNC);
+    #undef FUNC
+}
+
+void MfgThresholdFile::packThresholdDataIntoBuffer(
+                             uint8_t* & o_buffer,
+                             uint32_t i_sizeOfBuf)
+{
+    #define FUNC "[MfgThresholdFile::packThresholdDataIntoBuffer]"
+
+    PRDF_ERR(FUNC" not used in hostboot");
+
+    #undef FUNC
+}
+
 
 } // end namespace PRDF
-
-#endif

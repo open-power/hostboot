@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/test/prdfTest_Ex.H $                        */
+/* $Source: src/usr/diag/prdf/test/prdfTest_MfgThresSync.H $              */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,8 +20,15 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __TEST_PRDFEXTEST_H
-#define __TEST_PRDFEXTEST_H
+
+#ifndef __TEST_PRDFTESTMFGTHRESSYNC_H
+#define __TEST_PRDFTESTMFGTHRESSYNC_H
+
+/**
+ *  @file prdfTest_MfgThresSync.H
+ *
+ *  @brief prdf unit test
+ */
 
 #ifdef __HOSTBOOT_MODULE
   #include <cxxtest/TestSuite.H>
@@ -37,52 +44,27 @@
 #include <prdfMain.H>
 #include "prdfsimMacros.H"
 #include "prdfsimMfgThresholdSync.H"
-#include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
 
-class ExLFIR:public CxxTest::TestSuite
+class PrdfTest_MfgThresSync: public CxxTest::TestSuite
 {
-    public:
+    #define FUNC "PrdfTest_MfgThresSync"
+    PRDF_ENTER(FUNC);
+    PRDF::SimMfgThresholdSync l_syncer;
 
-        void TestRecoverable(void)
-        {
-            PRDS_BEGIN("EXLFIR recoverable attention");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EX{5}", 0xb53a0007);
-            // GLOBAL_RE_FIR set bit 21
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x0000040000000000);
-            // EX_CHIPLET_RE_FIR[1] Attention from EXLFIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10040001, 0x4000000000000000);
-            // set EXLFIR[7]
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x1004000a, 0x0100000000000000);
-            // EXLFIR_ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{5}", 0x10040011, 0xFFFFFFFFFFFFFFFF);
-            PRDS_START_SIM();
-            if(!(PRDS_END()))
-            {
-                TS_FAIL("Expected Signature Failed EXLFIR recoverable attention");
-            }
-        }
-
-        void TestL3CE(void)
-        {
-
-            PRDS_BEGIN("L3CE Test");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EX{4}", 0xc6b00004);
-            // GLOBAL_RE_FIR bit 20
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B, 0x0000080000000000);
-            // EX_CHIPLET_RE_FIR[4] - Analyze L3FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x10040001, 0x0800000000000000);
-            // EX_L3FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x10010800, 0x0800000000000000);
-            // EX_L3FIR_ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:EX{4}", 0x10010807, 0x0800000000000000);
-            PRDS_START_SIM();
-            if(!(PRDS_END()))
-            {
-                TS_FAIL("L3CE Test failed");
-            }
-        }
+    errlHndl_t l_err = l_syncer.syncMfgThresholdFromFsp();
+    if (l_err)
+    {
+        PRDF_ERR(FUNC" MfgThresSync test failed to sync from FSP");
+        PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
+        TS_FAIL(FUNC" MfgThresSync test failed to sync from FSP");
+    }
+    else
+    {
+        PRDF_TRAC(FUNC" MfgThresSync test is a success.");
+    }
+    PRDF_EXIT(FUNC);
+    #undef FUNC
 };
 #endif
+

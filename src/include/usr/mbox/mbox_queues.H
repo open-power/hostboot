@@ -69,6 +69,7 @@ namespace MBOX
         FSP_DUMP_MSGQ_ID        = 0x8000000A,
         FSP_HWPF_ATTR_MSGQ      = 0x8000000B, // HWPF Attribute override/sync
         FSP_VPD_MSGQ            = 0x8000000C,
+        FSP_PRD_SYNC_MSGQ_ID    = 0x8000000D,
         FSP_LID_MSGQ            = FSP_ATTR_SYNC_MSGQ,
 
 

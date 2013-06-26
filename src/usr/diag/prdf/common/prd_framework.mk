@@ -80,6 +80,7 @@ prd_register = \
  prdfScanFacility.o
 
 prd_mnfgtools = \
+ prdfMfgThresholdFile_common.o \
  prdfMfgThresholdMgr.o
 
 prd_object_files = \

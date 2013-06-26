@@ -99,7 +99,7 @@ OBJS = \
  ${prd_object_files_no_sim} \
  ${prd_ruletable} \
  ${prd_pegasus_specific} \
- ${prd_pegasus_specific_HB} \
+ ${prd_object_files_HB} \
  ${PRDF_RULE_PLUGINS_PEGASUS} \
  ${PRDF_RULE_PLUGINS_PEGASUS_HB} \
  ${PRDF_RULE_PLUGINS_PEGASUS_WSIM} \

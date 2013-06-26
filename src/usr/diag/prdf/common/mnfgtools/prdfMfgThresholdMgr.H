@@ -44,25 +44,76 @@ namespace PRDF
 class MfgThresholdMgr
 {
     public:
-        MfgThresholdMgr();
-        ~MfgThresholdMgr();
 
+        /**
+         *  @brief constructor
+        */
+        MfgThresholdMgr();
+
+        /**
+         *  @brief destructor
+        */
+        virtual ~MfgThresholdMgr();
+
+        /**
+         * @brief get MfgThresholdMgr singleton
+         *
+         * @return MfgThresholdMgr singleton
+         */
         static MfgThresholdMgr * getInstance();
 
+        /**
+         * @brief get threshold value from name
+         * @param[in] i_thrName - threshold name
+         *
+         * @return corresponding threshold value
+         */
         uint16_t getThreshold(uint32_t i_thrName);
+
+        /**
+         * @brief get threshold policy from name
+         * @param[in] i_thrName - threshold name
+         *
+         * @return threshold policy
+         */
         ThresholdResolution::ThresholdPolicy* getThresholdP(uint32_t i_thrName);
 
+        /**
+         *  @brief reset/clean up MfgThresholdMgr
+        */
         void reset();
 
+        /**
+         * @brief get MfgThresholdFile
+         *
+         * @return MfgThresholdFile pointer
+         */
+        inline MfgThresholdFile * getMfgThresholdFile() { return iv_file; };
+
+
+        /**
+         *  @brief Infinite threshold enum
+        */
         enum { INFINITE_LIMIT_THR = 0xffff };
 
     private:
+
+        /**
+         * @brief get default threshold value from name
+         * @param[in] i_thrName - threshold name
+         *
+         * @return corresponding threshold value
+         */
         uint16_t getThresholdDefault(uint32_t i_thrName);
-        void setupFile();
+
+        /**
+         *  @brief set up MfgThresholdFile
+        */
+        virtual void setupFile();
 
         FlyWeight<ThresholdResolution::ThresholdPolicy, 10> iv_thrs;
 
-        PRDF_MFG_THRESHOLD_FILE_DECLARE(iv_file);
+        MfgThresholdFile * iv_file;
 };
 
 } // end namespace PRDF

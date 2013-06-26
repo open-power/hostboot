@@ -27,15 +27,20 @@
 namespace PRDF
 {
 
-MfgThresholdMgr::MfgThresholdMgr()
+MfgThresholdMgr::MfgThresholdMgr() :
+  iv_file(NULL)
 {
-    PRDF_MFG_THRESHOLD_FILE_INIT(iv_file);
+
 }
 
 
 MfgThresholdMgr::~MfgThresholdMgr()
 {
-    PRDF_MFG_THRESHOLD_FILE_DELETE(iv_file);
+    if(NULL != iv_file)
+    {
+        delete iv_file;
+        iv_file = NULL;
+    }
 }
 
 MfgThresholdMgr * MfgThresholdMgr::getInstance()
@@ -48,15 +53,14 @@ uint16_t MfgThresholdMgr::getThreshold(uint32_t i_thrName)
 {
     this->setupFile();
 
-    int l_thr = -1;
-    PRDF_MFG_THRESHOLD_FILE_GET(iv_file, i_thrName, l_thr);
+    int l_thr = iv_file->getThreshold(i_thrName);
 
     if (0 > l_thr)
         return getThresholdDefault(i_thrName);
     else if (0 == l_thr) // zero is the "infinite" threshold.
         return INFINITE_LIMIT_THR;
     else
-        return (uint16_t) l_thr; //FIXME In case of error (-1), is it right behavior
+        return (uint16_t) l_thr;
 }
 
 ThresholdResolution::ThresholdPolicy*
@@ -84,7 +88,11 @@ void MfgThresholdMgr::reset()
 {
     iv_thrs.clear();
 
-    PRDF_MFG_THRESHOLD_FILE_DELETE(iv_file);
+    if(NULL != iv_file)
+    {
+        delete iv_file;
+        iv_file = NULL;
+    }
 }
 
 uint16_t MfgThresholdMgr::getThresholdDefault(uint32_t i_thrName)
@@ -107,7 +115,11 @@ uint16_t MfgThresholdMgr::getThresholdDefault(uint32_t i_thrName)
 
 void MfgThresholdMgr::setupFile()
 {
-    PRDF_MFG_THRESHOLD_FILE_SETUP(iv_file);
+    if(NULL == iv_file)
+    {
+        iv_file = new MfgThresholdFile();
+        iv_file->setup();
+    }
 }
 
 bool operator==(ThresholdResolution::ThresholdPolicy & l,

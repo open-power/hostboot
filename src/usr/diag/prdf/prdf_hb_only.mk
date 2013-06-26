@@ -37,3 +37,10 @@ prd_pegasus_specific_HB = \
     prdfDramRepairs.o \
 	prdfPlatCalloutUtil.o
 
+prd_mnfgtools_HB = \
+ prdfMfgThresholdFile.o \
+ prdfMfgThresholdSync.o
+
+prd_object_files_HB = \
+ ${prd_pegasus_specific_HB} \
+ ${prd_mnfgtools_HB}

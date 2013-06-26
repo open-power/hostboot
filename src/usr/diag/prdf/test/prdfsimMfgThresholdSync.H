@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/mnfgtools/prdfMfgThresholdFile.H $          */
+/* $Source: src/usr/diag/prdf/test/prdfsimMfgThresholdSync.H $            */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,40 +21,61 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDF_PRDFMFGTHRESHOLDFILE_H
-#define __PRDF_PRDFMFGTHRESHOLDFILE_H
+#ifndef __PRDF_SimMfgThresholdSync_H
+#define __PRDF_SimMfgThresholdSync_H
 
-#include <prdfMfgThresholdFile_common.H>
+#include <prdfMfgThresholdSync.H>
+
+#include <mbox/mbox_queues.H>
+#include <mbox/mboxif.H>
+#include <sys/msg.h>
+
 
 namespace PRDF
 {
 
-class MfgThresholdFile : public MfgThresholdFileCommon
+class SimMfgThresholdSync : public MfgThresholdSync
 {
     public:
 
         /**
-         *  @brief configure MfgThresholdFile
+        *  @brief ctor
         */
-        virtual void setup();
+        SimMfgThresholdSync();
 
         /**
-         * @brief serialize threshold data into data buffer
-         * @param[in/out] o_buffer - data buffer
-         * @param[in] i_sizeOfBuf - size of buffer
+        *  @brief dtor
+        */
+        virtual ~SimMfgThresholdSync();
+
+        /**
+         *  @brief sync from FSP mfg thresholds
+         *
+         *  @return     errlHndl_t
          */
-        virtual void packThresholdDataIntoBuffer(
-                                    uint8_t* & o_buffer,
-                                    uint32_t i_sizeOfBuf);
+        virtual errlHndl_t  syncMfgThresholdFromFsp();
 
     private:
 
         /**
-         *  @brief sync MFG thresholds from FSP
-        */
-        void syncFromFsp();
+         *  @brief  send a sync mbox message to the FSP using the
+         *          FSP_MFG_THRESHOLD_SYNC_MSGQ message queue
+         *
+         *  @param[in/out] i_msg
+         *                    This parameter is used as both input and an
+         *                    output parameter. If the message is
+         *                    synchronus the response will be populated
+         *                    in an object pointed to by this pointer.
+         *                    If the message is asynchronus the object
+         *                    pointed to by this parameter will be sent
+         *                    to the fsp.
+         *
+         *  @return     errlHndl_t
+         */
+        virtual errlHndl_t  sendMboxMsg( msg_t * i_msg );
 
 };
+
 
 } // end namespace PRDF
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/mnfgtools/prdfMfgThresholdFile.H $          */
+/* $Source: src/usr/diag/prdf/test/prdfsimFspMfgThresholdFile.H $         */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,40 +21,42 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDF_PRDFMFGTHRESHOLDFILE_H
-#define __PRDF_PRDFMFGTHRESHOLDFILE_H
+#ifndef __PRDF_SimFspMfgThresholdFile_H
+#define __PRDF_SimFspMfgThresholdFile_H
 
-#include <prdfMfgThresholdFile_common.H>
+#include <prdfMfgThresholdFile.H>
 
 namespace PRDF
 {
 
-class MfgThresholdFile : public MfgThresholdFileCommon
+class SimFspMfgThresholdFile : public MfgThresholdFile
 {
     public:
 
         /**
-         *  @brief configure MfgThresholdFile
+         *  @brief constructor
         */
-        virtual void setup();
+        SimFspMfgThresholdFile() {};
+
+        /**
+         *  @brief destructor
+        */
+        virtual ~SimFspMfgThresholdFile() {};
 
         /**
          * @brief serialize threshold data into data buffer
          * @param[in/out] o_buffer - data buffer
          * @param[in] i_sizeOfBuf - size of buffer
          */
-        virtual void packThresholdDataIntoBuffer(
-                                    uint8_t* & o_buffer,
-                                    uint32_t i_sizeOfBuf);
+        void packThresholdDataIntoBuffer(uint8_t* & o_buffer,
+                                         uint32_t i_sizeOfBuf);
+
+        void overrideThreshold();
 
     private:
 
-        /**
-         *  @brief sync MFG thresholds from FSP
-        */
-        void syncFromFsp();
-
 };
+
 
 } // end namespace PRDF
 

@@ -26,6 +26,19 @@
 
 /** @file prdfEnums.H */
 
+namespace PRDF
+{
+
+/**
+ * @brief  MFG threshold sync message types
+ * */
+enum MFG_THRES_SYNC_MSG_TYPE
+{
+    MFG_THRES_SYNC_FROM_FSP  = 0x1
+};
+
+}; // end namespace PRDF
+
 #ifdef  __HOSTBOOT_MODULE
 
     #ifndef __PRD_RULE_COMPILE
