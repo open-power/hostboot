@@ -359,7 +359,7 @@ sub findIdVersion
         {
             $display_name = $fn;
         }
-        $redundant = grep { m/$fn/ } @foundFn;
+        $redundant = grep { m/^$fn$/ } @foundFn;
         if ( !$redundant )
         {
             push( @foundFn, $display_name );
