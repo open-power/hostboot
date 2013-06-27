@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build.C,v 1.22 2013/03/27 20:05:52 cmolsen Exp $
+// $Id: p8_slw_build.C,v 1.23 2013/06/13 15:15:14 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -104,6 +104,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   uint32_t  wfInlineLenInWords;
 	uint64_t  scanMaxRotate=SCAN_ROTATE_DEFAULT;
   sizeImageOutMax = *io_sizeImageOut;
+	uint32_t bootCoreMask=0x000FFFF;
 	
 	
 	// 2012-11-13: CMO- Temporary defines of ring buffers. This will be changed by
@@ -306,7 +307,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 			else
 				break;
         }
-		FAPI_DBG("Overlay [raw] ring created. ");
+		FAPI_DBG("Overlay [raw] ring created for func L3 ring.");
 		// Get ring name from xip image.
 		rcLoc = sbe_xip_find((void*)i_imageIn, FUNC_L3_RING_TOC_NAME, &xipTocItem);
 		if (rcLoc)  {
@@ -381,7 +382,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 											buf1,
 											sizeBuf1,
 											buf2,
-											sizeBuf2);
+											sizeBuf2,
+                      bootCoreMask);
 		free(buf1);
 		free(buf2);
     buf1 = buf2 = NULL;
@@ -656,7 +658,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		}
     sizeImageTmp = sizeImageOutMax;
 		FAPI_INF("Calling xip_customize().\n");
-		FAPI_EXEC_HWP(rc, p8_xip_customize,	
+    FAPI_EXEC_HWP(rc, p8_xip_customize,	
 		                  i_target,
 											(void*)i_imageIn,
 											i_imageOut,
@@ -666,7 +668,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 											buf1,
 											sizeBuf1,
 											buf2,
-											sizeBuf2);
+											sizeBuf2,
+                      bootCoreMask);
 		free(buf1);
 		free(buf2);
     buf1 = buf2 = NULL;

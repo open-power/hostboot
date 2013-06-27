@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,7 +23,7 @@
 #ifndef __P8_SCAN_COMPRESSION_H__
 #define __P8_SCAN_COMPRESSION_H__
 
-// $Id: p8_scan_compression.H,v 1.4 2012/10/22 22:13:39 bcbrock Exp $
+// $Id: p8_scan_compression.H,v 1.5 2013/05/30 00:33:22 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/p8_scan_compression.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -314,6 +314,18 @@ int
 rs4_decompress(uint8_t** o_string,
                uint32_t* o_length,
                const CompressedScanData* i_data);
+
+
+/// Determine if an RS4 compressed scan string is all 0
+///
+/// \param[in] i_data A pointer to the CompressedScanData header + data to be
+///
+/// \param[out] o_redundant Set to 1 if the RS4 string is the compressed form
+/// of a scan string that is all 0; Otherwise set to 0.
+///
+/// \returns See \ref scan _compression_code
+int
+rs4_redundant(const CompressedScanData* i_data, int* o_redundant);
              
 
 #endif  // __ASSEMBLER__
@@ -358,7 +370,9 @@ CONST_UINT8_T(SCAN_DECOMPRESSION_MAGIC_ERROR, 2);
 /// Decompression produced a string of a size different than indicated in the
 /// header, indicating either a bug or data corruption.  Note that the entire
 /// application should be considered corrupted if this error occurs since it
-/// may not be discovered until after the decompression buffer is overrun.
+/// may not be discovered until after the decompression buffer is
+/// overrun. This error may also be returned by rs4_redundant() in the event
+/// of inconsistencies in the compressed string.
 CONST_UINT8_T(SCAN_DECOMPRESSION_SIZE_ERROR, 3);
 
 /// A buffer would overflow

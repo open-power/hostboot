@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.C,v 1.11 2013/03/28 16:03:16 cmolsen Exp $
+// $Id: p8_image_help_base.C,v 1.13 2013/06/10 22:09:49 jeshua Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help_base.c                                              */
 /* *! DESCRIPTION : Basic helper functions for building and extracting          */
@@ -279,14 +279,19 @@ int write_ring_block_to_image(  void             *io_image,
                       i_xipSectionId, 
                       (void*)i_ringBlock,
                       myRev32(i_ringBlock->sizeOfThis),
-                      i_sizeImageMax,
+                      //don't allow ring append to use up space the .dcrings needs
+                      i_sizeImageMax - xipSectionDcrings.iv_size,
                       &offsetRingBlock);
   if (rc)   {
     MY_ERR("sbe_xip_append() failed: %s  ", SBE_XIP_ERROR_STRING(g_errorStrings, rc));
     sbe_xip_image_size(io_image,&sizeImage);
     MY_ERR("Input image size: %i  ", sizeImage);
     MY_ERR("Max image size allowed: %i  ", i_sizeImageMax);
-    return IMGBUILD_ERR_APPEND;
+    if (rc==SBE_XIP_WOULD_OVERFLOW) {
+      return rc;
+    } else {
+      return IMGBUILD_ERR_APPEND;
+    }
   }
   
   // Re-append .dcrings section if inserting into .rings section.
@@ -300,7 +305,11 @@ int write_ring_block_to_image(  void             *io_image,
                           NULL);
       if (rc)  {
         MY_ERR("_append(.dcrings...) failed: w/rc=%i  ", rc);
-        return IMGBUILD_ERR_APPEND;
+        if (rc==SBE_XIP_WOULD_OVERFLOW) {
+          return rc;
+        } else {
+          return IMGBUILD_ERR_APPEND;
+        }
       }
     }
   }
@@ -331,9 +340,11 @@ int write_ring_block_to_image(  void             *io_image,
 	    return IMGBUILD_ERR_XIP_MISC;
 	  }
 	}
-	else
+	else  {
+    MY_DBG("Inserting Gptr overlay ring into .dcrings section and ensuring forward ptr is cleared. ");
 		// We can not have forward ptr to [non-scannanble] rings in the .dcrings section.
 		ringPoreAddress = 0;
+  }
   
   // Now, update the forward pointer, making sure that it's zero for .dcrings section.
   //
@@ -346,7 +357,7 @@ int write_ring_block_to_image(  void             *io_image,
   // and it shouldn't have changed after having been ported over to an 
   // IPL/Seeprom image.
   backPtr = myRev64(i_ringBlock->backItemPtr);
-  MY_DBG("backPtr = 0x%016llx",  backPtr);
+  MY_DBG("backPtr = 0x%016llx ",  backPtr);
   // Second, put the ring's Pore addr into the location pointed to by the back ptr.
   rc = sbe_xip_write_uint64(  io_image, 
                               backPtr,
@@ -369,6 +380,7 @@ int write_ring_block_to_image(  void             *io_image,
     MY_ERR("backPtr      =0x%016llx",backPtr);
     return IMGBUILD_ERR_FWD_BACK_PTR_MESS;
   }
+  MY_DBG("fwdPtr = 0x%016llx ",fwdPtrCheck);
   // ...test if successful update.
   rc = sbe_xip_validate( io_image, sizeImage);
   if (rc)   {

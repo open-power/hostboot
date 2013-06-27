@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.H,v 1.17 2013/05/01 15:49:00 dcrowell Exp $
+// $Id: p8_image_help_base.H,v 1.18 2013/06/10 22:08:20 jeshua Exp $
 //------------------------------------------------------------------------------
 //  Title:  p8_image_help_base.H
 //  Description:  Contains the most basic structures and defines needed for 
@@ -44,6 +44,8 @@ const uint32_t  FIXED_RING_BUF_SIZE     =     60000; // Fixed ring buf size for 
 const uint8_t   MAX_VPD_TYPES           =   2;   // #G and #R, so far.
 #define         CHIPLET_ID_MIN            0x00 
 #define         CHIPLET_ID_MAX            0x1F 
+#define         CHIPLET_ID_EX_MIN         0x10 
+#define         CHIPLET_ID_EX_MAX         0x1F 
 const uint8_t   MAX_CHIPLETS            = CHIPLET_ID_MAX-CHIPLET_ID_MIN+1;
 const uint32_t  ASM_RS4_LAUNCH_BUF_SIZE =  24; // Byte size of RS4 launch buffer. 
 const uint32_t  WF_ENCAP_SIZE           = 400; // Byte size of WF encapsulation.

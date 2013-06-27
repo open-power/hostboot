@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.42 2013/04/01 17:31:22 cmolsen Exp $
+// $Id: p8_delta_scan_rw.h,v 1.43 2013/06/10 22:19:36 jeshua Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -37,6 +37,7 @@
 #define PROC_PIB_REPR_VECTOR_TOC_NAME     "proc_sbe_pibmem_repair_vector"
 #define NEST_SKEWADJUST_VECTOR_TOC_NAME   "proc_sbe_nest_skewadjust_vector"
 #define SECURITY_SETUP_VECTOR_TOC_NAME    "proc_sbe_security_setup_vector"
+#define VALID_BOOT_CORES_MASK_TOC_NAME    "valid_boot_cores_mask"
 #define MAX_PLL_RING_SIZE                  128 // Bytes
 #define PERV_BNDY_PLL_RING_TOC_NAME       "perv_bndy_pll_ring"
 #define PERV_BNDY_PLL_RING_ALT_TOC_NAME   "perv_bndy_pll_ring_alt"

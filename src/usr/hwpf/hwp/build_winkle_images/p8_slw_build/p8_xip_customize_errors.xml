@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: p8_xip_customize_errors.xml,v 1.17 2013/06/13 22:36:37 cmolsen Exp $ -->
 <!-- Error definitions for proc_slw_build procedure -->
 <hwpErrors>
 <!-- *********************************************************************** -->
@@ -97,11 +98,17 @@
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
+  <rc>RC_PROC_XIPC_GEN_RAM_ERROR</rc>
+  <description>Updating RAM table w/LPCR or HMEER RAM failed. Check rc code in p8_delta_scan_rw.h</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
   <rc>RC_PROC_XIPC_PLL_RING_SIZE_TOO_LARGE</rc>
   <description>PLL ring size returned from attribute is too large.</description>
   <ffdc>DATA_ATTRIBUTE_RING_SIZE</ffdc>
   <ffdc>DATA_MAX_PLL_RING_SIZE</ffdc>
-	<ffdc>DATA_SIZE_OF_BUF1</ffdc>
+        <ffdc>DATA_SIZE_OF_BUF1</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
@@ -151,7 +158,7 @@
   <rc>RC_PROC_XIPC_PLL_RING_BLOCK_TOO_LARGE</rc>
   <description>PLL ring block is too large.</description>
   <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
-	<ffdc>DATA_SIZE_OF_BUF1</ffdc>
+        <ffdc>DATA_SIZE_OF_BUF1</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
@@ -208,8 +215,31 @@
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
-  <rc>RC_PROC_XIPC_WRITE_VPD_RING_TO_IMAGE_ERROR</rc>
-  <description>Error occured during write_vpd_ring_to_{ipl,slw}_image()</description>
+  <rc>RC_PROC_XIPC_CHECK_REDUNDANT_ERROR</rc>
+  <description>Error occured during rs4_redundant()</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_RING_WRITE_WOULD_OVERFLOW</rc>
+  <description>Ran out of space when trying to add a ring to the image
+               (write_vpd_ring_to_ipl_image returned SBE_XIP_WOULD_OVERFLOW)</description>
+  <ffdc>RC_LOCAL</ffdc>
+  <ffdc>CHIPLET_ID</ffdc>
+  <ffdc>RING_ID</ffdc>
+  <ffdc>RING_SIZE</ffdc>
+  <ffdc>IMAGE_SIZE</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_WRITE_VPD_RING_TO_IPL_IMAGE_ERROR</rc>
+  <description>Error occured during write_vpd_ring_to_ipl_image()</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_WRITE_VPD_RING_TO_SLW_IMAGE_ERROR</rc>
+  <description>Error occured during write_vpd_ring_to_slw_image()</description>
   <ffdc>RC_LOCAL</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->

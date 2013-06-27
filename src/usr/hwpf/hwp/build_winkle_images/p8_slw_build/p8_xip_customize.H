@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.H,v 1.6 2013/02/22 06:02:29 cmolsen Exp $
+// $Id: p8_xip_customize.H,v 1.8 2013/06/13 16:52:41 jeshua Exp $
 
 #include <fapi.H>
 
@@ -39,7 +39,8 @@ typedef fapi::ReturnCode (*p8_xip_customize_FP_t) (  const fapi::Target&,
                                                     void*,
                                                     const uint32_t,
                                                     void*,
-                                                    const uint32_t );
+                                                    const uint32_t,
+                                                     uint32_t& );
 
 extern "C"
 {
@@ -64,6 +65,9 @@ extern "C"
   // uint32_t     i_sizeBuf1:       Size of buf1.
   // void         *i_buf2:          Temp buffer2 for WF ring. Caller allocs/frees.
   // uint32_t     i_sizeBuf22       Size of buf2.
+  // uint32_t     &io_bootCoreMask  In: Mask of the desired boot cores (bits 16:31 = EX0:EX15)
+  //                                    (value is ignored when i_sysPhase != 0)
+  //                                Out: Mask of the valid boot cores in the image
   fapi::ReturnCode p8_xip_customize( const fapi::Target &i_target,
                                      void           *i_imageIn,
                                      void           *i_imageOut,
@@ -73,5 +77,6 @@ extern "C"
                                      void           *i_buf1,
                                      const uint32_t i_sizeBuf1,
                                      void           *i_buf2,
-                                     const uint32_t i_sizeBuf2 );
+                                     const uint32_t i_sizeBuf2,
+                                     uint32_t       &io_bootCoreMask);
 }

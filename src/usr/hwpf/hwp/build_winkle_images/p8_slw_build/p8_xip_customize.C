@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.45 2013/05/29 22:51:06 jeshua Exp $
+// $Id: p8_xip_customize.C,v 1.51 2013/06/13 22:38:28 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -53,9 +53,265 @@
 #include <p8_pore_table_gen_api.H>
 #include <p8_scom_addresses.H>
 
+#define min(a,b) ((a<b)?a:b)
+
 extern "C"  {
 
 using namespace fapi;
+
+  const uint32_t MINIMUM_VALID_EXS = 3;
+
+#ifndef IMGBUILD_PPD_IGNORE_VPD
+
+  /***************************************************************************
+   *                        CHIPLET WALK LOOP - Begin                        *
+   ***************************************************************************/
+  //
+  // Walk through #G rings first, then #R rings.
+  //   iVpdType=0 : #G Repair rings
+  //   iVpdType=1 : #R Repair rings
+  // Notes about VPD rings:
+  //   - Only space for the base ring is allocated in the TOC. No override space!
+  //   - Some ex_ rings are non-core-ID-specific and will have chipletID=0xFF.
+  //     Add these rings only once!!
+  // Notes about #G rings:
+  //   - Some ex_ rings are core ID specific. Add the fwd ptr based on the core ID.
+  // Notes about $R rings:
+  //   - The ex_ rings are core ID specific. Add the fwd ptr based on the core ID.
+  //
+//  Parameter list:
+//  const fapi::Target &i_target:  Processor chip target.
+//  void      *i_imageIn:      Ptr to input img. The IPL img for IPL and the ref img for SLW.
+//  void      *o_imageOut:     Ptr to output img.
+//  uint32_t  io_sizeImageOut: In: Max size of IPL/SRAM workspace/img. Out: Final size.
+//                             MUST equal FIXED_SEEPROM_WORK_SPACE for IPL Seeprom build.
+//  uint8_t   i_sysPhase:      0: IPL  1: SLW
+//  uint8_t   i_modeBuild:     0: HB/IPL  1: PHYP/Rebuild  2: SRAM 
+//  void      *i_buf1:         Temp buffer 1 for dexed RS4 ring. Caller allocs/frees.
+//                             Space MUST equal FIXED_RING_BUF_SIZE
+//  uint32_t  i_sizeBuf1:      Size of buf1.
+//                             MUST equal FIXED_RING_BUF_SIZE
+//  void      *i_buf2:         Temp buffer 2 for WF ring. Caller allocs/frees.
+//                             Space MUST equal FIXED_RING_BUF_SIZE
+//  uint32_t  i_sizeBuf22      Size of buf2.
+//                             MUST equal FIXED_RING_BUF_SIZE
+ReturnCode p8_xip_customize_insert_chiplet_rings( const fapi::Target &i_target,
+                                                  void               *i_imageIn,
+                                                  void               *o_imageOut,
+                                                  const uint8_t       i_sysPhase,
+                                                  void               *i_buf1,
+                                                  const uint32_t      i_sizeBuf1,
+                                                  void               *i_buf2,
+                                                  const uint32_t      i_sizeBuf2,
+                                                  const uint8_t       attrDdLevel,
+                                                  const uint32_t      sizeImageMax,
+                                                  uint8_t             chipletId,
+                                                  const SbeXipSection &xipSectionDcrings
+                                                  )
+{
+  fapi::ReturnCode rcFapi, rc=FAPI_RC_SUCCESS;
+  uint32_t   rcLoc=0;
+
+  uint8_t    iVpdType;
+  RingIdList *ring_id_list=NULL;
+  uint32_t   ring_id_list_size;
+  uint32_t   iRing;
+  uint32_t   sizeVpdRing=0;
+  uint8_t    ringId;
+  uint8_t    *bufVpdRing;
+  uint32_t   ddLevel=attrDdLevel;
+  uint32_t   sizeImageOut=sizeImageMax;
+  uint8_t    chipletIdVpd;
+	
+  // Now wade through all conceivable Mvpd rings and add any that's there to the image.
+  for (iVpdType=0; iVpdType<NUM_OF_VPD_TYPES; iVpdType++)  {
+    if (iVpdType==0)  {
+      ring_id_list = (RingIdList*)RING_ID_LIST_PG;
+      ring_id_list_size = (uint32_t)RING_ID_LIST_PG_SIZE;
+    }
+    else  {
+      ring_id_list = (RingIdList*)RING_ID_LIST_PR;
+      ring_id_list_size = (uint32_t)RING_ID_LIST_PR_SIZE;
+    }
+   
+    for (iRing=0; iRing<ring_id_list_size; iRing++)  {
+      ringId = (ring_id_list+iRing)->ringId;
+      if((chipletId>=(ring_id_list+iRing)->chipIdMin && chipletId<=(ring_id_list+iRing)->chipIdMax))  {
+        FAPI_INF("(iRing,ringId,chipletId) = (%i,0x%02X,0x%02x)",iRing,ringId,chipletId);
+
+        bufVpdRing = (uint8_t*)i_buf1;
+        sizeVpdRing = i_sizeBuf1; // We always supply max buffer space for ring.
+        // 2012-11-14: CMO- A thought: Once getMvpdRing() becomes available, add 
+        //             get_mvpd_keyword() func at bottom in this file. Then
+        //             put prototype in *.H file. The func should map the
+        //             vpd keyword (0,1,2,...) to mvpd keyword in the include
+        //             file, fapiMvpdAccess.H.
+        //rcFapi = get_mvpd_keyword((ring_id_list+iRing)->vpdKeyword, mvpdKeyword);
+        //if (rcFapi)  {
+        //  FAPI_ERR("get_mvpd_keyword() returned error.");
+        //  return rcFapi;
+        //}
+        fapi::MvpdKeyword mvpd_keyword;
+        if ((ring_id_list+iRing)->vpdKeyword==VPD_KEYWORD_PDG) 
+          mvpd_keyword = MVPD_KEYWORD_PDG;
+        else
+          if ((ring_id_list+iRing)->vpdKeyword==VPD_KEYWORD_PDR)
+            mvpd_keyword = MVPD_KEYWORD_PDR;
+          else  {
+            FAPI_ERR("Unable to resolve VPD keyword from ring list table.");
+            uint8_t & DATA_RING_LIST_VPD_KEYWORD = (ring_id_list+iRing)->vpdKeyword;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_VPD_KEYWORD_RESOLVE_ERROR);
+            return rc;
+          }
+        FAPI_EXEC_HWP(rcFapi, getMvpdRing,
+                      MVPD_RECORD_CP00,
+                      mvpd_keyword,
+                      i_target,
+                      chipletId,
+                      ringId,
+                      bufVpdRing,
+                      sizeVpdRing);
+        FAPI_DBG("XIPC: Mvpd rings: rcFapi=0x%08x",(uint32_t)rcFapi);
+        if (rcFapi==RC_REPAIR_RING_NOT_FOUND)  {
+          // No match, do nothing. Next ringId.
+          FAPI_INF("XIPC: Mvpd rings: (iRing,ringId,chipletId)=(%i,0x%02X,0x%02X) not found.",iRing,ringId,chipletId);
+          rcFapi = FAPI_RC_SUCCESS;
+        }
+        else  {
+          // Couple of other checks...
+          // 1. General rc error check.
+          if (rcFapi!=FAPI_RC_SUCCESS)  {
+            FAPI_ERR("getMvpdRing() returned error.");
+            return rcFapi;
+          }
+          // 2. Checking that chipletId didn't somehow get messed up.
+          chipletIdVpd = ((CompressedScanData*)bufVpdRing)->iv_chipletId;
+          if (chipletIdVpd!=chipletId)  {
+            FAPI_ERR("VPD ring's chipletId in scan container (=0x%02X) doesn't match the requested chipletId (=0x%02X).\n",chipletIdVpd,chipletId);
+            uint8_t & DATA_CHIPLET_ID_VPD = chipletIdVpd;
+            uint8_t & DATA_CHIPLET_ID_REQ = chipletId;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_CHIPLET_ID_MESS);
+            return rc;
+          }
+          // 3. Checking for buffer overflow.
+          if (sizeVpdRing>i_sizeBuf1)  {
+            // Supplied buffer from HB/PHYP is too small. Error out. Is this right
+            //   decision or should we ignore and proceed to next ring.
+            uint32_t sizeBuf1=(uint32_t)i_sizeBuf1;
+            uint32_t & DATA_RING_SIZE_REQ = sizeVpdRing;
+            uint32_t & DATA_RING_SIZE_MAX = sizeBuf1;
+            switch (iVpdType)  {
+            case 0:
+              FAPI_ERR("#G ring too large.");
+              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PG_RING_TOO_LARGE);
+              break;
+            case 1:
+              FAPI_ERR("#R ring too large.");
+              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PR_RING_TOO_LARGE);
+              break;
+            default:
+              uint8_t & DATA_VPD_TYPE = iVpdType;
+              FAPI_ERR("#Invalid VPD type.");
+              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_INVALID_VPD_TYPE);
+              break;
+            }
+            return rc;
+          }
+          else  {
+            // Enforce flush optimization for Mvpd rings.
+            ((CompressedScanData*)bufVpdRing)->iv_flushOptimization = 1;
+            // Do datacare, if needed.
+            if ( xipSectionDcrings.iv_offset!=0 )  {
+              FAPI_INF("Calling check_and_perform_ring_datacare()\n");
+              rcLoc = check_and_perform_ring_datacare( 
+                                                      i_imageIn,
+                                                      (void*)bufVpdRing,  //HB buf1
+                                                      attrDdLevel,        //Playing it safe.
+                                                      i_sysPhase,
+                                                      (char*)(ring_id_list+iRing)->ringNameImg,
+                                                      (void*)i_buf2,			//HB buf2
+                                                      i_sizeBuf2);
+              if (rcLoc)  {
+                FAPI_ERR("check_and_perform_ring_datacare() failed w/rc=%i  ",rcLoc);
+                uint32_t & RC_LOCAL = rcLoc;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PERFORM_RING_DATACARE_ERROR);
+                return rc;
+              }
+            }
+            // Check if the VPD ring is redundant
+            int redundant = 0;
+            rcLoc = rs4_redundant((CompressedScanData*)bufVpdRing, &redundant);
+            if(rcLoc) {
+              FAPI_ERR("rs4_redundant() failed w/rc=%i  ",rcLoc);
+              uint32_t & RC_LOCAL = rcLoc;
+              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_CHECK_REDUNDANT_ERROR);
+              return rc;
+            }
+            rcLoc = 0;
+            // Add VPD ring to image if not redundant
+            if( redundant ) {
+              FAPI_INF("Skipping VPD ring because it doesn't change the ring (iRing,ringId,chipletId)=(%i,0x%02X,0x%02X).",iRing,ringId,chipletId);
+            } else {
+              if (i_sysPhase==0)  {
+                // Add VPD ring to --->>> IPL <<<--- image
+                rcLoc = write_vpd_ring_to_ipl_image(
+                                                    o_imageOut,
+                                                    sizeImageOut,
+                                                    (CompressedScanData*)bufVpdRing, //HB buf1
+                                                    ddLevel,
+                                                    i_sysPhase,
+                                                    (char*)(ring_id_list+iRing)->ringNameImg,
+                                                    (void*)i_buf2,                   //HB buf2
+                                                    i_sizeBuf2,
+                                                    SBE_XIP_SECTION_RINGS);
+                if (rcLoc) {
+                  //Check if the add failed because of space issues, and return a unique error for that
+                  if (rcLoc==SBE_XIP_WOULD_OVERFLOW) {
+                    uint32_t & RC_LOCAL   = rcLoc;
+                    uint8_t  & CHIPLET_ID = chipletId;
+                    uint8_t  & RING_ID    = ringId;
+                    uint32_t & RING_SIZE  = sizeVpdRing;
+                    uint32_t & IMAGE_SIZE = sizeImageOut;
+                    FAPI_DBG("Ring %s won't fit into image. Size would be %i.", (char*)(ring_id_list+iRing)->ringNameImg, sizeImageOut);
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RING_WRITE_WOULD_OVERFLOW);
+                    return rc;
+                  } else {
+                    FAPI_ERR("write_vpd_ring_to_ipl_image() failed w/rc=%i",rcLoc);
+                    uint32_t & RC_LOCAL = rcLoc;
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_WRITE_VPD_RING_TO_IPL_IMAGE_ERROR);
+                    return rc;
+                  }
+                }
+              }
+              else  {
+                // Add VPD ring to --->>> SLW <<<--- image
+                rcLoc = write_vpd_ring_to_slw_image(
+                                                    o_imageOut,
+                                                    sizeImageOut,
+                                                    (CompressedScanData*)bufVpdRing, //HB buf1
+                                                    ddLevel,
+                                                    i_sysPhase,
+                                                    (char*)(ring_id_list+iRing)->ringNameImg,
+                                                    (void*)i_buf2,                   //HB buf2
+                                                    i_sizeBuf2,
+                                                    (ring_id_list+iRing)->bWcSpace);
+                if (rcLoc)  {
+                  FAPI_ERR("write_vpd_ring_to_slw_image() failed w/rc=%i",rcLoc);
+                  uint32_t & RC_LOCAL = rcLoc;
+                  FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_WRITE_VPD_RING_TO_SLW_IMAGE_ERROR);
+                  return rc;
+                }
+              }
+            } //if not redundant
+          } //no buffer overflow
+        } //ring found in VPD
+      } //chiplet ID is valid for this ring name
+    } //loop on ring names
+  } //loop on VPD types
+  return rc;
+}
+#endif
+
 
 //  Parameter list:
 //  const fapi::Target &i_target:  Processor chip target.
@@ -73,6 +329,9 @@ using namespace fapi;
 //                             Space MUST equal FIXED_RING_BUF_SIZE
 //  uint32_t  i_sizeBuf22      Size of buf2.
 //                             MUST equal FIXED_RING_BUF_SIZE
+//  uint32_t  &io_bootCoreMask In: Mask of the desired boot cores (bits 16:31 = EX0:EX15)
+//                                 (value is ignored when i_sysPhase != 0)
+//                             Out: Mask of the valid boot cores in the image
 //
 ReturnCode p8_xip_customize( const fapi::Target &i_target,
                              void            *i_imageIn,
@@ -83,7 +342,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                              void            *i_buf1,
                              const uint32_t  i_sizeBuf1,
                              void            *i_buf2,
-                             const uint32_t  i_sizeBuf2 )
+                             const uint32_t  i_sizeBuf2,
+                             uint32_t        &io_bootCoreMask)
 {
   fapi::ReturnCode rcFapi, rc=FAPI_RC_SUCCESS;
   uint32_t   rcLoc=0;
@@ -105,6 +365,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   uint32_t   dataTmp1, dataTmp2, dataTmp3;
   bool       largeSeeprom = false;
   uint8_t    seepromAddrBytes = 0;
+  const uint32_t   desiredBootCoreMask = (i_sysPhase==0)?io_bootCoreMask:0x0000FFFF;
+  FAPI_DBG("Desired boot core mask is 0x%08X, io_bootCoreMask is 0x%08X", desiredBootCoreMask, io_bootCoreMask);
 
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
@@ -254,9 +516,9 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostCombGoodVec);
   FAPI_DBG("Dumping [initial] global variable content of combined_good_vectors, then the updated value:\n");
   for (iVec=0; iVec<MAX_CHIPLETS; iVec++)  {
-    FAPI_DBG("combined_good_vectors[%2i]: Before=0x%016llX\n",iVec,*((uint64_t*)hostCombGoodVec+iVec));
+    FAPI_DBG("combined_good_vectors[%2i]: Before=0x%016llX\n",iVec,myRev64(*((uint64_t*)hostCombGoodVec+iVec)));
     *((uint64_t*)hostCombGoodVec+iVec) = myRev64(attrCombGoodVec[iVec]);
-    FAPI_DBG("                             After=0x%016llX\n",*((uint64_t*)hostCombGoodVec+iVec));
+    FAPI_DBG("                             After=0x%016llX\n",myRev64(*((uint64_t*)hostCombGoodVec+iVec)));
   }
   
   
@@ -286,9 +548,9 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostL2SingleMember);
   FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
 						L2_SINGLE_MEMBER_ENABLE_TOC_NAME);
-  FAPI_DBG(" Before=0x%016llX\n",*(uint64_t*)hostL2SingleMember);
+  FAPI_DBG(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostL2SingleMember));
   *(uint64_t*)hostL2SingleMember = myRev64((uint64_t)attrL2SingleMember<<32);
-  FAPI_DBG(" After =0x%016llX\n",*(uint64_t*)hostL2SingleMember);
+  FAPI_DBG(" After =0x%016llX\n",myRev64(*(uint64_t*)hostL2SingleMember));
   
   
   // ==========================================================================
@@ -318,9 +580,9 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostSecuritySetupVec);
 	  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
 							SECURITY_SETUP_VECTOR_TOC_NAME);
-	  FAPI_DBG(" Before=0x%016llX\n",*(uint64_t*)hostSecuritySetupVec);
+	  FAPI_DBG(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
 	  *(uint64_t*)hostSecuritySetupVec = myRev64(attrSecuritySetupVec);
-	  FAPI_DBG(" After =0x%016llX\n",*(uint64_t*)hostSecuritySetupVec);
+	  FAPI_DBG(" After =0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
 	}
 
 
@@ -695,234 +957,114 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // System phase:      Applies to both sysPhase modes: IPL and SLW.
   // Notes: For SLW, only update ex_ chiplet rings.
   // ==========================================================================
+  SbeXipSection xipSectionDcrings;
   
-  /***************************************************************************
-   *                        CHIPLET WALK LOOP - Begin                        *
-   ***************************************************************************/
-  //
-  // Walk through #G rings first, then #R rings.
-  //   iVpdType=0 : #G Repair rings
-  //   iVpdType=1 : #R Repair rings
-  // Notes about VPD rings:
-  //   - Only space for the base ring is allocated in the TOC. No override space!
-  //   - Some ex_ rings are non-core-ID-specific and will have chipletID=0xFF.
-  //     Add these rings only once!!
-  // Notes about #G rings:
-  //   - Some ex_ rings are core ID specific. Add the fwd ptr based on the core ID.
-  // Notes about $R rings:
-  //   - The ex_ rings are core ID specific. Add the fwd ptr based on the core ID.
-  //
-  uint8_t    iVpdType;
-  RingIdList *ring_id_list=NULL;
-  uint32_t   ring_id_list_size;
-  uint32_t   iRing;
-  uint32_t   sizeVpdRing=0;
-  uint8_t    chipletId, ringId;
-  uint8_t    *bufVpdRing;
-  uint32_t   ddLevel=0xFFFFFFFF;
-  uint8_t    bValidChipletId=0,bRingAlreadyAdded=0;
-  uint8_t    chipletIdVpd;
-  uint32_t   sizeImageOut;
-	SbeXipSection xipSectionDcrings;
-  
-	// First, is there an .dcrings section yet in the input image?  We need this to know 
-	//   if we should do datacare on #G rings a little later.
-	// (Note, it makes no sense checking in output image since SLW has been wiped clean, and 
-	//    the same may be the case with IPL image in the future.)
+  // First, is there an .dcrings section yet in the input image?  We need this to know 
+  //   if we should do datacare on #G rings a little later.
+  // (Note, it makes no sense checking in output image since SLW has been wiped clean, and 
+  //    the same may be the case with IPL image in the future.)
   rcLoc = sbe_xip_get_section(i_imageIn, SBE_XIP_SECTION_DCRINGS, &xipSectionDcrings);
   if (rcLoc)  {
     FAPI_ERR("_get_section(.dcrings...) failed with rc=%i  ",rcLoc);
-		uint32_t &RC_LOCAL=rcLoc;
+    uint32_t &RC_LOCAL=rcLoc;
     FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
     return rc;
   }
-	
-	// Now wade through all conceivable Mvpd rings and add any that's there to the image.
-  for (iVpdType=0; iVpdType<NUM_OF_VPD_TYPES; iVpdType++)  {
-    if (iVpdType==0)  {
-      ring_id_list = (RingIdList*)RING_ID_LIST_PG;
-      ring_id_list_size = (uint32_t)RING_ID_LIST_PG_SIZE;
-    }
-    else  {
-      ring_id_list = (RingIdList*)RING_ID_LIST_PR;
-      ring_id_list_size = (uint32_t)RING_ID_LIST_PR_SIZE;
-    }
-   
-    for (iRing=0; iRing<ring_id_list_size; iRing++)  {
-      ringId = (ring_id_list+iRing)->ringId;
-      bRingAlreadyAdded = 0;
-      for ( chipletId=(ring_id_list+iRing)->chipIdMin; 
-            (chipletId>=(ring_id_list+iRing)->chipIdMin && chipletId<=(ring_id_list+iRing)->chipIdMax); 
-            chipletId++)  {
-        FAPI_INF("(iRing,ringId,chipletId) = (%i,0x%02X,0x%02x)",iRing,ringId,chipletId);
-        bValidChipletId = 0;
-        if (chipletId>=CHIPLET_ID_MIN && chipletId<=CHIPLET_ID_MAX)  {
-          // Using known_good_vectors data to determine if a chiplet is functional.
-          if (attrCombGoodVec[chipletId])
-            bValidChipletId = 1;
-          else
-            bValidChipletId = 0;
-        }
-        else  {
-          if (chipletId==0xFF)
-            bValidChipletId = 1;
-          else  {
-            bValidChipletId = 0;
-            FAPI_INF("chipletId=0x%02x is not a valid chiplet ID. Check chiplet ID range in p8_ring_identification.c.",chipletId);
-          }
-        }
-        if (bValidChipletId)  {
-          bufVpdRing = (uint8_t*)i_buf1;
-          sizeVpdRing = i_sizeBuf1; // We always supply max buffer space for ring.
-          // 2012-11-14: CMO- A thought: Once getMvpdRing() becomes available, add 
-          //             get_mvpd_keyword() func at bottom in this file. Then
-          //             put prototype in *.H file. The func should map the
-          //             vpd keyword (0,1,2,...) to mvpd keyword in the include
-          //             file, fapiMvpdAccess.H.
-          //rcFapi = get_mvpd_keyword((ring_id_list+iRing)->vpdKeyword, mvpdKeyword);
-          //if (rcFapi)  {
-          //  FAPI_ERR("get_mvpd_keyword() returned error.");
-          //  return rcFapi;
-          //}
-          fapi::MvpdKeyword mvpd_keyword;
-          if ((ring_id_list+iRing)->vpdKeyword==VPD_KEYWORD_PDG) 
-            mvpd_keyword = MVPD_KEYWORD_PDG;
-          else
-            if ((ring_id_list+iRing)->vpdKeyword==VPD_KEYWORD_PDR)
-              mvpd_keyword = MVPD_KEYWORD_PDR;
-            else  {
-              FAPI_ERR("Unable to resolve VPD keyword from ring list table.");
-              uint8_t & DATA_RING_LIST_VPD_KEYWORD = (ring_id_list+iRing)->vpdKeyword;
-              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_VPD_KEYWORD_RESOLVE_ERROR);
-              return rc;
-            }
-          rcFapi = FAPI_RC_SUCCESS;
-          FAPI_EXEC_HWP(rcFapi, getMvpdRing,
-                        MVPD_RECORD_CP00,
-                        mvpd_keyword,
-                        i_target,
-                        chipletId,
-                        ringId,
-                        bufVpdRing,
-                        sizeVpdRing);
-          FAPI_DBG("XIPC: Mvpd rings: rcFapi=0x%08x",(uint32_t)rcFapi);
-          if (rcFapi==RC_REPAIR_RING_NOT_FOUND)  {
-            // No match, do nothing. Next (chipletId,ringId)-pair.
-            FAPI_INF("XIPC: Mvpd rings: (iRing,ringId,chipletId)=(%i,0x%02X,0x%02X) not found.",iRing,ringId,chipletId);
-          }
-          else  {
-            // Couple of other checks...
-            // 1. General rc error check.
-            if (rcFapi!=FAPI_RC_SUCCESS)  {
-              FAPI_ERR("getMvpdRing() returned error.");
-              return rcFapi;
-            }
-            // 2. Checking that chipletId didn't somehow get messed up.
-            chipletIdVpd = ((CompressedScanData*)bufVpdRing)->iv_chipletId;
-            if (chipletIdVpd!=chipletId && chipletIdVpd!=0xFF)  {
-              FAPI_ERR("VPD ring's chipletId in scan container (=0x%02X) is not equal to 0xFF nor does it match the requested chipletId (=0x%02X).\n",chipletIdVpd,chipletId);
-              uint8_t & DATA_CHIPLET_ID_VPD = chipletIdVpd;
-              uint8_t & DATA_CHIPLET_ID_REQ = chipletId;
-              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_CHIPLET_ID_MESS);
-              return rc;
-            }
-            // 3. Checking for buffer overflow.
-            if (sizeVpdRing>i_sizeBuf1)  {
-              // Supplied buffer from HB/PHYP is too small. Error out. Is this right
-              //   decision or should we ignore and proceed to next ring.
-              uint32_t sizeBuf1=(uint32_t)i_sizeBuf1;
-              uint32_t & DATA_RING_SIZE_REQ = sizeVpdRing;
-              uint32_t & DATA_RING_SIZE_MAX = sizeBuf1;
-              switch (iVpdType)  {
-              case 0:
-                FAPI_ERR("#G ring too large.");
-                FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PG_RING_TOO_LARGE);
-                break;
-              case 1:
-                FAPI_ERR("#R ring too large.");
-                FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PR_RING_TOO_LARGE);
-                break;
-              default:
-                uint8_t & DATA_VPD_TYPE = iVpdType;
-                FAPI_ERR("#Invalid VPD type.");
-                FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_INVALID_VPD_TYPE);
-                break;
-              }
-              return rc;
-            }
-            else  {
-              // Enforce flush optimization for Mvpd rings.
-              ((CompressedScanData*)bufVpdRing)->iv_flushOptimization = 1;
-              // Do datacare, if needed.
-              if ( xipSectionDcrings.iv_offset!=0 )  {
-                FAPI_INF("Calling check_and_perform_ring_datacare()\n");
-                rcLoc = check_and_perform_ring_datacare( 
-                                                        i_imageIn,
-                                                        (void*)bufVpdRing,  //HB buf1
-                                                        attrDdLevel,        //Playing it safe.
-                                                        i_sysPhase,
-                                                        (char*)(ring_id_list+iRing)->ringNameImg,
-                                                        (void*)i_buf2,			//HB buf2
-                                                        i_sizeBuf2);
-                if (rcLoc)  {
-                  FAPI_ERR("check_and_perform_ring_datacare() failed w/rc=%i  ",rcLoc);
-                  uint32_t & RC_LOCAL = rcLoc;
-                  FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PERFORM_RING_DATACARE_ERROR);
-                  return rc;
-                }
-              }
-              // Add VPD ring to image.
-              if (!bRingAlreadyAdded)  {
-                rcLoc = 0;
-                if (i_sysPhase==0)  {
-                  sizeImageOut = largeSeeprom? sizeImageOutMax:MAX_SEEPROM_IMAGE_SIZE;
-                  // Add VPD ring to --->>> IPL <<<--- image
-                  rcLoc = write_vpd_ring_to_ipl_image(
+
+  if (i_sysPhase==0 && !largeSeeprom) {
+    // The .dcrings section will eventually be removed from the image, so set the
+    // max size to final output size max + .dcrings size if we can
+    sizeImageMax = min(MAX_SEEPROM_IMAGE_SIZE + xipSectionDcrings.iv_size, sizeImageOutMax);
+  } else {
+    sizeImageMax = sizeImageOutMax;
+  }
+
+  // First, insert the chiplet XX rings
+  rc = p8_xip_customize_insert_chiplet_rings( i_target,
+                                              i_imageIn,
+                                              o_imageOut,
+                                              i_sysPhase,
+                                              i_buf1,
+                                              i_sizeBuf1,
+                                              i_buf2,
+                                              i_sizeBuf2,
+                                              attrDdLevel,
+                                              sizeImageMax,
+                                              0xFF,
+                                              xipSectionDcrings
+                                              );
+  if (rc) return rc;
+
+  // Then loop through the chiplets
+  uint32_t validEXCount = 0;
+  uint8_t  chipletId;
+  io_bootCoreMask = 0;
+  for (chipletId = CHIPLET_ID_MIN; chipletId <= CHIPLET_ID_MAX; chipletId++) {
+    // Only process functional chiplets
+    // Note - currently the SBE treats bad cores (0x93) as non-functional (0x00)
+    //        so inserting rings for those wastes space. I'll assume that they
+    //        won't be in the desiredBootCoreMask and thus won't get rings,
+    //        rather than checking for that case because the SBE code may change.
+    if (attrCombGoodVec[chipletId]) {
+      // Special handling for EX chiplet IDs
+      if ((chipletId >= CHIPLET_ID_EX_MIN) && (chipletId <= CHIPLET_ID_EX_MAX)) {
+        if (desiredBootCoreMask & (0x80000000 >> chipletId)) {
+          rc = p8_xip_customize_insert_chiplet_rings( i_target,
+                                                      i_imageIn,
                                                       o_imageOut,
-                                                      sizeImageOut,
-                                                      (CompressedScanData*)bufVpdRing, //HB buf1
-                                                      ddLevel,
                                                       i_sysPhase,
-                                                      (char*)(ring_id_list+iRing)->ringNameImg,
-                                                      (void*)i_buf2,                   //HB buf2
+                                                      i_buf1,
+                                                      i_sizeBuf1,
+                                                      i_buf2,
                                                       i_sizeBuf2,
-                                                      SBE_XIP_SECTION_RINGS);
-                }
-                else  {
-                  sizeImageOut = sizeImageOutMax;
-                  // Add VPD ring to --->>> SLW <<<--- image
-                  rcLoc = write_vpd_ring_to_slw_image(
-                                                      o_imageOut,
-                                                      sizeImageOut,
-                                                      (CompressedScanData*)bufVpdRing, //HB buf1
-                                                      ddLevel,
-                                                      i_sysPhase,
-                                                      (char*)(ring_id_list+iRing)->ringNameImg,
-                                                      (void*)i_buf2,                   //HB buf2
-                                                      i_sizeBuf2,
-                                                      (ring_id_list+iRing)->bWcSpace);
-                }
-                if (rcLoc)  {
-                  if (i_sysPhase==0)  {
-                    FAPI_ERR("write_vpd_ring_to_ipl_image() failed w/rc=%i",rcLoc);
-                  }
-                  else  {
-                    FAPI_ERR("write_vpd_ring_to_slw_image() failed w/rc=%i",rcLoc);
-                  }
-                  uint32_t & RC_LOCAL = rcLoc;
-                  FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_WRITE_VPD_RING_TO_IMAGE_ERROR);
-                  return rc;
-                }
-                if (chipletIdVpd==0xFF)
-                  bRingAlreadyAdded = 1;
-              } //if not already added
-            } //no buffer overflow
-          } //ring found in VPD
-        } //if valid chiplet
-      } //loop on chiplets
-    } //loop on ring names
-  } //loop on VPD types
-	
+                                                      attrDdLevel,
+                                                      sizeImageMax,
+                                                      chipletId,
+                                                      xipSectionDcrings
+                                                      );
+          if (rc) {
+            // fail out unless this was an overflow error for IPL and we've already met the mimimum
+            if ((validEXCount < MINIMUM_VALID_EXS) ||
+                (rc != RC_PROC_XIPC_RING_WRITE_WOULD_OVERFLOW) ||
+                (i_sysPhase!=0)) {
+              FAPI_DBG("Was only able to put %i EXs into the image (minimum is %i for IPL, all for SLW)", validEXCount, MINIMUM_VALID_EXS);
+              return rc;
+            }
+            // out of space for this chiplet, but got enough EXs in to run
+            // so jump to the end of EXs and continue
+            rc = FAPI_RC_SUCCESS;
+            chipletId = CHIPLET_ID_EX_MAX;
+            FAPI_DBG("Skipping the rest of the rings because image is full");
+          } else {
+            // Successfully added this chiplet
+            // Update tracking of valid EX chiplets in the image
+            io_bootCoreMask |= (0x80000000 >> chipletId);
+            validEXCount++;
+          }
+        } else {
+          FAPI_DBG("Skipping EX chiplet ID 0x%X because it's not in the bootCoreMask", chipletId);
+        }
+      } else {
+        // Normal handling for non-EX chiplet IDs
+        rc = p8_xip_customize_insert_chiplet_rings( i_target,
+                                                    i_imageIn,
+                                                    o_imageOut,
+                                                    i_sysPhase,
+                                                    i_buf1,
+                                                    i_sizeBuf1,
+                                                    i_buf2,
+                                                    i_sizeBuf2,
+                                                    attrDdLevel,
+                                                    sizeImageMax,
+                                                    chipletId,
+                                                    xipSectionDcrings
+                                                    );
+        if (rc) return rc;
+      } //end else non-EX chiplet
+    } //end if valid chiplet
+  } //end loop on chiplets
+#endif
+
   // Now, we can safely remove the .dcrings section from the output image. Though, no
   //   need to do it for SLW which was wiped clean in slw_build().
   //
@@ -934,8 +1076,35 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_XIP_DELETE_SECTION_ERROR);
       return rc;
     }
+    // Now that the section is removed, lower sizeImageMax to the actual max if needed
+    if (!largeSeeprom) {
+      sizeImageMax = min(MAX_SEEPROM_IMAGE_SIZE, sizeImageOutMax);
+    }
   }
-#endif
+
+  // ==========================================================================
+  // CUSTOMIZE item:    valid_boot_cores_mask
+  // Retrieval method:  Generated by this code
+  // System phase:      IPL sysPhase.
+  // Note: Indicates which EX cores had #G and #R rings inserted
+  // ==========================================================================
+  if (i_sysPhase==0)  {
+    void       *hostValidBootCoresMask;
+    rcLoc = sbe_xip_find( o_imageOut, VALID_BOOT_CORES_MASK_TOC_NAME, &xipTocItem);
+    if (rcLoc)  {
+      FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+      FAPI_ERR("Probable cause:");
+      FAPI_ERR("\tThe keyword (=%s) was not found.",VALID_BOOT_CORES_MASK_TOC_NAME);
+      uint32_t & RC_LOCAL = rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+      return rc;
+    }
+    sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostValidBootCoresMask);
+    FAPI_DBG("Dumping [initial] global variable content of valid_boot_cores_mask, then the updated value:\n");
+    FAPI_DBG(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostValidBootCoresMask));
+    *(uint64_t*)hostValidBootCoresMask = myRev64(((uint64_t)io_bootCoreMask)<<32);
+    FAPI_DBG(" After =0x%016llX\n",myRev64(*(uint64_t*)hostValidBootCoresMask));
+  }
 
 
   // ==========================================================================
@@ -1064,7 +1233,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
                       o_imageOut, 
-                      2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
+                      i_modeBuild,
                       (uint32_t)EX_L2_CERRS_RD_EPS_REG_0x10012814, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
@@ -1123,7 +1292,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
                       o_imageOut, 
-                      2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
+                      i_modeBuild,
                       (uint32_t)EX_L3_CERRS_RD_EPS_REG_0x10010829, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
@@ -1152,7 +1321,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
                       o_imageOut, 
-                      2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
+                      i_modeBuild,
                       (uint32_t)EX_L3_CERRS_WR_EPS_REG_0x1001082A, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
@@ -1206,7 +1375,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
                       o_imageOut, 
-                      2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
+                      i_modeBuild,
                       (uint32_t)EX_L3_BAR1_REG_0x1001080B, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
@@ -1235,7 +1404,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
                       o_imageOut, 
-                      2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
+                      i_modeBuild,
                       (uint32_t)EX_L3_BAR2_REG_0x10010813, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
@@ -1264,7 +1433,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
                       o_imageOut, 
-                      2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
+                      i_modeBuild,
                       (uint32_t)EX_L3_BAR_GROUP_MASK_REG_0x10010816, // Scom addr.
                       coreId,   // The core ID.
                       scomData,
@@ -1287,6 +1456,49 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   }
 #endif
 
+
+    
+  // ==========================================================================
+  // CUSTOMIZE item:    Put RAMs in RAM table to suppurt malfunction alert.
+  // Retrieval method:  N/A.
+  // System phase:      SLW sysPhase. (By MikeO)
+  // ==========================================================================
+    uint8_t   threadId;
+    uint64_t  lpcrData=(uint64_t)0x00005000; // Set bit(49) and bit(51).
+    uint64_t  hmeerData=((uint64_t)0x80000000)<<32; // Set bit(0).
+    for (coreId=0; coreId<=15; coreId++)  {
+      // Do the LPCR rams.
+      for (threadId=0; threadId<=7; threadId++)  {
+        rcLoc = p8_pore_gen_cpureg_fixed( 
+                        o_imageOut, 
+                        i_modeBuild,
+                        (uint32_t)P8_SPR_LPCR,
+                        lpcrData,
+                        coreId,
+                        threadId);
+        if (rcLoc)  {
+          FAPI_ERR("Updating RAM table w/LPCR ram unsuccessful (rcLoc=%i)\n",rcLoc);
+          uint32_t & RC_LOCAL = rcLoc;
+          FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_RAM_ERROR); 
+          return rc;
+        }
+      }  // End of for(threadId)
+      // Do the HMEER rams.
+      rcLoc = p8_pore_gen_cpureg_fixed( 
+                      o_imageOut, 
+                      i_modeBuild,
+                      (uint32_t)P8_SPR_HMEER,
+                      hmeerData,
+                      coreId,
+                      0);
+      if (rcLoc)  {
+        FAPI_ERR("Updating RAM table w/HMEER ram unsuccessful (rcLoc=%i)\n",rcLoc);
+        uint32_t & RC_LOCAL = rcLoc;
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_RAM_ERROR); 
+        return rc;
+      }
+    }  // End of for(coreId)
+
   }  // End of if (i_sysPhase==1)
 
 
@@ -1295,11 +1507,6 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   //  
 
   sbe_xip_image_size( o_imageOut, &io_sizeImageOut);
-  
-  if (i_sysPhase==0)
-    sizeImageMax = largeSeeprom? sizeImageOutMax:MAX_SEEPROM_IMAGE_SIZE;
-  else
-    sizeImageMax = sizeImageOutMax;
   
   FAPI_INF("XIPC:  Final output image:\n ");
   FAPI_INF("  location=0x%016llx\n  size (actual)=%i\n  size (max allowed)=%i\n ", 

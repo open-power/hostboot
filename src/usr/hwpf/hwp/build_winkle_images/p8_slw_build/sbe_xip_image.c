@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: sbe_xip_image.c,v 1.26 2013/03/13 23:28:17 cmolsen Exp $
+// $Id: sbe_xip_image.c,v 1.27 2013/06/13 20:26:25 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.c,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -522,21 +522,24 @@ xipTranslateToc(SbeXipToc* o_dest, SbeXipToc* i_src)
 XIP_STATIC int
 xipFinalSection(const void* i_image, int* o_sectionId)
 {
-    int i, rc;
+    int i, rc, found;
     uint32_t offset;
     SbeXipHeader hostHeader;
     
     sbe_xip_translate_header(&hostHeader, (SbeXipHeader*)i_image);
 
+    found = 0;
     offset = 0;
     *o_sectionId = 0;           /* Make GCC -O3 happy */
     for (i = 0; i < SBE_XIP_SECTIONS; i++) {
-        if (hostHeader.iv_section[i].iv_offset > offset) {
+        if ((hostHeader.iv_section[i].iv_size != 0) && 
+            (hostHeader.iv_section[i].iv_offset >= offset)) {
             *o_sectionId = i;
             offset = hostHeader.iv_section[i].iv_offset;
+            found = 1;
         }
     }
-    if (offset == 0) {
+    if (!found) {
         rc = TRACE_ERRORX(SBE_XIP_IMAGE_ERROR, "The image is empty\n");
     } else {
         rc = 0;
@@ -2143,10 +2146,24 @@ sbe_xip_delete_section(void* io_image, const int i_sectionId)
             break;
         }
 
-        xipSetImageSize(io_image, section.iv_offset);
         xipSetSectionOffset(io_image, i_sectionId, 0);
         xipSetSectionSize(io_image, i_sectionId, 0);
 
+
+        // For cleanliness we also remove any alignment padding that had been
+        // appended between the now-last section and the deleted section, then
+        // re-establish the final alignment. The assumption is that all images
+        // always have the correct final alignment, so there is no way this
+        // could overflow a designated buffer space since the image size is
+        // the same or has been reduced.
+
+        rc = xipFinalSection(io_image, &final);
+        if (rc) break;
+
+        rc = sbe_xip_get_section(io_image, final, &section);
+        if (rc) break;
+
+        xipSetImageSize(io_image, section.iv_offset + section.iv_size);
         xipFinalAlignment(io_image);
 
     } while (0);
@@ -2212,6 +2229,13 @@ sbe_xip_duplicate_section(const void* i_image,
 #endif // PPC_HYP
 
 
+// The append must be done in such a way that if the append fails, the image
+// is not modified. This behavior is required by applications that
+// speculatively append until the allocation fails, but still require the
+// final image to be valid. To accomplish this the initial image size and
+// section statistics are captured at entry, and restored in the event of an
+// error.
+
 int
 sbe_xip_append(void* io_image,
                const int i_sectionId,
@@ -2220,12 +2244,14 @@ sbe_xip_append(void* io_image,
                const uint32_t i_allocation,
                uint32_t* o_sectionOffset)
 {
-    SbeXipSection section;
-    int rc, final;
+    SbeXipSection section, initialSection;
+    int rc, final, restoreOnError;
     void* hostAddress;
-    uint32_t pad;
+    uint32_t pad, initialSize;
 
     do {
+        restoreOnError = 0;
+
         rc = xipQuickCheck(io_image, 1);
         if (rc) break;
 
@@ -2233,6 +2259,10 @@ sbe_xip_append(void* io_image,
         if (rc) break;
 
         if (i_size == 0) break;
+
+        initialSection = section;
+        initialSize = xipImageSize(io_image);
+        restoreOnError = 1;
 
         if (section.iv_size == 0) {
 
@@ -2284,15 +2314,24 @@ sbe_xip_append(void* io_image,
         }
 
 
-        // Update the image size and section table. 
+        // Update the image size and section table. Note that the final
+        // alignment may push out of the allocation.
 
         xipSetImageSize(io_image, xipImageSize(io_image) + i_size);
         xipFinalAlignment(io_image);
 
+        if (xipImageSize(io_image) > i_allocation) {
+            rc = TRACE_ERROR(SBE_XIP_WOULD_OVERFLOW);
+            break;
+        }            
+
         section.iv_size += i_size;
-        rc = xipPutSection(io_image, i_sectionId, &section);
-        if (rc) break;
-        
+
+        if (xipPutSection(io_image, i_sectionId, &section) != 0) {
+            rc = TRACE_ERROR(SBE_XIP_BUG); /* Can't happen */
+            break;
+        }
+
 
         // Special case
 
@@ -2302,6 +2341,13 @@ sbe_xip_append(void* io_image,
 
     } while (0);
 
+    if (rc && restoreOnError) {
+        if (xipPutSection(io_image, i_sectionId, &initialSection) != 0) {
+            rc = TRACE_ERROR(SBE_XIP_BUG); /* Can't happen */
+        }
+        xipSetImageSize(io_image, initialSize);
+    }
+     
     return rc;
 }
 

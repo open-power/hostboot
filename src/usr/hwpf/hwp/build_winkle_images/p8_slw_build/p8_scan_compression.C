@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scan_compression.C,v 1.6 2012/10/22 22:13:38 bcbrock Exp $
+// $Id: p8_scan_compression.C,v 1.7 2013/05/30 00:33:22 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/p8_scan_compression.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -681,4 +681,63 @@ rs4_decompress(uint8_t** o_string,
     return rc;
 }
     
+
+int
+rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
+{
+    int rc; 
+    uint8_t* data;
+    uint32_t length, stringLength, pos;
+
+    do {
+        *o_redundant = 0;
+
+        if (rs4_revle32(i_data->iv_magic) != RS4_MAGIC) {
+            rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
+            break;
+        }
+
+        data = (uint8_t*)i_data + sizeof(CompressedScanData);
+        stringLength = rs4_revle32(i_data->iv_length);
+
+        // A compressed scan string is redundant if the initial rotate is
+        // followed by the end-of-string marker, and any remaining mod-4 bits
+        // are also 0.
+
+        pos = stop_decode(&length, data, 0);
+        length *= 4;
+        if (rs4_get_nibble(data, pos) == 0) {
+
+            if (rs4_get_nibble(data, pos + 1) == 0) {
+
+                *o_redundant = 1;
+
+            } else { 
+
+                length += rs4_get_nibble(data, pos + 1);
+                if (rs4_get_nibble(data, pos + 2) == 0) {
+
+                    *o_redundant = 1;
+                }
+            }
+        }
+
+        if ((length > stringLength) ||
+            (*o_redundant && (length != stringLength))) {
+
+            rc = SCAN_DECOMPRESSION_SIZE_ERROR;
+
+        } else {
+
+            rc = 0;
+        }
+    } while (0);
+
+    return rc;
+}
     
+    
+
+
+
+                              

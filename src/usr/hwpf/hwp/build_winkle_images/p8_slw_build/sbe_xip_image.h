@@ -23,7 +23,7 @@
 #ifndef __SBE_XIP_IMAGE_H
 #define __SBE_XIP_IMAGE_H
 
-// $Id: sbe_xip_image.h,v 1.23 2013/03/20 21:41:53 cmolsen Exp $
+// $Id: sbe_xip_image.h,v 1.24 2013/06/13 20:26:33 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.h,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1104,8 +1104,11 @@ sbe_xip_get_halt(void* io_image,
 /// the final (highest address offset) section of the image may be deleted.
 /// Deleting the final section of the image means that the section size is set
 /// to 0, and the size of the image recorded in the header is reduced by the
-/// section size.  This API does not check for or warn if other sections in
-/// the image reference the deleted section.
+/// section size.  Any alignment padding of the now-last section is also
+/// removed.
+///
+/// \note This API does not check for or warn if other sections in the image
+/// reference the deleted section.
 ///
 /// \retval 0 Success
 ///
@@ -1174,7 +1177,8 @@ sbe_xip_duplicate_section(const void* i_image,
 ///
 /// \param[out] o_sectionOffset If non-0 at entry, then the API updates the
 /// location pointed to by \a o_sectionOffset with the offset of the first
-/// byte of the appended data within the indicated section.
+/// byte of the appended data within the indicated section. This return value
+/// is invalid in the event of a non-0 return code.
 ///
 /// This API copies data from \a i_data to the end of the indicated \a
 /// i_section.  The section \a i_section must either be empty, or must be the
@@ -1213,6 +1217,9 @@ sbe_xip_duplicate_section(const void* i_image,
 ///
 /// \note If the TOC section is modified then the image is marked as having an
 /// unsorted TOC.
+///
+/// \note If the call fails for any reason (other than a bug in the API
+/// itself) then the \a io_image data is returned unmodified.
 ///
 /// \retval 0 Success
 ///
