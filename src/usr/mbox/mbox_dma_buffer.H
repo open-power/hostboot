@@ -100,11 +100,14 @@ namespace MBOX
             bool isDmaAddress(void * i_address) const
             {
                 uint64_t address = reinterpret_cast<uint64_t>(i_address);
-                return
-                    (address >= VmmManager::MBOX_DMA_ADDR &&
-                     address < (VmmManager::MBOX_DMA_ADDR +
-                                (VmmManager::MBOX_DMA_PAGES *
-                                 VmmManager::MBOX_DMA_PAGESIZE)));
+                uint64_t bufaddr = reinterpret_cast<uint64_t>(iv_head);
+
+                return ((address >= bufaddr) &&
+                        (address < (bufaddr +
+                            (VmmManager::MBOX_DMA_PAGES *
+                             VmmManager::MBOX_DMA_PAGESIZE))
+                        )
+                    );
             }
 
             /**

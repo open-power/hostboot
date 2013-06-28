@@ -578,6 +578,14 @@ bool HeapManager::_freeBig(void* i_ptr)
         }
         bc = (big_chunk_t*) (((uint64_t)bc->next) & 0x00000000FFFFFFFF);
     }
+
+    // Small allocations are always aligned, hence we exited out at the
+    // beginning of the function.  Large allocations are always aligned.
+    // If we did not find a large allocation in the list (result == false)
+    // then either we have a double-free or someone trying to free something
+    // that doesn't belong on the heap.
+    crit_assert(result);
+
     return result;
 }
 

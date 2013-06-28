@@ -180,7 +180,7 @@ namespace TARGETING
                 if ( ATTR_SYNC_SECTION_TO_HB == l_pMsg->type )
                 {
                     TARG_DBG( "HB Attribute Sync Section message type received "
-                        "from the FSP"); 
+                        "from the FSP");
 
                     // get the section id
                     l_page.sectionId = ATTR_SYNC_GET_SECTION_ID(l_pMsg->data[0]);
@@ -231,11 +231,15 @@ namespace TARGETING
                     {
                         iv_pages.push_back(l_page);
                     }
+
+                    // Free memory allocated for message
+                    msg_free( l_pMsg );
+                    l_pMsg = NULL;
                 }
                 else if ( ATTR_SYNC_COMPLETE_TO_HB == l_pMsg->type )
                 {
                     TARG_DBG( "HB Attribute Sync Complete message type "
-                        "received from the FSP"); 
+                        "received from the FSP");
 
                     l_sync_complete = true;
 
@@ -299,11 +303,6 @@ namespace TARGETING
                 {
                     TARG_ERR( "WARNING: Invalid message type [0x%x] received "
                         "from the FSP, ignoring...", l_pMsg->type);
-                }
-
-                // Free memory allocated for message
-                if ( msg_is_async(l_pMsg) )
-                {
                     msg_free( l_pMsg );
                     l_pMsg = NULL;
                 }
@@ -477,7 +476,7 @@ namespace TARGETING
                 free( i_msg->extra_data );
             }
         }
-    
+
         return l_errl;
     }
 
@@ -514,7 +513,7 @@ namespace TARGETING
                 if( l_errl )
                 {
                     TRACFCOMP(g_trac_targeting,
-                            "Error returned when syncing section type %d to FSP", 
+                            "Error returned when syncing section type %d to FSP",
                             section_type[i]);
                     break;
                 }
@@ -547,7 +546,7 @@ namespace TARGETING
             if (l_errl)
             {
                 TARG_ERR( "Error registering the Hostboot message queue with "
-                    "mailbox service." ); 
+                    "mailbox service." );
                 break;
             }
 
