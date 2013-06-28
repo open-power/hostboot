@@ -41,7 +41,6 @@ cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_ex_l3purge.act >> \
 cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_ex_l3purge.act >> \
     $sb/simu/data/cec-chip/s1_ex.act
 
-
 echo "+++ Updating POR files for Secure ROM Support (removed with RTC 72729)"
 mkdir -p $sb/simu/data/cec-chip/
 grep -v 0x02020017 $BACKING_BUILD/src/simu/data/cec-chip/p8_master.por > \
@@ -60,3 +59,13 @@ cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_master.por >> \
     $sb/simu/data/cec-chip/s1_master.por
 cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_master.por >> \
     $sb/simu/data/cec-chip/s1_slave.por
+
+echo "+++ Updating actions for Thread Count(CMVC 889344)"
+mkdir -p $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/p8.act $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/s1.act $sb/simu/data/cec-chip
+patch $sb/simu/data/cec-chip/p8.act \
+      $HOSTBOOTROOT/src/build/citest/etc/patches/p8.act_sbe_thread_count_patch
+patch $sb/simu/data/cec-chip/s1.act \
+      $HOSTBOOTROOT/src/build/citest/etc/patches/s1.act_sbe_thread_count_patch
+

@@ -1,0 +1,30 @@
+*** ORIG/p8.act	2013-06-28 15:09:38.397876370 -0500
+--- NEW/p8.act	2013-06-28 16:36:03.653781869 -0500
+***************
+*** 157,168 ****
+    EFFECT: TARGET=[PROCREG(msr, 4, 6)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,D0000000 00000000)]# MSR to default
+    EFFECT: TARGET=[PROCREG(nia, 4, 7)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,00000000 00000100)]# NIA to default
+    EFFECT: TARGET=[PROCREG(msr, 4, 7)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,D0000000 00000000)]# MSR to default
+  
+    #ds01 Discover the secure state and save it away
+    EFFECT: TARGET=[LOGIC(0xFF0CC004)] OP=[EQUALTO,BUF,MASK,SHIFT] DATA=[REG(0x00010005)] MASK=[LITERAL(64,80000000 00000000)] SHIFT=[63]
+    # ds01 ch128 Load Hostboot base image from offset in MBOX SCRATCH3 reg (0x3A)
+    EFFECT: TARGET=[MODULE(sbeStart, FSIMBOX(0x3A), LOGIC(0xFF0CC004), 4)] OP=[MODULECALL] #dds129 
+!   
+    ##############################################################################
+    # Phase 2: Start SBE
+    ##############################################################################
+--- 157,169 ----
+    EFFECT: TARGET=[PROCREG(msr, 4, 6)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,D0000000 00000000)]# MSR to default
+    EFFECT: TARGET=[PROCREG(nia, 4, 7)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,00000000 00000100)]# NIA to default
+    EFFECT: TARGET=[PROCREG(msr, 4, 7)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,D0000000 00000000)]# MSR to default
++   EFFECT: TARGET=[PROCREG(scratch, 4,7)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,0000FF00 00000000)]# Thread Count
+  
+    #ds01 Discover the secure state and save it away
+    EFFECT: TARGET=[LOGIC(0xFF0CC004)] OP=[EQUALTO,BUF,MASK,SHIFT] DATA=[REG(0x00010005)] MASK=[LITERAL(64,80000000 00000000)] SHIFT=[63]
+    # ds01 ch128 Load Hostboot base image from offset in MBOX SCRATCH3 reg (0x3A)
+    EFFECT: TARGET=[MODULE(sbeStart, FSIMBOX(0x3A), LOGIC(0xFF0CC004), 4)] OP=[MODULECALL] #dds129 
+! 
+    ##############################################################################
+    # Phase 2: Start SBE
+    ##############################################################################

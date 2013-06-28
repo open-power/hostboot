@@ -30,3 +30,13 @@ Add POR setting for TBROM scom register
   Indirectly: p8_slave.por, s1_master.por, s1_slave.por
 -Coreq: None
 
+Add action for SBE to set Thread Count
+-RTC: 76712
+-CMVC: 889344
+- Files
+  src/build/citest/etc/workarounds.postsimsetup
+  src/build/citest/etc/patches/patchlist.txt
+  src/build/citest/etc/patches/p8.act_sbe_thread_count_patch
+  src/build/citest/etc/patches/s1.act_sbe_thread_count_patch
+-Coreq: None
+

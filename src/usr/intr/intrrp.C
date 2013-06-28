@@ -96,25 +96,40 @@ uint64_t get_enabled_threads( void )
         // Read the scratch reg that the SBE setup
         //  Enabled threads are listed as a bitstring in bits 16:23
         //  A value of zero means the SBE hasn't set them up yet
-        while( en_threads == 0 )
+
+        // Loop for 1 sec (1000 x 1 msec) for this value to be set
+        uint64_t loop_count = 0;
+        const uint64_t LOOP_MAX = 1000;
+
+        while( (en_threads == 0) && (loop_count < LOOP_MAX) )
         {
             en_threads = mmio_scratch_read(MMIO_SCRATCH_AVP_THREADS);
 
-            //@todo RTC:63991 - Remove this after we get the new SBE image
             if( en_threads == 0 )
             {
-                // Default to all threads enabled
-                uint64_t max_threads = cpu_thread_count();
-                en_threads =
-                  ((1ull << max_threads) - 1ull) << (48ull - max_threads);
+                // Sleep if value has not been set
+                nanosleep(0,NS_PER_MSEC);   // 1 msec
             }
-        }
-        en_threads = en_threads << 16; //left-justify the threads
-        TRACFCOMP( g_trac_intr,
-                   "Enabled Threads = %.16X",
-                   en_threads );
 
-        sys->setAttr<TARGETING::ATTR_ENABLED_THREADS>(en_threads);
+            // Update the counter
+            loop_count++;
+        }
+
+        // If LOOP_MAX reached, CRIT_ASSERT
+        if ( unlikely(loop_count == LOOP_MAX) )
+        {
+            TRACFCOMP( g_trac_intr,"SBE Didn't Set Active Threads");
+            crit_assert(0);
+        }
+        else
+        {
+            en_threads = en_threads << 16; //left-justify the threads
+            TRACFCOMP( g_trac_intr,
+                       "Enabled Threads = %.16X",
+                       en_threads );
+            sys->setAttr<TARGETING::ATTR_ENABLED_THREADS>(en_threads);
+        }
+
     }
     TRACDCOMP( g_trac_intr, "en_threads=%.16X", en_threads );
     return en_threads;
