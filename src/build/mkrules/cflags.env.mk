@@ -39,10 +39,6 @@ ASMFLAGS += $(COMMONFLAGS) -mcpu=power7
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Wall
 LDFLAGS += --nostdlib --sort-common $(COMMONFLAGS)
 
-ifdef BUILD_MINIMAL
-LDFLAGS += --strip-debug
-endif
-
 INCFLAGS = $(addprefix -I, $(INCDIR) )
 ASMINCFLAGS = $(addprefix $(lastword -Wa,-I), $(INCDIR))
 
