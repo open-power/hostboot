@@ -96,6 +96,14 @@ class CenDqBitmap
     int32_t setDram( uint8_t i_symbol, uint8_t i_pins = 0xff );
 
     /**
+     * @brief  Checks if chip mark is present on specified DRAM.
+     * @param  i_symbol A symbol on the target DRAM.
+     * @param  o_cm     True if chip mark is present false otherwise.
+     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    int32_t isChipMark( uint8_t i_symbol, bool & o_cm );
+
+    /**
      * @brief  Sets the DRAM spare on the specified port.
      * @param  i_portSlct The target port.
      * @param  i_pins     Optional 8-bit (x8 mode) or 4-bit (x4 mode) value of

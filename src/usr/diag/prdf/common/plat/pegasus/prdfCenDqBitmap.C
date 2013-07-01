@@ -174,6 +174,47 @@ int32_t CenDqBitmap::setDram( uint8_t i_symbol, uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
+int32_t CenDqBitmap::isChipMark( uint8_t i_symbol, bool & o_cm )
+{
+    #define PRDF_FUNC "[CenDqBitmap::isChipMark] "
+
+    int32_t o_rc = SUCCESS;
+    o_cm = false;
+
+    do
+    {
+        uint8_t evenDq   = CenSymbol::symbol2CenDq(    i_symbol );
+        uint8_t portSlct = CenSymbol::symbol2PortSlct( i_symbol );
+        if ( DQS_PER_DIMM <= evenDq || PORT_SLCT_PER_MBA <= portSlct )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_symbol=%d", i_symbol );
+            o_rc = FAIL; break;
+        }
+
+        uint8_t byteIdx = evenDq / DQS_PER_BYTE;
+        uint8_t bitIdx  = evenDq % DQS_PER_BYTE;
+
+        uint8_t pins   = 0xff;
+        uint8_t cmData = iv_data[portSlct][byteIdx];
+
+        if ( isDramWidthX4(iv_mba) )
+        {
+            pins = 0xf; // limit to 4 bits
+            uint8_t shift = (((DQS_PER_BYTE-1) - bitIdx) % 4) * 4; // 0,4
+            cmData = (cmData >> shift) & 0xf;
+        }
+
+        o_cm = ( cmData == pins );
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
 {
     #define PRDF_FUNC "[CenDqBitmap::setDramSpare] "
