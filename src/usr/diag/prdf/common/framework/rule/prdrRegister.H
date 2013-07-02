@@ -55,6 +55,7 @@
         std::cout<<"Failed to write data to file"; \
         exit(1); \
     }
+
 namespace PRDR_COMPILER
 {
 
@@ -141,7 +142,7 @@ struct CaptureReqStruct
                 str = str.substr(1, str.size() - 2);
             }
             l_tmp32 = htonl(PRDF::Util::hashString(str.c_str()));
-            fwrite(&l_tmp32, sizeof(l_tmp32), 1, l_file);
+            PRDR_FWRITE(&l_tmp32, sizeof(l_tmp32), 1, l_file);
         }
     };
 };

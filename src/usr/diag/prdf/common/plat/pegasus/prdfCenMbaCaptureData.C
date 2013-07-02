@@ -27,40 +27,57 @@
  */
 
 #include <prdfCenMbaCaptureData.H>
+
+// Framwork includes
 #include <utilmem.H>
 #include <UtilHash.H>
 #include <prdfDramRepairUsrData.H>
 #include <iipServiceDataCollector.h>
 #include <prdf_ras_services.H>
 
+// Pegasus includes
 #include <prdfCenMarkstore.H>
+#include <prdfCenDqBitmap.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 namespace CenMbaCaptureData
 {
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-void addDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
-                         errlHndl_t o_errHdl )
+void addMemEccData( TargetHandle_t i_mba, errlHndl_t io_errl )
 {
     CaptureData cd;
-    captureDramRepairsData( i_mbaTarget, cd);
-    ErrDataService::AddCapData( cd, o_errHdl );
+
+    // Add DRAM repairs data from hardware.
+    captureDramRepairsData( i_mba, cd );
+
+    // Add DRAM repairs data from VPD.
+    captureDramRepairsVpd( i_mba, cd );
+
+    ErrDataService::AddCapData( cd, io_errl );
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-void addDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
-                             STEP_CODE_DATA_STRUCT & io_sc )
+void addMemEccData( TargetHandle_t i_mba, STEP_CODE_DATA_STRUCT & io_sc )
 {
     CaptureData & cd = io_sc.service_data->GetCaptureData();
-    captureDramRepairsData( i_mbaTarget, cd);
+
+    // Add DRAM repairs data from hardware.
+    captureDramRepairsData( i_mba, cd );
+
+    // Add DRAM repairs data from VPD.
+    captureDramRepairsVpd( i_mba, cd );
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
                              CaptureData & o_cd )
@@ -139,6 +156,62 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
         o_cd.Add( i_mbaTarget, Util::hashString("DRAM_REPAIRS_DATA"),
                   dramRepairData );
     }
+}
+
+//------------------------------------------------------------------------------
+
+void captureDramRepairsVpd( TargetHandle_t i_mba, CaptureData & io_cd )
+{
+    #define PRDF_FUNC "[captureDramRepairsVpd] "
+
+    // Get the maximum capture data size.
+    static const size_t sz_rank  = sizeof(uint8_t);
+    static const size_t sz_entry = PORT_SLCT_PER_MBA * DIMM_DQ_RANK_BITMAP_SIZE;
+    static const size_t sz_word  = sizeof(CPU_WORD);
+
+    // Get the maximum capture data size.
+    size_t sz_maxData = MAX_RANKS_PER_MBA * (sz_rank + sz_entry);
+
+    // Adjust the size for endianess.
+    sz_maxData = ((sz_maxData + sz_word-1) / sz_word) * sz_word;
+
+    // Initialize to 0.
+    uint8_t capData[sz_maxData];
+    memset( capData, 0x00, sz_maxData );
+
+    // Get the data for each rank.
+    uint32_t idx = 0;
+    for ( uint8_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
+    {
+        CenRank rank ( r );
+        CenDqBitmap bitmap;
+
+        if ( SUCCESS != getBadDqBitmap(i_mba, rank, bitmap, true) )
+        {
+            PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x rank=%d",
+                      getHuid(i_mba), r );
+            continue; // skip this rank
+        }
+
+        if ( bitmap.badDqs() ) // make sure the data is non-zero
+        {
+            // Add the rank, then the entry data.
+            capData[idx] = r;                                  idx += sz_rank;
+            memcpy(&capData[idx], bitmap.getData(), sz_entry); idx += sz_entry;
+        }
+    }
+
+    // Fix endianess issues with non PPC machines.
+    size_t sz_capData = idx;
+    sz_capData = ((sz_capData + sz_word-1) / sz_word) * sz_word;
+    for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
+        ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
+
+    // Add data to capture data.
+    BIT_STRING_ADDRESS_CLASS bs ( 0, sz_capData*8, (CPU_WORD *) &capData );
+    io_cd.Add( i_mba, Util::hashString("DRAM_REPAIRS_VPD"), bs );
+
+    #undef PRDF_FUNC
 }
 
 }  //end namespace MbaCaptureData

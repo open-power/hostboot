@@ -609,6 +609,8 @@ int32_t calloutPeerBus( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & i_sc,
     } while (0);
 
     return SUCCESS;
+
+    #undef PRDF_FUNC
 }
 
 #define PLUGIN_CALLOUT_PEER_BUS( BUS, TYPE, POS ) \

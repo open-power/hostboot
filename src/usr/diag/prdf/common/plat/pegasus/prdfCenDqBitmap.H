@@ -60,6 +60,12 @@ class CenDqBitmap
   public: // functions
 
     /**
+     * @brief  Queries if there are any bad DQs present on either port.
+     * @return TRUE if any bad DQs present.
+     */
+    bool badDqs() const;
+
+    /**
      * @brief  Queries the given port to determine if there are any bad DQs
      *         present.
      * @param  i_portSlct The target port.

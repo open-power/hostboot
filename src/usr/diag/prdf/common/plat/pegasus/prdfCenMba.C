@@ -103,7 +103,7 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
     //       successful with no errors because the error log will not be
     //       committed.
     if ( !i_sc.service_data->IsDontCommitErrl() )
-        CenMbaCaptureData::addDramRepairsData( mbaTarget, i_sc );
+        CenMbaCaptureData::addMemEccData( mbaTarget, i_sc );
 
     return PRD_NO_CLEAR_FIR_BITS; // FIR bits are cleared by this plugin
 

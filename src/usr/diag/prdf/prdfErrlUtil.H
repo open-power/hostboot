@@ -32,10 +32,6 @@
  * related declarations specific to hostboot.
  */
 
-/*--------------------------------------------------------------------*/
-/*  Includes                                                          */
-/*--------------------------------------------------------------------*/
-#include <errl/errlmanager.H>
 #include <prdfEnums.H>
 
 /**

@@ -45,4 +45,15 @@ PRDR_ERROR_SIGNATURE(VcmMarksUnavail, 0xffff0023, "",
 PRDR_ERROR_SIGNATURE(DsdDramSpared,   0xffff0030, "", "DSD: DRAM spared");
 PRDR_ERROR_SIGNATURE(DsdBadSpare,     0xffff0031, "", "DSD: DRAM spare is bad");
 
+PRDR_ERROR_SIGNATURE(RdrInternalFail,  0xffff0040, "", "RDR: Internal failure");
+PRDR_ERROR_SIGNATURE(RdrInvalidConfig, 0xffff0041, "", "RDR: Invalid config");
+PRDR_ERROR_SIGNATURE(RdrScreenBadDqs,  0xffff0042, "",
+                     "RDR: DRAM repairs disabled and VPD found");
+PRDR_ERROR_SIGNATURE(RdrRepairsUsed,   0xffff0043, "",
+                     "RDR: Both spare and chip mark used");
+PRDR_ERROR_SIGNATURE(RdrRepairUnavail, 0xffff0044, "",
+                     "RDR: Repairs needed but unavailable");
+
+
+
 #endif // __prdfCenMbaExtraSig_H

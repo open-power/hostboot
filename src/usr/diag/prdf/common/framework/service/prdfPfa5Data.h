@@ -28,7 +28,7 @@
  @brief Version 5 format of the Pfa Data
 */
 
-#include <prdf_types.h>
+#include <iipconst.h>
 #include <utilstream.H>
 
 namespace PRDF
@@ -61,6 +61,8 @@ enum ErrlSubsect
     ErrlCapData_2    = 2,
     ErrlAVPData_1    = 41,
     ErrlAVPData_2    = 42,
+    ErrlMruData_1    = 61, // This will only be used in non-attenion code when
+                           // we want to add MRU.
     ErrlString       = 10,
 };
 

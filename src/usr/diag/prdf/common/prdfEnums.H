@@ -29,6 +29,10 @@
 #ifdef  __HOSTBOOT_MODULE
 
     #ifndef __PRD_RULE_COMPILE
+
+    #include <errl/errlmanager.H> // Must be included before including
+                                  // hwasCallout.H, otherwise the compile will
+                                  // fail.
     #include <hwas/common/hwasCallout.H>
 
     // FIXME: RTC: 62867 will resolve this

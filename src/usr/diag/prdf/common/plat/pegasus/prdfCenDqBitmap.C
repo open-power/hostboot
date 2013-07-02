@@ -33,6 +33,28 @@ namespace PRDF
 
 using namespace PlatServices;
 
+bool CenDqBitmap::badDqs() const
+{
+    bool o_badDqs = false;
+
+    for ( uint32_t i = 0; i < PORT_SLCT_PER_MBA; i++ )
+    {
+        for ( uint32_t j = 0; j < DIMM_DQ_RANK_BITMAP_SIZE; j++ )
+        {
+            if ( 0 != iv_data[i][j] )
+            {
+                o_badDqs = true;
+                break;
+            }
+        }
+        if ( o_badDqs ) break;
+    }
+
+    return o_badDqs;
+}
+
+//------------------------------------------------------------------------------
+
 int32_t CenDqBitmap::badDqs( uint8_t i_portSlct, bool & o_badDqs ) const
 {
     #define PRDF_FUNC "[CenDqBitmap::badDqs] "

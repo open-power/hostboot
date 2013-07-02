@@ -33,5 +33,6 @@ PRDF_RULE_PLUGINS_PEGASUS_HB = \
 ################################################################################
 
 prd_pegasus_specific_HB = \
-    prdfDramRepairs.o
+    prdfDramRepairs.o \
+	prdfPlatCalloutUtil.o
 
