@@ -2059,9 +2059,9 @@ sub generate_mcs
     my $swizzle = 0;
     foreach my $dmi ( @dbus_mcs )
     {
-        if (($dmi->[DBUS_MCS_NODE_INDEX],
-             $dmi->[DBUS_MCS_PROC_INDEX],
-             $dmi->[DBUS_MCS_UNIT_INDEX]) eq (${node},$proc,$mcs))
+        if (($dmi->[DBUS_MCS_NODE_INDEX] eq ${node} ) &&
+            ( $dmi->[DBUS_MCS_PROC_INDEX] eq $proc  ) &&
+            ($dmi->[DBUS_MCS_UNIT_INDEX] eq  $mcs   ))
         {
             $lane_swap = $dmi->[DBUS_MCS_DOWNSTREAM_INDEX];
             $msb_swap = $dmi->[DBUS_MCS_TX_SWAP_INDEX];
@@ -2299,8 +2299,8 @@ sub generate_centaur
     my $msb_swap = 0;
     foreach my $dmi ( @dbus_centaur )
     {
-        if (($dmi->[DBUS_CENTAUR_NODE_INDEX],
-             $dmi->[DBUS_CENTAUR_MEMBUF_INDEX]) eq (${node},$ctaur))
+        if (($dmi->[DBUS_CENTAUR_NODE_INDEX] eq ${node} ) &&
+            ($dmi->[DBUS_CENTAUR_MEMBUF_INDEX] eq $ctaur) )
         {
             $lane_swap = $dmi->[DBUS_CENTAUR_UPSTREAM_INDEX];
             $msb_swap = $dmi->[DBUS_CENTAUR_RX_SWAP_INDEX];
