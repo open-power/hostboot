@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.20 2013/04/09 11:04:34 lapietra Exp $
+// $Id: mss_termination_control.C,v 1.21 2013/04/22 16:36:34 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.21   | sasethur |16-Apr-13| Added DDR4 settings for rd_vref
 //  1.20   | sasethur |09-Apr-13| Changed wr_vref register settings as per ddr3spec
 //  1.19   | sasethur |05-Apr-13| Updated for port in parallel 
 //  1.18   | mwuu     |25-Feb-13| Added return code per port for config slew FN
@@ -145,7 +146,7 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
         rc_num = rc_num | data_buffer.insertFromRight(enslice_ffedrv,56,4);
         if (rc_num)
         {
-            FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
+            FAPI_ERR( "config_drv_imp: Error in setting up buffer ");
             rc.setEcmdError(rc_num);
             return rc;
         }
@@ -187,7 +188,7 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
         rc_num = rc_num | data_buffer.insertFromRight(enslice_ffedrv,56,4);
         if (rc_num)
         {
-            FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
+            FAPI_ERR( "config_drv_imp: Error in setting up buffer ");
             rc.setEcmdError(rc_num);
             return rc;
         }
@@ -307,7 +308,7 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
         rc_num = rc_num | data_buffer.insertFromRight(enslicepffeterm,56,4);
         if (rc_num)
         {
-            FAPI_ERR( "config_drv_imp: Error in setting up buffer ");
+            FAPI_ERR( "config_rcv_imp: Error in setting up buffer ");
             rc.setEcmdError(rc_num);
             return rc;
         }
@@ -349,7 +350,7 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
         rc_num = rc_num | data_buffer.insertFromRight(enslicepffeterm,56,4);
         if (rc_num)
         {
-            FAPI_ERR( "config_drv_imp: Error in setting up buffer ");
+            FAPI_ERR( "config_rcv_imp: Error in setting up buffer ");
             rc.setEcmdError(rc_num);
             return rc;
         }
@@ -819,7 +820,7 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
  * VDD64500 = 64500, VDD65875 = 65875, VDD67250 = 67250, VDD68625 = 68625, VDD70000 = 70000,
  * VDD71375 = 71375, VDD72750 = 72750, VDD74125 = 74125, VDD75500 = 75500, VDD76875 = 76875,
  * VDD78250 = 78250, VDD79625 = 79625, VDD81000 = 81000
- * DDR3 supports upto 61000
+ * DDR3 supports upto 61000, DDR4 - full range
  * ---------------------------------------------------------------------------*/
 
 fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t i_port, uint32_t i_rd_cen_vref)
@@ -836,17 +837,80 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
 	FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
 	return rc;
     }
-    for(uint8_t i=0; i< MAX_RD_VREF; i++)
+    
+    //if (rd_cen_vref == DDR3 rd_vref ) || (rd_cen_vref == DDR4)
+    
+    if((i_rd_cen_vref == 61000) || (i_rd_cen_vref == 81000)) 
     {
-	if (rd_cen_vref_array[i] == i_rd_cen_vref)
-	{
-            rd_vref = i;
-	    break;
-	}
+        rd_vref = 0xF;
+    }
+    else if((i_rd_cen_vref == 59625) || (i_rd_cen_vref == 79625))        
+    {                                                                    
+        rd_vref = 0xE;                                                   
+    }                                                                    
+    else if((i_rd_cen_vref == 58250) || (i_rd_cen_vref == 78250))        
+    {                                                                    
+        rd_vref = 0xD;                                                   
+    }                                                                    
+    else if((i_rd_cen_vref == 56875) || (i_rd_cen_vref == 76875))        
+    {                                                                                                                     
+        rd_vref = 0xC;
+    }
+    else if((i_rd_cen_vref == 55500) || (i_rd_cen_vref == 75500)) 
+    {
+        rd_vref = 0xB;
+    }
+    else if((i_rd_cen_vref == 54125) || (i_rd_cen_vref == 74125)) 
+    {
+        rd_vref = 0xA;
+    }
+    else if((i_rd_cen_vref == 52750) || (i_rd_cen_vref == 72750)) 
+    {
+        rd_vref = 0x9;
+    }
+    else if((i_rd_cen_vref == 51375) || (i_rd_cen_vref == 71375)) 
+    {
+        rd_vref = 0x8;
+    }
+    else if((i_rd_cen_vref == 50000) || (i_rd_cen_vref == 70000)) 
+    {
+        rd_vref = 0x0;
+    }
+    else if((i_rd_cen_vref == 48625) || (i_rd_cen_vref == 68625))    
+    {                                                                
+        rd_vref = 0x1;                                               
+    }                                                                
+    else if((i_rd_cen_vref == 47250) || (i_rd_cen_vref == 67250))    
+    {                                                                
+        rd_vref = 0x2;                                               
+    }                                                                
+    else if((i_rd_cen_vref == 45875) || (i_rd_cen_vref == 65875)) 
+    {
+        rd_vref = 0x3;
+    }
+    else if((i_rd_cen_vref == 44500) || (i_rd_cen_vref == 64500)) 
+    {
+        rd_vref = 0x4;
+    }
+    else if((i_rd_cen_vref == 43125) || (i_rd_cen_vref == 63125)) 
+    {
+        rd_vref = 0x5;
+    }
+    else if((i_rd_cen_vref == 41750) || (i_rd_cen_vref == 61750)) 
+    {
+        rd_vref = 0x6;
+    }
+    else if((i_rd_cen_vref == 40375) || (i_rd_cen_vref == 60375)) 
+    {
+        rd_vref = 0x7;        
+    }
+    else
+    {
+    	rd_vref = 0x0;
     }
 
 	rc = fapiGetScom(i_target_mba,
-		    DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0_0x800000060301143F,
+		    DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0_0x800000060301143F,  
 		    data_buffer); if(rc) return rc;
         rc_num = rc_num | data_buffer.insertFromRight(rd_vref,56,4);
         if (rc_num)

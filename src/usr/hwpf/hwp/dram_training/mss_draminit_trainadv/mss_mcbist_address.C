@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.C,v 1.11 2013/05/16 22:00:24 sasethur Exp $
+// $Id: mss_mcbist_address.C,v 1.10 2013/04/30 08:56:00 ppcaelab Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -38,8 +38,6 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
-// 1.11	   |preeragh|17-May-13| Fixed FW Review Comments
-// 1.10	   |preeragh|30-Apr-13| Fixed FW Review Comment
 // 1.9     |bellows |04-Apr-13| Changed program to be Hostboot compliant
 // 1.2     |bellows |03-Apr-13| Added Id and cleaned up a warning msg.
 // 1.1     |        |xx-Apr-13| Copied from original which is now known as mss_mcbist_address_default/_lab.C
@@ -51,17 +49,15 @@ extern "C"
 {
 using namespace fapi;
 
-#define MAX_ADDR_BITS 37
-#define MAX_VALUE_TWO 2
-
+#define MAX_STRING_LEN 80
 #define DELIMITERS ","
 
 fapi::ReturnCode address_generation(const fapi:: Target & i_target_mba,uint8_t i_port,mcbist_addr_mode i_addr_type,interleave_type i_add_inter_type,uint8_t i_rank,uint64_t &io_start_address, uint64_t &io_end_address)
 
 {
 fapi::ReturnCode  rc;
-uint8_t l_num_ranks_per_dimm[MAX_VALUE_TWO][MAX_VALUE_TWO];
-uint8_t l_num_master_ranks[MAX_VALUE_TWO][MAX_VALUE_TWO];
+uint8_t l_num_ranks_per_dimm[2][2];
+uint8_t l_num_master_ranks[2][2];
 uint8_t l_dram_gen=0;
 uint8_t l_dram_banks=0;
 uint8_t l_dram_rows=0;
@@ -108,7 +104,7 @@ FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][1]);
 FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim0 is %d ",l_num_master_ranks[0][0]);
 FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim1 is %d ",l_num_master_ranks[0][1]);
 FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim0 is %d ",l_num_master_ranks[1][0]);
-FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim1 is %d ",l_num_master_ranks[1][1]);
+FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM is l_num_master_p1_dim1 %d ",l_num_master_ranks[1][1]);
 
 //-------------------------------------------------------------------------------
 
@@ -188,14 +184,14 @@ return rc;
 fapi::ReturnCode parse_addr(const fapi:: Target & i_target_mba, char addr_string[],uint8_t mr3_valid,uint8_t mr2_valid,uint8_t mr1_valid,uint8_t l_dram_rows,uint8_t l_dram_cols,uint8_t l_addr_inter) 
 {
 fapi::ReturnCode  rc; 
-uint8_t i=MAX_ADDR_BITS;
+uint8_t i=37;
 
 uint8_t l_slave_rank = 0;
 uint8_t l_value;
 uint32_t l_value32 = 0;
 uint32_t l_sbit,rc_num;
 uint32_t l_start=0;
-uint32_t l_len = 0;
+uint32_t l_len = 6;
 uint64_t l_readscom_value = 0;
 uint64_t l_end = 0;
 uint64_t l_start_addr = 0;
@@ -203,7 +199,7 @@ uint8_t l_value_zero = 0;
 uint8_t l_user_end_addr = 0;
 ecmdDataBufferBase l_data_buffer_64(64);
 ecmdDataBufferBase l_data_buffer_rd64(64); 
-uint8_t l_attr_addr_mode = 3; //default Value - FULL Address Mode
+uint8_t l_attr_addr_mode = 3;
 uint8_t l_num_cols = 0;
 uint8_t l_num_rows = 0;
 
@@ -229,18 +225,17 @@ if(l_num_rows == 0 )
 
 rc_num = l_data_buffer_64.flushTo0();
 	
-		l_sbit = 0;l_value =i;
-		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
-		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
-		rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-		i--;
+	l_sbit = 0;l_value =i;
+	rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
+	rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
+	rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
+	i--;
 		
 		l_sbit = 54;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64);
 		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);
 		rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
 		i--;
-		
 		//FAPI_INF("Inside strcmp ba2");
 		l_sbit = 48;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
@@ -947,7 +942,7 @@ rc = fapiPutScom(i_target_mba,0x030106d3,l_data_buffer_rd64); if(rc) return rc;
 else
 {
 
-l_attr_addr_mode = 3; //Default it for FW with Full Address Range
+l_attr_addr_mode = 3;
 
 if(l_attr_addr_mode == 0)
 {
