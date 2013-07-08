@@ -352,8 +352,14 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                 // Note: This is currently not required.
 
                 // Check if we have the matching the Fabric Bus types
-                if((l_fabricBus->type != EREPAIR::PROCESSOR_EI4) &&
+                if((l_tgtType == fapi::TARGET_TYPE_ABUS_ENDPOINT) &&
                    (l_fabricBus->type != EREPAIR::PROCESSOR_EDI))
+                {
+                    continue;
+                }
+
+                if((l_tgtType == fapi::TARGET_TYPE_XBUS_ENDPOINT) &&
+                   (l_fabricBus->type != EREPAIR::PROCESSOR_EI4))
                 {
                     continue;
                 }
