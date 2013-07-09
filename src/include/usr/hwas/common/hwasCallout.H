@@ -59,12 +59,13 @@ typedef enum {
     GARD_Void                   = 0xFF
 } GARD_ErrorType;
 
-// from src/epub/fsp/epub_service_codes.H
-// nuVersionSID  1.24.14.36                  versionSID    1.24.14.36
-    /** @enum epubProcedureID
-     *  This enumeration contains all the Procedures to be used with a callout
-     *  in an SRC.
-     */
+// from src/epub/fsp/epub_service_codes.H v1.24.24.4
+// - Any additions should be added to FipS code first
+
+/** @enum epubProcedureID
+ *  This enumeration contains all the Procedures to be used with a callout
+ *  in an SRC.
+ */
 enum epubProcedureID
 {
     EPUB_PRC_NONE                   = 0x00,
@@ -85,7 +86,7 @@ enum epubProcedureID
     EPUB_PRC_EIBUS_ERROR            = 0x37,
     EPUB_PRC_POWER_ERROR            = 0x3F,
     EPUB_PRC_PERFORMANCE_DEGRADED   = 0x4D,
-    EPUB_PRC_HB_CODE                = 0x51
+    EPUB_PRC_HB_CODE                = 0x55
 };
 
 // from srci/fsp/srci.H
