@@ -1739,7 +1739,6 @@
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- @TOOD: Attribute is writable until MRW generates HUIDs for FSP -->
 <attribute>
     <id>HUID</id>
     <description>
@@ -1756,7 +1755,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
