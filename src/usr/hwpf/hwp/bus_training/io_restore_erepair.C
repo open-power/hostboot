@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_restore_erepair.C,v 1.12 2013/04/18 08:17:26 varkeykv Exp $
+// $Id: io_restore_erepair.C,v 1.13 2013/06/11 12:25:18 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -45,7 +45,7 @@
 #include <fapi.H>
 #include "io_restore_erepair.H"
 #include "gcr_funcs.H"
-#include "erepairGetFailedLanesHwp.H"
+#include <erepairAccessorHwpFuncs.H>
 
 extern "C" {
 
@@ -119,7 +119,7 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
   
   // This is specially for Cronus/Lab 
   if(tx_lanes.size()==0 && rx_lanes.size()==0){
-    rc=erepairGetFailedLanesHwp(target,tx_lanes,rx_lanes);
+    rc=erepairGetFailedLanes(target,tx_lanes,rx_lanes); 
     //FAPI_EXEC_HWP(rc,erepairGetFailedLanesHwp,target,tx_lanes,rx_lanes);
     if(!rc.ok()){
       FAPI_ERR("Accessor HWP has returned a fail");

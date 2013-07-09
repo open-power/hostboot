@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.32 2013/03/26 15:04:24 varkeykv Exp $
+// $Id: io_run_training.C,v 1.38 2013/06/17 13:50:19 mklight Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -51,20 +51,77 @@ extern "C" {
      using namespace fapi;
 // For clearing the FIR mask , used by io run training 
 ReturnCode clear_fir_mask_reg(const Target &i_target,fir_io_interface_t i_chip_interface){
-    
+
     ReturnCode rc;
-    uint64_t  scom_address64=0;
-    ecmdDataBufferBase putscom_data64(64),temp(64);
+    uint32_t rc_ecmd = 0;
+    uint8_t chip_unit = 0;
+    uint8_t link_fir_unmask_data = 0x8F;
+    ecmdDataBufferBase data(64);
     FAPI_INF("io_run_training:In the Clear FIR MASK register function ");
-    //get the 64 bit data
-    temp.setDoubleWord(0,fir_clear_mask_reg_addr[i_chip_interface]);
-    scom_address64=temp.getDoubleWord(0);
-    
-    //do the putscom
-    rc=fapiPutScom( i_target, scom_address64, putscom_data64);
-    
+
+    do
+    {
+        // initialize mask to all 1s
+        rc_ecmd |= data.invert();
+
+        // set FIR mask appropriately based on interface type / link being trained
+    	if ((i_chip_interface == FIR_CP_FABRIC_X0) ||
+    	    (i_chip_interface == FIR_CP_FABRIC_A0) ||
+            (i_chip_interface == FIR_CP_IOMC0_P0))
+        {
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
+                               &i_target,
+                               chip_unit);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error retreiving MCS chiplet number!");
+                break;
+            }
+
+            // swizzle to DMI number
+            if (i_chip_interface == FIR_CP_IOMC0_P0)
+            {
+                chip_unit = chip_unit % 4;
+                if (chip_unit == 3)
+                {
+                    chip_unit = 2;
+                }
+                else if (chip_unit == 2)
+                {
+                    chip_unit = 3;
+                }
+            }
+        }
+        else if (i_chip_interface == FIR_CEN_DMI)
+        {
+            chip_unit = 0;
+    	}
+
+        rc_ecmd |= data.insert(link_fir_unmask_data,
+                               8+(8*chip_unit),
+                               8);
+
+        // check buffer manipulation return codes
+        if (rc_ecmd)
+        {
+            FAPI_ERR("Error 0x%X setting up FIR mask data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        // use FIR AND mask register to un-mask selected bits
+        rc = fapiPutScom(i_target, fir_clear_mask_reg_addr[i_chip_interface], data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error writing FIR mask register (=%08X)!",
+                     fir_clear_mask_reg_addr[i_chip_interface]);
+            break;
+        }
+
+    } while(0);
+
     return(rc);
-    
 }
 
 // FIR Workaround Code -- Pre Training Section - HW205368 - procedure from Rob /Pete
@@ -228,9 +285,50 @@ ReturnCode fir_workaround_post_training(const Target& master_target,  io_interfa
 	}
 	FAPI_DBG("io_run_training : Clearing FIR masks now");
 	//Finally Unmask the LFIR to let PRD take action post training
-	clear_fir_mask_reg(slave_target,fir_slave_interface);
-	clear_fir_mask_reg(master_target,fir_master_interface);
+	rc=clear_fir_mask_reg(slave_target,fir_slave_interface);
+        if(rc) return rc;
+	rc=clear_fir_mask_reg(master_target,fir_master_interface);
         return(rc);
+}
+//HW Defect HW220449 , HW HW247831
+// Set rx_sls_extend_sel=001 on slave side of X bus post training
+ReturnCode do_sls_fix(const Target &slave_target, io_interface_t slave_interface)
+{
+     ReturnCode rc;
+     ecmdDataBufferBase set_bits(16),clear_bits(16);
+     uint16_t bits=1;
+     
+     FAPI_DBG("Setting rx_extend_sel to 001 for all Xbus slaves for HW220449");
+     for (int current_group = 0 ; current_group < 4; current_group++){
+	  rc = GCR_read( slave_target, slave_interface,ei4_rx_spare_mode_pg, current_group,  0,  set_bits);
+          set_bits.insert(bits,5,3,13); // insert rx_sls_extend_sel
+          rc=GCR_write(slave_target, slave_interface, ei4_rx_spare_mode_pg , current_group,0,   set_bits, clear_bits);
+     }
+     return rc;
+}
+
+// To handle the MAX_SPARE_EXCEEDED FIR case which we have to handle here in our HWP instead of waiting for PRD.
+ReturnCode handle_max_spare(const Target &target,io_interface_t interface,uint8_t current_group){
+   ReturnCode o_rc;
+   ecmdDataBufferBase error_data(16);
+   uint32_t bitPos=0x2680;
+   
+   if(interface==CP_FABRIC_X0){
+      o_rc=GCR_read(target ,  interface, ei4_rx_fir_training_pg,  current_group,0, error_data);
+   }
+   else{
+      o_rc=GCR_read(target ,  interface, rx_fir_training_pg,  current_group,0, error_data);
+   }
+   if(o_rc)
+           return o_rc;
+   if(error_data.isBitSet(2,1)){    // can be caused by a static (pre training - bit 2) or dynamic (post training - bit 5) or recal(bit 8)
+     FAPI_ERR("MAX_SPARE_EXCEEDED ON THIS BUS clock group %d",current_group);
+       error_data.setAnd(bitPos,0,16);
+       ecmdDataBufferBase & SPARE_ERROR_REG = error_data; //bit2 /bit 5 /bit 8of the register represents the max spare exceeded bit.To determine what caused the max spares exceeded error
+       const fapi::Target & CHIP_TARGET= target;
+       FAPI_SET_HWP_ERROR(o_rc,IO_FIR_MAX_SPARES_EXCEEDED_FIR_RC);
+   }
+   return(o_rc);
 }
 
 // These functions work on a pair of targets. One is the master side of the bus interface, the other the slave side. For eg; in EDI(DMI2)PU is the master and Centaur is the slave
@@ -241,6 +339,7 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
      io_interface_t master_interface,slave_interface;
      uint32_t master_group=0;
      uint32_t slave_group=0;
+     const uint32_t max_group=4; // Num of X bus groups in one bus
      edi_training init;
      // Workaround - HW 220654 -- Need to split WDERF into WDE + RF
      edi_training init1(SELECTED,SELECTED,SELECTED, NOT_RUNNING, NOT_RUNNING); // Run WDE first
@@ -262,16 +361,23 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
           slave_interface=CEN_DMI; // Centaur scom base
           master_group=3; // Design requires us to do this as per scom map and layout
           slave_group=0;
-          fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+          rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                       slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+          if(rc) return rc;
           // Workaround - HW 220654 -- Need to split WDERF into WDE + RF due to sync problem
           rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
           if(!rc.ok()){
                return rc;
           }
           rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
-          fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+          rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                        slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+          if(rc) return rc;
+               rc=handle_max_spare(master_target,master_interface,master_group);
+          if(rc) return rc;
+               rc=handle_max_spare(slave_target,slave_interface,slave_group);
+          if(rc) return rc;
+          
      }
      //This is an X Bus
      else if( (master_target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT  )&& (slave_target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT )){
@@ -285,22 +391,41 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                if(!is_master){
                      //Swap master and slave targets !!
                      FAPI_DBG("X Bus ..target swap performed");
-                     fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                  slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    if(rc) return rc;
                     rc=init1.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
                     if(rc) return rc;
                     rc=init2.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
-                    fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                  slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    if(rc) return rc;
+                    
+                    //HW Defect HW220449 , HW HW247831
+                    // Set rx_sls_extend_sel=001 on slave side of X bus post training
+                    rc=do_sls_fix(master_target,master_interface);
+                    if(rc) return rc;
 	       }
                else{
-                    fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                 slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    if(rc) return rc;
                     rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
                     if(rc) return rc;
                     rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
-                    fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                  slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    if(rc) return rc;
+                    //HW Defect HW220449 , HW HW247831
+                    // Set rx_sls_extend_sel=001 on slave side of X bus post training
+                    rc=do_sls_fix(slave_target,slave_interface);
+                    if(rc) return rc;
+               }
+               for(uint32_t current_group=0;current_group<max_group;++current_group){
+                    rc=handle_max_spare(master_target,master_interface,current_group);
+                    if(rc) return rc;
+                    rc=handle_max_spare(slave_target,slave_interface,current_group);
+                    if(rc) return rc;
                }
           }
      }
@@ -316,24 +441,33 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                if(!is_master)
                {
                     FAPI_DBG("A Bus ..target swap performed");
-                    fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                 slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    if(rc) return rc;
                     rc=init1.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
                     if(rc) return rc;
                     rc=init2.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
-                    fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                  slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    if(rc) return rc;
                }
                else
                {
-                    fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                 slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    if(rc) return rc;
                     rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
                     if(rc) return rc;
                     rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
-                    fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                  slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    if(rc) return rc;
+                    
                }
+               rc=handle_max_spare(master_target,master_interface,master_group);
+               if(rc) return rc;
+               rc=handle_max_spare(slave_target,slave_interface,slave_group);
+               if(rc) return rc;
           }
      }
      else{
