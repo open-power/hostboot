@@ -57,14 +57,6 @@ namespace PlatServices
 //##                      System Level Utility functions
 //##############################################################################
 
-bool isMasterFSP()
-{
-    // Always true in Hostboot
-    return true;
-}
-
-//------------------------------------------------------------------------------
-
 bool isMemoryPreservingIpl()
 {
     using namespace TARGETING;
@@ -92,13 +84,6 @@ void getCurrentTime( Timer & o_timer )
 
     // Since Hostboot doesn't have any system checkstop, we don't have to worry
     // about the detailed time struct for system checkstop timestamp.
-}
-
-//------------------------------------------------------------------------------
-
-int32_t syncFile( const char * i_fileName )
-{
-    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------

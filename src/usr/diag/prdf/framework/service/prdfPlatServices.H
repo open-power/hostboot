@@ -52,6 +52,13 @@ namespace PlatServices
 //##                      System Level Utility functions
 //##############################################################################
 
+// Inline function definitions for Hostboot compiler optimization. See
+// prdfPlatServices_common.H for the function declarations.
+
+inline bool isMasterFSP() { return true; }
+inline int32_t syncFile( const char * i_fileName ) { return SUCCESS; }
+inline bool atRuntime() { return false; }
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################

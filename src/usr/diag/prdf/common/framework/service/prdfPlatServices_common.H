@@ -124,13 +124,20 @@ void milliSleep( uint32_t i_seconds, uint32_t i_milliseconds );
  */
 fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target );
 
+/**
+ * @brief Check SMGR runtime state
+ * @return true if SMGR state is runtime, false in hostboot without checking
+ */
+bool atRuntime();
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################
 
 //##############################################################################
-//##                       Lane Repair functions /*  */
+//##                       Lane Repair functions
 //##############################################################################
+
 /**
  * @brief   Calls HWP to read newly failed bus lanes
  * @param   i_rxBusTgt    Target of the receiving end of the bus

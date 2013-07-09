@@ -202,19 +202,18 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip,
                              uint32_t & o_sev)
 {
     int32_t o_rc = SUCCESS;
+    bool l_runtime = atRuntime();
 
     SCAN_COMM_REGISTER_CLASS * l_rer = NULL;
     SCAN_COMM_REGISTER_CLASS * l_TPrer = NULL;
 
-    // FIXME 68302 - This needs a better check for FSP environment
-    // we could get a xstp during hostboot at a stage when GLOBALUNITXSTPFIR
-    // can't be accessed
-#ifndef __HOSTBOOT_MODULE
     SCAN_COMM_REGISTER_CLASS * l_unitxstp = NULL;
+    if ( l_runtime )
+    {
+        l_unitxstp = i_chip->getRegister("GLOBALUNITXSTPFIR");
+        o_rc |= l_unitxstp->Read();
+    }
 
-    l_unitxstp = i_chip->getRegister("GLOBALUNITXSTPFIR");
-    o_rc |= l_unitxstp->Read();
-#endif
     l_rer = i_chip->getRegister("GLOBAL_RE_FIR");
     o_rc |= l_rer->Read();
     l_TPrer = i_chip->getRegister("TP_CHIPLET_RE_FIR");
@@ -242,17 +241,13 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip,
         // error from TP (other than MCS chiplets)
         o_sev = 3;
     }
-    // FIXME 68302 - This needs a better check for FSP environment
-    // we could get a xstp during hostboot at a stage when GLOBALUNITXSTPFIR
-    // can't be accessed
-#ifndef __HOSTBOOT_MODULE
-    else if((l_rer->GetBitFieldJustified(16,16) &
+    else if(l_runtime &&
+            (l_rer->GetBitFieldJustified(16,16) &
              l_unitxstp->GetBitFieldJustified(16,16)) == 0 )
     {
         // core recoverable
         o_sev = 2;
     }
-#endif
     else
     {
         // core checkstop
@@ -360,16 +355,18 @@ int32_t CoreConfiguredAndNotHostboot(ExtensibleChip * i_chip,
                                      bool & o_isCoreConfigured)
 {
     o_isCoreConfigured = false;
-#ifdef __HOSTBOOT_MODULE
-    // if in hostboot just return false to prevent the default reg capture
-    return SUCCESS;
-#endif
 
-    TargetHandleList l_coreList =
-      PlatServices::getConnected(i_chip->GetChipHandle(), TYPE_EX);
+    // if at not at runtime just return o_isCoreConfigured = false to prevent
+    // the default reg capture
+    if (atRuntime())
+    {
+        // make sure this chip has config'd cores
+        TargetHandleList l_coreList =
+          PlatServices::getConnected(i_chip->GetChipHandle(), TYPE_EX);
 
-    if (l_coreList.size() > 0)
-        o_isCoreConfigured = true;
+        if (l_coreList.size() > 0)
+            o_isCoreConfigured = true;
+    }
 
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(Proc, CoreConfiguredAndNotHostboot);
