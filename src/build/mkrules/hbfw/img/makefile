@@ -31,7 +31,6 @@
 
 .if($(CONTEXT:R) == "ppc")
 
-FFSCMD = ffs
 VPATH += ../fsp
 
 DEFAULT_PATH = ${.PATH}
@@ -81,7 +80,7 @@ clobber_cp_hbfiles:
 #	   --binFile_HBI ${.PATH:Fhostboot_extended.bin} \
 #	   --binFile_HBD ${.PATH:F${MURANO_TARGETING}} \
 #	   --binFile_HBB ${.PATH:Fhostboot.bin} \
-#	   --ffsCmd "${FFSCMD}"
+#	   --fpartCmd "${FPARTCMD}" --fcpCmd "${FCPCMD}"
 ##################################################
 PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 
@@ -121,14 +120,23 @@ BUILD_SPECIFIC_IMAGE: .SPECTARG ${IMAGE_TARGET}
 	#@echo BINARIES ${IMAGE_BINS}
 	#@echo BIN_OPTION ${IMAGE_BIN_OPTION}
 
+FFSCMD = ${DUMMY:!which ffs 2>/dev/null!i}
+
 ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
-	${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
-		${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-		${IMAGE_BIN_OPTION} --ffsCmd "${FFSCMD}"
+	.if empty(FFSCMD)
+		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
+			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
+	.else
+		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
+			${IMAGE_BIN_OPTION} --ffsCmd "ffs"
+
+	.endif
 
 .endif
 
-build_pnor_images: .SPECTARG ${PNOR_IMG_INFO:S/^/__IMAGE_BUILD\//g}
+build_pnor_images:.SPECTARG ${PNOR_IMG_INFO:S/^/__IMAGE_BUILD\//g}
 
 clobber_build_pnor_images:
 	${PNOR_IMG_INFO:@image@${pnorimg:!rm -f ${image:s/:/ /g:xs/ .*//};!e}@}

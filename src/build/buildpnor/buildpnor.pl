@@ -57,6 +57,8 @@ my $tocVersion = 0x1;
 my $g_TOCEyeCatch = "part";
 my $emitTestSections = 0;
 my $g_ffsCmd = "";
+my $g_fpartCmd = "";
+my $g_fcpCmd = "";
 
 if ($#ARGV < 0) {
     usage();
@@ -90,6 +92,12 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
     elsif($ARGV[$i] =~ /--ffsCmd/) {
         $g_ffsCmd = $ARGV[++$i];
     }
+    elsif($ARGV[$i] =~ /--fpartCmd/) {
+        $g_fpartCmd = $ARGV[++$i];
+    }
+    elsif($ARGV[$i] =~ /--fcpCmd/) {
+        $g_fcpCmd = $ARGV[++$i];
+    }
     elsif($ARGV[$i] =~ /--test/) {
         $emitTestSections = 1;
     }
@@ -102,23 +110,10 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
 
 #Extract ffs version number from help text.
 #Use to trigger using proper input parms..
-my $ffsParms = 0;  
-my $ffsVersion = `$g_ffsCmd 2>&1  | grep "Partition Tool" `;
-$ffsVersion =~ s/.*(v[0-9\.]*).*/\1/;
-$ffsVersion = $1;
-
-if($ffsVersion eq "v1.0.0")
-{
-    #use v1.0.0 parms
-    $ffsParms = 100;
-    trace(1, "ffs exec version: $ffsVersion, ffsParms=$ffsParms");
-}
-else
-{
-    #use v2.0.0 parms
-    $ffsParms = 200;
-    trace(1, "ffs exec version: $ffsVersion, ffsParms=$ffsParms");
-}
+#my $ffsParms = 0;
+#my $ffsVersion = `$g_ffsCmd 2>&1  | grep "Partition Tool" `;
+#$ffsVersion =~ s/.*(v[0-9\.]*).*/\1/;
+#$ffsVersion = $1;
 
 #Load PNOR Layout XML file
 my $rc = loadPnorLayout($pnorLayoutFile, \%pnorLayout);
@@ -269,20 +264,16 @@ sub createPnorImage
     #Offset of Partition Table A in PNOR
     my $sideAOffset =  $$i_pnorLayoutRef{metadata}{sideAOffset};
 
-    if($ffsParms == 200)
-    {
-        #ffs --create --target tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
-        my $ffsOut = `$g_ffsCmd --create --target $i_pnorBinName --partition-offset $sideAOffset --size $imageSize --block $blockSize --force`;
-    }
-    else
-    {
-        #ffs --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
-        my $ffsOut = `$g_ffsCmd --create $i_pnorBinName --partition-offset $sideAOffset --size $imageSize --block $blockSize --force`;
+    #f{fs,part} --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
+    if ($g_ffsCmd eq "") {
+        my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --create --size $imageSize --block $blockSize --force`;
+    } else {
+        my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --create --size $imageSize --block $blockSize --force`;
     }
     $rc = $?;
     if($rc)
     {
-        trace(0, "$this_func: Call to ffs creating image failed.  rc=$rc.  Aborting!");
+        trace(0, "$this_func: Call to creating image failed.  rc=$rc.  Aborting!");
         return $rc;
     }
 
@@ -326,24 +317,30 @@ sub createPnorImage
             }
 
             #Add Partition
-            if($ffsParms == 200)
-            {
-                #ffs --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
-                my $ffsOut = `$g_ffsCmd --add --target $i_pnorBinName --partition-offset $sideAOffset --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
-                #Force Actual Size = Partition size  (implicit when trunc is called with no value)
-                #ffs --target tuleta.pnor --partition-offset 0 --name HBI --trunc
-                my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --trunc`;
-
-            }
-            else
-            {
-                #ffs --add tuleta.pnor --partition-offset 0 --offset 0x1000 --size 0x280000 --name HBI --type data --flags 0x0
-                my $ffsOut = `$g_ffsCmd --add $i_pnorBinName --partition-offset $sideAOffset --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --type data --flags 0x0`;
+            #f{fs,part} --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
+            if ($g_ffsCmd eq "") {
+                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
+            } else {
+                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
             }
             $rc = $?;
             if($rc)
             {
-                trace(0, "$this_func: Call to ffs adding partition $eyeCatch failed.  rc=$rc.  Aborting!");
+                trace(0, "$this_func: Call to add partition $eyeCatch failed.  rc=$rc.  Aborting!");
+                last;
+            }
+
+            #Trunc Partition
+            #f{fs,part} --target tuleta.pnor --partition-offset 0 --name HBI --trunc
+            if ($g_ffsCmd eq "") {
+                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --trunc --name $eyeCatch`;
+            } else {
+                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --trunc --name $eyeCatch`;
+            }
+            $rc = $?;
+            if($rc)
+            {
+                trace(0, "$this_func: Call to trunc partition $eyeCatch failed.  rc=$rc.  Aborting!");
                 last;
             }
         }
@@ -351,20 +348,12 @@ sub createPnorImage
         #Disable usewords for now.  Will get re-enabled and fixed up as
         #we add support for underlying functions
 
-#        if($ffsParms == 200)
-#        {
-            #ffs --target tuleta.pnor --partition-offset 0 --name HBI --user 0 --value 0x12345678
-#            my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
-#        }
-#        else
-#        {
-            #ffs --modify tuleta.pnor --partition-offset 0 --name HBI --user 0 --value 0x12345678
-#            my $ffsRc = `$g_ffsCmd --modify $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
-#        }
+#        my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset
+#        		--user 0 --name $eyeCatch --value $actualRegionSize`;
 #        $rc = $?;
 #        if($rc)
 #        {
-#            trace(0, "$this_func: Call to ffs setting user 0 for partition $eyeCatch failed.  rc=$rc.  Aborting!");
+#            trace(0, "$this_func: Call to fpart setting user 0 for partition $eyeCatch failed.  rc=$rc.  Aborting!");
 #            last;
 #        }
 
@@ -516,20 +505,17 @@ sub fillPnorImage
         }
 
         trace(5, "$this_func: populating section $eyeCatch, filename=$inputFile");
-        if($ffsParms == 200)
-        {
-            #ffs --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
-            my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --write $inputFile`;
-        }
-        else
-        {
-            #ffs --write tuleta.pnor --partition-offset 0 --name HBI --pad 0xff --data hostboot_extended.bin
-            my $ffsRc = `$g_ffsCmd --write $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --pad 0xff --data $inputFile`;
+
+        #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
+        if ($g_ffsCmd eq "") {
+            my $Out = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $sideAOffset --write`;
+        } else {
+            my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --write $inputFile`;
         }
         $rc = $?;
         if($rc)
         {
-            trace(0, "$this_func: Call to ffs adding data to partition $eyeCatch failed.  rc=$rc.  Aborting!");
+            trace(0, "$this_func: Call to fcp adding data to partition $eyeCatch failed.  rc=$rc.  Aborting!");
             last;
         }
 
@@ -669,7 +655,9 @@ print <<"ENDUSAGE";
                                        --binFile_TOC murano.toc
                          A section declared as Blank in the XML does not need to have a
                          binFile specified
-    --ffsCmd             invoke string for executing the ffs tool
+    --ffsCmd            invoke string for executing the ffs tool
+    --fpartCmd          invoke string for executing the fpart tool
+    --fcpCmd            invoke string for executing the fcp tool
     --test              Output test-only sections.
 
   Current Limitations:
