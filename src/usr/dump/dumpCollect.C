@@ -31,6 +31,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <targeting/common/commontargeting.H>
 #include <runtime/runtime.H>
 #include <util/align.H>
 #include <sys/mm.h>

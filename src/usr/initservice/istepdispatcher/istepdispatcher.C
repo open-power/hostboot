@@ -984,26 +984,6 @@ bool IStepDispatcher::getIStepMode( ) const
 
 
 // ----------------------------------------------------------------------------
-// IStepDispatcher::spLess()
-// ----------------------------------------------------------------------------
-bool IStepDispatcher::spLess ( void )
-{
-    bool spless = true;
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    TARGETING::SpFunctions spfuncs;
-    if( sys &&
-        sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
-        spfuncs.mailboxEnabled )
-    {
-        spless = false;
-    }
-
-    return spless;
-}
-
-
-// ----------------------------------------------------------------------------
 // IStepDispatcher::checkMpiplMode()
 // ----------------------------------------------------------------------------
 bool IStepDispatcher::checkMpiplMode( ) const

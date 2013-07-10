@@ -293,12 +293,6 @@ private:
      */
     void setIstepInfo ( uint16_t i_type );
 
-    /**
-     * @brief This function will return whether or not we are SPless
-     *
-     * @return bool - whether we are SPLESS.
-     */
-    bool spLess ( void );
 
     /**
      * @brief This function will check whether or not we are in MPIPL mode

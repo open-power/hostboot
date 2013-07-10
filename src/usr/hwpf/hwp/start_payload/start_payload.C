@@ -46,6 +46,7 @@
 #include    <initservice/istepdispatcherif.H>
 #include    <usr/cxxtest/TestSuite.H>
 #include    <hwpf/istepreasoncodes.H>
+#include    <errl/errludtarget.H>
 #include    <sys/time.h>
 #include    <sys/mmio.h>
 #include    <mbox/mbox_queues.H>
@@ -62,6 +63,8 @@
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
+#include    "p8_set_pore_bar.H"
+
 
 #include    "start_payload.H"
 #include    <runtime/runtime.H>
@@ -101,6 +104,76 @@ errlHndl_t callShutdown ( void );
  */
 errlHndl_t notifyFsp ( bool i_istepModeFlag,
                        TARGETING::SpFunctions i_spFuncs );
+
+/**
+ * @brief This function will clear the PORE BARs.  Needs to be done
+ *      depending on payload type
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t clearPoreBars ( void )
+{
+    errlHndl_t l_errl = NULL;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "set PORE bars back to 0" );
+
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    // loop thru all the cpus and reset the pore bars.
+    for (TargetHandleList::const_iterator
+         l_proc_iter = l_procTargetList.begin();
+         l_proc_iter != l_procTargetList.end();
+         ++l_proc_iter)
+    {
+        //  make a local copy of the CPU target
+        const TARGETING::Target* l_proc_target = *l_proc_iter;
+
+        //  trace HUID
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "target HUID %.8X", TARGETING::get_huid(l_proc_target));
+
+        // cast OUR type of target to a FAPI type of target.
+        fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
+                                         (const_cast<TARGETING::Target*>(
+                                                         l_proc_target)) );
+
+        //  reset pore bar notes:
+        //  A mem_size of 0 means to ignore the image address
+        //  This image should have been moved to memory after winkle
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl,
+                         p8_set_pore_bar,
+                         l_fapi_proc_target,
+                         0,
+                         0,
+                         0,
+                         SLW_MEMORY
+                         );
+        if ( l_errl )
+        {
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : p8_set_pore_bar, PLID=0x%x",
+                      l_errl->plid()  );
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : p8_set_pore_bar" );
+        }
+
+    }   // end for
+
+    return l_errl;
+}
+
 
 //
 //  Wrapper function to call host_runtime_setup
@@ -144,14 +217,24 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             break;
         }
 
-        // Only run OCC in AVP mode.  Run the rest in !AVP mode
+        // Get the Payload kind -- various tasks rely on payload
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
-
         TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
+        //If PHYP then clean the PORE BARs
+        if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
+        {
+            l_err = clearPoreBars();
+            if( l_err )
+            {
+                break;
+            }
+        }
+
+        //Only run OCC in AVP mode.  Run the rest in !AVP mode
         if( TARGETING::PAYLOAD_KIND_AVP == payload_kind )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Skipping host_runtime_setup in AVP mode.  Starting OCC" );
@@ -201,9 +284,11 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             }
             break;
         }
-        else if( TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind)
+        else if( is_sapphire_load() &&
+                 INITSERVICE::spLess())
         {
-            // Write the devtree out
+            // Write the devtree out when in SPLess
+            // Sapphire mode
             l_err = DEVTREE::build_flatdevtree();
             if ( l_err )
             {
@@ -434,10 +519,9 @@ errlHndl_t callShutdown ( void )
             break;
         }
 
-        // Load payload data if in SAPPHIRE mode
-        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
-          = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
-        if( TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind )
+        // Load payload data if in SPLess SAPPHIRE mode
+        if( is_sapphire_load() &&
+            INITSERVICE::spLess())
         {
             payloadData = DEVTREE::get_flatdevtree_phys_addr();
         }

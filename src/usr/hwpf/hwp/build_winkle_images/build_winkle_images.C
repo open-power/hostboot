@@ -75,6 +75,7 @@
 #include    "p8_pm.H"                               //  PM_INIT
 #include    "p8_set_pore_bar/p8_poreslw_init.H"
 #include    "p8_slw_build/sbe_xip_image.h"
+#include    <runtime/runtime.H>
 
 
 namespace   BUILD_WINKLE_IMAGES
@@ -311,6 +312,44 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
 }
 
 //
+// Utility function to obtain the highest known address in the system
+//
+uint64_t get_top_mem_addr(void)
+{
+    uint64_t top_addr = 0;
+
+    do
+    {
+        // Get all functional proc chip targets
+        TARGETING::TargetHandleList l_cpuTargetList;
+        getAllChips(l_cpuTargetList, TYPE_PROC);
+
+        for ( size_t proc = 0; proc < l_cpuTargetList.size(); proc++ )
+        {
+            TARGETING::Target * l_pProc = l_cpuTargetList[proc];
+
+            //Not checking success here as fail results in no change to
+            // top_addr
+            uint64_t l_mem_bases[8] = {0,};
+            uint64_t l_mem_sizes[8] = {0,};
+            l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_mem_bases);
+            l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_mem_sizes);
+
+            for (size_t i=0; i< 8; i++)
+            {
+                if(l_mem_sizes[i]) //non zero means that there is memory present
+                {
+                    top_addr = std::max(top_addr,
+                                        l_mem_bases[i] + l_mem_sizes[i]);
+                }
+            }
+        }
+    }while(0);
+
+    return top_addr;
+}
+
+//
 //  Wrapper function to call host_build_winkle
 //
 void*    call_host_build_winkle( void    *io_pArgs )
@@ -319,10 +358,9 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
     const char  *l_pPoreImage   =   NULL;
     uint32_t    l_poreSize      =   0;
-    void        *l_pRealMemBase =
-                        reinterpret_cast
-                 <void * const>(VMM_HOMER_REGION_START_ADDR );
-    void* l_pVirtMemBase = NULL;
+    void        *l_pRealMemBase = NULL;
+    void* l_pVirtMemBase        = NULL;
+    uint64_t l_memBase   = VMM_HOMER_REGION_START_ADDR;
 
     ISTEP_ERROR::IStepError     l_StepError;
 
@@ -337,6 +375,19 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
         assert(VMM_HOMER_REGION_SIZE <= THIRTYTWO_GB,
                "host_build_winkle: Unsupported HOMER Region size");
+
+        //If running Sapphire need to place this at the top of memory
+        if(is_sapphire_load())
+        {
+            l_memBase = get_top_mem_addr();
+            assert (l_memBase != 0,
+                    "host_build_winkle: Top of memory was 0!");
+            l_memBase -= VMM_HOMER_REGION_SIZE;
+        }
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "HOMER base = %x", l_memBase);
+
+        l_pRealMemBase = reinterpret_cast<void * const>(l_memBase );
 
         l_pVirtMemBase =
               mm_block_map(l_pRealMemBase, VMM_HOMER_REGION_SIZE);

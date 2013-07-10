@@ -25,6 +25,10 @@
 
 #include <vmmconst.h>
 #include <sys/msg.h>
+#include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
+#include    <targeting/namedtarget.H>
+#include    <targeting/attrsync.H>
 
 namespace INITSERVICE
 {
@@ -94,6 +98,28 @@ void doShutdown ( uint64_t i_status,
                   uint64_t i_payload_base = 0,
                   uint64_t i_payload_entry = 0,
                   uint64_t i_payload_data = 0) NO_RETURN;
+
+/**
+ * @brief This function will return whether or not we are SPless
+ *
+ * @return bool - whether we are SPLESS.
+ */
+inline bool spLess ( void )
+{
+    bool spless = false;
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    TARGETING::SpFunctions spfuncs;
+    if( sys &&
+        sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
+        !spfuncs.mailboxEnabled )
+    {
+        spless = true;
+    }
+
+    return spless;
 }
+}
+
 
 #endif

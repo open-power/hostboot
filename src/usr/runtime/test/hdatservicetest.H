@@ -32,8 +32,8 @@
 
 #include <arch/ppc.H> //for MAGIC
 #include <errl/errlmanager.H>
-#include <runtime/runtime.H>
 #include <targeting/common/commontargeting.H>
+#include <runtime/runtime.H>
 #include <attributeenums.H>
 #include "../hdatstructs.H"
 #include "../errlud_hdat.H"

@@ -91,6 +91,16 @@ void clear_hwas_changed_bit(Target * i_target, const HWAS_CHANGED_BIT i_bit);
  */
 bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type = NULL );
 
+/**
+ * @brief  Utility function to determine if Sapphire is the payload
+ *
+ * @description  If the payload kind is Sapphire returns true.  Does
+ *    not matter if it is Sapphire with FSP or standalone
+ *
+ * @return bool  True when loadding sapphire
+ */
+bool is_sapphire_load(void);
+
 }
 
 #endif // __TARGETING_COMMON_UTIL_H

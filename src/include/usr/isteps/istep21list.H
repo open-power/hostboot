@@ -105,6 +105,7 @@ namespace   INITSERVICE
 
 const DepModInfo  g_istep21Dependancies = {
     {
+        DEP_LIB(libbuild_winkle_images.so),
         DEP_LIB(libstart_payload.so),
         DEP_LIB(libruntime.so),
         DEP_LIB(libdevtree.so),

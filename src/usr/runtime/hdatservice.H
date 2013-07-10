@@ -27,10 +27,9 @@
 #include <util/locked/list.H>
 #include <list>
 #include <errl/errlentry.H>
-#include <usr/devicefw/driverif.H>
 #include <attributestructs.H>
 #include <sys/task.h>
-#include <usr/fsi/fsiif.H>
+#include <vector>
 
 namespace RUNTIME
 {
@@ -44,6 +43,21 @@ namespace RUNTIME
      */
     class hdatService
     {
+        struct hdatMemRegion_t
+        {
+            uint64_t    phys_addr;
+            void *      virt_addr;
+            size_t      size;
+
+            /**
+             * Default Contructor
+             */
+            hdatMemRegion_t() :
+              phys_addr(0), virt_addr(NULL), size(0) {}
+        };
+
+        typedef std::vector<hdatMemRegion_t>::iterator    memRegionItr;
+
       public:
 
         /**
@@ -95,6 +109,62 @@ namespace RUNTIME
         ~hdatService();
 
         /**
+         * @brief Map a region of memory
+         *
+         * Utility to map a region of memory so it can be accessed.
+         * Map information is stored as a class variable
+         *
+         * @param[in] i_addr  Physical address to map
+         * @param[in] i_bytes Number of bytes to map
+         * @param[out] o_vaddr Virtual address mapped to
+         *
+         * @return errlHndl_t  NULL on success
+         */
+        errlHndl_t mapRegion( uint64_t i_addr, size_t i_bytes,
+                              uint64_t &o_vaddr);
+
+        /**
+         * @brief Retrieve (and map if necessary) a SPIRA data area
+         *
+         *  PHYP SPIRA is within the base mapping, Sapphire is not
+         *
+         * @param[in] i_tuple Valid tuple pointer to area to be mapped
+         * @param[out] o_vaddr Virtual address to access data area
+         *
+         * @return errlHndl_t  NULL on success
+         */
+        errlHndl_t getSpiraTupleVA(hdat5Tuple_t* i_tuple,
+                                     uint64_t & o_vaddr);
+
+          /**
+           * @brief Verify that a block of memory falls inside a safe range
+           * @param i_addr  Address to check
+           * @param i_size  Number of bytes to check
+           * @return Error if address seems wrong
+           */
+          errlHndl_t verify_hdat_address( void* i_addr,
+                                          size_t i_size );
+
+        /**
+         * @brief Verify the header portion of an HDAT section
+         * @param i_header  Actual header data
+         * @param i_exp  Expected header data
+         * @return Error on mismatch
+         */
+        errlHndl_t check_header( hdatHDIF_t* i_header,
+                                 const hdatHeaderExp_t& i_exp );
+
+          /**
+           * @brief Verify basic characteristics of a HDAT Tuple structure
+           * @param i_section  Section name being verified
+           * @param i_tuple  Tuple to check
+           * @return Error if Tuple is unallocated
+           */
+          errlHndl_t check_tuple( const RUNTIME::SectionId i_section,
+                                  hdat5Tuple_t* i_tuple );
+
+
+        /**
          * @brief Retrieve hardcoded section addresses for standalone mode
          *
          * This is here to allow us to manually generate attribute data for
@@ -131,12 +201,9 @@ namespace RUNTIME
          ********************************************/
 
         /**
-         * Virtual address to payload base addr
-         (HDAT area is offset from there)
+         * Vector of virtual address mapped in
          */
-        void * iv_payload_addr;
-        void * iv_dumptest_addr;
-        void* iv_hdat_addr;
+        std::vector<hdatMemRegion_t>    iv_mem_regions;
 
         /**
          * Legacy SPIRA

@@ -23,9 +23,10 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <runtime/runtime_reasoncodes.H>
-#include <runtime/runtime.H>
 #include <sys/mm.h>
 #include <targeting/common/commontargeting.H>
+#include <initservice/initserviceif.H>
+#include <runtime/runtime.H>
 #include <attributeenums.H>
 #include <vmmconst.h>
 #include <util/align.H>
@@ -85,64 +86,67 @@ const uint64_t HDAT_MEM_SIZE = 128*MEGABYTE;
 
 /**
  * @brief Verify that a block of memory falls inside a safe range
- * @param i_base  Payload base address
  * @param i_addr  Address to check
  * @param i_size  Number of bytes to check
  * @return Error if address seems wrong
  */
-errlHndl_t verify_hdat_address( uint64_t i_base,
-                                uint64_t i_addr,
-                                size_t i_size )
+errlHndl_t hdatService::verify_hdat_address( void* i_addr,
+                                             size_t i_size )
 {
     errlHndl_t errhdl = NULL;
+    bool found = false;
+    uint64_t l_end =  reinterpret_cast<uint64_t>(i_addr)
+                       + i_size;
 
     // Make sure that the entire range is within the memory
-    //  space that we allocated
-    if( (i_addr < i_base)
-        || ((i_addr+i_size) > (i_base+HDAT_MEM_SIZE)) )
+    //  space that we mapped
+    for(memRegionItr region = iv_mem_regions.begin();
+        (region != iv_mem_regions.end()) && !found; ++region)
     {
-        TRACFCOMP( g_trac_runtime, "Invalid HDAT Address : i_base=0x%X, i_addr=0x%X, i_size=0x%X", i_base, i_addr, i_size );
+        hdatMemRegion_t memR = *region;
+
+        uint64_t l_range_end = reinterpret_cast<uint64_t>(memR.virt_addr)
+                               +  memR.size;
+        if ((i_addr >= memR.virt_addr) &&
+            (l_end <= l_range_end))
+        {
+            found = true;
+            break;
+        }
+    }
+
+    if(!found)
+    {
+        TRACFCOMP( g_trac_runtime, "Invalid HDAT Address : i_addr=%p, i_size=0x%X", i_addr, i_size );
+        for(memRegionItr region = iv_mem_regions.begin();
+            (region != iv_mem_regions.end()) && !found; ++region)
+        {
+            hdatMemRegion_t memR = *region;
+            TRACFCOMP( g_trac_runtime, "  Region : virt_addr=0x%X, size=0x%X",
+                       memR.virt_addr, memR.size );
+        }
         /*@
          * @errortype
          * @moduleid     RUNTIME::MOD_HDATSERVICE_VERIFY_HDAT_ADDRESS
          * @reasoncode   RUNTIME::RC_INVALID_ADDRESS
-         * @userdata1[0:31]   Start of address range under test
-         * @userdata1[32:63]  Size of address range under test
-         * @userdata2[0:31]   Payload base address
-         * @userdata2[32:63]  Size of mapped HDAT section
+         * @userdata1    Start of address range under test
+         * @userdata2    Size of address range under test
          * @devdesc      HDAT data block falls outside valid range
          */
         errhdl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             RUNTIME::MOD_HDATSERVICE_VERIFY_HDAT_ADDRESS,
                             RUNTIME::RC_INVALID_ADDRESS,
-                            TWO_UINT32_TO_UINT64(i_addr,i_size),
-                            TWO_UINT32_TO_UINT64(i_base,HDAT_MEM_SIZE) );
+                            reinterpret_cast<uint64_t>(i_addr),
+                            reinterpret_cast<uint64_t>(i_size));
         errhdl->collectTrace("RUNTIME",1024);
     }
 
     return errhdl;
 }
-// Handy overloading to avoid messy casts by the caller
-errlHndl_t verify_hdat_address( uint64_t i_base,
-                                void* i_addr,
-                                size_t i_size )
-{
-    return verify_hdat_address( i_base,
-                                reinterpret_cast<uint64_t>(i_addr),
-                                i_size );
-}
 
-/**
- * @brief Verify the header portion of an HDAT section
- * @param i_base  Payload base address
- * @param i_header  Actual header data
- * @param i_exp  Expected header data
- * @return Error on mismatch
- */
-errlHndl_t check_header( uint64_t i_base,
-                         hdatHDIF_t* i_header,
-                         const hdatHeaderExp_t& i_exp )
+errlHndl_t hdatService::check_header( hdatHDIF_t* i_header,
+                                      const hdatHeaderExp_t& i_exp )
 {
     TRACUCOMP( g_trac_runtime, "check_header(%s)> %.4X : %.4X : %s", i_exp.name, i_header->hdatStructId, i_header->hdatVersion, i_header->hdatStructName );
     errlHndl_t errhdl = NULL;
@@ -150,8 +154,7 @@ errlHndl_t check_header( uint64_t i_base,
     do
     {
         // Make sure the Tuple is pointing somewhere valid
-        errhdl = verify_hdat_address( i_base,
-                                      i_header,
+        errhdl = verify_hdat_address( i_header,
                                       sizeof(hdatHDIF_t) );
         if( errhdl ) { break; }
 
@@ -190,24 +193,15 @@ errlHndl_t check_header( uint64_t i_base,
     return errhdl;
 }
 
-/**
- * @brief Verify basic characteristics of a HDAT Tuple structure
- * @param i_base  Payload base address
- * @param i_section  Section name being verified
- * @param i_tuple  Tuple to check
- * @return Error if Tuple is unallocated
- */
-errlHndl_t check_tuple( uint64_t i_base,
-                        const RUNTIME::SectionId i_section,
-                        hdat5Tuple_t* i_tuple )
+errlHndl_t hdatService::check_tuple( const RUNTIME::SectionId i_section,
+                                     hdat5Tuple_t* i_tuple )
 {
     errlHndl_t errhdl = NULL;
 
     do
     {
         // Make sure the Tuple is in valid memory
-        errhdl = verify_hdat_address( i_base,
-                                      i_tuple,
+        errhdl = verify_hdat_address( i_tuple,
                                       sizeof(hdat5Tuple_t) );
         if( errhdl ) { break; }
 
@@ -250,33 +244,33 @@ errlHndl_t hdatService::get_standalone_section(
                                                size_t& o_dataSize )
 {
     errlHndl_t errhdl = NULL;
-    uint64_t v_baseAddr = reinterpret_cast<uint64_t>(iv_payload_addr);
-    uint64_t v_dumpAddr = reinterpret_cast<uint64_t>(iv_dumptest_addr);
 
     if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
     {
-        o_dataAddr = v_baseAddr;
+        o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[0].virt_addr);
         o_dataSize = 512*KILOBYTE;
     }
     else if( RUNTIME::HSVC_NODE_DATA == i_section )
     {
-        o_dataAddr = v_baseAddr + 512*KILOBYTE;
+        o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[0].virt_addr)
+                     + 512*KILOBYTE;
         o_dataSize = HSVC_TEST_MEMORY_SIZE - 512*KILOBYTE;
     }
     else if( RUNTIME::MS_DUMP_SRC_TBL == i_section )
     {
-        o_dataAddr = v_dumpAddr;
+        o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[1].virt_addr);
         o_dataSize = DUMP_TEST_SRC_MEM_SIZE;
     }
     else if( RUNTIME::MS_DUMP_DST_TBL == i_section )
     {
-        o_dataAddr = v_dumpAddr + DUMP_TEST_SRC_MEM_SIZE;
+        o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[1].virt_addr)
+                     + DUMP_TEST_SRC_MEM_SIZE;
         o_dataSize = DUMP_TEST_DST_MEM_SIZE;
     }
     else if( RUNTIME::MS_DUMP_RESULTS_TBL == i_section )
     {
-        o_dataAddr = v_dumpAddr + DUMP_TEST_SRC_MEM_SIZE +
-                     DUMP_TEST_DST_MEM_SIZE;
+        o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[1].virt_addr)
+                     + DUMP_TEST_SRC_MEM_SIZE + DUMP_TEST_DST_MEM_SIZE;
         o_dataSize = DUMP_TEST_RESULTS_MEM_SIZE;
     }
     else
@@ -302,9 +296,7 @@ errlHndl_t hdatService::get_standalone_section(
 }
 
 hdatService::hdatService(void)
-:iv_payload_addr(NULL)
-,iv_dumptest_addr(NULL)
-,iv_spiraL(NULL)
+:iv_spiraL(NULL)
 ,iv_spiraH(NULL)
 ,iv_spiraS(NULL)
 {
@@ -312,27 +304,142 @@ hdatService::hdatService(void)
 
 hdatService::~hdatService(void)
 {
-    if(iv_payload_addr)
+    for(memRegionItr region = iv_mem_regions.begin();
+        (region != iv_mem_regions.end()); ++region)
     {
-        mm_block_unmap(iv_payload_addr);
-        iv_payload_addr = NULL;
+         mm_block_unmap((*region).virt_addr);
     }
 
-    if(iv_dumptest_addr)
-    {
-        mm_block_unmap(iv_dumptest_addr);
-        iv_dumptest_addr = NULL;
-    }
+    iv_mem_regions.clear();
 }
 
-errlHndl_t hdatService::loadHostData(void)
+errlHndl_t hdatService::mapRegion(uint64_t i_addr, size_t i_bytes,
+                                  uint64_t &o_vaddr)
 {
     errlHndl_t errhdl = NULL;
 
     do
     {
-        //Check to see if already mapped, if so just return
-        if (iv_payload_addr != NULL)
+        hdatMemRegion_t l_mem;
+
+        l_mem.phys_addr = i_addr;
+        l_mem.size = i_bytes;
+
+        // make sure that our numbers are page-aligned, required by mm call
+        l_mem.phys_addr = ALIGN_PAGE_DOWN(l_mem.phys_addr); //round down
+        l_mem.size = ALIGN_PAGE(l_mem.size) + (4*KILOBYTE); //round up
+
+        l_mem.virt_addr = mm_block_map(reinterpret_cast<void*>(l_mem.phys_addr),
+                                        l_mem.size );
+        TRACFCOMP( g_trac_runtime, "mapRegion> Mapped in 0x%X-0x%X (%X ) @ %p", l_mem.phys_addr,
+                   l_mem.phys_addr+l_mem.size, l_mem.size, l_mem.virt_addr);
+
+        if (NULL == l_mem.virt_addr)
+        {
+            TRACFCOMP( g_trac_runtime, "Failure calling mm_block_map : virt_addr=%p",
+                       l_mem.virt_addr );
+            /*@
+             * @errortype
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
+             * @reasoncode   RUNTIME::RC_CANNOT_MAP_MEMORY
+             * @userdata1    Starting Address
+             * @userdata2    Size
+             * @devdesc      Error mapping in memory
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA,
+                                        RUNTIME::RC_CANNOT_MAP_MEMORY,
+                                        l_mem.phys_addr,
+                                        l_mem.size );
+            errhdl->collectTrace("RUNTIME",1024);
+            break;
+        }
+
+        iv_mem_regions.push_back(l_mem);
+        o_vaddr = reinterpret_cast<uint64_t>(l_mem.virt_addr);
+        o_vaddr = o_vaddr + (i_addr-l_mem.phys_addr);
+    }while(0);
+
+    return errhdl;
+}
+
+errlHndl_t hdatService::getSpiraTupleVA(hdat5Tuple_t* i_tuple,
+                                     uint64_t & o_vaddr)
+{
+    errlHndl_t errhdl = NULL;
+    bool found = false;
+    o_vaddr = 0x0;
+    uint64_t l_phys_addr, l_size;
+
+    //PHYP and Sapphire have different philsophies about how they
+    //lay the HDAT memory out.  PHYP puts it all within a 128MB
+    //area.  Sapphire puts the NACA in one area and then all of the
+    //SPIRA data sections in another (way up in memory).  This
+    //function checks to see if the requested region is already
+    //mapped, and if not it will map it.
+    //
+    //It then returns the "base" virtual pointer for the requested
+    //tuple
+
+    //Note that if Sapphire/PHYP change how they do things this
+    //code will break (and the various address checking is expected
+    //to catch it)
+
+    do
+    {
+        // Get the absolute address = tuple addr + HRMOR (payload base)
+        l_phys_addr = i_tuple->hdatAbsAddr + iv_mem_regions[0].phys_addr;
+        l_size = i_tuple->hdatActualCnt * i_tuple->hdatActualSize;
+
+        TRACUCOMP( g_trac_runtime, "SPIRA Data ptr 0x%X, size 0x%X",
+                   l_phys_addr, l_size);
+
+        //Check to see if the requested data fully falls within
+        //an existing mapping if so do nothing
+        for(memRegionItr region = iv_mem_regions.begin();
+            (region != iv_mem_regions.end()) && !found; ++region)
+        {
+            hdatMemRegion_t memR = *region;
+
+            if ((l_phys_addr >= memR.phys_addr) &&
+                ((l_phys_addr + l_size) < (memR.phys_addr + memR.size)))
+            {
+                found = true;
+                o_vaddr = reinterpret_cast<uint64_t>(memR.virt_addr);
+                o_vaddr = o_vaddr + (l_phys_addr-memR.phys_addr);
+                break;
+            }
+        }
+
+        //if not found, then map it in
+        if(!found)
+        {
+            TRACFCOMP( g_trac_runtime, "SPIRA Data @ 0x%X not mapped, mapping",
+                       l_phys_addr);
+            errhdl = mapRegion(l_phys_addr, l_size, o_vaddr);
+            if(errhdl)
+            {
+                break;
+            }
+        }
+    }while(0);
+
+    TRACUCOMP( g_trac_runtime, "SPIRA Data Base Data ptr 0x%X", o_vaddr);
+
+
+    return errhdl;
+}
+
+errlHndl_t hdatService::loadHostData(void)
+{
+    errlHndl_t errhdl = NULL;
+    uint64_t l_dummy = 0x0;
+
+    do
+    {
+        //if already loaded (mapping present) just exit
+        if(0 != iv_mem_regions.size())
         {
             break;
         }
@@ -356,7 +463,10 @@ errlHndl_t hdatService::loadHostData(void)
         payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
 #endif
 
-        if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
+        //If PHYP or Sapphire w/FSP
+        if( (TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
+            ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
+             !INITSERVICE::spLess()))
         {
             // PHYP
             TARGETING::ATTR_PAYLOAD_BASE_type payload_base
@@ -368,35 +478,12 @@ errlHndl_t hdatService::loadHostData(void)
 #ifdef REAL_HDAT_TEST
             hdat_start = 256*MEGABYTE;
 #endif
+            // make sure that our numbers are page-aligned, expected by
+            // rest of hdatservice code
+            assert(hdat_start == ALIGN_PAGE(hdat_start));
+            assert (hdat_size == ALIGN_PAGE(hdat_size));
 
-            // make sure that our numbers are page-aligned, required by mm call
-            hdat_start = ALIGN_PAGE_DOWN(hdat_start); //round down
-            hdat_size = ALIGN_PAGE(hdat_size); //round up
-
-            TRACFCOMP( g_trac_runtime, "load_host_data> PHYP: Mapping in 0x%X-0x%X (%d MB)", hdat_start, hdat_start+hdat_size, hdat_size );
-            iv_payload_addr = mm_block_map( reinterpret_cast<void*>(hdat_start),
-                                            hdat_size );
-            if (NULL == iv_payload_addr)
-            {
-                TRACFCOMP( g_trac_runtime, "Failure calling mm_block_map : iv_payload_addr=%p",
-                           iv_payload_addr );
-                /*@
-                 * @errortype
-                 * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
-                 * @reasoncode   RUNTIME::RC_CANNOT_MAP_MEMORY
-                 * @userdata1    Starting Address
-                 * @userdata2    Size
-                 * @devdesc      Error mapping in memory
-                 */
-                errhdl = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA,
-                                   RUNTIME::RC_CANNOT_MAP_MEMORY,
-                                   hdat_start,
-                                   hdat_size );
-                errhdl->collectTrace("RUNTIME",1024);
-                break;
-            }
+            errhdl = mapRegion(hdat_start, hdat_size, l_dummy);
         }
         else if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
         {
@@ -404,30 +491,14 @@ errlHndl_t hdatService::loadHostData(void)
             FakePayload::load();
 
             // Map in some arbitrary memory for the HostServices code to use
-            TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", HSVC_TEST_MEMORY_ADDR,                                     HSVC_TEST_MEMORY_ADDR+HSVC_TEST_MEMORY_SIZE,
+            TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", HSVC_TEST_MEMORY_ADDR,
+                HSVC_TEST_MEMORY_ADDR+HSVC_TEST_MEMORY_SIZE,
                 HSVC_TEST_MEMORY_SIZE);
-            iv_payload_addr = mm_block_map(
-                                reinterpret_cast<void*>(HSVC_TEST_MEMORY_ADDR),
-                                HSVC_TEST_MEMORY_SIZE);
-            if (NULL == iv_payload_addr)
+
+            errhdl = mapRegion(HSVC_TEST_MEMORY_ADDR,
+                               HSVC_TEST_MEMORY_SIZE, l_dummy);
+            if(errhdl)
             {
-                TRACFCOMP( g_trac_runtime, "Failure calling mm_block_map : iv_payload_addr=%p",
-                           iv_payload_addr );
-                /*@
-                 * @errortype
-                 * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
-                 * @reasoncode   RUNTIME::RC_CANNOT_MAP_MEMORY2
-                 * @userdata1    Starting Address
-                 * @userdata2    Size
-                 * @devdesc      Error mapping in standalone memory
-                 */
-                errhdl = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA,
-                                   RUNTIME::RC_CANNOT_MAP_MEMORY2,
-                                   HSVC_TEST_MEMORY_ADDR,
-                                   HSVC_TEST_MEMORY_SIZE );
-                errhdl->collectTrace("RUNTIME",1024);
                 break;
             }
 
@@ -435,28 +506,11 @@ errlHndl_t hdatService::loadHostData(void)
             TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", DUMP_TEST_MEMORY_ADDR,
                 DUMP_TEST_MEMORY_ADDR+DUMP_TEST_MEMORY_SIZE,
                 DUMP_TEST_MEMORY_SIZE);
-            iv_dumptest_addr = mm_block_map(
-                                reinterpret_cast<void*>(DUMP_TEST_MEMORY_ADDR),
-                                DUMP_TEST_MEMORY_SIZE );
-            if (NULL == iv_dumptest_addr)
+
+            errhdl = mapRegion(DUMP_TEST_MEMORY_ADDR,
+                               DUMP_TEST_MEMORY_SIZE, l_dummy);
+            if(errhdl)
             {
-                TRACFCOMP( g_trac_runtime, "Failure calling mm_block_map : iv_dumptest_addr=%p",
-                           iv_dumptest_addr );
-                /*@
-                 * @errortype
-                 * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
-                 * @reasoncode   RUNTIME::RC_CANNOT_MAP_MEMORY3
-                 * @userdata1    Starting Address
-                 * @userdata2    Size
-                 * @devdesc      Error mapping in standalone memory
-                 */
-                errhdl = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA,
-                                   RUNTIME::RC_CANNOT_MAP_MEMORY3,
-                                   DUMP_TEST_MEMORY_ADDR,
-                                   DUMP_TEST_MEMORY_SIZE );
-                errhdl->collectTrace("RUNTIME",1024);
                 break;
             }
         }
@@ -514,7 +568,10 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             // we're all done
             break;
         }
-        else if( TARGETING::PAYLOAD_KIND_PHYP != payload_kind )
+        //If payload is not (PHYP or Sapphire w/fsp)
+        else if( !((TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
+            ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
+             !INITSERVICE::spLess())))
         {
             TRACFCOMP( g_trac_runtime, "getHostDataSection> There is no host data for PAYLOAD_KIND=%d", payload_kind );
             /*@
@@ -535,7 +592,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         }
 
         // Go fetch the relative zero address that PHYP uses
-        uint64_t payload_base = reinterpret_cast<uint64_t>(iv_payload_addr);
+        // This is always the first entry in the vector
+        uint64_t payload_base =
+          reinterpret_cast<uint64_t>(iv_mem_regions[0].virt_addr);
 
         // Setup the SPIRA pointers
         errhdl = findSpira();
@@ -545,7 +604,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         // NACA
         if( RUNTIME::NACA == i_section )
         {
-            o_dataAddr = reinterpret_cast<uint64_t>(iv_payload_addr);
+            o_dataAddr = reinterpret_cast<uint64_t>(payload_base);
             o_dataAddr += HDAT_NACA_OFFSET;
             o_dataSize = sizeof(hdatNaca_t);
         }
@@ -591,6 +650,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         // Host Services System Data
         else if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
         {
+
             // Find the right tuple and verify it makes sense
             hdat5Tuple_t* tuple = NULL;
             if( iv_spiraS )
@@ -602,19 +662,20 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                 tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
             }
             TRACUCOMP( g_trac_runtime, "HSVC_SYSTEM_DATA tuple=%p", tuple );
-            errhdl = check_tuple( payload_base,
-                                  i_section,
+            errhdl = check_tuple( i_section,
                                   tuple );
             if( errhdl ) { break; }
 
-            uint64_t base_addr = tuple->hdatAbsAddr + payload_base;
+            uint64_t base_addr;
+            errhdl = getSpiraTupleVA(tuple, base_addr);
+            if( errhdl ) { break; }
+
             hdatHDIF_t* hsvc_header =
               reinterpret_cast<hdatHDIF_t*>(base_addr);
             TRACUCOMP( g_trac_runtime, "hsvc_header=%p", hsvc_header );
 
             // Check the headers and version info
-            errhdl = check_header( payload_base,
-                                   hsvc_header,
+            errhdl = check_header( hsvc_header,
                                    HSVC_DATA_HEADER );
             if( errhdl ) { break; }
 
@@ -623,8 +684,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
               (hsvc_header->hdatDataPtrOffset + base_addr);
             TRACUCOMP( g_trac_runtime, "sys_header=%p", sys_header );
             // Make sure the Data Header is pointing somewhere valid
-            errhdl = verify_hdat_address( payload_base,
-                                          sys_header,
+            errhdl = verify_hdat_address( sys_header,
                                           sizeof(hdatHDIFDataHdr_t) );
             if( errhdl ) { break; }
 
@@ -645,19 +705,21 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                 tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
             }
             TRACUCOMP( g_trac_runtime, "HSVC_NODE_DATA tuple=%p", tuple );
-            errhdl = check_tuple( payload_base,
-                                  i_section,
+            errhdl = check_tuple( i_section,
                                   tuple );
             if( errhdl ) { break; }
 
-            uint64_t base_addr = tuple->hdatAbsAddr + payload_base;
+
+            uint64_t base_addr;
+            errhdl = getSpiraTupleVA(tuple, base_addr);
+            if( errhdl ) { break; }
+
             hdatHDIF_t* hsvc_header =
               reinterpret_cast<hdatHDIF_t*>(base_addr);
             TRACUCOMP( g_trac_runtime, "hsvc_header=%p", hsvc_header );
 
             // Check the headers and version info
-            errhdl = check_header( payload_base,
-                                   hsvc_header,
+            errhdl = check_header( hsvc_header,
                                    HSVC_DATA_HEADER );
             if( errhdl ) { break; }
 
@@ -666,8 +728,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
               (hsvc_header->hdatChildStrOffset + base_addr);
             TRACUCOMP( g_trac_runtime, "node_headers=%p", node_header );
             // Make sure the Child Header is pointing somewhere valid
-            errhdl = verify_hdat_address( payload_base,
-                                          node_header,
+            errhdl = verify_hdat_address( node_header,
                                           sizeof(hdatHDIFChildHdr_t) );
             if( errhdl ) { break; }
 
@@ -675,8 +736,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
               reinterpret_cast<hdatHDIF_t*>
               (node_header->hdatOffset + base_addr);
             // Make sure the headers are all in a valid range
-            errhdl = verify_hdat_address( payload_base,
-                             node_data_headers,
+            errhdl = verify_hdat_address( node_data_headers,
                              sizeof(hdatHDIF_t)*(node_header->hdatCnt) );
             if( errhdl ) { break; }
 
@@ -689,8 +749,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             {
                 TRACUCOMP( g_trac_runtime, "index=%d", index );
                 // Check the headers and version info
-                errhdl = check_header( payload_base,
-                                       &(node_data_headers[index]),
+                errhdl = check_header( &(node_data_headers[index]),
                                        HSVC_NODE_DATA_HEADER );
                 if( errhdl ) { break; }
 
@@ -711,8 +770,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                   (node_data_headers[index].hdatDataPtrOffset + node_base_addr);
                 TRACUCOMP( g_trac_runtime, "local_node_header=%p", local_node_header );
                 // Make sure the header is pointing somewhere valid
-                errhdl = verify_hdat_address( payload_base,
-                                              local_node_header,
+                errhdl = verify_hdat_address( local_node_header,
                                               sizeof(hdatHDIFDataHdr_t) );
                 if( errhdl ) { break; }
 
@@ -763,19 +821,20 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                 tuple = &(iv_spiraL->hdatDataArea[SPIRAL_IPL_PARMS]);
             }
             TRACUCOMP( g_trac_runtime, "IPLPARMS_SYSTEM tuple=%p", tuple );
-            errhdl = check_tuple( payload_base,
-                                  i_section,
+            errhdl = check_tuple( i_section,
                                   tuple );
             if( errhdl ) { break; }
 
-            uint64_t base_addr = tuple->hdatAbsAddr + payload_base;
-            hdatHDIF_t* ipl_parms = reinterpret_cast<hdatHDIF_t*>
+            uint64_t base_addr;
+            errhdl = getSpiraTupleVA(tuple, base_addr);
+            if( errhdl ) { break; }
+
+           hdatHDIF_t* ipl_parms = reinterpret_cast<hdatHDIF_t*>
               (base_addr);
             TRACUCOMP( g_trac_runtime, "ipl_parms=%p", ipl_parms );
 
             // Check the headers and version info
-            errhdl = check_header( payload_base,
-                                   ipl_parms,
+            errhdl = check_header( ipl_parms,
                                    IPLPARMS_SYSTEM_HEADER );
             if( errhdl ) { break; }
 
@@ -784,8 +843,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
               (ipl_parms->hdatDataPtrOffset + base_addr);
             TRACUCOMP( g_trac_runtime, "internal_data_ptrs=%p", internal_data_ptrs );
             // Make sure the Header is pointing somewhere valid
-            errhdl = verify_hdat_address( payload_base,
-                                          internal_data_ptrs,
+            errhdl = verify_hdat_address( internal_data_ptrs,
                                           sizeof(hdatHDIFDataHdr_t) );
             if( errhdl ) { break; }
 
@@ -811,15 +869,15 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                 tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_SRC_TBL]);
             }
             TRACUCOMP( g_trac_runtime, "MS_DUMP_SRC_TBL tuple=%p", tuple );
-            errhdl = check_tuple( payload_base,
-                                  i_section,
+            errhdl = check_tuple( i_section,
                                   tuple );
             if( errhdl ) { break; }
 
             //Note - there is no header for the MDST
-            o_dataAddr = tuple->hdatAbsAddr + payload_base;
             o_dataSize = tuple->hdatActualCnt * tuple->hdatActualSize;
-        }
+            errhdl = getSpiraTupleVA(tuple, o_dataAddr);
+            if( errhdl ) { break; }
+       }
         // MS DUMP Destination Table - MDDT
         else if( RUNTIME::MS_DUMP_DST_TBL == i_section )
         {
@@ -838,14 +896,14 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                 tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_DST_TBL]);
             }
             TRACUCOMP( g_trac_runtime, "MS_DUMP_DST_TBL tuple=%p", tuple );
-            errhdl = check_tuple( payload_base,
-                                  i_section,
+            errhdl = check_tuple( i_section,
                                   tuple );
             if( errhdl ) { break; }
 
             //Note - there is no header for the MDDT
-            o_dataAddr = tuple->hdatAbsAddr + payload_base;
             o_dataSize = tuple->hdatActualCnt * tuple->hdatActualSize;
+            errhdl = getSpiraTupleVA(tuple, o_dataAddr);
+            if( errhdl ) { break; }
         }
         // MS DUMP Results Table - MDRT
         else if( RUNTIME::MS_DUMP_RESULTS_TBL == i_section )
@@ -865,15 +923,16 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                 tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_RSLT_TBL]);
             }
             TRACUCOMP( g_trac_runtime, "MS_DUMP_RESULTS_TBL tuple=%p", tuple );
-            errhdl = check_tuple( payload_base,
-                                  i_section,
+            errhdl = check_tuple( i_section,
                                   tuple );
             if( errhdl ) { break; }
 
             //Note - there is no header for the MDRT
-            o_dataAddr = tuple->hdatAbsAddr + payload_base;
             //return the total allocated size since it is empty at first
             o_dataSize = tuple->hdatAllocSize * tuple->hdatAllocSize;
+            errhdl = getSpiraTupleVA(tuple, o_dataAddr);
+            if( errhdl ) { break; }
+
         }
         // Not sure how we could get here...
         else
@@ -898,8 +957,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         }
 
         // Make sure the range we return is pointing somewhere valid
-        errhdl = verify_hdat_address( payload_base,
-                                      o_dataAddr,
+        errhdl = verify_hdat_address( reinterpret_cast<void*>(o_dataAddr),
                                       o_dataSize );
         if( errhdl ) { break; }
 
@@ -927,7 +985,9 @@ errlHndl_t hdatService::findSpira( void )
         }
 
         // Go fetch the relative zero address that PHYP uses
-        uint64_t payload_base = reinterpret_cast<uint64_t>(iv_payload_addr);
+        // This is always the first entry in the vector
+        uint64_t payload_base =
+          reinterpret_cast<uint64_t>(iv_mem_regions[0].virt_addr);
 
         // Everything starts at the NACA
         //   The NACA is part of the platform dependent LID which
@@ -978,8 +1038,7 @@ errlHndl_t hdatService::findSpira( void )
             TRACFCOMP( g_trac_runtime, "SPIRA-H=%p", iv_spiraH );
 
             // Check the headers and version info
-            errhdl = check_header( payload_base,
-                                   &(iv_spiraH->hdatHDIF),
+            errhdl = check_header( &(iv_spiraH->hdatHDIF),
                                    SPIRAH_HEADER );
             if( errhdl )
             {
@@ -995,8 +1054,7 @@ errlHndl_t hdatService::findSpira( void )
             tuple_addr += payload_base;
             hdat5Tuple_t* tuple = reinterpret_cast<hdat5Tuple_t*>(tuple_addr);
             TRACUCOMP( g_trac_runtime, "SPIRA-S tuple=%p", tuple );
-            errlHndl_t errhdl_s = check_tuple( payload_base,
-                                               SPIRA_S,
+            errlHndl_t errhdl_s = check_tuple( SPIRA_S,
                                                tuple );
             if( errhdl_s )
             {
@@ -1011,8 +1069,7 @@ errlHndl_t hdatService::findSpira( void )
                 TRACFCOMP( g_trac_runtime, "SPIRA-S=%p", iv_spiraS );
 
                 // Check the headers and version info
-                errhdl_s = check_header( payload_base,
-                                         &(iv_spiraH->hdatHDIF),
+                errhdl_s = check_header( &(iv_spiraH->hdatHDIF),
                                          SPIRAS_HEADER );
                 if( errhdl_s )
                 {
@@ -1031,8 +1088,7 @@ errlHndl_t hdatService::findSpira( void )
         TRACFCOMP( g_trac_runtime, "Legacy SPIRA=%p", iv_spiraL );
 
         // Make sure the SPIRA is valid
-        errhdl_l = verify_hdat_address( payload_base,
-                                        iv_spiraL,
+        errhdl_l = verify_hdat_address( iv_spiraL,
                                         sizeof(hdatSpira_t) );
         if( errhdl_l )
         {

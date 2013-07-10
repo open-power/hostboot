@@ -156,6 +156,24 @@ bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type )
     }
 
     return( PAYLOAD_KIND_PHYP == payload_kind );
+ }
+
+/**
+ * @brief  Utility function to determine if Sapphire is the payload
+ *
+ * @description  If the payload kind is Sapphire returns true.  Does
+ *    not matter if it is Sapphire with FSP or standalone
+ *
+ * @return bool  True when loadding sapphire
+ */
+bool is_sapphire_load(void)
+{
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+
+    return (TARGETING::PAYLOAD_KIND_SAPPHIRE ==
+            sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>());
 }
 
 

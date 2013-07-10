@@ -50,6 +50,7 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/namedtarget.H>
 #include    <targeting/attrsync.H>
+#include    <runtime/runtime.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -331,83 +332,9 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "set PORE bars back to 0" );
-
-        //  @todo   see RTC 51264 -
-        //  This has to be modified if we are loading other AVP's instead
-        //  of PHYP
+        // Call proc_post_winkle
         TARGETING::TargetHandleList l_procTargetList;
         getAllChips(l_procTargetList, TYPE_PROC);
-
-        // loop thru all the cpus and reset the pore bars.
-        for (TargetHandleList::const_iterator
-                l_proc_iter = l_procTargetList.begin();
-                l_proc_iter != l_procTargetList.end();
-                ++l_proc_iter)
-        {
-            //  make a local copy of the CPU target
-            const TARGETING::Target* l_proc_target = *l_proc_iter;
-
-            //  trace HUID
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l_proc_target));
-
-            // cast OUR type of target to a FAPI type of target.
-            fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
-                         (const_cast<TARGETING::Target*>(l_proc_target)) );
-
-            //  reset pore bar notes:
-            //  A mem_size of 0 means to ignore the image address
-            //  This image should have been moved to memory after winkle
-
-            //  call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP( l_errl,
-                             p8_set_pore_bar,
-                             l_fapi_proc_target,
-                             0,
-                             0,
-                             0,
-                             SLW_MEMORY
-                           );
-            if ( l_errl )
-            {
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
-
-                /*@
-                 * @errortype
-                 * @reasoncode      ISTEP_RESET_PORE_BARS_FAILED
-                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid        ISTEP_HOST_ACTIVATE_SLAVE_CORES
-                 * @userdata1       bytes 0-1: plid identifying first error
-                 *                  bytes 2-3: reason code of first error
-                 * @userdata2       bytes 0-1: total number of elogs included
-                 *                  bytes 2-3: N/A
-                 * @devdesc         call to set_pore_bars failed.
-                 *                  see error identified by the plid in
-                 *                  user data field.
-                 */
-                l_stepError.addErrorDetails(ISTEP_RESET_PORE_BARS_FAILED,
-                                            ISTEP_HOST_ACTIVATE_SLAVE_CORES,
-                                            l_errl );
-
-                errlCommit( l_errl, HWPF_COMP_ID );
-
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : p8_set_pore_bar, PLID=0x%x",
-                          l_errl->plid()  );
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS : p8_set_pore_bar" );
-            }
-
-        }   // end for
-
-
-        // Call proc_post_winkle 
 
         // Done activate all master/slave cores.
         // Run post winkle check on all EX targets, one proc at a time.
@@ -708,6 +635,15 @@ void*    call_host_ipl_complete( void    *io_pArgs )
         if ( !l_stepError.isNull() )
         {
             break;
+        }
+
+        //If Sapphire Payload need to set payload base to zero
+        if (is_sapphire_load())
+        {
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+            assert( sys != NULL );
+            sys->setAttr<ATTR_PAYLOAD_BASE>(0x0);
         }
 
         // Sync attributes to Fsp
