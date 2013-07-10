@@ -52,6 +52,11 @@ errlHndl_t loadSignedFile( const char * i_signedFile_name,
                            void * & o_signedFile_pageAddr,
                            size_t & o_signedFile_size     );
 
+// Safely removes signed files from memory
+void unloadSignedFile( void * & io_signedFile_pageAddr,
+                       size_t & io_signedFile_size     );
+
+
 // @todo RTC:34080 - In future key hash will come from HW, but
 // Get the software keys that match the signed container
 void useSwKeyHash(sha2_hash_t * o_sw_key_hash);
@@ -133,7 +138,7 @@ class SecureROMTest : public CxxTest::TestSuite
         printkd("test_verify(): expect to see 'mfsr r2 to CFAR handled': ");
 
         l_errl = l_sRom.verifyContainer( signedFile_pageAddr,
-                                          signedFile_size     );
+                                         signedFile_size     );
 
         if (l_errl)
         {
@@ -142,8 +147,16 @@ class SecureROMTest : public CxxTest::TestSuite
             return;
         }
 
-        TRACFCOMP(g_trac_secure,EXIT_MRK"SecureROMTest::test_verify");
 
+        /*******************************************************************/
+        /* Unload "test_signed_container" from memory                      */
+        /*******************************************************************/
+        if ( signedFile_pageAddr != NULL   )
+        {
+            unloadSignedFile( signedFile_pageAddr, signedFile_size);
+        }
+
+        TRACFCOMP(g_trac_secure,EXIT_MRK"SecureROMTest::test_verify");
 
     };
 
@@ -209,6 +222,25 @@ errlHndl_t loadSignedFile( const char * i_signedFile_name,
     return l_errl;
 }
 
+// Safely removes signed files from memory
+void unloadSignedFile( void * & io_signedFile_pageAddr,
+                       size_t & io_signedFile_size     )
+{
+
+        // Determine number of pages to be freed
+        size_t l_num_pages = ALIGN_PAGE(io_signedFile_size)/PAGESIZE;
+
+        // Free page(s)
+        PageManager::freePage(io_signedFile_pageAddr, l_num_pages);
+
+        // Reset pageAddr pointer
+        io_signedFile_pageAddr = NULL;
+
+        TRACUCOMP(g_trac_secure, "unloadSignedFile()> "
+                  "Info: sF_pA=%p, size=0x%x (pages=%d)",
+                  io_signedFile_pageAddr, io_signedFile_size, l_num_pages);
+
+}
 
 
 // @todo RTC:34080 - In future key hash will come from HW, but

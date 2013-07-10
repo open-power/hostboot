@@ -431,7 +431,7 @@ void SecureROM::_cleanup()
         //  update the previously-defined-as-excutable memory space
         uint64_t l_access_type = WRITABLE;
         uint64_t l_rc = mm_set_permission( iv_device_ptr,
-                                           SECUREROM_NUM_PAGES,
+                                           SECUREROM_MEMORY_SIZE,
                                            l_access_type );
 
         if (l_rc != 0)
