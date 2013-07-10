@@ -596,7 +596,7 @@ foreach my $argnum (1 .. $#ARGV)
             {
                 # Add the Target to cdgTargetHash to be processed with any
                 # callout and deconfigure requests
-                $cdgTargetHash{$gard->{target}}{deconf} = 1;
+                $cdgTargetHash{$gard->{target}}{gard} = 1;
             }
             elsif (exists $gard->{childTargets})
             {
