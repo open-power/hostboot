@@ -22,8 +22,8 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
-CODE_PASS_POST += linker
-CLEAN_TARGETS += linker
+CODE_PASS_POST += linker gensyms
+CLEAN_TARGETS += linker gensyms
 
 include $(ROOTPATH)/config.mk
 
@@ -32,3 +32,7 @@ linker: linker.C
 	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g linker.C -o linker \
 				         -lbfd -liberty -lz
 
+gensyms: gensyms.C
+	$(C2) "    CXX        $(notdir $<)"
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g gensyms.C -o gensyms \
+					 -lpthread

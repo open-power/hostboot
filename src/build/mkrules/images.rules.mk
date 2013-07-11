@@ -58,7 +58,7 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
 $(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
 	$(C2) "    GENLIST    $(notdir $*)"
 	$(C1)(cd $(ROOTPATH); \
-              src/build/tools/gensyms $*.bin $*_extended.bin 0x40000000 \
+              src/build/linker/gensyms $*.bin $*_extended.bin 0x40000000 \
                   > ./img/$*.syms ; \
               src/build/tools/genlist $*.bin | bzip2 -zc > ./img/$*.list.bz2)
 
