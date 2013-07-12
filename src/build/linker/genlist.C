@@ -289,7 +289,7 @@ string find_symbol_name(uint64_t addr, bool match)
     // Create the "symbol+offset" string.
     else
     {
-        char hex[16];
+        char hex[17];
         sprintf(hex, "%lx", addr - sym->first);
 
         return sym->second + string("+0x") + hex;
@@ -409,7 +409,7 @@ void* read_module_content(void* input)
                 result += string(line, matches[2].rm_eo);
                 result += "\t";
                 // Output offsetted address.
-                char addr_text[16];
+                char addr_text[17];
                 sprintf(addr_text, "%08lx", addr_value);
                 result += addr_text;
 
@@ -431,7 +431,7 @@ void* read_module_content(void* input)
                     uint64_t branch_addr = 0;
                     sscanf(&line[matches[2].rm_so], "%lx", &branch_addr);
                     branch_addr += mod_addr;
-                    char branch_addr_txt[16];
+                    char branch_addr_txt[17];
                     sprintf(branch_addr_txt, "%lx", branch_addr);
                     result += branch_addr_txt;
 
