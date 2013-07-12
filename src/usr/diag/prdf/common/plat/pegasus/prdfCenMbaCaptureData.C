@@ -136,7 +136,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
         // Allocate space for the capture data.
         BIT_STRING_ADDRESS_CLASS dramRepairData ( 0, ( dramStream.size() )*8,
                                                (CPU_WORD *) dramStream.base() );
-        o_cd.Add( i_mbaTarget, Util::hashString("MBA_DRAM_REPAIRS_DATA"),
+        o_cd.Add( i_mbaTarget, Util::hashString("DRAM_REPAIRS_DATA"),
                   dramRepairData );
     }
 }

@@ -327,7 +327,7 @@ void CenDqBitmap::getCaptureData( CaptureData & o_cd ) const
         ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
 
     BIT_STRING_ADDRESS_CLASS bs ( 0, sz_capData*8, (CPU_WORD *) &capData );
-    o_cd.Add( iv_mba, Util::hashString("MBA_BAD_DQ_BITMAP"), bs );
+    o_cd.Add( iv_mba, Util::hashString("BAD_DQ_BITMAP"), bs );
 }
 
 } // end namespace PRDF
