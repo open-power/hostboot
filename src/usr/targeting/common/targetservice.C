@@ -336,7 +336,7 @@ void TargetService::masterProcChipTargetHandle(
     TARG_ASSERT(iv_initialized, TARG_ERR_LOC
                 "USAGE: TargetService not initialized");
 
-    //@TODO Need to query the actual hardware and cross check it with
+    //@TODO RTC 78076 Need to query the actual hardware and cross check it with
     // PNOR to determine the master chip
     // target; for now, just always report sys0.n0.proc0
     EntityPath l_masterProcChipEntityPath(EntityPath::PATH_PHYSICAL);
