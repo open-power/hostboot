@@ -221,40 +221,45 @@ fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
  *         the boot processor.
  *
  *  @param[in]  i_target        The target where cfam access is called on.
+ *  @param[in]  i_address       CFAM Address being accessed
  *
  *  @return errlHndl_t if target is a processor, NULL otherwise.
  ****************************************************************************/
-static errlHndl_t verifyCfamAccessTarget(const fapi::Target& i_target)
+static errlHndl_t verifyCfamAccessTarget(const fapi::Target& i_target,
+                                         uint32_t i_address)
 {
     errlHndl_t l_err = NULL;
 
-    // Can't access cfam engine on master processor
+    // Can't access cfam engine on the master processor
     if (i_target.getType() == fapi::TARGET_TYPE_PROC_CHIP)
     {
         TARGETING::Target* l_pMasterProcChip = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle
-                                                            (l_pMasterProcChip);
-        TARGETING::Target* l_pTarget =
-                          reinterpret_cast< TARGETING::Target*>(i_target.get());
+        TARGETING::targetService().
+            masterProcChipTargetHandle( l_pMasterProcChip );
 
-        if (l_pTarget == l_pMasterProcChip)
+        TARGETING::Target* l_pTarget =
+            reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+        if( l_pMasterProcChip == l_pTarget )
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("verifyCfamAccessTarget: "
-                     "Attempt to access master processor CFAM register");
+            FAPI_ERR("verifyCfamAccessTarget: Attempt to access CFAM register %.8X on the master processor chip", i_address);
 
             /*@
              * @errortype
              * @moduleid     fapi::MOD_VERIFY_CFAM_ACCESS_TARGET
              * @reasoncode   fapi::RC_CFAM_ACCESS_ON_PROC_ERR
-             * @userdata1    Target type
-             * @devdesc      Attempt to access master processor CFAM register
+             * @userdata1    Target HUID
+             * @userdata2    CFAM address being accessed
+             * @devdesc      Attempt to access CFAM register on
+             *               the master processor chip
              */
             l_err = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    fapi::MOD_VERIFY_CFAM_ACCESS_TARGET,
-                    fapi::RC_CFAM_ACCESS_ON_PROC_ERR,
-                    i_target.getType());
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            fapi::MOD_VERIFY_CFAM_ACCESS_TARGET,
+                            fapi::RC_CFAM_ACCESS_ON_PROC_ERR,
+                            TARGETING::get_huid(l_pMasterProcChip),
+                            i_address);
         }
     }
 
@@ -333,7 +338,7 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
     do
     {
         // Can't access cfam engine on master processor
-        l_err = verifyCfamAccessTarget(i_target);
+        l_err = verifyCfamAccessTarget(i_target,i_address);
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
@@ -407,7 +412,7 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
     do
     {
         // Can't access cfam engine on master processor
-        l_err = verifyCfamAccessTarget(i_target);
+        l_err = verifyCfamAccessTarget(i_target,i_address);
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
@@ -505,7 +510,7 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
     do
     {
         // Can't access cfam engine on master processor
-        l_err = verifyCfamAccessTarget(i_target);
+        l_err = verifyCfamAccessTarget(i_target,i_address);
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode

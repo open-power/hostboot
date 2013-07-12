@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -209,6 +209,28 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                 //  it should be done (this layer or somewhere higher in the call stack?)
                 //@todo: May add recover actions later.  Currently undefined
 
+                //Grab the PIB2OPB Status reg for a XSCOM Block error
+                if( (l_status & 0x00007000) == 0x00001000 ) //piberr=001
+                {
+                    //@todo: Switch to external FSI FFDC interfaces RTC:35064
+                    TARGETING::Target* l_master = NULL;
+                    TARGETING::targetService().
+                      masterProcChipTargetHandle(l_master);
+
+                    uint64_t scomdata = 0;
+                    size_t scomsize = sizeof(uint64_t);
+                    errlHndl_t l_err2 = DeviceFW::deviceOp( DeviceFW::READ,
+                                           l_master,
+                                           &scomdata,
+                                           scomsize,
+                                           DEVICE_XSCOM_ADDRESS(0x00020001));
+                    if( l_err2 ) {
+                        delete l_err2;
+                    } else {
+                        TRACFCOMP( g_trac_fsiscom, "PIB2OPB Status = %.16X", scomdata );
+                    }
+                }
+
                 break;
             }
 
@@ -250,7 +272,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
            //bits 17-19 indicates PCB/PIB error
             if((l_status & 0x00007000) != 0)
             {
-                TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Read: PCB/PIB error received: l_status=0x%.8X)", l_status);
+                TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Read: PCB/PIB error received: l_status=0x%0.8X)", l_status);
 
                 /*@
                  * @errortype

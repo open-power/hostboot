@@ -166,7 +166,7 @@ class FsiDD
                      uint32_t* i_buffer);
 
     /**
-     * @brief Holds a set of addressomg information to describe the 
+     * @brief Holds a set of addressing information to describe the
      *   current FSI operation 
      */
     struct FsiAddrInfo_t {
@@ -243,7 +243,8 @@ class FsiDD
      */
     struct FsiChipInfo_t
     {
-        TARGETING::Target* master; ///< FSI Master  
+        TARGETING::Target* slave; //< FSI Slave chip
+        TARGETING::Target* master; ///< FSI Master
         TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
         uint8_t port; ///< Which port is this chip hanging off of 
         uint8_t cascade; ///< Slave cascade position
@@ -393,8 +394,8 @@ class FsiDD
         OPB_STAT_BUSY       = 0x00010000, /**< Bit 15 is the Busy bit */
         OPB_STAT_READ_VALID = 0x00020000, /**< Bit 14 is the Valid Read bit */
         OPB_STAT_ERR_OPB    = 0x09F00000, /**< 4,7-11 are OPB errors */
-        OPB_STAT_ERR_CMFSI  = 0x00007C00, /**< 16-21 are cMFSI errors */
-        OPB_STAT_ERR_MFSI   = 0x0000007C, /**< 24-29 are MFSI errors */
+        OPB_STAT_ERR_CMFSI  = 0x0000FC00, /**< 16-21 are cMFSI errors */
+        OPB_STAT_ERR_MFSI   = 0x000000FC, /**< 24-29 are MFSI errors */
         OPB_STAT_ERR_ANY    = (OPB_STAT_ERR_OPB |
                                OPB_STAT_ERR_CMFSI |
                                OPB_STAT_ERR_MFSI),
@@ -409,16 +410,31 @@ class FsiDD
         FSI_MCRSP0_008  = 0x008,
         FSI_MENP0_010   = 0x010,
         FSI_MLEVP0_018  = 0x018,
+        FSI_MSENP0_018  = 0x018,
+        FSI_MCENP0_020  = 0x020,
         FSI_MSIEP0_030  = 0x030,
-        FSI_MAEB_070    = 0x070,
+        FSI_MAESP0_050  = 0x050,
+        FSI_MAEB_070    = 0x070, //MREFP0
         FSI_MRESP0_0D0  = 0x0D0,
+        FSI_MSTAP0_0D0  = 0x0D0,
         FSI_MRESP0_0D1  = 0x0D1,
+        FSI_MSTAP0_0D1  = 0x0D1,
         FSI_MRESP0_0D2  = 0x0D2,
+        FSI_MSTAP0_0D2  = 0x0D2,
         FSI_MRESP0_0D3  = 0x0D3,
+        FSI_MSTAP0_0D3  = 0x0D3,
         FSI_MRESP0_0D4  = 0x0D4,
+        FSI_MSTAP0_0D4  = 0x0D4,
         FSI_MRESP0_0D5  = 0x0D5,
+        FSI_MSTAP0_0D5  = 0x0D5,
         FSI_MRESP0_0D6  = 0x0D6,
+        FSI_MSTAP0_0D6  = 0x0D6,
         FSI_MRESP0_0D7  = 0x0D7,
+        FSI_MSTAP0_0D7  = 0x0D7,
+        FSI_MESRB0_1D0  = 0x1D0,
+        FSI_MSCSB0_1D4  = 0x1D4,
+        FSI_MATRB0_1D8  = 0x1D8,
+        FSI_MDTRB0_1DC  = 0x1DC,
         FSI_MECTRL_2E0  = 0x2E0
     };
 
@@ -467,6 +483,14 @@ class FsiDD
      */
     FsiChipInfo_t getFsiInfo( TARGETING::Target* i_target );
 
+    /**
+     * @brief Clear out the error indication so that we can do more FSI ops
+     *
+     * @param[in] i_target  Target of FSI Slave in error
+     *
+     * @return errlHndl_t  NULL on success
+     */
+    errlHndl_t errorCleanup( TARGETING::Target* i_fsiTarg );
 
     /********************************************
      * VARIABLES
@@ -487,6 +511,11 @@ class FsiDD
      * Non-zero if a Task is currently collecting FFDC
      */
     tid_t iv_ffdcTask;
+
+    /**
+     * OPB Error Bits
+     */
+    uint32_t iv_opbErrorMask;
 
   private:
 

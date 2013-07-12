@@ -96,7 +96,8 @@ enum SlaveRegistersP8
     SLAVE_PEEK_TABLE = 0x000400, /**< Peek Table */
 
     SLAVE_REGS       = 0x000800, /**< FSI Slave Register */
-    SLAVE_MODE_00    = SLAVE_REGS|0x00,
+    SMODE_00         = SLAVE_REGS|0x00,
+    SLBUS_30         = SLAVE_REGS|0x30,
 
     FSI_SHIFT_ENGINE = 0x000C00, /**< FSI Shift Engine (SCAN) */
     FSI2PIB_ENGINE   = 0x001000, /**< FSI2PIB Engine (SCOM) */

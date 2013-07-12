@@ -409,6 +409,149 @@ errlHndl_t FsiDD::write(TARGETING::Target* i_target,
 }
 
 
+/**
+ * @brief Add FFDC for the target to an error log
+ */
+void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type, errlHndl_t &io_log,
+                       TARGETING::Target*  i_target)
+{
+    TRACDCOMP( g_trac_fsi, "FSI::getFFDC>" );
+
+    // Local Variables
+    uint8_t * l_data_ptr = NULL;
+    uint32_t l_ffdc_byte_len = 0;
+    bool i_merge = false;
+    uint64_t l_slaveEnableIndex=0;
+    uint64_t l_byte_index = 0;
+
+    // Check Type -- Not doing anything unique right now
+    if ( ! (i_ffdc_type == FSI::FSI_FFDC_PRESENCE_FAIL ) ||
+           (i_ffdc_type == FSI::FSI_FFDC_READWRITE_FAIL) )
+    {
+        // Unsupported FSI FFDC type, so don't add FFDC section
+        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> Incorect i_ffdc_type (%d) "
+                               "Not Adding FFDC section!",
+                               i_ffdc_type);
+
+        return;
+    }
+
+    // Add target to error log
+    if (i_target != NULL)
+    {
+        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(io_log);
+    }
+
+    // Add Master Target to Log
+    if (iv_master != NULL)
+    {
+        ERRORLOG::ErrlUserDetailsTarget(iv_master).addToLog(io_log);
+    }
+
+    //  Information to capture
+    //  1) FsiChipInfo_t associated with this target
+    //  2) Size of iv_slaves[]
+    //  3) iv_slaves[]
+    //  4) uint64_t -- slave enable Index
+    l_ffdc_byte_len = sizeof(FsiChipInfo_t) +
+                      sizeof(uint32_t)      +
+                      sizeof(iv_slaves)     +
+                      sizeof(uint64_t);
+
+    l_data_ptr = static_cast<uint8_t*>(malloc(l_ffdc_byte_len));
+
+
+    // Collect the data
+    FsiChipInfo_t l_fsi_chip_info = getFsiInfo(i_target);
+
+    l_slaveEnableIndex = getSlaveEnableIndex (l_fsi_chip_info.master,
+                                              l_fsi_chip_info.type);
+
+
+    TRACFCOMP( g_trac_fsi,
+               "FSI::getFFDC> l_ffdc_byte_len =%d, l_data_ptr=%p,"
+               " sizeof: FsiChipInfo_t=%d, iv_slaves=%d, u32=%d "
+               "u64=%d, l_slaveEnableIndex=0x%x", l_ffdc_byte_len,
+               l_data_ptr, sizeof(FsiChipInfo_t), sizeof(iv_slaves),
+               sizeof(uint32_t), sizeof(uint64_t), l_slaveEnableIndex);
+
+
+    // Copy Data into memory bloack
+    l_byte_index = 0;
+
+    // FsiChipInfo_t
+    memcpy(reinterpret_cast<void*>(l_data_ptr + l_byte_index),
+           &l_fsi_chip_info, sizeof(FsiChipInfo_t));
+
+    l_byte_index += sizeof(FsiChipInfo_t);
+
+
+    // Size of iv_slaves[]
+    const uint32_t l_so_iv_slaves   = sizeof(iv_slaves);
+    memcpy(reinterpret_cast<void*>(l_data_ptr + l_byte_index),
+           &l_so_iv_slaves, sizeof(uint32_t));
+
+    l_byte_index += sizeof(uint32_t);
+
+
+    // iv_slaves[]
+    memcpy(reinterpret_cast<void*>(l_data_ptr + l_byte_index),
+           &iv_slaves, sizeof(iv_slaves));
+
+    l_byte_index += sizeof(iv_slaves);
+
+
+    // getSlaveEnable Index
+    memcpy(reinterpret_cast<void*>(l_data_ptr + l_byte_index),
+           &l_slaveEnableIndex, sizeof(uint64_t));
+
+    l_byte_index += sizeof(uint64_t);
+
+
+    // Check we didn't go too far or too short
+    if (l_byte_index !=  l_ffdc_byte_len)
+    {
+        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> Byte Length Mismatch: "
+                               "Not Adding FFDC section!"
+                               "l_byte_index=%d, l_ffdc_byte_len=%d",
+                               l_byte_index, l_ffdc_byte_len);
+
+        // Free malloc'ed memory
+        if (l_data_ptr != NULL)
+        {
+            free(l_data_ptr);
+        }
+
+        return;
+    }
+
+    // Actual call to log the data
+    ERRORLOG::ErrlUD * l_pUD = (io_log)->addFFDC(FSI_COMP_ID,
+                                              l_data_ptr,
+                                              l_ffdc_byte_len,
+                                              FsiFFDC_Ver1,
+                                              FsiFFDC_CapData_1,
+                                              i_merge);
+
+    // Check for success
+    if (l_pUD == NULL)
+    {
+        // Failure to add FFDC section
+        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> FAILURE TO ADD FFDC" );
+
+        // Add errl trace
+        (io_log)->collectTrace("ERR");
+    }
+    else
+    {
+        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> FFDC Successfully added "
+                               "(%d bytes)", l_ffdc_byte_len );
+    }
+
+    return;
+
+}
+
 
 /********************
  Internal Methods
@@ -423,6 +566,35 @@ errlHndl_t FsiDD::initializeHardware()
     TRACFCOMP( g_trac_fsi, "FSI::initializeHardware>" );
 
     do{
+        //Hardware Bug HW222712 on Murano DD1.0 causes the
+        //  any_error bit to be un-clearable so we just
+        //  have to ignore it
+        if( (iv_master->getAttr<TARGETING::ATTR_MODEL>()
+             == TARGETING::MODEL_MURANO) )
+        {
+            // have to use the scom version on the master chip
+            uint32_t scom_data[2];
+            size_t scom_size = sizeof(scom_data);
+            l_err = deviceOp( DeviceFW::READ,
+                              TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                              scom_data,
+                              scom_size,
+                              DEVICE_XSCOM_ADDRESS(0x000F000F) );
+            if( l_err ) { break; }
+
+            uint32_t ec_level = 0x00;
+            ec_level = (scom_data[0] & 0xF0000000) >> 24;
+            ec_level |= ((scom_data[0] & 0x00F00000) >> 20);
+            if( ec_level < 0x20 )
+            {
+                // Ignore bits 16 and 24
+                // 16: cMFSI any-master-error
+                // 24: MFSI any-master-error
+                iv_opbErrorMask &= 0xFFFF7F7F;
+            }
+        }
+
+
         typedef struct {
             TARGETING::Target* targ;
             FsiDD::FsiChipInfo_t info;
@@ -600,148 +772,6 @@ errlHndl_t FsiDD::initializeHardware()
     return l_err;
 }
 
-/**
- * @brief Add FFDC for the target to an error log
- */
-void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type, errlHndl_t &io_log,
-                       TARGETING::Target*  i_target)
-{
-    TRACDCOMP( g_trac_fsi, "FSI::getFFDC>" );
-
-    // Local Variables
-    uint8_t * i_data_ptr = NULL;
-    uint32_t i_ffdc_byte_len = 0;
-    bool i_merge = false;
-    uint64_t l_slaveEnableIndex=0;
-    uint64_t l_byte_index = 0;
-
-    // Check Type -- Not doing anything unique right now
-    if ( ! (i_ffdc_type == FSI::FSI_FFDC_PRESENCE_FAIL ) ||
-           (i_ffdc_type == FSI::FSI_FFDC_READWRITE_FAIL) )
-    {
-        // Unsupported FSI FFDC type, so don't add FFDC section
-        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> Incorect i_ffdc_type (%d) "
-                               "Not Adding FFDC section!",
-                               i_ffdc_type);
-
-        return;
-    }
-
-    // Add target to error log
-    if (i_target != NULL)
-    {
-        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(io_log);
-    }
-
-    // Add Master Target to Log
-    if (iv_master != NULL)
-    {
-        ERRORLOG::ErrlUserDetailsTarget(iv_master).addToLog(io_log);
-    }
-
-    //  Information to capture
-    //  1) FsiChipInfo_t associated with this target
-    //  2) Size of iv_slaves[]
-    //  3) iv_slaves[]
-    //  4) uint64_t -- slave enable Index
-    i_ffdc_byte_len = sizeof(FsiChipInfo_t) +
-                      sizeof(uint32_t)      +
-                      sizeof(iv_slaves)     +
-                      sizeof(uint64_t);
-
-    i_data_ptr = static_cast<uint8_t*>(malloc(i_ffdc_byte_len));
-
-
-    // Collect the data
-    FsiChipInfo_t l_fsi_chip_info = getFsiInfo(i_target);
-
-    l_slaveEnableIndex = getSlaveEnableIndex (l_fsi_chip_info.master,
-                                              l_fsi_chip_info.type);
-
-
-    TRACFCOMP( g_trac_fsi,
-               "FSI::getFFDC> i_ffdc_byte_len =%d, i_data_ptr=%p,"
-               " sizeof: FsiChipInfo_t=%d, iv_slaves=%d, u32=%d "
-               "u64=%d, l_slaveEnableIndex=0x%x", i_ffdc_byte_len,
-               i_data_ptr, sizeof(FsiChipInfo_t), sizeof(iv_slaves),
-               sizeof(uint32_t), sizeof(uint64_t), l_slaveEnableIndex);
-
-
-    // Copy Data into memory bloack
-    l_byte_index = 0;
-
-    // FsiChipInfo_t
-    memcpy(reinterpret_cast<void*>(i_data_ptr + l_byte_index),
-           &l_fsi_chip_info, sizeof(FsiChipInfo_t));
-
-    l_byte_index += sizeof(FsiChipInfo_t);
-
-
-    // Size of iv_slaves[]
-    const uint32_t l_so_iv_slaves   = sizeof(iv_slaves);
-    memcpy(reinterpret_cast<void*>(i_data_ptr + l_byte_index),
-           &l_so_iv_slaves, sizeof(uint32_t));
-
-    l_byte_index += sizeof(uint32_t);
-
-
-    // iv_slaves[]
-    memcpy(reinterpret_cast<void*>(i_data_ptr + l_byte_index),
-           &iv_slaves, sizeof(iv_slaves));
-
-    l_byte_index += sizeof(iv_slaves);
-
-
-    // getSlaveEnable Index
-    memcpy(reinterpret_cast<void*>(i_data_ptr + l_byte_index),
-           &l_slaveEnableIndex, sizeof(uint64_t));
-
-    l_byte_index += sizeof(uint64_t);
-
-
-    // Check we didn't go too far or too short
-    if (l_byte_index !=  i_ffdc_byte_len)
-    {
-        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> Byte Length Mismatch: "
-                               "Not Adding FFDC section!"
-                               "l_byte_index=%d, i_ffdc_byte_len=%d",
-                               l_byte_index, i_ffdc_byte_len);
-
-        // Free malloc'ed memory
-        if (i_data_ptr != NULL)
-        {
-            free(i_data_ptr);
-        }
-
-        return;
-    }
-
-    // Actual call to log the data
-    ERRORLOG::ErrlUD * l_pUD = (io_log)->addFFDC(FSI_COMP_ID,
-                                              i_data_ptr,
-                                              i_ffdc_byte_len,
-                                              FsiFFDC_Ver1,
-                                              FsiFFDC_CapData_1,
-                                              i_merge);
-
-    // Check for success
-    if (l_pUD == NULL)
-    {
-        // Failure to add FFDC section
-        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> FAILURE TO ADD FFDC" );
-
-        // Add errl trace
-        (io_log)->collectTrace("ERR");
-    }
-    else
-    {
-        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> FFDC Successfully added "
-                               "(%d bytes)", i_ffdc_byte_len );
-    }
-
-    return;
-
-}
 
 /********************
  Internal Methods
@@ -753,6 +783,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type, errlHndl_t &io_log,
 FsiDD::FsiDD()
 :iv_master(NULL)
 ,iv_ffdcTask(0)
+,iv_opbErrorMask(OPB_STAT_ERR_ANY)
 {
     TRACFCOMP(g_trac_fsi, "FsiDD::FsiDD()>");
 
@@ -826,7 +857,7 @@ errlHndl_t FsiDD::write(uint64_t i_address,
 errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
                        uint32_t* o_buffer)
 {
-    TRACDCOMP(g_trac_fsi, "FsiDD::read(relAddr=0x%llx,absAddr=0x%11x)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
+    TRACDCOMP(g_trac_fsi, "FsiDD::read(relAddr=0x%.8X,absAddr=0x%.8X)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
     errlHndl_t l_err = NULL;
     bool need_unlock = false;
     mutex_t* l_mutex = NULL;
@@ -895,7 +926,7 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
 errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
                         uint32_t* i_buffer)
 {
-    TRACDCOMP(g_trac_fsi, "FsiDD::write(relAddr=0x%.llX,absAddr=0x%.11X)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
+    TRACDCOMP(g_trac_fsi, "FsiDD::write(relAddr=0x%.8X,absAddr=0x%.8X)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
     errlHndl_t l_err = NULL;
     bool need_unlock = false;
     mutex_t* l_mutex = NULL;
@@ -971,10 +1002,10 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
 {
     errlHndl_t l_err = NULL;
 
-    if( (i_opbStatReg & OPB_STAT_ERR_ANY)
+    if( (i_opbStatReg & iv_opbErrorMask)
         || (i_opbStatReg & OPB_STAT_BUSY) )
     {
-        TRACFCOMP( g_trac_fsi, "FsiDD::handleOpbErrors> Error during FSI access : relAddr=0x%X, absAddr=0x%X, OPB Status=0x%.8X", i_addrInfo.relAddr, i_addrInfo.absAddr, i_opbStatReg );
+        TRACFCOMP( g_trac_fsi, "FsiDD::handleOpbErrors> Error during FSI access to %.8X : relAddr=0x%X, absAddr=0x%X, OPB Status=0x%.8X", TARGETING::get_huid(i_addrInfo.fsiTarg), i_addrInfo.relAddr, i_addrInfo.absAddr, i_opbStatReg );
         /*@
          * @errortype
          * @moduleid     FSI::MOD_FSIDD_HANDLEOPBERRORS
@@ -1000,11 +1031,6 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
             uint32_t data = 0;
             errlHndl_t l_err2 = NULL;
 
-            // Add data to main error log 'l_err' where possible
-            size_t l_data_size = sizeof(data);
-            ERRORLOG::ErrlUserDetailsLogRegister
-                    l_eud_fsiT(i_addrInfo.fsiTarg);
-
             // Read some error regs from scom
             ERRORLOG::ErrlUserDetailsLogRegister
                     l_scom_data(iv_master);
@@ -1019,63 +1045,88 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
             l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0002000Aull));
             l_scom_data.addToLog(l_err);
 
-            l_err2 = read( i_addrInfo.opbTarg, 0x31D0, &data );
-            if( l_err2 )
-            {
-                delete l_err2;
-            }
-            else
-            {
-                TRACFCOMP( g_trac_fsi, "MESRB0(1D0) = %.8X", data );
-                l_eud_fsiT.addDataBuffer(&data, l_data_size,
-                                         DEVICE_FSI_ADDRESS(0x31D0ull));
+            //Clear out the error indication so that we can
+            // do subsequent FSI operations
+            l_err2 = errorCleanup(i_addrInfo.fsiTarg);
+            if(l_err2) { delete l_err2; }
 
+
+            // Figure out which control regs to use for FFDC regs
+            FsiChipInfo_t fsi_info = getFsiInfo( i_addrInfo.fsiTarg );
+            uint64_t ctl_reg = getControlReg(fsi_info.type);
+
+
+            // Add data to main error log 'l_err' where possible
+            size_t l_data_size = sizeof(data);
+            ERRORLOG::ErrlUserDetailsLogRegister
+                    l_eud_fsiT(i_addrInfo.fsiTarg);
+
+            uint64_t dump_regs[] = {
+                ctl_reg|FSI_MESRB0_1D0,
+                ctl_reg|FSI_MAESP0_050,
+                ctl_reg|FSI_MAEB_070,
+                ctl_reg|FSI_MSCSB0_1D4,
+                ctl_reg|FSI_MATRB0_1D8,
+                ctl_reg|FSI_MDTRB0_1DC
+            };
+
+            for( size_t x=0; x<(sizeof(dump_regs)/dump_regs[0]); x++ )
+            {
+                l_err2 = read( dump_regs[x], &data );
+                if( l_err2 )
+                {
+                    delete l_err2;
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_fsi, "%.8X = %.8X", dump_regs[x], data );
+                    l_eud_fsiT.addDataBuffer(&data, l_data_size,
+                                             DEVICE_FSI_ADDRESS(dump_regs[x]));
+                }
             }
 
-            l_err2 = read( i_addrInfo.opbTarg, 0x31D4, &data );
-            if( l_err2 )
+            // Save off the Status Port Controller Reg for all 8 slaves ports
+            for( size_t p = 0; p < 8; p++ )
             {
-                delete l_err2;
-            }
-            else
-            {
-                TRACFCOMP( g_trac_fsi, "MCSCSB0(1D4) = %.8X", data );
-                l_eud_fsiT.addDataBuffer(&data, l_data_size,
-                                         DEVICE_FSI_ADDRESS(0x31D4ull));
-            }
-
-            l_err2 = read( i_addrInfo.opbTarg, 0x31D8, &data );
-            if( l_err2 )
-            {
-                delete l_err2;
-            }
-            else
-            {
-                TRACFCOMP( g_trac_fsi, "MATRB0(1D8) = %.8X", data );
-                l_eud_fsiT.addDataBuffer(&data, l_data_size,
-                                         DEVICE_FSI_ADDRESS(0x31D8ull));
-            }
-
-            l_err2 = read( i_addrInfo.opbTarg, 0x31DC, &data );
-            if( l_err2 )
-            {
-                delete l_err2;
-            }
-            else
-            {
-                TRACFCOMP( g_trac_fsi, "MDTRB0(1DC) = %.8X", data );
-                l_eud_fsiT.addDataBuffer(&data, l_data_size,
-                                         DEVICE_FSI_ADDRESS(0x31DCull));
+                uint32_t addr1 = ctl_reg|(FSI_MSTAP0_0D0+p*0x4);
+                l_err2 = read( addr1, &data );
+                if( l_err2 )
+                {
+                    delete l_err2;
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_fsi, "%.8X = %.8X",
+                               ctl_reg|(FSI_MSTAP0_0D0+p*0x4), data );
+                    l_eud_fsiT.addDataBuffer(&data, l_data_size,
+                                             DEVICE_FSI_ADDRESS(addr1));
+                }
             }
 
             // Push details to error log
             l_eud_fsiT.addToLog(l_err);
 
+            //Reset the port -
+            //@todo-RTC:35287: should just be the 1 port, how do I do that?
+            for( uint32_t port = 0; port < MAX_SLAVE_PORTS; ++port )
+            {
+                // 1= Port: Error reset
+                data = 0x40000000;
+                l_err2 = write( ctl_reg|FSI_MRESP0_0D0|(port*4), &data );
+                if( l_err2 ) { delete l_err2; }
+            }
+
             //MAGIC_INSTRUCTION(MAGIC_BREAK);
 
             iv_ffdcTask = 0;
         }
-
+        else
+        {
+            //Clear out the error indication so that we can
+            // do subsequent FSI operations
+            errlHndl_t l_err2 = errorCleanup(i_addrInfo.fsiTarg);
+            if(l_err2) { delete l_err2; }
+        }
 
         // Add opbTarg to original error log
         ERRORLOG::ErrlUserDetailsTarget(i_addrInfo.opbTarg).addToLog(l_err);
@@ -1097,7 +1148,7 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                                   uint32_t* o_readData)
 {
     errlHndl_t l_err = NULL;
-    enum { MAX_OPB_TIMEOUT_NS = 1000000 }; //=1ms
+    enum { MAX_OPB_TIMEOUT_NS = 4000000 }; //=4ms
 
     do {
         // poll for complete
@@ -1131,69 +1182,21 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
             // check for completion or error
             TRACUCOMP(g_trac_fsi, "FsiDD::pollForComplete> ScomREAD : read_data[0]=%.8llX", read_data[0] );
             if( ((read_data[0] & OPB_STAT_BUSY) == 0)  //not busy
-                || (read_data[0] & OPB_STAT_ERR_ANY) ) //error bits
+                || (read_data[0] & iv_opbErrorMask) ) //error bits
             {
                 break;
             }
 
-            nanosleep( 0,10000 ); //sleep for 10,000 ns
+            nanosleep( 0, 10000 ); //sleep for 10,000 ns
             elapsed_time_ns += 10000;
         } while( elapsed_time_ns <= MAX_OPB_TIMEOUT_NS ); // hardware has 1ms limit
         if( l_err ) { break; }
-
-
-        // we should never timeout because the hardware should set an error
-        if( elapsed_time_ns > MAX_OPB_TIMEOUT_NS )
-        {
-            TRACFCOMP( g_trac_fsi, "FsiDD::pollForComplete> Never got complete or error on OPB operation : absAddr=0x%X, OPB Status=0x%.8X", i_addrInfo.absAddr, read_data[0] );
-            /*@
-             * @errortype
-             * @moduleid     FSI::MOD_FSIDD_POLLFORCOMPLETE
-             * @reasoncode   FSI::RC_OPB_TIMEOUT
-             * @userdata1[0:31]  Relative FSI Address
-             * @userdata1[32:63]  Absolute FSI Address
-             * @userdata2    OPB Status Register
-             * @devdesc      FsiDD::pollForComplete> Error during FSI access
-             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSI::MOD_FSIDD_POLLFORCOMPLETE,
-                                            FSI::RC_OPB_TIMEOUT,
-                                            TWO_UINT32_TO_UINT64(
-                                                i_addrInfo.relAddr,
-                                                i_addrInfo.absAddr),
-                                            TWO_UINT32_TO_UINT64(
-                                                read_data[0],
-                                                read_data[1]) );
-
-            // Save both targets in i_addrInfo to error log
-            ERRORLOG::ErrlUserDetailsTarget(
-                    i_addrInfo.fsiTarg
-                ).addToLog(l_err);
-            ERRORLOG::ErrlUserDetailsTarget(
-                    i_addrInfo.opbTarg
-                ).addToLog(l_err);
-
-            // Read some error regs from scom
-            ERRORLOG::ErrlUserDetailsLogRegister
-                    l_scom_data(i_addrInfo.opbTarg);
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020000ull));
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020001ull));
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020002ull));
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020005ull));
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020006ull));
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020007ull));
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020008ull));
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020009ull));
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0002000Aull));
-            l_scom_data.addToLog(l_err);
-
-            l_err->collectTrace("FSI");
-            l_err->collectTrace("FSIR");
-
-            break;
-        }
+        TRACDCOMP(g_trac_fsi,
+                  "FsiDD::pollForComplete> elapsed_time_ns=%d, Status=%.8X",
+                  elapsed_time_ns,read_data[0]);
 
         // check if we got an error from the OPB
+        //   (will also check for busy/timeout)
         l_err = handleOpbErrors( i_addrInfo, read_data[0] );
         if( l_err )
         {
@@ -1205,7 +1208,7 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
         {
             if( !(read_data[0] & OPB_STAT_READ_VALID) )
             {
-                TRACFCOMP( g_trac_fsi, "FsiDD::pollForComplete> Read valid never came on : absAddr=0x%X, OPB Status=0x%.8X", i_addrInfo.absAddr, read_data[0] );
+                TRACFCOMP( g_trac_fsi, "FsiDD::pollForComplete> Read valid never came on : absAddr=0x%.8X, OPB Status=0x%.8X", i_addrInfo.absAddr, read_data[0] );
                 /*@
                  * @errortype
                  * @moduleid     FSI::MOD_FSIDD_POLLFORCOMPLETE
@@ -1232,6 +1235,20 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                 ERRORLOG::ErrlUserDetailsTarget(
                         i_addrInfo.opbTarg
                     ).addToLog(l_err);
+
+                // Read some error regs from scom
+                ERRORLOG::ErrlUserDetailsLogRegister
+                  l_scom_data(iv_master);
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020000ull));
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020001ull));
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020002ull));
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020005ull));
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020006ull));
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020007ull));
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020008ull));
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020009ull));
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0002000Aull));
+                l_scom_data.addToLog(l_err);
 
                 l_err->collectTrace("FSI");
                 l_err->collectTrace("FSIR");
@@ -1460,10 +1477,9 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         //  before we run
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
-        TARGETING::SpFunctions spfuncs = TARGETING::SpFunctions();
-        if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
-            && spfuncs.fsiSlaveInit )
+        TARGETING::SpFunctions spfuncs =
+          sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
+        if( spfuncs.fsiSlaveInit )
         {
             TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init because SP did it" );
             o_enabled = true;
@@ -1483,8 +1499,13 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
 
         //Write the port enable (enables clocks for FSI link)
         databuf = static_cast<uint32_t>(portbit) << 24;
-        l_err = write( master_ctl_reg|FSI_MLEVP0_018, &databuf );
+        l_err = write( master_ctl_reg|FSI_MSENP0_018, &databuf );
         if( l_err ) { break; }
+
+        //Any pending errors before we do anything else?
+        l_err = read( master_ctl_reg|FSI_MESRB0_1D0, &databuf );
+        if( l_err ) { break; }
+        uint32_t orig_mesrb0 = databuf; //save for later
 
         //Send the BREAK command to all slaves on this port (target slave0)
         //  part of FSI definition, write magic string into address zero
@@ -1514,13 +1535,32 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
                                             FSI::RC_ERROR_ENABLING_SLAVE,
                                             i_fsiInfo.linkid.id,
                                             databuf);
+
+            // Read some error regs from scom
+            ERRORLOG::ErrlUserDetailsLogRegister
+                    l_scom_data(iv_master);
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020000ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020001ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020002ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020005ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020006ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020007ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020008ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00020009ull));
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0002000Aull));
+            l_scom_data.addDataBuffer(&orig_mesrb0,
+                          sizeof(uint32_t),
+                          DEVICE_FSI_ADDRESS(master_ctl_reg|FSI_MESRB0_1D0));
+            l_scom_data.addToLog(l_err);
+
             l_err->collectTrace("FSI");
             l_err->collectTrace("FSIR");
             break;
         }
 
-        // Note: need to write to 3rd slave spot because the BREAK
+        // Note: need to write to 1st slave spot because the BREAK
         //   resets everything to that window
+        uint32_t tmp_slave_offset = slave_offset;
         if( TARGETING::FSI_MASTER_TYPE_CMFSI == i_fsiInfo.type )
         {
             slave_offset |= CMFSI_SLAVE_0;
@@ -1537,40 +1577,33 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         // 12:15= Send delay cycles: 0xF
         // 20:23= Local bus ratio: 0x1
         databuf = 0x23FF0100;
-        l_err = write( slave_offset|FSI::SLAVE_MODE_00, &databuf );
+        l_err = write( tmp_slave_offset|FSI::SMODE_00, &databuf );
         if( l_err ) { break; }
 
+        //Note - We are not changing the slave ID due to bug HW239758
+#if 0 // Leaving code in place in case P9 fixes the bug
         //Note - this is a separate write because we want to have HW recovery
         //  enabled when we switch the window
         //Set FSI slave ID to 0 (move slave to 1st 2MB address window)
         // 6:7=	Slave ID: 0
         databuf = 0x20FF0100;
-        l_err = write( slave_offset|FSI::SLAVE_MODE_00, &databuf );
+        l_err = write( tmp_slave_offset|FSI::SMODE_00, &databuf );
         if( l_err ) { break; }
+#endif
 
         //Note : from here on use the real cascade offset
 
-#if 0 // skipping the config space reading because we're hardcoding engines
-        //Read the config space
-        for( uint64_t config_addr = slave_offset|FSI::SLAVE_CFG_TABLE;
-             config_addr < (slave_offset|FSI::SLAVE_PEEK_TABLE);
-             config_addr += 4 )
-        {
-            // read the entry
-            l_err = read( config_addr, &databuf );
-            if( l_err ) { break; }
+        //Force the local bus to my side
+        //databuf = 0x80000000;
+        //l_err = write( slave_offset|FSI::SLBUS_30, &databuf );
+        //if( l_err ) { break; }
+        //Uncomment above if they ever wire it to not default to us
 
-            // if bit0==0 then we're through all of the engines
-            if( databuf & 0x80000000 )
-            {
-                break;
-            }
-        }
-#endif
+        // wait for a little bit to be sure everything is done
+        nanosleep( 0, 1000000 ); //sleep for 1ms
 
         // No support for slave cascades so we're done
         o_enabled = true;
-
     } while(0);
 
     TRACDCOMP( g_trac_fsi, EXIT_MRK"FsiDD::initPort" );
@@ -1584,31 +1617,31 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                                     TARGETING::FSI_MASTER_TYPE i_type)
 {
     errlHndl_t l_err = NULL;
-    TRACFCOMP( g_trac_fsi, ENTER_MRK"FsiDD::initMasterControl> Initializing Master %.8X:%d", TARGETING::get_huid(i_master), i_type );
+    TRACFCOMP( g_trac_fsi,
+               ENTER_MRK"FsiDD::initMasterControl> Initializing Master %.8X:%c",
+               TARGETING::get_huid(i_master),
+               i_type==TARGETING::FSI_MASTER_TYPE_MFSI ? 'H' : 'C' );
 
     do {
         // Do not initialize the masters because they are already
         //  working before we run
-        bool fsp_master_init = false;
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
-        TARGETING::SpFunctions spfuncs = TARGETING::SpFunctions();
-        if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
-            && spfuncs.fsiMasterInit )
+        TARGETING::SpFunctions spfuncs =
+          sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
+        if( spfuncs.fsiMasterInit )
         {
             TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init because SP did it" );
-            fsp_master_init = true;
         }
 
         // Do not do any hardware initialization in mpipl
-        uint8_t is_mpipl = 0;
-        if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl)
-            && is_mpipl )
+        uint8_t is_mpipl = sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
+        if( is_mpipl )
         {
             TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init in MPIPL" );
         }
+
+        bool hb_doing_init = !(spfuncs.fsiMasterInit || is_mpipl);
 
         uint32_t databuf = 0;
 
@@ -1623,85 +1656,95 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         }
 
         //Always clear out any pending errors before we start anything
+        FsiAddrInfo_t addr_info( i_master, 0 );
+        l_err = genFullFsiAddr(addr_info);
+        if( l_err ) { break; }
+
         uint32_t scom_data[2] = {};
         size_t scom_size = sizeof(scom_data);
 
-        for( uint64_t scomaddr = 0x00020000;
-             scomaddr <= 0x0002000A;
-             ++scomaddr )
-        {
-            if( (scomaddr == 0x00020003)
-                || (scomaddr == 0x00020004) )
-            {
-                continue;
-            }
-
-            scom_size = sizeof(scom_data);
-            l_err = deviceOp( DeviceFW::READ,
-                              iv_master,
-                              scom_data,
-                              scom_size,
-                              DEVICE_XSCOM_ADDRESS(scomaddr) );
-            if( l_err ) { break; }
-
-            TRACFCOMP( g_trac_fsi,
-                       "Scom %0.8X = %0.8X %0.8X",
-                       scomaddr,
-                       scom_data[0],
-                       scom_data[1] );
-        }
-        if( l_err ) { break; }
-
+        uint64_t opbaddr = genOpbScomAddr(addr_info,OPB_REG_RES);
         scom_data[0] = 0; scom_data[1] = 0;
-        scom_size = sizeof(scom_data);
         l_err = deviceOp( DeviceFW::WRITE,
                           iv_master,
                           scom_data,
                           scom_size,
-                          DEVICE_XSCOM_ADDRESS(FSI2OPB_OFFSET_0|OPB_REG_RES) );
+                          DEVICE_XSCOM_ADDRESS(opbaddr) );
         if( l_err ) { break; }
 
+        opbaddr = genOpbScomAddr(addr_info,OPB_REG_STAT);
         scom_data[0] = 0; scom_data[1] = 0;
-        scom_size = sizeof(scom_data);
         l_err = deviceOp( DeviceFW::WRITE,
                           iv_master,
                           scom_data,
                           scom_size,
-                          DEVICE_XSCOM_ADDRESS(FSI2OPB_OFFSET_0|OPB_REG_STAT) );
+                          DEVICE_XSCOM_ADDRESS(opbaddr) );
         if( l_err ) { break; }
 
-        scom_size = sizeof(scom_data);
+        // Ensure we don't have any errors before we even start
+        opbaddr = genOpbScomAddr(addr_info,OPB_REG_STAT);
         l_err = deviceOp( DeviceFW::READ,
                           iv_master,
                           scom_data,
                           scom_size,
-                          DEVICE_XSCOM_ADDRESS(FSI2OPB_OFFSET_0|OPB_REG_STAT) );
+                          DEVICE_XSCOM_ADDRESS(opbaddr) );
         if( l_err ) { break; }
+        // Trace initial state for debug
         TRACFCOMP(g_trac_fsi,"Scom %0.8X = %0.8X %0.8X",
                   FSI2OPB_OFFSET_0|OPB_REG_STAT,
                   scom_data[0],
                   scom_data[1]);
-
-
-        if( !fsp_master_init && !is_mpipl )
+        l_err = handleOpbErrors( addr_info, scom_data[0] );
+        if( l_err )
         {
+            TRACFCOMP(g_trac_fsi,"Unclearable FSI Errors present at the beginning, no choice but to fail");
+            break;
+        }
+
+
+        // Initialize the FSI Master regs if they aren't already setup
+        if( hb_doing_init )
+        {
+            //Setup clock ratios and some error checking
+            // 1= Enable hardware error recovery
+            // 3= Enable parity checking
+            // 4:13= FSI clock ratio 0 is 1:1
+            // 14:23= FSI clock ratio 1 is 4:1
+            databuf = 0x50040400;
+            l_err = write( ctl_reg|FSI_MMODE_000, &databuf );
+            if( l_err ) { break; }
+
+            //Setup error control reg to do nothing
+            // 16= Enable OPB_errAck [=1]
+            // 18= Freeze FSI port on FSI/OPB bridge error [=0]
+            databuf = 0x00008000;
+            l_err = write( ctl_reg|FSI_MECTRL_2E0, &databuf );
+            if( l_err ) { break; }
+
             //Clear fsi port errors and general reset on all ports
             for( uint32_t port = 0; port < MAX_SLAVE_PORTS; ++port )
             {
+                // 0= Port: General reset
+                // 1= Port: Error reset
                 // 2= General reset to all bridges
                 // 3= General reset to all port controllers
-                databuf = 0x30000000;
+                // 4= Reset all FSI Master control registers
+                // 5= Reset parity error source latch
+                databuf = 0xFC000000;
                 l_err = write( ctl_reg|FSI_MRESP0_0D0|(port*4), &databuf );
                 if( l_err ) { break; }
             }
             if( l_err ) { break; }
 
-            //Freeze FSI Port on FSI/OPB bridge error (global)
-            // 18= Freeze FSI port on FSI/OPB bridge error
-            databuf = 0x00002000;
+            //Wait a little bit to be sure the reset is done
+            nanosleep( 0, 1000000 ); //sleep for 1ms
+
+            //Setup error control reg for regular use
+            // 16= Enable OPB_errAck [=1]
+            // 18= Freeze FSI port on FSI/OPB bridge error [=0]
+            databuf = 0x00008000;
             l_err = write( ctl_reg|FSI_MECTRL_2E0, &databuf );
             if( l_err ) { break; }
-
 
             //Set MMODE reg to enable HW recovery, parity checking,
             //  setup clock ratio
@@ -1710,7 +1753,21 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
             // 4:13= FSI clock ratio 0 is 1:1
             // 14:23= FSI clock ratio 1 is 4:1
             databuf = 0x50040400;
-            //Hardware Bug HW204566 on Murano DD1.0 requires legacy
+
+            //Setup timeout so that:
+            //   code(4ms) > masterproc (0.9ms) > remote fsi master (0.8ms)
+            if( i_master == iv_master )
+            {
+                // 26:27= Timeout (b01) = 0.9ms
+                databuf |= 0x00000010;
+            }
+            else
+            {
+                // 26:27= Timeout (b10) = 0.8ms
+                databuf |= 0x00000020;
+            }
+
+            //Hardware Bug HW204566 on Murano DD1.x requires legacy
             //  mode to be enabled
             if( (i_master->getAttr<TARGETING::ATTR_MODEL>()
                                       == TARGETING::MODEL_MURANO) )
@@ -1727,30 +1784,29 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                     // perform the read operation
                     l_err = read( addr_info, &idec );
                     if( l_err ) { break; }
-                    TRACFCOMP( g_trac_fsi, "FSI=%X", idec );
+                    TRACDCOMP( g_trac_fsi, "FSI=%X", idec );
                 }
                 else
                 {
                     // have to use the scom version on the master chip
-                    uint32_t scom_data[2];
+                    uint32_t tmp_data[2];
                     size_t scom_size = sizeof(scom_data);
                     l_err = deviceOp( DeviceFW::READ,
                                       TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                                      scom_data,
+                                      tmp_data,
                                       scom_size,
                                       DEVICE_XSCOM_ADDRESS(0x000F000F) );
                     if( l_err ) { break; }
 
-                    scom_data[0] = 0x1f0fffff;
-                    idec = scom_data[0];
+                    idec = tmp_data[0];
                 }
                 ec_level = (idec & 0xF0000000) >> 24;
                 ec_level |= ((idec & 0x00F00000) >> 20);
 
                 TRACFCOMP( g_trac_fsi, "%.8X: EC=%X", TARGETING::get_huid(i_master), ec_level );
-                if( ec_level == 0x10 )
+                if( ec_level < 0x20 )
                 {
-                    // 25=clock/4 mode
+                    // 25=clock/4 (legacy) mode
                     databuf |= 0x00000040;
                 }
             }
@@ -1779,18 +1835,23 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         // Only looking at the top bits
         uint64_t slave_index = getSlaveEnableIndex(i_master,i_type);
         iv_slaves[slave_index] = (uint8_t)(databuf >> (32-MAX_SLAVE_PORTS));
-        TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> %.8X:%d : Slave Detect = %.8X", TARGETING::get_huid(i_master), i_type, databuf );
+        TRACFCOMP( g_trac_fsi,
+                   "FsiDD::initMasterControl> %.8X:%c : Slave Detect = %.8X",
+                   TARGETING::get_huid(i_master),
+                   i_type==TARGETING::FSI_MASTER_TYPE_MFSI ? 'H' : 'C',
+                   databuf );
 
-        if( fsp_master_init || is_mpipl )
+        //If we aren't doing the initialization then we're all done
+        if( !hb_doing_init )
         {
             break; //all done
         }
+
 
         //Clear FSI Slave Interrupt on ports 0-7
         databuf = 0x00000000;
         l_err = write( ctl_reg|FSI_MSIEP0_030, &databuf );
         if( l_err ) { break; }
-
 
         //Set the delay rates
         // 0:3,8:11= Echo delay cycles is 15
@@ -1799,14 +1860,33 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         l_err = write( ctl_reg|FSI_MDLYR_004, &databuf );
         if( l_err ) { break; }
 
+        //Enable the Ports
+        databuf = 0xFF000000;
+        l_err = write( ctl_reg|FSI_MSENP0_018, &databuf );
+        if( l_err ) { break; }
 
-        //Enable IPOLL
-        // 0= Enable IPOLL and DMA access
-        // 1= Enable hardware error recovery
-        // 3= Enable parity checking
-        // 4:13= FSI clock ratio 0 is 1:1
-        // 14:23= FSI clock ratio 1 is 4:1
-        databuf = 0xD0040400;
+        //Wait 1ms
+        nanosleep( 0, 1000000 );
+
+        //Clear the port enable
+        databuf = 0xFF000000;
+        l_err = write( ctl_reg|FSI_MCENP0_020, &databuf );
+        if( l_err ) { break; }
+
+        //Reset all bridges and ports (again?)
+        databuf = 0xF0000000;
+        l_err = write( ctl_reg|FSI_MRESP0_0D0, &databuf );
+        if( l_err ) { break; }
+
+        //Wait a little bit to be sure reset is done
+        nanosleep( 0, 1000000 ); //sleep for 1ms
+
+        //Note: Not enabling IPOLL because we don't support hotplug
+
+        //Turn off Legacy mode
+        l_err = read( ctl_reg|FSI_MMODE_000, &databuf );
+        if( l_err ) { break; }
+        databuf &= ~0x00000040; //25: clock/4 mode
         l_err = write( ctl_reg|FSI_MMODE_000, &databuf );
         if( l_err ) { break; }
 
@@ -1898,6 +1978,7 @@ uint64_t FsiDD::getSlaveEnableIndex( TARGETING::Target* i_master,
 FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
 {
     FsiChipInfo_t info;
+    info.slave = i_target;
     info.master = NULL;
     info.type = TARGETING::FSI_MASTER_TYPE_NO_MASTER;
     info.port = 0;
@@ -2008,5 +2089,28 @@ bool FsiDD::isSlavePresent( TARGETING::Target* i_target )
     // look up the FSI information for this target
     FsiChipInfo_t info = getFsiInfo(i_target);
     return isSlavePresent( info.master, info.type, info.port );
+}
+
+/**
+ * @brief Clear out the error indication so that we can do more FSI ops
+ */
+errlHndl_t FsiDD::errorCleanup( TARGETING::Target* i_fsiTarg )
+{
+    errlHndl_t l_err = NULL;
+
+    do {
+        // Clear out OPB error
+        uint64_t scomdata = 0;
+        size_t scom_size = sizeof(uint64_t);
+        l_err = deviceOp( DeviceFW::WRITE,
+                          iv_master,//info.master,  @fixme-RTC:35287
+                          &scomdata,
+                          scom_size,
+                          DEVICE_XSCOM_ADDRESS(0x00020001ull) );
+        if(l_err) break;
+
+    } while(0);
+
+    return l_err;
 }
 
