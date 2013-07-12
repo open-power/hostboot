@@ -12634,4 +12634,19 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>HOSTSVC_PLID</id>
+    <description>
+        Value of the next PLID that host service should send
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

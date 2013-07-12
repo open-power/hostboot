@@ -186,6 +186,7 @@
     <attribute><id>MEM_MIRROR_PLACEMENT_POLICY</id></attribute>
     <attribute><id>RISK_LEVEL</id></attribute>
     <attribute><id>CDM_POLICIES</id></attribute>
+    <attribute><id>HOSTSVC_PLID</id></attribute>
 </targetType>
 
 <targetType>
