@@ -60,6 +60,6 @@ $(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
 	$(C1)(cd $(ROOTPATH); \
               src/build/linker/gensyms $*.bin $*_extended.bin 0x40000000 \
                   > ./img/$*.syms ; \
-              src/build/tools/genlist $*.bin | bzip2 -zc > ./img/$*.list.bz2)
+              src/build/linker/genlist $*.bin | bzip2 -zc > ./img/$*.list.bz2)
 
 endif
