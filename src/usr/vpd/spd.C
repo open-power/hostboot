@@ -822,7 +822,7 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
             break;
     };
     
-    TRACSSCOMP( g_trac_spd, EXIT_MRK"ddr4SpecialCases()" );
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"ddr3SpecialCases()" );
     return err;
 }
 
@@ -847,7 +847,6 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
         case TRFC4_MIN:
         case BASE_CONFIG_CRC:
         case MODULE_MANUFACTURER_ID:
-        case MODULE_REVISION_CODE:
         case DRAM_MANUFACTURER_ID:
         case MANUFACTURING_SECTION_CRC:
         case UMM_CRC:

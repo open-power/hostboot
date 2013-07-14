@@ -698,10 +698,10 @@ fapi::ReturnCode fapiPlatGetSlopeInterceptData (
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_MIRRORING, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_LR_F0RC3_F0RC2_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F0RC3_FORC2, &(VAL), sizeof(VAL) )
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F0RC3_F0RC2, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_LR_F0RC5_F0RC4_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F0RC5_FORC4, &(VAL), sizeof(VAL) )
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F0RC5_F0RC4, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_LR_F1RC11_F1RC8_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_F1RC11_F1RC8, &(VAL), sizeof(VAL) )
@@ -819,6 +819,9 @@ fapi::ReturnCode fapiPlatGetSlopeInterceptData (
 #define ATTR_SPD_CRC_BASE_CONFIG_DDR4_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::BASE_CONFIG_CRC, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_MODULE_REVISION_CODE_DDR4_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_REVISION_CODE_DDR4, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_DRAM_STEPPING_DDR4_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::DRAM_STEPPING, &(VAL), sizeof(VAL) )

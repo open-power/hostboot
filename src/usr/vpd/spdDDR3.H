@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -108,7 +108,6 @@ const KeywordData ddr3Data[] =
     { MODULE_MANUFACTURING_DATE,        0x78,   0x02,   0x00,   0x00, false, false, NA },
     { MODULE_SERIAL_NUMBER,             0x7a,   0x04,   0x00,   0x00, false, false, NA },
     { MODULE_PART_NUMBER,               0x80,   0x12,   0x00,   0x00, false, false, NA },
-    { MODULE_REVISION_CODE,             0x92,   0x02,   0x00,   0x00, true,  false, NA },
     { DRAM_MANUFACTURER_ID,             0x95,   0x02,   0x00,   0x00, true,  false, NA },
     { MANUFACTURER_SPECIFIC_DATA,       0x96,   0x1a,   0x00,   0x00, false, false, NA },
     { DIMM_BAD_DQ_DATA,                 0xb0,   0x50,   0x00,   0x00, false, true,  NA },
@@ -133,7 +132,8 @@ const KeywordData ddr3Data[] =
     { ASR,                              0x1f,   0x01,   0x04,   0x02, false, false, NA },
     { ETR_1X,                           0x1f,   0x01,   0x02,   0x01, false, false, NA },
     { ETR,                              0x1f,   0x01,   0x01,   0x00, false, false, NA },
-    { MODULE_CRC,                       0x7e,   0x02,   0x00,   0x00, true, false, NA },
+    { MODULE_CRC,                       0x7f,   0x02,   0x00,   0x00, true,  false, NA },
+    { MODULE_REVISION_CODE,             0x93,   0x02,   0x00,   0x00, true,  false, NA },
     // Module Specific fields supported on both DDR3 and DDR4
     { MODSPEC_COM_NOM_HEIGHT_MAX,       0x3c,   0x01,   0x1f,   0x00, false, false, ALL },
     { MODSPEC_COM_MAX_THICK_BACK,       0x3d,   0x01,   0xf0,   0x04, false, false, ALL },
@@ -173,10 +173,10 @@ const KeywordData ddr3Data[] =
     { RMM_RC14,                         0x4c,   0x01,   0x0f,   0x00, false, false, RMM },
     { LRMM_RANK_NUMBERING,              0x3f,   0x01,   0x20,   0x05, false, false, LRMM },
     { LRMM_MEMBUF_ORIEN,                0x3f,   0x01,   0x10,   0x04, false, false, LRMM },
-    { LRMM_F0RC3_FORC2,                 0x43,   0x01,   0x00,   0x00, false, false, LRMM },
+    { LRMM_F0RC3_F0RC2,                 0x43,   0x01,   0x00,   0x00, false, false, LRMM },
     { LRMM_F0RC3,                       0x43,   0x01,   0xf0,   0x04, false, false, LRMM },
     { LRMM_F0RC2,                       0x43,   0x01,   0x0f,   0x00, false, false, LRMM },
-    { LRMM_F0RC5_FORC4,                 0x44,   0x01,   0x00,   0x00, false, false, LRMM },
+    { LRMM_F0RC5_F0RC4,                 0x44,   0x01,   0x00,   0x00, false, false, LRMM },
     { LRMM_F0RC5,                       0x44,   0x01,   0xf0,   0x04, false, false, LRMM },
     { LRMM_F0RC4,                       0x44,   0x01,   0x0f,   0x00, false, false, LRMM },
     { LRMM_F1RC11_F1RC8,                0x45,   0x01,   0x00,   0x00, false, false, LRMM },

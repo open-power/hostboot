@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-  <!-- $Id: dimm_spd_attributes.xml,v 1.21 2013/06/14 18:51:49 mjjones Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.23 2013/07/14 01:35:41 mjjones Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -470,18 +470,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
 </attribute>
 
 <attribute>
-    <id>ATTR_SPD_MODULE_REVISION_CODE</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        Module Revision Code.
-        Located in DDR3 SPD bytes 146 (LSB) to 147.
-        Located in DDR4 SPD bytes 349 
-    </description>
-    <valueType>uint32</valueType>
-    <platInit/>
-</attribute>
-
-<attribute>
     <id>ATTR_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
@@ -661,6 +649,17 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 27.
     </description>
     <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_MODULE_REVISION_CODE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Revision Code.
+        Located in DDR3 SPD bytes 146 (LSB) to 147.
+    </description>
+    <valueType>uint32</valueType>
     <platInit/>
 </attribute>
 
@@ -1208,6 +1207,17 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 126(LSB) and 127(MSB).
     </description>
     <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_MODULE_REVISION_CODE_DDR4</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Revision Code.
+        Located in DDR4 SPD byte 349
+    </description>
+    <valueType>uint8</valueType>
     <platInit/>
 </attribute>
 
