@@ -200,6 +200,8 @@ fsp.tar_CONTENTS = \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/hbfwSrcParse*.C)) \
     $(addsuffix :plugins/,\
+        $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/prdf/*)) \
+    $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*)) \
     src/build/debug/fsp-memdump.sh:src/build/debug/
 
