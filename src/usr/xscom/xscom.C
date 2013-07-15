@@ -45,9 +45,6 @@
 #include <errl/errludlogregister.H>
 #include <xscom/piberror.H>
 
-//@fixme-RTC:67295 Only log the error once
-bool MULTICAST_ERROR_LOGGED_ONCE = false;
-
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
 TRAC_INIT(&g_trac_xscom, "XSCOM", 2*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -525,25 +522,9 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
         // Handle error
         if (io_hmer.mXSComStatus != PIB::PIB_NO_ERROR)
         {
-
-            //@fixme-RTC:67295 remove these hacks, make log UNRECOVERABLE again
-            if( ((i_xscomAddr & 0xFF000000) == 0x57000000)
-                && (io_hmer.mXSComStatus == PIB::PIB_INVALID_ADDRESS) )
-            {
-                if( MULTICAST_ERROR_LOGGED_ONCE )
-                {
-                    // Ignore this due to a Simics issue - see SW193003
-                    TRACFCOMP(g_trac_xscom, ERR_MRK "Skipping XSCOM errorlog for multicast error for addr=%llx",i_xscomAddr );
-                    io_buflen = XSCOM_BUFFER_SIZE;
-                    // break out as if success and do not create an error
-                    break;
-                }
-                MULTICAST_ERROR_LOGGED_ONCE = true;
-            }
-
             uint64_t l_hmerVal = io_hmer;
 
-            TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM status error HMER: %.16llx ,XSComStatus = %llx ,Addr=%llx",l_hmerVal,io_hmer.mXSComStatus, i_xscomAddr );
+            TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM status error HMER: %.16llx ,XSComStatus = %llx, Addr=%llx",l_hmerVal,io_hmer.mXSComStatus, i_xscomAddr );
             /*@
              * @errortype
              * @moduleid     XSCOM_DO_OP
@@ -557,7 +538,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
                                             XSCOM_STATUS_ERR,
                                             io_hmer,
                                             l_mmioAddr);
-
+            //Note: Callouts are added by the caller if needed
         }
     }
     while (0);
