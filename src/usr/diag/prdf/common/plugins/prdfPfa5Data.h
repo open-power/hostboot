@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/service/prdfPfa5Data.h $   */
+/* $Source: src/usr/diag/prdf/common/plugins/prdfPfa5Data.h $             */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -24,12 +24,13 @@
 #if !defined(prdfPfa5Data_h)
 #define prdfPfa5Data_h
 /**
- @file prdfPfa4Data.h
+ @file prdfPfa5Data.h
  @brief Version 5 format of the Pfa Data
 */
 
 #include <iipconst.h>
 #include <utilstream.H>
+#include <string.h>
 
 namespace PRDF
 {

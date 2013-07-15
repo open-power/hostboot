@@ -251,7 +251,7 @@ Resolution & ResolutionFactory::GetDumpResolution(
 }
 #endif
 
-Resolution & ResolutionFactory::GetGardResolution(GardResolution::ErrorType et)
+Resolution & ResolutionFactory::GetGardResolution(GardAction::ErrorType et)
 {
     return iv_gardResolutionFW.get(GardResolution(et));
 }

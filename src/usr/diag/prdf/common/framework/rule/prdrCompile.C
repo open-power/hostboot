@@ -94,15 +94,17 @@ int main(int argc, char ** argv)
         exit(-1);
     }
 
-#ifndef __HOSTBOOT_MODULE
-
     std::ofstream l_htmlFile((std::string(argv[1]) + ".html").c_str());
     std::ofstream l_errFile((std::string(argv[1]) + ".err.C").c_str());
     std::ofstream l_regFile((std::string(argv[1]) + ".reg.C").c_str());
 
+#ifndef __HOSTBOOT_MODULE
     // Get Backing build or sandbox name.
     std::string l_backingBuild(getenv("SANDBOXBASE"));
     l_backingBuild = l_backingBuild.substr(l_backingBuild.find_last_of('/')+1);
+#else
+    std::string l_backingBuild("HOSTBOOT");
+#endif
 
     // setup HTML headers.
     l_htmlFile << "<HTML><HEAD><STYLE type=\"text/css\">" << std::endl;
@@ -117,14 +119,12 @@ int main(int argc, char ** argv)
     l_htmlFile << "</STYLE>" << std::endl;
 
     // setup error signature file.
-    l_errFile << "#include <prdrErrlPluginSupt.H>" << std::endl;
+    l_errFile << "#include <prdrErrlPluginsSupt.H>" << std::endl;
     l_errFile << "PRDR_ERROR_SIGNATURE_TABLE_START ";
 
     // setup register id file.
-    l_regFile << "#include <prdrErrlPluginSupt.H>" << std::endl;
+    l_regFile << "#include <prdrErrlPluginsSupt.H>" << std::endl;
     l_regFile << "PRDR_REGISTER_ID_TABLE_START ";
-
-#endif
 
     yyline = 1;  // current line is 1.
     g_currentChip = NULL; // initialize current chip.
@@ -141,9 +141,7 @@ int main(int argc, char ** argv)
     if (NULL != g_currentChip)
     {
         g_currentChip->output(l_prfFile);
-#ifndef __HOSTBOOT_MODULE
         g_currentChip->outputRegisterFile(l_regFile);
-#endif
         //g_currentChip->print();
     }
     else
@@ -152,16 +150,12 @@ int main(int argc, char ** argv)
         exit(1);
     }
 
-#ifndef __HOSTBOOT_MODULE
-
     l_htmlFile << "<TITLE> PRD Table: "
                << g_currentChip->cv_name->substr(1,
                         g_currentChip->cv_name->length()-2)
                << "</TITLE>"
                << std::endl;
     l_htmlFile << "</HEAD><BODY>" << std::endl;
-
-#endif
 
     // output rules.
     l_size = htons((uint16_t)g_rules.size());
@@ -173,12 +167,10 @@ int main(int argc, char ** argv)
         (*i).second->output(l_prfFile);
     };
 
-#ifndef __HOSTBOOT_MODULE
     // set error register HOM_TYPE
     l_errFile << "( 0x" << std::hex << g_currentChip->cv_targetType << ", 0x"
               << std::hex << g_currentChip->cv_signatureOffset
               << " )" << std::endl;
-#endif
 
     // output bit groups
     uint32_t l_pos = 0;
@@ -194,28 +186,20 @@ int main(int argc, char ** argv)
     l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["UNIT_CS"]));  // @jl02
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);                              // @jl02
 
-#ifndef __HOSTBOOT_MODULE
-
     l_htmlFile << "<H2> Register Groups </H2>" << std::endl;
     l_htmlFile << "Generated from " << l_backingBuild << "<BR>" << std::endl;
-
-#endif
 
     for (std::map<std::string, Group *>::iterator i = g_groups.begin();
          i != g_groups.end();
          i++, l_pos++)
     {
         (*i).second->output(l_prfFile);
-#ifndef __HOSTBOOT_MODULE
         (*i).second->generateDoxygen(l_htmlFile, (*i).first, l_errFile);
-#endif
     }
 
     // output action classes.
     l_size = htons((uint16_t)g_actionclasses.size());
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
-
-#ifndef __HOSTBOOT_MODULE
 
     l_htmlFile << "<H2> Actions </H2>" << std::endl;
     l_htmlFile << "Generated from " << l_backingBuild << "<BR>" << std::endl;
@@ -224,31 +208,22 @@ int main(int argc, char ** argv)
                << "<TH> Description </TH> "
                << "<TH> Actions </TH></TR>" << std::endl;
 
-#endif
-
     for (std::map<std::string, Group *>::iterator i =
                 g_actionclasses.begin();
          i != g_actionclasses.end();
          i++)
     {
         (*i).second->output(l_prfFile);
-#ifndef __HOSTBOOT_MODULE
         (*i).second->generateDoxygen(l_htmlFile, (*i).first);
-#endif
     }
 
-#ifndef __HOSTBOOT_MODULE
     l_htmlFile << "</TABLE>" << std::endl;
-#endif
 
     fclose(l_prfFile);
 
-#ifndef __HOSTBOOT_MODULE
     l_htmlFile << "</HTML>";
     l_htmlFile.close();
-#endif
 
-#ifndef __HOSTBOOT_MODULE
     // Add chip's extra signatures.
     l_errFile << "//---- Extra Signatures ----" << std::endl;
     for (std::list<ExtraSignature>::iterator i
@@ -262,14 +237,11 @@ int main(int argc, char ** argv)
             << *(i->iv_desc) << ")" << std::endl;
     }
 
-
-
     l_errFile << "PRDR_ERROR_SIGNATURE_TABLE_END" << std::endl;
     l_errFile.close();
 
     l_regFile << "PRDR_REGISTER_ID_TABLE_END" << std::endl;
     l_regFile.close();
-#endif
 
     return (g_hadError ? -1 : 0);
 };
@@ -501,24 +473,24 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         #include <iipServiceDataCollector.h>
 
         // Initialize Gard values.
-        GardResolution::ErrorType errType = GardResolution::NoGard;
-        string tmpStr = string(GardResolution::ToString(errType));
+        GardAction::ErrorType errType = GardAction::NoGard;
+        string tmpStr = string(GardAction::ToString(errType));
         g_ActionArgMap[tmpStr] = errType;
 
-        errType = GardResolution::Predictive;
-        tmpStr = string(GardResolution::ToString(errType));
+        errType = GardAction::Predictive;
+        tmpStr = string(GardAction::ToString(errType));
         g_ActionArgMap[tmpStr] = errType;
 
-        errType = GardResolution::Fatal;
-        tmpStr = string(GardResolution::ToString(errType));
+        errType = GardAction::Fatal;
+        tmpStr = string(GardAction::ToString(errType));
         g_ActionArgMap[tmpStr] = errType;
 
-        errType = GardResolution::CheckStopOnlyGard;
-        tmpStr = string(GardResolution::ToString(errType));
+        errType = GardAction::CheckStopOnlyGard;
+        tmpStr = string(GardAction::ToString(errType));
         g_ActionArgMap[tmpStr] = errType;
 
-        errType = GardResolution::DeconfigNoGard;
-        tmpStr = string(GardResolution::ToString(errType));
+        errType = GardAction::DeconfigNoGard;
+        tmpStr = string(GardAction::ToString(errType));
         g_ActionArgMap[tmpStr] = errType;
 
 #ifdef __HOSTBOOT_MODULE

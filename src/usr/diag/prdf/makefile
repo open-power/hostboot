@@ -66,6 +66,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf/common
 EXTRAINCDIR += ${PRD_USR_PATH}
 EXTRAINCDIR += ${PRD_USR_PATH}/common
+EXTRAINCDIR += ${PRD_USR_PATH}/common/plugins
 EXTRAINCDIR += ${PRD_USR_PATH}/common/util
 EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/service
 EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/register

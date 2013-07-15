@@ -889,7 +889,7 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
 
         case Prdr::ACT_GARD: // GARD
             l_rc = &i_data.cv_reslFactory.GetGardResolution(
-                    (GardResolution::ErrorType) i_action->cv_value[0].i);
+                    (GardAction::ErrorType) i_action->cv_value[0].i);
             break;
 
         case Prdr::ACT_ANALY: // ANALYZE

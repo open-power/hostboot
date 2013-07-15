@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/resolution/prdfCalloutsData.H $ */
+/* $Source: src/usr/diag/prdf/common/plugins/prdfLogParse_common.H $      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2003,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,32 +21,47 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfCalloutsData.H
- *  @brief This is specifically designed to be included in both functional and
- *         error log parsing code (i.e. must be able to compile in PPC and
- *         x86.nfp contexts).
+#ifndef prdfLogParse_common_H
+#define prdfLogParse_common_H
+
+/** @file  prdfLogParse_common.H
+ *  @brief
  */
 
-#ifndef __prdfCalloutsData_H
-#define __prdfCalloutsData_H
+#include <srcisrc.H>
+#include <errlplugins.H>
+#include <errlusrparser.H>
+#include <stdint.h>
 
 namespace PRDF
 {
-
-namespace PRDcalloutData
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+namespace HOSTBOOT
+#else
+namespace FSP
+#endif
 {
+    struct ErrorCodeDescription
+    {
+        uint32_t signature;
+        const char * description;
+    };
 
-enum MruType
-{
-    TYPE_NONE,
-    TYPE_TARGET,
-    TYPE_MEMMRU,
-    TYPE_SYMFRU,
-};
+    struct RegisterName
+    {
+        uint16_t id;
+        const char * registername;
+        uint32_t address;
+    };
 
-} // end namespace PRDcalloutData
+/* SRC data parser */
+bool srcDataParse( ErrlUsrParser & i_parser, const SrciSrc & i_src );
 
+/* Usr data section parser */
+bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
+                          uint32_t i_buflen, errlver_t i_ver,
+                          errlsubsec_t i_sst );
+} // namespace FSP/HOSTBBOT
 } // end namespace PRDF
 
-#endif // __prdfCalloutsData_H
-
+#endif // prdfLogParse_common_H

@@ -344,7 +344,7 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     hitCount = buffer_get8(i_flatdata);
     threshold = buffer_get8(i_flatdata);
     startingPoint = buffer_getTarget(i_flatdata);
-    errorType = (GardResolution::ErrorType)buffer_get32(i_flatdata);
+    errorType = (GardAction::ErrorType)buffer_get32(i_flatdata);
     ivDumpRequestContent = (hwTableContent) buffer_get32(i_flatdata); //@ecdf
     ivpDumpRequestChipHandle = buffer_getTarget(i_flatdata);
 

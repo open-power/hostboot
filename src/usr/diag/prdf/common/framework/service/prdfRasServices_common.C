@@ -259,7 +259,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //Use this SDC unless determined in Check Stop processing to use a Latent, UE, or SUE saved SDC
     sdc = i_sdc;
 
-    GardResolution::ErrorType prdGardErrType;
+    GardAction::ErrorType prdGardErrType;
     HWSV::hwsvGardEnum gardState;  // defined in src/hwsv/server/hwsvTypes.H
     HWAS::GARD_ErrorType gardErrType = HWAS::GARD_NULL;
     HWAS::DeconfigEnum deconfigState = HWAS::NO_DECONFIG;
@@ -467,17 +467,17 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         prdGardErrType = sdc.QueryGard();
         switch (prdGardErrType)
         {
-            case GardResolution::NoGard:
+            case GardAction::NoGard:
                 gardState =  HWSV::HWSV_NO_GARD;
                 gardErrType = HWAS::GARD_NULL;
                 break;
-            case GardResolution::Predictive:
+            case GardAction::Predictive:
                 gardErrType = HWAS::GARD_Predictive;
                 break;
-            case GardResolution::Fatal:
+            case GardAction::Fatal:
                 gardErrType = HWAS::GARD_Func;
                 break;
-            case GardResolution::CheckStopOnlyGard:
+            case GardAction::CheckStopOnlyGard:
                 if  (MACHINE_CHECK == i_attnType)
                 {
                     gardErrType = HWAS::GARD_Func;
@@ -488,7 +488,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     gardErrType = HWAS::GARD_NULL;
                 }
                 break;
-            case GardResolution::DeconfigNoGard:
+            case GardAction::DeconfigNoGard:
                 gardState =  HWSV::HWSV_NO_GARD;
                 gardErrType = HWAS::GARD_NULL;
                 break;
@@ -503,15 +503,15 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     {
         // gardErrType is GARD_Func, set in latent/UE/SUE processing for Check Stop.
         // If NoGard was specified in this switched sdc, then keep the NoGard
-        if ( sdc.QueryGard() == GardResolution::NoGard )
+        if ( sdc.QueryGard() == GardAction::NoGard )
         {
             gardState = HWSV::HWSV_NO_GARD;
             gardErrType = HWAS::GARD_NULL;
-            prdGardErrType = GardResolution::NoGard;
+            prdGardErrType = GardAction::NoGard;
         }
         else
         {
-            prdGardErrType = GardResolution::Fatal;
+            prdGardErrType = GardAction::Fatal;
         }
     }
 
@@ -612,7 +612,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Deferred Deconfig should be used throughout all of Hostboot (both
     // checkForIplAttns() and MDIA).
     if ( (HWSV::HWSV_NO_GARD != gardState ||
-          GardResolution::DeconfigNoGard == prdGardErrType ) )
+          GardAction::DeconfigNoGard == prdGardErrType ) )
     {
         deferDeconfig = true;
         deconfigState = HWAS::DECONFIG;
@@ -1167,18 +1167,18 @@ will also be removed. Need to confirm if this code is required anymore.
                 PRDF_DTRAC( "PRDTRACE:   Unknown Priority Value" );
         }
 
-        GardResolution::ErrorType et = sdc.QueryGard();
+        GardAction::ErrorType et = sdc.QueryGard();
         switch ( et )
         {
-            case GardResolution::NoGard:
+            case GardAction::NoGard:
                 PRDF_DTRAC( "PRDTRACE:   NoGard" );            break;
-            case GardResolution::Predictive:
+            case GardAction::Predictive:
                 PRDF_DTRAC( "PRDTRACE:   Predictive" );        break;
-            case GardResolution::Fatal:
+            case GardAction::Fatal:
                 PRDF_DTRAC( "PRDTRACE:   Fatal" );             break;
-            case GardResolution::CheckStopOnlyGard:
+            case GardAction::CheckStopOnlyGard:
                 PRDF_DTRAC( "PRDTRACE:   CheckStopOnlyGard" ); break;
-            case GardResolution::DeconfigNoGard:
+            case GardAction::DeconfigNoGard:
                 PRDF_DTRAC( "PRDTRACE:   DeconfigNoGard" );
         }
     }

@@ -38,7 +38,7 @@ ServiceDataCollector::ServiceDataCollector() :
     hitCount(0),
     threshold(0),
     startingPoint(NULL),
-    errorType(GardResolution::NoGard),
+    errorType(GardAction::NoGard),
     ivpDumpRequestChipHandle(NULL),
     causeAttentionType(INVALID_ATTENTION_TYPE),
     ivpThermalChipHandle(NULL)
@@ -55,10 +55,10 @@ void ServiceDataCollector::SetAttentionType( ATTENTION_TYPE attention )
   if(attention == MACHINE_CHECK)
   {
       flags |= SERVICE_CALL;
-      errorType = GardResolution::Fatal;
+      errorType = GardAction::Fatal;
   } else
   {
-      errorType = GardResolution::Predictive;
+      errorType = GardAction::Predictive;
   }
 }
 
@@ -97,13 +97,13 @@ inline void ServiceDataCollector::SetTerminate(void)
 // ---------------------------------------------------------------
 
 inline
-GardResolution::ErrorType ServiceDataCollector::QueryGard(void)
+GardAction::ErrorType ServiceDataCollector::QueryGard(void)
 {
   if (IsServiceCall())
   {
     return errorType;
   }
-  return GardResolution::NoGard;
+  return GardAction::NoGard;
 }
 
 // dg12a -moved here from *.C --------------------------------------

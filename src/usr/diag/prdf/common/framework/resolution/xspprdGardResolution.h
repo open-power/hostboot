@@ -40,6 +40,7 @@
 //--------------------------------------------------------------------
 
 #include <iipResolution.h>
+#include <prdfGardType.H>
 
 namespace PRDF
 {
@@ -55,38 +56,12 @@ class GardResolution : public Resolution
 {
 public:
 
-  enum ErrorType
-  {
-    // No Gard is possible
-    NoGard        = 0,
-    // Recovered error at threshold
-    Predictive    = 1,
-    // Checkstop, failing resources can be removed to prevent future occurances
-    Fatal         = 2,
-    // This is NoGard unless attn type is CheckStop, then it is Fatal (Func)
-    CheckStopOnlyGard = 3,
-    //This is to allow Deferred Deconfig, with No Garding
-    DeconfigNoGard = 4
-  };
-
-  inline static const char* ToString( uint32_t i_type )
-  {
-      switch (i_type)
-      {
-          case NoGard:              return "NoGard";
-          case Predictive:          return "Predictive";
-          case Fatal:               return "Fatal";
-          case CheckStopOnlyGard:   return "CheckStopOnlyGard";
-          case DeconfigNoGard:      return "DeconfigNoGard";
-          default:                  return "Undefined";
-      }
-  }
-
   /**
    * @brief     Constructor
    * @param[in] i_et  error type
    */
-  GardResolution( ErrorType i_et = NoGard ) : xErrorType( i_et )
+  GardResolution( GardAction::ErrorType i_et = GardAction::NoGard )
+        : xErrorType( i_et )
   { }
 
   /*
@@ -117,7 +92,7 @@ public:
 private:  // functions
 private:  // Data
 
-  ErrorType xErrorType;
+  GardAction::ErrorType xErrorType;
 
 };
 

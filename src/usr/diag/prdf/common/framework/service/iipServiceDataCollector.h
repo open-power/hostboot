@@ -583,26 +583,26 @@ public:
   /**
    Set ErrorType for Gard
    <ul>
-   <br><b>Parameter    </b> GardResolution::ErrorType
+   <br><b>Parameter    </b> GardAction::ErrorType
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> None
    <br><b>Promises     </b> QueryRepeatGard() == et
    <br><b>Notes:       </b>
    </ul><br>
    */
-  void Gard(GardResolution::ErrorType et) { errorType = et; }
+  void Gard(GardAction::ErrorType et) { errorType = et; }
 
   /**
    Query for RepeatGard ErrorType
    <ul>
    <br><b>Paramters    </b> None.
-   <br><b>Returns:     </b> GardResolution::ErrorType
+   <br><b>Returns:     </b> GardAction::ErrorType
    <br><b>Requirements:</b> SetAttentionType()
    <br><b>Promises     </b> ErrorType set by Gard or NoGard
    <br><b>Notes:       </b>
    </ul><br>
    */
-  GardResolution::ErrorType QueryGard(void);
+  GardAction::ErrorType QueryGard(void);
 
   /**
    Set Error type as Special Uncorrectable Error SUE
@@ -794,8 +794,7 @@ private:  // Data
   uint8_t       hitCount;
   uint8_t       threshold;
   TARGETING::TargetHandle_t   startingPoint;
-// dg12d  BIT_STRING_BUFFER_CLASS rbsVpd;
-  GardResolution::ErrorType errorType;
+  GardAction::ErrorType errorType;
   Timer ivCurrentEventTime;
   TARGETING::TargetHandle_t ivpDumpRequestChipHandle;
   ATTENTION_TYPE causeAttentionType;    // MCK,REC,SPCL

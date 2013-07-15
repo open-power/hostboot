@@ -240,7 +240,7 @@ public:
    * @return    reference to a resolution
    * @post      only one instance of this object with this param will exist
    */
-  Resolution & GetGardResolution( GardResolution::ErrorType i_gardErrorType );
+  Resolution & GetGardResolution( GardAction::ErrorType i_gardErrorType );
 
   // dg06a - end
 

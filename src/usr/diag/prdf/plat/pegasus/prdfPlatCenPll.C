@@ -63,7 +63,7 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
     {
         // Check to make sure we are at threshold and have something garded.
         if ( !i_sc.service_data->IsAtThreshold() ||
-             (GardResolution::NoGard == i_sc.service_data->QueryGard()) )
+             (GardAction::NoGard == i_sc.service_data->QueryGard()) )
         {
             break; // nothing to do
         }

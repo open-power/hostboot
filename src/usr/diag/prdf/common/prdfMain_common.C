@@ -245,7 +245,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
                 serviceData.SetServiceCall();
                 // mk438901 a We don't want to gard unless we have a good
                 // return code
-                serviceData.Gard(GardResolution::NoGard);
+                serviceData.Gard(GardAction::NoGard);
             }
         }
     }
@@ -260,7 +260,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         g_prd_errlHndl = NULL;
 
         // pw 597903 -- Don't GARD if we got a global error.
-        serviceData.Gard(GardResolution::NoGard);
+        serviceData.Gard(GardAction::NoGard);
     }
 
     g_prd_errlHndl = serviceGenerator.GenerateSrcPfa( i_attentionType,

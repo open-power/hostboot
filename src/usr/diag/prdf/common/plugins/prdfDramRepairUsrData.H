@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/service/prdfDramRepairUsrData.H $ */
+/* $Source: src/usr/diag/prdf/common/plugins/prdfDramRepairUsrData.H $    */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -28,11 +28,10 @@
  * @brief ffdc data from dram repairs
  */
 
-#include <prdf_types.h>
+#include <stdint.h>
 #include <utilstream.H>
 #include <prdfCenConst.H>
 #include <vector>
-#include <iipconst.h>
 
 namespace PRDF
 {
