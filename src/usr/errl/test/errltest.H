@@ -428,7 +428,7 @@ public:
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_LOW,
                     HWAS::NO_DECONFIG,
-                    HWAS::GARD_PoreError);
+                    HWAS::GARD_PHYP);
             gardCount++;
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,

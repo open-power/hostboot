@@ -75,26 +75,20 @@ public:
         {
             case HWAS::BUS_CALLOUT:
             {
-                char * l_busType;
                 switch (ntohl(pData->busType))
                 {
-                    case HWAS::FSI_BUS_TYPE: l_busType = "FSI BUS";
-                                             break;
-                    case HWAS::DMI_BUS_TYPE: l_busType = "DMI BUS";
-                                             break;
-                    case HWAS::A_BUS_TYPE:   l_busType = "A BUS";
-                                             break;
-                    case HWAS::X_BUS_TYPE:   l_busType = "X BUS";
-                                             break;
-                    case HWAS::I2C_BUS_TYPE: l_busType = "I2C BUS";
-                                             break;
-                    case HWAS::PSI_BUS_TYPE: l_busType = "PSI BUS";
-                                             break;
-                    default:                 l_busType = "UNKNOWN BUS";
-                                             break;
-                }
-
-                i_parser.PrintString( "Callout Bus type", l_busType );
+#define case_BUS_TYPE(_type) \
+case HWAS::_type: i_parser.PrintString( "Bus Type", #_type); break;
+                    case_BUS_TYPE(FSI_BUS_TYPE)
+                    case_BUS_TYPE(DMI_BUS_TYPE)
+                    case_BUS_TYPE(A_BUS_TYPE)
+                    case_BUS_TYPE(X_BUS_TYPE)
+                    case_BUS_TYPE(I2C_BUS_TYPE)
+                    case_BUS_TYPE(PSI_BUS_TYPE)
+                    default:
+                        i_parser.PrintNumber( "Bus Type", "UNKNOWN: 0x%X",
+                                        ntohl(pData->busType) );
+                } // switch busType
 
                 // what follows the pData structure is Two entity paths
                 // print them out
@@ -133,35 +127,13 @@ case HWAS::_type: i_parser.PrintString( "Deconfig State", #_type); break;
 #define case_GARD_ERROR_TYPE(_type) \
 case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                     case_GARD_ERROR_TYPE(GARD_NULL)
-                    case_GARD_ERROR_TYPE(GARD_Pending)
-                    case_GARD_ERROR_TYPE(GARD_PendingCmplt)
+                    case_GARD_ERROR_TYPE(GARD_User_Manual)
                     case_GARD_ERROR_TYPE(GARD_Unrecoverable)
                     case_GARD_ERROR_TYPE(GARD_Fatal)
-                    case_GARD_ERROR_TYPE(GARD_Fabric)
-                    case_GARD_ERROR_TYPE(GARD_Computation)
-                    case_GARD_ERROR_TYPE(GARD_ComputationCmplt)
                     case_GARD_ERROR_TYPE(GARD_Predictive)
-                    case_GARD_ERROR_TYPE(GARD_PredictiveCmplt)
-                    case_GARD_ERROR_TYPE(GARD_ByAssociation)
-                    case_GARD_ERROR_TYPE(GARD_ResourceRecovery)
-                    case_GARD_ERROR_TYPE(GARD_Cmplt)
                     case_GARD_ERROR_TYPE(GARD_Func)
-                    case_GARD_ERROR_TYPE(GARD_FuncCmplt)
-                    case_GARD_ERROR_TYPE(GARD_DmaRecoverable)
-                    case_GARD_ERROR_TYPE(GARD_DmaUnrecoverable)
-                    case_GARD_ERROR_TYPE(GARD_Tod)
-                    case_GARD_ERROR_TYPE(GARD_TodCmplt)
-                    case_GARD_ERROR_TYPE(GARD_Slb)
-                    case_GARD_ERROR_TYPE(GARD_SlbCmplt)
-                    case_GARD_ERROR_TYPE(GARD_ProcRecoverable)
-                    case_GARD_ERROR_TYPE(GARD_ProcRecoverableCmplt)
-                    case_GARD_ERROR_TYPE(GARD_TimeFac)
-                    case_GARD_ERROR_TYPE(GARD_TimeFacCmplt)
-                    case_GARD_ERROR_TYPE(GARD_GxBusError)
-                    case_GARD_ERROR_TYPE(GARD_PowerBusError)
-                    case_GARD_ERROR_TYPE(GARD_Withheld)
-                    case_GARD_ERROR_TYPE(GARD_PoreError)
-                    case_GARD_ERROR_TYPE(GARD_NxError)
+                    case_GARD_ERROR_TYPE(GARD_Power)
+                    case_GARD_ERROR_TYPE(GARD_PHYP)
                     case_GARD_ERROR_TYPE(GARD_Void)
                     default:
                         i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",

@@ -529,7 +529,7 @@ public:
                         sizeof(HWAS::TARGET_IS_SENTINEL),
                         HWAS::SRCI_PRIORITY_LOW,
                         HWAS::DELAYED_DECONFIG,
-                        HWAS::GARD_PoreError).addToLog(errl);
+                        HWAS::GARD_PHYP).addToLog(errl);
             deconfigCount++;
             gardCount++;
 
