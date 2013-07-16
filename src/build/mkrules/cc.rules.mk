@@ -34,7 +34,7 @@ $(OBJDIR)/%.o : %.C
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $< \
 	            -o $@.trace $(INCFLAGS) -iquote .
-	$(C1)$(TRACE_HASHER) $@
+	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
 
 # Compiling *.cc files
@@ -42,7 +42,7 @@ $(OBJDIR)/%.o : %.cc
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(CXXFLAGS) $< -o $@.trace $(INCFLAGS) -iquote .
-	$(C1)$(TRACE_HASHER) $@
+	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
 
 
@@ -59,7 +59,7 @@ else
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $< \
 	            -o $@.trace $(INCFLAGS) -iquote .
 endif
-	$(C1)$(TRACE_HASHER) $@
+	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
 
 $(OBJDIR)/%.o : %.S

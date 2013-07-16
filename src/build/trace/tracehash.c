@@ -174,6 +174,9 @@ size_t format_offset = 0;
 /** Content to place into the format string section. */
 char* format_content = NULL;
 
+/** Keep the full strings in the code rather than reduce to format strings. */
+int full_strings = 0;
+
 ///--------- Forward Declarations ------------------///
 void create_sections(bfd*, asection*, void*);
 void copy_relocs(bfd*, asection*, void*);
@@ -198,6 +201,11 @@ int main(int argc, char** argv)
     static const char* inFileSuffix = ".trace";
 
     char* outFileName = strdup(argv[1]);
+
+    if ((argc == 3) && (0 == strcmp("--full-strings", argv[2])))
+    {
+        full_strings = 1;
+    }
 
     char* inFileName = (char*) malloc(strlen(outFileName) +
                                       strlen(inFileSuffix) + 1);
@@ -472,6 +480,8 @@ void copy_content(bfd* inFile, asection* s, void* param)
  */
 char* create_format_string(const char* string)
 {
+    if (full_strings) { return strdup(string); }
+
     size_t length = strlen(string) + 1;
 
     char* result = malloc(length);
