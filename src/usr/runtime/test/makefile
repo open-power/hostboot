@@ -25,8 +25,7 @@ ROOTPATH = ../../../..
 MODULE = testruntime
 TESTS = *.H
 
-#@fixme - remove this after testing
-##      support for fapi
+# support for fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat

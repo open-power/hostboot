@@ -36,7 +36,7 @@ namespace RUNTIME
         MOD_HDATSERVICE_CHECK_TUPLE     = 0x04, /**< hdatservice.C */
         MOD_HDATSERVICE_LOAD_HOST_DATA  = 0x05, /**< hdatservice.C */
         MOD_HDATSERVICE_GET_STANDALONE_SECTION  = 0x06, /**< hdatservice.C */
-        MOD_HDATSERVICE_GET_HOST_DATA_SECTION  = 0x07, /**< hdatservice.C */
+        MOD_HDATSERVICE_GETHOSTDATASECTION  = 0x07, /**< hdatservice.C */
         MOD_HDATSERVICE_VERIFY_HDAT_ADDRESS  = 0x08, /**< hdatservice.C */
         MOD_TCE_CREATE                  = 0x09,   /**< tce.C */
         MOD_TCE_INIT_HDW                = 0x0A,   /**< tce.C */
@@ -44,12 +44,13 @@ namespace RUNTIME
         MOD_TCE_DEALLOCATE              = 0x0C,   /**< tce.C */
         MOD_TCE_INIT                    = 0x0D,   /**< tce.C */
         MOD_TCE_MAP                     = 0x0E,   /**< tce.C */
-
+        MOD_HDATSERVICE_FINDSPIRA       = 0x0F, /** hdatservice.C */
 
     };
 
     enum RuntimeReasonCode
     {
+        RC_DO_NOT_USE_THIS          = RUNTIME_COMP_ID | 0x00,
         RC_ATTR_GET_FAIL            = RUNTIME_COMP_ID | 0x01,
         RC_BAD_HDAT_HEADER          = RUNTIME_COMP_ID | 0x02,
         RC_BAD_HDAT_TUPLE           = RUNTIME_COMP_ID | 0x03,
@@ -71,6 +72,16 @@ namespace RUNTIME
         RC_TCE_NO_ACTIVE_PSI        = RUNTIME_COMP_ID | 0x13,
         RC_TCE_NOT_ENOUGH_FREE_ENTRIES = RUNTIME_COMP_ID | 0x14,
         RC_TCE_ENTRY_NOT_CONTIGUOUS   = RUNTIME_COMP_ID | 0x15,
+        RC_NO_SPIRA                 = RUNTIME_COMP_ID | 0x16,
+        RC_CANNOT_MAP_HDAT          = RUNTIME_COMP_ID | 0x17,
+    };
+
+    enum UserDetailsTypes
+    {
+        RUNTIME_UDT_NO_FORMAT       = 0x0,
+        RUNTIME_UDT_NACA            = 0x1,
+        RUNTIME_UDT_SPIRA           = 0x2,
+        RUNTIME_UDT_TUPLE           = 0x3,
     };
 };
 

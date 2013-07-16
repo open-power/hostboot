@@ -33,6 +33,8 @@
 #include "fakepayload.H"
 #include <dump/dumpif.H>
 #include "hdatservice.H"
+#include "errlud_hdat.H"
+#include <errl/errlmanager.H>
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -60,6 +62,18 @@ const hdatHeaderExp_t IPLPARMS_SYSTEM_HEADER = {
     0xD1F0,   //id
     "IPLPMS", //name
     0x0058    //version
+};
+
+const hdatHeaderExp_t SPIRAH_HEADER = {
+    0xD1F0,   //id
+    "SPIRAH", //name
+    0x0050    //version
+};
+
+const hdatHeaderExp_t SPIRAS_HEADER = {
+    0xD1F0,   //id
+    "SPIRAS", //name
+    0x0040    //version
 };
 
 //big enough to hold all of PHYP
@@ -220,6 +234,7 @@ errlHndl_t check_tuple( uint64_t i_base,
                                                       i_tuple->hdatAllocCnt,
                                                       i_tuple->hdatAllocSize));
             errhdl->collectTrace("RUNTIME",1024);
+            RUNTIME::UdTuple(i_tuple).addToLog(errhdl);
             break;
         }
     } while(0);
@@ -287,7 +302,11 @@ errlHndl_t hdatService::get_standalone_section(
 }
 
 hdatService::hdatService(void)
-:iv_payload_addr(NULL), iv_dumptest_addr(NULL)
+:iv_payload_addr(NULL)
+,iv_dumptest_addr(NULL)
+,iv_spiraL(NULL)
+,iv_spiraH(NULL)
+,iv_spiraS(NULL)
 {
 }
 
@@ -344,6 +363,13 @@ errlHndl_t hdatService::loadHostData(void)
             }
         }
 
+#ifdef REAL_HDAT_TEST
+        // Manually load HDAT memory now
+        TRACFCOMP( g_trac_runtime, "Forcing PHYP mode for testing" );
+        MAGIC_INSTRUCTION(MAGIC_BREAK);
+        payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
+#endif
+
         if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
         {
             // PHYP
@@ -353,13 +379,17 @@ errlHndl_t hdatService::loadHostData(void)
             uint64_t hdat_start = payload_base*MEGABYTE;
             uint64_t hdat_size = HDAT_MEM_SIZE;
 
+#ifdef REAL_HDAT_TEST
+            hdat_start = 256*MEGABYTE;
+#endif
+
             // make sure that our numbers are page-aligned, required by mm call
             hdat_start = ALIGN_PAGE_DOWN(hdat_start); //round down
             hdat_size = ALIGN_PAGE(hdat_size); //round up
 
             TRACFCOMP( g_trac_runtime, "load_host_data> PHYP: Mapping in 0x%X-0x%X (%d MB)", hdat_start, hdat_start+hdat_size, hdat_size );
             iv_payload_addr = mm_block_map( reinterpret_cast<void*>(hdat_start),
-                                    hdat_size );
+                                            hdat_size );
             if (NULL == iv_payload_addr)
             {
                 TRACFCOMP( g_trac_runtime, "Failure calling mm_block_map : iv_payload_addr=%p",
@@ -462,7 +492,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                             size_t& o_dataSize )
 {
     errlHndl_t errhdl = NULL;
-    TRACFCOMP( g_trac_runtime, "RUNTIME::get_host_data_section( i_section=%d, i_instance=%d )", i_section, i_instance );
+    TRACFCOMP( g_trac_runtime, "RUNTIME::getHostDataSection( i_section=%d, i_instance=%d )", i_section, i_instance );
 
     do
     {
@@ -484,6 +514,11 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
+#ifdef REAL_HDAT_TEST
+        TRACFCOMP( g_trac_runtime, "Forcing PHYP mode for testing" );
+        payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
+#endif
+
         if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
         {
             errhdl = get_standalone_section( i_section,
@@ -495,17 +530,17 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         }
         else if( TARGETING::PAYLOAD_KIND_PHYP != payload_kind )
         {
-            TRACFCOMP( g_trac_runtime, "get_host_data_section> There is no host data for PAYLOAD_KIND=%d", payload_kind );
+            TRACFCOMP( g_trac_runtime, "getHostDataSection> There is no host data for PAYLOAD_KIND=%d", payload_kind );
             /*@
              * @errortype
-             * @moduleid     RUNTIME::MOD_HDATSERVICE_GET_HOST_DATA_SECTION
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
              * @reasoncode   RUNTIME::RC_INVALID_PAYLOAD_KIND
              * @userdata1    ATTR_PAYLOAD_KIND
              * @userdata2    Requested Section
              * @devdesc      There is no host data for specified kind of payload
              */
             errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              RUNTIME::MOD_HDATSERVICE_GET_HOST_DATA_SECTION,
+                              RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                               RUNTIME::RC_INVALID_PAYLOAD_KIND,
                               payload_kind,
                               i_section);
@@ -516,59 +551,70 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         // Go fetch the relative zero address that PHYP uses
         uint64_t payload_base = reinterpret_cast<uint64_t>(iv_payload_addr);
 
-        // Everything starts at the NACA
-        //   The NACA is part of the platform dependent LID which
-        //   is loaded at relative memory address 0x0
-        hdatNaca_t* naca = reinterpret_cast<hdatNaca_t*>
-          (HDAT_NACA_OFFSET + payload_base);
-        TRACFCOMP( g_trac_runtime, "NACA=%p", naca );
+        // Setup the SPIRA pointers
+        errhdl = findSpira();
+        if( errhdl ) { break; }
 
-        // Do some sanity checks on the NACA
-        if( naca->nacaPhypPciaSupport != 1 )
+
+        // NACA
+        if( RUNTIME::NACA == i_section )
         {
-            TRACFCOMP( g_trac_runtime, "get_host_data_section> nacaPhypPciaSupport=%.8X", naca->nacaPhypPciaSupport );
-            /*@
-             * @errortype
-             * @moduleid     RUNTIME::MOD_HDATSERVICE_GET_HOST_DATA_SECTION
-             * @reasoncode   RUNTIME::RC_BAD_NACA
-             * @userdata1    Mainstore address of NACA
-             * @userdata2[0:31]    Payload Base Address
-             * @userdata2[32:63]   Payload Kind
-             * @devdesc      NACA data doesn't seem right
-             */
-            errhdl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            RUNTIME::MOD_HDATSERVICE_GET_HOST_DATA_SECTION,
-                            RUNTIME::RC_BAD_NACA,
-                            reinterpret_cast<uint64_t>(naca),
-                            TWO_UINT32_TO_UINT64(payload_base,
-                                                 payload_kind));
-            errhdl->collectTrace("RUNTIME",1024);
-            //@todo-log NACA data
-            break;
+            o_dataAddr = reinterpret_cast<uint64_t>(iv_payload_addr);
+            o_dataAddr += HDAT_NACA_OFFSET;
+            o_dataSize = sizeof(hdatNaca_t);
         }
-
-
-        // The SPIRA pointer is also relative to PHYP's zero
-        hdatSpira_t* spira = reinterpret_cast<hdatSpira_t*>
-          (naca->spira + payload_base);
-        TRACFCOMP( g_trac_runtime, "SPIRA=%p", spira );
-        // Make sure the SPIRA is valid
-        errhdl = verify_hdat_address( payload_base,
-                                      spira,
-                                      sizeof(hdatSpira_t) );
-        if( errhdl )
+        // SPIRA-H
+        else if( (RUNTIME::SPIRA_H == i_section) && iv_spiraH )
         {
-            TRACFCOMP( g_trac_runtime, "Spira is at a wacky offset!!! %.16X", naca->spira );
-            //@todo-log NACA data RTC:53139
-            break;
+            o_dataAddr = reinterpret_cast<uint64_t>(iv_spiraH);
+            if( iv_spiraH )
+            {
+                o_dataSize = iv_spiraH->hdatHDIF.hdatSize;
+            }
+            else
+            {
+                o_dataSize = 0;
+            }
         }
-
+        // SPIRA-S
+        else if( (RUNTIME::SPIRA_S == i_section) && iv_spiraS )
+        {
+            o_dataAddr = reinterpret_cast<uint64_t>(iv_spiraS);
+            if( iv_spiraS )
+            {
+                o_dataSize = iv_spiraS->hdatHDIF.hdatSize;
+            }
+            else
+            {
+                o_dataSize = 0;
+            }
+        }
+        // Legacy SPIRA
+        else if( (RUNTIME::SPIRA_L == i_section) && iv_spiraL )
+        {
+            o_dataAddr = reinterpret_cast<uint64_t>(iv_spiraL);
+            if( iv_spiraL )
+            {
+                o_dataSize = iv_spiraL->hdatHDIF.hdatSize;
+            }
+            else
+            {
+                o_dataSize = 0;
+            }
+        }
         // Host Services System Data
-        if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
+        else if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
         {
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = &(spira->hdatDataArea[HSVC_DATA]);
+            hdat5Tuple_t* tuple = NULL;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HSVC_DATA]);
+            }
+            else if( unlikely(iv_spiraL != NULL) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
+            }
             TRACUCOMP( g_trac_runtime, "HSVC_SYSTEM_DATA tuple=%p", tuple );
             errhdl = check_tuple( payload_base,
                                   i_section,
@@ -603,7 +649,15 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         else if( RUNTIME::HSVC_NODE_DATA == i_section )
         {
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = &(spira->hdatDataArea[HSVC_DATA]);
+            hdat5Tuple_t* tuple = NULL;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HSVC_DATA]);
+            }
+            else if( unlikely(iv_spiraL != NULL) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
+            }
             TRACUCOMP( g_trac_runtime, "HSVC_NODE_DATA tuple=%p", tuple );
             errhdl = check_tuple( payload_base,
                                   i_section,
@@ -640,7 +694,8 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                              sizeof(hdatHDIF_t)*(node_header->hdatCnt) );
             if( errhdl ) { break; }
 
-            // Loop around all instances because the data could be sparsely populated
+            // Loop around all instances because the data
+            //   could be sparsely populated
             TRACUCOMP( g_trac_runtime, "nodecount=%d", node_header->hdatCnt );
             bool foundit = false;
             uint32_t found_instances = 0;
@@ -685,10 +740,10 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             // Make sure we found something
             if( !foundit )
             {
-                TRACFCOMP( g_trac_runtime, "get_host_data_section> HSVC_NODE_DATA instance %d of section %d is unallocated", i_instance, i_section );
+                TRACFCOMP( g_trac_runtime, "getHostDataSection> HSVC_NODE_DATA instance %d of section %d is unallocated", i_instance, i_section );
                 /*@
                  * @errortype
-                 * @moduleid     RUNTIME::MOD_HDATSERVICE_GET_HOST_DATA_SECTION
+                 * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
                  * @reasoncode   RUNTIME::RC_NO_HSVC_NODE_DATA_FOUND
                  * @userdata1    Mainstore address of node_data_headers
                  * @userdata2[0:31]    Requested Instance
@@ -698,7 +753,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                  */
                 errhdl = new ERRORLOG::ErrlEntry(
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                  RUNTIME::MOD_HDATSERVICE_GET_HOST_DATA_SECTION,
+                                  RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                                   RUNTIME::RC_NO_HSVC_NODE_DATA_FOUND,
                                   reinterpret_cast<uint64_t>(node_data_headers),
                                   TWO_UINT32_TO_UINT64(i_instance,
@@ -712,7 +767,15 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         else if( RUNTIME::IPLPARMS_SYSTEM == i_section )
         {
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = &(spira->hdatDataArea[HDAT_IPL_PARMS]);
+            hdat5Tuple_t* tuple = NULL;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_IPL_PARMS]);
+            }
+            else if( unlikely(iv_spiraL != NULL) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_IPL_PARMS]);
+            }
             TRACUCOMP( g_trac_runtime, "IPLPARMS_SYSTEM tuple=%p", tuple );
             errhdl = check_tuple( payload_base,
                                   i_section,
@@ -752,7 +815,15 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             //@todo: RTC:59171
 
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = &(spira->hdatDataArea[HDAT_MS_DUMP_SRC_TBL]);
+            hdat5Tuple_t* tuple = NULL;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAH_MS_DUMP_SRC_TBL]);
+            }
+            else if( unlikely(iv_spiraL != NULL) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_SRC_TBL]);
+            }
             TRACUCOMP( g_trac_runtime, "MS_DUMP_SRC_TBL tuple=%p", tuple );
             errhdl = check_tuple( payload_base,
                                   i_section,
@@ -771,7 +842,15 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             //@todo: RTC:59171
 
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = &(spira->hdatDataArea[HDAT_MS_DUMP_DST_TBL]);
+            hdat5Tuple_t* tuple = NULL;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAH_MS_DUMP_DST_TBL]);
+            }
+            else if( unlikely(iv_spiraL != NULL) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_DST_TBL]);
+            }
             TRACUCOMP( g_trac_runtime, "MS_DUMP_DST_TBL tuple=%p", tuple );
             errhdl = check_tuple( payload_base,
                                   i_section,
@@ -790,7 +869,15 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             //@todo: RTC:59171
 
             // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = &(spira->hdatDataArea[HDAT_MS_DUMP_RSLT_TBL]);
+            hdat5Tuple_t* tuple = NULL;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAH_MS_DUMP_RSLT_TBL]);
+            }
+            else if( unlikely(iv_spiraL != NULL) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_RSLT_TBL]);
+            }
             TRACUCOMP( g_trac_runtime, "MS_DUMP_RESULTS_TBL tuple=%p", tuple );
             errhdl = check_tuple( payload_base,
                                   i_section,
@@ -805,10 +892,10 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         // Not sure how we could get here...
         else
         {
-            TRACFCOMP( g_trac_runtime, "get_host_data_section> Unknown section %d", i_section );
+            TRACFCOMP( g_trac_runtime, "getHostDataSection> Unknown section %d", i_section );
             /*@
              * @errortype
-             * @moduleid     RUNTIME::MOD_HDATSERVICE_GET_HOST_DATA_SECTION
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
              * @reasoncode   RUNTIME::RC_INVALID_SECTION
              * @userdata1    Section Id
              * @userdata2    <unused>
@@ -816,7 +903,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
              */
             errhdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           RUNTIME::MOD_HDATSERVICE_GET_HOST_DATA_SECTION,
+                           RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                            RUNTIME::RC_INVALID_SECTION,
                            i_section,
                            0);
@@ -832,7 +919,198 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
 
     } while(0);
 
-    TRACFCOMP( g_trac_runtime, "get_host_data_section> o_dataAddr=0x%X, o_dataSize=%d", o_dataAddr, o_dataSize );
+    TRACFCOMP( g_trac_runtime, "getHostDataSection> o_dataAddr=0x%X, o_dataSize=%d", o_dataAddr, o_dataSize );
+
+    return errhdl;
+}
+
+/**
+ * @brief Locates the proper SPIRA structure and sets instance vars
+ */
+errlHndl_t hdatService::findSpira( void )
+{
+    errlHndl_t errhdl = NULL;
+    errlHndl_t errhdl_s = NULL; //SPIRA-S error
+    errlHndl_t errhdl_l = NULL; //Legacy SPIRA error
+
+    do {
+        // Only do this once
+        if( iv_spiraL || iv_spiraH || iv_spiraS )
+        {
+            break;
+        }
+
+        // Go fetch the relative zero address that PHYP uses
+        uint64_t payload_base = reinterpret_cast<uint64_t>(iv_payload_addr);
+
+        // Everything starts at the NACA
+        //   The NACA is part of the platform dependent LID which
+        //   is loaded at relative memory address 0x0
+        hdatNaca_t* naca = reinterpret_cast<hdatNaca_t*>
+          (HDAT_NACA_OFFSET + payload_base);
+        TRACFCOMP( g_trac_runtime, "NACA=%p", naca );
+
+        // Do some sanity checks on the NACA
+        if( naca->nacaPhypPciaSupport != 1 )
+        {
+            TRACFCOMP( g_trac_runtime, "findSpira> nacaPhypPciaSupport=%.8X", naca->nacaPhypPciaSupport );
+
+            // Figure out what kind of payload we have
+            TARGETING::Target * sys = NULL;
+            TARGETING::targetService().getTopLevelTarget( sys );
+            TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
+              = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+
+            /*@
+             * @errortype
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_FINDSPIRA
+             * @reasoncode   RUNTIME::RC_BAD_NACA
+             * @userdata1    Mainstore address of NACA
+             * @userdata2[0:31]    Payload Base Address
+             * @userdata2[32:63]   Payload Kind
+             * @devdesc      NACA data doesn't seem right
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            RUNTIME::MOD_HDATSERVICE_FINDSPIRA,
+                            RUNTIME::RC_BAD_NACA,
+                            reinterpret_cast<uint64_t>(naca),
+                            TWO_UINT32_TO_UINT64(payload_base,
+                                                 payload_kind));
+            errhdl->collectTrace("RUNTIME",1024);
+            RUNTIME::UdNaca(naca).addToLog(errhdl);
+            break;
+        }
+
+
+        // Are we using the SPIRA-H/S or Legacy format
+        if( naca->spiraH != 0 )
+        {
+            // pointer is also relative to PHYP's zero
+            iv_spiraH = reinterpret_cast<hdatSpira_t*>
+              (naca->spiraH + payload_base);
+            TRACFCOMP( g_trac_runtime, "SPIRA-H=%p", iv_spiraH );
+
+            // Check the headers and version info
+            errhdl = check_header( payload_base,
+                                   &(iv_spiraH->hdatHDIF),
+                                   SPIRAH_HEADER );
+            if( errhdl )
+            {
+                RUNTIME::UdNaca(naca).addToLog(errhdl);
+                break;
+            }
+
+            // SPIRA-S is at the beginning of the Host Data Area Tuple
+            uint64_t tuple_addr = reinterpret_cast<uint64_t>
+              (&(iv_spiraH->hdatDataArea[SPIRAH_HOST_DATA_AREAS]));
+            TRACUCOMP( g_trac_runtime, "SPIRA-S tuple offset=%.8X", tuple_addr );
+            // need to offset from virtual zero
+            tuple_addr += payload_base;
+            hdat5Tuple_t* tuple = reinterpret_cast<hdat5Tuple_t*>(tuple_addr);
+            TRACUCOMP( g_trac_runtime, "SPIRA-S tuple=%p", tuple );
+            errlHndl_t errhdl_s = check_tuple( payload_base,
+                                               SPIRA_S,
+                                               tuple );
+            if( errhdl_s )
+            {
+                TRACFCOMP( g_trac_runtime, "SPIRA-S is invalid, will try legacy SPIRA" );
+                RUNTIME::UdNaca(naca).addToLog(errhdl_s);
+                iv_spiraS = NULL;
+            }
+            else
+            {
+                iv_spiraS = reinterpret_cast<hdatSpira_t*>
+                  (tuple->hdatAbsAddr + payload_base);
+                TRACFCOMP( g_trac_runtime, "SPIRA-S=%p", iv_spiraS );
+
+                // Check the headers and version info
+                errhdl_s = check_header( payload_base,
+                                         &(iv_spiraH->hdatHDIF),
+                                         SPIRAS_HEADER );
+                if( errhdl_s )
+                {
+                    TRACFCOMP( g_trac_runtime, "SPIRA-S is invalid, will try legacy SPIRA" );
+                    RUNTIME::UdNaca(naca).addToLog(errhdl_s);
+                    RUNTIME::UdSpira(iv_spiraS).addToLog(errhdl_s);
+                    iv_spiraS = NULL;
+                }
+            }
+        }
+
+        //Legacy SPIRA
+        // pointer is also relative to PHYP's zero
+        iv_spiraL = reinterpret_cast<hdatSpira_t*>
+          (naca->spiraOld + payload_base);
+        TRACFCOMP( g_trac_runtime, "Legacy SPIRA=%p", iv_spiraL );
+
+        // Make sure the SPIRA is valid
+        errhdl_l = verify_hdat_address( payload_base,
+                                        iv_spiraL,
+                                        sizeof(hdatSpira_t) );
+        if( errhdl_l )
+        {
+            TRACFCOMP( g_trac_runtime, "Legacy Spira is at a wacky offset!!! %.16X", naca->spiraOld );
+            iv_spiraL = NULL;
+            RUNTIME::UdNaca(naca).addToLog(errhdl_l);
+        }
+        else
+        {
+            // Look for a filled in HEAP section to see if FSP is using the
+            //  new or old format
+            // (Note: this is the logic PHYP is using)
+            hdat5Tuple_t* heap_tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HEAP]);
+            TRACUCOMP( g_trac_runtime, "HEAP tuple=%p", heap_tuple );
+            if( heap_tuple->hdatActualSize == 0 )
+            {
+                TRACFCOMP( g_trac_runtime, "Legacy SPIRA is not filled in, using SPIRA-H/S" );
+                iv_spiraL = NULL;
+            }
+        }
+
+        // Make sure we have a good SPIRA somewhere
+        if( (iv_spiraL == NULL) && (iv_spiraS == NULL) )
+        {
+            TRACFCOMP( g_trac_runtime, "Could not find a valid SPIRA of any type" );
+            /*@
+             * @errortype
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_FINDSPIRA
+             * @reasoncode   RUNTIME::RC_NO_SPIRA
+             * @userdata1[0:31]    RC for Legacy SPIRA fail
+             * @userdata1[32:64]   EID for Legacy SPIRA fail
+             * @userdata2[0:31]    RC for SPIRA-S fail
+             * @userdata2[32:64]   EID for SPIRA-S fail
+             * @devdesc      Could not find a valid SPIRA of any type
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           RUNTIME::MOD_HDATSERVICE_FINDSPIRA,
+                           RUNTIME::RC_BAD_NACA,
+                           TWO_UINT32_TO_UINT64(ERRL_GETRC_SAFE(errhdl_l),
+                                                ERRL_GETEID_SAFE(errhdl_l)),
+                           TWO_UINT32_TO_UINT64(ERRL_GETRC_SAFE(errhdl_s),
+                                                ERRL_GETEID_SAFE(errhdl_s)));
+            errhdl->collectTrace("RUNTIME",1024);
+
+            // commit the errors related to each SPIRA
+            if( errhdl_s )
+            {
+                errhdl_s->plid(errhdl->plid());
+                errlCommit(errhdl_s,RUNTIME_COMP_ID);
+            }
+            if( errhdl_l )
+            {
+                errhdl_l->plid(errhdl->plid());
+                errlCommit(errhdl_l,RUNTIME_COMP_ID);
+            }
+
+            // return the summary log
+            break;
+        }
+    } while(0);
+
+    if( errhdl_s ) { delete errhdl_s; }
+    if( errhdl_l ) { delete errhdl_l; }
 
     return errhdl;
 }
@@ -842,7 +1120,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
  ********************/
 
 /**
- * @brief  Add the host data mainstore location to VMM
+ * @brief  Add the host data mainstore locations to VMM
  */
 errlHndl_t load_host_data( void )
 {

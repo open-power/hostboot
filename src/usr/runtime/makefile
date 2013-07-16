@@ -31,7 +31,8 @@ ROOTPATH = ../../..
 MODULE = runtime
 
 
-OBJS = populate_attributes.o hdatservice.o fakepayload.o tce.o
+OBJS = populate_attributes.o hdatservice.o fakepayload.o tce.o \
+       errlud_hdat.o
 
 SUBDIRS = test.d
 

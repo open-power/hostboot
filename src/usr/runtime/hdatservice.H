@@ -114,6 +114,16 @@ namespace RUNTIME
                                            uint64_t& o_dataAddr,
                                            size_t& o_dataSize );
 
+        /**
+         * @brief Locates the proper SPIRA structure and sets instance vars
+         *
+         * Walks the NACA and interrogates structures to determine which
+         * kind of SPIRA is available (if any).
+         *
+         * @return errlHndl_t  NULL on success
+         */
+        errlHndl_t findSpira( void );
+
       private:
 
         /********************************************
@@ -126,7 +136,22 @@ namespace RUNTIME
          */
         void * iv_payload_addr;
         void * iv_dumptest_addr;
+        void* iv_hdat_addr;
 
+        /**
+         * Legacy SPIRA
+         */
+        hdatSpira_t* iv_spiraL;
+
+        /**
+         * SPIRA-H
+         */
+        hdatSpira_t* iv_spiraH;
+
+        /**
+         * SPIRA-S
+         */
+        hdatSpira_t* iv_spiraS;
     };
 
 };

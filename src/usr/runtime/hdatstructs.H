@@ -49,10 +49,11 @@ const uint64_t HDAT_NACA_OFFSET = 0x00004000;
  */
 struct hdatNaca_t
 {
-    uint8_t  reserved1[48];       // 0x0000 Reserved space
-    uint64_t spira;               // 0x0030 SPIRA offset
+    uint64_t  spiraH;             // 0x0000 Spira-H offset (if non-zero)
+    uint8_t  reserved1[40];       // 0x0008 Reserved space
+    uint64_t spiraOld;            // 0x0030 Legacy SPIRA offset
     uint8_t  reserved2[104];      // 0x0038 Reserved space
-    uint32_t spiraSize;           // 0x00A0 Actual SPIRA size in bytes
+    uint32_t spiraSizeOld;        // 0x00A0 Actual Legacy SPIRA size in bytes
     uint8_t  nacaReserved4[28];   // 0x00A4 reserved space
     uint64_t nacaHypLoadMap;      // 0x00C0 Hyp resident module load map
     uint8_t  nacaReserved5[228];  // 0x00C8 reserved space
@@ -65,46 +66,79 @@ struct hdatNaca_t
 } __attribute__ ((packed));
 
 
-// Copied from FipS:src/hdat/fsp/hdatspira.H
+// Initially copied from FipS:src/hdat/fsp/hdatspira.H
 /** @enum hdatSpiraDataAreas
- *        This enumeration defines the various data areas that must be built
- *        and DMA'd to main memory or DMA'd from memory to the service
- *        processor.
- *        This list must be kept in the same order as the 5-tuple entries in
- *        the SPIRA.
- *
- *        If the order is changed, entries are added, or entries are deleted,
- *        update the HDAT_STR_NAME array in hdatPrtSpira().
+ *        This enumeration defines the list of N-Tuples within
+ *        the LegacySPIRA structure
  */
-enum hdatSpiraDataAreas
+enum hdatSpiraLegacyDataAreas
 {
-    HDAT_SPIRA_DA_FIRST   = 0,
-    HDAT_SP_SUBSYS        = 0,    // service processor subsystem
-    HDAT_IPL_PARMS        = 1,    // IPL parameters
-    HDAT_ENCLOSURE_VPD    = 2,    // enclosure vital product data
-    HDAT_SLCA             = 3,    // slot location code array
-    HDAT_BACKPLANE_VPD    = 4,    // backplane vital product data
-    HDAT_SYS_VPD          = 5,    // system vital product data
-    HDAT_CHIP_TOD         = 6,    // chip time-of-day
-    HDAT_PROC_INIT        = 7,    // phyp-supplied processor init data
-    HDAT_CLOCK_VPD        = 8,    // clock vital product data
-    HDAT_ANCHOR_VPD       = 9,    // anchor card vital product data
-    HDAT_OP_PNL_VPD       = 10,   // operator panel vital product data
-    HDAT_L3_VPD           = 11,   // level 3 cache vital product data
-    HDAT_MISC_CEC_VPD     = 12,   // miscellaneous FRU vital product data
-    RSV_1                 = 13,   // (old PACA)
-    HDAT_MDT              = 14,   // memory description tree
-    HDAT_IO_HUB           = 15,   // I/O hub FRU array
-    HDAT_CPU_CTRL         = 16,   // CPU controls
-    HDAT_MS_DUMP_SRC_TBL  = 17,   // mainstore dump source table
-    HDAT_MS_DUMP_DST_TBL  = 18,   // mainstore dump destination table
-    HDAT_MS_DUMP_RSLT_TBL = 19,   // mainstore dump results table
-    HDAT_SPIRA_DA_GA1LAST = 20,   // End of list for 1st eclipz release
-    HDAT_HEAP             = 20,   // Phyp allocated storage location
-    HDAT_PCIA             = 21,   // PCIA (Core information area)
-    HDAT_PCRD             = 22,   // PCRD (Chip related data area)
-    HSVC_DATA             = 23,   // Host Services Data
-    HDAT_SPIRA_DA_LAST    = 24
+    SPIRAL_FIRST            = 0,
+    SPIRAL_SP_SUBSYS        = 0,    // service processor subsystem
+    SPIRAL_IPL_PARMS        = 1,    // IPL parameters
+    SPIRAL_ENCLOSURE_VPD    = 2,    // enclosure vital product data
+    SPIRAL_SLCA             = 3,    // slot location code array
+    SPIRAL_BACKPLANE_VPD    = 4,    // backplane vital product data
+    SPIRAL_SYS_VPD          = 5,    // system vital product data
+    SPIRAL_CHIP_TOD         = 6,    // chip time-of-day
+    SPIRAL_PROC_INIT        = 7,    // phyp-supplied processor init data
+    SPIRAL_CLOCK_VPD        = 8,    // clock vital product data
+    SPIRAL_ANCHOR_VPD       = 9,    // anchor card vital product data
+    SPIRAL_OP_PNL_VPD       = 10,   // operator panel vital product data
+    SPIRAL_L3_VPD           = 11,   // level 3 cache vital product data
+    SPIRAL_MISC_CEC_VPD     = 12,   // miscellaneous FRU vital product data
+    SPIRAL_RSV_1            = 13,   // (old PACA)
+    SPIRAL_MDT              = 14,   // memory description tree
+    SPIRAL_IO_HUB           = 15,   // I/O hub FRU array
+    SPIRAL_CPU_CTRL         = 16,   // CPU controls
+    SPIRAL_MS_DUMP_SRC_TBL  = 17,   // mainstore dump source table
+    SPIRAL_MS_DUMP_DST_TBL  = 18,   // mainstore dump destination table
+    SPIRAL_MS_DUMP_RSLT_TBL = 19,   // mainstore dump results table
+    SPIRAL_HEAP             = 20,   // Phyp allocated storage location
+    SPIRAL_PCIA             = 21,   // PCIA (Core information area)
+    SPIRAL_PCRD             = 22,   // PCRD (Chip related data area)
+    SPIRAL_HSVC_DATA        = 23,   // Host Services Data
+    SPIRAL_LAST             = 24
+};
+
+/** @enum hdatSpiraHDataAreas
+ *        This enumeration defines the list of N-Tuples within
+ *        the SPIRA-H structure
+ */
+enum hdatSpiraHDataAreas
+{
+    SPIRAH_FIRST            = 0,
+    SPIRAH_HOST_DATA_AREAS  = 0,    // Reserved memory for FSP-filled data
+    SPIRAH_PROC_INIT        = 1,    // phyp-supplied processor init data
+    SPIRAH_CPU_CTRL         = 2,    // CPU controls
+    SPIRAH_MS_DUMP_SRC_TBL  = 3,    // mainstore dump source table
+    SPIRAH_MS_DUMP_DST_TBL  = 4,    // mainstore dump destination table
+    SPIRAH_MS_DUMP_RSLT_TBL = 5,    // mainstore dump results table
+    SPIRAH_LAST             = 5
+};
+
+/** @enum hdatSpiraSDataAreas
+ *        This enumeration defines the list of N-Tuples within
+ *        the SPIRA-S structure
+ */
+enum hdatSpiraSDataAreas
+{
+    SPIRAS_FIRST            = 0,
+    SPIRAS_SP_SUBSYS        = 0,    // service processor subsystem
+    SPIRAS_IPL_PARMS        = 1,    // IPL parameters
+    SPIRAS_SLCA             = 2,    // slot location code array
+    SPIRAS_BACKPLANE_VPD    = 3,    // backplane vital product data
+    SPIRAS_SYS_VPD          = 4,    // system vital product data
+    SPIRAS_CLOCK_VPD        = 5,    // clock vital product data
+    SPIRAS_ANCHOR_VPD       = 6,    // anchor card vital product data
+    SPIRAS_OP_PNL_VPD       = 7,    // operator panel vital product data
+    SPIRAS_MISC_CEC_VPD     = 9,    // miscellaneous FRU vital product data
+    SPIRAS_MDT              = 10,   // memory description tree
+    SPIRAS_IO_HUB           = 11,   // I/O hub FRU array
+    SPIRAS_PCIA             = 12,   // PCIA (Core information area)
+    SPIRAS_PCRD             = 13,   // PCRD (Chip related data area)
+    SPIRAS_HSVC_DATA        = 14,   // Host Services Data
+    SPIRAS_LAST             = 14
 };
 
 
@@ -177,7 +211,7 @@ struct hdatHDIFDataArray_t
 } __attribute__ ((packed));
 
 
-// Copied from FipS:src/hdat/fsp/hdatspira.H
+// Originally copied from FipS:src/hdat/fsp/hdatspira.H
 /** @brief The SPIRA is composed of an HDIF header and an array.  Each array
  *         entry is an n-tuple.  That is, it is a structure with a particular
  *         number of fields
@@ -188,7 +222,7 @@ struct hdatSpira_t
   hdatHDIFDataHdr_t    hdatDataHdr;         // 0x0020 Data "pointers"
   uint8_t              hdatReserved1[8];    // 0x0028 Padding/future growth
   hdatHDIFDataArray_t  hdatArrayInfo;       // 0x0030 Info on 5-tuple array
-  hdat5Tuple_t         hdatDataArea[HDAT_SPIRA_DA_LAST]; //0x0040 5-tuple array
+  hdat5Tuple_t         hdatDataArea[SPIRAL_LAST]; // 0x0040 5-tuple array
   // At this point, the host OS may have reserved extra space for future growth
   // but FipS does not need to be concerned with the reserved space nor DMA it
   // back from main memory.

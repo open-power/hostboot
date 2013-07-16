@@ -176,3 +176,44 @@ new_command("hb-singlethread",
     alias = "hb-st",
     type = ["hostboot-commands"],
     short = "Disable all threads except cpu0_0_05_0.")
+
+
+
+#------------------------------------------------
+#------------------------------------------------
+def hb_get_objects_by_class(classname):
+    obj_list=[]
+    obj_dict={}
+    # Put objects into a dictionary, indexed by object name
+    for obj in SIM_get_all_objects():
+        if (obj.classname == classname):
+            obj_dict[obj.name]=obj
+
+    # Sort the dictionary by key (object name)
+    obj_names=obj_dict.keys()
+    obj_names.sort()
+    for obj_name in obj_names:
+        obj_list.append(obj_dict[obj_name])
+        #print "object name=%s" % obj_name
+    return obj_list
+
+def hb_getallregs(regname):
+    proc_list=[]
+    proc_list=hb_get_objects_by_class("ppc-power8-mambo-core")
+    for proc in proc_list:
+        output = run_command("%s.read-reg %s"%(proc.name,regname))
+        print ">> %s : " %(proc.name) + "%x" %output
+
+new_command("hb-getallregs",
+    (lambda reg: hb_getallregs(reg)),
+    [ arg(str_t, "reg", "?", None),
+    ],
+    alias = "hb-gar",
+    type = ["hostboot-commands"],
+    short = "Read a reg from all cores.",
+    doc = """
+Examples: \n
+    hb-getallregs <regname>\n
+    hb-getallregs pc\n
+    """)
+

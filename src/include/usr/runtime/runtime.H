@@ -70,6 +70,10 @@ enum SectionId
     MS_DUMP_SRC_TBL,      //< MDST: Memory Dump Source Table
     MS_DUMP_DST_TBL,      //< MDDT: Memory Dump Destination Table
     MS_DUMP_RESULTS_TBL,  //< MDRT: Memory Dump Results Table
+    SPIRA_S,              //< SPIRA-S
+    SPIRA_H,              //< SPIRA-H
+    SPIRA_L,              //< Legacy SPIRA
+    NACA,                 //< NACA
 };
 
 /**

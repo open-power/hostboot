@@ -36,6 +36,19 @@
 #include <targeting/common/commontargeting.H>
 #include <attributeenums.H>
 #include "../hdatstructs.H"
+#include "../errlud_hdat.H"
+#include <runtime/runtime_reasoncodes.H>
+
+/*
+ * To test with a custom HDAT do the following:
+ *   #define REAL_HDAT_TEST in hdatservicetest.H
+ *   #define REAL_HDAT_TEST in hdatservice.C
+ *   When MAGIC_BREAK hits run this in simics:
+ *      system_cmp0.phys_mem.load-file hdat.bin 0x10000000
+ *
+ *   Note that there will be DumpTest failures.
+ */
+//#define REAL_HDAT_TEST
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -53,6 +66,10 @@ class HdatServiceTest: public CxxTest::TestSuite
         assert(sys != NULL);
         TARGETING::ATTR_PAYLOAD_KIND_type payload_kind =
           sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+
+#ifdef REAL_HDAT_TEST
+        payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
+#endif
 
         // Verify something in the system parms
         uint64_t sys_parms_addr = 0;
@@ -302,6 +319,108 @@ class HdatServiceTest: public CxxTest::TestSuite
         }
 
         TRACFCOMP( g_trac_runtime, "testHdat> finish" );
+    }
+
+    void testSpira( void )
+    {
+#ifdef REAL_HDAT_TEST
+        TRACFCOMP( g_trac_runtime, "testSpira> start" );
+        errlHndl_t errhdl = NULL;
+
+        uint64_t naca_addr = 0;
+        size_t naca_size = 0;
+        errhdl = RUNTIME::get_host_data_section(
+                                    RUNTIME::NACA,
+                                    0,
+                                    naca_addr,
+                                    naca_size );
+        if( errhdl  )
+        {
+            TS_FAIL("testSpira> Error trying to locate NACA");
+            errlCommit(errhdl,RUNTIME_COMP_ID);
+        }
+        else if( naca_addr == 0 )
+        {
+            TS_FAIL("testSpira> NULL returned for get_host_data_section(NACA)");
+        }
+        else if( (naca_size == 0)
+                 || (naca_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+        {
+            TS_FAIL("testSpira> Size of NACA data too small");
+        }
+
+
+        uint64_t spiral_addr = 0;
+        size_t spiral_size = 0;
+        errhdl = RUNTIME::get_host_data_section(
+                                    RUNTIME::SPIRA_L,
+                                    0,
+                                    spiral_addr,
+                                    spiral_size );
+        if( errhdl  )
+        {
+            TS_FAIL("testSpira> Error trying to locate SPIRA_L");
+            errlCommit(errhdl,RUNTIME_COMP_ID);
+        }
+        else if( spiral_addr == 0 )
+        {
+            TS_FAIL("testSpira> NULL returned for get_host_data_section(SPIRA_L)");
+        }
+        else if( (spiral_size == 0)
+                 || (spiral_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+        {
+            TS_FAIL("testSpira> Size of SPIRA_L data too small");
+        }
+
+
+        uint64_t spiras_addr = 0;
+        size_t spiras_size = 0;
+        errhdl = RUNTIME::get_host_data_section(
+                                    RUNTIME::SPIRA_S,
+                                    0,
+                                    spiras_addr,
+                                    spiras_size );
+        if( errhdl  )
+        {
+            TS_FAIL("testSpira> Error trying to locate SPIRA_S");
+            errlCommit(errhdl,RUNTIME_COMP_ID);
+        }
+        else if( spiras_addr == 0 )
+        {
+            TS_FAIL("testSpira> NULL returned for get_host_data_section(SPIRA_S)");
+        }
+        else if( (spiras_size == 0)
+                 || (spiras_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+        {
+            TS_FAIL("testSpira> Size of SPIRA-S data too small");
+        }
+
+
+        uint64_t spirah_addr = 0;
+        size_t spirah_size = 0;
+        errhdl = RUNTIME::get_host_data_section(
+                                    RUNTIME::SPIRA_H,
+                                    0,
+                                    spirah_addr,
+                                    spirah_size );
+        if( errhdl  )
+        {
+            TS_FAIL("testSpira> Error trying to locate SPIRA_H");
+            errlCommit(errhdl,RUNTIME_COMP_ID);
+        }
+        else if( spirah_addr == 0 )
+        {
+            TS_FAIL("testSpira> NULL returned for get_host_data_section(SPIRA_H)");
+        }
+        else if( (spirah_size == 0)
+                 || (spirah_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+        {
+            TS_FAIL("testSpira> Size of SPIRA_H data too small");
+        }
+
+
+        TRACFCOMP( g_trac_runtime, "testSpira> finish" );
+#endif
     }
 
 };

@@ -716,4 +716,19 @@ inline void ErrlEntry::setSrcType(const srcType_t i_srcType)
 } // End namespace
 
 
+/**
+ * Retrieve the RC inside an error log, or return zero if the log is NULL
+ */
+#define ERRL_GETRC_SAFE(errhdl) (errhdl == NULL ? 0 : errhdl->reasonCode())
+
+/**
+ * Retrieve the PLID inside an error log, or return zero if the log is NULL
+ */
+#define ERRL_GETPLID_SAFE(errhdl) (errhdl == NULL ? 0 : errhdl->plid())
+
+/**
+ * Retrieve the EID inside an error log, or return zero if the log is NULL
+ */
+#define ERRL_GETEID_SAFE(errhdl) (errhdl == NULL ? 0 : errhdl->eid())
+
 #endif //ERRLENTRY_H
