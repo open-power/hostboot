@@ -23,21 +23,27 @@
 ROOTPATH = ../../..
 
 CODE_PASS_POST += linker gensyms genlist
-CLEAN_TARGETS += linker gensyms genlist
+CLEAN_TARGETS += linker linker.o gensyms gensyms.o genlist genlist.o
 
 include $(ROOTPATH)/config.mk
 
 linker: linker.C
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g linker.C -o linker \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g linker.C -o linker.o -c
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g linker.o -o linker \
 				         -lbfd -liberty -lz
+	$(C1)rm linker.o
 
 gensyms: gensyms.C
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g gensyms.C -o gensyms \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g gensyms.C -o gensyms.o -c
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g gensyms.o -o gensyms \
 					 -lpthread
+	$(C1)rm gensyms.o
 
 genlist: genlist.C
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g genlist.C -o genlist \
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g genlist.C -o genlist.o -c
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g genlist.o -o genlist \
 					 -lpthread
+	$(C1)rm genlist.o

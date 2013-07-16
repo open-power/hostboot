@@ -23,10 +23,12 @@
 ROOTPATH = ../../..
 
 GEN_PASS_BODY += tracehash
-CLEAN_TARGETS += tracehash
+CLEAN_TARGETS += tracehash tracehash.o
 
 include $(ROOTPATH)/config.mk
 
 tracehash: tracehash.c
 	$(C2) "    CC         $(notdir $<)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -std=c99 -O3 -g $< -o $@ -lbfd
+	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -std=c99 -O3 -g -c $< -o $@.o
+	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -O3 -g $@.o -o $@ -lbfd
+	$(C1)rm $@.o
