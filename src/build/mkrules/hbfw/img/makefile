@@ -47,7 +47,8 @@ install_all: build_pnor_images
 #################################################
 BASE_IMAGE = hostboot.bin
 EXT_IMAGE =  hostboot_extended.bin
-BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE}
+HBRT_IMAGE = hostboot_runtime.bin
+BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
 BASE_W_HEADER_IMAGE = hostboot.header.bin
 BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
@@ -88,7 +89,7 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_IMAGE}
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}

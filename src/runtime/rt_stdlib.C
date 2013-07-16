@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/lib/stdio.C $                                             */
+/* $Source: src/runtime/rt_stdlib.C $                                     */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,59 +20,37 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <stdint.h>
-#include <stdio.h>
-#include <util/sprintf.H>
-#include <util/functor.H>
+#include <stdlib.h>
+#include <runtime/interface.h>
+#include <string.h>
 
-class SprintfBuffer
+void* malloc(size_t s)
 {
-    public:
-        int putc(int c)
-        {
-            if ('\b' == c)
-            {
-                iv_pos--;
-            }
-            else
-            {
-                iv_buffer[iv_pos++] = c;
-            }
-            return c;
-        }
-
-        explicit SprintfBuffer(char* buf) : iv_pos(0), iv_buffer(buf) {};
-
-    private:
-        size_t iv_pos;
-        char * iv_buffer;
-};
-
-int sprintf(char *str, const char * format, ...)
-{
-    using Util::mem_ptr_fun;
-    using Util::vasprintf;
-
-    va_list args;
-    va_start(args, format);
-
-    SprintfBuffer console(str);
-    size_t count = vasprintf(mem_ptr_fun(console, &SprintfBuffer::putc),
-                             format, args);
-
-    va_end(args);
-    console.putc('\0');
-    return count;
+    return g_hostInterfaces->malloc(s);
 }
 
-int vsprintf(char *str, const char * format, va_list args)
+void free(void* p)
 {
-    using Util::mem_ptr_fun;
+    g_hostInterfaces->free(p);
+}
 
-    SprintfBuffer console(str);
-    size_t count = vasprintf(mem_ptr_fun(console, &SprintfBuffer::putc),
-                             format, args);
+void* realloc(void* p, size_t s)
+{
+    return g_hostInterfaces->realloc(p, s);
+}
 
-    console.putc('\0');
-    return count;
+void* calloc(size_t num, size_t size)
+{
+    // Allocate a block of memory for an array of 'num' elements, each of them
+    // 'size' bytes long and initialize to zero
+    size_t total_size = num * size;
+    void* mem = NULL;
+
+    if (total_size)
+    {
+        mem = malloc(total_size);
+        memset(mem, 0, total_size);
+    }
+
+    return mem;
 }

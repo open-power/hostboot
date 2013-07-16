@@ -37,7 +37,7 @@ define ELF_template
 $$(IMGDIR)/$(1).elf: $$(addprefix $$(OBJDIR)/, $$($(1)_OBJECTS)) \
                      $$(ROOTPATH)/src/kernel.ld
 	$$(C2) "    LD         $$(notdir $$@)"
-	$$(C1)$$(LD) -static $$(LDFLAGS) \
+	$$(C1)$$(LD) -static $$(LDFLAGS) $$($$*_LDFLAGS) \
                      $$(addprefix $$(OBJDIR)/, $$($(1)_OBJECTS)) \
                      $$($(1)_LDFLAGS) -T $$(ROOTPATH)/src/kernel.ld -o $$@
 endef
@@ -49,8 +49,11 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
 	$(C2) "    LINKER     $(notdir $@)"
 	$(C1)set -o pipefail && $(CUSTOM_LINKER) $@ $< \
               $(addprefix $(IMGDIR)/lib, $(addsuffix .so, $($*_MODULES))) \
+	      $(if $($*_EXTENDED_MODULES), \
                   --extended=0x40000 $(IMGDIR)/$*_extended.bin \
-              $(addprefix $(IMGDIR)/lib, $(addsuffix .so, $($*_EXTENDED_MODULES))) \
+                  $(addprefix $(IMGDIR)/lib, \
+	              $(addsuffix .so, $($*_EXTENDED_MODULES))) \
+	      ) \
               $(addprefix $(IMGDIR)/, $($*_DATA_MODULES)) \
               | bzip2 -zc > $(IMGDIR)/.$*.lnkout.bz2
 	$(C1)$(ROOTPATH)/src/build/tools/addimgid $@ $<
@@ -58,7 +61,8 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
 $(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
 	$(C2) "    GENLIST    $(notdir $*)"
 	$(C1)(cd $(ROOTPATH)&& \
-              src/build/linker/gensyms $*.bin $*_extended.bin 0x40000000 \
+              src/build/linker/gensyms $*.bin \
+		  $(if $($*_EXTENDED_MODULES), $*_extended.bin 0x40000000) \
                   > ./img/$*.syms && \
               src/build/linker/genlist $*.bin | bzip2 -zc > ./img/$*.list.bz2)
 

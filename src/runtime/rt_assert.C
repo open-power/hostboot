@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/lib/stdio.C $                                             */
+/* $Source: src/runtime/rt_assert.C $                                     */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,59 +20,22 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <stdint.h>
+#include <assert.h>
 #include <stdio.h>
-#include <util/sprintf.H>
-#include <util/functor.H>
+#include <runtime/interface.h>
+#include <kernel/console.H>
 
-class SprintfBuffer
+/** Hook location for trace module to set up when loaded. */
+namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
+
+extern "C" void __assert(AssertBehavior i_assertb, int i_line)
 {
-    public:
-        int putc(int c)
-        {
-            if ('\b' == c)
-            {
-                iv_pos--;
-            }
-            else
-            {
-                iv_buffer[iv_pos++] = c;
-            }
-            return c;
-        }
+    if (i_assertb != ASSERT_TRACE_DONE)
+    {
+        printk("Assertion failed @%p on line %d.\n",
+                linkRegister(), i_line);
+    }
 
-        explicit SprintfBuffer(char* buf) : iv_pos(0), iv_buffer(buf) {};
-
-    private:
-        size_t iv_pos;
-        char * iv_buffer;
-};
-
-int sprintf(char *str, const char * format, ...)
-{
-    using Util::mem_ptr_fun;
-    using Util::vasprintf;
-
-    va_list args;
-    va_start(args, format);
-
-    SprintfBuffer console(str);
-    size_t count = vasprintf(mem_ptr_fun(console, &SprintfBuffer::putc),
-                             format, args);
-
-    va_end(args);
-    console.putc('\0');
-    return count;
-}
-
-int vsprintf(char *str, const char * format, va_list args)
-{
-    using Util::mem_ptr_fun;
-
-    SprintfBuffer console(str);
-    size_t count = vasprintf(mem_ptr_fun(console, &SprintfBuffer::putc),
-                             format, args);
-
-    console.putc('\0');
-    return count;
+    g_hostInterfaces->assert();
+    while(1);
 }

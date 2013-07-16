@@ -42,6 +42,11 @@ extern "C"
 #define ALWAYS_INLINE __attribute__((always_inline))
 
 /**
+ * Use of this macro will ensure that a function is never inlined.
+ */
+#define NEVER_INLINE __attribute__((noinline))
+
+/**
  * Use of this macro will ensure a data structure is aligned on a cacheline boundary
  */
 #define ALIGN_CACHELINE __attribute__((aligned (128)))

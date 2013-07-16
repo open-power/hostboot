@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -44,6 +44,7 @@ enum SectionId
     SBE_IPL,        /**< Self-Boot Engine IPL image */
     WINK,           /**< Sleep Winkle Reference image */
     PAYLOAD,        /**< HAL/OPAL */
+    HB_RUNTIME,     /**< Hostboot Runtime (for Sapphire) */
     HB_DATA,        /**< Hostboot Data */
     GUARD_DATA,     /**< Guard Data */
     HB_ERRLOGS,     /**< Hostboot Error log Repository */

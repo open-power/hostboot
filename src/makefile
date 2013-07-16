@@ -23,13 +23,11 @@
 
 ROOTPATH = ..
 
-SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d
-IMGS = hbicore hbicore_test
+SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d runtime.d
+IMGS = hbicore hbicore_test hbirt hbirt_test
 
-BASE_OBJECTS = console.o spinlock.o string.o string_ext.o stdlib.o ctype.o \
-               assert.o stdio.o builtins.o vfs_init.o heapmgr.o pagemgr.o \
-               math.o barrier.o idebug.o intmsghandler.o deferred.o \
-               idletask.o splaytree.o
+BASE_OBJECTS = string.o string_ext.o ctype.o math.o builtins.o stdio.o \
+	       splaytree.o cxxtest_data.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o
@@ -41,9 +39,12 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       syscall_msg.o syscall_mmio.o syscall_time.o \
                       syscall_mm.o init_main.o vfs_main.o sync.o futexmgr.o \
                       ptmgr.o segmentmgr.o basesegment.o devicesegment.o \
-                      block.o cxxtest_data.o cpuid.o misc.o msghandler.o \
-                      blockmsghdlr.o stacksegment.o softpatch_p8.o \
-                      shutdown.o forceattn_p8.o terminate.o ipc.o machchk.o
+                      block.o misc.o msghandler.o blockmsghdlr.o \
+		      stacksegment.o softpatch_p8.o shutdown.o forceattn_p8.o \
+		      terminate.o ipc.o machchk.o console.o spinlock.o \
+		      heapmgr.o pagemgr.o barrier.o idebug.o intmsghandler.o \
+		      deferred.o idletask.o vfs_init.o cpuid.o stdlib.o \
+		      assert.o
 
 BASE_MODULES = trace errl devicefw scom xscom initservice \
                secureboot_base pnor vfs
@@ -66,7 +67,13 @@ TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testpnor testi2c testfsi testvfs testhwas testintr testvpd \
                    testpore testutil testmbox testmdia testprdf testattn \
                    testscan testruntime testibscom testdump testsecureboot \
-                   testfsiscom
+                   testfsiscom testrtloader
+
+RUNTIME_OBJECTS = rt_start.o rt_main.o rt_console.o rt_stdlib.o rt_sync.o \
+                  rt_assert.o rt_vfs.o
+RUNTIME_MODULES = trace_rt
+RUNTIME_DATA_MODULES =
+RUNTIME_TESTCASE_MODULES = cxxtest_rt testsyslib_rt
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
@@ -97,6 +104,16 @@ hbicore_test_MODULES = ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES = ${hbicore_EXTENDED_MODULES} ${TESTCASE_MODULES}
 hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata \
                             test_signed_container
+
+hbirt_OBJECTS = ${RUNTIME_OBJECTS} ${BASE_OBJECTS}
+hbirt_MODULES = ${RUNTIME_MODULES}
+hbirt_DATA_MODULES = ${RUNTIME_DATA_MODULES}
+hbirt_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
+
+hbirt_test_OBJECTS = ${hbirt_OBJECTS}
+hbirt_test_MODULES = ${hbirt_MODULES} ${RUNTIME_TESTCASE_MODULES}
+hbirt_test_DATA_MODULES = ${hbirt_DATA_MODULES}
+hbirt_test_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
 
 IMAGE_PASS_POST += buildpnor imgsizecheck
 

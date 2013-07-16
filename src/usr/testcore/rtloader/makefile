@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/trace/makefile $
+# $Source: src/usr/testcore/rtloader/makefile $
 #
 # IBM CONFIDENTIAL
 #
@@ -20,12 +20,9 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = trace
+ROOTPATH = ../../../..
 
-OBJS = interface.o service.o compdesc.o buffer.o bufferpage.o daemonif.o \
-       debug.o assert.o
-
-SUBDIRS = daemon.d test.d runtime.d
+MODULE = testrtloader
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

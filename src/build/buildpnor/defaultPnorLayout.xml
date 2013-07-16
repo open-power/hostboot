@@ -95,6 +95,13 @@ Layout Description
         <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
+        <description>Hostboot Runtime Services for Sapphire (2MB)</description>
+        <eyeCatch>HBRT</eyeCatch>
+        <physicalOffset>0x2190000</physicalOffset>
+        <physicalRegionSize>0x200000</physicalRegionSize>
+        <side>A</side>
+    </section>
+    <section>
         <description>Special PNOR Test Space (32K)</description>
         <eyeCatch>TEST</eyeCatch>
         <physicalOffset>0x3590000</physicalOffset>

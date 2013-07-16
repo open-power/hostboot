@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -109,6 +109,26 @@ extern uint64_t g_ModulesCompleted;
 // TS_FAIL
 #define TS_FAIL(...)    TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__);   \
     CxxTest::doFailTest( __FILE__, __LINE__ )
+
+// These are all implemented in the cxxtest_data.C that gets put into the base
+// image.
+extern uint64_t g_TotalTests;
+extern uint64_t g_TraceCalls;
+extern uint64_t g_Warnings;
+extern uint64_t g_FailedTests;
+extern uint64_t g_ModulesStarted;
+extern uint64_t g_ModulesCompleted;
+
+// Statistics structure for passing original pointers to the runtime test suite.
+struct CxxTestStats
+{
+    uint64_t* totalTests;
+    uint64_t* traceCalls;
+    uint64_t* warnings;
+    uint64_t* failedTests;
+    uint64_t* modulesStarted;
+    uint64_t* modulesCompleted;
+};
 
 }
 

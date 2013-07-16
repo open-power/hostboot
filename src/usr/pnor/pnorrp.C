@@ -57,6 +57,7 @@ const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
     "SBE",    /**< PNOR::SBE_IPL       : Self-Boot Enginer IPL image */
     "WINK",   /**< PNOR::WINK          : Sleep Winkle Reference image */
     "PAYLOAD",/**< PNOR::PAYLOAD       : HAL/OPAL */
+    "HBRT",   /**< PNOR::HB_RUNTIME    : Hostboot Runtime (for Sapphire) */
     "HBD",    /**< PNOR::HB_DATA       : Hostboot Data */
     "GUARD",  /**< PNOR::GUARD_DATA    : Hostboot Data */
     "HBEL",   /**< PNOR::HB_ERRLOGS    : Hostboot Error log Repository */

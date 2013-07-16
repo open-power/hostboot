@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -144,6 +144,7 @@ namespace TRACE
             friend class TRACEDAEMON::Daemon;
 
         private:
+#ifndef __HOSTBOOT_RUNTIME
                 /** Front-size buffers */
             Buffer* iv_buffers[BUFFER_COUNT]; // slow / fast buffers.
                 /** Interface to signal daemon. */
@@ -155,6 +156,7 @@ namespace TRACE
             static Service* getGlobalInstance();
                 /** Copy the current time into the timestamp. */
             void _createTimeStamp(trace_entry_stamp_t* o_entry);
+#endif
     };
 }
 

@@ -44,3 +44,8 @@ INCFLAGS = $(addprefix -I, $(INCDIR) )
 ASMINCFLAGS = $(addprefix $(lastword -Wa,-I), $(INCDIR))
 
 FLAGS_FILTER ?= $(1)
+
+ifdef HOSTBOOT_RUNTIME
+CFLAGS += -D__HOSTBOOT_RUNTIME=1
+TRACE_FLAGS += --full-strings
+endif

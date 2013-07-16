@@ -73,7 +73,7 @@ void BaseSegment::_init()
         if (i == 0) continue;
 
         // Set pages in kernel text section to be read-only / executable.
-        if (((uint64_t)&data_load_address) > i)
+        if ((ALIGN_PAGE_DOWN((uint64_t)&data_load_address)) > i)
         {
             // Set the Text section to Excutable (implies read)
             iv_block->setPhysicalPage(i, i, EXECUTABLE);

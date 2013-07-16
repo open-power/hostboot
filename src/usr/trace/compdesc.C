@@ -93,6 +93,7 @@ namespace TRACE
             l_rc = &iv_components.back();
         }
 
+#ifndef __HOSTBOOT_RUNTIME  // TODO: RTC 79408
         // Check for special SCAN component to force enable debug trace on.
         if (0 == memcmp(l_compName, "SCAN", 5))
         {
@@ -107,6 +108,7 @@ namespace TRACE
                 l_rc->iv_debugEnabled = true;
             }
         }
+#endif
 
         mutex_unlock(&iv_mutex);
         return l_rc;

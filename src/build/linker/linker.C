@@ -271,6 +271,7 @@ vector<ModuleTable> module_tables;
 map<string,size_t> weak_symbols;
 set<string> all_symbols;
 set<string> weak_symbols_to_check;
+bool includes_extended_image = false;
 
 //-----------------------------------------------------------------------------
 // MAIN
@@ -330,6 +331,7 @@ int main(int argc, char** argv)
             {
                 base_addr = strtoul(fname.c_str()+11,NULL,16) * 0x1000;
                 isOutput = true;
+                includes_extended_image = true;
             }
             else
             {
@@ -423,9 +425,11 @@ int main(int argc, char** argv)
         //
 
         cout << "Updating last address..." << std::hex;
+        const Symbol& last_address_symbol =
+            objects[0].symbols[VFS_TOSTRING(VFS_LAST_ADDRESS)];
         uint64_t last_address_entry_address =
-            objects[0].symbols[VFS_TOSTRING(VFS_LAST_ADDRESS)].address +
-            objects[0].offset + objects[0].data.vma_offset;
+            last_address_symbol.address + last_address_symbol.base +
+            objects[0].offset;
 
         fseek(objects[0].iv_output, last_address_entry_address, SEEK_SET);
 
@@ -435,7 +439,8 @@ int main(int argc, char** argv)
 
         cout << last_address << " to " << last_address_entry_address << endl;
 
-        // Output relocation data.
+        // Output relocation data for single file images. (non-extended)
+        if (!includes_extended_image)
         {
             fseek(objects[0].iv_output, 0, SEEK_END);
             char temp64[sizeof(uint64_t)];
