@@ -43,12 +43,7 @@ group gPcieChipletFir filter singlebit
     /** PCIE_CHIPLET_FIR[4|5|6]
      *  Attention from PCICLOCKFIR (0-2)
      */
-# FIXME: RTC 67200 We are currently unable to SCOM to the PCICLOCKFIRs during
-#        hostboot. Dean is working on a HW solution for the time being, PRD will
-#        not do analysis on these FIRs. This story will be used to re-enable
-#        analysis.
-#    (PcieChipletFir, bit(4|5|6)) ? analyze(gPciClockFir);
-    (PcieChipletFir, bit(4|5|6)) ? TBDDefaultCallout;
+    (PcieChipletFir, bit(4|5|6)) ? analyze(gPciClockFir);
 
     /** PCIE_CHIPLET_FIR[8]
      *  Attention from PBFFIR
