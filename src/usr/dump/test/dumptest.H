@@ -122,14 +122,14 @@ class DumpTest: public CxxTest::TestSuite
 
         uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA, 64,  // 450000
                                 DUMP_TEST_SRC_DATA_AREA + 64, 64,
-                                DUMP_TEST_SRC_DATA_AREA + 128, 64,
-                                DUMP_TEST_SRC_DATA_AREA + 192, 64};
+                                DUMP_TEST_SRC_DATA_AREA + 192, 64,
+                                DUMP_TEST_SRC_DATA_AREA + 256, 64};
 
 
         uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA, 64,   // 460000
                                 DUMP_TEST_DST_DATA_AREA + 64, 64,
-                                DUMP_TEST_DST_DATA_AREA + 128, 64,
-                                DUMP_TEST_DST_DATA_AREA + 192, 64};
+                                DUMP_TEST_DST_DATA_AREA + 256, 64,
+                                DUMP_TEST_DST_DATA_AREA + 512, 64};
 
 
         // Put the src addresses defined above into the MDST
@@ -166,18 +166,14 @@ class DumpTest: public CxxTest::TestSuite
         uint64_t result_data[] = {
                       DUMP_TEST_SRC_DATA_AREA,
                       DUMP_TEST_DST_DATA_AREA,
-                      64, 0,
-
-                      DUMP_TEST_SRC_DATA_AREA+64,
-                      DUMP_TEST_DST_DATA_AREA+64,
-                      64, 0,
-
-                      DUMP_TEST_SRC_DATA_AREA+128,
-                      DUMP_TEST_DST_DATA_AREA+128,
-                      64, 0,
+                      64 *2, 0,
 
                       DUMP_TEST_SRC_DATA_AREA+192,
-                      DUMP_TEST_DST_DATA_AREA+192,
+                      DUMP_TEST_DST_DATA_AREA+256,
+                      64, 0,
+
+                      DUMP_TEST_SRC_DATA_AREA+256,
+                      DUMP_TEST_DST_DATA_AREA+512,
                       64, 0,
         };
 
@@ -268,7 +264,7 @@ class DumpTest: public CxxTest::TestSuite
             if (src_rc!=0)
             {
                 TRACFCOMP(g_trac_dump, "DumpTest::DumpCollect:1 : Results Data mismatch rc = %d", src_rc);
-                TS_FAIL( "DumpTest::DumpCollect ERROR : Unexpected error data mismatch in results table" );
+                TS_FAIL( "DumpTest::DumpCollect ERROR : Unexpected error DATA mismatch in results" );
             }
 
 
@@ -303,8 +299,10 @@ class DumpTest: public CxxTest::TestSuite
 
             if (result_rc!=0)
             {
-                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollect:1 : Results Data mismatch rc = %d", result_rc);
-                TS_FAIL( "DumpTest::DumpCollect ERROR : Unexpected error data mismatch in results table" );
+                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollect:1 : Results Table mismatch rc = %d", result_rc);
+                TRACFBIN( g_trac_dump, "MDRT=", resultTablePtr, sizeof(result_data) );
+                TRACFBIN( g_trac_dump, "expected=", result_data, sizeof(result_data)  );
+                TS_FAIL( "DumpTest::DumpCollect ERROR : Unexpected mismatch in results table" );
             }
         }
 
@@ -353,10 +351,10 @@ class DumpTest: public CxxTest::TestSuite
                                 DUMP_TEST_SRC_DATA_AREA+256 + 128,64, // 4500180
                                 DUMP_TEST_SRC_DATA_AREA+256 + 192, 64}; // 45001C0
 
-        uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA+1024, 64,   // 4600400
-                                DUMP_TEST_DST_DATA_AREA+1024 + 64, 32, // 4600440
-                                DUMP_TEST_DST_DATA_AREA+1024 + 96, 32, // 4600480
-                                DUMP_TEST_DST_DATA_AREA+1024+ 128, 128}; // 46004C0
+        uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA+1024, 64,     //4600400
+                             DUMP_TEST_DST_DATA_AREA+1024 + 64, 32,   //4600440
+                             DUMP_TEST_DST_DATA_AREA+1024 + 256, 32,  //4600500
+                             DUMP_TEST_DST_DATA_AREA+1024 + 128, 128};//4600520
 
         memcpy(srcTablePtr, src_data, sizeof(src_data));
         memcpy(dstTablePtr, dst_data, sizeof(dst_data));
@@ -388,18 +386,15 @@ class DumpTest: public CxxTest::TestSuite
         // results output data expected
         uint64_t result_data[] = {
             DUMP_TEST_SRC_DATA_AREA+256,
-            DUMP_TEST_DST_DATA_AREA+1024, 64, 0,
-
-            DUMP_TEST_SRC_DATA_AREA+256+64,
-            DUMP_TEST_DST_DATA_AREA+1024+64, 32, 0,
+            DUMP_TEST_DST_DATA_AREA+1024, 96, 0,
 
             DUMP_TEST_SRC_DATA_AREA+256+64+32,
-            DUMP_TEST_DST_DATA_AREA+1024+64+32, 32, 0,
+            DUMP_TEST_DST_DATA_AREA+1024+256, 32, 0,
 
             DUMP_TEST_SRC_DATA_AREA+256+128,
             DUMP_TEST_DST_DATA_AREA+1024+128, 64, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+256+192,
+            DUMP_TEST_SRC_DATA_AREA+256+128+64,
             DUMP_TEST_DST_DATA_AREA+1024+128+64, 64, 0,
         };
 
@@ -509,7 +504,7 @@ class DumpTest: public CxxTest::TestSuite
                 if (src_rc!=0)
                 {
                     TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenDest:1 : Results Data mismatch rc = %d for index = %d", src_rc, i);
-                    TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : Unexpected error data mismatch in results table" );
+                    TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : Unexpected error data mismatch in results data" );
                 }
 
 
@@ -618,8 +613,10 @@ class DumpTest: public CxxTest::TestSuite
 
             if (result_rc!=0)
             {
-                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenDest : Results Data mismatch rc = %d", result_rc);
-                TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : Unexpected error data mismatch in results table" );
+                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenDest : Results Table mismatch rc = %d", result_rc);
+                TRACFBIN( g_trac_dump, "MDRT=", resultTablePtr, sizeof(result_data) );
+                TRACFBIN( g_trac_dump, "expected=", result_data, sizeof(result_data)  );
+                TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : Unexpected error TABLE mismatch in results table" );
             }
         }
 
@@ -1128,8 +1125,10 @@ class DumpTest: public CxxTest::TestSuite
 
             if (result_rc!=0)
             {
-                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSRC:1 : Results Data mismatch rc = %d", result_rc);
-                TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error data mismatch in results table" );
+                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSRC:1 : Results Table mismatch rc = %d", result_rc);
+                TRACFBIN( g_trac_dump, "MDRT=", resultTablePtr, sizeof(result_data) );
+                TRACFBIN( g_trac_dump, "expected=", result_data, sizeof(result_data)  );
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error TABLE mismatch in results table" );
             }
         }
 

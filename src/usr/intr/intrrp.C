@@ -45,6 +45,7 @@
 #include <sys/time.h>
 #include <sys/vfs.h>
 #include <hwas/common/hwasCallout.H>
+#include <fsi/fsiif.H>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
 
@@ -73,7 +74,7 @@ const uint32_t IntrRp::cv_PE_BAR_SCOM_LIST[] =
 };
 
 trace_desc_t * g_trac_intr = NULL;
-TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, KILOBYTE, TRACE::BUFFER_SLOW);
+TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, 16*KILOBYTE, TRACE::BUFFER_SLOW);
 
 /**
  * setup _start and handle barrier
@@ -609,6 +610,133 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
     return err;
 }
 
+errlHndl_t IntrRp::getPsiIRSN(TARGETING::Target * i_target, uint32_t& o_irsn)
+{
+    errlHndl_t err = NULL;
+
+    // Setup PHBISR
+    // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
+    PSIHB_ISRN_REG_t reg;
+    size_t scom_len = sizeof(uint64_t);
+
+    do{
+        err = deviceRead
+          ( i_target,
+            &reg,
+            scom_len,
+            DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG));
+
+        if(err)
+        {
+            break;
+        }
+
+        o_irsn = reg.irsn & reg.mask;
+    }while(0);
+
+
+    TRACFCOMP(g_trac_intr,"PSIHB_ISRN: 0x%x",o_irsn);
+
+    return err;
+}
+
+errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target, uint32_t& o_irsn)
+{
+    errlHndl_t err = NULL;
+
+    size_t scom_len = sizeof(uint64_t);
+    uint64_t reg = 0x0;
+
+    do{
+        err = deviceRead
+          ( i_target,
+            &reg,
+            scom_len,
+            DEVICE_SCOM_ADDRESS(NX_BUID_SCOM_ADDR));
+
+        if(err)
+        {
+            break;
+        }
+
+        o_irsn = ((static_cast<uint32_t>(reg >> NX_IRSN_COMP_SHIFT)
+                   & NX_IRSN_COMP_MASK) &
+                  ((static_cast<uint32_t>(reg >> NX_IRSN_MASK_SHIFT)
+                    & NX_IRSN_MASK_MASK) || NX_IRSN_UPPER_MASK));
+    }while(0);
+
+
+    TRACFCOMP(g_trac_intr,"NX_ISRN: 0x%x",o_irsn);
+
+    return err;
+}
+
+
+errlHndl_t IntrRp::getPcieIRSNs(TARGETING::Target * i_target,
+                                std::vector<uint32_t> &o_irsn)
+{
+    errlHndl_t err = NULL;
+    o_irsn.clear();
+
+    uint64_t reg = 0;
+    uint64_t mask = 0;
+
+    size_t scom_len = sizeof(uint64_t);
+
+    do{
+        // PE
+        for(size_t i = 0;
+            i < sizeof(cv_PE_IRSN_COMP_SCOM_LIST)
+                       /sizeof(cv_PE_IRSN_COMP_SCOM_LIST[0]);
+            ++i)
+        {
+            scom_len = sizeof(uint64_t);
+            err = deviceRead
+              (
+               i_target,
+               &reg,
+               scom_len,
+               DEVICE_SCOM_ADDRESS(cv_PE_IRSN_COMP_SCOM_LIST[i])
+               );
+            if(err)
+            {
+                break;
+            }
+
+
+            scom_len = sizeof(uint64_t);
+            err = deviceRead
+              (
+               i_target,
+               &mask,
+               scom_len,
+               DEVICE_SCOM_ADDRESS(cv_PE_IRSN_MASK_SCOM_LIST[i])
+               );
+            if(err)
+            {
+                break;
+            }
+
+            uint64_t l_irsn64 = reg & mask;
+            reg >>= PE_IRSN_SHIFT;
+            mask >>=PE_IRSN_SHIFT;
+            l_irsn64 >>=PE_IRSN_SHIFT;
+            uint32_t l_irsn =  l_irsn64;
+            TRACFCOMP(g_trac_intr,"PE_ISRN[0x%08x] PE%d ", l_irsn, i);
+            if(l_irsn != 0x0)
+            {
+                o_irsn.push_back(l_irsn);
+            }
+        }
+        if(err)
+        {
+            break;
+        }
+    }while(0);
+
+    return err;
+}
+
 
 errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
 {
@@ -688,6 +816,11 @@ errlHndl_t IntrRp::initXIVR(enum ISNvalue_t i_isn, bool i_enable)
 
         switch(i_isn)
         {
+        case ISN_PSI:
+            xivr.priority   = PsiHbXivr::PSI_PRIO;
+            scom_addr       = PsiHbXivr::PSI_XIVR_ADRR;
+            break;
+
         case ISN_OCC:
             xivr.priority   = PsiHbXivr::OCC_PRIO;
             scom_addr       = PsiHbXivr::OCC_XIVR_ADRR;
@@ -792,6 +925,7 @@ errlHndl_t IntrRp::maskXIVR(TARGETING::Target *i_target)
 
     static  const XIVR_INFO xivr_info[] =
     {
+        {ISN_PSI,       PsiHbXivr::PSI_XIVR_ADRR},
         {ISN_OCC,       PsiHbXivr::OCC_XIVR_ADRR},
         {ISN_FSI,       PsiHbXivr::FSI_XIVR_ADRR},
         {ISN_LPC,       PsiHbXivr::LPC_XIVR_ADRR},
@@ -1186,12 +1320,12 @@ errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
         PSIHB_ISRN_REG_t reg;
 
         err = deviceRead
-            (
-             i_proc,
-             &reg,
-             scom_len,
-             DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
-            );
+          (
+           i_proc,
+           &reg,
+           scom_len,
+           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
+           );
 
         if(err)
         {
@@ -1200,23 +1334,23 @@ errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
 
         switch(i_rx_tx)
         {
-            case INTR_UPSTREAM:
-                reg.uie = 0;   //upstream interrupt enable = 0 (disable)
-                break;
+        case INTR_UPSTREAM:
+            reg.uie = 0;   //upstream interrupt enable = 0 (disable)
+            break;
 
-            case INTR_DOWNSTREAM:
-                reg.die = 0;  //downstream interrupt enable = 0 (disable)
-                break;
+        case INTR_DOWNSTREAM:
+            reg.die = 0;  //downstream interrupt enable = 0 (disable)
+            break;
         }
 
         scom_len = sizeof(uint64_t);
         err = deviceWrite
-            (
-             i_proc,
-             &reg,
-             scom_len,
-             DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
-            );
+          (
+           i_proc,
+           &reg,
+           scom_len,
+           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
+           );
 
         if(err)
         {
@@ -1245,13 +1379,13 @@ errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
             switch(i_rx_tx)
             {
                 case INTR_UPSTREAM:
-                    // reset bit PE_IRSN_RX
-                    reg &= ~((1ull << (63-PE_IRSN_RX)));
+                    // reset bit PE_IRSN_UPSTREAM
+                    reg &= ~((1ull << (63-PE_IRSN_UPSTREAM)));
                     break;
 
                 case INTR_DOWNSTREAM:
-                    // reset bit PE_IRSN_TX
-                    reg &= ~((1ull << (63-PE_IRSN_TX)));
+                    // reset bit PE_IRSN_DOWNSTREAM
+                    reg &= ~((1ull << (63-PE_IRSN_DOWNSTREAM)));
                     break;
             }
 
@@ -1328,12 +1462,12 @@ errlHndl_t IntrRp::hw_resetIRSNregs(TARGETING::Target * i_proc)
         // all other fields = 0
 
         err = deviceWrite
-            (
-             i_proc,
-             &reg1,
-             scom_len,
-             DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
-            );
+          (
+           i_proc,
+           &reg1,
+           scom_len,
+           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
+           );
         if(err)
         {
             break;
@@ -1397,31 +1531,433 @@ errlHndl_t IntrRp::hw_resetIRSNregs(TARGETING::Target * i_proc)
     return err;
 }
 
+//----------------------------------------------------------------------------
+
+errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
+{
+    errlHndl_t err = NULL;
+
+    TARGETING::TargetHandleList procCores;
+    getChildChiplets(procCores, i_proc, TYPE_CORE, false); //state can change
+
+    do
+    {
+        //Issue eio to IPIs first
+        for(TARGETING::TargetHandleList::iterator
+            core = procCores.begin();
+            core != procCores.end();
+            ++core)
+        {
+            FABRIC_CHIP_ID_ATTR chip = i_proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+            FABRIC_NODE_ID_ATTR node = i_proc->getAttr<ATTR_FABRIC_NODE_ID>();
+            CHIP_UNIT_ATTR coreId =
+                                (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+            PIR_t pir(0);
+            pir.nodeId = node;
+            pir.chipId = chip;
+            pir.coreId = coreId;
+
+            size_t threads = cpu_thread_count();
+            for(size_t thread = 0; thread < threads; ++thread)
+            {
+                pir.threadId = thread;
+                uint64_t xirrAddr = iv_baseAddr +
+                  cpuOffsetAddr(pir);
+                uint32_t * xirrPtr =
+                  reinterpret_cast<uint32_t*>(xirrAddr + XIRR_OFFSET);
+                uint8_t * mfrrPtr = reinterpret_cast<uint8_t*>(
+                                                 xirrAddr + MFRR_OFFSET);
+
+                //need to set mfrr to 0xFF first
+                TRACDCOMP(g_trac_intr,"Clearing IPI to xirrPtr[%p]", xirrPtr);
+                *mfrrPtr = 0xFF;
+                *xirrPtr = 0xFF000002;
+            }
+        }
+
+        PIR_t pir(iv_masterCpu);
+        pir.threadId = 0;
+        //Can just write all EOIs to master core thread 0 XIRR
+        uint64_t xirrAddr = iv_baseAddr + cpuOffsetAddr(pir);
+        volatile uint32_t * xirrPtr =
+                   reinterpret_cast<uint32_t*>(xirrAddr +XIRR_OFFSET);
+
+
+        //Issue eio to PSI logic
+        uint32_t l_psiBaseIsn;
+        err = getPsiIRSN(i_proc, l_psiBaseIsn);
+        if(err)
+        {
+            break;
+        }
+
+        //Only issue if ISN is non zero (ie set)
+        if(l_psiBaseIsn)
+        {
+            l_psiBaseIsn |= 0xFF000000;
+            uint32_t l_psiMaxIsn = l_psiBaseIsn + ISN_HOST;
+
+            TRACFCOMP(g_trac_intr,"Issuing EOI to PSIHB range %x - %x",
+                      l_psiBaseIsn, l_psiMaxIsn);
+
+            for(uint32_t l_isn = l_psiBaseIsn; l_isn < l_psiMaxIsn; ++l_isn)
+            {
+                TRACDCOMP(g_trac_intr,"   xirrPtr[%p] xirr[%x]\n", xirrPtr, l_isn);
+                *xirrPtr = l_isn;
+            }
+        }
+
+
+        //Issue EIOs to PE (PCIE) ISN
+        std::vector<uint32_t> l_peIsn;
+        err = getPcieIRSNs(i_proc, l_peIsn);
+        if(err)
+        {
+            break;
+        }
+
+        for(std::vector<uint32_t>::iterator peIsn = l_peIsn.begin();
+            peIsn != l_peIsn.end();
+            ++peIsn)
+        {
+            //now need to issue on all SN up to 2048
+            uint32_t l_peBaseIsn = (*peIsn) | 0xFF000000;
+            uint32_t l_peMaxIsn = l_peBaseIsn + MAX_PE_IRSN_SN;
+            TRACFCOMP(g_trac_intr,"Issuing EOI to PCIE range %x - %x",
+                      l_peBaseIsn, l_peMaxIsn);
+
+            for(uint32_t l_isn = l_peBaseIsn; l_isn < l_peMaxIsn; ++l_isn)
+            {
+                *xirrPtr = l_isn;
+            }
+        }
+
+        //Issue eio to NX logic
+        uint32_t l_nxBaseIsn;
+        err = getNxIRSN(i_proc, l_nxBaseIsn);
+        if(err)
+        {
+            break;
+        }
+
+        //Only issue if ISN is non zero (ie set)
+        if(l_nxBaseIsn)
+        {
+            l_nxBaseIsn |= 0xFF000000;
+            uint32_t l_nxMaxIsn = l_nxBaseIsn + MAX_NX_IRSN_SN;
+            TRACFCOMP(g_trac_intr,"Issuing EOI to NX range % - %x",
+                      l_nxBaseIsn, l_nxMaxIsn);
+
+            for(uint32_t l_isn = l_nxBaseIsn; l_isn < l_nxMaxIsn; ++l_isn)
+            {
+                *xirrPtr = l_isn;
+            }
+        }
+    } while(0);
+    return err;
+}
+
 
 //----------------------------------------------------------------------------
 
-errlHndl_t IntrRp::hw_disableIntrMpIpl()
+errlHndl_t IntrRp::findProcs_Cores(TARGETING::TargetHandleList & o_procs,
+                                   TARGETING::TargetHandleList& o_cores)
 {
     errlHndl_t err = NULL;
+
     do
     {
+        //Build a list of "functional" processors.  This needs to be
+        //done without targetting support (just blueprint) since
+        //on MPIPL the targeting information is obtained in
+        //discover_targets -- much later in the IPL.
+
+        //Since this is MPIPL we will rely on two things:
+        // 1) FSI will be active to present chips
+        // 2) The MPIPL HW bit in CFAM 2839 will be set
+
+        //force FSI to init so we can rely on slave data
+        err = FSI::initializeHardware();
+        if(err)
+        {
+            break;
+        }
+
         TARGETING::TargetHandleList procChips;
-        getAllChips(procChips, TYPE_PROC);
+        TARGETING::PredicateCTM predProc( TARGETING::CLASS_CHIP,
+                                          TARGETING::TYPE_PROC );
 
-        TARGETING::TargetHandleList procCores;
-        getAllChiplets(procCores, TYPE_CORE);
+        TARGETING::TargetService& tS = TARGETING::targetService();
+        TARGETING::Target * sysTarget = NULL;
+        tS.getTopLevelTarget( sysTarget );
+        assert( sysTarget != NULL );
 
-        // Disable upstream intr routing on all processor chips
+        TARGETING::Target* masterProcTarget = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(
+                                                        masterProcTarget );
+
+        tS.getAssociated( procChips,
+                          sysTarget,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::ALL,
+                          &predProc );
+
         for(TARGETING::TargetHandleList::iterator proc = procChips.begin();
             proc != procChips.end();
             ++proc)
         {
+            //if master proc -- just add it as we are running on it
+            if (*proc == masterProcTarget)
+            {
+                o_procs.push_back(*proc);
+                continue;
+            }
+
+            //First see if present
+            if(FSI::isSlavePresent(*proc))
+            {
+                TRACFCOMP(g_trac_intr,"Proc %x detected via FSI", TARGETING::get_huid(*proc));
+
+                //Second check to see if MPIPL bit is on cfam "2839" which
+                //Note 2839 is ecmd addressing, real address is 0x28E4 (byte)
+                uint64_t l_addr = 0x28E4;
+                uint32_t l_data = 0;
+                size_t l_size = sizeof(uint32_t);
+                err = deviceRead(*proc,
+                                   &l_data,
+                                   l_size,
+                                   DEVICE_FSI_ADDRESS(l_addr));
+                if (err)
+                {
+                    TRACFCOMP(g_trac_intr,"Failed to read CFAM 2838 on %x",
+                              TARGETING::get_huid(*proc));
+                    break;
+                }
+
+                TRACFCOMP(g_trac_intr,"Proc %x 2839 val [%x]", TARGETING::get_huid(*proc),
+                          l_data);
+
+                if(l_data & 0x80000000)
+                {
+                    //Chip is present and functional -- add it to our list
+                    o_procs.push_back(*proc);
+
+                    //Also need to force it to use Xscom
+                    //Note that it has to support (ie it is part of the SMP)
+                    ScomSwitches l_switches =
+                                     (*proc)->getAttr<ATTR_SCOM_SWITCHES>();
+
+                    l_switches.useFsiScom = 0;
+                    l_switches.useXscom = 1;
+
+                    (*proc)->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+                }
+            }
+        }
+        if (err)
+        {
+            break;
+        }
+
+
+        //Build up a list of all possible cores (don't care if func/present,
+        //just that they exist in the blueprint
+        TARGETING::TargetHandleList l_cores;
+        for(TARGETING::TargetHandleList::iterator proc = o_procs.begin();
+            proc != o_procs.end();
+            ++proc)
+        {
+            l_cores.clear();
+            getChildChiplets(l_cores, *proc, TYPE_CORE, false);
+            for(TARGETING::TargetHandleList::iterator core = l_cores.begin();
+                core != l_cores.end();
+                ++core)
+            {
+                o_cores.push_back(*core);
+            }
+        }
+    }while(0);
+
+    return err;
+}
+
+void IntrRp::allowAllInterrupts(TARGETING::Target* i_core)
+{
+    const TARGETING::Target * proc = getParentChip(i_core);
+
+    FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+    FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
+    CHIP_UNIT_ATTR coreId = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+    PIR_t pir(0);
+    pir.nodeId = node;
+    pir.chipId = chip;
+    pir.coreId = coreId;
+
+    size_t threads = cpu_thread_count();
+    for(size_t thread = 0; thread < threads; ++thread)
+    {
+        pir.threadId = thread;
+        uint64_t cpprAddr=cpuOffsetAddr(pir)+iv_baseAddr+CPPR_OFFSET;
+        uint8_t *cppr = reinterpret_cast<uint8_t*>(cpprAddr);
+        *cppr = 0xff; // allow all interrupts
+    }
+
+}
+
+void IntrRp::disableAllInterrupts(TARGETING::Target* i_core)
+{
+    const TARGETING::Target * proc = getParentChip(i_core);
+
+    FABRIC_CHIP_ID_ATTR  chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+    FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
+    CHIP_UNIT_ATTR coreId = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+    PIR_t pir(0);
+    pir.nodeId = node;
+    pir.chipId = chip;
+    pir.coreId = coreId;
+
+    size_t threads = cpu_thread_count();
+    for(size_t thread = 0; thread < threads; ++thread)
+    {
+        pir.threadId = thread;
+        disableInterruptPresenter(pir);
+    }
+}
+
+void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
+{
+    TRACFCOMP(g_trac_intr,"Drain pending interrupts");
+    bool interrupt_found = false;
+    size_t retryCount = 10;
+
+    do
+    {
+        interrupt_found = false;
+        nanosleep(0,1000000);   // 1 ms
+
+        for(TARGETING::TargetHandleList::iterator
+            core = i_cores.begin();
+            core != i_cores.end();
+            ++core)
+        {
+            const TARGETING::Target * proc = getParentChip(*core);
+
+            FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+            FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
+            CHIP_UNIT_ATTR coreId =
+                              (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+            PIR_t pir(0);
+            pir.nodeId = node;
+            pir.chipId = chip;
+            pir.coreId = coreId;
+
+            TRACFCOMP(g_trac_intr,"  n%d p%d c%d", node, chip, coreId);
+            size_t threads = cpu_thread_count();
+            for(size_t thread = 0; thread < threads; ++thread)
+            {
+                pir.threadId = thread;
+                uint64_t xirrAddr = iv_baseAddr +
+                  cpuOffsetAddr(pir) + XIRR_RO_OFFSET;
+                uint32_t * xirrPtr =
+                  reinterpret_cast<uint32_t*>(xirrAddr);
+                uint32_t xirr = *xirrPtr & 0x00FFFFFF;
+                TRACDCOMP(g_trac_intr,"   xirrPtr[%p] xirr[%x]\n", xirrPtr, xirr);
+                if(xirr)
+                {
+                    // Found pending interrupt!
+                    interrupt_found = true;
+
+                    TRACFCOMP(g_trac_intr,
+                              ERR_MRK
+                              "Pending interrupt found on MPIPL."
+                              " CpuId:0x%x XIRR:0x%x",
+                              pir.word,
+                              xirr);
+                    uint8_t * mfrrPtr =
+                      reinterpret_cast<uint8_t*>(xirrAddr + MFRR_OFFSET);
+                    // Signal EOI - read then write xirr value
+                    ++xirrPtr;        // move to RW XIRR reg
+                    volatile uint32_t xirr_rw = *xirrPtr;
+
+                    //If IPI need to set mfrr to 0xFF
+                    if(INTERPROC_XISR == xirr)
+                    {
+                        *mfrrPtr = 0xFF;
+                    }
+
+                    *xirrPtr = xirr_rw;
+                    --xirrPtr;      // back to RO XIRR reg
+                }
+            }
+        }
+    } while(interrupt_found == true && --retryCount != 0);
+
+    if(interrupt_found && (retryCount == 0))
+    {
+        // traces above should identify stuck interrupt
+        INITSERVICE::doShutdown(INTR::RC_PERSISTANT_INTERRUPTS);
+    }
+}
+
+
+
+errlHndl_t IntrRp::hw_disableIntrMpIpl()
+{
+    errlHndl_t err = NULL;
+    TARGETING::TargetHandleList funcProc, procCores;
+
+    //Need to clear out all pending interrupts.  This includes
+    //ones that PHYP already accepted and ones "hot" in the XIRR
+    //register.   Must be done for all processors prior to opening
+    //up traffic for mailbox (since we switch the IRSN).  PHYP
+    //can route PSI interrupts to any chip in the system so all
+    //must be cleaned up prior to switching
+
+    do
+    {
+        //Get the procs/cores
+        err = findProcs_Cores(funcProc, procCores);
+        if(err)
+        {
+            break;
+        }
+
+        //since HB will need to use PSI interrupt block, we need to
+        //perform the extra step of disabling FSP PSI interrupts at
+        //source(theoretically upstream disable should have handled,
+        //but it seesms to slip through somehow and doesn't get fully
+        //cleaned up cause we clear the XIVR
+        for(TARGETING::TargetHandleList::iterator proc = funcProc.begin();
+            (proc != funcProc.end()) && !err;
+            ++proc)
+        {
+            uint64_t reg = PSI_FSP_INT_ENABLE;
+            size_t scom_len = sizeof(uint64_t);
+            err = deviceWrite
+              (
+               (*proc),
+               &reg,
+               scom_len,
+               DEVICE_SCOM_ADDRESS(PSI_HBCR_AND_SCOM_ADDR)
+               );
+        }
+        if(err)
+        {
+            break;
+        }
+
+        // Disable upstream intr routing on all processor chips
+        TRACFCOMP(g_trac_intr,"Disable upstream interrupt");
+        for(TARGETING::TargetHandleList::iterator proc = funcProc.begin();
+            (proc != funcProc.end()) && !err;
+            ++proc)
+        {
             // disable upstream intr routing
             err = hw_disableRouting(*proc,INTR_UPSTREAM);
-            if(err)
-            {
-                break;
-            }
         }
         if(err)
         {
@@ -1429,126 +1965,42 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
         }
 
         // Set interrupt presenter to allow all interrupts
+        TRACFCOMP(g_trac_intr,"Allow interrupts");
         for(TARGETING::TargetHandleList::iterator 
             core = procCores.begin();
             core != procCores.end();
             ++core)
         {
-            const TARGETING::Target * proc = getParentChip(*core);
-
-            FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-            FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
-            CHIP_UNIT_ATTR coreId = 
-                (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-            PIR_t pir(0);
-            pir.nodeId = node;
-            pir.chipId = chip;
-            pir.coreId = coreId;
-
-            size_t threads = cpu_thread_count();
-            for(size_t thread = 0; thread < threads; ++thread)
-            {
-                pir.threadId = thread;
-                uint64_t cpprAddr=cpuOffsetAddr(pir)+iv_baseAddr+CPPR_OFFSET;
-                uint8_t *cppr = reinterpret_cast<uint8_t*>(cpprAddr);
-                *cppr = 0xff; // allow all interrupts
-            }
+            allowAllInterrupts(*core);
         }
 
         // Now look for interrupts
-        bool interrupt_found = false;
-        size_t retryCount = 10;
+        drainMpIplInterrupts(procCores);
 
-        do
+        // Issue blind EOIs to all threads IPIs and  to clean up stale XIRR
+        TRACFCOMP(g_trac_intr,"Issue blind EOIs to all ISRN and IPIs");
+        for(TARGETING::TargetHandleList::iterator proc = funcProc.begin();
+            (proc != funcProc.end()) && !err;
+            ++proc)
         {
-            interrupt_found = false;
-            nanosleep(0,1000000);   // 1 ms
-
-            for(TARGETING::TargetHandleList::iterator 
-                core = procCores.begin();
-                core != procCores.end();
-                ++core)
-            {
-                const TARGETING::Target * proc = getParentChip(*core);
-
-                FABRIC_CHIP_ID_ATTR chip = 
-                    proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-                FABRIC_NODE_ID_ATTR node = 
-                    proc->getAttr<ATTR_FABRIC_NODE_ID>();
-                CHIP_UNIT_ATTR coreId = 
-                    (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-                PIR_t pir(0);
-                pir.nodeId = node;
-                pir.chipId = chip;
-                pir.coreId = coreId;
-
-                size_t threads = cpu_thread_count();
-                for(size_t thread = 0; thread < threads; ++thread)
-                {
-                    pir.threadId = thread;
-                    uint64_t xirrAddr = iv_baseAddr +
-                        cpuOffsetAddr(pir) + XIRR_RO_OFFSET;
-                    uint32_t * xirrPtr = 
-                        reinterpret_cast<uint32_t*>(xirrAddr);
-                    uint32_t xirr = *xirrPtr & 0x00FFFFFF;
-                    if(xirr) // pending interrupt
-                    {
-                        // Found pending interrupt!
-                        interrupt_found = true;
-
-                        TRACFCOMP(g_trac_intr,
-                                  ERR_MRK
-                                  "Pending interrupt found on MPIPL."
-                                  " CpuId:0x%x XIRR:0x%x",
-                                  pir.word,
-                                  xirr);
-                        // Signal EOI - read then write xirr value
-                        ++xirrPtr;        // move to RW XIRR reg
-                        volatile uint32_t xirr_rw = *xirrPtr;
-                        *xirrPtr = xirr_rw;
-                        --xirrPtr;      // back to RO XIRR reg
-                    }
-                }
-            }
-        } while(interrupt_found == true && --retryCount != 0);
-
-        if(interrupt_found && (retryCount == 0))
+            err = blindIssueEOIs(*proc);
+        }
+        if(err)
         {
-            // traces above should identify stuck interrupt
-            INITSERVICE::doShutdown(INTR::RC_PERSISTANT_INTERRUPTS);
+            break;
         }
 
         // Disable all interrupt presenters
-        for(TARGETING::TargetHandleList::iterator 
-            core = procCores.begin();
+        for(TARGETING::TargetHandleList::iterator core = procCores.begin();
             core != procCores.end();
             ++core)
         {
-            const TARGETING::Target * proc = getParentChip(*core);
-
-            FABRIC_CHIP_ID_ATTR  chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-            FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
-            CHIP_UNIT_ATTR coreId =
-                (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-            PIR_t pir(0);
-            pir.nodeId = node;
-            pir.chipId = chip;
-            pir.coreId = coreId;
-
-            size_t threads = cpu_thread_count();
-            for(size_t thread = 0; thread < threads; ++thread)
-            {
-                pir.threadId = thread;
-                disableInterruptPresenter(pir);
-            }
+            disableAllInterrupts(*core);
         }
 
         // disable downstream routing and clean up IRSN regs
-        for(TARGETING::TargetHandleList::iterator proc = procChips.begin();
-            proc != procChips.end();
+        for(TARGETING::TargetHandleList::iterator proc = funcProc.begin();
+            proc != funcProc.end();
             ++proc)
         {
             // disable downstream routing
@@ -1564,6 +2016,15 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
             {
                 break;
             }
+
+            //Now mask off all XIVRs under the PSI unit
+            //This prevents hot PSI mbox interrupts from flowing up to HB
+            //and allows PHYP to deal with them
+            err = maskXIVR(*proc);
+            if(err)
+            {
+                break;
+            }
         }
         if(err)
         {
@@ -1572,6 +2033,7 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
     } while(0);
     return err;
 }
+
 
 void IntrRp::cleanCheck()
 {
@@ -1847,5 +2309,3 @@ uint64_t INTR::getIntpAddr(const TARGETING::Target * i_ex, uint8_t i_thread)
               pir.word & (InterruptMsgHdlr::P8_PIR_THREADID_MSK |
                           InterruptMsgHdlr::P8_PIR_COREID_MSK)));
 }
-
-

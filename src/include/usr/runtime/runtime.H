@@ -96,6 +96,35 @@ errlHndl_t get_host_data_section( SectionId i_section,
                                   size_t& o_dataSize );
 const size_t DATA_SIZE_UNKNOWN = 0xFFFFFFFFFFFFFFFF;
 
+/**
+ * @brief  Update the actual count of section.  Only supported for
+ *         memory dump results table
+ *
+ * @param[in] i_section  Chunk of data to find
+ * @param[out] i_count   Actual countPhysical memory address of data
+ *
+ * @return errlHndl_t  NULL on success
+ */
+errlHndl_t update_host_data_section_actual( SectionId i_section,
+                                            uint16_t i_count );
+
+/**
+ * @brief This function updates the actual count for the MDRT
+ * May be called at anytime, but the actual value is updated
+ * to the SPIRA during populate_attributes
+ *
+ */
+void update_MDRT_Count(uint16_t i_count);
+
+/**
+ * @brief This function writes the stored count for the MDRT
+ * out to the SPIRA
+ *
+ * @return  errlHndl_t
+ */
+errlHndl_t write_MDRT_Count(void);
+
+
 }
 
 #endif 

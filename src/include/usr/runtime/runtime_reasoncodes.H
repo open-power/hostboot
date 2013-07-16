@@ -45,7 +45,7 @@ namespace RUNTIME
         MOD_TCE_INIT                    = 0x0D,   /**< tce.C */
         MOD_TCE_MAP                     = 0x0E,   /**< tce.C */
         MOD_HDATSERVICE_FINDSPIRA       = 0x0F, /** hdatservice.C */
-
+        MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL = 0x10, /**< hdatservice.C */
     };
 
     enum RuntimeReasonCode

@@ -139,6 +139,20 @@ void InterruptMsgHdlr::handleInterrupt()
         // by writing the xirr back with the value read.
 
         printk("XIRR @ %lx = %x\n",xirrAddress,xirr);
+
+        //If this is an IPI -- clean it up
+        if((xirr & 0x00FFFFFF) == INTERPROC_XISR)
+        {
+            uint64_t mfrrAddress =
+              cv_ipc_base_address + mmio_offset(pir) + MFRR_ADDR_OFFSET;
+
+            // Ignore HRMOR setting
+            mfrrAddress |= 0x8000000000000000ul;
+            uint8_t mfrr = 0xFF;
+
+            asm volatile("stbcix %0,0,%1" :: "r" (mfrr) , "r" (mfrrAddress));
+            asm volatile("stwcix %0,0,%1" :: "r" (xirr) , "r" (xirrAddress));
+        }
     }
 }
 

@@ -95,6 +95,17 @@ namespace RUNTIME
                                        uint64_t& o_dataAddr,
                                        size_t& o_dataSize );
 
+        /**
+         * @brief  Update the actual count of section.  Only supported for
+         *         memory dump results table
+         *
+         * @param[in] i_section  Chunk of data to find
+         * @param[in] i_count   Actual count
+         *
+         * @return errlHndl_t  NULL on success
+         */
+        errlHndl_t updateHostDataSectionActual( SectionId i_section,
+                                                uint16_t i_count );
 
       protected:
         /**
@@ -219,6 +230,43 @@ namespace RUNTIME
          * SPIRA-S
          */
         hdatSpira_t* iv_spiraS;
+
+        /**
+         * Count of number of MDRT entries present
+         * on MPIPL/Dump.  A value of 0 implies it
+         * doesn't need to be written
+         */
+        uint16_t iv_mdrtCnt;
+
+      public:
+        /**
+         * @brief  Update the actual count of MDRT.  Called by dump
+         *  and needs to be saved away till populate_attributes.  Can't
+         *  be directly written by dump since FSP will load new value over
+
+         * @param[in] i_count   Actual count for MDRT entries
+         *
+         */
+        void updateMdrtCount( uint16_t i_count )
+        {
+            iv_mdrtCnt = i_count;
+        }
+
+        /**
+         * @brief  Write the MDRT stored value to SPIRA
+         *
+         * @return errlHndl_t  NULL on success
+         */
+        errlHndl_t writeMdrtCount( void )
+        {
+            errlHndl_t l_err = NULL;
+            if(iv_mdrtCnt)
+            {
+                l_err = updateHostDataSectionActual(
+                                   MS_DUMP_RESULTS_TBL,iv_mdrtCnt);
+            }
+            return l_err;
+        }
     };
 
 };

@@ -90,7 +90,7 @@ namespace INTR
 
     enum ISNvalue_t
     {
-        ISN_FSP         = 0,
+        ISN_PSI         = 0,
         ISN_OCC         = 1,
         ISN_FSI         = 2,
         FSP_MAILBOX     = 2,
@@ -138,6 +138,7 @@ namespace INTR
         MSG_INTR_DISABLE,           //!< Disable external interrupts
         MSG_INTR_SHUTDOWN,          //!< Call to shutdown interrupt presenter
         MSG_INTR_ENABLE_PSI_INTR,   //!< Enable PSI interrupts
+        MSG_INTR_MPIPL_CLEANUP,     //!< Clean up interrupts on MPIPL
     };
 
     /**

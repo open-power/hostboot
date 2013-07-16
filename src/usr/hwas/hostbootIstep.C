@@ -40,6 +40,7 @@
 
 #include <targeting/attrsync.H>
 #include <diag/prdf/prdfMain.H>
+#include <intr/interrupt.H>
 
 namespace HWAS
 {
@@ -115,6 +116,7 @@ void* host_discover_targets( void *io_pArgs )
 
             // Sync attributes from Fsp
             errl = syncAllAttributesFromFsp();
+
         }
         else
         {

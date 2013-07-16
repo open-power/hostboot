@@ -853,7 +853,6 @@ void*   call_host_mpipl_service( void *io_pArgs )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : proc_mpipl_ex_cleanup" );
 
-
         // currently according to Adriana, the dump calls should only cause an
         // istep failure when the dump collect portion of this step fails..  We
         // will not fail the istep on any mbox message failures. instead we will
@@ -861,8 +860,20 @@ void*   call_host_mpipl_service( void *io_pArgs )
    
         errlHndl_t l_errMsg = NULL;
 
-        // Need to load the dump module
-        l_err = VFS::module_load( "libdump.so" );
+        // Dump relies upon the runtime module
+        // Not declaring in istep DEP list cause if we load it
+        // we want it to stay loaded
+        if (  !VFS::module_is_loaded( "libruntime.so" ) )
+        {
+            l_err = VFS::module_load( "libruntime.so" );
+
+            if ( l_err )
+            {
+                //  load module returned with errl set
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Could not load runtime module" );
+            }
+        }
 
         // If dump module successfull loaded then continue with DumpCollect and
         // messaging
@@ -952,8 +963,7 @@ void*   call_host_mpipl_service( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR : returned from VFS::module_load (libdump.so)" );
-        }    
-
+        }
     }
 
     // If got an error in the procedure or collection of the dump kill the istep

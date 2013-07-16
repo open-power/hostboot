@@ -113,6 +113,9 @@ errlHndl_t doDumpCollect(void)
         int rc = 0;
         bool invalidSrcSize = false;
         bool invalidDestSize = false;
+        bool l_contiguous = false;
+        uint64_t l_prevSrcAddr = 0xFFFFFFFFFFFFFFFF;
+        uint32_t l_resultCount = 0x0;
 
         // local src table info
         uint64_t *vaSrcTableAddr = 0;
@@ -190,14 +193,18 @@ errlHndl_t doDumpCollect(void)
             }
 
             vaMapSrcTableAddr =
-              (static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(curSrcTableAddr)),
-                                                   THIRTYTWO_GB)));
+              (static_cast<uint64_t*>(mm_block_map(
+                         reinterpret_cast<void*>(ALIGN_PAGE_DOWN
+                                      (curSrcTableAddr & RM_TOP_NIBBLE_MASK)),
+                                       THIRTYTWO_GB)));
 
             vaSrcTableAddr = vaMapSrcTableAddr;
 
             vaMapDestTableAddr =
-              (static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(curDestTableAddr)),
-                                                   THIRTYTWO_GB)));
+              (static_cast<uint64_t*>(mm_block_map(
+                         reinterpret_cast<void*>(ALIGN_PAGE_DOWN
+                                       (curDestTableAddr & RM_TOP_NIBBLE_MASK)),
+                                        THIRTYTWO_GB)));
 
             vaDestTableAddr = vaMapDestTableAddr;
 
@@ -212,6 +219,7 @@ errlHndl_t doDumpCollect(void)
             // Current Destination physical and Va address
             TRACFCOMP(g_trac_dump, "HBDumpCopySrcToDest DestTableIndex = %d, DestTableAddr = %.16X, VA = %.16X", curDestIndex, curDestTableAddr, vaDestTableAddr);
 
+            resultsTableEntry->dataSize = 0x0;
 
             while(1)
             {
@@ -219,7 +227,8 @@ errlHndl_t doDumpCollect(void)
                 if (bytesLeftInSrc == 0)
                 {
                     // unmap the previous src entry
-                    rc =  mmio_dev_unmap(reinterpret_cast<void*>(vaMapSrcTableAddr));
+                    rc =  mm_block_unmap(
+                                 reinterpret_cast<void*>(vaMapSrcTableAddr));
 
                     if (rc != 0)
                     {
@@ -275,8 +284,10 @@ errlHndl_t doDumpCollect(void)
                     // map the MDST entry to a device such that we can read and write from that memory
                     // address
                     vaMapSrcTableAddr =
-                      (static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(curSrcTableAddr)),
-                                                           THIRTYTWO_GB)));
+                      (static_cast<uint64_t*>(mm_block_map(
+                          reinterpret_cast<void*>(ALIGN_PAGE_DOWN
+                            (curSrcTableAddr & RM_TOP_NIBBLE_MASK)),
+                            THIRTYTWO_GB)));
 
                     vaSrcTableAddr = vaMapSrcTableAddr;
 
@@ -291,8 +302,8 @@ errlHndl_t doDumpCollect(void)
                 if (bytesLeftInDest == 0)
                 {
                     // unmap the previous dest entry
-                    rc =  mmio_dev_unmap(reinterpret_cast<void*>(vaMapDestTableAddr));
-
+                    rc =  mm_block_unmap(
+                           reinterpret_cast<void*>(vaMapDestTableAddr));
                     if (rc != 0)
                     {
                         /*@
@@ -358,6 +369,20 @@ errlHndl_t doDumpCollect(void)
                     curDestTableAddr = destTableEntry[curDestIndex].dataAddr;
                     bytesLeftInDest = destTableEntry[curDestIndex].dataSize;
 
+                    //check to see if this destination addr is contiguous
+                    l_contiguous = false;
+                    if(curDestIndex !=0)
+                    {
+                        if(((destTableEntry[curDestIndex-1].dataAddr +
+                            destTableEntry[curDestIndex-1].dataSize)
+                            == curDestTableAddr)
+                           && (l_prevSrcAddr == curSrcTableAddr))
+                        {
+                            l_contiguous = true;
+
+                        }
+                    }
+
                     // If the current dest addr or the size to copy are zero.
                     if ((curDestTableAddr == 0) || (bytesLeftInDest == 0))
                     {
@@ -410,8 +435,10 @@ errlHndl_t doDumpCollect(void)
 
                     // map the MDDT to a VA addresss
                     vaMapDestTableAddr =
-                      (static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(curDestTableAddr)),
-                                                           THIRTYTWO_GB)));
+                      (static_cast<uint64_t*>(mm_block_map(
+                             reinterpret_cast<void*>(ALIGN_PAGE_DOWN
+                                  (curDestTableAddr & RM_TOP_NIBBLE_MASK)),
+                                   THIRTYTWO_GB)));
 
                     vaDestTableAddr = vaMapDestTableAddr;
 
@@ -434,11 +461,23 @@ errlHndl_t doDumpCollect(void)
                 if (curResultIndex < maxResultEntries)
                 {
                     // Update the results table
-                    resultsTableEntry->srcAddr = curSrcTableAddr;
-                    resultsTableEntry->destAddr = curDestTableAddr;
-                    resultsTableEntry->dataSize = sizeToCopy;
-                    resultsTableEntry++;
-                    curResultIndex++;
+                    if(l_contiguous)
+                    {
+                        (resultsTableEntry-1)->dataSize +=sizeToCopy;
+                    }
+                    else
+                    {
+                        resultsTableEntry->srcAddr = curSrcTableAddr;
+                        resultsTableEntry->destAddr = curDestTableAddr;
+                        resultsTableEntry->dataSize = sizeToCopy;
+                        resultsTableEntry++;
+                        l_resultCount++;
+                        curResultIndex++;
+                        if (curResultIndex < maxResultEntries)
+                        {
+                            resultsTableEntry->dataSize = 0x0;
+                        }
+                    }
                 }
                 else
                 {
@@ -476,6 +515,7 @@ errlHndl_t doDumpCollect(void)
                 curDestTableAddr += sizeToCopy;
                 vaSrcTableAddr += addrOffset;
                 vaDestTableAddr += addrOffset;
+                l_prevSrcAddr = curSrcTableAddr;  //src address last used
 
             } // end of while loop
 
@@ -525,6 +565,8 @@ errlHndl_t doDumpCollect(void)
                 break;
             }
 
+            //Update actual count in RUNTIME
+            RUNTIME::update_MDRT_Count(l_resultCount);
         }while(0);// end of do-while loop
 
         // Got an errorlog back from get_host_data_sections

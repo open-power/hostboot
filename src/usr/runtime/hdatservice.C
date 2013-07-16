@@ -299,6 +299,7 @@ hdatService::hdatService(void)
 :iv_spiraL(NULL)
 ,iv_spiraH(NULL)
 ,iv_spiraS(NULL)
+,iv_mdrtCnt(0)
 {
 }
 
@@ -599,7 +600,6 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         // Setup the SPIRA pointers
         errhdl = findSpira();
         if( errhdl ) { break; }
-
 
         // NACA
         if( RUNTIME::NACA == i_section )
@@ -929,7 +929,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
 
             //Note - there is no header for the MDRT
             //return the total allocated size since it is empty at first
-            o_dataSize = tuple->hdatAllocSize * tuple->hdatAllocSize;
+            o_dataSize = tuple->hdatAllocSize * tuple->hdatAllocCnt;
             errhdl = getSpiraTupleVA(tuple, o_dataAddr);
             if( errhdl ) { break; }
 
@@ -1157,6 +1157,115 @@ errlHndl_t hdatService::findSpira( void )
     return errhdl;
 }
 
+errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
+                                                     uint16_t i_count )
+{
+    errlHndl_t errhdl = NULL;
+    TRACFCOMP( g_trac_runtime, "RUNTIME::updateHostDataSectionActual( i_section=%d )", i_section);
+
+    do
+    {
+        //Always force a load (mapping)
+        errhdl = loadHostData();
+        if(errhdl)
+        {
+            break;
+        }
+
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        // Figure out what kind of payload we have
+        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
+          = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+
+        if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
+        {
+            // we're all done -- don't need to do anything
+            break;
+        }
+        //If payload is not (PHYP or Sapphire w/fsp)
+        else if( !((TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
+            ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
+             !INITSERVICE::spLess())))
+        {
+            TRACFCOMP( g_trac_runtime, "get_host_data_section> There is no host data for PAYLOAD_KIND=%d", payload_kind );
+            /*@
+             * @errortype
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL
+             * @reasoncode   RUNTIME::RC_INVALID_PAYLOAD_KIND
+             * @userdata1    ATTR_PAYLOAD_KIND
+             * @userdata2    Requested Section
+             * @devdesc      There is no host data for specified kind of payload
+             */
+            errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              RUNTIME::MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL,
+                              RUNTIME::RC_INVALID_PAYLOAD_KIND,
+                              payload_kind,
+                              i_section);
+            errhdl->collectTrace("RUNTIME",1024);
+            break;
+        }
+
+        // Setup the SPIRA pointers
+        errhdl = findSpira();
+        if( errhdl ) { break; }
+
+
+        // MS DUMP Results Table - MDRT
+        if( RUNTIME::MS_DUMP_RESULTS_TBL == i_section )
+        {
+            //For security we can't trust the FSP's payload attribute
+            //  on MPIPLs for the dump tables.
+            //@todo: RTC:59171
+
+            // Find the right tuple and verify it makes sense
+            hdat5Tuple_t* tuple = NULL;
+            if( iv_spiraS )
+            {
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAH_MS_DUMP_RSLT_TBL]);
+            }
+            else if( unlikely(iv_spiraL != NULL) )
+            {
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_MS_DUMP_RSLT_TBL]);
+            }
+            TRACFCOMP( g_trac_runtime, "MS_DUMP_RESULTS_TBL tuple=%p, count=%x", tuple, i_count);
+            errhdl = check_tuple( i_section,
+                                  tuple );
+            if( errhdl ) { break; }
+
+            tuple->hdatActualCnt = i_count;
+        }
+        // Not sure how we could get here...
+        else
+        {
+            TRACFCOMP( g_trac_runtime, "get_host_data_section> Unknown section %d", i_section );
+            /*@
+             * @errortype
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL
+             * @reasoncode   RUNTIME::RC_INVALID_SECTION
+             * @userdata1    Section Id
+             * @userdata2    <unused>
+             * @devdesc      Unknown section requested
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           RUNTIME::MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL,
+                           RUNTIME::RC_INVALID_SECTION,
+                           i_section,
+                           0);
+            errhdl->collectTrace("RUNTIME",1024);
+            break;
+        }
+
+        if( errhdl ) { break; }
+
+    } while(0);
+
+    return errhdl;
+}
+
 /********************
  Public Methods
  ********************/
@@ -1183,6 +1292,22 @@ errlHndl_t get_host_data_section( SectionId i_section,
       getHostDataSection(i_section,i_instance, o_dataAddr, o_dataSize);
 }
 
+errlHndl_t update_host_data_section_actual( SectionId i_section,
+                                            uint16_t i_count )
+{
+    return Singleton<hdatService>::instance().
+      updateHostDataSectionActual(i_section,i_count);
+}
+
+void update_MDRT_Count(uint16_t i_count )
+{
+    Singleton<hdatService>::instance().updateMdrtCount(i_count);
+}
+
+errlHndl_t write_MDRT_Count( void )
+{
+    return Singleton<hdatService>::instance().writeMdrtCount();
+}
 };
 
 /********************

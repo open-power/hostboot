@@ -300,6 +300,15 @@ void*    call_host_runtime_setup( void    *io_pArgs )
         }
         else
         {
+            //Update the MDRT value
+            l_err = RUNTIME::write_MDRT_Count();
+            if(l_err != NULL)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "write_MDRT_Count failed" );
+                break;
+            }
+
             // Write the HostServices attributes into mainstore
             l_err = RUNTIME::populate_attributes();
             if ( l_err )

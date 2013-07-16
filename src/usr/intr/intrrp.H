@@ -123,6 +123,14 @@ namespace INTR
                 // Used to enable/disable and control interrupt routing
                 NX_BUID_SCOM_ADDR       = 0x0201308E, //INTR CTRL for NX
                 NX_BUID_ENABLE          = 0,          //INTR Enable bit for NX
+                NX_IRSN_COMP_MASK       = 0x7FFFF,
+                NX_IRSN_MASK_MASK       = 0x1FFF,
+                NX_IRSN_UPPER_MASK      = 0x7E000,
+                NX_IRSN_COMP_SHIFT      = 44,
+                NX_IRSN_MASK_SHIFT      = 31,
+                MAX_NX_IRSN_SN          = 32,
+
+
 
                 PE0_IRSN_COMP_SCOM_ADDR = 0x0201201A, //INTR IRSN compare
                 PE0_IRSN_MASK_SCOM_ADDR = 0x0201201B, //INTR IRSN mask
@@ -137,8 +145,14 @@ namespace INTR
                 PE2_BAREN_SCOM_ADDR     = 0x02012845, //INTR enable/disable
 
                 // Bit pos in PEx_BAREN_SCOM register
-                PE_IRSN_RX = 3,         // upstream enable
-                PE_IRSN_TX = 4,         // downstream enable
+                PE_IRSN_DOWNSTREAM = 3,         // downstream (PE RX enable)
+                PE_IRSN_UPSTREAM = 4,           // upstream   (PE TX enable)
+                PE_IRSN_SHIFT           = 45,
+                MAX_PE_IRSN_SN          = 2048,
+
+
+                PSI_FSP_INT_ENABLE      = 0x1000000000000000ULL,
+                PSI_HBCR_AND_SCOM_ADDR  = 0x02010913,
             };
 
             enum INTR_ROUTING_t
@@ -228,7 +242,9 @@ namespace INTR
                     LPC_PRIO            = 0x40,
                     LCL_ERR_PRIO        = 0x10,
                     HOST_PRIO           = 0x50,
+                    PSI_PRIO            = 0x60,
 
+                    PSI_XIVR_ADRR           = 0x02010910,
                     OCC_XIVR_ADRR           = 0x02010916,
                     FSI_XIVR_ADRR           = 0x02010917,
                     LPC_XIVR_ADRR           = 0x02010918,
@@ -281,7 +297,6 @@ namespace INTR
             typedef std::vector<PIR_t> CpuList_t;
             typedef std::vector<TARGETING::Target *> ChipList_t;
             typedef  std::vector<ISNvalue_t> ISNList_t;
-
 
             msg_q_t     iv_msgQ;        //!< Kernel Interrupt message queue
             Registry_t  iv_registry;    //!< registered interrupt type
@@ -419,6 +434,14 @@ namespace INTR
             errlHndl_t hw_disableRouting(TARGETING::Target * i_proc,
                                          INTR_ROUTING_t i_rx_tx);
 
+            /*
+             * During MPIPL issue EOIs (blind) to all ISNs
+             * @param i_proc  The processor chip target to issue EOIs for
+             * @return an error handle on error
+             */
+            errlHndl_t blindIssueEOIs(TARGETING::Target * i_proc);
+
+
             /**
              * Reset ISRN value in hardware regs
              * @param i_proc  The target processor
@@ -427,9 +450,72 @@ namespace INTR
             errlHndl_t hw_resetIRSNregs(TARGETING::Target * i_proc);
 
             /**
+             * Build a list of "functional" processors.  This needs to be
+             * done without targetting support (just blueprint) since
+             * on MPIPL the targeting information is obtained in
+             * discover_targets -- much later in the IPL.
+             *
+
+             * @param o_proc  List of "functional" processors on SMP
+             * @param o_cores List of cores under functional processors
+             * @return an error handle on error
+             */
+            errlHndl_t findProcs_Cores(TARGETING::TargetHandleList & o_procs,
+                                       TARGETING::TargetHandleList& o_cores);
+
+            /**
              * disableHwMpIpl
              */
             errlHndl_t hw_disableIntrMpIpl();
+
+            /**
+             * Read the Psi interrupt source number out of the HW
+             *
+             * @param i_target  Processor target to read value from
+             * @param o_irsn    IRSN of the PSI unit for the processor
+             * @return an error handle on error
+             */
+            errlHndl_t getPsiIRSN(TARGETING::Target * i_target,
+                                  uint32_t& o_irsn);
+
+            /**
+             * Read the PCIE interrupt source numbers out of the HW
+             *
+             * @param i_target  Processor target to read value from
+             * @param o_irsn    List of IRSN for the PCIE units
+             * @return an error handle on error
+             */
+            errlHndl_t getPcieIRSNs(TARGETING::Target * i_target,
+                                    std::vector<uint32_t> &o_irsn);
+
+            /**
+             * Read the NX interrupt source number out of the HW
+             *
+             * @param i_target  Processor target to read value from
+             * @param o_irsn    IRSN of the NX unit for the processor
+             * @return an error handle on error
+             */
+            errlHndl_t getNxIRSN(TARGETING::Target * i_target,
+                                 uint32_t& o_irsn);
+
+
+            /**
+             * Drain all outstanding interrupts during MPIPL
+             * @param i_cores  List of all existing cores on functional procs
+             */
+            void drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores);
+
+            /**
+             * Disable all interrupts on passed in core
+             * @param i_core  Core to disable interrupts on
+             */
+            void disableAllInterrupts(TARGETING::Target* i_core);
+
+            /**
+             * Allow all interrupts on passed in core
+             * @param i_core  Core to enable interrupts on
+             */
+            void allowAllInterrupts(TARGETING::Target* i_core);
 
             /**
              * cleanCheck - verify there are no active interrupts

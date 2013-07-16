@@ -65,6 +65,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
+         * @brief   FSI Device Driver
+         */
+
+        {
+            "libfsi.so" ,                               // taskname
+            NULL,                                       // no pointer to fn
+            {
+                INIT_TASK,                          // task type
+                EXT_IMAGE,                          // Extended Module
+            }
+        },
+
+        /**
          * @brief External interrupt resource provider
          */
         {
@@ -103,18 +116,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
 
-        /**
-         * @brief   FSI Device Driver
-         */
-
-        {
-            "libfsi.so" ,                               // taskname
-            NULL,                                       // no pointer to fn
-            {
-                INIT_TASK,                          // task type
-                EXT_IMAGE,                          // Extended Module
-            }
-        },
 
         /**
          * @brief   FSI SCOM Device Driver
