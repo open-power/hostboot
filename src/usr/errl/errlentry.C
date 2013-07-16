@@ -650,7 +650,9 @@ void ErrlEntry::processCallout()
                 (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
             {
                 // call HWAS to have this processed
-                (*pFn)(this,(*it)->iv_pData, (*it)->iv_Size, false);
+                errlHndl_t l_errl = this;
+                (*pFn)(l_errl,(*it)->iv_pData, (*it)->iv_Size, false);
+                assert((this == l_errl), "processCallout changed the errl");
             }
         } // for each SectionVector
     } // if HWAS module loaded
@@ -688,7 +690,9 @@ void ErrlEntry::deferredDeconfigure()
                 // call HWAS function to register this action,
                 //  put it on a queue and will be processed separately,
                 //  when the time is right.
-                (*pFn)(this,(*it)->iv_pData, (*it)->iv_Size, true);
+                errlHndl_t l_errl = this;
+                (*pFn)(l_errl,(*it)->iv_pData, (*it)->iv_Size, true);
+                assert((this == l_errl), "processCallout changed the errl");
             }
         } // for each SectionVector
     } // if HWAS module loaded

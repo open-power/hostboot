@@ -40,10 +40,15 @@ namespace HWAS
 // platHandleProcedureCallout
 //******************************************************************************
 errlHndl_t platHandleProcedureCallout(
-        errlHndl_t i_errl,
+        errlHndl_t &io_errl,
         epubProcedureID i_procedure,
         callOutPriority i_priority)
 {
+    // WARNING:
+    // this hostboot code should not change io_errl, unless the caller of the
+    //  processCallouts() function also changes, as today it (errlentry.C) calls
+    //  from the errlEntry object
+
     errlHndl_t errl = NULL;
 
     // hostboot does not handle or do any action for procedure callouts
@@ -57,9 +62,14 @@ errlHndl_t platHandleHWCallout(
         TARGETING::Target *i_pTarget,
         callOutPriority i_priority,
         DeconfigEnum    i_deconfigState,
-        errlHndl_t i_errl,
+        errlHndl_t &io_errl,
         GARD_ErrorType  i_gardErrorType)
 {
+    // WARNING:
+    // this hostboot code should not change io_errl, unless the caller of the
+    //  processCallouts() function also changes, as today it (errlentry.C) calls
+    //  from the errlEntry object
+
     errlHndl_t errl = NULL;
 
     HWAS_INF("HW callout; pTarget %p gardErrorType %x deconfigState %x",
@@ -80,7 +90,7 @@ errlHndl_t platHandleHWCallout(
             default:
             {
                 errl = HWAS::theDeconfigGard().createGardRecord(*i_pTarget,
-                        i_errl->plid(),
+                        io_errl->plid(),
                         i_gardErrorType);
                 break;
             }
@@ -96,7 +106,7 @@ errlHndl_t platHandleHWCallout(
             {
                 // call HWAS common function
                 errl = HWAS::theDeconfigGard().deconfigureTarget(*i_pTarget,
-                            i_errl->plid());
+                            io_errl->plid());
                 break;
             }
             case (DELAYED_DECONFIG):
@@ -119,8 +129,8 @@ errlHndl_t platHandleHWCallout(
             if (!hwasState.functional)
             {
                 HWAS_ERR("master proc deconfigured - Shutdown due to plid 0x%X",
-                        i_errl->plid());
-                INITSERVICE::doShutdown(i_errl->plid());
+                        io_errl->plid());
+                INITSERVICE::doShutdown(io_errl->plid());
             }
         }
     } // PLD
@@ -136,8 +146,13 @@ errlHndl_t platHandleBusCallout(
         TARGETING::Target *i_pTarget2,
         busTypeEnum i_busType,
         callOutPriority i_priority,
-        errlHndl_t i_errl)
+        errlHndl_t &io_errl)
 {
+    // WARNING:
+    // this hostboot code should not change io_errl, unless the caller of the
+    //  processCallouts() function also changes, as today it (errlentry.C) calls
+    //  from the errlEntry object
+
     errlHndl_t errl = NULL;
 
     // hostboot does not handle or do any action for bus callouts

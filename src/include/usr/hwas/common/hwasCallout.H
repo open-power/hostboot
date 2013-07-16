@@ -143,25 +143,25 @@ typedef struct callout_ud
  *  @brief processCallout process the userdetail for a callout, calling
  *              the deconfigure and/or GARD funcationality as appropriate
  *
- *  @param[in]  i_errl Error log handle
+ *  @param[in]  io_errl Error log handle reference
  *  @param[in]  i_pData  Pointer to the callout bundle
  *  @param[in]  i_Size  size of the data in the callout bundle
  *  @param[in]  i_DeferredOnly  bool - true if ONLY check for defered deconfig
  *
  */
-void processCallout(errlHndl_t i_errl,
+void processCallout(errlHndl_t &io_errl,
         uint8_t *i_pData,
         uint64_t i_Size,
         bool i_DeferredOnly = false);
 
 // typedef for function pointer that the errlog class will use.
-typedef bool (*processCalloutFn)(errlHndl_t, uint8_t *, uint64_t, bool);
+typedef bool (*processCalloutFn)(errlHndl_t &, uint8_t *, uint64_t, bool);
 
 /**
  * @brief platform specific code to handle a procedure callout that has been
  *  found in an errlog
  *
- * @param[in]  i_errl       errlHndl for this errlog.
+ * @param[in]  io_errl      reference to errlHndl for this errlog.
  * @param[in]  i_procedure  Enum indicating which procedure to add to the
  *                          error log
  * @param[in]  i_priority   Enum indicating the priority of the callout
@@ -169,7 +169,7 @@ typedef bool (*processCalloutFn)(errlHndl_t, uint8_t *, uint64_t, bool);
  * @return errlHndl_t       valid errlHndl_t handle if there was an error,
  *                          NULL if no errors;
  */
-errlHndl_t platHandleProcedureCallout(errlHndl_t i_errl,
+errlHndl_t platHandleProcedureCallout(errlHndl_t &io_errl,
         epubProcedureID i_procedure,
         callOutPriority i_priority);
 
@@ -180,7 +180,7 @@ errlHndl_t platHandleProcedureCallout(errlHndl_t i_errl,
  * @param[in]  i_pTarget        target
  * @param[in]  i_priority       Enum indicating the priority of the callout
  * @param[in]  i_deconfigState  Enum indicating whether to deconfig or not
- * @param[in]  i_errl           errlHnld for this errlog
+ * @param[in]  io_errl          reference to errlHnld for this errlog
  * @param[in]  i_gardErrType    Enum indicating the type of failure
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error,
@@ -190,7 +190,7 @@ errlHndl_t platHandleHWCallout(
         TARGETING::Target *i_pTarget,
         callOutPriority i_priority,
         DeconfigEnum    i_deconfigState,
-        errlHndl_t i_errl,
+        errlHndl_t &io_errl,
         GARD_ErrorType  i_gardErrorType);
 
 /**
@@ -201,7 +201,7 @@ errlHndl_t platHandleHWCallout(
  * @param[in]  i_pTarget2       target endpoint2
  * @param[in]  i_busType        bus type Enum
  * @param[in]  i_priority       Enum indicating the priority of the callout
- * @param[in]  i_errl           errlHnld for this errlog
+ * @param[in]  io_errl          reference to errlHnld for this errlog
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error,
  *                          NULL if no errors;
@@ -211,7 +211,7 @@ errlHndl_t platHandleBusCallout(
         TARGETING::Target *i_pTarget2,
         busTypeEnum i_busType,
         callOutPriority i_priority,
-        errlHndl_t i_errl);
+        errlHndl_t &io_errl);
 
 #endif // not PARSER
 

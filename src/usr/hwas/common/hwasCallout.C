@@ -95,7 +95,7 @@ bool retrieveTarget(uint8_t * & io_uData,
     return l_err;
 }
 
-void processCallout(errlHndl_t i_errl,
+void processCallout(errlHndl_t &io_errl,
         uint8_t *i_pData,
         uint64_t i_Size,
         bool i_DeferredOnly)
@@ -112,13 +112,13 @@ void processCallout(errlHndl_t i_errl,
         {
             TARGETING::Target *pTarget = NULL;
             uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
-            bool l_err = retrieveTarget(l_uData, pTarget, i_errl);
+            bool l_err = retrieveTarget(l_uData, pTarget, io_errl);
 
             if (!l_err)
             {
                 HWAS::theDeconfigGard().registerDeferredDeconfigure(
                             *pTarget,
-                            i_errl->plid());
+                            io_errl->plid());
             }
         }
         // else, no deferred deconfigures - all good.
@@ -130,7 +130,7 @@ void processCallout(errlHndl_t i_errl,
         {
             TARGETING::Target *pTarget = NULL;
             uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
-            bool l_err = retrieveTarget(l_uData, pTarget, i_errl);
+            bool l_err = retrieveTarget(l_uData, pTarget, io_errl);
 
             if (!l_err)
             {
@@ -138,7 +138,7 @@ void processCallout(errlHndl_t i_errl,
                                         pTarget,
                                         pCalloutUD->priority,
                                         pCalloutUD->deconfigState,
-                                        i_errl,
+                                        io_errl,
                                         pCalloutUD->gardErrorType);
                 if (errl)
                 {
@@ -153,7 +153,7 @@ void processCallout(errlHndl_t i_errl,
             HWAS_INF("Procedure callout; proc 0x%x priority 0x%x",
                 pCalloutUD->procedure, pCalloutUD->priority);
 
-            errlHndl_t errl = platHandleProcedureCallout(i_errl,
+            errlHndl_t errl = platHandleProcedureCallout(io_errl,
                             pCalloutUD->procedure, pCalloutUD->priority);
             if (errl)
             {
@@ -168,8 +168,8 @@ void processCallout(errlHndl_t i_errl,
             TARGETING::Target *pTarget2 = NULL;
 
             uint8_t * l_targetData = (uint8_t *)(pCalloutUD + 1);
-            bool l_err1 = retrieveTarget(l_targetData, pTarget1, i_errl);
-            bool l_err2 = retrieveTarget(l_targetData, pTarget2, i_errl);
+            bool l_err1 = retrieveTarget(l_targetData, pTarget1, io_errl);
+            bool l_err2 = retrieveTarget(l_targetData, pTarget2, io_errl);
 
             if (!l_err1 && !l_err2)
             {
@@ -177,7 +177,7 @@ void processCallout(errlHndl_t i_errl,
                                         pTarget1, pTarget2,
                                         pCalloutUD->busType,
                                         pCalloutUD->priority,
-                                        i_errl);
+                                        io_errl);
                 if (errl)
                 {
                     HWAS_ERR("HW callout: error from platHandlBusCallout");
