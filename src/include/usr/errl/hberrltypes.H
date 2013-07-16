@@ -203,7 +203,7 @@ enum errlEventType_t
  * Needs to fit into 1 byte for flattening purposes.
  *
  * This represents the byte in an SRC in position
- * XX......  such as B1 in B181F00B.
+ * XX......  such as BC in BC81F00B.
  *
  * Refer to errlentry.H and this setter:
  * void ErrlEntry::setSrcType(const srcType_t i_srcType)
@@ -211,10 +211,10 @@ enum errlEventType_t
  */
 enum srcType_t
 {
-    SRC_INTERVENTION_REQ   = 0xA1,
-    SRC_ERR_INFO           = 0xB1,
-    SRC_IPL_STATUS         = 0xC1,
-    SRC_GENERAL_STATUS     = 0xD1,
+    SRC_INTERVENTION_REQ   = 0xAC,
+    SRC_ERR_INFO           = 0xBC,
+    SRC_IPL_STATUS         = 0xCC,
+    SRC_GENERAL_STATUS     = 0xDC,
 };
 
 
