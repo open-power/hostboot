@@ -208,7 +208,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
                 err->addHwCallout(target,
                         HWAS::SRCI_PRIORITY_HIGH,
-                        HWAS::DECONFIG,
+                        HWAS::DELAYED_DECONFIG,
                         HWAS::GARD_NULL);
 
                 errlCommit(err, MDIA_COMP_ID);
