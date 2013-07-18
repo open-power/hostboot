@@ -161,7 +161,7 @@ namespace RUNTIME
 struct system_data_t
 {
     enum {
-        MAX_ATTRIBUTES = 25
+        MAX_ATTRIBUTES = 100
     };
 
     // header data that HostServices uses
@@ -180,7 +180,7 @@ struct node_data_t
     enum {
         MAX_PROCS_RSV = P8_MAX_PROCS*2, //leave space for double
         MAX_EX_RSV = MAX_PROCS_RSV*P8_MAX_EX_PER_PROC,
-        NUM_PROC_ATTRIBUTES = 125,
+        NUM_PROC_ATTRIBUTES = 150,
         NUM_EX_ATTRIBUTES = 10,
         MAX_ATTRIBUTES = MAX_PROCS_RSV*NUM_PROC_ATTRIBUTES +
                          MAX_EX_RSV*NUM_EX_ATTRIBUTES
@@ -388,25 +388,39 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
           reinterpret_cast<uint64_t>(node_data->procs)
           - reinterpret_cast<uint64_t>(node_data);
 
-        // Get the list of processors
-        TARGETING::TargetHandleList all_procs;
-        TARGETING::getAllChips( all_procs, TARGETING::TYPE_PROC, false );
+        // Get all proc targets
+        //  use PredicateHwas to filter only present procs
+        TARGETING::PredicateHwas isPresent;
+        isPresent.reset().poweredOn(true).present(true);
+        //  filter for Chips/Chiplets
+        TARGETING::PredicateCTM isChipProc(TARGETING::CLASS_CHIP,
+                                           TARGETING::TYPE_PROC);
+        //  declare a postfix expression widget
+        TARGETING::PredicatePostfixExpr goodFilter;
+        //  is-a-chip  is-present   AND
+        goodFilter.push(&isChipProc).push(&isPresent).And();
+        //  apply the filter through all targets.
+        TARGETING::TargetRangeFilter procIter(
+                        TARGETING::targetService().begin(),
+                        TARGETING::targetService().end(),
+                        &goodFilter );
 
-        // Loop around all of the proc chips
-        for( size_t p = 0; p < all_procs.size(); p++ )
+        // Iterate through the present proc list
+        // p is the index of the current procIter
+        for ( size_t p = 0; procIter; ++procIter,p++ )
         {
             // Cast to a FAPI type of target.
             fapi::Target fapi_proc( fapi::TARGET_TYPE_PROC_CHIP,
                          reinterpret_cast<void *>
-                         (const_cast<TARGETING::Target*>(all_procs[p])) );
+                         (const_cast<TARGETING::Target*>(*procIter)) );
 
             // Compute the processor id to match what HDAT uses
             uint64_t node_id =
-              all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+              (*procIter)->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
             uint64_t chip_id =
-              all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+              (*procIter)->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
             uint32_t procid = (node_id << 3) | (chip_id); //NNNCCC
-            TRACDCOMP( g_trac_runtime, "PROC:%d (%.8X)", procid, TARGETING::get_huid(all_procs[p]) );
+            TRACDCOMP( g_trac_runtime, "PROC:%d (%.8X)", procid, TARGETING::get_huid(*procIter) );
 
             // Fill in the metadata
             node_data->procs[p].procid = procid;
@@ -422,10 +436,10 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             _target = &fapi_proc;
 
             // Fill up the attributes
-            ADD_HUID( (all_procs[p]) ); // for debug
-            ADD_PHYS_PATH( (all_procs[p]) );
+            ADD_HUID( (*procIter) ); // for debug
+            ADD_PHYS_PATH( (*procIter) );
             ADD_ECMD_STRING();
-            ADD_IBSCOM_BASE( (all_procs[p]) );
+            ADD_IBSCOM_BASE( (*procIter) );
 
             // Use a generated file for the list of attributes to load
             #include "common/hsvc_procdata.C"
@@ -433,14 +447,14 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             // Add an empty attribute header to signal the end
             EMPTY_ATTRIBUTE;
 
-            TRACFCOMP( g_trac_runtime, "populate_node_attributes> PROC:%d (%.8X) : numAttr=%d", procid, TARGETING::get_huid(all_procs[p]), node_data->procs[p].numAttr );
+            TRACFCOMP( g_trac_runtime, "populate_node_attributes> PROC:%d (%.8X) : numAttr=%d", procid, TARGETING::get_huid(*procIter), node_data->procs[p].numAttr );
 
             // Make sure we don't overrun our space
             assert( *_num_attr < node_data_t::NUM_PROC_ATTRIBUTES );
 
             // Loop around all of the EX chiplets for this proc
             TARGETING::TargetHandleList all_ex;
-            TARGETING::getChildChiplets( all_ex, all_procs[p],
+            TARGETING::getChildChiplets( all_ex, (*procIter),
                                          TARGETING::TYPE_EX, false );
             for( size_t e = 0; e < all_ex.size(); e++ )
             {

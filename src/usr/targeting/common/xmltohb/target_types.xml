@@ -104,9 +104,6 @@
     <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
     <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
-    <attribute><id>PROC_EPS_GB_PERCENTAGE</id></attribute>
-    <attribute><id>PROC_EPS_GB_DIRECTION</id></attribute>
-    <attribute><id>PROC_FABRIC_ASYNC_SAFE_MODE</id></attribute>
     <attribute><id>FREQ_PCIE</id></attribute>
     <attribute><id>L2_R_T0_EPS</id></attribute>
     <attribute><id>L2_R_T1_EPS</id></attribute>
@@ -159,6 +156,12 @@
     <attribute><id>A_EREPAIR_THRESHOLD_MNFG</id></attribute>
     <attribute><id>DMI_EREPAIR_THRESHOLD_MNFG</id></attribute>
     <!-- End erepair_thresholds.xml -->
+    <!-- proc_fab_smp_fabric_attributes.xml -->
+    <attribute><id>FREQ_CORE</id></attribute>
+    <attribute><id>PROC_EPS_GB_PERCENTAGE</id></attribute>
+    <attribute><id>PROC_EPS_GB_DIRECTION</id></attribute>
+    <attribute><id>PROC_FABRIC_ASYNC_SAFE_MODE</id></attribute>
+    <!-- End proc_fab_smp_fabric_attributes.xml -->
 
     <attribute><id>ENABLED_THREADS</id></attribute>
     <attribute><id>MSS_ZSERIES</id></attribute>
@@ -274,7 +277,6 @@
     <attribute><id>PROC_L3_BAR2_REG</id></attribute>
     <attribute><id>PROC_L3_BAR_GROUP_MASK_REG</id></attribute>
      <!--   proc_fab_smp_fabric_attributes.xml  -->
-     <attribute><id>FREQ_CORE</id></attribute>
      <attribute><id>PROC_PCIE_NOT_F_LINK</id></attribute>
      <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
      <attribute><id>MSS_MCS_GROUP_32</id></attribute>
