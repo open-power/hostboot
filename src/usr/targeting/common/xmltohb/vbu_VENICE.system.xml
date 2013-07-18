@@ -1193,14 +1193,6 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
-    <attribute>
-        <id>EI_BUS_RX_MSB_LSB_SWAP</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
-        <default>0</default>
-    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1223,14 +1215,6 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute> 
-    <attribute>
-        <id>EI_BUS_RX_MSB_LSB_SWAP</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
-        <default>0</default>
-    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1252,14 +1236,6 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_RX_MSB_LSB_SWAP</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
-        <default>0</default>
     </attribute>
 </targetInstance>
 

@@ -27,25 +27,6 @@
 
 <attributes>
   <!-- ********************************************************************* -->
-<!--  <attribute>
-    <id>ATTR_EI_BUS_RX_MSB_LSB_SWAP</id>
-    <targetType>TARGET_TYPE_MCS_CHIPLET,TARGET_TYPE_MEMBUF_CHIP,TARGET_TYPE_ABUS_ENDPOINT</targetType>
-    <description>
-        When = 1, indicates the bus is end-for-end flipped in the board wiring. 
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-  </attribute>
-  <attribute>
-    <id>ATTR_EI_BUS_TX_MSB_LSB_SWAP</id>
-    <targetType>TARGET_TYPE_MCS_CHIPLET,TARGET_TYPE_MEMBUF_CHIP,TARGET_TYPE_ABUS_ENDPOINT</targetType>
-    <description>
-        When = 1, indicates the bus is end-for-end flipped in the board wiring.
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-  </attribute>
--->
   <attribute>
     <id>ATTR_EI_BUS_TX_MSBSWAP</id>
     <targetType>TARGET_TYPE_MCS_CHIPLET,TARGET_TYPE_MEMBUF_CHIP,TARGET_TYPE_ABUS_ENDPOINT</targetType>
@@ -118,5 +99,17 @@
     <valueType>uint8</valueType>
     <platInit/>
   </attribute>
+
+<!-- Not yet supported by firmware
+  <attribute>
+    <id>ATTR_DMI_DFE_OVERRIDE</id>
+    <targetType>TARGET_TYPE_MCS_CHIPLET,TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+      Defines where to apply DMI bus DFE override settings for HW244323.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+-->
 
 </attributes>

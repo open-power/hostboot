@@ -663,8 +663,6 @@
         <default>ABUS</default>
     </attribute>
     <attribute><id>CHIP_UNIT</id></attribute>
-    <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
-    <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>PEER_TARGET</id></attribute>
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
@@ -994,8 +992,6 @@
         <id>TYPE</id>
         <default>MCS</default>
     </attribute>
-    <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
-    <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id></attribute>
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
     <attribute><id>DMI_REFCLOCK_SWIZZLE</id></attribute>
@@ -1079,8 +1075,6 @@
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
     <attribute><id>ECID</id></attribute>
-    <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
-    <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute>
         <!-- Centaur memory buffer chips do not have SCOM accessible FSI GP regs -->
         <id>FSI_GP_REG_SCOM_ACCESS</id>

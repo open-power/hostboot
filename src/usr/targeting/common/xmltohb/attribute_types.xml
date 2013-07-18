@@ -2047,38 +2047,6 @@
 </attribute>
 
 <attribute>
-    <id>EI_BUS_RX_MSB_LSB_SWAP</id>
-    <description>PRBS scramble pattern per lane on DMI bus for p8 and centaur.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EI_BUS_RX_MSB_LSB_SWAP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EI_BUS_TX_MSB_LSB_SWAP</id>
-    <description>PRBS scramble pattern per lane on DMI bus for p8 and centaur.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EI_BUS_TX_MSB_LSB_SWAP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>FABRIC_TO_PHYSICAL_NODE_MAP</id>
     <description>
         Correlate HDAT node number (physical) to the logical node
