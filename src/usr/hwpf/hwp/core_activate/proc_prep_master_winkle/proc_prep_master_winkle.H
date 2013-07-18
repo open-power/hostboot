@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_prep_master_winkle.H,v 1.6 2012/10/24 22:22:43 jmcgill Exp $
+// $Id: proc_prep_master_winkle.H,v 1.7 2013/07/01 18:41:37 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_prep_master_winkle.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -50,7 +50,7 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*proc_prep_master_winkle_FP_t)(const fapi::Target &,
-                                                         const bool );
+                                                         const bool &);
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -67,7 +67,7 @@ extern "C"
 /**
  * @brief Start the auto-POR engine and the SBE
  *
- * @param[in] i_target     Reference to master chip target
+ * @param[in] i_ex_target  Reference to master chiplet target
  * @param[in] i_useRealSBE True if proc_sbe_trigger_winkle is supposed to be
  *                         running on the real SBE (default is true), else
  *                         false if proc_sbe_trigger_winkle is running on
@@ -75,7 +75,7 @@ extern "C"
  *
  * @return ReturnCode
  */
-  fapi::ReturnCode proc_prep_master_winkle(const fapi::Target & i_target,
+  fapi::ReturnCode proc_prep_master_winkle(const fapi::Target & i_ex_target,
                                            const bool & i_useRealSBE);
 
 } // extern "C"

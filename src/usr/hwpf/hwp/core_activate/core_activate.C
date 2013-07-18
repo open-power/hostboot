@@ -102,27 +102,31 @@ void*    call_host_activate_master( void    *io_pArgs )
 
         const TARGETING::Target*  l_masterCore  = getMasterCore( );
         assert( l_masterCore != NULL );
-
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_master: Find master chip: " );
+        
         TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
                                           ( getParentChip( l_masterCore ) );
 
-        //  trace HUID
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
-
-        // cast OUR type of target to a FAPI type of target.
+        // Cast OUR type of target to a FAPI type of target.
         const fapi::Target l_fapi_cpu_target( TARGET_TYPE_PROC_CHIP,
                            (const_cast<TARGETING::Target*> (l_cpu_target)) );
 
+        // Pass in Master EX target
+        const TARGETING::Target* l_masterEx = getExChiplet(l_masterCore);
+        assert(l_masterEx != NULL );
+        
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_activate_master: call proc_prep_master_winkle." );
+                   "call_host_activate_master: call proc_prep_master_winkle. "
+                   "Target HUID %.8X",
+                    TARGETING::get_huid(l_masterEx));
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
+                           (const_cast<TARGETING::Target*> (l_masterEx)) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP( l_errl,
                          proc_prep_master_winkle,
-                         l_fapi_cpu_target,
+                         l_fapi_ex_target,
                          true  );
         if ( l_errl )
         {
@@ -131,7 +135,7 @@ void*    call_host_activate_master( void    *io_pArgs )
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_masterEx).addToLog( l_errl );
 
             break;
         }
@@ -178,7 +182,8 @@ void*    call_host_activate_master( void    *io_pArgs )
                    "Returned from Winkle." );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Call proc_stop_deadman_timer..." );
+                   "Call proc_stop_deadman_timer. Target %.8X",
+                    TARGETING::get_huid(l_cpu_target) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP( l_errl,

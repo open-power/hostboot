@@ -119,6 +119,16 @@ void getParentAffinityTargets ( TARGETING::TargetHandleList& o_vector,
  */
 const Target * getParentChip( const Target * i_pChiplet );
 
+/**
+ * @brief return the EX target of the specified input core chiplet
+ *
+ * @parm[in]  i_pCoreChiplet, core chiplet target for retrieving the
+ *            EX target
+ *
+ * @return EX target pointer or NULL if error
+ */
+const Target * getExChiplet( const Target * i_pCoreChiplet );
+
 
 /**
  * @brief Return a list of all cards in a system

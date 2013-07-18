@@ -238,6 +238,35 @@ const Target * getParentChip( const Target * i_pChiplet )
     return l_pChip;
 }
 
+const Target * getExChiplet( const Target * i_pCoreChiplet )
+{
+    const Target * l_pExChiplet = NULL;
+
+    // Create a Class/Type/Model predicate to look for EX chiplet of the input
+    // core (i.e. the core's parent)
+    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_UNIT);
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_exList;
+
+    // Get parent
+    TARGETING::targetService().getAssociated(l_exList, i_pCoreChiplet,
+                          TARGETING::TargetService::PARENT,
+                          TARGETING::TargetService::ALL, &l_predicate);
+
+    if (l_exList.size() == 1)
+    {
+        l_pExChiplet = l_exList[0];
+    }
+    else
+    {
+        TARG_ERR("Number of EX chiplet is not 1, but %d", l_exList.size());
+    }
+
+    return l_pExChiplet;
+}
+
+
 void getPeerTargets(
           TARGETING::TargetHandleList& o_peerTargetList,
     const Target*                      i_pSrcTarget,

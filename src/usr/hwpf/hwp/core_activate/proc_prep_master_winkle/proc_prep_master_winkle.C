@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_prep_master_winkle.C,v 1.11 2012/10/24 22:22:23 jmcgill Exp $
+// $Id: proc_prep_master_winkle.C,v 1.12 2013/07/01 18:41:34 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_prep_master_winkle.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -75,22 +75,32 @@ extern "C"
 //     Start SBE deadman timer
 //     *Enter winkle*
 //
-// parameters: i_target     => master chip target
+// parameters: i_ex_target     => Reference to master chiplet target
 //             i_useRealSBE => True if proc_sbe_trigger_winkle is supposed to be
 //                             running on the real SBE (default is true), else
 //                             false if proc_sbe_trigger_winkle is running on
 //                             the FSP (via poreve).
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
-    fapi::ReturnCode proc_prep_master_winkle(const fapi::Target & i_target, 
-                                             const bool & i_useRealSBE = true)
+    fapi::ReturnCode proc_prep_master_winkle(const fapi::Target & i_ex_target, 
+                                             const bool & i_useRealSBE)
     {
         // data buffer to hold register values
         ecmdDataBufferBase data(64);
+        ecmdDataBufferBase pmgp1(64);
 
         // return codes
-        uint32_t rc_ecmd = 0;
-        fapi::ReturnCode rc;
+        uint32_t                    rc_ecmd = 0;
+        fapi::ReturnCode            rc;
+        
+        // istep/substep umbers
+        uint32_t                    istep_num = 0;
+        uint8_t                     substep_num = 0;
+        
+        // addressing variables
+        uint64_t                    address;
+        uint8_t                     l_ex_number = 0;
+        fapi::Target                l_parentTarget;
 
         // mark function entry
         FAPI_INF("Entry, useRealSBE is %s\n", i_useRealSBE? "true":"false");
@@ -98,11 +108,19 @@ extern "C"
         do
         {
             
+            // Get the parent chip to target the PCBS registers
+            rc = fapiGetParentChip(i_ex_target, l_parentTarget);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetParentChip access");
+                break;
+            }
+                                  
             // Wait for SBE ready
             // ie. SBE running, and istep num and substep num correct
             if( i_useRealSBE )
             {            
-                rc = fapiGetScom(i_target, PORE_SBE_CONTROL_0x000E0001, data);
+                rc = fapiGetScom(l_parentTarget, PORE_SBE_CONTROL_0x000E0001, data);
                 if(!rc.ok())
                 {
                     FAPI_ERR("Scom error reading SBE STATUS\n");
@@ -111,22 +129,20 @@ extern "C"
                 if( data.isBitSet( 0 ) )
                 {
                     FAPI_ERR("SBE isn't running when it should be\n");
-                    const fapi::Target & CHIP_IN_ERROR = i_target;
+                    const fapi::Target & CHIP_IN_ERROR = l_parentTarget;
                     ecmdDataBufferBase & SBE_STATUS = data;
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_PREP_MASTER_WINKLE_SBE_NOT_RUNNING);
                     break;
                 }
             }
 
-            rc = fapiGetScom(i_target, MBOX_SBEVITAL_0x0005001C, data);
+            rc = fapiGetScom(l_parentTarget, MBOX_SBEVITAL_0x0005001C, data);
             if(!rc.ok())
             {
                 FAPI_ERR("Scom error reading SBE VITAL\n");
                 break;
             }
 
-            uint32_t istep_num = 0;
-            uint8_t substep_num = 0;
             rc_ecmd |= data.extractToRight(&istep_num,
                                            ISTEP_NUM_BIT_POSITION,
                                            ISTEP_NUM_BIT_LENGTH);
@@ -145,7 +161,7 @@ extern "C"
                 FAPI_ERR("Expected istep num %llX but found %X\n",
                          PROC_SBE_TRIGGER_WINKLE_ISTEP_NUM,
                          istep_num );
-                const fapi::Target & CHIP_IN_ERROR = i_target;
+                const fapi::Target & CHIP_IN_ERROR = l_parentTarget;
                 ecmdDataBufferBase & SBE_VITAL = data;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_PREP_MASTER_WINKLE_BAD_ISTEP_NUM);
                 break;
@@ -155,12 +171,43 @@ extern "C"
                 FAPI_ERR("Expected substep num %X but found %X\n",
                          SUBSTEP_SBE_READY,
                          substep_num );
-                const fapi::Target & CHIP_IN_ERROR = i_target;
+                const fapi::Target & CHIP_IN_ERROR = l_parentTarget;
                 ecmdDataBufferBase & SBE_VITAL = data;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_PREP_MASTER_WINKLE_BAD_SUBSTEP_NUM);
                 break;
             }
             FAPI_INF("SBE is ready for master to enter winkle\n");
+
+            // Get the core number
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_ex_target, l_ex_number);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+
+            FAPI_INF("Processing core %d on %s", l_ex_number, l_parentTarget.toEcmdString());           
+                
+            // Disable movement to Fast Winkle if errors are present
+            rc_ecmd |= pmgp1.flushTo0();
+            rc_ecmd |= pmgp1.setBit(20);
+            if(rc_ecmd)
+            {
+                FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
+
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            address = EX_PMGP1_OR_0x100F0105 + (l_ex_number*0x01000000);
+            rc = fapiPutScom(l_parentTarget, address, pmgp1);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Scom error updating PMGP1\n");
+                break;
+            }
+            FAPI_INF("Disabled the ability to have Deep Winkle turned to Fast Winkle if errors are present\n");  
+          
 
             //Start the deadman timer
             substep_num = SUBSTEP_DEADMAN_START;
@@ -173,7 +220,7 @@ extern "C"
                 rc.setEcmdError(rc_ecmd);
                 break;
             }
-            rc = fapiPutScom(i_target, MBOX_SBEVITAL_0x0005001C, data);
+            rc = fapiPutScom(l_parentTarget, MBOX_SBEVITAL_0x0005001C, data);
             if(!rc.ok())
             {
                 FAPI_ERR("Scom error updating SBE VITAL\n");
