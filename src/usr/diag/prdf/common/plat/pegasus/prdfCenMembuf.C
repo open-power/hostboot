@@ -26,21 +26,26 @@
  */
 
 #include <iipServiceDataCollector.h>
-#include <prdfCalloutUtil.H>
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
 #include <prdfGlobal.H>
 #include <iipSystem.h>
-#include <prdfLaneRepair.H>
 #include <UtilHash.H>
+
+// Pegasus includes
+#include <prdfCalloutUtil.H>
+#include <prdfCenAddress.H>
+#include <prdfCenMarkstore.H>
+#include <prdfCenMembufDataBundle.H>
+#include <prdfLaneRepair.H>
 
 using namespace TARGETING;
 
-#include <prdfCenMembufDataBundle.H>
-
 namespace PRDF
 {
+
+using namespace PlatServices;
 
 namespace Membuf
 {
@@ -319,6 +324,12 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
 }
 PRDF_PLUGIN_DEFINE( Membuf, PostAnalysis );
 
+//##############################################################################
+//
+//                               DMIFIR
+//
+//##############################################################################
+
 /**
  * @brief Handle lane repair spare deployed
  * @param  i_membChip A Centaur chip.
@@ -369,6 +380,280 @@ int32_t checkSpareBit( ExtensibleChip * i_mbChip,
     return l_rc;
 }
 PRDF_PLUGIN_DEFINE( Membuf, checkSpareBit );
+
+//##############################################################################
+//
+//                               MBSECCFIRs
+//
+//##############################################################################
+
+/**
+ * @brief  MBSECCFIR[0-7] - Fetch Mark Placed Event (MPE).
+ * @param  i_membChip A Centaur chip.
+ * @param  i_sc       The step code data struct.
+ * @param  i_mbaPos   The MBA position.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
+                          STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos )
+{
+    #define PRDF_FUNC "[AnalyzeFetchMpe] "
+
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
+        ExtensibleChip * mbaChip = membdb->getMbaChip( i_mbaPos );
+        if ( NULL == mbaChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
+            l_rc = FAIL; break;
+        }
+        TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
+
+        // Callout all DIMMs with chip marks.
+        const char * reg_str = ( 0 == i_mbaPos ) ? "MBA0_MBSECCFIR"
+                                                 : "MBA1_MBSECCFIR";
+        SCAN_COMM_REGISTER_CLASS * fir = i_membChip->getRegister( reg_str );
+        l_rc = fir->Read();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
+            break;
+        }
+
+        for ( uint8_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
+        {
+            if ( !fir->IsBitSet(r) ) continue; // nothing to do.
+
+            CenRank rank ( r );
+            CenMark mark;
+
+            // Get the current marks in hardware.
+            if ( SUCCESS != mssGetMarkStore(mbaTrgt, rank, mark) )
+            {
+                PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
+                l_rc = FAIL;
+                continue; // check the other ranks.
+            }
+
+            if ( !mark.getCM().isValid() )
+            {
+                PRDF_ERR( PRDF_FUNC"FIR bit set but no valid chip mark: "
+                          "rank=%d", r );
+                l_rc = FAIL;
+                continue; // check the other ranks.
+            }
+
+            // Callout the mark.
+            CalloutUtil::calloutMark( mbaTrgt, rank, mark, i_sc );
+        }
+
+    } while (0);
+
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: MEMBUF=0x%08x i_mbaPos=%d",
+                  i_membChip->GetId(), i_mbaPos );
+        CalloutUtil::defaultError( i_sc );
+    }
+
+    return SUCCESS; // Intentionally return SUCCESS for this plugin
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MBSECCFIR[16] - Fetch New CE (NCE).
+ * @param  i_membChip A Centaur chip.
+ * @param  i_sc       The step code data struct.
+ * @param  i_mbaPos   The MBA position.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
+                          STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos )
+{
+    #define PRDF_FUNC "[AnalyzeFetchNce] "
+
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
+        ExtensibleChip * mbaChip = membdb->getMbaChip( i_mbaPos );
+        if ( NULL == mbaChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
+            l_rc = FAIL; break;
+        }
+
+        CenReadAddrReg reg = (0 == i_mbaPos) ? READ_NCE_ADDR_0
+                                             : READ_NCE_ADDR_1;
+        CenAddr addr;
+        l_rc = getCenReadAddr( i_membChip, reg, addr );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+            break;
+        }
+
+        // FIXME: RTC 47289 Need to read MBSEVR to get the symbol. There is a
+        //        bug in DD1.x so we can't use this register. There is a
+        //        workaround but is it complicated. Need to check with Ken if it
+        //        is ok to just callout the rank for DD1.x.
+
+        MemoryMru memmru ( mbaChip->GetChipHandle(), addr.getRank(),
+                           MemoryMruData::CALLOUT_RANK );
+        i_sc.service_data->SetCallout( memmru );
+
+    } while (0);
+
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: MEMBUF=0x%08x i_mbaPos=%d",
+                  i_membChip->GetId(), i_mbaPos );
+        CalloutUtil::defaultError( i_sc );
+    }
+
+    return SUCCESS; // Intentionally return SUCCESS for this plugin
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MBSECCFIR[17] - Fetch Retry CE (RCE).
+ * @param  i_membChip A Centaur chip.
+ * @param  i_sc       The step code data struct.
+ * @param  i_mbaPos   The MBA position.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchRce( ExtensibleChip * i_membChip,
+                         STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos )
+{
+    #define PRDF_FUNC "[AnalyzeFetchRce] "
+
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
+        ExtensibleChip * mbaChip = membdb->getMbaChip( i_mbaPos );
+        if ( NULL == mbaChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
+            l_rc = FAIL; break;
+        }
+
+        CenReadAddrReg reg = (0 == i_mbaPos) ? READ_RCE_ADDR_0
+                                             : READ_RCE_ADDR_1;
+        CenAddr addr;
+        l_rc = getCenReadAddr( i_membChip, reg, addr );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+            break;
+        }
+
+        // Callout the rank and the attached MBA.
+        MemoryMru memmru ( mbaChip->GetChipHandle(), addr.getRank(),
+                           MemoryMruData::CALLOUT_RANK_AND_MBA );
+        i_sc.service_data->SetCallout( memmru );
+
+    } while (0);
+
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: MEMBUF=0x%08x i_mbaPos=%d",
+                  i_membChip->GetId(), i_mbaPos );
+        CalloutUtil::defaultError( i_sc );
+    }
+
+    return SUCCESS; // Intentionally return SUCCESS for this plugin
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MBSECCFIR[19] - Fetch UE.
+ * @param  i_membChip A Centaur chip.
+ * @param  i_sc       The step code data struct.
+ * @param  i_mbaPos   The MBA position.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
+                         STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos )
+{
+    #define PRDF_FUNC "[AnalyzeFetchUe] "
+
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
+        ExtensibleChip * mbaChip = membdb->getMbaChip( i_mbaPos );
+        if ( NULL == mbaChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
+            l_rc = FAIL; break;
+        }
+
+        CenReadAddrReg reg = (0 == i_mbaPos) ? READ_UE_ADDR_0
+                                             : READ_UE_ADDR_1;
+        CenAddr addr;
+        l_rc = getCenReadAddr( i_membChip, reg, addr );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+            break;
+        }
+
+        // Callout the rank.
+        MemoryMru memmru ( mbaChip->GetChipHandle(), addr.getRank(),
+                           MemoryMruData::CALLOUT_RANK );
+        i_sc.service_data->SetCallout( memmru );
+
+    } while (0);
+
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: MEMBUF=0x%08x i_mbaPos=%d",
+                  i_membChip->GetId(), i_mbaPos );
+        CalloutUtil::defaultError( i_sc );
+    }
+
+    return SUCCESS; // Intentionally return SUCCESS for this plugin
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+// Define the plugins for memory ECC errors.
+#define PLUGIN_MEMORY_ECC_ERROR( TYPE, ECC, POS ) \
+int32_t Analyze##TYPE##ECC##POS( ExtensibleChip * i_membChip, \
+                                 STEP_CODE_DATA_STRUCT & i_sc ) \
+{ \
+    return Analyze##TYPE##ECC( i_membChip, i_sc, POS ); \
+} \
+PRDF_PLUGIN_DEFINE( Membuf, Analyze##TYPE##ECC##POS );
+
+PLUGIN_MEMORY_ECC_ERROR( Fetch, Mpe, 0 )
+PLUGIN_MEMORY_ECC_ERROR( Fetch, Mpe, 1 )
+PLUGIN_MEMORY_ECC_ERROR( Fetch, Nce, 0 )
+PLUGIN_MEMORY_ECC_ERROR( Fetch, Nce, 1 )
+PLUGIN_MEMORY_ECC_ERROR( Fetch, Rce, 0 )
+PLUGIN_MEMORY_ECC_ERROR( Fetch, Rce, 1 )
+PLUGIN_MEMORY_ECC_ERROR( Fetch, Ue,  0 )
+PLUGIN_MEMORY_ECC_ERROR( Fetch, Ue,  1 )
+
+#undef PLUGIN_MEMORY_ECC_ERROR
 
 } // end namespace Membuf
 

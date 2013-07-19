@@ -62,19 +62,10 @@ PRDF_PLUGIN_DEFINE( Membuf, FUNC );
 //
 //##############################################################################
 
-// MBSECCFIR[0-7,16,17,19,20-27,39,41]
+// MBSECCFIR[20-27,39,41]
 
 #define PLUGIN_MEMORY_ECC_ERROR( TYPE, ECC, POS ) \
     PLUGIN_UNEXPECTED_ATTN( Analyze##TYPE##ECC##POS )
-
-PLUGIN_MEMORY_ECC_ERROR( Fetch, Mpe, 0 )
-PLUGIN_MEMORY_ECC_ERROR( Fetch, Mpe, 1 )
-PLUGIN_MEMORY_ECC_ERROR( Fetch, Nce, 0 )
-PLUGIN_MEMORY_ECC_ERROR( Fetch, Nce, 1 )
-PLUGIN_MEMORY_ECC_ERROR( Fetch, Rce, 0 )
-PLUGIN_MEMORY_ECC_ERROR( Fetch, Rce, 1 )
-PLUGIN_MEMORY_ECC_ERROR( Fetch, Ue,  0 )
-PLUGIN_MEMORY_ECC_ERROR( Fetch, Ue,  1 )
 
 PLUGIN_MEMORY_ECC_ERROR( Maint, Mpe, 0 )
 PLUGIN_MEMORY_ECC_ERROR( Maint, Mpe, 1 )
