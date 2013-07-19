@@ -64,10 +64,10 @@
 #include    "proc_prep_master_winkle.H"
 #include    "proc_stop_deadman_timer.H"
 #include    "p8_set_pore_bar.H"
-// #include    "host_activate_slave_cores/host_activate_slave_cores.H"
 #include    "proc_switch_cfsim.H"
 #include    "proc_switch_rec_attn.H"
 #include    "cen_switch_rec_attn.H"
+#include    "proc_post_winkle.H"
 
 namespace   CORE_ACTIVATE
 {
@@ -322,7 +322,14 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
         }
     }
 
-    if ( ! l_errl )
+    if (l_errl)
+    {
+        l_stepError.addErrorDetails(ISTEP_BAD_RC,
+                                    ISTEP_HOST_ACTIVATE_SLAVE_CORES,
+                                    l_errl);
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
+    else
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "set PORE bars back to 0" );
@@ -398,6 +405,80 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
             }
 
         }   // end for
+
+
+        // Call proc_post_winkle 
+
+        // Done activate all master/slave cores.
+        // Run post winkle check on all EX targets, one proc at a time.
+        for (TargetHandleList::const_iterator l_procIter =
+             l_procTargetList.begin();
+             l_procIter != l_procTargetList.end();
+             ++l_procIter)
+        {
+            const TARGETING::Target* l_pChipTarget = *l_procIter;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running proc_post_winkle on chip HUID %.8X",
+                TARGETING::get_huid(l_pChipTarget));
+
+            // Get EX list under this proc
+            TARGETING::TargetHandleList l_exList;
+            getChildChiplets( l_exList, l_pChipTarget, TYPE_EX );
+
+            for (TargetHandleList::const_iterator
+                l_exIter = l_exList.begin();
+                l_exIter != l_exList.end();
+                ++l_exIter)
+            {
+                const TARGETING::Target * l_exTarget = *l_exIter;
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running proc_post_winkle on EX target HUID %.8X",
+                TARGETING::get_huid(l_exTarget));
+
+                // cast OUR type of target to a FAPI type of target.
+                fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
+                         (const_cast<TARGETING::Target*>(l_exTarget)) );
+
+                //  call the HWP with each fapi::Target
+                FAPI_INVOKE_HWP( l_errl,
+                                 proc_post_winkle,
+                                 l_fapi_ex_target);
+
+                if ( l_errl )
+                {
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_pChipTarget).addToLog( l_errl );
+                    /*@
+                     * @errortype
+                     * @reasoncode      ISTEP_PROC_POST_WINKLE_FAILED
+                     * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid        ISTEP_HOST_ACTIVATE_SLAVE_CORES
+                     * @userdata1       bytes 0-1: plid identifying first error
+                     *                  bytes 2-3: reason code of first error
+                     * @userdata2       bytes 0-1: total number of elogs included
+                     *                  bytes 2-3: N/A
+                     * @devdesc         call to host_activate_master failed see
+                     *                  error identified by the plid in user data
+                     *                  field.
+                    */
+                    l_stepError.addErrorDetails(ISTEP_PROC_POST_WINKLE_FAILED,
+                                            ISTEP_HOST_ACTIVATE_SLAVE_CORES,
+                                            l_errl );
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                             "ERROR : proc_post_winkle, PLID=0x%x",
+                             l_errl->plid()  );
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "SUCCESS : proc_post_winkle" );
+                }
+            }
+
+        }   // end for
+
     }   // end if
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@

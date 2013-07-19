@@ -43,6 +43,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_prep_master_winkle
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_stop_deadman_timer
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_switch_cfsim
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_post_winkle
 ##  @todo   RTC Story 51709 and Story 51711 : revisit this later -
 ##  proc_set_pore_bar is used by multiple isteps, so it should be in its own
 ##  "utility" library
@@ -55,7 +56,8 @@ OBJS =  core_activate.o \
         proc_stop_deadman_timer.o   \
         proc_switch_cfsim.o         \
         proc_switch_rec_attn.o      \
-        cen_switch_rec_attn.o
+        cen_switch_rec_attn.o       \
+        proc_post_winkle.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
@@ -65,7 +67,7 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_prep_master_winkle
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_stop_deadman_timer
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_switch_cfsim
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/switch_rec_attn
-
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_post_winkle
 
 include ${ROOTPATH}/config.mk
 
