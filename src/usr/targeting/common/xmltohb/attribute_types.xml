@@ -179,8 +179,12 @@
         <value>25</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>TEST_FAIL</name>
         <value>26</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>27</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>

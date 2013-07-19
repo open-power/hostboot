@@ -344,6 +344,10 @@ const char* EntityPath::pathElementTypeAsString(
             return "FSP";
         case TYPE_PNOR:
             return "PNOR";
+        case TYPE_OSC:
+            return "OSC";
+        case TYPE_TODCLK:
+            return "TodClock";
         case TYPE_NA:
             return "NA";
 //        case TYPE_FSI_LINK:

@@ -184,6 +184,7 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeStringImplementationFileHeader($stringImplementationFile);
     writeStringImplementationFileStrings($attributes,$stringImplementationFile);
     writeStringImplementationFileFooter($stringImplementationFile);
+    writeTestEntityPath($attributes);
     close $stringImplementationFile;
 
     open(STRUCTS_HEADER_FILE,">$cfgSrcOutputDir"."attributestructs.H")
@@ -956,6 +957,84 @@ namespace TARGETING {
 VERBATIM
 
 }
+
+################################################################################
+# Writes test for toString entity path function
+################################################################################
+
+sub writeTestEntityPath {
+    my($attributes) = @_;
+
+    open EP_TEST_FILE, ">", "$cfgSrcOutputDir"."test_ep.H" or die $!;
+
+    print EP_TEST_FILE "#include <attributeenums.H>\n";
+    print EP_TEST_FILE "EntityPath l_path;\n";
+    print EP_TEST_FILE "const char * name = NULL;\n";
+    print(EP_TEST_FILE "const char * test_string = \"Unknown path" .
+                       " type\";\n");
+    print EP_TEST_FILE "size_t size = strlen( test_string );\n";
+
+    foreach my $attribute (@{$attributes->{attribute}})
+    {
+        if(exists $attribute->{simpleType})
+        {
+            my $simpleType = $attribute->{simpleType};
+            if(exists $simpleType->{enumeration})
+            {
+                my $enumeration = $simpleType->{enumeration};
+
+                my $enumerationType = getEnumerationType($attributes,
+                    $enumeration->{id});
+
+                foreach my $enumerator (@{$enumerationType->{enumerator}})
+                {
+                    if( $attribute->{id} eq "TYPE" )
+                    {
+                        print(EP_TEST_FILE "name = " .
+                            "l_path.pathElementTypeAsString( " .
+                            "TYPE_$enumerator->{name} );\n");
+                        print EP_TEST_FILE "size = strlen( name );\n";
+
+                        if( $enumerator->{name} eq "LAST_IN_RANGE" )
+                        {
+                            print(EP_TEST_FILE "if( memcmp( name, " .
+                                "test_string, size ))\n{\n");
+
+                            print(EP_TEST_FILE "TS_FAIL(\"type " .
+                                "attribute TYPE_$enumerator->{name}" .
+                                " - did not return expected error " .
+                                "message. - update entitypath.C\");\n}\n");
+
+                        }
+                        elsif( $enumerator->{name} eq "TEST_FAIL" )
+                        {
+                            #TEST_FAIL is not defined in the function
+                            #pathElementTypeAsString - validate error string
+                            print(EP_TEST_FILE "if( memcmp( name, " .
+                                "test_string, size ))\n{\n");
+
+                            print(EP_TEST_FILE "TS_FAIL(\"type " .
+                                "attribute TYPE_$enumerator->{name}" .
+                                " - did not return expected error " .
+                                "message. - update entitypath.C\");\n}\n");
+                        }
+                        else
+                        {
+                            print(EP_TEST_FILE "if( !memcmp( name, " .
+                                "test_string, size ))\n{\n");
+
+                            print(EP_TEST_FILE "TS_FAIL(\"undefined TYPE " .
+                                "attribute TYPE_$enumerator->{name}" .
+                                " - update entitypath.C\");\n}\n");
+                        }
+                    }
+                }
+            }
+        }
+    }
+close EP_TEST_FILE;
+}
+
 
 ################################################################################
 # Writes string implementation
