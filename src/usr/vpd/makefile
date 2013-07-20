@@ -27,7 +27,7 @@ OBJS = vpd.o spd.o ipvpd.o mvpd.o dimmPres.o cvpd.o
 
 SUBDIRS = test.d
 
-BINARY_FILES = $(IMGDIR)/dimmspd.dat:9a6e6b6a7f6d3fc77a12d38537279d402124d699
+BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:9473e24c02c40a577700ae0292676c4b82698c13
 BINARY_FILES += $(IMGDIR)/cvpd.dat:7410a45451fb7826daf1ae218f81b2a694e64234
 
