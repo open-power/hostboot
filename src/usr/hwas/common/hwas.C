@@ -42,6 +42,7 @@
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwasError.H>
 
+#include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 
@@ -425,7 +426,9 @@ errlHndl_t discoverTargets()
         // PR keyword processing - potentially reduce the number of ex/core
         //  units that are functional based on what's in the PR keyword.
         //  call to restrict EX units, marking bad units as present=false;
-        errl = restrictEXunits(l_procPRList, false);
+        //  deconfigReason = 0 because present is false so this is not a
+        //  deconfigured event.
+        errl = restrictEXunits(l_procPRList, false, 0);
 
         if (errl)
         {
@@ -457,7 +460,8 @@ errlHndl_t discoverTargets()
 
 errlHndl_t restrictEXunits(
     std::vector <procRestrict_t> &i_procList,
-    bool i_present)
+    const bool i_present,
+    const uint32_t i_deconfigReason)
 {
     HWAS_INF("restrictEXunits entry, %d elements", i_procList.size());
     errlHndl_t errl = NULL;
@@ -592,7 +596,7 @@ errlHndl_t restrictEXunits(
             while (pEX_it[i] != pEXList[i].end())
             {
                 TargetHandle_t l_pEX = *(pEX_it[i]);
-                enableHwasState(l_pEX, i_present, false, 0);
+                enableHwasState(l_pEX, i_present, false, i_deconfigReason);
                 HWAS_INF("pEX   %.8X - marked %spresent, NOT functional",
                         l_pEX->getAttr<ATTR_HUID>(),
                         i_present ? "" : "NOT ");
@@ -600,7 +604,8 @@ errlHndl_t restrictEXunits(
                 // now need to mark the child CORE
                 TargetHandleList pCoreList;
                 getChildChiplets(pCoreList, l_pEX, TYPE_CORE, true);
-                enableHwasState(pCoreList[0], i_present, false, 0);
+                enableHwasState(pCoreList[0], i_present, false,
+                        i_deconfigReason);
                 HWAS_INF("pCore %.8X - marked %spresent, NOT functional",
                         l_pEX->getAttr<ATTR_HUID>(),
                         i_present ? "" : "NOT ");

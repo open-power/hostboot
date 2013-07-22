@@ -1146,7 +1146,7 @@ public:
             // create GARD record, call 'doGard' step and confirm target is
             //  deconfigured
             l_pErr = theDeconfigGard().
-                    createGardRecord( *l_target, 0x12, GARD_Fatal);
+                    createGardRecord( *l_target, 0x12, GARD_User_Manual);
             if (l_pErr)
             {
                 TS_FAIL("testGard8: Error from createGardRecord");

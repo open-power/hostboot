@@ -201,7 +201,8 @@ void*    call_mss_getecid( void *io_pArgs )
                     {
                         // call HWAS to deconfigure this target
                         l_err = HWAS::theDeconfigGard().deconfigureTarget(
-                                                            *l_pMBA, 0);
+                                    *l_pMBA, HWAS::DeconfigGard::
+                                                DECONFIGURED_BY_MEMORY_CONFIG);
                         l_num_func_mbas--;
 
                         if (l_err)
@@ -221,7 +222,9 @@ void*    call_mss_getecid( void *io_pArgs )
                 {
                     // call HWAS to deconfigure this target
                     l_err = HWAS::theDeconfigGard().deconfigureTarget(
-                                                        *l_pCentaur, 0);
+                                    *l_pCentaur,
+                                    HWAS::DeconfigGard::
+                                                DECONFIGURED_BY_MEMORY_CONFIG);
                 }
 
                 if (l_err)
@@ -320,7 +323,9 @@ void*    call_mss_getecid( void *io_pArgs )
                         get_huid( *l_l4_iter));
 
                     l_err = HWAS::theDeconfigGard().
-                        deconfigureTarget(**l_l4_iter , 0);
+                        deconfigureTarget(**l_l4_iter ,
+                                    HWAS::DeconfigGard::
+                                                DECONFIGURED_BY_MEMORY_CONFIG);
 
                     if (l_err)
                     {

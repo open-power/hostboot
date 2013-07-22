@@ -88,6 +88,7 @@ errlHndl_t discoverTargets();
  * @param[in] i_procRestrict   vector of procRestrict entries
  * @param[in] i_present    boolean for 'present' HWAS value for restricted
  *                          EX units
+ * @param[in] i_deconfigReason   DECONFIGURED_BY_ enum or 0
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
  *                          NULL if no errors;
@@ -103,7 +104,8 @@ typedef struct {
 
 errlHndl_t restrictEXunits(
     std::vector <procRestrict_t> &i_procRestrict,
-    bool i_present);
+    const bool i_present,
+    const uint32_t i_deconfigReason);
 
 /**
  * @brief Verifies that the system has enough hardware to proceed through

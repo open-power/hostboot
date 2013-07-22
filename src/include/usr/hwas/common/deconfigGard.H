@@ -90,6 +90,22 @@ public:
         GET_ALL_GARD_RECORDS = EMPTY_GARD_RECORDID,
     };
 
+    // enums to indicated non-error reason for a targets deconfiguration.
+    //  used in TARGETING::HwasSate.deconfiguredByPlid
+    enum
+    {
+        DECONFIGURED_BY_CODE_BASE               = 0x0000FF00,
+
+        // set when GARD_User_Manual
+        DECONFIGURED_BY_MANUAL_GARD,            // BASE | 0x01
+
+        // set by processFieldCoreOverride() in hwas/common/deconfigGard.C
+        DECONFIGURED_BY_FIELD_CORE_OVERRIDE,    // BASE | 0x02
+
+        // set by call_mss_getecid() in dmi_training.c
+        DECONFIGURED_BY_MEMORY_CONFIG,          // BASE | 0x03
+    };
+
     /**
      * @struct GardRecord
      *
@@ -121,7 +137,7 @@ public:
     struct DeconfigureRecord
     {
         const TARGETING::Target * iv_target;
-        uint32_t            iv_errlogPlid;
+        uint32_t            iv_errlogPlid; // plid OR deconfigReason value
     };
 
     typedef std::vector<DeconfigureRecord> DeconfigureRecords_t;

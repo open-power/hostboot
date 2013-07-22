@@ -255,8 +255,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
              l_itr != l_gardRecords.end();
              ++l_itr)
         {
+            GardRecord l_gardRecord = *l_itr;
+
             if ((l_sys_policy & TARGETING::CDM_POLICIES_PREDICTIVE_DISABLED) &&
-                ((*l_itr).iv_errorType == GARD_Predictive))
+                (l_gardRecord.iv_errorType == GARD_Predictive))
             {
                 // predictive records are disabled AND gard record is predictive
                 //  - don't process
@@ -265,7 +267,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             }
 
             if ((l_sys_policy & TARGETING::CDM_POLICIES_FUNCTIONAL_DISABLED) &&
-                ((*l_itr).iv_errorType == GARD_Func))
+                (l_gardRecord.iv_errorType == GARD_Func))
             {
                 // functional records are disabled AND gard record is Functional
                 //  - don't process
@@ -275,14 +277,14 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
             // Find the associated Target
             TARGETING::Target * l_pTarget =
-                TARGETING::targetService().toTarget((*l_itr).iv_targetId);
+                TARGETING::targetService().toTarget(l_gardRecord.iv_targetId);
 
             if (l_pTarget == NULL)
             {
                 // could be a platform specific target for the other
                 // ie, we are hostboot and this is an FSP target, or vice-versa
                 DG_INF_TARGET("Could not find Target for",
-                               &((*l_itr).iv_targetId));
+                               &(l_gardRecord.iv_targetId));
                 continue;
             }
 
@@ -302,13 +304,18 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
+            // special case - use errlogPlid UNLESS it's a Manual Gard
+            const uint32_t l_errlogPlid =
+                (l_gardRecord.iv_errorType == GARD_User_Manual) ?
+                    DECONFIGURED_BY_MANUAL_GARD : l_gardRecord.iv_errlogPlid;
+
             // Deconfigure the Target
             // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
             //  here, it's because of a gard record on this target
-            _deconfigureTarget(*l_pTarget, (*l_itr).iv_errlogPlid);
+            _deconfigureTarget(*l_pTarget, l_errlogPlid);
 
             // Deconfigure other Targets by association
-            _deconfigureByAssoc(*l_pTarget, (*l_itr).iv_errlogPlid);
+            _deconfigureByAssoc(*l_pTarget, l_errlogPlid);
         } // for
 
         //  check and see if we still have enough hardware to continue
@@ -425,10 +432,12 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
             } // for pProc_it
 
             // restrict the EX units; units turned off are marked
-            //  present=true, functional=false
+            //  present=true, functional=false, and marked with the
+            //  appropriate deconfigure code.
             HWAS_INF("FCO: calling restrictEXunits with %d entries",
                     l_procRestrictList.size());
-            l_pErr = restrictEXunits(l_procRestrictList, true);
+            l_pErr = restrictEXunits(l_procRestrictList,
+                        true, DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
             if (l_pErr)
             {
                 break;
