@@ -83,7 +83,7 @@ static bool myDataParse(\
     }\
     return l_rc;\
 }\
-static errl::DataPlugin g_DataPlugin(COMPID, myDataParse);
+static errl::DataPlugin g_DataPlugin(COMPID, myDataParse, ERRL_CID_HOSTBOOT);
 
 #endif
 

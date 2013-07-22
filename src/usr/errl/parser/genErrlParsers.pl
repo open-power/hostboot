@@ -669,7 +669,7 @@ foreach my $compValue (keys %compValueToParseHash)
     print OFILE "    return l_success;\n";
     print OFILE "}\n\n";
     print OFILE "static errl::SrcPlugin g_SrcPlugin(0x$compValue";
-    print OFILE "00, SrcDataParse);\n";
+    print OFILE "00, SrcDataParse, ERRL_CID_HOSTBOOT);\n";
 
     close(OFILE);
 }

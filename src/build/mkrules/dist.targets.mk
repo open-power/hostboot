@@ -190,6 +190,7 @@ fsp.tar_CONTENTS = \
     src/build/tools/hwp_id.pl \
     obj/genfiles/plugins/makefile:plugins/ \
     obj/genfiles/plugins/hbfwUdIds.H:plugins/ \
+    src/include/usr/hbotcompid.H \
     src/include/usr/hwas/common/hwasCallout.H:hwas/ \
     src/include/usr/devicefw/driverif.H:devicefw/ \
     src/include/usr/devicefw/userif.H:devicefw/ \
