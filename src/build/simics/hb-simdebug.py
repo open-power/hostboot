@@ -164,10 +164,9 @@ Examples: \n
 #------------------------------------------------
 #------------------------------------------------
 def hb_singlethread():
-    run_command("foreach $cpu in (system_cmp0.get-processor-list) " +
-                "{ pdisable $cpu}");
-    run_command("penable cpu0_0_05_0");
-    run_command("pselect cpu0_0_05_0");
+    # Note: will default to using the currently selected cpu
+    # emulates the SBE thread count register
+    run_command("($hb_cpu).write-reg scratch7 0x0000800000000000");
     return
 
 new_command("hb-singlethread",
@@ -175,8 +174,7 @@ new_command("hb-singlethread",
     [],
     alias = "hb-st",
     type = ["hostboot-commands"],
-    short = "Disable all threads except cpu0_0_05_0.")
-
+    short = "Disable all threads except 1 - Must be run before starting sim.")
 
 
 #------------------------------------------------
@@ -217,3 +215,6 @@ Examples: \n
     hb-getallregs pc\n
     """)
 
+
+#------------------------------------------------
+#------------------------------------------------

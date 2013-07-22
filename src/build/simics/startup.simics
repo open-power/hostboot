@@ -9,27 +9,29 @@ python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 
 
 # Setup some common vars to use across machine types
-echo "Note: Error messages for cecdrawer0_XXX are expected for non-Brazos machines"
 $hb_masterproc = ""
-try {
-    # Attempt to use the Brazos name
-    @SIM_get_object("cecdrawer0_p8Proc0")
-    $hb_masterproc = "cecdrawer0_p8Proc0"
-} except {
-    # Default to Tuleta/Orlena name
-    $hb_masterproc = "p8Proc0"
-}
+@simenv.hb_masterproc = quiet_run_command("get-master-proc")[0]
+echo "Master Proc is: "+$hb_masterproc
 
 $hb_pnor = ""
+@simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
 try {
-    # Attempt to use the Brazos name
-    @SIM_get_object("cecdrawer0_fpga0")
-    $hb_pnor = "cecdrawer0_fpga0"
+    @SIM_get_object(simenv.hb_pnor[0])
 } except {
-    # Default to Tuleta/Orlena name
-    $hb_pnor = "fpga0"
+    try {
+        # Attempt to use the Brazos name
+        @SIM_get_object("cecdrawer0_fpga0")
+        $hb_pnor = "cecdrawer0_fpga0"
+    } except {
+        # Default to Tuleta/Orlena name
+        $hb_pnor = "fpga0"
+    }
 }
+echo "Master PNOR is: "+$hb_pnor
 
+# Choose a default core to start with
+$hb_cpu = "system_cmp0.cpu0_0_04_0"
+echo "Defaulting to CPU "+$hb_cpu+" for Hostboot tools"
 
 # Load HB debug tools.
 try {
