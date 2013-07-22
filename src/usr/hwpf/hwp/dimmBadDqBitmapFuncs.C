@@ -31,6 +31,9 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     02/17/2012  Created.
+ *                          dedahle     06/20/2013  dimmGetBadDqBitmap/
+ *                                                  dimmSetBadDqBitmap funcs
+ *                                                  get/set ATTR_BAD_DQ_BITMAP
  */
 
 #include <dimmBadDqBitmapFuncs.H>
@@ -38,16 +41,6 @@
 
 extern "C"
 {
-
-// TODO
-// For the dimmGetBadDqBitmap and dimmSetBadDqBitmap funcs, the original plan to
-// get/set the bitmap was to get/set a HWPF attribute called ATTR_BAD_DQ_BITMAP.
-// This would automatically call the dimmBadDqBitmapAccessHwp HWP which would
-// access the ATTR_SPD_BAD_DQ_DATA HWPF attribute and decode the data. However,
-// automatically bridging an attribute request to a HWP turns out to be
-// difficult due to the fact that the FAPI_ATTR_GET macro returns a ReturnCode
-// and the FAPI_EXEC_HWP macro takes a ReturnCode as parameter. For now call the
-// HWP directly and revisit later
 
 
 //------------------------------------------------------------------------------
@@ -158,20 +151,21 @@ fapi::ReturnCode dimmGetBadDqBitmap(const fapi::Target & i_mba,
 
     if (!l_rc)
     {
-        // Get the Bad DQ bitmap by calling the dimmBadDqBitmapAccessHwp HWP.
+        // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
         // Use a heap based array to avoid large stack alloc
         uint8_t (&l_dqBitmap)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE] =
             *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE]>
                 (new uint8_t[DIMM_DQ_MAX_DIMM_RANKS*DIMM_DQ_RANK_BITMAP_SIZE]));
        
-        FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp, l_dimm, l_dqBitmap, true);
+        l_rc = FAPI_ATTR_GET(ATTR_BAD_DQ_BITMAP, &l_dimm, l_dqBitmap);
 
         if (l_rc)
         {
-            FAPI_ERR("dimmGetBadDqBitmap: Error from dimmBadDqBitmapAccessHwp");
+            FAPI_ERR("dimmGetBadDqBitmap: Error getting ATTR_BAD_DQ_BITMAP for dimm");
         }
         else
         {
+            //Write contents of DQ bitmap for specific rank to o_data.
             memcpy(o_data, l_dqBitmap[i_rank], DIMM_DQ_RANK_BITMAP_SIZE);
         }
 
@@ -200,28 +194,28 @@ fapi::ReturnCode dimmSetBadDqBitmap(
 
     if (!l_rc)
     {
-        // Get the Bad DQ bitmap by calling the dimmBadDqBitmapAccessHwp HWP.
+        // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
         // Use a heap based array to avoid large stack alloc
         uint8_t (&l_dqBitmap)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE] =
             *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE]>
                 (new uint8_t[DIMM_DQ_MAX_DIMM_RANKS*DIMM_DQ_RANK_BITMAP_SIZE]));
 
-        FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp, l_dimm, l_dqBitmap, true);
+        l_rc = FAPI_ATTR_GET(ATTR_BAD_DQ_BITMAP, &l_dimm, l_dqBitmap);
 
         if (l_rc)
         {
-            FAPI_ERR("dimmSetBadDqBitmap: Error from dimmBadDqBitmapAccessHwp (get)");
+            FAPI_ERR("dimmSetBadDqBitmap: Error getting ATTR_BAD_DQ_BITMAP for dimm");
         }
         else
         {
             // Add the rank bitmap to the DIMM bitmap and write the bitmap
             memcpy(l_dqBitmap[i_rank], i_data, DIMM_DQ_RANK_BITMAP_SIZE);
 
-            FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp, l_dimm, l_dqBitmap, false);
+            l_rc = FAPI_ATTR_SET(ATTR_BAD_DQ_BITMAP, &l_dimm, l_dqBitmap);
 
             if (l_rc)
             {
-                FAPI_ERR("dimmSetBadDqBitmap: Error from dimmBadDqBitmapAccessHwp (set)");
+                FAPI_ERR("dimmSetBadDqBitmap: Error setting ATTR_BAD_DQ_BITMAP for dimm");
             }
         }
 

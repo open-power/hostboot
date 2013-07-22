@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/fapiTestHwpDq.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/fapiTestHwpDq.C $                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiTestHwpDq.C
  *
@@ -102,48 +101,51 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
             break;
         }
 
-        // Get the bad DQ Bitmap for the DIMM, rank 3
-        l_rc = dimmGetBadDqBitmap(i_mba, l_port, l_dimm, 3, l_dqBitmap);
-
-        if (l_rc)
+        // Get the bad DQ Bitmap for all ranks and print any non-zero data
+        uint8_t l_rank = 0;
+        for (l_rank = 0; l_rank < 3; l_rank++)
         {
-            FAPI_ERR("fapiTestHwpDq: Error from dimmGetBadDqBitmap");
-            break;
-        }
+            // Get the bad DQ Bitmap for the rank
+            l_rc = dimmGetBadDqBitmap(i_mba, l_port, l_dimm, l_rank,
+                                      l_dqBitmap);
 
-        // If the data is not all zeroes then skip the rest of the test, do not
-        // want to modify any real Bad DQ records
-        bool l_nonZeroData = false;
-
-        for (uint8_t i = 0; i < DIMM_DQ_RANK_BITMAP_SIZE; i++)
-        {
-            if (l_dqBitmap[i] != 0)
+            if (l_rc)
             {
-                FAPI_INF("fapiTestHwpDq: Non-zero DQ data, skipping test");
-                l_nonZeroData = true;
+                FAPI_ERR("fapiTestHwpDq: Error from dimmGetBadDqBitmap");
                 break;
+            }
+
+            // Trace any bad DQs
+            for (uint8_t i = 0; i < DIMM_DQ_RANK_BITMAP_SIZE; i++)
+            {
+                if (l_dqBitmap[i] != 0)
+                {
+                    FAPI_INF("fapiTestHwpDq: Non-zero DQ data. Rank:%d, Byte:%d, Val:0x02%x",
+                             l_rank, i, l_dqBitmap[i]);
+                }
             }
         }
 
-        if (l_nonZeroData)
+        if (l_rc)
         {
             break;
         }
+
+        // Record the two bytes of the bad DQ bitmap that this function
+        // will change so that it can be restored
+        uint8_t l_origDq2 = l_dqBitmap[2];
+        uint8_t l_origDq6 = l_dqBitmap[6];
 
         // Set 2 bad DQ bits
         l_dqBitmap[2] = 0x40;
         l_dqBitmap[6] = 0x20;
 
-        // Set the bad DQ Bitmap
-        l_rc = dimmSetBadDqBitmap(i_mba, 1, 0, 3, l_dqBitmap);
+        // Set the bad DQ Bitmap for the last rank
+        l_rc = dimmSetBadDqBitmap(i_mba, l_port, l_dimm, l_rank, l_dqBitmap);
 
         if (l_rc)
         {
             FAPI_ERR("fapiTestHwpDq: Error from dimmSetBadDqBitmap");
-
-            // TODO
-            FAPI_ERR("fapiTestHwpDq: Waiting for SPD DD support for writes (story 35766)");
-            l_rc = fapi::FAPI_RC_SUCCESS;
             break;
         }
 
@@ -151,7 +153,7 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
         l_dqBitmap[2] = 0;
         l_dqBitmap[6] = 0;
 
-        l_rc = dimmGetBadDqBitmap(i_mba, 1, 0, 3, l_dqBitmap);
+        l_rc = dimmGetBadDqBitmap(i_mba, l_port, l_dimm, l_rank, l_dqBitmap);
 
         if (l_rc)
         {
@@ -169,11 +171,11 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
             break;
         }
 
-        // Write the data back to zero
-        l_dqBitmap[2] = 0;
-        l_dqBitmap[6] = 0;
+        // Write the original data back
+        l_dqBitmap[2] = l_origDq2;
+        l_dqBitmap[6] = l_origDq6;
 
-        l_rc = dimmSetBadDqBitmap(i_mba, 1, 0, 3, l_dqBitmap);
+        l_rc = dimmSetBadDqBitmap(i_mba, l_port, l_dimm, l_rank, l_dqBitmap);
 
         if (l_rc)
         {

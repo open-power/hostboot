@@ -36,6 +36,7 @@
  *                          mjjones     06/27/2011  Created.
  *                          bofferdn    09/13/2011  Support fapi->hb mapping
  *                          thi         01/28/2013  Add SPD CUSTOM attr
+ *                          dedahle     06/20/2013  Add Bad DIMM DQ Bitmap attr
  */
 
 #ifndef FAPIPLATATTRIBUTESERVICE_H_
@@ -57,6 +58,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdAddrMirrorData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
 #include <vpd/spdenums.H>
 #include <dimmConsts.H>
 #include <util/singleton.H>
@@ -499,6 +501,59 @@ fapi::ReturnCode fapiPlatGetSlopeInterceptData (
                               const fapi::Target * i_pTarget,
                               const fapi::MBvpdSlopeIntercept i_attr,
                               uint32_t  & o_Val);
+
+//------------------------------------------------------------------------------
+// Prototypes to support BAD_DQ_BITMAP attribute
+//  See dimm_spd_attributes.xml for detailed descriptions
+//------------------------------------------------------------------------------
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the Bad DQ Bitmap attribute
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target pointer
+ *  @param[out] o_data      Bad DIMM DQ Bitmap
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatDimmGetBadDqBitmap (
+                                   const fapi::Target * i_pTarget,
+                                   uint8_t (&o_data)[DIMM_DQ_MAX_DIMM_RANKS]\
+                                                    [DIMM_DQ_RANK_BITMAP_SIZE]);
+
+/**
+ * @brief This function is called by the FAPI_ATTR_SET macro when setting
+ * the Bad DQ Bitmap attribute
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target pointer
+ *  @param[in]  i_data      Bad DIMM DQ Bitmap
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatDimmSetBadDqBitmap (
+                                   const fapi::Target * i_pTarget,
+                                   uint8_t (&i_data)[DIMM_DQ_MAX_DIMM_RANKS]\
+                                                    [DIMM_DQ_RANK_BITMAP_SIZE]);
+
+//------------------------------------------------------------------------------
+// Prototype to support VPD_DIMM_SPARE attribute
+//  See dimm_spd_attributes.xml for detailed description
+//------------------------------------------------------------------------------
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the VPD DIMM Spare attribute
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target pointer
+ *  @param[out] o_data      Spare DRAM availability for DIMM
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatDimmGetSpareDram (
+                                    const fapi::Target * i_pTarget,
+                                    uint8_t &o_data);
+
+
 } // namespace platAttrSvc
 
 } // namespace fapi
@@ -1443,5 +1498,25 @@ fapi::ReturnCode fapiPlatGetSlopeInterceptData (
     fapi::FAPI_RC_SUCCESS :\
     fapi::platAttrSvc::fapiPlatGetSlopeInterceptData\
         (PTARGET, fapi::SUPPLIER_POWER_INTERCEPT , VAL)
+
+//------------------------------------------------------------------------------
+//  MACRO to support BAD_DQ_BITMAP Attribute
+//------------------------------------------------------------------------------
+#define ATTR_BAD_DQ_BITMAP_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatDimmGetBadDqBitmap\
+        (PTARGET, VAL)
+#define ATTR_BAD_DQ_BITMAP_SETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::setAttrActionsFunc(fapi::ID, PTARGET,\
+                                               sizeof(VAL), &VAL),\
+    fapi::platAttrSvc::fapiPlatDimmSetBadDqBitmap(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACRO to support VPD_DIMM_SPARE Attribute
+//------------------------------------------------------------------------------
+#define ATTR_VPD_DIMM_SPARE_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatDimmGetSpareDram\
+        (PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_
