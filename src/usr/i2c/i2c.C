@@ -97,6 +97,8 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          va_list i_args )
 {
     errlHndl_t err = NULL;
+    bool      l_withStop      = false;
+    bool      l_skipModeSetup = false;
 
     // Get the input args our of the va_list
     //  Address, Port, Engine, Device Addr.
@@ -105,16 +107,30 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     args.engine = va_arg( i_args, uint64_t );
     args.devAddr = va_arg( i_args, uint64_t );
 
+
+    // These are additional parms in the case an offset is passed in
+    // via va_list, as well
+    uint64_t  l_offset_length = 0;
+    uint8_t * l_offset_buffer = NULL;
+
+    l_offset_length = va_arg( i_args, uint64_t);
+
+    if ( l_offset_length != 0)
+    {
+        l_offset_buffer = reinterpret_cast<uint8_t*>(va_arg(i_args, uint64_t));
+    }
+
     TRACDCOMP( g_trac_i2c,
-               ENTER_MRK"i2cPerformOp(): i_opType=%d, "
-               "p=%d, engine=%d, devAddr=0x%lx",
-               (uint64_t) i_opType, args.port, args.engine, args.devAddr );
+               ENTER_MRK"i2cPerformOp(): i_opType=%d, aType=%d, "
+               "p/e/devAddr= %d/%d/0x%X, len=%d, offset=%d/%p",
+               (uint64_t) i_opType, i_accessType, args.port, args.engine,
+               args.devAddr, io_buflen, l_offset_length, l_offset_buffer);
 
     TRACUCOMP( g_trac_i2c,
-               ENTER_MRK"i2cPerformOp(): i_opType=%d, p/e/devAddr= "
-               "%d/%d/0x%x, len=%d",
-               (uint64_t) i_opType, args.port, args.engine, args.devAddr,
-               io_buflen);
+               ENTER_MRK"i2cPerformOp(): i_opType=%d, aType=%d, "
+               "p/e/devAddr= %d/%d/0x%x, len=%d, offset=%d/%p",
+               (uint64_t) i_opType, i_accessType, args.port, args.engine,
+               args.devAddr, io_buflen, l_offset_length, l_offset_buffer);
 
     do
     {
@@ -205,25 +221,96 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                 nanosleep( 0, I2C_RETRY_DELAY );
             }
 
-            if( i_opType == DeviceFW::READ )
+
+            if( i_opType        == DeviceFW::READ &&
+                l_offset_length != 0 )
             {
+
+                // First WRITE offset to device without a stop
+                l_withStop = false;
+
+                err = i2cWrite( i_target,
+                                l_offset_buffer,
+                                l_offset_length,
+                                l_withStop,
+                                args );
+
+
+
+                // Now do the READ with a stop (reads always have 'stop')
+                // Skip mode setup on this cmd - already set with previous cmd
+                l_skipModeSetup = true;
+
                 err = i2cRead( i_target,
                                io_buffer,
                                io_buflen,
+                               l_skipModeSetup,
                                args );
             }
-            else if( i_opType == DeviceFW::WRITE )
+
+            else if( i_opType        == DeviceFW::WRITE &&
+                     l_offset_length != 0 )
             {
+
+                // Add the Offset Information to the start of the data and
+                // then send as a single write operation
+
+                size_t newBufLen = l_offset_length + io_buflen;
+                uint8_t * newBuffer = static_cast<uint8_t*>(malloc(newBufLen));
+
+                // Add the Offset to the buffer
+                memcpy( newBuffer, l_offset_buffer, l_offset_length);
+
+                // Now add the data the user wanted to write
+                memcpy( &newBuffer[l_offset_length], io_buffer, io_buflen);
+
+                // Other parms:
+                l_withStop = true;
+                l_skipModeSetup = false;
+
+                err = i2cWrite( i_target,
+                                newBuffer,
+                                newBufLen,
+                                l_withStop,
+                                args );
+
+
+                free( newBuffer );
+
+            }
+
+            else if ( i_opType        == DeviceFW::READ &&
+                      l_offset_length == 0 )
+            {
+                // Do a direct READ
+                l_skipModeSetup = false;
+
+                err = i2cRead( i_target,
+                               io_buffer,
+                               io_buflen,
+                               l_skipModeSetup,
+                               args );
+            }
+
+
+            else if( i_opType        == DeviceFW::WRITE &&
+                     l_offset_length == 0 )
+            {
+                // Do a direct WRITE with a stop
+                l_withStop = true;
                 err = i2cWrite( i_target,
                                 io_buffer,
                                 io_buflen,
+                                l_withStop,
                                 args );
             }
             else
             {
-                TRACFCOMP( g_trac_i2c,
-                           ERR_MRK"i2cPerformOp() - Unknown Operation Type!" );
-                uint64_t userdata2 = args.port;
+                TRACFCOMP( g_trac_i2c, ERR_MRK"i2cPerformOp() - "
+                           "Unsupported Op/Offset-Type Combination=%d/%d",
+                           i_opType, l_offset_length );
+                uint64_t userdata2 = l_offset_length;
+                userdata2 = (userdata2 << 16) | args.port;
                 userdata2 = (userdata2 << 16) | args.engine;
                 userdata2 = (userdata2 << 16) | args.devAddr;
 
@@ -233,7 +320,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                  * @severity         ERRL_SEV_UNRECOVERABLE
                  * @moduleid         I2C_PERFORM_OP
                  * @userdata1        i_opType
-                 * @userdata2[0:15]  <UNUSED>
+                 * @userdata2[0:15]  Offset Length
                  * @userdata2[16:31] Master Port
                  * @userdata2[32:47] Master Engine
                  * @userdata2[48:63] Slave Device Address
@@ -249,7 +336,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             }
 
             // If no errors, break here
-            if( NULL == err )
+            if( err == NULL )
             {
                 break;
             }
@@ -280,6 +367,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 errlHndl_t i2cRead ( TARGETING::Target * i_target,
                      void * o_buffer,
                      size_t & i_buflen,
+                     bool & i_skipModeSetup,
                      input_args_t i_args )
 {
     errlHndl_t err = NULL;
@@ -312,6 +400,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
                         i_buflen,
                         true,  // i_readNotWrite
                         true,  // i_withStop
+                        i_skipModeSetup,
                         i_args );
 
         if( err )
@@ -414,6 +503,9 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 
             *((uint8_t*)o_buffer + bytesRead) = fifo.byte_0;
 
+            // Everytime FIFO is read, reset timeout count
+            timeoutCount = I2C_TIMEOUT_COUNT( interval );
+
             TRACUCOMP( g_trac_i2cr,
                        "I2C READ  DATA  : engine %.2X : port %.2x : "
                        "devAddr %.2X : byte %d : %.2X (0x%lx)",
@@ -452,6 +544,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 errlHndl_t i2cWrite ( TARGETING::Target * i_target,
                       void * i_buffer,
                       size_t & io_buflen,
+                      bool & i_withStop,
                       input_args_t i_args )
 {
     errlHndl_t err = NULL;
@@ -478,7 +571,8 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
         err = i2cSetup( i_target,
                         io_buflen,
                         false, // i_readNotWrite
-                        true,  // i_withStop
+                        i_withStop,
+                        false, // i_skipModeSetup,
                         i_args );
 
         if( err )
@@ -523,7 +617,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
             break;
         }
 
-        // Check for Command complete, and make sure no errors
+        // Check for Command complete
         err = i2cWaitForCmdComp( i_target,
                                  i_args );
 
@@ -553,6 +647,7 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
                       size_t & i_buflen,
                       bool i_readNotWrite,
                       bool i_withStop,
+                      bool i_skipModeSetup,
                       input_args_t i_args )
 {
     errlHndl_t err = NULL;
@@ -581,31 +676,36 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
             break;
         }
 
-        // Write Mode Register:
-        //      - bit rate divisor
-        //      - port number
-        mode.value = 0x0ull;
 
+        // Skip mode setup on 2nd of 2 cmd strung together - like when sending
+        //  device offset first before read or write
 
-
-        // @todo RTC:72715 - Add multiple bus speed support
-        // Hard code to 400KHz until we get attributes in place to get
-        // this from the target.
-        mode.bit_rate_div = I2C_CLOCK_DIVISOR_400KHZ;
-        mode.port_num = port;
-
-        TRACUCOMP( g_trac_i2c,"i2cSetup(): set mode = 0x%lx", mode.value);
-
-        err = deviceWrite( i_target,
-                           &mode.value,
-                           size,
-                           DEVICE_SCOM_ADDRESS( masterAddrs[engine].mode ) );
-
-
-        if( err )
+        if ( i_skipModeSetup == false)
         {
-            break;
+            // Write Mode Register:
+            //      - bit rate divisor
+            //      - port number
+            mode.value = 0x0ull;
+
+            // @todo RTC:72715 - Add multiple bus speed support
+            // Hard code to 400KHz until we get attributes in place to get
+            // this from the target.
+            mode.bit_rate_div = I2C_CLOCK_DIVISOR_400KHZ;
+            mode.port_num = port;
+
+            TRACUCOMP( g_trac_i2c,"i2cSetup(): set mode = 0x%lx", mode.value);
+
+            err = deviceWrite( i_target,
+                               &mode.value,
+                               size,
+                               DEVICE_SCOM_ADDRESS( masterAddrs[engine].mode));
+
+            if( err )
+            {
+                break;
+            }
         }
+
 
         // Write Command Register:
         //      - with start

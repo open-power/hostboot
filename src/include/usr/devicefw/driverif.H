@@ -102,11 +102,29 @@ namespace DeviceFW
      * @param[in] i_port - Which port to use from the I2C master.
      * @param[in] i_engine - Which I2C master engine to use.
      * @param[in] i_devAddr - The device address on a given engine/port.
+     * @note '0' and 'NULL' added to line up with other DeviceFW::I2C
      */
     #define DEVICE_I2C_ADDRESS( i_port, i_engine, i_devAddr )\
         DeviceFW::I2C, static_cast<uint64_t>(( i_port )),\
             static_cast<uint64_t>(( i_engine )),\
-            static_cast<uint64_t>(( i_devAddr ))
+            static_cast<uint64_t>(( i_devAddr )),\
+            0,\
+            NULL
+
+    /**
+     * Construct the device addressing parameters for the I2C-offset device ops.
+     * @param[in] i_port - Which port to use from the I2C master.
+     * @param[in] i_engine - Which I2C master engine to use.
+     * @param[in] i_devAddr - The device address on a given engine/port.
+     * @param[in] i_offset_len - Length of offset (in bytes)
+     * @param[in] i_offset - Offset into I2C device
+     */
+    #define DEVICE_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
+        DeviceFW::I2C, static_cast<uint64_t>(( i_port )),\
+            static_cast<uint64_t>(( i_engine )),\
+            static_cast<uint64_t>(( i_devAddr )),\
+            static_cast<uint64_t>(( i_offset_len )),\
+            static_cast<uint8_t*>(( i_offset ))
 
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.

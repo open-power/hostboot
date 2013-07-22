@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -451,6 +451,9 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
  * @param[in] i_buflen - The size of the data to read and place in the
  *      buffer.
  *
+ * @param[in] i_skipModeSetup - true if mode register setup needs to be
+ *      skipped
+ *
  * @param[in] i_args - Structure containing arguments needed for a command
  *  transaction.
  *
@@ -460,6 +463,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 errlHndl_t i2cRead ( TARGETING::Target * i_target,
                      void * o_buffer,
                      size_t & i_buflen,
+                     bool & i_skipModeSetup,
                      input_args_t i_args );
 
 /**
@@ -474,6 +478,9 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
  * @param[in/out] io_buflen - INPUT: The size of the data to write to the
  *      target device.   OUTPUT: The size of the data buffer written.
  *
+ * @param[in] i_withStop - true if with_stop bit is to be set on operation;
+ *                         otherwise, with_stop bit will be set to zero.
+ *
  * @param[in] i_args - Structure containing arguments needed for a command
  *  transaction.
  *
@@ -484,6 +491,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 errlHndl_t i2cWrite ( TARGETING::Target * i_target,
                       void * i_buffer,
                       size_t & io_buflen,
+                      bool & i_withStop,
                       input_args_t i_args );
 
 /**
@@ -500,6 +508,9 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
  * @param[in] i_withStop - true if with_stop bit is to be set, otherwise
  *      with_stop will be set to zero.
  *
+ * @param[in] i_skipModeSetup - true if mode register setup needs to be
+ *      skipped
+ *
  * @param[in] i_args - Structure containing arguments needed for a command
  *  transaction.
  *
@@ -510,6 +521,7 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
                       size_t & i_buflen,
                       bool i_readNotWrite,
                       bool i_withStop,
+                      bool i_skipModeSetup,
                       input_args_t i_args );
 
 /**

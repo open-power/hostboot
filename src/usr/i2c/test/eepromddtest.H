@@ -41,9 +41,7 @@
 
 extern trace_desc_t* g_trac_eeprom;
 
-// Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+// NOTE: TRACUCOMP defined/controlled in i2ctest.H
 
 using namespace TARGETING;
 using namespace EEPROM;
@@ -82,7 +80,6 @@ class EEPROMTest: public CxxTest::TestSuite
             } testData[] =
 
             {
-
 
                 // MVPD of processor - chip 0
                 // Write:

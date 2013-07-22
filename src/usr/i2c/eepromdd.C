@@ -233,36 +233,46 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
         // Only write the byte address if we have data to write
         if( 0 != byteAddrSize )
         {
-            // Write the Byte Address of the Slave Device
-            err = deviceOp( DeviceFW::WRITE,
+
+            // Use the I2C OFFSET Interface for the READ
+            err = deviceOp( DeviceFW::READ,
                             i_target,
-                            &byteAddr,
-                            byteAddrSize,
+                            o_buffer,
+                            i_buflen,
+                            DEVICE_I2C_ADDRESS_OFFSET(
+                                       i_i2cInfo.port,
+                                       i_i2cInfo.engine,
+                                       i_i2cInfo.devAddr,
+                                       byteAddrSize,
+                                       reinterpret_cast<uint8_t*>(&byteAddr)));
+
+            if( err )
+            {
+                TRACFCOMP(g_trac_eeprom,
+                          ERR_MRK"eepromRead(): I2C Read-Offset failed on "
+                          "%d/%d/0x%x",
+                          i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr);
+                break;
+            }
+        }
+        else
+        {
+            // Do the actual read via I2C
+            err = deviceOp( DeviceFW::READ,
+                            i_target,
+                            o_buffer,
+                            i_buflen,
                             DEVICE_I2C_ADDRESS( i_i2cInfo.port,
                                                 i_i2cInfo.engine,
                                                 i_i2cInfo.devAddr ) );
 
             if( err )
             {
+                TRACFCOMP(g_trac_eeprom,
+                          ERR_MRK"eepromRead(): I2C Read failed on %d/%d/0x%x",
+                          i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr);
                 break;
             }
-        }
-
-        // Do the actual read via I2C
-        err = deviceOp( DeviceFW::READ,
-                        i_target,
-                        o_buffer,
-                        i_buflen,
-                        DEVICE_I2C_ADDRESS( i_i2cInfo.port,
-                                            i_i2cInfo.engine,
-                                            i_i2cInfo.devAddr ) );
-
-        if( err )
-        {
-            TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"eepromRead(): I2C Read failed on %d/%d/0x%x",
-                       i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr );
-            break;
         }
 
         mutex_unlock( &g_eepromMutex );
