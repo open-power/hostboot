@@ -755,42 +755,17 @@ errlHndl_t doDumpCollect(void)
                 // if no error then collect as expected.
                 if (!l_err)
                 {
-
-                    // TODO:  Issue RTC 67082 - fix sending the MDRT
-                    // to FSP once we have a design that can send the
-                    // entire table.. Max size is 512K - truncating to
-                    // 32K for the time being.
-                    uint64_t l_resultsTableSize = resultsTableSize;
-
-                    // If the results table is greater than 32K truncate it.
-                    if (resultsTableSize > (32*KILOBYTE))
-                    {
-                        // Set the results table size to only include up to
-                        // 32K
-                        l_resultsTableSize = (32*KILOBYTE);
-
-                        TRACFCOMP( g_trac_dump,
-                                   INFO_MRK"Truncating the RESULTS table to 32K for dump msg type =. %.8X,",
-                                   i_type);
-
-                    }
-
-                    // TODO:  RTC 67082 - Need to make sure we put the physical
-                    // Address here.
-
-                    // Address of the results table
-                    msg->data[0] = resultsTableAddr;
+                    // Physical Address of the results table
+                    uint64_t l_mdrt_phys =
+                      mm_virt_to_phys(
+                          reinterpret_cast<void*>(resultsTableAddr));
+                    msg->data[0] = l_mdrt_phys;
 
                     // Number of bytes in the results table
-                    msg->data[1] = l_resultsTableSize;
+                    msg->data[1] = resultsTableSize;
 
-                    //Copy the Results table into the message
-                    msg->extra_data = malloc( l_resultsTableSize );
-
-                    memcpy( msg->extra_data,
-                            reinterpret_cast<uint64_t*>(resultsTableAddr),
-                            l_resultsTableSize);
-
+                    // No extra data to worry about
+                    msg->extra_data = NULL;
 
                 }
                 else
