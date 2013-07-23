@@ -35,16 +35,11 @@
     <attribute><id>HUID</id></attribute>
     <attribute><id>PHYS_PATH</id></attribute>
     <attribute><id>AFFINITY_PATH</id></attribute>
-    <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-    </attribute>
+    <attribute><id>PRIMARY_CAPABILITIES</id></attribute>
     <attribute><id>HWAS_STATE</id></attribute>
     <attribute><id>HWAS_STATE_CHANGED_FLAG</id></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id></attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
 </targetType>
 
 <targetType>
@@ -217,13 +212,6 @@
         <id>FSI_OPTION_FLAGS</id>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!--GARD -->
-    </attribute>
-    <attribute>
         <id>EC</id>
     </attribute>
     <attribute>
@@ -264,6 +252,10 @@
         <!-- Processor chips have an SBE -->
         <id>CHIP_HAS_SBE</id>
         <default>1</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000005</default> <!-- GARD, PSIDIAG -->
     </attribute>
     <!-- TODO. MVPD_FREQ_CORE_NOMINAL to be deleted when MVPD available -->
     <attribute><id>MVPD_FREQ_CORE_NOMINAL</id></attribute>
@@ -375,9 +367,6 @@
      <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
      <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
      <!-- End Supporting poreve_memory_attributes.xml -->
-    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000005</default> <!-- GARD, PSIDIAG -->
-    </attribute>
 <!-- TODO RTC 62291. This next attribute moves to hostboot only
      with this story  -->
     <attribute><id>PROC_SECURITY_SETUP_VECTOR</id></attribute>
@@ -511,13 +500,6 @@
         </default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!-- GARD -->
-    </attribute>
-    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -529,6 +511,10 @@
     <attribute>
         <id>TYPE</id>
         <default>EX</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
     </attribute>
     <!-- Start pm_hwp_attributes.xml -->
     <attribute><id>PM_SPWUP_FSP</id></attribute>
@@ -588,6 +574,10 @@
         <id>TYPE</id>
         <default>CORE</default>
     </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000000</default>
+    </attribute>
 </targetType>
 
 <targetType>
@@ -615,6 +605,10 @@
     <attribute>
         <id>TYPE</id>
         <default>PCI</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
     </attribute>
 </targetType>
 
@@ -653,6 +647,10 @@
         <default>POWER8</default>
     </attribute>
     <attribute><id>FIELD_CORE_OVERRIDE</id></attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
+    </attribute>
 </targetType>
 
 <targetType>
@@ -661,6 +659,10 @@
     <attribute>
         <id>TYPE</id>
         <default>ABUS</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
     </attribute>
     <attribute><id>CHIP_UNIT</id></attribute>
     <attribute><id>PEER_TARGET</id></attribute>
@@ -695,6 +697,10 @@
         <id>TYPE</id>
         <default>XBUS</default>
     </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
+    </attribute>
     <attribute><id>CHIP_UNIT</id></attribute>
     <attribute><id>PEER_TARGET</id></attribute>
 </targetType>
@@ -726,6 +732,10 @@
         <id>TYPE</id>
         <default>L4</default>
     </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
+    </attribute>
 </targetType>
 
 <targetType>
@@ -734,6 +744,10 @@
     <attribute>
         <id>TYPE</id>
         <default>MBA</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
     </attribute>
     <attribute><id>MSS_DIMM_MFG_ID_CODE</id></attribute>
     <attribute><id>EFF_DIMM_RANKS_CONFIGED</id></attribute>
@@ -992,6 +1006,10 @@
         <id>TYPE</id>
         <default>MCS</default>
     </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
+    </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id></attribute>
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
     <attribute><id>DMI_REFCLOCK_SWIZZLE</id></attribute>
@@ -1060,6 +1078,10 @@
             <field><id>supportsInbandScom</id><value>1</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
     </attribute>
     <attribute>
         <id>SCOM_SWITCHES</id>
@@ -1188,6 +1210,10 @@
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
     </attribute>
 
     <!-- Defaulting this info to the one Simics Dummy device that we have -->
