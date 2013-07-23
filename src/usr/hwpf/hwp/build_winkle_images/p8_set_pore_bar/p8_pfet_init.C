@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_init.C,v 1.3 2013/03/18 17:58:33 pchatnah Exp $
+// $Id: p8_pfet_init.C,v 1.9 2013/08/02 19:05:49 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -90,13 +90,15 @@ using namespace fapi;
 // Function prototypes
 // ----------------------------------------------------------------------
 
-fapi::ReturnCode pfet_init(const Target& i_target);
+fapi::ReturnCode pfet_init(const Target& i_target, uint32_t i_mode);
 fapi::ReturnCode pfet_config(const Target& i_target);
 fapi::ReturnCode pfet_set_delay( const fapi::Target& i_target,
                                  const uint64_t      i_address,
                                  const uint8_t       i_delay0,
                                  const uint8_t       i_delay1,
                                  const uint32_t      i_select);
+uint8_t convert_delay_to_value ( uint32_t   i_delay,
+                                 uint32_t   i_attr_proc_nest_frequency);
 
 // ----------------------------------------------------------------------
 // Function definitions
@@ -104,26 +106,24 @@ fapi::ReturnCode pfet_set_delay( const fapi::Target& i_target,
 
 
 /// \param[in] i_target EX target
-/// \param[in] mode     Control mode for the procedure
+/// \param[in] i_mode   Control mode for the procedure
 ///                     (PM_CONFIG, PM_INIT, PM_RESET,
 ///                      PM_OVERRIDE)
-/// \param[in] domain
-/// \param[in] opcontrol
-
+///
 /// \retval FAPI_RC_SUCCESS
 /// \retval ERROR defined in xml
 
 fapi::ReturnCode
-p8_pfet_init(const Target& i_target, uint32_t mode)
+p8_pfet_init(const Target& i_target, uint32_t i_mode)
 {
     fapi::ReturnCode      l_rc;
 
-    FAPI_INF("Executing p8_pfet_init in mode %x ....", mode);
+    FAPI_INF("Executing p8_pfet_init in mode %x ....", i_mode);
 
     /// -------------------------------
     /// Configuration:  perform translation of any Platform Attributes
     /// into Feature Attributes that are applied during Initalization
-    if (mode == PM_CONFIG)
+    if (i_mode == PM_CONFIG)
     {
         FAPI_INF("PFET config...");
         FAPI_INF("---> None is defined...");
@@ -132,16 +132,16 @@ p8_pfet_init(const Target& i_target, uint32_t mode)
     /// -------------------------------
     /// Initialization:  perform order or dynamic operations to initialize
     /// the SLW using necessary Platform or Feature attributes.
-    else if (mode == PM_INIT)
+    else if (i_mode == PM_INIT || i_mode == PM_INIT_SPECIAL)
     {
         FAPI_INF("PFET init...");
-        l_rc = pfet_init(i_target);
+        l_rc = pfet_init(i_target, i_mode);
     }
 
     /// -------------------------------
     /// Reset:  perform reset of PFETs so that it can reconfigured and
     /// reinitialized
-    else if (mode == PM_RESET)
+    else if (i_mode == PM_RESET)
     {
         FAPI_INF("PFET reset...");
         FAPI_INF("---> None is defined...");
@@ -152,7 +152,7 @@ p8_pfet_init(const Target& i_target, uint32_t mode)
     else
     {
 
-        FAPI_ERR("Unknown mode passed to p8_pfet_init. Mode %x ....", mode);
+        FAPI_ERR("Unknown mode passed to p8_pfet_init. Mode %x ....", i_mode);
         FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_CODE_BAD_MODE);
 
     }
@@ -164,7 +164,7 @@ p8_pfet_init(const Target& i_target, uint32_t mode)
 // PFET Configuration Function
 //------------------------------------------------------------------------------
 fapi::ReturnCode
-pfet_init(const Target& i_target)
+pfet_init(const Target& i_target, uint32_t i_mode)
 {
     fapi::ReturnCode            l_rc;
     uint32_t                    e_rc = 0;
@@ -173,12 +173,13 @@ pfet_init(const Target& i_target)
     std::vector<fapi::Target>   l_exChiplets;
     uint8_t                     l_functional = 0;
     uint8_t                     l_ex_number = 0;
-    bool __attribute__((unused)) error_flag = false; // HACK
 
     uint64_t                    address;
 
     uint8_t                     core_vret_voff_value;
     uint8_t                     eco_vret_voff_value;
+
+    pfet_force_t                off_mode;
 
     uint32_t                    attr_proc_refclk_frequency;
 
@@ -266,7 +267,6 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_FREQ_PROC_REFCLOCK");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -277,7 +277,6 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERUP_CORE_DELAY0");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -288,7 +287,6 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERUP_CORE_DELAY1");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -299,7 +297,6 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERDOWN_CORE_DELAY0");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -310,7 +307,6 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERDOWN_CORE_DELAY1");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -321,7 +317,6 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERUP_ECO_DELAY0");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -333,17 +328,16 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERUP_ECO_DELAY1");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
         /// ----------------------------------------------------------
         l_rc = FAPI_ATTR_GET(   ATTR_PM_PFET_POWERDOWN_ECO_DELAY0,
-        &i_target, attr_pm_pfet_powerdown_eco_delay0);
+                                &i_target,
+                                attr_pm_pfet_powerdown_eco_delay0);
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERDOWN_ECO_DELAY0");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -354,7 +348,6 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERDOWN_ECO_DELAY1");
-	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -453,149 +446,194 @@ pfet_init(const Target& i_target)
                                     TARGET_TYPE_EX_CHIPLET,
                                     l_exChiplets,
                                     TARGET_STATE_PRESENT);
-	    if (l_rc)
-	    {
-	        FAPI_ERR("Error from fapiGetChildChiplets!");
-	        break;
-	    }
+        if (l_rc)
+        {
+            FAPI_ERR("Error from fapiGetChildChiplets!");
+            break;
+        }
 
-	    FAPI_DBG("\tChiplet vector size  => %u ", l_exChiplets.size());
+        FAPI_DBG("\tNumber of EX chiplets present => %u", l_exChiplets.size());
 
         // Iterate through the returned chiplets
-	    for (uint8_t j=0; j < l_exChiplets.size(); j++)
-	    {
+        for (uint8_t j=0; j < l_exChiplets.size(); j++)
+        {
             // Determine if it's functional
             l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[j], l_functional);
             if (l_rc)
             {
                 FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
-                error_flag = true;
                 break;
             }
-            else if ( l_functional )
+
+            // Get the core number
+            l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
+            if (l_rc)
             {
-                // Get the core number
-                l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
-                if (l_rc)
+                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
+                break;
+            }
+
+
+            FAPI_INF("Set PFET attribute values into EX %X", l_ex_number);
+
+            // -------------------------------------------------------------
+            FAPI_DBG("\tSetting Core Power up Delays");
+            address = EX_CorePFPUDly_REG_0x100F012C + (0x01000000 * l_ex_number);
+            l_rc=pfet_set_delay(i_target,
+                                address,
+                                attr_pm_pfet_powerup_core_delay0_value,
+                                attr_pm_pfet_powerup_core_delay1_value,
+                                attr_pm_pfet_powerup_core_sequence_delay_select
+                               );
+            if (l_rc)
+            {
+                FAPI_ERR("pfet_set_delay error 0x%08llu", address);
+                break;
+            }
+
+            // -------------------------------------------------------------
+            FAPI_DBG("\tSetting Core Power down Delays");
+            address = EX_CorePFPDDly_REG_0x100F012D + (0x01000000 * l_ex_number);
+            l_rc=pfet_set_delay(i_target,
+                                address,
+                                attr_pm_pfet_powerup_core_delay0_value,
+                                attr_pm_pfet_powerup_core_delay1_value,
+                                attr_pm_pfet_powerup_core_sequence_delay_select
+                               );
+            if (l_rc)
+            {
+                FAPI_ERR("pfet_set_delay error 0x%08llu", address);
+                break;
+            }
+
+
+            // -------------------------------------------------------------
+            FAPI_DBG("\tSetting Core Voff Settings");
+            e_rc |= data.setBitLength(64);
+            e_rc |= data.insertFromRight(core_vret_voff_value, 0, 8);
+            if (e_rc)
+            {
+                FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+                l_rc.setEcmdError(e_rc);
+                break;
+            }
+
+            address = EX_CorePFVRET_REG_0x100F0130 + (0x01000000 * l_ex_number);
+            l_rc=fapiPutScom(i_target, address, data );
+            if (l_rc)
+            {
+                FAPI_ERR("PutScom error 0x%08llu", address);
+                break;
+            }
+
+            // -------------------------------------------------------------
+            FAPI_DBG("\tSetting ECO Power up Delays");
+            address = EX_ECOPFPUDly_REG_0x100F014C + (0x01000000 * l_ex_number);
+            l_rc=pfet_set_delay(i_target,
+                                address,
+                                attr_pm_pfet_powerup_eco_delay0_value,
+                                attr_pm_pfet_powerup_eco_delay1_value,
+                                attr_pm_pfet_powerup_eco_sequence_delay_select
+                               );
+            if (l_rc)
+            {
+                FAPI_ERR("pfet_set_delay error 0x%08llu", address);
+                break;
+            }
+
+            // -------------------------------------------------------------
+            FAPI_DBG("\tSetting ECO Power down Delays");
+            address = EX_ECOPFPDDly_REG_0x100F014D + (0x01000000 * l_ex_number);
+            l_rc=pfet_set_delay(i_target,
+                                address,
+                                attr_pm_pfet_powerdown_eco_delay0_value,
+                                attr_pm_pfet_powerdown_eco_delay1_value,
+                                attr_pm_pfet_powerdown_eco_sequence_delay_select
+                               );
+            if (l_rc)
+            {
+                FAPI_ERR("pfet_set_delay error 0x%08llu", address);
+                break;
+            }
+
+
+            // -------------------------------------------------------------
+            FAPI_DBG("\tSetting ECO Voff Settings");
+            e_rc |= data.setBitLength(64);
+            e_rc |= data.insertFromRight(eco_vret_voff_value, 0, 8);
+            if (e_rc)
+            {
+                FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+                l_rc.setEcmdError(e_rc);
+                break;
+            }
+
+            address = EX_ECOPFVRET_REG_0x100F0150 + (0x01000000 * l_ex_number);
+            l_rc=fapiPutScom(i_target, address, data );
+            if (l_rc)
+            {
+                FAPI_ERR("PutScom error 0x%08llu", address);
+                break;
+            }
+
+            // Functional - run any work-arounds necessary
+            if (l_functional)
+            {
+                // \todo:  make DD1 relevent
+                FAPI_INF("Perform iVRM work-around on configured EX %d", l_ex_number);
+
+                FAPI_EXEC_HWP(l_rc, p8_pfet_control,    i_target,
+                                                        l_ex_number,
+                                                           BOTH,
+                                                          VON);
+                if(l_rc)
                 {
-                    FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
-                    error_flag = true;
-                    break;
-                }
-
-                FAPI_DBG("\tGP0(0) from core %x (@ %08llx) => 0x%16llx",
-                                l_ex_number,
-                                EX_GP3_0x100F0012+(l_ex_number*0x01000000),
-                                data.getDoubleWord(0));
-
-
-                FAPI_INF("\tSet the PFET attribute values into the appropriate registers");
-
-                // -------------------------------------------------------------
-                FAPI_DBG("\tSetting Core Power up Delays");
-                address = EX_CorePFPUDly_REG_0x100F012C + (0x01000000 * l_ex_number);
-                l_rc=pfet_set_delay(i_target,
-                                    address,
-                                    attr_pm_pfet_powerup_core_delay0_value,
-                                    attr_pm_pfet_powerup_core_delay1_value,
-                                    attr_pm_pfet_powerup_core_sequence_delay_select
-                                   );
-                if (l_rc)
-                {
-                    FAPI_ERR("pfet_step_delay error 0x%08llu", address);
-                    break;
-                }
-
-                // -------------------------------------------------------------
-                FAPI_DBG("\tSetting Core Power down Delays");
-                address = EX_CorePFPDDly_REG_0x100F012D + (0x01000000 * l_ex_number);
-                l_rc=pfet_set_delay(i_target,
-                                    address,
-                                    attr_pm_pfet_powerup_core_delay0_value,
-                                    attr_pm_pfet_powerup_core_delay1_value,
-                                    attr_pm_pfet_powerup_core_sequence_delay_select
-                                   );
-                if (l_rc)
-                {
-                    FAPI_ERR("pfet_step_delay error 0x%08llu", address);
-                    break;
-                }
-
-
-                // -------------------------------------------------------------
-                FAPI_DBG("\tSetting Core Voff Settings");
-                e_rc |= data.setBitLength(64);
-	            e_rc |= data.insertFromRight(core_vret_voff_value, 0, 8);
-                if (e_rc)
-                {
-                    FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
-                    l_rc.setEcmdError(e_rc);
-                    break;
-                }
-
-                address = EX_CorePFVRET_REG_0x100F0130 + (0x01000000 * l_ex_number);
-                l_rc=fapiPutScom(i_target, address, data );
-                if (l_rc)
-                {
-                    FAPI_ERR("pfet_step_delay error 0x%08llu", address);
-                    break;
-                }
-
-                // -------------------------------------------------------------
-                FAPI_DBG("\tSetting ECO Power up Delays");
-                address = EX_ECOPFPUDly_REG_0x100F014C + (0x01000000 * l_ex_number);
-                l_rc=pfet_set_delay(i_target,
-                                    address,
-                                    attr_pm_pfet_powerup_core_delay0_value,
-                                    attr_pm_pfet_powerup_core_delay1_value,
-                                    attr_pm_pfet_powerup_core_sequence_delay_select
-                                   );
-                if (l_rc)
-                {
-                    FAPI_ERR("pfet_step_delay error 0x%08llu", address);
-                    break;
-                }
-
-                // -------------------------------------------------------------
-                FAPI_DBG("\tSetting ECO Power down Delays");
-                address = EX_ECOPFPDDly_REG_0x100F014D + (0x01000000 * l_ex_number);
-                l_rc=pfet_set_delay(i_target,
-                                    address,
-                                    attr_pm_pfet_powerup_core_delay0_value,
-                                    attr_pm_pfet_powerup_core_delay1_value,
-                                    attr_pm_pfet_powerup_core_sequence_delay_select
-                                   );
-                if (l_rc)
-                {
-                    FAPI_ERR("pfet_step_delay error 0x%08llu", address);
-                    break;
-                }
-
-
-                // -------------------------------------------------------------
-                FAPI_DBG("\tSetting ECO Voff Settings");
-                e_rc |= data.setBitLength(64);
-	            e_rc |= data.insertFromRight(eco_vret_voff_value, 0, 8);
-                if (e_rc)
-                {
-                    FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
-                    l_rc.setEcmdError(e_rc);
-                    break;
-                }
-
-                address = EX_ECOPFVRET_REG_0x100F0150 + (0x01000000 * l_ex_number);
-                l_rc=fapiPutScom(i_target, address, data );
-                if (l_rc)
-                {
-                    FAPI_ERR("pfet_step_delay error 0x%08llu", address);
+                    FAPI_ERR("iVRM / PFET Controller error");
                     break;
                 }
 
             }
             // Not Functional - disable the PFETs
+            // Only done on hardware as this can cause sim issue for unpopulated
+            // chiplest
+            uint8_t is_sim;
+
+            l_rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
+            if (l_rc)
+            {
+                FAPI_ERR("fapi_attr_get(ATTR_IS_SIMULATION ) failed. "
+                 "With rc = 0x%x", (uint32_t) l_rc );
+                break;
+            }
+            if(!is_sim)
+            {
+                if (!l_functional )
+                {
+                    FAPI_INF("Turn off PFETs on EX %d", l_ex_number);
+                    off_mode = VOFF;
+                    if (i_mode == PM_INIT_SPECIAL)
+                    {
+                        FAPI_INF("\tUsing PFET override mode");
+                        off_mode = VOFF_OVERRIDE;
+                    }
+
+                   FAPI_EXEC_HWP(l_rc, p8_pfet_control,    i_target,
+                       l_ex_number,
+                       BOTH,
+                       off_mode);
+
+
+
+                    if(l_rc)
+                    {
+                        FAPI_ERR("PFET Controller error");
+                        break;
+                    }
+                }
+            }
             else
             {
-                // Do nothing
+                FAPI_INF("Simulation detected: Not disabling PFETs in deconfigured chiplets");
             }
         } // chiplet loop
     } while(0);
@@ -624,8 +662,8 @@ pfet_set_delay( const fapi::Target& i_target,
     {
 
         e_rc |= data.setBitLength(64);
-	    e_rc |= data.insertFromRight(i_delay0, 0, 4);   // bits 0:3
-	    e_rc |= data.insertFromRight(i_delay1, 4, 4);   // bits 4:7
+        e_rc |= data.insertFromRight(i_delay0, 0, 4);   // bits 0:3
+        e_rc |= data.insertFromRight(i_delay1, 4, 4);   // bits 4:7
         e_rc |= data.insertFromRight(i_select, 8, 12);  // bits 8:19
         if (e_rc)
         {
@@ -634,7 +672,7 @@ pfet_set_delay( const fapi::Target& i_target,
             break;
         }
 
-	    l_rc=fapiPutScom(i_target, i_address, data );
+        l_rc=fapiPutScom(i_target, i_address, data );
         if (l_rc)
         {
             FAPI_ERR("PutScom error 0x%08llu", i_address);
@@ -683,7 +721,6 @@ convert_delay_to_value (uint32_t i_delay,
 
     return (pfet_delay_value);
 }
-
 
 
 /*

@@ -55,6 +55,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_initialization/proc_pcie_config/proc_pcie_config_errors.xml \
     hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar_errors.xml  \
     hwp/build_winkle_images/p8_set_pore_bar/p8_pmc_deconfig_setup_errors.xml \
+    hwp/build_winkle_images/p8_set_pore_bar/p8_pfet_errors.xml \
     hwp/build_winkle_images/p8_set_pore_bar/p8_poreslw_errors.xml   \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_check_slave_sbe_seeprom_complete_errors.xml \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_sbe_rc_errors.xml \

@@ -343,7 +343,7 @@ mods_started_addr=`echo "obase=16; $temp" | bc`
 
 temp=$(($HRMOR + 0x$mods_completed_addr))
 mods_completed_addr=`echo "obase=16; $temp" | bc`
-     
+
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
 declare -i timeout=0
@@ -353,13 +353,13 @@ loopcount=0
 while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; do
     sleep 5
     ((loopcount++))     # increment loopcount
-        autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08"     1> $SBXHOME/modscompleted.log  2> /dev/null
-    modscompleted=`cat $SBXHOME/modscompleted.log | xargs echo -n`
-    autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$mods_started_addr 0x08"     1> $SBXHOME/modsstarted.log  2> /dev/null
-    modsstarted=`cat $SBXHOME/modsstarted.log | xargs echo -n`
+        autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)"  1> $SBXHOME/modscompleted.log  2> /dev/null
+   modscompleted=`cat $SBXHOME/modscompleted.log | awk '/0x/ {print strtonum($1)}'`
+    autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_started_addr 0x08)"     1> $SBXHOME/modsstarted.log  2> /dev/null
+    modsstarted=`cat $SBXHOME/modsstarted.log |  awk '/0x/ {print strtonum($1)}'`
 
     echo "ModulesStarted:ModulesCompleted  => $modsstarted:$modscompleted"
-    
+
     if [ "$loopcount" -gt 60 ];   then
         echo    "ERROR: timed out after 5 minutes"
         autosim $NOWIN --simcmd   "hb-Ps"
@@ -370,47 +370,47 @@ done
 
 
 echo "====> dump totaltests..."
-autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$totaltests_addr 0x08"     1> $SBXHOME/totaltests.log  2> /dev/null
+autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$totaltests_addr 0x08)"     1> $SBXHOME/totaltests.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
         stopserver
         exit 1
 fi
-totaltests=`cat $SBXHOME/totaltests.log | xargs echo -n`
+totaltests=`cat $SBXHOME/totaltests.log |  awk '/0x/ {print strtonum($1)}'`
 
 
 echo "====> dump failedtests..."
-autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$failedtests_addr 0x08"     1> $SBXHOME/failedtests.log  2> /dev/null
+autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$failedtests_addr 0x08)"     1> $SBXHOME/failedtests.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
         stopserver
         exit 1
 fi
-failedtests=`cat $SBXHOME/failedtests.log | xargs echo -n`
+failedtests=`cat $SBXHOME/failedtests.log |  awk '/0x/ {print strtonum($1)}'`
 
 
 echo "====> dump warnings..."
-autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$warnings_addr 0x08"     1> $SBXHOME/warnings.log  2> /dev/null
+autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$warnings_addr 0x08)"     1> $SBXHOME/warnings.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
         stopserver
         exit 1
 fi
-warnings=`cat $SBXHOME/warnings.log | xargs echo -n`
+warnings=`cat $SBXHOME/warnings.log |  awk '/0x/ {print strtonum($1)}'`
 
 
 echo "====> dump tracecalls..."
-autosim $NOWIN --simcmd   "(system_cmp0.phys_mem).read 0x$tracecalls_addr 0x08"     1> $SBXHOME/tracecalls.log  2> /dev/null
+autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$tracecalls_addr 0x08)"     1> $SBXHOME/tracecalls.log  2> /dev/null
 if [ $? -ne 0 ] ; then
         echo "ERROR: Unable to run $?"
         stopsim
         stopserver
         exit 1
 fi
-tracecalls=`cat $SBXHOME/tracecalls.log | xargs echo -n`
+tracecalls=`cat $SBXHOME/tracecalls.log |  awk '/0x/ {print strtonum($1)}'`
 
 
 echo "====> dump printk buffer..."

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_init.H,v 1.1 2012/12/07 20:12:30 stillgs Exp $
+// $Id: p8_pfet_init.H,v 1.2 2013/08/02 19:06:05 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_init.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -69,7 +69,7 @@ extern "C" {
 /// \retval FAPI_RC_SUCCESS if something good happens,
 /// \retval RC per p8_pfet_init_errors.xml otherwise
 fapi::ReturnCode 
-p8_pfet_init(const fapi::Target& i_target, uint32_t mode);
+p8_pfet_init(const fapi::Target& i_target, uint32_t i_mode);
 
 } // extern "C"
 

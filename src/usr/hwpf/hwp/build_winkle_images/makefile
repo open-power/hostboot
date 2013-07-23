@@ -64,7 +64,8 @@ OBJS =  build_winkle_images.o   \
         p8_ring_identification.o  \
         p8_slw_build.o          \
         p8_image_help_base.o    \
-        p8_pfet_init.o
+        p8_pfet_init.o          \
+        p8_pfet_control.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:

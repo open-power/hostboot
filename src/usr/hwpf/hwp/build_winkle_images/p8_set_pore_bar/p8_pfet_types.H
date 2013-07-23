@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_types.H,v 1.1 2012/12/12 04:29:27 stillgs Exp $
+// $Id: p8_pfet_types.H,v 1.3 2013/05/17 20:15:44 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_types.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -54,12 +54,23 @@ typedef enum  pfet_dom_type
 // valid force options
 typedef enum  pfet_force_type
 {
-  NONE,         // no operation (00)
-  VOFF,         // voff (01)
-  VRET,         // Vret (10)... not supported
-  VON,          // von (11)
-  NO_FORCE_PARM // use this when not writing to reg.
+  NONE,          // no operation (00)
+  VOFF,          // voff (01)
+  VRET,          // Vret (10)... not supported
+  VON,           // von (11)
+  NO_FORCE_PARM, // use this when not writing to reg.
+  VOFF_OVERRIDE
 } pfet_force_t;
+
+// valid read options
+typedef enum  pfet_read_type
+{
+  PFET_READ_VOFF,
+  PFET_READ_VREG,
+  PFET_READ_VON,
+  PFET_READ_VBETWEEN,
+  PFET_READ_VOFFOVRD
+} pfet_read_t;
 
 
 } // extern "C"

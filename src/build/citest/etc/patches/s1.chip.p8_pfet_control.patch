@@ -1,0 +1,94 @@
+--- s1.chip.build	2013-08-20 12:00:27.105810289 -0500
++++ s1.chip.new	2013-08-20 11:04:04.104091652 -0500
+@@ -21,6 +21,7 @@
+ #        F877027   sankarkk  03/25/13  Updated scom ranges
+ #        SW201429  bradleyb  05/03/13  fix scan range clock masks
+ #        F884180   dkodihal  05/21/13  Updated SCANRANGE with fastarray rings
++#        D892792   jknight   08/20/13  Updated SCOM ranges
+ 
+ VERSION 1               # .chip file format ID
+ TYPE=s1                 # Chip Type
+@@ -131,9 +132,10 @@
+ SCOMRANGE    # Value, Mask, Clocks, Logical Address
+ 
+     # Scom Ranges for ex14 
+-    0x1E040000, 0xFFF40000, 0x80000000 00000003, 0xFFC5001E  # ex14prv, chiplet vital, chip vital 
+-    0x1E030000, 0xFFF30000, 0x00000000 00000003, 0xFFC5001E  # ex14vital, chiplet vital, chip vital 
+-    0x1E020000, 0xFFF20000, 0x80000000 00000003, 0xFFC5001E  # ex14oha, chiplet vital, chip vital 
++    0x1E0F0000, 0xFFFF0000, 0x00000000 00000001, 0xFFC5001E  # chip vital 
++    0x1E040000, 0xFFFF0000, 0x80000000 00000003, 0xFFC5001E  # ex14prv, chiplet vital, chip vital 
++    0x1E030000, 0xFFFF0000, 0x00000000 00000003, 0xFFC5001E  # ex14vital, chiplet vital, chip vital 
++    0x1E020000, 0xFFFF0000, 0x80000000 00000003, 0xFFC5001E  # ex14oha, chiplet vital, chip vital 
+     0x1E013C00, 0xFFFFFC00, 0x60000000 00000003, 0xFFC5001E  # ex14pcsec, chiplet vital, chip vital 
+     0x1E013000, 0xFFFF3000, 0x60000000 00000003, 0xFFC5001E  # ex14pc, chiplet vital, chip vital 
+     0x1E012C00, 0xFFFFFC00, 0xE0000000 00000003, 0xFFC5001E  # ex14trapc, chiplet vital, chip vital 
+@@ -147,9 +149,10 @@
+     0x1E000000, 0xFE000000, 0x00000000 00000003, 0xFFC5001E  # ex14vital, chiplet vital, chip vital 
+ 
+     # Scom Ranges for ex13 
+-    0x1D040000, 0xFFF40000, 0x80000000 00000003, 0xFFC5001D  # ex13prv, chiplet vital, chip vital 
+-    0x1D030000, 0xFFF30000, 0x00000000 00000003, 0xFFC5001D  # ex13vital, chiplet vital, chip vital 
+-    0x1D020000, 0xFFF20000, 0x80000000 00000003, 0xFFC5001D  # ex13oha, chiplet vital, chip vital 
++    0x1D0F0000, 0xFFFF0000, 0x00000000 00000001, 0xFFC5001D  # chip vital 
++    0x1D040000, 0xFFFF0000, 0x80000000 00000003, 0xFFC5001D  # ex13prv, chiplet vital, chip vital 
++    0x1D030000, 0xFFFF0000, 0x00000000 00000003, 0xFFC5001D  # ex13vital, chiplet vital, chip vital 
++    0x1D020000, 0xFFFF0000, 0x80000000 00000003, 0xFFC5001D  # ex13oha, chiplet vital, chip vital 
+     0x1D013C00, 0xFFFFFC00, 0x60000000 00000003, 0xFFC5001D  # ex13pcsec, chiplet vital, chip vital 
+     0x1D013000, 0xFFFF3000, 0x60000000 00000003, 0xFFC5001D  # ex13pc, chiplet vital, chip vital 
+     0x1D012C00, 0xFFFFFC00, 0xE0000000 00000003, 0xFFC5001D  # ex13trapc, chiplet vital, chip vital 
+@@ -163,9 +166,10 @@
+     0x1D000000, 0xFD000000, 0x00000000 00000003, 0xFFC5001D  # ex13vital, chiplet vital, chip vital 
+ 
+     # Scom Ranges for ex12 
+-    0x1C040000, 0xFFF40000, 0x80000000 00000003, 0xFFC5001C  # ex12prv, chiplet vital, chip vital 
+-    0x1C030000, 0xFFF30000, 0x00000000 00000003, 0xFFC5001C  # ex12vital, chiplet vital, chip vital 
+-    0x1C020000, 0xFFF20000, 0x80000000 00000003, 0xFFC5001C  # ex12oha, chiplet vital, chip vital 
++    0x1C0F0000, 0xFFFF0000, 0x00000000 00000001, 0xFFC5001C  # chip vital 
++    0x1C040000, 0xFFFF0000, 0x80000000 00000003, 0xFFC5001C  # ex12prv, chiplet vital, chip vital 
++    0x1C030000, 0xFFFF0000, 0x00000000 00000003, 0xFFC5001C  # ex12vital, chiplet vital, chip vital 
++    0x1C020000, 0xFFFF0000, 0x80000000 00000003, 0xFFC5001C  # ex12oha, chiplet vital, chip vital 
+     0x1C013C00, 0xFFFFFC00, 0x60000000 00000003, 0xFFC5001C  # ex12pcsec, chiplet vital, chip vital 
+     0x1C013000, 0xFFFF3000, 0x60000000 00000003, 0xFFC5001C  # ex12pc, chiplet vital, chip vital 
+     0x1C012C00, 0xFFFFFC00, 0xE0000000 00000003, 0xFFC5001C  # ex12trapc, chiplet vital, chip vital 
+@@ -179,9 +183,10 @@
+     0x1C000000, 0xFC000000, 0x00000000 00000003, 0xFFC5001C  # ex12vital, chiplet vital, chip vital 
+ 
+     # Scom Ranges for ex06 
+-    0x16040000, 0xFFF40000, 0x80000000 00000003, 0xFFC50016  # ex06prv, chiplet vital, chip vital 
+-    0x16030000, 0xFFF30000, 0x00000000 00000003, 0xFFC50016  # ex06vital, chiplet vital, chip vital 
+-    0x16020000, 0xFFF20000, 0x80000000 00000003, 0xFFC50016  # ex06oha, chiplet vital, chip vital 
++    0x160F0000, 0xFFFF0000, 0x00000000 00000001, 0xFFC50016  # chip vital 
++    0x16040000, 0xFFFF0000, 0x80000000 00000003, 0xFFC50016  # ex06prv, chiplet vital, chip vital 
++    0x16030000, 0xFFFF0000, 0x00000000 00000003, 0xFFC50016  # ex06vital, chiplet vital, chip vital 
++    0x16020000, 0xFFFF0000, 0x80000000 00000003, 0xFFC50016  # ex06oha, chiplet vital, chip vital 
+     0x16013C00, 0xFFFFFC00, 0x60000000 00000003, 0xFFC50016  # ex06pcsec, chiplet vital, chip vital 
+     0x16013000, 0xFFFF3000, 0x60000000 00000003, 0xFFC50016  # ex06pc, chiplet vital, chip vital 
+     0x16012C00, 0xFFFFFC00, 0xE0000000 00000003, 0xFFC50016  # ex06trapc, chiplet vital, chip vital 
+@@ -195,9 +200,10 @@
+     0x16000000, 0xF6000000, 0x00000000 00000003, 0xFFC50016  # ex06vital, chiplet vital, chip vital 
+ 
+     # Scom Ranges for ex05 
+-    0x15040000, 0xFFF40000, 0x80000000 00000003, 0xFFC50015  # ex05prv, chiplet vital, chip vital 
+-    0x15030000, 0xFFF30000, 0x00000000 00000003, 0xFFC50015  # ex05vital, chiplet vital, chip vital 
+-    0x15020000, 0xFFF20000, 0x80000000 00000003, 0xFFC50015  # ex05oha, chiplet vital, chip vital 
++    0x150F0000, 0xFFFF0000, 0x00000000 00000001, 0xFFC50015  # chip vital 
++    0x15040000, 0xFFFF0000, 0x80000000 00000003, 0xFFC50015  # ex05prv, chiplet vital, chip vital 
++    0x15030000, 0xFFFF0000, 0x00000000 00000003, 0xFFC50015  # ex05vital, chiplet vital, chip vital 
++    0x15020000, 0xFFFF0000, 0x80000000 00000003, 0xFFC50015  # ex05oha, chiplet vital, chip vital 
+     0x15013C00, 0xFFFFFC00, 0x60000000 00000003, 0xFFC50015  # ex05pcsec, chiplet vital, chip vital 
+     0x15013000, 0xFFFF3000, 0x60000000 00000003, 0xFFC50015  # ex05pc, chiplet vital, chip vital 
+     0x15012C00, 0xFFFFFC00, 0xE0000000 00000003, 0xFFC50015  # ex05trapc, chiplet vital, chip vital 
+@@ -211,9 +217,10 @@
+     0x15000000, 0xF5000000, 0x00000000 00000003, 0xFFC50015  # ex05vital, chiplet vital, chip vital 
+ 
+     # Scom Ranges for ex04 
+-    0x14040000, 0xFFF40000, 0x80000000 00000003, 0xFFC50014  # ex04prv, chiplet vital, chip vital 
+-    0x14030000, 0xFFF30000, 0x00000000 00000003, 0xFFC50014  # ex04vital, chiplet vital, chip vital 
+-    0x14020000, 0xFFF20000, 0x80000000 00000003, 0xFFC50014  # ex04oha, chiplet vital, chip vital 
++    0x140F0000, 0xFFFF0000, 0x00000000 00000001, 0xFFC50014  # chip vital 
++    0x14040000, 0xFFFF0000, 0x80000000 00000003, 0xFFC50014  # ex04prv, chiplet vital, chip vital 
++    0x14030000, 0xFFFF0000, 0x00000000 00000003, 0xFFC50014  # ex04vital, chiplet vital, chip vital 
++    0x14020000, 0xFFFF0000, 0x80000000 00000003, 0xFFC50014  # ex04oha, chiplet vital, chip vital 
+     0x14013C00, 0xFFFFFC00, 0x60000000 00000003, 0xFFC50014  # ex04pcsec, chiplet vital, chip vital 
+     0x14013000, 0xFFFF3000, 0x60000000 00000003, 0xFFC50014  # ex04pc, chiplet vital, chip vital 
+     0x14012C00, 0xFFFFFC00, 0xE0000000 00000003, 0xFFC50014  # ex04trapc, chiplet vital, chip vital 
