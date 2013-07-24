@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.C,v 1.18 2013/04/12 01:28:32 stillgs Exp $
+// $Id: p8_pm_prep_for_reset.C,v 1.20 2013/06/20 12:56:24 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -125,7 +125,7 @@
 #include <fapi.H>
 #include "p8_scom_addresses.H"
 #include "p8_pm_prep_for_reset.H"
-#include "p8_cpu_special_wakeup.H"
+// #include "p8_cpu_special_wakeup.H"
 
 extern "C" {
 
@@ -180,7 +180,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
 
 
     fapi::ReturnCode rc;
-    uint8_t                         l_functional = 0;
+    //    uint8_t                         l_functional = 0;
     uint8_t                         l_ex_number = 0;
 
     std::vector<fapi::Target>       l_exChiplets;
@@ -210,30 +210,6 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
             FAPI_DBG("Running on DCM");
         }
         
-        //  ******************************************************************
-        //  Mask the FIRs
-        //  ******************************************************************
-
-        FAPI_INF("Executing:p8_pm_firinit in mode PM_RESET");
-
-        FAPI_EXEC_HWP(rc, p8_pm_firinit, i_primary_chip_target , PM_RESET );
-        if (rc)
-        {
-            FAPI_ERR("ERROR: p8_pm_firinit detected failed  result");
-            break;
-        }
-
-        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {
-
-            FAPI_EXEC_HWP(rc, p8_pm_firinit, i_secondary_chip_target , PM_RESET );
-            if (rc)
-            {
-                FAPI_ERR("ERROR: p8_pm_firinit detected failed  result");
-                break;
-            }
-        }
-
 
         //  ******************************************************************
         //  Put OCC PPC405 into reset
@@ -273,7 +249,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
 
         //  ******************************************************************
         //  Put all EX chiplet special wakeup
-        //  ******************************************************************
+        //  *****************************************************************
         //     - call proc_cpu_special_wakeup.C  *chiptarget, ENUM:OCC_SPECIAL_WAKEUP
         //             - For each chiplet,  put into Special Wake-up via the OCC special wake-up bit
 
@@ -281,7 +257,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
         rc = fapiGetChildChiplets (  i_primary_chip_target,
                                      TARGET_TYPE_EX_CHIPLET,
                                      l_exChiplets,
-                                     TARGET_STATE_PRESENT);
+                                     TARGET_STATE_FUNCTIONAL);
         if (rc)
         {
             FAPI_ERR("Error from fapiGetChildChiplets!");
@@ -290,22 +266,24 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
 
         FAPI_DBG("Number of EX chiplet on primary  => %u ", l_exChiplets.size());
 
-         // Iterate through the returned chiplets
+	// Iterate through the returned chiplets
         for (uint8_t j=0; j < l_exChiplets.size(); j++)
-        {
-
-            // Determine if it's functional
-            rc = FAPI_ATTR_GET( ATTR_FUNCTIONAL,
-                                &l_exChiplets[j],
-                                l_functional);
-            if (rc)
+	  {
+	  
+	  /*
+	  // Determine if it's functional
+	  rc = FAPI_ATTR_GET( ATTR_FUNCTIONAL,
+	                          &l_exChiplets[j],
+	                                  l_functional);
+	    if (rc)
             {
-                FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
-                break;
-            }
-
-            if ( l_functional )
-            {
+	    FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
+	    break;
+            } 
+	    
+	    if ( l_functional )
+             {
+	  */
                 // The ex is functional let's build the SCOM address
                 rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
                 FAPI_DBG("Running special wakeup on ex chiplet %d ", l_ex_number);
@@ -320,7 +298,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
                     break;    
                 }
 
-            }
+		//}
         }  // chiplet loop
         
         // Exit if error
@@ -345,7 +323,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
             rc = fapiGetChildChiplets ( i_secondary_chip_target,
                                         TARGET_TYPE_EX_CHIPLET,
                                         l_exChiplets,
-                                        TARGET_STATE_PRESENT);
+                                        TARGET_STATE_FUNCTIONAL);
             if (rc)
             {
               FAPI_ERR("Error from fapiGetChildChiplets!");
@@ -358,20 +336,23 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
             for (uint8_t j=0; j < l_exChiplets.size(); j++)
             {
 
-                // Determine if it's functional
-                rc = FAPI_ATTR_GET(  ATTR_FUNCTIONAL,
-                         &l_exChiplets[j],
-                         l_functional);
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
-                    break;
-                }
 
-                if ( l_functional )
-                {
+	      /*
+                // Determine if it's functional
+                 rc = FAPI_ATTR_GET(  ATTR_FUNCTIONAL,
+                          &l_exChiplets[j],
+                          l_functional);
+                 if (rc)
+                 {
+                     FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
+                     break;
+                 }  
+
+                 if ( l_functional )
+                 {
+	      */
                     // The ex is functional
-                    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
+	      rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
                     FAPI_DBG("Running special wakeup on EX chiplet %d ", l_ex_number);
 
                     // Set special wakeup for EX
@@ -383,7 +364,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
                         FAPI_ERR("fapiSpecialWakeup: Failed to put CORE %d into special wakeup. With rc = 0x%x",  l_ex_number, (uint32_t)rc);  
                         break;    
                     }
-                }
+		    //               }
             }  // chiplet loop
             
             // Exit if error
@@ -403,6 +384,38 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
     //        FAPI_DBG(" EX_PMGP0_0x150F0100 =   %016llX",  data.getDoubleWord(0) );
 
         }
+
+
+        //  ******************************************************************
+        //  Mask the FIRs
+        //  ******************************************************************
+
+        FAPI_INF("Executing:p8_pm_firinit in mode PM_RESET");
+
+        FAPI_EXEC_HWP(rc, p8_pm_firinit, i_primary_chip_target , PM_RESET );
+        if (rc)
+        {
+            FAPI_ERR("ERROR: p8_pm_firinit detected failed  result");
+            break;
+        }
+
+        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
+        {
+
+            FAPI_EXEC_HWP(rc, p8_pm_firinit, i_secondary_chip_target , PM_RESET );
+            if (rc)
+            {
+                FAPI_ERR("ERROR: p8_pm_firinit detected failed  result");
+                break;
+            }
+        }
+
+
+
+
+
+
+
 
         //  ******************************************************************
         //  Force Vsafe value into voltage controller
@@ -799,7 +812,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
         }
 
     } while(0);
-    fapiDelay(300 , 3000 );
+    //    fapiDelay(300 , 3000 );
 
     FAPI_INF("Exiting p8_pm_prep_for_reset");
     
@@ -807,78 +820,81 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target ,
 } // Procedure
 
 
+
+  // ***************************************************** BACKUPS *********************************************************************************
+
 //------------------------------------------------------------------------------
 // Core Status
 //------------------------------------------------------------------------------
-fapi::ReturnCode
-corestat(const fapi::Target& i_target) 
-{
-    fapi::ReturnCode rc;   
+// fapi::ReturnCode
+// corestat(const fapi::Target& i_target) 
+// {
+//     fapi::ReturnCode rc;   
  
-    ecmdDataBufferBase              data(64);
+//     ecmdDataBufferBase              data(64);
     
-    std::vector<fapi::Target>       l_exChiplets;
-    uint8_t                         l_functional = 0;
-    uint8_t                         l_ex_number = 0;
+//     std::vector<fapi::Target>       l_exChiplets;
+//     uint8_t                         l_functional = 0;
+//     uint8_t                         l_ex_number = 0;
     
 
-    FAPI_INF("Core Status ...");
+//     FAPI_INF("Core Status ...");
        
-    rc = fapiGetChildChiplets ( i_target, 
-                                TARGET_TYPE_EX_CHIPLET, 
-                                l_exChiplets, 
-                                TARGET_STATE_FUNCTIONAL);
-	if (rc)
-	{
-	    FAPI_ERR("Error from fapiGetChildChiplets!");
-	    return rc;
-	}
-    FAPI_DBG("Number of chiplets  => %u", l_exChiplets.size());
+//     rc = fapiGetChildChiplets ( i_target, 
+//                                 TARGET_TYPE_EX_CHIPLET, 
+//                                 l_exChiplets, 
+//                                 TARGET_STATE_FUNCTIONAL);
+// 	if (rc)
+// 	{
+// 	    FAPI_ERR("Error from fapiGetChildChiplets!");
+// 	    return rc;
+// 	}
+//     FAPI_DBG("Number of chiplets  => %u", l_exChiplets.size());
     
-    // Iterate through the returned chiplets
-    //for (itr = l_exChiplets.begin(); itr != l_exChiplets.end(); itr++) 
-    for (uint8_t c=0; c < l_exChiplets.size(); c++)
-    {
-        // Determine if it's functional
-        //rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, itr, l_functional);
-        rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[c], l_functional);
-        if (rc)
-        {
-            FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
-            break;
-        }
+//     // Iterate through the returned chiplets
+//     //for (itr = l_exChiplets.begin(); itr != l_exChiplets.end(); itr++) 
+//     for (uint8_t c=0; c < l_exChiplets.size(); c++)
+//     {
+//         // Determine if it's functional
+//         //rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, itr, l_functional);
+//         rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[c], l_functional);
+//         if (rc)
+//         {
+//             FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
+//             break;
+//         }
         
-        // With TARGET_STATE_FUNCTIONAL above, this check may be redundant
-        if ( l_functional )
-        {
-            // Get the core number
-            //rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, itr, c); 
-            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);                  
-            if (rc)
-            {
-                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
-                break;
-            }
+//         // With TARGET_STATE_FUNCTIONAL above, this check may be redundant
+//         if ( l_functional )
+//         {
+//             // Get the core number
+//             //rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, itr, c); 
+//             rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);                  
+//             if (rc)
+//             {
+//                 FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
+//                 break;
+//             }
 
-            FAPI_DBG("Processing core : %d ", l_ex_number);
+//             FAPI_DBG("Processing core : %d ", l_ex_number);
     
-            // Read register content
+//             // Read register content
             
-            rc = fapiGetScom( l_exChiplets[c], EX_PERV_SCRATCH0_10013283 , data );
-            if (rc) 
-            {
-                FAPI_ERR("fapiGetScom(EX_OHA_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
-                return rc;    
-            }
+//             rc = fapiGetScom( l_exChiplets[c], EX_PERV_SCRATCH0_10013283 , data );
+//             if (rc) 
+//             {
+//                 FAPI_ERR("fapiGetScom(EX_OHA_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
+//                 return rc;    
+//             }
 
-            FAPI_DBG ("EX_PERV_SCRATCH0_10013283  :  %016llX", data.getDoubleWord(0));
+//             FAPI_DBG ("EX_PERV_SCRATCH0_10013283  :  %016llX", data.getDoubleWord(0));
             
-        }
-    }     
+//         }
+//     }     
     
-    return rc;
+//     return rc;
   
-}  //corestat
+// }  //corestat
 
 
 

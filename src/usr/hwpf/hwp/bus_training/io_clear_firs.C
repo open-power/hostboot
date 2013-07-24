@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_clear_firs.C,v 1.12 2013/05/29 17:43:53 jmcgill Exp $
+// $Id: io_clear_firs.C,v 1.14 2013/06/20 13:29:37 jmcgill Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 2012, 2013
 // *!           All Rights Reserved -- Property of IBM

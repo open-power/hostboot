@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,35 +20,48 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_prep_master_winkle_errors.xml,v 1.6 2013/04/25 22:03:58 jeshua Exp $ -->
 <!-- Error definitions for proc_prep_master_winkle procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_PREP_MASTER_WINKLE_SBE_NOT_RUNNING</rc>
-    <description>The SBE is stopped and so will never wake up the master core</description>
+    <description>
+      Procedure: proc_prep_master_winkle
+      The SBE is stopped and so will never wake up the master EX
+    </description>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
     <ffdc>SBE_STATUS</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_PREP_MASTER_WINKLE_BAD_ISTEP_NUM</rc>
-    <description>The SBE is not at the correct istep number</description>
+    <description>
+      Procedure: proc_prep_master_winkle
+      The SBE is not at the correct istep number for the master winkle
+    </description>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
     <ffdc>SBE_VITAL</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_PREP_MASTER_WINKLE_BAD_SUBSTEP_NUM</rc>
-    <description>The SBE is not at the correct substep number</description>
+    <description>
+      Procedure: proc_prep_master_winkle
+      The SBE is not at the correct substep number for the master winkle
+    </description>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
     <ffdc>SBE_VITAL</ffdc>
   </hwpError>

@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_build_smp_errors.xml,v 1.4 2013/05/22 15:46:58 mjjones Exp $ -->
 <!-- Error definitions for proc_build_smp -->
 <hwpErrors>
   <!-- *********************************************************************** -->

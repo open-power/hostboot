@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.H,v 1.8 2013/03/27 08:34:05 pchatnah Exp $
+// $Id: p8_pm_prep_for_reset.H,v 1.9 2013/06/20 09:36:24 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.H,v $
 
 //------------------------------------------------------------------------------
@@ -40,7 +40,7 @@
 #define UNIT_CONFIG     0x1
 #define UNIT_RESET      0x2
 
-#include "proc_cpu_special_wakeup.H"
+// #include "proc_cpu_special_wakeup.H"
 #include "p8_pm.H"
 #include "p8_poregpe_init.H"
 #include "p8_pcbs_init.H"

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.38 2013/06/17 13:50:19 mklight Exp $
+// $Id: io_run_training.C,v 1.40 2013/06/20 06:16:29 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -46,6 +46,7 @@
 #include <fapi.H>
 #include "io_run_training.H"
 #include "io_funcs.H"
+
 
 extern "C" {
      using namespace fapi;
@@ -290,6 +291,234 @@ ReturnCode fir_workaround_post_training(const Target& master_target,  io_interfa
 	rc=clear_fir_mask_reg(master_target,fir_master_interface);
         return(rc);
 }
+
+// //HW249235 --For DLL workaround
+// This function will check DLL status on slave and slave side . If any DLL has failed it will update to the next valid
+// DLL value . 3,4,5,6 are valid values that we are given to select.
+// This will continue until we run out of valid DLL reg selects or when the DLL cal passes
+
+ReturnCode check_dll_status_and_modify(const Target &master_target, io_interface_t master_interface,const Target &slave_target,
+                                       io_interface_t slave_interface,bool dll_master_array[16],
+                                       bool dll_slave_array[16],bool &dll_workaround_done,bool &dll_workaround_fail)
+{
+     ReturnCode rc;
+     uint32_t rc_ecmd=0;
+     ecmdDataBufferBase dll_reg(16),set_bits(16),clear_bits(16),temp_bits(16);
+     const uint16_t dll_vals[]={2,3,4,5,6,7};
+     uint16_t bits=0;
+     uint16_t dll_value=0;
+     bool found_dll_master=false;
+     bool found_dll_slave=false;
+     bool found_dll_master_groups=false;
+     bool found_dll_slave_groups=false;
+     //bool dump_ffdc=false;
+     
+     bits=ei4_rx_dll_vreg_ref_sel_clear;
+     rc_ecmd=clear_bits.insert(bits,0,16);
+     
+     if(rc_ecmd)
+     {
+           FAPI_ERR("Failed buffer intialization in DLL workaround function \n");
+           rc.setEcmdError(rc_ecmd);
+     }
+     
+     FAPI_INF("DLL WORKAROUND CODE executing");
+     // First we will populate current DLL values into std::vector
+      for (int current_group = 0 ; current_group < 4; current_group++){
+            // slave side operations
+          rc = GCR_read( slave_target, slave_interface,  ei4_rx_dll_analog_tweaks_pg, current_group,  0,   dll_reg);
+          rc_ecmd|=dll_reg.extract( &dll_value,   4, 3 );
+          if(rc_ecmd)
+          {
+                FAPI_ERR("Failed buffer intialization in DLL workaround function \n");
+                rc.setEcmdError(rc_ecmd);
+          }
+          
+          FAPI_DBG("Extracted DLL value is %d",dll_value);
+          dll_value=dll_value>>13;
+          FAPI_DBG("DLL value for %d clock group is %d on slave side",current_group,dll_value);
+          if(rc){return rc;}
+          
+          if(dll_value>=dll_vals[0] && dll_value<=dll_vals[5]){
+                dll_slave_array[current_group*6+(dll_value-dll_vals[0])]=true;
+          }
+          else{
+               FAPI_ERR("DLL Vreg Cal sel value out of bounds for workaround !!");
+          }
+          
+          rc = GCR_read( slave_target, slave_interface, ei4_rx_dll_cal_cntl_pg, current_group,  0,   dll_reg);
+          if(rc){return rc;}
+          if(dll_reg.isBitSet(1) || dll_reg.isBitSet(2) || dll_reg.isBitSet(9) || dll_reg.isBitSet(10)){
+               // Some DLL error is present , lets push this Clock group ref cal value to the next untried value
+               FAPI_DBG("DLL error detected on clock group %d on slave target",current_group);
+
+                 rc=GCR_write(slave_target, slave_interface,  ei4_rx_dll_cal_cntl_pg, current_group,0,   temp_bits, temp_bits,1,1);
+                  rc=GCR_write(master_target, master_interface,  ei4_rx_dll_cal_cntl_pg, current_group,0,   temp_bits, temp_bits,1,1);
+               for(int dll_valid=0;dll_valid<6;++dll_valid){
+                    if(dll_slave_array[current_group*6 + dll_valid]==false){
+                         // Now set the DLL vref cal sel reg value to the next valid untried value
+                         dll_value=dll_vals[dll_valid];
+                         FAPI_DBG("DLL value to be written is %d dll_valid=%d current_group=%d",dll_value,dll_valid,current_group);
+                         rc=GCR_read(slave_target , slave_interface,  ei4_rx_dll_analog_tweaks_pg,  current_group,0, set_bits);
+                         rc_ecmd=set_bits.insert(dll_value,4,3,13);
+                         if(rc_ecmd)
+                         {
+                               FAPI_ERR("Failed buffer insertion in DLL workaround function \n");
+                               rc.setEcmdError(rc_ecmd);
+                         }
+                         rc=GCR_write(slave_target, slave_interface,  ei4_rx_dll_analog_tweaks_pg, current_group,0,   set_bits, clear_bits);
+                         found_dll_slave=true;
+                         dll_slave_array[current_group*6 + dll_valid]=true;
+                         break;
+                    }
+               }
+               if(found_dll_slave==false){
+                    FAPI_ERR("No valid DLL reg value left to search.. DLL cal on slave of this channel has failed ");
+                    // Now do FFDC call outs
+                    //dump_ffdc=true;
+                    dll_workaround_fail=true;
+               }
+          }
+          else{
+               FAPI_DBG("NO DLL error detected on clock group %d on slave target",current_group);
+          }
+  
+     if(!found_dll_slave){  // If slave has DLL failure , Master status is invalid - John G 
+          // master SIDE operations 
+          // Push current DLL value into the std::vector
+          dll_reg.flushTo0();
+          rc = GCR_read( master_target, master_interface,  ei4_rx_dll_analog_tweaks_pg, current_group,  0,   dll_reg);
+          rc_ecmd|=dll_reg.extract( &dll_value,   4, 3 );
+          if(rc_ecmd)
+          {
+                FAPI_ERR("Failed buffer intialization in DLL workaround function \n");
+                rc.setEcmdError(rc_ecmd);
+          }
+          
+          FAPI_DBG("Extracted DLL value is %d",dll_value);
+          dll_value=dll_value>>13;
+          FAPI_DBG("DLL value for %d clock group is %d on master side",current_group,dll_value);
+          if(rc){return rc;}
+          if(dll_value>=dll_vals[0] && dll_value<=dll_vals[5]){
+                dll_master_array[current_group*6+(dll_value-dll_vals[0])]=true;
+          }
+          else{
+               FAPI_ERR("DLL Vreg Cal sel value out of bounds for workaround !!");
+          }
+          rc = GCR_read( master_target, master_interface, ei4_rx_dll_cal_cntl_pg, current_group,  0,   dll_reg);
+          if(rc){return rc;}
+          if(dll_reg.isBitSet(1) || dll_reg.isBitSet(2) || dll_reg.isBitSet(9) || dll_reg.isBitSet(10)){
+               // Some DLL error is present , lets push this Clock group to the next untried value
+               FAPI_DBG("DLL error detected on clock group %d on master target",current_group);
+                 rc=GCR_write(slave_target, slave_interface,  ei4_rx_dll_cal_cntl_pg, current_group,0,   temp_bits, temp_bits,1,1);
+                rc=GCR_write(master_target, master_interface,  ei4_rx_dll_cal_cntl_pg, current_group,0,   temp_bits, temp_bits,1,1);
+                
+               for(int dll_valid=0;dll_valid<6;++dll_valid){
+                    if(dll_master_array[current_group*6 + dll_valid]==false){
+                         // Now set the DLL vref cal sel reg value to the next valid untried value
+                         dll_value=dll_vals[dll_valid];
+                         FAPI_DBG("DLL value to be written is %d",dll_value);
+                         rc=GCR_read(master_target , master_interface,  ei4_rx_dll_analog_tweaks_pg,  current_group,0, set_bits);
+                         rc_ecmd=set_bits.insert(dll_value,4,3,13);
+                         if(rc_ecmd)
+                         {
+                               FAPI_ERR("Failed buffer insertion in DLL workaround function \n");
+                               rc.setEcmdError(rc_ecmd);
+                         }
+                         rc=GCR_write(master_target, master_interface,  ei4_rx_dll_analog_tweaks_pg, current_group,0,   set_bits, clear_bits);
+                         found_dll_master=true;
+                         dll_master_array[current_group*6 + dll_valid]=true;
+                         break;
+                    }
+               }
+               if(found_dll_master==false){
+                    FAPI_ERR("No valid DLL reg value left to search.. DLL cal on master of this channel has failed ");
+                    //dump_ffdc=true;
+               }
+          }
+          else{
+               FAPI_DBG("NO DLL error detected on clock group %d on master target",current_group);
+          }
+          
+     }
+                if(found_dll_master){
+               found_dll_master_groups=true;
+          }
+          if(found_dll_slave){
+               found_dll_slave_groups=true;
+          }
+      }
+     
+     if(found_dll_master_groups || found_dll_slave_groups ) {
+          // at least one clock group on a slave or slave had a DLL fail and valid values to try so we will ask wrapper to continue the
+          // workaround invocations
+          FAPI_DBG("One setting failed on master or slave ");
+          dll_workaround_done=false;
+     }
+     else{
+          // No DLL fail or no Vreg sel values left to try out so we are done 
+          dll_workaround_done=true;
+          FAPI_DBG("DLL Workaround done in checker function");
+          //if(dump_ffdc){
+          //     rc=edi_training::dump_dll_ffdc(master_target,master_interface,slave_target,slave_interface);
+          //}
+     }
+
+     
+     return rc;
+}
+
+ReturnCode set_tx_drv_pattern(const Target &master_target, io_interface_t master_interface,uint32_t master_group,const Target &slave_target,
+                              io_interface_t slave_interface,uint32_t slave_group)
+{
+     ReturnCode rc;
+     uint32_t rc_ecmd=0;
+     // For DLL shmoo workaround 
+     ecmdDataBufferBase set_bits(16),clear_bits(16);
+     uint16_t bits=0;
+     
+     FAPI_DBG("DLL workaround : Setting TX DRV pattern back to 0000 before restarting training on X bus ");
+     // Clear Clk pattern
+     bits=ei4_tx_drv_data_pattern_gcrmsg_clear;
+     rc_ecmd=clear_bits.insert(bits,0,16);
+     if(rc_ecmd)
+     {
+           FAPI_ERR("Failed buffer intialization in DLL workaround function \n");
+           rc.setEcmdError(rc_ecmd);
+     }
+     rc=GCR_write(slave_target, slave_interface,ei4_tx_data_cntl_gcrmsg_pl  , 15,31,   set_bits, clear_bits,1,1);
+     rc=GCR_write(master_target, master_interface,ei4_tx_data_cntl_gcrmsg_pl , 15,31,   set_bits, clear_bits,1,1);
+     //Clear Data pattern 
+     bits=ei4_tx_drv_clk_pattern_gcrmsg_clear;
+     rc_ecmd=clear_bits.insert(bits,0,16);
+     if(rc_ecmd)
+     {
+           FAPI_ERR("Failed buffer intialization in DLL workaround function \n");
+           rc.setEcmdError(rc_ecmd);
+     }
+     rc=GCR_write(slave_target, slave_interface, ei4_tx_clk_cntl_gcrmsg_pg  , 15,0,   set_bits, clear_bits,1,1);
+     rc=GCR_write(master_target, master_interface, ei4_tx_clk_cntl_gcrmsg_pg , 15,0,   set_bits, clear_bits,1,1);
+    
+     // According to John G , This reset is required as well 
+     bits= ei4_rx_wt_cu_pll_reset_clear  ;
+     rc_ecmd=clear_bits.insert(bits,0,16);
+     set_bits.flushTo0();
+     //Reset wt_cu_pll
+      for (int current_group = 0 ; current_group < 4; current_group++){
+          //rc = GCR_read( slave_target, slave_interface,ei4_rx_wiretest_pll_cntl_pg , current_group,  0,  set_bits);
+          //set_bits.clearBit(1);
+          rc=GCR_write(slave_target, slave_interface, ei4_rx_wiretest_pll_cntl_pg  , current_group,0,   set_bits, clear_bits,1,1);
+          //
+          //rc = GCR_read( master_target, master_interface,ei4_rx_wiretest_pll_cntl_pg , current_group,  0,  set_bits);
+          //set_bits.clearBit(1);
+          rc=GCR_write(master_target, master_interface, ei4_rx_wiretest_pll_cntl_pg  , current_group,0,   set_bits, clear_bits,1,1);
+      }
+
+      
+     FAPI_DBG("Done Setting TX Drv pattern to 0000 and wt_cu_pll_reset to 0 for DLL workaround ");
+     return rc;
+}
+
 //HW Defect HW220449 , HW HW247831
 // Set rx_sls_extend_sel=001 on slave side of X bus post training
 ReturnCode do_sls_fix(const Target &slave_target, io_interface_t slave_interface)
@@ -341,11 +570,18 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
      uint32_t slave_group=0;
      const uint32_t max_group=4; // Num of X bus groups in one bus
      edi_training init;
+
      // Workaround - HW 220654 -- Need to split WDERF into WDE + RF
      edi_training init1(SELECTED,SELECTED,SELECTED, NOT_RUNNING, NOT_RUNNING); // Run WDE first
+     
+     // For Xbus DLL Workaround , we need Wiretest alone , then DE and RF 
+     edi_training init_w(SELECTED,NOT_RUNNING, NOT_RUNNING, NOT_RUNNING, NOT_RUNNING); // Run W for Xbus
+     edi_training init_de(SELECTED,SELECTED,SELECTED, NOT_RUNNING, NOT_RUNNING); // Run DE next for X bus
+     // Need an object to restore object state after one wiretest run. 
+     edi_training copy_w=init_w;
+     // DE & RF needs to be split due to HW 220654 
      edi_training init2( NOT_RUNNING, NOT_RUNNING, NOT_RUNNING,SELECTED,SELECTED); // Run RF next
      bool is_master=false;
-     
      //FIR workaround buffers
      //These buffers will store old bad lane info that was restored prior to training 
      ecmdDataBufferBase slave_data_one_old[4];
@@ -381,26 +617,63 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
      }
      //This is an X Bus
      else if( (master_target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT  )&& (slave_target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT )){
-          FAPI_DBG("This is a X Bus training invocation");
+         FAPI_DBG("This is a X Bus training invocation");
           master_interface=CP_FABRIC_X0; // base scom for X bus
           slave_interface=CP_FABRIC_X0; // base scom for X bus
-          master_group=0; // Design requires us to do this as per scom map and layout
-          slave_group=0;
+          slave_group=0; // Design requires us to do this as per scom map and layout
+          master_group=0;
+          uint8_t trial_count=0;
+          //HW249235 --For DLL workaround 
+          bool dll_master_array[24],dll_slave_array[24]; // DLL array for each clock group
+          bool dll_workaround_done=false;
+          bool dll_workaround_fail=false;
+          
+          //init Bool array
+          for(int i=0;i<24;++i){
+               dll_master_array[i]=false;
+               dll_slave_array[i]=false;
+          }
+          
           rc=init.isChipMaster(master_target,master_interface,master_group,is_master);
           if(rc.ok()){
-               if(!is_master){
-                     //Swap master and slave targets !!
+                             if(!is_master){
+                     //Swap slave and slave targets !!
                      FAPI_DBG("X Bus ..target swap performed");
-                    rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                     rc=fir_workaround_pre_training(slave_target,slave_interface,slave_group,slave_target,slave_interface,slave_group,
                                                  slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
-                    if(rc) return rc;
-                    rc=init1.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
+                     if(rc) return rc;
+                    do{
+                         trial_count++;
+                         FAPI_DBG("TRAINING TRIAL count=%d",trial_count);
+                         rc=init_w.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
+                         if(rc) {
+                              //HW249235 --For DLL workaround
+                              FAPI_DBG("Starting DLL Workaround");
+                              rc=check_dll_status_and_modify(slave_target,slave_interface,master_target,master_interface,
+                                                            dll_slave_array,dll_master_array,dll_workaround_done,dll_workaround_fail);
+                              if(rc) return rc;
+                              // Reset tx drive pattern to 0000 before starting Wiretest again -- As per Rob /Pete
+                              //Prep the targets for next round of WDE training -- Steps by Rob & Pete
+                              if(!dll_workaround_done){
+                                   rc=set_tx_drv_pattern(slave_target,slave_interface,slave_group,master_target,master_interface,
+                                                             master_group);
+                              }
+                              if(rc) return rc;
+                         }
+                         else{
+                              if(trial_count>1){
+                                   FAPI_DBG("DLL workaround was successfull");
+                              }
+                              dll_workaround_done=true;
+                         }
+                         init_w=copy_w;
+                    }while(!dll_workaround_done);
+                    rc=init_de.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
                     if(rc) return rc;
                     rc=init2.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
-                    rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                    rc=fir_workaround_post_training(slave_target,slave_interface,slave_group,slave_target,slave_interface,slave_group,
                                                  slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
                     if(rc) return rc;
-                    
                     //HW Defect HW220449 , HW HW247831
                     // Set rx_sls_extend_sel=001 on slave side of X bus post training
                     rc=do_sls_fix(master_target,master_interface);
@@ -408,18 +681,49 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
 	       }
                else{
                     rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
-                                                slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                                                master_data_one_old,master_data_two_old,slave_data_one_old,slave_data_two_old);
                     if(rc) return rc;
-                    rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
-                    if(rc) return rc;
-                    rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
-                    rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
-                                                 slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
-                    if(rc) return rc;
+                 do{
+                         trial_count++;
+                         FAPI_DBG("TRAINING TRIAL count=%d",trial_count);
+                         rc=init_w.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                         if(rc) {
+                              //HW249235 --For DLL workaround
+                              FAPI_DBG("Starting DLL Workaround");
+                              rc=check_dll_status_and_modify(master_target,master_interface,slave_target,slave_interface,
+                                                            dll_master_array,dll_slave_array,dll_workaround_done,dll_workaround_fail);
+                              if(rc) return rc;
+                              // Reset tx drive pattern to 0000 before starting Wiretest again -- As per Rob /Pete
+                              //Prep the targets for next round of WDE training -- Steps by Rob & Pete
+                              if(!dll_workaround_done){
+                                   rc=set_tx_drv_pattern(master_target,master_interface,master_group,slave_target,slave_interface,
+                                    slave_group);
+                              }
+                              if(rc) return rc;
+                         }
+                         else{
+                              if(trial_count>1){
+                                   FAPI_DBG("DLL workaround was successfull");
+                              }
+                              dll_workaround_done=true;
+                         }
+                         init_w=copy_w;// Reset training object state to default
+                    }while(!dll_workaround_done);
+                    if(!dll_workaround_fail){
+                         rc=init_de.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                         if(rc) {
+                              
+                              return rc;}
+                         
+                         rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                         rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
+                                                      master_data_one_old,master_data_two_old,slave_data_one_old,slave_data_two_old);
+                         if(rc) return rc;
+                    }
                     //HW Defect HW220449 , HW HW247831
                     // Set rx_sls_extend_sel=001 on slave side of X bus post training
-                    rc=do_sls_fix(slave_target,slave_interface);
-                    if(rc) return rc;
+                   rc=do_sls_fix(slave_target,slave_interface);
+                   if(rc) return rc;
                }
                for(uint32_t current_group=0;current_group<max_group;++current_group){
                     rc=handle_max_spare(master_target,master_interface,current_group);

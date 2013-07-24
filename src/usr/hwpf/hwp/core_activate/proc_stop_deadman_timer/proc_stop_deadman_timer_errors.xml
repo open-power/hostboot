@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_stop_deadman_timer_errors.xml,v 1.4 2013/04/25 22:04:00 jeshua Exp $ -->
 <!-- Error definitions for proc_stop_deadman_timer procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -27,8 +28,9 @@
     <rc>RC_PROC_STOP_DEADMAN_TIMER_BAD_ISTEP_NUM</rc>
     <description>The SBE is not at the correct istep number</description>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
     <ffdc>SBE_VITAL</ffdc>
   </hwpError>
@@ -37,8 +39,9 @@
     <rc>RC_PROC_STOP_DEADMAN_TIMER_BAD_SUBSTEP_NUM</rc>
     <description>The SBE is not at the correct substep number</description>
     <collectRegisterFfdc>
-        <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-        <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
     <ffdc>SBE_VITAL</ffdc>
   </hwpError>

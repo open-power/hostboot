@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: io_errors.xml,v 1.10 2013/07/23 22:05:40 rjknight Exp $ -->
 <!-- Error definitions for IO HWPS  -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -93,6 +94,16 @@
     <description>IO GCR write operation failed to readback data that was written</description>
     <ffdc>READ_BUF</ffdc>
     <ffdc>WRITE_BUF</ffdc>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_DLL_WORKAROUND_FAIL</rc>
+    <description>DLL Workaround failed to arrive at a solution</description>
+  </hwpError>
+      <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_RUN_TRAINING_DLL_VAL_OUT_OF_BOUND_RC</rc>
+    <description>DLL Workaround encountered unexpected start value</description>
   </hwpError>
    <!-- *********************************************************************** -->
   <hwpError>
