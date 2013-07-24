@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/service/prdf_ras_services.C $ */
+/* $Source: src/usr/diag/prdf/common/framework/service/prdfRasServices_common.C $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,13 +21,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdf_ras_services.C
- *  @brief Definition of external RAS services needed by PRD
+/** @file  prdfRasServices_common.H
+ *  @brief Utility code to parse an SDC and produce the appropriate error log.
  */
 
-#define prdf_ras_services_C
-
-#include <prdf_ras_services.H>
+#include <prdfRasServices.H>
 #include <prdfPfa5Data.h>
 #include <time.h>
 #include <iipServiceDataCollector.h>
@@ -59,8 +57,6 @@
   #include <prdfSdcFileControl.H>
 #endif
 
-#undef prdf_ras_services_C
-
 using namespace TARGETING;
 
 namespace PRDF
@@ -68,16 +64,9 @@ namespace PRDF
 
 using namespace PlatServices;
 
-// ----------------------------------------------------------------------------
-// Local macros and types
-// ----------------------------------------------------------------------------
-#ifndef BIN_TO_BCD
-#define BIN_TO_BCD(val) ((val) = (((val)/1000)<<12) + (((val%1000)/100)<<8) + (((val%100)/10)<<4) + (val)%10)
-#endif
-
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Local Globals
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #ifndef __HOSTBOOT_MODULE
 
 const char * ThermalFileKeys[]  = {"fstp/P1_Root","prdf/ThermalSdcPath"};
@@ -92,16 +81,16 @@ Timer previousEventTime;
 const double LATENT_MCK_WINDOW = 2;   // two seconds to determin latency
 RasServices thisServiceGenerator;
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Member Functions
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 ServiceGeneratorClass & ServiceGeneratorClass::ThisServiceGenerator(void)
 {
   return thisServiceGenerator;
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 RasServices::RasServices() :
     iv_ErrDataService(NULL)
@@ -110,7 +99,7 @@ RasServices::RasServices() :
     iv_ErrDataService = new ErrDataService();
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 RasServices::~RasServices()
 {
     if(NULL != iv_ErrDataService)
@@ -121,7 +110,7 @@ RasServices::~RasServices()
     }
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void ErrDataService::Initialize()
 {
@@ -134,7 +123,7 @@ void RasServices::Initialize()
     iv_ErrDataService->Initialize();
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void RasServices::setErrDataService(ErrDataService & i_ErrDataService)
 {
@@ -150,7 +139,7 @@ void RasServices::setErrDataService(ErrDataService & i_ErrDataService)
     iv_ErrDataService = &i_ErrDataService;
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void ErrDataService::SetErrorTod(ATTENTION_TYPE the_attention,
                                  bool *is_latent,
@@ -194,7 +183,7 @@ void RasServices::SetErrorTod(ATTENTION_TYPE the_attention,
                                    sdc);
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 bool ErrDataService::QueryLoggingBufferFull(void) const
 {
@@ -206,7 +195,7 @@ bool RasServices::QueryLoggingBufferFull(void) const
     return iv_ErrDataService->QueryLoggingBufferFull();
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void ErrDataService ::SaveRcForSrc(int32_t the_rc)
 {
@@ -218,30 +207,23 @@ void RasServices::SaveRcForSrc(int32_t the_rc)
     iv_ErrDataService->SaveRcForSrc(the_rc);
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-errlHndl_t RasServices::GenerateSrcPfa(ATTENTION_TYPE attn_type,
-                                             ServiceDataCollector & i_sdc)
+errlHndl_t RasServices::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
+                                        ServiceDataCollector & i_sdc )
 
 {
-    PRDF_DENTER("RasServices::GenerateSrcPfa()");
-
-    errlHndl_t errLog = NULL;
-    errLog = iv_ErrDataService->GenerateSrcPfa(attn_type, i_sdc);
-
-    PRDF_DEXIT("RasServices::GenerateSrcPfa()");
-    return errLog;
-
+    return iv_ErrDataService->GenerateSrcPfa( i_attnType, i_sdc );
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
-                                             ServiceDataCollector & i_sdc)
+errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
+                                           ServiceDataCollector & i_sdc )
 {
-    #define PRDF_FUNC "GenerateSrcPfa() "
-    PRDF_DENTER( PRDF_FUNC );
-    errlHndl_t errLog = NULL;
+    #define PRDF_FUNC "[ErrDataService::GenerateSrcPfa] "
+
+    errlHndl_t o_errl = NULL;
 
 #ifdef __HOSTBOOT_MODULE
     using namespace ERRORLOG;
@@ -301,7 +283,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     ////////////////////////////////////////////////////////////////
     // Machine Check ATTN (CHECKSTOP)
     ////////////////////////////////////////////////////////////////
-    if (attn_type == MACHINE_CHECK)
+    if (i_attnType == MACHINE_CHECK)
     {
 #ifdef  __HOSTBOOT_MODULE
 
@@ -383,7 +365,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     ////////////////////////////////////////////////////////////////
     // Recoverable ATTN or Unit CheckStop
     ////////////////////////////////////////////////////////////////
-    else if (attn_type == RECOVERABLE  || attn_type == UNIT_CS )
+    else if (i_attnType == RECOVERABLE  || i_attnType == UNIT_CS )
     {
 #ifndef  __HOSTBOOT_MODULE
         // FIXME: I don't think Hostboot needs latent SDC and UE/SUE support
@@ -418,7 +400,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         }
 #endif  // if not __HOSTBOOT_MODULE
 
-        // For a Recoverable Attn with MPFatal and Cause_attn_type not
+        // For a Recoverable Attn with MPFatal and Cause_i_attnType not
         // equal Special, make this a Predictive, Parable error.
         if (!sdc.IsLogging() )
         {
@@ -447,7 +429,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     ////////////////////////////////////////////////////////////////
     // Special ATTN
     ////////////////////////////////////////////////////////////////
-    else if (attn_type == SPECIAL)
+    else if (i_attnType == SPECIAL)
     {
         //SMA path on Special attn
         if (sdc.IsMpFatal() && (sdc.IsLogging() || sdc.IsServiceCall() ) )
@@ -499,7 +481,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                 gardErrType = GARD_Func;
                 break;
             case GardResolution::CheckStopOnlyGard:
-                if  (MACHINE_CHECK == attn_type)
+                if  (MACHINE_CHECK == i_attnType)
                 {
                     gardErrType = GARD_Func;
                 }
@@ -536,7 +518,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         }
     }
 
-    if (sdc.IsThermalEvent() && (MACHINE_CHECK != attn_type) )
+    if (sdc.IsThermalEvent() && (MACHINE_CHECK != i_attnType) )
     {  //Force No Gard
         gardState = HWSV::HWSV_NO_GARD;
         gardErrType = GARD_NULL;
@@ -657,7 +639,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     //**************************************************************
     ErrorSignature * esig = sdc.GetErrorSignature();
 
-    PRDF_HW_CREATE_ERRL(errLog,
+    PRDF_HW_CREATE_ERRL(o_errl,
                         ERRL_SEV_PREDICTIVE,
                         ERRL_ETYPE_NOT_APPLICABLE,
                         SRCI_MACH_CHECK,
@@ -680,12 +662,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     bool capDataAdded = false;
     if (calloutsPlusDimms > 3)
     {
-        AddCapData(sdc.GetCaptureData(),errLog);
+        AddCapData(sdc.GetCaptureData(),o_errl);
         capDataAdded = true;
     }
 
     // make sure serviceAction doesn't override errl severity
-    errLog->setSev(severityParm);
+    o_errl->setSev(severityParm);
 
     if (ERRL_ACTION_HIDDEN == actionFlag)
     {  //Change HCDB Update to not do the update for non-visible logs
@@ -718,7 +700,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                                 thispriority,
                                 thisDeconfigState,
                                 gardState,
-                                errLog,
+                                o_errl,
                                 writeVPD,
                                 gardErrType,
                                 severityParm,
@@ -737,7 +719,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                                      thispriority,
                                      deconfigState,
                                      gardState,
-                                     errLog,
+                                     o_errl,
                                      writeVPD,
                                      gardErrType,
                                      severityParm,
@@ -753,7 +735,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 
             PRDF_HW_ADD_PROC_CALLOUT(thisProcedureID,
                                      thispriority,
-                                     errLog,
+                                     o_errl,
                                      severityParm);
 
             // Use the flags set earlier to determine if the callout is just Software (SP code or Phyp Code).
@@ -765,7 +747,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 
                 PRDF_HW_ADD_PROC_CALLOUT(EPUB_PRC_LVL_SUPP,
                                          MRU_LOW,
-                                         errLog,
+                                         o_errl,
                                          severityParm);
 
                 SecondLevel = true;
@@ -872,7 +854,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     pfaData.Threshold               = sdc.GetThreshold();
     pfaData.ErrorType               = prdGardErrType;
     pfaData.homGardState            = gardState;
-    pfaData.PRD_AttnTypes           = attn_type;
+    pfaData.PRD_AttnTypes           = i_attnType;
     pfaData.PRD_SecondAttnTypes     = i_sdc.GetCauseAttentionType();
     pfaData.THERMAL_EVENT           = (sdc.IsThermalEvent()==true)? 1:0;
     pfaData.UNIT_CHECKSTOP          = (sdc.IsUnitCS()==true)? 1:0;
@@ -987,7 +969,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                            PlatServices::getHuid(l_dumpHandle)  );
                 ForceTerminate = true;
                 pfaData.LAST_CORE_TERMINATE = true;
-                errLog->setSev(ERRL_SEV_UNRECOVERABLE);  //Update Errl Severity
+                o_errl->setSev(ERRL_SEV_UNRECOVERABLE);  //Update Errl Severity
                 //Update PFA data
                 pfaData.PFA_errlSeverity = ERRL_SEV_UNRECOVERABLE;
             }
@@ -997,12 +979,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     // Check the errl for the terminate state
     // Note: will also be true for CheckStop attn.
     bool l_termSRC = false;
-    PRDF_GET_TERM_SRC(errLog, l_termSRC);
+    PRDF_GET_TERM_SRC(o_errl, l_termSRC);
     if(l_termSRC)
     {
         ForceTerminate = true;
         uint32_t l_plid = 0;
-        PRDF_GET_PLID(errLog, l_plid);
+        PRDF_GET_PLID(o_errl, l_plid);
         PRDF_INF(PRDF_FUNC"check for isTerminateSRC is true. PLID=%.8X", l_plid);
     }
 
@@ -1019,7 +1001,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
              !HW )
         {
             //Terminate in Manufacturing Mode, in IPL mode, for visible log, with no HW callouts.
-            PRDF_SRC_WRITE_TERM_STATE_ON(errLog, SRCI_TERM_STATE_MNFG);
+            PRDF_SRC_WRITE_TERM_STATE_ON(o_errl, SRCI_TERM_STATE_MNFG);
         }
         //Do not Terminate in Manufacturing Mode if not at threshold.
         //Allow Manufacturing Mode Terminate for Thermal Event. It's severityParm will be
@@ -1034,7 +1016,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         }
         else
         {
-            PRDF_SRC_WRITE_TERM_STATE_ON(errLog, SRCI_TERM_STATE_MNFG);
+            PRDF_SRC_WRITE_TERM_STATE_ON(o_errl, SRCI_TERM_STATE_MNFG);
         }
 
         if (sdc.IsThermalEvent() )
@@ -1053,7 +1035,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     //**************************************************************
     UtilMem l_membuf;
     l_membuf << pfaData;
-    PRDF_ADD_FFDC( errLog, (const char*)l_membuf.base(), l_membuf.size(),
+    PRDF_ADD_FFDC( o_errl, (const char*)l_membuf.base(), l_membuf.size(),
                    ErrlVer1, ErrlSectPFA5_1 );
 
     //**************************************************************
@@ -1082,7 +1064,7 @@ will also be removed. Need to confirm if this code is required anymore.
             //Add Test Case Number to Error Log User Data
             UtilMem l_membuf;
             l_membuf << avpTCNumber;
-            errLog->addUsrDtls(l_membuf.base(),l_membuf.size(),PRDF_COMP_ID,ErrlVer1,ErrlAVPData_1);
+            o_errl->addUsrDtls(l_membuf.base(),l_membuf.size(),PRDF_COMP_ID,ErrlVer1,ErrlAVPData_1);
         }
     }
 */
@@ -1110,7 +1092,7 @@ will also be removed. Need to confirm if this code is required anymore.
             memcpy(&usrDtlsTCData[4], &avpTCData[40], 4);
             memcpy(&usrDtlsTCData[8], &avpTCData[37], 1);
             memcpy(&usrDtlsTCData[9], &avpTCData[44], 20);
-            PRDF_ADD_FFDC( errLog, (const char*)usrDtlsTCData, sz_usrDtlsTCData,
+            PRDF_ADD_FFDC( o_errl, (const char*)usrDtlsTCData, sz_usrDtlsTCData,
                            ErrlVer1, ErrlAVPData_2 );
         }
     }
@@ -1123,7 +1105,7 @@ will also be removed. Need to confirm if this code is required anymore.
     // Check to make sure Capture Data wasn't added earlier.
     if (!capDataAdded)
     {
-        AddCapData(sdc.GetCaptureData() ,errLog);
+        AddCapData(sdc.GetCaptureData() ,o_errl);
     }
 
     // Note moved the code from here, that was associated with checking for the last
@@ -1132,17 +1114,17 @@ will also be removed. Need to confirm if this code is required anymore.
     // Collect PRD trace
     // NOTE: Each line of trace is on average 36 bytes so 768 bytes should get
     //       us around 21 lines of trace output.
-    PRDF_COLLECT_TRACE(errLog, 768);
+    PRDF_COLLECT_TRACE(o_errl, 768);
 
     //**************************************************************
     // Commit the eror log.
     // This will also perform Gard and Deconfig actions.
     // Do the Unit Dumps if needed.
     //**************************************************************
-    if (sdc.IsDontCommitErrl() && !sdc.IsUnitCS() && (MACHINE_CHECK != attn_type) )
+    if (sdc.IsDontCommitErrl() && !sdc.IsUnitCS() && (MACHINE_CHECK != i_attnType) )
     {
-        delete errLog;
-        errLog = NULL;
+        delete o_errl;
+        o_errl = NULL;
     }
     else if ( !ReturnELog        && !ForceTerminate &&
               !i_sdc.IsMpFatal() && !i_sdc.Terminate() )
@@ -1171,7 +1153,7 @@ will also be removed. Need to confirm if this code is required anymore.
 
                 if ( SUCCESS == l_rc )
                 {
-                    l_rc = PRDF_HWUDUMP( errLog, CONTENT_HWNXLCL,
+                    l_rc = PRDF_HWUDUMP( o_errl, CONTENT_HWNXLCL,
                                          pfaData.MsDumpInfo.DumpId );
                 }
             }
@@ -1211,7 +1193,7 @@ will also be removed. Need to confirm if this code is required anymore.
                     // Call Dump for Proc Core CS
                     if ( TYPE_CORE == l_targetType )
                     {
-                        l_rc = PRDF_HWUDUMP( errLog,
+                        l_rc = PRDF_HWUDUMP( o_errl,
                                              CONTENT_SINGLE_CORE_CHECKSTOP,
                                              pfaData.MsDumpInfo.DumpId );
                     }
@@ -1228,17 +1210,17 @@ will also be removed. Need to confirm if this code is required anymore.
 
         // Commit the Error log
         // Need to move below here since we'll need
-        // to pass errLog to PRDF_HWUDUMP
+        // to pass o_errl to PRDF_HWUDUMP
         // for FSP specific SRC handling in the future
 #ifndef __HOSTBOOT_MODULE
         MnfgTrace(esig);
 #endif
 
-        PRDF_GET_PLID(errLog, dumpPlid);
+        PRDF_GET_PLID(o_errl, dumpPlid);
 
         bool l_sysTerm = false;
         PRDF_HW_COMMIT_ERRL(l_sysTerm,
-                            errLog,
+                            o_errl,
                             deconfigSched,
                             actionFlag,
                             HWSV::HWSV_CONTINUE);
@@ -1246,21 +1228,21 @@ will also be removed. Need to confirm if this code is required anymore.
         {
             //Just commit the log
             uint32_t l_rc = 0;
-            PRDF_GET_RC(errLog, l_rc);
+            PRDF_GET_RC(o_errl, l_rc);
 
             uint16_t l_reasonCode = 0;
-            PRDF_GET_REASONCODE(errLog, l_reasonCode);
+            PRDF_GET_REASONCODE(o_errl, l_reasonCode);
 
             PRDF_INF( PRDF_FUNC"committing error log: PLID=%.8X, ReasonCode=%.8X, RC=%.8X, actions=%.4X",
                       dumpPlid,
                       l_reasonCode,
                       l_rc, actionFlag );
-            PRDF_COMMIT_ERRL(errLog, actionFlag);
+            PRDF_COMMIT_ERRL(o_errl, actionFlag);
         }
         else
         {
             // Error log has been committed, return NULL Error Log to PrdMain
-            errLog = NULL;
+            o_errl = NULL;
         }
 
     }
@@ -1277,7 +1259,7 @@ will also be removed. Need to confirm if this code is required anymore.
         if (ForceTerminate && sdc.IsThermalEvent() ) //MP42 a  Start
         {  //For Manufacturing Mode terminate, change the severity in
            //the error log to be Predictive for Thermal Event.
-            errLog->setSev(ERRL_SEV_PREDICTIVE);
+            o_errl->setSev(ERRL_SEV_PREDICTIVE);
         }
     }
 
@@ -1379,14 +1361,12 @@ will also be removed. Need to confirm if this code is required anymore.
     if ( sdc.IsFlooding() )      PRDF_DTRAC( "PRDTRACE: Flooding detected" );
     if ( sdc.IsMemorySteered() ) PRDF_DTRAC( "PRDTRACE: Memory steered" );
 
-    PRDF_DEXIT( PRDF_FUNC );
-
-    return errLog;
+    return o_errl;
 
     #undef PRDF_FUNC
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #ifndef __HOSTBOOT_MODULE
 void ErrDataService::MnfgTrace(ErrorSignature * l_esig )
@@ -1461,7 +1441,7 @@ void ErrDataService::MnfgTrace(ErrorSignature * l_esig )
 }
 #endif // if not __HOSTBOOT_MODULE
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void ErrDataService::AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl)
 {
@@ -1510,7 +1490,7 @@ void ErrDataService::AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl)
     }while (0);
 }
 
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #ifndef __HOSTBOOT_MODULE
 
 bool ErrDataService::SdcSave(sdcSaveFlagsEnum i_saveFlag, ServiceDataCollector & i_saveSdc)

@@ -53,7 +53,7 @@ prd_config = \
 
 prd_service = \
  prdfServiceDataCollector.o \
- prdf_ras_services.o \
+ prdfRasServices_common.o \
  prdfTargetServices.o \
  xspprdsdbug.o
 

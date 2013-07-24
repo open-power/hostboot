@@ -33,7 +33,7 @@
 #include <UtilHash.H>
 #include <prdfDramRepairUsrData.H>
 #include <iipServiceDataCollector.h>
-#include <prdf_ras_services.H>
+#include <prdfRasServices.H>
 
 // Pegasus includes
 #include <prdfCenMarkstore.H>

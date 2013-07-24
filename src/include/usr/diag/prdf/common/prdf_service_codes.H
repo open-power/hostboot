@@ -68,7 +68,7 @@ enum ModuleId
 //  The tags need to be in a .C file - the tools won't pick up if in a .H file.
 //  In theory the tags should be right in with the code that generates the
 //  Reason Code. For prdf this is not possible in most instances.
-//  prdf_ras_services.C is the default place holder for the Service tags.
+//  prdfRasServices.C is the default place holder for the Service tags.
 //  So the Service tags should be either added to a prdf .C file for a unique
 //  instance, or in ras services.
 /******************************************************************************/

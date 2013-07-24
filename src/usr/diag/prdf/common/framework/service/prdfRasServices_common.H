@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/service/prdf_ras_services.H $ */
+/* $Source: src/usr/diag/prdf/common/framework/service/prdfRasServices_common.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,12 +21,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PRDF_RAS_SERVICES_H
-#define PRDF_RAS_SERVICES_H
-/**
-   @file prdf_ras_services.H
-   @brief Description
-*/
+#ifndef __prdfRasServices_common_H
+#define __prdfRasServices_common_H
+
+/** @file  prdfRasServices_common.H
+ *  @brief Utility code to parse an SDC and produce the appropriate error log.
+ */
 
 #include <xspprdService.h>
 #include <errlentry.H>
@@ -287,4 +287,4 @@ private:  // Data
 
 } // End namespace PRDF
 
-#endif // PRDF_RAS_SERVICES_H
+#endif // __prdfRasServices_common_H

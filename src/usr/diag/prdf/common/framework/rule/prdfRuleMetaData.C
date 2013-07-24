@@ -31,7 +31,7 @@
 #include <iipEregResolution.h> // for EregResolution
 #include <iipServiceDataCollector.h> // for ServiceDataCollector
 #include <prdfGroup.H>
-#include <prdf_ras_services.H>
+#include <prdfRasServices.H>
 #include <prdrLoadChip.H>
 #include <prdrLoadChipCache.H>
 #include <prdfScanFacility.H> // for ScanFacility

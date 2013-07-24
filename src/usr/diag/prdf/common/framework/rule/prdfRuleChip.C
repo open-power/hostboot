@@ -41,7 +41,7 @@
 #include <prdfErrorSignature.H> // for ErrorSignature
 #include <prdfPfa5Data.h> // for errl user data flags.
 #include <iipSystem.h> // for System
-#include <prdf_ras_services.H>
+#include <prdfRasServices.H>
 
 namespace PRDF
 {

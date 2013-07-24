@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/test/prdfsim_ras_services.C $               */
+/* $Source: src/usr/diag/prdf/test/prdfsimRasServices.C $                 */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,11 +21,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "prdfsim_ras_services.H"
+#include "prdfsimRasServices.H"
 #include "prdfsimServices.H"
 #include "stdio.h"
 #include <targeting/common/targetservice.H>
-
 
 namespace PRDF
 {

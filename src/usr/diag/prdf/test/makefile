@@ -58,7 +58,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 # objects
 #------------------------------------------------------------------------------
 
-OBJS = prdfsimHomRegisterAccess.o  prdfsim_ras_services.o  prdfsimScrDataSet.o  prdfsimScrDB.o  prdfsimServices.o  prdsimSignatureParser.o prdfsimUtil.o
+OBJS = prdfsimHomRegisterAccess.o  prdfsimRasServices.o  prdfsimScrDataSet.o  prdfsimScrDB.o  prdfsimServices.o  prdsimSignatureParser.o prdfsimUtil.o
 
 TESTS = prdfTest_ABus.H \
         prdfTest_Ex.H  \

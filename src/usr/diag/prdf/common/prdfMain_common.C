@@ -38,7 +38,7 @@
 #include <iipSystem.h>
 #include <prdrLoadChipCache.H>  // To flush chip-file cache.
 #include <prdfPlatServices.H>
-#include <prdf_ras_services.H>
+#include <prdfRasServices.H>
 #include <prdfRegisterCache.H>
 #include <prdfScanFacility.H>
 #include <prdfSystemSpecific.H>

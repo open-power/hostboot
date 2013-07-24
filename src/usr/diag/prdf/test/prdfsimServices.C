@@ -31,7 +31,7 @@
 #include "prdsimSignatureParser.H"
 #include "prdfsimScrDB.H"
 #include "prdfsimHomRegisterAccess.H"
-#include "prdfsim_ras_services.H"
+#include "prdfsimRasServices.H"
 
 #include <targeting/common/targetservice.H>
 
