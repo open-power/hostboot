@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.H,v 1.3 2013/04/08 14:57:41 jmcgill Exp $
+// $Id: proc_pcie_scominit.H,v 1.4 2013/05/15 04:18:58 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -119,6 +119,28 @@ const uint64_t PROC_PCIE_SCOMINIT_PLL_GLOBAL_CONTROL2[PROC_PCIE_SCOMINIT_NUM_IOP
     PCIE_IOP1_PLL_GLOBAL_CONTROL2_0x8000080A0901187F
 };
 const uint32_t PLL_GLOBAL_CONTROL2_PROG_COMPLETE_BIT = 50;
+
+// PCIe PLL FIR register field/bit definitions
+const uint32_t PROC_PCIE_SCOMINIT_PLL_FIR[PROC_PCIE_SCOMINIT_NUM_IOP] =
+{
+    PCIE_IOP0_PLL_FIR_0x09011400,
+    PCIE_IOP1_PLL_FIR_0x09011840
+};
+
+const uint32_t PROC_PCIE_SCOMINIT_PLL_FIR_WOF[PROC_PCIE_SCOMINIT_NUM_IOP] =
+{
+    PCIE_IOP0_PLL_FIR_WOF_0x09011408,
+    PCIE_IOP1_PLL_FIR_WOF_0x09011848
+};
+
+const uint32_t PROC_PCIE_SCOMINIT_PLL_FIR_MASK[PROC_PCIE_SCOMINIT_NUM_IOP] =
+{
+    PCIE_IOP0_PLL_FIR_MASK_0x09011403,
+    PCIE_IOP1_PLL_FIR_MASK_0x09011843
+};
+
+const uint64_t PCIE_PLL_FIR_MASK_VAL = 0x0080000000000000ULL;
+
 
 //------------------------------------------------------------------------------
 // Structure definitions

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.C,v 1.6 2013/04/08 14:57:39 jmcgill Exp $
+// $Id: proc_pcie_scominit.C,v 1.7 2013/05/15 04:18:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -379,8 +379,67 @@ fapi::ReturnCode proc_pcie_scominit_iop_complete(
                              data);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE%d_ETU_RESET_0x%016llX)",
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE%d_ETU_RESET_0x%08X)",
                           i, PROC_PCIE_SCOMINIT_ETU_RESET[i]);
+                break;
+            }
+        }
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // configure IOP FIR
+        for (size_t i = 0; i < PROC_PCIE_SCOMINIT_NUM_IOP; i++)
+        {
+            rc_ecmd |= data.flushTo0();
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error 0x%x setting up PLL FIR register clear data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            // clear FIR
+            rc = fapiPutScom(i_target,
+                             PROC_PCIE_SCOMINIT_PLL_FIR[i],
+                             data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%d_PLL_FIR_0x%08X)",
+                         i, PROC_PCIE_SCOMINIT_PLL_FIR[i]);
+                break;
+            }
+
+            // clear FIR WOF
+            rc = fapiPutScom(i_target,
+                             PROC_PCIE_SCOMINIT_PLL_FIR_WOF[i],
+                             data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%d_PLL_FIR_WOF_0x%08X)",
+                         i, PROC_PCIE_SCOMINIT_PLL_FIR_WOF[i]);
+                break;
+            }
+
+            rc_ecmd |= data.setDoubleWord(0, PCIE_PLL_FIR_MASK_VAL);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error 0x%x setting up PLL FIR mask register data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            // unmask
+            rc = fapiPutScom(i_target,
+                             PROC_PCIE_SCOMINIT_PLL_FIR_MASK[i],
+                             data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE_IOP%d_PLL_FIR_MASK_0x%08X)",
+                         i, PROC_PCIE_SCOMINIT_PLL_FIR_MASK[i]);
                 break;
             }
         }

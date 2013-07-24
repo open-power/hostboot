@@ -1,4 +1,4 @@
-#-- $Id: p8.pe.phase1.scom.initfile,v 1.3 2013/03/25 21:39:24 jmcgill Exp $
+#-- $Id: p8.pe.phase1.scom.initfile,v 1.4 2013/05/15 04:24:37 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -33,10 +33,28 @@ define lane32 = (ATTR_CHIP_EC_FEATURE_32_PCIE_LANES != 0);
 #-- IOP 0
 #--
 
+#-- IOP PLL FIR Action0 Register
+scom 0x09011406 {
+    bits,     scom_data;
+    0:63,     0x0000000000000000;
+}
+
+#-- IOP PLL FIR Action1 Register
+scom 0x09011407 {
+    bits,     scom_data;
+    0:63,     0xFF00000000000000;
+}
+
+#-- IOP PLL FIR Mask Register
+scom 0x09011403 {
+    bits,     scom_data;
+    0:63,     0xFF80000000000000;
+}
+
 #-- G3 PLL Control Register 0
 scom 0x800008010901143F {
-    bits,  scom_data;
-    51:63, ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0[0];
+    bits,     scom_data;
+    51:63,    ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0[0];
 }
 
 #-- G2 PLL Control Register 0
@@ -757,6 +775,24 @@ scom 0x800008420901143F {
 #--
 #-- IOP 1
 #--
+
+#-- IOP PLL FIR Action0 Register
+scom 0x09011846 {
+    bits,     scom_data;
+    0:63,     0x0000000000000000;
+}
+
+#-- IOP PLL FIR Action1 Register
+scom 0x09011847 {
+    bits,     scom_data;
+    0:63,     0xFF00000000000000;
+}
+
+#-- IOP PLL FIR Mask Register
+scom 0x09011843 {
+    bits,     scom_data;
+    0:63,     0xFF80000000000000;
+}
 
 #-- G3 PLL Control Register 0
 scom 0x800008010901187F {
