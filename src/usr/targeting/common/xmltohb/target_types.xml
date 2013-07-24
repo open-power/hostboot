@@ -255,7 +255,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000005</default> <!-- GARD, PSIDIAG -->
+        <default>0x00000005</default> <!-- GARD | PSIDIAG -->
     </attribute>
     <!-- TODO. MVPD_FREQ_CORE_NOMINAL to be deleted when MVPD available -->
     <attribute><id>MVPD_FREQ_CORE_NOMINAL</id></attribute>
@@ -1008,7 +1008,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!--GARD -->
+        <default>0x00000003</default> <!--GARD | MEMDIAG -->
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id></attribute>
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
@@ -1081,7 +1081,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!--GARD -->
+        <default>0x00000003</default> <!--GARD | MEMDIAG -->
     </attribute>
     <attribute>
         <id>SCOM_SWITCHES</id>
@@ -1213,7 +1213,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!--GARD -->
+        <default>0x00000003</default> <!--GARD | MEMDIAG -->
     </attribute>
 
     <!-- Defaulting this info to the one Simics Dummy device that we have -->
