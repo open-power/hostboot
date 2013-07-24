@@ -311,7 +311,8 @@ class MdiaSmTest : public CxxTest::TestSuite
                 Checks(START_PATTERN_5, true),
                 Checks(START_PATTERN_6, true),
                 Checks(START_PATTERN_7, true),
-                Checks(START_SCRUB, true)
+                Checks(START_SCRUB, true),
+                Checks(CLEAR_HW_CHANGED_STATE, false)
             };
 
             StateMachine sm;

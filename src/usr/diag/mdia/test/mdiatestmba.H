@@ -31,6 +31,7 @@
 #include <builtins.h>
 #include <cxxtest/TestSuite.H>
 #include <targeting/common/target.H>
+#include <targeting/common/utilFilter.H>
 #include "../mdiafwd.H"
 #include "../mdiaglobals.H"
 #include "../mdiasm.H"
@@ -46,21 +47,28 @@ class MdiaMbaTest : public CxxTest::TestSuite
 
             TS_TRACE(ENTER_MRK "testGetMbaDiagnosticMode");
 
-            DiagMode mode;
-            Globals globals = {};
-            TargetHandle_t mba = 0;
+            TargetHandleList mbaList;
+            getAllChiplets(mbaList, TYPE_MBA);
 
-            errlHndl_t err = getMbaDiagnosticMode(
-                    globals, mba, mode);
-
-            if(err)
+            if( !mbaList.empty() )
             {
-                TS_FAIL("getMbaDiagnosticMode failed unexpectedly");
-            }
+                DiagMode mode;
+                Globals globals = {};
+                TargetHandle_t mba = mbaList[0];
 
-            if(mode != INIT_ONLY)
-            {
-                TS_FAIL("mode != INIT_ONLY");
+                errlHndl_t err = getMbaDiagnosticMode(
+                                        globals, mba, mode);
+
+                if(err)
+                {
+                    TS_FAIL("getMbaDiagnosticMode failed "
+                            "unexpectedly");
+                }
+
+                if(mode != INIT_ONLY)
+                {
+                    TS_FAIL("mode != INIT_ONLY");
+                }
             }
 
             TS_TRACE(EXIT_MRK "testGetMbaDiagnosticMode");
@@ -76,24 +84,33 @@ class MdiaMbaTest : public CxxTest::TestSuite
             Globals globals = {};
             TargetHandle_t mba = 0;
             DiagMode mode;
+            errlHndl_t err = NULL;
+            TargetHandleList mbaList;
+            getAllChiplets(mbaList, TYPE_MBA);
 
-            errlHndl_t err = getMbaDiagnosticMode(
-                    globals, mba, mode);
-
-            if(err)
+            if( !mbaList.empty() )
             {
-                TS_FAIL("getMbaDiagnosticMode failed unexpectedly");
-            }
+                mba = mbaList[0];
+                err = getMbaDiagnosticMode(
+                                globals, mba, mode);
 
-            if(mode != INIT_ONLY)
-            {
-                TS_FAIL("mode != INIT_ONLY");
+                if(err)
+                {
+                    TS_FAIL("getMbaDiagnosticMode "
+                            "failed unexpectedly");
+                }
+
+                if(mode != INIT_ONLY)
+                {
+                    TS_FAIL("mode != INIT_ONLY");
+                }
             }
 
             WorkFlow wf, expected;
 
             expected.push_back(RESTORE_DRAM_REPAIRS);
             expected.push_back(START_PATTERN_0);
+            expected.push_back(CLEAR_HW_CHANGED_STATE);
 
             err = getMbaWorkFlow(mode, wf);
 

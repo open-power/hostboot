@@ -31,6 +31,7 @@
 #include <mdia/mdia.H>
 #include <mdia/mdiareasoncodes.H>
 #include <targeting/common/attributes.H>
+#include <targeting/common/targetservice.H>
 #include <vector>
 #include <map>
 
@@ -183,6 +184,25 @@ errlHndl_t getMbaWorkFlow(
  * @param[in] i_globals contains objects to be cleaned up
  */
 void doStepCleanup(const Globals & i_globals);
+
+/**
+ * @brief check if hw state has been changed for an mba's
+ *        associated targets
+ *
+ * @param[in] i_mba input mba target
+ *
+ * @retval true if hw state has been changed or else
+ */
+bool isHWStateChanged(TARGETING::TargetHandle_t i_mba);
+
+/**
+ * @brief clear hw changed state for an mba's
+ *        associated targets
+ *
+ * @param[in] i_mba input mba target
+ *
+ */
+void clearHWStateChanged(TARGETING::TargetHandle_t i_mba);
 
 }
 #endif

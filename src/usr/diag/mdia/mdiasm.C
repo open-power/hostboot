@@ -480,6 +480,7 @@ bool StateMachine::workItemIsAsync(WorkFlowProperties & i_wfp)
     {
         case RESTORE_DRAM_REPAIRS:
         case DUMMY_SYNC_PHASE:
+        case CLEAR_HW_CHANGED_STATE:
 
             // no attention associated with these so
             // schedule the next work item now
@@ -542,6 +543,16 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
             case START_SCRUB:
 
                 err = doMaintCommand(*i_wfp);
+
+                break;
+
+            case CLEAR_HW_CHANGED_STATE:
+
+                mutex_lock(&iv_mutex);
+
+                clearHWStateChanged(getTarget(*i_wfp));
+
+                mutex_unlock(&iv_mutex);
 
                 break;
 
@@ -822,6 +833,7 @@ CommandMonitor & StateMachine::getMonitor()
 
 bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 {
+
     enum
     {
         CLEANUP_CMD = 0x8,
@@ -870,8 +882,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
         cmd = static_cast<mss_MaintCmd *>(wfp.data);
 
-        MDIA_FAST("sm: processing event for: %x: cmd: %p",
-                get_huid(getTarget(wfp)));
+        MDIA_FAST("sm: processing event for: %x, cmd: %p, type: %x",
+                get_huid(getTarget(wfp)), cmd, i_event.type);
 
         switch(i_event.type)
         {

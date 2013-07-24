@@ -55,6 +55,7 @@ enum WorkFlowPhase
     DUMMY_ASYNC_PHASE,
     RESTORE_DRAM_REPAIRS,
     START_SCRUB,
+    CLEAR_HW_CHANGED_STATE,
 };
 
 /**
