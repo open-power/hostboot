@@ -24,6 +24,15 @@
 #Also builds images which contain the test code.
 ROOTPATH = ../../..
 
+##############################################################
+#Disabling this as our code size is getting too big for
+#fake PNOR.  Only commenting out the bare minimum so it's easy
+#to revive should the situation arise where we're forced
+#to do so.  This also keeps the 'make clean' path working
+#so people aren't stuck with dead files in their img directory.
+#
+##############################################################
+
 # Default target to 'buildpnor'.  This way you can type make
 # in this directory without a target and it will build the
 # pnor images.  In the standard case, this makefile is called
@@ -35,17 +44,17 @@ PNOR_VBU_TARGETS = vbu_MURANO vbu_VENICE
 
 define PNOR_vbu_template
 $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
-ifdef HOSTBOOT_PROFILE
-	@echo "  HOSTBOOT_PROFILE enabled."
-	@echo "  Build of vbu.pnor skipped due to space constraints."
-else
-	./buildpnorOld.pl --pnorLayout ./pnorLayoutVpo.xml \
-	    --genToc \
-	    --pnorOutBin $${IMGDIR}/$(1).pnor \
-	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
-	    --binFile_HBI $${IMGDIR}/hbicore_extended.bin \
-	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin
-endif
+#ifdef HOSTBOOT_PROFILE
+#	@echo "  HOSTBOOT_PROFILE enabled."
+#	@echo "  Build of vbu.pnor skipped due to space constraints."
+#else
+#	./buildpnorOld.pl --pnorLayout ./pnorLayoutVpo.xml \
+#	    --genToc \
+#	    --pnorOutBin $${IMGDIR}/$(1).pnor \
+#	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
+#	    --binFile_HBI $${IMGDIR}/hbicore_extended.bin \
+#	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin
+#endif
 endef
 
 PNOR_VBU_IMAGES =  $(addsuffix .pnor, $(addprefix $(IMGDIR)/, ${PNOR_VBU_TARGETS})) \
@@ -56,7 +65,6 @@ include ${ROOTPATH}/config.mk
 
 .PHONY: buildpnor
 buildpnor: ${PNOR_VBU_IMAGES}
-
 
 #VBU Specific images
 $(foreach pnor,$(PNOR_VBU_TARGETS),$(eval $(call PNOR_vbu_template,$(pnor))))

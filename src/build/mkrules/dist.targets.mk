@@ -38,7 +38,7 @@ ROOTPATH = ../../..
 #
 
 # Content targets.
-VALID_TARGETS = fsp vpo tools
+VALID_TARGETS = fsp tools
 
 #
 # Files which are to be directly copied into content targets.
