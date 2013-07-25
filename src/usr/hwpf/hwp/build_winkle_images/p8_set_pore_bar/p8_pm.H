@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm.H,v 1.4 2013/04/12 01:22:23 stillgs Exp $
+// $Id: p8_pm.H,v 1.6 2013/05/31 10:53:14 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -64,7 +64,8 @@ enum p8_PM_FLOW_MODE {
         PM_SETUP        = 0x4,
         PM_SETUP_PIB    = 0x5,
         PM_SETUP_ALL    = 0x6,
-        PM_RESET_NOPMC  = 0x7
+        PM_RESET_NOPMC  = 0x7,
+        PM_INIT_SPECIAL = 0x8
         };
 #endif  // _P8_PM_FLOW_MODE
 
@@ -78,7 +79,6 @@ enum p8_PM_FLOW_MODE {
     if(!l_rc.ok())                                                      \
     {                                                                   \
         FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);     \
-        error_flag=true;                                                \
         break;                                                          \
     }                                                                   \
 }
@@ -88,13 +88,12 @@ enum p8_PM_FLOW_MODE {
     if(!l_rc.ok())                                                      \
     {                                                                   \
         FAPI_ERR("GetScom error to address 0x%08llx", _mi_address);     \
-        error_flag=true;                                                \
         break;                                                          \
     }                                                                   \
 }
 
 #define E_RC_CHECK(_mi_e_rc, _mi_l_rc){                                 \
-    if (e_rc)                                                           \
+    if (_mi_e_rc)                                                       \
     {                                                                   \
         FAPI_ERR("Error (0x%x) accessing ecmdDataBufferBase", _mi_e_rc);\
         _mi_l_rc.setEcmdError(_mi_e_rc);                                \

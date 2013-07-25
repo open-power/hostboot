@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,27 +20,21 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: p8_pcbs_init_errors.xml,v 1.5 2013/05/23 18:44:17 stillgs Exp $ -->
 <!-- Error definitions for proc_pcbs_init procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT</rc>
     <description>Psafe Pstate and FSM-stable timeout in proc_pcbs_init.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_PCBS_CODE_PUTGETSCOM_FAILED</rc>
-    <description>Register read/write failed in proc_pcbs_init.</description>
+    <ffdc>LOOPCOUNT</ffdc>
+    <ffdc>PMSR</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_PCBS_CODE_BAD_MODE</rc>
     <description>Unknown mode passed to proc_pcbs_init.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->  
-  <hwpError>
-    <rc>RC_PROC_PCBS_CODE_BITOP_FAILED</rc>
-    <description>Bit operation failed in proc_pcbs_init.</description>
+    <ffdc>MODE</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>

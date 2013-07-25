@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pcbs_init.C,v 1.15 2013/04/12 01:31:59 stillgs Exp $
+// $Id: p8_pcbs_init.C,v 1.18 2013/05/23 02:18:02 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pcbs_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -108,112 +108,112 @@
 ///  - completed multicast setup
 ///
 ///
-/// if PM_CONFIG {                                                                                                                              
-///    PState translation                                                                                                                       
-///          convert_safe_freq()                                                                                                                
-///    Resonant Clocking settings (band definitions from frequency to Pstate)                                                                   
-///          convert_resclk_freqs_to_pstates()                                                                                                  
-///    PFET Sequencing Delays                                                                                                                   
-///          convert_pfet_delays()                                                                                                              
+/// if PM_CONFIG {
+///    PState translation
+///          convert_safe_freq()
+///    Resonant Clocking settings (band definitions from frequency to Pstate)
+///          convert_resclk_freqs_to_pstates()
+///    PFET Sequencing Delays
+///          convert_pfet_delays()
 ///
-/// else if PM_INIT {                                                                                                                           
+/// else if PM_INIT {
 ///
-///   set CPM_FILTER_ENABLE = 0                                   -- #110f0152, DPLL_CPM_PARM_REG[10] = 0                                       
-///                                                               -- PMGP1_REG   WOX_OR 150f0105                                                
+///   set CPM_FILTER_ENABLE = 0                                   -- #110f0152, DPLL_CPM_PARM_REG[10] = 0
+///                                                               -- PMGP1_REG   WOX_OR 150f0105
 ///
-///   set PMCR[0:39]  = 0                                        --  PMCR default value adjustment                                              
-///                                                              -- (Hardware flush 0 -> restore to 0 for reset case)                           
-///                                                              -- #110f0159, PCBS_POWER_MANAGEMENT_CONTROL_REG                                
+///   set PMCR[0:39]  = 0                                        --  PMCR default value adjustment
+///                                                              -- (Hardware flush 0 -> restore to 0 for reset case)
+///                                                              -- #110f0159, PCBS_POWER_MANAGEMENT_CONTROL_REG
 ///
-///               pm_spr_override_en must be set to write this reg!!                                                                            
-///   set PMICR[0:47]  = 0                                       --  PMICR default value adjustment                                             
-///                                                              -- (Hardware flush 0 -> restore to TBD for reset case)                         
-///                                                              -- #110f0158, PCBS_POWER_MANAGEMENT_IDLE_CONTROL_REG                           
-///
-///
-///
-/// } else if PM_RESET {                                                                                                                        
-///
-///   loop over all valid chiplets {                                                                                                            
-///
-///       -- TODO check about                                                                                                                   
-///       -- initialize all pm_reg with scan-zero values upfront                                                                                
-///
-///       //  Force safe mode                                                                                                                   
-///       set force_safe_mode = 1                                 -- Force safe mode (uses Psafe Pstate setting)                                
-///                                                               -- XXXX multicast PCBS_PM_PMGP1_REG_1[12] = 1///                              
-///       //  psafe Pstate achived AND FSM-stable ?                                                                                             
-///       if psafePstate achived AND FSM-stable {                 -- Check PCBS-PM state/status that Psafe (Pstate) as been achieved and        
-///                                                               -- that FSM are in a stable state                                             
-///                                                               -- PCBS_POWER_MANAGEMENT_STATUS_REG[33] safe_mode_active                      
-///                                                               -- PCBS_POWER_MANAGEMENT_STATUS_REG[36] all_fsms_in_safe_state                
-///       } elsif timeout {                                                                                                                     
-///         --BAD RC: timeout - no PsafePstate or FSMs not stable                                                                               
-///       }                                                                                                                                     
-///
-///       //  DPLL settings                                                                                                                     
-///       set dpll_freq_override_enable = 1                       -- PCBS_PM_PMGP1_REG_1[10] = 1                                                
-///                                                               -- only in override mode is a write to FREQ_CTRL_REG possible                 
-///
-///       set minPstate = min(Psafe,global actual pstate)         -- PCBS_OCC_Heartbeat_Reg[17..24]  Psafe                                      
-///                                                               -- PCBS_POWER_MANAGEMENT_STATUS_REG[0..7] global actual pstate                
-///       set dpll_min = fnom + minPstate(signed)                 -- FREQ_CTRL_REG[20..27]  pstate_dpll_fnom                                    
+///               pm_spr_override_en must be set to write this reg!!
+///   set PMICR[0:47]  = 0                                       --  PMICR default value adjustment
+///                                                              -- (Hardware flush 0 -> restore to TBD for reset case)
+///                                                              -- #110f0158, PCBS_POWER_MANAGEMENT_IDLE_CONTROL_REG
 ///
 ///
-///       set dpll_fmin                                           -- FREQ_CTRL_REG[0..7]   scaninit: 00110010                                   
-///       set dpll_fmax                                           -- FREQ_CTRL_REG[8..15]  scaninit: 00110010                                   
 ///
-///       set pm_spr_override_en = 1                              -- Force OCC SPR Mode                                                         
-///                                                               -- XXXX multicast PCBS_PM_PMGP1_REG_1[11] = 1                                 
+/// } else if PM_RESET {
 ///
-///       set enable_Pstate_mode = 0                              -- PCBSPM_MODE_REG[0] ....multicast                                           
+///   loop over all valid chiplets {
 ///
-///       set enable_global_pstate_req = 0                        -- Force *global_en PState to off  to cease interrupts to PMC....multicast    
-///                                                               -- PCBSPM_MODE_REG[2]                                                         
+///       -- TODO check about
+///       -- initialize all pm_reg with scan-zero values upfront
 ///
-///                                                               -- Reset Pmin and Pmax to wide open...multicast                               
-///       set Pmin_clip   =  -128                                 -- PCBS_Power_Management_Bounds_Reg[0..7]  0b10000000                         
-///       set Pmax_clip   =   127                                 -- PCBS_Power_Management_Bounds_Reg[8..15] 0b01111111                         
+///       //  Force safe mode
+///       set force_safe_mode = 1                                 -- Force safe mode (uses Psafe Pstate setting)
+///                                                               -- XXXX multicast PCBS_PM_PMGP1_REG_1[12] = 1///
+///       //  psafe Pstate achived AND FSM-stable ?
+///       if psafePstate achived AND FSM-stable {                 -- Check PCBS-PM state/status that Psafe (Pstate) as been achieved and
+///                                                               -- that FSM are in a stable state
+///                                                               -- PCBS_POWER_MANAGEMENT_STATUS_REG[33] safe_mode_active
+///                                                               -- PCBS_POWER_MANAGEMENT_STATUS_REG[36] all_fsms_in_safe_state
+///       } elsif timeout {
+///         --BAD RC: timeout - no PsafePstate or FSMs not stable
+///       }
+///
+///       //  DPLL settings
+///       set dpll_freq_override_enable = 1                       -- PCBS_PM_PMGP1_REG_1[10] = 1
+///                                                               -- only in override mode is a write to FREQ_CTRL_REG possible
+///
+///       set minPstate = min(Psafe,global actual pstate)         -- PCBS_OCC_Heartbeat_Reg[17..24]  Psafe
+///                                                               -- PCBS_POWER_MANAGEMENT_STATUS_REG[0..7] global actual pstate
+///       set dpll_min = fnom + minPstate(signed)                 -- FREQ_CTRL_REG[20..27]  pstate_dpll_fnom
 ///
 ///
-///       //  Settings                                                                                                                          
-///       set resclk_dis = 1                                      -- Chiplets resonant clocking (via PCBS) disabled                             
-///                                                                  -- EH.TPCHIP.NET.PCBSLPREV.GP3_REG[22]                                     
-///                                                               -- This is only ROX PCBS_Resonant_Clock_Control_Reg0[0]                       
+///       set dpll_fmin                                           -- FREQ_CTRL_REG[0..7]   scaninit: 00110010
+///       set dpll_fmax                                           -- FREQ_CTRL_REG[8..15]  scaninit: 00110010
 ///
-///       set occ_heartbeat_enable = 0                            -- OCC Heartbeat disable                                                      
-///                                                               -- PCBS_OCC_Heartbeat_Reg[8]                                                  
+///       set pm_spr_override_en = 1                              -- Force OCC SPR Mode
+///                                                               -- XXXX multicast PCBS_PM_PMGP1_REG_1[11] = 1
 ///
-///       //  IVRM Setup                                                                                                                        
-///       get the mrwb attribute ivrms_enabled                    -- If '0' Salerno, if '1' Venice                                              
-///       if ivrms_enabled {                                                                                                                    
-///           set ivrm_fsm_enable = 0                             -- PCBS_iVRM_Control_Status_Reg[0]                                            
-///                                                               -- ivrm_fsm_enable have be '0' to enable bypass_b writes                      
-///           set bypass_b mode = 0                                                                                                             
-///                                    --ivrm_core_vdd_bypass_b   -- PCBS_iVRM_Control_Status_Reg[4]                                            
-///                                    --ivrm_core_vcs_bypass_b   -- PCBS_iVRM_Control_Status_Reg[6]                                            
-///                                    --ivrm_eco_vdd_bypass_b    -- PCBS_iVRM_Control_Status_Reg[8]                                            
-///                                    --ivrm_eco_vcs_bypass_b    -- PCBS_iVRM_Control_Status_Reg[10]                                           
-///       }                                                                                                                                     
+///       set enable_Pstate_mode = 0                              -- PCBSPM_MODE_REG[0] ....multicast
 ///
-///                                                               -- Undervolting values reset                                                  
-///       set Kuv = 0                                             -- PCBS_UNDERVOLTING_REG[16..21]                                              
-///                                                               -- Puv_min and Puv_max  to disable                                            
-///       set Puv_min = -128                                      -- PCBS_UNDERVOLTING_REG[0..7]                                                
-///       set Puv_max = -128                                      -- PCBS_UNDERVOLTING_REG[8..15]                                               
+///       set enable_global_pstate_req = 0                        -- Force *global_en PState to off  to cease interrupts to PMC....multicast
+///                                                               -- PCBSPM_MODE_REG[2]
 ///
-///       set enable_LPFT_function = 0                            -- Local Pstate Frequency Target mechanism disabled                           
-///                                                               -- PCBS_Local_Pstate_Frequency_Target_Control_Register[20]                    
+///                                                               -- Reset Pmin and Pmax to wide open...multicast
+///       set Pmin_clip   =  -128                                 -- PCBS_Power_Management_Bounds_Reg[0..7]  0b10000000
+///       set Pmax_clip   =   127                                 -- PCBS_Power_Management_Bounds_Reg[8..15] 0b01111111
 ///
-///       //  Issue reset to PCBS-PM                                                                                                            
-///       set endp_reset_pm_only  = 1                             -- Issue reset to PCBS-PM                                                     
-///                                                               -- PMGP1_REG[9]                                                               
-///      -- unset off reset in the next cycle??                                                                                                 
-///       set endp_reset_pm_only  = 0                             -- PMGP1_REG[9]                                                               
 ///
-///   ] --end loop over all valid chiplets                                                                                                      
+///       //  Settings
+///       set resclk_dis = 1                                      -- Chiplets resonant clocking (via PCBS) disabled
+///                                                                  -- EH.TPCHIP.NET.PCBSLPREV.GP3_REG[22]
+///                                                               -- This is only ROX PCBS_Resonant_Clock_Control_Reg0[0]
 ///
-///   }   //end PM_RESET -mode                                                                                                                  
+///       set occ_heartbeat_enable = 0                            -- OCC Heartbeat disable
+///                                                               -- PCBS_OCC_Heartbeat_Reg[8]
+///
+///       //  IVRM Setup
+///       get the mrwb attribute ivrms_enabled                    -- If '0' Salerno, if '1' Venice
+///       if ivrms_enabled {
+///           set ivrm_fsm_enable = 0                             -- PCBS_iVRM_Control_Status_Reg[0]
+///                                                               -- ivrm_fsm_enable have be '0' to enable bypass_b writes
+///           set bypass_b mode = 0
+///                                    --ivrm_core_vdd_bypass_b   -- PCBS_iVRM_Control_Status_Reg[4]
+///                                    --ivrm_core_vcs_bypass_b   -- PCBS_iVRM_Control_Status_Reg[6]
+///                                    --ivrm_eco_vdd_bypass_b    -- PCBS_iVRM_Control_Status_Reg[8]
+///                                    --ivrm_eco_vcs_bypass_b    -- PCBS_iVRM_Control_Status_Reg[10]
+///       }
+///
+///                                                               -- Undervolting values reset
+///       set Kuv = 0                                             -- PCBS_UNDERVOLTING_REG[16..21]
+///                                                               -- Puv_min and Puv_max  to disable
+///       set Puv_min = -128                                      -- PCBS_UNDERVOLTING_REG[0..7]
+///       set Puv_max = -128                                      -- PCBS_UNDERVOLTING_REG[8..15]
+///
+///       set enable_LPFT_function = 0                            -- Local Pstate Frequency Target mechanism disabled
+///                                                               -- PCBS_Local_Pstate_Frequency_Target_Control_Register[20]
+///
+///       //  Issue reset to PCBS-PM
+///       set endp_reset_pm_only  = 1                             -- Issue reset to PCBS-PM
+///                                                               -- PMGP1_REG[9]
+///      -- unset off reset in the next cycle??
+///       set endp_reset_pm_only  = 0                             -- PMGP1_REG[9]
+///
+///   ] --end loop over all valid chiplets
+///
+///   }   //end PM_RESET -mode
 ///
 ///
 ///  \endverbatim
@@ -338,9 +338,7 @@ using namespace fapi;
 // -----------------------------------------------------------------------------
 
 // Macros to enhance readability yet provide for error handling
-// Assume the error path is to break out of the current loop.  If nested loops
-// are employed, the error_flag can be used to break out of the necessary
-// levels.
+// Assume the error path is to break out of the current loop.
 //
 // Set Double Word Scan0
 #define SETDWSCAN0(_mi_target, _mi_address, _mi_buffer, _mi_reset_value){   \
@@ -349,7 +347,6 @@ using namespace fapi;
     {                                                                       \
         FAPI_ERR("Set DoubleWord failed. With rc = 0x%x", (uint32_t)e_rc);  \
         l_rc.setEcmdError(e_rc);                                            \
-        error_flag=true;                                                    \
         break;                                                              \
     }                                                                       \
     FAPI_DBG("Scan0 equivalent reset of 0x%08llx to 0x%16llX",              \
@@ -358,7 +355,6 @@ using namespace fapi;
     if(!l_rc.ok())                                                          \
     {                                                                       \
         FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);         \
-        error_flag=true;                                                    \
         break;                                                              \
     }                                                                       \
 }
@@ -370,7 +366,6 @@ using namespace fapi;
     {                                                                       \
         FAPI_ERR("Set Word failed. With rc = 0x%x", (uint32_t)e_rc);        \
         l_rc.setEcmdError(e_rc);                                            \
-        error_flag=true;                                                    \
         break;                                                              \
     }                                                                       \
     FAPI_DBG("Scan0 equivalent reset of 0x%08llx to 0x%08X",                \
@@ -379,7 +374,6 @@ using namespace fapi;
     if(!l_rc.ok())                                                          \
     {                                                                       \
         FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);         \
-        error_flag=true;                                                    \
         break;                                                              \
     }                                                                       \
 }
@@ -569,7 +563,7 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
         else
         {
             FAPI_ERR("Unknown mode passed to p8_pcbs_init. Mode %x ....", i_mode);
-            //TODO RTC: 71328 - unused variable const uint64_t& MODE = (uint32_t)i_mode;
+            const uint64_t& MODE = (uint32_t)i_mode;
             FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PCBS_CODE_BAD_MODE);
         }
     } while(0);
@@ -620,7 +614,6 @@ p8_pcbs_init_init(const Target& i_target)
     uint32_t                        e_rc;              // eCmd returncode
 
     ecmdDataBufferBase              data(64);
-    ecmdDataBufferBase              mask(64);
 
     // Variables
     std::vector<fapi::Target>       l_exChiplets;
@@ -628,8 +621,6 @@ p8_pcbs_init_init(const Target& i_target)
     uint8_t                         l_functional = 0;
     uint8_t                         l_ex_number = 0;
     uint64_t                        address;
-    //TODO RTC: 71328 - hack to indicate unused
-    bool                            __attribute__((unused)) error_flag = false;
 
     FAPI_INF("p8_pcbs_init_init beginning for target %s ...", i_target.toEcmdString());
 
@@ -677,19 +668,19 @@ p8_pcbs_init_init(const Target& i_target)
             }
 
             FAPI_DBG("Core number = %d", l_ex_number);
-         
-            // Set DPLL Lock Replacement value (15:23) = 2 (eg bit 22 = 1)          
+
+            // Set DPLL Lock Replacement value (15:23) = 2 (eg bit 22 = 1)
             FAPI_INF ("Set DPLL Lock Replacement value of EX_DPLL_CPM_PARM_REG_0x1*0F0152 ");
 
-            address =  EX_DPLL_CPM_PARM_REG_0x100F0152 + 
+            address =  EX_DPLL_CPM_PARM_REG_0x100F0152 +
                         (l_ex_number * 0x01000000);
             GETSCOM(i_target, address, data);
-            
+
             e_rc  = data.setBit(22);
             E_RC_CHECK(e_rc, l_rc);
 
             PUTSCOM(i_target, address, data);
-            
+
             //  ******************************************************************
             //  - Enable DPLL Lock Replacement mode
             //  ******************************************************************
@@ -700,23 +691,32 @@ p8_pcbs_init_init(const Target& i_target)
 
             GETSCOM(i_target, address, data );
 
-            e_rc |= data.setBit(7);            
+            e_rc |= data.setBit(7);
             E_RC_CHECK(e_rc, l_rc);
 
             PUTSCOM(i_target, address, data );
-            
+
+            //  ******************************************************************
+            //  - set PCBS_PM_PMGP1_REG_1
+            //              [11] PM_SPR_OVERRIDE_EN = 1
+            //  ******************************************************************
+            FAPI_INF("Force PM_SPR_OVERRIDE");
+
+            // Using Write OR to set bit11
+            // Clear buffer
+            e_rc  = data.flushTo0();
+            e_rc |= data.setBit(11);    // Force OCC SPR Mode = 1
+            E_RC_CHECK(e_rc, l_rc);
+
+            address =  EX_PMGP1_OR_0x100F0105 + (l_ex_number * 0x01000000);
+            PUTSCOM(i_target, address, data );
+
+            FAPI_INF("Forced OCC SPR Mode");
+
             //  ******************************************************************
             //  - Power Management Control Reg
             //  ******************************************************************
             FAPI_INF("Clear Power Management Control Reg");
-            
-            // This can only be done if PMGP1(11) (pm_spr_override_en) is set
-            e_rc = data.setBit(10);
-            E_RC_CHECK(e_rc, l_rc);
-
-            address =  EX_PMGP1_OR_0x100F0105 + (l_ex_number * 0x01000000);
-            PUTSCOM(i_target, address, data);
-
 
             // Clear buffer
             e_rc = data.flushTo0();
@@ -730,7 +730,7 @@ p8_pcbs_init_init(const Target& i_target)
             //  - Power Management Idle Control Reg
             //  ******************************************************************
             FAPI_INF("Clear Power Management Idle Control Reg");
-          
+
             // Clear buffer
             e_rc = data.flushTo0();
             E_RC_CHECK(e_rc, l_rc);
@@ -740,7 +740,6 @@ p8_pcbs_init_init(const Target& i_target)
             PUTSCOM(i_target, address, data);
 
             FAPI_INF ("PMCR default value adjustment (Hardware flush 0) of EX_PCBS_Power_Management_Idle_Control_Reg_0x1*0F0158 " );
-
 
         }  //END FOR
         if (!l_rc.ok() )
@@ -781,8 +780,6 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
     uint8_t                     l_functional = 0;
     uint8_t                     l_ex_number = 0;
     uint64_t                    address;
-    //TODO RTC: 71328 - hack to indicate unused
-    bool                        __attribute__((unused)) error_flag = false;
     uint32_t                    loopcount = 0; // number of times PCBS-PMSR has been checked
 
     FAPI_INF("p8_pcbs_init_reset beginning for target %s ...", i_target.toEcmdString());
@@ -837,7 +834,6 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             if (l_rc)
             {
                 FAPI_ERR(" p8_pcbs_init_scan0 failed. With l_rc = 0x%x", (uint32_t)l_rc);
-                error_flag = true;
                 break;
             }
 
@@ -853,7 +849,7 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
                                 (l_ex_number * 0x01000000);
             GETSCOM(i_target, address, data);
             FAPI_DBG("\tPCBS_MODE_REG value 0x%16llX", data.getDoubleWord(0));
-            
+
             if (data.isBitSet(0))  // Pstates enabled
             {
 
@@ -897,10 +893,9 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
                     if( ++loopcount > pcbs_val_init.MAX_PSAFE_FSM_LOOPS )
                     {
                         FAPI_ERR("Gave up waiting for Psafe Pstate and FSM-stable!" );
-                        ///TODO RTC: 71328 - unused variable const uint64_t& LOOPCOUNT = (uint32_t)loopcount;
-                        ///TODO RTC: 71328 - unused variable const uint64_t& PMSR = data.getDoubleWord(0);
+                        const uint64_t& LOOPCOUNT = (uint32_t)loopcount;
+                        const uint64_t& PMSR = data.getDoubleWord(0);
                         FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT);
-//                        error_flag = true;
                         break;
                     }
 
@@ -915,7 +910,6 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
                     if (l_rc)
                     {
                         FAPI_ERR("fapiDelay(MAX_DELAY, MAX_SIM_CYCLES) failed. With rc = 0x%x", (uint32_t)l_rc);
-//                        error_flag = true;
                         break;
                     }
 
@@ -1200,8 +1194,6 @@ p8_pcbs_init_scan0(const Target &i_target, uint8_t i_ex_number)
     uint64_t                    address;
     uint64_t                    reset_doubleword;
     uint32_t                    reset_word;
-    ///TODO RTC: 71328 - hack to indicate unused
-    bool                        __attribute__((unused)) error_flag = false;
 
     do
     {
@@ -1231,7 +1223,7 @@ p8_pcbs_init_scan0(const Target &i_target, uint8_t i_ex_number)
         //      remain intact.
         //  EX_PCBS_OCC_Heartbeat_Reg_0x100F0164 not reset as this is reset fully
         //      by register accesses
-        
+
         //----
         address =  EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165
                     + (i_ex_number * 0x01000000);
@@ -1311,6 +1303,15 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pcbs_init.C,v $
+Revision 1.18  2013/05/23 02:18:02  stillgs
+
+Fix error_flag compile issue by removing it as coming header change will do anyway
+
+Revision 1.17  2013/05/22 16:33:33  stillgs
+
+Fix for SW204379 - was not clearing a ecmddatabuffer before touching PMGP1.  This cause OHA wake-up overrideds to be inadvertently set
+Addressed SW204139 -  fixed a bit number bug for OCC SPR Override setting prior to PMCR/PMICR updates
+
 Revision 1.15  2013/04/12 01:31:59  stillgs
 
 Added DPLL replacement enablement and value setting per hardware PManIrr testing
