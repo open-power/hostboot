@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id$
+// $Id: getMBvpdSlopeInterceptData.C,v 1.2 2013/07/19 18:41:09 whs Exp $
 /**
  *  @file getMBvpdSlopeInterceptData.C
  *
@@ -109,10 +109,10 @@ fapi::ReturnCode getMBvpdMasterData(
     struct mw_keyword
     {
         uint8_t     MWKeywordVersion;
-        uint8_t     masterPowerSlope_LSB;     //little endian order
-        uint8_t     masterPowerSlope_MSB;
-        uint8_t     masterPowerIntercept_LSB; //little endian order
-        uint8_t     masterPowerIntercept_MSB;
+        uint8_t     masterPowerSlope_MSB;     //big endian order
+        uint8_t     masterPowerSlope_LSB;
+        uint8_t     masterPowerIntercept_MSB; //big endian order
+        uint8_t     masterPowerIntercept_LSB;
         uint8_t     reserved[4];
         uint8_t     tempSensorPrimaryLayout;
         uint8_t     tempSensorSecondaryLayout;
@@ -155,11 +155,11 @@ fapi::ReturnCode getMBvpdMasterData(
         // Return requested value
         switch (i_attr)
         {
-           case MASTER_POWER_SLOPE:  //convert from little endian order
+           case MASTER_POWER_SLOPE:  //get each byte to perserve endian
                o_val = l_pMwBuffer->masterPowerSlope_LSB;
                o_val |= (l_pMwBuffer->masterPowerSlope_MSB << 8);
                break;
-           case MASTER_POWER_INTERCEPT:  //convert from little endian order
+           case MASTER_POWER_INTERCEPT:  //get each byte to perserve endian
                o_val = l_pMwBuffer->masterPowerIntercept_LSB;
                o_val |= (l_pMwBuffer->masterPowerIntercept_MSB << 8);
                break;
@@ -195,20 +195,20 @@ fapi::ReturnCode getMBvpdSupplierData(
     struct pdI_keyword
     {
         uint8_t   filler1[117]; // other fields and reserved bytes
-        uint8_t   moduleID_LSB; // at offset 117. Little endian order
-        uint8_t   moduleID_MSB; // VPD data CCIN_31E1_v.5.3.ods
+        uint8_t   moduleID_MSB; // at offset 117. Big endian order
+        uint8_t   moduleID_LSB; // VPD data CCIN_31E1_v.5.3.ods
         uint8_t   filler2[PDI_KEYWORD_SIZE-117-2]; // trailing space
     };
 
     //MV keyword layout
     struct mv_vendorInfo
     {
-        uint8_t   supplierID_LSB;              // little endian order
-        uint8_t   supplierID_MSB;
-        uint8_t   supplierPowerSlope_LSB;      // little endian order
-        uint8_t   supplierPowerSlope_MSB;
-        uint8_t   supplierPowerIntercept_LSB;  // little endian order
-        uint8_t   supplierPowerIntercept_MSB;
+        uint8_t   supplierID_MSB;              // Big endian order
+        uint8_t   supplierID_LSB;
+        uint8_t   supplierPowerSlope_MSB;      // Big endian order
+        uint8_t   supplierPowerSlope_LSB;
+        uint8_t   supplierPowerIntercept_MSB;  // Big endian order
+        uint8_t   supplierPowerIntercept_LSB;
         uint8_t   reserved[4];
     };
     struct mv_keyword //variable length
@@ -334,11 +334,11 @@ fapi::ReturnCode getMBvpdSupplierData(
         {
             switch (i_attr)
             {
-               case SUPPLIER_POWER_SLOPE:  //convert from little endian order
+               case SUPPLIER_POWER_SLOPE:  //get each byte to perserve endian
                    o_val = l_pVendorInfo->supplierPowerSlope_LSB;
                    o_val |= (l_pVendorInfo->supplierPowerSlope_MSB << 8);
                    break;
-               case SUPPLIER_POWER_INTERCEPT: //convert from little endian order
+               case SUPPLIER_POWER_INTERCEPT: //get each byte to perserve endian
                    o_val = l_pVendorInfo->supplierPowerIntercept_LSB;
                    o_val |= (l_pVendorInfo->supplierPowerIntercept_MSB << 8);
                    break;

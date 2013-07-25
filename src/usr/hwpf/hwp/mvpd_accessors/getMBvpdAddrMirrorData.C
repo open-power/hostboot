@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id$
+// $Id: getMBvpdAddrMirrorData.C,v 1.2 2013/07/18 15:33:35 whs Exp $
 /**
  *  @file getMBvpdAddrMirrorData.C
  *

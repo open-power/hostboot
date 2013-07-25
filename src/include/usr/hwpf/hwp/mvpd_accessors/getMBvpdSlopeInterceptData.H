@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id$
+// $Id: getMBvpdSlopeInterceptData.H,v 1.1 2013/07/18 15:35:01 whs Exp $
 
 /**
  *  @file getMBvpdSlopeInterceptData.H

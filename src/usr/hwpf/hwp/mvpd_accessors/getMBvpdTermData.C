@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdTermData.C,v 1.1 2013/05/28 11:17:23 whs Exp $
+// $Id: getMBvpdTermData.C,v 1.2 2013/06/13 13:48:46 whs Exp $
 /**
  *  @file getMBvpdTermData.C
  *

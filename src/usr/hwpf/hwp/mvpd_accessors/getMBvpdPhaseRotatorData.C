@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdPhaseRotatorData.C,v 1.3 2013/05/28 10:52:53 whs Exp $
+// $Id: getMBvpdPhaseRotatorData.C,v 1.4 2013/06/12 21:12:49 whs Exp $
 /**
  *  @file getMBvpdPhaseRotatorData.C
  *

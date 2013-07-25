@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiMBvpdAccess.H,v 1.2 2012/10/09 21:32:55 mjjones Exp $
+// $Id: fapiMBvpdAccess.H,v 1.3 2013/06/11 15:15:16 whs Exp $
 /**
  *  @file fapiMBvpdAccess.H
  *
@@ -28,7 +28,6 @@
  *   must implement
  *
  */
-// $Id: fapiMBvpdAccess.H,v 1.2 2013/04/29 16:09:31 whs Exp $
 
 /*
  * Change Log ******************************************************************

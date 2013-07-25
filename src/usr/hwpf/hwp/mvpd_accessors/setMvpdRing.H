@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: RepairRingFunc.H,v 1.1 2012/07/19 22:00:38 mjjones Exp $
+// $Id: setMvpdRing.H,v 1.2 2013/01/25 21:12:40 whs Exp $
 /**
  *  @file setMvpdRing.H
  *
