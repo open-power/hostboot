@@ -51,6 +51,7 @@ extern "C"
  *        parsing.
  *
  * @param[in] i_tgtHandle   Reference to X-Bus or A-Bus or MCS target
+ * @param[in] i_vpdType     Specifies which VPD (MNFG or Field) to access.
  * @param[o]  o_txFailLanes Reference to a vector that will hold eRepair fail
  *                          lane numbers of the Tx sub-interface.
  * @param[o]  o_rxFailLanes Reference to a vector that will hold eRepair fail
@@ -58,9 +59,10 @@ extern "C"
  *
  * @return ReturnCode
  */
-fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
-                                    std::vector<uint8_t> &o_txFailLanes,
-                                    std::vector<uint8_t> &o_rxFailLanes);
+fapi::ReturnCode retrieveRepairData(const fapi::Target      &i_tgtHandle,
+                                    EREPAIR::erepairVpdType i_vpdType,
+                                    std::vector<uint8_t>    &o_txFailLanes,
+                                    std::vector<uint8_t>    &o_rxFailLanes);
 
 /**
  * @brief Function called by the FW Team HWP that parses the data read from
@@ -91,9 +93,11 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
  * Accessor HWP
  *****************************************************************************/
 
-fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
-                                          std::vector<uint8_t> &o_txFailLanes,
-                                          std::vector<uint8_t> &o_rxFailLanes)
+fapi::ReturnCode erepairGetFailedLanesHwp(
+                                         const fapi::Target      &i_tgtHandle,
+                                         EREPAIR::erepairVpdType i_vpdType,
+                                         std::vector<uint8_t>    &o_txFailLanes,
+                                         std::vector<uint8_t>    &o_rxFailLanes)
 {
     fapi::ReturnCode l_rc;
     fapi::Target     l_processorTgt;
@@ -125,6 +129,7 @@ fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
 
         // Retrieve the Field eRepair lane numbers from the VPD
         l_rc = retrieveRepairData(i_tgtHandle,
+                                  i_vpdType,
                                   o_txFailLanes,
                                   o_rxFailLanes);
 
@@ -136,28 +141,34 @@ fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
         }
     }while(0);
 
-    FAPI_INF("<< erepairGetFailedLanesHwp");
-
     return l_rc;
 }
 
-fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
-                                    std::vector<uint8_t> &o_txFailLanes,
-                                    std::vector<uint8_t> &o_rxFailLanes)
+fapi::ReturnCode retrieveRepairData(const fapi::Target      &i_tgtHandle,
+                                    EREPAIR::erepairVpdType i_vpdType,
+                                    std::vector<uint8_t>    &o_txFailLanes,
+                                    std::vector<uint8_t>    &o_rxFailLanes)
 {
     fapi::ReturnCode l_rc;
     uint8_t          *l_retBuf = NULL;
     uint32_t         l_bufSize = 0;
     fapi::Target     l_procTarget;
 
-    FAPI_INF(">> retrieveRepairData");
+    FAPI_DBG(">> retrieveRepairData");
 
     do
     {
         if(i_tgtHandle.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)
         {
+            fapi::MBvpdRecord l_vpdRecord = fapi::MBVPD_RECORD_VEIR;
+
+            if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
+            {
+                l_vpdRecord = fapi::MBVPD_RECORD_MER0;
+            }
+
             // Determine the size of the eRepair data in the VPD
-            l_rc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VEIR,
+            l_rc = fapiGetMBvpdField(l_vpdRecord,
                                      fapi::MBVPD_KEYWORD_PDI,
                                      i_tgtHandle,
                                      NULL,
@@ -171,7 +182,10 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
             }
 
             if((l_bufSize == 0) ||
-               (l_bufSize > EREPAIR::EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR))
+               ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
+                (l_bufSize > EREPAIR::EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR))||
+               ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
+                (l_bufSize > EREPAIR::EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR)))
             {
                 FAPI_SET_HWP_ERROR(l_rc, RC_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE);
                 break;
@@ -187,7 +201,7 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
             }
 
             // Retrieve the Field eRepair data from the PNOR
-            l_rc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VEIR,
+            l_rc = fapiGetMBvpdField(l_vpdRecord,
                                      fapi::MBVPD_KEYWORD_PDI,
                                      i_tgtHandle,
                                      l_retBuf,
@@ -211,8 +225,15 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
                 break;
             }
 
+            fapi::MvpdRecord l_vpdRecord = fapi::MVPD_RECORD_VWML;
+
+            if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
+            {
+                l_vpdRecord = fapi::MVPD_RECORD_MER0;
+            }
+
             // Determine the size of the eRepair data in the VPD
-            l_rc = fapiGetMvpdField(fapi::MVPD_RECORD_VWML,
+            l_rc = fapiGetMvpdField(l_vpdRecord,
                                     fapi::MVPD_KEYWORD_PDI,
                                     l_procTarget,
                                     NULL,
@@ -226,7 +247,10 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
             }
 
             if((l_bufSize == 0) ||
-               (l_bufSize > EREPAIR::EREPAIR_P8_MODULE_VPD_FIELD_SIZE))
+               ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
+                (l_bufSize > EREPAIR::EREPAIR_P8_MODULE_VPD_FIELD_SIZE)) ||
+               ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
+                (l_bufSize > EREPAIR::EREPAIR_P8_MODULE_VPD_MNFG_SIZE)))
             {
                 FAPI_SET_HWP_ERROR(l_rc,
                                    RC_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE);
@@ -243,7 +267,7 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
             }
 
             // Retrieve the Field eRepair data from the PNOR
-            l_rc = fapiGetMvpdField(fapi::MVPD_RECORD_VWML,
+            l_rc = fapiGetMvpdField(l_vpdRecord,
                                     fapi::MVPD_KEYWORD_PDI,
                                     l_procTarget,
                                     l_retBuf,
@@ -274,7 +298,7 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
     // Delete the buffer which has Field eRepair data
     delete[] l_retBuf;
 
-    FAPI_INF("<< retrieveRepairData");
+    FAPI_DBG("<< retrieveRepairData");
 
     return (l_rc);
 }
@@ -298,7 +322,7 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
     fapi::ReturnCode l_rc;
     fapi::ATTR_CHIP_UNIT_POS_Type l_busNum;
 
-    FAPI_INF(">> determineRepairLanes");
+    FAPI_DBG(">> determineRepairLanes");
 
     do
     {
@@ -497,7 +521,7 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
 
     }while(0);
 
-    FAPI_INF("<< determineRepairLanes: tx: %d, rx: %d",
+    FAPI_INF("<< No.of Fail Lanes: tx: %d, rx: %d",
               o_txFailLanes.size(), o_rxFailLanes.size());
 
     return(l_rc);

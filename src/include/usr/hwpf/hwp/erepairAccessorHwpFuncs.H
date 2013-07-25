@@ -39,14 +39,6 @@
 
 #include <fapi.H>
 
-// VPD Type to read-write
-enum erepairVpdType
-{
-    EREPAIR_VPD_UNKNOWN = 0,
-    EREPAIR_VPD_MNFG    = 1,
-    EREPAIR_VPD_FIELD   = 2,
-};
-
 const uint8_t EREPAIR_MAX_CENTAUR_PER_MCS = 1;
 
 typedef fapi::ReturnCode (*getLanes_t)(

@@ -126,6 +126,14 @@ enum interfaceType
     RECEIVE                  = 8   // Rx
 };
 
+// VPD Type to read-write
+enum erepairVpdType
+{
+    EREPAIR_VPD_UNKNOWN = 0,
+    EREPAIR_VPD_MNFG    = 1,
+    EREPAIR_VPD_FIELD   = 2,
+};
+
 }// end of EREPAIR namespace
 
 /******************************************************************************

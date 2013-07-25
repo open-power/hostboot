@@ -41,21 +41,23 @@
 
 
 typedef fapi::ReturnCode (*erepairGetFailedLanesHwp_FP_t)(
-                          const fapi::Target   &i_tgtHandle,
-                          std::vector<uint8_t> &o_txFailLanes,
-                          std::vector<uint8_t> &o_rxFailLanes);
+                          const fapi::Target       &i_tgtHandle,
+                          EREPAIR::erepairVpdType  i_vpdType,
+                          std::vector<uint8_t>     &o_txFailLanes,
+                          std::vector<uint8_t>     &o_rxFailLanes);
 
 extern "C"
 {
 
 /**
- * @brief FW Team HWP that retrieves the eRepair fail lanes from Field VPD.
- *        It retrieves the eRepair data from the P8 MVPD or the Centaur FRU
+ * @brief FW Team HWP that retrieves the eRepair fail lanes.
+ *        It retrieves the eRepair data from the P8 MVPD and the Centaur FRU
  *        VPD sections depending on the passed target type. It then parses the
  *        eRepair data to determine the fail lane numbers on the sub-interfaces
  *        (Tx and Rx) of the passed bus target.
  *
  * @param[in] i_tgtHandle   Reference to X-Bus or A-Bus or MCS or memBuf Target
+ * @param[in] i_vpdType     Specifies which VPD (MNFG or Field) to access.
  * @param[o]  o_txFailLanes Reference to a vector that will hold eRepair fail
  *                          lane numbers of the Tx sub-interface.
  * @param[o]  o_rxFailLanes Reference to a vector that will hold eRepair fail
@@ -64,9 +66,11 @@ extern "C"
  * @return ReturnCode
  *
  */
-fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
-                                          std::vector<uint8_t> &o_txFailLanes,
-                                          std::vector<uint8_t> &o_rxFailLanes);
+fapi::ReturnCode erepairGetFailedLanesHwp(
+                                        const fapi::Target      &i_tgtHandle,
+                                        EREPAIR::erepairVpdType i_vpdType,
+                                        std::vector<uint8_t>    &o_txFailLanes,
+                                        std::vector<uint8_t>    &o_rxFailLanes);
 
 }// end of extern C
 

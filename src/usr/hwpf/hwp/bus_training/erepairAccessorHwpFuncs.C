@@ -1115,8 +1115,8 @@ fapi::ReturnCode getVerifiedRepairLanes(
     std::vector<uint8_t> l_txFaillanes;
     std::vector<uint8_t> l_rxFaillanes;
 
-    FAPI_INF(">> getVerifiedRepairLanes: charm: %d, vpdType: %d",
-             i_charmModeIPL, i_vpdType);
+    FAPI_INF(">> getVerifiedRepairLanes: charm: %d, vpdType: %s",
+             i_charmModeIPL, i_vpdType == EREPAIR_VPD_FIELD ? "Field":"Mnfg");
 
     do
     {
@@ -1391,7 +1391,7 @@ fapi::ReturnCode erepairGetFieldFailedLanes(const fapi::Target &i_endp_target,
 {
     fapi::ReturnCode l_rc;
 
-    FAPI_INF(">> erepairGetFieldFailedLanes for %s", i_endp_target.toEcmdString());
+    FAPI_DBG(">> erepairGetFieldFailedLanes for %s", i_endp_target.toEcmdString());
 
     do
     {
@@ -1399,6 +1399,7 @@ fapi::ReturnCode erepairGetFieldFailedLanes(const fapi::Target &i_endp_target,
         FAPI_EXEC_HWP(l_rc,
                       erepairGetFailedLanesHwp,
                       i_endp_target,
+                      EREPAIR_VPD_FIELD,
                       o_txFailLanes,
                       o_rxFailLanes);
 
@@ -1434,14 +1435,15 @@ fapi::ReturnCode erepairGetMnfgFailedLanes(const fapi::Target &i_endp_target,
 {
     fapi::ReturnCode l_rc;
 
-    FAPI_INF(">> erepairGetMnfgFailedLanes for %s",
+    FAPI_DBG(">> erepairGetMnfgFailedLanes for %s",
              i_endp_target.toEcmdString());
     do
     {
         // Execute the Accessor HWP to retrieve the failed lanes from the VPD
         FAPI_EXEC_HWP(l_rc,
-                      erepairGetMnfgFailedLanesHwp,
+                      erepairGetFailedLanesHwp,
                       i_endp_target,
+                      EREPAIR_VPD_MNFG,
                       o_txFailLanes,
                       o_rxFailLanes);
 
@@ -1632,6 +1634,7 @@ fapi::ReturnCode erepairSetFieldFailedLanes(
         FAPI_EXEC_HWP(l_rc,
                       erepairSetFailedLanesHwp,
                       i_endp_target,
+                      EREPAIR_VPD_FIELD,
                       i_txFailLanes,
                       i_rxFailLanes);
 
@@ -1657,8 +1660,9 @@ fapi::ReturnCode erepairSetMnfgFailedLanes(
     {
         // Execute the Accessor HWP to write the fail lanes to Mnfg VPD
         FAPI_EXEC_HWP(l_rc,
-                      erepairSetMnfgFailedLanesHwp,
+                      erepairSetFailedLanesHwp,
                       i_endp_target,
+                      EREPAIR_VPD_MNFG,
                       i_txFailLanes,
                       i_rxFailLanes);
 

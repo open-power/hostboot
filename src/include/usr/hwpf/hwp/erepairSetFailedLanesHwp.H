@@ -41,19 +41,21 @@
 
 
 typedef fapi::ReturnCode (*erepairSetFailedLanesHwp_FP_t)(
-                          const fapi::Target   &i_tgtHandle,
-                          std::vector<uint8_t> &i_txFailLanes,
-                          std::vector<uint8_t> &i_rxFailLanes);
+                          const fapi::Target      &i_tgtHandle,
+                          EREPAIR::erepairVpdType i_vpdType,
+                          std::vector<uint8_t>    &i_txFailLanes,
+                          std::vector<uint8_t>    &i_rxFailLanes);
 
 extern "C"
 {
 
 /**
- * @brief FW Team HWP that writes the Field eRepair fail lanes to the VPD.
+ * @brief FW Team HWP that writes the eRepair fail lanes to the VPD.
  *        The fail lanes will be written to either the P8 MVPD or the
  *        Centaur FRU VPD depending on the passed target type.
  *
  * @param[in] i_tgtHandle   Reference to X-Bus or A-Bus or MCS or memBuf Target
+ * @param[in] i_vpdType     Specifies which VPD (MNFG or Field) to access.
  * @param[in] i_txFailLanes Reference to a vector that has the Tx side
  *                          (of i_tgtHandle) fail lane numbers that need
  *                          to be written to the VPD
@@ -66,6 +68,7 @@ extern "C"
  */
 fapi::ReturnCode erepairSetFailedLanesHwp(
                                      const fapi::Target         &i_tgtHandle,
+                                     EREPAIR::erepairVpdType    i_vpdType,
                                      const std::vector<uint8_t> &i_txFailLanes,
                                      const std::vector<uint8_t> &i_rxFailLanes);
 

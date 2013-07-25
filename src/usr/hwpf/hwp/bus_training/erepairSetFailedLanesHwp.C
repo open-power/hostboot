@@ -50,6 +50,7 @@ extern "C"
  *        This function calls fapiSetMvpdField to write the VPD.
  *
  * @param[in] i_tgtHandle   Reference to X-Bus or A-Bus or MCS target
+ * @param[in] i_vpdType     Specifies which VPD (MNFG or Field) to access.
  * @param[in] i_txFailLanes Reference to a vector that has eRepair fail
  *                          lane numbers of the Tx sub-interface.
  * @param[in] i_rxFailLanes Reference to a vector that has eRepair fail
@@ -58,6 +59,7 @@ extern "C"
  * @return ReturnCode
  */
 ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
+                                erepairVpdType             i_vpdType,
                                 const std::vector<uint8_t> &i_txFailLanes,
                                 const std::vector<uint8_t> &i_rxFailLanes);
 
@@ -108,6 +110,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
  *****************************************************************************/
 
 ReturnCode erepairSetFailedLanesHwp(const Target               &i_tgtHandle,
+                                    erepairVpdType             i_vpdType,
                                     const std::vector<uint8_t> &i_txFailLanes,
                                     const std::vector<uint8_t> &i_rxFailLanes)
 {
@@ -142,6 +145,7 @@ ReturnCode erepairSetFailedLanesHwp(const Target               &i_tgtHandle,
         }
 
         l_rc = writeRepairDataToVPD(i_tgtHandle,
+                                    i_vpdType,
                                     i_txFailLanes,
                                     i_rxFailLanes);
 
@@ -153,13 +157,12 @@ ReturnCode erepairSetFailedLanesHwp(const Target               &i_tgtHandle,
         }
     }while(0);
 
-    FAPI_INF("<< erepairSetFailedLanesHwp");
-
     return l_rc;
 }
 
 
 ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
+                                erepairVpdType             i_vpdType,
                                 const std::vector<uint8_t> &i_txFailLanes,
                                 const std::vector<uint8_t> &i_rxFailLanes)
 {
@@ -168,16 +171,23 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
     uint32_t   l_bufSize = 0;
     Target     l_procTarget;
 
-    FAPI_INF(">> writeRepairDataToVPD");
+    FAPI_DBG(">> writeRepairDataToVPD");
 
     do
     {
         if(i_tgtHandle.getType() == TARGET_TYPE_MEMBUF_CHIP)
         {
+            fapi::MBvpdRecord l_vpdRecord = MBVPD_RECORD_VEIR;
+
+            if(i_vpdType == EREPAIR_VPD_MNFG)
+            {
+                l_vpdRecord = MBVPD_RECORD_MER0;
+            }
+
             /*** Read the data from the FRU VPD ***/
 
             // Determine the size of the eRepair data in the Centaur VPD
-            l_rc = fapiGetMBvpdField(MBVPD_RECORD_VEIR,
+            l_rc = fapiGetMBvpdField(l_vpdRecord,
                                      MBVPD_KEYWORD_PDI,
                                      i_tgtHandle,
                                      NULL,
@@ -190,7 +200,10 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
             }
 
             if((l_bufSize == 0) ||
-               (l_bufSize > EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR))
+               ((i_vpdType == EREPAIR_VPD_FIELD) &&
+                (l_bufSize > EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR)) ||
+               ((i_vpdType == EREPAIR_VPD_MNFG) &&
+                (l_bufSize > EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR)))
             {
                 FAPI_SET_HWP_ERROR(l_rc, RC_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE);
                 break;
@@ -206,7 +219,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
             }
 
             // Retrieve the Field eRepair data from the Centaur FRU VPD
-            l_rc = fapiGetMBvpdField(MBVPD_RECORD_VEIR,
+            l_rc = fapiGetMBvpdField(l_vpdRecord,
                                      MBVPD_KEYWORD_PDI,
                                      i_tgtHandle,
                                      l_retBuf,
@@ -234,7 +247,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
             }
 
             /*** Write the updated eRepair buffer back to Centaru FRU VPD ***/
-            l_rc = fapiSetMBvpdField(MBVPD_RECORD_VEIR,
+            l_rc = fapiSetMBvpdField(l_vpdRecord,
                                      MBVPD_KEYWORD_PDI,
                                      i_tgtHandle,
                                      l_retBuf,
@@ -257,10 +270,17 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
                 break;
             }
 
+            fapi::MvpdRecord l_vpdRecord = MVPD_RECORD_VWML;
+
+            if(i_vpdType == EREPAIR_VPD_MNFG)
+            {
+                l_vpdRecord = MVPD_RECORD_MER0;
+            }
+
             /*** Read the data from the Module VPD ***/
 
             // Determine the size of the eRepair data in the VPD
-            l_rc = fapiGetMvpdField(MVPD_RECORD_VWML,
+            l_rc = fapiGetMvpdField(l_vpdRecord,
                                     MVPD_KEYWORD_PDI,
                                     l_procTarget,
                                     NULL,
@@ -273,7 +293,10 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
             }
 
             if((l_bufSize == 0) ||
-               (l_bufSize > EREPAIR_P8_MODULE_VPD_FIELD_SIZE))
+               ((i_vpdType == EREPAIR_VPD_FIELD) &&
+                (l_bufSize > EREPAIR_P8_MODULE_VPD_FIELD_SIZE)) ||
+               ((i_vpdType == EREPAIR_VPD_MNFG) &&
+                 (l_bufSize > EREPAIR_P8_MODULE_VPD_MNFG_SIZE)))
             {
                 FAPI_SET_HWP_ERROR(l_rc,
                                    RC_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE);
@@ -290,7 +313,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
             }
 
             // Retrieve the Field eRepair data from the MVPD
-            l_rc = fapiGetMvpdField(MVPD_RECORD_VWML,
+            l_rc = fapiGetMvpdField(l_vpdRecord,
                                     MVPD_KEYWORD_PDI,
                                     l_procTarget,
                                     l_retBuf,
@@ -318,7 +341,7 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
             }
 
             /*** Write the updated eRepair buffer back to MVPD ***/
-            l_rc = fapiSetMvpdField(MVPD_RECORD_VWML,
+            l_rc = fapiSetMvpdField(l_vpdRecord,
                                     MVPD_KEYWORD_PDI,
                                     l_procTarget,
                                     l_retBuf,
@@ -335,8 +358,6 @@ ReturnCode writeRepairDataToVPD(const Target               &i_tgtHandle,
     // Delete the buffer which has Field eRepair data
     delete[] l_retBuf;
 
-    FAPI_INF("<< writeRepairDataToVPD");
-
     return (l_rc);
 }
 
@@ -348,7 +369,7 @@ ReturnCode writeRepairLanesToBuf(const Target               &i_tgtHandle,
 {
     ReturnCode l_rc;
 
-    FAPI_INF(">> writeRepairLanesToBuf");
+    FAPI_DBG(">> writeRepairLanesToBuf");
 
     do
     {
@@ -385,7 +406,6 @@ ReturnCode writeRepairLanesToBuf(const Target               &i_tgtHandle,
         }
     }while(0);
 
-    FAPI_INF("<< writeRepairLanesToBuf");
     return (l_rc);
 }
 
@@ -413,7 +433,8 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
     std::vector<const uint8_t>::iterator l_it;
     ATTR_CHIP_UNIT_POS_Type l_busNum;
 
-    FAPI_INF(">> updateRepairLanesToBuf, interface: %d", i_interface);
+    FAPI_DBG(">> updateRepairLanesToBuf, interface: %s",
+              i_interface == DRIVE ? "Drive" : "Recevie");
 
     do
     {
@@ -800,8 +821,6 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
         l_vpdHeadPtr->numRecords = l_newNumRepairs;
 
     }while(0);
-
-    FAPI_INF("<< updateRepairLanesToBuf");
 
     return(l_rc);
 }

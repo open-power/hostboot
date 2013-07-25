@@ -41,9 +41,7 @@
 #include <fapiTestHwpDq.H>
 #include <dimmBadDqBitmapAccessHwp.H>
 #include <erepairGetFailedLanesHwp.H>
-#include <erepairGetMnfgFailedLanesHwp.H>
 #include <erepairSetFailedLanesHwp.H>
-#include <erepairSetMnfgFailedLanesHwp.H>
 
 /**
  * @brief HWP Executor macro

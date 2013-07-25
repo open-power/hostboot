@@ -106,6 +106,8 @@ void*    call_fabric_erepair( void    *io_pArgs )
     TargetPairs_t l_PbusConnections;
     const uint32_t MaxBusSet = 2;
     TYPE busSet[MaxBusSet] = { TYPE_ABUS, TYPE_XBUS };
+    uint32_t l_count = 0;
+    fapi::TargetType l_tgtType = fapi::TARGET_TYPE_NONE;
 
     for (uint32_t i = 0; l_StepError.isNull() && (i < MaxBusSet); i++)
     {
@@ -230,6 +232,25 @@ void*    call_fabric_erepair( void    *io_pArgs )
                 break;
             }
 
+            l_tgtType = l_fapi_endp1_target.getType();
+            for(l_count = 0; l_count < l_endp1_txFaillanes.size(); l_count++)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                          " restored Tx lane %d, of %s, of endpoint %s",
+                          l_endp1_txFaillanes[l_count],
+                          l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
+                          "A-Bus", l_fapi_endp1_target.toEcmdString());
+            }
+
+            for(l_count = 0; l_count < l_endp1_rxFaillanes.size(); l_count++)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                          " restored Rx lane %d, of %s, of endpoint %s",
+                          l_endp1_txFaillanes[l_count],
+                          l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
+                          "A-Bus", l_fapi_endp1_target.toEcmdString());
+            }
+
             if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
             {
                 // call the io_restore_erepair HWP to restore eRepair
@@ -269,6 +290,25 @@ void*    call_fabric_erepair( void    *io_pArgs )
 
                 errlCommit(l_errl, HWPF_COMP_ID);
                 break;
+            }
+
+            l_tgtType = l_fapi_endp2_target.getType();
+            for(l_count = 0; l_count < l_endp2_txFaillanes.size(); l_count++)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                          " restored Tx lane %d, of %s, of endpoint %s",
+                          l_endp1_txFaillanes[l_count],
+                          l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
+                          "A-Bus", l_fapi_endp2_target.toEcmdString());
+            }
+
+            for(l_count = 0; l_count < l_endp2_rxFaillanes.size(); l_count++)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                          " restored Rx lane %d, of %s, of endpoint %s",
+                          l_endp2_txFaillanes[l_count],
+                          l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
+                          "A-Bus", l_fapi_endp2_target.toEcmdString());
             }
         } // end for l_PbusConnections
     } // end for MaxBusSet
