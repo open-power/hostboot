@@ -1371,6 +1371,8 @@ sub generate_sys
 
     my $proc_refclk = $policy->{'required-policy-settings'}->
                                {'processor-refclock-frequency'}->{content};
+    my $proc_refclk_khz = $policy->{'required-policy-settings'}->
+                               {'processor-refclock-frequency-khz'}->{content};
     my $mem_refclk = $policy->{'required-policy-settings'}->
                               {'memory-refclock-frequency'}->{content};
 
@@ -1391,6 +1393,10 @@ sub generate_sys
     <attribute>
         <id>FREQ_PROC_REFCLOCK</id>
         <default>$proc_refclk</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PROC_REFCLOCK_KHZ</id>
+        <default>$proc_refclk_khz</default>
     </attribute>
     <attribute>
         <id>EXECUTION_PLATFORM</id>

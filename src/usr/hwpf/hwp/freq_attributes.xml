@@ -39,6 +39,17 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_FREQ_PROC_REFCLOCK_KHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of the processor refclock in KHz.
+      Provided by the MRW.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_FREQ_MEM_REFCLOCK</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>

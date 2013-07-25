@@ -1640,6 +1640,22 @@
 </attribute>
 
 <attribute>
+    <id>FREQ_PROC_REFCLOCK_KHZ</id>
+    <description>
+        System attribute.
+        The frequency of the processor refclock in KHz.
+        Provided by the MRW.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_PROC_REFCLOCK_KHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>FREQ_MEM_REFCLOCK</id>
     <description>
         System attribute.

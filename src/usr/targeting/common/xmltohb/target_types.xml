@@ -87,6 +87,7 @@
     <attribute><id>PROC_X_BUS_WIDTH</id></attribute>
     <attribute><id>ALL_MCS_IN_INTERLEAVING_GROUP</id></attribute>
     <attribute><id>FREQ_PROC_REFCLOCK</id></attribute>
+    <attribute><id>FREQ_PROC_REFCLOCK_KHZ</id></attribute>
     <attribute><id>FREQ_MEM_REFCLOCK</id></attribute>
     <attribute><id>FREQ_CORE_FLOOR</id></attribute>
     <attribute><id>FREQ_PB</id></attribute>
