@@ -87,7 +87,21 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/pstates/pstates/proc_get_voltage_errors.xml \
     hwp/proc_cfam_registers.xml \
     hwp/proc_slw_registers.xml \
-    hwp/proc_sbe_select_ex_errors.xml
+    hwp/proc_sbe_select_ex_errors.xml \
+    hwp/utility_procedures/memory_mss_maint_cmds.xml \
+    hwp/mc_config/mss_volt/memory_mss_volt.xml \
+    hwp/mc_config/mss_freq/memory_mss_freq.xml \
+    hwp/mc_config/mss_eff_config/memory_mss_eff_grouping.xml \
+    hwp/mc_config/mss_eff_config/memory_mss_eff_config_thermal.xml \
+    hwp/mc_config/mss_eff_config/memory_mss_bulk_pwr_throttles.xml \
+    hwp/dram_training/memory_mss_funcs.xml \
+    hwp/dram_training/mss_draminit_training/memory_mss_draminit_training.xml  \
+    hwp/dram_training/mss_ddr_phy_reset/memory_mss_ddr_phy_reset.xml \
+    hwp/dram_training/memory_mss_termination_control.xml \
+    hwp/dram_training/mem_startclocks/memory_cen_stopclocks.xml \
+    hwp/dram_training/mss_scominit/memory_mss_scominit.xml \
+    hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist_common.xml \
+    hwp/dram_initialization/proc_setup_bars/memory_mss_setup_bars.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \

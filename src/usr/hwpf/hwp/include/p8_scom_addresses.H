@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.158 2013/06/21 18:23:33 jeshua Exp $
+// $Id: p8_scom_addresses.H,v 1.159 2013/06/28 16:50:17 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -760,10 +760,12 @@ CONST_UINT64_T( PBA_TRUSTMODE_0x02013F08              , ULL(0x02013F08) );
 //------------------------------------------------------------------------------
 //      PBAX
 //------------------------------------------------------------------------------
-CONST_UINT64_T( PBAXSNDTX_00064020    , ULL(0x00064020) );
-CONST_UINT64_T( PBAXCFG_00064021      , ULL(0x00064021) );
-CONST_UINT64_T( PBAXSHBR0_00064026    , ULL(0x00064026) );
-CONST_UINT64_T( PBAXSHBR1_0006402A    , ULL(0x0006402A) );
+CONST_UINT64_T( PBAXSNDTX_00064020                    , ULL(0x00064020) );
+CONST_UINT64_T( PBAXCFG_00064021                      , ULL(0x00064021) );
+CONST_UINT64_T( PBAXSHBR0_00064026                    , ULL(0x00064026) );
+CONST_UINT64_T( PBAXSHCS0_00064027                    , ULL(0x00064027) );
+CONST_UINT64_T( PBAXSHBR1_0006402A                    , ULL(0x0006402A) );
+CONST_UINT64_T( PBAXSHBR1_0006402B                    , ULL(0x0006402B) );
 
 //------------------------------------------------------------------------------
 //      PSI
@@ -1958,6 +1960,10 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.159  2013/06/28 16:50:17  stillgs
+
+Adde PBAX Push Control/Status 1 registers for pba_init -reset
+
 Revision 1.158  2013/06/21 18:23:33  jeshua
 Added EX_PARTIAL_GOOD_0x520F0012 for FFDC
 

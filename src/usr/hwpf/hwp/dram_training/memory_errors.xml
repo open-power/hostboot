@@ -21,44 +21,9 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_errors.xml,v 1.39 2013/05/20 16:51:14 gollub Exp $ -->
+<!-- $Id: memory_errors.xml,v 1.41 2013/06/19 18:27:28 bellows Exp $ -->
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 <!-- *********************************************************************** -->
-
-  <hwpError>
-    <rc>RC_MSS_RCD_PARITY_ERROR_PORT0</rc>
-    <description>An rcd parity error has been registered on port_0</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_RCD_PARITY_ERROR_PORT1</rc>
-    <description>An rcd parity error has been registered on port_1</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_RCD_PARITY_ERROR_LIMIT</rc>
-    <description>The number of rcd parity errors have exceeded the maximum allowable number</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_CCS_HUNG</rc>
-    <description>The ccs failed to return from in_progress status and failed to describe an error further.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_CCS_READ_MISCOMPARE</rc>
-    <description>The ccs errors at runtime and registers a read miscompare.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_CCS_UE_SUE</rc>
-    <description>The ccs errors at runtime and registers a UE or SUE</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_CCS_CAL_TIMEOUT</rc>
-    <description>The ccs errors at runtime and registers a calibration operation timeout</description>
-</hwpError>
 
   <hwpError>
     <rc>RC_MSS_PLACE_HOLDER_ERROR</rc>
@@ -68,11 +33,6 @@
   <hwpError>
     <rc>RC_MSS_EFF_CONFIG_RANK_GROUP_RC_ERROR_001A</rc>
     <description>Plug rule violation in EFF_CONFIG_RANK_GROUP.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_EFF_CONFIG_RC_ERROR_001A</rc>
-    <description>Plug rule violation in EFF_CONFIG.</description>
 </hwpError>
 
   <hwpError>
@@ -131,26 +91,6 @@
 </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_DP18_0_PLL_FAILED_TO_LOCK</rc>
-    <description>DP18  0x0C000 PLL failed to lock!  See lock status register at address: 0x8000C0000301143F</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_DP18_1_PLL_FAILED_TO_LOCK</rc>
-    <description>DP18  0x1C000 PLL failed to lock!  See lock status register at address: 0x8001C0000301143F</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_AD32S_0_PLL_FAILED_TO_LOCK</rc>
-    <description>AD32S 0x0C001 PLL failed to lock!  See lock status register at address: 0x8000C0010301143F</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_AD32S_1_PLL_FAILED_TO_LOCK</rc>
-    <description>AD32S 0x1C001 PLL failed to lock!  See lock status register at address: 0x8001C0010301143F</description>
-</hwpError>
-
-  <hwpError>
     <rc>RC_MSS_GENERAL_PUTSCOM_ERROR</rc>
     <description>PutScom failed!   See previous error message for details.</description>
 </hwpError>
@@ -161,11 +101,6 @@
 </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_UNEXPECTED_CLOCK_STATUS</rc>
-    <description>Unexpected clock status!  See previous error message for details.</description>
-</hwpError>
-
-  <hwpError>
     <rc>RC_MSS_UNEXPECTED_FIR_STATUS</rc>
     <description>Unexpected FIR status!  See previous error message for details.</description>
 </hwpError>
@@ -173,22 +108,6 @@
   <hwpError>
     <rc>RC_MSS_INIT_CAL_FAILED</rc>
     <description>Inital Calibration failed.  Check init cal error register at address: 0x8001C0180301143F </description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE</rc>
-    <description>Unsupported DIMM type found.  All dimms must be DDR3 or DDR4</description>
-    <ffdc>DEVICE_TYPE</ffdc>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED</rc>
-    <description>Mixing of DDR3 and DDR4 not supported.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
-    <description>One or more DIMMs do not support required voltage for DDR type.</description>
 </hwpError>
 
   <hwpError>
@@ -206,179 +125,12 @@
     <description>Failed to get simulation hierarchy from eCmd target.</description>
 </hwpError>
 
-  <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
-    <description>The frequency calculated with spd data is not supported by the jedec standards.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR</rc>
-    <description>MCS is listed as a member in multiple groups.</description>
-    <ffdc>MCS_POS</ffdc>
-    <ffdc>GROUP_INDEX_A</ffdc>
-    <ffdc>GROUP_INDEX_B</ffdc>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_SETUP_BARS_NM_ALT_BAR_ERR</rc>
-    <description>Invalid non-mirrored alternate BAR configuration.</description>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_SETUP_BARS_M_ALT_BAR_ERR</rc>
-    <description>Invalid mirrored alternate BAR configuration.</description>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_START_NOT_RESET</rc>
-    <description>MBMCCQ[0]: maint_cmd_start not reset by hw.</description>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBMCC</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>    
-    <!-- FFDC: MBMCT[0:4] contains the cmd type set in hw -->
-    <ffdc>MBMCT</ffdc>                
-    <!-- Callout MBA HIGH -->
-    <callout><target>MBA</target><priority>HIGH</priority></callout>
-    <!-- Deconfigure MBA -->
-    <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MBA -->    
-    <gard><target>MBA</target></gard>    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_STOP_NOT_RESET</rc>
-    <description>MBMCCQ[1]: maint_cmd_stop not reset by hw.</description>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBMCC</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>        
-    <!-- FFDC: MBMCT[0:4] contains the cmd type previously run -->
-    <ffdc>MBMCT</ffdc>                
-    <!-- Callout MBA HIGH -->
-    <callout><target>MBA</target><priority>HIGH</priority></callout>
-    <!-- Deconfigure MBA -->
-    <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MBA -->    
-    <gard><target>MBA</target></gard>    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_CMD_IN_PROGRESS</rc>
-    <description>MBMSRQ[0]: Can't start new cmd if previous cmd still in progress.</description>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBMSR</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>        
-    <!-- FFDC: MBMCT[0:4] contains the cmd type previously run -->
-    <ffdc>MBMCT</ffdc>                
-    <!-- TODO: Callout FW HIGH -->
-    <!-- Callout MBA LOW -->
-    <callout><target>MBA</target><priority>LOW</priority></callout>
-    <!-- Deconfigure MBA -->
-    <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MBA -->    
-    <gard><target>MBA</target></gard>        
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_NO_MEM_CNFG</rc>
-    <description>MBAXCRn[0:3] = 0, meaning no memory configured behind this MBA.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBAXCR</ffdc>
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_CCS_MUX_NOT_MAINLINE</rc>
-    <description>CCS_MODEQ[29] = 1, meaning mux set for CCS instead of mainline.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>CCS_MODE</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>        
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_ECC_DISABLED</rc>
-    <description>MBSECC[0] non zero, meaning ECC check/correct disabled.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBSECC</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>        
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_CMD</rc>
-    <description>MBAFIRQ[0], invalid_maint_cmd.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBAFIR</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>        
-    <!-- FFDC: MBMCT[0:4] contains the cmd type set in hw -->
-    <ffdc>MBMCT</ffdc>                
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_ADDR</rc>
-    <description>MBAFIRQ[1], cmd started with invalid_maint_address.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBAFIR</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>        
-    <!-- FFDC: MBMCT[0:4] contains the cmd type set in hw -->
-    <ffdc>MBMCT</ffdc>                
-    <!-- Collect registers as FFDC -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_INVALID_ADDR</id>
-      <target>MBA</target>
-    </collectRegisterFfdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
 <registerFfdc>
   <id>REG_FFDC_INVALID_ADDR</id>
   <scomRegister>MBA01_MBMACAQ_0x0301060D</scomRegister>
   <scomRegister>MBA01_MBMEAQ_0x0301060E</scomRegister>
   <scomRegister>MBA01_MBA_MCBERRPTQ_0x030106e7</scomRegister>
 </registerFfdc>
-
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_CMD_TIMEOUT</rc>
-    <description>Maint cmd timeout.</description>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>        
-    <!-- Collect MBA registers as FFDC -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_CMD_TIMEOUT_MBA_REGS</id>
-      <target>MBA</target>
-    </collectRegisterFfdc>
-    <!-- Collect MBS registers as FFDC -->
-    <collectRegisterFfdc>
-      <id>REG_FFDC_CMD_TIMEOUT_MBS_REGS</id>
-      <target>CENTAUR</target>
-    </collectRegisterFfdc>
-    <!-- TODO: Callout FW HIGH -->
-    <!-- Callout MBA LOW -->
-    <callout><target>MBA</target><priority>LOW</priority></callout>
-    <!-- Deconfigure MBA -->
-    <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MBA -->    
-    <gard><target>MBA</target></gard>        
-</hwpError>
 
 <registerFfdc>
   <id>REG_FFDC_CMD_TIMEOUT_MBA_REGS</id>
@@ -434,360 +186,8 @@
 </registerFfdc>
 
   <hwpError>
-    <rc>RC_MSS_MAINT_ZERO_DDR_FREQ</rc>
-    <description>ATTR_MSS_FREQ set to zero so can't calculate scrub rate.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>        
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_DRAM_SIZE_WIDTH</rc>
-    <description>Invalid dramSize or dramWidth in MBAXCRn.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBAXCR</ffdc>
-    <!-- FFDC: DRAM width -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_DIMM_CNFG</rc>
-    <description>MBAXCRn configured with invalid combination of configType, configSubType, slotConfig.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBAXCR</ffdc>
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_X4_SYMBOL_ON_READ</rc>
-    <description>Symbol mark not allowed in x4 mode.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width (should be x4) -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading markstore for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: Markstore with non-zero symbol entry -->    
-    <ffdc>MARKSTORE</ffdc>
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_MARKSTORE</rc>
-    <description>Invalid galois field in markstore.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading markstore for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: Markstore with invalid galois field  -->    
-    <ffdc>MARKSTORE</ffdc>
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_X4_SYMBOL_ON_WRITE</rc>
-    <description>Symbol mark not allowed in x4 mode.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width (should be x4) -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading markstore for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: Symbol mark we are trying to write to markstore -->    
-    <ffdc>SYMBOL_MARK</ffdc>
-    <!-- FFDC: Chip mark we are trying to write to markstore -->    
-    <ffdc>CHIP_MARK</ffdc>
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_SYMBOL_INDEX</rc>
-    <description>Symbol index out of range.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading markstore for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: Symbol mark we are trying to write to markstore -->    
-    <ffdc>SYMBOL_MARK</ffdc>
-    <!-- FFDC: Chip mark we are trying to write to markstore -->    
-    <ffdc>CHIP_MARK</ffdc>
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_CHIP_INDEX</rc>
-    <description>Not first symbol index of a chip.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading markstore for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: Symbol mark we are trying to write to markstore -->    
-    <ffdc>SYMBOL_MARK</ffdc>
-    <!-- FFDC: Chip mark we are trying to write to markstore -->    
-    <ffdc>CHIP_MARK</ffdc>
-    <!-- TODO: Callout FW HIGH -->
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED</rc>
-    <description>Markstore write may have been blocked due to MPE FIR set.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading markstore for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: Symbol mark we are trying to write to markstore -->    
-    <ffdc>SYMBOL_MARK</ffdc>
-    <!-- FFDC: Chip mark we are trying to write to markstore -->    
-    <ffdc>CHIP_MARK</ffdc>
-    <!-- FFDC: MBECCFIR showing MPE -->    
-    <ffdc>MBECCFIR</ffdc>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_STEER_MUX</rc>
-    <description>Steer mux index out of range</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading steer mux for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: MUX_TYPE: read or write -->    
-    <ffdc>MUX_TYPE</ffdc>
-    <!-- FFDC: Capture steer mux -->    
-    <ffdc>STEER_MUX</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER</rc>
-    <description>Trying to steer invalid symbol.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading steer mux for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: MUX_TYPE: read or write -->    
-    <ffdc>MUX_TYPE</ffdc>
-    <!-- FFDC: STEER_TYPE: port0, port1, or ecc spare -->    
-    <ffdc>STEER_TYPE</ffdc>
-    <!-- FFDC: SYMBOL: Symbol we are trying to steer -->    
-    <ffdc>SYMBOL</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_NO_X8_ECC_SPARE</rc>
-    <description>Invalid to use ECC spare in x8 mode.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: DRAM width -->    
-    <ffdc>DRAM_WIDTH</ffdc>
-    <!-- FFDC: RANK we are reading steer mux for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: MUX_TYPE: read or write -->    
-    <ffdc>MUX_TYPE</ffdc>
-    <!-- FFDC: STEER_TYPE: port0, port1, or ecc spare -->    
-    <ffdc>STEER_TYPE</ffdc>
-    <!-- FFDC: SYMBOL: Symbol we are trying to steer -->    
-    <ffdc>SYMBOL</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_NO_UE_TRAP</rc>
-    <description>IPL UE trapping didn't work.</description>
-    <!-- FFDC: Capture UE trap contents -->
-    <ffdc>UE_TRAP0</ffdc>
-    <ffdc>UE_TRAP1</ffdc>
-    <!-- FFDC: MBMCT[0:4] contains the cmd type -->
-    <ffdc>MBMCT</ffdc>        
-    <!-- FFDC: MBMMR[4:7] contains the pattern index -->
-    <ffdc>MBMMR</ffdc>        
-    <!-- FFDC: MBSTR[59]: UE trap enable bit -->
-    <ffdc>MBSTR</ffdc>        
-    <!-- Callout MBA HIGH -->
-    <callout><target>MBA</target><priority>HIGH</priority></callout>
-    <!-- Deconfigure MBA -->
-    <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MBA -->    
-    <gard><target>MBA</target></gard>    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_GET_ADDRESS_RANGE_BAD_INPUT</rc>
-    <description>i_rank input to mss_get_address_range out of range</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: RANK we are trying to get address range for -->    
-    <ffdc>RANK</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_GET_MARK_STORE_BAD_INPUT</rc>
-    <description>i_rank input to mss_get_mark_store out of range</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: RANK we are trying read markstore for -->    
-    <ffdc>RANK</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_PUT_MARK_STORE_BAD_INPUT</rc>
-    <description>i_rank input to mss_put_mark_store out of range</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: RANK we are trying write markstore for -->    
-    <ffdc>RANK</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_GET_STEER_MUX_BAD_INPUT</rc>
-    <description>i_rank or i_muxType input to mss_get_steer_mux out of range</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: RANK we are reading steer mux for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: MUX_TYPE: read or write -->    
-    <ffdc>MUX_TYPE</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_PUT_STEER_MUX_BAD_INPUT</rc>
-    <description>i_rank or i_muxType or i_steerType or i_symbol input to mss_put_steer_mux out of range</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: RANK we are writing steer mux for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: MUX_TYPE: read or write -->    
-    <ffdc>MUX_TYPE</ffdc>
-    <!-- FFDC: STEER_TYPE: port0 spare, port1 spare or ecc spare -->    
-    <ffdc>STEER_TYPE</ffdc>
-    <!-- FFDC: SYMBOL: 0-71 -->    
-    <ffdc>SYMBOL</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_DO_STEER_INPUT_OUT_OF_RANGE</rc>
-    <description>i_rank or i_symbol input to mss_do_steer out of range</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-    <!-- FFDC: RANK we are writing steer mux for -->    
-    <ffdc>RANK</ffdc>
-    <!-- FFDC: SYMBOL: 0-71 -->    
-    <ffdc>SYMBOL</ffdc>
-    <!-- FFDC: X4ECCSPARE: true or false -->    
-    <ffdc>X4ECCSPARE</ffdc>
-    <!-- TODO: Callout FW HIGH -->    
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MAINT_UNSUCCESSFUL_FORCED_MAINT_CMD_STOP</rc>
-    <description>MBMSRQ[0] = 1, unsuccessful forced maint cmd stop.</description>
-    <!-- FFDC: Capture register we used to stop cmd -->    
-    <ffdc>MBMCC</ffdc>
-    <!-- FFDC: Capture register we are checking -->    
-    <ffdc>MBMSR</ffdc>
-    <!-- FFDC: Capture command type we are trying to run -->        
-    <ffdc>CMD_TYPE</ffdc>    
-    <!-- Callout MBA HIGH -->
-    <callout><target>MBA</target><priority>HIGH</priority></callout>
-    <!-- Deconfigure MBA -->
-    <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MBA -->    
-    <gard><target>MBA</target></gard>    
-</hwpError>
-
-
-  <hwpError>
-    <rc>RC_MSS_MEMDIAGS_RESTORE_REPAIRS_EXCEEDED</rc>
-    <description>FATAL: Memdiags exiting with error before running patterns, due to DRAM repairs exceeded.</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MEMDIAGS_UE_OR_SUE_IN_LAST_PATTERN</rc>
-    <description>FATAL: Memdiags exiting with error due to UE, or SUE(in last pattern).</description>
-    <!-- FFDC: MBA target -->    
-    <ffdc>MBA</ffdc>
-</hwpError>
-
-
-  <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_SPD_DATA</rc>
-    <description>Invalid SPD data returned.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_NO_COMMON_SUPPORTED_CL</rc>
-    <description>Current Configuration has no common supported CL Values.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_EXCEED_TAA_MAX_NO_CL</rc>
-    <description>Exceeded TAA MAX with Lowest frequency.  No compatable CL.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MODULE_TYPE_MIX</rc>
-    <description>Differing DIMM types in the same configuration.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_NUM_MBA_ERROR</rc>
-    <description>Less than 2 MBA's returned by fapiGetChildChiplets</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_SLEW_CAL_ERROR</rc>
-    <description>Slew calibration error occurred.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_INVALID_FREQ</rc>
-    <description>MSS_FREQ attribute equals 0.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_INVALID_DRAM_GEN</rc>
-    <description>DRAM_GEN attribute is not valid; equals 0 for empty.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_IMP_INPUT_ERROR</rc>
-    <description>Impedance is invalid for driver/receiver type.</description>
-</hwpError>
-
-  <hwpError>
     <rc>RC_MSS_INVALID_FN_INPUT_ERROR</rc>
     <description>An input to FN call is out of range.</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MCBIST_TIMEOUT_ERROR</rc>
-    <description>Timeout on MCBIST configuration register polling.</description>
 </hwpError>
 
   <hwpError>
@@ -825,79 +225,9 @@
     <description>TBD</description>
 </hwpError>
 
-  <hwpError>
-    <rc>RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION</rc>
-    <description>One or more DIMMs classified non-functional has a tolerated voltage below selected voltage.</description>
- <!-- Deconfigure MASTER_CHIP -->
- <deconfigure><target>MASTER_CHIP</target></deconfigure>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_DRAMINIT_TRAINING_INIT_CAL_STALLED</rc>
-    <description>One or more Rank Pairs Stalled Init Cal within Draminit_training</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_DRAMINIT_TRAINING_INIT_CAL_FAILED</rc>
-    <description>One or more Rank Pairs Failed Init Cal within Draminit_training</description>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_DIMM_POWER_CURVE_DATA_LAB</rc>
-    <description>DIMM power curve data is lab data not MSL</description>
-    <ffdc>FFDC_DATA_1</ffdc>	
-    <ffdc>FFDC_DATA_2</ffdc>	
-    <ffdc>FFDC_DATA_3</ffdc>	
-    <ffdc>FFDC_DATA_4</ffdc>	
-    <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_DIMM_POWER_CURVE_DATA_INVALID</rc>
-    <description>DIMM power curve data is invalid</description>
-    <ffdc>FFDC_DATA_1</ffdc>	
-    <ffdc>FFDC_DATA_2</ffdc>	
-    <ffdc>FFDC_DATA_3</ffdc>	
-    <ffdc>FFDC_DATA_4</ffdc>	
-    <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_DIMM_NOT_FOUND_IN_POWER_TABLE</rc>
-    <description>Unable to find matching entry in DIMM power table</description>
-    <ffdc>FFDC_DATA_1</ffdc>	
-    <ffdc>FFDC_DATA_2</ffdc>	
-    <ffdc>FFDC_DATA_3</ffdc>	
-    <callout><target>MEM_DIMM</target><priority>HIGH</priority></callout>
-</hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER</rc>
-    <description>Unable to find throttle setting that has DIMM power underneath the limit.  Callout Firmware.</description>
-    <ffdc>MEM_CHIP</ffdc>	
-    <ffdc>FFDC_DATA_1</ffdc>	
-    <ffdc>FFDC_DATA_2</ffdc>
-    <ffdc>FFDC_DATA_3</ffdc>
-    <ffdc>FFDC_DATA_4</ffdc>
-    <ffdc>FFDC_DATA_5</ffdc>
-    <!-- TODO:  callout firmware -->
-</hwpError>
-
 <hwpError>
     <rc>RC_MSS_INPUT_ERROR</rc>
     <description>Invalid input </description>
-</hwpError>
-
-<hwpError>
-    <rc>RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE</rc>
-    <description>FABRIC IS IN NON-CHECKER BOARD MODE.  SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. OR ENABLE CHECKER BOARD, TO SUPPORT '1MCS/GROUP'. MRW NEEDS TO BE UPDATED. </description>
-    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
-</hwpError>
-
-<hwpError>
-    <rc>RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE</rc>
-    <description>FABRIC IS IN CHECKER BOARD MODE BUT IT DOES NOT SUPPORT 1MCS/GROUP. SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '1MCS/GROUP'. OR DISABLE CHECKER BOARD, TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. MRW NEEDS TO BE UPDATED. </description>
-    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
 </hwpError>
 
 <hwpError>
@@ -926,17 +256,6 @@
     <ffdc>_ATTR_MSS_MCS_GROUP_32</ffdc>
     <ffdc>_ATTR_PROC_MIRROR_BASES</ffdc>
     <ffdc>_ATTR_PROC_MIRROR_SIZES</ffdc>
-</hwpError>
-
-<hwpError>
-    <rc>RC_MSS_UNABLE_TO_GROUP_SUMMARY</rc>
-    <description>MCS COULD NOT BE GROUPED.  SEE PREVIOUS ERROR MESSAGES FOR WHICH MCS HAS BEEN RC_MSS_UNABLE_TO_GROUP_MCS</description>
-</hwpError>
-
-<hwpError>
-    <rc>RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS</rc>
-    <description>MIRROR BASE ADDRESS OVERLAPS WITH MEMORY BASE ADDRESS.</description>
-    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
 </hwpError>
 
 <hwpError>
@@ -986,10 +305,8 @@
        <target>CENCHIP_MBA</target>
     </collectRegisterFfdc>
 
-
  
 </hwpError>
-
 
 <registerFfdc>
   <id>REG_FFDC_MBA_FIR_REGS</id>
@@ -1073,7 +390,6 @@
   <scomRegister>PHY01_DDRPHY_FIR_ACTION1_REG_0x800200970301143fULL</scomRegister>
   <scomRegister>PHY01_DDRPHY_FIR_WOF_REG_0x800200980301143fULL</scomRegister>
 </registerFfdc>
-
 
 <registerFfdc>
   <id>REG_FFDC_DMI_FIR_REGS</id>

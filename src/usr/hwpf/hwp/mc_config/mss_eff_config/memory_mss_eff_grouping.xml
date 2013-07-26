@@ -1,0 +1,55 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/memory_mss_eff_grouping.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+<!-- $Id: memory_mss_eff_grouping.xml,v 1.2 2013/06/19 21:33:10 bellows Exp $ -->
+<!-- For file ../../ipl/fapi/mss_eff_grouping.C -->
+
+<!-- Original Source for RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE memory_errors.xml -->
+<hwpError>
+    <rc>RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE</rc>
+    <description>FABRIC IS IN NON-CHECKER BOARD MODE.  SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. OR ENABLE CHECKER BOARD, TO SUPPORT '1MCS/GROUP'. MRW NEEDS TO BE UPDATED. </description>
+    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
+</hwpError>
+
+<!-- Original Source for RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE memory_errors.xml -->
+<hwpError>
+    <rc>RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE</rc>
+    <description>FABRIC IS IN CHECKER BOARD MODE BUT IT DOES NOT SUPPORT 1MCS/GROUP. SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '1MCS/GROUP'. OR DISABLE CHECKER BOARD, TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. MRW NEEDS TO BE UPDATED. </description>
+    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
+</hwpError>
+
+<!-- Original Source for RC_MSS_UNABLE_TO_GROUP_SUMMARY memory_errors.xml -->
+<hwpError>
+    <rc>RC_MSS_UNABLE_TO_GROUP_SUMMARY</rc>
+    <description>MCS COULD NOT BE GROUPED.  SEE PREVIOUS ERROR MESSAGES FOR WHICH MCS HAS BEEN RC_MSS_UNABLE_TO_GROUP_MCS</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS memory_errors.xml -->
+<hwpError>
+    <rc>RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS</rc>
+    <description>MIRROR BASE ADDRESS OVERLAPS WITH MEMORY BASE ADDRESS.</description>
+    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
+</hwpError>
+
+
+</hwpErrors>

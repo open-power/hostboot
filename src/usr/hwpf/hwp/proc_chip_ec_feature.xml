@@ -20,9 +20,25 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.14 2013/05/01 22:08:25 jmcgill Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.22 2013/07/16 21:41:12 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      For Venice specific inits. Returns true if Venice.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW_BUG_PIBSLVRESET</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -47,8 +63,10 @@
       <chip>
         <name>ENUM_ATTR_NAME_MURANO</name>
         <ec>
-          <value>0x11</value>
-          <test>LESS_THAN_OR_EQUAL</test>
+          <!-- WARNING: need to adjust to support true DD1.0 parts -->
+          <!-- this change ensures we test without workaround on DD1.01 -->
+          <value>0x10</value>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -134,6 +152,56 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Returns if a chip contains SCOM configuration for CAPP unit PB hang recovrery controls.  True if:
+        Murano EC 0x20 or greater
+        Venice EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_NX_HANG_CONTROL_ON_SCOM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns if a chip contains SCOM configuration for NX unit PB hang recovrery controls.  True if:
+        Murano EC 0x20 or greater
+        Venice EC 0x20 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HCA_SPLIT_HANG_CONTROL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns if a chip contains separate SCOM configuration for HCA oper/data hang PB hang recovrery controls.  True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
     </description>
@@ -333,6 +401,81 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_TRACE_CONTROL_ON_SCOM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC greater than or equal to 0x20
+        Venice
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MPIPL_AISS_WINKLE_ENTRY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC less than 0x20
+        Venice EC less than 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_CENT5_VER2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC greater than or equal to 0x20
+        Venice EC greater than or equal to 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>

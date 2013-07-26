@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/dmi_training/cen_dmi_scominit_errors.xml $   -->
+<!-- $Source: src/usr/hwpf/hwp/dram_training/mss_draminit_training/memory_mss_draminit_training.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,13 +20,21 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: cen_dmi_scominit_errors.xml,v 1.3 2013/06/25 15:37:38 cswenson Exp $ -->
-<!-- Error definitions for cen_dmi_scominit procedure -->
 <hwpErrors>
-  <!-- *********************************************************************** -->
-  <!-- $Id: cen_dmi_scominit_errors.xml,v 1.3 2013/06/25 15:37:38 cswenson Exp $ -->
+<!-- $Id: memory_mss_draminit_training.xml,v 1.1 2013/06/19 18:27:49 bellows Exp $ -->
+<!-- For file ../../ipl/fapi/mss_draminit_training.C -->
+
+<!-- Original Source for RC_MSS_DRAMINIT_TRAINING_INIT_CAL_STALLED memory_errors.xml -->
   <hwpError>
-    <rc>RC_CEN_DMI_SCOMINIT_INVALID_TARGET</rc>
-    <description>Invalid target type presented to cen_dmi_scominit HWP (expects TARGET_TYPE_MEMBUF_CHIP).</description>
-  </hwpError>
+    <rc>RC_MSS_DRAMINIT_TRAINING_INIT_CAL_STALLED</rc>
+    <description>One or more Rank Pairs Stalled Init Cal within Draminit_training</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_DRAMINIT_TRAINING_INIT_CAL_FAILED memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_DRAMINIT_TRAINING_INIT_CAL_FAILED</rc>
+    <description>One or more Rank Pairs Failed Init Cal within Draminit_training</description>
+</hwpError>
+
+
 </hwpErrors>

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.21 2013/02/13 00:23:34 jdsloat Exp $
+// $Id: mss_freq.C,v 1.22 2013/06/27 20:51:49 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -61,6 +61,8 @@
 //  1.19   | jdsloat  | 01/30/13 | Added Check for l_spd_min_tck_max
 //  1.20   | jdsloat  | 02/12/13 | Added path for freq_override
 //  1.21   | jdsloat  | 02/12/13 | Added Debug messages
+//  1.22   | jdsloat  | 06/27/13 | Fixed overridng RC error that results in coredump on no centaur SPD info.
+
 //
 // This procedure takes CENTAUR as argument.  for each DIMM (under each MBA)
 // DIMM SPD attributes are read to determine optimal DRAM frequency
@@ -382,36 +384,40 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
       FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_SPD_DATA);
   }
 
-  l_rc = FAPI_ATTR_GET(ATTR_MSS_FREQ_OVERRIDE,  &i_target_memb, l_freq_override); 
-  if ( l_freq_override != 0)
+  if (!l_rc)
   {
-      // The relationship is as such
-      // l_dimm_freq_min = 2000000 / l_spd_min_tck_max
+	l_rc = FAPI_ATTR_GET(ATTR_MSS_FREQ_OVERRIDE,  &i_target_memb, l_freq_override); 
+	if ( l_freq_override != 0)
+	{
+		// The relationship is as such
+		// l_dimm_freq_min = 2000000 / l_spd_min_tck_max
 
-      if (l_freq_override == 1866)
-      {
-	  l_dimm_freq_min = 1866;
-	  l_spd_min_tck_max = 1072;
-      }
+		if (l_freq_override == 1866)
+		{
+		  l_dimm_freq_min = 1866;
+		  l_spd_min_tck_max = 1072;
+		}
 
-      if (l_freq_override == 1600)
-      {
-	  l_dimm_freq_min = 1600;
-	  l_spd_min_tck_max = 1250;
-      }
+		if (l_freq_override == 1600)
+		{
+		  l_dimm_freq_min = 1600;
+		  l_spd_min_tck_max = 1250;
+		}
 
-      if (l_freq_override == 1333)
-      {
-	  l_dimm_freq_min = 1333;
-	  l_spd_min_tck_max = 1500;
-      }
+		if (l_freq_override == 1333)
+		{
+		  l_dimm_freq_min = 1333;
+		  l_spd_min_tck_max = 1500;
+		}
 
-      if (l_freq_override == 1066)
-      {
-	  l_dimm_freq_min = 1066;
-	  l_spd_min_tck_max = 1875;
-      }
-  FAPI_INF( "Override Frequency Detected: %d", l_dimm_freq_min); 
+		if (l_freq_override == 1066)
+		{
+		  l_dimm_freq_min = 1066;
+		  l_spd_min_tck_max = 1875;
+		}
+
+		FAPI_INF( "Override Frequency Detected: %d", l_dimm_freq_min); 
+	}
   }
 
   if ((l_spd_cas_lat_supported_all == 0) && (!l_rc))

@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/dmi_training/cen_dmi_scominit_errors.xml $   -->
+<!-- $Source: src/usr/hwpf/hwp/mc_config/mss_volt/memory_mss_volt.xml $     -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,13 +20,38 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: cen_dmi_scominit_errors.xml,v 1.3 2013/06/25 15:37:38 cswenson Exp $ -->
-<!-- Error definitions for cen_dmi_scominit procedure -->
 <hwpErrors>
-  <!-- *********************************************************************** -->
-  <!-- $Id: cen_dmi_scominit_errors.xml,v 1.3 2013/06/25 15:37:38 cswenson Exp $ -->
+<!-- $Id: memory_mss_volt.xml,v 1.1 2013/06/19 18:28:37 bellows Exp $ -->
+<!-- For file ../../ipl/fapi/mss_volt.C -->
+<!-- // *! OWNER NAME :   Jeff Sabrowski (jsabrow@us.ibm.com) -->
+<!-- // *! BACKUP NAME : -->
+
+<!-- Original Source for RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE memory_errors.xml -->
   <hwpError>
-    <rc>RC_CEN_DMI_SCOMINIT_INVALID_TARGET</rc>
-    <description>Invalid target type presented to cen_dmi_scominit HWP (expects TARGET_TYPE_MEMBUF_CHIP).</description>
-  </hwpError>
+    <rc>RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE</rc>
+    <description>Unsupported DIMM type found.  All dimms must be DDR3 or DDR4</description>
+    <ffdc>DEVICE_TYPE</ffdc>
+</hwpError>
+
+<!-- Original Source for RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED</rc>
+    <description>Mixing of DDR3 and DDR4 not supported.</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
+    <description>One or more DIMMs do not support required voltage for DDR type.</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION</rc>
+    <description>One or more DIMMs classified non-functional has a tolerated voltage below selected voltage.</description>
+ <!-- Deconfigure MASTER_CHIP -->
+ <deconfigure><target>MASTER_CHIP</target></deconfigure>
+</hwpError>
+
+
 </hwpErrors>

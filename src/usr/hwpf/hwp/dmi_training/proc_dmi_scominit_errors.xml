@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_dmi_scominit_errors.xml,v 1.2 2013/06/25 15:38:26 cswenson Exp $ -->
 <!-- Error definitions for proc_dmi_scominit procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->

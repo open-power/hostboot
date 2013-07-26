@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_scominit.C,v 1.15 2012/11/12 03:08:50 mwuu Exp $
+// $Id: mss_scominit.C,v 1.17 2013/07/02 21:05:23 mwuu Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -41,6 +41,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//	 1.17  | menlowuu |02-JUL-13| Fixed vector insert for L4 targets
+//	 1.16  | menlowuu |02-JUL-13| Added L4 targets for MBS initfile
 //	 1.15  | menlowuu |11-NOV-12| Removed include of dimmBadDqBitmapFuncs.H>
 //   1.14  | menlowuu |09-NOV-12| Removed mss_set_bbm_regs FN since now handled
 //  							  in draminit_training.
@@ -91,7 +93,7 @@ extern "C" {
 ReturnCode mss_scominit(const Target & i_target) {
 
 	ReturnCode rc;
-	std::vector<Target> vector_targets;
+	std::vector<Target> vector_targets, vector_l4_targets;
 	const char* mbs_if[] = {
 		"mbs_def.if",
 		/* "mbs_mcbist.if"	// moved into mbs_def file */
@@ -129,6 +131,28 @@ ReturnCode mss_scominit(const Target & i_target) {
 	{
 		// insert centaur target at beginning of vector
 		vector_targets.insert(vector_targets.begin(),i_target);
+
+		FAPI_INF("Getting L4 targets");
+		// Get L4 vectors
+		rc = fapiGetChildChiplets(i_target, TARGET_TYPE_L4,
+								vector_l4_targets, TARGET_STATE_PRESENT);
+
+		if (rc)
+		{
+			FAPI_ERR("Error from fapiGetChildChiplets getting L4 targets!");
+			FAPI_ERR("RC = 0x%x", static_cast<uint32_t>(rc));
+			return (rc);
+		}
+		
+		if (vector_l4_targets.size() != 1)
+		{
+			FAPI_ERR("Error target does not have L4!");
+			FAPI_ERR("RC = 0x%x", static_cast<uint32_t>(rc));
+			return (rc);
+		}
+
+		// insert L4 targets at the end	
+		vector_targets.insert(vector_targets.end(),vector_l4_targets.begin(), vector_l4_targets.end());
 
 		// run mbs initfile...
 		uint8_t num_mbs_files = sizeof(mbs_if)/sizeof(char*);

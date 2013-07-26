@@ -1,0 +1,72 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/dram_training/memory_mss_funcs.xml $         -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+<!-- $Id: memory_mss_funcs.xml,v 1.1 2013/06/19 18:28:11 bellows Exp $ -->
+<!-- For file ../../ipl/fapi/mss_funcs.C -->
+<!-- // *! OWNER NAME : jdsloat@us.ibm.com -->
+<!-- // *! BACKUP NAME : -->
+
+<!-- Original Source for RC_MSS_CCS_READ_MISCOMPARE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_CCS_READ_MISCOMPARE</rc>
+    <description>The ccs errors at runtime and registers a read miscompare.</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_CCS_UE_SUE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_CCS_UE_SUE</rc>
+    <description>The ccs errors at runtime and registers a UE or SUE</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_CCS_CAL_TIMEOUT memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_CCS_CAL_TIMEOUT</rc>
+    <description>The ccs errors at runtime and registers a calibration operation timeout</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_CCS_HUNG memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_CCS_HUNG</rc>
+    <description>The ccs failed to return from in_progress status and failed to describe an error further.</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_RCD_PARITY_ERROR_LIMIT memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_RCD_PARITY_ERROR_LIMIT</rc>
+    <description>The number of rcd parity errors have exceeded the maximum allowable number</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_RCD_PARITY_ERROR_PORT0 memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_RCD_PARITY_ERROR_PORT0</rc>
+    <description>An rcd parity error has been registered on port_0</description>
+</hwpError>
+
+<!-- Original Source for RC_MSS_RCD_PARITY_ERROR_PORT1 memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_RCD_PARITY_ERROR_PORT1</rc>
+    <description>An rcd parity error has been registered on port_1</description>
+</hwpError>
+
+
+</hwpErrors>

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.24 2013/05/20 16:52:28 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.25 2013/05/24 19:39:02 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -71,6 +71,8 @@
 //   1.22  | 04/30/13 | mjjones | Removed unused variable
 //   1.23  | 05/03/13 | gollub  | Clear cmd complete attention in mss_stopCmd
 //   1.24  | 05/20/13 | gollub  | Updates from review.
+//   1.25  | 05/24/13 | gollub  | Added DDR4 support to mss_get_address_range
+//         |          |         | Disabled superfast increment mode if DDR4 - due to DD1 bug
 
 //------------------------------------------------------------------------------
 //    Includes
@@ -174,12 +176,15 @@ namespace mss_MemConfig
  */
     enum MemOrg
     {
+        ROW_14 = 0x00003FFF,
         ROW_15 = 0x00007FFF,
         ROW_16 = 0x0000FFFF,
+        ROW_17 = 0x0001FFFF,        
         COL_10 = 0x000003F8,    // c2, c1, c0 always 0
         COL_11 = 0x000007F8,    // c2, c1, c0 always 0
         COL_12 = 0x00000FF8,    // c2, c1, c0 always 0
         BANK_3 = 0x00000007,
+        BANK_4 = 0x0000000F,        
     };
    
 /**
@@ -1058,21 +1063,36 @@ fapi::ReturnCode mss_MaintCmd::loadCmdType()
     fapi::ReturnCode l_rc;
     uint32_t l_ecmd_rc = 0;
     ecmdDataBufferBase l_data(64);
+    uint8_t l_dram_gen;
 
     FAPI_INF("ENTER mss_MaintCmd::loadCmdType()");
+
+    // Get DDR3/DDR4: ATTR_EFF_DRAM_GEN 
+    // 0x01 = ENUM_ATTR_EFF_DRAM_GEN_DDR3
+    // 0x02 = ENUM_ATTR_EFF_DRAM_GEN_DDR4
+  	l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &iv_target, l_dram_gen);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting DDR3/DDR4 on %s.", iv_target.toEcmdString());
+        return l_rc;
+    }
 
     l_rc = fapiGetScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_data);
     if(l_rc) return l_rc;
     l_ecmd_rc |= l_data.insert( (uint32_t)iv_cmdType, 0, 5, 32-5 );
     
-    // NOTE: Setting super fast address increment mode, where COL bits are LSB.
-    // Valid for all cmds.
-    l_ecmd_rc |= l_data.setBit(5);
-    if(l_ecmd_rc)
+    // Setting super fast address increment mode for DDR3, where COL bits are LSB. Valid for all cmds.
+    // NOTE: Super fast address increment mode is broken for DDR4 due to DD1 bug
+    if (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)    
     {
-        l_rc.setEcmdError(l_ecmd_rc);
-        return l_rc;
+        l_ecmd_rc |= l_data.setBit(5);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
     }
+    
     l_rc = fapiPutScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_data);
     if(l_rc) return l_rc;
 
@@ -2962,6 +2982,7 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
     uint8_t l_configSubType = 0;
     uint8_t l_end_master_rank = 0;
     uint8_t l_end_slave_rank = 0;
+    uint8_t l_dram_gen;    
 
     // Get Centaur target for the given MBA
     l_rc = fapiGetParentChip(i_target, l_targetCentaur);
@@ -2995,6 +3016,16 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
         return l_rc;
     }
 
+    // Get DDR3/DDR4: ATTR_EFF_DRAM_GEN 
+    // 0x01 = ENUM_ATTR_EFF_DRAM_GEN_DDR3
+    // 0x02 = ENUM_ATTR_EFF_DRAM_GEN_DDR4
+  	l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, l_dram_gen);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting DDR3/DDR4 on %s.",i_target.toEcmdString());
+        return l_rc;
+    }
+
     // Check MBAXCRn, to show memory configured behind this MBA
     l_rc = fapiGetScom(l_targetCentaur, mss_mbaxcr[l_mbaPosition], l_data);
     if(l_rc) return l_rc;
@@ -3025,57 +3056,120 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
         return l_rc;
     }
 
-    if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_2))
+    if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_2) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
     {
         // For memory part Size = 256Mbx8 (2Gb), row/col/bank = 15/10/3
-        FAPI_INF("For memory part Size = 256Mbx8 (2Gb), row/col/bank = 15/10/3");
+        FAPI_INF("For memory part Size = 256Mbx8 (2Gb), row/col/bank = 15/10/3, DDR3");
         l_row =     mss_MemConfig::ROW_15;
         l_col =     mss_MemConfig::COL_10;
         l_bank =    mss_MemConfig::BANK_3;
     }
-    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_2))
+
+    else if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_2) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+    {
+        // For memory part Size = 256Mbx8 (2Gb), row/col/bank = 14/10/4
+        FAPI_INF("For memory part Size = 256Mbx8 (2Gb), row/col/bank = 14/10/4, DDR4");
+        l_row =     mss_MemConfig::ROW_14;
+        l_col =     mss_MemConfig::COL_10;
+        l_bank =    mss_MemConfig::BANK_4;
+    }
+    
+    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_2) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
     {
         // For memory part Size = 512Mbx4 (2Gb), row/col/bank = 15/11/3
-        FAPI_INF("For memory part Size = 512Mbx4 (2Gb), row/col/bank = 15/11/3");
+        FAPI_INF("For memory part Size = 512Mbx4 (2Gb), row/col/bank = 15/11/3, DDR3");
         l_row =     mss_MemConfig::ROW_15;
         l_col =     mss_MemConfig::COL_11;
         l_bank =    mss_MemConfig::BANK_3;
     }
-    else if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_4))
+    
+    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_2) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+    {
+        // For memory part Size = 512Mbx4 (2Gb), row/col/bank = 15/10/4
+        FAPI_INF("For memory part Size = 512Mbx4 (2Gb), row/col/bank = 15/10/4, DDR4");
+        l_row =     mss_MemConfig::ROW_15;
+        l_col =     mss_MemConfig::COL_10;
+        l_bank =    mss_MemConfig::BANK_4;
+    }
+    
+    else if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_4) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
     {
         // For memory part Size = 512Mbx8 (4Gb), row/col/bank = 16/10/3
-        FAPI_INF("For memory part Size = 512Mbx8 (4Gb), row/col/bank = 16/10/3");
+        FAPI_INF("For memory part Size = 512Mbx8 (4Gb), row/col/bank = 16/10/3, DDR3");
         l_row =     mss_MemConfig::ROW_16;
         l_col =     mss_MemConfig::COL_10;
         l_bank =    mss_MemConfig::BANK_3;
     }
-    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_4))
+
+    else if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_4) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+    {
+        // For memory part Size = 512Mbx8 (4Gb), row/col/bank = 14/10/4
+        FAPI_INF("For memory part Size = 512Mbx8 (4Gb), row/col/bank = 14/10/4, DDR4");
+        l_row =     mss_MemConfig::ROW_15;
+        l_col =     mss_MemConfig::COL_10;
+        l_bank =    mss_MemConfig::BANK_4;
+    }
+
+
+    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_4) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
     {
         // For memory part Size = 1Gbx4 (4Gb), row/col/bank = 16/11/3
-        FAPI_INF("For memory part Size = 1Gbx4 (4Gb), row/col/bank = 16/11/3");
+        FAPI_INF("For memory part Size = 1Gbx4 (4Gb), row/col/bank = 16/11/3, DDR3");
         l_row =     mss_MemConfig::ROW_16;
         l_col =     mss_MemConfig::COL_11;
         l_bank =     mss_MemConfig::BANK_3;
     }
-    else if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_8))
+
+    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_4) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+    {
+        // For memory part Size = 1Gbx4 (4Gb), row/col/bank = 16/10/4
+        FAPI_INF("For memory part Size = 1Gbx4 (4Gb), row/col/bank = 16/10/4, DDR4");
+        l_row =     mss_MemConfig::ROW_16;
+        l_col =     mss_MemConfig::COL_10;
+        l_bank =     mss_MemConfig::BANK_4;
+    }
+
+    else if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_8) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
     {
         // For memory part Size = 1Gbx8 (8Gb), row/col/bank = 16/11/3
-        FAPI_INF("For memory part Size = 1Gbx8 (8Gb), row/col/bank = 16/11/3");
+        FAPI_INF("For memory part Size = 1Gbx8 (8Gb), row/col/bank = 16/11/3, DDR3");
         l_row =     mss_MemConfig::ROW_16;
         l_col =     mss_MemConfig::COL_11;
         l_bank =     mss_MemConfig::BANK_3;
     }
-    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_8))
+
+    else if((l_dramWidth == mss_MemConfig::X8) && (l_dramSize == mss_MemConfig::GBIT_8) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+    {
+        // For memory part Size = 1Gbx8 (8Gb), row/col/bank = 16/10/4
+        FAPI_INF("For memory part Size = 1Gbx8 (8Gb), row/col/bank = 16/10/4, DDR4");
+        l_row =     mss_MemConfig::ROW_16;
+        l_col =     mss_MemConfig::COL_10;
+        l_bank =     mss_MemConfig::BANK_4;
+    }
+
+
+    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_8) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
     {
         // For memory part Size = 2Gbx4 (8Gb), row/col/bank = 16/12/3
-        FAPI_INF("For memory part Size = 2Gbx4 (8Gb), row/col/bank = 16/12/3");
+        FAPI_INF("For memory part Size = 2Gbx4 (8Gb), row/col/bank = 16/12/3, DDR3");
         l_row =     mss_MemConfig::ROW_16;
         l_col =     mss_MemConfig::COL_12;
         l_bank =     mss_MemConfig::BANK_3;
     }
+    
+    else if((l_dramWidth == mss_MemConfig::X4) && (l_dramSize == mss_MemConfig::GBIT_8) && (l_dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+    {
+        // For memory part Size = 2Gbx4 (8Gb), row/col/bank = 17/10/4
+        FAPI_INF("Forosr memory part Size = 2Gbx4 (8Gb), row/col/bank = 17/10/4, DDR4");
+        l_row =     mss_MemConfig::ROW_17;
+        l_col =     mss_MemConfig::COL_10;
+        l_bank =     mss_MemConfig::BANK_4;
+    }
     else
     {
-        FAPI_ERR("Invalid l_dramSize = %d or l_dramWidth = %d in MBAXCRn on %s.", l_dramSize, l_dramWidth, i_target.toEcmdString()); 
+        FAPI_ERR("Invalid l_dramSize = %d or l_dramWidth = %d in MBAXCRn, or l_dram_gen = %d on %s.",
+        l_dramSize, l_dramWidth, l_dram_gen, i_target.toEcmdString()); 
+
 
         // TODO: Calling out FW high
         // FFDC: MBA target
@@ -3084,6 +3178,8 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
         ecmdDataBufferBase & MBAXCR = l_data;
         // FFDC: DRAM width
         uint8_t DRAM_WIDTH = l_dramWidth;        
+        // FFDC: DRAM width
+        uint8_t DRAM_GEN = l_dram_gen;        
         // Create new log.        
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_DRAM_SIZE_WIDTH);
         return l_rc;

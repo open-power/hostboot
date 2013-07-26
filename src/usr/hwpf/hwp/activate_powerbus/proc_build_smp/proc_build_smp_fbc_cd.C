@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.C,v 1.8 2013/05/07 22:10:20 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.C,v 1.9 2013/06/20 21:19:02 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1266,19 +1266,44 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0x0;
     ecmdDataBufferBase data(64);
+    uint8_t ver2 = 0x0;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_set_sconfig_we5: Start");
 
     do
     {
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_CENT5_VER2,
+                           &(i_smp_chip.chip->this_chip),
+                           ver2);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying Chip EC feature: ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_CENT5_VER2");
+            break;
+        }
+
         // build register content
         // pb_cfg_lock_on_links
+        uint32_t PB_SCONFIG_WE5_LOCK_ON_LINKS_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_LOCK_ON_LINKS_BIT_VER2):
+            (PB_SCONFIG_WE5_LOCK_ON_LINKS_BIT_VER1);
+
         rc_ecmd |= data.writeBit(
             PB_SCONFIG_WE5_LOCK_ON_LINKS_BIT,
             PB_SCONFIG_WE5_LOCK_ON_LINKS?1:0);
 
         // pb_cfg_x_on_link_tok_agg_threshold
+        uint32_t PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_START_BIT_VER2):
+            (PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_END_BIT_VER2):
+            (PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD,
             PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_START_BIT,
@@ -1286,6 +1311,16 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_X_ON_LINK_TOK_AGG_THRESHOLD_START_BIT+1));
 
         // pb_cfg_x_off_link_tok_agg_threshold
+        uint32_t PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_START_BIT_VER2):
+            (PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_END_BIT_VER2):
+            (PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD,
             PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_START_BIT,
@@ -1293,6 +1328,16 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_X_OFF_LINK_TOK_AGG_THRESHOLD_START_BIT+1));
 
         // pb_cfg_x_a_link_tok_agg_threshold
+        uint32_t PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_START_BIT_VER2):
+            (PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_END_BIT_VER2):
+            (PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD,
             PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_START_BIT,
@@ -1300,6 +1345,16 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_A_LINK_TOK_AGG_THRESHOLD_START_BIT+1));
 
         // pb_cfg_x_f_link_tok_agg_threshold
+        uint32_t PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_START_BIT_VER2):
+            (PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_END_BIT_VER2):
+            (PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD,
             PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_START_BIT,
@@ -1307,6 +1362,16 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_F_LINK_TOK_AGG_THRESHOLD_START_BIT+1));
 
         // pb_cfg_x_a_link_tok_ind_threshold
+        uint32_t PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_START_BIT_VER2):
+            (PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_END_BIT_VER2):
+            (PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD,
             PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_START_BIT,
@@ -1314,11 +1379,26 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_A_LINK_TOK_IND_THRESHOLD_START_BIT+1));
 
         // pb_cfg_passthru_enable
+        uint32_t PB_SCONFIG_WE5_PASSTHRU_ENABLE_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_PASSTHRU_ENABLE_BIT_VER2):
+            (PB_SCONFIG_WE5_PASSTHRU_ENABLE_BIT_VER1);
+
         rc_ecmd |= data.writeBit(
             PB_SCONFIG_WE5_PASSTHRU_ENABLE_BIT,
             PB_SCONFIG_WE5_PASSTHRU_ENABLE?1:0);
 
         // pb_cfg_passthru_x_priority
+        uint32_t PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_START_BIT_VER2):
+            (PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_END_BIT_VER2):
+            (PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY,
             PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_START_BIT,
@@ -1326,6 +1406,16 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_PASSTHRU_X_PRIORITY_START_BIT+1));
 
         // pb_cfg_passthru_a_priority
+        uint32_t PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_START_BIT_VER2):
+            (PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_END_BIT_VER2):
+            (PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY,
             PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_START_BIT,
@@ -1333,6 +1423,16 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_PASSTHRU_A_PRIORITY_START_BIT+1));
 
         // pb_cfg_a_tok_init
+        uint32_t PB_SCONFIG_WE5_A_TOK_INIT_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_A_TOK_INIT_START_BIT_VER2):
+            (PB_SCONFIG_WE5_A_TOK_INIT_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_A_TOK_INIT_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_A_TOK_INIT_END_BIT_VER2):
+            (PB_SCONFIG_WE5_A_TOK_INIT_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_A_TOK_INIT,
             PB_SCONFIG_WE5_A_TOK_INIT_START_BIT,
@@ -1340,6 +1440,15 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_A_TOK_INIT_START_BIT+1));
 
         // pb_cfg_f_tok_init
+        uint32_t PB_SCONFIG_WE5_F_TOK_INIT_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_F_TOK_INIT_START_BIT_VER2):
+            (PB_SCONFIG_WE5_F_TOK_INIT_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_F_TOK_INIT_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_F_TOK_INIT_END_BIT_VER2):
+            (PB_SCONFIG_WE5_F_TOK_INIT_END_BIT_VER1);
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_F_TOK_INIT,
             PB_SCONFIG_WE5_F_TOK_INIT_START_BIT,
@@ -1347,23 +1456,64 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
              PB_SCONFIG_WE5_F_TOK_INIT_START_BIT+1));
 
         // pb_cfg_em_fp_enable
+        uint32_t PB_SCONFIG_WE5_EM_FP_ENABLE_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_EM_FP_ENABLE_BIT_VER2):
+            (PB_SCONFIG_WE5_EM_FP_ENABLE_BIT_VER1);
+
         rc_ecmd |= data.writeBit(
             PB_SCONFIG_WE5_EM_FP_ENABLE_BIT,
             PB_SCONFIG_WE5_EM_FP_ENABLE?1:0);
 
         // spare
+        uint32_t PB_SCONFIG_WE5_SPARE_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_SPARE_START_BIT_VER2):
+            (PB_SCONFIG_WE5_SPARE_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_SPARE_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_SPARE_END_BIT_VER2):
+            (PB_SCONFIG_WE5_SPARE_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_SPARE,
             PB_SCONFIG_WE5_SPARE_START_BIT,
             (PB_SCONFIG_WE5_SPARE_END_BIT-
              PB_SCONFIG_WE5_SPARE_START_BIT+1));
 
+        // pb_cfg_a_ind_threshold
+        if (ver2)
+        {
+            rc_ecmd |= data.writeBit(
+                PB_SCONFIG_WE5_A_IND_THRESHOLD_BIT_VER2,
+                PB_SCONFIG_WE5_A_IND_THRESHOLD?1:0);
+        }
+
         // pb_cfg_mem_stv_priority
+        uint32_t PB_SCONFIG_WE5_MEM_STV_PRIORITY_START_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_MEM_STV_PRIORITY_START_BIT_VER2):
+            (PB_SCONFIG_WE5_MEM_STV_PRIORITY_START_BIT_VER1);
+
+        uint32_t PB_SCONFIG_WE5_MEM_STV_PRIORITY_END_BIT =
+            (ver2)?
+            (PB_SCONFIG_WE5_MEM_STV_PRIORITY_END_BIT_VER2):
+            (PB_SCONFIG_WE5_MEM_STV_PRIORITY_END_BIT_VER1);
+
         rc_ecmd |= data.insertFromRight(
             PB_SCONFIG_WE5_MEM_STV_PRIORITY,
             PB_SCONFIG_WE5_MEM_STV_PRIORITY_START_BIT,
             (PB_SCONFIG_WE5_MEM_STV_PRIORITY_END_BIT-
              PB_SCONFIG_WE5_MEM_STV_PRIORITY_START_BIT+1));
+
+        // pb_cfg_x_off_set
+        if (ver2)
+        {
+            rc_ecmd |= data.writeBit(
+                PB_SCONFIG_WE5_X_OFF_SEL_BIT_VER2,
+                PB_SCONFIG_WE5_X_OFF_SEL?1:0);
+        }
 
         if (rc_ecmd)
         {
@@ -1374,7 +1524,10 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
         }
 
         // call common routine to program chain
-        rc = proc_build_smp_set_sconfig(i_smp_chip, PB_SCONFIG_WE5_DEF, data);
+        rc = proc_build_smp_set_sconfig(
+            i_smp_chip,
+            (ver2)?(PB_SCONFIG_WE5_DEF_VER2):(PB_SCONFIG_WE5_DEF_VER1),
+            data);
         if (!rc.ok())
         {
             FAPI_ERR("proc_build_smp_set_sconfig_we5: Error from proc_build_smp_set_sconfig");

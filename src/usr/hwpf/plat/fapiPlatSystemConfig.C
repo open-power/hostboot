@@ -261,6 +261,11 @@ fapi::ReturnCode fapiGetChildChiplets(
         {
             l_type = TARGETING::TYPE_ABUS;
         }
+        else if (i_chipletType == fapi::TARGET_TYPE_L4)
+        {
+            l_type = TARGETING::TYPE_L4;
+        }
+        
         else
         {
             FAPI_ERR("fapiGetChildChiplets. Chiplet type 0x%08x not supported",

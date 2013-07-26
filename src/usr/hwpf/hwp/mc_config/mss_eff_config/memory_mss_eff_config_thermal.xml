@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/dmi_training/cen_dmi_scominit_errors.xml $   -->
+<!-- $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/memory_mss_eff_config_thermal.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,13 +20,43 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: cen_dmi_scominit_errors.xml,v 1.3 2013/06/25 15:37:38 cswenson Exp $ -->
-<!-- Error definitions for cen_dmi_scominit procedure -->
 <hwpErrors>
-  <!-- *********************************************************************** -->
-  <!-- $Id: cen_dmi_scominit_errors.xml,v 1.3 2013/06/25 15:37:38 cswenson Exp $ -->
+<!-- $Id: memory_mss_eff_config_thermal.xml,v 1.1 2013/06/19 18:28:01 bellows Exp $ -->
+<!-- For file ../../ipl/fapi/mss_eff_config_thermal.C -->
+<!-- // *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com -->
+<!-- // *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com -->
+
+<!-- Original Source for RC_MSS_DIMM_POWER_CURVE_DATA_LAB memory_errors.xml -->
   <hwpError>
-    <rc>RC_CEN_DMI_SCOMINIT_INVALID_TARGET</rc>
-    <description>Invalid target type presented to cen_dmi_scominit HWP (expects TARGET_TYPE_MEMBUF_CHIP).</description>
-  </hwpError>
+    <rc>RC_MSS_DIMM_POWER_CURVE_DATA_LAB</rc>
+    <description>DIMM power curve data is lab data not MSL</description>
+    <ffdc>FFDC_DATA_1</ffdc>	
+    <ffdc>FFDC_DATA_2</ffdc>	
+    <ffdc>FFDC_DATA_3</ffdc>	
+    <ffdc>FFDC_DATA_4</ffdc>	
+    <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
+</hwpError>
+
+<!-- Original Source for RC_MSS_DIMM_POWER_CURVE_DATA_INVALID memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_DIMM_POWER_CURVE_DATA_INVALID</rc>
+    <description>DIMM power curve data is invalid</description>
+    <ffdc>FFDC_DATA_1</ffdc>	
+    <ffdc>FFDC_DATA_2</ffdc>	
+    <ffdc>FFDC_DATA_3</ffdc>	
+    <ffdc>FFDC_DATA_4</ffdc>	
+    <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
+</hwpError>
+
+<!-- Original Source for RC_MSS_DIMM_NOT_FOUND_IN_POWER_TABLE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_DIMM_NOT_FOUND_IN_POWER_TABLE</rc>
+    <description>Unable to find matching entry in DIMM power table</description>
+    <ffdc>FFDC_DATA_1</ffdc>	
+    <ffdc>FFDC_DATA_2</ffdc>	
+    <ffdc>FFDC_DATA_3</ffdc>	
+    <callout><target>MEM_DIMM</target><priority>HIGH</priority></callout>
+</hwpError>
+
+
 </hwpErrors>
