@@ -327,14 +327,16 @@ int32_t cleanupSecondaryFirBits( ExtensibleChip * i_chip,
                                       i_busPos);
         mcsChip = ( ExtensibleChip * )systemPtr->GetChip( mcsTgt );
         mbChip =  getMcsDataBundle( mcsChip )->getMembChip();
-        mbTgt =   mbChip->GetChipHandle();
+        if (mbChip)
+            mbTgt =   mbChip->GetChipHandle();
 
     }
     else if ( i_busType == TYPE_MEMBUF )
     {
         mbTgt = i_chip->GetChipHandle();
         mcsChip = getMembufDataBundle( i_chip )->getMcsChip();
-        mcsTgt  = mcsChip->GetChipHandle();
+        if (mcsChip)
+            mcsTgt  = mcsChip->GetChipHandle();
         mbChip = i_chip;
     }
 
