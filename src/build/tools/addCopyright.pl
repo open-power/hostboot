@@ -407,6 +407,14 @@ sub filetype
     chomp $fileinfo;
 
     # Sorted by anticipated frequency of occurrence.
+    if ( $filename =~ m/\.xml$/i )
+        # Added XML file to the top of the list because some comments in
+        # an XML file cause older versions of 'file' to incorrectly return
+        # "ASCII C++ program text" even though the file is obviously XML.
+        # Specifically we are seeing "<!-- // ..." cause this trouble.
+    {
+        return "xml"
+    }
     if ( ( $filename =~ m/\.[cht]$/i )
        ||( $filename =~ m/\.[cht]\+\+$/i )
        ||( $filename =~ m/\.[cht]pp$/i )
@@ -485,10 +493,6 @@ sub filetype
     if ( $filename =~ m/\.ld$/ )
     {
         return "LinkerScript";
-    }
-    if ( $filename =~ m/\.xml$/i )
-    {
-        return "xml"
     }
     if ( $filename =~ m/\.rule$/i )
     {
