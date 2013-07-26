@@ -36,21 +36,24 @@
 
 #include <hwas/common/hwas.H>                   // checkMinimumHardware()
 
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+
 // Trace definition
 #define __COMP_TD__ g_trac_deconf
 
 // TODO The DeconfigGard code needs to trace a target. The current recommended
 // way is to get the Target's PHYS_PATH attribute and do a binary trace.
-// However, the size of a TARGETING::EntityPath is more than 16 bytes. This code
+// However, the size of a EntityPath is more than 16 bytes. This code
 // will trace only the first 16 bytes (which in most cases is enough) to avoid a
 // multi-line binary trace. This all seems a little convoluted. Is there a
 // better way to trace a Target
 #define DG_DBG_TARGET(string, pPath) \
-    HWAS_DBG_BIN(string, pPath, sizeof(TARGETING::EntityPath) - 1)
+    HWAS_DBG_BIN(string, pPath, sizeof(EntityPath) - 1)
 #define DG_INF_TARGET(string, pPath) \
-    HWAS_INF_BIN(string, pPath, sizeof(TARGETING::EntityPath) - 1)
+    HWAS_INF_BIN(string, pPath, sizeof(EntityPath) - 1)
 #define DG_ERR_TARGET(string, pPath) \
-    HWAS_ERR_BIN(string, pPath, sizeof(TARGETING::EntityPath) - 1)
+    HWAS_ERR_BIN(string, pPath, sizeof(EntityPath) - 1)
 
 // TODO There are a number of error logs created in this file. Most of them
 // should include the target identifier (PHYS_PATH). There is a plan in RTC
@@ -61,13 +64,14 @@ namespace HWAS
 {
 
 using namespace HWAS::COMMON;
+using namespace TARGETING;
 
 bool processDeferredDeconfig()
 {
     return HWAS::theDeconfigGard()._processDeferredDeconfig();
 }
 
-errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate)
+errlHndl_t collectGard(const PredicateBase *i_pPredicate)
 {
     HWAS_INF("collectGard entry" );
     errlHndl_t errl = NULL;
@@ -140,8 +144,8 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
     errlHndl_t l_pErr = NULL;
 
     // Create the predicate with HWAS changed state and our GARD bit
-    TARGETING::PredicateHwasChanged l_predicateHwasChanged;
-    l_predicateHwasChanged.changedBit(TARGETING::HWAS_CHANGED_BIT_GARD, true);
+    PredicateHwasChanged l_predicateHwasChanged;
+    l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_GARD, true);
 
     HWAS_MUTEX_LOCK(iv_mutex);
     do
@@ -163,7 +167,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
             }
 
             // Find the associated Target
-            TARGETING::Target* l_pTarget = TARGETING::targetService().
+            Target* l_pTarget = targetService().
                             toTarget(iv_pGardRecords[i].iv_targetId);
 
             if (l_pTarget == NULL)
@@ -179,21 +183,21 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
             if (l_predicateHwasChanged(l_pTarget) == false)
             {
                 HWAS_INF("skipping %.8X - GARD changed bit false",
-                        TARGETING::get_huid(l_pTarget));
+                        get_huid(l_pTarget));
                 continue;
             }
 
             // Clear the gard record
             HWAS_INF("clearing GARD for %.8X, recordId %d",
-                        TARGETING::get_huid(l_pTarget),
+                        get_huid(l_pTarget),
                         iv_pGardRecords[i].iv_recordId);
             iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
             l_GardAddress.writeRecord(&iv_pGardRecords[i]);
             l_GardAddress.flush();
 
             // now clear our 'changed' bit
-            TARGETING::clear_hwas_changed_bit(
-                    l_pTarget,TARGETING::HWAS_CHANGED_BIT_GARD);
+            clear_hwas_changed_bit(
+                    l_pTarget,HWAS_CHANGED_BIT_GARD);
 
         } // for
     }
@@ -205,7 +209,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
-        const TARGETING::PredicateBase *i_pPredicate)
+        const PredicateBase *i_pPredicate)
 {
     HWAS_INF("Deconfigure Targets from GARD Records for IPL");
     errlHndl_t l_pErr = NULL;
@@ -219,15 +223,14 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
     HWAS_MUTEX_LOCK(iv_mutex);
     do
     {
-        TARGETING::Target* pSys;
-        TARGETING::targetService().getTopLevelTarget(pSys);
-        HWAS_ASSERT(pSys,
-                "HWAS _createGardRecord: no system TopLevelTarget found");
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        HWAS_ASSERT(pSys, "HWAS deconfigTargetsFromGardRecordsForIpl: no TopLevelTarget");
 
         // check for system CDM Policy
-        const TARGETING::ATTR_CDM_POLICIES_type l_sys_policy =
-                pSys->getAttr<TARGETING::ATTR_CDM_POLICIES>();
-        if (l_sys_policy & TARGETING::CDM_POLICIES_MANUFACTURING_DISABLED)
+        const ATTR_CDM_POLICIES_type l_sys_policy =
+                pSys->getAttr<ATTR_CDM_POLICIES>();
+        if (l_sys_policy & CDM_POLICIES_MANUFACTURING_DISABLED)
         {
             // manufacturing records are disabled
             //  - don't process
@@ -257,7 +260,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         {
             GardRecord l_gardRecord = *l_itr;
 
-            if ((l_sys_policy & TARGETING::CDM_POLICIES_PREDICTIVE_DISABLED) &&
+            if ((l_sys_policy & CDM_POLICIES_PREDICTIVE_DISABLED) &&
                 (l_gardRecord.iv_errorType == GARD_Predictive))
             {
                 // predictive records are disabled AND gard record is predictive
@@ -266,7 +269,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
-            if ((l_sys_policy & TARGETING::CDM_POLICIES_FUNCTIONAL_DISABLED) &&
+            if ((l_sys_policy & CDM_POLICIES_FUNCTIONAL_DISABLED) &&
                 (l_gardRecord.iv_errorType == GARD_Func))
             {
                 // functional records are disabled AND gard record is Functional
@@ -276,8 +279,8 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             }
 
             // Find the associated Target
-            TARGETING::Target * l_pTarget =
-                TARGETING::targetService().toTarget(l_gardRecord.iv_targetId);
+            Target * l_pTarget =
+                targetService().toTarget(l_gardRecord.iv_targetId);
 
             if (l_pTarget == NULL)
             {
@@ -292,15 +295,15 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             if (i_pPredicate && ((*i_pPredicate)(l_pTarget) == false))
             {
                 HWAS_INF("skipping %.8X - predicate didn't match",
-                        TARGETING::get_huid(l_pTarget));
+                        get_huid(l_pTarget));
                 continue;
             }
 
             // skip if not present
-            if (!l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
+            if (!l_pTarget->getAttr<ATTR_HWAS_STATE>().present)
             {
                 HWAS_INF("skipping %.8X - target not present",
-                        TARGETING::get_huid(l_pTarget));
+                        get_huid(l_pTarget));
                 continue;
             }
 
@@ -450,7 +453,7 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
 }
 
 //******************************************************************************
-errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
+errlHndl_t DeconfigGard::deconfigureTarget(Target & i_target,
                                            const uint32_t i_errlPlid,
                                            bool i_evenAtRunTime)
 {
@@ -467,15 +470,15 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
             break;
         }
 
-        const uint8_t lDeconfigGardable =
-                i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>();
+        const ATTR_DECONFIG_GARDABLE_type lDeconfigGardable =
+                i_target.getAttr<ATTR_DECONFIG_GARDABLE>();
         const uint8_t lPresent =
-                i_target.getAttr<TARGETING::ATTR_HWAS_STATE>().present;
+                i_target.getAttr<ATTR_HWAS_STATE>().present;
         if (!lDeconfigGardable || !lPresent)
         {
             // Target is not Deconfigurable. Create an error
             HWAS_ERR("Target %.8X not Deconfigurable",
-                TARGETING::get_huid(&i_target));
+                get_huid(&i_target));
 
             /*@
              * @errortype
@@ -488,7 +491,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
              * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
              */
             const uint64_t userdata1 =
-                (static_cast<uint64_t>(TARGETING::get_huid(&i_target)) << 32) |
+                (static_cast<uint64_t>(get_huid(&i_target)) << 32) |
                 i_errlPlid;
             const uint64_t userdata2 =
                 (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
@@ -519,20 +522,19 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
             HWAS_ERR("Error from checkMinimumHardware ");
             break;
         }
-
     }
     while (0);
 
     return l_pErr;
-}
+} // deconfigureTarget
 
 //******************************************************************************
 void DeconfigGard::registerDeferredDeconfigure(
-        const TARGETING::Target & i_target,
+        const Target & i_target,
         const uint32_t i_errlPlid)
 {
-    HWAS_INF("registerDeferredDeconfigure Target %.8X, errlPlid %X",
-            TARGETING::get_huid(&i_target), i_errlPlid);
+    HWAS_INF("registerDeferredDeconfigure Target %.8X, errlPlid 0x%X",
+            get_huid(&i_target), i_errlPlid);
 
     // Create a Deconfigure Record
     HWAS_MUTEX_LOCK(iv_mutex);
@@ -541,7 +543,7 @@ void DeconfigGard::registerDeferredDeconfigure(
 }
 
 //******************************************************************************
-errlHndl_t DeconfigGard::createGardRecord(const TARGETING::Target & i_target,
+errlHndl_t DeconfigGard::createGardRecord(const Target & i_target,
                                           const uint32_t i_errlPlid,
                                           const GARD_ErrorType i_errorType)
 {
@@ -554,7 +556,7 @@ errlHndl_t DeconfigGard::createGardRecord(const TARGETING::Target & i_target,
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_getDeconfigureRecords(
-    const TARGETING::Target * i_pTarget,
+    const Target * i_pTarget,
     DeconfigureRecords_t & o_records)
 {
     HWAS_INF("Get Deconfigure Record(s)");
@@ -612,7 +614,7 @@ errlHndl_t DeconfigGard::clearGardRecords(const uint32_t i_recordId)
 
 //******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecords(
-    const TARGETING::EntityPath & i_targetId)
+    const EntityPath & i_targetId)
 {
     HWAS_INF("Clear GARD Record(s) by Target ID");
     HWAS_MUTEX_LOCK(iv_mutex);
@@ -635,7 +637,7 @@ errlHndl_t DeconfigGard::getGardRecords(
 
 //******************************************************************************
 errlHndl_t DeconfigGard::getGardRecords(
-    const TARGETING::EntityPath & i_targetId,
+    const EntityPath & i_targetId,
     GardRecords_t & o_records)
 {
     HWAS_INF("Get GARD Record(s) by Target ID");
@@ -645,96 +647,420 @@ errlHndl_t DeconfigGard::getGardRecords(
     return l_pErr;
 }
 
+/**
+ * @brief       simple helper fn to find and return the list of MCS targets
+ *                  that are in the same MSS_MEM_MC_IN_GROUP as the input.
+ *
+ * @param[in]   i_startMcs      pointer to starting MCS target
+ * @param[in]   o_McsInGroup    list of functional Targets that are in the same
+ *                              group as i_startMcs
+ *
+ * @return      none
+ *
+ */
+void findMcsInGroup(const Target *i_startMcs, TargetHandleList &o_McsInGroup)
+{
+    // find the group that this MCS is in by reading the
+    // group list from the proc. this is an array of 8 bitmasks.
+    // the 8 elements are each a different group; the bits in each
+    // element represent the MCS units in each group.
+
+    o_McsInGroup.clear();
+    const Target *l_proc = getParentChip(i_startMcs);
+    ATTR_MSS_MEM_MC_IN_GROUP_type l_group;
+    l_proc->tryGetAttr<ATTR_MSS_MEM_MC_IN_GROUP>(l_group);
+
+    HWAS_DBG("findMcsInGroup MCS %.8X under proc %.8X",
+                 get_huid(i_startMcs), get_huid(l_proc));
+    HWAS_DBG(" groups: %.2X %.2X %.2X %.2X   %.2X %.2X %.2X %.2X",
+        l_group[0], l_group[1], l_group[2], l_group[3],
+        l_group[4], l_group[5], l_group[6], l_group[7]);
+
+    const uint8_t my_bit = 0x80 >> i_startMcs->getAttr<ATTR_CHIP_UNIT>();
+    uint8_t my_group = 0;
+    for (;
+            (my_group < 8 ) && ((l_group[my_group] & my_bit) == 0);
+            ++my_group)
+    {} // nothing - just looking for exit condition
+
+    // if found a match before we hit the end, find the list.
+    if (my_group != 8)
+    {
+        //  get MCS CHILDs that are functional
+        PredicateCTM predMcs(CLASS_UNIT, TYPE_MCS);
+        PredicateIsFunctional isFunctional;
+        PredicatePostfixExpr checkExpr;
+        checkExpr.push(&predMcs).push(&isFunctional).And();
+        targetService().getAssociated(o_McsInGroup, l_proc,
+            TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+            &checkExpr);
+
+        for (TargetHandleList::iterator pMcs_it = o_McsInGroup.begin();
+               pMcs_it != o_McsInGroup.end();
+               /* increment will be done in loop */)
+        {
+            TargetHandle_t pMcs = *pMcs_it;
+            const uint8_t mcs_bit = 0x80 >> pMcs->getAttr<ATTR_CHIP_UNIT>();
+
+            // if this is a paired MEMBUF - in the same group
+            if (l_group[my_group] & mcs_bit)
+            {
+                HWAS_INF("findMcsInGroup: MCS %.8X (0x%.2X) paired in group %d",
+                     get_huid(pMcs), mcs_bit, my_group);
+
+                // keep it in the list
+                pMcs_it++;
+            }
+            else
+            {
+                HWAS_DBG("findMcsInGroup: MCS %.8X (0x%.2X) not in group %d",
+                     get_huid(pMcs), mcs_bit, my_group);
+
+                 // erase this MCS, and 'increment' to next
+                pMcs_it = o_McsInGroup.erase(pMcs_it);
+            }
+        } // for
+    }
+    else
+    {
+        HWAS_INF("findMcsInGroup: can't find MCS %.8X in a group!",
+                get_huid(i_startMcs));
+        // just return an empty list
+    }
+} // findMcsInGroup
+
 //******************************************************************************
-void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
+void DeconfigGard::_deconfigureByAssoc(Target & i_target,
                                        const uint32_t i_errlPlid)
 {
-    HWAS_INF("Deconfiguring by Association for: %.8X",
-                   TARGETING::get_huid(&i_target));
+    HWAS_INF("deconfigByAssoc for %.8X", get_huid(&i_target));
 
-    TARGETING::TargetHandleList pChildList;
-    TARGETING::PredicateHwas hwasPredicate;
-    hwasPredicate.poweredOn(true).present(true).functional(true);
+    // some common variables used below
+    TargetHandleList pChildList;
+    PredicateIsFunctional isFunctional;
 
-    // find all CHILD and CHILD_BY_AFFINITY matches for this target
-    // and deconfigure them
-    TARGETING::targetService().getAssociated( pChildList, &i_target,
-        TARGETING::TargetService::CHILD,
-        TARGETING::TargetService::ALL,
-        &hwasPredicate);
-    for (TARGETING::TargetHandleList::const_iterator
-            pChild_it = pChildList.begin();
+    // find all CHILD matches for this target and deconfigure them
+    targetService().getAssociated(pChildList, &i_target,
+        TargetService::CHILD, TargetService::ALL, &isFunctional);
+    for (TargetHandleList::iterator pChild_it = pChildList.begin();
             pChild_it != pChildList.end();
             ++pChild_it)
     {
-        TARGETING::TargetHandle_t pChild = *pChild_it;
+        TargetHandle_t pChild = *pChild_it;
 
-        if (pChild->getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
+        if (pChild->getAttr<ATTR_DECONFIG_GARDABLE>())
         {   // only deconfigure targets that are able to be deconfigured
+            HWAS_INF("deconfigByAssoc CHILD: %.8X",
+                get_huid(pChild));
             _deconfigureTarget(*pChild, i_errlPlid);
+            // Deconfigure other Targets by association
+            _deconfigureByAssoc(*pChild, i_errlPlid);
         }
     } // for CHILD
 
-    TARGETING::targetService().getAssociated( pChildList, &i_target,
-        TARGETING::TargetService::CHILD_BY_AFFINITY,
-        TARGETING::TargetService::ALL,
-        &hwasPredicate);
-    for (TARGETING::TargetHandleList::const_iterator
-            pChild_it = pChildList.begin();
+    // find all CHILD_BY_AFFINITY matches for this target and deconfigure them
+    targetService().getAssociated(pChildList, &i_target,
+        TargetService::CHILD_BY_AFFINITY, TargetService::ALL, &isFunctional);
+    for (TargetHandleList::iterator pChild_it = pChildList.begin();
             pChild_it != pChildList.end();
             ++pChild_it)
     {
-        TARGETING::TargetHandle_t pChild = *pChild_it;
+        TargetHandle_t pChild = *pChild_it;
 
-        if (pChild->getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
+        if (pChild->getAttr<ATTR_DECONFIG_GARDABLE>())
         {   // only deconfigure targets that are able to be deconfigured
+            HWAS_INF("deconfigByAssoc CHILD_BY_AFFINITY: %.8X",
+                get_huid(pChild));
             _deconfigureTarget(*pChild, i_errlPlid);
+            // Deconfigure other Targets by association
+            _deconfigureByAssoc(*pChild, i_errlPlid);
         }
     } // for CHILD_BY_AFFINITY
-}
+
+    // Memory deconfigureByAssociation rules
+    // depends on the type of this target - MEMBUF, MBA, DIMM
+    switch (i_target.getAttr<ATTR_TYPE>())
+    {
+        case TYPE_MEMBUF:
+        {
+            //  get parent MCS
+            TargetHandleList pParentMcsList;
+            getParentAffinityTargets(pParentMcsList, &i_target,
+                    CLASS_UNIT, TYPE_MCS, true /*functional*/);
+            HWAS_ASSERT((pParentMcsList.size() <= 1),
+                "HWAS deconfigByAssoc: pParentMcsList > 1");
+
+            // done if parent is already deconfigured
+            if (pParentMcsList.empty())
+            {
+                break;
+            }
+
+            // deconfigure the parent
+            const Target *l_parentMcs = pParentMcsList[0];
+            HWAS_INF("deconfigByAssoc MEMBUF parent MCS: %.8X",
+                get_huid(l_parentMcs));
+            _deconfigureTarget(const_cast<Target &> (*l_parentMcs),
+                i_errlPlid);
+            _deconfigureByAssoc(const_cast<Target &> (*l_parentMcs),
+                i_errlPlid);
+
+            Target *pSys;
+            targetService().getTopLevelTarget(pSys);
+            HWAS_ASSERT(pSys, "HWAS _deconfigureByAssoc: no TopLevelTarget");
+
+            // done if not in interleaved mode
+            if (!pSys->getAttr<ATTR_ALL_MCS_IN_INTERLEAVING_GROUP>())
+            {
+                break;
+            }
+
+            // if paired mode (interleaved)
+            //      deconfigure paired MCS and MEMBUF (Centaur)
+            // find paired MCS / MEMBUF (Centaur)
+            TargetHandleList pMcsList;
+            findMcsInGroup(l_parentMcs, pMcsList);
+
+            // deconfigure each paired MCS
+            for (TargetHandleList::iterator pMcs_it = pMcsList.begin();
+                    pMcs_it != pMcsList.end();
+                    ++pMcs_it)
+            {
+                TargetHandle_t pMcs = *pMcs_it;
+
+                HWAS_INF("deconfigByAssoc MCS (& MEMBUF) paired: %.8X",
+                    get_huid(pMcs));
+                _deconfigureTarget(*pMcs, i_errlPlid);
+                _deconfigureByAssoc(*pMcs, i_errlPlid);
+            } // for
+            break;
+        } // TYPE_MEMBUF
+
+        case TYPE_MBA:
+        {
+            // get parent MEMBUF (Centaur)
+            const Target *l_parentMembuf = getParentChip(&i_target);
+
+            // get children DIMM that are functional
+            PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predDimm).push(&isFunctional).And();
+            TargetHandleList pDimmList;
+            targetService().getAssociated(pDimmList, l_parentMembuf,
+                TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+                &checkExpr);
+
+            // if parent MEMBUF (Centaur) has no functional memory
+            if (pDimmList.empty())
+            {
+                // deconfigure parent MEMBUF (Centaur)
+                HWAS_INF("deconfigByAssoc MEMBUF parent with no memory: %.8X",
+                    get_huid(l_parentMembuf));
+                _deconfigureTarget(const_cast<Target &> (*l_parentMembuf),
+                    i_errlPlid);
+                _deconfigureByAssoc(const_cast<Target &> (*l_parentMembuf),
+                    i_errlPlid);
+
+                // and we're done, so break;
+                break;
+            }
+
+            // parent MEMBUF still has functional memory
+            Target *pSys;
+            targetService().getTopLevelTarget(pSys);
+            HWAS_ASSERT(pSys, "HWAS _deconfigureByAssoc: no TopLevelTarget");
+
+            // done if not in interleaved mode
+            if (!pSys->getAttr<ATTR_ALL_MCS_IN_INTERLEAVING_GROUP>())
+            {
+                break;
+            }
+
+            // we need to make sure that MBA memory is balanced.
+
+            // find parent MCS
+            TargetHandleList pParentMcsList;
+            getParentAffinityTargets(pParentMcsList, l_parentMembuf,
+                    CLASS_UNIT, TYPE_MCS, true /*functional*/);
+            HWAS_ASSERT((pParentMcsList.size() <= 1),
+                "HWAS deconfigByAssoc: pParentMcsList > 1");
+
+            if (pParentMcsList.empty())
+            {
+                // MCS is already deconfigured, we're done
+                break;
+            }
+
+            // MEMBUF only has 1 parent
+            const Target *l_parentMcs = pParentMcsList[0];
+
+            // find paired MCS / MEMBUF (Centaur)
+            TargetHandleList pMcsList;
+            findMcsInGroup(l_parentMcs, pMcsList);
+
+            // how much memory does this MBA have
+            ATTR_EFF_DIMM_SIZE_type l_dimmSize;
+            i_target.tryGetAttr<ATTR_EFF_DIMM_SIZE>(l_dimmSize);
+            const uint64_t l_mbaDimmSize =
+                    l_dimmSize[0][0] + l_dimmSize[0][1] +
+                    l_dimmSize[1][0] + l_dimmSize[1][1];
+
+            if (l_mbaDimmSize == 0)
+            {   // before this attribute has been set, so don't check
+                break;
+            }
+
+            // now we'll walk thru MCS targets in the group, find MBAs
+            // that match in memory size, and deconfigure them, and add
+            // them to this list to do the deconfigByAssoc afterward.
+            TargetHandleList l_deconfigList;
+
+            // for each paired MCS in the group
+            for (TargetHandleList::iterator pMcs_it = pMcsList.begin();
+                    pMcs_it != pMcsList.end();
+                    ++pMcs_it)
+            {
+                TargetHandle_t pMcs = *pMcs_it;
+
+                if (pMcs == l_parentMcs)
+                {   // this is 'my' MCS - continue
+                    continue;
+                }
+
+                // search for memory on EITHER of its MBA that matchs
+                TargetHandleList pMbaList;
+                PredicateCTM predMba(CLASS_UNIT, TYPE_MBA);
+                PredicatePostfixExpr checkExpr;
+                checkExpr.push(&predMba).push(&isFunctional).And();
+                targetService().getAssociated(pMbaList, pMcs,
+                    TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+                    &checkExpr);
+
+                // if there are 2 functional MBA, then one of them matches
+                // the MBA we just deconfigured, so we need to find the
+                // match and deconfigure it.
+
+                // assumes 2 MBA per MEMBUF. if this changes, then instead
+                // of '1', count the number of MBAs under this MEMBUF and
+                // use that as the comparison.
+                if (pMbaList.size() != 1) // this != myMbaCount
+                {
+                    // unbalanced, so lets find one to deconfigure
+                    for (TargetHandleList::iterator
+                            pMba_it = pMbaList.begin();
+                            pMba_it != pMbaList.end();
+                            ++pMba_it)
+                    {
+                        TargetHandle_t pMba = *pMba_it;
+                        pMba->tryGetAttr<ATTR_EFF_DIMM_SIZE>(l_dimmSize);
+                        const uint64_t l_thisDimmSize =
+                            l_dimmSize[0][0] + l_dimmSize[0][1] +
+                            l_dimmSize[1][0] + l_dimmSize[1][1];
+
+                        // if this MBA matches, deconfigure it.
+                        if (l_mbaDimmSize == l_thisDimmSize)
+                        {
+                            HWAS_INF("deconfigByAssoc MBA matched: %.8X",
+                                get_huid(pMba));
+                            _deconfigureTarget(*pMba, i_errlPlid);
+                            l_deconfigList.push_back(pMba);
+                            break; // only need to do 1 MBA - we're done.
+                        }
+                    } // for MBA
+                } // if 2 functional MBA
+            } // for paired MCS
+
+            // now loop thru and do the ByAssoc deconfig for each of the
+            // MBA targets. this should get the CHILD associations, but
+            // won't cause any pair deconfigs, since we coverered that
+            // already.
+            for (TargetHandleList::iterator
+                    pMba_it = l_deconfigList.begin();
+                    pMba_it != l_deconfigList.end();
+                    ++pMba_it)
+            {
+                TargetHandle_t pMba = *pMba_it;
+                HWAS_INF("deconfigByAssoc MBA matched (bA): %.8X",
+                    get_huid(pMba));
+                _deconfigureByAssoc(*pMba, i_errlPlid);
+            } // for
+            break;
+        } // TYPE_MBA
+
+        case TYPE_DIMM:
+        {
+            //  get deconfigure parent MBA
+            TargetHandleList pParentMbaList;
+            getParentAffinityTargets(pParentMbaList, &i_target,
+                    CLASS_UNIT, TYPE_MBA, true /*functional*/);
+            HWAS_ASSERT((pParentMbaList.size() <= 1),
+                "HWAS deconfigByAssoc: pParentMbaList > 1");
+
+            // if parent MBA hasn't already been deconfigured
+            if (!pParentMbaList.empty())
+            {
+                const Target *l_parentMba = pParentMbaList[0];
+                HWAS_INF("deconfigByAssoc DIMM parent MBA: %.8X",
+                    get_huid(l_parentMba));
+                _deconfigureTarget(const_cast<Target &> (*l_parentMba),
+                    i_errlPlid);
+                _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
+                    i_errlPlid);
+            }
+            break;
+        } // TYPE_DIMM
+        default:
+            // no action
+        break;
+    } // switch
+
+    //HWAS_INF("deconfigByAssoc exiting: %.8X", get_huid(&i_target));
+} // _deconfigByAssoc
 
 //******************************************************************************
-void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
+void DeconfigGard::_deconfigureTarget(Target & i_target,
                                       const uint32_t i_errlPlid)
 {
-    HWAS_INF("Deconfiguring Target %.8X, errlPlid %X",
-            TARGETING::get_huid(&i_target), i_errlPlid);
+    HWAS_INF("Deconfiguring Target %.8X, errlPlid 0x%X",
+            get_huid(&i_target), i_errlPlid);
 
     // Set the Target state to non-functional. The assumption is that it is
     // not possible for another thread (other than deconfigGard) to be
     // updating HWAS_STATE concurrently.
-    TARGETING::HwasState l_state =
-        i_target.getAttr<TARGETING::ATTR_HWAS_STATE>();
+    HwasState l_state =
+        i_target.getAttr<ATTR_HWAS_STATE>();
 
     if (!l_state.functional)
     {
         HWAS_DBG(
-        "Target HWAS_STATE already has functional=0; deconfiguredByPlid=0x%x",
+        "Target HWAS_STATE already has functional=0; deconfiguredByPlid=0x%X",
                 l_state.deconfiguredByPlid);
     }
     else
     {
         HWAS_INF(
-        "Setting Target HWAS_STATE: functional=0, deconfiguredByPlid=0x%x",
+        "Setting Target HWAS_STATE: functional=0, deconfiguredByPlid=0x%X",
             i_errlPlid);
         l_state.functional = 0;
         l_state.deconfiguredByPlid = i_errlPlid;
-        i_target.setAttr<TARGETING::ATTR_HWAS_STATE>(l_state);
+        i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+
+        // Do any necessary Deconfigure Actions
+        _doDeconfigureActions(i_target);
     }
 
-    // Do any necessary Deconfigure Actions
-    _doDeconfigureActions(i_target);
-}
+    //HWAS_DBG("Deconfiguring Target %.8X exiting", get_huid(&i_target));
+} // _deconfigureTarget
 
 //******************************************************************************
-void DeconfigGard::_doDeconfigureActions(TARGETING::Target & i_target)
+void DeconfigGard::_doDeconfigureActions(Target & i_target)
 {
     // TODO
 }
 
 //******************************************************************************
 void DeconfigGard::_createDeconfigureRecord(
-    const TARGETING::Target & i_target,
+    const Target & i_target,
     const uint32_t i_errlPlid)
 {
     // Look for an existing Deconfigure Record for the Target
@@ -744,7 +1070,7 @@ void DeconfigGard::_createDeconfigureRecord(
     {
         if ((*l_itr).iv_target == &i_target)
         {
-            HWAS_DBG("Not creating Deconfigure Record, one exists errlPlid %X",
+            HWAS_DBG("Not creating Deconfigure Record, one exists errlPlid 0x%X",
                 (*l_itr).iv_errlogPlid);
             break;
         }
@@ -819,8 +1145,9 @@ bool DeconfigGard::_processDeferredDeconfig()
     {
         // do the deconfigure
         DeconfigureRecord l_record = *l_itr;
-        _deconfigureTarget(
-                const_cast<TARGETING::Target &> (*(l_record.iv_target)),
+        _deconfigureTarget(const_cast<Target &> (*(l_record.iv_target)),
+                l_record.iv_errlogPlid);
+        _deconfigureByAssoc(const_cast<Target &> (*(l_record.iv_target)),
                 l_record.iv_errlogPlid);
     } // for
 
@@ -834,20 +1161,20 @@ bool DeconfigGard::_processDeferredDeconfig()
 } // _processDeferredDeconfig
 
 //******************************************************************************
-errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
+errlHndl_t DeconfigGard::_createGardRecord(const Target & i_target,
                                            const uint32_t i_errlPlid,
                                            const GARD_ErrorType i_errorType)
 {
     HWAS_INF("Creating GARD Record for %.8X",
-            TARGETING::get_huid(&i_target));
+            get_huid(&i_target));
     errlHndl_t l_pErr = NULL;
 
     do
     {
-        const uint8_t lDeconfigGardable =
-                i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>();
+        const ATTR_DECONFIG_GARDABLE_type lDeconfigGardable =
+                i_target.getAttr<ATTR_DECONFIG_GARDABLE>();
         const uint8_t lPresent =
-                i_target.getAttr<TARGETING::ATTR_HWAS_STATE>().present;
+                i_target.getAttr<ATTR_HWAS_STATE>().present;
         if (!lDeconfigGardable || !lPresent)
         {
             // Target is not GARDable. Commit an error
@@ -864,7 +1191,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
              * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
              */
             const uint64_t userdata1 =
-                (static_cast<uint64_t>(TARGETING::get_huid(&i_target)) << 32) |
+                (static_cast<uint64_t>(get_huid(&i_target)) << 32) |
                 i_errlPlid;
             const uint64_t userdata2 =
                 (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
@@ -877,15 +1204,14 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
             break;
         }
 
-        TARGETING::Target* pSys;
-        TARGETING::targetService().getTopLevelTarget(pSys);
-        HWAS_ASSERT(pSys,
-                "HWAS _createGardRecord: no system TopLevelTarget found");
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        HWAS_ASSERT(pSys, "HWAS _createGardRecord: no TopLevelTarget");
 
         // check for system CDM Policy
-        const TARGETING::ATTR_CDM_POLICIES_type l_sys_policy =
-                pSys->getAttr<TARGETING::ATTR_CDM_POLICIES>();
-        if (l_sys_policy & TARGETING::CDM_POLICIES_MANUFACTURING_DISABLED)
+        const ATTR_CDM_POLICIES_type l_sys_policy =
+                pSys->getAttr<ATTR_CDM_POLICIES>();
+        if (l_sys_policy & CDM_POLICIES_MANUFACTURING_DISABLED)
         {
             // manufacturing records are disabled
             //  - don't process
@@ -893,7 +1219,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
             break;
         }
 
-        if ((l_sys_policy & TARGETING::CDM_POLICIES_PREDICTIVE_DISABLED) &&
+        if ((l_sys_policy & CDM_POLICIES_PREDICTIVE_DISABLED) &&
             (i_errorType == GARD_Predictive))
         {
             // predictive records are disabled AND gard record is predictive
@@ -902,7 +1228,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
             break;
         }
 
-        if ((l_sys_policy & TARGETING::CDM_POLICIES_FUNCTIONAL_DISABLED) &&
+        if ((l_sys_policy & CDM_POLICIES_FUNCTIONAL_DISABLED) &&
             (i_errorType == GARD_Func))
         {
             // functional records are disabled AND gard record is Functional
@@ -942,7 +1268,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
              * @userdata1    HUID of input target // GARD errlog PLID
              */
             const uint64_t userdata1 =
-                (static_cast<uint64_t> (TARGETING::get_huid(&i_target)) << 32) |
+                (static_cast<uint64_t> (get_huid(&i_target)) << 32) |
                 i_errlPlid;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
@@ -953,7 +1279,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
         }
 
         l_pRecord->iv_recordId = iv_nextGardRecordId++;
-        l_pRecord->iv_targetId = i_target.getAttr<TARGETING::ATTR_PHYS_PATH>();
+        l_pRecord->iv_targetId = i_target.getAttr<ATTR_PHYS_PATH>();
         l_pRecord->iv_errlogPlid = i_errlPlid;
         l_pRecord->iv_errorType = i_errorType;
         l_pRecord->iv_ResourceRecovery = 0;  //Finished by Story 35114 & 62392.
@@ -1025,7 +1351,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_clearGardRecords(
-    const TARGETING::EntityPath & i_targetId)
+    const EntityPath & i_targetId)
 {
     errlHndl_t l_pErr = NULL;
 
@@ -1108,7 +1434,7 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_getGardRecords(
-    const TARGETING::EntityPath & i_targetId,
+    const EntityPath & i_targetId,
     GardRecords_t & o_records)
 {
     errlHndl_t l_pErr = NULL;

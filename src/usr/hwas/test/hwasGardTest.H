@@ -307,6 +307,324 @@ public:
     }
 
     /**
+     *  @brief Test Deconfiguring by Association
+     */
+    void testDeconfigureAssoc1()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssoc1: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // find an MBA
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predMba(CLASS_UNIT, TYPE_MBA);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predMba).push(&predFunctional).And();
+            TargetHandleList pMba;
+            targetService().getAssociated( pMba, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pMba.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc1: empty pMba");
+                break;
+            }
+            //TargetHandle_t l_pTarget = *pMba.begin();
+            TargetHandle_t l_pTarget = pMba[pMba.size()-1];
+
+            // Get the original HWAS_STATE of the target
+            HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            // Deconfigure the target.
+            l_pErr = theDeconfigGard().
+                    deconfigureTarget(*l_pTarget, 0xA101);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssoc1: Error from deconfigureTarget");
+                break;
+            }
+
+            l_pTarget = pMba[1];
+
+            // Deconfigure the target.
+            l_pErr = theDeconfigGard().
+                    deconfigureTarget(*l_pTarget, 0xA102);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssoc1: Error from deconfigureTarget");
+                break;
+            }
+            // Get the new HWAS_STATE of the target
+            HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            if (l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssoc1: target functional after deconfigure");
+                break;
+            }
+
+            // Reset the HWAS_STATE of the target
+            l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
+
+            TS_TRACE(INFO_MRK "testDeconfigureAssoc1: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+#endif
+    }
+
+    /**
+     *  @brief Test Deconfiguring by Association
+     */
+    void testDeconfigureAssoc2()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssoc2: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // find an MEMBUF
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predMembuf(CLASS_CHIP, TYPE_MEMBUF);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predMembuf).push(&predFunctional).And();
+            TargetHandleList pMembuf;
+            targetService().getAssociated( pMembuf, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pMembuf.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc2: empty pMembuf");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pMembuf.begin();
+
+            // Get the original HWAS_STATE of the target
+            HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            // Deconfigure the target.
+            l_pErr = theDeconfigGard().
+                    deconfigureTarget(*l_pTarget, 0xA2);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssoc2: Error from deconfigureTarget");
+                break;
+            }
+
+            // Get the new HWAS_STATE of the target
+            HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            if (l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssoc2: target functional after deconfigure");
+                break;
+            }
+
+            // Reset the HWAS_STATE of the target
+            l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
+
+            TS_TRACE(INFO_MRK "testDeconfigureAssoc2: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+#endif
+    }
+
+    /**
+     *  @brief Test Deconfiguring by Association
+     */
+    void testDeconfigureAssoc3()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssoc3: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // find an DIMM
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predDimm).push(&predFunctional).And();
+            TargetHandleList pDimm;
+            targetService().getAssociated( pDimm, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pDimm.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc3: empty pDimm");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pDimm.begin();
+
+            // Get the original HWAS_STATE of the target
+            HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            // Deconfigure the target.
+            l_pErr = theDeconfigGard().
+                    deconfigureTarget(*l_pTarget, 0xA3);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssoc3: Error from deconfigureTarget");
+                break;
+            }
+
+            // Get the new HWAS_STATE of the target
+            HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            if (l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssoc3: target functional after deconfigure");
+                break;
+            }
+
+            // Reset the HWAS_STATE of the target
+            l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
+
+            TS_TRACE(INFO_MRK "testDeconfigureAssoc3: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+#endif
+    }
+    /**
+     *  @brief Test Deconfiguring by Association
+     */
+    void testDeconfigureAssoc4()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssoc4: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // find an MCS
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predMcs(CLASS_UNIT, TYPE_MCS);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predMcs).push(&predFunctional).And();
+            TargetHandleList pMcs;
+            targetService().getAssociated( pMcs, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pMcs.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc4: empty pMcs");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pMcs.begin();
+
+            // Get the original HWAS_STATE of the target
+            HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            // Deconfigure the target.
+            l_pErr = theDeconfigGard().
+                    deconfigureTarget(*l_pTarget, 0xA4);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssoc4: Error from deconfigureTarget");
+                break;
+            }
+
+            // Get the new HWAS_STATE of the target
+            HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            if (l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssoc4: target functional after deconfigure");
+                break;
+            }
+
+            // Reset the HWAS_STATE of the target
+            l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
+
+            TS_TRACE(INFO_MRK "testDeconfigureAssoc4: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+#endif
+    }
+
+    /**
      *  @brief Test Deconfiguring a Target via deferred
      */
     void testDefDeconfig1()

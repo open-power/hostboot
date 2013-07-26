@@ -214,19 +214,6 @@ void*    call_mss_getecid( void *io_pArgs )
                     }
                 } // for
 
-                // If there are no functional MBAs for this Centaur, deconfigure
-                // the Centaur as well
-                // TODO: RTC: 63225
-                //  this will go away when deconfigureByAssocation() handles this.
-                if (!l_err && (0 == l_num_func_mbas))
-                {
-                    // call HWAS to deconfigure this target
-                    l_err = HWAS::theDeconfigGard().deconfigureTarget(
-                                    *l_pCentaur,
-                                    HWAS::DeconfigGard::
-                                                DECONFIGURED_BY_MEMORY_CONFIG);
-                }
-
                 if (l_err)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
