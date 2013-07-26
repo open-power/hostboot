@@ -110,6 +110,7 @@ namespace DUMP
         uint64_t srcAddr;
         uint64_t destAddr;
         uint64_t dataSize;
+        uint64_t reserved;
     };
 
 
