@@ -60,6 +60,19 @@ namespace HWAS
 bool platSystemIsAtRuntime();
 
 /**
+ * @brief platform specific code to determine if minimum hardware
+ * check is allowed.
+ *
+ * @param[out] o_minHwCheckingAllowed   boolean:
+ *             TRUE if minimum hardware checking is allowed
+ *             FALSE if minimum hardware checking is not allowed
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t platIsMinHwCheckingAllowed(bool &o_minHwCheckingAllowed);
+
+/**
  * @brief platform specific code to determine if the targets in the
  *  input list are present or not. If a target is NOT present, it is erased
  *  from the list

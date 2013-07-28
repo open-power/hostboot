@@ -134,6 +134,21 @@ bool platSystemIsAtRuntime()
 }
 
 //******************************************************************************
+// platIsMinHwCheckingAllowed function
+// Description: This function will return false always because when Hostboot
+// is running then System cannot be at runtime
+//******************************************************************************
+errlHndl_t platIsMinHwCheckingAllowed(bool &o_minHwCheckingAllowed)
+{
+    errlHndl_t errl = NULL;
+
+    // for hostboot, minimum hardware checkign is always allowed
+    o_minHwCheckingAllowed = true;
+
+    return errl;
+}
+
+//******************************************************************************
 // platReadPartialGood function
 //******************************************************************************
 errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,

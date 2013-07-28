@@ -623,140 +623,163 @@ errlHndl_t restrictEXunits(
 errlHndl_t  checkMinimumHardware()
 {
     errlHndl_t  l_errl              =   NULL;
-    uint32_t    l_reasonCode        =   0;
-    uint32_t    l_commonPlid        =   0;
+    HWAS_INF("checkMinimumHardware entry");
 
-    //***********************************************************************/
-    //  Common present and functional hardware checks.
-    //***********************************************************************/
-
-    //  check for functional cores
-    TargetHandleList l_cores;
-    getAllChiplets(l_cores, TYPE_CORE, true );
-    HWAS_DBG( "platCheckMinimumHardware: %d functional cores",
-              l_cores.size() );
-    if ( l_cores.empty() )
+    do
     {
-        TargetHandleList l_presentCores;
-        getAllChiplets(l_presentCores, TYPE_CORE, false );
-        HWAS_ERR( "Insufficient HW to continue IPL: (func Cores)"
-                  ", %d cores are present",
-                  l_presentCores.size() );
-        /*@
-         * @errortype
-         * @severity     ERRL_SEV_UNRECOVERABLE
-         * @moduleid     MOD_SYS_AVAIL_SVC
-         * @reasoncode   RC_SYSAVAIL_NO_CORES_FUNC
-         * @devdesc      checkSystem availability check found no functional
-         *               processor cores.
-         * @userdata1    Number of present, nonfunctional cores.
-         * @userdata2    0
-         */
-        l_reasonCode = RC_SYSAVAIL_NO_CORES_FUNC;
-        l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
-                                MOD_SYS_AVAIL_SVC,
-                                l_reasonCode,
-                                l_presentCores.size(),
-                                0 );
-        //  call out the procedure to find the deconfigured part.
-        hwasErrorAddProcedureCallout( l_errl,
-                                      EPUB_PRC_FIND_DECONFIGURED_PART,
-                                      SRCI_PRIORITY_HIGH );
-        //  if we already have an error, link this one to the earlier plid.
-        //  if not, set the common plid
-        hwasErrorUpdatePlid( l_errl,
-                             l_commonPlid );
+        uint32_t    l_reasonCode        =   0;
+        uint32_t    l_commonPlid        =   0;
 
-        //  finally, commit the log.
-        errlCommit(l_errl, HWAS_COMP_ID);
-        // errl is now NULL
+        // before we check, confirm that we're allowed to check right now.
+        bool l_minHwCheckingAllowed = false;
+        l_errl = platIsMinHwCheckingAllowed(l_minHwCheckingAllowed);
+
+        if (l_errl)
+        {
+            HWAS_ERR("platIsMinHwCheckingAllowed returned error - skipping");
+            break;
+        }
+
+        if (!l_minHwCheckingAllowed)
+        {
+            HWAS_INF("platIsMinHwCheckingAllowed returned false - skipping");
+            break;
+        }
+
+        //*********************************************************************/
+        //  Common present and functional hardware checks.
+        //*********************************************************************/
+
+        //  check for functional cores
+        TargetHandleList l_cores;
+        getAllChiplets(l_cores, TYPE_CORE, true );
+        HWAS_DBG( "platCheckMinimumHardware: %d functional cores",
+                  l_cores.size() );
+        if ( l_cores.empty() )
+        {
+            TargetHandleList l_presentCores;
+            getAllChiplets(l_presentCores, TYPE_CORE, false );
+            HWAS_ERR( "Insufficient HW to continue IPL: (func Cores)"
+                      ", %d cores are present",
+                      l_presentCores.size() );
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     MOD_SYS_AVAIL_SVC
+             * @reasoncode   RC_SYSAVAIL_NO_CORES_FUNC
+             * @devdesc      checkSystem availability check found no functional
+             *               processor cores.
+             * @userdata1    Number of present, nonfunctional cores.
+             * @userdata2    0
+             */
+            l_reasonCode = RC_SYSAVAIL_NO_CORES_FUNC;
+            l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
+                                    MOD_SYS_AVAIL_SVC,
+                                    l_reasonCode,
+                                    l_presentCores.size(),
+                                    0 );
+            //  call out the procedure to find the deconfigured part.
+            hwasErrorAddProcedureCallout( l_errl,
+                                          EPUB_PRC_FIND_DECONFIGURED_PART,
+                                          SRCI_PRIORITY_HIGH );
+            //  if we already have an error, link this one to the earlier plid.
+            //  if not, set the common plid
+            hwasErrorUpdatePlid( l_errl,
+                                 l_commonPlid );
+
+            //  finally, commit the log.
+            errlCommit(l_errl, HWAS_COMP_ID);
+            // errl is now NULL
+        } // if no cores
+
+        //  check here for functional dimms
+        TargetHandleList l_dimms;
+        getAllLogicalCards(l_dimms, TYPE_DIMM, true );
+        HWAS_DBG( "platCheckMinimumHardware: %d functional dimms",
+                  l_dimms.size() );
+        if ( l_dimms.empty() )
+        {
+            TargetHandleList    l_presentDimms;
+            getAllLogicalCards(l_presentDimms, TYPE_DIMM, false );
+            HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)"
+                      ", %d dimms present",
+                      l_presentDimms.size() );
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     MOD_SYS_AVAIL_SVC
+             * @reasoncode   RC_SYSAVAIL_NO_MEMORY_FUNC
+             * @devdesc      checkSystem availability check found no
+             *               functional dimm cards.
+             * @userdata1    Number of present, nonfunctional dimms
+             * @userdata2    0
+             */
+            l_reasonCode    =   RC_SYSAVAIL_NO_MEMORY_FUNC;
+            l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
+                                    MOD_SYS_AVAIL_SVC,
+                                    l_reasonCode,
+                                    l_presentDimms.size(),
+                                    0  );
+            //  call out the procedure to find the deconfigured part.
+            hwasErrorAddProcedureCallout( l_errl,
+                                          EPUB_PRC_FIND_DECONFIGURED_PART,
+                                          SRCI_PRIORITY_HIGH );
+            //  if we already have an error, link this one to the earlier plid.
+            //  if not, set the common plid
+            hwasErrorUpdatePlid( l_errl,
+                                 l_commonPlid );
+
+            errlCommit(l_errl, HWAS_COMP_ID);
+            // errl is now NULL
+        } // if no dimms
+
+        //  ------------------------------------------------------------
+        //  Check for Mirrored memory -
+        //  If the user requests mirrored memory and we do not have it,
+        //  post an errorlog but do not return a terminating error.
+        //  ------------------------------------------------------------
+        //  Need to read an attribute set by PHYP?
+
+
+        //  check for minimum hardware that is specific to HostBoot.
+        //  if it exists, create and commit an error, and tie it to the
+        //  the rest of them with the common plid.
+        platCheckMinimumHardware( l_commonPlid );
+
+        //  ---------------------------------------------------------------
+        // if the common plid got set anywhere above, we have an error.
+        //  ---------------------------------------------------------------
+        if ( l_commonPlid  )
+        {
+
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     MOD_SYS_AVAIL_SVC
+             * @reasoncode   RC_SYSAVAIL_INSUFFICIENT_HW
+             * @devdesc      Insufficient hardware to continue.
+             * @userdata1    0
+             * @userdata2    0
+             */
+            l_reasonCode    =   RC_SYSAVAIL_INSUFFICIENT_HW;
+            l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
+                                    MOD_SYS_AVAIL_SVC,
+                                    l_reasonCode,
+                                    0,
+                                    0 );
+            //  call out the procedure to find the deconfigured part.
+            hwasErrorAddProcedureCallout( l_errl,
+                                          EPUB_PRC_FIND_DECONFIGURED_PART,
+                                          SRCI_PRIORITY_HIGH );
+            //  if we already have an error, link this one to the earlier plid.
+            hwasErrorUpdatePlid( l_errl,
+                                 l_commonPlid );
+        }
     }
+    while (0);
 
-
-    //  check here for functional dimms
-    TargetHandleList l_dimms;
-    getAllLogicalCards(l_dimms, TYPE_DIMM, true );
-    HWAS_DBG( "platCheckMinimumHardware: %d functional dimms",
-              l_dimms.size() );
-    if ( l_dimms.empty() )
-    {
-        TargetHandleList    l_presentDimms;
-        getAllLogicalCards(l_presentDimms, TYPE_DIMM, false );
-        HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)"
-                  ", %d dimms present",
-                  l_presentDimms.size() );
-        /*@
-         * @errortype
-         * @severity     ERRL_SEV_UNRECOVERABLE
-         * @moduleid     MOD_SYS_AVAIL_SVC
-         * @reasoncode   RC_SYSAVAIL_NO_MEMORY_FUNC
-         * @devdesc      checkSystem availability check found no
-         *               functional dimm cards.
-         * @userdata1    Number of present, nonfunctional dimms
-         * @userdata2    0
-         */
-        l_reasonCode    =   RC_SYSAVAIL_NO_MEMORY_FUNC;
-        l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
-                                MOD_SYS_AVAIL_SVC,
-                                l_reasonCode,
-                                l_presentDimms.size(),
-                                0  );
-        //  call out the procedure to find the deconfigured part.
-        hwasErrorAddProcedureCallout( l_errl,
-                                      EPUB_PRC_FIND_DECONFIGURED_PART,
-                                      SRCI_PRIORITY_HIGH );
-        //  if we already have an error, link this one to the earlier plid.
-        //  if not, set the common plid
-        hwasErrorUpdatePlid( l_errl,
-                             l_commonPlid );
-
-        errlCommit(l_errl, HWAS_COMP_ID);
-        // errl is now NULL
-    }
-
-    //  ------------------------------------------------------------
-    //  Check for Mirrored memory -
-    //  If the user requests mirrored memory and we do not have it,
-    //  post an errorlog but do not return a terminating error.
-    //  ------------------------------------------------------------
-    //  Need to read an attribute set by PHYP?
-
-
-    //  check for minimum hardware that is specific to HostBoot.
-    //  if it exists, create and commit an error, and tie it to the
-    //  the rest of them with the common plid.
-    platCheckMinimumHardware( l_commonPlid );
-
-    //  ---------------------------------------------------------------
-    // if the common plid got set anywhere above, we have an error.
-    //  ---------------------------------------------------------------
-    if ( l_commonPlid  )
-    {
-
-        /*@
-         * @errortype
-         * @severity     ERRL_SEV_UNRECOVERABLE
-         * @moduleid     MOD_SYS_AVAIL_SVC
-         * @reasoncode   RC_SYSAVAIL_INSUFFICIENT_HW
-         * @devdesc      Insufficient hardware to continue.
-         * @userdata1    0
-         * @userdata2    0
-         */
-        l_reasonCode    =   RC_SYSAVAIL_INSUFFICIENT_HW;
-        l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
-                                MOD_SYS_AVAIL_SVC,
-                                l_reasonCode,
-                                0,
-                                0 );
-        //  call out the procedure to find the deconfigured part.
-        hwasErrorAddProcedureCallout( l_errl,
-                                      EPUB_PRC_FIND_DECONFIGURED_PART,
-                                      SRCI_PRIORITY_HIGH );
-        //  if we already have an error, link this one to the earlier plid.
-        hwasErrorUpdatePlid( l_errl,
-                             l_commonPlid );
-    }
-
+    HWAS_INF("checkMinimumHardware exit - minimum hardware %s",
+            (l_errl == NULL) ? "available" : "NOT available");
     return  l_errl ;
 }
 
