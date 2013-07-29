@@ -35,9 +35,10 @@ namespace PRDF
 {
 
 const uint32_t PFA5_Format = 0x50464135;
-const uint32_t MruListLIMIT = 8;
+
+const uint32_t MruListLIMIT  = 8;
 const uint32_t HcdbListLIMIT = 8;
-const uint32_t SignatureListLIMIT = 8;
+const uint32_t SigListLIMIT  = 8;
 
 // Size of PRD Capture Data
 #ifdef __HOSTBOOT_MODULE
@@ -68,363 +69,250 @@ enum ErrlSubsect
 
 struct MsDumpStruct
 {
-  int32_t DumpContent;
-  HUID DumpId;
+    int32_t content;
+    HUID    id;
 
-  friend UtilStream& operator<<(UtilStream& i_left, MsDumpStruct& i_right)
-  {
-      i_left << i_right.DumpContent << i_right.DumpId;
+    friend UtilStream& operator<<( UtilStream& i_left, MsDumpStruct& i_right )
+    {
+        i_left << i_right.content << i_right.id;
+        return i_left;
+    };
 
-      return i_left;
-  };
-
-  friend UtilStream& operator>>(UtilStream& i_left, MsDumpStruct& i_right)
-  {
-      i_left >> i_right.DumpContent >>i_right.DumpId;
-
-      return i_left;
-  };
+    friend UtilStream& operator>>( UtilStream& i_left, MsDumpStruct& i_right )
+    {
+        i_left >> i_right.content >>i_right.id;
+        return i_left;
+    };
 };
 
-struct PfaCalloutListStruct
+struct PfaMruListStruct
 {
-  uint32_t Callout;
-  uint8_t  MRUtype;         // See enum PRDcallout::MruType
-  uint8_t  MRUpriority;     // in srci/fsp/srci.H
-                            // SRCI_PRIORITY_LOW   = 1
-                            // SRCI_PRIORITY_MEDC  = 2
-                            // SRCI_PRIORITY_MEDB  = 3
-                            // SRCI_PRIORITY_MEDA  = 4
-                            // SRCI_PRIORITY_MED   = 5
-                            // SRCI_PRIORITY_HIGH  = 6
-  uint8_t Reserved_3;
-  uint8_t Reserved_4;
+    uint32_t callout;  // 32-bit representation of HUID, MemoryMru, symbolic FRU
+    uint8_t  type;     // See enum PRDcallout::MruType
+    uint8_t  priority; // See enum srciPriority (in srci/fsp/srci.H)
 
-  friend UtilStream& operator<<(UtilStream& i_left,
-                                PfaCalloutListStruct& i_right)
-  {
-        i_left << i_right.Callout << i_right.MRUtype << i_right.MRUpriority
-             << i_right.Reserved_3 << i_right.Reserved_4;
+    friend UtilStream& operator<<( UtilStream& i_left,
+                                   PfaMruListStruct& i_right )
+    {
+        i_left << i_right.callout << i_right.type << i_right.priority;
+        return i_left;
+    };
 
-      return i_left;
-  };
-
-  friend UtilStream& operator>>(UtilStream& i_left,
-                                PfaCalloutListStruct& i_right)
-  {
-    i_left >> i_right.Callout >> i_right.MRUtype >> i_right.MRUpriority
-             >> i_right.Reserved_3 >> i_right.Reserved_4;
-      return i_left;
-  };
-
+    friend UtilStream& operator>>( UtilStream& i_left,
+                                   PfaMruListStruct& i_right )
+    {
+        i_left >> i_right.callout >> i_right.type >> i_right.priority;
+        return i_left;
+    };
 };
 
-//NOTE: The addition of the hcdb data requires additonal PFA data and
-//      error log parsing. This is triggered / indicated by a new
-//      PFA data bit,HCDB_SUPPORT. Support is for fips720 and beyond.
 struct PfaHcdbListStruct
 {
-    HUID     hcdbId ;
+    HUID     hcdbId;
     uint32_t compSubType;
     uint32_t compType;
-    uint32_t hcdbReserved1;
-    uint32_t hcdbReserved2;
 
-    friend UtilStream& operator<<(UtilStream& i_left,
-                                  PfaHcdbListStruct& i_right)
+    friend UtilStream& operator<<( UtilStream& i_left,
+                                   PfaHcdbListStruct& i_right )
     {
-      i_left << i_right.hcdbId << i_right.compSubType << i_right.compType
-          << i_right.hcdbReserved1 << i_right.hcdbReserved2;
+        i_left << i_right.hcdbId << i_right.compSubType << i_right.compType;
         return i_left;
     };
 
-    friend UtilStream& operator>>(UtilStream& i_left,
-                                  PfaHcdbListStruct& i_right)
+    friend UtilStream& operator>>( UtilStream& i_left,
+                                   PfaHcdbListStruct& i_right )
     {
-        i_left >> i_right.hcdbId >> i_right.compSubType >> i_right.compType
-          >> i_right.hcdbReserved1 >> i_right.hcdbReserved2;
+        i_left >> i_right.hcdbId >> i_right.compSubType >> i_right.compType;
         return i_left;
     };
 };
 
-struct PfaSignatureListStruct
+struct PfaSigListStruct
 {
-    HUID  chipId ;
+    HUID     chipId;
     uint32_t signature;
 
-    friend UtilStream& operator<<(UtilStream& i_left,
-                                  PfaSignatureListStruct& i_right)
+    friend UtilStream& operator<<( UtilStream& i_left,
+                                   PfaSigListStruct& i_right )
     {
         i_left << i_right.chipId << i_right.signature;
         return i_left;
     };
 
-    friend UtilStream& operator>>(UtilStream& i_left,
-                                  PfaSignatureListStruct& i_right)
+    friend UtilStream& operator>>( UtilStream& i_left,
+                                   PfaSigListStruct& i_right )
     {
         i_left >> i_right.chipId >> i_right.signature;
         return i_left;
     };
 };
 
-/*********************************************************************
- * NOTE: the MsDumpLabel and its information must be first in this
- *       structure. Attn handling is dependent on this ordering.
- **********************************************************************/
 struct PfaData
 {
-  //0x0000
-  uint32_t MsDumpLabel[2];
-  MsDumpStruct MsDumpInfo;
+    // Dump info
+    // NOTE: The msDumpLabel and its information must be first in this
+    //       structure. ATTN handling is dependent on this ordering.
+    uint32_t     msDumpLabel[2];
+    MsDumpStruct msDumpInfo;
 
-  uint32_t PFA_errlActions :16,// Error Log Actions Parm
-  //                              ERRL_ACTION_NONE              = 0x0000
-  //                              ERRL_ACTION_SA                = 0x8000
-  //                              ERRL_ACTION_HIDDEN            = 0x4000
-  //                              ERRL_ACTION_REPORT            = 0x2000
-  //                              ERRL_ACTION_REPORT_HMC_ONLY   = 0x1000
-  //                              ERRL_ACTION_CALL_HOME         = 0x0800
-  //                              ERRL_ACTION_FNM_REQ           = 0x0400
-  //                              ERRL_ACTION_HYP_GARD          = 0x0200
-  //                              ERRL_ACTION_OS_RECONFIG       = 0x0100
-           PFA_errlSeverity :8,// Error Log Severity Parm
-  //                              See errlSeverity in errltypes.H
-  //                              ERRL_SEV_INFORMATIONAL                = 0,
-  //                              ERRL_SEV_RECOVERED                    = 0x10
-  //                              ERRL_SEV_PREDICTIVE                   = 0x20
-  //                              ERRL_SEV_PREDICTIVE_DEGRADED          = 0x21
-  //                              ERRL_SEV_PREDICTIVE_CORRECTABLE       = 0x22
-  //                              ERRL_SEV_PREDICTIVE_CORRECTABLE2      = 0x23
-  //                              ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST   = 0x24
-  //                              ERRL_SEV_UNRECOVERABLE1               = 0x41
-  //                              ERRL_SEV_UNRECOVERABLE2               = 0x44
-  //                              ERRL_SEV_UNRECOVERABLE3               = 0x45
-  //                              ERRL_SEV_UNRECOVERABLE4               = 0x48
-  //                              ERRL_SEV_DIAGNOSTIC_ERROR1            = 0x60
-  //                              ERRL_SEV_DIAGNOSTIC_ERROR2            = 0x61
-  //                              ERRL_SEV_UNRECOVERABLE                = 0x70
-  //                              ERRL_SEV_UNRECOVERABLE_REIPL          = 0x71
-  //                              ERRL_SEV_RESERVED                     = 0xFF
+    // Error log actions and severity
+    uint32_t errlActions          :16, // See enum errlActions (in errltypes.H)
+             errlSeverity         : 8, // See enum errlSeverity (in errltypes.H)
+             serviceActionCounter : 8; // Number of service actions requested
+                                       // by PRD.
 
+    // PRD Service Data Collector Flags (1:true, 0:false)
+    uint32_t DUMP                 :1,
+             UERE                 :1,
+             SUE                  :1,
+             AT_THRESHOLD         :1,
+             DEGRADED             :1,
+             SERVICE_CALL         :1,
+             TRACKIT              :1,
+             TERMINATE            :1,
+             LOGIT                :1,
+             FLOODING             :1,
+             THERMAL_EVENT        :1,
+             UNIT_CHECKSTOP       :1,
+             USING_SAVED_SDC      :1,
+             LAST_CORE_TERMINATE  :1,
+             DEFER_DECONFIG       :1,
+             CM_MODE              :1,
+             Reserved             :16;
 
-           Reserved_2     :8;
+    // Thresholding
+    uint32_t errorCount :16, // Number of occurrences of this attention
+             threshold  :16; // Theshold for this attention
 
-  // PRD Service Data Collector Flags
-  uint32_t MP_DUMP_REQ          :1,
-           MP_RESET_REQ         :1,
-           MP_FATAL             :1,
-           REBOOT_MSG           :1,
-           DUMP                 :1,
-           UERE                 :1,
-           SUE                  :1,
-           CRUMB                :1,
-           AT_THRESHOLD         :1,
-           DEGRADED             :1,
-           SERVICE_CALL         :1,
-           TRACKIT              :1,
-           TERMINATE            :1,
-           LOGIT                :1,
-           MEMORY_STEERED       :1,
-           FLOODING             :1,
-           THERMAL_EVENT        :1,
-           UNIT_CHECKSTOP       :1,
-           USING_SAVED_SDC      :1,
-           LAST_CORE_TERMINATE  :1,
-           FORCE_LATENT_CS      :1,
-           Reserved_0           :1,
-           DEFER_DECONFIG       :1,
-           CM_MODE              :1,
-           TERMINATE_ON_CS      :1,
-           HCDB_SUPPORT         :1,
-           SIGNATURE_SUPPORT    :1,
-           Reserved             :5;
-  //                            1  TRUE
-  //                            0  FALSE
-  //
-  //0x00xx
-  //uint32_t ComponentDataLabel[2];// Label to show start of Component data.
-  uint32_t ErrorCount      :16,
-  //                            PRD Hits on this Error since IPL.
-           Threshold       :16;
-  //                            PRD Threshold for this error (MAKMAK how represent interval?)
+    // Attention types and GARD state.
+    uint32_t priAttnType    : 8, // primary attention type
+             secAttnType    : 8, // secondary attention type
+             prdGardErrType : 8, // See enum GardResolution::ErrorType
+             hwasGardState  : 8; // See enum hwsvGardEnum (in hwsvTypes.H)
 
-  uint32_t PRDServiceActionCounter :8,
-  //                                  PRD Service Action Counter
-           ErrorType               :8,
-  //                                  Error type gard was called with (see xspprdGardResolution.h)
-           homGardState            :8,
-  //                                  homGardEnum in src/hwsv/server/hwsvTypes.H
-  //                                        HOM_NO_GARD = 0
-  //                                        HOM_DECONFIG_GARD =1
-  //                                        HOM_BYPASS_GARD = 2
-           Reserved_5              :8;  //MP01 c - SystemType not needed
+    uint32_t mruListCount;                  // Total number of MRUs.
+    PfaMruListStruct mruList[MruListLIMIT]; // Full list of MRUs.
 
-  uint32_t PRD_AttnTypes        :8,
-  //                                  0x00 NULL
-  //                                  0x01 CheckStop Attn
-  //                                  0x02 Recoverable Attn
-  //                                  0x03 Special Attn
-           PRD_SecondAttnTypes  :8,
-  //                                  0x00 NULL
-  //                                  0x01 CheckStop Attn
-  //                                  0x02 Recoverable Attn
-  //                                  0x03 Special Attn
+    uint32_t hcdbListCount;                    // Total number of MRUs.
+    PfaHcdbListStruct hcdbList[HcdbListLIMIT]; // Full list of HCDB changes.
 
-           reasonCode           :16;  //MP06 a
+    uint32_t sigListCount;                  // Total number of multi-signatures.
+    PfaSigListStruct sigList[SigListLIMIT]; // Full list of multi-signatures.
 
-  uint32_t PfaCalloutCount;      // The number of MRUs below.
-  PfaCalloutListStruct PfaCalloutList[MruListLIMIT]; //full list of MRUs and flags.
-  uint32_t hcdbListCount;  //mp15 a
-  PfaHcdbListStruct PfaHcdbList[HcdbListLIMIT];
-  uint32_t signatureCount;
-  PfaSignatureListStruct PfaSignatureList[SignatureListLIMIT];
-  //pw01
-  friend UtilStream& operator<<(UtilStream& i_left, PfaData& i_right)
-  {
-      i_left << i_right.MsDumpLabel[0] << i_right.MsDumpLabel[1]
-             << i_right.MsDumpInfo
-            <<
-                    ( (i_right.PFA_errlActions << 16) |
-                      (i_right.PFA_errlSeverity << 8) |
-                      (i_right.Reserved_2)
-                    )
-            <<
-                    ( (i_right.MP_DUMP_REQ          << 31) |
-                      (i_right.MP_RESET_REQ         << 30) |
-                      (i_right.MP_FATAL             << 29) |
-                      (i_right.REBOOT_MSG           << 28) |
-                      (i_right.DUMP                 << 27) |
-                      (i_right.UERE                 << 26) |
-                      (i_right.SUE                  << 25) |
-                      (i_right.CRUMB                << 24) |
-                      (i_right.AT_THRESHOLD         << 23) |
-                      (i_right.DEGRADED             << 22) |
-                      (i_right.SERVICE_CALL         << 21) |
-                      (i_right.TRACKIT              << 20) |
-                      (i_right.TERMINATE            << 19) |
-                      (i_right.LOGIT                << 18) |
-                      (i_right.MEMORY_STEERED       << 17) |
-                      (i_right.FLOODING             << 16) |
-                      (i_right.THERMAL_EVENT        << 15) |
-                      (i_right.UNIT_CHECKSTOP       << 14) |
-                      (i_right.USING_SAVED_SDC      << 13) |
-                      (i_right.LAST_CORE_TERMINATE  << 12) |
-                      (i_right.FORCE_LATENT_CS      << 11) |
-                      (i_right.Reserved_0           << 10) |
-                      (i_right.DEFER_DECONFIG       <<  9) |
-                      (i_right.CM_MODE              <<  8) |
-                      (i_right.TERMINATE_ON_CS      <<  7) |
-                      (i_right.HCDB_SUPPORT         <<  6) |
-                      (i_right.SIGNATURE_SUPPORT    <<  5) |
-                      (i_right.Reserved                  )
-                    )
-            //<< i_right.ComponentDataLabel[0] << i_right.ComponentDataLabel[1]
-            <<
-                    ( (i_right.ErrorCount << 16) |
-                      (i_right.Threshold)
-                    )
-            <<
-                    ( (i_right.PRDServiceActionCounter << 24) |
-                      (i_right.ErrorType << 16) |
-                      (i_right.homGardState << 8) |
-                      (i_right.Reserved_5)
-                    )
-            <<
-                    ( (i_right.PRD_AttnTypes << 24) |
-                      (i_right.PRD_SecondAttnTypes << 16) |
-                      (i_right.reasonCode)
-                    )
-            << i_right.PfaCalloutCount;
-      for (uint32_t i = 0; i < i_right.PfaCalloutCount; i++)
-                i_left << i_right.PfaCalloutList[i];
+    /**
+     * @brief Default constructor
+     */
+    PfaData()
+    {
+        memset( &mruList[0],  0x00, sizeof(PfaMruListStruct)  * MruListLIMIT  );
+        memset( &hcdbList[0], 0x00, sizeof(PfaHcdbListStruct) * HcdbListLIMIT );
+        memset( &sigList[0],  0x00, sizeof(PfaSigListStruct)  * SigListLIMIT  );
+    }
 
-      if ( 0 != i_right.HCDB_SUPPORT )                             //mp16 a
-        {
-            i_left << i_right.hcdbListCount;                       //mp15 a
-            for (uint32_t i = 0; i < i_right.hcdbListCount; i++)   //mp15 a
-                i_left << i_right.PfaHcdbList[i];                  //mp15 a
-        }
+    friend UtilStream& operator<<(UtilStream& i_left, PfaData& i_right)
+    {
+        i_left << i_right.msDumpLabel[0] << i_right.msDumpLabel[1]
+               << i_right.msDumpInfo;
 
-      if ( 0 != i_right.SIGNATURE_SUPPORT )                         //mp16 a
-        {
-            i_left << i_right.signatureCount;
-            for (uint32_t i = 0; i < i_right.signatureCount; i++)
-                i_left << i_right.PfaSignatureList[i];
-        }
+        i_left << ( (i_right.errlActions          << 16) |
+                    (i_right.errlSeverity         <<  8) |
+                    (i_right.serviceActionCounter      ) );
 
-      return i_left;
-  };
+        i_left << ( (i_right.DUMP                 << 31) |
+                    (i_right.UERE                 << 30) |
+                    (i_right.SUE                  << 29) |
+                    (i_right.AT_THRESHOLD         << 28) |
+                    (i_right.DEGRADED             << 27) |
+                    (i_right.SERVICE_CALL         << 26) |
+                    (i_right.TRACKIT              << 25) |
+                    (i_right.TERMINATE            << 24) |
+                    (i_right.LOGIT                << 23) |
+                    (i_right.FLOODING             << 22) |
+                    (i_right.THERMAL_EVENT        << 21) |
+                    (i_right.UNIT_CHECKSTOP       << 20) |
+                    (i_right.USING_SAVED_SDC      << 19) |
+                    (i_right.LAST_CORE_TERMINATE  << 18) |
+                    (i_right.DEFER_DECONFIG       << 17) |
+                    (i_right.CM_MODE              << 16) |
+                    (i_right.Reserved                  ) );
 
-  friend UtilStream& operator>>(UtilStream& i_left, PfaData& i_right)
-  {
-      uint32_t l_tmp[6];
-      i_left >> i_right.MsDumpLabel[0] >> i_right.MsDumpLabel[1]
-             >> i_right.MsDumpInfo
-             >> l_tmp[1]
-             >> l_tmp[2]
-             >> l_tmp[3]
-             >> l_tmp[4]
-             >> l_tmp[5];
+        i_left << ( (i_right.errorCount << 16) |
+                    (i_right.threshold       ) );
 
-      i_right.PFA_errlActions           = (l_tmp[1] >> 16) & 0xFFFF;
-      i_right.PFA_errlSeverity          = (l_tmp[1] >>  8) & 0xFF;
-      i_right.MP_DUMP_REQ               = (l_tmp[2] >> 31) & 0x01;
-      i_right.MP_RESET_REQ              = (l_tmp[2] >> 30) & 0x01;
-      i_right.MP_FATAL                  = (l_tmp[2] >> 29) & 0x01;
-      i_right.REBOOT_MSG                = (l_tmp[2] >> 28) & 0x01;
-      i_right.DUMP                      = (l_tmp[2] >> 27) & 0x01;
-      i_right.UERE                      = (l_tmp[2] >> 26) & 0x01;
-      i_right.SUE                       = (l_tmp[2] >> 25) & 0x01;
-      i_right.CRUMB                     = (l_tmp[2] >> 24) & 0x01;
-      i_right.AT_THRESHOLD              = (l_tmp[2] >> 23) & 0x01;
-      i_right.DEGRADED                  = (l_tmp[2] >> 22) & 0x01;
-      i_right.SERVICE_CALL              = (l_tmp[2] >> 21) & 0x01;
-      i_right.TRACKIT                   = (l_tmp[2] >> 20) & 0x01;
-      i_right.TERMINATE                 = (l_tmp[2] >> 19) & 0x01;
-      i_right.LOGIT                     = (l_tmp[2] >> 18) & 0x01;
-      i_right.MEMORY_STEERED            = (l_tmp[2] >> 17) & 0x01;
-      i_right.FLOODING                  = (l_tmp[2] >> 16) & 0x01;
-      i_right.THERMAL_EVENT             = (l_tmp[2] >> 15) & 0x01;
-      i_right.UNIT_CHECKSTOP            = (l_tmp[2] >> 14) & 0x01;
-      i_right.USING_SAVED_SDC           = (l_tmp[2] >> 13) & 0x01;
-      i_right.LAST_CORE_TERMINATE       = (l_tmp[2] >> 12) & 0x01;
-      i_right.FORCE_LATENT_CS           = (l_tmp[2] >> 11) & 0x01;
-      i_right.Reserved_0                = (l_tmp[2] >> 10) & 0x01;
-      i_right.DEFER_DECONFIG            = (l_tmp[2] >>  9) & 0x01;
-      i_right.CM_MODE                   = (l_tmp[2] >>  8) & 0x01;
-      i_right.TERMINATE_ON_CS           = (l_tmp[2] >>  7) & 0x01;
-      i_right.HCDB_SUPPORT              = (l_tmp[2] >>  6) & 0x01;
-      i_right.SIGNATURE_SUPPORT         = (l_tmp[2] >>  5) & 0x01;
-      i_right.ErrorCount                = (l_tmp[3] >> 16) & 0xFFFF;
-      i_right.Threshold                 = (l_tmp[3]      ) & 0xFFFF;
-      i_right.PRDServiceActionCounter   = (l_tmp[4] >> 24) & 0xFF;
-      i_right.ErrorType                 = (l_tmp[4] >> 16) & 0xFF;
-      i_right.homGardState              = (l_tmp[4] >>  8) & 0xFF;
-      i_right.PRD_AttnTypes             = (l_tmp[5] >> 24) & 0xFF;
-      i_right.PRD_SecondAttnTypes       = (l_tmp[5] >> 16) & 0xFF;
-      i_right.reasonCode                = (l_tmp[5]      ) & 0xFFFF;
+        i_left << ( (i_right.priAttnType    << 24) |
+                    (i_right.secAttnType    << 16) |
+                    (i_right.prdGardErrType <<  8) |
+                    (i_right.hwasGardState       ) );
 
-      i_left >>        i_right.PfaCalloutCount;                     //mp16 m
-      for (uint32_t i = 0; i < i_right.PfaCalloutCount; i++)
-          i_left >> i_right.PfaCalloutList[i];
+        i_left << i_right.mruListCount;
+        for ( uint32_t i = 0; i < i_right.mruListCount; i++ )
+            i_left << i_right.mruList[i];
 
-      if ( 0 != i_right.HCDB_SUPPORT  )                          //mp16 a
-      {
-          i_left >> i_right.hcdbListCount;                        //mp15 a
-          for (uint32_t i = 0; i < i_right.hcdbListCount; i++)    //mp15 a
-              i_left >> i_right.PfaHcdbList[i];                   //mp15 a
-      }
+        i_left << i_right.hcdbListCount;
+        for ( uint32_t i = 0; i < i_right.hcdbListCount; i++ )
+            i_left << i_right.hcdbList[i];
 
-      if ( 0 != i_right.SIGNATURE_SUPPORT )                      //mp16 a
-      {
-          i_left >> i_right.signatureCount;
-          for (uint32_t i = 0; i < i_right.signatureCount; i++)
-              i_left >> i_right.PfaSignatureList[i];
-      }
+        i_left << i_right.sigListCount;
+        for ( uint32_t i = 0; i < i_right.sigListCount; i++ )
+            i_left << i_right.sigList[i];
 
-      return i_left;
-  };
-  //--pw01
+        return i_left;
+    };
+
+    friend UtilStream& operator>>(UtilStream& i_left, PfaData& i_right)
+    {
+        uint32_t l_tmp[5];
+        i_left >> i_right.msDumpLabel[0] >> i_right.msDumpLabel[1]
+               >> i_right.msDumpInfo
+               >> l_tmp[1]
+               >> l_tmp[2]
+               >> l_tmp[3]
+               >> l_tmp[4];
+
+        i_right.errlActions          = (l_tmp[1] >> 16) & 0xFFFF;
+        i_right.errlSeverity         = (l_tmp[1] >>  8) & 0xFF;
+        i_right.serviceActionCounter = (l_tmp[1]      ) & 0xFF;
+
+        i_right.DUMP                = (l_tmp[2] >> 31) & 0x01;
+        i_right.UERE                = (l_tmp[2] >> 30) & 0x01;
+        i_right.SUE                 = (l_tmp[2] >> 29) & 0x01;
+        i_right.AT_THRESHOLD        = (l_tmp[2] >> 28) & 0x01;
+        i_right.DEGRADED            = (l_tmp[2] >> 27) & 0x01;
+        i_right.SERVICE_CALL        = (l_tmp[2] >> 26) & 0x01;
+        i_right.TRACKIT             = (l_tmp[2] >> 25) & 0x01;
+        i_right.TERMINATE           = (l_tmp[2] >> 24) & 0x01;
+        i_right.LOGIT               = (l_tmp[2] >> 23) & 0x01;
+        i_right.FLOODING            = (l_tmp[2] >> 22) & 0x01;
+        i_right.THERMAL_EVENT       = (l_tmp[2] >> 21) & 0x01;
+        i_right.UNIT_CHECKSTOP      = (l_tmp[2] >> 20) & 0x01;
+        i_right.USING_SAVED_SDC     = (l_tmp[2] >> 19) & 0x01;
+        i_right.LAST_CORE_TERMINATE = (l_tmp[2] >> 18) & 0x01;
+        i_right.DEFER_DECONFIG      = (l_tmp[2] >> 17) & 0x01;
+        i_right.CM_MODE             = (l_tmp[2] >> 16) & 0x01;
+
+        i_right.errorCount = (l_tmp[3] >> 16) & 0xFFFF;
+        i_right.threshold  = (l_tmp[3]      ) & 0xFFFF;
+
+        i_right.priAttnType    = (l_tmp[4] >> 24) & 0xFF;
+        i_right.secAttnType    = (l_tmp[4] >> 16) & 0xFF;
+        i_right.prdGardErrType = (l_tmp[4] >>  8) & 0xFF;
+        i_right.hwasGardState  = (l_tmp[4]      ) & 0xFF;
+
+        i_left >> i_right.mruListCount;
+        for ( uint32_t i = 0; i < i_right.mruListCount; i++ )
+            i_left >> i_right.mruList[i];
+
+        i_left >> i_right.hcdbListCount;
+        for ( uint32_t i = 0; i < i_right.hcdbListCount; i++ )
+            i_left >> i_right.hcdbList[i];
+
+        i_left >> i_right.sigListCount;
+        for ( uint32_t i = 0; i < i_right.sigListCount; i++ )
+            i_left >> i_right.sigList[i];
+
+        return i_left;
+    };
+
 };
 
 struct CaptureDataClass

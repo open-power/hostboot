@@ -74,7 +74,6 @@ char  * ThermalFilename = NULL;
 
 #endif
 
-PfaData pfaData;
 bool ErrDataService::terminateOnCheckstop = true;
 bool previousWasRecovered = false;
 Timer previousEventTime;
@@ -115,7 +114,7 @@ RasServices::~RasServices()
 void ErrDataService::Initialize()
 {
     savedLatentSdc = false;
-    serviceActionCounter = 0;
+    iv_serviceActionCounter = 0;
 }
 
 void RasServices::Initialize()
@@ -271,7 +270,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     bool iplDiagMode = false;
     bool deferDeconfig = false;
 
-    ++serviceActionCounter;
+    ++iv_serviceActionCounter;
 
     uint16_t PRD_Reason_Code = 0;
     uint32_t dumpPlid = 0;
@@ -306,9 +305,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             ((!sdc.IsUERE() ) &&
              (!sdc.IsSUE()  )   )
         {
-            if //if LtntMck and last recoverable Stored use it.
-                ((latentMachineCheck || sdc.IsForceLatentCS() ) &&
-                 (savedLatentSdc      )   )
+            // If LtntMck and last recoverable Stored use it.
+            if ( latentMachineCheck && savedLatentSdc )
             {
                 gardErrType = GARD_Func;
                 sdc = latentSdc;
@@ -408,8 +406,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             severityParm = ERRL_SEV_INFORMATIONAL;
             actionFlag = (actionFlag | ERRL_ACTION_HIDDEN);
         }
-        else if (sdc.IsServiceCall() || //At Thresold
-            (sdc.IsMpFatal() && sdc.GetCauseAttentionType() != SPECIAL) )
+        else if ( sdc.IsServiceCall() || //At Thresold
+                  (sdc.GetCauseAttentionType() != SPECIAL) )
         {
             severityParm = ERRL_SEV_PREDICTIVE;
         }
@@ -432,7 +430,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     else if (i_attnType == SPECIAL)
     {
         //SMA path on Special attn
-        if (sdc.IsMpFatal() && (sdc.IsLogging() || sdc.IsServiceCall() ) )
+        if ( sdc.IsLogging() || sdc.IsServiceCall() )
         {
             severityParm = ERRL_SEV_UNRECOVERABLE;
             savedLatentSdc = true;  //Save this SDC as Latent SDC
@@ -579,37 +577,29 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ////////////////////////////////////////////////////////////////
     //Set the PRD Reason Code based on the flags set in the above callout loop.
     ////////////////////////////////////////////////////////////////
-    uint16_t SDC_Reason_Code = sdc.GetReasonCode();
-    if (SDC_Reason_Code == 0) // If the analysis code has not set its own
-                              // Reason Code.
+
+    if (HW == true && SW == true)
     {
-        if (HW == true && SW == true)
-        {
-            if (SW_High == true)
-                PRD_Reason_Code = PRDF_DETECTED_FAIL_SOFTWARE_PROBABLE;
-            else
-                PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
-        }
-        else if (HW == true && SW == false && SecondLevel == true)
-            PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
-        else if (HW == true && SW == false && SecondLevel == false)
-            PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE;
-        else if (HW == false && SW == true)
-            PRD_Reason_Code = PRDF_DETECTED_FAIL_SOFTWARE;
+        if (SW_High == true)
+            PRD_Reason_Code = PRDF_DETECTED_FAIL_SOFTWARE_PROBABLE;
         else
-        {
-            // If we get here both HW and SW flags were false. Callout may be
-            // Second Level Support only, or a procedure not checked in the SW
-            // flag code.
             PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
-        }
     }
+    else if (HW == true && SW == false && SecondLevel == true)
+        PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
+    else if (HW == true && SW == false && SecondLevel == false)
+        PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE;
+    else if (HW == false && SW == true)
+        PRD_Reason_Code = PRDF_DETECTED_FAIL_SOFTWARE;
     else
-    {   //Set to Reason Code in SDC, set by the chip analysis code.
-        PRD_Reason_Code = SDC_Reason_Code;
+    {
+        // If we get here both HW and SW flags were false. Callout may be
+        // Second Level Support only, or a procedure not checked in the SW
+        // flag code.
+        PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
     }
 
-    SrcWord7 = i_sdc.GetAttentionType() << 8;
+    SrcWord7  = i_sdc.GetAttentionType() << 8;
     SrcWord7 |= i_sdc.GetCauseAttentionType();
 
     //--------------------------------------------------------------------------
@@ -678,7 +668,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Add each mru/callout to the error log.
     //**************************************************************
     fspmrulist = sdc.GetMruList();
-    uint32_t calloutcount = fspmrulist.size();
     for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
           i < fspmrulist.end(); ++i )
     {
@@ -757,7 +746,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     }
 
 #ifndef  __HOSTBOOT_MODULE
-    // FIXME: need to investigate whether or not to add HCDB to Hostboot
+    // FIXME: RTC 51618 Need to add HCDB to Hostboot
 
     //**************************************************************
     //  setChangeState for HomIds in the HCDB change list
@@ -768,7 +757,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         //FIXME  comp_id_t, l_pchipHandle commented to avoid warning
         //TargetHandle_t l_pchipHandle = (*i).iv_phcdbtargetHandle;
        // comp_id_t thisCompId = (*i).iv_compType;
-        hcdb::comp_subtype_t thisCompSubType = (*i).iv_compSubType;
+        hcdb::comp_subtype_t thisCompSubType = i->compSubType;
         if (hcdb::SUBTYPE_ANY == thisCompSubType)
         {
             //PlatServices::setHcdbChangeState(l_pchipHandle);//FIXME functions commneted for now in wrapper
@@ -796,182 +785,39 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //**************************************************************
     // Build Dump Flags and PFA5 data
     //**************************************************************
-    //MP01 a Start
-    pfaData.MsDumpLabel[0] = 0x4D532020;                //start of MS Dump flags
-    pfaData.MsDumpLabel[1] = 0x44554D50;                // 'MS  DUMP'
 
-    TargetHandle_t l_dumpHandle = NULL;
-#ifdef  __HOSTBOOT_MODULE
-    sdc.GetDumpRequest( l_dumpHandle );
-#else
-    hwTableContent l_dumpRequestContent; //not used but needed to call GetDumpRequest
-    sdc.GetDumpRequest( l_dumpRequestContent, l_dumpHandle );
-    pfaData.MsDumpInfo.DumpContent = l_dumpRequestContent;
-#endif
+    PfaData pfaData;
+    TargetHandle_t dumpTrgt = NULL;
 
-    pfaData.MsDumpInfo.DumpId = PlatServices::getHuid(l_dumpHandle);
-    TYPE l_targetType = PlatServices::getTargetType(l_dumpHandle);
+    initPfaData( sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
+                 prdGardErrType, gardState, pfaData, dumpTrgt );
 
-    if (i_sdc.IsMpDumpReq())
-    {
-        pfaData.MP_DUMP_REQ = 1;
-    }
-    else
-    {
-        pfaData.MP_DUMP_REQ = 0;
-    }
-    if (i_sdc.IsMpResetReq())
-    {
-        pfaData.MP_RESET_REQ = 1;
-    }
-    else
-    {
-        pfaData.MP_RESET_REQ = 0;
-    }
-    //Pass Error Log Action Flag to attn handling, so it know what actions to commit
-
-    pfaData.MP_FATAL = (i_sdc.IsMpFatal()==true)? 1:0;
-
-    pfaData.PFA_errlActions = actionFlag;
-    pfaData.PFA_errlSeverity = severityParm;
-
-    pfaData.REBOOT_MSG = 0; //  Not supported??
-    pfaData.DUMP = (sdc.IsDump()==true)? 1:0;
-    pfaData.UERE = (sdc.IsUERE()==true)? 1:0;
-    pfaData.SUE = (sdc.IsSUE()==true)? 1:0;
-    pfaData.CRUMB = (sdc.MaybeCrumb()==true)? 1:0;
-    pfaData.AT_THRESHOLD = (sdc.IsAtThreshold()==true)? 1:0;
-    pfaData.DEGRADED = (sdc.IsDegraded()==true)? 1:0;
-    pfaData.SERVICE_CALL = (sdc.IsServiceCall()==true)? 1:0;
-    pfaData.TRACKIT = (sdc.IsMfgTracking()==true)? 1:0;
-    pfaData.TERMINATE = (sdc.Terminate()==true)? 1:0;
-    pfaData.LOGIT = (sdc.IsLogging()==true)? 1:0;
-    pfaData.MEMORY_STEERED = (sdc.IsMemorySteered()==true)? 1:0;
-    pfaData.FLOODING = (sdc.IsFlooding()==true)? 1:0;
-
-    pfaData.ErrorCount              = sdc.GetHits();
-    pfaData.PRDServiceActionCounter = serviceActionCounter;
-    pfaData.Threshold               = sdc.GetThreshold();
-    pfaData.ErrorType               = prdGardErrType;
-    pfaData.homGardState            = gardState;
-    pfaData.PRD_AttnTypes           = i_attnType;
-    pfaData.PRD_SecondAttnTypes     = i_sdc.GetCauseAttentionType();
-    pfaData.THERMAL_EVENT           = (sdc.IsThermalEvent()==true)? 1:0;
-    pfaData.UNIT_CHECKSTOP          = (sdc.IsUnitCS()==true)? 1:0;
-    pfaData.USING_SAVED_SDC         = (sdc.IsUsingSavedSdc()==true)? 1:0;
-    pfaData.FORCE_LATENT_CS         = (i_sdc.IsForceLatentCS()==true)? 1:0;
-    pfaData.DEFER_DECONFIG          = (deferDeconfig==true)? 1:0;
-    pfaData.CM_MODE                 = 0; //FIXME RTC 50063
-    pfaData.TERMINATE_ON_CS         = (terminateOnCheckstop==true)? 1:0;
-    pfaData.reasonCode              = sdc.GetReasonCode();
-    pfaData.PfaCalloutCount         = calloutcount;
-
-    // First clear out the PFA Callout list from previous SRC
-    for (uint32_t j = 0; j < MruListLIMIT; ++j)
-    {
-        pfaData.PfaCalloutList[j].Callout = 0;
-        pfaData.PfaCalloutList[j].MRUtype = 0;
-        pfaData.PfaCalloutList[j].MRUpriority = 0;
-    }
-
-    // Build the mru list into PFA data Callout list
-    uint32_t n = 0;
-    fspmrulist = sdc.GetMruList();
-    for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
-          i < fspmrulist.end(); ++i )
-    {
-        if ( n < MruListLIMIT )
-        {
-            pfaData.PfaCalloutList[n].MRUpriority = (uint8_t)(*i).priority;
-            pfaData.PfaCalloutList[n].Callout = i->callout.flatten();
-            pfaData.PfaCalloutList[n].MRUtype = i->callout.getType();
-
-            ++n;
-        }
-    }
-
-#ifndef __HOSTBOOT_MODULE
-    // FIXME: need to investigate whether or not we need to add HCDB support in Hostboot
-    // First clear out the HCDB from previous SRC
-    for (uint32_t j = 0; j < HcdbListLIMIT; ++j)
-    {
-        pfaData.PfaHcdbList[j].hcdbId = 0;//Resetting entity path
-        pfaData.PfaHcdbList[j].compSubType = 0;
-        pfaData.PfaHcdbList[j].compType = 0;
-        pfaData.PfaHcdbList[j].hcdbReserved1 = 0;
-        pfaData.PfaHcdbList[j].hcdbReserved2 = 0;
-    }
-
-    // Build the HCDB list into PFA data
-    n = 0;
-    hcdbList = sdc.GetHcdbList();
-    pfaData.hcdbListCount = hcdbList.size();
-    for (HCDB_CHANGE_LIST::iterator i = hcdbList.begin(); i < hcdbList.end(); ++i)
-    {
-        if (n < HcdbListLIMIT)
-        {
-            pfaData.PfaHcdbList[n].hcdbId = PlatServices::getHuid((*i).iv_phcdbtargetHandle);
-            pfaData.PfaHcdbList[n].compSubType = (*i).iv_compSubType;
-            pfaData.PfaHcdbList[n].compType = (*i).iv_compType;
-            ++n;
-        }
-        else
-            break;
-    }
-    // Set flag so we know to parse the hcdb data
-    pfaData.HCDB_SUPPORT = 1;
-#endif // if not __HOSTBOOT_MODULE
-
-    PRDF_SIGNATURES signatureList = sdc.GetSignatureList();
-    // First clear out the HCDB from previous SRC
-    for (uint32_t j = 0; j < SignatureListLIMIT; ++j)
-    {
-        pfaData.PfaSignatureList[j].chipId = 0;//Resetting the chipPath
-        pfaData.PfaSignatureList[j].signature = 0;
-    }
-
-    // Build the signature list into PFA data
-    n = 0;
-    signatureList = sdc.GetSignatureList();
-    pfaData.signatureCount = signatureList.size();
-    for (PRDF_SIGNATURES::iterator i = signatureList.begin(); i < signatureList.end(); ++i)
-    {
-        if (n < SignatureListLIMIT)
-        {
-            pfaData.PfaSignatureList[n].chipId = PlatServices::getHuid((*i).iv_pSignatureHandle);
-            pfaData.PfaSignatureList[n].signature = (*i).iv_signature;
-            ++n;
-        }
-        else
-            break;
-    }
-    // Set flag so we know to parse the hcdb data
-    pfaData.SIGNATURE_SUPPORT = 1;
+    HUID dumpId       = pfaData.msDumpInfo.id;
+    TYPE dumpTrgtType = getTargetType( dumpTrgt );
 
     //**************************************************************
     // Check for Unit CheckStop.
     // Check for Last Functional Core.
     // PFA data updates for these item.
     //**************************************************************
-    pfaData.LAST_CORE_TERMINATE = false;
+
     // Now the check is for Unit Check Stop and Dump ID for Processor
     // Skip the termination on Last Core if this is a Saved SDC
-    if (sdc.IsUnitCS()  && (!sdc.IsUsingSavedSdc() ) )
+    if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
     {
-        PRDF_TRAC( PRDF_FUNC"Unit CS, Func HUID: %x, TargetType: %x",
-                   pfaData.MsDumpInfo.DumpId, l_targetType );
-        if (TYPE_CORE == l_targetType)
+        PRDF_TRAC( PRDF_FUNC"Unit CS on HUID: 0x%08x", dumpId );
+
+        if ( TYPE_CORE == dumpTrgtType )
         {
-            //Check if this is last functional core
-            if ( PlatServices::checkLastFuncCore(l_dumpHandle) )
+            // Check if this is last functional core
+            if ( PlatServices::checkLastFuncCore(dumpTrgt) )
             {
-                PRDF_TRAC( PRDF_FUNC"Last Func Core: %x was true.",
-                           PlatServices::getHuid(l_dumpHandle)  );
+                PRDF_TRAC(PRDF_FUNC"Last Functional Core HUID: 0x%08x", dumpId);
+
                 ForceTerminate = true;
                 pfaData.LAST_CORE_TERMINATE = true;
-                o_errl->setSev(ERRL_SEV_UNRECOVERABLE);  //Update Errl Severity
-                //Update PFA data
-                pfaData.PFA_errlSeverity = ERRL_SEV_UNRECOVERABLE;
+                o_errl->setSev(ERRL_SEV_UNRECOVERABLE);
+                pfaData.errlSeverity = ERRL_SEV_UNRECOVERABLE;
             }
         }
     }
@@ -1023,7 +869,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         {  //For Manufacturing Mode terminate, change the action flags for Thermal Event.
             actionFlag = (ERRL_ACTION_SA | ERRL_ACTION_REPORT | ERRL_ACTION_CALL_HOME);
         }
-        pfaData.PFA_errlActions = actionFlag;
+        pfaData.errlActions = actionFlag;
     }
 
 
@@ -1126,13 +972,12 @@ will also be removed. Need to confirm if this code is required anymore.
         delete o_errl;
         o_errl = NULL;
     }
-    else if ( !ReturnELog        && !ForceTerminate &&
-              !i_sdc.IsMpFatal() && !i_sdc.Terminate() )
+    else if ( !ReturnELog && !ForceTerminate && !i_sdc.Terminate() )
     {
         // Check to see if we need to do a Proc Core dump
         if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
         {
-            if ( l_targetType == TYPE_PROC )
+            if ( dumpTrgtType == TYPE_PROC )
             {
                 // NX Unit Checktop - runtime deconfig each accelerator
                 int32_t l_rc = SUCCESS;
@@ -1154,23 +999,23 @@ will also be removed. Need to confirm if this code is required anymore.
                 if ( SUCCESS == l_rc )
                 {
                     l_rc = PRDF_HWUDUMP( o_errl, CONTENT_HWNXLCL,
-                                         pfaData.MsDumpInfo.DumpId );
+                                         dumpId );
                 }
             }
-            else if (l_targetType == TYPE_MEMBUF ||
-                     l_targetType == TYPE_MBA    ||
-                     l_targetType == TYPE_MCS)
+            else if (dumpTrgtType == TYPE_MEMBUF ||
+                     dumpTrgtType == TYPE_MBA    ||
+                     dumpTrgtType == TYPE_MCS)
             {
                 // Centaur Checkstop
-                TargetHandle_t centaurHandle = l_dumpHandle;
-                if ( TYPE_MCS == l_targetType )
+                TargetHandle_t centaurHandle = dumpTrgt;
+                if ( TYPE_MCS == dumpTrgtType )
                 {
-                    centaurHandle = getConnectedChild( l_dumpHandle,
+                    centaurHandle = getConnectedChild( dumpTrgt,
                                                        TYPE_MEMBUF, 0 );
                 }
-                else if ( TYPE_MBA == l_targetType )
+                else if ( TYPE_MBA == dumpTrgtType )
                 {
-                    centaurHandle = getConnectedParent( l_dumpHandle,
+                    centaurHandle = getConnectedParent( dumpTrgt,
                                                         TYPE_MEMBUF );
                 }
 
@@ -1180,29 +1025,29 @@ will also be removed. Need to confirm if this code is required anymore.
                     if ( SUCCESS != l_rc )
                     {
                         PRDF_ERR( PRDF_FUNC"runtime deconfig failed 0x%08x",
-                                  pfaData.MsDumpInfo.DumpId );
+                                  dumpId );
                     }
                     // No unit dump for Centaur checkstop
                 }
             }
             else
             {
-                int32_t l_rc = PRDF_RUNTIME_DECONFIG( l_dumpHandle );
+                int32_t l_rc = PRDF_RUNTIME_DECONFIG( dumpTrgt );
                 if ( SUCCESS == l_rc )
                 {
                     // Call Dump for Proc Core CS
-                    if ( TYPE_CORE == l_targetType )
+                    if ( TYPE_CORE == dumpTrgtType )
                     {
                         l_rc = PRDF_HWUDUMP( o_errl,
                                              CONTENT_SINGLE_CORE_CHECKSTOP,
-                                             pfaData.MsDumpInfo.DumpId );
+                                             dumpId );
                     }
                     // FIXME: Will need to add Centaur DMI channel checkstop
                     //        support later.
                     else
                     {
                         PRDF_ERR( PRDF_FUNC"Unsupported dump for target 0x%08x",
-                                  pfaData.MsDumpInfo.DumpId );
+                                  dumpId );
                     }
                 }
             }
@@ -1212,9 +1057,7 @@ will also be removed. Need to confirm if this code is required anymore.
         // Need to move below here since we'll need
         // to pass o_errl to PRDF_HWUDUMP
         // for FSP specific SRC handling in the future
-#ifndef __HOSTBOOT_MODULE
-        MnfgTrace(esig);
-#endif
+        MnfgTrace( esig, pfaData );
 
         PRDF_GET_PLID(o_errl, dumpPlid);
 
@@ -1251,9 +1094,7 @@ will also be removed. Need to confirm if this code is required anymore.
     else
     {
 
-#ifndef __HOSTBOOT_MODULE
-        MnfgTrace(esig);
-#endif
+        MnfgTrace( esig, pfaData );
 
         PRDF_DTRAC( PRDF_FUNC"generating a terminating, or MP Fatal SRC" );
         if (ForceTerminate && sdc.IsThermalEvent() ) //MP42 a  Start
@@ -1346,7 +1187,6 @@ will also be removed. Need to confirm if this code is required anymore.
     PRDF_DTRAC( "PRDTRACE: Flag Values" );
     if ( sdc.IsSUE() )         PRDF_DTRAC( "PRDTRACE: SUE Flag Set" );
     if ( sdc.IsUERE() )        PRDF_DTRAC( "PRDTRACE: UERE Flag Set" );
-    if ( sdc.MaybeCrumb() )    PRDF_DTRAC( "PRDTRACE: Check for PCI Crumb" );
     if ( sdc.IsAtThreshold() ) PRDF_DTRAC( "PRDTRACE: AT_THRESHOLD" );
     if ( sdc.IsDegraded() )    PRDF_DTRAC( "PRDTRACE: Performance is degraded" );
 
@@ -1359,7 +1199,6 @@ will also be removed. Need to confirm if this code is required anymore.
     if ( sdc.Terminate() )       PRDF_DTRAC( "PRDTRACE: BRING DOWN MACHINE" );
     if ( sdc.IsLogging() )       PRDF_DTRAC( "PRDTRACE: Create history log entry" );
     if ( sdc.IsFlooding() )      PRDF_DTRAC( "PRDTRACE: Flooding detected" );
-    if ( sdc.IsMemorySteered() ) PRDF_DTRAC( "PRDTRACE: Memory steered" );
 
     return o_errl;
 
@@ -1368,78 +1207,178 @@ will also be removed. Need to confirm if this code is required anymore.
 
 //------------------------------------------------------------------------------
 
-#ifndef __HOSTBOOT_MODULE
-void ErrDataService::MnfgTrace(ErrorSignature * l_esig )
+void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
+                                  uint32_t i_attnType, bool i_deferDeconfig,
+                                  uint32_t i_errlAct, uint32_t i_errlSev,
+                                  uint32_t i_prdGardType, uint32_t i_gardState,
+                                  PfaData & o_pfa, TargetHandle_t & o_dumpTrgt )
 {
-    char  * MnfgFilename = NULL;
-    uint32_t l_size = 0;
-    const char * MnfgKey[] = {"fstp/P0_Root"};
+    // Dump info
+    o_pfa.msDumpLabel[0] = 0x4D532020; // Start of MS Dump flags
+    o_pfa.msDumpLabel[1] = 0x44554D50; // 'MS  DUMP'
 
-    if ( PlatServices::mfgMode() )
+    // FIXME: RTC 51618 Need add DUMP support in Hostboot
+#ifdef  __HOSTBOOT_MODULE
+    i_sdc.GetDumpRequest( o_dumpTrgt );
+#else
+    hwTableContent dumpContent;
+    i_sdc.GetDumpRequest( dumpContent, o_dumpTrgt );
+    o_pfa.msDumpInfo.content = dumpContent;
+#endif
+
+    o_pfa.msDumpInfo.id = getHuid(o_dumpTrgt);
+
+    // Error log actions and severity
+    o_pfa.errlActions  = i_errlAct;
+    o_pfa.errlSeverity = i_errlSev;
+
+    // PRD Service Data Collector Flags (1:true, 0:false)
+    o_pfa.DUMP                = i_sdc.IsDump()          ? 1 : 0;
+    o_pfa.UERE                = i_sdc.IsUERE()          ? 1 : 0;
+    o_pfa.SUE                 = i_sdc.IsSUE()           ? 1 : 0;
+    o_pfa.AT_THRESHOLD        = i_sdc.IsAtThreshold()   ? 1 : 0;
+    o_pfa.DEGRADED            = i_sdc.IsDegraded()      ? 1 : 0;
+    o_pfa.SERVICE_CALL        = i_sdc.IsServiceCall()   ? 1 : 0;
+    o_pfa.TRACKIT             = i_sdc.IsMfgTracking()   ? 1 : 0;
+    o_pfa.TERMINATE           = i_sdc.Terminate()       ? 1 : 0;
+    o_pfa.LOGIT               = i_sdc.IsLogging()       ? 1 : 0;
+    o_pfa.FLOODING            = i_sdc.IsFlooding()      ? 1 : 0;
+    o_pfa.THERMAL_EVENT       = i_sdc.IsThermalEvent()  ? 1 : 0;
+    o_pfa.UNIT_CHECKSTOP      = i_sdc.IsUnitCS()        ? 1 : 0;
+    o_pfa.LAST_CORE_TERMINATE = false; // Will be set later, if needed.
+    o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc() ? 1 : 0;
+    o_pfa.DEFER_DECONFIG      = i_deferDeconfig         ? 1 : 0;
+    o_pfa.CM_MODE             = 0; //FIXME RTC 50063
+
+    // Thresholding
+    o_pfa.errorCount = i_sdc.GetHits();
+    o_pfa.threshold  = i_sdc.GetThreshold();
+
+    // Misc
+    o_pfa.serviceActionCounter = iv_serviceActionCounter;
+    o_pfa.prdGardErrType       = i_prdGardType;
+    o_pfa.hwasGardState        = i_gardState;
+
+    // Attention types
+    o_pfa.priAttnType = i_attnType;
+    o_pfa.secAttnType = i_sdc.GetCauseAttentionType();
+
+    // Build the MRU list into PFA data.
+    SDC_MRU_LIST fspmrulist = i_sdc.GetMruList();
+    uint32_t i; // Iterator used to set limited list count.
+    for ( i = 0; i < fspmrulist.size() && i < MruListLIMIT; i++ )
     {
-        errlHndl_t errorLog = UtilReg::path(MnfgKey, 1, "prdfMfgErrors",
-                                            MnfgFilename, l_size);
-        if (errorLog == NULL)
-        {
-            UtilFile l_mfgFile;
-            l_mfgFile.Open(MnfgFilename,"a+");
-
-            char l_string[100];
-            uint32_t signature = l_esig->getSigId();
-            HUID sigChip = l_esig->getChipId();
-
-            // Get Entity Path String
-            TargetHandle_t l_ptempHandle = PlatServices::getTarget(sigChip);
-            TARGETING::EntityPath path;
-            PlatServices::getEntityPath(l_ptempHandle, path,
-                                        EntityPath::PATH_PHYSICAL);
-            char *epStr = path.toString();
-            if (epStr)
-            {
-                snprintf(l_string, 100, "%s, ", path.toString());
-                free(epStr);
-            }
-
-            l_mfgFile.write(l_string, strlen(l_string));
-
-            // Write Signature
-            snprintf(l_string, 100, "0x%08x, 0x%08x, ", sigChip, signature);
-            l_mfgFile.write(l_string, strlen(l_string));
-
-            // Write chip ECID data
-            PlatServices::getECIDString(l_ptempHandle, l_string);
-            l_mfgFile.write(l_string, strlen(l_string));
-
-            // Write MRU list
-            uint32_t n = 0;
-            while ( (n < MruListLIMIT )  && (n < pfaData.PfaCalloutCount) )
-            {
-                snprintf(l_string, 100, " , %08x", pfaData.PfaCalloutList[n].Callout);
-                l_mfgFile.write(l_string, strlen(l_string));
-                ++n;
-            }
-            snprintf(l_string, 100, "\n");
-            l_mfgFile.write(l_string, 1);
-
-            l_mfgFile.Close();
-        }
-        else
-        {
-            PRDF_ERR( "PRDTRACE: MnfgTrace Failure in getting file path" );
-            PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
-        }
+        o_pfa.mruList[i].callout  = fspmrulist[i].callout.flatten();
+        o_pfa.mruList[i].type     = fspmrulist[i].callout.getType();
+        o_pfa.mruList[i].priority = (uint8_t)fspmrulist[i].priority;
     }
+    o_pfa.mruListCount = i;
 
-    if (MnfgFilename != NULL)
-    {  //need to free the pathname
-        free(MnfgFilename);
-        MnfgFilename = NULL;
+    // FIXME: RTC 51618 Need add HCDB support in Hostboot
+#ifdef __HOSTBOOT_MODULE
+    o_pfa.hcdbListCount = 0;
+#else
+
+    // Build the HCDB list into PFA data
+    HCDB_CHANGE_LIST hcdbList = i_sdc.GetHcdbList();
+    for ( i = 0; i < hcdbList.size() && i < HcdbListLIMIT; i++ )
+    {
+        o_pfa.hcdbList[i].hcdbId      = getHuid(hcdbList[i].target);
+        o_pfa.hcdbList[i].compSubType = hcdbList[i].compSubType;
+        o_pfa.hcdbList[i].compType    = hcdbList[i].compType;
     }
+    o_pfa.hcdbListCount = i;
 
-    return;
+#endif // __HOSTBOOT_MODULE
+
+    // Build the signature list into PFA data
+    PRDF_SIGNATURES sigList = i_sdc.GetSignatureList();
+    for ( i = 0; i < sigList.size() && i < SigListLIMIT; i++ )
+    {
+        o_pfa.sigList[i].chipId    = getHuid(sigList[i].target);
+        o_pfa.sigList[i].signature = sigList[i].signature;
+    }
+    o_pfa.sigListCount = i;
 
 }
+
+//------------------------------------------------------------------------------
+
+void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
+                                const PfaData & i_pfaData )
+{
+#ifndef __HOSTBOOT_MODULE
+    // TODO: RTC 79440 Need to add Hostboot support for this function.
+
+    do
+    {
+        if ( !PlatServices::mfgMode() ) break; // Nothing to do
+
+        char * MnfgFilename = NULL;
+        uint32_t l_size = 0;
+        const char * MnfgKey[] = {"fstp/P0_Root"};
+
+        errlHndl_t errl = UtilReg::path( MnfgKey, 1, "prdfMfgErrors",
+                                         MnfgFilename, l_size );
+        if ( NULL != errl )
+        {
+            PRDF_ERR( "[ErrDataService::MnfgTrace] UtilReg::path() failed" );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            break;
+        }
+
+        UtilFile l_mfgFile;
+        l_mfgFile.Open(MnfgFilename,"a+");
+
+        char l_string[100];
+        uint32_t signature = i_esig->getSigId();
+        HUID sigChip = i_esig->getChipId();
+
+        // Get Entity Path String
+        TargetHandle_t l_ptempHandle = PlatServices::getTarget(sigChip);
+        TARGETING::EntityPath path;
+        PlatServices::getEntityPath(l_ptempHandle, path,
+                EntityPath::PATH_PHYSICAL);
+        char *epStr = path.toString();
+        if (epStr)
+        {
+            snprintf(l_string, 100, "%s, ", path.toString());
+            free(epStr);
+        }
+
+        l_mfgFile.write(l_string, strlen(l_string));
+
+        // Write Signature
+        snprintf(l_string, 100, "0x%08x, 0x%08x, ", sigChip, signature);
+        l_mfgFile.write(l_string, strlen(l_string));
+
+        // Write chip ECID data
+        PlatServices::getECIDString(l_ptempHandle, l_string);
+        l_mfgFile.write(l_string, strlen(l_string));
+
+        // Write MRU list
+        uint32_t n = 0;
+        while ( (n < MruListLIMIT ) && (n < i_pfaData.mruListCount) )
+        {
+            snprintf( l_string, 100, " , %08x", i_pfaData.mruList[n].callout );
+            l_mfgFile.write( l_string, strlen(l_string) );
+            ++n;
+        }
+        snprintf(l_string, 100, "\n");
+        l_mfgFile.write(l_string, 1);
+
+        l_mfgFile.Close();
+
+        if (MnfgFilename != NULL)
+        {  //need to free the pathname
+            free(MnfgFilename);
+            MnfgFilename = NULL;
+        }
+
+    } while (0);
+
 #endif // if not __HOSTBOOT_MODULE
+}
 
 //------------------------------------------------------------------------------
 

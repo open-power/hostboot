@@ -159,7 +159,6 @@
 // defines for enums that are not available in hostboot
 // these ERRL sevs are currently not supported in HB
 #define ERRL_SEV_PREDICTIVE          ERRL_SEV_UNRECOVERABLE
-#define ERRL_SEV_DIAGNOSTIC_ERROR1   ERRL_SEV_UNRECOVERABLE
 #define ERRL_SEV_RECOVERED           ERRL_SEV_INFORMATIONAL
 
 /**

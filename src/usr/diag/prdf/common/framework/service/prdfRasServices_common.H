@@ -31,10 +31,10 @@
 #include <xspprdService.h>
 #include <errlentry.H>
 #include <iipServiceDataCollector.h>
+#include <prdfPfa5Data.h>
 
 #ifndef __HOSTBOOT_MODULE
   #include <tmgt.H>
-  #include <prdfPfa5Data.h>   //for PfaCalloutListStruct
 #endif
 
 namespace PRDF
@@ -64,7 +64,7 @@ class ErrDataService
     inline ErrDataService() :
         loggingBufferFull(false),
         savedLatentSdc(false),
-        serviceActionCounter(0),
+        iv_serviceActionCounter(0),
         savedPrdReturnCode(0)
     {}
 
@@ -175,17 +175,26 @@ class ErrDataService
       */
     bool SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer);
 
-    /**
-     @brief Add Trace Data to File for Manufacturing.
-     @param[in] ErrorSignature
-     @return None.
-     @pre None.
-     @post None.
-     @exception None.
-     */
-    void MnfgTrace(ErrorSignature * l_esig);
-
     #endif // end if not __HOSTBOOT_MODULE
+
+    /**
+     * @brief Add trace data to file for Manufacturing.
+     * @param i_esig    Error signature.
+     * @param i_pfaData The PFA data.
+     */
+    void MnfgTrace( ErrorSignature * i_esig, const PfaData & i_pfaData );
+
+    /**
+     * @brief Initializes the PFA data.
+     * @param i_sdc      The service data collector.
+     * @param o_pfa      The PFA data struct.
+     * @param o_dumpTrgt The DUMP target.
+     */
+    void initPfaData( ServiceDataCollector & i_sdc,
+                      uint32_t i_attnType, bool i_deferDeconfig,
+                      uint32_t i_errlAct, uint32_t i_errlSev,
+                      uint32_t i_prdGardType, uint32_t i_gardState,
+                      PfaData & o_pfa, TARGETING::TargetHandle_t & o_dumpTrgt );
 
   private:
 
@@ -193,7 +202,7 @@ class ErrDataService
     bool latentMachineCheck;
     bool savedLatentSdc;
 
-    uint32_t serviceActionCounter;
+    uint32_t iv_serviceActionCounter;
 
     int32_t savedPrdReturnCode;
 

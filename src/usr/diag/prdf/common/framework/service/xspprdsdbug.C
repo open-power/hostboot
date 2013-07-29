@@ -115,7 +115,7 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
              * @procedure EPUB_PRC_SP_CODE
              */
             PRDF_CREATE_ERRL( g_prd_errlHndl,
-                              ERRL_SEV_DIAGNOSTIC_ERROR1, // error on diagnostic
+                              ERRL_SEV_UNRECOVERABLE, // error on diagnostic
                               ERRL_ETYPE_NOT_APPLICABLE,
                               SRCI_MACH_CHECK,
                               SRCI_NO_ATTR,

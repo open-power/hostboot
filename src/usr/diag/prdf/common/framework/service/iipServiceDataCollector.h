@@ -94,25 +94,36 @@ typedef std::vector<SdcCallout> SDC_MRU_LIST;
 
 #ifndef __HOSTBOOT_MODULE
 
-struct HcdbChangeItem {
-  TARGETING::TargetHandle_t iv_phcdbtargetHandle ;
-  hcdb::comp_subtype_t iv_compSubType;
-  comp_id_t            iv_compType;
-  HcdbChangeItem() : iv_phcdbtargetHandle(NULL), iv_compSubType(hcdb::LBST_ABIST) {}
-  HcdbChangeItem(TARGETING::TargetHandle_t i_pTargetHandle, hcdb::comp_subtype_t i_compSubType, comp_id_t i_compType)
-      : iv_phcdbtargetHandle(i_pTargetHandle), iv_compSubType(i_compSubType), iv_compType(i_compType){}
+struct HcdbChangeItem
+{
+    TARGETING::TargetHandle_t target;
+    hcdb::comp_subtype_t      compSubType;
+    comp_id_t                 compType;
+
+    HcdbChangeItem() :
+        target(NULL), compSubType(hcdb::LBST_ABIST)
+    {}
+
+    HcdbChangeItem( TARGETING::TargetHandle_t i_target,
+                    hcdb::comp_subtype_t i_compSubType, comp_id_t i_compType ) :
+        target(i_target), compSubType(i_compSubType), compType(i_compType)
+    {}
 };
 
 typedef std::vector<HcdbChangeItem> HCDB_CHANGE_LIST;
 
 #endif
 
-struct SignatureList {
-  TARGETING::TargetHandle_t           iv_pSignatureHandle;
-  uint32_t                            iv_signature;
-  SignatureList() : iv_pSignatureHandle(NULL), iv_signature(0) {}
-  SignatureList(TARGETING::TargetHandle_t i_pTargetHandle , uint32_t i_signature)
-      : iv_pSignatureHandle(i_pTargetHandle), iv_signature(i_signature){}
+struct SignatureList
+{
+    TARGETING::TargetHandle_t target;
+    uint32_t                  signature;
+
+    SignatureList() : target(NULL), signature(0) {}
+
+    SignatureList( TARGETING::TargetHandle_t i_target, uint32_t i_signature ) :
+        target(i_target), signature(i_signature)
+    {}
 };
 
 typedef std::vector<SignatureList> PRDF_SIGNATURES;
@@ -134,26 +145,20 @@ public:
 
   //mk03c
   PRDF_SDC_FLAGS_MAP        // flag positions
-    PRDF_SDC_FLAG(FORCE_LATENT_CS,         0x80000)                // mp07
     PRDF_SDC_FLAG(USING_SAVED_SDC,         0x40000)                // mp05
     PRDF_SDC_FLAG(PROC_CORE_CS,            0x20000)                // mp03
     PRDF_SDC_FLAG(UNIT_CS,                 0x20000)                // mp06 a (Note this is intentionally the same value as PROC_CORE_CS)
     PRDF_SDC_FLAG(THERMAL_EVENT,           0x10000)                // pw01
-    PRDF_SDC_FLAG(MP_DUMP_REQ,             0x08000)                // rc09
-    PRDF_SDC_FLAG(MP_RESET_REQ,            0x04000)             // dg08
-    PRDF_SDC_FLAG(MP_FATAL,                0x02000)              // dg08
     PRDF_SDC_FLAG(DONT_COMMIT_ERRL,        0x01000)        // mp02
     PRDF_SDC_FLAG(DUMP,                    0x00800)              // dg04
     PRDF_SDC_FLAG(UERE,                    0x00400)              // dg02
     PRDF_SDC_FLAG(SUE,                     0x00200)              // dg02
-    PRDF_SDC_FLAG(CRUMB,                   0x00100)
     PRDF_SDC_FLAG(AT_THRESHOLD,            0x00080)
     PRDF_SDC_FLAG(DEGRADED,                0x00040)
     PRDF_SDC_FLAG(SERVICE_CALL,            0x00020)
     PRDF_SDC_FLAG(TRACKIT,                 0x00010)
     PRDF_SDC_FLAG(TERMINATE,               0x00008)
     PRDF_SDC_FLAG(LOGIT,                   0x00004)
-    PRDF_SDC_FLAG(MEMORY_STEERED,          0x00002)
     PRDF_SDC_FLAG(FLOODING,                0x00001)
   PRDF_SDC_FLAGS_MAP_END
 
@@ -172,7 +177,6 @@ public:
    <li>                 terminate() == false
    <li>                 IsDegraded() == false
    <li>                 IsServiceCall() == false
-   <li>                 IsMemorySteered == false
    <li>                 IsMfgTracking() == true
    <li>                 IsLogging() == true
    </ul>
@@ -476,51 +480,6 @@ public:
    */
   bool IsServiceCall(void) const { return (flags & SERVICE_CALL)!=0 ? true:false; }
 
-// dg12d - start
-  /*
-   Indicate that mainstore has had redundent memory steered in
-   <ul>
-   <br><b>Parameter:   </b> offset: offset in card vpd to write bitPos
-   <br><b>Parameter:   </b> bitPos: bit position steered in this extent
-   <br><b>Returns:     </b> None.
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> IsMemorySteered() == true, this object contains
-                            VPD data that needs to be transferred to VPD
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-//  void SetMemorySteered(uint32_t offset, uint32_t bitPos);
-
-  /**
-   Query for mainstore redundent steering
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> GetRbsVpdData() returns new data to be
-                            transfered to VPD
-   <br><b>Notes:       </b> Depreciated - always returns false
-   </ul><br>
-   */
-  bool IsMemorySteered(void) const { return (flags & MEMORY_STEERED)!=0 ? true:false; }
-
-  /*
-   Get the latest RBS vpd data
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> Bitstring
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   <br><b>Notes:       </b> if SetMemorySteered() has not been called or
-                            IsMemorySteered() == false then this
-                            returns data that indicates that nothing has
-                            been steered
-   </ul><br>
-   */
-//  const BIT_STRING_CLASS & GetRbsVpdData(void) const { return rbsVpd; }
-// dg12d - end
-
   /**
    Indicate the chip where analysis begain
    <ul>
@@ -597,33 +556,6 @@ public:
    */
   uint8_t GetThreshold(void) const { return threshold; }
 
-  //mp04 a Start
-  /**
-   Indicate the Reason Code (for the SRC) for this error
-   <ul>
-   <br><b>Parameters:  </b> reasonCode
-   <br><b>Returns:     </b> None.
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> GetReasonCode() == i_reasonCode
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void SetReasonCode(uint16_t i_reasonCode) { reasonCode = i_reasonCode; }
-
-  /**
-   Get the Reason Code value for this error
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> reasonCode value
-   <br><b>Requirements:</b> SetReasonCode()
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   <br><b>Notes:       </b> optional
-   </ul><br>
-   */
-  uint16_t GetReasonCode(void) const { return reasonCode; }
-  //mp04 a Stop
-
   /**
    Indicate that PRD is being called faster than SP can send error logs
    <ul>
@@ -673,31 +605,6 @@ public:
   GardResolution::ErrorType QueryGard(void);
 
   /**
-   Indicate that there may be a valid "Cookie Crumb" from I/O initialization
-   <ul>
-   <br><b>Parameters:  </b> None
-   <br><b>Returns:     </b> None
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> MaybeCrumb() == true
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void SeekCrumb(void) { flags |= CRUMB; }
-
-  /**
-   Indicates wether service should look for a "cookie crumb" from I/O init
-   <ul>
-   <br><b>Parameters:  </b> None
-   <br><b>Returns:     </b> [true(1)|false(0)]
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> None
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  bool MaybeCrumb(void) const { return (flags & CRUMB)!=0 ? true:false;}
-
-  // dg02 - start
-  /**
    Set Error type as Special Uncorrectable Error SUE
    <ul>
    <br><b>Parameters:  </b> None
@@ -745,8 +652,6 @@ public:
    */
   bool IsUERE(void) const { return (flags & UERE)!=0 ? true:false;}
 
-  // dg02 - end
-
   /**
    Set a flag
    <ul>
@@ -769,7 +674,6 @@ public:
    </ul><br>
    */
   bool GetFlag(Flag flag) { return ((flags & flag)!=0);}
-
 
   /**
    Clear a flag
@@ -803,36 +707,6 @@ public:
    */
   void SetTOE(Timer& theTime) { ivCurrentEventTime = theTime; }
 
-  /**
-   Is this an MP Fatal error
-   <ul>
-   <br><b>Paramter:    </b> None
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirments: </b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  bool IsMpFatal(void) const { return (flags & MP_FATAL)!=0 ? true:false; }
-
-  /**
-   Is an MP Reset requested?
-   <ul>
-   <br><b>Paramter:    </b> None
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirments: </b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  bool IsMpResetReq(void) const { return (flags & MP_RESET_REQ)!=0 ? true:false; }
-  // dg08 end
-
-  /**
-   Is an MP Dump requested?
-   */
-  bool IsMpDumpReq(void) const { return (flags & MP_DUMP_REQ) != 0 ? true:false; } // rc09a
-
   /** Is an Thermal Event Flag on? */
   bool IsThermalEvent(void) const { return (flags & THERMAL_EVENT) != 0 ? true:false; }
 
@@ -846,7 +720,6 @@ public:
   bool IsUsingSavedSdc (void) const { return (flags & USING_SAVED_SDC) != 0 ? true:false; }
 
   /** Is a Force Lantent Check Stop flag on? */
-  bool IsForceLatentCS (void) const { return (flags & FORCE_LATENT_CS) != 0 ? true:false; }
 
 #ifndef __HOSTBOOT_MODULE
 
@@ -920,7 +793,6 @@ private:  // Data
   uint32_t       flags;        //mp01 c from  uint16_t
   uint8_t       hitCount;
   uint8_t       threshold;
-  uint16_t       reasonCode;   //mp04
   TARGETING::TargetHandle_t   startingPoint;
 // dg12d  BIT_STRING_BUFFER_CLASS rbsVpd;
   GardResolution::ErrorType errorType;

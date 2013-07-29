@@ -69,7 +69,7 @@ public:
     DeconfigNoGard = 4
   };
 
-  inline static const char* ToString(ErrorType i_type)
+  inline static const char* ToString( uint32_t i_type )
   {
       switch (i_type)
       {
@@ -78,7 +78,7 @@ public:
           case Fatal:               return "Fatal";
           case CheckStopOnlyGard:   return "CheckStopOnlyGard";
           case DeconfigNoGard:      return "DeconfigNoGard";
-          default:                  return "Unknown_ErrorType";
+          default:                  return "Undefined";
       }
   }
 

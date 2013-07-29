@@ -35,6 +35,7 @@
 #include <prdfTrace.H>
 #undef prdfServiceDataCollector_C
 
+using namespace TARGETING;
 
 //------------------------------------------------------------------------------
 //  User Types, Constants, macros, prototypes, globals
@@ -157,29 +158,38 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
 
 //------------------------------------------------------------------------------
 
-void ServiceDataCollector::AddSignatureList(TARGETING::TargetHandle_t i_pTargetHandle,
-                                            uint32_t  i_signature)
+void ServiceDataCollector::AddSignatureList( TargetHandle_t i_target,
+                                             uint32_t i_signature )
 {
-    bool found = false;
-    if(NULL == i_pTargetHandle)
+    #define PRDF_FUNC "[ServiceDataCollector::AddSignatureList] "
+
+    do
     {
-        PRDF_ERR(" ServiceDataCollector::AddSignatureList  could not add invalid target ");
-        return;
-    }
-    for(PRDF_SIGNATURES::iterator i = iv_SignatureList.begin();
-        i != iv_SignatureList.end(); i++)
-    {
-        if((i->iv_pSignatureHandle == i_pTargetHandle) &&
-           (i->iv_signature == i_signature))
+        if ( NULL == i_target )
         {
-            found = true;
+            PRDF_ERR( PRDF_FUNC"Given target is NULL" );
             break;
         }
-    }
-    if(found == false)
-    {
-        iv_SignatureList.push_back(SignatureList(i_pTargetHandle, i_signature));
-    }
+
+        bool found = false;
+        for ( PRDF_SIGNATURES::iterator i = iv_SignatureList.begin();
+              i != iv_SignatureList.end(); i++ )
+        {
+            if ( (i->target == i_target) && (i->signature == i_signature) )
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if ( !found )
+        {
+            iv_SignatureList.push_back( SignatureList(i_target, i_signature) );
+        }
+
+    } while (0);
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -232,23 +242,22 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
         for(HCDB_CHANGE_LIST::const_iterator i = iv_HcdbChangeList.begin();
             i != iv_HcdbChangeList.end(); ++i)
         {
-            buffer_append(current_ptr,(TARGETING::TargetHandle_t)i->iv_phcdbtargetHandle);
-            buffer_append(current_ptr,(uint32_t)i->iv_compSubType);
-            buffer_append(current_ptr,(uint32_t)i->iv_compType);
+            buffer_append( current_ptr, i->target );
+            buffer_append( current_ptr, (uint32_t)i->compSubType );
+            buffer_append( current_ptr, (uint32_t)i->compType );
         }
         buffer_append(current_ptr, iv_SignatureList.size());
         for(PRDF_SIGNATURES::const_iterator i = iv_SignatureList.begin();
             i != iv_SignatureList.end(); ++i)
         {
-            buffer_append(current_ptr,(TARGETING::TargetHandle_t)i->iv_pSignatureHandle);
-            buffer_append(current_ptr,(uint32_t)i->iv_signature);
+            buffer_append( current_ptr, i->target );
+            buffer_append( current_ptr, i->signature );
         }
         buffer_append(current_ptr,maskId);
         buffer_append(current_ptr,(uint32_t)attentionType);
         buffer_append(current_ptr,flags);
         buffer_append(current_ptr,hitCount);
         buffer_append(current_ptr,threshold);
-        buffer_append(current_ptr,reasonCode);
         buffer_append(current_ptr,startingPoint);
         buffer_append(current_ptr,(uint32_t)errorType);
         //@ecdf - Removed ivDumpRequestType.
@@ -334,7 +343,6 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     flags = buffer_get32(i_flatdata);  //mp02 c from buffer_get16
     hitCount = buffer_get8(i_flatdata);
     threshold = buffer_get8(i_flatdata);
-    reasonCode = buffer_get16(i_flatdata);  //mp04 a
     startingPoint = buffer_getTarget(i_flatdata);
     errorType = (GardResolution::ErrorType)buffer_get32(i_flatdata);
     ivDumpRequestContent = (hwTableContent) buffer_get32(i_flatdata); //@ecdf
@@ -360,37 +368,45 @@ ServiceDataCollector & ServiceDataCollector::operator=(
 
 //------------------------------------------------------------------------------
 
-void ServiceDataCollector::AddChangeForHcdb(TARGETING::TargetHandle_t i_pTargetHandle ,
-                                            hcdb::comp_subtype_t i_testType,
-                                            comp_id_t i_compType)
+void ServiceDataCollector::AddChangeForHcdb( TargetHandle_t i_target,
+                                             hcdb::comp_subtype_t i_testType,
+                                             comp_id_t i_compType )
 {
-    bool found = false;
-    //Ensuring the handles are valid before pushing to the list
-    if(NULL == i_pTargetHandle)
-    {
-        PRDF_ERR(" ServiceDataCollector::AddChangeForHcdb  could not add invalid target ");
-        return;
-    }
+    #define PRDF_FUNC "[ServiceDataCollector::AddChangeForHcdb] "
 
-    for(HCDB_CHANGE_LIST::iterator i = iv_HcdbChangeList.begin();
-        i != iv_HcdbChangeList.end(); i++)
+    do
     {
-        if((i->iv_phcdbtargetHandle ==i_pTargetHandle) &&
-           (i->iv_compSubType == i_testType) &&
-           (i->iv_compType    == i_compType))
+        if ( NULL == i_target )
         {
-            found = true;
+            PRDF_ERR( PRDF_FUNC"Given target is NULL" );
             break;
         }
-    }
-    if(found == false)
-    {
-        iv_HcdbChangeList.push_back( HcdbChangeItem(i_pTargetHandle, i_testType,
-                                                    i_compType) );
-    }
+
+        bool found = false;
+        for ( HCDB_CHANGE_LIST::iterator i = iv_HcdbChangeList.begin();
+              i != iv_HcdbChangeList.end(); i++ )
+        {
+            if ( (i->target      == i_target  ) &&
+                 (i->compSubType == i_testType) &&
+                 (i->compType    == i_compType) )
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if ( !found )
+        {
+            iv_HcdbChangeList.push_back( HcdbChangeItem(i_target, i_testType,
+                                                        i_compType) );
+        }
+
+    } while (0);
+
+    #undef PRDF_FUNC
 }
+
 #endif // #ifndef __HOSTBOOT_MODULE
-//------------------------------------------------------------------------------
 
 } // end namespace PRDF
 

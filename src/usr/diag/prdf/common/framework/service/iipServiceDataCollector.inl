@@ -37,7 +37,6 @@ ServiceDataCollector::ServiceDataCollector() :
     flags(TRACKIT | LOGIT),
     hitCount(0),
     threshold(0),
-    reasonCode(0),
     startingPoint(NULL),
     errorType(GardResolution::NoGard),
     ivpDumpRequestChipHandle(NULL),
