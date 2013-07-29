@@ -42,6 +42,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_run_training
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_set_inband_addr
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/mss_getecid
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_dccal
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_pre_trainadv
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_post_trainadv
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_dmi_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/cen_dmi_scominit
 
@@ -60,6 +62,8 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_run_training
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_set_inband_addr
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/mss_getecid
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_dccal
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_pre_trainadv
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_post_trainadv
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_dmi_scominit
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/cen_dmi_scominit
 

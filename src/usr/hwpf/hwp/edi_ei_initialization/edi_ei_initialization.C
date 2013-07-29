@@ -66,9 +66,9 @@
 #include    "io_restore_erepair.H"
 // #include    "fabric_io_dccal/fabric_io_dccal.H"
 // #include    "fabric_erepair/fabric_erepair.H"
-// #include    "fabric_pre_trainadv/fabric_pre_trainadv.H"
 #include    "fabric_io_run_training/fabric_io_run_training.H"
-// #include    "fabric_post_trainadv/fabric_post_trainadv.H"
+#include    "io_pre_trainadv.H"
+#include    "io_post_trainadv.H"
 // #include    "host_startprd_pbus/host_startprd_pbus.H"
 // #include    "host_attnlisten_proc/host_attnlisten_proc.H"
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
@@ -451,45 +451,114 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
 void*    call_fabric_pre_trainadv( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
+    IStepError  l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_pre_trainadv entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    TargetPairs_t l_PbusConnections;
+    TargetPairs_t::iterator l_itr;
+    const uint32_t MaxBusSet = 2;
+    TYPE busSet[MaxBusSet] = { TYPE_ABUS, TYPE_XBUS };
 
-    //  write HUID of target
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l));
+    // Note:
+    // Due to lab tester board environment, HW procedure writer (Varkey) has
+    // requested to send in one target of a time (we used to send in
+    // both ends in one call). Even though they don't have to be
+    // in order, we should keep the pair concept here in case we need to send
+    // in a pair in the future again.
 
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, fabric_pre_trainadv, _args_...);
-    if ( l_errl )
+    for (uint32_t ii = 0; (!l_errl) && (ii < MaxBusSet); ii++)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
+        l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                            l_PbusConnections, busSet[ii] );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        for (l_itr = l_PbusConnections.begin();
+             l_itr != l_PbusConnections.end();
+             ++l_itr)
+        {
+            const fapi::Target l_fapi_endp1_target(
+                   (ii ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   (const_cast<TARGETING::Target*>(l_itr->first)));
+            const fapi::Target l_fapi_endp2_target(
+                   (ii ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   (const_cast<TARGETING::Target*>(l_itr->second)));
+
+            //  call the HWP with each bus connection
+            FAPI_INVOKE_HWP( l_errl, io_pre_trainadv, l_fapi_endp1_target );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "%s : %cbus connection fabric_pre_trainadv. Target 0x%.8X",
+                       (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'A'),
+                        TARGETING::get_huid(l_itr->first) );
+            if ( l_errl )
+            {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
+
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_FABRIC_PRE_TRAINADV_ENDPOINT1_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_FABRIC_PRE_TRAINADV
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to fabric_pre_trainadv has failed
+                 *              see error log in the user details section for
+                 *              additional details.
+                 */
+                l_StepError.addErrorDetails(ISTEP_FABRIC_PRE_TRAINADV_ENDPOINT1_FAILED,
+                                            ISTEP_FABRIC_PRE_TRAINADV,
+                                            l_errl );
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+                // We want to continue the training despite the error, so
+                // no break
+            }
+
+            //  call the HWP with each bus connection
+            FAPI_INVOKE_HWP( l_errl, io_pre_trainadv, l_fapi_endp2_target );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "%s : %cbus connection fabric_pre_trainadv. Target 0x%.8X",
+                       (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'A'),
+                        TARGETING::get_huid(l_itr->second) );
+            if ( l_errl )
+            {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
+
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_FABRIC_PRE_TRAINADV_ENDPOINT2_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_FABRIC_PRE_TRAINADV
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to fabric_pre_trainadv has failed
+                 *              see error log in the user details section for
+                 *              additional details.
+                 */
+                l_StepError.addErrorDetails(ISTEP_FABRIC_PRE_TRAINADV_ENDPOINT2_FAILED,
+                                            ISTEP_FABRIC_PRE_TRAINADV,
+                                            l_errl );
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+                // We want to continue the training despite the error, so
+                // no break
+            }
+        }
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_pre_trainadv exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -595,54 +664,121 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
 }
 
 
-
 //
 //  Wrapper function to call fabric_post_trainadv
 //
 void*    call_fabric_post_trainadv( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
+    IStepError  l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_post_trainadv entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    TargetPairs_t l_PbusConnections;
+    TargetPairs_t::iterator l_itr;
+    const uint32_t MaxBusSet = 2;
+    TYPE busSet[MaxBusSet] = { TYPE_ABUS, TYPE_XBUS };
 
-    //  write HUID of target
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l));
+    // Note:
+    // Due to lab tester board environment, HW procedure writer (Varkey) has
+    // requested to send in one target of a time (we used to send in
+    // both ends in one call). Even though they don't have to be
+    // in order, we should keep the pair concept here in case we need to send
+    // in a pair in the future again.
 
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, fabric_post_trainadv, _args_...);
-    if ( l_errl )
+    for (uint32_t ii = 0; (!l_errl) && (ii < MaxBusSet); ii++)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
+        l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                            l_PbusConnections, busSet[ii] );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        for (l_itr = l_PbusConnections.begin();
+             l_itr != l_PbusConnections.end();
+             ++l_itr)
+        {
+            const fapi::Target l_fapi_endp1_target(
+                   (ii ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   (const_cast<TARGETING::Target*>(l_itr->first)));
+            const fapi::Target l_fapi_endp2_target(
+                   (ii ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   (const_cast<TARGETING::Target*>(l_itr->second)));
+
+            //  call the HWP with each bus connection
+            FAPI_INVOKE_HWP( l_errl, io_post_trainadv, l_fapi_endp1_target );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "%s : %cbus connection fabric_post_trainadv. Target 0x%.8X",
+                       (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'A'),
+                        TARGETING::get_huid(l_itr->first) );
+            if ( l_errl )
+            {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
+
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_FABRIC_POST_TRAINADV_ENDPOINT1_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_FABRIC_POST_TRAINADV
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to fabric_post_trainadv has failed
+                 *              see error log in the user details section for
+                 *              additional details.
+                 */
+                l_StepError.addErrorDetails(ISTEP_FABRIC_POST_TRAINADV_ENDPOINT1_FAILED,
+                                            ISTEP_FABRIC_POST_TRAINADV,
+                                            l_errl );
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+                // We want to continue the training despite the error, so
+                // no break
+            }
+
+            //  call the HWP with each bus connection
+            FAPI_INVOKE_HWP( l_errl, io_post_trainadv, l_fapi_endp2_target );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "%s : %cbus connection fabric_post_trainadv. Target 0x%.8X",
+                       (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'A'),
+                        TARGETING::get_huid(l_itr->second) );
+            if ( l_errl )
+            {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
+
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_FABRIC_POST_TRAINADV_ENDPOINT2_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_FABRIC_POST_TRAINADV
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to fabric_post_trainadv has failed
+                 *              see error log in the user details section for
+                 *              additional details.
+                 */
+                l_StepError.addErrorDetails(ISTEP_FABRIC_POST_TRAINADV_ENDPOINT2_FAILED,
+                                            ISTEP_FABRIC_POST_TRAINADV,
+                                            l_errl );
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+                // We want to continue the training despite the error, so
+                // no break
+            }
+        }
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_post_trainadv exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
-
 
 
 //

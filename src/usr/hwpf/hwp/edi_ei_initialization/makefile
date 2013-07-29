@@ -45,18 +45,21 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_run_training
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_dccal
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_pre_trainadv
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_post_trainadv
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  edi_ei_initialization.o \
         proc_fab_iovalid.o fabric_io_run_training.o fabric_io_dccal.o
 
-        
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_run_training
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_dccal
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_pre_trainadv
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_post_trainadv
 
 include ${ROOTPATH}/config.mk
 

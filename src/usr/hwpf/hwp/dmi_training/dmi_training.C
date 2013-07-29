@@ -67,6 +67,8 @@
 #include    "dmi_io_run_training.H"
 #include    "proc_dmi_scominit.H"
 #include    "cen_dmi_scominit.H"
+#include    "io_post_trainadv.H"
+#include    "io_pre_trainadv.H"
 #include    "proc_cen_set_inband_addr.H"
 #include    "mss_get_cen_ecid.H"
 #include    "io_restore_erepair.H"
@@ -88,7 +90,6 @@ using   namespace   EDI_EI_INITIALIZATION;
 // Function prototypes
 //*****************************************************************
 void get_dmi_io_targets(TargetPairs_t& o_dmi_io_targets);
-
 
 //
 //  Wrapper function to call mss_getecid
@@ -886,14 +887,114 @@ void*    call_dmi_io_dccal( void *io_pArgs )
 //
 void*    call_dmi_pre_trainadv( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_errl = NULL;
+    ISTEP_ERROR::IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv entry" );
+
+    TargetPairs_t l_dmi_pre_trainadv_targets;
+    get_dmi_io_targets(l_dmi_pre_trainadv_targets);
+
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv exit" );
+    // Note:
+    // Due to lab tester board environment, HW procedure writer (Varkey) has
+    // requested to send in one target of a time (we used to send in
+    // the MCS and MEMBUF pair in one call). Even though they don't have to be
+    // in order, we should keep the pair concept here in case we need to send
+    // in a pair in the future again.
+    for (TargetPairs_t::const_iterator
+         l_itr = l_dmi_pre_trainadv_targets.begin();
+         l_itr != l_dmi_pre_trainadv_targets.end();
+         ++l_itr)
+    {
+        const fapi::Target l_fapi_mcs_target( TARGET_TYPE_MCS_CHIPLET,
+                (const_cast<TARGETING::Target*>(l_itr->first)));
 
-    return l_err;
+        const fapi::Target l_fapi_membuf_target( TARGET_TYPE_MEMBUF_CHIP,
+                (const_cast<TARGETING::Target*>(l_itr->second)));
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "===== Call dmi_pre_trainadv HWP( mcs 0x%.8X, mem 0x%.8X) : ",
+                TARGETING::get_huid(l_itr->first),
+                TARGETING::get_huid(l_itr->second));
+
+        // Call on the MCS
+        FAPI_INVOKE_HWP(l_errl, io_pre_trainadv, l_fapi_mcs_target);
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X :  dmi_pre_trainadv HWP Target MCS 0x%.8X",
+                      l_errl->reasonCode(), TARGETING::get_huid(l_itr->first));
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_PRE_TRAINADV_MCS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_PRE_TRAINADV
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to dmi_pre_trainadv on MCS has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_PRE_TRAINADV_MCS_FAILED,
+                                        ISTEP_DMI_PRE_TRAINADV,
+                                        l_errl);
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+            // We want to continue the training despite the error, so
+            // no break
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  call_dmi_pre_trainadv HWP - Target 0x%.8X",
+                    TARGETING::get_huid(l_itr->first));
+        }
+
+        // Call on the MEMBUF
+        FAPI_INVOKE_HWP(l_errl, io_pre_trainadv, l_fapi_membuf_target);
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X :  dmi_pre_trainadv HWP Target Membuf 0x%.8X",
+                      l_errl->reasonCode(), TARGETING::get_huid(l_itr->second));
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_PRE_TRAINADV_MEMBUF_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_PRE_TRAINADV
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to dmi_pre_trainadv on MEMBUF has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_PRE_TRAINADV_MEMBUF_FAILED,
+                                        ISTEP_DMI_PRE_TRAINADV,
+                                        l_errl);
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+            // We want to continue the training despite the error, so
+            // no break
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  call_dmi_pre_trainadv HWP - Target 0x%.8X",
+                    TARGETING::get_huid(l_itr->second));
+        }
+
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_dmi_pre_trainadv exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -975,14 +1076,114 @@ void*    call_dmi_io_run_training( void *io_pArgs )
 //
 void*    call_dmi_post_trainadv( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_errl = NULL;
+    ISTEP_ERROR::IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv entry" );
+
+    TargetPairs_t l_dmi_post_trainadv_targets;
+    get_dmi_io_targets(l_dmi_post_trainadv_targets);
+
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv exit" );
+    // Note:
+    // Due to lab tester board environment, HW procedure writer (Varkey) has
+    // requested to send in one target of a time (we used to send in
+    // the MCS and MEMBUF pair in one call). Even though they don't have to be
+    // in order, we should keep the pair concept here in case we need to send
+    // in a pair in the future again.
+    for (TargetPairs_t::const_iterator
+         l_itr = l_dmi_post_trainadv_targets.begin();
+         l_itr != l_dmi_post_trainadv_targets.end();
+         ++l_itr)
+    {
+        const fapi::Target l_fapi_mcs_target( TARGET_TYPE_MCS_CHIPLET,
+                (const_cast<TARGETING::Target*>(l_itr->first)));
 
-    return l_err;
+        const fapi::Target l_fapi_membuf_target( TARGET_TYPE_MEMBUF_CHIP,
+                (const_cast<TARGETING::Target*>(l_itr->second)));
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "===== Call dmi_post_trainadv HWP( mcs 0x%.8X, mem 0x%.8X) : ",
+                TARGETING::get_huid(l_itr->first),
+                TARGETING::get_huid(l_itr->second));
+
+        // Call on the MCS
+        FAPI_INVOKE_HWP(l_errl, io_post_trainadv, l_fapi_mcs_target);
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X :  dmi_post_trainadv HWP Target MCS 0x%.8X",
+                      l_errl->reasonCode(), TARGETING::get_huid(l_itr->first));
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_POST_TRAINADV_MCS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_POST_TRAINADV
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to dmi_post_trainadv on MCS has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_POST_TRAINADV_MCS_FAILED,
+                                        ISTEP_DMI_POST_TRAINADV,
+                                        l_errl);
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+            // We want to continue the training despite the error, so
+            // no break
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  call_dmi_post_trainadv HWP - Target 0x%.8X",
+                    TARGETING::get_huid(l_itr->first));
+        }
+
+        // Call on the MEMBUF
+        FAPI_INVOKE_HWP(l_errl, io_post_trainadv, l_fapi_membuf_target);
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X :  dmi_post_trainadv HWP Target Membuf 0x%.8X",
+                      l_errl->reasonCode(), TARGETING::get_huid(l_itr->second));
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_POST_TRAINADV_MEMBUF_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_POST_TRAINADV
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to dmi_post_trainadv on MEMBUF has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_POST_TRAINADV_MEMBUF_FAILED,
+                                        ISTEP_DMI_POST_TRAINADV,
+                                        l_errl);
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+            // We want to continue the training despite the error, so
+            // no break
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  call_dmi_post_trainadv HWP - Target 0x%.8X",
+                    TARGETING::get_huid(l_itr->second));
+        }
+
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_dmi_post_trainadv exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
 }
 
 
