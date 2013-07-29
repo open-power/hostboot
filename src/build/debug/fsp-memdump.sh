@@ -27,7 +27,7 @@
 # Print usage statement.
 usage()
 {
-    echo "memdump.sh <filename> [STATE|discover]"
+    echo "fsp-memdump.sh <filename> [STATE|discover]"
     echo
     echo "    STATE should be a two nibble hex value corresponding to the"
     echo "    MemSize enumeration in <kernel/memstate.H> or the ASCII string"
@@ -85,7 +85,7 @@ if [[ -z ${FILE} ]]; then
 fi
 
 if [[ -z ${STATE} ]]; then
-    STATE=08
+    STATE=discover
 fi
 
 # Calculate HRMOR (in decimal).

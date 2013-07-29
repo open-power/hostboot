@@ -102,8 +102,8 @@ sub main
     }
 
     # Read the current memory state.
-    my ($memstate_addr, $memstate_size) =
-        ::findSymbolAddress("KernelMemState::state");
+    my $memstate_addr = ::read64(0x2000 + 0x8); # Read descriptor address.
+    $memstate_addr += 0x10; # Memory state is 3rd entry into descriptor.
     my $memstate = ::read32($memstate_addr + 4);  # only need bottom 32 bits
     ::userDisplay (sprintf "Current state is %x\n", $memstate) if $debug;
 
