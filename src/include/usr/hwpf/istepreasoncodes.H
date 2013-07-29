@@ -179,6 +179,7 @@ enum istepReasonCode
     ISTEP_TOP_LEVEL_TARGET_NULL                 = ISTEP_COMP_ID | 0x30,
     ISTEP_DECONFIGURE_MBA_FAILED                = ISTEP_COMP_ID | 0x31,
     ISTEP_DECONFIGURE_L4_FAILED                 = ISTEP_COMP_ID | 0x32,
+    ISTEP_REPAIR_LOADER_RETRY_OCCURED           = ISTEP_COMP_ID | 0x33,
 };  // end ISTEP
 
 }

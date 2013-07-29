@@ -58,10 +58,14 @@
 extern fapi::ReturnCode fapiPoreVe(const fapi::Target i_target,
 		   std::list<uint64_t> & io_sharedObjectArgs);
 
+const uint64_t REPAIR_LOADER_RETRY_CTR_MASK = 0x000007FC00000000ull;
 
 // Constants
 // Memory Relocation Register for Centaur SBE image
 const uint64_t CENTAUR_SBE_PNOR_MRR = 0;
+
+// Max SBE image buffer size
+const uint32_t MAX_SBE_IMG_SIZE = 48 * 1024; 
 
 namespace   SBE_CENTAUR_INIT
 {
@@ -154,9 +158,11 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         const fapi::Target l_fapiTarget( fapi::TARGET_TYPE_MEMBUF_CHIP,
                         (const_cast<TARGETING::Target*>(l_membuf_target)));
 
-        const uint32_t l_customizedMaxSize = 32 * 1024;
-        const uint32_t l_buf1Size = 32 * 1024;
-        const uint32_t l_buf2Size = 32 * 1024;
+        // Expand buffer for new image size
+        const uint32_t l_customizedMaxSize = MAX_SBE_IMG_SIZE;
+        const uint32_t l_buf1Size = MAX_SBE_IMG_SIZE;
+        const uint32_t l_buf2Size = MAX_SBE_IMG_SIZE;
+
         uint32_t l_customizedSize = l_customizedMaxSize;
         char * l_pCustomizedImage = (char *)malloc(l_customizedMaxSize);
         void * l_pBuf1 = malloc(l_buf1Size);
@@ -227,6 +233,54 @@ void*    call_sbe_centaur_init( void *io_pArgs )
                    "ERROR 0x%.8X call_sbe_centaur_init - Error returned from"
                    " VSBE engine on this Centaur, l_rc 0x%llX",
                    l_errl->reasonCode());
+                l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 1024);
+                l_errl->collectTrace("ISTEPS_TRACE", 512);
+            }
+       
+            // Log informational error if we retried the Repair Loader
+            errlHndl_t  l_tempErrl = NULL;
+            ecmdDataBufferBase l_dataBuffer(64);
+            fapi::ReturnCode  l_rc = fapiGetScom(l_fapiTarget, 0x0104000A,
+                                                 l_dataBuffer);
+            if (!l_rc.ok())
+            {
+                FAPI_ERR("ERROR in call_sbe_centaur_init - target %.8X "
+                   "Scom error reading Repair Loader retry counter 0x0104000A",
+                   TARGETING::get_huid(l_membuf_target));
+                l_tempErrl = fapi::fapiRcToErrl(l_rc);
+                l_tempErrl->setSev(ERRL_SEV_INFORMATIONAL);
+                errlCommit( l_tempErrl, HWPF_COMP_ID );
+            }
+            else
+            {
+                // If the counter !=0, log an informational error
+                uint64_t l_counter = l_dataBuffer.getDoubleWord(0);
+                FAPI_INF("Target 0x%.8X - RepairLoader Reg_0x0104000A %.16llX",
+                   TARGETING::get_huid(l_membuf_target), l_counter);
+
+                if (l_counter & REPAIR_LOADER_RETRY_CTR_MASK)
+                {
+                    FAPI_ERR("ERROR in call_sbe_centaur_init - target %.8X "
+                    "Repair Loader retry occured, "
+                    "RepairLoader Reg_0x0104000A %.16llX",
+                    TARGETING::get_huid(l_membuf_target), l_counter);
+
+                    /*@
+                     * @errortype
+                     * @moduleid     ISTEP_SBE_CENTAUR_INIT
+                     * @reasoncode   ISTEP_REPAIR_LOADER_RETRY_OCCURED
+                     * @userdata1    Register 0x0104000A
+                     * @userdata2    Membuf target
+                     * @devdesc      Repair Loader error, retry was performed
+                     */
+                    l_tempErrl = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                          ISTEP_SBE_CENTAUR_INIT,
+                                          ISTEP_REPAIR_LOADER_RETRY_OCCURED,
+                                          l_counter,
+                                          TARGETING::get_huid(l_membuf_target));
+                    errlCommit( l_tempErrl, HWPF_COMP_ID );
+                }
             }
         }
 

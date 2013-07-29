@@ -23,7 +23,7 @@
 #ifndef __VSBE_PIB2CFAM_H
 #define __VSBE_PIB2CFAM_H
 
-// $Id: pib2cfam.H,v 1.4 2013/01/11 15:53:49 thi Exp $
+// $Id: pib2cfam.H,v 1.6 2013/07/30 15:15:30 jeshua Exp $
 
 /// \file pib2cfam.H
 /// \brief A temporary hack while waiting for hardware updates - a simple
@@ -36,10 +36,10 @@ namespace vsbe {
     class Pib2Cfam;
     
     /// PIB base address of PIB range mapped by Pib2Cfam
-    const uint32_t PIB2CFAM_PIB_BASE = 0x00050007;
+    const uint32_t PIB2CFAM_PIB_BASE = 0x00050006;
 
     /// Number of PIB addresses mapped by Pib2Cfam
-    const int PIB2CFAM_PIB_SIZE = ((0x0005001b - 0x00050007) + 1);
+    const int PIB2CFAM_PIB_SIZE = ((0x0005001b - 0x00050006) + 1);
 }
 
 
@@ -69,7 +69,8 @@ public:
     ///
     /// The following PIB registers are mapped to CFAM registers:
     ///
-    /// - PIB 0x00050007 -> CFAM 0x1007, FSI2PIB.STATUS, R
+    /// - PIB 0x00050006 -> CFAM 0x1006, FSI2PIB Reset, W
+    /// - PIB 0x00050007 -> CFAM 0x1007, FSI2PIB STATUS (R), PIB RESET (W)
     /// - PIB 0x00050012 -> CFAM 0x1012, FSIGP3, R/W
     /// - PIB 0x00050013 -> CFAM 0x1013, FSIGP4, R/W
     /// - PIB 0x00050014 -> CFAM 0x1014, FSIGP5, R/W
