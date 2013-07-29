@@ -220,7 +220,7 @@ ${REG_PLUGIN_PATHS}: ${OBJ_PLUG_DIR}/% : ${OBJ_RULE_DIR}/% | ${OBJ_PLUG_DIR}
 
 # Link all individual header file needed to compile plugin code.
 define LINK_RULE
-${OBJ_PLUG_DIR}/$(notdir $(1)): $(ROOTPATH)/$(1)
+${OBJ_PLUG_DIR}/$(notdir $(1)): $(ROOTPATH)/$(1) | ${OBJ_PLUG_DIR}
 	$(C2) "    LINK       $$(notdir $$@)"
 	$(C1)ln -sf ${OBJ_PLUG_LINK_PATH}/$(1) $$@
 endef

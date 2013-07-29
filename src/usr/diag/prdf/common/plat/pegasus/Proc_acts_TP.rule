@@ -179,52 +179,92 @@ group gTpLFir filter singlebit
     /** TP_LFIR[0]
      *  CFIR internal parity error
      */
-    (TpLFir, bit(0)) ? TBDDefaultCallout;
+    (TpLFir, bit(0)) ? SelfHighThr32PerDay;
 
     /** TP_LFIR[1]
      *  Local errors from GPIO (PCB error)
      */
-    (TpLFir, bit(1)) ? TBDDefaultCallout;
+    (TpLFir, bit(1)) ? defaultMaskedError;
 
     /** TP_LFIR[2]
      *  Local errors from CC (PCB error)
      */
-    (TpLFir, bit(2)) ? TBDDefaultCallout;
+    (TpLFir, bit(2)) ? defaultMaskedError;
 
     /** TP_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (TpLFir, bit(3)) ? TBDDefaultCallout;
+    (TpLFir, bit(3)) ? SelfHighThr32PerDay;
 
     /** TP_LFIR[4]
      *  Local errors from PSC (PCB error)
      */
-    (TpLFir, bit(4)) ? TBDDefaultCallout;
+    (TpLFir, bit(4)) ? defaultMaskedError;
 
     /** TP_LFIR[5]
      *  Local errors from PSC (parity error)
      */
-    (TpLFir, bit(5)) ? TBDDefaultCallout;
+    (TpLFir, bit(5)) ? defaultMaskedError;
 
     /** TP_LFIR[6]
      *  Local errors from Thermal (parity error)
      */
-    (TpLFir, bit(6)) ? TBDDefaultCallout;
+    (TpLFir, bit(6)) ? defaultMaskedError;
 
     /** TP_LFIR[7]
      *  Local errors from Thermal (PCB error)
      */
-    (TpLFir, bit(7)) ? TBDDefaultCallout;
+    (TpLFir, bit(7)) ? defaultMaskedError;
 
     /** TP_LFIR[8|9]
      *  Local errors from Thermal (Trip error)
      */
-    (TpLFir, bit(8|9)) ? TBDDefaultCallout;
+    (TpLFir, bit(8|9)) ? defaultMaskedError;
 
-    /** TP_LFIR[10|11]
+    /** TP_LFIR[10]
      *  Local errors from Trace Array ( error)
      */
-    (TpLFir, bit(10|11)) ? TBDDefaultCallout;
+    #FIXME RTC 23127 bit action suggests threshold 32per day but commnet on bit
+    # 10 suggests threshold of 1
+    (TpLFir, bit(10)) ? SelfHighThr32PerDay;
+
+    /** TP_LFIR[11]
+     *  Local errors from Trace Array ( error)
+     */
+    (TpLFir, bit(11)) ? SelfHighThr32PerDay;
+
+    /** TP_LFIR[12|13]
+     *  Local errors from I2CM
+     */
+    (TpLFir, bit(12|13)) ? defaultMaskedError;
+
+    /** TP_LFIR[14]
+     *  Local errors from PCB
+     */
+    #FIXME RTC 23127 Comments not clear
+    (TpLFir, bit(14)) ? SelfHighThr32PerDay;
+
+    /** TP_LFIR[15]
+     *  Local errors from Trace Array ( error)
+     */
+    (TpLFir, bit(15)) ? defaultMaskedError;
+
+    /** TP_LFIR[16]
+     *  Local errors from TOD ( error) Error in backup topology
+     */
+    (TpLFir, bit(16)) ? defaultMaskedError;
+
+    #FIXME RTC 23127 "First Instance" need clarification
+    /** TP_LFIR[17]
+     *  Local errors from TOD ( error)
+     */
+    (TpLFir, bit(17)) ? defaultMaskedError;
+
+    /** TP_LFIR[18]
+     *  Local errors from TOD ( error)
+     */
+    #FIXME RTC 23127 Shall be handled in TOD Activity
+    (TpLFir, bit(18)) ? TBDDefaultCallout;
 
     /** TP_LFIR[19]
      *  Processor PLL error
@@ -233,6 +273,76 @@ group gTpLFir filter singlebit
      *  Should be handled by global PRD PLL code.
      */
     (TpLFir, bit(19)) ? threshold32pday;
+
+    /** TP_LFIR[20]
+     *  Sbe indicated error_event0to4 enabled by mask bit 5 to 9
+     */
+    (TpLFir, bit(20)) ? defaultMaskedError;
+
+    /** TP_LFIR[21]
+     *  Sbe indicated error_event0to4 enabled by mask bit 10 to 14
+     */
+    (TpLFir, bit(21)) ? defaultMaskedError;
+
+    /** TP_LFIR[22|23]
+     *  local errors from I2CS
+     */
+    (TpLFir, bit(22|23)) ? defaultMaskedError;
+
+    /** TP_LFIR[24]
+     *  Local errors from OTP
+     */
+    (TpLFir, bit(24)) ? defaultMaskedError;
+
+    /** TP_LFIR[25]
+     *  local error from Ext trigger
+     */
+    (TpLFir, bit(25)) ? defaultMaskedError;
+
+    /** TP_LFIR[26]
+     *  Fast xstop fir error
+     */
+    (TpLFir, bit(26)) ? defaultMaskedError;
+
+    /** TP_LFIR[27]
+     *   PCB mcast grp error
+     */
+    (TpLFir, bit(27)) ? SelfHighThr1;
+
+    /** TP_LFIR[28]
+     *  PCB Parity error
+     */
+    (TpLFir, bit(28)) ? defaultMaskedError;
+
+    /** TP_LFIR[29|30]
+     *  EECB lpc fir error
+     */
+    (TpLFir, bit(29|30)) ? defaultMaskedError;
+
+    /** TP_LFIR[31|32]
+     *  EECB i2c fir error
+     */
+    (TpLFir, bit(31|32)) ? defaultMaskedError;
+
+    /** TP_LFIR[33|34]
+     *  Local errors from PIBMEM
+     */
+    (TpLFir, bit(33|34)) ? defaultMaskedError;
+
+    /** TP_LFIR[35]
+     *  OTP correctable error
+     */
+    (TpLFir, bit(35)) ? threshold32pday;
+
+    /** TP_LFIR[36|37|38|39]
+     *  Unused error
+     */
+    (TpLFir, bit(36|37|38|39)) ? defaultMaskedError;
+
+    /** TP_LFIR[40]
+     *  Malfunction alert
+     */
+    (TpLFir, bit(40)) ? defaultMaskedError;
 
 };
 
@@ -247,216 +357,219 @@ rule OccFir
     SPECIAL:     OCCFIR & ~OCCFIR_MASK &  OCCFIR_ACT0 & ~OCCFIR_ACT1;
 };
 
+#based on spreadsheet p8dd1_mss_FFDC_51.xls
 group gOccFir filter singlebit
 {
     /** OCCFIR[0]
      *  OCC_SCOM_OCCFIR_OCC_FW0
      */
-    (OccFir, bit(0)) ? TBDDefaultCallout;
+    (OccFir, bit(0)) ? defaultMaskedError;
 
     /** OCCFIR[1]
      *  OCC_SCOM_OCCFIR_OCC_FW1
      */
-    (OccFir, bit(1)) ? TBDDefaultCallout;
+    (OccFir, bit(1)) ? defaultMaskedError;
 
     /** OCCFIR[2]
      *  OCC_SCOM_OCCFIR_OCC_FW2
      */
-    (OccFir, bit(2)) ? TBDDefaultCallout;
+    (OccFir, bit(2)) ? defaultMaskedError;
 
     /** OCCFIR[3]
      *  OCC_SCOM_OCCFIR_OCC_FW3
      */
-    (OccFir, bit(3)) ? TBDDefaultCallout;
+    (OccFir, bit(3)) ? defaultMaskedError;
 
     /** OCCFIR[4]
      *  OCC_SCOM_OCCFIR_PMC_PORE_SW_MALF
      */
+    #RTC 23127 ? found in RAS spread sheet.Action need to be updated.
     (OccFir, bit(4)) ? TBDDefaultCallout;
 
     /** OCCFIR[5]
      *  OCC_SCOM_OCCFIR_PMC_OCC_HB_MALF
      */
-    (OccFir, bit(5)) ? TBDDefaultCallout;
+    (OccFir, bit(5)) ? defaultMaskedError;
 
     /** OCCFIR[6]
      *  OCC_SCOM_OCCFIR_PORE_GPE0_FATAL_ERR
      */
-    (OccFir, bit(6)) ? TBDDefaultCallout;
+    (OccFir, bit(6)) ? defaultMaskedError;
 
     /** OCCFIR[7]
      *  OCC_SCOM_OCCFIR_PORE_GPE1_FATAL_ERR
      */
-    (OccFir, bit(7)) ? TBDDefaultCallout;
+    (OccFir, bit(7)) ? defaultMaskedError;
 
     /** OCCFIR[8]
      *  OCC_SCOM_OCCFIR_OCB_ERROR
      */
-    (OccFir, bit(8)) ? TBDDefaultCallout;
+    (OccFir, bit(8)) ? defaultMaskedError;
 
     /** OCCFIR[9]
      *  OCC_SCOM_OCCFIR_SRT_UE
      */
-    (OccFir, bit(9)) ? TBDDefaultCallout;
+    (OccFir, bit(9)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[10]
      *  OCC_SCOM_OCCFIR_SRT_CE
      */
-    (OccFir, bit(10)) ? TBDDefaultCallout;
+    (OccFir, bit(10)) ? defaultMaskedError;
 
     /** OCCFIR[11]
      *  OCC_SCOM_OCCFIR_SRT_READ_ERROR
      */
-    (OccFir, bit(11)) ? TBDDefaultCallout;
+    (OccFir, bit(11)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[12]
      *  OCC_SCOM_OCCFIR_SRT_WRITE_ERROR
      */
-    (OccFir, bit(12)) ? TBDDefaultCallout;
+    (OccFir, bit(12)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[13]
      *  OCC_SCOM_OCCFIR_SRT_DATAOUT_PERR
      */
-    (OccFir, bit(13)) ? TBDDefaultCallout;
+    (OccFir, bit(13)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[14]
      *  OCC_SCOM_OCCFIR_SRT_OCI_WRITE_DATA_PARITY
      */
-    (OccFir, bit(14)) ? TBDDefaultCallout;
+    (OccFir, bit(14)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[15]
      *  OCC_SCOM_OCCFIR_SRT_OCI_BE_PARITY_ER
      */
-    (OccFir, bit(15)) ? TBDDefaultCallout;
+    (OccFir, bit(15)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[16]
      *  OCC_SCOM_OCCFIR_SRT_OCI_ADDR_PARITY_ERR
      */
-    (OccFir, bit(16)) ? TBDDefaultCallout;
+    (OccFir, bit(16)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[17]
      *  OCC_SCOM_OCCFIR_PORE_SW_ERROR_ERR
      */
-    (OccFir, bit(17)) ? TBDDefaultCallout;
+    (OccFir, bit(17)) ? defaultMaskedError;
 
     /** OCCFIR[18]
      *OCC_SCOM_OCCFIR_PORE_GPE0_ERROR_ERR
      */
-    (OccFir, bit(18)) ? TBDDefaultCallout;
+    (OccFir, bit(18)) ? defaultMaskedError;
 
     /** OCCFIR[19]
      *  OCC_SCOM_OCCFIR_PORE_GPE1_ERROR_ERR
      */
-    (OccFir, bit(19)) ? TBDDefaultCallout;
+    (OccFir, bit(19)) ? defaultMaskedError;
 
     /** OCCFIR[20]
      *  OCC_SCOM_OCCFIR_EXTERNAL_TRAP
      */
-    (OccFir, bit(20)) ? TBDDefaultCallout;
+    (OccFir, bit(20)) ? defaultMaskedError;
 
     /** OCCFIR[21]
      *  OCC_SCOM_OCCFIR_PPC405_CORE_RESET
      */
-    (OccFir, bit(21)) ? TBDDefaultCallout;
+    (OccFir, bit(21)) ? defaultMaskedError;
 
     /** OCCFIR[22]
      *  OCC_SCOM_OCCFIR_PPC405_CHIP_RESET
      */
-    (OccFir, bit(22)) ? TBDDefaultCallout;
+    (OccFir, bit(22)) ? defaultMaskedError;
 
     /** OCCFIR[23]
      *  OCC_SCOM_OCCFIR_PPC405_SYSTEM_RESET
      */
-    (OccFir, bit(23)) ? TBDDefaultCallout;
+    (OccFir, bit(23)) ? defaultMaskedError;
 
     /** OCCFIR[24]
      *OCC_SCOM_OCCFIR_PPC405_DBGMSRWE
      */
-    (OccFir, bit(24)) ? TBDDefaultCallout;
+    (OccFir, bit(24)) ? defaultMaskedError;
 
     /** OCCFIR[25]
      *  OCC_SCOM_OCCFIR_PPC405_DBGSTOPACK
      */
-    (OccFir, bit(25)) ? TBDDefaultCallout;
+    (OccFir, bit(25)) ? defaultMaskedError;
 
     /** OCCFIR[26]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_TIMEOUT
      */
-    (OccFir, bit(26)) ? TBDDefaultCallout;
+    (OccFir, bit(26)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[27]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_READ_DATA_PARITY
      */
-    (OccFir, bit(27)) ? TBDDefaultCallout;
+    (OccFir, bit(27)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[28]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_SLAVE_ERROR
      */
-    (OccFir, bit(28)) ? TBDDefaultCallout;
+    (OccFir, bit(28)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[29]
      *  OCC_SCOM_OCCFIR_OCB_PIB_ADDR_PARITY_ERR
      */
-    (OccFir, bit(29)) ? TBDDefaultCallout;
+    (OccFir, bit(29)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[30]
      *  OCC_SCOM_OCCFIR_OCB_DB_PIB_DATA_PARITY_ERR
      */
-    (OccFir, bit(30)) ? TBDDefaultCallout;
+    (OccFir, bit(30)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[31]
      *  OCC_SCOM_OCCFIR_OCB_IDC0_ERROR
      */
-    (OccFir, bit(31)) ? TBDDefaultCallout;
+    (OccFir, bit(31)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[32]
      *  OCC_SCOM_OCCFIR_OCB_IDC1_ERROR
      */
-    (OccFir, bit(32)) ? TBDDefaultCallout;
+    (OccFir, bit(32)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[33]
      *  OCC_SCOM_OCCFIR_OCB_IDC2_ERROR
      */
-    (OccFir, bit(33)) ? TBDDefaultCallout;
+    (OccFir, bit(33)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[34]
      *  OCC_SCOM_OCCFIR_OCB_IDC3_ERROR
      */
-    (OccFir, bit(34)) ? TBDDefaultCallout;
+    (OccFir, bit(34)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[35]
      *  OCC_SCOM_OCCFIR_SRT_FSM_ERR
      */
-    (OccFir, bit(35)) ? TBDDefaultCallout;
+    (OccFir, bit(35)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[36]
      *  OCC_SCOM_OCCFIR_JTAGACC_ERR
      */
-    (OccFir, bit(36)) ? TBDDefaultCallout;
+    (OccFir, bit(36)) ? defaultMaskedError;
 
     /** OCCFIR[37]
      *  OCC_SCOM_OCCFIR_OCB_DW_ERR
      */
-    (OccFir, bit(37)) ? TBDDefaultCallout;
+    (OccFir, bit(37)) ? defaultMaskedError;
 
     /** OCCFIR[38]
      *  OCC_SCOM_OCCFIR_C405_ECC_UE
      */
-    (OccFir, bit(38)) ? TBDDefaultCallout;
+    (OccFir, bit(38)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[39]
      *  OCC_SCOM_OCCFIR_C405_ECC_CE
      */
-    (OccFir, bit(39)) ? TBDDefaultCallout;
+    (OccFir, bit(39)) ? defaultMaskedError;
 
     /** OCCFIR[40]
      *  OCC_SCOM_OCCFIR_C405_OCI_MACHINECHECK
      */
-    (OccFir, bit(40)) ? TBDDefaultCallout;
+        (OccFir, bit(40)) ? defaultMaskedError;
 
     /** OCCFIR[41]
      *  OCC_SCOM_OCCFIR_SRAM_SPARE_DIRECT_ERROR0
      */
+    #FIXME RTC 23127 action for bit 41,42,43,44 are undecided.
     (OccFir, bit(41)) ? TBDDefaultCallout;
 
     /** OCCFIR[42]
@@ -477,18 +590,18 @@ group gOccFir filter singlebit
     /** OCCFIR[45]
      *  OCC_SCOM_OCCFIR_SLW_OCISLV_ERR
      */
-    (OccFir, bit(45)) ? TBDDefaultCallout;
+    (OccFir, bit(45)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[46]
      *  OCC_SCOM_OCCFIR_GPE_OCISLV_ERR
      */
-    (OccFir, bit(46)) ? TBDDefaultCallout;
+    (OccFir, bit(46)) ? calloutConnectedOccThr1;
 
     /** OCCFIR[47]
      *  OCC_SCOM_OCCFIR_OCB_OCISLV_ERR
      */
-    (OccFir, bit(47)) ? TBDDefaultCallout;
-
+    (OccFir, bit(47)) ? calloutConnectedOccThr1;
+    #FIXME RTC23127 actions for bit 48,49 are undecided.
     /** OCCFIR[48]
      *  OCC_SCOM_OCCFIR_C405ICU_M_TIMEOUT
      */
@@ -499,10 +612,15 @@ group gOccFir filter singlebit
      */
     (OccFir, bit(49)) ? TBDDefaultCallout;
 
+    /** OCCFIR[50|51|52|53|54|55|56|57|58|59|60|61]
+     *  OCC_SCOM_OCCLFIR_SPARE_FIR
+     */
+    (OccFir, bit(50|51|52|53|54|55|56|57|58|59|60|61)) ? defaultMaskedError;
+
     /** OCCFIR[62|63]
      *  OCC_SCOM_OCCFIR_FIR_PARITY_ERR_DUP
      */
-    (OccFir, bit(62|63)) ? TBDDefaultCallout;
+    (OccFir, bit(62|63)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -583,192 +701,107 @@ group gPmcFir filter singlebit
     /** PMCFIR[0]
      *  LFIR_PSTATE_OCI_MASTER_RDERR
      */
-    (PmcFir, bit(0)) ? TBDDefaultCallout;
+    (PmcFir, bit(0)) ? SelfHighThr1;
 
     /** PMCFIR[1]
      *  LFIR_PSTATE_OCI_MASTER_RDDATA_PARITY_ERR
      */
-    (PmcFir, bit(1)) ? TBDDefaultCallout;
+    (PmcFir, bit(1)) ? SelfHighThr1;
 
     /** PMCFIR[2]
      *  LFIR_PSTATE_GPST_CHECKBYTE_ERR
      */
-    (PmcFir, bit(2)) ? TBDDefaultCallout;
+    (PmcFir, bit(2)) ? SelfHighThr1;
 
     /** PMCFIR[3]
      *  LFIR_PSTATE_GACK_TO_ERR
      */
-    (PmcFir, bit(3)) ? TBDDefaultCallout;
+    (PmcFir, bit(3)) ? SelfHighThr1;
 
     /** PMCFIR[4]
      *  LFIR_PSTATE_PIB_MASTER_NONOFFLINE_ERR
      */
-    (PmcFir, bit(4)) ? TBDDefaultCallout;
+    (PmcFir, bit(4)) ? SelfHighThr1;
 
     /** PMCFIR[5]
      *  LFIR_PSTATE_PIB_MASTER_OFFLINE_ERR
      */
-    (PmcFir, bit(5)) ? TBDDefaultCallout;
+    (PmcFir, bit(5)) ? SelfHighThr1;
 
     /** PMCFIR[6]
      *  LFIR_PSTATE_OCI_MASTER_TO_ERR
      */
-    (PmcFir, bit(6)) ? TBDDefaultCallout;
+    (PmcFir, bit(6)) ? SelfHighThr1;
 
     /** PMCFIR[7]
      *  LFIR_PSTATE_INTERCHIP_UE_ERR
      */
-    (PmcFir, bit(7)) ? TBDDefaultCallout;
+    (PmcFir, bit(7)) ? SelfHighThr1;
 
     /** PMCFIR[8]
      *  LFIR_PSTATE_INTERCHIP_ERRORFRAME_ERR
      */
-    (PmcFir, bit(8)) ? TBDDefaultCallout;
+    (PmcFir, bit(8)) ? SelfHighThr1;
 
     /** PMCFIR[9]
      *  LFIR_PSTATE_MS_FSM_ERR
      */
-    (PmcFir, bit(9)) ? TBDDefaultCallout;
+    (PmcFir, bit(9)) ? SelfHighThr1;
 
     /** PMCFIR[10]
      *  LFIR_MS_COMP_PARITY_ERR
      */
-    (PmcFir, bit(10)) ? TBDDefaultCallout;
+    (PmcFir, bit(10)) ? defaultMaskedError;
 
-    /** PMCFIR[11]
-     *  LFIR_IDLE_PORESW_FATAL_ERR
+    /** PMCFIR[11:17]
+     *  LFIR_IDLE
      */
-    (PmcFir, bit(11)) ? TBDDefaultCallout;
-
-    /** PMCFIR[12]
-     *  LFIR_IDLE_PORESW_STATUS_RC_ERR
-     */
-    (PmcFir, bit(12)) ? TBDDefaultCallout;
-
-    /** PMCFIR[13]
-     *  LFIR_IDLE_PORESW_STATUS_VALUE_ERR
-     */
-    (PmcFir, bit(13)) ? TBDDefaultCallout;
-
-    /** PMCFIR[14]
-     *  LFIR_IDLE_PORESW_WRITE_WHILE_INACTIVE_ERR
-     */
-    (PmcFir, bit(14)) ? TBDDefaultCallout;
-
-    /** PMCFIR[15]
-     *  LFIR_IDLE_PORESW_TIMEOUT_ERR
-     */
-    (PmcFir, bit(15)) ? TBDDefaultCallout;
-
-    /** PMCFIR[16]
-     *  LFIR_IDLE_OCI_MASTER_WRITE_TIMEOUT_ERR
-     */
-    (PmcFir, bit(16)) ? TBDDefaultCallout;
-
-    /** PMCFIR[17]
-     *  LFIR_IDLE_INTERNAL_ERR
-     */
-    (PmcFir, bit(17)) ? TBDDefaultCallout;
+    (PmcFir, bit(11|12|13|14|15|16|17)) ? defaultMaskedError;
 
     /** PMCFIR[18]
      *  LFIR_INT_COMP_PARITY_ERR
      */
-    (PmcFir, bit(18)) ? TBDDefaultCallout;
+    (PmcFir, bit(18)) ? defaultMaskedError;
 
     /** PMCFIR[19]
      *  LFIR_PMC_OCC_HEARTBEAT_TIMEOUT
      */
-    (PmcFir, bit(19)) ? TBDDefaultCallout;
+    (PmcFir, bit(19)) ? defaultMaskedError;
 
-    /** PMCFIR[20]
-     *  LFIR_SPIVID_CRC_ERROR0
+    /** PMCFIR[20:25]
+     *  LFIR_SPIVID
      */
-    (PmcFir, bit(20)) ? TBDDefaultCallout;
+    (PmcFir, bit(20|21|22|23|24|25)) ? defaultMaskedError;
 
-    /** PMCFIR[21]
-     *  LFIR_SPIVID_CRC_ERROR1
+    /** PMCFIR[26:32]
+     *  LFIR_O2S
      */
-    (PmcFir, bit(21)) ? TBDDefaultCallout;
+    (PmcFir, bit(26|27|28|29|30|31|32)) ? defaultMaskedError;
 
-    /** PMCFIR[22]
-     *  LFIR_SPIVID_CRC_ERROR2
+    /** PMCFIR[33:24]
+     *  LFIR_O2P
      */
-    (PmcFir, bit(22)) ? TBDDefaultCallout;
-
-    /** PMCFIR[23]
-     *  LFIR_SPIVID_RETRY_TIMEOUT
-     */
-    (PmcFir, bit(23)) ? TBDDefaultCallout;
-
-    /** PMCFIR[24]
-     *  LFIR_SPIVID_FSM_ERR
-     */
-    (PmcFir, bit(24)) ? TBDDefaultCallout;
-
-    /** PMCFIR[25]
-     *  LFIR_SPIVID_MAJORITY_DETECTED_A_MINORITY
-     */
-    (PmcFir, bit(25)) ? TBDDefaultCallout;
-
-    /** PMCFIR[26]
-     *  LFIR_O2S_CRC_ERROR0
-     */
-    (PmcFir, bit(26)) ? TBDDefaultCallout;
-
-    /** PMCFIR[27]
-     *  LFIR_O2S_CRC_ERROR1
-     */
-    (PmcFir, bit(27)) ? TBDDefaultCallout;
-
-    /** PMCFIR[28]
-     *LFIR_O2S_CRC_ERROR1
-     */
-    (PmcFir, bit(28)) ? TBDDefaultCallout;
-
-    /** PMCFIR[29]
-     *  LFIR_O2S_RETRY_TIMEOUT
-     */
-    (PmcFir, bit(29)) ? TBDDefaultCallout;
-
-    /** PMCFIR[30]
-     *  LFIR_O2S_WRITE_WHILE_BRIDGE_BUSY_ERR
-     */
-    (PmcFir, bit(30)) ? TBDDefaultCallout;
-
-    /** PMCFIR[31]
-     *  LFIR_O2S_FSM_ERR
-     */
-    (PmcFir, bit(31)) ? TBDDefaultCallout;
-
-    /** PMCFIR[32]
-     *  LFIR_O2S_MAJORITY_DETECTED_A_MINORITY
-     */
-    (PmcFir, bit(32)) ? TBDDefaultCallout;
-
-    /** PMCFIR[33]
-     *  LFIR_O2P_WRITE_WHILE_BRIDGE_BUSY_ERR
-     */
-    (PmcFir, bit(33)) ? TBDDefaultCallout;
-
-    /** PMCFIR[34]
-     *  LFIR_O2P_FSM_ERR
-     */
-    (PmcFir, bit(34)) ? TBDDefaultCallout;
+    (PmcFir, bit(33|34)) ? defaultMaskedError;
 
     /** PMCFIR[35]
      *  LFIR_OCI_SLAVE_ERR
      */
-    (PmcFir, bit(35)) ? TBDDefaultCallout;
+    (PmcFir, bit(35)) ? defaultMaskedError;
 
     /** PMCFIR[36]
      *  LFIR_IF_COMP_PARITY_ERROR
      */
-    (PmcFir, bit(36)) ? TBDDefaultCallout;
+    (PmcFir, bit(36)) ? defaultMaskedError;
+
+    /** PMCFIR[37:46]
+     *  SPARE
+     */
+    (PmcFir, bit(37|38|39|40|41|42|43|44|45|46)) ? defaultMaskedError;
 
     /** PMCFIR[47|48]
      *  FIR_PARITY_ERR
      */
-    (PmcFir, bit(47|48)) ? TBDDefaultCallout;
+    (PmcFir, bit(47|48)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -829,4 +862,11 @@ actionclass analyzeMcs31
 {
     analyze(connected(TYPE_MCS, 7));
     funccall("MaskMCS31IfCentaurCheckstop");
+};
+
+/** Callout the connected OCC */
+actionclass calloutConnectedOccThr1
+{
+   threshold1;
+   callout ( connected(TYPE_OCC, 0), MRU_MED );
 };

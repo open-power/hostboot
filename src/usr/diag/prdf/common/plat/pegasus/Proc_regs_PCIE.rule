@@ -99,117 +99,29 @@
     };
 
     ############################################################################
-    # PCIE Chiplet PCICLOCKFIR_0
+    # PCIE Chiplet PCICLOCKFIRs
+    # These FIRs are completely masked but they will be captured for FFDC.
     ############################################################################
 
     register PCICLOCKFIR_0
     {
         name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012000;
-        reset       (&, 0x09012001);
-        mask        (|, 0x09012005);
         capture     group default;
     };
-
-    register PCICLOCKFIR_0_MASK
-    {
-        name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
-        scomaddr    0x09012003;
-        capture     group default;
-    };
-
-    register PCICLOCKFIR_0_ACT0
-    {
-        name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
-        scomaddr    0x09012006;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PCICLOCKFIR_0");
-    };
-
-    register PCICLOCKFIR_0_ACT1
-    {
-        name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
-        scomaddr    0x09012007;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PCICLOCKFIR_0");
-    };
-
-    ############################################################################
-    # PCIE Chiplet PCICLOCKFIR_1
-    ############################################################################
 
     register PCICLOCKFIR_1
     {
         name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012400;
-        reset       (&, 0x09012401);
-        mask        (|, 0x09012405);
         capture     group default;
     };
-
-    register PCICLOCKFIR_1_MASK
-    {
-        name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
-        scomaddr    0x09012403;
-        capture     group default;
-    };
-
-    register PCICLOCKFIR_1_ACT0
-    {
-        name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
-        scomaddr    0x09012406;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PCICLOCKFIR_1");
-    };
-
-    register PCICLOCKFIR_1_ACT1
-    {
-        name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
-        scomaddr    0x09012407;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PCICLOCKFIR_1");
-    };
-
-    ############################################################################
-    # PCIE Chiplet PCICLOCKFIR_2
-    ############################################################################
 
     register PCICLOCKFIR_2
     {
         name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012800;
-        reset       (&, 0x09012801);
-        mask        (|, 0x09012805);
         capture     group default;
-    };
-
-    register PCICLOCKFIR_2_MASK
-    {
-        name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
-        scomaddr    0x09012803;
-        capture     group default;
-    };
-
-    register PCICLOCKFIR_2_ACT0
-    {
-        name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
-        scomaddr    0x09012806;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PCICLOCKFIR_2");
-    };
-
-    register PCICLOCKFIR_2_ACT1
-    {
-        name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
-        scomaddr    0x09012807;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("PCICLOCKFIR_2");
     };
 
     ############################################################################

@@ -499,307 +499,323 @@ rule CoreFir
     RECOVERABLE: COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
-group gCoreFir filter priority(0,1,2,3,4,5,6,7,8,9,
-                               10,11,12,13,14,15,16,17,18,19,
-                               20,21,22,23,24,25,26,27,28,29,
-                               30,31,32,33,34,35,36,37,38,39,
-                               40,41,42,43,44,   46,47,48,49,
-                               50,51,52,53,54,55,56,57,58,59,
-                               60,61,62,63)
-    # (I assume this is still true...pay attention to this in FIR reviews)
-    # Bit 45 should be a low priority bit but isn't at the end. It is used in
-    # a workaround for core checkstops and can come one with other core
-    # checkstop errors.
+#Based on RAS SpreadSheet p8dd1_mss_FFDC_51.xls
+group gCoreFir filter singlebit
 {
     /** COREFIR[0]
      *  IFU_SRAM_PARITY_ERR: SRAM recoverable error (ICACHE parity error, etc.)
      */
-    (CoreFir, bit(0)) ? TBDDefaultCallout;
+    (CoreFir, bit(0)) ? SelfHighThr5PerHour;
 
     /** COREFIR[1]
      *  IF_SETDELETE_ERR: set deleted
      */
-    (CoreFir, bit(1)) ? TBDDefaultCallout;
+    #FIXME RTC 23127 a comment observed against bit 1
+    (CoreFir, bit(1)) ? SelfHighThr1;
 
     /** COREFIR[2]
      *  IF_RFILE_REC_ERR: RegFile recoverable error
      */
-    (CoreFir, bit(2)) ? TBDDefaultCallout;
+    (CoreFir, bit(2)) ? SelfHighThr5PerHour;
 
     /** COREFIR[3]
      *  IF_RFILE_CHKSTOP_ERR: RegFile core check stop
      */
-    (CoreFir, bit(3)) ? TBDDefaultCallout;
+    (CoreFir, bit(3)) ? SelfHighThr1;
 
     /** COREFIR[4]
      *  IF_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(4)) ? TBDDefaultCallout;
+    (CoreFir, bit(4)) ? SelfHighThr5PerHour;
 
     /** COREFIR[5]
      *  IF_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(5)) ? TBDDefaultCallout;
+    (CoreFir, bit(5)) ? SelfHighThr1;
 
     /** COREFIR[6]
      *  IF_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(6)) ? TBDDefaultCallout;
+    (CoreFir, bit(6)) ? checkAttnThrldOrCallout;
 
     /** COREFIR[7]
      *  IF_CHKSTOP_ERR: system check stop
      */
-    (CoreFir, bit(7)) ? TBDDefaultCallout;
+    (CoreFir, bit(7)) ? SelfHighThr1;
 
     /** COREFIR[8]
      *  RECOV_FIR_CHKSTOP_ERR: recovery core check stop
      */
-    (CoreFir, bit(8)) ? TBDDefaultCallout;
+    (CoreFir, bit(8)) ? spareOrSelfHighThr1;
 
     /** COREFIR[9]
      *  SD_RFILE_REC_ERR: RegFile recoverable error
      */
-    (CoreFir, bit(9)) ? TBDDefaultCallout;
+    (CoreFir, bit(9)) ? SelfHighThr5PerHour;
 
     /** COREFIR[10]
      *  SD_RFILE_CHKSTOP_ERR: RegFile core check stop (mapper error)
      */
-    (CoreFir, bit(10)) ? TBDDefaultCallout;
+    (CoreFir, bit(10)) ? SelfHighThr1;
 
     /** COREFIR[11]
      *  SD_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(11)) ? TBDDefaultCallout;
+    (CoreFir, bit(11)) ? SelfHighThr5PerHour;
 
     /** COREFIR[12]
      *  SD_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(12)) ? TBDDefaultCallout;
+    (CoreFir, bit(12)) ? SelfHighThr1;
 
     /** COREFIR[13]
      *  SD_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(13)) ? TBDDefaultCallout;
+    (CoreFir, bit(13)) ? checkAttnThrldOrCallout;
 
     /** COREFIR[14]
      *  SD_MCHK_AND_ME_EQ_0: MCHK received while ME=0 non recoverable
      */
-    (CoreFir, bit(14)) ? TBDDefaultCallout;
+    #FIXME RTC 23127  A side note observed against this bit regarding
+    # it's better handling
+    (CoreFir, bit(14)) ? SelfHighThr1;
 
     /** COREFIR[15]
      *  SD_PC_L2_UE_ERR: UE from L2
      */
-    (CoreFir, bit(15)) ? TBDDefaultCallout;
+    (CoreFir, bit(15)) ? defaultMaskedError;
 
     /** COREFIR[16]
      *  ISU_L2_UE_OVER_TH_ERR: Number of UEs from L2 above threshold
      */
-    (CoreFir, bit(16)) ? TBDDefaultCallout;
+    (CoreFir, bit(16)) ? defaultMaskedError;
 
     /** COREFIR[17]
      *  SD_PC_CI_UE: UE on CI load
      */
-    (CoreFir, bit(17)) ? TBDDefaultCallout;
+    (CoreFir, bit(17)) ? defaultMaskedError;
+
+    /** COREFIR[18]
+     *  UNUSED_2
+     */
+    (CoreFir, bit(18)) ? defaultMaskedError;
 
     /** COREFIR[19]
      *  FX_GPR_REC_ERR: GPR recoverable error
      */
-    (CoreFir, bit(19)) ? TBDDefaultCallout;
+    (CoreFir, bit(19)) ? SelfHighThr5PerHour;
+
+    /** COREFIR[20]
+     *  UNUSED_3
+     */
+    (CoreFir, bit(20)) ? defaultMaskedError;
 
     /** COREFIR[21]
      *  FX_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(21)) ? TBDDefaultCallout;
+    (CoreFir, bit(21)) ? SelfHighThr1;
 
     /** COREFIR[22]
      *  FX_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(22)) ? TBDDefaultCallout;
+    (CoreFir, bit(22)) ? checkAttnThrldOrCallout;
 
     /** COREFIR[23]
      *  VS_VRF_REC_ERR: VRF recoverable error
      */
-    (CoreFir, bit(23)) ? TBDDefaultCallout;
+    (CoreFir, bit(23)) ? SelfHighThr5PerHour;
 
     /** COREFIR[24]
      *  VS_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(24)) ? TBDDefaultCallout;
+    (CoreFir, bit(24)) ? SelfHighThr5PerHour;
 
     /** COREFIR[25]
      *  VS_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(25)) ? TBDDefaultCallout;
+    (CoreFir, bit(25)) ? SelfHighThr1;
 
     /** COREFIR[26]
      *  RECOV_IN_MAINT_ERR: 26 = recov_in_maint
      */
-    (CoreFir, bit(26)) ? TBDDefaultCallout;
+    (CoreFir, bit(26)) ? callout2ndLvlMed;
 
     /** COREFIR[27]
      *  DU_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(27)) ? TBDDefaultCallout;
+    (CoreFir, bit(27)) ? SelfHighThr5PerHour;
 
     /** COREFIR[28]
      *  DU_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(28)) ? TBDDefaultCallout;
+    (CoreFir, bit(28)) ? defaultMaskedError;
 
     /** COREFIR[29]
      *  LSU_SRAM_PARITY_ERR: SRAM recoverable error (DCACHE parity error, etc.)
      */
-    (CoreFir, bit(29)) ? TBDDefaultCallout;
+    (CoreFir, bit(29)) ? SelfHighThr5PerHour;
 
     /** COREFIR[30]
      *  LS_SETDELETE_ERR: set deleted
      */
-    (CoreFir, bit(30)) ? TBDDefaultCallout;
+    #FIXME RTC 23127  Observed ??? against this bit in spreadsheet
+    (CoreFir, bit(30)) ? SelfHighThr1;
 
     /** COREFIR[31]
      *  LS_RFILE_REC_ERR: RegFile recoverable error
      */
-    (CoreFir, bit(31)) ? TBDDefaultCallout;
+    (CoreFir, bit(31)) ? SelfHighThr5PerHour;
 
     /** COREFIR[32]
      *  LS_RFILE_CHKSTOP_ERR: RegFile core check stop
      */
-    (CoreFir, bit(32)) ? TBDDefaultCallout;
+    (CoreFir, bit(32)) ? SelfHighThr1;
 
     /** COREFIR[33]
      *  LS_TLB_MULTIHIT_ERR: special recovery error TLB multi hit error occurred
      */
-    (CoreFir, bit(33)) ? TBDDefaultCallout;
+    (CoreFir, bit(33)) ? defaultMaskedError;
 
     /** COREFIR[34]
      *  LS_SLB_MULTIHIT_ERR: special recovery error SLBFEE multi hit error occurred
      */
-    (CoreFir, bit(34)) ? TBDDefaultCallout;
+    (CoreFir, bit(34)) ? defaultMaskedError;
 
     /** COREFIR[35]
      *  LS_DERAT_MULTIHIT_ERR: special recovery error ERAT multi hit error occurred
      */
-    (CoreFir, bit(35)) ? TBDDefaultCallout;
+    (CoreFir, bit(35)) ? defaultMaskedError;
 
     /** COREFIR[36]
      *  FORWARD_PROGRESS_ERR: forward progress error
      */
-    (CoreFir, bit(36)) ? TBDDefaultCallout;
+    (CoreFir, bit(36)) ? SelfHighThr1;
 
     /** COREFIR[37]
      *  LS_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(37)) ? TBDDefaultCallout;
+    (CoreFir, bit(37)) ? SelfHighThr5PerHour;
 
     /** COREFIR[38]
      *  LS_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(38)) ? TBDDefaultCallout;
+    (CoreFir, bit(38)) ? SelfHighThr1;
 
     /** COREFIR[39]
      *  LS_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(39)) ? TBDDefaultCallout;
+    (CoreFir, bit(39)) ? checkAttnThrldOrCallout;
 
     /** COREFIR[40]
      *  LS_NOT_CI_REC_ERR: recoverable if not in CI window
      */
-    (CoreFir, bit(40)) ? TBDDefaultCallout;
+    (CoreFir, bit(40)) ? checkAttnThrldOrCallout;
 
     /** COREFIR[41]
      *  LS_CHKSTOP_ERR: system check stop
      */
-    (CoreFir, bit(41)) ? TBDDefaultCallout;
+    (CoreFir, bit(41)) ? SelfHighThr1;
 
     /** COREFIR[42]
      *  LS_GPR_RCV_CHKSTOP_ERR: UE from GPR/VRF recovery process
      */
-    (CoreFir, bit(42)) ? TBDDefaultCallout;
+    (CoreFir, bit(42)) ? defaultMaskedError;
 
     /** COREFIR[43]
      *  THREAD_HANG_REC_ERR: thread hang recoverable error
      */
-    (CoreFir, bit(43)) ? TBDDefaultCallout;
+    (CoreFir, bit(43)) ? SelfAndLevel2MedThr5PerHr;
 
     /** COREFIR[44]
      *  FIR_LOG_RECOV_ERR: logic recoverable error
      */
-    (CoreFir, bit(44)) ? TBDDefaultCallout;
+    (CoreFir, bit(44)) ? SelfHighThr5PerHour;
 
     /** COREFIR[45]
      *  PC_LOG_CHKSTOP_ERR: PC logic core check stop
      */
-    (CoreFir, bit(45)) ? TBDDefaultCallout;
+    (CoreFir, bit(45)) ? SelfHighThr1;
+
+    /** COREFIR[46]
+     *  RESERVED
+     */
+    (CoreFir, bit(46)) ? defaultMaskedError;
 
     /** COREFIR[47]
      *  TFC_FIR_TFMR_P_ERR: TFMR Parity Error (timing facility may be corrupt)
      */
-    (CoreFir, bit(47)) ? TBDDefaultCallout;
+    (CoreFir, bit(47)) ? defaultMaskedError;
 
     /** COREFIR[48]
      *  SPRD_FIR_HYP_RES_P_ERR: Hypervisor Resource error - core check stop
      */
-    (CoreFir, bit(48)) ? TBDDefaultCallout;
+    (CoreFir, bit(48)) ? SelfHighThr1;
 
     /** COREFIR[49]
      *  TFC_FIR_P_ERR: TFAC parity error
      */
-    (CoreFir, bit(49)) ? TBDDefaultCallout;
+    (CoreFir, bit(49)) ? defaultMaskedError;
 
     /** COREFIR[50]
      *  TFC_FIR_CONTROL_ERR: TFAC control error
      */
-    (CoreFir, bit(50)) ? TBDDefaultCallout;
+    (CoreFir, bit(50)) ? defaultMaskedError;
 
     /** COREFIR[51]
      *  PC_FIRM_AND_SEL_ERR: TFAC firmware error and select error
      */
-    (CoreFir, bit(51)) ? TBDDefaultCallout;
+    (CoreFir, bit(51)) ? defaultMaskedError;
 
     /** COREFIR[52]
      *  CORE_HUNG: Hang recovery failed (core check stop)
      */
-    (CoreFir, bit(52)) ? TBDDefaultCallout;
+    (CoreFir, bit(52)) ? SelfHighThr1;
 
     /** COREFIR[53]
      *  CORE_HANG_DETECT: Internal hang detected (core hang)
      */
-    (CoreFir, bit(53)) ? TBDDefaultCallout;
+    (CoreFir, bit(53)) ? defaultMaskedError;
 
     /** COREFIR[54]
      *  AMBI_HANG_DETECT: Hang detected unknown source
      */
-    (CoreFir, bit(54)) ? TBDDefaultCallout;
+    (CoreFir, bit(54)) ? calloutSelfAndLevel2MedThr1;
 
     /** COREFIR[55]
      *  NEST_HANG_DETECT: External Hang detected
      */
-    (CoreFir, bit(55)) ? TBDDefaultCallout;
+    (CoreFir, bit(55)) ? calloutProcLow2ndLvlMedThr1;
+
+    /** COREFIR[56|57|58]
+     *  RESERVED
+     */
+    (CoreFir, bit(56|57|58)) ? defaultMaskedError;
 
     /** COREFIR[59]
      *  PC_SOM_ERR: SCOM satellite error detected
      */
-    (CoreFir, bit(59)) ? TBDDefaultCallout;
+    (CoreFir, bit(59)) ? defaultMaskedError;
 
     /** COREFIR[60]
      *  DBG_FIR_CHECKSTOP_ON_TRIGGER: debug Trigger Error inject
      */
-    (CoreFir, bit(60)) ? TBDDefaultCallout;
+    (CoreFir, bit(60)) ? defaultMaskedError;
 
     /** COREFIR[61]
      *  SP_INJ_REC_ERR: SCOM or Firmware recoverable Error Inject
      */
-    (CoreFir, bit(61)) ? TBDDefaultCallout;
+    (CoreFir, bit(61)) ? defaultMaskedError;
 
     /** COREFIR[62]
      *  SP_INJ_XSTOP_ERR: Firmware Xstop Error Inject
      */
-    (CoreFir, bit(62)) ? TBDDefaultCallout;
+    (CoreFir, bit(62)) ? defaultMaskedError;
 
     /** COREFIR[63]
      *  SPRD_PHYP_ERR_INJ: Phyp Xstop via SPRC / SPRD
      */
-    (CoreFir, bit(63)) ? TBDDefaultCallout;
+    #FIXME RTC 23127  Needto clarify action Chip+SW Level 2IPP
+    (CoreFir, bit(63)) ? callout2ndLvlMed;
 };
 
 ################################################################################
@@ -1452,4 +1468,37 @@ actionclass L2PowerBusCE
 actionclass calloutParentProcLow
 {
     callout(connected(TYPE_PROC),MRU_LOW);
+};
+
+/** calls out Ex if threshold exceeds. Calls for second level support as well*/
+actionclass SelfAndLevel2MedThr5PerHr
+{
+    calloutSelfMed;
+    callout2ndLvlMed;
+    threshold5phour;
+};
+
+/** callouts Proc on first instance. Calls for second level support as well*/
+actionclass calloutProcLow2ndLvlMedThr1
+{
+    calloutParentProcLow;
+    callout2ndLvlMed;
+    threshold1;
+};
+
+/** Callouts core with high priority on first instance if sparing not done */
+actionclass spareOrSelfHighThr1
+{
+    #FIXME RTC 23127  Need to figure out extension bit to determine if sparing
+    #      is  done
+    TBDDefaultCallout;
+};
+
+/** if attention is recoverable then threshold else callout and gard on first
+ * instance*/
+
+actionclass checkAttnThrldOrCallout
+{
+    #FIXME RTC 23127 Need to clarify what is Threshold B
+    TBDDefaultCallout;
 };

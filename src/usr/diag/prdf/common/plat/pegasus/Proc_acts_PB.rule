@@ -83,7 +83,7 @@ group gPbChipletFir filter singlebit
     /** PB_CHIPLET_FIR[14]
      *  Attention from EHHCAFIR
      */
-    (PbChipletFir, bit(14)) ? analyze(gEhHcaFir);
+    (PbChipletFir, bit(14)) ? defaultMaskedError;
 
     /** PB_CHIPLET_FIR[15]
      *  Attention from NXASFIR
@@ -93,7 +93,7 @@ group gPbChipletFir filter singlebit
     /** PB_CHIPLET_FIR[16]
      *  Attention from ENHCAFIR
      */
-    (PbChipletFir, bit(16)) ? analyze(gEnHcaFir);
+    (PbChipletFir, bit(16)) ? defaultMaskedError;
 
     /** PB_CHIPLET_FIR[17|18|19]
      *  Attention from PCINESTFIRs
@@ -194,6 +194,8 @@ rule NxDmaEngFir
         NXDMAENGFIR & ~NXDMAENGFIR_MASK & ~NXDMAENGFIR_ACT0 &  NXDMAENGFIR_ACT1;
 };
 
+#FIXME RTC 23127 Due to various pending queries action for many bits not defined
+#yet
 group gNxDmaEngFir filter singlebit
 {
 # FIXME - Get confirmation from HW team to see how this FIR is wired.
@@ -235,7 +237,7 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[8]
      *  DMA non-zero CSB CC detected
      */
-    (NxDmaEngFir, bit(8)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(8)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[9]
      *  DMA array correctable ECC error
@@ -265,7 +267,7 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[14]
      *  Error from other SCOM satellites
      */
-    (NxDmaEngFir, bit(14)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(14)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[15]
      *  DMA invalid state error
@@ -355,12 +357,12 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[32]
      *  SUE error on CRB(CSB address, CCB)
      */
-    (NxDmaEngFir, bit(32)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(32)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[33]
      *  SUE error on something other than CRB(CSB address, CCB)
      */
-    (NxDmaEngFir, bit(33)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(33)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[34|35]
      *  Reserved
@@ -385,12 +387,12 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[48]
      *  FIR/SCOM satellite parity error
      */
-    (NxDmaEngFir, bit(48)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(48)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[49]
      *  FIR/SCOM satellite parity error FIR bit duplicate
      */
-    (NxDmaEngFir, bit(49)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(49)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -1477,6 +1479,8 @@ group gPbCentFir filter singlebit
 # PB Chiplet PSIHBFIR
 ################################################################################
 
+#actions for bits updated based  on p8dd1_mss_FFDC_54
+
 rule PsiHbFir
 {
     CHECK_STOP:  PSIHBFIR & ~PSIHBFIR_MASK & ~PSIHBFIR_ACT0 & ~PSIHBFIR_ACT1;
@@ -1488,133 +1492,145 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[0]
      *  PB_ECC_ERR_CE
      */
-    (PsiHbFir, bit(0)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(0)) ? SelfHighThr32PerDay;
 
     /** PSIHBFIR[1]
      *  PB_ECC_ERR_UE
      */
-    (PsiHbFir, bit(1)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(1)) ? SelfHighThr1;
 
     /** PSIHBFIR[2]
      *  PB_ECC_ERR_SUE
      */
-    (PsiHbFir, bit(2)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(2)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[3]
      *  INTERRUPT_FROM_ERROR
      */
-    (PsiHbFir, bit(3)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(3)) ? defaultMaskedError;
 
     /** PSIHBFIR[4]
      *  INTERRUPT_FROM_FSP
      */
-    (PsiHbFir, bit(4)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(4)) ? defaultMaskedError;
 
     /** PSIHBFIR[5]
      *  FSP_ECC_ERR_CE
      */
-    (PsiHbFir, bit(5)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(5)) ? calloutPsiThr32;
 
     /** PSIHBFIR[6]
      *  FSP_ECC_ERR_UE
      */
-    (PsiHbFir, bit(6)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(6)) ? calloutPsiThr1;
 
     /** PSIHBFIR[7]
      *  ERROR_STATE
      */
-    (PsiHbFir, bit(7)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(7)) ? defaultMaskedError;
 
     /** PSIHBFIR[8]
      *  INVALID_TTYPE
      */
-    (PsiHbFir, bit(8)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(8)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[9]
      *  INVALID_CRESP
      */
-    (PsiHbFir, bit(9)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(9)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[10]
      *  PB_DATA_TIME_OUT
      */
-    (PsiHbFir, bit(10)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(10)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[11]
      *  PB_PARITY_ERROR
      */
-    (PsiHbFir, bit(11)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(11)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[12]
      *  FSP_ACCESS_TRUSTED_SPACE
      */
-    (PsiHbFir, bit(12)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(12)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[13]
      *  UNEXPECTED_PB
      */
-    (PsiHbFir, bit(13)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(13)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[14]
      *  INTERRUPT_REG_CHANGE_WHILE_ACTIVE
      */
-    (PsiHbFir, bit(14)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(14)) ? defaultMaskedError;
 
     /** PSIHBFIR[15]
      *  INTERRUPT0_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(15)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(15)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[16]
      *  INTERRUPT1_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(16)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(16)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[17]
      *  INTERRUPT2_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(17)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(17)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[18]
      *  INTERRUPT3_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(18)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(18)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[19]
      *  INTERRUPT4_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(19)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(19)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[20]
      *  INTERRUPT5_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(20)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(20)) ? callout2ndLvlMedThr1;
 
     /** PSIHBFIR[21]
      *  TCBR_TP_PSI_GLB_ERR_0
      */
+    #FIXME RTC 23127 Action not clear from spread sheet
     (PsiHbFir, bit(21)) ? TBDDefaultCallout;
 
     /** PSIHBFIR[22]
      *  TCBR_TP_PSI_GLB_ERR_1
      */
-    (PsiHbFir, bit(22)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(22)) ? defaultMaskedError;
 
     /** PSIHBFIR[23]
+     *  UPSTREAM_FIR
+     */
+    (PsiHbFir, bit(23)) ? callout2ndLvlMedThr32perDay;
+
+    /** PSIHBFIR[24|25|26]
+     *  SPARE_FIR
+     */
+    (PsiHbFir, bit(24|25|26)) ? defaultMaskedError;
+
+    /** PSIHBFIR[27]
      *  SCOM_ERROR
      */
-    (PsiHbFir, bit(23)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(27)) ? defaultMaskedError;
 
-    /** PSIHBFIR[24]
+    /** PSIHBFIR[28]
      *  FIR_PARITY_ERROR
      */
-    (PsiHbFir, bit(24)) ? TBDDefaultCallout;
+    (PsiHbFir, bit(28)) ? defaultMaskedError;
 };
 
 ################################################################################
 # PB Chiplet ICPFIR
 ################################################################################
 
+#Based on p8dd1_mss_FFDC_54.xls
 rule IcpFir
 {
     CHECK_STOP:  ICPFIR & ~ICPFIR_MASK & ~ICPFIR_ACT0 & ~ICPFIR_ACT1;
@@ -1623,65 +1639,63 @@ rule IcpFir
 
 group gIcpFir filter singlebit
 {
+    # TODO RTC23127 Here we are calling out proc but in RAS spreadsheet
+    # ICR target is mentioned. Verify.
     /** ICPFIR[0]
      *  INT_HW_ERROR_EOI_Q
      */
-    (IcpFir, bit(0)) ? TBDDefaultCallout;
+    (IcpFir, bit(0)) ? SelfMedThr1;
 
     /** ICPFIR[1]
      *  INT_HW_ERROR_FWD_Q
      */
-    (IcpFir, bit(1)) ? TBDDefaultCallout;
+    (IcpFir, bit(1)) ? SelfMedThr1;
 
     /** ICPFIR[2]
      *  INT_HW_ERROR_IR_QU
      */
-    (IcpFir, bit(2)) ? TBDDefaultCallout;
+    (IcpFir, bit(2)) ? SelfMedThr1;
 
     /** ICPFIR[3]
      *  INT_HW_ERROR_RET_Q
      */
-    (IcpFir, bit(3)) ? TBDDefaultCallout;
+    (IcpFir, bit(3)) ? SelfMedThr32PerDay;
 
+    # TODO RTC23127 verify bit 4
     /** ICPFIR[4]
      *  INT_HW_ERROR_ADDRI
      */
-    (IcpFir, bit(4)) ? TBDDefaultCallout;
+    (IcpFir, bit(4)) ? defaultMaskedError;
 
     /** ICPFIR[5]
      *  INT_HW_ERROR_DATAI
      */
-    (IcpFir, bit(5)) ? TBDDefaultCallout;
+    (IcpFir, bit(5)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[6]
      *  INT_HW_ERROR_ADDRO
      */
-    (IcpFir, bit(7)) ? TBDDefaultCallout;
+    (IcpFir, bit(6)) ? SelfMedThr32PerDay;
+
+    /** ICPFIR[7]
+     *  INT_HW_ERROR_DATAO
+     */
+    (IcpFir, bit(7)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[8]
      *  INT_HW_ERROR_LDSTQ
      */
-    (IcpFir, bit(8)) ? TBDDefaultCallout;
+    (IcpFir, bit(8)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[9]
      *  INT_HW_ERROR_REQQ
      */
-    (IcpFir, bit(9)) ? TBDDefaultCallout;
+    (IcpFir, bit(9)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[10]
      *  SCOM_REG_CHECK
      */
-    (IcpFir, bit(10)) ? TBDDefaultCallout;
-
-    /** ICPFIR[11]
-     *  INVALID_FORWARD_SETUP
-     */
-    (IcpFir, bit(11)) ? TBDDefaultCallout;
-
-    /** ICPFIR[12]
-     *  ADDRESS_CORE_FIELD
-     */
-    (IcpFir, bit(12)) ? TBDDefaultCallout;
+    (IcpFir, bit(10)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[13]
      *  ADDRESS_CORE_FIELD_MMIO
@@ -1691,97 +1705,121 @@ group gIcpFir filter singlebit
     /** ICPFIR[14]
      *  UNSOLICITED_CRESP
      */
-    (IcpFir, bit(14)) ? TBDDefaultCallout;
+    (IcpFir, bit(14)) ? defaultMaskedError;
 
     /** ICPFIR[15]
      *  UNSOLICITED_DATA
      */
-    (IcpFir, bit(15)) ? TBDDefaultCallout;
+    (IcpFir, bit(15)) ? defaultMaskedError;
 
     /** ICPFIR[16]
      *  INVALID_CMD
      */
-    (IcpFir, bit(16)) ? TBDDefaultCallout;
+    (IcpFir, bit(16)) ? defaultMaskedError;
 
     /** ICPFIR[17]
      *  INVALID_CRESPZ
      */
-    (IcpFir, bit(17)) ? TBDDefaultCallout;
+    (IcpFir, bit(17)) ? defaultMaskedError;
 
     /** ICPFIR[18]
      *  INVALID_CRESP
      */
-    (IcpFir, bit(18)) ? TBDDefaultCallout;
+    (IcpFir, bit(18)) ? defaultMaskedError;
 
     /** ICPFIR[19]
      *  Reserved field (Access type is reserved)
      */
-    (IcpFir, bit(19)) ? TBDDefaultCallout;
+    (IcpFir, bit(19)) ? defaultMaskedError;
 
     /** ICPFIR[20]
      *  ECC_CE_ON_DATA
      */
-    (IcpFir, bit(20)) ? TBDDefaultCallout;
+    (IcpFir, bit(20)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[21]
      *  ECC_UE_ON_DATA
      */
-    (IcpFir, bit(21)) ? TBDDefaultCallout;
+    (IcpFir, bit(21)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[22]
      *  ECC_SUE_ON_DATA
      */
-    (IcpFir, bit(22)) ? TBDDefaultCallout;
+    (IcpFir, bit(22)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[23]
      *  PARITY_CHK_ADDRESS
      */
-    (IcpFir, bit(23)) ? TBDDefaultCallout;
+    (IcpFir, bit(23)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[24]
      *  PARITY_CHK_TAG
      */
-    (IcpFir, bit(24)) ? TBDDefaultCallout;
+    (IcpFir, bit(24)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[25]
      *  TIMEOUT_LD_STQ
      */
-    (IcpFir, bit(25)) ? TBDDefaultCallout;
+    (IcpFir, bit(25)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[26]
      *  TIMEOUT_RETURNQ
      */
-    (IcpFir, bit(26)) ? TBDDefaultCallout;
+    (IcpFir, bit(26)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[27]
      *  TIMEOUT_FWDQ
      */
-    (IcpFir, bit(27)) ? TBDDefaultCallout;
+    (IcpFir, bit(27)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[28]
      *  TIMEOUT_EOIQ
      */
-    (IcpFir, bit(28)) ? TBDDefaultCallout;
+    (IcpFir, bit(28)) ? SelfMedThr32PerDay;
+
+    #TODO RTC 23127 : Check for bits 29 and 30. Unused in scomdef
+    # but defined in RAS spreadsheet.
+
+    /** ICPFIR[29]
+     *  RESERVED
+     */
+    (IcpFir, bit(29)) ? TBDDefaultCallout;
+
+    /** ICPFIR[30]
+     *  RESERVED
+     */
+    (IcpFir, bit(30)) ? TBDDefaultCallout;
+
+    /** ICPFIR[31]
+     *  RESERVED
+     */
+    (IcpFir, bit(31)) ? defaultMaskedError;
 
     /** ICPFIR[32]
      *  EXT_TRACE_0
      */
-    (IcpFir, bit(32)) ? TBDDefaultCallout;
+    (IcpFir, bit(32)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[33]
      *  EXT_TRACE_1
      */
-    (IcpFir, bit(33)) ? TBDDefaultCallout;
+    (IcpFir, bit(33)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[34]
      *  ADU_RECOV
      */
-    (IcpFir, bit(34)) ? TBDDefaultCallout;
+    (IcpFir, bit(34)) ? SelfMedThr32PerDay;
 
+    # TODO RTC23127 : Not defined in RAS spreadsheet.
     /** ICPFIR[35]
      *  EXT_XSTOP
      */
-    (IcpFir, bit(35)) ? TBDDefaultCallout;
+    (IcpFir, bit(35)) ? SelfMedThr32PerDay;
+
+    /** ICPFIR[36:37]
+     *  Reserved
+     */
+    (IcpFir, bit(36|37)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -1799,468 +1837,128 @@ group gPbaFir filter singlebit
     /** PBAFIR[0]
      *  PBAFIR_OCI_APAR_ERR
      */
-    (PbaFir, bit(0)) ? TBDDefaultCallout;
+    (PbaFir, bit(0)) ? SelfHighThr1;
 
     /** PBAFIR[1]
      *  PBAFIR_PB_RDADRERR_FW
      */
-    (PbaFir, bit(1)) ? TBDDefaultCallout;
+    (PbaFir, bit(1)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[2]
      *  PBAFIR_PB_RDDATATO_FW
      */
-    (PbaFir, bit(2)) ? TBDDefaultCallout;
+    (PbaFir, bit(2)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[3]
      *  PBAFIR_PB_SUE_FW
      */
+     #FIXME RTC 23127 Action "Foreign LinkIPP" not clear
     (PbaFir, bit(3)) ? TBDDefaultCallout;
 
     /** PBAFIR[4]
      *  PBAFIR_PB_UE_FW
      */
-    (PbaFir, bit(4)) ? TBDDefaultCallout;
+    (PbaFir, bit(4)) ? SelfHighThr1;
 
     /** PBAFIR[5]
      *  PBAFIR_PB_CE_FW
      */
-    (PbaFir, bit(5)) ? TBDDefaultCallout;
+    (PbaFir, bit(5)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[6]
      *  PBAFIR_OCI_SLAVE_INIT
      */
-    (PbaFir, bit(6)) ? TBDDefaultCallout;
+    (PbaFir, bit(6)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[7]
      *  PBAFIR_OCI_WRPAR_ERR
      */
-    (PbaFir, bit(7)) ? TBDDefaultCallout;
+    (PbaFir, bit(7)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[8]
      *  PBAFIR_OCI_REREQTO
      */
-    (PbaFir, bit(8)) ? TBDDefaultCallout;
+    (PbaFir, bit(8)) ? defaultMaskedError;
 
     /** PBAFIR[9]
      *  PBAFIR_PB_UNEXPCRESP
      */
-    (PbaFir, bit(9)) ? TBDDefaultCallout;
+    (PbaFir, bit(9)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[10]
      *  PBAFIR_PB_UNEXPDATA
      */
-    (PbaFir, bit(10)) ? TBDDefaultCallout;
+    (PbaFir, bit(10)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[11]
      *  PBAFIR_PB_PARITY_ERR
      */
-    (PbaFir, bit(11)) ? TBDDefaultCallout;
+    (PbaFir, bit(11)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[12]
      *  PBAFIR_PB_WRADRERR_FW
      */
-    (PbaFir, bit(12)) ? TBDDefaultCallout;
+    (PbaFir, bit(12)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[13]
      *  PBAFIR_PB_BADCRESP
      */
-    (PbaFir, bit(13)) ? TBDDefaultCallout;
+    (PbaFir, bit(13)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[14]
      *  PBAFIR_PB_ACKDEAD_FW
      */
-    (PbaFir, bit(14)) ? TBDDefaultCallout;
+    (PbaFir, bit(14)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[15]
      *  PBAFIR_PB_CRESPTO
      */
-    (PbaFir, bit(15)) ? TBDDefaultCallout;
+    (PbaFir, bit(15)) ? callout2ndLvlMedThr1;
 
-    /** PBAFIR[16]
-     *  PBAFIR_BCUE_SETUP_ERR
+    /** PBAFIR[16:19]
+     *  PBAFIR_BCUE
      */
-    (PbaFir, bit(16)) ? TBDDefaultCallout;
+    (PbaFir, bit(16|17|18|19)) ? defaultMaskedError;
 
-    /** PBAFIR[17]
-     *  PBAFIR_BCUE_PB_ACK_DEAD
+    /** PBAFIR[20:27]
+     *  PBAFIR_BCDE
      */
-    (PbaFir, bit(17)) ? TBDDefaultCallout;
-
-    /** PBAFIR[18]
-     *  PBAFIR_BCUE_PB_ADRERR
-     */
-    (PbaFir, bit(18)) ? TBDDefaultCallout;
-
-    /** PBAFIR[19]
-     *  PBAFIR_BCUE_OCI_DATERR
-     */
-    (PbaFir, bit(19)) ? TBDDefaultCallout;
-
-    /** PBAFIR[20]
-     *  PBAFIR_BCDE_SETUP_ERR
-     */
-    (PbaFir, bit(20)) ? TBDDefaultCallout;
-
-    /** PBAFIR[21]
-     *  PBAFIR_BCDE_PB_ACK_DEAD
-     */
-    (PbaFir, bit(21)) ? TBDDefaultCallout;
-
-    /** PBAFIR[22]
-     *  PBAFIR_BCDE_PB_ADRERR
-     */
-    (PbaFir, bit(22)) ? TBDDefaultCallout;
-
-    /** PBAFIR[23]
-     *  PBAFIR_BCDE_RDDATATO_ERR
-     */
-    (PbaFir, bit(23)) ? TBDDefaultCallout;
-
-    /** PBAFIR[24]
-     *  PBAFIR_BCDE_SUE_ERR
-     */
-    (PbaFir, bit(24)) ? TBDDefaultCallout;
-
-    /** PBAFIR[25]
-     *  PBAFIR_BCDE_UE_ERR
-     */
-    (PbaFir, bit(25)) ? TBDDefaultCallout;
-
-    /** PBAFIR[26]
-     *  PBAFIR_BCDE_CE
-     */
-    (PbaFir, bit(26)) ? TBDDefaultCallout;
-
-    /** PBAFIR[27]
-     *  PBAFIR_BCDE_OCI_DATERR
-     */
-    (PbaFir, bit(27)) ? TBDDefaultCallout;
+    (PbaFir, bit(20|21|22|23|24|25|26|27)) ? defaultMaskedError;
 
     /** PBAFIR[28]
      *  PBAFIR_INTERNAL_ERR
      */
-    (PbaFir, bit(28)) ? TBDDefaultCallout;
+    (PbaFir, bit(28)) ? SelfHighThr1;
 
     /** PBAFIR[29]
      *  PBAFIR_ILLEGAL_CACHE_OP
      */
-    (PbaFir, bit(29)) ? TBDDefaultCallout;
+    (PbaFir, bit(29)) ? callout2ndLvlMedThr1;
 
     /** PBAFIR[30]
      *  PBAFIR_OCI_BAD_REG_ADDR
      */
-    (PbaFir, bit(30)) ? TBDDefaultCallout;
+    (PbaFir, bit(30)) ? callout2ndLvlMedThr1;
 
-    /** PBAFIR[31]
-     *  PBAFIR_AXPUSH_WRERR
+    /** PBAFIR[31:39]
+     *  PBAFIR_AX
      */
-    (PbaFir, bit(31)) ? TBDDefaultCallout;
-
-    /** PBAFIR[32]
-     *  PBAFIR_AXRCV_DLO_ERR
-     */
-    (PbaFir, bit(32)) ? TBDDefaultCallout;
-
-    /** PBAFIR[33]
-     *  PBAFIR_AXRCV_DLO_TO
-     */
-    (PbaFir, bit(33)) ? TBDDefaultCallout;
-
-    /** PBAFIR[34]
-     *  PBAFIR_AXRCV_RSVDATA_TO
-     */
-    (PbaFir, bit(34)) ? TBDDefaultCallout;
-
-    /** PBAFIR[35]
-     *  PBAFIR_AXFLOW_ERR
-     */
-    (PbaFir, bit(35)) ? TBDDefaultCallout;
-
-    /** PBAFIR[36]
-     *  PBAFIR_AXSND_DHI_RTYTO
-     */
-    (PbaFir, bit(36)) ? TBDDefaultCallout;
-
-    /** PBAFIR[37]
-     *  PBAFIR_AXSND_DLO_RTYTO
-     */
-    (PbaFir, bit(37)) ? TBDDefaultCallout;
-
-    /** PBAFIR[38]
-     *  PBAFIR_AXSND_RSVTO
-     */
-    (PbaFir, bit(38)) ? TBDDefaultCallout;
-
-    /** PBAFIR[39]
-     *  PBAFIR_AXSND_RSVERR
-     */
-    (PbaFir, bit(39)) ? TBDDefaultCallout;
+    (PbaFir, bit(31|32|33|34|35|36|37|38|39)) ? defaultMaskedError;
 
     /** PBAFIR[40]
      *  PBAFIR_PB_ACKDEAD_FW_WR
      */
-    (PbaFir, bit(40)) ? TBDDefaultCallout;
+    (PbaFir, bit(40)) ? callout2ndLvlMedThr1;
+
+    /** PBAFIR[41:43]
+     *  RESERVED
+     */
+    (PbaFir, bit(41|42|43)) ? defaultMaskedError;
 
     /** PBAFIR[44|45]
      *  PBAFIR_FIR_PARITY_ERR
      */
-    (PbaFir, bit(44|45)) ? TBDDefaultCallout;
-};
-
-################################################################################
-# PB Chiplet EHHCAFIR
-################################################################################
-
-rule EhHcaFir
-{
-    CHECK_STOP:  EHHCAFIR & ~EHHCAFIR_MASK & ~EHHCAFIR_ACT0 & ~EHHCAFIR_ACT1;
-    RECOVERABLE: EHHCAFIR & ~EHHCAFIR_MASK & ~EHHCAFIR_ACT0 &  EHHCAFIR_ACT1;
-};
-
-group gEhHcaFir filter singlebit
-{
-    /** EHHCAFIR[0]
-     *  CE1_0_OUT: array0_a CE
-     */
-    (EhHcaFir, bit(0)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[1]
-     *  CE2_0_OUT: array0_b CE
-     */
-    (EhHcaFir, bit(1)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[2
-     *  UE1_0_OUT: array0_a ue
-     */
-    (EhHcaFir, bit(2)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[3]
-     *  UE2_0_OUT: array0_b ue
-     */
-    (EhHcaFir, bit(3)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[4]
-     *  CE1_1_OUT: array1_a CE
-     */
-    (EhHcaFir, bit(4)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[5]
-     *  CE2_1_OUT: array1_b CE
-     */
-    (EhHcaFir, bit(5)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[6]
-     *  UE1_1_OUT: array1_a ue
-     */
-    (EhHcaFir, bit(6)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[7]
-     *  UE2_1_OUT: array1_b ue
-     */
-    (EhHcaFir, bit(7)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[8]
-     *  CE1_2_OUT: array2_a CE
-     */
-    (EhHcaFir, bit(8)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[9]
-     *  CE2_2_OUT: array2_b CE
-     */
-    (EhHcaFir, bit(9)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[10]
-     *  UE1_2_OUT: array2_a ue
-     */
-    (EhHcaFir, bit(10)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[11]
-     *  UE2_2_OUT: array2_b ue
-     */
-    (EhHcaFir, bit(11)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[12]
-     *  CE1_3_OUT: array3_a CE
-     */
-    (EhHcaFir, bit(12)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[13]
-     *  CE2_3_OUT: array3_b CE
-     */
-    (EhHcaFir, bit(13)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[14]
-     *  UE1_3_OUT: array3_a ue
-     */
-    (EhHcaFir, bit(14)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[15]
-     *  UE2_3_OUT: array3_b ue
-     */
-    (EhHcaFir, bit(15)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[16]
-     *  CE1_4_OUT: array4_a CE
-     */
-    (EhHcaFir, bit(16)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[17]
-     *  CE2_4_OUT: array4_b CE
-     */
-    (EhHcaFir, bit(17)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[18]
-     *  UE1_4_OUT: array4_a ue
-     */
-    (EhHcaFir, bit(18)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[19]
-     *  UE2_4_OUT: array4_b ue
-     */
-    (EhHcaFir, bit(19)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[20]
-     *  CE1_5_OUT: array5_a CE
-     */
-    (EhHcaFir, bit(20)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[21]
-     *  CE2_5_OUT: array5_b CE
-     */
-    (EhHcaFir, bit(21)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[22]
-     *  UE1_5_OUT: array5_a ue
-     */
-    (EhHcaFir, bit(22)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[23]
-     *  UE2_5_OUT: array5_b ue
-     */
-    (EhHcaFir, bit(23)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[24]
-     *  CE1_6_OUT: array6_a CE
-     */
-    (EhHcaFir, bit(24)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[25]
-     *  CE2_6_OUT: array6_b CE
-     */
-    (EhHcaFir, bit(25)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[26]
-     *  UE1_6_OUT: array6_a ue
-     */
-    (EhHcaFir, bit(26)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[27]
-     *  UE2_6_OUT: array6_b ue
-     */
-    (EhHcaFir, bit(27)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[28]
-     *  CE1_7_OUT: array7_a CE
-     */
-    (EhHcaFir, bit(28)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[29]
-     *  CE2_7_OUT: array7_b CE
-     */
-    (EhHcaFir, bit(29)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[30]
-     *  UE1_7_OUT: array7_a ue
-     */
-    (EhHcaFir, bit(30)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[31]
-     *  UE2_7_OUT: array7_b ue
-     */
-    (EhHcaFir, bit(31)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[32]
-     *  DROP_COUNTER_FULL: Drop Counter Full
-     */
-    (EhHcaFir, bit(32)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[33]
-     *  INTERNAL_ERROR: Internal Error
-     */
-    (EhHcaFir, bit(33)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[34]
-     *  SCOM_ERROR
-     */
-    (EhHcaFir, bit(34)) ? TBDDefaultCallout;
-
-    /** EHHCAFIR[35]
-     *  FIR_PARITY_ERROR
-     */
-    (EhHcaFir, bit(35)) ? TBDDefaultCallout;
-};
-
-################################################################################
-# PB Chiplet ENHCAFIR
-################################################################################
-
-rule EnHcaFir
-{
-    CHECK_STOP:  ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 & ~ENHCAFIR_ACT1;
-    RECOVERABLE: ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 &  ENHCAFIR_ACT1;
-};
-
-group gEnHcaFir filter singlebit
-{
-    /** ENHCAFIR[0]
-     *  DPX0_DAT_UE: PB0 data UE
-     */
-    (EnHcaFir, bit(0)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[1]
-     *  DPX0_DAT_SUE: PB0 data UE
-     */
-    (EnHcaFir, bit(1)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[2]
-     *  DPX0_DAT_CE: PB0 data ue
-     */
-    (EnHcaFir, bit(2)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[3]
-     *
-     */
-    (EnHcaFir, bit(3)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[4]
-     *  CO_DROP_COUNTER_FULL: Castout Drop Counter Full
-     */
-    (EnHcaFir, bit(4)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[5]
-     *  DATA_HANG_DETECT: Castout Drop Counter Full
-     */
-    (EnHcaFir, bit(5)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[6]
-     *  UNEXPECTED_DATA_OR_CRESP: Castout Drop Counter Full
-     */
-    (EnHcaFir, bit(6)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[7]
-     *  INTERNAL_ERROR: Castout Drop Counter Full
-     */
-    (EnHcaFir, bit(7)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[8]
-     *  SCOM_ERROR
-     */
-    (EnHcaFir, bit(8)) ? TBDDefaultCallout;
-
-    /** ENHCAFIR[9]
-     *  FIR_PARITY_ERROR
-     */
-    (EnHcaFir, bit(9)) ? TBDDefaultCallout;
+    (PbaFir, bit(44|45)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -3091,3 +2789,38 @@ actionclass maxSparesExceeded_dmiBus6
 actionclass maxSparesExceeded_dmiBus7
 { calloutDmiBus7Th1; funccall("maxSparesExceeded_dmiBus7"); };
 
+/** Callout 2nd level support of first instance */
+actionclass callout2ndLvlMedThr1
+{
+    callout2ndLvlMed;
+    threshold1;
+};
+
+/** Callout 2nd level support of afer 32 events per day */
+actionclass callout2ndLvlMedThr32perDay
+{
+    callout2ndLvlMed;
+    threshold32pday;
+};
+
+/** callout both ends of PSI Link.Threshold is 32 events per day.
+ */
+actionclass  calloutPsiThr32
+{
+    calloutPsiLink;
+    threshold32pday;
+};
+
+/** callout both ends of PSI Link on first instance.*/
+actionclass  calloutPsiThr1
+{
+    calloutPsiLink;
+    threshold1;
+};
+
+/** callout both ends of PSI link */
+actionclass  calloutPsiLink
+{
+    callout(connected(TYPE_PSI, 0), MRU_MEDA);
+    funccall("calloutPeerBus_psi0");
+};
