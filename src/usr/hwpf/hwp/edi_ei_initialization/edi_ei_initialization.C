@@ -50,6 +50,9 @@
 
 #include    <initservice/isteps_trace.H>
 
+#include    <hwas/common/deconfigGard.H>
+#include    <hwas/common/hwasCommon.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -87,6 +90,7 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
+using   namespace   HWAS;
 
 
 //
@@ -797,6 +801,18 @@ void*    call_host_startprd_pbus( void    *io_pArgs )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "Error returned from call to PRDF::initialize");
+    }
+
+    // Perform calculated deconfiguration of procs based on
+    // bus endpoint deconfigurations, and perform SMP node
+    // balancing
+    l_errl = HWAS::theDeconfigGard().deconfigureAssocProc();
+
+    if (l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Error returned from call to "
+                "HWAS::theDeconfigGard().deconfigureAssocProc");
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

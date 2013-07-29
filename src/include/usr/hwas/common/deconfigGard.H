@@ -37,9 +37,12 @@
 #include <hwas/hwasPlatDeconfigGard.H>
 #include <hwas/hwasPlatThread.H>
 
+#include <targeting/common/commontargeting.H>
+
+class HwasGardTest;
+
 namespace HWAS
 {
-
 /**
  *  @brief processDeferredDeconfig process any deferred deconfigure callouts
  *              that might have been 'queued' up.
@@ -79,6 +82,9 @@ DeconfigGard & theDeconfigGard();
 class DeconfigGard
 {
 
+    // Allow HwasGardTest to access private methods.
+    friend class ::HwasGardTest;
+
 public:
 
     enum
@@ -105,6 +111,9 @@ public:
         // set by discover_targets() when mcs is disabled b/c there
         // is a non functional membuf
         DECONFIGURED_BY_NO_CHILD_MEMBUF,        // BASE | 0x04
+
+        // set by deconfigureAssocProc() in hwas/common/deconfigGard.C
+        DECONFIGURED_BY_BUS_DECONFIG,           // BASE | 0x05
     };
 
     /**
@@ -337,6 +346,39 @@ private:
     DeconfigGard & operator=(const DeconfigGard & i_right);
 
     /**
+     * @brief Maximum number of A/X bus endpoints. Used to initialize
+     *        ProcInfo structs.
+     */
+    static const uint8_t NUM_A_BUSES = 3; // Max number of ABus links
+    static const uint8_t NUM_X_BUSES = 4; // Max number of XBus links
+
+
+    /**
+     * @brief  Struct representing a particular processor.  Used by
+     * _invokeDeconfigureAssocProc to populate a vector of procInfo's
+     * effectively describing the current system state for subsequent use by
+     * _deconfigureAssocProc
+     */
+    struct ProcInfo
+    {
+        // target for this chip
+        TARGETING::Target * iv_pThisProc;
+        TARGETING::ATTR_HUID_type procHUID;
+        TARGETING::ATTR_FABRIC_NODE_ID_type procFabricNode;
+        TARGETING::ATTR_FABRIC_CHIP_ID_type procFabricChip;
+        bool iv_isMaster;
+        bool iv_deconfigured;
+
+        // targets defining A link connected chips
+        ProcInfo * iv_pAProcs[NUM_A_BUSES];
+        bool iv_ADeconfigured[NUM_A_BUSES];
+
+        // targets defining X link connected chips
+        ProcInfo * iv_pXProcs[NUM_X_BUSES];
+        bool iv_XDeconfigured[NUM_X_BUSES];
+    };
+
+    /**
      * @brief Deconfigures Targets by association.
      *
      * @param[in] i_target   Reference to base Target.
@@ -372,6 +414,67 @@ private:
      */
     void _createDeconfigureRecord(const TARGETING::Target & i_target,
                                   const uint32_t i_errlEid);
+
+
+    /**
+     *  @brief Invokes _deconfigureAssocProc
+     *
+     *  Called by deconfigureAssocProc and
+     *  deconfigureTargetsFromGardRecordsForIpl. This function queries the
+     *  system and populates a vector of structs which represent
+     *  processors.  This vector is then passed to _deconfigureAssocProc
+     *  which systematically marks processors to be deconfigured based
+     *  on previously deconfigured bus endpoint chiplets.  Upon
+     *  completion of _deconfigureAssocProc, this function iterates
+     *  through the returned vector and deconfigures any proc marked
+     *  for deconfiguration.
+     *
+     *  @return errlHndl_t. Error log handle.
+     *
+     */
+    errlHndl_t _invokeDeconfigureAssocProc();
+
+    /**
+     *  @brief _deconfigureAssocProc deconfigures procs based on
+     *         deconfigured x/a buses.
+     *
+     *  Run once per logical node, this algorithm systematically
+     *  marks processors, by setting deconfigured booleans in a
+     *  vector of structs which represent the processors, for
+     *  deconfiguration based on previously deconfigured bus endpoint
+     *  chiplets. Upon completion, this function then calls
+     *  _symmetryValidation to ensure all logical nodes are symmetric
+     *  from an available processor standpoint.
+     *
+     *  @param[in/out]  io_procInfo  Reference to vector of ProcInfo struct
+     *                               pointers which contain the pertinant
+     *                               information about a particular processor
+     *
+     *  @return errlHndl_t. Error log handle.
+     *
+     */
+    static errlHndl_t _deconfigureAssocProc(
+                                std::vector<ProcInfo *> &io_procInfo);
+
+    /**
+     *  @brief Performs SMP node balancing
+     *
+     *  Called by _deconfigureAssocProc.
+     *  This function examines a vector of structs representing
+     *  processors, and systematically marks processors to be
+     *  deconfigured based on the state of the master-proc-containing
+     *  logical node to ensure symmetry from an available processor
+     *  standpoint.
+     *
+     *  @param[in/out]  io_procInfo  Reference to vector of ProcInfo struct
+     *                               pointers which contain the pertinant
+     *                               information about a particular processor
+     *
+     *
+     *  @return errlHndl_t. Error log handle.
+     *
+     */
+    static errlHndl_t _symmetryValidation(std::vector<ProcInfo *> &io_procInfo);
 
 public:
 
@@ -418,6 +521,20 @@ public:
      */
     bool _processDeferredDeconfig();
 
+    /**
+     *  @brief Starts deconfiguration of procs based on deconfigured
+     *  bus endpoints process
+     *
+     *  Called by call_host_startprd_pbus (istep 8.6).  This function
+     *  calls _invokeDeconfigureAssocProc to begin the calculated
+     *  deconfiguration of processors based on previously deconfigured
+     *  bus endpoint chiplets.
+     *
+     *  @return errlHndl_t. Error log handle.
+     *
+     */
+    errlHndl_t deconfigureAssocProc();
+
 private:
 
     // Mutex for thread safety
@@ -430,6 +547,17 @@ private:
     // platform functions can malloc space here if needed;
     // deconfigGard dtor will free()
     void *iv_platDeconfigGard;
+
+    /**
+     * @brief  Flag indicating if _deconfigureTarget has deconfigured an
+     * x/a bus endpoint.
+     *
+     * Used by _invokeDeconfigureAssocProc.  If true,
+     * _invokeDeconfigureAssocProc will execute and then call
+     * _deconfigureAssocProc.  If false, there is no work to be done
+     * and _invokeDeconfigureAssocProc will break and return.
+     */
+    bool iv_XABusEndpointDeconfigured;
 
 }; // DeconfigGard
 HWAS_DECLARE_SINGLETON(HWAS::DeconfigGard,theDeconfigGardSingleton);
