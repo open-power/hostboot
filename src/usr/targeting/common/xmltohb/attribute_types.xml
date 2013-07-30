@@ -12617,4 +12617,23 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>RUN_MAX_MEM_PATTERNS</id>
+    <description>
+        Policy indicating whether to perform the maximum amount of memory
+            pattern testing possible or not.
+        Set to 0x01 to perform the maximum amount of memory pattern testing
+            possible.
+        Set to 0x00 to perform the default amount of memory pattern testing.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

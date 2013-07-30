@@ -182,6 +182,7 @@
     <attribute><id>RISK_LEVEL</id></attribute>
     <attribute><id>CDM_POLICIES</id></attribute>
     <attribute><id>HOSTSVC_PLID</id></attribute>
+    <attribute><id>RUN_MAX_MEM_PATTERNS</id></attribute>
 </targetType>
 
 <targetType>
