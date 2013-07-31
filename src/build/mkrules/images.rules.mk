@@ -47,7 +47,7 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
     $(wildcard $(IMGDIR)/*.so) $(addprefix $(IMGDIR)/, $($*_DATA_MODULES)) \
     $(CUSTOM_LINKER_EXE)
 	$(C2) "    LINKER     $(notdir $@)"
-	$(C1)$(CUSTOM_LINKER) $@ $< \
+	$(C1)set -o pipefail && $(CUSTOM_LINKER) $@ $< \
               $(addprefix $(IMGDIR)/lib, $(addsuffix .so, $($*_MODULES))) \
                   --extended=0x40000 $(IMGDIR)/$*_extended.bin \
               $(addprefix $(IMGDIR)/lib, $(addsuffix .so, $($*_EXTENDED_MODULES))) \
@@ -57,9 +57,9 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
 
 $(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
 	$(C2) "    GENLIST    $(notdir $*)"
-	$(C1)(cd $(ROOTPATH); \
+	$(C1)(cd $(ROOTPATH)&& \
               src/build/linker/gensyms $*.bin $*_extended.bin 0x40000000 \
-                  > ./img/$*.syms ; \
+                  > ./img/$*.syms && \
               src/build/linker/genlist $*.bin | bzip2 -zc > ./img/$*.list.bz2)
 
 endif
