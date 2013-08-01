@@ -35,20 +35,6 @@
                                   // fail.
     #include <hwas/common/hwasCallout.H>
 
-    // FIXME: RTC: 62867 will resolve this
-    namespace HWSV
-    {
-        enum
-        {
-            // hwsvDeconfigEnum
-            // mapping from HWSV enums to HB ones
-            // eventually these HWAS will make it way to fips
-            HWSV_NO_DECONFIG    = HWAS::NO_DECONFIG,
-            HWSV_DECONFIG       = HWAS::DECONFIG,
-            HWSV_DEFER_DECONFIG = HWAS::DELAYED_DECONFIG
-        };
-    };
-
     // FIXME: remove these mapping once the enums are made common
     #define EPUB_PRC_ALL_PROCS      HWAS::EPUB_PRC_ALL_PROCS
     #define EPUB_PRC_SP_CODE        HWAS::EPUB_PRC_SP_CODE
@@ -105,7 +91,6 @@
         typedef uint32_t hwsvHCDBUpdate;
         typedef uint32_t hwsvTermEnum;
         typedef uint32_t hwsvGardEnum;
-        typedef uint32_t hwsvDeconfigEnum;
         typedef uint32_t hwsvDeconfigSchedule;
 
         enum

@@ -50,7 +50,6 @@
   #include <stdio.h>
 #else
   #include <srcisrc.H>
-  #include <GardExtInt.H> //for GARD_ErrorType
   #include <utilreg.H> //For registry functions
   #include <evenmgt.H>
   #include <rmgrBaseClientLib.H>  //for rmgrSyncFile
@@ -262,8 +261,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     GardResolution::ErrorType prdGardErrType;
     HWSV::hwsvGardEnum gardState;  // defined in src/hwsv/server/hwsvTypes.H
-    GARD_ErrorType gardErrType = GARD_NULL;
-    HWSV::hwsvDeconfigEnum deconfigState = HWSV::HWSV_NO_DECONFIG;
+    HWAS::GARD_ErrorType gardErrType = HWAS::GARD_NULL;
+    HWAS::DeconfigEnum deconfigState = HWAS::NO_DECONFIG;
 
     bool ReturnELog = false;
     bool ForceTerminate = false;
@@ -308,7 +307,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             // If LtntMck and last recoverable Stored use it.
             if ( latentMachineCheck && savedLatentSdc )
             {
-                gardErrType = GARD_Func;
+                gardErrType = HWAS::GARD_Func;
                 sdc = latentSdc;
                 causeAttnPreviouslyReported = true;
             }
@@ -336,7 +335,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     {
                         //set the sdc to the Saved SDC for UE
                         sdc = sdcBuffer;
-                        gardErrType = GARD_Func;
+                        gardErrType = HWAS::GARD_Func;
                         causeAttnPreviouslyReported = true;
                     }
                 }
@@ -351,7 +350,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     {
                         //set the sdc to the Saved SDC for SUE
                         sdc = sdcBuffer;
-                        gardErrType = GARD_Func;
+                        gardErrType = HWAS::GARD_Func;
                         causeAttnPreviouslyReported = true;
                     }
                 }
@@ -463,39 +462,39 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     // If gardErrType was determined during latent/UE/SUE processing for Check Stop,
     // use that and not determine gardErrType from the sdc values.
-    if (gardErrType != GARD_Func)
+    if (gardErrType != HWAS::GARD_Func)
     {
         prdGardErrType = sdc.QueryGard();
         switch (prdGardErrType)
         {
             case GardResolution::NoGard:
                 gardState =  HWSV::HWSV_NO_GARD;
-                gardErrType = GARD_NULL;
+                gardErrType = HWAS::GARD_NULL;
                 break;
             case GardResolution::Predictive:
-                gardErrType = GARD_Predictive;
+                gardErrType = HWAS::GARD_Predictive;
                 break;
             case GardResolution::Fatal:
-                gardErrType = GARD_Func;
+                gardErrType = HWAS::GARD_Func;
                 break;
             case GardResolution::CheckStopOnlyGard:
                 if  (MACHINE_CHECK == i_attnType)
                 {
-                    gardErrType = GARD_Func;
+                    gardErrType = HWAS::GARD_Func;
                 }
                 else
                 {
                     gardState =  HWSV::HWSV_NO_GARD;
-                    gardErrType = GARD_NULL;
+                    gardErrType = HWAS::GARD_NULL;
                 }
                 break;
             case GardResolution::DeconfigNoGard:
                 gardState =  HWSV::HWSV_NO_GARD;
-                gardErrType = GARD_NULL;
+                gardErrType = HWAS::GARD_NULL;
                 break;
             default:
                 gardState =  HWSV::HWSV_NO_GARD;
-                gardErrType = GARD_NULL;
+                gardErrType = HWAS::GARD_NULL;
                 PRDF_DTRAC( PRDF_FUNC"Unknown prdGardErrType" );
                 break;
         }
@@ -507,7 +506,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         if ( sdc.QueryGard() == GardResolution::NoGard )
         {
             gardState = HWSV::HWSV_NO_GARD;
-            gardErrType = GARD_NULL;
+            gardErrType = HWAS::GARD_NULL;
             prdGardErrType = GardResolution::NoGard;
         }
         else
@@ -519,7 +518,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     if (sdc.IsThermalEvent() && (MACHINE_CHECK != i_attnType) )
     {  //Force No Gard
         gardState = HWSV::HWSV_NO_GARD;
-        gardErrType = GARD_NULL;
+        gardErrType = HWAS::GARD_NULL;
     }
 
     //**************************************************************
@@ -616,7 +615,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
           GardResolution::DeconfigNoGard == prdGardErrType ) )
     {
         deferDeconfig = true;
-        deconfigState = HWSV::HWSV_DECONFIG;
+        deconfigState = HWAS::DECONFIG;
         // NOTE: deconfigSched is not actually used in Hostboot. Will remove in
         // the refactoring effort.
     }
@@ -675,7 +674,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         thiscallout = (*i).callout;
         if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
-            HWSV::hwsvDeconfigEnum thisDeconfigState = deconfigState;
+            HWAS::DeconfigEnum thisDeconfigState = deconfigState;
 
             #ifdef __HOSTBOOT_MODULE
             // Special case for Hostboot.
