@@ -11948,6 +11948,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
       firmware notes: none</description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2, 2, 4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12654,6 +12655,238 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+</attribute>
+
+<attribute>
+    <id>EFF_RLO</id>
+    <description>Gives the RLO value to use for this port.  This comes from the MR Keyword of the VPD gives and indication of the value.  It will be writable until it comes from VPD. The value is a positive integer number.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_RLO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_WLO</id>
+    <description>Read Latency Offset value that is used in the phy.  This value  comes from the MR keyword of the VPD</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_WLO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_GPO</id>
+    <description>Global Phy Offset value that is used in setting up the phy.  This value comes from the MR keyword of the VPD</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_GPO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CKE_PRI_MAP</id>
+    <description>Contains the CKE MAP for the DIMM being plugged in.  It comes from the MT keyword but is not on a port basis --- meaning this Attribute may be split: with 16 bits associated with port A data and 16 bits with B. This value goes directly into the MBA01 Rank-to-primary-CKE mapping table register bits 0:31 (MBA01_MBAREF1Q) register. This attribute is writeable until it comes from the VPD</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CKE_PRI_MAP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CKE_PWR_MAP</id>
+    <description>Contains the CKE Power Domain mapping tables for the DIMM being plugged in.  It comes from the MT keyword but is not on a port basis --- meaning this Attribute may be split: with 32 bits associated with port A data and 32 bits with B. This value goes directly into the MBA01 Rank-to-CKE power domain mapping table bits 0:33 (MBA01_MBARPC1Q) register. This attribute is writeable until it comes from the VPD</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CKE_PWR_MAP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_RDTAG</id>
+    <description>Read Tag value that is used in setting up the phy.  It is expected that this value will come from the VPD</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_RDTAG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TSYS_ADR</id>
+    <description>TSYS for all address blocks in the MBA pair. This value comes from the MR keyword of the VPD</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TSYS_ADR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TSYS_DP18</id>
+    <description>TSYS for all DP18 blocks in the MBA pair.  This value comes from the MR keyword of the VPD</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TSYS_DP18</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DQ_WR_OFFSET</id>
+    <description>DQ write offset value that is used in setting up the phy's phase rotators before WR_LVL, 0x40 is HW Default.  It is expected that this value will come from the VPD</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DQ_WR_OFFSET</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_BUFFER_LATENCY</id>
+    <description>Additional buffer latency in the case of RDIMMs and LRDIMMs.    It is expected that this value will come from the VPD</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_BUFFER_LATENCY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>LRDIMM_MR12_REG</id>
+    <description>LRDIMM MR1,2 register.
+     DRAM Rtt_WR for all ranks, DRAM Rtt_Nom for ranks 0 and 1, DRAM driver impedance for all ranks.  Eff config should set this up.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_LRDIMM_MR12_REG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>LRDIMM_ADDITIONAL_CNTL_WORDS</id>
+    <description>LRDIMM additional RCD control words as set by DIMM SPD:
+     F[3,4]RC10, F[3,4]RC11, F[5,6]RC10, F[5,6]RC11, F[7,8]RC10, F[7,8]RC11, F[9,10]RC10, F[9,10]RC11,
+     F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
+     Eff config should set this up</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_LRDIMM_ADDITIONAL_CNTL_WORDS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>LRDIMM_RANK_MULT_MODE</id>
+    <description>LRDIMM rank multiplication mode.
+     Will be set at an MBA level with one policy to be used</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_LRDIMM_RANK_MULT_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 </attributes>

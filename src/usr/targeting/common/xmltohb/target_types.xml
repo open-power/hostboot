@@ -999,6 +999,20 @@
     <attribute><id>EFF_WRITE_CRC</id></attribute>
     <attribute><id>EFF_DRAM_2N_MODE_ENABLED</id></attribute>
     <attribute><id>EFF_DRAM_ADDRESS_MIRRORING</id></attribute>
+    <attribute><id>EFF_RLO</id></attribute>
+    <attribute><id>EFF_WLO</id></attribute>
+    <attribute><id>EFF_GPO</id></attribute>
+    <attribute><id>EFF_CKE_PRI_MAP</id></attribute>
+    <attribute><id>EFF_CKE_PWR_MAP</id></attribute>
+    <attribute><id>EFF_RDTAG</id></attribute>
+    <attribute><id>EFF_TSYS_ADR</id></attribute>
+    <attribute><id>EFF_TSYS_DP18</id></attribute>
+    <attribute><id>EFF_DQ_WR_OFFSET</id></attribute>
+    <attribute><id>EFF_BUFFER_LATENCY</id></attribute>
+    <attribute><id>LRDIMM_MR12_REG</id></attribute>
+    <attribute><id>LRDIMM_ADDITIONAL_CNTL_WORDS</id></attribute>
+    <attribute><id>LRDIMM_RANK_MULT_MODE</id></attribute>
+    <attribute><id>EFF_CRC_WR_LATENCY</id></attribute>
 </targetType>
 
 <targetType>

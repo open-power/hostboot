@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.24 2013/04/22 14:17:45 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.26 2013/06/21 18:48:03 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,7 +44,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.25  |          |         | 
+//   1.27  |          |         | 
+//   1.26  | bellows  |21-JUN-13| Removed last update because caused lab problems
+//   1.25  | asaetow  |20-JUN-13| Added EFF_STACK_TYPE_DDP_QDP support.
 //   1.24  | asaetow  |19-APR-13| Fixed X4 CDIMM spare for RCB to use LOW_NIBBLE only.
 //   1.23  | asaetow  |17-APR-13| Added 10% margin to TRFI per defect HW248225
 //   1.22  | asaetow  |11-APR-13| Changed eff_dram_tdqs from 0 back to 1 for X8 ISDIMMs. 
