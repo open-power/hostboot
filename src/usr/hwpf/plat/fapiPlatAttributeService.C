@@ -1041,14 +1041,30 @@ fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
     }
     else
     {
+        // In PHYP mode, we need to leave the PCI BARs disabled
+        bool phyp_mode = false;
+        if( TARGETING::is_phyp_load() )
+        {
+            phyp_mode = true;
+        }
+
         //  BAR # 0 are the PCIE unit #'s
         //  BAR # 1 is reserved, should be DISabled (per Joe McGill)
         //  BAR # 2 are the PHB REGS
         for( uint8_t u=0; u<3; u++ )
         {
-            o_pcieBarEnable[u][0]   =   l_isEnabled ;
-            o_pcieBarEnable[u][1]   =   PROC_BARS_DISABLE ;
-            o_pcieBarEnable[u][2]   =   l_isEnabled ;
+            if( phyp_mode )
+            {
+                o_pcieBarEnable[u][0]   =   PROC_BARS_DISABLE ;
+                o_pcieBarEnable[u][1]   =   PROC_BARS_DISABLE ;
+                o_pcieBarEnable[u][2]   =   PROC_BARS_DISABLE ;
+            }
+            else
+            {
+                o_pcieBarEnable[u][0]   =   l_isEnabled ;
+                o_pcieBarEnable[u][1]   =   PROC_BARS_DISABLE ;
+                o_pcieBarEnable[u][2]   =   l_isEnabled ;
+            }
 
             FAPI_DBG( "fapiPlatGetProcPcieBarEnable: Unit %d : %p %p %p",
                       u,

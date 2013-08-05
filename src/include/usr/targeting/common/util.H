@@ -30,7 +30,7 @@
  *  @brief Targeting utility functions
  */
 
-#include <attributeenums.H>
+#include <targeting/common/attributes.H>
 
 namespace TARGETING
 {
@@ -81,6 +81,15 @@ void update_hwas_changed_mask(Target * i_target);
  * @param[in]   bit to clear
  */
 void clear_hwas_changed_bit(Target * i_target, const HWAS_CHANGED_BIT i_bit);
+
+/**
+ * @brief   Checks if we are loading a PHYP payload
+ * @description  Looks at both ATTR_PAYLOAD_KIND and the MNFG flags
+ *    to determine if we are really loading and starting PHYP
+ * @param[out]   Current value of PAYLOAD_KIND
+ * @return  True if PHYP will be loaded and started
+ */
+bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type = NULL );
 
 }
 

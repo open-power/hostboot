@@ -337,31 +337,17 @@ errlHndl_t hdatService::loadHostData(void)
             break;
         }
 
+        // Call this routine to make sure we check the MNFG flags
+        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind =
+          TARGETING::PAYLOAD_KIND_NONE;
+        bool is_phyp = TARGETING::is_phyp_load(&payload_kind);
+        TRACFCOMP( g_trac_runtime,
+                   "PAYLOAD_KIND = %d (is_phyp=%d)",
+                   payload_kind, is_phyp );
+
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
-
-        // get the current payload kind
-        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
-          = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
-
-        // read the mfg flags
-        TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags
-          = sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-
-        // if any AVP flags are set, override the payload kind
-        if( (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_AVP_ENABLE)
-            || (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE) )
-        {
-            if( payload_kind != TARGETING::PAYLOAD_KIND_AVP )
-            {
-                TRACFCOMP( g_trac_runtime,
-                           "Overriding PAYLOAD_KIND to AVP (from %d) based on MNFG flags (=%.8X)",
-                           payload_kind, mnfg_flags );
-                payload_kind = TARGETING::PAYLOAD_KIND_AVP;
-                sys->setAttr<TARGETING::ATTR_PAYLOAD_KIND>(payload_kind);
-            }
-        }
 
 #ifdef REAL_HDAT_TEST
         // Manually load HDAT memory now

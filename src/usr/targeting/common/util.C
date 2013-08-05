@@ -121,4 +121,42 @@ void clear_hwas_changed_bit(Target * i_target, const HWAS_CHANGED_BIT i_bit)
     i_target->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(hwasChangedState);
 }
 
+/**
+ * @brief   Checks if we are loading a PHYP payload
+ */
+bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type )
+{
+    Target* sys = NULL;
+    targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+
+    // get the current payload kind
+    ATTR_PAYLOAD_KIND_type payload_kind = sys->getAttr<ATTR_PAYLOAD_KIND>();
+
+    // read the mfg flags if we haven't already
+    if( payload_kind != PAYLOAD_KIND_AVP )
+    {
+        ATTR_MNFG_FLAGS_type mnfg_flags = sys->getAttr<ATTR_MNFG_FLAGS>();
+
+        // if any AVP flags are set, override the payload kind
+        if( (mnfg_flags & MNFG_FLAG_BIT_MNFG_AVP_ENABLE)
+            || (mnfg_flags & MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE) )
+        {
+            if( payload_kind != PAYLOAD_KIND_AVP )
+            {
+                payload_kind = PAYLOAD_KIND_AVP;
+                sys->setAttr<ATTR_PAYLOAD_KIND>(payload_kind);
+            }
+        }
+    }
+
+    if( o_type )
+    {
+        *o_type = payload_kind;
+    }
+
+    return( PAYLOAD_KIND_PHYP == payload_kind );
+}
+
+
 }
