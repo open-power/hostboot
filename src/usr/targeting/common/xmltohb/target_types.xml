@@ -260,7 +260,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000005</default> <!-- GARD | PSIDIAG -->
+        <default>0x00000001</default> <!-- GARD -->
     </attribute>
     <!-- TODO. MVPD_FREQ_CORE_NOMINAL to be deleted when MVPD available -->
     <attribute><id>MVPD_FREQ_CORE_NOMINAL</id></attribute>
