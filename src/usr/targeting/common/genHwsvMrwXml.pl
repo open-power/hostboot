@@ -269,6 +269,7 @@ use constant PBUS_DOWNSTREAM_INDEX => 2;
 use constant PBUS_UPSTREAM_INDEX => 3;
 use constant PBUS_TX_MSB_LSB_SWAP => 4;
 use constant PBUS_RX_MSB_LSB_SWAP => 5;
+use constant PBUS_ENDPOINT_INSTANCE_PATH => 6;
 foreach my $i (@{$powerbus->{'power-bus'}})
 {
     # Pull out the connection information from the description
@@ -291,11 +292,14 @@ foreach my $i (@{$powerbus->{'power-bus'}})
         $tx_swap = ($tx_swap eq "false") ? 0 : 1;
         $rx_swap = ($rx_swap eq "false") ? 0 : 1;
     }
+
+    my $endpoint1_ipath = $i->{'endpoint'}[0]->{'instance-path'};
+    my $endpoint2_ipath = $i->{'endpoint'}[1]->{'instance-path'};
     #print STDOUT "powerbus: $endp1, $endp2, $dwnstrm_swap, $upstrm_swap\n";
     push @pbus, [ lc($endp1), lc($endp2), $dwnstrm_swap,
-                  $upstrm_swap, $tx_swap, $rx_swap ];
+                  $upstrm_swap, $tx_swap, $rx_swap, $endpoint1_ipath ];
     push @pbus, [ lc($endp2), lc($endp1), $dwnstrm_swap,
-                  $upstrm_swap, $tx_swap, $rx_swap ];
+                  $upstrm_swap, $tx_swap, $rx_swap, $endpoint2_ipath ];
 }
 
 open (FH, "<$mrwdir/${sysname}-dmi-busses.xml") ||
@@ -865,12 +869,12 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         next;
     }
 
+    my $ipath = $STargets[$i][PATH_FIELD];
     if ($STargets[$i][NAME_FIELD] eq "pu")
     {
         my $fru_found = 0;
         my $fru_path = $STargets[$i][FRU_PATH];
         my $proc = $STargets[$i][POS_FIELD];
-        my $ipath = $STargets[$i][PATH_FIELD];
         $proc_ordinal_id = $STargets[$i][ORDINAL_FIELD];
 
         use constant FRU_PATHS => 0;
@@ -952,7 +956,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             {
                 print "\n<!-- $SYSNAME n${node}p$proc EX units -->\n";
             }
-            generate_ex($proc, $ex, $STargets[$i][ORDINAL_FIELD]);
+            generate_ex($proc, $ex, $STargets[$i][ORDINAL_FIELD], $ipath);
             $ex_count++;
             if ($STargets[$i+1][NAME_FIELD] eq "mcs")
             {
@@ -984,7 +988,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc MCS units -->\n";
         }
-        generate_mcs($proc,$mcs, $STargets[$i][ORDINAL_FIELD]);
+        generate_mcs($proc,$mcs, $STargets[$i][ORDINAL_FIELD], $ipath);
         $mcs_count++;
         if (($STargets[$i+1][NAME_FIELD] eq "pu") ||
             ($STargets[$i+1][NAME_FIELD] eq "memb"))
@@ -1012,10 +1016,10 @@ for my $i ( 0 .. $#STargets )
         next;
     }
 
+    my $ipath = $STargets[$i][PATH_FIELD];
     if ($STargets[$i][NAME_FIELD] eq "memb")
     {
         $memb = $STargets[$i][POS_FIELD];
-        my $ipath = $STargets[$i][PATH_FIELD];
         my $centaur = "n${node}:p${memb}";
         my $found = 0;
         my $cfsi;
@@ -1047,7 +1051,7 @@ for my $i ( 0 .. $#STargets )
 
         generate_centaur( $memb, $membMcs, $cfsi, $ipath,
                                $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid,
-                               $vmem_id, $vmemDevPath, $vmemAddr);
+                               $vmem_id, $vmemDevPath, $vmemAddr, $ipath);
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
     {
@@ -1058,7 +1062,8 @@ for my $i ( 0 .. $#STargets )
             print "\n";
         }
         my $mba = $STargets[$i][UNIT_FIELD];
-        generate_mba( $memb, $membMcs, $mba, $STargets[$i][ORDINAL_FIELD] );
+        generate_mba( $memb, $membMcs, $mba, 
+            $STargets[$i][ORDINAL_FIELD], $ipath);
         $mba_count += 1;
         if ($mba_count == 2)
         {
@@ -1079,6 +1084,7 @@ for my $i ( 0 .. $#SMembuses )
         next;
     }
 
+    my $ipath = $SMembuses[$i][DIMM_PATH_FIELD];
     my $proc = $SMembuses[$i][MCS_TARGET_FIELD];
     my $mcs = $proc;
     $proc =~ s/.*:p(.*):.*/$1/;
@@ -1104,7 +1110,7 @@ for my $i ( 0 .. $#SMembuses )
         $dimmid = sprintf ("%d", $dimmid);
         generate_dimm( $proc, $mcs, $ctaur, $pos, $dimmid, $id,
                              ($SMembuses[$i][BUS_ORDINAL_FIELD]*8)+$id,
-                              $relativeDimmRid, $relativePos);
+                              $relativeDimmRid, $relativePos, $ipath);
     }
 }
 
@@ -1391,6 +1397,10 @@ sub generate_sys
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:sys-$sys</default>
+    </compileAttribute>
     <attribute>
         <id>FREQ_PROC_REFCLOCK</id>
         <default>$proc_refclk</default>
@@ -1666,7 +1676,11 @@ sub generate_system_node
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node</default>
-    </attribute>";
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:TO_BE_ADDED</default>
+    </compileAttribute>";
         # add fsp extensions
         do_plugin('fsp_node_add_extensions', $node);
         print "
@@ -1760,6 +1774,10 @@ sub generate_proc
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
         <default>$lognode</default>
@@ -1980,7 +1998,7 @@ sub generate_proc
 
 sub generate_ex
 {
-    my ($proc, $ex, $ordinalId) = @_;
+    my ($proc, $ex, $ordinalId, $ipath) = @_;
     my $uidstr = sprintf("0x%02X06%04X",${node},$ex+$proc*16);
     print "
 <targetInstance>
@@ -1995,6 +2013,10 @@ sub generate_ex
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/ex-$ex</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$ex</default>
@@ -2025,6 +2047,10 @@ sub generate_ex_core
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/ex-$ex/core-0</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:ex_core:TO_BE_ADDED</default>
+    </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$ex</default>
@@ -2040,7 +2066,7 @@ sub generate_ex_core
 
 sub generate_mcs
 {
-    my ($proc, $mcs, $ordinalId) = @_;
+    my ($proc, $mcs, $ordinalId, $ipath) = @_;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$mcs+$proc*8+${node}*8*8);
 
     my $lognode;
@@ -2091,6 +2117,10 @@ sub generate_mcs
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$mcs</default>
@@ -2147,6 +2177,10 @@ sub generate_a_pcie
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/pci-$phb</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:pci:TO_BE_ADDED</default>
+    </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$phb</default>
@@ -2185,6 +2219,7 @@ sub generate_ax_buses
         my $p_port = 0;
         my $lane_swap = 0;
         my $msb_swap = 0;
+        my $ipath = "abus_or_xbus:TO_BE_ADDED";
         foreach my $pbus ( @pbus )
         {
             if ($pbus->[PBUS_FIRST_END_POINT_INDEX] eq "n${node}:p${proc}:${type}${i}")
@@ -2196,6 +2231,7 @@ sub generate_ax_buses
                 $p_node =~ s/^n(.*):p.*:.*$/$1/;
                 $p_proc =~ s/^.*:p(.*):.*$/$1/;
                 $p_port =~ s/.*:p.*:.(.*)$/$1/;
+                $ipath = $pbus->[PBUS_ENDPOINT_INSTANCE_PATH];
                 # Calculation from Pete Thomsen for 'master' chip
                 if(((${node}*100) + $proc) < (($p_node*100) + $p_proc))
                 {
@@ -2227,6 +2263,10 @@ sub generate_ax_buses
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/${type}bus-$i</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$i</default>
@@ -2292,7 +2332,7 @@ sub generate_ax_buses
 sub generate_centaur
 {
     my ($ctaur, $mcs, $cfsi, $ipath, $ordinalId, $relativeCentaurRid,
-            $vmemId, $vmemDevPath, $vmemAddr) = @_;
+            $vmemId, $vmemDevPath, $vmemAddr, $ipath) = @_;
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
     my $scomsize = length($scompath) + 1;
@@ -2333,6 +2373,10 @@ sub generate_centaur
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
     <attribute>
         <id>VMEM_ID</id>
         <default>$vmemId</default>
@@ -2391,7 +2435,12 @@ sub generate_centaur
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur/l4-0</default>
-    </attribute>";
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:l4:TO_BE_ADDED</default>
+    </compileAttribute>"
+;
 
     # call to do any fsp per-centaur_l4 attributes
     do_plugin('fsp_centaur_l4', $ctaur, $ordinalId );
@@ -2403,7 +2452,7 @@ sub generate_centaur
 
 sub generate_mba
 {
-    my ($ctaur, $mcs, $mba, $ordinalId) = @_;
+    my ($ctaur, $mcs, $mba, $ordinalId, $ipath) = @_;
     my $proc = $mcs;
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
@@ -2426,6 +2475,10 @@ sub generate_mba
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur/mba-$mba</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$mba</default>
@@ -2500,6 +2553,10 @@ sub generate_dimm
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$pos/mba-$x/dimm-$zz</default>
     </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:logical dimms:TO_BE_ADDED</default>
+    </compileAttribute>
     <attribute>
         <id>MBA_DIMM</id>
         <default>$z</default>
