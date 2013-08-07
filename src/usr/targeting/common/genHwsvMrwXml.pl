@@ -827,6 +827,7 @@ for my $i ( 0 .. $#Fsis )
         $Mproc = $Fsis[$i][FSI_TARGET_FIELD];
         $Mproc =~ s/.*p(.*)/$1/;
         $hasProc = 1;
+        last;
     }
 }
 
