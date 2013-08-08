@@ -213,6 +213,10 @@ namespace KernelMisc
         // Restore timebase.
         setTB(iv_timebase);
 
+        // Restore memory state register.
+        updateScratchReg(MMIO_SCRATCH_MEMORY_STATE,
+                         kernel_hbDescriptor.kernelMemoryState);
+
         // Restore caller of cpu_master_winkle().
         iv_caller->state = TASK_STATE_RUNNING;
         TaskManager::setCurrentTask(iv_caller);
@@ -304,6 +308,10 @@ namespace KernelMisc
     void WinkleAll::masterPostWork()
     {
         printk("Awake!\n");
+
+        // Restore memory state register.
+        updateScratchReg(MMIO_SCRATCH_MEMORY_STATE,
+                         kernel_hbDescriptor.kernelMemoryState);
 
         // Restore caller of cpu_all_winkle().
         iv_caller->state = TASK_STATE_RUNNING;
