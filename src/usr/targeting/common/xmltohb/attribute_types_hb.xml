@@ -34,7 +34,6 @@
     <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -52,7 +51,6 @@
     <description>Cached Virtual Address of Xscom memory space for this Chip</description>
     <simpleType>
         <uint64_t>
-            <default>0</default>
         </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -66,7 +64,6 @@
     <description>Mutex for FSI Master Operations</description>
     <simpleType>
         <hbmutex>
-            <default>0</default>
         </hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -81,7 +78,6 @@
     <description>Host boot mutex for testing</description>
     <simpleType>
         <hbmutex>
-            <default>0</default>
         </hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -95,7 +91,6 @@
     <description>Mutex for I2C Master engine 0</description>
     <simpleType>
         <hbmutex>
-            <default>0</default>
         </hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -109,7 +104,6 @@
     <description>Mutex for I2C Master engine 1</description>
     <simpleType>
         <hbmutex>
-            <default>0</default>
         </hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -123,7 +117,6 @@
     <description>Mutex for I2C Master engine 2</description>
     <simpleType>
         <hbmutex>
-            <default>0</default>
         </hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -137,7 +130,6 @@
     <description>Mutex for FSI-based SCOM Operations</description>
     <simpleType>
         <hbmutex>
-            <default>0</default>
         </hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -151,7 +143,6 @@
     <description>Mutex for Indirect SCOM read operation</description>
     <simpleType>
         <hbmutex>
-            <default>0</default>
         </hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -209,7 +200,6 @@
     <description>Cached Virtual Address of Inband Scom memory space for this Chip</description>
     <simpleType>
         <uint64_t>
-            <default>0</default>
         </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -222,7 +212,6 @@
     <description>Mutex for Inband SCOM Operations</description>
     <simpleType>
         <hbmutex>
-            <default>0</default>
         </hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -235,7 +224,6 @@
     <description>Used to force IBSCOM enabled for lab testing</description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -250,7 +238,6 @@
     -->
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>

@@ -169,10 +169,22 @@
     <!-- Max/min config attributes -->
     <attribute><id>MAX_PROC_CHIPS_PER_NODE</id></attribute>
     <attribute><id>MAX_EXS_PER_PROC_CHIP</id></attribute>
-    <attribute><id>MAX_DIMMS_PER_MBA_PORT</id></attribute>
-    <attribute><id>MAX_MBA_PORTS_PER_MBA</id></attribute>
-    <attribute><id>MAX_MBAS_PER_MEMBUF_CHIP</id></attribute>
-    <attribute><id>MAX_CHIPLETS_PER_PROC</id></attribute>
+    <attribute>
+        <id>MAX_DIMMS_PER_MBA_PORT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>MAX_MBA_PORTS_PER_MBA</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>MAX_MBAS_PER_MEMBUF_CHIP</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>MAX_CHIPLETS_PER_PROC</id>
+        <default>32</default>
+    </attribute>
     <attribute><id>MAX_MCS_PER_SYSTEM</id></attribute>
     <!-- End max/min config attributes -->
     <attribute><id>PROC_PBIEX_ASYNC_SEL</id></attribute>
@@ -208,6 +220,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default>
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
@@ -1176,7 +1189,6 @@
     <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id></attribute>
     <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH</id></attribute>
     <attribute><id>MSS_FREQ_BIAS_PERCENTAGE</id></attribute>
-    <attribute><id>MEMB_NEST_FREQ</id></attribute>
     <attribute><id>CDIMM_SENSOR_MAP_PRIMARY</id></attribute>
     <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>

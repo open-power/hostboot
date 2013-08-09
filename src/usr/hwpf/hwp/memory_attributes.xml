@@ -3161,6 +3161,21 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <persistent/>
 </attribute>
 
+<!-- Mark Bellows said it will be removed
+<attribute>
+    <id>ATTR_MEMB_NEST_FREQ</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Frequency of the Centaur NEST PLL in MHz.
+consumer:  cen_mem_pll_initf
+firmware notes:  Platforms should initialize the attribute to the correct value for the system.</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+-->
+
 <attribute>
     <id>ATTR_CDIMM_SENSOR_MAP_PRIMARY</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>

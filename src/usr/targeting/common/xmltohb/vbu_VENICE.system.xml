@@ -203,6 +203,42 @@
         <id>IS_SIMULATION</id>
         <default>1</default>
     </attribute>
+    <attribute><id>MAX_EXS_PER_PROC_CHIP</id>
+        <default>12</default>
+    </attribute>
+    <attribute><id>MAX_MCS_PER_SYSTEM</id>
+        <default>8</default>
+    </attribute>
+    <attribute><id>X_EREPAIR_THRESHOLD_FIELD</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>A_EREPAIR_THRESHOLD_FIELD</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>DMI_EREPAIR_THRESHOLD_FIELD</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>X_EREPAIR_THRESHOLD_MNFG</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>A_EREPAIR_THRESHOLD_MNFG</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>DMI_EREPAIR_THRESHOLD_MNFG</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <default>96</default>
+    </attribute>
+    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
+        <default>512</default>
+    </attribute>
+    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <default>32</default>
+    </attribute>
+    <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+        <default>5000</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
@@ -960,6 +996,9 @@
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E00000000000</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -981,6 +1020,9 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E02000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -1004,6 +1046,9 @@
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E04000000000</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1025,6 +1070,9 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E06000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -1048,6 +1096,9 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E08000000000</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1068,6 +1119,9 @@
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E0A000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -1090,6 +1144,9 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E0C000000000</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1110,6 +1167,9 @@
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E0E000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 -->
@@ -1193,6 +1253,9 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1214,7 +1277,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
-    </attribute> 
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1236,6 +1302,9 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -2065,6 +2134,9 @@
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E10000000000</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2086,6 +2158,9 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E12000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -2109,6 +2184,9 @@
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E14000000000</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2130,6 +2208,9 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E16000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -2153,6 +2234,10 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E18000000000</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
+
 </targetInstance>
 
 <targetInstance>
@@ -2173,6 +2258,9 @@
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E1A000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -2195,6 +2283,9 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E1C000000000</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2215,6 +2306,9 @@
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E1E000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 -->
@@ -2285,6 +2379,9 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2307,6 +2404,9 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2328,6 +2428,9 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -2449,6 +2552,9 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute><id>MSS_CACHE_ENABLE</id><default>1</default></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf0 -->
@@ -2548,6 +2654,9 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
     <attribute><id>MSS_CACHE_ENABLE</id><default>1</default></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf1 -->
@@ -2646,6 +2755,9 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf2 -->
@@ -2744,6 +2856,9 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf3 -->
@@ -2842,6 +2957,9 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf4 -->
@@ -2940,6 +3058,9 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf5 -->
@@ -3038,6 +3159,9 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf6 -->
@@ -3136,6 +3260,9 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf7 -->
