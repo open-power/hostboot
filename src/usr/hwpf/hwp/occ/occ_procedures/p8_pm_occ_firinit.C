@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_occ_firinit.C,v 1.12 2013/04/12 01:17:23 stillgs Exp $
+// $Id: p8_pm_occ_firinit.C,v 1.13 2013/08/06 18:07:35 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_occ_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -140,80 +140,71 @@ p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
             //   SET_FIR_MASKED(b) - sets mask to '1' for LFIR bit b
             // ------------------------------------------------------------------------
 
-            SET_MALF_ALERT(0);          //  0 = occ_fw0
-            SET_MALF_ALERT(1);          //  1 = occ_fw1
-            SET_MALF_ALERT(2);          //  2 = occ_fw2
-            SET_MALF_ALERT(3);          //  3 = occ_fw3
-            SET_MALF_ALERT(4);          //  4 = pmc_pore_sw_malf
-            SET_MALF_ALERT(5);          //  5 = pmc_occ_hb_malf
+            SET_MALF_ALERT(0);  SET_FIR_MASKED(0);        //  0 = occ_fw0
+            SET_MALF_ALERT(1);  SET_FIR_MASKED(1);        //  1 = occ_fw1
+            SET_MALF_ALERT(2);  SET_FIR_MASKED(2);        //  2 = occ_fw2
+            SET_MALF_ALERT(3);  SET_FIR_MASKED(3);        //  3 = occ_fw3
+            SET_MALF_ALERT(4);  SET_FIR_MASKED(4);        //  4 = pmc_pore_sw_malf
+            SET_MALF_ALERT(5);  SET_FIR_MASKED(5);        //  5 = pmc_occ_hb_malf
 
-            SET_FIR_MASKED(6);          //  6 = pore_gpe0_fatal_err
-            SET_FIR_MASKED(7);          //  7 = pore_gpe1_fatal_err
-            SET_FIR_MASKED(8);          //  8 = ocb_error
-
-            SET_RECOV_ATTN(9);          //  9 = srt_ue
-            SET_RECOV_ATTN(10);         //  10 = srt_ce
-            SET_RECOV_ATTN(11);         //  11 = srt_read_error
-            SET_RECOV_ATTN(12);         //  12 = srt_write_error
-            SET_RECOV_ATTN(13);         //  13 = srt_dataout_perr
-            SET_RECOV_ATTN(14);         //  14 = srt_oci_write_data_parity
-            SET_RECOV_ATTN(15);         //  15 = srt_oci_be_parity_err
-            SET_RECOV_ATTN(16);         //  16 = srt_oci_addr_parity_err
-
-            SET_FIR_MASKED(17);         //  17 = pore_sw_error_err
-            SET_FIR_MASKED(18);         //  18 = pore_gpe0_error_err
-            SET_FIR_MASKED(19);         //  19 = pore_gpe1_error_err
-            SET_FIR_MASKED(20);         //  20 = external_trap
-            SET_FIR_MASKED(21);         //  21 = ppc405_core_reset
-            SET_FIR_MASKED(22);         //  22 = ppc405_chip_reset
-            SET_FIR_MASKED(23);         //  23 = ppc405_system_reset
-            SET_FIR_MASKED(24);         //  24 = ppc405_dbgmsrwe
-            SET_FIR_MASKED(25);         //  25 = ppc405_dbgstopack
-
-            SET_RECOV_ATTN(26);         //  26 = ocb_db_oci_timeout
-            SET_RECOV_ATTN(27);         //  27 = ocb_db_oci_read_data_parity
-            SET_RECOV_ATTN(28);         //  28 = ocb_db_oci_slave_error
-            SET_RECOV_ATTN(29);         //  29 = ocb_pib_addr_parity_err
-            SET_RECOV_ATTN(30);         //  30 = ocb_db_pib_data_parity_err
-            SET_RECOV_ATTN(31);         //  31 = ocb_idc0_error
-            SET_RECOV_ATTN(32);         //  32 = ocb_idc1_error
-            SET_RECOV_ATTN(33);         //  33 = ocb_idc2_error
-            SET_RECOV_ATTN(34);         //  34 = ocb_idc3_error
-            SET_RECOV_ATTN(35);         //  35 = srt_fsm_err
-            SET_RECOV_ATTN(36);         //  36 = jtagacc_err
-
-            SET_FIR_MASKED(37);         //  37 = spare_err_37
-
-            SET_RECOV_ATTN(38);         //  38 = c405_ecc_ue
-            SET_RECOV_ATTN(39);         //  39 = c405_ecc_ce
-
-            SET_FIR_MASKED(40);         //  40 = c405_oci_machinecheck
-
-            SET_RECOV_ATTN(41);         //  41 = sram_spare_direct_error0
-            SET_RECOV_ATTN(42);         //  42 = sram_spare_direct_error1
-            SET_RECOV_ATTN(43);         //  43 = sram_spare_direct_error2
-            SET_RECOV_ATTN(44);         //  44 = sram_spare_direct_error3
-            SET_RECOV_ATTN(45);         //  45 = slw_ocislv_err
-            SET_RECOV_ATTN(46);         //  46 = gpe_ocislv_err
-            SET_RECOV_ATTN(47);         //  47 = ocb_ocislv_err
-            SET_RECOV_ATTN(48);         //  48 = c405icu_m_timeout
-            SET_RECOV_ATTN(49);         //  49 = c405dcu_m_timeout
-
-            SET_FIR_MASKED(50);         //  50 = spare_fir
-            SET_FIR_MASKED(51);         //  51 = spare_fir
-            SET_FIR_MASKED(52);         //  52 = spare_fir
-            SET_FIR_MASKED(53);         //  53 = spare_fir
-            SET_FIR_MASKED(54);         //  54 = spare_fir
-            SET_FIR_MASKED(55);         //  55 = spare_fir
-            SET_FIR_MASKED(56);         //  56 = spare_fir
-            SET_FIR_MASKED(57);         //  57 = spare_fir
-            SET_FIR_MASKED(58);         //  58 = spare_fir
-            SET_FIR_MASKED(59);         //  59 = spare_fir
-            SET_FIR_MASKED(60);         //  60 = spare_fir
-            SET_FIR_MASKED(61);         //  61 = spare_fir
-
-            SET_RECOV_ATTN(62);         //  62 = fir_parity_err_dup
-            SET_RECOV_ATTN(63);         //  63 = fir_parity_err
+            SET_RECOV_ATTN(6);  SET_FIR_MASKED(6);        //  6 = pore_gpe0_fatal_err
+            SET_RECOV_ATTN(7);  SET_FIR_MASKED(7);        //  7 = pore_gpe1_fatal_err
+            SET_RECOV_ATTN(8);  SET_FIR_MASKED(8);        //  8 = ocb_error
+            SET_RECOV_ATTN(9);                            //  9 = srt_ue
+            SET_RECOV_ATTN(10); SET_FIR_MASKED(10);       //  10 = srt_ce
+            SET_RECOV_ATTN(11);                           //  11 = srt_read_error
+            SET_RECOV_ATTN(12);                           //  12 = srt_write_error
+            SET_RECOV_ATTN(13);                           //  13 = srt_dataout_perr
+            SET_RECOV_ATTN(14);                           //  14 = srt_oci_write_data_parity
+            SET_RECOV_ATTN(15);                           //  15 = srt_oci_be_parity_err
+            SET_RECOV_ATTN(16);                           //  16 = srt_oci_addr_parity_err
+            SET_RECOV_ATTN(17); SET_FIR_MASKED(17);       //  17 = pore_sw_error_err                        
+            SET_RECOV_ATTN(18); SET_FIR_MASKED(18);       //  18 = pore_gpe0_error_err                      
+            SET_RECOV_ATTN(19); SET_FIR_MASKED(19);       //  19 = pore_gpe1_error_err                      
+            SET_RECOV_ATTN(20); SET_FIR_MASKED(20);       //  20 = external_trap                            
+            SET_RECOV_ATTN(21); SET_FIR_MASKED(21);       //  21 = ppc405_core_reset                        
+            SET_RECOV_ATTN(22); SET_FIR_MASKED(22);       //  22 = ppc405_chip_reset                        
+            SET_RECOV_ATTN(23); SET_FIR_MASKED(23);       //  23 = ppc405_system_reset                      
+            SET_RECOV_ATTN(24); SET_FIR_MASKED(24);       //  24 = ppc405_dbgmsrwe                          
+            SET_RECOV_ATTN(25); SET_FIR_MASKED(25);       //  25 = ppc405_dbgstopack                        
+            SET_RECOV_ATTN(26);                           //  26 = ocb_db_oci_timeout
+            SET_RECOV_ATTN(27);                           //  27 = ocb_db_oci_read_data_parity
+            SET_RECOV_ATTN(28);                           //  28 = ocb_db_oci_slave_error
+            SET_RECOV_ATTN(29);                           //  29 = ocb_pib_addr_parity_err
+            SET_RECOV_ATTN(30);                           //  30 = ocb_db_pib_data_parity_err
+            SET_RECOV_ATTN(31);                           //  31 = ocb_idc0_error
+            SET_RECOV_ATTN(32);                           //  32 = ocb_idc1_error
+            SET_RECOV_ATTN(33);                           //  33 = ocb_idc2_error
+            SET_RECOV_ATTN(34);                           //  34 = ocb_idc3_error
+            SET_RECOV_ATTN(35);                           //  35 = srt_fsm_err
+            SET_RECOV_ATTN(36); SET_FIR_MASKED(36);       //  36 = jtagacc_err
+            SET_RECOV_ATTN(37); SET_FIR_MASKED(37);       //  37 = spare_err_37
+            SET_RECOV_ATTN(38);                           //  38 = c405_ecc_ue
+            SET_RECOV_ATTN(39); SET_FIR_MASKED(39);       //  39 = c405_ecc_ce
+            SET_RECOV_ATTN(40); SET_FIR_MASKED(40);       //  40 = c405_oci_machinecheck
+            SET_RECOV_ATTN(41);                           //  41 = sram_spare_direct_error0
+            SET_RECOV_ATTN(42);                           //  42 = sram_spare_direct_error1
+            SET_RECOV_ATTN(43);                           //  43 = sram_spare_direct_error2
+            SET_RECOV_ATTN(44);                           //  44 = sram_spare_direct_error3
+            SET_RECOV_ATTN(45);                           //  45 = slw_ocislv_err
+            SET_RECOV_ATTN(46);                           //  46 = gpe_ocislv_err
+            SET_RECOV_ATTN(47);                           //  47 = ocb_ocislv_err
+            SET_RECOV_ATTN(48);                           //  48 = c405icu_m_timeout
+            SET_RECOV_ATTN(49);                           //  49 = c405dcu_m_timeout
+            SET_RECOV_ATTN(50); SET_FIR_MASKED(50);       //  50 = spare_fir                   
+            SET_RECOV_ATTN(51); SET_FIR_MASKED(51);       //  51 = spare_fir                   
+            SET_RECOV_ATTN(52); SET_FIR_MASKED(52);       //  52 = spare_fir                   
+            SET_RECOV_ATTN(53); SET_FIR_MASKED(53);       //  53 = spare_fir                   
+            SET_RECOV_ATTN(54); SET_FIR_MASKED(54);       //  54 = spare_fir                   
+            SET_RECOV_ATTN(55); SET_FIR_MASKED(55);       //  55 = spare_fir                   
+            SET_RECOV_ATTN(56); SET_FIR_MASKED(56);       //  56 = spare_fir                   
+            SET_RECOV_ATTN(57); SET_FIR_MASKED(57);       //  57 = spare_fir                   
+            SET_RECOV_ATTN(58); SET_FIR_MASKED(58);       //  58 = spare_fir                   
+            SET_RECOV_ATTN(59); SET_FIR_MASKED(59);       //  59 = spare_fir                   
+            SET_RECOV_ATTN(60); SET_FIR_MASKED(60);       //  60 = spare_fir                   
+            SET_RECOV_ATTN(61); SET_FIR_MASKED(61);       //  61 = spare_fir                   
+            SET_RECOV_ATTN(62);                           //  62 = fir_parity_err_dup
+            SET_RECOV_ATTN(63);                           //  63 = fir_parity_err
 
             if (e_rc)
             {
