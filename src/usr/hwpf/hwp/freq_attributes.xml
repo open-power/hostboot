@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: freq_attributes.xml,v 1.7 2013/08/09 15:14:59 mjjones Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are frequency attributes.
@@ -32,7 +33,9 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
       The frequency of the processor refclock in MHz.
-      Provided by the MRW.
+      Provided by the Machine Readable Workbook.
+      This is read by the set_ref_clock HWP to find out the desired frequency.
+      This can be overridden to adjust the refclock frequency.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -42,8 +45,11 @@
     <id>ATTR_FREQ_PROC_REFCLOCK_KHZ</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      The frequency of the processor refclock in KHz.
-      Provided by the MRW.
+      The frequency of the processor refclock in kHz.
+      Provided by the Machine Readable Workbook.
+      This is read by the procedures needing kHz precision of the refclock value set
+      into ATTR_FREQ_PROC_REFCLOCK.
+      This can be overridden to adjust the refclock frequency.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -54,7 +60,9 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
       The frequency of the memory refclock in MHz.
-      Provided by the MRW.
+      Provided by the Machine Readable Workbook.
+      This is read by the set_ref_clock HWP to find out the desired frequency.
+      This can be overridden to adjust the refclock frequency.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -66,7 +74,7 @@
     <description>
       The lowest frequency that a core can be set to in MHz.
       This is the same for all cores in the system.
-      Provided by the MRW.
+      Provided by the Machine Readable Workbook.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
