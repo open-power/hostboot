@@ -39,6 +39,8 @@
 #include "ibscom.H"
 #include <assert.h>
 #include <limits.h>
+#include <errl/errludtarget.H>
+#include <xscom/piberror.H>
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -456,8 +458,8 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
             const uint64_t HOST_ERROR_VALID = 0x0000000080000000;
             const uint64_t PIB_ERROR_STATUS_MASK = 0x0000000070000000;
             const uint64_t PIB_ERROR_SHIFT = 28;
-            uint64_t errData = 0;
             size_t readSize = sizeof(uint64_t);
+            uint64_t mbsiberr0_data = 0;
 
             //Use FSISCOM as workaround for DD1.x centaur chips (HW246298)
             if(i_target->getAttr<TARGETING::ATTR_EC>() < 0x20)
@@ -465,7 +467,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                 //Need to explicitly use FSI SCOM in DD1X chips
                 l_err = deviceOp( DeviceFW::READ,
                                      i_target,
-                                     &errData,
+                                     &mbsiberr0_data,
                                      readSize,
                                      DEVICE_FSISCOM_ADDRESS(MBSIBERR0) );
                 if(l_err)
@@ -485,7 +487,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                 }
                 TRACUCOMP(g_trac_ibscom,
                           "doIBScom: MBSIBERR0(0x%.16x) = 0x%.16X",
-                          MBSIBERR0, errData);
+                          MBSIBERR0, mbsiberr0_data);
 
                 //attempt to clear the error register so future accesses
                 //will work
@@ -502,62 +504,23 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                     l_err = NULL;
                 }
 
-
-                uint64_t pib_code = (errData & PIB_ERROR_STATUS_MASK)
-                  >> PIB_ERROR_SHIFT;
-                if((errData & HOST_ERROR_VALID) &&//bit 32
-                   // technically between 0x001 && 0x7, but only 3
-                   // bits are valid.
-                   (pib_code > 0x000))
-                {
-                    //TODO RTC: 35064 - This will be the same as the FSI SCOM
-                    //error handling.
-                    //Look at data to decide if bus is down
-                    //Make smart decisions based on PIB error code.
-
-                    //Assume caller provided bad address for now.
-                    TRACFCOMP(g_trac_ibscom, "doIBScom: MBSIBERR0 bit 0 set, caller most likely used a bad address (0x%.8x)",
-                              i_addr);
-
-                    /*@
-                     * @errortype
-                     * @moduleid     IBSCOM_DO_IBSCOM
-                     * @reasoncode   IBSCOM_INVALID_ADDRESS
-                     * @userdata1[0:31]   HUID of Centaur Target
-                     * @userdata1[32:64]  SCOM Address
-                     * @userdata2    Contents of MBSIBERR0 register
-                     * @devdesc      Operation rejected by HW due to bad
-                     *               address.
-                     */
-                    l_err =
-                      new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    IBSCOM_DO_IBSCOM,
-                                    IBSCOM_INVALID_ADDRESS,
-                                    TWO_UINT32_TO_UINT64(
-                                                         get_huid(i_target),
-                                                         i_addr),
-                                    errData);
-                    l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                               HWAS::SRCI_PRIORITY_HIGH);
-                    break;
-                }
-                else
+                //if the MBSIBERR0Q_IB_HOST_ERROR_VALID bit is not set
+                //  then we have a bus failure
+                if( !(mbsiberr0_data & HOST_ERROR_VALID) )
                 {
                     //Bus is down
                     busDown = true;
                 }
-
-
             }
             else  // >= DD20
             {
                 //TODO RTC: 68984: Validate error path on DD2.0 Centaurs
                 l_err = doIBScom(DeviceFW::READ,
-                                    i_target,
-                                    &errData,
-                                    readSize,
-                                    MBSIBERR0,
-                                    true);
+                                 i_target,
+                                 &mbsiberr0_data,
+                                 readSize,
+                                 MBSIBERR0,
+                                 true);
                 if(l_err != NULL)
                 {
                     if( IBSCOM_SUE_IN_ERR_PATH == l_err->reasonCode() )
@@ -573,17 +536,6 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                         TRACFCOMP(g_trac_ibscom, ERR_MRK"doIBScom: Unexpected error when checking for SUE");
                         break;
                     }
-                }
-                else //MBSIBERR0 returned valid data
-                {
-                    //TODO RTC: 35064 - This will be the same as the FSI SCOM
-                    //error handling.
-                    //Look at data to decide if bus is down
-                    //Make smart decisions based on PIB error code.
-
-                    //For now, assume bus is Down
-                    busDown = true;
-
                 }
             } // >= DD20
 
@@ -608,7 +560,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                                 TWO_UINT32_TO_UINT64(
                                                      get_huid(i_target),
                                                      i_addr),
-                                errData);
+                                mbsiberr0_data);
 
                 l_err->addHwCallout(i_target,
                                     HWAS::SRCI_PRIORITY_HIGH,
@@ -629,6 +581,39 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                     // Turn off IBSCOM and turn on FSI SCOM.
                     i_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
                 }
+                break;
+            }
+            else // bus isn't down, some other kind of error
+            {
+                /*@
+                 * @errortype
+                 * @moduleid     IBSCOM_DO_IBSCOM
+                 * @reasoncode   IBSCOM_PIB_FAILURE
+                 * @userdata1[0:31]   HUID of Centaur Target
+                 * @userdata1[32:64]  SCOM Address
+                 * @userdata2    Contents of MBSIBERR0 register
+                 * @devdesc      PIB error when attempting to perform
+                 *               IBSCOM operation.
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      IBSCOM_DO_IBSCOM,
+                                      IBSCOM_BUS_FAILURE,
+                                      TWO_UINT32_TO_UINT64(
+                                          get_huid(i_target),
+                                          i_addr),
+                                      mbsiberr0_data);
+
+                //Add this target to the FFDC
+                ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_err);
+
+                uint64_t pib_code =
+                  (mbsiberr0_data & PIB_ERROR_STATUS_MASK) >> PIB_ERROR_SHIFT;
+
+                //add callouts based on the PIB error
+                PIB::addFruCallouts( i_target,
+                                     pib_code,
+                                     l_err );
+
                 break;
             }
         }

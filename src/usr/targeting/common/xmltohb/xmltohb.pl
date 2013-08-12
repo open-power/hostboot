@@ -2391,7 +2391,8 @@ sub writeTargetErrlCFile {
 
     print $outFile "//------------------------------------------------------------------------------\n";
     print $outFile "ErrlUserDetailsTarget::ErrlUserDetailsTarget(\n";
-    print $outFile "    const Target * i_pTarget)\n";
+    print $outFile "    const Target * i_pTarget,\n";
+    print $outFile "    const char* i_label)\n";
     print $outFile "{\n";
     print $outFile "    // Set up ErrlUserDetails instance variables\n";
     print $outFile "    iv_CompId = ERRL_COMP_ID;\n";
@@ -2400,18 +2401,35 @@ sub writeTargetErrlCFile {
     print $outFile "    // override the default of false\n";
     print $outFile "    iv_merge = true;\n";
     print $outFile "\n";
+    print $outFile "    uint8_t* label_buf = NULL;\n";
+    print $outFile "\n";
     print $outFile "    if (i_pTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) {\n";
-    print $outFile "        uint32_t *pBuffer = reinterpret_cast<uint32_t *>(\n";
-    print $outFile "                                reallocUsrBuf(sizeof(uint32_t)));\n";
+    print $outFile "        label_buf = reallocUsrBuf(sizeof(uint32_t)\n";
+    print $outFile "                                +sizeof(TargetLabel_t));\n";
+    print $outFile "        uint32_t *pBuffer = reinterpret_cast<uint32_t*>\n";
+    print $outFile "          (label_buf+sizeof(TargetLabel_t));\n";
     print $outFile "        // copy 0xFFFFFFFF to indicate MASTER just as gethuid() does\n";
     print $outFile "        *pBuffer = 0xFFFFFFFF;\n";
     print $outFile "    } else {\n";
     print $outFile "        uint32_t bufSize = 0;\n";
     print $outFile "        uint8_t *pTargetString = i_pTarget->targetFFDC(bufSize);\n";
-    print $outFile "        uint8_t *pBuffer = reinterpret_cast<uint8_t *>(reallocUsrBuf(bufSize));\n";
+    print $outFile "        label_buf = reallocUsrBuf(bufSize+sizeof(TargetLabel_t));\n";
+    print $outFile "        uint8_t* pBuffer = (label_buf+sizeof(TargetLabel_t));\n";
     print $outFile "        memcpy(pBuffer, pTargetString, bufSize);\n";
     print $outFile "        free (pTargetString);\n";
     print $outFile "    }\n";
+    print $outFile "\n";
+    print $outFile "    // Prepend a label\n";
+    print $outFile "    TargetLabel_t label;\n";
+    print $outFile "    if( i_label )\n";
+    print $outFile "    {\n";
+    print $outFile "        strcpy( label.x, i_label );\n";
+    print $outFile "    }\n";
+    print $outFile "    else // no label, put a generic one in there\n";
+    print $outFile "    {\n";
+    print $outFile "        strcpy( label.x, \"Target\" );\n";
+    print $outFile "    }\n";
+    print $outFile "    memcpy( label_buf, &label, sizeof(label) );\n";
     print $outFile "}\n";
     print $outFile "\n";
 
@@ -2435,6 +2453,19 @@ sub writeTargetErrlHFile {
     print $outFile "#ifndef ERRL_UDTARGET_H\n";
     print $outFile "#define ERRL_UDTARGET_H\n";
     print $outFile "\n";
+    print $outFile "namespace ERRORLOG\n";
+    print $outFile "{\n";
+    print $outFile "typedef struct TargetLabel_t\n";
+    print $outFile "{\n";
+    print $outFile "    static const uint32_t LABEL_TAG = 0xEEEEEEEE;\n";
+    print $outFile "    uint32_t tag;\n";
+    print $outFile "    char x[24]; //space to left of divider\n";
+    print $outFile "    TargetLabel_t() : tag(0xEEEEEEEE)\n";
+    print $outFile "    {\n";
+    print $outFile "        memset(x,'\\0',sizeof(x));\n";
+    print $outFile "    };\n";
+    print $outFile "} TargetLabel_t;\n";
+    print $outFile "}\n";
     print $outFile "#ifndef PARSER\n";
     print $outFile "\n";
     print $outFile "#include <errl/errluserdetails.H>\n";
@@ -2447,7 +2478,8 @@ sub writeTargetErrlHFile {
     print $outFile "class ErrlUserDetailsTarget : public ErrlUserDetails {\n";
     print $outFile "public:\n";
     print $outFile "\n";
-    print $outFile "    ErrlUserDetailsTarget(const TARGETING::Target * i_pTarget);\n";
+    print $outFile "    ErrlUserDetailsTarget(const TARGETING::Target * i_pTarget,\n";
+    print $outFile "                          const char* i_label = NULL);\n";
     print $outFile "    virtual ~ErrlUserDetailsTarget();\n";
     print $outFile "\n";
     print $outFile "private:\n";
@@ -2546,6 +2578,8 @@ sub writeTargetErrlHFile {
     print $outFile "                        const uint32_t i_buflen) const\n";
     print $outFile "  {\n";
     print $outFile "    const char *attrData;\n";
+    print $outFile "    char l_label[24];\n";
+    print $outFile "    sprintf(l_label,\"Target\");\n";
     print $outFile "    uint32_t *l_ptr32 = reinterpret_cast<uint32_t *>(i_pBuffer);\n";
     print $outFile "    // while there is still at least 1 word of data left\n";
     print $outFile "    for (; (l_ptr32 + 1) <= (uint32_t *)((uint8_t*)i_pBuffer + i_buflen); )\n";
@@ -2553,11 +2587,15 @@ sub writeTargetErrlHFile {
     print $outFile "      if (*l_ptr32 == 0xFFFFFFFF) { // special - master\n";
     print $outFile "        i_parser.PrintString(\"Target\", \"MASTER_PROCESSOR_CHIP_TARGET_SENTINEL\");\n";
     print $outFile "        l_ptr32++; // past the marker\n";
+    print $outFile "      } else if (*l_ptr32 == TargetLabel_t::LABEL_TAG) {\n";
+    print $outFile "        TargetLabel_t* tmp_label = reinterpret_cast<TargetLabel_t*>(l_ptr32);\n";
+    print $outFile "        memcpy( l_label, tmp_label->x, sizeof(l_label)-1 );\n";
+    print $outFile "        l_ptr32 += (sizeof(TargetLabel_t)/sizeof(uint32_t));\n";
     print $outFile "      } else { \n";
 
     print $outFile "        // first 4 are always the same\n";
     print $outFile "        if ((l_ptr32 + 4) <= (uint32_t *)((uint8_t*)i_pBuffer + i_buflen)) {\n";
-    print $outFile "            i_parser.PrintNumber( \"Target\", \"HUID = 0x%08X\", ntohl(*l_ptr32) );\n";
+    print $outFile "            i_parser.PrintNumber( l_label, \"HUID = 0x%08X\", ntohl(*l_ptr32) );\n";
     print $outFile "            l_ptr32++;\n";
 
     # find CLASS

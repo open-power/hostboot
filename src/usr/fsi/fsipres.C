@@ -200,7 +200,7 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         }
 
         // Add FFDC for the target to an error log
-        getFsiFFDC( FSI_FFDC_PRESENCE_FAIL, l_errl, i_target);
+        getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);
 
 
         // Add FSI and VPD trace
@@ -372,7 +372,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
         }
 
         // Add FFDC for the target to an error log
-        getFsiFFDC( FSI_FFDC_PRESENCE_FAIL, l_errl, i_target);
+        getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);
 
         // Add FSI and VPD trace
         l_errl->collectTrace("FSI");

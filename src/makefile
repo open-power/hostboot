@@ -65,7 +65,8 @@ TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testvpd \
                    testpore testutil testmbox testmdia testprdf testattn \
-                   testscan testruntime testibscom testdump testsecureboot
+                   testscan testruntime testibscom testdump testsecureboot \
+                   testfsiscom
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

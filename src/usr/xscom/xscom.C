@@ -212,8 +212,6 @@ uint8_t getMaxChipsPerNode()
     uint8_t l_numOfChips = 0;
 
     ProcessorCoreType l_coreType = cpu_core_type();
-    //@todo - Need to verify if this number is correct
-    // for both Murano and Venice
     switch (l_coreType)
     {
         case CORE_POWER8_MURANO:

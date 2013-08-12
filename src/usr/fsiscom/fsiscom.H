@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/fsiscom/fsiscom.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/fsiscom/fsiscom.H $                                   */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __FSISCOM_H
 #define __FSISCOM_H
 
@@ -31,12 +31,18 @@ namespace FSISCOM
 {
 
   enum {
-    //FSI addresses are byte offsets, so need to multiply by 4 since each register is 4 bytes long.
-    //prefix with 0x10xx for engine offset
-    DATA0_REG   = 0x1000,  /* SCOM Data Register 0 (0x00) */
-    DATA1_REG   = 0x1004,  /* SCOM Data Register 1 (0x01) */
-    COMMAND_REG = 0x1008,  /* SCOM Command Register (0x02) */
-    STATUS_REG  = 0x101C,  /* STATUS Register (0x07) */
+    //FSI addresses are byte offsets, so need to multiply by 4
+    // since each register is 4 bytes long.
+    // prefix with 0x10xx for FSI2PIB engine offset
+    DATA0_REG         = 0x1000,  /* SCOM Data Register 0 (0x00) */
+    DATA1_REG         = 0x1004,  /* SCOM Data Register 1 (0x01) */
+    COMMAND_REG       = 0x1008,  /* SCOM Command Register (0x02) */
+    ENGINE_RESET_REG  = 0x1018,  /* Engine Reset Register (0x06) */
+    STATUS_REG        = 0x101C,  /* STATUS Register (0x07) */
+    PIB_RESET_REG     = 0x101C,  /* PIB Reset Register (0x07) */
+
+    PIB_ABORT_BIT     = 0x00100000, /* 12= PIB Abort */
+    PIB_ERROR_BITS    = 0x00007000, /* 17:19= PCB/PIB Errors */
   };
 
 /**

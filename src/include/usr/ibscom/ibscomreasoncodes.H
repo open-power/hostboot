@@ -45,6 +45,7 @@ namespace IBSCOM
         IBSCOM_SUE_IN_ERR_PATH      = IBSCOM_COMP_ID | 0x05,
         IBSCOM_BUS_FAILURE          = IBSCOM_COMP_ID | 0x06,
         IBSCOM_INVALID_ADDRESS      = IBSCOM_COMP_ID | 0x07,
+        IBSCOM_PIB_FAILURE          = IBSCOM_COMP_ID | 0x08,
     };
 };
 

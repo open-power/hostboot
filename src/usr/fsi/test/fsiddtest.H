@@ -38,6 +38,7 @@
 #include <fsi/fsi_reasoncodes.H>
 #include <sys/time.h>
 #include <targeting/common/attributes.H>
+#include <targeting/common/utilFilter.H>
 
 extern trace_desc_t* g_trac_fsi;
 
@@ -461,6 +462,51 @@ class FsiDDTest : public CxxTest::TestSuite
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_badTargets> %d/%d fails", fails, total );
     };
 
+    /**
+     * @brief FSI DD test - FFDC Collection
+     *        Verify FFDC for errors
+     */
+    void test_FFDC(void)
+    {
+        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> Start" );
+        errlHndl_t l_err = NULL;
+
+        // Find any Centaur target
+        TARGETING::TargetHandleList l_memTargetList;
+        getAllChips( l_memTargetList, TYPE_MEMBUF, true );
+        if( l_memTargetList.empty() )
+        {
+            TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> No Centaurs found..." );
+            TS_FAIL( "FsiDDTest::test_FFDC> No Centaurs found..." );
+        }
+        TARGETING::Target* fsi_target = *(l_memTargetList.begin());
+
+        l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         FSI::MOD_FSIDD_INVALID,
+                                         FSI::RC_BAD_REASONCODE,
+                                         TARGETING::get_huid(fsi_target),
+                                         FSI::FFDC_PRESENCE_FAIL);
+        FSI::getFsiFFDC( FSI::FFDC_PRESENCE_FAIL, l_err, fsi_target );
+        errlCommit(l_err,CXXTEST_COMP_ID);
+
+        l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         FSI::MOD_FSIDD_INVALID,
+                                         FSI::RC_BAD_REASONCODE,
+                                         TARGETING::get_huid(fsi_target),
+                                         FSI::FFDC_READWRITE_FAIL);
+        FSI::getFsiFFDC( FSI::FFDC_READWRITE_FAIL, l_err, fsi_target );
+        errlCommit(l_err,CXXTEST_COMP_ID);
+
+        l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         FSI::MOD_FSIDD_INVALID,
+                                         FSI::RC_BAD_REASONCODE,
+                                         TARGETING::get_huid(fsi_target),
+                                         FSI::FFDC_PIB_FAIL);
+        FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL, l_err, fsi_target );
+        errlCommit(l_err,CXXTEST_COMP_ID);
+
+        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> Finish" );
+    };
 };     
 
 

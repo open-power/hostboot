@@ -45,6 +45,7 @@ namespace FSI
 
     enum FSIReasonCode
     {
+        RC_BAD_REASONCODE            = FSI_COMP_ID | 0x00,
         RC_INVALID_LENGTH            = FSI_COMP_ID | 0x01,
         RC_INVALID_ADDRESS           = FSI_COMP_ID | 0x02,
         RC_OPB_TIMEOUT               = FSI_COMP_ID | 0x03,

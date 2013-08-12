@@ -28,14 +28,18 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
+#include <xscom/piberror.H>
 #include <fsiscom/fsiscom_reasoncodes.H>
+#include <fsi/fsiif.H>
+#include <sys/time.h>
 #include "fsiscom.H"
 
 //Globals/Constants
 
 // Trace definition
 trace_desc_t* g_trac_fsiscom = NULL;
-TRAC_INIT(&g_trac_fsiscom, "FSISCOM", 2*KILOBYTE); //2K
+TRAC_INIT(&g_trac_fsiscom, FSISCOM_COMP_NAME, 2*KILOBYTE); //2K
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -54,8 +58,55 @@ union ioData6432
     };
 };
 
-//@fixme - not full tested due to simics instability.  Will full test when
-// enabling the scom test cases.
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void pib_error_handler( TARGETING::Target* i_target,
+                        errlHndl_t i_errlog,
+                        uint32_t i_status )
+{
+    //Add this target to the FFDC
+    ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target").addToLog(i_errlog);
+
+    //Add the callouts for the specific PCB/PIB error
+    uint32_t pib_error = i_status >> 12;
+    PIB::addFruCallouts( i_target,
+                         pib_error,
+                         i_errlog );
+
+    //Grab the PIB2OPB Status reg for a Resource Occupied error
+    if( pib_error == PIB::PIB_RESOURCE_OCCUPIED ) //piberr=001
+    {
+        FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL,
+                         i_errlog,
+                         i_target );
+    }
+
+    //Recovery sequence from Markus
+    //  if SCOM fails and FSI Master displays "MasterTimeOut"
+    //     then 7,6  <covered by FSI driver>
+    //  else if SCOM fails and FSI2PIB Status shows PIB abort
+    //     then just perform unit reset (6) and wait 1 ms
+    //  else (PIB_abort='0' but PIB error is unequal 0)
+    //     then just perform unit reset (6) (wait not needed).
+    uint32_t l_command = 0;
+    size_t op_size = sizeof(uint32_t);
+    errlHndl_t l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                       i_target,
+                                       &l_command,
+                                       op_size,
+                                       DEVICE_FSI_ADDRESS(ENGINE_RESET_REG));
+    if(l_err)
+    {
+        TRACFCOMP( g_trac_fsiscom,
+                   ERR_MRK"Error resetting FSI : %.4X",
+                   ERRL_GETRC_SAFE(l_err) );
+        l_err->plid(i_errlog->plid());
+        errlCommit(l_err,FSISCOM_COMP_ID);
+    }
+
+    nanosleep( 0,NS_PER_MSEC ); //sleep for ms
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,36 +138,41 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              * @reasoncode   FSISCOM::RC_INVALID_LENGTH
              * @userdata1    SCOM Address
              * @userdata2    Data Length
-             * @devdesc      FSISCOM: fsiScomPerformOp> Invalid data length (!= 8 bytes)
+             * @devdesc      fsiScomPerformOp> Invalid data length (!= 8 bytes)
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSISCOM::MOD_FSISCOM_PERFORMOP,
                                             FSISCOM::RC_INVALID_LENGTH,
                                             l_scomAddr,
                                             TO_UINT64(io_buflen));
-            //@fixme: Need to callout target somehow.  Need to decide how to callout target and where
-            //  it should be done (this layer or somewhere higher in the call stack?)
+            l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                        HWAS::SRCI_PRIORITY_LOW );
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target").
+              addToLog(l_err);
             break;
         }
 
         if( (l_scomAddr & 0xFFFFFFFF80000000) != 0)
         {
-            TRACFCOMP( g_trac_fsiscom, ERR_MRK "fsiScomPerformOp> Address contains more than 31 bits : l_scomAddr=0x%.8x", l_scomAddr );
+            TRACFCOMP( g_trac_fsiscom, ERR_MRK "fsiScomPerformOp> Address contains more than 31 bits : l_scomAddr=0x%.16X", l_scomAddr );
             /*@
              * @errortype
              * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
              * @reasoncode   FSISCOM::RC_INVALID_ADDRESS
              * @userdata1    SCOM Address
              * @userdata2    0
-             * @devdesc      FSISCOM: fsiScomPerformOp> Address contains more than 31 bits.
+             * @devdesc      fsiScomPerformOp> Address contains
+             *               more than 31 bits.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSISCOM::MOD_FSISCOM_PERFORMOP,
                                             FSISCOM::RC_INVALID_ADDRESS,
                                             l_scomAddr,
-                                            0);
-            //@fixme: Need to callout target somehow.  Need to decide how to callout target and where
-            //  it should be done (this layer or somewhere higher in the call stack?)
+                                            TARGETING::get_huid(i_target));
+            l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                        HWAS::SRCI_PRIORITY_LOW );
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target").
+              addToLog(l_err);
             break;
         }
 
@@ -183,12 +239,9 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                 break;
             }
 
-            // atomic section <<
-            need_unlock = false;
-            mutex_unlock(l_mutex);
-
-            //bits 17-19 indicates PCB/PIB error
-            if(l_status & 0x00007000)
+            // Check the status reg for errors
+            if( (l_status & PIB_ERROR_BITS)      // PCB/PIB Errors
+                || (l_status & PIB_ABORT_BIT)  ) // PIB Abort
             {
                 TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Write: PCB/PIB error received: l_status=0x%X)", l_status);
                 /*@
@@ -197,17 +250,18 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                  * @reasoncode   FSISCOM::RC_WRITE_ERROR
                  * @userdata1    SCOM Addr
                  * @userdata2    SCOM Status Reg
-                 * @devdesc      fsiScomPerformOp> Error returned from SCOM Engine after write
+                 * @devdesc      fsiScomPerformOp> Error returned
+                 *               from SCOM Engine after write
                  */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                FSISCOM::MOD_FSISCOM_PERFORMOP,
-                                                FSISCOM::RC_WRITE_ERROR,
-                                                l_scomAddr,
-                                                TO_UINT64(l_status));
+                l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                FSISCOM::MOD_FSISCOM_PERFORMOP,
+                                FSISCOM::RC_WRITE_ERROR,
+                                l_scomAddr,
+                                TO_UINT64(l_status));
 
-                //@fixme: Need to callout target somehow.  Need to decide how to callout target and where
-                //  it should be done (this layer or somewhere higher in the call stack?)
-                //@todo: May add recover actions later.  Currently undefined
+                // call common error handler to do callouts and recovery
+                pib_error_handler( i_target, l_err, l_status );
 
                 //Grab the PIB2OPB Status reg for a XSCOM Block error
                 if( (l_status & 0x00007000) == 0x00001000 ) //piberr=001
@@ -234,8 +288,9 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                 break;
             }
 
-
-
+            // atomic section <<
+            need_unlock = false;
+            mutex_unlock(l_mutex);
         }
         else if(i_opType == DeviceFW::READ)
         {
@@ -269,8 +324,9 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                 break;
             }
 
-           //bits 17-19 indicates PCB/PIB error
-            if((l_status & 0x00007000) != 0)
+            // Check the status reg for errors
+            if( (l_status & PIB_ERROR_BITS)      // PCB/PIB Errors
+                || (l_status & PIB_ABORT_BIT)  ) // PIB Abort
             {
                 TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Read: PCB/PIB error received: l_status=0x%0.8X)", l_status);
 
@@ -288,9 +344,9 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                                 l_scomAddr,
                                                 TO_UINT64(l_status));
 
-                //@fixme: Need to callout target somehow.  Need to decide how to callout target and where
-                //  it should be done (this layer or somewhere higher in the call stack?)
-                //@todo: May add recover actions later.  Currently undefined
+                // call common error handler to do callouts and recovery
+                pib_error_handler( i_target, l_err, l_status );
+
                 break;
             }
 
@@ -332,18 +388,24 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              * @errortype
              * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
              * @reasoncode   FSISCOM::RC_INVALID_OPTYPE
-             * @userdata1    Operation Type (i_opType) : 0=READ, 1=WRITE
-             * @userdata2    0
+             * @userdata1[0:31]    Operation Type (i_opType) : 0=READ, 1=WRITE
+             * @userdata1[32:64]   Input scom address
+             * @userdata2    Target HUID
              * @devdesc      fsiScomPerformOp> Unsupported Operation Type specified
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             FSISCOM::MOD_FSISCOM_PERFORMOP,
                                             FSISCOM::RC_INVALID_OPTYPE,
-                                            TO_UINT64(i_opType),
-                                            0);
+                                            TWO_UINT32_TO_UINT64(i_opType,
+                                                                 l_scomAddr),
+                                            TARGETING::get_huid(i_target));
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target").
+              addToLog(l_err);
 
-            //@fixme: Need to callout target somehow.  Need to decide how to callout target and where
-            //  it should be done (this layer or somewhere higher in the call stack?)
+            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
+
             break;
 
         }

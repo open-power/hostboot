@@ -67,8 +67,9 @@ bool isSlavePresent( TARGETING::Target* i_target );
  */
 enum fsiFFDCType_t
 {
-    FSI_FFDC_PRESENCE_FAIL  = 0,
-    FSI_FFDC_READWRITE_FAIL,
+    FFDC_PRESENCE_FAIL  = 0,
+    FFDC_READWRITE_FAIL = 1,
+    FFDC_PIB_FAIL       = 2
 };
 
 /**
@@ -107,6 +108,8 @@ enum SlaveRegistersP8
 };
 
 
+// Trace buffer for FSI Register read/writes
+#define FSIR_TRACE_BUF "FSIR"
 
 }
 

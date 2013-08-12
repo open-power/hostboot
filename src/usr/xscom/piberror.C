@@ -57,8 +57,8 @@ void addFruCallouts(TARGETING::Target* i_target,
      case  PIB::PIB_INVALID_ADDRESS:
        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
-
        break;
+
      case PIB::PIB_PARITY_ERROR:
      case PIB::PIB_TIMEOUT:
        io_errl->addHwCallout( i_target,
@@ -66,6 +66,7 @@ void addFruCallouts(TARGETING::Target* i_target,
                               HWAS::NO_DECONFIG,
                               HWAS::GARD_NULL );
        break;
+
      case  PIB::PIB_CLOCK_ERROR:
         if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
                     TARGETING::TYPE_PROC)
