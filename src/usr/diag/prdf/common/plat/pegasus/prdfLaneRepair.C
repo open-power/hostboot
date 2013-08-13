@@ -20,9 +20,12 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /** @file prdfLaneRepair.C */
 
 #include <prdfLaneRepair.H>
+
+// Framework includes
 #include <prdfPlatServices.H>
 #include <iipconst.h>
 #include <prdfGlobal.H>
@@ -30,6 +33,9 @@
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <UtilHash.H>
+
+// Pegasus includes
+#include <prdfCalloutUtil.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfP8McsDataBundle.H>
 
@@ -42,12 +48,14 @@ using namespace PlatServices;
 namespace LaneRepair
 {
 
-int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
+int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                                TYPE i_busType,
                                uint32_t i_busPos,
                                STEP_CODE_DATA_STRUCT & i_sc,
-                               bool i_spareDeployed)
+                               bool i_spareDeployed )
 {
+    #define PRDF_FUNC "[LaneRepair::handleLaneRepairEvent] "
+
     int32_t l_rc = SUCCESS;
     TargetHandle_t rxBusTgt = NULL;
     TargetHandle_t txBusTgt = NULL;
@@ -60,7 +68,8 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
     BitStringBuffer l_newLaneMap0to63(64);
     BitStringBuffer l_newLaneMap64to127(64);
 
-    do {
+    do
+    {
         // Get RX bus target
         TYPE iChipType = getTargetType(i_chip->GetChipHandle());
 
@@ -75,27 +84,21 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
                                           i_busType, i_busPos );
             if ( NULL == rxBusTgt )
             {
-                PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] HUID: 0x%08x "
-                          "Couldn't find RX connected bus",
-                          getHuid(i_chip->GetChipHandle()) );
-                break;
+                PRDF_ERR( PRDF_FUNC"Could not find RX connected bus" );
+                l_rc = FAIL; break;
             }
         }
         else
         {
-            PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] HUID: 0x%08x "
-                      "Not of type MEMBUF or PROC",
-                      getHuid(i_chip->GetChipHandle()) );
-            break;
+            PRDF_ERR( PRDF_FUNC"i_chip is not of type MEMBUF or PROC" );
+            l_rc = FAIL; break;
         }
 
         // Call io_read_erepair
         l_rc = readErepair(rxBusTgt, rx_lanes);
         if (SUCCESS != l_rc)
         {
-            PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] i_chip: 0x%08x "
-                      "rxBusTgt: 0x%08x. readErepair failed",
-                      getHuid(i_chip->GetChipHandle()),
+            PRDF_ERR( PRDF_FUNC"readErepair() failed: rxBusTgt=0x%08x",
                       getHuid(rxBusTgt) );
             break;
         }
@@ -109,19 +112,21 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
             else if (*lane < 127)
                 l_newLaneMap64to127.Set(*lane - 64);
             else
-                PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] HUID: 0x%08x "
-                          "rxBusTgt: 0x%08x. invalid lane number %d",
-                          getHuid(i_chip->GetChipHandle()),
-                          getHuid(rxBusTgt),
-                          *lane );
+            {
+                PRDF_ERR( PRDF_FUNC"Invalid lane number %d: rxBusTgt=0x%08x",
+                          *lane, getHuid(rxBusTgt) );
+                l_rc = FAIL; break;
+            }
         }
+        if ( SUCCESS != l_rc ) break;
+
         // Add failed lane capture data to errorlog
         i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                    Util::hashString("NEW_FAILED_LANES_0TO63"),
-                                    l_newLaneMap0to63);
+                                Util::hashString("NEW_FAILED_LANES_0TO63"),
+                                l_newLaneMap0to63);
         i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                    Util::hashString("NEW_FAILED_LANES_64TO127"),
-                                    l_newLaneMap64to127);
+                                Util::hashString("NEW_FAILED_LANES_64TO127"),
+                                l_newLaneMap64to127);
 
         if (!mfgMode()) // Don't read/write VPD in mfg mode
         {
@@ -129,10 +134,8 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
             l_rc = getVpdFailedLanes(rxBusTgt, rx_vpdLanes, tx_vpdLanes);
             if (SUCCESS != l_rc)
             {
-                PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] HUID: 0x%08x "
-                          "rxBusTgt: 0x%08x. getVpdFailedLanes failed",
-                          getHuid(i_chip->GetChipHandle()),
-                          getHuid(rxBusTgt) );
+                PRDF_ERR( PRDF_FUNC"getVpdFailedLanes() failed: "
+                          "rxBusTgt=0x%08x", getHuid(rxBusTgt) );
                 break;
             }
 
@@ -145,22 +148,22 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
                 else if (*lane < 127)
                     l_vpdLaneMap64to127.Set(*lane - 64);
                 else
-                    PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] "
-                              "HUID: 0x%08x rxBusTgt: 0x%08x "
-                              "invalid vpd lane number %d",
-                              getHuid(i_chip->GetChipHandle()),
-                              getHuid(rxBusTgt),
-                              *lane );
+                {
+                    PRDF_ERR( PRDF_FUNC"Invalid VPD lane number %d: "
+                              "rxBusTgt=0x%08x", *lane, getHuid(rxBusTgt) );
+                    l_rc = FAIL; break;
+                }
             }
+            if ( SUCCESS != l_rc ) break;
+
             // Add failed lane capture data to errorlog
             i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                                 Util::hashString(
-                                                   "VPD_FAILED_LANES_0TO63"),
-                                                 l_vpdLaneMap0to63);
+                                Util::hashString("VPD_FAILED_LANES_0TO63"),
+                                l_vpdLaneMap0to63);
             i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                                 Util::hashString(
-                                                   "VPD_FAILED_LANES_64TO127"),
-                                                 l_vpdLaneMap64to127);
+                                Util::hashString("VPD_FAILED_LANES_64TO127"),
+                                l_vpdLaneMap64to127);
+
             if (i_spareDeployed)
             {
                 // Get TX bus target
@@ -179,11 +182,9 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
 
                 if ( NULL == txBusTgt )
                 {
-                    PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] i_chip: "
-                              "0x%08x rxBusTgt: 0x%08x. Couldn't find TX "
-                              "connected bus", getHuid(i_chip->GetChipHandle()),
-                              getHuid(rxBusTgt));
-                    break;
+                    PRDF_ERR( PRDF_FUNC"Could not find TX connected bus: "
+                              "rxBusTgt: 0x%08x", getHuid(rxBusTgt) );
+                    l_rc = FAIL; break;
                 }
 
                 // Call Erepair to update VPD
@@ -191,11 +192,9 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
                                          rx_lanes, thrExceeded);
                 if (SUCCESS != l_rc)
                 {
-                    PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] "
-                              "HUID: 0x%08x setVpdFailedLanes failed"
-                              "Tx: 0x%08x Rx: 0x%08x",
-                              getHuid(i_chip->GetChipHandle()),
-                              getHuid(txBusTgt), getHuid(rxBusTgt));
+                    PRDF_ERR( PRDF_FUNC"setVpdFailedLanes() failed: "
+                              "rxBusTgt=0x%08x txBusTgt=0x%08x",
+                              getHuid(rxBusTgt), getHuid(txBusTgt) );
                     break;
                 }
             }
@@ -208,11 +207,8 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
             l_rc = getVpdFailedLanes(rxBusTgt, rx_vpdLanes, tx_vpdLanes);
             if (SUCCESS != l_rc)
             {
-                PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] HUID: 0x%08x "
-                          "getVpdFailedLanes before power down failed"
-                          "rxBusTgt: 0x%08x",
-                          getHuid(i_chip->GetChipHandle()),
-                          getHuid(rxBusTgt));
+                PRDF_ERR( PRDF_FUNC"getVpdFailedLanes() before power down "
+                          "failed: rxBusTgt=0x%08x", getHuid(rxBusTgt) );
                 break;
             }
 
@@ -220,10 +216,8 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
             l_rc = powerDownLanes(rxBusTgt, rx_vpdLanes, tx_vpdLanes);
             if (SUCCESS != l_rc)
             {
-                PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] HUID: 0x%08x "
-                          "powerDownLanes failed rxBusTgt: 0x%08x",
-                          getHuid(i_chip->GetChipHandle()),
-                          getHuid(rxBusTgt));
+                PRDF_ERR( PRDF_FUNC"powerDownLanes() failed: rxBusTgt=0x%08x",
+                          getHuid(rxBusTgt) );
                 break;
             }
         }
@@ -246,7 +240,22 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
     {
         l_rc |= cleanupSecondaryFirBits( i_chip, i_busType, i_busPos );
     }
-    return l_rc;
+
+    // This return code gets returned by the plugin code back to the rule code.
+    // So, we do not want to give a return code that the rule code does not
+    // understand. So far, there is no need return a special code, so always
+    // return SUCCESS.
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"i_chip: 0x%08x i_busType:%d i_busPos:%d",
+                  i_chip->GetId(), i_busType, i_busPos );
+
+        CalloutUtil::defaultError( i_sc );
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
 }
 
 //-----------------------------------------------------------------------------
