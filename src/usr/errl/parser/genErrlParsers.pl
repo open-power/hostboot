@@ -743,15 +743,17 @@ print OFILE "\#\n";
 print OFILE "CFLAGS += -DPARSER\n\n";
 print OFILE "EXPLIBS =\n\n";
 
-print OFILE "\#-------------------------------------------------------------\n";
-print OFILE "\# Call PRD makefile for prdf plugins\n";
-print OFILE "\#-------------------------------------------------------------\n";
-print OFILE ".if ( \$(CONTEXT) != \"x86.nfp\" )\n";
-print OFILE "EXPLIB_SUBDIRS += prdf\n";
-print OFILE "EXPSHLIB_SUBDIRS += prdf\n";
-print OFILE ".else\n";
-print OFILE "EXPLIB_SUBDIRS += prdf\n";
-print OFILE ".endif\n";
+#TODO: RTC 64943 Need to uncomment this code once the PRD error log plugin
+#      support is merged into Hostboot.
+#print OFILE "\#-------------------------------------------------------------\n";
+#print OFILE "\# Call PRD makefile for prdf plugins\n";
+#print OFILE "\#-------------------------------------------------------------\n";
+#print OFILE ".if ( \$(CONTEXT) != \"x86.nfp\" )\n";
+#print OFILE "EXPLIB_SUBDIRS += prdf\n";
+#print OFILE "EXPSHLIB_SUBDIRS += prdf\n";
+#print OFILE ".else\n";
+#print OFILE "EXPLIB_SUBDIRS += prdf\n";
+#print OFILE ".endif\n";
 
 print OFILE "\#-------------------------------------------------------------\n";
 print OFILE "\# SRC Parsers\n";
