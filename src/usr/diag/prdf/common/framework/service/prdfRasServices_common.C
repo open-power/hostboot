@@ -1116,78 +1116,9 @@ will also be removed. Need to confirm if this code is required anymore.
     PRDF_INF( PRDF_FUNC"PRD called to analyze an error: 0x%08x 0x%08x",
               esig->getChipId(), esig->getSigId() );
 
-    //##########################################################################
-    // Start debug trace output
-    //##########################################################################
+    //prints debug traces
 
-    switch ( sdc.GetAttentionType() )
-    {
-        case MACHINE_CHECK:
-            PRDF_DTRAC( "PRDTRACE: Attention Type = CHECKSTOP" );   break;
-        case RECOVERABLE:
-            PRDF_DTRAC( "PRDTRACE: Attention Type = RECOVERABLE" ); break;
-        case SPECIAL:
-            PRDF_DTRAC( "PRDTRACE: Attention Type = SPECIAL" );     break;
-        default:
-            PRDF_DTRAC( "PRDTRACE: Attention Type = Unknown" );
-    }
-
-    if ( RECOVERABLE == sdc.GetAttentionType() )
-    {
-        PRDF_DTRAC( "PRDTRACE: Hit Count: 0x%x", sdc.GetHits() );
-        PRDF_DTRAC( "PRDTRACE: Threshold at: 0x%x", sdc.GetThreshold() );
-        PRDF_DTRAC( "PRDTRACE: Mask id: 0x%x", sdc.GetThresholdMaskId() );
-    }
-
-    fspmrulist = sdc.GetMruList();
-    for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
-          i < fspmrulist.end(); ++i )
-    {
-        PRDF_DTRAC( "PRDTRACE: Callout: %x", i->callout.flatten() );
-
-        switch ( i->priority )
-        {
-            case MRU_LOW:  PRDF_DTRAC( "PRDTRACE:   LOW" );   break;
-            case MRU_MEDC: PRDF_DTRAC( "PRDTRACE:   MED_C" ); break;
-            case MRU_MEDB: PRDF_DTRAC( "PRDTRACE:   MED_B" ); break;
-            case MRU_MEDA: PRDF_DTRAC( "PRDTRACE:   MED_A" ); break;
-            case MRU_MED:  PRDF_DTRAC( "PRDTRACE:   MED" );  break;
-            case MRU_HIGH: PRDF_DTRAC( "PRDTRACE:   HIGH" );  break;
-            default:
-                PRDF_DTRAC( "PRDTRACE:   Unknown Priority Value" );
-        }
-
-        GardAction::ErrorType et = sdc.QueryGard();
-        switch ( et )
-        {
-            case GardAction::NoGard:
-                PRDF_DTRAC( "PRDTRACE:   NoGard" );            break;
-            case GardAction::Predictive:
-                PRDF_DTRAC( "PRDTRACE:   Predictive" );        break;
-            case GardAction::Fatal:
-                PRDF_DTRAC( "PRDTRACE:   Fatal" );             break;
-            case GardAction::CheckStopOnlyGard:
-                PRDF_DTRAC( "PRDTRACE:   CheckStopOnlyGard" ); break;
-            case GardAction::DeconfigNoGard:
-                PRDF_DTRAC( "PRDTRACE:   DeconfigNoGard" );
-        }
-    }
-
-    PRDF_DTRAC( "PRDTRACE: Flag Values" );
-    if ( sdc.IsSUE() )         PRDF_DTRAC( "PRDTRACE: SUE Flag Set" );
-    if ( sdc.IsUERE() )        PRDF_DTRAC( "PRDTRACE: UERE Flag Set" );
-    if ( sdc.IsAtThreshold() ) PRDF_DTRAC( "PRDTRACE: AT_THRESHOLD" );
-    if ( sdc.IsDegraded() )    PRDF_DTRAC( "PRDTRACE: Performance is degraded" );
-
-    if ( sdc.IsServiceCall() )
-        PRDF_DTRAC( "PRDTRACE: SERVICE REQUIRED" );
-    else
-        PRDF_DTRAC( "PRDTRACE: SERVICE NOT REQUIRED" );
-
-    if ( sdc.IsMfgTracking() )   PRDF_DTRAC( "PRDTRACE: Track this error" );
-    if ( sdc.Terminate() )       PRDF_DTRAC( "PRDTRACE: BRING DOWN MACHINE" );
-    if ( sdc.IsLogging() )       PRDF_DTRAC( "PRDTRACE: Create history log entry" );
-    if ( sdc.IsFlooding() )      PRDF_DTRAC( "PRDTRACE: Flooding detected" );
+    printDebugTraces();
 
     return o_errl;
 
@@ -1419,9 +1350,76 @@ void ErrDataService::AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl)
 }
 
 //------------------------------------------------------------------------------
+
+void ErrDataService::printDebugTraces( )
+{
+    #define PRDF_FUNC "[ErrDataService::printDebugTraces()]"
+
+    const char * tmp = "Unknown";
+    switch ( sdc.GetAttentionType() )
+    {
+        case MACHINE_CHECK: tmp = "CHECKSTOP";      break;
+        case UNIT_CS:       tmp = "UNIT CHECKSTOP"; break;
+        case RECOVERABLE:   tmp = "RECOVERABLE";    break;
+        case SPECIAL:       tmp = "SPECIAL";        break;
+    }
+    PRDF_DTRAC( "PRDTRACE: Attention Type = %s", tmp );
+
+    if ( RECOVERABLE == sdc.GetAttentionType() )
+    {
+        PRDF_DTRAC( "PRDTRACE: Hit Count: 0x%x", sdc.GetHits() );
+        PRDF_DTRAC( "PRDTRACE: Threshold at: 0x%x", sdc.GetThreshold() );
+        PRDF_DTRAC( "PRDTRACE: Mask id: 0x%x", sdc.GetThresholdMaskId() );
+    }
+
+    SDC_MRU_LIST fspmrulist = sdc.GetMruList();
+
+    for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
+          i < fspmrulist.end(); ++i )
+    {
+        tmp = "Unknown";
+        switch ( i->priority )
+        {
+            case MRU_LOW:  tmp = "LOW";   break;
+            case MRU_MEDC: tmp = "MED_C"; break;
+            case MRU_MEDB: tmp = "MED_B"; break;
+            case MRU_MEDA: tmp = "MED_A"; break;
+            case MRU_MED:  tmp = "MED";   break;
+            case MRU_HIGH: tmp = "HIGH";  break;
+        }
+        PRDF_DTRAC( "PRDTRACE: Callout=0x%08x Priority=%s",
+                    i->callout.flatten(), tmp );
+    }
+
+    GardAction::ErrorType et = sdc.QueryGard();
+    PRDF_DTRAC ("GardType: %s", GardAction::ToString( et ) );
+
+    PRDF_DTRAC( "PRDTRACE: Flag Values" );
+    if( sdc.IsSUE() )          PRDF_DTRAC( "PRDTRACE: SUE Flag Set" );
+    if( sdc.IsUERE() )         PRDF_DTRAC( "PRDTRACE: UERE Flag Set" );
+    if( sdc.IsAtThreshold() )  PRDF_DTRAC( "PRDTRACE: AT_THRESHOLD" );
+    if( sdc.IsDegraded() )     PRDF_DTRAC( "PRDTRACE: Performance is degraded");
+
+    if( sdc.IsServiceCall() )
+        PRDF_DTRAC( "PRDTRACE: SERVICE REQUIRED" );
+    else
+        PRDF_DTRAC( "PRDTRACE: SERVICE NOT REQUIRED" );
+
+    if( sdc.IsMfgTracking() ) PRDF_DTRAC( "PRDTRACE: Track this error" );
+    if( sdc.Terminate() )     PRDF_DTRAC( "PRDTRACE: BRING DOWN MACHINE" );
+    if( sdc.IsLogging() )     PRDF_DTRAC( "PRDTRACE: Create history log entry");
+    if( sdc.IsFlooding() )    PRDF_DTRAC( "PRDTRACE: Flooding detected" );
+
+    #undef PRDF_FUNC
+
+}
+
+//------------------------------------------------------------------------------
+
 #ifndef __HOSTBOOT_MODULE
 
-bool ErrDataService::SdcSave(sdcSaveFlagsEnum i_saveFlag, ServiceDataCollector & i_saveSdc)
+bool ErrDataService::SdcSave( sdcSaveFlagsEnum i_saveFlag,
+                              ServiceDataCollector & i_saveSdc )
 {
     #define PRDF_FUNC "SdcRetrieve() "
     errlHndl_t errorLog = NULL;

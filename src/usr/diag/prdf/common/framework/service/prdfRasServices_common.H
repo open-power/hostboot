@@ -196,6 +196,11 @@ class ErrDataService
                       uint32_t i_prdGardType, uint32_t i_gardState,
                       PfaData & o_pfa, TARGETING::TargetHandle_t & o_dumpTrgt );
 
+    /**
+     * @brief Prints debug traces
+     */
+    void printDebugTraces();
+
   private:
 
     bool loggingBufferFull;
