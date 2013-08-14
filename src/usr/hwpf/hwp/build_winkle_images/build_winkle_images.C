@@ -76,6 +76,7 @@
 #include    "p8_set_pore_bar/p8_poreslw_init.H"
 #include    "p8_slw_build/sbe_xip_image.h"
 #include    <runtime/runtime.H>
+#include    "p8_slw_build/p8_image_help_base.H"
 
 
 namespace   BUILD_WINKLE_IMAGES
@@ -100,7 +101,7 @@ using   namespace   DeviceFW;
  *  @return      NULL if success, errorlog if failure
  *
  */
-errlHndl_t  loadPoreImage(  const char              *& o_rporeAddr,
+errlHndl_t  loadPoreImage(  char                    *& o_rporeAddr,
                             uint32_t                 & o_rporeSize )
 {
     errlHndl_t l_errl = NULL;
@@ -144,7 +145,7 @@ errlHndl_t  loadPoreImage(  const char              *& o_rporeAddr,
             break;
         }
 
-        o_rporeAddr = reinterpret_cast<const char*>(l_info.vaddr);
+        o_rporeAddr = reinterpret_cast<char*>(l_info.vaddr);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "WINK addr = 0x%p, size=0x%x",
@@ -223,12 +224,12 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
         //  msr and hrmor are common across all threads, only set for thread 0
         //  on each core
         l_threadId  =   0;
-        l_rc =  p8_pore_gen_cpureg( io_image,
-                                    i_sizeImage,
-                                    P8_MSR_MSR,
-                                    l_msrVal,
-                                    l_coreId,
-                                    l_threadId);
+        l_rc =  p8_pore_gen_cpureg_fixed( io_image,
+                                          P8_SLW_MODEBUILD_IPL,
+                                          P8_MSR_MSR,
+                                          l_msrVal,
+                                          l_coreId,
+                                          l_threadId);
         if ( l_rc )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -237,12 +238,12 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
             break;
         }
 
-        l_rc =  p8_pore_gen_cpureg( io_image,
-                                    i_sizeImage,
-                                    P8_SPR_HRMOR,
-                                    l_hrmorVal,
-                                    l_coreId,
-                                    l_threadId);
+        l_rc =  p8_pore_gen_cpureg_fixed( io_image,
+                                          P8_SLW_MODEBUILD_IPL,
+                                          P8_SPR_HRMOR,
+                                          l_hrmorVal,
+                                          l_coreId,
+                                          l_threadId);
         if ( l_rc ){
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "ERROR: HRMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
@@ -266,12 +267,12 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
                        "applyPoreGenCpuRegs: msrc=0x%x,lpcr=0x%x,hrmor=0x%x",
                        l_msrVal, l_lpcrVal, l_hrmorVal  );
 
-            l_rc =  p8_pore_gen_cpureg( io_image,
-                                        i_sizeImage,
-                                        P8_SPR_LPCR,
-                                        l_lpcrVal,
-                                        l_coreId,
-                                        l_threadId);
+            l_rc =  p8_pore_gen_cpureg_fixed( io_image,
+                                              P8_SLW_MODEBUILD_IPL,
+                                              P8_SPR_LPCR,
+                                              l_lpcrVal,
+                                              l_coreId,
+                                              l_threadId);
             if ( l_rc )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -356,7 +357,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    const char  *l_pPoreImage   =   NULL;
+    char  *l_pPoreImage   =   NULL;
     uint32_t    l_poreSize      =   0;
     void        *l_pRealMemBase = NULL;
     void* l_pVirtMemBase        = NULL;
@@ -368,6 +369,11 @@ void*    call_host_build_winkle( void    *io_pArgs )
                "call_host_build_winkle entry" );
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
+
+    // allocate some working buffers
+    void* l_rs4_tmp = malloc(FIXED_RING_BUF_SIZE);
+    void* l_wf_tmp = malloc(FIXED_RING_BUF_SIZE);
+
 
     do  {
         //  Get a chunk of real memory big enough to store all the possible
@@ -475,13 +481,16 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
                 //  call the HWP with each fapi::Target
                 FAPI_INVOKE_HWP( l_errl,
-                                 p8_slw_build,
-                                 l_fapi_cpu_target,
-                                 reinterpret_cast<const void*>(l_pPoreImage),
-                                 l_poreSize,
+                                 p8_slw_build_fixed, 
+                                 l_fapi_cpu_target, //Proc chip target.
+                                 reinterpret_cast<void*>(l_pPoreImage),
                                  l_pImageOut,
-                                 &l_sizeImageOut
-                               );
+                                 l_sizeImageOut,
+                                 P8_SLW_MODEBUILD_IPL, //i_modeBuild
+                                 l_rs4_tmp,//RS4
+                                 FIXED_RING_BUF_SIZE,
+                                 l_wf_tmp,//WF
+                                 FIXED_RING_BUF_SIZE );
                 if ( l_errl )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -554,6 +563,10 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
     }  while (0);
     // @@@@@    END CUSTOM BLOCK:   @@@@@
+
+    // delete working buffers
+    if( l_rs4_tmp ) { free(l_rs4_tmp); }
+    if( l_wf_tmp ) { free(l_wf_tmp); }
 
     if(l_pVirtMemBase)
     {

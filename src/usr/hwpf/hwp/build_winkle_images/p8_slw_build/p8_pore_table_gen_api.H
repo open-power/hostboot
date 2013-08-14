@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.20 2013/05/08 20:18:50 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.21 2013/05/23 21:10:40 dcrowell Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -156,7 +156,9 @@ CONST_UINT64_T( SCRATCH0_RESET_VALUE,           (0xABBA99EBBA33DADA) );
 
 
 //#include <stdio.h>
+#ifndef PPC_HYP
 #include <stdlib.h>
+#endif // PPC_HYP
 #ifndef __P8_PORE_TABLE_GEN_API_C
 #include <p8_pore_api_custom.h>
 #endif
@@ -313,9 +315,11 @@ enum  {
 #define SLW_RAM_WARNING_TABLE_CONTAMINATION  6
 
 
+#ifndef PPC_HYP
 #ifdef __cplusplus
 extern "C" {
 #endif
+#endif // PPC_HYP
 
 /********************************************************************/
 /* C-code RAM section  -  begin                                     */
@@ -410,9 +414,11 @@ uint32_t p8_pore_gen_scom_fixed(void      *io_image,
                           uint32_t  i_operation,
                           uint32_t  i_section);
 
+#ifndef PPC_HYP
 #ifdef __cplusplus
 }
 #endif
+#endif // PPC_HYP
 
 #endif  // FOR_PORE_RAMMING
 

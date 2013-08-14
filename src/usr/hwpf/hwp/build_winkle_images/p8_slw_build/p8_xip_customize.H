@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 // $Id: p8_xip_customize.H,v 1.8 2013/06/13 16:52:41 jeshua Exp $
 
 #include <fapi.H>
@@ -30,7 +31,7 @@ typedef fapi::ReturnCode (*fapiGetMvpdField_FP_t) ( const fapi::MvpdRecord i_rec
                                                     uint8_t * const i_pBuffer,
                                                     uint32_t &io_fieldSize);
 
-typedef fapi::ReturnCode (*p8_xip_customize_FP_t) (  const fapi::Target&, 
+typedef fapi::ReturnCode (*p8_xip_customize_FP_t) (  const fapi::Target&,
                                                     void*,
                                                     void*,
                                                     uint32_t&,
@@ -49,18 +50,18 @@ extern "C"
 // Function declares.
 //
 
-  // Description: 
+  // Description:
   // FAPI HWP entry point for p8_xip_customize().
   // p8_xip_customize() adds VPD rings to the IPL and SLW images and updates
   //   various vectors in the images.
   //
-  // Parameters:  
+  // Parameters:
   // fapi::Target &i_target:        Processor chip target.
   // void         *i_imageIn:       Ptr to input IPL or SLW image.
   // void         *i_imageOut:      Ptr to output IPL img. (Ignored for SLW/RAM imgs.)
   // uint32_t     &io_sizeImageOut: In: Max size of IPL/SRAM img. Out: Final size.
   // uint8_t      i_sysPhase:       0: IPL  1: SLW
-  // uint8_t      i_modeBuild:      0: HB/IPL  1: PHYP/Rebuild  2: SRAM 
+  // uint8_t      i_modeBuild:      0: HB/IPL  1: PHYP/Rebuild  2: SRAM
   // void         *i_buf1:          Temp buffer1 for dexed RS4 ring. Caller allocs/frees.
   // uint32_t     i_sizeBuf1:       Size of buf1.
   // void         *i_buf2:          Temp buffer2 for WF ring. Caller allocs/frees.
@@ -73,7 +74,7 @@ extern "C"
                                      void           *i_imageOut,
                                      uint32_t       &io_sizeImageOut,
                                      const uint8_t  i_sysPhase,
-                                     const uint8_t  i_modeBuild, 
+                                     const uint8_t  i_modeBuild,
                                      void           *i_buf1,
                                      const uint32_t i_sizeBuf1,
                                      void           *i_buf2,

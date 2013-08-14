@@ -56,14 +56,13 @@ OBJS =  build_winkle_images.o   \
         p8_pba_bar_config.o     \
         sbe_xip_image.o         \
         p8_pore_table_static_data.o   \
-        p8_pore_table_gen_api.o \
         p8_pore_table_gen_api_fixed.o \
         p8_pmc_deconfig_setup.o \
         p8_poreslw_init.o       \
         p8_set_pore_bar.o       \
         p8_xip_customize.o      \
         p8_ring_identification.o  \
-        p8_slw_build.o          \
+        p8_slw_build_fixed.o      \
         p8_image_help_base.o    \
         p8_pfet_init.o          \
         p8_pfet_control.o

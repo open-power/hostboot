@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.51 2013/06/13 22:38:28 cmolsen Exp $
+
+// $Id: p8_xip_customize.C,v 1.52 2013-08-06 18:47:46 jeshua Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -238,21 +239,21 @@ ReturnCode p8_xip_customize_insert_chiplet_rings( const fapi::Target &i_target,
                 return rc;
               }
             }
-            // Check if the VPD ring is redundant
-            int redundant = 0;
-            rcLoc = rs4_redundant((CompressedScanData*)bufVpdRing, &redundant);
-            if(rcLoc) {
-              FAPI_ERR("rs4_redundant() failed w/rc=%i  ",rcLoc);
-              uint32_t & RC_LOCAL = rcLoc;
-              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_CHECK_REDUNDANT_ERROR);
-              return rc;
-            }
-            rcLoc = 0;
-            // Add VPD ring to image if not redundant
-            if( redundant ) {
-              FAPI_INF("Skipping VPD ring because it doesn't change the ring (iRing,ringId,chipletId)=(%i,0x%02X,0x%02X).",iRing,ringId,chipletId);
-            } else {
-              if (i_sysPhase==0)  {
+            if (i_sysPhase==0)  {
+              // Check if the VPD ring is redundant
+              int redundant = 0;
+              rcLoc = rs4_redundant((CompressedScanData*)bufVpdRing, &redundant);
+              if(rcLoc) {
+                FAPI_ERR("rs4_redundant() failed w/rc=%i  ",rcLoc);
+                uint32_t & RC_LOCAL = rcLoc;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_CHECK_REDUNDANT_ERROR);
+                return rc;
+              }
+              rcLoc = 0;
+              // Add VPD ring to image if not redundant
+              if( redundant ) {
+                FAPI_INF("Skipping VPD ring because it doesn't change the ring (iRing,ringId,chipletId)=(%i,0x%02X,0x%02X).",iRing,ringId,chipletId);
+              } else {
                 // Add VPD ring to --->>> IPL <<<--- image
                 rcLoc = write_vpd_ring_to_ipl_image(
                                                     o_imageOut,
@@ -282,27 +283,27 @@ ReturnCode p8_xip_customize_insert_chiplet_rings( const fapi::Target &i_target,
                     return rc;
                   }
                 }
+              } //if not redundant
+            }
+            else  {
+              // Add VPD ring to --->>> SLW <<<--- image
+              rcLoc = write_vpd_ring_to_slw_image(
+                                                  o_imageOut,
+                                                  sizeImageOut,
+                                                  (CompressedScanData*)bufVpdRing, //HB buf1
+                                                  ddLevel,
+                                                  i_sysPhase,
+                                                  (char*)(ring_id_list+iRing)->ringNameImg,
+                                                  (void*)i_buf2,                   //HB buf2
+                                                  i_sizeBuf2,
+                                                  (ring_id_list+iRing)->bWcSpace);
+              if (rcLoc)  {
+                FAPI_ERR("write_vpd_ring_to_slw_image() failed w/rc=%i",rcLoc);
+                uint32_t & RC_LOCAL = rcLoc;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_WRITE_VPD_RING_TO_SLW_IMAGE_ERROR);
+                return rc;
               }
-              else  {
-                // Add VPD ring to --->>> SLW <<<--- image
-                rcLoc = write_vpd_ring_to_slw_image(
-                                                    o_imageOut,
-                                                    sizeImageOut,
-                                                    (CompressedScanData*)bufVpdRing, //HB buf1
-                                                    ddLevel,
-                                                    i_sysPhase,
-                                                    (char*)(ring_id_list+iRing)->ringNameImg,
-                                                    (void*)i_buf2,                   //HB buf2
-                                                    i_sizeBuf2,
-                                                    (ring_id_list+iRing)->bWcSpace);
-                if (rcLoc)  {
-                  FAPI_ERR("write_vpd_ring_to_slw_image() failed w/rc=%i",rcLoc);
-                  uint32_t & RC_LOCAL = rcLoc;
-                  FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_WRITE_VPD_RING_TO_SLW_IMAGE_ERROR);
-                  return rc;
-                }
-              }
-            } //if not redundant
+            }
           } //no buffer overflow
         } //ring found in VPD
       } //chiplet ID is valid for this ring name

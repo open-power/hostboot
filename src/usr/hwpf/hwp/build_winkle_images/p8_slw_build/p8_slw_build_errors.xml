@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: p8_slw_build_errors.xml,v 1.8 2013-04-23 22:47:26 wenning Exp $   -->
 <!-- Error definitions for proc_slw_build procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -31,8 +32,15 @@
 </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_PROC_SLWB_IMG_PTR_ERROR</rc>
+    <description>Supplied image ptrs are the same. This is not allowed.</description>
+    <ffdc>DATA_BUF1_PTR</ffdc>
+    <ffdc>DATA_BUF2_PTR</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_PROC_SLWB_BUF_PTR_ERROR</rc>
-    <description>Supplied buffer(s) is invalid.</description>
+    <description>Supplied buffer(s) is invalid. Either it (they) does not exist or they are the same. This is not allowed.</description>
     <ffdc>DATA_BUF1_PTR</ffdc>
     <ffdc>DATA_BUF2_PTR</ffdc>
   </hwpError>

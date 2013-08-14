@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_static_data.c,v 1.6 2013/05/08 20:19:41 cmolsen Exp $
+
+// $Id: p8_pore_table_static_data.c,v 1.7 2013-05-23 21:10:38 dcrowell Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -33,7 +34,6 @@
 /* *! COMMENTS :    This file is exclusively for PHYP environment.              */
 //
 /*------------------------------------------------------------------------------*/
-#include <HvPlicModule.H>
 #include <p8_pore_table_gen_api.H>
 
 const SlwSprRegs SLW_SPR_REGS[] = {  
