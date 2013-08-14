@@ -27,12 +27,12 @@
 # Print usage statement.
 usage()
 {
-    echo "fsp-memdump.sh <filename> [STATE|discover]"
+    echo "fsp-memdump.sh <filename> [STATE|discover|limit]"
     echo
     echo "    STATE should be a two nibble hex value corresponding to the"
-    echo "    MemSize enumeration in <kernel/memstate.H> or the ASCII string"
-    echo "    'discover'."
-    exit -1
+    echo "    MemSize enumeration in <kernel/memstate.H> or the ASCII strings"
+    echo "    'discover', 'limit'."
+    exit 0
 }
 
 # @fn dump
@@ -75,6 +75,19 @@ discover()
 
     # Read state.
     STATE=`cipgetmempba ${state_addr_h} 1 -ox -quiet | tail -n1 | sed "s/0x//"`
+}
+
+# @fn limit_memory
+# Limit the state to 8MB so that the memory can be dumpped in a reasonable time.
+limit_memory()
+{
+    case ${STATE} in
+        20)
+            STATE=08
+            ;;
+        *)
+            ;;
+    esac
 }
 
 # Read filename and state.
@@ -151,6 +164,10 @@ do
             ;;
         discover)  # Call discover function to determine state.
             discover
+            ;;
+        limit) # Call discover function and then reduce to 8MB if bigger.
+            discover
+            limit_memory
             ;;
         *)
             echo Unsupported STATE.

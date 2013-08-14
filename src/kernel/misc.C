@@ -138,6 +138,15 @@ namespace KernelMisc
 
                 l_barrier->wait();
 
+                if (c->master)
+                {
+                    // Reset the memory state register so that the dump tools
+                    // don't attempt to dump all of memory once payload runs.
+                    KernelMemState::setMemScratchReg(
+                            KernelMemState::MEM_CONTAINED_NR,
+                            KernelMemState::NO_MEM);
+                }
+
                 kernel_shutdown(CpuManager::getCpuCount(),
                                 g_payload_base,
                                 g_payload_entry,
