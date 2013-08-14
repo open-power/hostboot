@@ -1052,6 +1052,28 @@
             <type>uint8_t</type>
             <default>0x80</default>
         </field>
+        <field>
+            <name>byteAddrOffset</name>
+            <description>The number of bytes a device requires to set its
+                         internal address/offset.</description>
+            <type>uint8_t</type>
+            <default>0x02</default>
+        </field>
+        <field>
+            <name>maxMemorySizeKB</name>
+            <description>The number of kilobytes a device can hold.  'Zero'
+                         value possible for some devices.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>writePageSize</name>
+            <description>The maximum number of bytes that can be written to
+                         a device at one time. 'Zero' value means no maximum
+                         value is expected or checked.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
     </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -1090,6 +1112,28 @@
                          value.</description>
             <type>uint8_t</type>
             <default>0x80</default>
+        </field>
+        <field>
+            <name>byteAddrOffset</name>
+            <description>The number of bytes a device requires to set its
+                         internal address/offset.</description>
+            <type>uint8_t</type>
+            <default>0x02</default>
+        </field>
+        <field>
+            <name>maxMemorySizeKB</name>
+            <description>The number of kilobytes a device can hold.  'Zero'
+                         value possible for some devices.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>writePageSize</name>
+            <description>The maximum number of bytes that can be written to
+                         a device at one time. 'Zero' value means no maximum
+                         value is expected or checked.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
         </field>
     </complexType>
     <persistency>non-volatile</persistency>
@@ -1130,6 +1174,28 @@
             <type>uint8_t</type>
             <default>0x80</default>
         </field>
+        <field>
+            <name>byteAddrOffset</name>
+            <description>The number of bytes a device requires to set its
+                         internal address/offset.</description>
+            <type>uint8_t</type>
+            <default>0x02</default>
+        </field>
+        <field>
+            <name>maxMemorySizeKB</name>
+            <description>The number of kilobytes a device can hold.  'Zero'
+                         value possible for some devices.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>writePageSize</name>
+            <description>The maximum number of bytes that can be written to
+                         a device at one time. 'Zero' value means no maximum
+                         value is expected or checked.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
     </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -1168,6 +1234,28 @@
                          value.</description>
             <type>uint8_t</type>
             <default>0x80</default>
+        </field>
+        <field>
+            <name>byteAddrOffset</name>
+            <description>The number of bytes a device requires to set its
+                         internal address/offset.</description>
+            <type>uint8_t</type>
+            <default>0x02</default>
+        </field>
+        <field>
+            <name>maxMemorySizeKB</name>
+            <description>The number of kilobytes a device can hold.  'Zero'
+                         value possible for some devices.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>writePageSize</name>
+            <description>The maximum number of bytes that can be written to
+                         a device at one time. 'Zero' value means no maximum
+                         value is expected or checked.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
         </field>
     </complexType>
     <persistency>non-volatile</persistency>

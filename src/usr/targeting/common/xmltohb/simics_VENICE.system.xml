@@ -427,6 +427,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -436,6 +439,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -445,6 +451,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -454,6 +463,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -1540,6 +1552,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -1549,6 +1564,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -1558,6 +1576,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -1567,6 +1588,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -2653,6 +2677,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -2662,6 +2689,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -2671,6 +2701,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -2680,6 +2713,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -3766,6 +3802,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -3775,6 +3814,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -3784,6 +3826,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -3793,6 +3838,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -4878,6 +4926,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -4887,6 +4938,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -4896,6 +4950,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -4905,6 +4962,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -5959,6 +6019,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -5968,6 +6031,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -5977,6 +6043,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -5986,6 +6055,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -7038,6 +7110,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -7047,6 +7122,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -7056,6 +7134,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -7065,6 +7146,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -8117,6 +8201,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -8126,6 +8213,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -8135,6 +8225,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
     <attribute>
@@ -8144,6 +8237,9 @@
              <field><id>port</id><value>1</value></field>
              <field><id>devAddr</id><value>0xA2</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+             <field><id>writePageSize</id><value>0x80</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -9028,6 +9124,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9138,6 +9237,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9248,6 +9350,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9358,6 +9463,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9468,6 +9576,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9578,6 +9689,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9688,6 +9802,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9798,6 +9915,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9908,6 +10028,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10018,6 +10141,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10128,6 +10254,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10238,6 +10367,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10348,6 +10480,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10458,6 +10593,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10568,6 +10706,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10678,6 +10819,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10788,6 +10932,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10898,6 +11045,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11008,6 +11158,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11118,6 +11271,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11228,6 +11384,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11338,6 +11497,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11448,6 +11610,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11558,6 +11723,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11668,6 +11836,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11778,6 +11949,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11888,6 +12062,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11998,6 +12175,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12108,6 +12288,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12218,6 +12401,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12328,6 +12514,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12438,6 +12627,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12548,6 +12740,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -12655,6 +12850,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -12762,6 +12960,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -12869,6 +13070,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -12976,6 +13180,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13083,6 +13290,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13190,6 +13400,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13297,6 +13510,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13404,6 +13620,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13511,6 +13730,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13618,6 +13840,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13725,6 +13950,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13832,6 +14060,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13939,6 +14170,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14046,6 +14280,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14153,6 +14390,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14260,6 +14500,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14367,6 +14610,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14474,6 +14720,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14581,6 +14830,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14688,6 +14940,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14795,6 +15050,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14902,6 +15160,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15009,6 +15270,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15116,6 +15380,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15223,6 +15490,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15330,6 +15600,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15437,6 +15710,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15544,6 +15820,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15651,6 +15930,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15758,6 +16040,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15865,6 +16150,9 @@
              <field><id>port</id><value>0</value></field>
              <field><id>devAddr</id><value>0xA0</value></field>
              <field><id>engine</id><value>0</value></field>
+             <field><id>byteAddrOffset</id><value>0x02</value></field>
+             <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+             <field><id>writePageSize</id><value>0x20</value></field>
          </default>
      </attribute>
 </targetInstance>

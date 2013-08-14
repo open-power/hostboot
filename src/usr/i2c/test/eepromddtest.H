@@ -28,14 +28,15 @@
  *
  *  @brief Test cases for the eeprom dd code
  */
-#include <sys/time.h>
 
+#include <sys/time.h>
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <i2c/eepromddreasoncodes.H>
 #include <targeting/common/commontargeting.H>
+#include <pnor/pnorif.H>
 #include "i2ctest.H"
 #include "../eepromdd.H"
 
@@ -45,7 +46,6 @@ extern trace_desc_t* g_trac_eeprom;
 
 using namespace TARGETING;
 using namespace EEPROM;
-
 
 
 class EEPROMTest: public CxxTest::TestSuite
@@ -62,10 +62,6 @@ class EEPROMTest: public CxxTest::TestSuite
             errlHndl_t err = NULL;
             int fails = 0;
             int num_ops = 0;
-
-            uint8_t* testBuffer = NULL;
-            uint8_t* testBuffer_read = NULL;
-
 
             TRACFCOMP( g_trac_eeprom,
                        "testEEPROMReadWrite - Start" );
@@ -151,8 +147,8 @@ class EEPROMTest: public CxxTest::TestSuite
                 for( uint32_t j = 0; j < fullList.size(); j++ )
                 {
                     // Skip this target if EEPROM isn't available. or if non functional
-                    if( !isI2CAvailable( fullList[j] ) ||
-                        !fullList[j]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                    if( !fullList[j]->getAttr<TARGETING::ATTR_HWAS_STATE>()\
+                        .functional)
                     {
                         continue;
                     }
@@ -208,93 +204,256 @@ class EEPROMTest: public CxxTest::TestSuite
                     }
                 }
 
-                // Test EEPROM Write of large size
-                // @todo RTC:69113 - will clean this up:
-                //  1) Make its own testcase function
-                //  2) Will use a larger data set: Plan on using 4K header of
-                //  test_signed_container and putting it into un-used area of
-                //  SBE_BACKUP
-                //  3) Will restore original data just in case
-                uint64_t testBufLen = 0xF1;
-                testBuffer = static_cast<uint8_t*>(malloc(testBufLen));
-                memset(testBuffer, 0xFE, testBufLen);
+            } while( 0 );
 
-                // Randomize the Data a bit
-                for (uint64_t i = 0;
-                       i < ((testBufLen / 8) + 1);
-                     i++)
-                    testBuffer[i*8] = i;
+            TRACFCOMP( g_trac_eeprom,
+                       "testEEPROMReadWrite - End: %d/%d fails",
+                       fails, num_ops );
+        }
 
-                for (uint64_t k = 0; k < 8; k++)
-                    testBuffer[k] = k;
 
-                // do the Write operation
-                err = deviceOp( DeviceFW::WRITE,
+        /**
+         * @brief EEPROM Read/Write Large Test
+         *      This test will read and write 1KB of data to SBE Backup
+         *      VPD.  It will attempt to restore the original data at
+         *      the end of the test.
+         *
+         *      Note: 1st 1K of SBE EEPROM data is currently blank, so this
+         *      test will read and write to that address space
+         */
+        void testEEPROMReadWriteLarge ( void )
+        {
+            errlHndl_t err = NULL;
+            int fails = 0;
+            int num_ops = 0;
+            int cmds = 0;
+
+            // Create 1KB buffers
+            size_t  testBufLen = 1024;
+            uint8_t testBuffer[testBufLen];
+            uint8_t new_data[testBufLen];
+            uint8_t original_data[testBufLen];
+
+
+            TRACFCOMP( g_trac_eeprom,
+                       "testEEPROMReadWriteLarge - Start" );
+
+            // Skipping EEPROM test altogether in VBU/VPO environment
+            if( TARGETING::is_vpo() )
+            {
+                return;
+            }
+
+            do
+            {
+                // Get a processor Target
+                TARGETING::TargetService& l_targetService =
+                                          TARGETING::targetService();
+                TARGETING::Target* testTarget = NULL;
+                l_targetService.masterProcChipTargetHandle( testTarget );
+                assert(testTarget != NULL);
+                TargetHandleList fullList;
+                fullList.push_back( testTarget );
+
+                // 5 operations of 1K data per target (details below)
+                const uint32_t NUM_CMDS = 5;
+
+                // Number of total operations
+                num_ops = fullList.size() * NUM_CMDS;
+
+
+                /************************************************************/
+                /* Using PNOR to return the extended image to use as new_data */
+                /**************************************************************/
+                // Jumping 32K into extended image for more dense data
+                static const uint64_t HEADER_OFFSET = 0x8000;
+                PNOR::SectionInfo_t pnorSectionInfo;
+
+                err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE,
+                                           PNOR::CURRENT_SIDE,
+                                           pnorSectionInfo);
+
+                if ( err ||
+                     (pnorSectionInfo.size < HEADER_OFFSET + testBufLen)
+                   )
+                {
+                    TS_FAIL("testEEPROMReadWriteLarge: PNOR::getSectionInfo failed or size too small: pnorSize=0x%X, HEADER_OFFSET=0x%X, testBufLen = 0x%X", pnorSectionInfo.size, HEADER_OFFSET, testBufLen);
+                    errlCommit(err, EEPROM_COMP_ID);
+                    delete err;
+                    fails++;
+                    break;
+                }
+
+
+                void* tmp_ptr = reinterpret_cast<void*>(pnorSectionInfo.vaddr +
+                                                         HEADER_OFFSET);
+
+                if (tmp_ptr == NULL)
+                {
+                    TS_FAIL("testEEPROMReadWriteLarge: Couldn't get tmp_ptr for new data");
+                    errlCommit(err, EEPROM_COMP_ID);
+                    delete err;
+                    fails++;
+                    break;
+
+                }
+
+                //  Valid Buffer, so memcpy the first 1KB
+                memcpy( new_data, tmp_ptr, testBufLen );
+
+
+                /************************************************************/
+                /* Loop through targets and perform operations              */
+                /************************************************************/
+
+                for( uint32_t i = 0; i < fullList.size(); i++ )
+                {
+                    // Skip this target if EEPROM isn't available
+                    // or if non functional
+                    if( !fullList[i]->getAttr<TARGETING::ATTR_HWAS_STATE>()\
+                        .functional)
+                    {
+                        continue;
+                    }
+
+
+                    // Before starting, clear original data buffer
+                    memset(original_data, 0x0, testBufLen);
+
+                    for (uint8_t j = 1; j <= NUM_CMDS; j++)
+                    {
+
+                        // Details: 5 operations of 1K data per target
+                        // 1) Read Original Data and Save It
+                        // 2) Write New Data
+                        // 3) Read New Data and Compare
+                        // 4) Write Back Original Data
+                        // 5) Read Back Original Data and Compare
+
+                        // Clear data buffer before reads
+                        if ( (j == 1) || (j == 3) || (j == 5) )
+                        {
+                            memset(testBuffer, 0x0, testBufLen);
+                        }
+
+                        // For Loop 2: set data to new data
+                        if ( j == 2 )
+                        {
+                            memcpy(testBuffer, new_data, testBufLen);
+                        }
+
+                        // For Loop 4: set data to original_data
+                        if ( j == 4 )
+                        {
+                            memcpy(testBuffer, original_data, testBufLen);
+                        }
+
+                        // increment cmd op counter
+                        cmds++;
+
+                        // do the Operation
+                        err = deviceOp(
+                                (j%2) ? DeviceFW::READ : DeviceFW::WRITE,
                                 fullList[0],
                                 testBuffer,
                                 testBufLen,
                                 DEVICE_EEPROM_ADDRESS(SBE_BACKUP,0x0));
-                if( err )
-                {
-                    TS_FAIL( "testEEPROMReadWrite - FAIL on large Data Write");
-                    errlCommit( err,
-                                EEPROM_COMP_ID );
-                    delete err;
-                    break;
-                }
 
-                // Read Back and Compare
-                testBuffer_read = static_cast<uint8_t*>(malloc( testBufLen ));
-
-                // clear read buffer
-                memset (testBuffer_read, 0, testBufLen);
-
-                // do the Read operation
-                err = deviceOp( DeviceFW::READ,
-                                fullList[0],
-                                testBuffer_read,
-                                testBufLen,
-                                DEVICE_EEPROM_ADDRESS(SBE_BACKUP,0x0));
+                        if( err )
+                        {
+                            TS_FAIL( "testEEPROMReadWriteLarge = OP %d FAILED "
+                                     "- cmd %d out of %d",
+                                     j, i, NUM_CMDS );
+                            errlCommit( err,
+                                        EEPROM_COMP_ID );
+                            delete err;
+                            fails++;
+                            continue;
+                        }
 
 
-                if( err )
-                {
-                    TS_FAIL( "testEEPROMReadWrite - FAIL on large Data Read");
-                    errlCommit( err,
-                                EEPROM_COMP_ID );
-                    delete err;
-                    break;
-                }
+                        // Handle loop-specific results
+
+                        // For Loop 1: save original data
+                        if ( j == 1 )
+                        {
+                            memcpy(original_data, testBuffer, testBufLen);
+
+                            TRACUCOMP(g_trac_eeprom,"testEEPROMReadWriteLarge:"
+                                      " saving original data. i=%d, j=%d",
+                                      i, j);
+                        }
+
+                        // For Loop 3: compare new data
+                        if ( j == 3 )
+                        {
+                            // Compare the data
+                            if ( memcmp(testBuffer, new_data, testBufLen) )
+                            {
+                                TRACFCOMP(g_trac_eeprom,
+                                          "testEEPROMReadWriteLarge: MISCOMPARE"
+                                          " of new data, len=0x%X", testBufLen);
+
+                                TRACFBIN( g_trac_eeprom, "testBuffer=",
+                                          testBuffer, testBufLen);
+                                TRACFBIN( g_trac_eeprom, "new_data=",
+                                          new_data, testBufLen);
+                                TS_FAIL( "testEEPROMReadWriteLarge - MISCOMPARE"
+                                         " on writing new data");
+                                fails++;
+
+                                // Don't break - try to write back original data
+                                continue;
+                            }
+                            else
+                            {
+                                TRACUCOMP(g_trac_eeprom,
+                                          "testEEPROMReadWriteLarge: New "
+                                          "Data R/W Successful i=%d,j=%d",
+                                          i, j);
+                            }
+                        }
 
 
-                // Compare the data
-                if ( memcmp( testBuffer, testBuffer_read, testBufLen) )
-                {
-                    TS_FAIL( "testEEPROMReadWrite - MISCOMPARE on large Data");
-                    break;
-                }
-                else
-                {
-                    TRACUCOMP( g_trac_eeprom, "testEEPROMReadWrite - large "
-                                              "Data R/W Successful");
-                }
+                        // For Loop 5: compare writing-back original data
+                        if ( j == 5 )
+                        {
+                            // Compare the data
+                            if ( memcmp(testBuffer, original_data, testBufLen) )
+                            {
+                                TRACFCOMP(g_trac_eeprom,
+                                          "testEEPROMReadWriteLarge: MISCOMPARE"
+                                          " of original data, len=0x%X",
+                                          testBufLen);
+
+                                TRACFBIN( g_trac_eeprom, "testBuffer=",
+                                          testBuffer, testBufLen);
+                                TRACFBIN( g_trac_eeprom, "orig_data=",
+                                          original_data, testBufLen);
+
+                                TS_FAIL( "testEEPROMReadWriteLarge - MISCOMPARE"
+                                         " on writing back original data");
+                                fails++;
+
+                                break;
+                            }
+                            else
+                            {
+                                TRACUCOMP(g_trac_eeprom,
+                                          "testEEPROMReadWriteLarge: Original "
+                                          "Data R/W Successful i=%d,j=%d",
+                                          i, j);
+                            }
+                        }
+
+                    }  // end of 'j' loop: 5 ops per target
+
+                }  // end of 'i' loop: target loop
 
             } while( 0 );
 
-            // Clean up malloc'ed buffers
-            if ( testBuffer != NULL)
-            {
-                free(testBuffer);
-            }
-
-            if ( testBuffer_read != NULL)
-            {
-                free(testBuffer_read);
-            }
-
-
             TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMReadWrite - %d/%d fails",
+                       "testEEPROMReadWriteLarge - End: %d/%d fails",
                        fails, num_ops );
         }
 
@@ -310,6 +469,9 @@ class EEPROMTest: public CxxTest::TestSuite
             uint64_t data = 0x0ull;
             size_t dataSize = 8;
 
+            TRACFCOMP( g_trac_eeprom,
+                       "testEEPROMInvalidOperation - Start" );
+
             do
             {
                 // Get a processor Target
@@ -318,10 +480,9 @@ class EEPROMTest: public CxxTest::TestSuite
                 tS.masterProcChipTargetHandle( testTarget );
                 assert(testTarget != NULL);
 
-                // Skip this target if EEPROM isn't available or target is non
-                // functional
-                if( !isI2CAvailable( testTarget )  ||
-                    !testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                // Skip this target if target is non-functional
+                if(!testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().\
+                                                   functional)
                 {
                     continue;
                 }
@@ -337,31 +498,40 @@ class EEPROMTest: public CxxTest::TestSuite
                 if( NULL == err )
                 {
                     fails++;
-                    TS_FAIL( "Error should've resulted in Operation type of LAST_OP_TYPE!" );
+                    TS_FAIL( "testEEPROMInvalidOperation - Error should've "
+                             " resulted in Operation type of LAST_OP_TYPE!" );
                 }
                 else
                 {
+                    TRACUCOMP(g_trac_eeprom, "testEEPROMInvalidOperation - "
+                              "Error log returned as expected. RC=0x%X",
+                              err->reasonCode() );
                     delete err;
                     err = NULL;
                 }
             } while( 0 );
             TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMInvalidOperation - %d/%d fails",
+                       "testEEPROMInvalidOperation - End: %d/%d fails",
                        fails, num_ops );
         }
 
+
         /**
-         * @brief EEPROM Invalid Chip Test
-         *      This test will pass in an invalid chip identifier which should
-         *      result in an error being returned back from
+         * @brief EEPROM Overflow Test
+         *      This test will pass in a target which does not have an
+         *      EEPROM attribute associated with it.  It is expected that i
+         *      an error log is to be returned.
          */
-        void testEEPROMInvalidChip ( void )
+        void testEEPROMOverflow ( void )
         {
             errlHndl_t err = NULL;
             int64_t fails = 0, num_ops = 0;
             uint64_t data = 0x0ull;
-            size_t dataSize = 8;
+            size_t dataSize = 0;
+            uint64_t offset = 0x0ull;
 
+            TRACFCOMP( g_trac_eeprom,
+                       "testEEPROMOverflow - Start" );
 
             do
             {
@@ -371,10 +541,76 @@ class EEPROMTest: public CxxTest::TestSuite
                 tS.masterProcChipTargetHandle( testTarget );
                 assert(testTarget != NULL);
 
-                // Skip this target if EEPROM isn't available. or target is non
-                // functional
-                if( !isI2CAvailable( testTarget )  ||
-                    !testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                // Skip this target if target is non-functional
+                if(!testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>()
+                                                   .functional)
+                {
+                    continue;
+                }
+
+                // Set max length and offset
+                dataSize = 0xFFFFFFFFFFFFFFFF;
+                offset = 0xFFFFFFFFFFFFFFFF;
+
+                num_ops++;
+                err = deviceOp( DeviceFW::WRITE,
+                                testTarget,
+                                &data,
+                                dataSize,
+                                DEVICE_EEPROM_ADDRESS( 0x0,
+                                                       offset ) );
+
+                if( NULL == err )
+                {
+                    fails++;
+                    TS_FAIL( "testEEPROMOverflow - Error should've "
+                             "resulted from overflow offset and length: "
+                             "offset=0x%X, length = 0x%x",
+                             offset, dataSize);
+                }
+                else
+                {
+                    TRACUCOMP(g_trac_eeprom, "testEEPROMOverflow - "
+                              "Error log returned as expectede. RC=0x%X",
+                              err->reasonCode() );
+                    delete err;
+                    err = NULL;
+                }
+            } while( 0 );
+
+            TRACFCOMP( g_trac_eeprom,
+                       "testEEPROMInvalidChip - End: %d/%d fails",
+                       fails, num_ops );
+        }
+
+
+        /**
+         * @brief EEPROM Invalid Chip Test
+         *      This test will pass in an invalid chip identifier which should
+         *      result in an error being returned.
+         */
+        void testEEPROMInvalidChip ( void )
+        {
+            errlHndl_t err = NULL;
+            int64_t fails = 0, num_ops = 0;
+            uint64_t data = 0x0ull;
+            size_t dataSize = 8;
+
+            TRACFCOMP( g_trac_eeprom,
+                       "testEEPROMInvalidChip - Start" );
+
+            do
+            {
+
+                // Get a processor Target
+                TARGETING::TargetService& tS = TARGETING::targetService();
+                TARGETING::Target* testTarget = NULL;
+                tS.masterProcChipTargetHandle( testTarget );
+                assert(testTarget != NULL);
+
+                // Skip this target if target is non-functional
+                if(!testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>()
+                                                   .functional)
                 {
                     continue;
                 }
@@ -390,20 +626,27 @@ class EEPROMTest: public CxxTest::TestSuite
                 if( NULL == err )
                 {
                     fails++;
-                    TS_FAIL( "Error should've resulted in using EEPROM chip %d!",
+                    TS_FAIL( "testEEPROMInvalidChip - Error should've "
+                             "resulted in using EEPROM chip %d!",
                              LAST_CHIP_TYPE );
                 }
                 else
                 {
+                    TRACUCOMP(g_trac_eeprom, "testEEPROMInvalidChip - "
+                              "Error log returned as expected. RC=0x%x ",
+                              err->reasonCode() );
                     delete err;
                     err = NULL;
                 }
+
             } while( 0 );
 
             TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMInvalidChip - %d/%d fails",
+                       "testEEPROMInvalidChip - End: %d/%d fails",
                        fails, num_ops );
         }
+
+
 
 };
 

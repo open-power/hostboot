@@ -35,6 +35,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
+#include <i2c/i2cif.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/attributes.H>
 
@@ -50,33 +51,6 @@ using namespace TARGETING;
 // Used to ignore comparing data on reads
 #define I2C_TEST_IGNORE_DATA_COMPARE 0xFFFFFFFFFFFFFFFF
 
-// @todo RTC:72715: Re-visit the use of this function when we have full
-// Attribute support
-bool isI2CAvailable( TARGETING::Target * i_target )
-{
-    bool avail = true;
-
-    // Rudimentary Check - Every I2C Master has VPD Primary Attribute
-    EepromVpdPrimaryInfo eepromData;
-    if( i_target->tryGetAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>( eepromData ) )
-    {
-
-        if( ( 0x80 == eepromData.port ) &&
-            ( 0x80 == eepromData.devAddr ) &&
-            ( 0x80 == eepromData.engine ) )
-        {
-            // Default values, thus, not present
-            avail = false;
-        }
-    }
-    else
-    {
-        // Didn't find attribute, thus, not present
-        avail = false;
-    }
-
-    return avail;
-}
 
 class I2CTest: public CxxTest::TestSuite
 {
@@ -296,28 +270,21 @@ class I2CTest: public CxxTest::TestSuite
                             break;
 
                         default:
-                            TS_FAIL( "Invalid Chip type specificed in testData!" );
+                            TS_FAIL( "testI2CDirect - Invalid Chip type "
+                                     "specificed in testData!" );
                             fails++;
                             continue;
                             break;
                     };
 
-                    // Check to see if I2C function is there
-                    if( !isI2CAvailable( theTarget ) )
-                    {
-                        TRACFCOMP( g_trac_i2c,
-                               "testI2CDirect Operation - no i2c function" );
-                        continue;
-                    }
-
-                    // check to see if the target is functional before we
+                    // Check to see if the target is functional before we
                     // continue..
                     if
                         (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                     {
 
                         TRACFCOMP( g_trac_i2c,
-                            "testI2CDirect Operation - target not functional");
+                            "testI2CDirect - target not functional");
 
                         continue;
                     }
@@ -363,7 +330,7 @@ class I2CTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_i2c,
-                       "testI2CDirect - %d/%d fails",
+                       "testI2CDirect - End: %d/%d fails",
                        fails, cmds );
         }
 
@@ -494,29 +461,22 @@ class I2CTest: public CxxTest::TestSuite
                             break;
 
                         default:
-                            TS_FAIL( "Invalid Chip type specificed in testData!" );
+                            TS_FAIL( "testI2COffset - Invalid Chip type "
+                                     "specificed in testData!" );
                             fails++;
                             continue;
                             break;
                     };
 
 
-                    // Check to see if I2C function is there
-                    if( !isI2CAvailable( theTarget ) )
-                    {
-                        TRACFCOMP( g_trac_i2c,
-                               "testI2COfset Operation - no i2c function" );
-                        continue;
-                    }
-
-                    // check to see if the target is functional before we
+                    // Check to see if the target is functional before we
                     // continue..
                     if
                         (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                     {
 
                         TRACFCOMP( g_trac_i2c,
-                            "testI2COffset Operation - target not functional");
+                            "testI2COffset - target not functional");
 
                         continue;
                     }
@@ -603,7 +563,8 @@ class I2CTest: public CxxTest::TestSuite
                                     "Data Compare Fail: wrote=%016llx, "
                                     "read back=%016llx. cmd: %d/%d (%d)",
                                     testData[i].data, data, i, NUM_CMDS, j);
-                                TS_FAIL( "testI2COffset - Failure comparing new data!" );
+                                TS_FAIL( "testI2COffset - Failure comparing "
+                                         "new data!" );
                                 fails++;
 
                                 // Don't break - try to write back original data
@@ -626,7 +587,8 @@ class I2CTest: public CxxTest::TestSuite
                                     "Data Compare Fail: original=%016llx, "
                                     "read back=%016llx. cmd: %d/%d (%d)",
                                     original_data, data, i, NUM_CMDS, j);
-                                TS_FAIL( "testI2COffset - Failure comparing original data!" );
+                                TS_FAIL( "testI2COffset - Failure comparing "
+                                         "original data!" );
                                 fails++;
 
                                 // Break: stop testing if we can't write back
@@ -642,10 +604,40 @@ class I2CTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_i2c,
-                       "testI2COffset - %d/%d fails",
+                       "testI2COffset - End: %d/%d fails",
                        fails, cmds );
         }
 
+
+        /**
+         * @brief Call I2C Setup Masters Function
+         *      This function is part of the shutdown path and is
+         *      needed by PHYP to ensure that the I2C masters are
+         *      setup correctly on the system.
+         */
+        void testI2CSetupMasters ( void )
+        {
+            errlHndl_t err = NULL;
+            int fails = 0;
+            const int NUM_CMDS = 1;
+
+            TRACFCOMP( g_trac_i2c,
+                       "testI2CSetupMasters - Start" );
+
+            err = I2C::i2cSetupMasters();
+
+            if( err )
+            {
+                TS_FAIL( "testI2CSetupMasters - Error returned from "
+                         "i2cSetupMasters()");
+                fails++;
+                delete err;
+            }
+
+            TRACFCOMP( g_trac_i2c,
+                       "testI2CSetupMasters - End: %d/%d fails",
+                       fails, NUM_CMDS );
+        }
 
 
         /**
@@ -678,7 +670,8 @@ class I2CTest: public CxxTest::TestSuite
 
             if( !err )
             {
-                TS_FAIL( "Failure to return error using Master Sentinel Chip!" );
+                TS_FAIL( "testI2CInvalidTarget - Failure to return error "
+                         "using Master Sentinel Chip!" );
                 fails++;
             }
             else
@@ -688,7 +681,7 @@ class I2CTest: public CxxTest::TestSuite
             }
 
             TRACFCOMP( g_trac_i2c,
-                       "testI2CInvalidTarget - %d/%d fails",
+                       "testI2CInvalidTarget - End: %d/%d fails",
                        fails, NUM_CMDS );
         }
 
@@ -704,6 +697,9 @@ class I2CTest: public CxxTest::TestSuite
             uint64_t data = 0x0ull;
             size_t dataSize = 8;
 
+            TRACFCOMP( g_trac_i2c,
+                       "testI2CInvalidOperation - Start" );
+
             do
             {
                 // Get a processor Target
@@ -712,15 +708,6 @@ class I2CTest: public CxxTest::TestSuite
                 tS.masterProcChipTargetHandle( testTarget );
                 assert(testTarget != NULL);
 
-                // Check to see if I2C function is there
-                if( !isI2CAvailable( testTarget ) )
-                {
-                    TRACFCOMP( g_trac_i2c,
-                               "testI2CInvalid Operation - no i2c function" );
-
-
-                    continue;
-                }
 
                 // check to see if the target is functional before we
                 // continue..
@@ -728,7 +715,7 @@ class I2CTest: public CxxTest::TestSuite
                     (!testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                 {
                     TRACFCOMP( g_trac_i2c,
-                               "testI2CInvalide Operation - not functional" );
+                               "testI2CInvalidOperation - not functional" );
 
 
                     continue;
@@ -746,7 +733,8 @@ class I2CTest: public CxxTest::TestSuite
                 if( NULL == err )
                 {
                     fails++;
-                    TS_FAIL( "Error should've resulted in Operation type of LAST_OP_TYPE!" );
+                    TS_FAIL( "testI2CInvalidOperation - Error should've "
+                             "resulted in Operation type of LAST_OP_TYPE!" );
                 }
                 else
                 {
@@ -755,7 +743,7 @@ class I2CTest: public CxxTest::TestSuite
                 }
             } while( 0 );
             TRACFCOMP( g_trac_i2c,
-                       "testI2CInvalidOperation - %d/%d fails",
+                       "testI2CInvalidOperation - End: %d/%d fails",
                        fails, num_ops );
         }
 

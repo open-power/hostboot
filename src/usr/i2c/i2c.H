@@ -105,7 +105,7 @@ namespace I2C
 /**
  * @brief I2C Master register structure and address definition
  */
-typedef struct
+struct i2c_addrs_t
 {
     uint64_t fifo;
     uint64_t command;
@@ -114,9 +114,11 @@ typedef struct
     uint64_t interrupt;
     uint64_t status;
     uint64_t reset;
-} i2c_addrs_t;
+};
 
-// Addresses for each of the registers in each engine.
+/**
+ * @brief Addresses for each of the registers in each engine.
+ */
 static i2c_addrs_t masterAddrs[] =
 {
     { /* Master 0 */
@@ -148,6 +150,34 @@ static i2c_addrs_t masterAddrs[] =
     }
 };
 
+/**
+ * @brief Structure used to pass important variables between functions
+ */
+struct misc_args_t
+{
+    uint8_t  port;
+    uint8_t  engine;
+    uint64_t devAddr;
+    bool     skip_mode_setup;
+    bool     with_stop;
+    bool     read_not_write;
+    uint64_t bus_speed;          // in kbits/sec (ie 400KHz)
+    uint16_t bit_rate_divisor;   // uint16_t to match size in mode register
+    uint64_t timeout_interval;
+    uint64_t timeout_count;
+};
+
+/**
+ * @brief Different ways of setting the I2C Bus Speed
+ */
+enum i2c_bus_setting_mode_t
+{
+    READ_I2C_BUS_ATTRIBUTES,
+    SET_I2C_BUS_400KHZ,
+    LAST_BUS_SETTING_MODE_TYPE
+};
+
+
 
 // -----------------------------------------------------------------------
 // NOTE: Addressing listed below is from the PIB I2C Master Addressing
@@ -159,7 +189,7 @@ static i2c_addrs_t masterAddrs[] =
 * @brief I2C FIFO register definition
 *       Address 0x04
 */
-union fiforeg
+union fifo_reg_t
 {
     uint64_t value;
     struct
@@ -167,13 +197,13 @@ union fiforeg
         uint64_t byte_0 : 8;
         uint64_t padding : 56;
     } PACKED;
-} fifo_reg_t;
+};
 
 /**
  * @brief I2C Command register definition
  *      Address 0x05
  */
-union cmdreg
+union command_reg_t
 {
     uint64_t value;
     struct
@@ -188,13 +218,13 @@ union cmdreg
         uint64_t length_b : 16;
         uint64_t padding : 32;
     } PACKED;
-} command_reg_t;
+};
 
 /**
  * @brief I2C Mode register definition
  *      Address 0x06
  */
-union modereg
+union mode_reg_t
 {
     uint64_t value;
     struct
@@ -208,13 +238,13 @@ union modereg
         uint64_t wrap_mode : 1;
         uint64_t padding : 32;
     } PACKED;
-} mode_reg_t;
+};
 
 /**
  * @brief Watermark register definition
  *      Address 0x07
  */
-union watermarkreg
+union watermark_reg_t
 {
     uint64_t value;
     struct
@@ -226,13 +256,13 @@ union watermarkreg
         uint64_t reserved2 : 4;
         uint64_t padding : 32;
     } PACKED;
-} watermark_reg_t;
+};
 
 /**
  * @brief Interrupt Mask register definition
  *      Address 0x08
  */
-union intmaskreg
+union interrupt_mask_reg_t
 {
     uint64_t value;
     struct
@@ -256,13 +286,13 @@ union intmaskreg
         uint64_t sda_eq_0 : 1;
         uint64_t padding : 32;
     } PACKED;
-} interrupt_mask_reg_t;
+};
 
 /**
  * @brief Interrupt Condition register definition
  *      Address 0x09
  */
-union intcondreg
+union interrupt_cond_reg_t
 {
     uint64_t value;
     struct
@@ -286,13 +316,13 @@ union intcondreg
         uint64_t sda_eq_0 : 1;
         uint64_t padding : 32;
     } PACKED;
-} interrupt_cond_reg_t;
+};
 
 /**
  * @brief Interrupt register definition
  *      Address 0x0A
  */
-union interruptreg
+union interrupt_reg_t
 {
     uint64_t value;
     struct
@@ -316,13 +346,13 @@ union interruptreg
         uint64_t sda_eq_0 : 1;
         uint64_t padding: 32;
     } PACKED;
-} interrupt_reg_t;
+};
 
 /**
  * @brief Status register definition
  *      Address 0x0B
  */
-union statusreg
+union status_reg_t
 {
     uint64_t value;
     struct
@@ -347,13 +377,13 @@ union statusreg
         uint64_t fifo_entry_count : 8;
         uint64_t padding : 32;
     } PACKED;
-} status_reg_t;
+};
 
 /**
  * @brief Extended Status register definition
  *      Address 0x0C
  */
-union extstatusreg
+union extended_status_reg_t
 {
     uint64_t value;
     struct
@@ -375,13 +405,13 @@ union extstatusreg
         uint64_t i2c_version : 5;
         uint64_t padding : 32;
     } PACKED;
-} extended_status_reg_t;
+};
 
 /**
  * @brief Residual Front/Back end length register definition
  *      Address 0x0D
  */
-union residuallengthreg
+union residual_length_reg_t
 {
     uint64_t value;
     struct
@@ -390,14 +420,8 @@ union residuallengthreg
         uint64_t back_end_length : 16;
         uint64_t padding : 32;
     } PACKED;
-} residual_length_reg_t;
+};
 
-typedef struct
-{
-    uint64_t port;
-    uint64_t engine;
-    uint64_t devAddr;
-} input_args_t;
 
 
 /**
@@ -451,9 +475,6 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
  * @param[in] i_buflen - The size of the data to read and place in the
  *      buffer.
  *
- * @param[in] i_skipModeSetup - true if mode register setup needs to be
- *      skipped
- *
  * @param[in] i_args - Structure containing arguments needed for a command
  *  transaction.
  *
@@ -463,8 +484,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 errlHndl_t i2cRead ( TARGETING::Target * i_target,
                      void * o_buffer,
                      size_t & i_buflen,
-                     bool & i_skipModeSetup,
-                     input_args_t i_args );
+                     misc_args_t & i_args);
 
 /**
  * @brief This function will do the real work of writinging to the I2C
@@ -478,9 +498,6 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
  * @param[in/out] io_buflen - INPUT: The size of the data to write to the
  *      target device.   OUTPUT: The size of the data buffer written.
  *
- * @param[in] i_withStop - true if with_stop bit is to be set on operation;
- *                         otherwise, with_stop bit will be set to zero.
- *
  * @param[in] i_args - Structure containing arguments needed for a command
  *  transaction.
  *
@@ -491,8 +508,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 errlHndl_t i2cWrite ( TARGETING::Target * i_target,
                       void * i_buffer,
                       size_t & io_buflen,
-                      bool & i_withStop,
-                      input_args_t i_args );
+                      misc_args_t & i_args);
 
 /**
  * @brief This function will do the I2C setup of the Address/Command registers
@@ -502,15 +518,6 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
  *
  * @param[in] i_buflen - The size of the data that will be read/written.
  *
- * @param[in] i_readNotWrite - true if doing a read operation, false if
- *      doing a write operation.
- *
- * @param[in] i_withStop - true if with_stop bit is to be set, otherwise
- *      with_stop will be set to zero.
- *
- * @param[in] i_skipModeSetup - true if mode register setup needs to be
- *      skipped
- *
  * @param[in] i_args - Structure containing arguments needed for a command
  *  transaction.
  *
@@ -519,10 +526,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
  */
 errlHndl_t i2cSetup ( TARGETING::Target * i_target,
                       size_t & i_buflen,
-                      bool i_readNotWrite,
-                      bool i_withStop,
-                      bool i_skipModeSetup,
-                      input_args_t i_args );
+                      misc_args_t & i_args);
 
 /**
  * @brief This function will wait for the command to be complete or
@@ -537,7 +541,7 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
-                               input_args_t i_args );
+                               misc_args_t & i_args);
 
 /**
  * @brief This function will read the I2C Master engine status register
@@ -554,8 +558,8 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
-                              input_args_t i_args,
-                              statusreg & o_statusReg );
+                              misc_args_t & i_args,
+                              status_reg_t & o_statusReg );
 
 /**
  * @brief This function will check for errors in the status register
@@ -572,8 +576,8 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
-                               input_args_t i_args,
-                               statusreg i_statusVal );
+                               misc_args_t & i_args,
+                               status_reg_t i_statusVal );
 
 /**
  * @brief This function will read the status register and not return
@@ -590,7 +594,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
-                                 input_args_t i_args );
+                                 misc_args_t & i_args);
 
 /**
  * @brief This function will reset the I2C Master engine specified
@@ -606,7 +610,7 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cReset ( TARGETING::Target * i_target,
-                      input_args_t i_args );
+                      misc_args_t & i_args );
 
 /**
  * @brief This function will send the Stop command to the slave device
@@ -621,7 +625,7 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
-                              input_args_t i_args );
+                              misc_args_t & i_args );
 
 /**
  * @brief This function will read the interrupt register and return the
@@ -639,8 +643,26 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
  *      the error log.
  */
 errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
-                              input_args_t i_args,
+                              misc_args_t & i_args,
                               uint64_t & o_intRegValue );
+
+/**
+ * @brief This function calculates the different variables related to the
+ *        I2C Bus Speed that are used in the other functions
+ *
+ * @param[in] i_target - The I2C master target.
+ *
+ * @param[in] i_mode - States how bus setting will be determined
+ *
+ * @param[in/out] io_args - Structure containing arguments needed for a command
+ *      transaction. Clock arguments set in this function.
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
+                                i2c_bus_setting_mode_t i_mode,
+                                misc_args_t & io_args );
 
 
 }; // end I2C namespace

@@ -44,10 +44,11 @@ namespace EEPROM
 */
 typedef enum
 {
-    TWO_BYTE_ADDR,
-    ONE_BYTE_ADDR,
+    ZERO_BYTE_ADDR  = 0,
+    ONE_BYTE_ADDR   = 1,
+    TWO_BYTE_ADDR   = 2,
     LAST_DEVICE_TYPE
-} eeprom_device_t;
+} eeprom_addr_size_t;
 
 /**
  * @brief Structure of common parameters needed by different parts of
@@ -60,10 +61,10 @@ typedef struct
     uint64_t devAddr;
     int64_t  chip;
     uint64_t offset;
-    eeprom_device_t deviceType;
+    eeprom_addr_size_t addrSize;
     TARGETING::EntityPath i2cMasterPath;
     uint64_t writePageSize;  // in bytes
-    eeprom_chip_types_t chipTypeEnum;
+    uint64_t devSize_KB;     // in kilobytes
 } eeprom_addr_t;
 
 /**
@@ -156,8 +157,8 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
  *      existing buffer (for Writes), or as a separate write operation
  *      (for Reads).
  *
- * @param[out] o_buffer - The buffer to be written as a byte address to
- *      the EEPROM device.
+ * @param[in/out] io_buffer - The buffer to be written as a byte address to
+ *      the EEPROM device.  Must be pre-allocated to MAX_BYTE_ADDR size.
  *
  * @param[out] o_bufSize - The size of the buffer to be written.
  *
@@ -167,7 +168,7 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t eepromPrepareAddress ( void * o_buffer,
+errlHndl_t eepromPrepareAddress ( void * io_buffer,
                                   size_t & o_bufSize,
                                   eeprom_addr_t i_i2cInfo );
 

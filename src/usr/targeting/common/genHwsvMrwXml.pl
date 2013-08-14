@@ -42,7 +42,6 @@
 #   This perl script processes the various xml files of the MRW to
 #   extract the needed information for generating the final xml file.
 #
-
 use strict;
 use XML::Simple;
 use Data::Dumper;
@@ -1948,6 +1947,10 @@ sub generate_proc
     #TODO RTC [59707]
     #Update Lane equalization values
 
+    # add EEPROM attributes
+    addEeproms($sys, $node, $proc);
+
+
     # fsp-specific proc attributes
     do_plugin('fsp_proc', $scompath, $scomsize, $scanpath, $scansize,
             $node, $proc, $fruid, $ipath, $hwTopology, $mboxpath, $mboxsize,
@@ -2786,6 +2789,113 @@ sub addProcPcieAttrs
         }
     }
 }
+
+# RTC 80614 - these values will eventually be pulled from the MRW
+sub addEeproms
+{
+    my ($sys, $node, $proc) = @_;
+
+    my $id_name eq "";
+    my $port = 0;
+    my $devAddr = 0x00;
+    my $mur_num = $proc % 2;
+
+
+    for my $i (0 .. 3)
+    {
+        # Loops on $i
+        # %i = 0 -> EEPROM_VPD_PRIMARY_INFO
+        # %i = 1 -> EEPROM_VPD_BACKUP_INFO
+        # %i = 2 -> EEPROM_SBE_PRIMARY_INFO
+        # %i = 3 -> EEPROM_SBE_BACKUP_INFO
+
+        # no EEPROM_VPD_BACKUP on Murano
+        if ( ($i eq 1) && ($CHIPNAME eq "murano"))
+        {
+            next;
+        }
+
+
+        if($CHIPNAME eq "murano")
+        {
+            if ($i eq 0 )
+            {
+                $id_name = "EEPROM_VPD_PRIMARY_INFO";
+                $port    = 1;
+
+                if ($mur_num eq 0)
+                {
+                    $devAddr = 0xA4;
+                }
+                else
+                {
+                    $devAddr = 0xA6;
+                }
+            }
+
+            # $i = 1: EEPROM_VPD_BACKUP_INFO skipped above
+
+            elsif ($i eq 2 )
+            {
+                $id_name = "EEPROM_SBE_PRIMARY_INFO";
+                $port    = 0;
+                $devAddr = 0xAC;
+            }
+            elsif ($i eq 3 )
+            {
+                $id_name = "EEPROM_SBE_BACKUP_INFO";
+                $port    = 0;
+                $devAddr = 0xAE;
+            }
+        }
+
+        elsif ($CHIPNAME eq "venice")
+        {
+            if ($i eq 0 )
+            {
+                $id_name = "EEPROM_VPD_PRIMARY_INFO";
+                $port    = 0;
+                $devAddr = 0xA0;
+            }
+            elsif ($i eq 1 )
+            {
+                $id_name = "EEPROM_VPD_BACKUP_INFO";
+                $port    = 1;
+                $devAddr = 0xA0;
+            }
+            elsif ($i eq 2 )
+            {
+                $id_name = "EEPROM_SBE_PRIMARY_INFO";
+                $port    = 0;
+                $devAddr = 0xA2;
+            }
+            elsif ($i eq 3 )
+            {
+                $id_name = "EEPROM_SBE_BACKUP_INFO";
+                $port    = 1;
+                $devAddr = 0xA2;
+            }
+        }
+
+        # make devAddr show as a hex number
+        my $devAddr_hex = sprintf("0x%02X", $devAddr);
+
+        print "    <attribute>\n";
+        print "        <id>$id_name</id>\n";
+        print "        <default>\n";
+        print "            <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/proc-$proc</value></field>\n";
+        print "             <field><id>port</id><value>$port</value></field>\n";
+        print "             <field><id>devAddr</id><value>$devAddr_hex</value></field>\n";
+        print "             <field><id>engine</id><value>0</value></field>\n";
+        print "             <field><id>byteAddrOffset</id><value>0x02</value></field>\n";
+        print "             <field><id>maxMemorySizeKB</id><value>0x40</value></field>\n";
+        print "             <field><id>writePageSize</id><value>0x80</value></field>\n";
+        print "        </default>\n";
+        print "    </attribute>\n";
+    }
+
+}
+
 
 sub display_help
 {

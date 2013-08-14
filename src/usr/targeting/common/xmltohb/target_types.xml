@@ -1256,7 +1256,6 @@
         <default>0x00000003</default> <!--GARD | MEMDIAG -->
     </attribute>
 
-    <!-- Defaulting this info to the one Simics Dummy device that we have -->
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>

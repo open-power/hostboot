@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -54,7 +54,9 @@ enum i2cModuleId
     I2C_READ_STATUS_REG                 = 0x06,
     I2C_CHECK_FOR_ERRORS                = 0x07,
     I2C_SETUP_MASTERS                   = 0x08,
+    I2C_SET_BUS_VARIABLES               = 0x09,
 };
+
 
 /**
  * @enum i2cReasonCode
@@ -74,6 +76,7 @@ enum i2cReasonCode
     I2C_MASTER_SENTINEL_TARGET          = I2C_COMP_ID | 0x07,   // Master Sentinel used as target
     I2C_NO_CENTAUR_FOUND                = I2C_COMP_ID | 0x08,   // No Centaur chip found
     I2C_NO_PROC_FOUND                   = I2C_COMP_ID | 0x09,   // No Processor chip found
+    I2C_INVALID_BUS_SPEED_MODE          = I2C_COMP_ID | 0x0A,   // Invalid Bus Speed Mode
 };
 
 };  // end I2C
