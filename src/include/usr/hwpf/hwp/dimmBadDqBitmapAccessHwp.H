@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: dimmBadDqBitmapAccessHwp.H,v 1.2 2013/08/13 20:29:40 mjjones Exp $
 /**
  *  @file dimmBadDqBitmapAccessHwp.H
  *

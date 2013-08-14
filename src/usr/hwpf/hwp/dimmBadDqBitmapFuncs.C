@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: dimmBadDqBitmapFuncs.C,v 1.4 2013/08/13 20:32:55 mjjones Exp $
 /**
  *  @file dimmBadDqBitmapFuncs.C
  *
@@ -31,12 +32,17 @@
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     02/17/2012  Created.
+ *                          farrugia    07/09/2012  Added dimmBadDqBitmapAccessHwp.H
+ *                                                  since FAPI_HWP_EXEC may need the
+ *                                      typedefs function pointer when
+ *                                                  running with some PLATs (ie Cronus)
  *                          dedahle     06/20/2013  dimmGetBadDqBitmap/
  *                                                  dimmSetBadDqBitmap funcs
  *                                                  get/set ATTR_BAD_DQ_BITMAP
  */
 
 #include <dimmBadDqBitmapFuncs.H>
+#include <dimmBadDqBitmapAccessHwp.H>
 #include <string.h>
 
 extern "C"
