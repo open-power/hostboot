@@ -153,6 +153,7 @@ Layout Description
         <physicalOffset>0x3ECE000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
         <side>A</side>  <!-- Choices: A, B -->
+        <ecc/>
     </section>
     <section>
         <description>Global Data (36K)</description>
