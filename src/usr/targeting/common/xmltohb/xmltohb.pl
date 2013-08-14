@@ -968,6 +968,7 @@ sub writeTestEntityPath {
     open EP_TEST_FILE, ">", "$cfgSrcOutputDir"."test_ep.H" or die $!;
 
     print EP_TEST_FILE "#include <attributeenums.H>\n";
+    print EP_TEST_FILE "using namespace TARGETING;\n";
     print EP_TEST_FILE "EntityPath l_path;\n";
     print EP_TEST_FILE "const char * name = NULL;\n";
     print(EP_TEST_FILE "const char * test_string = \"Unknown path" .
