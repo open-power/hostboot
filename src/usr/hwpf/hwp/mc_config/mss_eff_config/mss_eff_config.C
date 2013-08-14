@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.26 2013/06/21 18:48:03 bellows Exp $
+// $Id: mss_eff_config.C,v 1.27 2013/08/06 00:06:30 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,7 +44,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.27  |          |         | 
+//   1.28  |          |         | 
+//   1.27  | asaetow  |05-AUG-13| Restored EFF_STACK_TYPE_DDP_QDP support v1.25.
+//         |          |         | NOTE: Do NOT pickup without mss_eff_config_termination.C v1.28 or newer, contains workaround for incorrect byte33 SPD data in early lab OLD 16G/32G CDIMMs.
 //   1.26  | bellows  |21-JUN-13| Removed last update because caused lab problems
 //   1.25  | asaetow  |20-JUN-13| Added EFF_STACK_TYPE_DDP_QDP support.
 //   1.24  | asaetow  |19-APR-13| Fixed X4 CDIMM spare for RCB to use LOW_NIBBLE only.
@@ -194,6 +196,7 @@ struct mss_eff_config_data
 struct mss_eff_config_spd_data
 {
     uint8_t dram_device_type[PORT_SIZE][DIMM_SIZE];
+    uint8_t sdram_device_type[PORT_SIZE][DIMM_SIZE];
     uint8_t module_type[PORT_SIZE][DIMM_SIZE];
     uint8_t custom[PORT_SIZE][DIMM_SIZE];
     uint8_t sdram_banks[PORT_SIZE][DIMM_SIZE];
@@ -438,6 +441,9 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
     {
         rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_DEVICE_TYPE, &i_target_dimm,
                 p_o_spd_data->dram_device_type[i_port][i_dimm]);
+        if(rc) break;
+        rc = FAPI_ATTR_GET(ATTR_SPD_SDRAM_DEVICE_TYPE, &i_target_dimm,
+                p_o_spd_data->sdram_device_type[i_port][i_dimm]);
         if(rc) break;
         rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE, &i_target_dimm,
             p_o_spd_data->module_type[i_port][i_dimm]);
@@ -1614,38 +1620,38 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                     = fapi::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
                }  
             }
-            // AST HERE: Needs SPD byte33[7,1:0], for expanded IBM_TYPE and STACK_TYPE
+
+            if ( p_i_data->sdram_device_type[l_cur_mba_port][l_cur_mba_dimm] == 
+                 fapi::ENUM_ATTR_SPD_SDRAM_DEVICE_TYPE_NON_STANDARD) {
+               p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP;
+            } else {
+               p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+            }
+
+            // AST HERE: Needed SPD byte33[7,1:0], for expanded IBM_TYPE
             if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) {
                if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1) {
-                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1A;
                } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
-                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1B;
                } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
-                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP;
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1D;
                } else {
-                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
                   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
                }
             } else if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM ) {
                if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1) {
-                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1A;
                } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
-                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP;
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1B;
                } else {
-                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
                   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
                }
             } else {
-               p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
                p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                FAPI_ERR("Currently unsupported DIMM_TYPE on %s!", i_target_mba.toEcmdString());
                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;

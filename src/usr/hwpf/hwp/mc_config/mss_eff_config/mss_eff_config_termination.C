@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_termination.C,v 1.27 2013/07/24 20:05:09 bellows Exp $
+// $Id: mss_eff_config_termination.C,v 1.28 2013/08/06 00:04:44 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_termination.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,6 +42,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.29  |          |         | 
+//   1.28  | asaetow  |05-AUG-13| Added temp workaround for incorrect byte33 SPD data in early lab OLD 16G/32G CDIMMs.
+//         |          |         | NOTE: Do NOT pickup without mss_eff_config.C v1.27 or newer, contains EFF_STACK_TYPE_DDP_QDP support.
 //   1.27  | bellows  |24-JUL-13| KG3 support #def for cronus only compiles
 //   1.26  | dcadiga  |28-JUN-13| Fixed checking of lab_only_rc
 //   1.25  | dcadiga  |26-JUN-13| B4 Change to run regardless of ranks configured, Set code to point back to B4 settings instead of B settings (was test mode)
@@ -679,6 +682,7 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    uint8_t l_nwell_misplacement = 0;
    uint8_t l_num_ranks_per_dimm_u8array[PORT_SIZE][DIMM_SIZE];
    uint8_t l_stack_type_u8array[PORT_SIZE][DIMM_SIZE];
+   uint8_t l_dimm_size_u8array[PORT_SIZE][DIMM_SIZE];
    // ATTR_EFF_DRAM_GEN: EMPTY = 0, DDR3 = 1, DDR4 = 2, 
    uint8_t l_dram_gen_u8;
    // ATTR_EFF_DIMM_TYPE: CDIMM = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3,
@@ -716,9 +720,26 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimm_custom_u8); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target_mba, l_num_drops_per_port); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width_u8); if(rc) return rc;
-   
-   
-   
+   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SIZE, &i_target_mba, l_dimm_size_u8array); if(rc) return rc;
+ 
+ 
+   // Temp workaround for incorrect byte33 SPD data "ATTR_EFF_STACK_TYPE" in early lab CDIMMs.
+   uint8_t l_stack_type_modified = 0;
+   for (uint8_t cur_port = 0; cur_port < PORT_SIZE; cur_port += 1) {
+      for (uint8_t cur_dimm = 0; cur_dimm < DIMM_SIZE; cur_dimm += 1) {
+         if ((l_dimm_custom_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (l_stack_type_u8array[cur_port][cur_dimm] == fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP) && (l_dram_width_u8 == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8) && (l_dimm_size_u8array[cur_port][cur_dimm] == 4)) {
+            FAPI_INF("WARNING: Wrong Byte33 SPD detected for OLD 16G/32G CDIMM on %s PORT%d DIMM%d!", i_target_mba.toEcmdString(), cur_port, cur_dimm);
+            FAPI_INF("WARNING: Implimenting workaround on %s PORT%d DIMM%d!", i_target_mba.toEcmdString(), cur_port, cur_dimm);
+            l_stack_type_modified = 1; 
+            l_stack_type_u8array[cur_port][cur_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+         }
+      }
+   }
+   if (l_stack_type_modified == 1) {
+      FAPI_INF("WARNING: ATTR_EFF_STACK_TYPE is being set to ENUM_ATTR_EFF_STACK_TYPE_NONE. Check Byte33 of your SPD on %s!", i_target_mba.toEcmdString());
+      rc = FAPI_ATTR_SET(ATTR_EFF_STACK_TYPE, &i_target_mba, l_stack_type_u8array); if(rc) return rc;
+   }
+
 
    // Fetch impacted attributes
    uint64_t l_attr_eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
