@@ -49,6 +49,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mem_pll_setup
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_trainadv
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_dimm_power_test
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  dram_training.o \
@@ -68,10 +69,12 @@ OBJS =  dram_training.o \
         mss_mcbist.o \
         mss_mcbist_common.o\
         hbVddrMsg.o \
-        mss_mcbist_address.o
+        mss_mcbist_address.o \
+        mss_dimm_power_test.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_dimm_power_test
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_training
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit_mc
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_draminit

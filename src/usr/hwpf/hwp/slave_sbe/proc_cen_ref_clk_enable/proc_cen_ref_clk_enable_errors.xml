@@ -1,0 +1,39 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable/proc_cen_ref_clk_enable_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_cen_ref_clk_enable_errors.xml,v 1.1 2013/08/14 20:45:46 jmcgill Exp $ -->
+<!-- Error definitions for proc_cen_ref_clk_enable -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_REF_CLK_ENABLE_SWIZZLE_ERR</rc>
+    <description>Translated Centaur refclock enable bit position is out of range.</description>
+    <ffdc>POSITION</ffdc>
+    <ffdc>REFCLOCK_BIT</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_CEN_REF_CLK_ENABLE_CONFIG_ERR</rc>
+    <description>Not all Centaurs marked as attached were configured.</description>
+    <ffdc>CONFIGURED</ffdc>
+    <ffdc>ATTACHED</ffdc>
+  </hwpError>
+</hwpErrors>

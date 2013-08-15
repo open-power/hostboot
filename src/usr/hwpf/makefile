@@ -101,7 +101,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_training/mem_startclocks/memory_cen_stopclocks.xml \
     hwp/dram_training/mss_scominit/memory_mss_scominit.xml \
     hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist_common.xml \
-    hwp/dram_initialization/proc_setup_bars/memory_mss_setup_bars.xml
+    hwp/dram_initialization/proc_setup_bars/memory_mss_setup_bars.xml \
+    hwp/slave_sbe/proc_cen_ref_clk_enable/proc_cen_ref_clk_enable_errors.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \

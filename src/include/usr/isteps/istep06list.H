@@ -27,7 +27,6 @@
  * @file    istep6list.H
  *
  *  list of functions called by HWAS (ISTEP 6) - "named isteps"
- *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -49,7 +48,7 @@ namespace   INITSERVICE
  * @note    IStep definition for Hostboot - Slave SBE
  *
  *  IStep 06    Slave SBE
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v1.37 (08/13/13)
  *
  *  06.1    host_setup
  *        : Setup host environment (non-executable istep)
@@ -59,7 +58,7 @@ namespace   INITSERVICE
  *        : Setup the FSI links to slave chips
  *  06.4    host_set_ipl_parms
  *        : Build ipl parameters
- *  06.5    host_discover_targets 
+ *  06.5    host_discover_targets
  *      :   Builds targeting
  *  06.6    host_gard
  *      :   Do Gard
@@ -67,11 +66,13 @@ namespace   INITSERVICE
  *      :   Clear deconfigured states
  *  06.8    proc_revert_sbe_mcs_setup
  *      :   Clean up MCS extent regs
- *  06.9    host_slave_sbe_config
- *  06.10   host_sbe_start
- *  06.11   proc_check_slave_sbe_seeprom_complete
+ *  06.9    proc_cen_ref_clk_enable
+ *      :   Setup centaur ref clocks
+ *  06.10    host_slave_sbe_config
+ *  06.11   host_sbe_start
+ *  06.12   proc_check_slave_sbe_seeprom_complete
  *        : Check Slave SBE Complete
- *  06.12   proc_xmit_sbe
+ *  06.13   proc_xmit_sbe
  *        : vSBE Init of Slave Chips
  *
  */
@@ -168,7 +169,17 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,09,"host_slave_sbe_config"),
+                ISTEPNAME(06,09,"proc_cen_ref_clk_enable"),
+                SLAVE_SBE::call_proc_cen_ref_clk_enable,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                        false,
+                }
+        },
+        {
+                ISTEPNAME(06,10,"host_slave_sbe_config"),
                 SLAVE_SBE::call_host_slave_sbe_config,
                 {
                         START_FN,
@@ -179,7 +190,7 @@ const   TaskInfo    g_istep06[]  =   {
         },
 
         {
-                ISTEPNAME(06,10,"host_sbe_start"),
+                ISTEPNAME(06,11,"host_sbe_start"),
                 SLAVE_SBE::call_host_sbe_start,
                 {
                         START_FN,
@@ -190,7 +201,7 @@ const   TaskInfo    g_istep06[]  =   {
         },
 
         {
-                ISTEPNAME(06,11,"proc_check_slave_sbe_seeprom_complete"),
+                ISTEPNAME(06,12,"proc_check_slave_sbe_seeprom_complete"),
                 SLAVE_SBE::call_proc_check_slave_sbe_seeprom_complete,
                 {
                         START_FN,
@@ -200,7 +211,7 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,12,"proc_xmit_sbe"),
+                ISTEPNAME(06,13,"proc_xmit_sbe"),
                 SLAVE_SBE::call_proc_xmit_sbe,
                 {
                         START_FN,

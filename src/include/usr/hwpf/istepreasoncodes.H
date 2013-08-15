@@ -118,6 +118,8 @@ enum istepModuleId
     ISTEP_MEM_PLL_INITF                                 = 0x46,
     ISTEP_PROC_GETECID                                  = 0x47,
     ISTEP_INITSVC_MOD_ID                                = 0x48,
+    ISTEP_MSS_DIMM_POWER_TEST                           = 0x49,
+    ISTEP_PROC_CEN_REF_CLK_ENABLE                       = 0x4A,
 };
 
 /**

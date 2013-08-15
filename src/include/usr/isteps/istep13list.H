@@ -27,7 +27,7 @@
  * @file    istep13list.H
  *
  *  IStep 13    Step 13 DRAM Training
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v1.37 (08/13/13)
  *
  *  13.1      host_disable_vddr
  *      : Disable VDDR on CanContinue loops
@@ -51,6 +51,7 @@
  *      : Advanced dram training
  *  13.11     mss_draminit_mc
  *      : Hand off control to MC
+ *  13.12 mss_dimm_power_test
  *
  *  *****************************************************************
  *  THIS FILE WAS GENERATED ON 2012-02-27:2142
@@ -192,7 +193,16 @@ const   TaskInfo    g_istep13[]  =   {
                         true,
                 }
         },
-
+        {
+                ISTEPNAME(13,12,"mss_dimm_power_test"),
+                DRAM_TRAINING::call_mss_dimm_power_test,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                        true,
+                }
+        },
 
         //  END OF LIST!
 };

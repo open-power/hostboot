@@ -65,18 +65,16 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 //  --  prototype   includes    --
 #include    "dram_training.H"
 
-//  Un-comment these files as they become available:
-// #include    "host_disable_vddr/host_disable_vddr.H"
 #include    "mem_pll_setup/cen_mem_pll_initf.H"
 #include    "mem_pll_setup/cen_mem_pll_setup.H"
 #include    "mem_startclocks/cen_mem_startclocks.H"
-// #include    "host_enable_vddr/host_enable_vddr.H"
 #include    "mss_scominit/mss_scominit.H"
 #include    "mss_ddr_phy_reset/mss_ddr_phy_reset.H"
 #include    "mss_draminit/mss_draminit.H"
 #include    "mss_draminit_training/mss_draminit_training.H"
 #include    "mss_draminit_trainadv/mss_draminit_training_advanced.H"
 #include    "mss_draminit_mc/mss_draminit_mc.H"
+#include    "mss_dimm_power_test/mss_dimm_power_test.H"
 
 namespace   DRAM_TRAINING
 {
@@ -936,6 +934,99 @@ void*    call_mss_draminit_mc( void *io_pArgs )
 
     return l_stepError.getErrorHandle();
 }
+//
+//  Wrapper function to call mss_dimm_power_test
+//
+void*    call_mss_dimm_power_test( void *io_pArgs )
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_mss_dimm_power_test entry" );
+
+    errlHndl_t l_err = NULL;
+
+    // get a list of mba targets
+    IStepError l_stepError;
+
+    TARGETING::TargetHandleList l_mbaTargetList;
+    TARGETING::TargetHandleList::const_iterator pRangeLimitItr;
+    TARGETING::TargetHandleList::const_iterator pTargetItr;
+
+    // Get all MBA targets
+    getAllChiplets(l_mbaTargetList, TYPE_MBA, true);
+
+    // Limit the number of MBAs to run in VPO environment to save time.
+    uint8_t l_mbaLimit = l_mbaTargetList.size();
+    if (TARGETING::is_vpo() && (VPO_NUM_OF_MBAS_TO_RUN < l_mbaLimit))
+    {
+        // limit the range to VPO_NUM_OF_MBAS_TO_RUN
+        pRangeLimitItr = l_mbaTargetList.begin() + VPO_NUM_OF_MBAS_TO_RUN;
+    }
+    else
+    {
+        // process all targets
+        pRangeLimitItr = l_mbaTargetList.end();
+
+    }
+    // process each target till we reach the limit set above
+    for (  TARGETING::TargetHandleList::const_iterator pTargetItr
+           = l_mbaTargetList.begin();
+           pTargetItr != pRangeLimitItr; pTargetItr++)
+    {
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_mba_target = *pTargetItr;
+
+        // Dump current run on target
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_dimm_power_test HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_mba_target));
+
+        // Cast to a FAPI type of target.
+        const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
+                        (const_cast<TARGETING::Target*>(l_mba_target)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP(l_err, mss_dimm_power_test, l_fapi_mba_target);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X: mss_dimm_power_test HWP returns error",
+                    l_err->reasonCode());
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_DIMM_POWER_TEST
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_dimm_power_test has failed
+             */
+            l_stepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                             ISTEP_MSS_DIMM_POWER_TEST,
+                             l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  call_mss_dimm_power_test HWP( )" );
+        }
+    } // end l_mbaNum loop
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_mss_dimm_power_test exit" );
+
+    return l_stepError.getErrorHandle();
+}
+
 
 
 };   // end namespace
