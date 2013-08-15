@@ -133,29 +133,18 @@ bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type )
     // get the current payload kind
     ATTR_PAYLOAD_KIND_type payload_kind = sys->getAttr<ATTR_PAYLOAD_KIND>();
 
-    // read the mfg flags if we haven't already
-    if( payload_kind != PAYLOAD_KIND_AVP )
-    {
-        ATTR_MNFG_FLAGS_type mnfg_flags = sys->getAttr<ATTR_MNFG_FLAGS>();
-
-        // if any AVP flags are set, override the payload kind
-        if( (mnfg_flags & MNFG_FLAG_BIT_MNFG_AVP_ENABLE)
-            || (mnfg_flags & MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE) )
-        {
-            if( payload_kind != PAYLOAD_KIND_AVP )
-            {
-                payload_kind = PAYLOAD_KIND_AVP;
-                sys->setAttr<ATTR_PAYLOAD_KIND>(payload_kind);
-            }
-        }
-    }
-
     if( o_type )
     {
         *o_type = payload_kind;
     }
 
-    return( PAYLOAD_KIND_PHYP == payload_kind );
+    //If in AVP mode default to false
+    bool is_phyp = false;
+    if(!is_avp_load())
+    {
+        is_phyp = (PAYLOAD_KIND_PHYP == payload_kind);
+    }
+    return is_phyp;
  }
 
 /**
@@ -171,9 +160,38 @@ bool is_sapphire_load(void)
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
     assert(sys != NULL);
+    bool is_sapphire = false;
 
-    return (TARGETING::PAYLOAD_KIND_SAPPHIRE ==
-            sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>());
+    //If in AVP mode default to false
+    if(!is_avp_load())
+    {
+        is_sapphire = (PAYLOAD_KIND_SAPPHIRE ==
+                       sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>());
+    }
+    return is_sapphire;
+}
+
+/**
+ * @brief  Utility function to determine if an AVP is the payload
+ *         Note the actual payload could be something else -- this
+ *         is based solely on MFG flags
+ *
+ * @description  If MFG AVP mode flags are set then returns true
+ *      Does not matter what the actual payload is
+ *
+ * @return bool  True when in AVP mode
+ */
+bool is_avp_load(void)
+{
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+
+    TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags =
+      sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+
+    return ((mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_AVP_ENABLE)
+       || (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE));
 }
 
 

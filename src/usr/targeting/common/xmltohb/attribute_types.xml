@@ -2027,16 +2027,12 @@
         <value>1</value>
     </enumerator>
     <enumerator>
-        <name>AVP</name>
+        <name>SAPPHIRE</name>
         <value>2</value>
     </enumerator>
     <enumerator>
-        <name>SAPPHIRE</name>
-        <value>3</value>
-    </enumerator>
-    <enumerator>
         <name>NONE</name>
-        <value>4</value>
+        <value>3</value>
     </enumerator>
     <default>UNKNOWN</default>
 </enumerationType>
@@ -2051,7 +2047,7 @@
             <id>PAYLOAD_KIND</id>
         </enumeration>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
     <hasStringConversion/>

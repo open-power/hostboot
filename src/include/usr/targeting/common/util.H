@@ -101,6 +101,18 @@ bool is_phyp_load( ATTR_PAYLOAD_KIND_type* o_type = NULL );
  */
 bool is_sapphire_load(void);
 
+/**
+ * @brief  Utility function to determine if an AVP is the payload
+ *         Note the actual payload could be something else -- this
+ *         is based solely on MFG flags
+ *
+ * @description  If MFG AVP mode flags are set then returns true
+ *      Does not matter what the actual payload is
+ *
+ * @return bool  True when in AVP mode
+ */
+bool is_avp_load(void);
+
 }
 
 #endif // __TARGETING_COMMON_UTIL_H

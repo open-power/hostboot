@@ -137,7 +137,7 @@
     </attribute>
     <attribute>
         <id>PAYLOAD_KIND</id>
-        <default>AVP</default>
+        <default>NONE</default>
     </attribute>
     <attribute>
         <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>

@@ -210,7 +210,6 @@ void*    call_host_runtime_setup( void    *io_pArgs )
         }
 
         // Map the Host Data into the VMM if applicable
-        //   Note: call will set ATTR_PAYLOAD_KIND appropriately
         l_err = RUNTIME::load_host_data();
         if( l_err )
         {
@@ -224,18 +223,9 @@ void*    call_host_runtime_setup( void    *io_pArgs )
         TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
-        //If PHYP then clean the PORE BARs
-        if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
-        {
-            l_err = clearPoreBars();
-            if( l_err )
-            {
-                break;
-            }
-        }
 
         //Only run OCC in AVP mode.  Run the rest in !AVP mode
-        if( TARGETING::PAYLOAD_KIND_AVP == payload_kind )
+        if( is_avp_load() )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Skipping host_runtime_setup in AVP mode.  Starting OCC" );
             //Load modules needed by OCC
@@ -298,8 +288,18 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 break;
             }
         }
-        else
+        else //PHYP or SAPPHIRE with FSP
         {
+            //If PHYP then clean the PORE BARs
+            if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
+            {
+                l_err = clearPoreBars();
+                if( l_err )
+                {
+                    break;
+                }
+            }
+
             //Update the MDRT value
             l_err = RUNTIME::write_MDRT_Count();
             if(l_err != NULL)
