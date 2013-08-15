@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.11 2012/12/12 20:10:41 pardeik Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.13 2013/07/22 14:10:45 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -70,6 +70,13 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.13  | pardeik  |19-JUL-13| removed code to identify if throttles are 
+//         |          |         |   based on thermal or power reasons since the
+//         |          |         |   runtime throttles will now be determined
+//         |          |         |   whenever mss_eff_config_thermal runs
+//   1.12  | pardeik  |08-JUL-13| Update to use CUSTOM_DIMM instead of DIMM_TYPE
+//         |          |         | removed incrementing of throttle denominator
+//         |          |         | set throttle per_mba at end of procedure
 //   1.11  | pardeik  |04-DEC-12| update lines to have a max width of 80 chars
 //         |          |         | added FAPI_ERR before return code lines
 //         |          |         | made trace statements for procedure FAPI_IMP
@@ -125,7 +132,9 @@ extern "C" {
 //------------------------------------------------------------------------------
 // Funtions in this file
 //------------------------------------------------------------------------------
-    fapi::ReturnCode mss_bulk_pwr_throttles(const fapi::Target & i_target_mba);
+    fapi::ReturnCode mss_bulk_pwr_throttles(
+					    const fapi::Target & i_target_mba
+					    );
 
 
 //------------------------------------------------------------------------------
@@ -137,21 +146,16 @@ extern "C" {
 // @return fapi::ReturnCode
 //------------------------------------------------------------------------------
 
-    fapi::ReturnCode mss_bulk_pwr_throttles(const fapi::Target & i_target_mba)
+    fapi::ReturnCode mss_bulk_pwr_throttles(const fapi::Target & i_target_mba
+					    )
     {
 	fapi::ReturnCode rc;
 
 	char procedure_name[32];
 	sprintf(procedure_name, "mss_bulk_pwr_throttles");
-	FAPI_IMP("*** Running %s ***", procedure_name);
+	FAPI_IMP("*** Running %s on %s ***", procedure_name,
+		 i_target_mba.toEcmdString());
 
-	enum
-	{
-	    CDIMM  = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM,
-	    RDIMM  = fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
-	    UDIMM  = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM,
-	    LRDIMM = fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
-	};
 
 // other variables used in this procedure
 	const uint8_t MAX_NUM_PORTS = 2;
@@ -182,18 +186,18 @@ extern "C" {
 	bool not_enough_available_power;
 	bool channel_pair_throttle_done;
 	float channel_pair_power;
-	uint8_t dimm_type;
+	uint8_t custom_dimm;
 	uint8_t num_mba_with_dimms;
 	uint32_t power_int_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
-	bool thermal_throttle_active;
 	uint8_t mba_index;
 
 // Get input attributes
-	rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, dimm_type);
+	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, custom_dimm);
 	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_EFF_DIMM_TYPE");
+	    FAPI_ERR("Error getting attribute ATTR_EFF_CUSTOM_DIMM");
 	    return rc;
 	}
+
 	rc = FAPI_ATTR_GET(ATTR_MSS_MEM_WATT_TARGET,
 			   &i_target_mba, channel_pair_watt_target);
 	if (rc) {
@@ -205,29 +209,9 @@ extern "C" {
 	    FAPI_ERR("Error getting attribute ATTR_MSS_POWER_INT");
 	    return rc;
 	}
-// runtime throttles will be the thermal throttle values (or zero if not
-// initialized yet)
-	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
-			   &i_target_mba, throttle_n_per_mba);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
-	    return rc;
-	}
-	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-			   &i_target_mba, throttle_n_per_chip);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
-	    return rc;
-	}
-	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
-			   &i_target_mba, throttle_d);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
-	    return rc;
-	}
 
-// get number of mba's with dimms for a CDIMM
-	if (dimm_type == CDIMM)
+// get number of mba's  with dimms for a CDIMM
+	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
 	{
 // Get Centaur target for the given MBA
 	    rc = fapiGetParentChip(i_target_mba, target_chip);
@@ -278,44 +262,16 @@ extern "C" {
 // If over limit, then increase throttle value until it is at or below limit
 // If unable to get power below limit, then call out an error
 
-// Determine whether to base throttles on thermal or power reasons (power
-// throttles can give you better performance than thermal throttles)
-	if (
-	    (throttle_n_per_mba == 0) &&
-	    (throttle_n_per_chip == 0) &&
-	    (throttle_d == 0)
-	    )
-	{
-// runtime throttles are all zero here, they have not been defined yet and need
-// to be
-	    thermal_throttle_active = true;
 // Set runtime throttles to default values as a starting value
-	    throttle_n_per_mba = MEM_THROTTLE_N_DEFAULT_PER_MBA;
-	    throttle_n_per_chip = MEM_THROTTLE_N_DEFAULT_PER_CHIP *
-	      num_mba_with_dimms;
-	    throttle_d = MEM_THROTTLE_D_DEFAULT;
-	}
-	else if (
-		 (throttle_n_per_mba != MEM_THROTTLE_N_DEFAULT_PER_MBA) ||
-		 (throttle_n_per_chip !=
-		  (MEM_THROTTLE_N_DEFAULT_PER_CHIP * num_mba_with_dimms)) ||
-		 (throttle_d != MEM_THROTTLE_D_DEFAULT)
-		 )
-	{
-// if runtime throttles are not equal to the default values, then thermal
-// throttles are in place
-	    thermal_throttle_active = true;
-	}
-	else
-	{
-// runtime throttles are not all zero and equal to the defaults, so no thermal
-// throttles are in place - so now any throttles will be power based
-	    thermal_throttle_active = false;
-	}
+	throttle_n_per_mba = MEM_THROTTLE_N_DEFAULT_PER_MBA;
+	throttle_n_per_chip = MEM_THROTTLE_N_DEFAULT_PER_CHIP *
+	  num_mba_with_dimms;
+	throttle_d = MEM_THROTTLE_D_DEFAULT;
+
 // Adjust power limit value as needed here
 // For CDIMM, we want the throttles to be per-chip, and to allow all commands to
 // go to one MBA to get to the power limit
-	if (dimm_type == CDIMM)
+	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
 	{
 // Set channel pair power limit to whole CDIMM power limit (multiply by number
 // of MBAs used) and subtract off idle power for dimms on other MBA
@@ -353,92 +309,37 @@ extern "C" {
 
 // compare channel pair power to mss_watt_target for channel and decrease
 // throttles if it is above this limit
-// throttle decrease will decrement throttle numerator by one (or increase
-// throttle denominator) and recalculate power until utilization (N/M) reaches a
-// lower limit
+// throttle decrease will decrement throttle numerator by one
+// and recalculate power until utilization (N/M) reaches a lower limit
 
 	    if (channel_pair_power > channel_pair_watt_target)
 	    {
 // check to see if dimm utilization is greater than the min utilization limit,
 // continue if it is, error if it is not
-		if (
-		    (
-		     ((((float)throttle_n_per_chip * 100 * 4) / throttle_d) >
-		      MIN_UTIL) &&
-		     (dimm_type != CDIMM) &&
-		     (thermal_throttle_active == false)
-		     )
-		    ||
-		    (
-		     ((((float)throttle_n_per_chip * 100 * 4) / throttle_d) >
-		      MIN_UTIL) &&
-		     (dimm_type != CDIMM) &&
-		     (thermal_throttle_active == true)
-		     )
-		    ||
-		    (
-		     ((((float)throttle_n_per_chip * 100 * 4) / throttle_d) >
-		      MIN_UTIL) &&
-		     (dimm_type == CDIMM)
-		     )
-		    )
+		if ((((float)throttle_n_per_chip * 100 * 4) / throttle_d) >
+		      MIN_UTIL)
 		{
-		    if (
-			(
-			 (throttle_n_per_chip > 1) &&
-			 (dimm_type != CDIMM) &&
-			 (thermal_throttle_active == false)
-			 )
-			||
-			(
-			 (throttle_n_per_chip > 1) &&
-			 (dimm_type != CDIMM) &&
-			 (thermal_throttle_active == true)
-			 )
-			||
-			(
-			 (throttle_n_per_chip > 1) &&
-			 (dimm_type == CDIMM)
-			 )
-			)
+		    if (throttle_n_per_chip > 1)
 		    {
-			if (dimm_type == CDIMM)
+			if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
 			{
 // CDIMMs, use per chip throttling for any thermal or available power limits
 			    throttle_n_per_chip--;
 			}
 			else
 			{
-// ISDIMMs, use per slot throttling for thermal power limits
-			    if (thermal_throttle_active == true)
-			    {
+// ISDIMMs, use per mba throttling for available power limit
 // per_mba throttling (ie.  per dimm for ISDIMMs) will limit performance if all
 // traffic is sent to one dimm, so use the per_chip
-// This works as long as the other dimm is providing termination (for 2 dimms
-// per channel)
-//    If the other dimm is not providing termination, then we would want to
-//    redefine the power curve in mss_eff_config_thermal and use the per_mba
-//    throttle here
-// It there is only one dimm on channel, then it will provide its own
-// termination and the per_mba and per_chip will effectively do the same
-// throttling (ie.  doesn't matter which one we do in this case)
-// Warning:  If this changes, then the two if statements above need to be
-// modified
-				throttle_n_per_chip--;
-			    }
-			    else
-			    {
-// ISDIMMs, use per mba throttling for available power limit
-// Warning:  If this changes, then the two if statements above need to be
-// modified
-				throttle_n_per_chip--;
-			    }
+			    throttle_n_per_chip--;
 			}
 		    }
-// increment throttle denominator if numerator is at one (its lowest setting)
+// This was increment throttle_d++, but don't want to change the denominator since OCC does not set it.
+// Done if we reach this point (ie.  not enough power)
 		    else
 		    {
-			throttle_d++;
+			channel_pair_throttle_done = true;
+			not_enough_available_power = true;
 		    }
 		    FAPI_DBG("Throttle update [N_per_mba/N_per_chip/M %d/%d/%d]", throttle_n_per_mba, throttle_n_per_chip, throttle_d);
 		}
@@ -456,6 +357,16 @@ extern "C" {
 		FAPI_DBG("There is enough available memory power [Channel Pair Power %4.2f/%d cW]", channel_pair_power, channel_pair_watt_target);
 		channel_pair_throttle_done = true;
 	    }
+	}
+
+// Set per_mba throttle to per_chip throttle if it is greater
+// This way, when OCC throttles using per_mba due to thermal reasons,
+// it has a higher chance of making an immediate impact
+// NOTE:  If above throttle determination uses throttle_n_per_mba, then
+// we need to change this around
+	if (throttle_n_per_mba > throttle_n_per_chip)
+	{
+	    throttle_n_per_mba = throttle_n_per_chip;
 	}
 
 	FAPI_DBG("Final Throttle Settings [N_per_mba/N_per_chip/M %d/%d/%d]", throttle_n_per_mba, throttle_n_per_chip, throttle_d);
@@ -497,7 +408,8 @@ extern "C" {
 	    if (rc) fapiLogError(rc);
 	}
 
-	FAPI_IMP("*** %s COMPLETE ***", procedure_name);
+	FAPI_IMP("*** %s COMPLETE on %s ***", procedure_name,
+		 i_target_mba.toEcmdString());
 	return rc;
     }
 

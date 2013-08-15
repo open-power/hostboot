@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_cpu_special_wakeup.C,v 1.7 2013/04/16 12:14:14 pchatnah Exp $
+// $Id: p8_cpu_special_wakeup.C,v 1.13 2013/08/02 18:59:13 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_cpu_special_wakeup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -79,10 +79,7 @@
 
 #include "p8_pm.H"
 #include "p8_cpu_special_wakeup.H"
-#include <ecmdDataBufferBase.H>
-//#include <ecmdClientCapi.H>
-#include <fapi.H>
-
+#include "p8_pcb_scom_errors.H"
 
 extern "C" {
 
@@ -101,33 +98,32 @@ p8_cpu_special_wakeup(  const fapi::Target& i_target,
                         PROC_SPCWKUP_ENTITY i_entity )
 
 {
-    fapi::ReturnCode    l_rc;
+    fapi::ReturnCode    rc;
+    fapi::ReturnCode    oha_rc;
     uint32_t            e_rc = 0;
     ecmdDataBufferBase  data(64);
+    ecmdDataBufferBase  fsi_data(64);
     ecmdDataBufferBase  polldata(64);
-    //TODO RTC: 71328 - hack to indicate unused
-    bool                __attribute__((unused)) error_flag = false;
-    //TODO RTC: 71328 - needs to be const
-    const char* PROC_SPCWKUP_ENTITY_NAMES[] = 
-      {
-	"HOST",
-	"FSP",
-	"OCC",
-	"PHYP",
-	"SPW_ALL"
-      };        
-    
 
+    fapi::Target        l_parentTarget;
+    uint8_t             attr_chip_unit_pos = 0;
 
-    //TODO RTC: 71328 - needs to be const
+    const char* PROC_SPCWKUP_ENTITY_NAMES[] =
+    {
+        "HOST",
+        "FSP",
+        "OCC",
+        "PHYP",
+        "SPW_ALL"
+    };
+
     const char* PROC_SPCWKUP_OPS_NAMES[] =
-      {
-	"DISABLE",
-	"ENABLE",
-	"INIT"
-      };
-        
-    
+    {
+        "DISABLE",
+        "ENABLE",
+        "INIT"
+    };
+
     uint32_t            special_wakeup_max_polls;
 
     /// Time (binary in milliseconds) for the first poll check (running/nap
@@ -136,8 +132,9 @@ p8_cpu_special_wakeup(  const fapi::Target& i_target,
 
     ///  Get an attribute that defines the maximum special wake-up polling
     ///         timing (binary in milliseconds).
+    ///  Increased timeout to 200ms - 6/10/13
 
-    uint32_t            special_wakeup_timeout = 25;
+    uint32_t            special_wakeup_timeout = 200;
 
     ///  Get an attribute that defines the special wake-up polling interval
     ///         (binary in milliseconds).
@@ -149,47 +146,68 @@ p8_cpu_special_wakeup(  const fapi::Target& i_target,
     std::vector<fapi::Target>      l_chiplets;
     std::vector<Target>::iterator  itr;
 
-    uint64_t            SP_WKUP_REG_ADDRS;
+    uint8_t            oha_spwkup_flag = 0;
+    uint8_t            ignore_xstop_flag = 0;
 
     //--------------------------------------------------------------------------
     // Read the counts of different ENTITY (FSP,OCC,PHYP) from the Attributes
     //--------------------------------------------------------------------------
 
-    uint32_t            PHYP_SPWKUP_COUNT = 0;
-    uint32_t            FSP_SPWKUP_COUNT  = 0;
-    uint32_t            OCC_SPWKUP_COUNT  = 0;
+    uint32_t            phyp_spwkup_count = 0;
+    uint32_t            fsp_spwkup_count  = 0;
+    uint32_t            occ_spwkup_count  = 0;
+
+    uint64_t            spwkup_address  = 0;
 
     do
     {
-    
+
         FAPI_INF("Executing p8_cpu_special_wakeup %s for %s ...",
                     PROC_SPCWKUP_OPS_NAMES[i_operation],
                     PROC_SPCWKUP_ENTITY_NAMES[i_entity]);
-                    
+
         // Initialize the attributes to 0.
         if (i_operation == SPCWKUP_INIT)
         {
+            FAPI_INF("Processing target %s", i_target.toEcmdString());
             FAPI_INF("Initializing ATTR_PM_SPWUP_FSP");
-            l_rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_FSP, &i_target, FSP_SPWKUP_COUNT);
-            if (l_rc)
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_FSP, &i_target, fsp_spwkup_count);
+            if (rc)
             {
-                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_FSP with l_rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_FSP with rc = 0x%x", (uint32_t)rc);
+                break ;
             }
 
             FAPI_INF("Initializing ATTR_PM_SPWUP_OCC");
-            l_rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OCC, &i_target, OCC_SPWKUP_COUNT);
-            if (l_rc)
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OCC, &i_target, occ_spwkup_count);
+            if (rc)
             {
-                 FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_OCC with l_rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_OCC with rc = 0x%x", (uint32_t)rc);
                 break;
             }
 
             FAPI_INF("Initializing ATTR_PM_SPWUP_PHYP");
-            l_rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_PHYP, &i_target, PHYP_SPWKUP_COUNT);
-            if (l_rc)
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_PHYP, &i_target, phyp_spwkup_count);
+            if (rc)
             {
-                 FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_PHYP with l_rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_PHYP with rc = 0x%x", (uint32_t)rc);
                 break;
+            }
+
+            FAPI_INF("Initializing ATTR_PM_SPWUP_OHA_FLAG");
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OHA_FLAG, &i_target, oha_spwkup_flag);
+            if (rc)
+            {
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+
+            FAPI_INF("Initializing ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG");
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG, &i_target, ignore_xstop_flag);
+            if (rc)
+            {
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG with rc = 0x%x", (uint32_t)rc);
+                break ;
             }
 
             // Leave the procedure
@@ -200,55 +218,43 @@ p8_cpu_special_wakeup(  const fapi::Target& i_target,
         //           Checking the ENTITY who raised this OPERATION
         //--------------------------------------------------------------------------
 
-        fapi::Target l_parentTarget;
-        uint8_t attr_chip_unit_pos = 0;
-
         // Get the parent chip to target the registers
-        l_rc = fapiGetParentChip(i_target, l_parentTarget);
-        if (l_rc)
+        rc = fapiGetParentChip(i_target, l_parentTarget);
+        if (rc)
         {
             break;    // throw error
         }
 
-        // Check whether system is checkstopped
-        l_rc=fapiGetScom(l_parentTarget, PCBMS_INTERRUPT_TYPE_REG_0x000F001A, data);
-        if( data.isBitSet( 2 ) )
+        // Get the core number
+        rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, attr_chip_unit_pos);
+        if (rc)
         {
-            FAPI_ERR( "This chip is xstopped, so ignoring the special wakeup request\n" );
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_CHKSTOP);
+            FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)rc);
             break;
         }
 
-        // Get the core number
-        l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, attr_chip_unit_pos);
-        if (l_rc)
-        {
-            FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with l_rc = 0x%x", (uint32_t)l_rc);
-            break;
-        }
-        //    CORE_NUM = attr_chip_unit_pos;
         FAPI_DBG("Core number = %d", attr_chip_unit_pos);
 
-        // Read the Attributes to know the Special_wake counts form each entities .
+        // Read the Attributes to know the Special_wake counts from each entity
         // This should be different for different EX chiplets.
-        l_rc = FAPI_ATTR_GET(ATTR_PM_SPWUP_FSP, &i_target, FSP_SPWKUP_COUNT);
-        if (l_rc)
+        rc = FAPI_ATTR_GET(ATTR_PM_SPWUP_FSP, &i_target, fsp_spwkup_count);
+        if (rc)
         {
-             FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_FSP with l_rc = 0x%x", (uint32_t)l_rc);
+            FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_FSP with rc = 0x%x", (uint32_t)rc);
             break;
         }
 
-        l_rc = FAPI_ATTR_GET(ATTR_PM_SPWUP_OCC, &i_target, OCC_SPWKUP_COUNT );
-        if (l_rc)
+        rc = FAPI_ATTR_GET(ATTR_PM_SPWUP_OCC, &i_target, occ_spwkup_count );
+        if (rc)
         {
-             FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_FSP with l_rc = 0x%x", (uint32_t)l_rc);
+            FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_OCC with rc = 0x%x", (uint32_t)rc);
             break;
         }
 
-        l_rc = FAPI_ATTR_GET(ATTR_PM_SPWUP_PHYP,&i_target , PHYP_SPWKUP_COUNT );
-        if (l_rc)
+        rc = FAPI_ATTR_GET(ATTR_PM_SPWUP_PHYP,&i_target , phyp_spwkup_count );
+        if (rc)
         {
-             FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_FSP with l_rc = 0x%x", (uint32_t)l_rc);
+            FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_PHYP with rc = 0x%x", (uint32_t)rc);
             break;
         }
 
@@ -261,23 +267,23 @@ p8_cpu_special_wakeup(  const fapi::Target& i_target,
         // Process counts based on the calling entity
         if (i_entity == OCC)
         {
-            count = OCC_SPWKUP_COUNT ;
+            count = occ_spwkup_count ;
             FAPI_INF("OCC count before = %d" , count);
-            SP_WKUP_REG_ADDRS = PM_SPECIAL_WKUP_OCC_0x100F010C +
+            spwkup_address = PM_SPECIAL_WKUP_OCC_0x100F010C +
                                 (attr_chip_unit_pos  * 0x01000000) ;
         }
         else if (i_entity == FSP)
         {
-            count = FSP_SPWKUP_COUNT ;
+            count = fsp_spwkup_count ;
             FAPI_INF("FSP count before = %d" , count);
-            SP_WKUP_REG_ADDRS = PM_SPECIAL_WKUP_FSP_0x100F010B +
+            spwkup_address = PM_SPECIAL_WKUP_FSP_0x100F010B +
                                 (attr_chip_unit_pos  * 0x01000000);
         }
         else if (i_entity == PHYP)
         {
-            count = PHYP_SPWKUP_COUNT ;
+            count = phyp_spwkup_count ;
             FAPI_INF("PHYP count before = %d" , count);
-            SP_WKUP_REG_ADDRS = PM_SPECIAL_WKUP_PHYP_0x100F010D +
+            spwkup_address = PM_SPECIAL_WKUP_PHYP_0x100F010D +
                                 (attr_chip_unit_pos  * 0x01000000);
         }
         else
@@ -285,7 +291,7 @@ p8_cpu_special_wakeup(  const fapi::Target& i_target,
             FAPI_ERR("Unknown entity passed to proc_special_wakeup. Entity %x ....", i_entity);
             //    I_ENTITY = i_entity;
             PROC_SPCWKUP_ENTITY & I_ENTITY = i_entity ;
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_SPCWKUP_CODE_BAD_ENTITY);
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_SPCWKUP_CODE_BAD_ENTITY);
             break;
         }
 
@@ -293,106 +299,313 @@ p8_cpu_special_wakeup(  const fapi::Target& i_target,
         //           Checking the type of OPERATION and process the request
         /////////////////////////////////////////////////////////////////////////////
 
-        l_rc=fapiGetScom(l_parentTarget, EX_PMGP0_0x1X0F0100, data);
-        if(l_rc)
+        rc=fapiGetScom(l_parentTarget, EX_PMGP0_0x1X0F0100, data);
+        if(rc)
         {
             break;
         }
 
         if (i_operation == SPCWKUP_ENABLE)
         {
+
+            // If the OHA flag is set, then any subsequent calls to the this
+            // procedure must return a "good" response or else an infinite
+            // loop results for any calling algorithm that first sets
+            // special wake-up, does a SCOM, and then clears special
+            // wake-up.
+            rc = FAPI_ATTR_GET(   ATTR_PM_SPWUP_OHA_FLAG, 
+                                    &i_target, 
+                                    oha_spwkup_flag);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+
+            if (oha_spwkup_flag)
+            {
+                 FAPI_INF("OHA special wakeup flag is set so returning with good response to break recursion.  Counts are NOT updated.");
+                // This is a purposeful mid-procedure return
+                return rc;
+            }
+
+            // Determine if xstop checking should be ignored base on a caller
+            // set attribute.
+            // 
+            // This is used during MPIPL clean-up to a core to clear FIRs that 
+            // will eventually clear the xstop condition.  However, to do so 
+            // needs the xstop check to not keep the special wake-up operation 
+            // from happening.
+            rc = FAPI_ATTR_GET(   ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG, 
+                                    &i_target, 
+                                    ignore_xstop_flag);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG with rc = 0x%x", (uint32_t)rc);
+                break ;
+            }
+
+            if (!ignore_xstop_flag)
+            {                 
+                // Check whether system is checkstopped..
+                rc=fapiGetScom(l_parentTarget, PCBMS_INTERRUPT_TYPE_REG_0x000F001A, data);
+                if(rc)
+                {
+                    break;
+                }
+
+                if( data.isBitSet( 2 ) )
+                {
+                    FAPI_ERR( "This chip is xstopped, so ignoring the special wakeup request\n" );
+                    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_CHKSTOP);
+                    break;
+                }
+            }
+            else
+            {
+                FAPI_INF("Ignore checkstop flag is set so checkstop checking is NOT being performed");
+            }
+
             FAPI_INF("Setting Special Wake-up  ...") ;
 
-            //    FAPI_INF("Count value after the increment is  %x  ...", count);
             if (count == 0)
             {
 
-                GETSCOM(i_target,  SP_WKUP_REG_ADDRS, data);
+                GETSCOM(rc, i_target, spwkup_address, data);
 
                 e_rc  = data.flushTo0();
                 e_rc |= data.setBit(0);
-                E_RC_CHECK(e_rc, l_rc);
+                E_RC_CHECK(e_rc, rc);
 
-                PUTSCOM(i_target,  SP_WKUP_REG_ADDRS, data);
+                PUTSCOM(rc, i_target, spwkup_address, data);
 
                 // poll for the set completion
                 pollcount = 0;
                 e_rc=data.flushTo0();
-                E_RC_CHECK(e_rc, l_rc);
+                E_RC_CHECK(e_rc, rc);
 
                 while (data.isBitClear(31) && pollcount < special_wakeup_max_polls)
                 {
-                    GETSCOM(l_parentTarget, EX_PMGP0_0x1X0F0100, data);
-                    FAPI_DBG("  Loop get for PMGP0(31) to goto 1          => 0x%16llx", data.getDoubleWord(0));
+                    GETSCOM(rc, l_parentTarget, EX_PMGP0_0x1X0F0100, data);
+                    FAPI_DBG("  Loop get for PMGP0(31) to goto 1          => 0x%016llx", data.getDoubleWord(0));
 
-                    fapiDelay(special_wakeup_poll_interval*1000, 1000000);
+                    rc = fapiDelay(special_wakeup_poll_interval*1000, 1000000);
+                    if (rc)
+                    {
+                        break;
+                    }
                     pollcount ++ ;
-
                 }
+                if (!rc.ok())
+                {
+                    break;
+                }
+
+                // Workaround for HW255321 start here
+                // at timeout time:
+                //  - check for existing external interrupts or malf alerts pending :     PMGP0 bit52
+                //     AND if OHA is in the AISS-FSM-state  P7_SEQ_WAIT_INT_PENDING EX_OHA_RO_STATUS_REG_0x1002000B
+                // If yes - then OHA hangs
+                // To leave this FSM state:
+                //   -  Set  Bit 9  of  OHA_ARCH_IDLE_STATE_REG(  RESET_IDLE_STATE_SEQUENCER).  EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011
+                // This resets the idle sequencer and  force OHA into the DO_NOTHING_STATE ...should be completed in the next cycle
+                //
+                // Continue further down and check special_wakeup completion by checking bit31 of EX_PMGP0_0x1X0F0100
+                // If set then is OHA awake else error
+
+
+                GETSCOM(rc, l_parentTarget, EX_PMGP0_0x1X0F0100, data);
+
+                if (data.isBitClear(31) && data.isBitSet(52) )
+                {
+                    FAPI_DBG("Timed out setting Special wakeup with regular wake-up available, the logical OR of external interrupt and malfunction alert   ... ");
+                    FAPI_DBG("Checking for Hang-Situation in AISS-FSM-State P7_SEQ_WAIT_INT_PENDING ... ");
+                    FAPI_DBG("Special Wake-up Done NOT asserted (PMGP0(31,52)!! =>0x%016llx", data.getDoubleWord(0));
+
+                    oha_spwkup_flag = 1;
+
+                    rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OHA_FLAG, &i_target, oha_spwkup_flag);
+                    if (rc)
+                    {
+                        FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                        break;
+                    }
+                    FAPI_INF("Set OHA special wakeup flag");
+
+                    // Check now if OHA is in the AISS-FSM-state  P7_SEQ_WAIT_INT_PENDING  EX_OHA_RO_STATUS_REG_0x1002000B  (bit 13-19) 0b0011100
+                    GETSCOM(rc, i_target, EX_OHA_RO_STATUS_REG_0x1002000B, data);
+
+                    FAPI_DBG("\tCURRENT_AISS_FSM_STATE_VECTOR  (OHA_RO_STATUS(13:19) => 0x%016llx", data.getDoubleWord(0));
+
+                    if (data.isBitClear(13) &&      // 0
+                        data.isBitClear(14) &&      // 0
+                        data.isBitSet(15)   &&      // 1
+                        data.isBitSet(16)   &&      // 1
+                        data.isBitSet(17)   &&      // 1
+                        data.isBitClear(18) &&      // 0
+                        data.isBitClear(19) )       // 0
+                    {
+                        FAPI_DBG("OHA hanging in AISS-FSM-state P7_SEQ_WAIT_INT_PENDING (0b11100) (OHA_RO_STATUS_REG(13:19) => 0x%016llx", data.getDoubleWord(0));
+                        FAPI_DBG("Start reset of IDLE STATE SEQUENCER: Set OHA_ARCH_IDLE_STATE_REG(9)");
+
+                        GETSCOM(rc, i_target, EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011, data);
+                        FAPI_DBG("\tEX_OHA_ARCH_IDLE_STATE_REG_RWx10020011 : 0x%016llx", data.getDoubleWord(0));
+
+                        //Set RESET_IDLE_STATE_SEQUENCER  ... Bit 9 of OHA_ARCH_IDLE_STATE_REG
+                        e_rc=data.setBit(9);
+                        E_RC_CHECK(e_rc, rc);
+
+                        PUTSCOM(rc, i_target, EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011, data);
+
+                        // This resets the idle sequencer and force OHA into the
+                        // DO_NOTHING_STATE ... should be completed in the next
+                        // cycle since special wakeup is still asserted, OHA should
+                        // not leave the DO_NOTHING_STATE
+
+                        // Check again for AISS-FSM-state  P7_SEQ_WAIT_INT_PENDING  EX_OHA_RO_STATUS_REG_0x1002000B  (bit 13-19) 0b11100
+                        GETSCOM(rc, i_target, EX_OHA_RO_STATUS_REG_0x1002000B, data);
+                        FAPI_DBG("\tCURRENT_AISS_FSM_STATE_VECTOR  (OHA_RO_STATUS(13:19) => 0x%016llx", data.getDoubleWord(0));
+
+                        // We're done accessing the OHA so clear the flag
+                        oha_spwkup_flag = 0;
+                        rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OHA_FLAG, &i_target, oha_spwkup_flag);
+                        if (rc)
+                        {
+                            FAPI_ERR("fapiSetAttribute to clear ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                            // This is a purposeful mid-procedure return
+                            return rc;
+                        }
+                        FAPI_INF("Cleared OHA special wakeup flag");
+                    }
+                }
+
+                // Check again if special_wakeup completed
+                GETSCOM(rc, l_parentTarget, EX_PMGP0_0x1X0F0100, data);
+
+                // Workaround for HW255321 ends here
+
                 if (data.isBitClear(31))
                 {
                     FAPI_ERR("Timed out in setting the CPU in Special wakeup    ... ");
-                    FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_SPCWKUP_TIMEOUT);
+
+                    GETSCOM(rc, l_parentTarget, EX_PMGP0_0x1X0F0100, data);
+                    FAPI_DBG("Special Wake-up Done asserted (PMGP0(31)!! =>0x%016llx", data.getDoubleWord(0));
+                    const uint64_t& PMGP0 =  data.getDoubleWord(0);
+
+                    // Removing per SW205177 as the following GETSCOM creates an
+                    // infinite loop during execution on the FSP.  It is not
+                    // clear why that is so we'll address its reinstatement as
+                    // part of the RAS review process.
+
+                    // GETSCOM(rc, i_target, EX_OHA_RO_STATUS_REG_0x1002000B, data);
+                    // FAPI_DBG("  Special Wake-up complete (OHA_RO_STATUS(1)!! => 0x%016llx", data.getDoubleWord(0));
+                    // const uint64_t& OHA_RO_STATUS =  data.getDoubleWord(0);
+
+                    GETSCOM(rc, l_parentTarget, spwkup_address , data);
+                    FAPI_DBG("  After set of SPWKUP_REG (0x%08llx) => 0x%016llx", spwkup_address, data.getDoubleWord(0));
+                    const uint64_t& SP_WKUP_REG_ADDRESS = spwkup_address;
+                    const uint64_t& SP_WKUP_REG_VALUE =  data.getDoubleWord(0);
+
+                    const uint64_t& POLLCOUNT =  (uint64_t)pollcount;
+                    const uint64_t& EX =  (uint64_t)attr_chip_unit_pos;
+                    const uint64_t& ENTITY =  (uint64_t)i_entity;
+                    PROC_SPCWKUP_OPS& I_OPERATION = i_operation ;
+
+                    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_SPCWKUP_TIMEOUT);
                     break;
+
                 }
-                GETSCOM(l_parentTarget, EX_PMGP0_0x1X0F0100, data);
-                FAPI_DBG("  Special Wake-up Done asserted (PMGP0(31)!! =>0x%16llx", data.getDoubleWord(0));
-
-                GETSCOM(i_target, EX_OHA_RO_STATUS_REG_0x1002000B, data);
-                FAPI_DBG("  Special Wake-up complete (OHA_RO_STATUS(1)!! => 0x%16llx", data.getDoubleWord(0));
-
-                GETSCOM(l_parentTarget, SP_WKUP_REG_ADDRS , data);
-                FAPI_DBG("  After set of SPWKUP_REG (0x%08llx) => 0x%16llx", SP_WKUP_REG_ADDRS, data.getDoubleWord(0));
-
+                else
+                {
+                    FAPI_INF("Special wakeup done is set.  SUCCESS!  ... ");
+                }
             }
             count++ ;
-
         }
         else if (i_operation == SPCWKUP_DISABLE)
         {
 
             FAPI_INF("Clearing Special Wake-up...");
 
+            // If the OHA flag is set, then any subsequent calls to the this
+            // procedure must return a "good" response or elso an infinite
+            // loop results for any calling algorithm that first sets
+            // special wake-up, does a SCOM, and then clears special
+            // wake-up.
+
+            rc = FAPI_ATTR_GET(ATTR_PM_SPWUP_OHA_FLAG, &i_target, oha_spwkup_flag);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+
+            if (oha_spwkup_flag)
+            {
+                 FAPI_INF("OHA special wakeup flag is set so returning with good response to break recursion.  Counts are NOT updated.");
+                // This is a purposeful mid-procedure return
+                return rc;
+            }
+
+
             if ( count == 1 )
             {
-                GETSCOM(l_parentTarget, SP_WKUP_REG_ADDRS , data);
-                FAPI_DBG("  Before clear of SPWKUP_REG (0x%08llx) => =>0x%16llx",  SP_WKUP_REG_ADDRS, data.getDoubleWord(0));
+                GETSCOM(rc, l_parentTarget, spwkup_address , data);
+                FAPI_DBG("  Before clear of SPWKUP_REG (0x%08llx) => =>0x%016llx",  spwkup_address, data.getDoubleWord(0));
 
                 e_rc=data.flushTo0();
-                E_RC_CHECK(e_rc, l_rc);
+                E_RC_CHECK(e_rc, rc);
 
-                PUTSCOM(l_parentTarget, SP_WKUP_REG_ADDRS , data);
-                FAPI_DBG("  After clear putscom of SPWKUP_REG (0x%08llx) => 0x%16llx", SP_WKUP_REG_ADDRS, data.getDoubleWord(0));
+                PUTSCOM(rc, l_parentTarget, spwkup_address , data);
+                FAPI_DBG("  After clear putscom of SPWKUP_REG (0x%08llx) => 0x%016llx", spwkup_address, data.getDoubleWord(0));
 
                 // This puts an inherent delay in the propagation of the reset transition.
-                GETSCOM(l_parentTarget, SP_WKUP_REG_ADDRS , data);
-                FAPI_DBG("  After read (delay) of SPWKUP_REG (0x%08llx) 0x%16llx", SP_WKUP_REG_ADDRS, data.getDoubleWord(0));
+                GETSCOM(rc, l_parentTarget, spwkup_address , data);
+                FAPI_DBG("  After read (delay) of SPWKUP_REG (0x%08llx) 0x%016llx", spwkup_address, data.getDoubleWord(0));
 
                 count -- ;
             }
             else if ( count > 1 )
             {
-                FAPI_INF("Other processes having clear Special Wake-up pending.  Chiplet is still in Special Wake-up state.");
+                FAPI_INF("Other processes have clear Special Wake-up pending.  Chiplet is still in Special Wake-up state.");
                 count -- ;
             }
-            else
+            else // this should never happen
             {
-                FAPI_ERR("Illegal Special wake up operation : already Disabled on this platform  %x", i_entity);
-                FAPI_ERR ("  FSP_COUNT = %d , OCC_COUNT = %d , PHYP_COUNT = %d ", FSP_SPWKUP_COUNT ,OCC_SPWKUP_COUNT ,PHYP_SPWKUP_COUNT);
+                FAPI_ERR("Ineffective Special wake up Disable operation as it is already disabled for this platform  %x", i_entity);
+                FAPI_ERR ("  FSP_COUNT = %d , OCC_COUNT = %d , PHYP_COUNT = %d ", fsp_spwkup_count ,occ_spwkup_count ,phyp_spwkup_count);
                 PROC_SPCWKUP_OPS & I_OPERATION = i_operation ;
-                FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_SPCWKUP_CODE_BAD_OP);
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_SPCWKUP_CODE_BAD_OP);
                 break;
             }
 
-            GETSCOM(l_parentTarget, SP_WKUP_REG_ADDRS , data);
-            FAPI_DBG("  After configuring  SPWKUP_REG value     =>0x%16llx", data.getDoubleWord(0));
+            GETSCOM(rc, l_parentTarget, spwkup_address , data);
+            FAPI_DBG("  After configuring  SPWKUP_REG value     =>0x%016llx", data.getDoubleWord(0));
 
+        }
+        else if (i_operation == SPCWKUP_FORCE_DEASSERT)
+        {
+            
+            GETSCOM(rc, l_parentTarget, spwkup_address , data);
+            FAPI_DBG("  Before clear of SPWKUP_REG (0x%08llx) => =>0x%016llx",  spwkup_address, data.getDoubleWord(0));
+
+            e_rc=data.flushTo0();
+            E_RC_CHECK(e_rc, rc);
+
+            PUTSCOM(rc, l_parentTarget, spwkup_address , data);
+            FAPI_DBG("  After clear putscom of SPWKUP_REG (0x%08llx) => 0x%016llx", spwkup_address, data.getDoubleWord(0));
+
+            // This puts an inherent delay in the propagation of the reset transition.
+            GETSCOM(rc, l_parentTarget, spwkup_address , data);
+            FAPI_DBG("  After read (delay) of SPWKUP_REG (0x%08llx) 0x%016llx", spwkup_address, data.getDoubleWord(0));
+
+            count = 0;
         }
         else
         {
-            FAPI_ERR("Please specify operation either ENABLE or DISABLE. Operation %x", i_operation );
+            FAPI_ERR("ENABLE, DISABLE or INIT must be specified. Operation %x", i_operation );
             PROC_SPCWKUP_OPS & I_OPERATION = i_operation ;
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_SPCWKUP_CODE_BAD_OP);
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_SPCWKUP_CODE_BAD_OP);
             break;
         }
 
@@ -402,39 +615,83 @@ p8_cpu_special_wakeup(  const fapi::Target& i_target,
 
         if ( i_entity == OCC )
         {
-            OCC_SPWKUP_COUNT  = count ;
-            l_rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OCC, &i_target, OCC_SPWKUP_COUNT );
-            if (l_rc)
+            occ_spwkup_count  = count ;
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OCC, &i_target, occ_spwkup_count );
+            if (rc)
             {
-                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_OCC with l_rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_OCC with rc = 0x%x", (uint32_t)rc);
                 break;
             }
         }
         else if (i_entity == FSP)
         {
-            FSP_SPWKUP_COUNT = count ;
-            l_rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_FSP, &i_target, FSP_SPWKUP_COUNT );
-            if (l_rc)
+            fsp_spwkup_count = count ;
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_FSP, &i_target, fsp_spwkup_count );
+            if (rc)
             {
-                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_FSP with l_rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_FSP with rc = 0x%x", (uint32_t)rc);
                 break;
             }
         }
         else if (i_entity == PHYP)
         {
-            PHYP_SPWKUP_COUNT = count;
-            l_rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_PHYP, &i_target, PHYP_SPWKUP_COUNT );
-            if (l_rc)
+            phyp_spwkup_count = count;
+            rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_PHYP, &i_target, phyp_spwkup_count );
+            if (rc)
             {
-                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_PHYP1 with l_rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_PHYP with rc = 0x%x", (uint32_t)rc);
                 break;
             }
         }
 
-        FAPI_INF ("  FSP_COUNT = %d , OCC_COUNT = %d , PHYP_COUNT = %d ", FSP_SPWKUP_COUNT ,OCC_SPWKUP_COUNT ,PHYP_SPWKUP_COUNT);
+        FAPI_INF ("  FSP_COUNT = %d , OCC_COUNT = %d , PHYP_COUNT = %d ", fsp_spwkup_count ,occ_spwkup_count ,phyp_spwkup_count);
     } while (0);
 
-    return l_rc ;
+    // Clean up the OHA flag as it should not be set out of this exit (normal
+    // and error) path.  Note:  there is ia mid-procedure return above.
+    oha_rc = FAPI_ATTR_GET(ATTR_PM_SPWUP_OHA_FLAG, &i_target, oha_spwkup_flag);
+    if (oha_rc)
+    {
+        FAPI_ERR("fapiGetAttribute of ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)oha_rc);
+    }
+    else
+    {
+        if (oha_spwkup_flag)
+        {
+            oha_spwkup_flag = 0;
+
+            oha_rc = FAPI_ATTR_SET(ATTR_PM_SPWUP_OHA_FLAG, &i_target, oha_spwkup_flag);
+            if (oha_rc)
+            {
+                FAPI_ERR("fapiSetAttribute of ATTR_PM_SPWUP_OHA_FLAG with rc = 0x%x", (uint32_t)oha_rc);
+            }
+
+            FAPI_ERR("Clearing OHA flag attribute upon procedure exit.  This is NOT expected");
+            PROC_SPCWKUP_OPS& I_OPERATION = i_operation ;
+            const uint64_t& EX =  (uint64_t)attr_chip_unit_pos;
+            const uint64_t& ENTITY =  (uint64_t)i_entity;
+            const uint64_t& PHYP_SPCWKUP_COUNT = (uint64_t)phyp_spwkup_count;
+            const uint64_t& FSP_SPCWKUP_COUNT  = (uint64_t)fsp_spwkup_count;
+            const uint64_t& OCC_SPCWKUP_COUNT  = (uint64_t)occ_spwkup_count;
+            FAPI_SET_HWP_ERROR(oha_rc, RC_PROCPM_SPCWKUP_OHA_FLAG_SET_ON_EXIT);
+
+        }
+    }
+
+    // Exit with the proper return code.  rc has priority over oha_rc as it indicates
+    // the first failure.
+    if (!rc.ok())
+    {
+        return rc ;
+    }
+    else if (!oha_rc.ok())
+    {
+        return oha_rc ;
+    }
+    else
+    {
+        return rc;
+    }
 }
 
 

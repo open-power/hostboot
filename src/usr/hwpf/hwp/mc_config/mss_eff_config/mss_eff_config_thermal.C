@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.15 2013/02/11 18:42:45 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.17 2013/07/22 14:09:20 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -43,7 +43,7 @@
 //    values are in cW.
 //    -- ISDIMM will calculate values based on various attributes
 //    -- CDIMM will get values from VPD
-// -- The throttle attributes will setup values for safemode and runtime
+// -- The throttle attributes will setup values for IPL and runtime
 //
 //
 //------------------------------------------------------------------------------
@@ -53,6 +53,15 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.17  | pardeik  |19-JUL-13| Use runtime throttles for IPL for scominit
+//         |          |         | Removed MRW safemode throttle stuff
+//         |          |         | Always determine runtime throttles now
+//   1.16  | pardeik  |08-JUL-13| Using CUSTOM_DIMM attribute
+//         |          |         | Initialize some termination variables to zero
+//         |          |         | changed handling of TYPE_1D
+//         |          |         | only get NUM_OF_REGISTERS_USED_ON_RDIMM 
+//         |          |         |   for RDIMM (non custom)
+//         |          |         | get thermal power limit from MRW
 //   1.15  | pardeik  |11-FEB-13| set safemode throttles to unthrottled value
 //         |          |         | for lab until fw sets runtime throttles
 //   1.14  | pardeik  |03-DEC-12| update lines to have a max width of 80 chars
@@ -98,13 +107,8 @@ TODO ITEMS:
 
 Waiting for platinit attributes to enable sections in this procedure:
 1.  Power Curves to originate from CDIMM VPD (platinit)
-2.  Thermal memory power limit from MRW (platinit)
-3.  Safemode throttles from MRW (platinit)
-5.  Need runtime throttles non-volatile and initialized to zero by firmware on
-    the first IPL
-6.  Call out error for CDIMM and lab VPD power curves when it makes sense
-7.  Update power table after hardware measurements are done
-
+2.  Call out error for CDIMM and lab VPD power curves when it makes sense
+3.  Update ISDIMM power table after hardware measurements are done
 */
 
 //------------------------------------------------------------------------------
@@ -143,7 +147,9 @@ extern "C" {
 //------------------------------------------------------------------------------
 // Funtions in this file
 //------------------------------------------------------------------------------
-    fapi::ReturnCode mss_eff_config_thermal(const fapi::Target & i_target_mba);
+    fapi::ReturnCode mss_eff_config_thermal(
+					    const fapi::Target & i_target_mba
+					    );
 
     fapi::ReturnCode mss_eff_config_thermal_term
       (
@@ -154,7 +160,9 @@ extern "C" {
        uint32_t i_dimm_voltage,
        uint8_t i_dram_width,
        uint8_t i_dram_tdqs,
-       uint8_t i_ibm_type[NUM_PORTS][NUM_DIMMS],
+       uint8_t i_dimm_type,
+       uint8_t i_stack_type,
+       uint8_t i_dimm_master_ranks_array[NUM_PORTS][NUM_DIMMS],
        uint8_t i_dimm_ranks_configed_array[NUM_PORTS][NUM_DIMMS],
        uint8_t i_dimm_dram_ron[NUM_PORTS][NUM_DIMMS],
        uint8_t i_dimm_rank_odt_rd[NUM_PORTS][NUM_DIMMS][NUM_RANKS],
@@ -189,20 +197,18 @@ extern "C" {
 // @return fapi::ReturnCode
 //------------------------------------------------------------------------------
 
-    fapi::ReturnCode mss_eff_config_thermal(const fapi::Target & i_target_mba)
+    fapi::ReturnCode mss_eff_config_thermal(const fapi::Target & i_target_mba
+					    )
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
 	char procedure_name[32];
 	sprintf(procedure_name, "mss_eff_config_thermal");
-	FAPI_IMP("*** Running %s ***", procedure_name);
+	FAPI_IMP("*** Running %s on %s ***", procedure_name,
+		 i_target_mba.toEcmdString());
 
 	enum
 	{
-	    CDIMM  = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM,
-	    RDIMM  = fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
-	    UDIMM  = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM,
-	    LRDIMM = fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
 	    DDR3 = fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3,
 	    DDR4 = fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
 	    X4 = fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -253,6 +259,7 @@ extern "C" {
 //            Gen   Width Ranks	 idle,full  Adder       Volt    Freq
 //                               cW         U,LR,RDIMM  mV      MHz
 //------------------------------------------------------------------------------
+// TODO:  Update ISDIMM power table values after measurements have been taken
 	power_data_t power_table[] =
 	{
 	    { DDR3, X4,   1,     { 70,373}, {0,93,104}, 1350,	1066 },
@@ -272,6 +279,8 @@ extern "C" {
 	uint8_t rank;
 	uint8_t entry;
 	uint8_t dimm_type;
+	uint8_t stack_type[NUM_PORTS][NUM_DIMMS];
+	uint8_t custom_dimm;
 	uint8_t dimm_ranks_array[NUM_PORTS][NUM_DIMMS];
 	uint32_t power_table_size;
 	uint32_t power_slope_array[NUM_PORTS][NUM_DIMMS];
@@ -291,14 +300,14 @@ extern "C" {
 	float dimm_power_mulitiplier_freq;
 	float dimm_idle_power;
 	float dimm_active_power;
-	float dimm_power_adder_termination;
+	float dimm_power_adder_termination = 0;
 	float dimm_power_adder_termination_largest = 0;
 	uint8_t dimm_rank_odt_rd[NUM_PORTS][NUM_DIMMS][NUM_RANKS];
 	uint8_t dimm_rank_odt_wr[NUM_PORTS][NUM_DIMMS][NUM_RANKS];
 	uint8_t dimm_dram_ron[NUM_PORTS][NUM_DIMMS];
 	uint8_t cen_dq_dqs_rcv_imp[NUM_PORTS];
 	uint8_t cen_dq_dqs_drv_imp[NUM_PORTS];
-	float dimm_power_adder_termination_wc;
+	float dimm_power_adder_termination_wc = 0;
 	float dimm_power_adder_termination_largest_wc = 0;
 	uint8_t cen_dq_dqs_rcv_imp_wc[NUM_PORTS];
 	uint8_t cen_dq_dqs_drv_imp_wc[NUM_PORTS];
@@ -311,7 +320,6 @@ extern "C" {
 	uint32_t runtime_throttle_d;
 	uint8_t dram_rtt_nom[NUM_PORTS][NUM_DIMMS][NUM_RANKS];
 	uint8_t dram_rtt_wr[NUM_PORTS][NUM_DIMMS][NUM_RANKS];
-	uint8_t ibm_type[NUM_PORTS][NUM_DIMMS];
 	char dram_gen_str[4];
 	uint32_t dimm_thermal_power_limit;
 	uint32_t channel_pair_thermal_power_limit;
@@ -323,15 +331,20 @@ extern "C" {
 	uint32_t cdimm_master_power_intercept;
 	uint32_t cdimm_supplier_power_slope;
 	uint32_t cdimm_supplier_power_intercept;
-	uint32_t safemode_throttle_n_per_mba;
-	uint32_t safemode_throttle_n_per_chip;
-	uint32_t safemode_throttle_d;
 
 	power_table_size = (sizeof(power_table))/(sizeof(power_data_t));
 
 //------------------------------------------------------------------------------
 // Get input attributes
 //------------------------------------------------------------------------------
+
+// Get Centaur target for the given MBA
+	rc = fapiGetParentChip(i_target_mba, target_chip);
+	if (rc) {
+	    FAPI_ERR("Error from fapiGetParentChip");
+	    return rc;
+	}
+
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target_mba, dram_gen);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_DRAM_GEN");
@@ -340,6 +353,16 @@ extern "C" {
 	rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, dimm_type);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_DIMM_TYPE");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target_mba, stack_type);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_EFF_STACK_TYPE");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, custom_dimm);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_EFF_CUSTOM_DIMM");
 	    return rc;
 	}
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, dram_width);
@@ -407,11 +430,6 @@ extern "C" {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_DRAM_RTT_WR");
 	    return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_IBM_TYPE, &i_target_mba, ibm_type);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_EFF_IBM_TYPE");
-	    return rc;
-	}
 	rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT,
 			   &i_target_mba, num_dimms_on_port);
 	if (rc) {
@@ -425,95 +443,39 @@ extern "C" {
 	cdimm_supplier_power_slope = CDIMM_POWER_SLOPE_DEFAULT;
 	cdimm_supplier_power_intercept = CDIMM_POWER_INT_DEFAULT;
 /*
-	rc = FAPI_ATTR_GET(ATTR_SPD_CDIMM_MASTER_POWER_SLOPE,
-			   &i_target_mba, cdimm_master_power_slope);
+	rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_SLOPE,
+			   &target_chip, cdimm_master_power_slope);
 	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_SPD_CDIMM_MASTER_POWER_SLOPE");
+	    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_MASTER_POWER_SLOPE");
 	    return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_SPD_CDIMM_MASTER_POWER_INTERCEPT,
-			   &i_target_mba, cdimm_master_power_intercept);
+	rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT,
+			   &target_chip, cdimm_master_power_intercept);
 	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_SPD_CDIMM_MASTER_POWER_INTERCEPT");
+	    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT");
 	    return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_SPD_CDIMM_SUPPLIER_POWER_SLOPE,
-			   &i_target_mba, cdimm_supplier_power_slope);
+	rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE,
+			   &target_chip, cdimm_supplier_power_slope);
 	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_SPD_CDIMM_SUPPLIER_POWER_SLOPE");
+	    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE");
 	    return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_SPD_CDIMM_SUPPLIER_POWER_INTERCEPT,
-			   &i_target_mba, cdimm_supplier_power_intercept);
+	rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT,
+			   &target_chip, cdimm_supplier_power_intercept);
 	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_SPD_CDIMM_SUPPLIER_POWER_INTERCEPT");
-	    return rc;
-	}
-*/
-// TODO:  Get Safemode throttles from MRW (platinit), hardcode until available
-// Do not use safe mode throttles until firmware programs runtime throttles (ie.  don't impact lab with throttles)
-	if (dimm_type == CDIMM)
-	{
-	    safemode_throttle_n_per_mba = 96;
-	}
-	else
-	{
-	    safemode_throttle_n_per_mba = 96;
-	}
-//	safemode_throttle_n_per_chip = 32;
-	if (dimm_type == CDIMM)
-	{
-	    safemode_throttle_n_per_chip = 192;
-	}
-	else
-	{
-	    safemode_throttle_n_per_chip = 96;
-	}
-	safemode_throttle_d = 512;
-/*
-	rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA,
-			   &i_target_mba, safemode_throttle_n_per_mba);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA");
-	    return rc;
-	}
-	rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-			   &i_target_mba, safemode_throttle_n_per_chip);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP");
-	    return rc;
-	}
-	rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR,
-			   &i_target_mba, safemode_throttle_d);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR");
-	    return rc;
-	}
-*/
-// TODO:  Get Thermal power Limit from MRW (platinit), hardcode until available
-	if (dimm_type == CDIMM)
-	{
-	    dimm_thermal_power_limit = 5000; // in cW, per CDIMM, high limit
-	}
-	else
-	{
-	    dimm_thermal_power_limit = 2000; // in cW, per ISDIMM, high limit
-	}
-/*
-	rc = FAPI_ATTR_GET(ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT,
-			   &i_target_mba, dimm_thermal_power_limit);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT");
+	    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT");
 	    return rc;
 	}
 */
 
-// Get Centaur target for the given MBA
-	rc = fapiGetParentChip(i_target_mba, target_chip);
+	rc = FAPI_ATTR_GET(ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT,
+			   NULL, dimm_thermal_power_limit);
 	if (rc) {
-	    FAPI_ERR("Error from fapiGetParentChip");
+	    FAPI_ERR("Error getting attribute ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT");
 	    return rc;
 	}
+
 // Get voltage and frequency attributes
 	rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &target_chip, dimm_voltage);
 	if (rc) {
@@ -528,7 +490,10 @@ extern "C" {
 
 
 // get any attributes from DIMM SPD
-	if (dimm_type != CDIMM)
+	if (
+	    (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
+	    && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)
+	    )
 	{
 	    rc = fapiGetAssociatedDimms(i_target_mba, target_dimm_array,
 					fapi::TARGET_STATE_PRESENT);
@@ -563,7 +528,7 @@ extern "C" {
 	}
 
 // Get number of Centaur MBAs that have dimms present
-	if (dimm_type == CDIMM)
+	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
 	{
 	    rc = fapiGetChildChiplets(target_chip,
 				      fapi::TARGET_TYPE_MBA_CHIPLET,
@@ -591,7 +556,7 @@ extern "C" {
 	}
 
 // determine worst case termination settings here for ISDIMMs (to be used later)
-	if (dimm_type != CDIMM)
+	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
 	{
 // get worst case termination values that will be used
 // Only look at Centaur DQ/DQS Driver and Receiver termination settings
@@ -621,7 +586,7 @@ extern "C" {
 	for (port=0; port < NUM_PORTS; port++)
 	{
 // Get termination power for ISDIMM
-	    if (dimm_type != CDIMM)
+	    if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
 	    {
 		dimm_power_adder_termination_largest=0;
 		dimm_power_adder_termination_largest_wc=0;
@@ -642,7 +607,9 @@ extern "C" {
 			   dimm_voltage,
 			   dram_width,
 			   dram_tdqs,
-			   ibm_type,
+			   dimm_type,
+			   stack_type[port][dimm],
+			   dimm_master_ranks_array,
 			   dimm_ranks_configed_array,
 			   dimm_dram_ron,
 			   dimm_rank_odt_rd,
@@ -675,7 +642,9 @@ extern "C" {
 			   dimm_voltage,
 			   dram_width,
 			   dram_tdqs,
-			   ibm_type,
+			   dimm_type,
+			   stack_type[port][dimm],
+			   dimm_master_ranks_array,
 			   dimm_ranks_configed_array,
 			   dimm_dram_ron,
 			   dimm_rank_odt_rd,
@@ -716,7 +685,7 @@ extern "C" {
 
 // CDIMM power slope/intercept will come from VPD
 // Data in VPD needs to be the power per virtual dimm on the CDIMM
-		    if (dimm_type == CDIMM)
+		    if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
 		    {
 			power_slope_array[port][dimm] =
 			  cdimm_master_power_slope;
@@ -828,12 +797,12 @@ extern "C" {
 				)
 			    {
 // get adder for dimm type
-				if (dimm_type == UDIMM)
+				if (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)
 				{
 				    dimm_power_adder_type =
 				      power_table[entry].dimm_type_adder.udimm;
 				}
-				else if (dimm_type == LRDIMM)
+				else if (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)
 				{
 				    dimm_power_adder_type =
 				      power_table[entry].dimm_type_adder.lrdimm;
@@ -845,7 +814,7 @@ extern "C" {
 				}
 
 
-				if (dimm_type == RDIMM) {
+				if (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) {
 				    dimm_power_adder_type =
 				      dimm_power_adder_type *
 				      dimm_number_registers[port][dimm];
@@ -974,6 +943,7 @@ extern "C" {
 //------------------------------------------------------------------------------
 			if (found_entry_in_table == 0)
 			{
+
 			    FAPI_ERR("Failed to Find DIMM Power Values on %s.  Default values will be used [P%d:D%d][Slope=%d:INT=%d cW]", i_target_mba.toEcmdString(), port, dimm, power_slope_array[port][dimm], power_int_array[port][dimm]);
 
 // get dimm target, we should always find a valid dimm target from this
@@ -1046,60 +1016,8 @@ extern "C" {
 // Memory Throttle Determination
 //------------------------------------------------------------------------------
 
-// Runtime throttles will be non-volatile, so don't recalculate them if they
-// have already been set
+// Determine memory throttle settings needed based on dimm thermal power limit
 
-// TODO:  remove this section when firmware initializes attributes to zero AND
-// runtime throttles are non-volatile
-	runtime_throttle_n_per_mba = 0;
-	runtime_throttle_n_per_chip = 0;
-	runtime_throttle_d = 0;
-	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
-			   &i_target_mba, runtime_throttle_n_per_mba);
-	if (rc) {
-	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
-	    return rc;
-	}
-	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-			   &i_target_mba, runtime_throttle_n_per_chip);
-	if (rc) {
-	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
-	    return rc;
-	}
-	rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
-			   &i_target_mba, runtime_throttle_d);
-	if (rc) {
-	    FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
-	    return rc;
-	}
-
-// Get the runtime throttle attributes here
-	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
-			   &i_target_mba, runtime_throttle_n_per_mba);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA");
-	    return rc;
-	}
-	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-			   &i_target_mba, runtime_throttle_n_per_chip);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP");
-	    return rc;
-	}
-	rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
-			   &i_target_mba, runtime_throttle_d);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
-	    return rc;
-	}
-// check to see if runtime throttles are all zero here
-	if (
-	    (runtime_throttle_n_per_mba == 0) &&
-	    (runtime_throttle_n_per_chip == 0) &&
-	    (runtime_throttle_d == 0)
-	    )
-	{
-// Values have not been initialized, so get them initialized
 //------------------------------------------------------------------------------
 // Determine the thermal power limit to use, which represents a single channel
 // pair power limit for the dimms on that channel pair (ie.  power for all dimms
@@ -1112,7 +1030,7 @@ extern "C" {
 //   This means that the power limit for a MBA channel pair must be the total
 // CDIMM power limit minus the idle power of the other MBAs logical dimms
 //------------------------------------------------------------------------------
-	    if (dimm_type == CDIMM)
+	    if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
 	    {
 		channel_pair_thermal_power_limit =
 		  dimm_thermal_power_limit / num_mba_with_dimms;
@@ -1143,7 +1061,8 @@ extern "C" {
 		return rc;
 	    }
 
-// Read back in the updated throttle attribute values (these are now set to values that will give dimm/channel power underneath the thermal power limit)
+// Read back in the updated throttle attribute values (these are now set to
+// values that will give dimm/channel power underneath the thermal power limit)
 	    rc = FAPI_ATTR_GET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA,
 			       &i_target_mba, runtime_throttle_n_per_mba);
 	    if (rc) {
@@ -1183,13 +1102,13 @@ extern "C" {
 		return rc;
 	    }
 
-	}
 
-// Initialize the generic throttle attributes to safemode throttles (since the
-// IPL will be done at the safemode throttles)
-	throttle_n_per_mba = safemode_throttle_n_per_mba;
-	throttle_n_per_chip = safemode_throttle_n_per_chip;
-	throttle_d = safemode_throttle_d;
+// Initialize the generic throttle attributes to be used for scominit 
+// These throttles will be the runtime throttles for mcbist/msdiag
+// safemode throttles will be set in thermal_init step
+	throttle_n_per_mba = runtime_throttle_n_per_mba;
+	throttle_n_per_chip = runtime_throttle_n_per_chip;
+	throttle_d = runtime_throttle_d;
 
 // write output attributes
 	rc = FAPI_ATTR_SET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA,
@@ -1211,7 +1130,8 @@ extern "C" {
 	    return rc;
 	}
 
-	FAPI_IMP("*** %s COMPLETE ***", procedure_name);
+	FAPI_IMP("*** %s COMPLETE on %s ***", procedure_name,
+		 i_target_mba.toEcmdString());
 	return rc;
     }
 
@@ -1227,8 +1147,9 @@ extern "C" {
 // @param[in]   uint32_t i_dimm_voltage:  DIMM Voltage
 // @param[in]   uint8_t i_dram_width:  DRAM Width
 // @param[in]   uint8_t i_dram_tdqs:  DRAM TDQS enable/disable
-// @param[in]   uint8_t i_ibm_type[NUM_PORTS][NUM_DIMMS]:  IBM bus topology
-//              type
+// @param[in]   uint8_t i_dimm_type:  DIMM Type
+// @param[in]   uint8_t i_stack_type:  DRAM Stack Type
+// @param[in]   uint8_t i_dimm_master_ranks_array:  Number of Master Ranks
 // @param[in]   uint8_t i_dimm_ranks_configed_array[NUM_PORTS][NUM_DIMMS]:
 //              Master Ranks configured
 // @param[in]   uint8_t i_dimm_dram_ron[NUM_PORTS][NUM_DIMMS]:  DRAM RON driver
@@ -1260,7 +1181,9 @@ extern "C" {
        uint32_t i_dimm_voltage,
        uint8_t i_dram_width,
        uint8_t i_dram_tdqs,
-       uint8_t i_ibm_type[NUM_PORTS][NUM_DIMMS],
+       uint8_t i_dimm_type,
+       uint8_t i_stack_type,
+       uint8_t i_dimm_master_ranks_array[NUM_PORTS][NUM_DIMMS],
        uint8_t i_dimm_ranks_configed_array[NUM_PORTS][NUM_DIMMS],
        uint8_t i_dimm_dram_ron[NUM_PORTS][NUM_DIMMS],
        uint8_t i_dimm_rank_odt_rd[NUM_PORTS][NUM_DIMMS][NUM_RANKS],
@@ -1328,7 +1251,19 @@ extern "C" {
 // Also need to consider if ODT is tied high for writes (if rtt_wr is set for
 // the rank being written to, then it will be assumed that ODT is tied high)
 
-	if (i_ibm_type[i_port][i_dimm] == fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1D)
+// Type_1D is also the following (use these instead of attribute)
+// 1.  RDIMM or UDIMM
+// 2.  4 Master Ranks
+// 3.  Planar or DDP/QDP
+	if (
+	    ((i_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)
+	     || (i_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM))
+	    &&
+	    (i_dimm_master_ranks_array[i_port][i_dimm] == 4)
+	    &&
+	    ((i_stack_type == fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE)
+	     || (i_stack_type == fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP))
+	    )
 	{
 	    ma0odt01_dimm = 0;
 	    ma1odt01_dimm = 1;
@@ -1859,7 +1794,12 @@ extern "C" {
 	       );
 	    FAPI_DBG("%s TERM:[P%d:D%d:R%d] CEN[DRV=%d RCV=%d] DRAM[DRV=%d ODT_RD=%4.2f ODT_WR=%4.2f]", i_nom_or_wc_term, i_port, i_dimm, i_rank, cen_dq_dqs_drv_imp_value, i_cen_dq_dqs_rcv_imp[i_port], i_dimm_dram_ron[i_port][i_dimm], eff_term_rd, eff_term_wr);
 	    FAPI_DBG("%s TERM POWER:[P%d:D%d:R%d] RD[Nets=%d EffTerm=%3.2f ODTMult=%1.2f] WR[Nets=%d EffTerm=%3.2f ODTMult=%1.2f] TermPower(%d%%)=%2.2f W", i_nom_or_wc_term, i_port, i_dimm, i_rank, number_nets_term_rd, eff_net_term_rd, term_odt_mult_rd, number_nets_term_wr, eff_net_term_wr, term_odt_mult_wr, ACTIVE_DIMM_UTILIZATION, o_dimm_power_adder_termination);
-	}	
+	}
+	else
+	{
+// rank not configured, so it has no termination power associated with it
+	    o_dimm_power_adder_termination = 0;
+	}
 
 	FAPI_IMP("*** %s COMPLETE ***", procedure_name);
 	return rc;

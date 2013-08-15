@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_cpu_special_wakeup.H,v 1.5 2013/04/16 12:14:35 pchatnah Exp $
+// $Id: p8_cpu_special_wakeup.H,v 1.6 2013/08/02 18:59:22 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_cpu_special_wakeup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -65,7 +65,8 @@ enum PROC_SPCWKUP_OPS
 {
     SPCWKUP_DISABLE,
     SPCWKUP_ENABLE,
-    SPCWKUP_INIT
+    SPCWKUP_INIT,
+    SPCWKUP_FORCE_DEASSERT
 };
 
 

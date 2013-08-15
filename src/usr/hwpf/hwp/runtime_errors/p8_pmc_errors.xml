@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: p8_pmc_errors.xml,v 1.6 2013/08/02 19:15:41 stillgs Exp $ -->
 <!-- Error definitions for proc_pmc_init procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -35,20 +36,46 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_PMCRESET_TARGET_ERROR</rc>
-    <description>Either both targets are masters or slaves in reset mode.</description>
+    <rc>RC_PROCPM_PMCRESET_SPIVID_CONFIG_ERROR</rc>
+    <description>Master target does not have SPIVID ports enabled: check the configuration setup.</description>
+    <ffdc>MASTER_TARGET</ffdc>
+    <ffdc>ATTR_SPIVID_PORT_ENABLE</ffdc>
   </hwpError>
-
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_FIR_ERROR</rc>
     <description>Either both targets are masters or slaves in reset mode.</description>
   </hwpError>
-
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR</rc>
     <description>Error found in DCM installment..</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PMC_MASTER_CONFIG_ERROR</rc>
+    <description>MasterPMC bit of Master PMC is not set.</description>
+    <ffdc>MASTERPMCMODE</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PMC_SLAVE_CONFIG_ERROR</rc>
+    <description>MasterPMC bit of Slave PMC is not set.</description>
+    <ffdc>SLAVEPMCMODE</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PMC_INTERCHIP_CONFIG_ERROR</rc>
+    <description>Master is enabled with interchip interface but slave is not.</description>
+    <ffdc>MASTERPMCMODE</ffdc>
+    <ffdc>SLAVEPMCMODE</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PMC_FW_MODE_ERROR</rc>
+    <description>Master is enabled with FW pstate mode but slave is not </description>
+    <ffdc>MASTERPMCMODE</ffdc>
+    <ffdc>SLAVEPMCMODE</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>

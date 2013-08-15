@@ -1,9 +1,12 @@
 
-#-- $Id: mba_def.initfile,v 1.44 2013/05/06 15:28:35 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.46 2013/07/17 18:23:53 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.46|tschang | 7/17/13|updated refresh interval and refresh check interval calculations
+#--     1.45|tschang | 6/04/13|using ATTR_EFF_DRAM_RRD, etc timing parms for settings
+#--                            setting RD ODT according to Menlo's equation
 #--     1.44|tschang | 5/06/13|added 2n_mode to timing parms equations
 #--     1.43|tschang | 5/01/13|def_refresh_interval optimized to avoid divide by 0 condition
 #--     1.42|tschang | 5/01/13|cfg_min_domain_reduction disabled as requested by performance team
@@ -1983,10 +1986,7 @@ scom 0x0301040B     {
     48:51   ,   0b1001   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 2400);                           # WWDM_dly     12                              D
     52:55   ,   0b0100   + def_margin2 ,             1            ,   any; # RROP_dly is 4 for all cfgs       13                                                        D
     56:59   ,   0b0100   + def_margin2 ,             1            ,   any; # WWOP_dly is 4 for all cfgs       14                                                        D
-    60:63   ,   0b0100   + def_margin2 ,             1            ,   (def_MBA_TMR0Q_Trrd_dly4 == 1); # TMR0Q_Trrd     15
-    60:63   ,   0b0101   + def_margin2 ,             1            ,   (def_MBA_TMR0Q_Trrd_dly5 == 1); # TMR0Q_Trrd     15
-    60:63   ,   0b0110   + def_margin2 ,             1            ,   (def_MBA_TMR0Q_Trrd_dly6 == 1); # TMR0Q_Trrd     15
-    60:63   ,   0b0111   + def_margin2 ,             1            ,   (def_MBA_TMR0Q_Trrd_dly7 == 1); # TMR0Q_Trrd     15
+    60:63   ,   ATTR_EFF_DRAM_TRRD     ,             1            ,   any; # TMR0Q_Trrd
 }
 
 # MBA_TMR1Q  mba01 timer settings
@@ -2018,6 +2018,7 @@ scom 0x0301040C     {
     7:13    ,   0b0110001    ,          1            ,   (def_mba_tmr1q_cfg_twap49 == 1); # cfg_twap     17
     7:13    ,   0b0110011    ,          1            ,   (def_mba_tmr1q_cfg_twap51 == 1); # cfg_twap     17
     7:13    ,   0b0110101    ,          1            ,   (def_mba_tmr1q_cfg_twap53 == 1); # cfg_twap     17
+#    14:19   ,   ATTR_EFF_DRAM_TFAW,          1             ,   any; # cfg_tfaw    # uncomment when Anuwat has added in fix
     14:19   ,   0b010100    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly20 == 1); # cfg_tfaw     18
     14:19   ,   0b010110    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly22 == 1); # cfg_tfaw     18
     14:19   ,   0b010111    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly23 == 1); # cfg_tfaw     18
@@ -2056,6 +2057,11 @@ define def_WL_AL0 = (ATTR_EFF_DRAM_CWL - 7);
 define def_WL_AL_MINUS1 = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 1 - 7);
 define def_WL_AL_MINUS2 = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 2 - 7);
 
+define def_RDODT_start_udimm  = (ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_CWL + 1);
+define def_RDODT_start_rdimm  = (ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_CWL + 2);
+define def_RDODT_start_lrdimm = (ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_CWL + 6);
+define def_RDODT_duration = (5);
+
 # MBA_DSM0Q  mba01 data state machine settings
 #< B0.C0.M00A.CENTAUR.MBU.MBA01.MBA_SRQ.MBA_DSM0Q(0:63) = 0x0870466094038800
 #> B0.C0.M00A.CENTAUR.MBU.MBA01.MBA_SRQ.MBA_DSM0Q(0:63) = 0x08704660A4838800
@@ -2063,18 +2069,14 @@ define def_WL_AL_MINUS2 = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 2 - 7);
 
 scom 0x0301040A     {
     bits    ,   scom_data   ,       ATTR_FUNCTIONAL,    expr;
-    0:5     ,   0b000000    ,           1            ,    (def_mba_dsm0q_CFG_RODT_start_dly0 == 1); # CFG_RODT_start_dly   21
-    0:5     ,   0b000001    ,           1            ,    (def_mba_dsm0q_CFG_RODT_start_dly1 == 1); # CFG_RODT_start_dly   21
-    0:5     ,   0b000010    ,           1            ,    (def_mba_dsm0q_CFG_RODT_start_dly2 == 1); # CFG_RODT_start_dly   21
-    0:5     ,   0b000011    ,           1            ,    (def_mba_dsm0q_CFG_RODT_start_dly3 == 1); # CFG_RODT_start_dly   21
-    0:5     ,   0b000100    ,           1            ,    (def_mba_dsm0q_CFG_RODT_start_dly4 == 1); # CFG_RODT_start_dly   21
-    6:11    ,   0b000101    ,           1            ,    (def_mba_dsm0q_CFG_RODT_end_dly5 == 1); # CFG_RODT_end_dly     22
-    6:11    ,   0b000110    ,           1            ,    (def_mba_dsm0q_CFG_RODT_end_dly6 == 1); # CFG_RODT_end_dly     22
-    6:11    ,   0b000111    ,           1            ,    (def_mba_dsm0q_CFG_RODT_end_dly7 == 1); # CFG_RODT_end_dly     22
-    6:11    ,   0b001000    ,           1            ,    (def_mba_dsm0q_CFG_RODT_end_dly8 == 1); # CFG_RODT_end_dly     22
-    6:11    ,   0b001001    ,           1            ,    (def_mba_dsm0q_CFG_RODT_end_dly9 == 1); # CFG_RODT_end_dly     22
-    12:17   ,   0b000000    ,           1            ,    any; # CFG_WODT_start_dly is 1 for all cfgs   23                     D
-    18:23   ,   0b000101    ,           1            ,    any; # CFG_WODT_end_dly is 6 for all cfgs     24                     D
+    0:5     ,   def_RDODT_start_udimm                        ,           1            , (ATTR_EFF_DIMM_TYPE == 0) && (ATTR_EFF_DIMM_TYPE == 2); # CFG_RODT_start_dly   21
+    0:5     ,   def_RDODT_start_rdimm                        ,           1            , (ATTR_EFF_DIMM_TYPE == 1); # CFG_RODT_start_dly   21
+    0:5     ,   def_RDODT_start_lrdimm                       ,           1            , (ATTR_EFF_DIMM_TYPE == 3); # CFG_RODT_start_dly   21
+    6:11    ,   def_RDODT_start_udimm  + def_RDODT_duration  ,           1            , (ATTR_EFF_DIMM_TYPE == 0) && (ATTR_EFF_DIMM_TYPE == 2); # CFG_RODT_end_dly     22
+    6:11    ,   def_RDODT_start_rdimm  + def_RDODT_duration  ,           1            , (ATTR_EFF_DIMM_TYPE == 1); # CFG_RODT_end_dly     22
+    6:11    ,   def_RDODT_start_lrdimm + def_RDODT_duration  ,           1            , (ATTR_EFF_DIMM_TYPE == 3); # CFG_RODT_end_dly     22
+    12:17   ,   0b000000    ,           1            ,    any; # CFG_WODT_start_dly is 0 for all cfgs   23                     D
+    18:23   ,   0b000101    ,           1            ,    any; # CFG_WODT_end_dly is 5 for all cfgs     24                     D
     24:29   ,   0b011000    ,           1            ,    any; # wrdone_dly is 24 for all cfgs 25                              D
     30:35   ,   def_WL_AL0 + 1  ,       1            ,    (((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3)) && (ATTR_EFF_DRAM_AL == 0)); # wrdata_dly
     30:35   ,   def_WL_AL0      ,       1            ,    (((ATTR_EFF_DIMM_TYPE == 0) || (ATTR_EFF_DIMM_TYPE == 2)) && (ATTR_EFF_DRAM_AL == 0)); # wrdata_dly
@@ -2100,31 +2102,34 @@ scom 0x0301040A     {
     36:41   ,   0b011011 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly27 == 1); # rdtag_dly		27
     36:41   ,   0b011100 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly28 == 1); # rdtag_dly		27
     36:41   ,   0b011101 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly29 == 1); # rdtag_dly		27
-    43:48   ,   0b000101    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY5 == 1); # CFG_RODT_BC4_END_DLY 28
-    43:48   ,   0b000110    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY6 == 1); # CFG_RODT_BC4_END_DLY 28
-    43:48   ,   0b000111    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY7 == 1); # CFG_RODT_BC4_END_DLY 28
-    43:48   ,   0b001000    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY8 == 1); # CFG_RODT_BC4_END_DLY 28
-    43:48   ,   0b001001    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY9 == 1); # CFG_RODT_BC4_END_DLY 28
-    49:54   ,   0b000100    ,           1            ,    any; # CFG_WODT_BC4_END_DLY is 4 for all cfgs 29                     D
+    43:48   ,   def_RDODT_start_udimm  + def_RDODT_duration - 2 ,           1            , (ATTR_EFF_DIMM_TYPE == 0) && (ATTR_EFF_DIMM_TYPE == 2); # CFG_RODT_BC4_END_DLY 28
+    43:48   ,   def_RDODT_start_rdimm  + def_RDODT_duration - 2 ,           1            , (ATTR_EFF_DIMM_TYPE == 1); # CFG_RODT_BC4_END_DLY 28
+    43:48   ,   def_RDODT_start_lrdimm + def_RDODT_duration - 2 ,           1            , (ATTR_EFF_DIMM_TYPE == 3); # CFG_RODT_BC4_END_DLY 28
+    49:54   ,   0b000011    ,           1            ,    any; # CFG_WODT_BC4_END_DLY is 3 for all cfgs 29                     D
 }
 
 ## Refresh Interval Calculuation
-## refresh_interval = ((ATTR_EFF_DRAM_TRFI/(def_num_ranks/2))/8);
-define def_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][1]);
-define def_refresh_interval = ((2*ATTR_EFF_DRAM_TRFI)/(8*def_num_ranks));
+## refresh_interval = ((ATTR_EFF_DRAM_TRFI/(def_num_ranks))/8);
+#define def_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][1]);
+define def_mba01_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[0][1]);
+define def_mba23_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][1]);
+define def_mba01_refresh_interval = ((ATTR_EFF_DRAM_TRFI)/(8*def_mba01_num_ranks));
+define def_mba23_refresh_interval = ((ATTR_EFF_DRAM_TRFI)/(8*def_mba23_num_ranks));
+define def_refresh_check_interval = (ATTR_EFF_DRAM_TRFI/8);  # same for both mba01 and mba23
 
 # MBAREF0Q   mba01 refresh settings
 #
 scom 0x03010432    {
     bits    ,   scom_data    ,      ATTR_FUNCTIONAL,    expr;
      4:7    ,   0b0111       ,           1            ,    any; # MBAREF0Q_refresh priority threshold is 0x7 for all cfgs      30     ?# refresh interval = tREFI(7.8) / # ranks per port / DRAM clk(ns) / 0.008
-     8:18   ,   def_refresh_interval,    1            ,    any; # MBAREF0Q_refresh intveral set to 176 decimal                 31     ?		!!FIXME# reset check interval = tREFI(7.8) / DRAM clk(ns) / 0.008
+     8:18   ,   def_mba01_refresh_interval,    1            ,    ATTR_CHIP_UNIT_POS == 0; # see calculation above
+     8:18   ,   def_mba23_refresh_interval,    1            ,    ATTR_CHIP_UNIT_POS == 1; # see calculation above
     19:29   ,   0b00011000010,           1            ,    any; # MBAREF0Q_refresh reset interval set to 194 decimal           32     ?		!!FIXME
     30:39   ,   ATTR_EFF_DRAM_TRFC,      1            ,    any; # MBAREF0Q_cfg_trfc   33
     40:49   ,   0b0000100000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly32 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
     40:49   ,   0b0000110000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly48 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
     40:49   ,   0b0001000000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly64 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
-    50:60   ,   0b01100001100,           1            ,    any; # MBAREF0Q_refresh check intveral set to 780 decimal            35
+    50:60   ,   def_refresh_check_interval,           1            ,    any; # MBAREF0Q_refresh check intveral set to 780 decimal            35
 }
 
 # MBAPC0Q    power control settings reg 1

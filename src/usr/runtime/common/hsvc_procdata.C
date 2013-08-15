@@ -20,77 +20,29 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Wed Jul 17 21:21:59 CDT 2013 by cswenson from
-//  ./create_hsvc_data.pl -w ../../xml/attribute_info/common_attributes.xml ../../xml/attribute_info/chip_attributes.xml ../../xml/attribute_info/poreve_memory_attributes.xml ../../xml/attribute_info/p8_xip_customize_attributes.xml ../../xml/attribute_info/proc_pll_ring_attributes.xml ../../xml/attribute_info/L2_L3_attributes.xml ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml ../../xml/attribute_info/freq_attributes.xml ../../xml/attribute_info/unit_attributes.xml ../../xml/attribute_info/pm_hwp_attributes.xml ../../xml/attribute_info/scratch_attributes.xml ../../xml/attribute_info/pm_plat_attributes.xml ../../xml/attribute_info/system_attributes.xml ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml
-// -- Input: ../../xml/attribute_info/common_attributes.xml --
+// Generated on Wed Feb 20 15:44:15 CST 2013 by dcrowell from 
+//  src/usr/runtime/common/create_hsvc_data.pl src/usr/runtime/common/extra_runtime_attributes.xml src/usr/hwpf/hwp/chip_attributes.xml src/usr/hwpf/hwp/runtime_attributes/pm_plat_attributes.xml src/usr/hwpf/hwp/runtime_attributes/pm_hwp_attributes.xml -w -d
+// -- Input: src/usr/runtime/common/extra_runtime_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_FUNCTIONAL );
-HSVC_LOAD_ATTR( ATTR_POS );
-// -- Input: ../../xml/attribute_info/chip_attributes.xml --
+// -- Input: src/usr/hwpf/hwp/chip_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_CHIP_HAS_SBE );
 HSVC_LOAD_ATTR( ATTR_CHIP_ID );
 HSVC_LOAD_ATTR( ATTR_CHIP_REGIONS_TO_ENABLE );
 HSVC_LOAD_ATTR_P( ATTR_EC );
-HSVC_LOAD_ATTR( ATTR_EX_L2_SINGLE_MEMBER_ENABLE );
 HSVC_LOAD_ATTR( ATTR_FABRIC_CHIP_ID );
 HSVC_LOAD_ATTR( ATTR_FABRIC_NODE_ID );
 HSVC_LOAD_ATTR( ATTR_FSI_GP_REG_SCOM_ACCESS );
 HSVC_LOAD_ATTR_P( ATTR_NAME );
 HSVC_LOAD_ATTR( ATTR_PROC_DCM_INSTALLED );
-// -- Input: ../../xml/attribute_info/poreve_memory_attributes.xml --
-HSVC_LOAD_ATTR( ATTR_PNOR_I2C_ADDRESS_BYTES );
-HSVC_LOAD_ATTR( ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES );
-HSVC_LOAD_ATTR( ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS );
-HSVC_LOAD_ATTR( ATTR_SBE_SEEPROM_I2C_PORT );
-// -- Input: ../../xml/attribute_info/p8_xip_customize_attributes.xml --
-HSVC_LOAD_ATTR( ATTR_PROC_ADU_UNTRUSTED_BAR_BASE_ADDR );
-HSVC_LOAD_ATTR( ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE );
-HSVC_LOAD_ATTR( ATTR_PROC_A_ENABLE );
-HSVC_LOAD_ATTR( ATTR_PROC_NX_ENABLE );
-HSVC_LOAD_ATTR( ATTR_PROC_PCIE_ENABLE );
-HSVC_LOAD_ATTR( ATTR_PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR );
-HSVC_LOAD_ATTR( ATTR_PROC_PSI_UNTRUSTED_BAR0_SIZE );
-HSVC_LOAD_ATTR( ATTR_PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR );
-HSVC_LOAD_ATTR( ATTR_PROC_PSI_UNTRUSTED_BAR1_SIZE );
-HSVC_LOAD_ATTR( ATTR_PROC_SECURITY_SETUP_VECTOR );
-HSVC_LOAD_ATTR( ATTR_PROC_X_ENABLE );
-// -- Input: ../../xml/attribute_info/proc_pll_ring_attributes.xml --
-HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_CHIPLET_ID );
-HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_DATA );
-HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FLUSH );
-HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA );
-//HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH );
-HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_LENGTH );
-HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_SCAN_SELECT );
-HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_CHIPLET_ID );
-HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_DATA );
-HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FLUSH );
-HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA );
-//HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH );
-HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_LENGTH );
-HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_SCAN_SELECT );
-HSVC_LOAD_ATTR( ATTR_PROC_PCI_BNDY_PLL_CHIPLET_ID );
-HSVC_LOAD_ATTR( ATTR_PROC_PCI_BNDY_PLL_DATA );
-HSVC_LOAD_ATTR( ATTR_PROC_PCI_BNDY_PLL_FLUSH );
-HSVC_LOAD_ATTR( ATTR_PROC_PCI_BNDY_PLL_LENGTH );
-HSVC_LOAD_ATTR( ATTR_PROC_PCI_BNDY_PLL_SCAN_SELECT );
-HSVC_LOAD_ATTR( ATTR_PROC_PERV_BNDY_PLL_CHIPLET_ID );
-HSVC_LOAD_ATTR( ATTR_PROC_PERV_BNDY_PLL_DATA );
-HSVC_LOAD_ATTR( ATTR_PROC_PERV_BNDY_PLL_FLUSH );
-HSVC_LOAD_ATTR( ATTR_PROC_PERV_BNDY_PLL_LENGTH );
-HSVC_LOAD_ATTR( ATTR_PROC_PERV_BNDY_PLL_SCAN_SELECT );
-// -- Input: ../../xml/attribute_info/L2_L3_attributes.xml --
-// No attributes found
-// -- Input: ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml --
-HSVC_LOAD_ATTR( ATTR_PROC_PCIE_NOT_F_LINK );
-// -- Input: ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml --
-HSVC_LOAD_ATTR( ATTR_PROC_L3_BAR1_REG );
-HSVC_LOAD_ATTR( ATTR_PROC_L3_BAR2_REG );
-HSVC_LOAD_ATTR( ATTR_PROC_L3_BAR_GROUP_MASK_REG );
-// -- Input: ../../xml/attribute_info/freq_attributes.xml --
-// No attributes found
-// -- Input: ../../xml/attribute_info/unit_attributes.xml --
-// No attributes found
-// -- Input: ../../xml/attribute_info/pm_hwp_attributes.xml --
+// -- Input: src/usr/hwpf/hwp/runtime_attributes/pm_plat_attributes.xml --
+HSVC_LOAD_ATTR( ATTR_PM_APSS_CHIP_SELECT );
+HSVC_LOAD_ATTR( ATTR_PM_PBAX_BRDCST_ID_VECTOR );
+HSVC_LOAD_ATTR( ATTR_PM_PBAX_CHIPID );
+HSVC_LOAD_ATTR( ATTR_PM_PBAX_NODEID );
+HSVC_LOAD_ATTR( ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM );
+HSVC_LOAD_ATTR( ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM );
+HSVC_LOAD_ATTR( ATTR_PM_SPIVID_PORT_ENABLE );
+// -- Input: src/usr/hwpf/hwp/runtime_attributes/pm_hwp_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_PM_AISS_TIMEOUT );
 HSVC_LOAD_ATTR( ATTR_PM_EXTERNAL_VRM_STEPDELAY_RANGE );
 HSVC_LOAD_ATTR( ATTR_PM_EXTERNAL_VRM_STEPDELAY_VALUE );
@@ -134,9 +86,10 @@ HSVC_LOAD_ATTR( ATTR_PM_RESONANT_CLOCK_HFRLOW_PSTATE );
 HSVC_LOAD_ATTR( ATTR_PM_RESONANT_CLOCK_LFRLOW_PSTATE );
 HSVC_LOAD_ATTR( ATTR_PM_RESONANT_CLOCK_LFRUPPER_PSTATE );
 HSVC_LOAD_ATTR( ATTR_PM_SAFE_PSTATE );
-HSVC_LOAD_ATTR( ATTR_PM_SLEEP_ENTRY );
-HSVC_LOAD_ATTR( ATTR_PM_SLEEP_EXIT );
-HSVC_LOAD_ATTR( ATTR_PM_SLEEP_TYPE );
+// TODO - Issue 78944
+//HSVC_LOAD_ATTR( ATTR_PM_SLEEP_ENTRY );
+//HSVC_LOAD_ATTR( ATTR_PM_SLEEP_EXIT );
+//HSVC_LOAD_ATTR( ATTR_PM_SLEEP_TYPE );
 HSVC_LOAD_ATTR( ATTR_PM_SLEEP_WINKLE_REQUEST_TIMEOUT );
 HSVC_LOAD_ATTR( ATTR_PM_SPIPSS_CLOCK_DIVIDER );
 HSVC_LOAD_ATTR( ATTR_PM_SPIPSS_CLOCK_PHASE );
@@ -162,20 +115,6 @@ HSVC_LOAD_ATTR( ATTR_PM_SPIVID_IN_DELAY_FRAME1 );
 HSVC_LOAD_ATTR( ATTR_PM_SPIVID_IN_DELAY_FRAME2 );
 HSVC_LOAD_ATTR( ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE );
 HSVC_LOAD_ATTR( ATTR_PM_SPIVID_MAX_RETRIES );
-HSVC_LOAD_ATTR( ATTR_PM_WINKLE_TYPE );
+// TODO - Issue 78944
+//HSVC_LOAD_ATTR( ATTR_PM_WINKLE_TYPE );
 HSVC_LOAD_ATTR( ATTR_PROC_DPLL_DIVIDER );
-// -- Input: ../../xml/attribute_info/scratch_attributes.xml --
-// No attributes found
-// -- Input: ../../xml/attribute_info/pm_plat_attributes.xml --
-HSVC_LOAD_ATTR( ATTR_PM_APSS_CHIP_SELECT );
-HSVC_LOAD_ATTR( ATTR_PM_PBAX_BRDCST_ID_VECTOR );
-HSVC_LOAD_ATTR( ATTR_PM_PBAX_CHIPID );
-HSVC_LOAD_ATTR( ATTR_PM_PBAX_NODEID );
-HSVC_LOAD_ATTR( ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM );
-HSVC_LOAD_ATTR( ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM );
-HSVC_LOAD_ATTR( ATTR_PM_SPIVID_PORT_ENABLE );
-// -- Input: ../../xml/attribute_info/system_attributes.xml --
-// No attributes found
-// -- Input: ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml --
-HSVC_LOAD_ATTR( ATTR_PROC_EX_FUNC_L3_DELTA_DATA );
-HSVC_LOAD_ATTR( ATTR_PROC_EX_FUNC_L3_LENGTH );

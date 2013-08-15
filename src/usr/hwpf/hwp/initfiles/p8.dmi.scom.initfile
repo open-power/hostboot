@@ -1,4 +1,4 @@
-#-- $Id: p8.dmi.scom.initfile,v 1.17 2013/04/18 19:13:44 jgrell Exp $ 
+#-- $Id: p8.dmi.scom.initfile,v 1.22 2013/07/30 20:45:32 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,14 +7,18 @@
 ##      Based on SETUP_ID_MODE DMI_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODPV_MC_WRAP.IODPV_MC_WRAP.figdb
 ##
-##   Created on Mon Apr 15 15:03:50 CDT 2013, by jgrell
+##   Created on Tue Jul 30 10:22:10 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jfg13072400| jfg     |07-24-13| HW253558: change pgooddly to MAX from lab feedback
+ ## -- mbs13071200| mbs     |07-12-13| Updates for HW239870 and HW258990                
+ ## --            |         |        | Disable recal adjustment for allv1 (DFE bug)     
  ## -- jgr13041800| jgr     |04-18-13| Added rx_max_ber_check_count setting to 0x03
+ ## -- smr13032500| SMR     |03-25-13| Changed rx_dyn_recal_overall_timeout_sel init to 0b100 & rx_sls_timeout_sel init to 0b110
  ## -- jgr13031300| jgr     |03-13-13| Added missing entries from rel 0128
  ## -- mbs13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
  ## -- mbs12121100| mbs     |12-11-12| Added rx_prot_speed_slct and rx_c4_sel
@@ -66,8 +70,8 @@ include edi.io.define
 
 define def_bus_id3 = ((ATTR_CHIP_UNIT_POS == 0) || (ATTR_CHIP_UNIT_POS == 4));
 define def_bus_id2 = ((ATTR_CHIP_UNIT_POS == 1) || (ATTR_CHIP_UNIT_POS == 5));
-define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 7));
-define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 6));
+define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 7));
+define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 6));
 
 
 
@@ -93,19 +97,19 @@ scom 0x800AF06002011A3F {
 #RX3.RXCTL.RX_CTL_REGS.RX_DFE_CONFIG_PP
 scom 0x800B786002011A3F { 
 	bits, scom_data, expr;
-     rx_amin_cfg,  0b010,   def_IS_HW && def_bus_id3;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id0;
+     rx_amin_cfg,  0b111,   def_IS_HW && def_bus_id3;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id0;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id0;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id1;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id1;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id2;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id2;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id2;
      rx_amin_cfg,  0b000,  def_IS_VBU && def_bus_id3;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id0;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id0;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id0;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id1;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id1;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id2;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id2;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id2;
      rx_anap_cfg,  0b10,   def_IS_HW && def_bus_id3;
 	rx_anap_cfg, 0b10, def_IS_HW && def_bus_id0;
@@ -121,20 +125,20 @@ scom 0x800B786002011A3F {
 	rx_anap_cfg, 0b00, def_IS_VBU && def_bus_id1;
 	rx_anap_cfg, 0b10, def_IS_HW && def_bus_id2;
 	rx_anap_cfg, 0b00, def_IS_VBU && def_bus_id2;
-     rx_h1ap_cfg,  0b011,   def_IS_HW && def_bus_id3;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id0;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id0;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id1;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id2;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id2;
-     rx_h1ap_cfg,  0b000,  def_IS_VBU && def_bus_id3;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id0;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id0;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id1;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id2;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_h1_cfg,  0b01,   def_IS_HW && def_bus_id3;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id0;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id0;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id1;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id1;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id2;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id2;
+     rx_h1_cfg,  0b00,  def_IS_VBU && def_bus_id3;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id0;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id0;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id1;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id1;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id2;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id2;
      rx_peak_cfg,  0b10,   def_IS_HW && def_bus_id3;
 	rx_peak_cfg, 0b10, def_IS_HW && def_bus_id0;
 	rx_peak_cfg, 0b00, def_IS_VBU && def_bus_id0;
@@ -154,19 +158,61 @@ scom 0x800B786002011A3F {
 #RX3.RXCTL.RX_CTL_REGS.RX_DFE_TIMERS_PP
 scom 0x800B806002011A3F { 
 	bits, scom_data, expr;
-     rx_init_tmr_cfg,  0b100,   def_IS_HW && def_bus_id3;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id0;
+     rx_ber_cfg,  0b100,   def_IS_HW && def_bus_id3;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id0;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id0;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id1;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id1;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id2;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_ber_cfg,  0b000,  def_IS_VBU && def_bus_id3;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id0;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id0;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id1;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id1;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id2;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_dac_bo_cfg,  0b101,   def_IS_HW && def_bus_id3;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id0;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id0;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id1;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id1;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id2;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_dac_bo_cfg,  0b000,  def_IS_VBU && def_bus_id3;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id0;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id0;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id1;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id1;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id2;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_ddc_cfg,  0b10,   def_IS_HW && def_bus_id3;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id0;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id0;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id1;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id1;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id2;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id2;
+     rx_ddc_cfg,  0b00,  def_IS_VBU && def_bus_id3;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id0;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id0;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id1;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id1;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id2;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id2;
+     rx_init_tmr_cfg,  0b111,   def_IS_HW && def_bus_id3;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id0;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id0;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id1;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id1;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id2;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id2;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id2;
      rx_init_tmr_cfg,  0b000,  def_IS_VBU && def_bus_id3;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id0;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id0;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id0;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id1;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id1;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id2;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id2;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id2;
      rx_prot_cfg,  0b10,   def_IS_HW && def_bus_id3;
 	rx_prot_cfg, 0b10, def_IS_HW && def_bus_id0;
@@ -187,10 +233,19 @@ scom 0x800B806002011A3F {
 #RX3.RXCTL.RX_CTL_REGS.RX_DYN_RECAL_CONFIG_PG
 scom 0x800A186002011A3F { 
 	bits, scom_data, expr;
-	rx_dyn_recal_overall_timeout_sel, 0b001, def_bus_id3;
-	rx_dyn_recal_overall_timeout_sel, 0b001, def_bus_id0;
-	rx_dyn_recal_overall_timeout_sel, 0b001, def_bus_id1;
-	rx_dyn_recal_overall_timeout_sel, 0b001, def_bus_id2;
+	rx_dyn_recal_overall_timeout_sel, 0b100, def_bus_id3;
+	rx_dyn_recal_overall_timeout_sel, 0b100, def_bus_id0;
+	rx_dyn_recal_overall_timeout_sel, 0b100, def_bus_id1;
+	rx_dyn_recal_overall_timeout_sel, 0b100, def_bus_id2;
+}
+
+#RX3.RXCTL.RX_CTL_REGS.RX_DYN_RECAL_TIMEOUTS_PP
+scom 0x800B406002011A3F { 
+	bits, scom_data, expr;
+	rx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id3;
+	rx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id0;
+	rx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id1;
+	rx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id2;
 }
 
 #RX3.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
@@ -458,25 +513,6 @@ scom 0x8009C06002011A3F {
 	rx_prot_speed_slct, 0b0, def_IS_VBU && def_bus_id2;
 }
 
-#RX3.RXCTL.RX_CTL_REGS.RX_MODE1_PP
-scom 0x800B086002011A3F { 
-	bits, scom_data, expr;
-     rx_bit_lock_timeout_sel,  0b110,   def_IS_HW && def_bus_id3;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id0;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id0;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id1;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id1;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id2;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id2;
-     rx_bit_lock_timeout_sel,  0b101,  def_IS_VBU && def_bus_id3;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id0;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id0;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id1;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id1;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id2;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id2;
-}
-
 #RX3.RXCTL.RX_CTL_REGS.RX_MODE_PG
 scom 0x8008186002011A3F { 
 	bits, scom_data, expr;
@@ -531,34 +567,14 @@ scom 0x800AB86002011A3F {
 	rx_rc_enable_ddc, 0b0, def_IS_VBU && def_bus_id1;
 	rx_rc_enable_ddc, 0b1, def_IS_HW && def_bus_id2;
 	rx_rc_enable_ddc, 0b0, def_IS_VBU && def_bus_id2;
-     rx_rc_enable_dfe_h1_cal,  0b1,   def_IS_HW && def_bus_id3;
-	rx_rc_enable_dfe_h1_cal, 0b1, def_IS_HW && def_bus_id0;
-	rx_rc_enable_dfe_h1_cal, 0b0, def_IS_VBU && def_bus_id0;
-	rx_rc_enable_dfe_h1_cal, 0b1, def_IS_HW && def_bus_id1;
-	rx_rc_enable_dfe_h1_cal, 0b0, def_IS_VBU && def_bus_id1;
-	rx_rc_enable_dfe_h1_cal, 0b1, def_IS_HW && def_bus_id2;
-	rx_rc_enable_dfe_h1_cal, 0b0, def_IS_VBU && def_bus_id2;
-     rx_rc_enable_dfe_h1_cal,  0b0,  def_IS_VBU && def_bus_id3;
-	rx_rc_enable_dfe_h1_cal, 0b1, def_IS_HW && def_bus_id0;
-	rx_rc_enable_dfe_h1_cal, 0b0, def_IS_VBU && def_bus_id0;
-	rx_rc_enable_dfe_h1_cal, 0b1, def_IS_HW && def_bus_id1;
-	rx_rc_enable_dfe_h1_cal, 0b0, def_IS_VBU && def_bus_id1;
-	rx_rc_enable_dfe_h1_cal, 0b1, def_IS_HW && def_bus_id2;
-	rx_rc_enable_dfe_h1_cal, 0b0, def_IS_VBU && def_bus_id2;
-     rx_rc_enable_h1ap_tweak,  0b1,   def_IS_HW && def_bus_id3;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id0;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id0;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id1;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id1;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id2;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id2;
-     rx_rc_enable_h1ap_tweak,  0b0,  def_IS_VBU && def_bus_id3;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id0;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id0;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id1;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id1;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id2;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id2;
+	rx_rc_enable_dfe_h1_cal, 0b0, def_bus_id3;
+	rx_rc_enable_dfe_h1_cal, 0b0, def_bus_id0;
+	rx_rc_enable_dfe_h1_cal, 0b0, def_bus_id1;
+	rx_rc_enable_dfe_h1_cal, 0b0, def_bus_id2;
+	rx_rc_enable_h1ap_tweak, 0b0, def_bus_id3;
+	rx_rc_enable_h1ap_tweak, 0b0, def_bus_id0;
+	rx_rc_enable_h1ap_tweak, 0b0, def_bus_id1;
+	rx_rc_enable_h1ap_tweak, 0b0, def_bus_id2;
      rx_rc_enable_latch_offset_cal,  0b1,   def_IS_HW && def_bus_id3;
 	rx_rc_enable_latch_offset_cal, 0b1, def_IS_HW && def_bus_id0;
 	rx_rc_enable_latch_offset_cal, 0b0, def_IS_VBU && def_bus_id0;
@@ -603,108 +619,141 @@ scom 0x800AB86002011A3F {
 	rx_rc_enable_vga_cal, 0b0, def_IS_VBU && def_bus_id2;
 }
 
+#RX3.RXCTL.RX_CTL_REGS.RX_RECAL_TO1_PP
+scom 0x800B906002011A3F { 
+	bits, scom_data, expr;
+     rx_recal_timeout_sel_b,  0b0110,   def_IS_HW && def_bus_id3;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_b,  0b1000,  def_IS_VBU && def_bus_id3;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id2;
+}
+
 #RX3.RXCTL.RX_CTL_REGS.RX_RECAL_TO2_PP
 scom 0x800B986002011A3F { 
 	bits, scom_data, expr;
      rx_recal_timeout_sel_g,  0b0111,   def_IS_HW && def_bus_id3;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id0;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id0;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id1;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id1;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id2;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id2;
-     rx_recal_timeout_sel_g,  0b0110,  def_IS_VBU && def_bus_id3;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_g,  0b0100,  def_IS_VBU && def_bus_id3;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id0;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id0;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id1;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id1;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id2;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id2;
-     rx_recal_timeout_sel_h,  0b0110,   def_IS_HW && def_bus_id3;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_h,  0b1011,   def_IS_HW && def_bus_id3;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id0;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id1;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id2;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id2;
      rx_recal_timeout_sel_h,  0b1000,  def_IS_VBU && def_bus_id3;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id0;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id1;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id2;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id2;
 }
 
 #RX3.RXCTL.RX_CTL_REGS.RX_RECAL_TO3_PP
 scom 0x800BA06002011A3F { 
 	bits, scom_data, expr;
-     rx_recal_timeout_sel_i,  0b0111,   def_IS_HW && def_bus_id3;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id0;
+     rx_recal_timeout_sel_i,  0b1011,   def_IS_HW && def_bus_id3;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id0;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id1;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id2;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id2;
      rx_recal_timeout_sel_i,  0b1000,  def_IS_VBU && def_bus_id3;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id0;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id1;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id2;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id2;
-     rx_recal_timeout_sel_l,  0b0100,   def_IS_HW && def_bus_id3;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id0;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id1;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id2;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id2;
-     rx_recal_timeout_sel_l,  0b0110,  def_IS_VBU && def_bus_id3;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id0;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id1;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id2;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_j,  0b1011,   def_IS_HW && def_bus_id3;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_j,  0b1000,  def_IS_VBU && def_bus_id3;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_k,  0b1011,   def_IS_HW && def_bus_id3;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_k,  0b1000,  def_IS_VBU && def_bus_id3;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id2;
 }
 
 #RX3.RXCTL.RX_CTL_REGS.RX_SERVO_TO1_PP
 scom 0x800B606002011A3F { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_d,  0b1001,   def_IS_HW && def_bus_id3;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id0;
+     rx_servo_timeout_sel_b,  0b1010,   def_IS_HW && def_bus_id3;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id0;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_servo_timeout_sel_b,  0b1000,  def_IS_VBU && def_bus_id3;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id0;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_servo_timeout_sel_d,  0b1010,   def_IS_HW && def_bus_id3;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_d,  0b1000,  def_IS_VBU && def_bus_id3;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id2;
 }
 
 #RX3.RXCTL.RX_CTL_REGS.RX_SERVO_TO2_PP
 scom 0x800B686002011A3F { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_f,  0b0001,   def_IS_HW && def_bus_id3;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id0;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id1;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id2;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id2;
-     rx_servo_timeout_sel_f,  0b0110,  def_IS_VBU && def_bus_id3;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id0;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id1;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id2;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_g,  0b0111,   def_IS_HW && def_bus_id3;
 	rx_servo_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id0;
@@ -719,19 +768,19 @@ scom 0x800B686002011A3F {
 	rx_servo_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id1;
 	rx_servo_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id2;
-     rx_servo_timeout_sel_h,  0b1110,   def_IS_HW && def_bus_id3;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id0;
+     rx_servo_timeout_sel_h,  0b1011,   def_IS_HW && def_bus_id3;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_h,  0b1000,  def_IS_VBU && def_bus_id3;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id2;
 }
 
@@ -752,19 +801,19 @@ scom 0x800B706002011A3F {
 	rx_servo_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id1;
 	rx_servo_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id2;
-     rx_servo_timeout_sel_j,  0b1100,   def_IS_HW && def_bus_id3;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id0;
+     rx_servo_timeout_sel_j,  0b1101,   def_IS_HW && def_bus_id3;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_j,  0b1000,  def_IS_VBU && def_bus_id3;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_k,  0b1101,   def_IS_HW && def_bus_id3;
 	rx_servo_timeout_sel_k, 0b1101, def_IS_HW && def_bus_id0;
@@ -888,10 +937,10 @@ scom 0x8008986002011A3F {
 	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id1;
 	rx_ds_timeout_sel, 0b110, def_IS_HW && def_bus_id2;
 	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id2;
-	rx_sls_timeout_sel, 0b001, def_bus_id3;
-	rx_sls_timeout_sel, 0b001, def_bus_id0;
-	rx_sls_timeout_sel, 0b001, def_bus_id1;
-	rx_sls_timeout_sel, 0b001, def_bus_id2;
+	rx_sls_timeout_sel, 0b110, def_bus_id3;
+	rx_sls_timeout_sel, 0b110, def_bus_id0;
+	rx_sls_timeout_sel, 0b110, def_bus_id1;
+	rx_sls_timeout_sel, 0b110, def_bus_id2;
      rx_wt_timeout_sel,  0b111,   def_IS_HW && def_bus_id3;
 	rx_wt_timeout_sel, 0b111, def_IS_HW && def_bus_id0;
 	rx_wt_timeout_sel, 0b011, def_IS_VBU && def_bus_id0;
@@ -933,19 +982,19 @@ scom 0x8009586002011A3F {
 #RX3.RXCTL.RX_CTL_REGS.RX_WIRETEST_PLL_CNTL_PG
 scom 0x800A306002011A3F { 
 	bits, scom_data, expr;
-     rx_wt_cu_pll_pgooddly,  0b001,   def_IS_HW && def_bus_id3;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id0;
+     rx_wt_cu_pll_pgooddly,  0b110,   def_IS_HW && def_bus_id3;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id0;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id0;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id1;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id1;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id1;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id2;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id2;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id2;
      rx_wt_cu_pll_pgooddly,  0b000,  def_IS_VBU && def_bus_id3;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id0;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id0;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id0;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id1;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id1;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id1;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id2;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id2;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id2;
      rx_wt_cu_pll_reset,  0b0,   def_IS_HW && def_bus_id3;
 	rx_wt_cu_pll_reset, 0b0, def_IS_HW && def_bus_id0;
@@ -1186,6 +1235,15 @@ scom 0x800CC46002011A3F {
 	tx_drv_clk_pattern_gcrmsg, 0b00, def_bus_id0;
 	tx_drv_clk_pattern_gcrmsg, 0b00, def_bus_id1;
 	tx_drv_clk_pattern_gcrmsg, 0b00, def_bus_id2;
+}
+
+#TX_WRAP.TX3.TXCTL.TX_CTL_REGS.TX_DYN_RECAL_TIMEOUTS_PP
+scom 0x800EAC6002011A3F { 
+	bits, scom_data, expr;
+	tx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id3;
+	tx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id0;
+	tx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id1;
+	tx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id2;
 }
 
 #TX_WRAP.TX3.TXCTL.TX_CTL_REGS.TX_ID1_PG

@@ -20,12 +20,20 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_cpu_special_wakeup_errors.xml,v 1.5 2013/06/20 13:28:18 stillgs Exp $ -->
 <!-- Error definitions for proc_cpu_special_wakeup procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_SPCWKUP_TIMEOUT</rc>
     <description>Special wakeup to all EX chiplets timed out.</description>
+    <ffdc>I_OPERATION</ffdc>
+    <ffdc>EX</ffdc>
+    <ffdc>ENTITY</ffdc>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>PMGP0</ffdc>
+    <ffdc>SP_WKUP_REG_ADDRESS</ffdc>
+    <ffdc>SP_WKUP_REG_VALUE</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -37,12 +45,29 @@
   <hwpError>
     <rc>RC_PROCPM_SPCWKUP_CODE_BAD_OP</rc>
     <description>An invalid operation (eg besides Set or Clear ENUM) was passed to proc_cpu_special_wakeup</description>
-   <ffdc>I_OPERATION</ffdc> 
+   <ffdc>I_OPERATION</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_CHKSTOP</rc>
     <description>system is checkstopped before proc_cpu_special_wakeup</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_SPCWKUP_PUTGETSCOM_FAILED</rc>
+    <description>Register read/write failed in proc_cpu_special_wakeup</description>
+    <ffdc>ERRORS</ffdc>    
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_SPCWKUP_OHA_FLAG_SET_ON_EXIT</rc>
+    <description>Register read/write failed in proc_cpu_special_wakeup</description>
+    <ffdc>I_OPERATION</ffdc>
+    <ffdc>EX</ffdc>
+    <ffdc>ENTITY</ffdc>
+    <ffdc>PHYP_SPCWKUP_COUNT</ffdc>
+    <ffdc>FSP_SPCWKUP_COUNT</ffdc>
+    <ffdc>OCC_SPCWKUP_COUNT</ffdc>
   </hwpError>
 
 </hwpErrors>

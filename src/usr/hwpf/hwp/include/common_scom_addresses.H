@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: common_scom_addresses.H,v 1.46 2013/05/06 21:03:10 jeshua Exp $
+// $Id: common_scom_addresses.H,v 1.47 2013/07/10 15:30:36 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -36,7 +36,7 @@
 // The purpose of this header is to define scom addresses for use by procedures.
 // This will help catch address typos at compile time, and will make it easy
 // to track down which procedures use each address
-//
+
 
 #ifndef COMMON_SCOM_ADDRESSES
 #define COMMON_SCOM_ADDRESSES
@@ -121,6 +121,18 @@ CONST_UINT64_T( GENERIC_GP2_0x00000002                , ULL(0x00000002) );
 CONST_UINT64_T( GENERIC_GP4_0x00000003                , ULL(0x00000003) );
 CONST_UINT64_T( GENERIC_GP0_AND_0x00000004            , ULL(0x00000004) );
 CONST_UINT64_T( GENERIC_GP0_OR_0x00000005             , ULL(0x00000005) );
+
+//------------------------------------------------------------------------------
+//      GENERIC DEBUG
+//------------------------------------------------------------------------------
+CONST_UINT64_T( GENERIC_DBG_MODE_REG_0x000107C0        , ULL(0x000107C0) );
+CONST_UINT64_T( GENERIC_DBG_INST1_COND_REG1_0x000107C1 , ULL(0x000107C1) );
+CONST_UINT64_T( GENERIC_DBG_INST1_COND_REG2_0x000107C2 , ULL(0x000107C2) );
+CONST_UINT64_T( GENERIC_DBG_INST2_COND_REG1_0x000107C3 , ULL(0x000107C3) );
+CONST_UINT64_T( GENERIC_DBG_INST2_COND_REG2_0x000107C4 , ULL(0x000107C4) );
+CONST_UINT64_T( GENERIC_DBG_TRACE_REG0_0x000107C9      , ULL(0x000107C9) );
+CONST_UINT64_T( GENERIC_DBG_TRACE_REG1_0x000107CA      , ULL(0x000107CA) );
+CONST_UINT64_T( GENERIC_DBG_TRACE_REG2_0x000107CB      , ULL(0x000107CB) );
 
 //------------------------------------------------------------------------------
 //      GENERIC CLOCK CONTROL
@@ -621,6 +633,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.47  2013/07/10 15:30:36  jmcgill
+add entries for SCOM debug resources
+
 Revision 1.46  2013/05/06 21:03:10  jeshua
 Added GENERIC_PCB_ERR_0x000F001F
 

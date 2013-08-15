@@ -1,9 +1,14 @@
-#-- $Id: mbs_def.initfile,v 1.31 2013/04/17 14:41:41 yctschan Exp $
+#-- $Id: mbs_def.initfile,v 1.36 2013/07/08 14:37:16 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
-#--   1.30  |tschang |04/17/13| hash mode updated for type 1a/1b/5b
+#--   1.36  |tschang |07/03/13| L4.ATTR_FUNCTIONAL for cache enable for some bits I missed
+#--   1.35  |tschang |07/02/13| L4.ATTR_FUNCTIONAL for cache enable
+#--   1.34  |tschang |06/11/13| removed mask out bit 8 - internal parity error - HW244827 and HW251643
+#--   1.33  |tschang |06/06/13| mask out bit 8 - internal parity error - HW244827 and HW251643
+#--   1.32  |tschang |04/24/13| fixed 1d cfg type
+#--   1.31  |tschang |04/17/13| hash mode updated for type 1a/1b/5b
 #--   1.30  |tschang |04/16/13| updated file for new IBM_TYPE defnitions
 #--   1.29  |tschang |04/08/13| added MBI cfg register initialization for Irving
 #--   1.26  |tschang |03/13/13| changed cache interleave mode to have ATTR_MSS_CACHE_ENABLE as a condition
@@ -78,6 +83,8 @@ define def_equal_test     =  (SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT
 
 define MBA0 = TGT1;
 define MBA1 = TGT2;
+define L4 = TGT3;
+
 # MBA0.ATTR_CHIP_UNIT_POS - that should equal 0
 # MBA1.ATTR_CHIP_UNIT_POS should equal
 
@@ -106,17 +113,19 @@ define def_mba01_1b_2socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2 ))) 
 ## 1C 1 and 2 sockets not supported
 #define def_mba01_1c_1socket   = 0;
 #define def_mba01_1c_2socket   = 0;
-define def_mba01_1c_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
-define def_mba01_1c_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
-define def_mba01_1c_cdimm          = ((((MBA0.ATTR_CHIP_UNIT_POS == 1 ) && (MBA0.ATTR_EFF_IBM_TYPE[1][0] == 3 )) || ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
+#define def_mba01_1c_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+#define def_mba01_1c_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba01_1c_1socket       = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 ) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || def_mba01_1d_1socket;
+define def_mba01_1c_2socket       = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 ) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || def_mba01_1d_2socket;
+define def_mba01_1c_cdimm          = (((MBA0.ATTR_EFF_IBM_TYPE[1][0] == 3 ) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 )) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
 
 ## Current they is no 1D IBM type in the attribute
 #define def_mba01_1d_1socket       = 0;
 #define def_mba01_1d_2socket       = 0;
 #define def_mba01_1d_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 #define def_mba01_1d_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
-define def_mba01_1d_1socket       = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
-define def_mba01_1d_2socket       = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
+define def_mba01_1d_1socket       = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 4 ) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
+define def_mba01_1d_2socket       = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 4 ) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
 
 ## note the CDIMMs 2A-2C CDIMMs are wired just like the single slot ISDIMMs
 define def_mba01_2a_1socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba01_2a_cdimm));
@@ -202,8 +211,10 @@ define def_mba23_1b_2socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2 ))) 
 ## 1C 1 and 2 sockets not supported
 #define def_mba23_1c_1socket   = 0;
 #define def_mba23_1c_2socket   = 0;
-define def_mba23_1c_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
-define def_mba23_1c_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+#define def_mba23_1c_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+#define def_mba23_1c_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba23_1c_1socket       = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || def_mba23_1d_1socket;
+define def_mba23_1c_2socket       = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || def_mba23_1d_2socket;
 define def_mba23_1c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
 
 ## Current they is no 1D IBM type in the attribute
@@ -211,8 +222,8 @@ define def_mba23_1c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ))) &
 #define def_mba23_1d_2socket       = 0;
 #define def_mba23_1d_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 #define def_mba23_1d_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
-#efine def_mba23_1d_1socket       = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 4 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
-#efine def_mba23_1d_2socket       = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 4 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
+define def_mba23_1d_1socket       = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 4 ) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
+define def_mba23_1d_2socket       = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 4 ) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
 
 ## note the CDIMMs 2A-2C CDIMMs are wired just like the single slot ISDIMMs
 define def_mba23_2a_1socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 5 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_mba23_2a_cdimm));
@@ -394,6 +405,16 @@ define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mb
 #define  def_01ATTR_EFF_MBA_POS = 0;	# -MW not needed?
 #define  def_23ATTR_EFF_MBA_POS = 1;	# -MW not needed?
 
+#--******************************************************************************
+#-- MBS FIR MASK Register
+#--******************************************************************************
+# scom 0x02011403              {
+#     bits ,                    scom_data        ;
+#     8    ,                    0b1              ;              # int_parity_error - HW244827 and HW251643
+#
+# }
+
+
 # YCT added for Irving
 #--******************************************************************************
 #-- MBI Configuration Register
@@ -470,12 +491,11 @@ scom 0x02011411   {
 # MBCCFGQ   MBC Configuration Register
 scom 0x0201140F   {
     bits,       scom_data   , expr;
-    0   ,       0b0     , (ATTR_MSS_CACHE_ENABLE == 0);   # MBCCFGQ_cache_enable
-    0   ,       0b1     , (ATTR_MSS_CACHE_ENABLE != 0);   # MBCCFGQ_cache_enable
-#    1   ,       0b0     , any                       ;        # -MW match dials
+    0   ,       0b0     , (L4.ATTR_FUNCTIONAL == 0) || (ATTR_MSS_CACHE_ENABLE == 0);   # MBCCFGQ_cache_enable
+    0   ,       0b1     , (L4.ATTR_FUNCTIONAL == 1) && (ATTR_MSS_CACHE_ENABLE != 0);   # MBCCFGQ_cache_enable
     1   ,       0b0     , any                       ;         # MBCCFGQ_cfg_dyn_whap_en
-    2   ,       0b0     , ((SYS.ATTR_MSS_CLEANER_ENABLE == 0) || (ATTR_MSS_CACHE_ENABLE != 1)); # MBCCFGQ_cleaner_enable
-    2   ,       0b1     , ((SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (ATTR_MSS_CACHE_ENABLE == 1)); # MBCCFGQ_cleaner_enable
+    2   ,       0b0     , ((SYS.ATTR_MSS_CLEANER_ENABLE == 0) || ((L4.ATTR_FUNCTIONAL == 0) || (ATTR_MSS_CACHE_ENABLE == 0))); # MBCCFGQ_cleaner_enable
+    2   ,       0b1     , ((SYS.ATTR_MSS_CLEANER_ENABLE == 1) && ((L4.ATTR_FUNCTIONAL == 1) && (ATTR_MSS_CACHE_ENABLE != 0))); # MBCCFGQ_cleaner_enable
     3   ,       0b0     , any                       ;         # MBCCFGQ_cache_only_enable
     4   ,       0b0     , any                       ;         # MBCCFGQ_lru_dmap_en
     5   ,       0b0     , any                       ;         # MBCCFGQ_lru_random_en
@@ -610,8 +630,8 @@ scom 0x0201140B     {
 #    10:11   ,   0b00        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 0);  # MBAXCR01Q_MBA01_Hash_Mode
 #    10:11   ,   0b01        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 1);  # MBAXCR01Q_MBA01_Hash_Mode
 #    10:11   ,   0b10        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 2);  # MBAXCR01Q_MBA01_Hash_Mode
-    12      , 0b0           ,         1           , ((SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0) || (ATTR_MSS_CACHE_ENABLE != 1)); # MBAXCR01Q_MBA01_Interleave_Mode
-    12      , 0b1           ,         1           , ((SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1) && (ATTR_MSS_CACHE_ENABLE == 1)); # MBAXCR01Q_MBA01_Interleave_Mod
+    12      , 0b0           ,         1           , ((SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0) || ((L4.ATTR_FUNCTIONAL == 0) || (ATTR_MSS_CACHE_ENABLE == 0))); # MBAXCR01Q_MBA01_Interleave_Mode
+    12      , 0b1           ,         1           , ((SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1) && ((L4.ATTR_FUNCTIONAL == 1) && (ATTR_MSS_CACHE_ENABLE != 0))); # MBAXCR01Q_MBA01_Interleave_Mod
 }
 
 

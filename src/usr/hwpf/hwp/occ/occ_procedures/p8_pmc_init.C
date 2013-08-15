@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_init.C,v 1.35 2013/06/07 19:17:24 stillgs Exp $
+// $Id: p8_pmc_init.C,v 1.36 2013/08/02 19:09:07 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -100,19 +100,20 @@ pmc_config_spivid_settings(const Target& l_pTarget)
     uint32_t attr_pm_spivid_inter_retry_delay_value;
     uint32_t attr_pm_spivid_inter_retry_delay;
 
-
+    FAPI_INF("pmc_config_spivid start...");
     do
     {
-        FAPI_INF("Entering the config function");
 
         //----------------------------------------------------------
-        GETATTR(            ATTR_FREQ_PB,
+        GETATTR(            rc,
+                            ATTR_FREQ_PB,
                             "ATTR_FREQ_PB",
                             NULL,
                             attr_proc_nest_frequency);
 
         //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_FREQUENCY,
+        GETATTR_DEFAULT(    rc,
+                            ATTR_PM_SPIVID_FREQUENCY,
                             "ATTR_PM_SPIVID_FREQUENCY",
                             NULL,
                             attr_pm_spivid_frequency,
@@ -123,7 +124,8 @@ pmc_config_spivid_settings(const Target& l_pTarget)
                                             (attr_pm_spivid_frequency*8)-1 );
 
 
-        SETATTR(            ATTR_PM_SPIVID_CLOCK_DIVIDER,
+        SETATTR(            rc,
+                            ATTR_PM_SPIVID_CLOCK_DIVIDER,
                             "ATTR_PM_SPIVID_CLOCK_DIVIDER",
                             &l_pTarget,
                             attr_pm_spivid_clock_divider);
@@ -132,7 +134,8 @@ pmc_config_spivid_settings(const Target& l_pTarget)
         // Delay between command and status frames of a SPIVID WRITE operation
         // (binary in nanoseconds)
 
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS,
+        GETATTR_DEFAULT(    rc,
+                            ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS,
                             "ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS",
                             &l_pTarget,
                             attr_pm_spivid_interframe_delay_write_status,
@@ -144,7 +147,8 @@ pmc_config_spivid_settings(const Target& l_pTarget)
         attr_pm_spivid_interframe_delay_write_status_value =
                 attr_pm_spivid_interframe_delay_write_status / 100;
 
-        SETATTR(            ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE,
+        SETATTR(            rc,
+                            ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE,
                             "ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE",
                             &l_pTarget,
                             attr_pm_spivid_interframe_delay_write_status_value);
@@ -154,7 +158,8 @@ pmc_config_spivid_settings(const Target& l_pTarget)
         // Delay between SPIVID reture attempts when WRITE command status
         // indicates an error (binary in nanoseconds)
 
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_INTER_RETRY_DELAY,
+        GETATTR_DEFAULT(    rc,
+                            ATTR_PM_SPIVID_INTER_RETRY_DELAY,
                             "ATTR_PM_SPIVID_INTER_RETRY_DELAY",
                             &l_pTarget,
                             attr_pm_spivid_inter_retry_delay,
@@ -169,14 +174,16 @@ pmc_config_spivid_settings(const Target& l_pTarget)
         attr_pm_spivid_inter_retry_delay_value =
                 attr_pm_spivid_inter_retry_delay / 100;
 
-        SETATTR(            ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE,
+        SETATTR(            rc,
+                            ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE,
                             "ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE",
                             &l_pTarget,
                             attr_pm_spivid_inter_retry_delay_value);
 
-        FAPI_INF("Exiting the config function");
 
     } while(0);
+
+    FAPI_INF("pmc_config_spivid end...");
 
     return rc ;
 }
@@ -193,11 +200,15 @@ pmc_config_spivid_settings(const Target& l_pTarget)
  * @retval ERROR defined in xml
  */
 fapi::ReturnCode
-pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2 )
+pmc_reset_function( const fapi::Target& i_target1 , 
+                    const fapi::Target& i_target2, 
+                    uint32_t i_mode)
 {
 
     fapi::ReturnCode rc;
     ecmdDataBufferBase data(64);
+    ecmdDataBufferBase pmcmode_master(64);
+    ecmdDataBufferBase pmcmode_slave(64);
     //  ecmdDataBufferBase mask(64);
     uint32_t e_rc = 0;
     uint32_t count = 0 ;
@@ -228,6 +239,8 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
     uint8_t attr_dcm_installed_2 = 0;
     uint64_t any_error = 0;
 
+    FAPI_INF("pmc_reset start...");
+
     do
     {
         // Check for validity of passed parms
@@ -246,8 +259,8 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         if (attr_dcm_installed_1 == 0)
         {
 
-            //         target2 should be NULL
-            //         if not NULL, exit with config error
+            // target2 should be NULL
+            // if not NULL, exit with config error
             if (i_target2.getType() != TARGET_TYPE_NONE  )
             {
                 FAPI_ERR ("config error : target2 is not null for target1 dcm not installed case");
@@ -267,24 +280,26 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             //    break;
             //}
 
-      if (i_target2.getType() != TARGET_TYPE_NONE  )
-            {            rc = FAPI_ATTR_GET(ATTR_PROC_DCM_INSTALLED, &i_target2, attr_dcm_installed_2);
-          if (rc)
-        {
-          FAPI_ERR("fapiGetAttribute of ATTR_DCM_INSTALLED with rc = 0x%x", (uint32_t)rc);
-          break;
-        }
-          FAPI_INF (" ATTR_DCM_INSTALLED value in reset function = 0x%x", attr_dcm_installed_2 );
+            if (i_target2.getType() != TARGET_TYPE_NONE  )
+            {
+                rc = FAPI_ATTR_GET(ATTR_PROC_DCM_INSTALLED, &i_target2, attr_dcm_installed_2);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetAttribute of ATTR_DCM_INSTALLED with rc = 0x%x", (uint32_t)rc);
+                    break;
+                }
+                FAPI_INF (" ATTR_DCM_INSTALLED value in reset function = 0x%x", attr_dcm_installed_2 );
 
-          if (attr_dcm_installed_2 != 1)
-        {
-          FAPI_ERR ("config error:  DCM_INSTALLED target2 does not match target1");
-          FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR);
-          break;
-        }
+                if (attr_dcm_installed_2 != 1)
+                {
+                    FAPI_ERR ("config error:  DCM_INSTALLED target2 does not match target1");
+                    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR);
+                    break;
+                }
 
-          dcm = true;
-        }
+                dcm = true;
+
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -295,7 +310,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         ////////////////////////////////////////////////////////////////////////////
 
 
-        FAPI_INF("Performing STEP 1");
+        FAPI_INF("Determine master chip and slave targets");
         rc = FAPI_ATTR_GET( ATTR_PM_SPIVID_PORT_ENABLE,
                             &i_target1,
                             attr_pm_spivid_port_enable1);
@@ -307,58 +322,20 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         FAPI_INF (" value read from the attribute attr_pm_spivid_port_enable in reset function = 0x%x",
                     attr_pm_spivid_port_enable1);
 
-        // \todo  Removing until as the secondary port enable attrributes are irrelevant
-        /*
-        if (dcm)
-        {
-            rc = FAPI_ATTR_GET( ATTR_PM_SPIVID_PORT_ENABLE,
-                                &i_target2,
-                                attr_pm_spivid_port_enable2);
-            if (rc)
-            {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_PORT_ENABLE with rc = 0x%x", (uint32_t)rc);
-                break;
-            }
-            FAPI_INF (" value read from the attribute attr_pm_spivid_port_enable in reset function = 0x%x",
-                        attr_pm_spivid_port_enable2);
-        }
 
-
-        if (attr_pm_spivid_port_enable2 != 0 &&   attr_pm_spivid_port_enable1 != 0 )
+        if (attr_pm_spivid_port_enable1 != 0 )
         {
-            FAPI_ERR("Both targets have SPIVIDs enabled: check the configuration setup.");
-            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_TARGET_ERROR);
-            break;
-        }
-        else if (attr_pm_spivid_port_enable2 == 0 &&   attr_pm_spivid_port_enable1 == 0 )
-        {
-            FAPI_ERR("Neither target has SPIVID enabled: check the configuration setup.");
-            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_TARGET_ERROR);
-            break;
+            master_target = i_target1;
+            slave_target = i_target2;
         }
         else
         {
-
-            if (attr_pm_spivid_port_enable2 != 0 )
-            {
-                master_target = i_target2;
-                slave_target = i_target1;
-            }
-        */
-            if (attr_pm_spivid_port_enable1 != 0 )
-            {
-                master_target = i_target1;
-                slave_target = i_target2;
-            }
-            else
-            {
-                FAPI_ERR("Master target does not have SPIVID ports enabled: check the configuration setup.");
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_TARGET_ERROR);
-                break;
-            }
-        //}
-
-
+            FAPI_ERR("Master target does not have SPIVID ports enabled: ATTR_PM_SPIVID_PORT_ENABLE must be non-zero.");
+            const fapi::Target& MASTER_TARGET = i_target1;
+            const uint64_t& ATTR_SPIVID_PORT_ENABLE = (uint64_t)attr_pm_spivid_port_enable1;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_SPIVID_CONFIG_ERROR);
+            break;
+        }
 
         ////////////////////////////////////////////////////////////////////////////
         // 2.0 cRQ_TD_IntMaskRQ: Mask OCC interrupts in OIMR1
@@ -383,7 +360,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         // Master
         // ******************************************************
 
-        FAPI_INF("Performing STEP 2.00");
+        FAPI_INF("Mask OCC interrupts in OIMR0 and OIMR1 on Master");
 
         // CHECKING PMC_FIRS
 
@@ -405,10 +382,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         if (any_error)
         {
            FAPI_DBG(" PMC_FIR has error(s) active.  Continuing though  0x%16llX ", data.getDoubleWord(0));
-           //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); break;
-           //return rc ;
         }
-
 
         e_rc = data.flushTo0();
         if (e_rc)
@@ -418,12 +392,13 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         }
 
         rc = fapiGetScom(master_target, OCB_OCI_OIMR1_0x0006a014 , data );
-        if (rc) {
-             FAPI_ERR("fapiGetScom(OCB_OCI_OIMR1_0x0006a014) failed."); break;
+        if (rc)
+        {
+             FAPI_ERR("fapiGetScom(OCB_OCI_OIMR1_0x0006a014) failed.");
+             break;
         }
 
-
-        e_rc  = data.setBit(12);
+        e_rc |= data.setBit(12);
         e_rc |= data.setBit(13);
         e_rc |= data.setBit(14);
         e_rc |= data.setBit(15);
@@ -438,17 +413,20 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         }
 
         rc = fapiPutScom(master_target, OCB_OCI_OIMR1_0x0006a014 , data );
-        if (rc) {
-             FAPI_ERR("fapiPutScom(OCB_OCI_OIMR1_0x0006a014) failed."); break;
+        if (rc)
+        {
+             FAPI_ERR("fapiPutScom(OCB_OCI_OIMR1_0x0006a014) failed.");
+             break;
         }
 
         rc = fapiGetScom(master_target, OCB_OCI_OIMR0_0x0006a004 , data );
-        if (rc) {
-             FAPI_ERR("fapiGetScom(OCB_OCI_OIMR0_0x0006a004) failed."); break;
+        if (rc)
+        {
+             FAPI_ERR("fapiGetScom(OCB_OCI_OIMR0_0x0006a004) failed.");
+             break;
         }
 
-
-        e_rc = data.setBit(9);
+        e_rc |= data.setBit(9);
         e_rc |= data.setBit(13);
         e_rc |= data.setBit(21);
         if (e_rc)
@@ -457,8 +435,6 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             rc.setEcmdError(e_rc);
             break;
         }
-
-
 
         rc = fapiPutScom(master_target, OCB_OCI_OIMR0_0x0006a004 , data );
         if (rc)
@@ -474,7 +450,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         if (dcm)
         {
 
-            FAPI_INF("Performing STEP 2.01");
+            FAPI_INF("Mask OCC interrupts in OIMR0 and OIMR1 on Slave");
 
             // CHECKING PMC_FIRS
 
@@ -487,18 +463,17 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             }
 
             rc = fapiGetScom(slave_target, PMC_LFIR_0x01010840 , data );
-            if (rc) {
-              FAPI_ERR("fapiGetScom(PMC_LFIR_0x01010840) failed.");
-              break;
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_LFIR_0x01010840) failed.");
+                break;
             }
 
             any_error = data.getDoubleWord(0);
 
             if (any_error)
             {
-               FAPI_ERR(" PMC_FIR has error(s) active.  0x%16llX ", data.getDoubleWord(0));
-               //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); break;
-               //return rc ;
+                FAPI_DBG(" PMC_FIR has error(s) active.  Continuing though  0x%16llX ", data.getDoubleWord(0));
             }
 
             e_rc = data.flushTo0();
@@ -515,7 +490,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
                 FAPI_ERR("fapiGetScom(OCB_OCI_OIMR1_0x0006a014) failed."); break;
             }
 
-            e_rc  = data.setBit(12);
+            e_rc |= data.setBit(12);
             e_rc |= data.setBit(13);
             e_rc |= data.setBit(14);
             e_rc |= data.setBit(15);
@@ -543,7 +518,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
                  break;
             }
 
-            e_rc  = data.setBit(9);
+            e_rc |= data.setBit(9);
             e_rc |= data.setBit(13);
             e_rc |= data.setBit(21);
             if (e_rc)
@@ -576,7 +551,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         // ******************************************************
         // Master
         // ******************************************************
-        FAPI_INF("Performing STEP 3.00");
+        FAPI_INF("Halt Pstates and Idles on Master");
 
         rc = fapiGetScom(master_target, PMC_MODE_REG_0x00062000 , data );
         if (rc)
@@ -585,7 +560,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
              break;
         }
 
-        e_rc = data.setBit(05);
+        e_rc |= data.setBit(05);
         e_rc |= data.setBit(14);
         if (e_rc)
         {
@@ -606,6 +581,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         master_enable_fw_pstate_mode = data.isBitSet(2) ;
         master_is_enable_interchip_interface = data.isBitSet(6) ;
 
+        pmcmode_master = data;
 
         // ******************************************************
         // Slave
@@ -613,7 +589,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
 
         if (dcm)
         {
-            FAPI_INF("Performing STEP 3.01");
+            FAPI_INF("Halt Pstates and Idles on Slave");
             rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
             if (rc)
             {
@@ -622,7 +598,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             }
 
 
-            e_rc = data.setBit(05);
+            e_rc |= data.setBit(05);
             e_rc |= data.setBit(14);
             if (e_rc)
             {
@@ -643,32 +619,46 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             slave_enable_fw_pstate_mode = data.isBitSet(2) ;
             slave_is_enable_interchip_interface = data.isBitSet(6) ;
 
+            pmcmode_slave = data;
 
             // Check with Greg about return
             // TODO : if ATTR_DCM_INSTALLED = 1 chip level attribute
+            /*
             if (master_is_MasterPMC == 0)
             {
-              FAPI_ERR(" MasterPMC bit of Master PMC is not set");
-
+                FAPI_ERR(" MasterPMC bit of Master PMC is not set");
+                const uint64_t& MASTERPMCMODE = pmcmode_master.getDoubleWord(0);
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_MASTER_CONFIG_ERROR);
+                break;
             }
 
             if (slave_is_MasterPMC == 1)
             {
                 FAPI_ERR(" MasterPMC bit of Slave PMC is set");
+                const uint64_t& SLAVEPMCMODE = pmcmode_slave.getDoubleWord(0);
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_SLAVE_CONFIG_ERROR);
+                break;
             }
 
 
             if ((master_is_enable_interchip_interface ==1) && (slave_is_enable_interchip_interface == 0))
             {
-              FAPI_ERR (" Configuration Error : Master is enabled with interchip interface but slave is not ");
-
+                FAPI_ERR (" Configuration Error : Master is enabled with interchip interface but slave is not ");
+                const uint64_t& MASTERPMCMODE = pmcmode_master.getDoubleWord(0);
+                const uint64_t& SLAVEPMCMODE = pmcmode_slave.getDoubleWord(0);
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_INTERCHIP_CONFIG_ERROR);
+                break;
             }
 
             if ( (master_enable_fw_pstate_mode == 1)  &&  (slave_enable_fw_pstate_mode == 0))
             {
               FAPI_ERR (" Configuration Error : Master is enabled with FW pstate mode but slave is not ");
-
+              const uint64_t& MASTERPMCMODE = pmcmode_master.getDoubleWord(0);
+              const uint64_t& SLAVEPMCMODE = pmcmode_slave.getDoubleWord(0);
+              FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_INTERCHIP_CONFIG_ERROR);
+              break;
             }
+            */
         }
 
 
@@ -705,7 +695,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         // ******************************************************
         if (dcm)
         {
-            FAPI_INF("Performing STEP 4.00");
+            FAPI_INF("Halt interchip interface on Master");
             if (master_is_enable_interchip_interface == 1)
             {
 
@@ -818,9 +808,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             // ******************************************************
             // Slave
             // ******************************************************
-
-
-            FAPI_INF("Performing STEP 4.01");
+            FAPI_INF("Halt interchip interface on Slave");
 
             if (slave_is_enable_interchip_interface ==1)
             {
@@ -950,10 +938,10 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         //       else -->MPS_HaltWait
         ////////////////////////////////////////////////////////////////////////////
 
-         FAPI_INF("Performing STEP 5.00");
-
         if (master_enable_pstate_voltage_changes==1)
         {
+            FAPI_INF("Halt SPIVID controller on Master");
+
             //  HaltSpivid: PMC_SPIV_COMMAND_REG.spivid_halt_fsm<-1
             rc = fapiGetScom(master_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
             if (rc)
@@ -1003,7 +991,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             // Timeout check
             if (count > VOLTAGE_CHANGE_POLL_COUNT)
             {
-                FAPI_ERR("Timed out in polling spiv ongoing  : Reset_suspicious    ... ");
+                FAPI_ERR("Timed out in polling SPIVID ongoing  : Reset_suspicious    ... ");
                 // \todo
                 //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
                 //       break;
@@ -1030,8 +1018,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         //       if (!is_stopped) then -->MPS_HaltWait   (Wait limit)
         ////////////////////////////////////////////////////////////////////////////
 
-         FAPI_INF("Performing STEP 6.00 ");
-
+         FAPI_INF("Check for Pstate FSM being stopped on Master");
 
         // ******************************************************
         // Master
@@ -1079,7 +1066,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         // ******************************************************
         if (dcm)
         {
-            FAPI_INF("Performing STEP 6.01 ");
+            FAPI_INF("Check for Pstate FSM being stopped on Slave");
 
             for (count = 0 , is_stopped = 0 ; count <= PSTATE_HALT_POLL_COUNT && is_stopped == 0 ; count++)
             {
@@ -1158,7 +1145,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         // Master
         // ******************************************************
 
-        FAPI_INF("Performing STEP 7.00 ");
+        FAPI_INF("Poll for O2P bridge being complete on Master");
         rc = fapiGetScom(master_target, PMC_O2S_COMMAND_REG_0x00062057 , data );
         if (rc)
         {
@@ -1244,7 +1231,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
 
         if (dcm)
         {
-            FAPI_INF("Performing STEP 7.01 ");
+            FAPI_INF("Poll for O2P bridge being complete on Slave");
 
             for (count = 0 , is_stopped = 0 ; count <= O2P_POLL_COUNT  && is_stopped == 0 ; count++)
             {
@@ -1292,7 +1279,11 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         // the execution of p8_poreslw_recovery.C will have taken place.
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        FAPI_INF("Performing STEP 8.00 ");
+        // ******************************************************
+        // Master
+        // ******************************************************
+        
+        FAPI_INF("Poll for Idle FSM being quiesced on Master");
         for (count = 0 , is_stopped = 0 ; count <= PORE_REQ_POLL_COUNT  && is_stopped == 0 ; count++)
         {
             rc = fapiGetScom(master_target, PMC_PORE_REQ_REG0_0x0006208E , data );
@@ -1320,6 +1311,41 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             //       break;
         }
 
+        // ******************************************************
+        // Slave
+        // ******************************************************
+        
+        if (dcm)
+        {
+            FAPI_INF("Poll for Idle FSM being quiesced on Slave");
+            for (count = 0 , is_stopped = 0 ; count <= PORE_REQ_POLL_COUNT  && is_stopped == 0 ; count++)
+            {
+                rc = fapiGetScom(slave_target, PMC_PORE_REQ_REG0_0x0006208E , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_O2P_STATUS_REG__0x00062061) failed.");
+                    break;
+                }
+
+                is_stopped = (data.isBitClear(20)) ;
+                FAPI_DBG("Polling pore_busy bit ...");
+            }
+
+            // Error check
+            if (!rc.ok())
+            {
+                break;
+            }
+
+            //  Timeout check
+            if (count > PORE_REQ_POLL_COUNT)
+            {
+                FAPI_ERR("Timed out in polling pore_busy bit  . : Reset_suspicious .. ");
+                //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+                //       break;
+            }
+        }
+
         ///////////////////////////////////////////////////////////////////////////////
         // GREG:
         // Issue interchip interface reset (if enabled) on master_chiptarget
@@ -1340,7 +1366,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
         // ******************************************************
 
 
-        FAPI_INF("Performing STEP 9.00 ");
+        FAPI_INF("Reset interchip interface on Master");
 
         if ( master_is_enable_interchip_interface == 1)
         {
@@ -1389,7 +1415,7 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
 
          if (dcm)
          {
-             FAPI_INF("Performing STEP 9.01 ");
+             FAPI_INF("Reset interchip interface on Slave");
 
              if ( slave_is_enable_interchip_interface == 1)
              {
@@ -1433,100 +1459,116 @@ pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2
             }
         }
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
         // Issue reset to the PMC
-        // Note:  this action will wipe out the Idle Pending queue so that requests for idle transitions (entry and exit) will be lost which means that PHYP notification needs to happen.
+        // Note:  this action will wipe out the Idle Pending queue so that
+        // requests for idle transitions (entry and exit) will be lost which
+        // means that PHYP notification needs to happen.
+        //
         // Write PMC_MODE_REG.pmc_reset_all_voltage_registers = 1.
         // Clearing LFIRs will have  been done by PRD
         // Note:  this will remove CONFIG settings
         // This puts the PMC into firmware mode which halts any future Global Actual operations
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
 
         // ******************************************************
         // Master
         // ******************************************************
         // RESET_ALL_PMC_REGISTERS
-        rc = fapiGetScom(master_target, PMC_MODE_REG_0x00062000 , data );
-        if (rc)
+       
+        if (i_mode == PM_RESET)
         {
-            FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
-            break;
-        }
-
-        e_rc = data.setBit(12);
-            if (e_rc)
-            {
-                FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Master reset");
-                rc.setEcmdError(e_rc);
-                break;
-            }
-        if (rc)
-        {
-            FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
-            break;
-        }
-
-        rc = fapiPutScom(master_target, PMC_MODE_REG_0x00062000 , data );
-        if (rc)
-        {
-             FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
-             break;
-        }
-
-        // ******************************************************
-        // Slave
-        // ******************************************************
-        if (dcm)
-        {
-
-            rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
-            if (rc)
-            {
-                 FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
-                 break;
-            }
-
-            e_rc = data.setBit(12);
-            if (e_rc)
-            {
-                FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Slave reset");
-                rc.setEcmdError(e_rc);
-                break;
-            }
-
-            rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
-            if (rc)
-            {
-                FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
-                break;
-            }
-
-            // \todo remove in deference to init path
-            // Restored only for slave
-            // SAFE_MODE_WITHOUT_SPIVID
-            rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            FAPI_INF("Hard reset detected");
+            FAPI_INF("Reset PMC on Master");
+            rc = fapiGetScom(master_target, PMC_MODE_REG_0x00062000 , data );
             if (rc)
             {
                 FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
                 break;
             }
 
-            e_rc = data.setBit(13);
-            if (e_rc)
+            e_rc = data.setBit(12);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Master reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+            if (rc)
             {
-                FAPI_ERR("ecmdDataBufferBase error for PMC_MODE_REG_0x00062000 on Slave reset");
-                rc.setEcmdError(e_rc);
+                FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
                 break;
             }
 
-            rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            rc = fapiPutScom(master_target, PMC_MODE_REG_0x00062000 , data );
             if (rc)
             {
-                FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
-                break;
+                 FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+                 break;
+            }
+
+            // ******************************************************
+            // Slave
+            // ******************************************************
+            if (dcm)
+            {
+                FAPI_INF("Reset PMC on Slave");
+
+                rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+                if (rc)
+                {
+                     FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+                     break;
+                }
+
+                e_rc = data.setBit(12);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Slave reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+
+                rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+                    break;
+                }
+
+                // \todo remove in deference to init path
+                // Restored only for slave
+                // SAFE_MODE_WITHOUT_SPIVID
+                rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+                    break;
+                }
+
+                e_rc = data.setBit(13);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error for PMC_MODE_REG_0x00062000 on Slave reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+
+                rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+                    break;
+                }
             }
         }
+        else
+        {
+            FAPI_INF("Soft reset detected. PMC register reset skipped.");
+        }
     } while(0);
+
+    FAPI_INF("pmc_reset end...");
 
     return rc;
 }
@@ -1593,99 +1635,113 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
         interchip_clock_divider = ( proc_nest_frequency /(attr_pm_interchip_frequency*8)-1 );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_FRAME_SIZE,
-                    "ATTR_PM_SPIVID_FRAME_SIZE",
-                    &i_target1,
-                    attr_pm_spivid_frame_size,
-                    default_spivid_frame_size );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_FRAME_SIZE,
+                        "ATTR_PM_SPIVID_FRAME_SIZE",
+                        &i_target1,
+                        attr_pm_spivid_frame_size,
+                        default_spivid_frame_size );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_IN_DELAY_FRAME1,
-                    "ATTR_PM_SPIVID_IN_DELAY_FRAME1",
-                    &i_target1,
-                    attr_pm_spivid_in_delay_frame1,
-                    default_spivid_in_delay_frame1 );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_IN_DELAY_FRAME1,
+                        "ATTR_PM_SPIVID_IN_DELAY_FRAME1",
+                        &i_target1,
+                        attr_pm_spivid_in_delay_frame1,
+                        default_spivid_in_delay_frame1 );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_IN_DELAY_FRAME1,
-                    "ATTR_PM_SPIVID_IN_DELAY_FRAME1",
-                    &i_target1,
-                    attr_pm_spivid_in_delay_frame2,
-                    default_spivid_in_delay_frame2 );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_IN_DELAY_FRAME1,
+                        "ATTR_PM_SPIVID_IN_DELAY_FRAME1",
+                        &i_target1,
+                        attr_pm_spivid_in_delay_frame2,
+                        default_spivid_in_delay_frame2 );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CLOCK_POLARITY,
-                    "ATTR_PM_SPIVID_CLOCK_POLARITY",
-                    &i_target1,
-                    attr_pm_spivid_clock_polarity,
-                    default_spivid_clock_polarity );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_CLOCK_POLARITY,
+                        "ATTR_PM_SPIVID_CLOCK_POLARITY",
+                        &i_target1,
+                        attr_pm_spivid_clock_polarity,
+                        default_spivid_clock_polarity );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CLOCK_PHASE,
-                    "ATTR_PM_SPIVID_CLOCK_PHASE",
-                    &i_target1,
-                    attr_pm_spivid_clock_phase,
-                    default_spivid_clock_phase );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_CLOCK_PHASE,
+                        "ATTR_PM_SPIVID_CLOCK_PHASE",
+                        &i_target1,
+                        attr_pm_spivid_clock_phase,
+                        default_spivid_clock_phase );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CRC_GEN_ENABLE,
-                    "ATTR_PM_SPIVID_CRC_GEN_ENABLE",
-                    &i_target1,
-                    attr_pm_spivid_crc_gen_enable,
-                    default_spivid_crc_gen_enable );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_CRC_GEN_ENABLE,
+                        "ATTR_PM_SPIVID_CRC_GEN_ENABLE",
+                        &i_target1,
+                        attr_pm_spivid_crc_gen_enable,
+                        default_spivid_crc_gen_enable );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CRC_CHECK_ENABLE,
-                    "ATTR_PM_SPIVID_CRC_CHECK_ENABLE",
-                    &i_target1,
-                    attr_pm_spivid_crc_check_enable,
-                    default_spivid_crc_check_enable );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_CRC_CHECK_ENABLE,
+                        "ATTR_PM_SPIVID_CRC_CHECK_ENABLE",
+                        &i_target1,
+                        attr_pm_spivid_crc_check_enable,
+                        default_spivid_crc_check_enable );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE,
-                    "ATTR_PM_SPIVID_CRC_CHECK_ENABLE",
-                    &i_target1,
-                    attr_pm_spivid_majority_vote_enable,
-                    default_spivid_majority_vote_enable );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE,
+                        "ATTR_PM_SPIVID_CRC_CHECK_ENABLE",
+                        &i_target1,
+                        attr_pm_spivid_majority_vote_enable,
+                        default_spivid_majority_vote_enable );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_MAX_RETRIES,
-                    "ATTR_PM_SPIVID_MAX_RETRIES",
-                    &i_target1,
-                    attr_pm_spivid_max_retries,
-                    default_spivid_max_retries );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_MAX_RETRIES,
+                        "ATTR_PM_SPIVID_MAX_RETRIES",
+                        &i_target1,
+                        attr_pm_spivid_max_retries,
+                        default_spivid_max_retries );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES,
-                    "ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES",
-                    &i_target1,
-                    attr_pm_spivid_crc_polynomial_enables,
-                    default_spivid_crc_polynomial_enables );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES,
+                        "ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES",
+                        &i_target1,
+                        attr_pm_spivid_crc_polynomial_enables,
+                        default_spivid_crc_polynomial_enables );
 
             //----------------------------------------------------------
-        GETATTR_DEFAULT(    ATTR_PM_SPIVID_PORT_ENABLE,
-                    "ATTR_PM_SPIVID_PORT_ENABLE",
-                    &i_target1,
-                    attr_pm_spivid_port_enable,
-                    default_spivid_port_enable );
+        GETATTR_DEFAULT(rc,
+                        ATTR_PM_SPIVID_PORT_ENABLE,
+                        "ATTR_PM_SPIVID_PORT_ENABLE",
+                        &i_target1,
+                        attr_pm_spivid_port_enable,
+                        default_spivid_port_enable );
 
            //----------------------------------------------------------
-       GETATTR(     ATTR_PM_SPIVID_CLOCK_DIVIDER,
-                    "ATTR_PM_SPIVID_CLOCK_DIVIDER",
-                    &i_target1,
-                    attr_pm_spivid_clock_divider);
+        GETATTR(        rc,
+                        ATTR_PM_SPIVID_CLOCK_DIVIDER,
+                        "ATTR_PM_SPIVID_CLOCK_DIVIDER",
+                        &i_target1,
+                        attr_pm_spivid_clock_divider);
 
             //----------------------------------------------------------
-       GETATTR(     ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE,
-                   "ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE",
-                    &i_target1,
-                    attr_pm_spivid_interframe_delay_write_status_value);
+        GETATTR(        rc,
+                        ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE,
+                        "ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE",
+                        &i_target1,
+                        attr_pm_spivid_interframe_delay_write_status_value);
 
             //----------------------------------------------------------
-        GETATTR(    ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE,
-                    "ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE",
-                    &i_target1,
-                    attr_pm_spivid_inter_retry_delay_value);
+        GETATTR(        rc,
+                        ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE,
+                        "ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE",
+                        &i_target1,
+                        attr_pm_spivid_inter_retry_delay_value);
 
         FAPI_INF("PMC initialization...");
 
@@ -1761,9 +1817,11 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
 
         if (any_error)
         {
-           FAPI_ERR(" PMC_FIR has error(s) active.  0x%16llX ", data.getDoubleWord(0));
-           //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); break;
-           //return rc ;
+            // Once clear FIRs are established, this will throw errors.
+            FAPI_INF("WARNING: PMC_FIR has error(s) active.  0x%016llX ", data.getDoubleWord(0));
+            //FAPI_ERR(" PMC_FIR has error(s) active.  0x%16llX ", data.getDoubleWord(0));
+            //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR);
+            //break;
         }
 
         //  ******************************************************************
@@ -2336,7 +2394,7 @@ fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
  *
  * @param[in] i_target1 Primary Chip target:   Murano - chip0; Venice - chip
  * @param[in] i_target2 Secondary Chip target: Murano - chip1; Venice - NULL
- * @param[in] mode (PM_INIT , PM_CONFIG, PM_RESET)
+ * @param[in] mode (PM_INIT , PM_CONFIG, PM_RESET, PM_RESET_SOFT)
  *
  * @retval ECMD_SUCCESS
  * @retval ERROR defined in xml
@@ -2398,11 +2456,26 @@ p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32
         }
 
         /// -------------------------------
-        /// Reset:  perform reset of PMC
+        /// Reset:  perform hard reset of PMC
         /// -------------------------------
         else if (mode == PM_RESET)
         {
-            rc = pmc_reset_function(i_target1 , i_target2);
+            FAPI_INF("Hard reset detected.  Calling pmc_reset_function");           
+            rc = pmc_reset_function(i_target1 , i_target2, mode);
+            if (rc)
+            {
+                FAPI_ERR("Error from pmc_reset_function");
+                break;
+            }
+        }
+        
+        // -------------------------------
+        /// Reset:  perform soft reset of PMC
+        /// -------------------------------
+        else if (mode == PM_RESET_SOFT)
+        {
+            FAPI_INF("Soft reset detected.  Calling pmc_reset_function");
+            rc = pmc_reset_function(i_target1 , i_target2, mode);
             if (rc)
             {
                 FAPI_ERR("Error from pmc_reset_function");
@@ -2410,13 +2483,14 @@ p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32
             }
         }
 
+
         /// -------------------------------
         /// Unsupported Mode
         /// -------------------------------
         else
         {
             FAPI_ERR("Unknown mode passed to p8_pmc_init. Mode %x ", mode);
-            uint32_t & MODE = mode;
+            const uint64_t & MODE = (uint64_t)mode;
             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_CODE_BAD_MODE);
         }
 
@@ -2434,6 +2508,13 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pmc_init.C,v $
+Revision 1.36  2013/08/02 19:09:07  stillgs
+
+- Support for p8_pm.H.
+- Temporarily changed the detection of set FIR bit from FAPI_ERR to FAPI_INF until fully complete with testing.
+This keeps "FAPI ERR" from showing up in log for things that do not give non-zero RCs.
+- Added plumbing support for "soft" rest.  FUNCTION IS NOT YET SUPPORTED
+
 Revision 1.35  2013/06/07 19:17:24  stillgs
 
 Fix swap of Pmin and PMax rail settings

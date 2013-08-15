@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm.H,v 1.6 2013/05/31 10:53:14 pchatnah Exp $
+// $Id: p8_pm.H,v 1.7 2013/08/02 19:02:43 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -64,8 +64,10 @@ enum p8_PM_FLOW_MODE {
         PM_SETUP        = 0x4,
         PM_SETUP_PIB    = 0x5,
         PM_SETUP_ALL    = 0x6,
-        PM_RESET_NOPMC  = 0x7,
-        PM_INIT_SPECIAL = 0x8
+        PM_RESET_SOFT   = 0x7,
+        PM_CONFIG_SOFT  = PM_CONFIG,
+        PM_INIT_SOFT    = 0x8,
+        PM_INIT_SPECIAL = 0x9
         };
 #endif  // _P8_PM_FLOW_MODE
 
@@ -74,18 +76,18 @@ enum p8_PM_FLOW_MODE {
 // Assume the error path is to break out of the current loop.  If nested loops
 // are employed, the error_flag can be used to break out of the necessary
 // levels.
-#define PUTSCOM(_mi_target, _mi_address, _mi_buffer){		            \
-    l_rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);            \
-    if(!l_rc.ok())                                                      \
+#define PUTSCOM(_mi_rc, _mi_target, _mi_address, _mi_buffer){		    \
+    _mi_rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);          \
+    if(!_mi_rc.ok())                                                    \
     {                                                                   \
         FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);     \
         break;                                                          \
     }                                                                   \
 }
 
-#define GETSCOM(_mi_target, _mi_address, _mi_buffer){		            \
-    l_rc = fapiGetScom(_mi_target, _mi_address, _mi_buffer);            \
-    if(!l_rc.ok())                                                      \
+#define GETSCOM(_mi_rc, _mi_target, _mi_address, _mi_buffer){		    \
+    _mi_rc = fapiGetScom(_mi_target, _mi_address, _mi_buffer);          \
+    if(!_mi_rc.ok())                                                    \
     {                                                                   \
         FAPI_ERR("GetScom error to address 0x%08llx", _mi_address);     \
         break;                                                          \
@@ -101,11 +103,11 @@ enum p8_PM_FLOW_MODE {
     }                                                                   \
 }
 
-#define GETATTR_DEFAULT(_mi_attr, _mi_attr_name, _mi_target, _mi_value, _mi_default){\
-        rc = FAPI_ATTR_GET(_mi_attr, _mi_target, _mi_value); \
-        if (rc) \
+#define GETATTR_DEFAULT(_mi_rc, _mi_attr, _mi_attr_name, _mi_target, _mi_value, _mi_default){\
+        _mi_rc = FAPI_ATTR_GET(_mi_attr, _mi_target, _mi_value); \
+        if (_mi_rc) \
         { \
-            FAPI_ERR("fapiGetAttribute of %s with rc = 0x%x", _mi_attr_name, (uint32_t)rc); \
+            FAPI_ERR("fapiGetAttribute of %s with rc = 0x%x", _mi_attr_name, (uint32_t)_mi_rc); \
             break; \
         } \
         FAPI_INF (" value read from attribute %s = 0x%x",  _mi_attr_name,  _mi_value ); \
@@ -116,9 +118,9 @@ enum p8_PM_FLOW_MODE {
         } \
 }
 
-#define GETATTR(_mi_attr, _mi_attr_name, _mi_target, _mi_value){\
-        rc = FAPI_ATTR_GET(_mi_attr, _mi_target, _mi_value); \
-        if (rc) \
+#define GETATTR(_mi_rc, _mi_attr, _mi_attr_name, _mi_target, _mi_value){\
+        _mi_rc = FAPI_ATTR_GET(_mi_attr, _mi_target, _mi_value); \
+        if (_mi_rc) \
         { \
              FAPI_ERR("fapiGetAttribute of %s with rc = 0x%x",  _mi_attr_name, (uint32_t)rc); \
             break; \
@@ -126,11 +128,11 @@ enum p8_PM_FLOW_MODE {
         FAPI_INF (" value read from attribute %s = 0x%x", _mi_attr_name, _mi_value ); \
 }
 
-#define SETATTR(_mi_attr, _mi_attr_name, _mi_target, _mi_value){\
-        rc = FAPI_ATTR_SET(_mi_attr, _mi_target, _mi_value); \
-        if (rc) \
+#define SETATTR(_mi_rc, _mi_attr, _mi_attr_name, _mi_target, _mi_value){\
+        _mi_rc = FAPI_ATTR_SET(_mi_attr, _mi_target, _mi_value); \
+        if (_mi_rc) \
         { \
-            FAPI_ERR("fapiSetAttribute of %s with rc = 0x%x",  _mi_attr_name, (uint32_t)rc); \
+            FAPI_ERR("fapiSetAttribute of %s with rc = 0x%x",  _mi_attr_name, (uint32_t)_mi_rc); \
             break; \
         } \
         FAPI_INF (" value written to attribute %s = 0x%x",  _mi_attr_name,  _mi_value ); \

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pcbs_init.C,v 1.18 2013/05/23 02:18:02 stillgs Exp $
+// $Id: p8_pcbs_init.C,v 1.19 2013/08/02 19:03:12 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pcbs_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -185,7 +185,7 @@
 ///                                                               -- PCBS_OCC_Heartbeat_Reg[8]
 ///
 ///       //  IVRM Setup
-///       get the mrwb attribute ivrms_enabled                    -- If '0' Salerno, if '1' Venice
+///       get the mrwb `ibute ivrms_enabled                    -- If '0' Salerno, if '1' Venice
 ///       if ivrms_enabled {
 ///           set ivrm_fsm_enable = 0                             -- PCBS_iVRM_Control_Status_Reg[0]
 ///                                                               -- ivrm_fsm_enable have be '0' to enable bypass_b writes
@@ -346,13 +346,13 @@ using namespace fapi;
     if(e_rc)                                                                \
     {                                                                       \
         FAPI_ERR("Set DoubleWord failed. With rc = 0x%x", (uint32_t)e_rc);  \
-        l_rc.setEcmdError(e_rc);                                            \
+        rc.setEcmdError(e_rc);                                            \
         break;                                                              \
     }                                                                       \
     FAPI_DBG("Scan0 equivalent reset of 0x%08llx to 0x%16llX",              \
                  _mi_address, _mi_reset_value);                             \
-    l_rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);                \
-    if(!l_rc.ok())                                                          \
+    rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);                \
+    if(!rc.ok())                                                          \
     {                                                                       \
         FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);         \
         break;                                                              \
@@ -365,13 +365,13 @@ using namespace fapi;
     if(e_rc)                                                                \
     {                                                                       \
         FAPI_ERR("Set Word failed. With rc = 0x%x", (uint32_t)e_rc);        \
-        l_rc.setEcmdError(e_rc);                                            \
+        rc.setEcmdError(e_rc);                                            \
         break;                                                              \
     }                                                                       \
     FAPI_DBG("Scan0 equivalent reset of 0x%08llx to 0x%08X",                \
                  _mi_address, _mi_reset_value);                             \
-    l_rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);                \
-    if(!l_rc.ok())                                                          \
+    rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);                \
+    if(!rc.ok())                                                          \
     {                                                                       \
         FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);         \
         break;                                                              \
@@ -467,7 +467,7 @@ p8_pcbs_init_scan0(const Target &i_target, uint8_t i_ex_number);
 fapi::ReturnCode
 p8_pcbs_init( const Target& i_target, uint32_t i_mode)
 {
-    fapi::ReturnCode l_rc;
+    fapi::ReturnCode rc;
 
     //Declare parms struct
     struct_pcbs_val_init_type  pcbs_val_init;
@@ -479,10 +479,10 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
 
         if ( i_mode == PM_CONFIG )
         {
-            l_rc=p8_pcbs_init_config(i_target);
-            if (l_rc)
+            rc=p8_pcbs_init_config(i_target);
+            if (rc)
             {
-              FAPI_ERR("p8_pcbs_init_config failed. With l_rc = 0x%x", (uint32_t)l_rc);
+              FAPI_ERR("p8_pcbs_init_config failed. With rc = 0x%x", (uint32_t)rc);
               break;
             }
 
@@ -490,10 +490,10 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
         else if ( i_mode == PM_INIT )
         {
 
-            l_rc=p8_pcbs_init_init(i_target);
-            if (l_rc)
+            rc=p8_pcbs_init_init(i_target);
+            if (rc)
             {
-              FAPI_ERR("p8_pcbs_init_init failed. With l_rc = 0x%x", (uint32_t)l_rc);
+              FAPI_ERR("p8_pcbs_init_init failed. With rc = 0x%x", (uint32_t)rc);
               break;
             }
         }
@@ -502,8 +502,9 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
             // ----------------------------------------------------------------------
             // Assign default values
             // ----------------------------------------------------------------------
+            // These are only needed to put the hardware back to a known state from
+            // which the OCC can start again in enabling Pstates
 
-            /// \todo CHECK: Review those defaults
             pcbs_val_init.MAX_PSAFE_FSM_LOOPS  =   20; // PMSR poll attempts
             pcbs_val_init.MAX_DELAY =   1000000;       // in ns; 1ms
             pcbs_val_init.MAX_SIM_CYCLES =   1000;
@@ -517,46 +518,46 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
             pcbs_val_init.KUV = 0;                     // Default
             pcbs_val_init.ivrms_enabled = 1 ;
 
-       //            l_rc = FAPI_ATTR_GET(   ATTR_PM_IVRMS_ENABLED,
+       //            rc = FAPI_ATTR_GET(   ATTR_PM_IVRMS_ENABLED,
        //                                    &i_target,
        //                                    pcbs_val_init.ivrms_enabled);
-            if (l_rc)
+            if (rc)
             {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_IVRMS_ENABLED with rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiGetAttribute of ATTR_PM_IVRMS_ENABLED with rc = 0x%x", (uint32_t)rc);
                 break;
             }
 
-//             l_rc = FAPI_ATTR_GET(   ATTR_PM_SAFE_PSTATE,
+//             rc = FAPI_ATTR_GET(   ATTR_PM_SAFE_PSTATE,
 //                                     &i_target,
 //                                     pcbs_val_init.PSAFE);
-            if (l_rc)
+            if (rc)
             {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_SAFE_PSTATE with rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiGetAttribute of ATTR_PM_SAFE_PSTATE with rc = 0x%x", (uint32_t)rc);
                 break;
             }
 
-//             l_rc = FAPI_ATTR_GET(   ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM,
+//             rc = FAPI_ATTR_GET(   ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM,
 //                                     &i_target,
 //                                     pcbs_val_init.PUV_MIN);
-           if (l_rc)
+           if (rc)
             {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM with rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiGetAttribute of ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM with rc = 0x%x", (uint32_t)rc);
                 break;
             }
 
- //            l_rc = FAPI_ATTR_GET(   ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM,
+ //            rc = FAPI_ATTR_GET(   ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM,
 //                                     &i_target,
 //                                     pcbs_val_init.PUV_MAX);
-            if (l_rc)
+            if (rc)
             {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM with rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiGetAttribute of ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM with rc = 0x%x", (uint32_t)rc);
                 break;
             }
 
-            l_rc = p8_pcbs_init_reset( i_target, pcbs_val_init);
-            if (l_rc)
+            rc = p8_pcbs_init_reset( i_target, pcbs_val_init);
+            if (rc)
             {
-                FAPI_ERR("p8_pcbs_init_reset failed. With l_rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("p8_pcbs_init_reset failed. With rc = 0x%x", (uint32_t)rc);
                 break;
             }
         }
@@ -564,12 +565,12 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
         {
             FAPI_ERR("Unknown mode passed to p8_pcbs_init. Mode %x ....", i_mode);
             const uint64_t& MODE = (uint32_t)i_mode;
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PCBS_CODE_BAD_MODE);
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_PCBS_CODE_BAD_MODE);
         }
     } while(0);
     FAPI_INF("Exiting p8_pcbs_init ...");
 
-    return l_rc;
+    return rc;
 
 }
 
@@ -586,7 +587,7 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
 fapi::ReturnCode
 p8_pcbs_init_config(const Target& i_target)
 {
-  fapi::ReturnCode l_rc;
+  fapi::ReturnCode rc;
 
   /// Function moved in p8_pfet_int.C
   /// FAPI_DBG("*************************************");
@@ -594,7 +595,7 @@ p8_pcbs_init_config(const Target& i_target)
   /// FAPI_DBG("*************************************");
   ///
 
-  return l_rc;
+  return rc;
 
 } //end CONFIG
 
@@ -610,29 +611,28 @@ p8_pcbs_init_config(const Target& i_target)
 fapi::ReturnCode
 p8_pcbs_init_init(const Target& i_target)
 {
-    fapi::ReturnCode                l_rc;
+    fapi::ReturnCode                rc;
     uint32_t                        e_rc;              // eCmd returncode
 
     ecmdDataBufferBase              data(64);
 
     // Variables
     std::vector<fapi::Target>       l_exChiplets;
-    fapi::TargetState               l_state = TARGET_STATE_FUNCTIONAL;
-    uint8_t                         l_functional = 0;
     uint8_t                         l_ex_number = 0;
     uint64_t                        address;
+    uint64_t                    ex_offset;
 
     FAPI_INF("p8_pcbs_init_init beginning for target %s ...", i_target.toEcmdString());
 
     do
     {
-        l_rc = fapiGetChildChiplets(i_target,
+        rc = fapiGetChildChiplets(i_target,
                                     fapi::TARGET_TYPE_EX_CHIPLET,
                                     l_exChiplets,
-                                    l_state);
-        if (l_rc)
+                                    TARGET_STATE_FUNCTIONAL);
+        if (rc)
         {
-            FAPI_ERR("fapiGetChildChiplets with rc = 0x%x", (uint32_t)l_rc);
+            FAPI_ERR("fapiGetChildChiplets with rc = 0x%x", (uint32_t)rc);
             break;
         }
 
@@ -641,60 +641,42 @@ p8_pcbs_init_init(const Target& i_target)
         // For each chiplet in the functional list
         for (uint8_t c=0; c< l_exChiplets.size(); c++)
         {
-            FAPI_DBG("\tLoop Variable %d ",c);
 
-            l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[c], l_functional);
-            if (l_rc)
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);
+            if (rc)
             {
-                FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL with rc = 0x%x", (uint32_t)l_rc);
-                break;
-            }
-
-
-            if (!l_functional)
-            {
-                FAPI_DBG("Core number = %d  is not functional", c);
-                // Iterate
-                continue;
-            }
-
-            // The ex is functional let's build the SCOM address
-            l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);
-            if (l_rc)
-            {
-                FAPI_ERR("No functional chiplets exist");
-                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)rc);
                 break;
             }
 
             FAPI_DBG("Core number = %d", l_ex_number);
 
+            ex_offset = l_ex_number * 0x01000000;
+
             // Set DPLL Lock Replacement value (15:23) = 2 (eg bit 22 = 1)
             FAPI_INF ("Set DPLL Lock Replacement value of EX_DPLL_CPM_PARM_REG_0x1*0F0152 ");
 
-            address =  EX_DPLL_CPM_PARM_REG_0x100F0152 +
-                        (l_ex_number * 0x01000000);
-            GETSCOM(i_target, address, data);
+            address =  EX_DPLL_CPM_PARM_REG_0x100F0152 + ex_offset;
+            GETSCOM(rc, i_target, address, data);
 
             e_rc  = data.setBit(22);
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data);
+            PUTSCOM(rc, i_target, address, data);
 
             //  ******************************************************************
             //  - Enable DPLL Lock Replacement mode
             //  ******************************************************************
             FAPI_INF("Set DPLL Lock Replacement mode");
 
-            address = EX_PCBSPM_MODE_REG_0x100F0156 +
-                                (l_ex_number * 0x01000000);
+            address = EX_PCBSPM_MODE_REG_0x100F0156 + ex_offset;
 
-            GETSCOM(i_target, address, data );
+            GETSCOM(rc, i_target, address, data );
 
             e_rc |= data.setBit(7);
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data );
+            PUTSCOM(rc, i_target, address, data );
 
             //  ******************************************************************
             //  - set PCBS_PM_PMGP1_REG_1
@@ -706,10 +688,10 @@ p8_pcbs_init_init(const Target& i_target)
             // Clear buffer
             e_rc  = data.flushTo0();
             e_rc |= data.setBit(11);    // Force OCC SPR Mode = 1
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            address =  EX_PMGP1_OR_0x100F0105 + (l_ex_number * 0x01000000);
-            PUTSCOM(i_target, address, data );
+            address =  EX_PMGP1_OR_0x100F0105 + ex_offset;
+            PUTSCOM(rc, i_target, address, data );
 
             FAPI_INF("Forced OCC SPR Mode");
 
@@ -720,11 +702,10 @@ p8_pcbs_init_init(const Target& i_target)
 
             // Clear buffer
             e_rc = data.flushTo0();
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            address =  EX_PCBS_Power_Management_Control_Reg_0x100F0159 +
-                                (l_ex_number * 0x01000000);
-            PUTSCOM(i_target, address, data);
+            address = EX_PCBS_Power_Management_Control_Reg_0x100F0159 + ex_offset;
+            PUTSCOM(rc, i_target, address, data);
 
             //  ******************************************************************
             //  - Power Management Idle Control Reg
@@ -733,22 +714,21 @@ p8_pcbs_init_init(const Target& i_target)
 
             // Clear buffer
             e_rc = data.flushTo0();
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            address =  EX_PCBS_Power_Management_Idle_Control_Reg_0x100F0158 +
-                                (l_ex_number * 0x01000000);
-            PUTSCOM(i_target, address, data);
+            address = EX_PCBS_Power_Management_Idle_Control_Reg_0x100F0158 + ex_offset;
+            PUTSCOM(rc, i_target, address, data);
 
             FAPI_INF ("PMCR default value adjustment (Hardware flush 0) of EX_PCBS_Power_Management_Idle_Control_Reg_0x1*0F0158 " );
 
         }  //END FOR
-        if (!l_rc.ok() )
+        if (!rc.ok() )
         {
             break;
         }
     } while(0);
 
-    return l_rc;
+    return rc;
 
 }  //end INIT
 
@@ -767,7 +747,7 @@ p8_pcbs_init_init(const Target& i_target)
 fapi::ReturnCode
 p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
 {
-    fapi::ReturnCode            l_rc;
+    fapi::ReturnCode            rc;
     uint32_t                    e_rc;           // ecmd returncode
 
     ecmdDataBufferBase          data(64);
@@ -776,22 +756,56 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
 
     // Variables
     std::vector<fapi::Target>   l_exChiplets;
-    fapi::TargetState           l_state = TARGET_STATE_FUNCTIONAL;
-    uint8_t                     l_functional = 0;
     uint8_t                     l_ex_number = 0;
     uint64_t                    address;
-    uint32_t                    loopcount = 0; // number of times PCBS-PMSR has been checked
+    uint64_t                    ex_offset;
+
+    uint32_t                    loopcount = 0;
+    // PCBSPM MODE bits
+    const uint32_t              PCBSPMMODE_ENABLE_PSTATE_MODE_BIT = 0;
+    const uint32_t              PCBSPMMODE_ENABLE_GLOBAL_PSTATE_REQ_BIT = 2;
+
+    // PMGP1 bits
+    const uint32_t              PMGP1_DPLL_FREQ_OVERRIDE_ENABLE = 10;
+    const uint32_t              PMGP1_PM_SPR_OVERRIDE_EN_BIT = 11;
+    const uint32_t              PMGP1_FORCE_SAFE_MODE_BIT = 12;
+
+    // PMSR bits
+    const uint32_t              PMSR_PSAFE_MODE_ACTIVE_BIT = 33;
+    const uint32_t              PMSR_ALL_FSMS_IN_SAFE_STATE_BIT = 36;
+
+    // PMCR bits
+    const uint32_t              PMSR_AUTO_OVERRIDE0_PSTATE_LIMIT_EN_BIT = 16;
+    const uint32_t              PMSR_AUTO_OVERRIDE1_PSTATE_LIMIT_EN_BIT = 17;
+
+    // PMICR bits
+    const uint32_t              PMICR_NAP_PSTATE_EN_BIT = 8;
+    const uint32_t              PMICR_SLEEP_PSTATE_EN_BIT = 24;
+    const uint32_t              PMICR_WINKLE_PSTATE_EN_BIT = 40;
+
+    // GP3 bits
+    const uint32_t              GP3_RESCLK_DIS_BIT = 22;
+
+    // PCBS OCC Heartbeat bits
+    const uint32_t              POHR_OCC_HEARTBEAT_EN_BIT = 8;
+
+    // PCBS OCC Heartbeat bits
+    const uint32_t              IVRMCS_IVRM_FSM_ENABLE_BIT = 0;
+    const uint32_t              IVRMCS_IVRM_CORE_VDD_BYPASS_B_BIT = 4;
+    const uint32_t              IVRMCS_IVRM_CORE_VCS_BYPASS_B_BIT = 6;
+    const uint32_t              IVRMCS_IVRM_ECO_VDD_BYPASS_B_BIT = 8;
+    const uint32_t              IVRMCS_IVRM_ECO_VCS_BYPASS_B_BIT = 10;
 
     FAPI_INF("p8_pcbs_init_reset beginning for target %s ...", i_target.toEcmdString());
     do
     {
-        l_rc = fapiGetChildChiplets(i_target,
+        rc = fapiGetChildChiplets(i_target,
                                     fapi::TARGET_TYPE_EX_CHIPLET,
                                     l_exChiplets,
-                                    l_state);
-        if (l_rc)
+                                    TARGET_STATE_FUNCTIONAL);
+        if (rc)
         {
-            FAPI_ERR("fapiGetChildChiplets with rc = 0x%x", (uint32_t)l_rc);
+            FAPI_ERR("fapiGetChildChiplets with rc = 0x%x", (uint32_t)rc);
             break;
         }
 
@@ -800,43 +814,17 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
         // For each chiplet
         for (uint8_t c=0; c< l_exChiplets.size(); c++)
         {
-            FAPI_DBG("\tLoop Variable %d ",c);
 
-            l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[c], l_functional);
-            if (l_rc)
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);
+            if (rc)
             {
-              FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL with rc = 0x%x", (uint32_t)l_rc);
-              break;
-            }
-
-            if (!l_functional)
-            {
-                FAPI_DBG("Core number = %d  is not functional", c);
-                // Iterate
-                continue;
-            }
-
-            // The ex is functional let's build the SCOM address
-            l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);
-            if (l_rc)
-            {
-                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)l_rc);
+                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)rc);
                 break;
             }
 
             FAPI_DBG("\tCore number = %d", l_ex_number);
 
-            //  ******************************************************************
-            //  Set the regs back to scan0 state -  NO... NOT HERE!
-            //  ******************************************************************
-
-            l_rc = p8_pcbs_init_scan0(i_target, l_ex_number);
-            if (l_rc)
-            {
-                FAPI_ERR(" p8_pcbs_init_scan0 failed. With l_rc = 0x%x", (uint32_t)l_rc);
-                break;
-            }
-
+            ex_offset = l_ex_number * 0x01000000;
 
             //  ******************************************************************
             //  Force safe mode if Pstates are enabled.
@@ -845,12 +833,11 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             //              [12] force_safe_mode = 1
             //  ******************************************************************
 
-            address = EX_PCBSPM_MODE_REG_0x100F0156 +
-                                (l_ex_number * 0x01000000);
-            GETSCOM(i_target, address, data);
+            address = EX_PCBSPM_MODE_REG_0x100F0156 + ex_offset;
+            GETSCOM(rc, i_target, address, data);
             FAPI_DBG("\tPCBS_MODE_REG value 0x%16llX", data.getDoubleWord(0));
 
-            if (data.isBitSet(0))  // Pstates enabled
+            if (data.isBitSet(PCBSPMMODE_ENABLE_PSTATE_MODE_BIT))  // Pstates enabled
             {
 
                 FAPI_INF("Pstate enabled - Force safe mode");
@@ -858,14 +845,13 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
                 // Using Write OR to just set bit12
                 // Clear buffer
                 e_rc = data.flushTo0();
-                E_RC_CHECK(e_rc, l_rc);
+                E_RC_CHECK(e_rc, rc);
 
-                e_rc = data.setBit(12);    // force_safe_mode = 1
-                E_RC_CHECK(e_rc, l_rc);
+                e_rc = data.setBit(PMGP1_FORCE_SAFE_MODE_BIT);  // force_safe_mode = 1
+                E_RC_CHECK(e_rc, rc);
 
-                address =  EX_PMGP1_OR_0x100F0105 +
-                                (l_ex_number * 0x01000000);;
-                PUTSCOM(i_target, address, data);
+                address =  EX_PMGP1_OR_0x100F0105 + ex_offset;
+                PUTSCOM(rc, i_target, address, data);
 
                 FAPI_INF("Forced Safe Mode");
 
@@ -875,27 +861,28 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
                 //  ******************************************************************
                 //  - PCBS_POWER_MANAGEMENT_STATUS_REG[33] safe_mode_active
                 //  - PCBS_POWER_MANAGEMENT_STATUS_REG[36] all_fsms_in_safe_state
-                //
                 //  ******************************************************************
                 FAPI_INF("Psafe Pstate and FSM-stable?");
 
                 loopcount = 0;
 
-                address =  EX_PCBS_POWER_MANAGEMENT_STATUS_REG_0x100F0153 +
-                                    (l_ex_number * 0x01000000);
-                GETSCOM(i_target, address, data);
-
+                address =  EX_PCBS_POWER_MANAGEMENT_STATUS_REG_0x100F0153 + ex_offset;
                 // loop until  (safe_mode_active AND all_fsms_in_safe_state)
-                while( data.isBitClear( 33 ) || data.isBitClear( 36 )  )
+                do
                 {
+
+                    // Read PMSR
+                    GETSCOM(rc, i_target, address, data);
+
                     FAPI_DBG("\t loopcount => %d ",loopcount  );
                     // OR timeout .... set to 20 loops
                     if( ++loopcount > pcbs_val_init.MAX_PSAFE_FSM_LOOPS )
                     {
                         FAPI_ERR("Gave up waiting for Psafe Pstate and FSM-stable!" );
+                        const fapi::Target& PROC_CHIP = i_target;
                         const uint64_t& LOOPCOUNT = (uint32_t)loopcount;
                         const uint64_t& PMSR = data.getDoubleWord(0);
-                        FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT);
+                        FAPI_SET_HWP_ERROR(rc, RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT);
                         break;
                     }
 
@@ -906,19 +893,17 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
                     FAPI_DBG("\t Wait DELAY: %d  ", pcbs_val_init.MAX_DELAY);
                     FAPI_DBG("\t Wait SimCycles: %d  ", pcbs_val_init.MAX_SIM_CYCLES);
 
-                    l_rc =  fapiDelay(pcbs_val_init.MAX_DELAY, pcbs_val_init.MAX_SIM_CYCLES);
-                    if (l_rc)
+                    rc =  fapiDelay(pcbs_val_init.MAX_DELAY, pcbs_val_init.MAX_SIM_CYCLES);
+                    if (rc)
                     {
-                        FAPI_ERR("fapiDelay(MAX_DELAY, MAX_SIM_CYCLES) failed. With rc = 0x%x", (uint32_t)l_rc);
+                        FAPI_ERR("fapiDelay(MAX_DELAY, MAX_SIM_CYCLES) failed. With rc = 0x%x", (uint32_t)rc);
                         break;
                     }
 
-                    // Read PMSR again
-                    GETSCOM(i_target, address, data);
-
-                }
+                } while ( data.isBitClear(PMSR_PSAFE_MODE_ACTIVE_BIT) ||
+                          data.isBitClear(PMSR_ALL_FSMS_IN_SAFE_STATE_BIT));
                 // if error, break the outer loop
-                if (!l_rc.ok())
+                if (!rc.ok())
                 {
                     break;
                 }
@@ -946,26 +931,26 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             FAPI_INF("Hold the DPLL to the value that the last Pstate represents");
 
             // Write calculated values to FREQ_CTRL_REG
-            address = EX_FREQCNTL_0x100F0151 + (l_ex_number * 0x01000000);
-            GETSCOM(i_target, address, data);
+            address = EX_FREQCNTL_0x100F0151 + ex_offset;
+            GETSCOM(rc, i_target, address, data);
 
             FAPI_DBG(" Pre write content of FREQ_CTRL_REG_0x1*0F0151 :  %016llX",
                             data.getDoubleWord(0));
 
             // Clear the DPLL bias;  did not clear other fields
             e_rc = data.clearBit(18, 4);
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data);
+            PUTSCOM(rc, i_target, address, data);
 
             // Lock the DPLL in via the override mode.  Note:  this DOES
             // allow for continued CPM enablement
             e_rc |= data.flushTo0();
-            e_rc |= data.setBit(10);     // dpll_freq_override_enable
-            E_RC_CHECK(e_rc, l_rc);
+            e_rc |= data.setBit(PMGP1_DPLL_FREQ_OVERRIDE_ENABLE);
+            E_RC_CHECK(e_rc, rc);
 
-            address = EX_PMGP1_OR_0x100F0105 + (l_ex_number * 0x01000000);
-            PUTSCOM(i_target, address, data);
+            address = EX_PMGP1_OR_0x100F0105 + ex_offset;
+            PUTSCOM(rc, i_target, address, data);
 
             //  ******************************************************************
             //  - Disable Pstate mode
@@ -973,16 +958,15 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             //  ******************************************************************
             FAPI_INF("Disable Pstate mode and disable Pstate requests");
 
-            address = EX_PCBSPM_MODE_REG_0x100F0156 +
-                                (l_ex_number * 0x01000000);
+            address = EX_PCBSPM_MODE_REG_0x100F0156 + ex_offset;
 
-            GETSCOM(i_target, address, data );
+            GETSCOM(rc, i_target, address, data );
 
-            e_rc |= data.clearBit(0);       //Disable Pstate mode
-            e_rc |= data.clearBit(2);       //Disable Pstate requests
-            E_RC_CHECK(e_rc, l_rc);
+            e_rc |= data.clearBit(PCBSPMMODE_ENABLE_PSTATE_MODE_BIT);
+            e_rc |= data.clearBit(PCBSPMMODE_ENABLE_GLOBAL_PSTATE_REQ_BIT);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data );
+            PUTSCOM(rc, i_target, address, data );
 
             FAPI_INF("Disabled Pstate mode");
 
@@ -998,11 +982,11 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             // Using Write OR to set bit11
             // Clear buffer
             e_rc  = data.flushTo0();
-            e_rc |= data.setBit(11);    // Force OCC SPR Mode = 1
-            E_RC_CHECK(e_rc, l_rc);
+            e_rc |= data.setBit(PMGP1_PM_SPR_OVERRIDE_EN_BIT);
+            E_RC_CHECK(e_rc, rc);
 
-            address =  EX_PMGP1_OR_0x100F0105 + (l_ex_number * 0x01000000);
-            PUTSCOM(i_target, address, data );
+            address =  EX_PMGP1_OR_0x100F0105 + ex_offset;
+            PUTSCOM(rc, i_target, address, data );
 
             FAPI_INF("Forced OCC SPR Mode");
 
@@ -1014,26 +998,25 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             FAPI_INF("Disabling Global Pstate Request bits ");
 
             address =  EX_PCBS_Power_Management_Idle_Control_Reg_0x100F0158 +
-                                (l_ex_number * 0x01000000);
-            GETSCOM(i_target, address, data );
+                                ex_offset;
+            GETSCOM(rc, i_target, address, data );
 
-            e_rc |= data.clearBit(8);       // Disable Nap Pstate Enable
-            e_rc |= data.clearBit(24);      // Disable Sleep Pstate Enable
-            e_rc |= data.clearBit(40);      // Disable Winkle Pstate Enable
-            E_RC_CHECK(e_rc, l_rc);
+            e_rc |= data.clearBit(PMICR_NAP_PSTATE_EN_BIT);
+            e_rc |= data.clearBit(PMICR_SLEEP_PSTATE_EN_BIT);
+            e_rc |= data.clearBit(PMICR_WINKLE_PSTATE_EN_BIT);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data );
+            PUTSCOM(rc, i_target, address, data );
 
             // Auto overrides
-            address =  EX_PCBS_Power_Management_Control_Reg_0x100F0159 +
-                                (l_ex_number * 0x01000000);
-            GETSCOM(i_target, address, data );
+            address = EX_PCBS_Power_Management_Control_Reg_0x100F0159 + ex_offset;
+            GETSCOM(rc, i_target, address, data );
 
-            e_rc |= data.clearBit(16);      // Disable Auto Override 0
-            e_rc |= data.clearBit(17);      // Disable Auto Override 1
-            E_RC_CHECK(e_rc, l_rc);
+            e_rc |= data.clearBit(PMSR_AUTO_OVERRIDE0_PSTATE_LIMIT_EN_BIT);
+            e_rc |= data.clearBit(PMSR_AUTO_OVERRIDE1_PSTATE_LIMIT_EN_BIT);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data );
+            PUTSCOM(rc, i_target, address, data );
 
             FAPI_INF("Disabled Global Pstate Requests");
 
@@ -1046,11 +1029,10 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             e_rc |= data.flushTo0();
             e_rc |= data.setByte(0, pcbs_val_init.PMIN_CLIP); //Pmin_clip   =  -128
             e_rc |= data.setByte(1, pcbs_val_init.PMAX_CLIP); //Pmax_clip   =   127
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            address = EX_PCBS_Power_Management_Bounds_Reg_0x100F015D +
-                                (l_ex_number * 0x01000000);
-            PUTSCOM(i_target, address, data );
+            address = EX_PCBS_Power_Management_Bounds_Reg_0x100F015D + ex_offset;
+            PUTSCOM(rc, i_target, address, data );
 
             FAPI_DBG("Pmin/Pmax written to PCBS_Power_Management_Bounds_Reg :  %016llX",
                             data.getDoubleWord(0));
@@ -1067,28 +1049,27 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             // Using Write OR to just set bit22
             // Clear buffer
             e_rc = data.flushTo0();
-            e_rc = data.setBit(22);     //disable RESCLK
-            E_RC_CHECK(e_rc, l_rc);
+            e_rc = data.setBit(GP3_RESCLK_DIS_BIT);
+            E_RC_CHECK(e_rc, rc);
 
-            address = EX_GP3_OR_0x100F0014 + (l_ex_number * 0x01000000);
-            PUTSCOM(i_target, address, data);
+            address = EX_GP3_OR_0x100F0014 + ex_offset;
+            PUTSCOM(rc, i_target, address, data);
 
             FAPI_INF ("Disabled RESCLK, set bit 22 of GP3_REG_0_RWXx1*0F0012 " );
 
             //  ******************************************************************
             //  Disable OCC Heartbeat
             //  ******************************************************************
-            address = EX_PCBS_OCC_Heartbeat_Reg_0x100F0164 +
-                                (l_ex_number * 0x01000000);
-            GETSCOM(i_target, address, data);
+            address = EX_PCBS_OCC_Heartbeat_Reg_0x100F0164 + ex_offset;
+            GETSCOM(rc, i_target, address, data);
 
             FAPI_DBG(" Pre write content of PCBS_OCC_HEARTBEAT_REG_0x1*0F0164  :  %016llX",
                             data.getDoubleWord(0));
 
-            e_rc = data.clearBit(8);     //OCC Heartbeat disable
-            E_RC_CHECK(e_rc, l_rc);
+            e_rc = data.clearBit(POHR_OCC_HEARTBEAT_EN_BIT);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data);
+            PUTSCOM(rc, i_target, address, data);
 
             FAPI_INF ("OCC Heartbeat disabled, cleared bit 8 of PCBS_OCC_HEARTBEAT_REG_0x1*0F0164" );
 
@@ -1104,22 +1085,21 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
 
             if (pcbs_val_init.ivrms_enabled)
             {
-                address =  EX_PCBS_iVRM_Control_Status_Reg_0x100F0154 +
-                                (l_ex_number * 0x01000000);
-                GETSCOM(i_target, address, data);
+                address =  EX_PCBS_iVRM_Control_Status_Reg_0x100F0154 + ex_offset;
+                GETSCOM(rc, i_target, address, data);
                 FAPI_DBG(" Pre write content of PCBS_iVRM_Control_Status_Reg_0x1*0F0154  :  %016llX",
                                 data.getDoubleWord(0));
 
-                e_rc  = data.clearBit(0);      // disable ivrms
-                e_rc |= data.clearBit(4);      // ivrm_core_vdd_bypass_b
-                e_rc |= data.clearBit(6);      // ivrm_core_vcs_bypass_b
-                e_rc |= data.clearBit(8);      // ivrm_eco_vdd_bypass_b
-                e_rc |= data.clearBit(10);     // ivrm_eco_vcs_bypass_b
-                E_RC_CHECK(e_rc, l_rc);
+                e_rc  = data.clearBit(IVRMCS_IVRM_FSM_ENABLE_BIT);
+                e_rc |= data.clearBit(IVRMCS_IVRM_CORE_VDD_BYPASS_B_BIT);
+                e_rc |= data.clearBit(IVRMCS_IVRM_CORE_VCS_BYPASS_B_BIT);
+                e_rc |= data.clearBit(IVRMCS_IVRM_ECO_VDD_BYPASS_B_BIT);
+                e_rc |= data.clearBit(IVRMCS_IVRM_ECO_VCS_BYPASS_B_BIT);
+                E_RC_CHECK(e_rc, rc);
 
-                PUTSCOM(i_target, address, data);
+                PUTSCOM(rc, i_target, address, data);
                 // Write twice since  ivrm_fsm_enable have to be 0 to enable the set the bypass modes
-                PUTSCOM(i_target, address, data);
+                PUTSCOM(rc, i_target, address, data);
 
                 FAPI_INF ("iVRMs disabled and in bypass-mode" );
             }
@@ -1127,9 +1107,8 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             //  ******************************************************************
             //  Disable undervolting
             //  ******************************************************************
-            address =  EX_PCBS_UNDERVOLTING_REG_0x100F015B +
-                                (l_ex_number * 0x01000000);
-            GETSCOM(i_target, address, data);
+            address =  EX_PCBS_UNDERVOLTING_REG_0x100F015B + ex_offset;
+            GETSCOM(rc, i_target, address, data);
 
             FAPI_DBG(" Pre write content of PCBS_UNDERVOLTING_REG_0x1*0F015B  :  %016llX",
                             data.getDoubleWord(0));
@@ -1137,11 +1116,9 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             e_rc |= data.setByte(0, pcbs_val_init.PUV_MIN);  //Puv_min   =  -128
             e_rc |= data.setByte(1, pcbs_val_init.PUV_MAX);  //Puv_max   =  -128
             e_rc |= data.setByte(2, pcbs_val_init.KUV);      //Kuv       =  0
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data);
-
-
+            PUTSCOM(rc, i_target, address, data);
 
             FAPI_DBG("\t PUV_MIN => %d ", pcbs_val_init.PUV_MIN );
             FAPI_DBG("\t PUV_MAX => %d ", pcbs_val_init.PUV_MAX );
@@ -1153,25 +1130,36 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             //  Disable Local Pstate Frequency Target mechanism
             //  ******************************************************************
             address =  EX_PCBS_Local_Pstate_Frequency_Target_Control_Register_0x100F0168
-                            + (l_ex_number * 0x01000000);
-            GETSCOM(i_target, address, data);
+                            + ex_offset;
+            GETSCOM(rc, i_target, address, data);
 
             e_rc |= data.clearBit(20);
-            E_RC_CHECK(e_rc, l_rc);
+            E_RC_CHECK(e_rc, rc);
 
-            PUTSCOM(i_target, address, data);
-
+            PUTSCOM(rc, i_target, address, data);
 
             FAPI_INF ("Local Pstate Frequency Target mechanism disabled" );
+
+            //  ******************************************************************
+            //  Set other regs back to scan0 state
+            //  ******************************************************************
+
+            rc = p8_pcbs_init_scan0(i_target, l_ex_number);
+            if (rc)
+            {
+                FAPI_ERR(" p8_pcbs_init_scan0 failed. With rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+
         } // Chiplet loop
     } while(0);
 
-    if (l_rc.ok())
+    if (rc.ok())
     {
-        FAPI_INF("Reset complete  ....");
+        FAPI_INF("Reset complete ...\n");
     }
 
-    return l_rc;
+    return rc;
 }   // end RESET
 
 //------------------------------------------------------------------------------
@@ -1188,17 +1176,20 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
 fapi::ReturnCode
 p8_pcbs_init_scan0(const Target &i_target, uint8_t i_ex_number)
 {
-    fapi::ReturnCode            l_rc;
+    fapi::ReturnCode            rc;
     uint32_t                    e_rc;           // ecmd returncode
     ecmdDataBufferBase          data(64);
     uint64_t                    address;
+    uint64_t                    ex_offset;
     uint64_t                    reset_doubleword;
     uint32_t                    reset_word;
 
     do
     {
+        ex_offset = i_ex_number * 0x01000000;
+
         //  ******************************************************************
-        //  initialize all pm_reg with scan-zero values upfront
+        //  Initialize PM Regs with scan-zero values
         //  *****************************************************************
         FAPI_INF("Put selective PCBSLV_PM registers to the scan0 value that are touched by OCC firmware");
 
@@ -1210,7 +1201,7 @@ p8_pcbs_init_scan0(const Target &i_target, uint8_t i_ex_number)
         //      VDD to operational chiplets.
         //  EX_PFVddCntlStat_REG_0x100F010E not reset has this would disrupt
         //      VCS to operational chiplets
-        //  EX_FREQCNTL_0x100F0151not reset has this would disrupt the frequency
+        //  EX_FREQCNTL_0x100F0151 not reset has this would disrupt the frequency
         //      of operational chiplets
         //  EX_DPLL_CPM_PARM_REG_0x100F0152 not reset has this has DPLL control
         //      bits that could/would disrupt operational chiplets
@@ -1225,74 +1216,64 @@ p8_pcbs_init_scan0(const Target &i_target, uint8_t i_ex_number)
         //      by register accesses
 
         //----
-        address =  EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165 + ex_offset;
         reset_doubleword = EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165_scan0;
         SETDWSCAN0(i_target, address, data, reset_doubleword );
 
         //----
-        address =  EX_PMErrMask_REG_0x100F010A
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PMErrMask_REG_0x100F010A + ex_offset;
         reset_word = EX_PMErrMask_REG_0x100F010A_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         // OCC does not mess with the PFET delays so these are left in tact.
 
         //  This can only be done IF the IVRM is previously  disabled.
-        address =  EX_PCBS_iVRM_Control_Status_Reg_0x100F0154
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_iVRM_Control_Status_Reg_0x100F0154 + ex_offset;
         reset_word = EX_PCBS_iVRM_Control_Status_Reg_0x100F0154_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         //----
-        address =  EX_PCBS_iVRM_Value_Setting_Reg_0x100F0155
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_iVRM_Value_Setting_Reg_0x100F0155 + ex_offset;
         reset_word = EX_PCBS_iVRM_Value_Setting_Reg_0x100F0155_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         //----
-        address =  EX_PCBS_PMC_VF_CTRL_REG_0x100F015A
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_PMC_VF_CTRL_REG_0x100F015A + ex_offset;
         reset_word = EX_PCBS_PMC_VF_CTRL_REG_0x100F015A_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         //----
-        address =  EX_PCBS_Pstate_Index_Bound_Reg_0x100F015C
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_Pstate_Index_Bound_Reg_0x100F015C + ex_offset;
         reset_word = EX_PCBS_Pstate_Index_Bound_Reg_0x100F015C_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         //----
-        address =  EX_PCBS_PSTATE_TABLE_CTRL_REG_0x100F015E
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_PSTATE_TABLE_CTRL_REG_0x100F015E + ex_offset;
         reset_word = EX_PCBS_PSTATE_TABLE_CTRL_REG_0x100F015E_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         //----
-        address =  EX_PCBS_iVRM_VID_Control_Reg0_0x100F0162
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_iVRM_VID_Control_Reg0_0x100F0162  + ex_offset;
         reset_word = EX_PCBS_iVRM_VID_Control_Reg0_0x100F0162_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         //----
-        address =  EX_PCBS_iVRM_VID_Control_Reg1_0x100F0163
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_iVRM_VID_Control_Reg1_0x100F0163 + ex_offset;
         reset_word = EX_PCBS_iVRM_VID_Control_Reg1_0x100F0163_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         //----
-        address =  EX_PCBS_Resonant_Clock_Control_Reg1_0x100F0166
-                    + (i_ex_number * 0x01000000);
+        address =  EX_PCBS_Resonant_Clock_Control_Reg1_0x100F0166 + ex_offset;
         reset_word = EX_PCBS_Resonant_Clock_Control_Reg1_0x100F0166_scan0;
         SETSCAN0(i_target, address, data, reset_word );
 
         /// \todo  Regcheck error check at latest model
         // address =  EX_PCBS_Local_Pstate_Frequency_Target_Control_Register_0x100F0168
-        //          + (i_ex_number * 0x01000000);
+        //          + ex_offset;
         // reset_word = EX_PCBS_Local_Pstate_Frequency_Target_Control_Register_0x100F0168_scan0;
         // SETSCAN0(i_target, address, data, reset_word );
     } while(0);
-    return l_rc;
+    return rc;
 }
 
 } //end extern C
@@ -1303,6 +1284,13 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pcbs_init.C,v $
+Revision 1.19  2013/08/02 19:03:12  stillgs
+
+- Fix for SW209736 (OCC Reset Procedure incorrectly sets Freq to Turbo Value)
+- Removed redundant check of functional attribute (Gerrit)
+- Moved reg bit definitions to literals for clarity
+- General clean-up in prep for RAS reviews.  Added some FFDC info.
+
 Revision 1.18  2013/05/23 02:18:02  stillgs
 
 Fix error_flag compile issue by removing it as coming header change will do anyway
