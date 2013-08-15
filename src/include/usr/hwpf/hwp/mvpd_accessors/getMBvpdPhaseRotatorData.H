@@ -36,8 +36,35 @@
 
 namespace fapi
 {
+// The MBvpdPhaseRotatorData enumeration is used on the FAPI_ATTR_GET and
+// getMBvpdPhaseRotatorData HWP accessor interface. The lower byte (6 bits)
+// matches the offset of the vpd field in the MR keyword. This is a convenient
+// use of the value for efficiency to index into the vpd keyword data.
+//
+// Most of the attributes are byte values and can be returned to the requester
+// directly. There are some that require special processing. For those, a
+// special processing flag is added into the value. This also distinguishes
+// values which have the same offset.
 
-// values match offset into MR keyword data
+// special processing flags to be added on to the MBvpdPhaseRotatorData value
+    enum MBvpdPhaseRotatorSpecial
+    {
+        PHASE_ROT_HIGH_NIBBLE = 0x0100,     //bits 4:7 shifted right 4
+        PHASE_ROT_LOW_NIBBLE  = 0x0200,     //bits 0:3
+        PHASE_ROT_PORT00=0x0300, // return vpd port 0 value for 0 and 1
+        PHASE_ROT_PORT11=0x0400, // return vpd port 1 value for 0 and 1
+    };
+// mask to isolate special processing flags
+const uint16_t PHASE_ROT_SPECIAL_MASK = 0x0700;
+
+// The offset changed for some of the attributes going from v5.3 of the vpd
+// layout to v6.0 and after. There is a work around to use the proper offset
+// based on the version
+// Flag to be added into MBvpdPhaseRotatorData value for attributes that need
+// to be checked for the work around.
+const uint8_t  PHASE_ROT_CHK60 = 0x40;  // check version for offset to use
+
+// base values match offset into MR keyword data
     enum MBvpdPhaseRotatorData
     {
         PHASE_ROT_M0_CLK_P0 = 0x00,
@@ -88,11 +115,24 @@ namespace fapi
         PHASE_ROT_M1_CNTL_CSN3 = 0x2d,
         PHASE_ROT_M1_CNTL_ODT0 = 0x2e,
         PHASE_ROT_M1_CNTL_ODT1 = 0x2f,
-// The max value is 0x3f. The MR keyword is 255 bytes. There is only room for
-// 63 attributes per port. There are 4 x  64 byte sections,
-// but the last one is 1 byte short.
+        // DRAM_2N_MODE reserved = 0x30,
+        PHASE_ROT_TSYS_ADR  = 0x31 | PHASE_ROT_CHK60 | PHASE_ROT_PORT00,
+        PHASE_ROT_TSYS_DP18 = 0x31 | PHASE_ROT_CHK60 | PHASE_ROT_PORT11,
+// Use these offsets for vpd less than version 6.0
+        PHASE_ROT_RLO_V53 = 0x31 | PHASE_ROT_HIGH_NIBBLE,
+        PHASE_ROT_WLO_V53 = 0x31 | PHASE_ROT_LOW_NIBBLE,
+        PHASE_ROT_GPO_V53= 0x32,
+        PHASE_ROT_TSYS_ADR_V53  = 0x33 | PHASE_ROT_PORT00,
+        PHASE_ROT_TSYS_DP18_V53 = 0x33 | PHASE_ROT_PORT11,
+        // invalid value
+        PHASE_ROT_INVALID = 0x3f,
     };
 }
+// The max base offset value is 0x3e. The MR keyword is 255 bytes.
+// There is only room for 63 attributes per port. There are 4 x  64 byte
+// sections, but the last one is 1 byte short. See diagram below...
+const uint8_t PHASE_ROT_OFFSET_MASK = 0x003f; // mask attr to isolate base
+                                              // vpd offsetk
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*getMBvpdPhaseRotatorData_FP_t)
@@ -108,6 +148,25 @@ extern "C"
  * There are Phase Rotator attributes for the mba's 2 ports in cvpd
  * record VSPD keyword MR. Each attribute has 2 bytes, one for each port.
  * There are two mba per memory buffer, position 0 and position 1.
+ * The Termination Data attributes are retrieved from cvpd record VSPD
+ * keyword MT.
+ *
+ * cpvd record VSPD keyword MR
+ * -----------------------------------
+ * | mba position 0                  |
+ * |  -----------------------------  |
+ * |  | port 0  (Port A) 64 bytes |  |
+ * |  |---------------------------|  |
+ * |  | port 1  (Port B) 64 bytes |  |
+ * |  -----------------------------  |
+ * |---------------------------------|
+ * | mba postion 1                   |
+ * |  -----------------------------  |
+ * |  | port 0  (Port C) 64 bytes |  |
+ * |  |---------------------------|  |
+ * |  | port 1  (Port D) 63 bytes |  |
+ * |  -----------------------------  |
+ * -----------------------------------
  *
  * @param i_mbaTarget       -   mba target
  * @param i_attr            -   Phase Rotator Data attribute enumerator

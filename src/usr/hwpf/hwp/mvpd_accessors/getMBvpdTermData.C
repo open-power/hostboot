@@ -34,6 +34,7 @@
 #include    <fapi.H>
 #include    <fapiUtil.H>
 #include    <getMBvpdTermData.H>
+#include    <getMBvpdPhaseRotatorData.H>
 
 extern "C"
 {
@@ -77,6 +78,9 @@ fapi::ReturnCode getMBvpdTermData(
     mt_keyword * l_pMtBuffer = NULL; // MBvpd MT keyword buffer
     uint32_t  l_MtBufsize = sizeof(mt_keyword);
     uint32_t  l_sizeCheck = 0; //invalid size
+    // Mask off to isolate vpd offset. MBvpdTermData value is offset into vpd.
+    // Also protects against indexing out of bounds
+    uint8_t   l_attrOffset = i_attr & TERM_DATA_OFFSET_MASK;
 
     FAPI_DBG("getMBvpdTermData: entry attr=0x%02x, size=%d ",
              i_attr,i_valSize  );
@@ -161,6 +165,26 @@ fapi::ReturnCode getMBvpdTermData(
                l_sizeCheck=
                sizeof (MBvpdTermDataSize<TERM_DATA_CEN_SLEW_RATE_SPCKE>::Type);
                break;
+           case TERM_DATA_CKE_PRI_MAP:
+               l_sizeCheck=
+               sizeof (MBvpdTermDataSize<TERM_DATA_CKE_PRI_MAP>::Type);
+               break;
+           case TERM_DATA_CKE_PWR_MAP:
+               l_sizeCheck=
+               sizeof (MBvpdTermDataSize<TERM_DATA_CKE_PWR_MAP>::Type);
+               break;
+           case TERM_DATA_RLO:
+               l_sizeCheck=
+               sizeof (MBvpdTermDataSize<TERM_DATA_RLO>::Type);
+               break;
+           case TERM_DATA_WLO:
+               l_sizeCheck=
+               sizeof (MBvpdTermDataSize<TERM_DATA_WLO>::Type);
+               break;
+           case TERM_DATA_GPO:
+               l_sizeCheck=
+               sizeof (MBvpdTermDataSize<TERM_DATA_GPO>::Type);
+               break;
            default: // Hard to do, but needs to be caught
                FAPI_ERR("getMBvpdTermData: invalid attribute ID 0x%02x",
                        i_attr);
@@ -204,6 +228,75 @@ fapi::ReturnCode getMBvpdTermData(
         FAPI_DBG("getMBvpdTermData: parent path=%s ",
              l_mbTarget.toEcmdString()  );
 
+        // Check if the old vpd layout is different for this attr
+        if (TERM_DATA_CHK60 & i_attr) // need to check vpd version for this attr
+        {
+            uint16_t l_vpdVersion = 0;
+            uint32_t l_bufSize = sizeof(l_vpdVersion);
+            const uint16_t VPD_VERSION_V60=0x3130; // Version 6.0 is ascii "10"
+
+            // get vpd version from record VINI keyword VZ
+            l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VINI,
+                                     fapi::MBVPD_KEYWORD_VZ,
+                                     l_mbTarget,
+                                     reinterpret_cast<uint8_t *>(&l_vpdVersion),
+                                     l_bufSize);
+            if (l_fapirc)
+            {
+                FAPI_ERR("getMBvpdTermData: Read of VZ keyword failed");
+                break;  //  break out with fapirc
+            }
+            FAPI_DBG("getMBvpdTermData: vpd version=0x%08x",
+                l_vpdVersion);
+
+            // Check that sufficient size was returned.
+            if (l_bufSize < sizeof(l_vpdVersion) )
+            {
+                FAPI_ERR("getMBvpdTermData:"
+                     " less keyword data returned than expected %d < %d",
+                       l_bufSize, sizeof(l_vpdVersion));
+                const uint32_t & KEYWORD = sizeof(l_vpdVersion);
+                const uint32_t & RETURNED_SIZE = l_bufSize;
+                FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
+                break;  //  break out with fapirc
+            }
+
+            // Check if work around needed
+            if (l_vpdVersion < VPD_VERSION_V60)
+            {
+                MBvpdPhaseRotatorData l_phaseRotAttr = PHASE_ROT_INVALID;
+
+                if (TERM_DATA_RLO == i_attr)
+                {
+                    l_phaseRotAttr = PHASE_ROT_RLO_V53;
+                }
+                else if (TERM_DATA_WLO == i_attr)
+                {
+                    l_phaseRotAttr = PHASE_ROT_WLO_V53;
+                }
+                else if (TERM_DATA_GPO == i_attr)
+                {
+                    l_phaseRotAttr = PHASE_ROT_GPO_V53;
+                }
+                else // not expected
+                {
+                    FAPI_ERR("getMBvpdTermData: invalid attribute ID 0x%02x",
+                       i_attr);
+                    const fapi::MBvpdTermData & ATTR_ID = i_attr;
+                    FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INVALID_ATTRIBUTE_ID);
+                    break;  //  break out with fapirc
+                }
+
+                // Retrieve these attributes from the MR keyword
+                FAPI_EXEC_HWP(l_fapirc,
+                              getMBvpdPhaseRotatorData,
+                              i_mbaTarget,
+                              l_phaseRotAttr,
+                              *((uint8_t (*)[2])o_pVal));
+                break; // break out with Phase Rotator data fapirc
+            }
+        }
+
         // Read the MT keyword field
         l_pMtBuffer = new mt_keyword;
 
@@ -243,7 +336,7 @@ fapi::ReturnCode getMBvpdTermData(
                     for (uint8_t l_j=0; l_j<NUM_DIMMS; l_j++)
                     {
                         (*l_pVal)[l_port][l_j] = l_pMtBuffer->
-                           mb_mba[l_pos].mba_port[l_port].port_attr[i_attr+l_j];
+                     mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset+l_j];
                     }
                }
                break;
@@ -262,7 +355,7 @@ fapi::ReturnCode getMBvpdTermData(
                         for (uint8_t l_k=0; l_k<NUM_RANKS; l_k++)
                         {
                             (*l_pVal)[l_port][l_j][l_k] = l_pMtBuffer->
-           mb_mba[l_pos].mba_port[l_port].port_attr[i_attr+(l_j*NUM_RANKS)+l_k];
+     mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset+(l_j*NUM_RANKS)+l_k];
                         }
                     }
                }
@@ -272,14 +365,31 @@ fapi::ReturnCode getMBvpdTermData(
             // need to consider endian since they are word fields
             case TERM_DATA_CEN_RD_VREF:
             case TERM_DATA_DRAM_WR_VREF:
+            case TERM_DATA_CKE_PWR_MAP:
             {
                 uint32_t (* l_pVal)[2] = (uint32_t (*)[2])o_pVal;
                 for (uint8_t l_port=0; l_port<2;l_port++)
                 {
                     uint32_t * l_pWord =  (uint32_t *)&l_pMtBuffer->
-                         mb_mba[l_pos].mba_port[l_port].port_attr[i_attr];
+                        mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset];
                     (*l_pVal)[l_port] = FAPI_BE32TOH(*l_pWord);
                 }
+                break;
+            }
+            // return the uint16_t [2] attributes from the MT keyword buffer
+            // into the return uint32_t [2]
+            // need to consider endian since they are word fields
+            case TERM_DATA_CKE_PRI_MAP:
+            {
+                uint32_t (* l_pVal)[2] = (uint32_t (*)[2])o_pVal;
+                (*l_pVal)[0] = l_pMtBuffer->
+                    mb_mba[l_pos].mba_port[0].port_attr[l_attrOffset+1]; //LSB
+                (*l_pVal)[0] |= (l_pMtBuffer->
+                    mb_mba[l_pos].mba_port[0].port_attr[l_attrOffset]<<8); //MSB
+                (*l_pVal)[1] = l_pMtBuffer->
+                    mb_mba[l_pos].mba_port[1].port_attr[l_attrOffset+1]; //LSB
+                (*l_pVal)[1] |= (l_pMtBuffer->
+                    mb_mba[l_pos].mba_port[1].port_attr[l_attrOffset]<<8); //MSB
                 break;
             }
             // return the uint8_t [2] attributes from the MT keyword buffer
@@ -295,13 +405,37 @@ fapi::ReturnCode getMBvpdTermData(
             case TERM_DATA_CEN_SLEW_RATE_ADDR:
             case TERM_DATA_CEN_SLEW_RATE_CLK:
             case TERM_DATA_CEN_SLEW_RATE_SPCKE:
+            case TERM_DATA_RLO:
+            case TERM_DATA_WLO:
+            case TERM_DATA_GPO:
             {
                 uint8_t (* l_pVal)[2] = (uint8_t (*)[2])o_pVal;
-                for (uint8_t l_port=0; l_port<NUM_PORTS;l_port++)
+
+                // pull data from keyword buffer
+                uint8_t l_port0 = l_pMtBuffer->
+                        mb_mba[l_pos].mba_port[0].port_attr[l_attrOffset];
+                uint8_t l_port1 = l_pMtBuffer->
+                        mb_mba[l_pos].mba_port[1].port_attr[l_attrOffset];
+
+                // isolate special processing flags
+                uint32_t  l_special = i_attr & TERM_DATA_SPECIAL_MASK;
+                switch (l_special)
                 {
-                    (*l_pVal)[l_port] = l_pMtBuffer->
-                        mb_mba[l_pos].mba_port[l_port].port_attr[i_attr];
+                case TERM_DATA_LOW_NIBBLE: // return low nibble
+                    l_port0 = l_port0 & 0x0F;
+                    l_port1 = l_port1 & 0x0F;
+                    break;
+
+                case TERM_DATA_HIGH_NIBBLE: // return high nibble
+                    l_port0 = ((l_port0 & 0xF0)>>4);
+                    l_port1 = ((l_port1 & 0xF0)>>4);
+                    break;
+                    default:
+                         ;      // data is ok directly from keyword buffer
                 }
+
+                (*l_pVal)[0] = l_port0;
+                (*l_pVal)[1] = l_port1;
                 break;
             }
         }

@@ -65,6 +65,7 @@ namespace CVPD
         { VER0, "VER0" },  //Not currently used, but keep support
         { MER0, "MER0" },
         { VSPD, "VSPD" },
+        { VINI, "VINI" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_RECORD, "TEST" },
@@ -93,6 +94,7 @@ namespace CVPD
         { MW,  "MW" },
         { MV,  "MV" },
         { AM,  "AM" },
+        { VZ,  "VZ" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_KEYWORD, "XX" },

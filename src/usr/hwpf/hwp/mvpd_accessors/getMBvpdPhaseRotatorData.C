@@ -72,8 +72,12 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
     uint8_t l_pos = NUM_PORTS; //initialize to out of range value (+1)
     mr_keyword * l_pMrBuffer = NULL; // MBvpd MR keyword buffer
     uint32_t  l_MrBufsize = sizeof(mr_keyword);
-
-    FAPI_DBG("getMBvpdPhaseRotatorData: entry attr=0x%02x ",
+    // Mask off to isolate vpd offset. MBvpdPhaseRatorData value is the offset
+    // into vpd. Also protects against indexing out of bounds.
+    uint8_t   l_attrOffset = i_attr & PHASE_ROT_OFFSET_MASK;
+    uint32_t  l_special = i_attr & PHASE_ROT_SPECIAL_MASK; // mask off to
+                                // isolate special processing flags
+    FAPI_DBG("getMBvpdPhaseRotatorData: entry attr=0x%04x ",
              i_attr  );
 
     do {
@@ -97,6 +101,57 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
         }
         FAPI_DBG("getMBvpdPhaseRotatorData: parent path=%s ",
              l_mbTarget.toEcmdString()  );
+
+        // Check if the old vpd layout is different for this attr
+        if (PHASE_ROT_CHK60 & i_attr) // need to check vpd version for this attr
+        {
+            uint16_t l_vpdVersion = 0;
+            uint32_t l_bufSize = sizeof(l_vpdVersion);
+            const uint16_t VPD_VERSION_V60=0x3130; // Version 6.0 is ascii "10"
+
+            // get vpd version from record VINI keyword VZ
+            l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VINI,
+                                     fapi::MBVPD_KEYWORD_VZ,
+                                     l_mbTarget,
+                                     reinterpret_cast<uint8_t *>(&l_vpdVersion),
+                                     l_bufSize);
+            if (l_fapirc)
+            {
+                FAPI_ERR("getMBvpdPhaseRotatorData: Read of VZ keyword failed");
+                break;  //  break out with fapirc
+            }
+            FAPI_DBG("getMBvpdPhaseRotatorData: vpd version=0x%08x",
+                l_vpdVersion);
+
+            // Check that sufficient size was returned.
+            if (l_bufSize < sizeof(l_vpdVersion) )
+            {
+                FAPI_ERR("getMBvpdPhaseRotatorData:"
+                     " less keyword data returned than expected %d < %d",
+                       l_bufSize, sizeof(l_vpdVersion));
+                const uint32_t & KEYWORD = sizeof(l_vpdVersion);
+                const uint32_t & RETURNED_SIZE = l_bufSize;
+                FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
+                break;  //  break out with fapirc
+            }
+
+            // Check if work around needed
+            if (l_vpdVersion < VPD_VERSION_V60)
+            {
+                // use the v5.3 offsets and special processing
+                if (PHASE_ROT_TSYS_ADR == i_attr)
+                {
+                    l_attrOffset=PHASE_ROT_TSYS_ADR_V53 & PHASE_ROT_OFFSET_MASK;
+                    l_special=PHASE_ROT_TSYS_ADR_V53 & PHASE_ROT_SPECIAL_MASK;
+                }
+                else if (PHASE_ROT_TSYS_DP18 == i_attr)
+                {
+                    l_attrOffset=PHASE_ROT_TSYS_DP18_V53 &
+                        PHASE_ROT_OFFSET_MASK;
+                    l_special=PHASE_ROT_TSYS_DP18_V53 & PHASE_ROT_SPECIAL_MASK;
+                }
+            }
+        }
 
         // Read the MR keyword field
         l_pMrBuffer = new mr_keyword;
@@ -124,12 +179,38 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
             break;  //  break out with fapirc
         }
 
-        // return the requested attributes from the MR keyword buffer
-        for (uint8_t l_port=0 ; l_port<NUM_PORTS ; l_port++)
+        // pull data from MR keyword buffer
+        uint8_t l_port0=
+                l_pMrBuffer->mb_mba[l_pos].mba_port[0].port_attr[l_attrOffset];
+        uint8_t l_port1=
+                l_pMrBuffer->mb_mba[l_pos].mba_port[1].port_attr[l_attrOffset];
+        switch (l_special)
         {
-            o_val[l_port]=l_pMrBuffer->
-                      mb_mba[l_pos].mba_port[l_port].port_attr[i_attr];
+            case PHASE_ROT_LOW_NIBBLE: // return low nibble
+                l_port0 = l_port0 & 0x0F;
+                l_port1 = l_port1 & 0x0F;
+                break;
+
+            case PHASE_ROT_HIGH_NIBBLE: // return high nibble
+                l_port0 = ((l_port0 & 0xF0)>>4);
+                l_port1 = ((l_port1 & 0xF0)>>4);
+                break;
+
+            case PHASE_ROT_PORT00: // return port 0 for both ports 0 and 1
+                l_port1=l_port0;
+                break;
+
+            case PHASE_ROT_PORT11:// return port 1 for both ports 0 and 1
+                l_port0=l_port1;
+                break;
+
+            default:
+                 ;      // data is ok directly from MR keyword buffer
         }
+
+        // return the requested attributes from the MR keyword buffer
+        o_val[0]=l_port0;
+        o_val[1]=l_port1;
 
     } while (0);
 

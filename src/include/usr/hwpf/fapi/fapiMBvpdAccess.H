@@ -53,6 +53,7 @@ namespace fapi
         MBVPD_RECORD_VER0 = 0x01,
         MBVPD_RECORD_MER0 = 0x02,
         MBVPD_RECORD_VSPD = 0x03,
+        MBVPD_RECORD_VINI = 0x04,
     };
 
     enum MBvpdKeyword
@@ -67,6 +68,7 @@ namespace fapi
         MBVPD_KEYWORD_MW  = 0x07,
         MBVPD_KEYWORD_MV  = 0x08,
         MBVPD_KEYWORD_AM  = 0x09,
+        MBVPD_KEYWORD_VZ  = 0x0a,
     };
 
 }

@@ -37,8 +37,34 @@
 namespace fapi
 {
 
-// Values match offset into MT keyword cvpd data
-// There are multiple types of output values. The type is shown in the comment
+// The MBvpdTermData enumeration is used on the FAPI_ATTR_GET and
+// getMBvpdTermData HWP accessor interface. The lower byte (6 bits)
+// matches the offset of the vpd field in the MT keyword. This is a convenient
+// use of the value for efficiency to index into the vpd keyword data.
+//
+// Most of the vpd attribute values can be returned to the requester directly.
+// There are some that require special processing. For those, a
+// special processing flag is added into the value. This also distinguishes
+// values which have the same offset.
+
+// special processing flags to be added on to the MBvpdTermData value
+    enum MBvpdTermDataSpecial
+    {
+        TERM_DATA_HIGH_NIBBLE = 0x0100,     //bits 4:7 shifted right 4
+        TERM_DATA_LOW_NIBBLE  = 0x0200,     //bits 0:3
+    };
+// mask to isolate special processing flags
+const uint16_t TERM_DATA_SPECIAL_MASK = 0x0300;
+
+// The vpd keyword changed for some of the attributes going from v5.3 of the vpd
+// layout to v6.0 and after. There is a work around to use the previous
+// keyword based on the vpd version.
+// Flag to be added into MBvpdTermData value for attributes that need to be
+// checked for work around.
+const uint8_t TERM_DATA_CHK60 = 0x40;  // check version for keyword to use
+
+// There are multiple types of output values. The type is shown in the comment.
+// The base offset value is incremented based on the vpd data type.
     enum MBvpdTermData
     {
        TERM_DATA_DRAM_RON =                0x00,  //uint8_t [2][2]
@@ -60,11 +86,19 @@ namespace fapi
        TERM_DATA_CEN_SLEW_RATE_ADDR =      0x33,  //uint8_t [2]
        TERM_DATA_CEN_SLEW_RATE_CLK =       0x34,  //uint8_t [2]
        TERM_DATA_CEN_SLEW_RATE_SPCKE =     0x35,  //uint8_t [2]
-// The max value is 0x3e. The MT keyword is 255 bytes divided into four
-// 64 byte sections, but the last one is 1 byte short.  There is only room for
-// 63 bytes of attributes per section.
+// TERM_DATA_CKE_PRI_MAP is a uint16 in the vpd data. It is returned as
+// as a uint32. The offset is incremented by only 2 to get the next vpd value.
+       TERM_DATA_CKE_PRI_MAP =             0x36,  //uint32_t [2]
+       TERM_DATA_CKE_PWR_MAP =             0x38,  //uint32_t [2]
+       TERM_DATA_RLO = 0x3c|TERM_DATA_CHK60|TERM_DATA_HIGH_NIBBLE, //uint8_t[2]
+       TERM_DATA_WLO = 0x3c|TERM_DATA_CHK60|TERM_DATA_LOW_NIBBLE,  //uint8_t[2]
+       TERM_DATA_GPO = 0x3d|TERM_DATA_CHK60,    //uint8_t[2]
     };
 }
+// The max base offset value is 0x3e. The MT keyword is 255 bytes.
+// There is only room for 63 attributes per port. There are 4 x  64 byte
+// sections, but the last one is 1 byte short. See diagram below...
+const uint8_t TERM_DATA_OFFSET_MASK = 0x003f; //mask attr to isolate base offset
 
 // Template class that is specialized for each attribute specifying it's type
 template<const fapi::MBvpdTermData A>
@@ -106,6 +140,16 @@ template<>class MBvpdTermDataSize<fapi::TERM_DATA_CEN_SLEW_RATE_ADDR>
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_CEN_SLEW_RATE_CLK>
     { public: typedef uint8_t Type[2]; };
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE>
+    { public: typedef uint8_t Type[2]; };
+template<>class MBvpdTermDataSize<fapi::TERM_DATA_CKE_PRI_MAP>
+    { public: typedef uint32_t Type[2]; };
+template<>class MBvpdTermDataSize<fapi::TERM_DATA_CKE_PWR_MAP>
+    { public: typedef uint32_t Type[2]; };
+template<>class MBvpdTermDataSize<fapi::TERM_DATA_RLO>
+    { public: typedef uint8_t Type[2]; };
+template<>class MBvpdTermDataSize<fapi::TERM_DATA_WLO>
+    { public: typedef uint8_t Type[2]; };
+template<>class MBvpdTermDataSize<fapi::TERM_DATA_GPO>
     { public: typedef uint8_t Type[2]; };
 
 // Template function that checks that the type is as expected.

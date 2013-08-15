@@ -37,6 +37,8 @@
  *                          bofferdn    09/13/2011  Support fapi->hb mapping
  *                          thi         01/28/2013  Add SPD CUSTOM attr
  *                          dedahle     06/20/2013  Add Bad DIMM DQ Bitmap attr
+ *                          whs         08/15/2013  79615 Clock Mapping,
+ *                                                  DIMM timing and TSYS
  */
 
 #ifndef FAPIPLATATTRIBUTESERVICE_H_
@@ -552,7 +554,6 @@ fapi::ReturnCode fapiPlatDimmSetBadDqBitmap (
 fapi::ReturnCode fapiPlatDimmGetSpareDram (
                                     const fapi::Target * i_pTarget,
                                     uint8_t &o_data);
-
 
 } // namespace platAttrSvc
 
@@ -1203,6 +1204,16 @@ fapi::ReturnCode fapiPlatDimmGetSpareDram (
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_ODT1, VAL)
+#endif
+#define ATTR_VPD_TSYS_ADR_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
+        (PTARGET, PHASE_ROT_TSYS_ADR, VAL)
+#define ATTR_VPD_TSYS_DP18_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
+        (PTARGET, PHASE_ROT_TSYS_DP18, VAL)
+#if RTC69935
 // TODO: RTC 69935: remove the no op sets once work around in
 //       mss_eff_config_termination.C is removed
 #define ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0_SETMACRO(ID, PTARGET, VAL)\
@@ -1434,7 +1445,38 @@ fapi::ReturnCode fapiPlatDimmGetSpareDram (
     (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE , VAL, sizeof(VAL)))
-
+#endif
+#define ATTR_VPD_RLO_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_RLO>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_RLO , VAL, sizeof(VAL)))
+#define ATTR_VPD_WLO_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_WLO>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_WLO , VAL, sizeof(VAL)))
+#define ATTR_VPD_GPO_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_GPO>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_GPO , VAL, sizeof(VAL)))
+#define ATTR_VPD_CKE_PRI_MAP_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CKE_PRI_MAP>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CKE_PRI_MAP , VAL, sizeof(VAL)))
+#define ATTR_VPD_CKE_PWR_MAP_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CKE_PWR_MAP>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CKE_PWR_MAP , VAL, sizeof(VAL)))
+#if RTC69935
 #define ATTR_EFF_DRAM_RON_SETMACRO(ID, PTARGET, VAL)\
         fapi::FAPI_RC_SUCCESS
 #define ATTR_EFF_DRAM_RTT_NOM_SETMACRO(ID, PTARGET, VAL)\

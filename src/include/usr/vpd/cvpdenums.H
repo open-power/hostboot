@@ -37,6 +37,7 @@ namespace CVPD
         VER0        = 0x01,
         MER0        = 0x02,
         VSPD        = 0x03,
+        VINI        = 0x04,
         // Last Record
         CVPD_LAST_RECORD,
         CVPD_TEST_RECORD,   // Test purposes ONLY!
@@ -60,6 +61,7 @@ namespace CVPD
         MW           = 0x07,
         MV           = 0x08,
         AM           = 0x09,
+        VZ           = 0x0a,
         // Last Keyword
         CVPD_LAST_KEYWORD,
         CVPD_TEST_KEYWORD,  // Test purposes ONLY!
