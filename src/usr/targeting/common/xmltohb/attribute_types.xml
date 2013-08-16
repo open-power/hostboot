@@ -980,7 +980,8 @@
 
 <attribute>
     <id>DECONFIG_GARDABLE</id>
-    <description>If the Target is Deconfigurable and GARDable</description>
+    <description>If the Target is directly deconfigurable and GARDable; target
+    may still be deconfigured in 'by association' processing.</description>
     <simpleType>
         <uint8_t>
             <default>0</default>

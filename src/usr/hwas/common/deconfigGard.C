@@ -739,6 +739,9 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
     TargetHandleList pChildList;
     PredicateIsFunctional isFunctional;
 
+    // note - ATTR_DECONFIG_GARDABLE is NOT checked for all 'by association'
+    // deconfigures, as that attribute is only for direct deconfigure requests.
+
     // find all CHILD matches for this target and deconfigure them
     targetService().getAssociated(pChildList, &i_target,
         TargetService::CHILD, TargetService::ALL, &isFunctional);
@@ -748,14 +751,10 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
     {
         TargetHandle_t pChild = *pChild_it;
 
-        if (pChild->getAttr<ATTR_DECONFIG_GARDABLE>())
-        {   // only deconfigure targets that are able to be deconfigured
-            HWAS_INF("deconfigByAssoc CHILD: %.8X",
-                get_huid(pChild));
-            _deconfigureTarget(*pChild, i_errlPlid);
-            // Deconfigure other Targets by association
-            _deconfigureByAssoc(*pChild, i_errlPlid);
-        }
+        HWAS_INF("deconfigByAssoc CHILD: %.8X", get_huid(pChild));
+        _deconfigureTarget(*pChild, i_errlPlid);
+        // Deconfigure other Targets by association
+        _deconfigureByAssoc(*pChild, i_errlPlid);
     } // for CHILD
 
     // find all CHILD_BY_AFFINITY matches for this target and deconfigure them
@@ -767,14 +766,10 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
     {
         TargetHandle_t pChild = *pChild_it;
 
-        if (pChild->getAttr<ATTR_DECONFIG_GARDABLE>())
-        {   // only deconfigure targets that are able to be deconfigured
-            HWAS_INF("deconfigByAssoc CHILD_BY_AFFINITY: %.8X",
-                get_huid(pChild));
-            _deconfigureTarget(*pChild, i_errlPlid);
-            // Deconfigure other Targets by association
-            _deconfigureByAssoc(*pChild, i_errlPlid);
-        }
+        HWAS_INF("deconfigByAssoc CHILD_BY_AFFINITY: %.8X", get_huid(pChild));
+        _deconfigureTarget(*pChild, i_errlPlid);
+        // Deconfigure other Targets by association
+        _deconfigureByAssoc(*pChild, i_errlPlid);
     } // for CHILD_BY_AFFINITY
 
     // Memory deconfigureByAssociation rules
