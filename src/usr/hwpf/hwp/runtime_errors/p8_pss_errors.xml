@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/runtime_errors/proc_force_vsafe_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_errors/p8_pss_errors.xml $           -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,44 +20,18 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_force_vsafe_errors.xml,v 1.2 2013/06/25 15:38:19 cswenson Exp $ -->
-<!-- Error definitions for proc_pmc_force_vsage procedure -->
+<!-- $Id: p8_pss_errors.xml,v 1.2 2013/05/23 18:44:33 stillgs Exp $ -->
+<!-- Error definitions for proc_pmc_init procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_VLT_TIMEOUT</rc>
-    <description>voltage change timeout for the ongoing operation completion.</description>
+    <rc>RC_PROCPM_PSS_CODE_BAD_MODE</rc>
+    <description>Unknown mode passed to proc_pss_init.</description>
+    <ffdc>MODE</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_VLT_ERROR</rc>
-    <description>voltage change not done because of  errors on the status register.</description>
+    <rc>RC_PROCPM_PSS_WRONG_DEVICE</rc>
+    <description>wrong device taget : make sure that you use 0xA=APSS and 0XD=DPSS no other value works.</description>
   </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PSTATE_MONITOR_ERR</rc>
-    <description>voltage change done but expected pstate didnot match after completion.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
- <hwpError>
-    <rc>RC_PROCPM_VOLTAGE_CHAGE_MODE_ERR</rc>
-    <description>PMC is disabled for Voltage changes.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
- <hwpError>
-    <rc>RC_PROCPM_INITAL_AUCTION_MODE_ERR</rc>
-    <description>PMC is not in HARDWARE or FIRMWARE AUCTION MODE.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
- <hwpError>
-    <rc>RC_PROCPM_MST_SEQUENCER_STATE_ERR</rc>
-    <description>PMC is disabled PMC_MASTER_SEQUENCER.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
-
-
-
-
-
-
 </hwpErrors>

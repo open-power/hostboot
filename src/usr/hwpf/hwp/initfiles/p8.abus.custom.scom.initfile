@@ -1,8 +1,9 @@
-#-- $Id: p8.abus.custom.scom.initfile,v 1.3 2013/05/01 20:36:16 jgrell Exp $
+#-- $Id: p8.abus.custom.scom.initfile,v 1.4 2013/06/18 18:31:18 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.4 |jgrell  |06/18/13|Added Venice specific PRBS tap IDs due to common initfile
 #--     1.3 |thomsen |04/30/13|Added TGT1. to ATTR_CHIP_EC* attribute instances to reference a chip target rather than a chiplet target
 #--     1.2 |jgrell  |04/18/13|Added EC controled Recal enables
 #--     1.1 |thomsen |01/29/13|Created initial version
@@ -303,6 +304,152 @@ bits,                         	scom_data, 	expr;
 rx_rc_enable_ddc,		0b0,		TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
 rx_rc_enable_ctle_cal,		0b0,		TGT1.ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
 }
+
+
+#--**************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------
+# Venice Specific Inits
+#----------------------------------------------------------------------------------------------------------------
+#--**************************************************************************************************************
+
+#TX_WRAP.TX0.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341408010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b010, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341508010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b001, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341308010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b011, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341608010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b000, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341108010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b101, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341008010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b110, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341208010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b100, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340F08010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b111, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#2.TXPACK_2.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340C08010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b010, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#2.TXPACK_2.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340D08010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b001, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#2.TXPACK_2.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340E08010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b000, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340108010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b001, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340208010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b010, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340008010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b000, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340308010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b011, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#4.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340608010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b110, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#4.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340508010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b101, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#4.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340708010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b111, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#4.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340408010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b100, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#5.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340908010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b001, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#5.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340A08010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b010, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#5.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340808010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b000, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
+#TX_WRAP.TX0.TXPACKS#5.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340B08010C3F { 
+	bits, scom_data, expr;
+	tx_prbs_tap_id, 0b011, ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC==1;
+}
+
 
 ############################################################################################
 # END OF FILE

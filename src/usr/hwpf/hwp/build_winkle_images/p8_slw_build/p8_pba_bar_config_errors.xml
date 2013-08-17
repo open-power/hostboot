@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/p8_poregpe_errors.xml $                      -->
+<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/p8_pba_bar_config_errors.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,26 +20,43 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for proc_poregpe procedure -->
+<!-- $Id: p8_pba_bar_config_errors.xml,v 1.3 2013/02/06 17:47:07 stillgs Exp $ -->
+<!-- Error definitions for proc_pba_bar_config procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_GPE0_RESET_TIMEOUT</rc>
-    <description>GPE0 reset failed in proc_poregpe_init.</description>
+    <rc>RC_PROC_PBA_BAR_INDEX_OUT_OF_RANGE</rc>
+    <description>pba bar index out of range, allowed is 0 to 3</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_GPE1_RESET_TIMEOUT</rc>
-    <description>GPE1 reset failed in proc_poregpe_init.</description>
+    <rc>RC_PROC_PBA_BAR_SCOPE_OUT_OF_RANGE</rc>
+    <description>pba bar scope  out of range, allowed is 0 to 7</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_GPE_CODE_BAD_MODE</rc>
-    <description>Unknown mode passed to proc_poregpe_init.</description>
+    <rc>RC_PROC_PBA_ADDR_OUT_OF_RANGE</rc>
+    <description>pba bar scope  out of range, allowed is 0 to 7</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_GPE_BAD_ENGINE</rc>
-    <description>Unknown engine passed to proc_poregpe_init. </description>
+    <rc>RC_PROC_PBA_ADDR_ALIGNMENT_ERROR</rc>
+    <description>pba BAR must be on a 1MB boundary</description>
   </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_SIZE_INVALID</rc>
+    <description>Non-zero PBA BAR defined with region size of 0. Size must be 1MB or greater</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_MODE_NOT_SUPPORTED</rc>
+    <description>pba bar procedure mode is not supported .</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_PUTSCOM_FAILED</rc>
+    <description>pba bar putscom failed .</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

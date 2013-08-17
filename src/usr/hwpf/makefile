@@ -43,7 +43,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit_errors.xml \
     hwp/build_winkle_images/p8_slw_build/p8_slw_build_errors.xml    \
     hwp/build_winkle_images/p8_slw_build/p8_xip_customize_errors.xml    \
-    hwp/build_winkle_images/p8_slw_build/proc_pba_bar_config_errors.xml \
+    hwp/build_winkle_images/p8_slw_build/p8_pba_bar_config_errors.xml \
     hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup_errors.xml \
     hwp/core_activate/proc_prep_master_winkle/proc_prep_master_winkle_errors.xml \
     hwp/core_activate/proc_stop_deadman_timer/proc_stop_deadman_timer_errors.xml \
@@ -66,9 +66,9 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/runtime_errors/p8_oha_init_errors.xml \
     hwp/runtime_errors/p8_pcbs_init_errors.xml \
     hwp/runtime_errors/p8_pm_prep_for_reset_errors.xml \
-    hwp/runtime_errors/proc_force_vsafe_errors.xml \
+    hwp/runtime_errors/p8_force_vsafe_errors.xml \
     hwp/runtime_errors/p8_pmc_errors.xml \
-    hwp/runtime_errors/proc_pss_errors.xml \
+    hwp/runtime_errors/p8_pss_errors.xml \
     hwp/runtime_errors/proc_cpu_special_wakeup_errors.xml \
     hwp/runtime_errors/p8_poregpe_errors.xml \
     hwp/runtime_errors/p8_pba_init_errors.xml \

@@ -1,4 +1,4 @@
-#-- $Id: p8.dmi.custom.scom.initfile,v 1.9 2013/05/01 20:31:29 jgrell Exp $
+#-- $Id: p8.dmi.custom.scom.initfile,v 1.12 2013/06/27 15:07:02 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
@@ -253,41 +253,6 @@ scom 0x800.0b(tx_mode_pg)(tx_grp3)(lane_na).0x(dmi0_gcr_addr) {
     bits,            scom_data;
     tx_msbswap,      (ATTR_EI_BUS_TX_MSBSWAP & 0x01);
 }
-
-#--**************************************************************************************************************
-#----------------------------------------------------------------------------------------------------------------
-#    ________________     ____        ________             ____             _ __           __  ___           __  
-#   / ____/ ____/ __ \   / __ )__  __/ __/ __/__  _____   / __ \____ ______(_) /___  __   /  |/  /___ ______/ /__
-#  / / __/ /   / /_/ /  / __  / / / / /_/ /_/ _ \/ ___/  / /_/ / __ `/ ___/ / __/ / / /  / /|_/ / __ `/ ___/ //_/
-# / /_/ / /___/ _, _/  / /_/ / /_/ / __/ __/  __/ /     / ____/ /_/ / /  / / /_/ /_/ /  / /  / / /_/ (__  ) ,<   
-# \____/\____/_/ |_|  /_____/\__,_/_/ /_/  \___/_/     /_/    \__,_/_/  /_/\__/\__, /  /_/  /_/\__,_/____/_/|_|  
-#                                                                             /____/                             
-#----------------------------------------------------------------------------------------------------------------
-#--**************************************************************************************************************
-# HW242564: Temporarily mask the GCR Buffer Parity Checker until the source of the error can be found. This ungates the lab.
-# 0x800???0002011E3F
-# This is applied to all configured clkgrp's via chiplet targetting
-scom 0x800.0b(rx_fir1_mask_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
-bits,                             scom_data;
-rx_pg_fir_err_mask_gcr_buff,      0b1;
-}
-scom 0x800.0b(tx_fir_mask_pg)(tx_grp3)(lane_na).0x(dmi0_gcr_addr) {
-bits,                             scom_data;
-tx_pg_fir_err_mask_gcr_buff,      0b1;
-}
-scom 0x800.0b(rx_fir_mask_pb)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
-bits,                             scom_data;
-rx_pb_fir_err_mask_gcr_buff0,    0b1;
-rx_pb_fir_err_mask_gcr_buff1,    0b1;
-rx_pb_fir_err_mask_gcr_buff2,    0b1;
-}
-
-# Mask off all rx and tx parity errors in the fir register
-scom 0x02011A03 {
-scom_data;
-0xC000000000000000;
-}
-
 
 #--**************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------

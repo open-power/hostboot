@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/proc_pba_bar_config_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_errors/p8_force_vsafe_errors.xml $   -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,38 +20,44 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_pba_bar_config_errors.xml,v 1.4 2012/09/12 21:59:26 wenning Exp $ -->
-<!-- Error definitions for proc_pba_bar_config procedure -->
+<!-- $Id: p8_force_vsafe_errors.xml,v 1.2 2013/06/25 15:38:19 cswenson Exp $ -->
+<!-- Error definitions for proc_pmc_force_vsage procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_BAR_INDEX_OUT_OF_RANGE</rc>
-    <description>pba bar index out of range, allowed is 0 to 3</description>
+    <rc>RC_PROCPM_VLT_TIMEOUT</rc>
+    <description>voltage change timeout for the ongoing operation completion.</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_BAR_SCOPE_OUT_OF_RANGE</rc>
-    <description>pba bar scope  out of range, allowed is 0 to 7</description>
+    <rc>RC_PROCPM_VLT_ERROR</rc>
+    <description>voltage change not done because of  errors on the status register.</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_PBA_ADDR_OUT_OF_RANGE</rc>
-    <description>pba bar scope  out of range, allowed is 0 to 7</description>
+    <rc>RC_PROCPM_PSTATE_MONITOR_ERR</rc>
+    <description>voltage change done but expected pstate didnot match after completion.</description>
   </hwpError>
   <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_PBA_BAR_MASK_OUT_OF_RANGE</rc>
-    <description>pba bar mask out of range. .</description>
+ <hwpError>
+    <rc>RC_PROCPM_VOLTAGE_CHAGE_MODE_ERR</rc>
+    <description>PMC is disabled for Voltage changes.</description>
   </hwpError>
   <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_PBA_BAR_MODE_NOT_SUPPORTED</rc>
-    <description>pba bar procedure mode is not supported .</description>
+ <hwpError>
+    <rc>RC_PROCPM_INITAL_AUCTION_MODE_ERR</rc>
+    <description>PMC is not in HARDWARE or FIRMWARE AUCTION MODE.</description>
   </hwpError>
   <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_PBA_BAR_PUTSCOM_FAILED</rc>
-    <description>pba bar putscom failed .</description>
+ <hwpError>
+    <rc>RC_PROCPM_MST_SEQUENCER_STATE_ERR</rc>
+    <description>PMC is disabled PMC_MASTER_SEQUENCER.</description>
   </hwpError>
   <!-- *********************************************************************** -->
+
+
+
+
+
+
 </hwpErrors>

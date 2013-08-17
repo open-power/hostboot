@@ -1,4 +1,4 @@
-#-- $Id: p8.abus.scom.initfile,v 1.10 2013/04/18 22:28:40 jgrell Exp $ 
+#-- $Id: p8.abus.scom.initfile,v 1.14 2013/07/30 20:45:32 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,14 +7,18 @@
 ##      Based on SETUP_ID_MODE A_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODUV_ABUS_WRAP.IODUV_ABUS_WRAP.figdb
 ##
-##   Created on Mon Apr 15 15:04:01 CDT 2013, by jgrell
+##   Created on Tue Jul 30 10:22:22 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jfg13072400| jfg     |07-24-13| HW253558: change pgooddly to MAX from lab feedback
+ ## -- mbs13071200| mbs     |07-12-13| Updates for HW239870 and HW258990
+ ## -- jgr13062500| jgr     |06-25-13| Added DFE override settings (HW244323)
  ## -- jgr13041800| jgr     |04-18-13| Added missing entries from rel 0128
+ ## -- smr13032500| SMR     |03-25-13| Changed rx_dyn_recal_overall_timeout_sel init to 0b100 & rx_sls_timeout_sel init to 0b110
  ## -- mbs13021100| mbs     |02-11-13| Changed A bus id's to 1,2,3 from 0,1,2 (HW239245)
  ## -- mbs13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
  ## -- mbs12121100| mbs     |12-11-12| Added rx_prot_speed_slct and rx_c4_sel
@@ -59,6 +63,31 @@ define def_is_slave  = (prim_id > conn_id);
 
 
 
+#RX0.RXCTL.RX_CTL_REGS.RX_AMAX_PG
+scom 0x800A680008010C3F { 
+	bits, scom_data, expr;
+     rx_amax_high,  0b01101110,   def_IS_HW && def_bus_id0;
+	rx_amax_high, 0b01101110, def_IS_HW && def_bus_id1;
+	rx_amax_high, 0b01011010, def_IS_VBU && def_bus_id1;
+	rx_amax_high, 0b01101110, def_IS_HW && def_bus_id2;
+	rx_amax_high, 0b01011010, def_IS_VBU && def_bus_id2;
+     rx_amax_high,  0b01011010,  def_IS_VBU && def_bus_id0;
+	rx_amax_high, 0b01101110, def_IS_HW && def_bus_id1;
+	rx_amax_high, 0b01011010, def_IS_VBU && def_bus_id1;
+	rx_amax_high, 0b01101110, def_IS_HW && def_bus_id2;
+	rx_amax_high, 0b01011010, def_IS_VBU && def_bus_id2;
+     rx_amax_low,  0b01010000,   def_IS_HW && def_bus_id0;
+	rx_amax_low, 0b01010000, def_IS_HW && def_bus_id1;
+	rx_amax_low, 0b00111100, def_IS_VBU && def_bus_id1;
+	rx_amax_low, 0b01010000, def_IS_HW && def_bus_id2;
+	rx_amax_low, 0b00111100, def_IS_VBU && def_bus_id2;
+     rx_amax_low,  0b00111100,  def_IS_VBU && def_bus_id0;
+	rx_amax_low, 0b01010000, def_IS_HW && def_bus_id1;
+	rx_amax_low, 0b00111100, def_IS_VBU && def_bus_id1;
+	rx_amax_low, 0b01010000, def_IS_HW && def_bus_id2;
+	rx_amax_low, 0b00111100, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXCTL.RX_CTL_REGS.RX_BER_CHK_PG
 scom 0x800AF00008010C3F { 
 	bits, scom_data, expr;
@@ -77,15 +106,15 @@ scom 0x800AF00008010C3F {
 #RX0.RXCTL.RX_CTL_REGS.RX_DFE_CONFIG_PP
 scom 0x800B780008010C3F { 
 	bits, scom_data, expr;
-     rx_amin_cfg,  0b010,   def_IS_HW && def_bus_id0;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id1;
+     rx_amin_cfg,  0b111,   def_IS_HW && def_bus_id0;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id1;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id2;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id2;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id2;
      rx_amin_cfg,  0b000,  def_IS_VBU && def_bus_id0;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id1;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id1;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_amin_cfg, 0b010, def_IS_HW && def_bus_id2;
+	rx_amin_cfg, 0b111, def_IS_HW && def_bus_id2;
 	rx_amin_cfg, 0b000, def_IS_VBU && def_bus_id2;
      rx_anap_cfg,  0b10,   def_IS_HW && def_bus_id0;
 	rx_anap_cfg, 0b10, def_IS_HW && def_bus_id1;
@@ -97,16 +126,16 @@ scom 0x800B780008010C3F {
 	rx_anap_cfg, 0b00, def_IS_VBU && def_bus_id1;
 	rx_anap_cfg, 0b10, def_IS_HW && def_bus_id2;
 	rx_anap_cfg, 0b00, def_IS_VBU && def_bus_id2;
-     rx_h1ap_cfg,  0b011,   def_IS_HW && def_bus_id0;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id1;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id2;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id2;
-     rx_h1ap_cfg,  0b000,  def_IS_VBU && def_bus_id0;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id1;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_h1ap_cfg, 0b011, def_IS_HW && def_bus_id2;
-	rx_h1ap_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_h1_cfg,  0b01,   def_IS_HW && def_bus_id0;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id1;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id1;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id2;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id2;
+     rx_h1_cfg,  0b00,  def_IS_VBU && def_bus_id0;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id1;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id1;
+	rx_h1_cfg, 0b01, def_IS_HW && def_bus_id2;
+	rx_h1_cfg, 0b00, def_IS_VBU && def_bus_id2;
      rx_peak_cfg,  0b10,   def_IS_HW && def_bus_id0;
 	rx_peak_cfg, 0b10, def_IS_HW && def_bus_id1;
 	rx_peak_cfg, 0b00, def_IS_VBU && def_bus_id1;
@@ -122,15 +151,45 @@ scom 0x800B780008010C3F {
 #RX0.RXCTL.RX_CTL_REGS.RX_DFE_TIMERS_PP
 scom 0x800B800008010C3F { 
 	bits, scom_data, expr;
-     rx_init_tmr_cfg,  0b100,   def_IS_HW && def_bus_id0;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id1;
+     rx_ber_cfg,  0b100,   def_IS_HW && def_bus_id0;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id1;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id1;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id2;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_ber_cfg,  0b000,  def_IS_VBU && def_bus_id0;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id1;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id1;
+	rx_ber_cfg, 0b100, def_IS_HW && def_bus_id2;
+	rx_ber_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_dac_bo_cfg,  0b101,   def_IS_HW && def_bus_id0;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id1;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id1;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id2;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_dac_bo_cfg,  0b000,  def_IS_VBU && def_bus_id0;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id1;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id1;
+	rx_dac_bo_cfg, 0b101, def_IS_HW && def_bus_id2;
+	rx_dac_bo_cfg, 0b000, def_IS_VBU && def_bus_id2;
+     rx_ddc_cfg,  0b10,   def_IS_HW && def_bus_id0;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id1;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id1;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id2;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id2;
+     rx_ddc_cfg,  0b00,  def_IS_VBU && def_bus_id0;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id1;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id1;
+	rx_ddc_cfg, 0b10, def_IS_HW && def_bus_id2;
+	rx_ddc_cfg, 0b00, def_IS_VBU && def_bus_id2;
+     rx_init_tmr_cfg,  0b111,   def_IS_HW && def_bus_id0;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id1;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id2;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id2;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id2;
      rx_init_tmr_cfg,  0b000,  def_IS_VBU && def_bus_id0;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id1;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id1;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id1;
-	rx_init_tmr_cfg, 0b100, def_IS_HW && def_bus_id2;
+	rx_init_tmr_cfg, 0b111, def_IS_HW && def_bus_id2;
 	rx_init_tmr_cfg, 0b000, def_IS_VBU && def_bus_id2;
      rx_prot_cfg,  0b10,   def_IS_HW && def_bus_id0;
 	rx_prot_cfg, 0b10, def_IS_HW && def_bus_id1;
@@ -147,9 +206,17 @@ scom 0x800B800008010C3F {
 #RX0.RXCTL.RX_CTL_REGS.RX_DYN_RECAL_CONFIG_PG
 scom 0x800A180008010C3F { 
 	bits, scom_data, expr;
-	rx_dyn_recal_overall_timeout_sel, 0b001, def_bus_id0;
-	rx_dyn_recal_overall_timeout_sel, 0b001, def_bus_id1;
-	rx_dyn_recal_overall_timeout_sel, 0b001, def_bus_id2;
+	rx_dyn_recal_overall_timeout_sel, 0b100, def_bus_id0;
+	rx_dyn_recal_overall_timeout_sel, 0b100, def_bus_id1;
+	rx_dyn_recal_overall_timeout_sel, 0b100, def_bus_id2;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_DYN_RECAL_TIMEOUTS_PP
+scom 0x800B400008010C3F { 
+	bits, scom_data, expr;
+	rx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id0;
+	rx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id1;
+	rx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id2;
 }
 
 #RX0.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
@@ -231,16 +298,9 @@ scom 0x800A380008010C3F {
 	rx_eo_enable_final_l2u_adj, 0b1, def_bus_id0;
 	rx_eo_enable_final_l2u_adj, 0b1, def_bus_id1;
 	rx_eo_enable_final_l2u_adj, 0b1, def_bus_id2;
-     rx_eo_enable_h1ap_tweak,  0b1,   def_IS_HW && def_bus_id0;
-	rx_eo_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id1;
-	rx_eo_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id1;
-	rx_eo_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id2;
-	rx_eo_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id2;
-     rx_eo_enable_h1ap_tweak,  0b0,  def_IS_VBU && def_bus_id0;
-	rx_eo_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id1;
-	rx_eo_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id1;
-	rx_eo_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id2;
-	rx_eo_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id2;
+	rx_eo_enable_h1ap_tweak, 0b0, def_bus_id0;
+	rx_eo_enable_h1ap_tweak, 0b0, def_bus_id1;
+	rx_eo_enable_h1ap_tweak, 0b0, def_bus_id2;
      rx_eo_enable_latch_offset_cal,  0b1,   def_IS_HW && def_bus_id0;
 	rx_eo_enable_latch_offset_cal, 0b1, def_IS_HW && def_bus_id1;
 	rx_eo_enable_latch_offset_cal, 0b0, def_IS_VBU && def_bus_id1;
@@ -352,21 +412,6 @@ scom 0x8009C00008010C3F {
 	rx_prot_speed_slct, 0b1, def_IS_VBU && def_bus_id2;
 }
 
-#RX0.RXCTL.RX_CTL_REGS.RX_MODE1_PP
-scom 0x800B080008010C3F { 
-	bits, scom_data, expr;
-     rx_bit_lock_timeout_sel,  0b110,   def_IS_HW && def_bus_id0;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id1;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id1;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id2;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id2;
-     rx_bit_lock_timeout_sel,  0b101,  def_IS_VBU && def_bus_id0;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id1;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id1;
-	rx_bit_lock_timeout_sel, 0b110, def_IS_HW && def_bus_id2;
-	rx_bit_lock_timeout_sel, 0b101, def_IS_VBU && def_bus_id2;
-}
-
 #RX0.RXCTL.RX_CTL_REGS.RX_MODE_PG
 scom 0x8008180008010C3F { 
 	bits, scom_data, expr;
@@ -411,16 +456,9 @@ scom 0x800AB80008010C3F {
 	rx_rc_enable_dfe_h1_cal, 0b0, def_bus_id0;
 	rx_rc_enable_dfe_h1_cal, 0b0, def_bus_id1;
 	rx_rc_enable_dfe_h1_cal, 0b0, def_bus_id2;
-     rx_rc_enable_h1ap_tweak,  0b1,   def_IS_HW && def_bus_id0;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id1;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id1;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id2;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id2;
-     rx_rc_enable_h1ap_tweak,  0b0,  def_IS_VBU && def_bus_id0;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id1;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id1;
-	rx_rc_enable_h1ap_tweak, 0b1, def_IS_HW && def_bus_id2;
-	rx_rc_enable_h1ap_tweak, 0b0, def_IS_VBU && def_bus_id2;
+	rx_rc_enable_h1ap_tweak, 0b0, def_bus_id0;
+	rx_rc_enable_h1ap_tweak, 0b0, def_bus_id1;
+	rx_rc_enable_h1ap_tweak, 0b0, def_bus_id2;
      rx_rc_enable_latch_offset_cal,  0b1,   def_IS_HW && def_bus_id0;
 	rx_rc_enable_latch_offset_cal, 0b1, def_IS_HW && def_bus_id1;
 	rx_rc_enable_latch_offset_cal, 0b0, def_IS_VBU && def_bus_id1;
@@ -453,84 +491,109 @@ scom 0x800AB80008010C3F {
 	rx_rc_enable_vga_cal, 0b0, def_IS_VBU && def_bus_id2;
 }
 
+#RX0.RXCTL.RX_CTL_REGS.RX_RECAL_TO1_PP
+scom 0x800B900008010C3F { 
+	bits, scom_data, expr;
+     rx_recal_timeout_sel_b,  0b0110,   def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_b,  0b1000,  def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_b, 0b0110, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXCTL.RX_CTL_REGS.RX_RECAL_TO2_PP
 scom 0x800B980008010C3F { 
 	bits, scom_data, expr;
      rx_recal_timeout_sel_g,  0b0111,   def_IS_HW && def_bus_id0;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id1;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id1;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id2;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id2;
-     rx_recal_timeout_sel_g,  0b0110,  def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_g,  0b0100,  def_IS_VBU && def_bus_id0;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id1;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id1;
 	rx_recal_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id2;
-	rx_recal_timeout_sel_g, 0b0110, def_IS_VBU && def_bus_id2;
-     rx_recal_timeout_sel_h,  0b0110,   def_IS_HW && def_bus_id0;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_h,  0b1011,   def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id1;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id2;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id2;
      rx_recal_timeout_sel_h,  0b1000,  def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id1;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_h, 0b0110, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id2;
 	rx_recal_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXCTL.RX_CTL_REGS.RX_RECAL_TO3_PP
 scom 0x800BA00008010C3F { 
 	bits, scom_data, expr;
-     rx_recal_timeout_sel_i,  0b0111,   def_IS_HW && def_bus_id0;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id1;
+     rx_recal_timeout_sel_i,  0b1011,   def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id1;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id2;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id2;
      rx_recal_timeout_sel_i,  0b1000,  def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id1;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_i, 0b0111, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id2;
 	rx_recal_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id2;
-     rx_recal_timeout_sel_l,  0b0100,   def_IS_HW && def_bus_id0;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id1;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id2;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id2;
-     rx_recal_timeout_sel_l,  0b0110,  def_IS_VBU && def_bus_id0;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id1;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id1;
-	rx_recal_timeout_sel_l, 0b0100, def_IS_HW && def_bus_id2;
-	rx_recal_timeout_sel_l, 0b0110, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_j,  0b1011,   def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_j,  0b1000,  def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_j, 0b1011, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_k,  0b1011,   def_IS_HW && def_bus_id0;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_recal_timeout_sel_k,  0b1000,  def_IS_VBU && def_bus_id0;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id1;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_recal_timeout_sel_k, 0b1011, def_IS_HW && def_bus_id2;
+	rx_recal_timeout_sel_k, 0b1000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO1_PP
 scom 0x800B600008010C3F { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_d,  0b1001,   def_IS_HW && def_bus_id0;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id1;
+     rx_servo_timeout_sel_b,  0b1010,   def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_servo_timeout_sel_b,  0b1000,  def_IS_VBU && def_bus_id0;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id1;
+	rx_servo_timeout_sel_b, 0b1010, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_b, 0b1000, def_IS_VBU && def_bus_id2;
+     rx_servo_timeout_sel_d,  0b1010,   def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_d,  0b1000,  def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_d, 0b1001, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_d, 0b1010, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_d, 0b1000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO2_PP
 scom 0x800B680008010C3F { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_f,  0b0001,   def_IS_HW && def_bus_id0;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id1;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id2;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id2;
-     rx_servo_timeout_sel_f,  0b0110,  def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id1;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_f, 0b0001, def_IS_HW && def_bus_id2;
-	rx_servo_timeout_sel_f, 0b0110, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_g,  0b0111,   def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id1;
@@ -541,15 +604,15 @@ scom 0x800B680008010C3F {
 	rx_servo_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id1;
 	rx_servo_timeout_sel_g, 0b0111, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_g, 0b0100, def_IS_VBU && def_bus_id2;
-     rx_servo_timeout_sel_h,  0b1110,   def_IS_HW && def_bus_id0;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id1;
+     rx_servo_timeout_sel_h,  0b1011,   def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_h,  0b1000,  def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_h, 0b1110, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_h, 0b1011, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_h, 0b1000, def_IS_VBU && def_bus_id2;
 }
 
@@ -566,15 +629,15 @@ scom 0x800B700008010C3F {
 	rx_servo_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id1;
 	rx_servo_timeout_sel_i, 0b1011, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_i, 0b1000, def_IS_VBU && def_bus_id2;
-     rx_servo_timeout_sel_j,  0b1100,   def_IS_HW && def_bus_id0;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id1;
+     rx_servo_timeout_sel_j,  0b1101,   def_IS_HW && def_bus_id0;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_j,  0b1000,  def_IS_VBU && def_bus_id0;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id1;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id1;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id1;
-	rx_servo_timeout_sel_j, 0b1100, def_IS_HW && def_bus_id2;
+	rx_servo_timeout_sel_j, 0b1101, def_IS_HW && def_bus_id2;
 	rx_servo_timeout_sel_j, 0b1000, def_IS_VBU && def_bus_id2;
      rx_servo_timeout_sel_k,  0b1101,   def_IS_HW && def_bus_id0;
 	rx_servo_timeout_sel_k, 0b1101, def_IS_HW && def_bus_id1;
@@ -666,9 +729,9 @@ scom 0x8008980008010C3F {
 	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id1;
 	rx_ds_timeout_sel, 0b110, def_IS_HW && def_bus_id2;
 	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id2;
-	rx_sls_timeout_sel, 0b001, def_bus_id0;
-	rx_sls_timeout_sel, 0b001, def_bus_id1;
-	rx_sls_timeout_sel, 0b001, def_bus_id2;
+	rx_sls_timeout_sel, 0b110, def_bus_id0;
+	rx_sls_timeout_sel, 0b110, def_bus_id1;
+	rx_sls_timeout_sel, 0b110, def_bus_id2;
      rx_wt_timeout_sel,  0b111,   def_IS_HW && def_bus_id0;
 	rx_wt_timeout_sel, 0b111, def_IS_HW && def_bus_id1;
 	rx_wt_timeout_sel, 0b011, def_IS_VBU && def_bus_id1;
@@ -703,15 +766,15 @@ scom 0x8009580008010C3F {
 #RX0.RXCTL.RX_CTL_REGS.RX_WIRETEST_PLL_CNTL_PG
 scom 0x800A300008010C3F { 
 	bits, scom_data, expr;
-     rx_wt_cu_pll_pgooddly,  0b001,   def_IS_HW && def_bus_id0;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id1;
+     rx_wt_cu_pll_pgooddly,  0b110,   def_IS_HW && def_bus_id0;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id1;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id1;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id2;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id2;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id2;
      rx_wt_cu_pll_pgooddly,  0b000,  def_IS_VBU && def_bus_id0;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id1;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id1;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id1;
-	rx_wt_cu_pll_pgooddly, 0b001, def_IS_HW && def_bus_id2;
+	rx_wt_cu_pll_pgooddly, 0b110, def_IS_HW && def_bus_id2;
 	rx_wt_cu_pll_pgooddly, 0b000, def_IS_VBU && def_bus_id2;
      rx_wt_cu_pll_reset,  0b0,   def_IS_HW && def_bus_id0;
 	rx_wt_cu_pll_reset, 0b0, def_IS_HW && def_bus_id1;
@@ -725,12 +788,42 @@ scom 0x800A300008010C3F {
 	rx_wt_cu_pll_reset, 0b1, def_IS_VBU && def_bus_id2;
 }
 
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000501508010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#0.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B01508010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b001, def_bus_id0;
 	rx_prbs_tap_id, 0b001, def_bus_id1;
 	rx_prbs_tap_id, 0b001, def_bus_id2;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000501408010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#0.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -741,12 +834,42 @@ scom 0x8000B01408010C3F {
 	rx_prbs_tap_id, 0b010, def_bus_id2;
 }
 
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000501608010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#0.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B01608010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b000, def_bus_id0;
 	rx_prbs_tap_id, 0b000, def_bus_id1;
 	rx_prbs_tap_id, 0b000, def_bus_id2;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500A08010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#0.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -757,12 +880,42 @@ scom 0x8000B00A08010C3F {
 	rx_prbs_tap_id, 0b010, def_bus_id2;
 }
 
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500B08010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#0.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B00B08010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b011, def_bus_id0;
 	rx_prbs_tap_id, 0b011, def_bus_id1;
 	rx_prbs_tap_id, 0b011, def_bus_id2;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500908010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#0.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -773,12 +926,42 @@ scom 0x8000B00908010C3F {
 	rx_prbs_tap_id, 0b001, def_bus_id2;
 }
 
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000501208010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#1.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B01208010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b100, def_bus_id0;
 	rx_prbs_tap_id, 0b100, def_bus_id1;
 	rx_prbs_tap_id, 0b100, def_bus_id2;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000501708010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#1.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -789,12 +972,42 @@ scom 0x8000B01708010C3F {
 	rx_prbs_tap_id, 0b000, def_bus_id2;
 }
 
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500708010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#1.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B00708010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b111, def_bus_id0;
 	rx_prbs_tap_id, 0b111, def_bus_id1;
 	rx_prbs_tap_id, 0b111, def_bus_id2;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000501308010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#1.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -805,12 +1018,42 @@ scom 0x8000B01308010C3F {
 	rx_prbs_tap_id, 0b011, def_bus_id2;
 }
 
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500608010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#1.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B00608010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b110, def_bus_id0;
 	rx_prbs_tap_id, 0b110, def_bus_id1;
 	rx_prbs_tap_id, 0b110, def_bus_id2;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500808010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#1.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -821,12 +1064,42 @@ scom 0x8000B00808010C3F {
 	rx_prbs_tap_id, 0b000, def_bus_id2;
 }
 
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500508010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#2.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B00508010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b101, def_bus_id0;
 	rx_prbs_tap_id, 0b101, def_bus_id1;
 	rx_prbs_tap_id, 0b101, def_bus_id2;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500308010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#2.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -837,12 +1110,42 @@ scom 0x8000B00308010C3F {
 	rx_prbs_tap_id, 0b011, def_bus_id2;
 }
 
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000501108010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#2.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B01108010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b101, def_bus_id0;
 	rx_prbs_tap_id, 0b101, def_bus_id1;
 	rx_prbs_tap_id, 0b101, def_bus_id2;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500408010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#2.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -853,12 +1156,42 @@ scom 0x8000B00408010C3F {
 	rx_prbs_tap_id, 0b100, def_bus_id2;
 }
 
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000501008010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#2.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B01008010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b110, def_bus_id0;
 	rx_prbs_tap_id, 0b110, def_bus_id1;
 	rx_prbs_tap_id, 0b110, def_bus_id2;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500F08010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#2.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -869,12 +1202,42 @@ scom 0x8000B00F08010C3F {
 	rx_prbs_tap_id, 0b111, def_bus_id2;
 }
 
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500008010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#3.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B00008010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b000, def_bus_id0;
 	rx_prbs_tap_id, 0b000, def_bus_id1;
 	rx_prbs_tap_id, 0b000, def_bus_id2;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500208010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#3.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -885,12 +1248,42 @@ scom 0x8000B00208010C3F {
 	rx_prbs_tap_id, 0b010, def_bus_id2;
 }
 
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500108010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#3.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B00108010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b001, def_bus_id0;
 	rx_prbs_tap_id, 0b001, def_bus_id1;
 	rx_prbs_tap_id, 0b001, def_bus_id2;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500E08010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#3.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -901,12 +1294,42 @@ scom 0x8000B00E08010C3F {
 	rx_prbs_tap_id, 0b000, def_bus_id2;
 }
 
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500C08010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+}
+
 #RX0.RXPACKS#3.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
 scom 0x8000B00C08010C3F { 
 	bits, scom_data, expr;
 	rx_prbs_tap_id, 0b010, def_bus_id0;
 	rx_prbs_tap_id, 0b010, def_bus_id1;
 	rx_prbs_tap_id, 0b010, def_bus_id2;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_AMP_VAL_PL
+scom 0x8000500D08010C3F { 
+	bits, scom_data, expr;
+     rx_amp_gain,  0b1001,   def_IS_HW && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
+     rx_amp_gain,  0b0000,  def_IS_VBU && def_bus_id0;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id1;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id1;
+	rx_amp_gain, 0b1001, def_IS_HW && def_bus_id2;
+	rx_amp_gain, 0b0000, def_IS_VBU && def_bus_id2;
 }
 
 #RX0.RXPACKS#3.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
@@ -923,6 +1346,14 @@ scom 0x800CC40008010C3F {
 	tx_drv_clk_pattern_gcrmsg, 0b00, def_bus_id0;
 	tx_drv_clk_pattern_gcrmsg, 0b00, def_bus_id1;
 	tx_drv_clk_pattern_gcrmsg, 0b00, def_bus_id2;
+}
+
+#TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_DYN_RECAL_TIMEOUTS_PP
+scom 0x800EAC0008010C3F { 
+	bits, scom_data, expr;
+	tx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id0;
+	tx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id1;
+	tx_dyn_recal_interval_timeout_sel, 0b101, def_bus_id2;
 }
 
 #TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_ID1_PG
