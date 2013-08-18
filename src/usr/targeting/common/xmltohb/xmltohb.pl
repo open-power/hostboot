@@ -405,10 +405,11 @@ sub validateTargetTypes {
     my($attributes) = @_;
 
     my %elements = ( );
-    $elements{"id"}          = { required => 1, isscalar => 1};
-    $elements{"parent"}      = { required => 0, isscalar => 1};
-    $elements{"attribute"}   = { required => 0, isscalar => 0};
-    $elements{"fspOnly"}     = { required => 0, isscalar => 0};
+    $elements{"id"}               = { required => 1, isscalar => 1};
+    $elements{"parent"}           = { required => 0, isscalar => 1};
+    $elements{"attribute"}        = { required => 0, isscalar => 0};
+    $elements{"fspOnly"}          = { required => 0, isscalar => 0};
+    $elements{"compileAttribute"} = { required => 0, isscalar => 0};
 
     foreach my $targetType (@{$attributes->{targetType}})
     {
@@ -424,9 +425,10 @@ sub validateTargetInstances{
     my($attributes) = @_;
 
     my %elements = ( );
-    $elements{"id"}          = { required => 1, isscalar => 1};
-    $elements{"type"}        = { required => 1, isscalar => 1};
-    $elements{"attribute"}   = { required => 0, isscalar => 0};
+    $elements{"id"}               = { required => 1, isscalar => 1};
+    $elements{"type"}             = { required => 1, isscalar => 1};
+    $elements{"attribute"}        = { required => 0, isscalar => 0};
+    $elements{"compileAttribute"} = { required => 0, isscalar => 0};
 
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
