@@ -68,11 +68,6 @@ namespace PlatServices
 //##                      System Level Utility functions
 //##############################################################################
 
-//FIXME functions defintion not found.Should we remove it?
-//void enterCCMMode();
-//bool inCMMode();
-//bool isCM_FUNCTIONAL(TARGETING::TargetHandle_t);
-
 /**
  * @brief   Returns if role is mater fsp.
  * @param   None.

@@ -804,7 +804,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 PRDF_TRAC(PRDF_FUNC"Last Functional Core HUID: 0x%08x", dumpId);
 
                 ForceTerminate = true;
-                pfaData.LAST_CORE_TERMINATE = true;
+                pfaData.LAST_CORE_TERMINATE = 1;
                 o_errl->setSev(ERRL_SEV_UNRECOVERABLE);
                 pfaData.errlSeverity = ERRL_SEV_UNRECOVERABLE;
             }
@@ -1165,10 +1165,9 @@ void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
     o_pfa.FLOODING            = i_sdc.IsFlooding()      ? 1 : 0;
     o_pfa.THERMAL_EVENT       = i_sdc.IsThermalEvent()  ? 1 : 0;
     o_pfa.UNIT_CHECKSTOP      = i_sdc.IsUnitCS()        ? 1 : 0;
-    o_pfa.LAST_CORE_TERMINATE = false; // Will be set later, if needed.
+    o_pfa.LAST_CORE_TERMINATE = 0; // Will be set later, if needed.
     o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc() ? 1 : 0;
     o_pfa.DEFER_DECONFIG      = i_deferDeconfig         ? 1 : 0;
-    o_pfa.CM_MODE             = 0; //FIXME RTC 50063
 
     // Thresholding
     o_pfa.errorCount = i_sdc.GetHits();

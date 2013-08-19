@@ -163,10 +163,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         if(g_prd_errlHndl != NULL) rc = PRD_NOT_INITIALIZED;
     }
 
-    //FIXME enterCCMMode ,isInCCM  function not available in wrapper
-    //    if (SystemData::getInstance()->isInCCM())
-    //        PlatServices::enterCCMMode();
-
     bool latent_check_stop = false;
     ServiceDataCollector serviceData;
     STEP_CODE_DATA_STRUCT sdc;
