@@ -299,6 +299,41 @@ void ErrlEntry::removeBackTrace()
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
+                        const HWAS::clockTypeEnum i_clockType,
+                        const HWAS::callOutPriority i_priority)
+{
+    TRACFCOMP(g_trac_errl, ENTER_MRK"addClockCallout(%p, %d, 0x%x)",
+                i_target, i_clockType, i_priority);
+
+    TARGETING::EntityPath ep;
+    const void *pData;
+    uint32_t size;
+
+    if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        size = sizeof(HWAS::TARGET_IS_SENTINEL);
+        pData = &HWAS::TARGET_IS_SENTINEL;
+    }
+    else
+    {   // we got a non MASTER_SENTINEL target, therefore the targeting
+        // module is loaded, therefore we can make this call.
+        ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        // size is total EntityPath size minus unused path elements
+        size = sizeof(ep) -
+                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep.size()) *
+                        sizeof(TARGETING::EntityPath::PathElement);
+        pData = &ep;
+    }
+
+    ErrlUserDetailsCallout( pData, size, i_clockType,
+            i_priority).addToLog(this);
+
+} // addClockCallout
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
                         const TARGETING::Target *i_target_endp2,
                         const HWAS::busTypeEnum i_busType,

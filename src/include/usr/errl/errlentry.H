@@ -423,6 +423,23 @@ public:
     void removeBackTrace();
 
     /**
+     *  @brief Add a clock callout.
+     *  The i_target is used to identify the actual clock to callout because
+     *  some systems have multiple clocks of a given type. This target is
+     *  usually a chip target, but can possibly be a unit, depending on
+     *  the clock type.
+     *
+     *  @param[in]  i_target        The hardware target fed by the clock
+     *  @param[in]  i_clockType     The hardware clock type
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    void addClockCallout(const TARGETING::Target *i_target,
+                       const HWAS::clockTypeEnum i_clockType,
+                       const HWAS::callOutPriority i_priority);
+
+    /**
      *  @brief Add a bus callout
      *
      *  @param[in]  i_target1       The hardware bus endpoint target1

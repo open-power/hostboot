@@ -580,6 +580,12 @@ public:
                         HWAS::EPUB_PRC_FSI_PATH,
                         HWAS::SRCI_PRIORITY_HIGH).addToLog(errl);
 
+            ErrlUserDetailsCallout(
+                        &ep,
+                        ep_size,
+                        HWAS::TODCLK_TYPE,
+                        HWAS::SRCI_PRIORITY_LOW).addToLog(errl);
+
             if (pExList.size() > 1)
             {
                 TARGETING::EntityPath ep2;

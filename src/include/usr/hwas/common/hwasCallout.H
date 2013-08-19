@@ -110,10 +110,19 @@ enum busTypeEnum
     PSI_BUS_TYPE    = 6
 };
 
+enum clockTypeEnum
+{
+    TODCLK_TYPE     = 1,
+    MEMCLK_TYPE     = 2,
+    OSCREFCLK_TYPE  = 3,
+    OSCPCICLK_TYPE  = 4,
+};
+
 //
 const uint8_t HW_CALLOUT        = 0x01;
 const uint8_t PROCEDURE_CALLOUT = 0x02;
 const uint8_t BUS_CALLOUT       = 0x03;
+const uint8_t CLOCK_CALLOUT     = 0x04;
 
 const uint8_t TARGET_IS_SENTINEL = 0xF0;
 
@@ -121,18 +130,24 @@ typedef struct callout_ud
 {
     uint8_t             type;
     uint8_t             pad[3];
-    callOutPriority     priority; // uint32_t
+    callOutPriority     priority;           // uint32_t
     union {
-        struct {    // deconfigure / gard
-            DeconfigEnum    deconfigState; // uint32_t
-            GARD_ErrorType  gardErrorType; // uint32_t
+        struct {    // type == HW_CALLOUT
+            DeconfigEnum    deconfigState;  // uint32_t
+            GARD_ErrorType  gardErrorType;  // uint32_t
             uint32_t        cpuid;
+            // one Target will follow
         };
-        struct {    // callout
-            epubProcedureID procedure;  // uint32_t
+        struct {    // type == PROCEDURE_CALLOUT
+            epubProcedureID procedure;      // uint32_t
         };
-        struct {
-            busTypeEnum     busType;
+        struct {    // type == BUS_CALLOUT
+            busTypeEnum     busType;        // uint32_t
+            // two Targets will follow
+        };
+        struct {    // type == CLOCK_CALLOUT
+            clockTypeEnum   clockType;      // uint32_t
+            // one Target will follow
         };
     };
 } callout_ud_t;
@@ -210,6 +225,24 @@ errlHndl_t platHandleBusCallout(
         TARGETING::Target *i_pTarget1,
         TARGETING::Target *i_pTarget2,
         busTypeEnum i_busType,
+        callOutPriority i_priority,
+        errlHndl_t &io_errl);
+
+/**
+ * @brief platform specific code to handle a clock callout that has been
+ *  found in an errlog
+ *
+ * @param[in]  i_pTarget        target
+ * @param[in]  i_clockType      Enum indicating which type of clock
+ * @param[in]  i_priority       Enum indicating the priority of the callout
+ * @param[in]  io_errl          reference to errlHnld for this errlog
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error,
+ *                          NULL if no errors;
+ */
+errlHndl_t platHandleClockCallout(
+        TARGETING::Target *i_pTarget,
+        clockTypeEnum i_clockType,
         callOutPriority i_priority,
         errlHndl_t &io_errl);
 

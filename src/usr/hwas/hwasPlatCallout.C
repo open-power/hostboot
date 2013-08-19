@@ -159,4 +159,24 @@ errlHndl_t platHandleBusCallout(
     return errl;
 }
 
+//******************************************************************************
+// platHandleClockCallout
+//******************************************************************************
+errlHndl_t platHandleClockCallout(
+        TARGETING::Target *i_pTarget,
+        clockTypeEnum i_clockType,
+        callOutPriority i_priority,
+        errlHndl_t &io_errl)
+{
+    // WARNING:
+    // this hostboot code should not change io_errl, unless the caller of the
+    //  processCallouts() function also changes, as today it (errlentry.C) calls
+    //  from the errlEntry object
+
+    errlHndl_t errl = NULL;
+
+    // hostboot does not handle or do any action for clock callouts
+    return errl;
+}
+
 } // namespace HWAS

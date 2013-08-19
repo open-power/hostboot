@@ -52,6 +52,22 @@ class ErrlUserDetailsCallout : public ErrlUserDetails
 public:
 
     /**
+     *  @brief Construct a clock callout user detail
+     *
+     *  @param[in]  i_pTargetData   The hardware target data
+     *  @param[in]  i_targetDataLength    length of i_pTargetData
+     *  @param[in]  i_clockType     clock type Enum
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    ErrlUserDetailsCallout(
+                        const void *i_pTargetData,
+                        uint32_t i_targetDataLength,
+                        const HWAS::clockTypeEnum i_clockType,
+                        const HWAS::callOutPriority i_priority);
+
+    /**
      *  @brief Construct a bus callout user detail
      *
      *  @param[in]  i_pTarget1Data   The hardware target1 data

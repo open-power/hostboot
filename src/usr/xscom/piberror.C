@@ -67,9 +67,26 @@ void addFruCallouts(TARGETING::Target* i_target,
                               HWAS::GARD_NULL );
        break;
      case  PIB::PIB_CLOCK_ERROR:
-       // @todo:  RTC: 73480 Add Clock callout support
-       // (likely will need a procedure callout and have HWserver add the fru
-       // add a procedure callout type to hwascallout.H)
+        if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
+                    TARGETING::TYPE_PROC)
+        {
+            io_errl->addClockCallout(i_target,
+                                HWAS::OSCREFCLK_TYPE,
+                                HWAS::SRCI_PRIORITY_LOW);
+        }
+        else if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
+                    TARGETING::TYPE_MEMBUF)
+        {
+            io_errl->addClockCallout(i_target,
+                                HWAS::MEMCLK_TYPE,
+                                HWAS::SRCI_PRIORITY_LOW);
+        }
+        else // for anything else, just blame the refclock
+        {
+            io_errl->addClockCallout(i_target,
+                                HWAS::OSCREFCLK_TYPE,
+                                HWAS::SRCI_PRIORITY_LOW);
+        }
        break;
 
      default:

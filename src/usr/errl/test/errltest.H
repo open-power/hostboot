@@ -441,6 +441,11 @@ public:
                     HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
                     HWAS::SRCI_PRIORITY_HIGH);
 
+            errl->addClockCallout(
+                pExList[0],
+                HWAS::TODCLK_TYPE,
+                HWAS::SRCI_PRIORITY_MED);
+
             if (pExList.size() > 1)
             {
                 errl->addBusCallout(

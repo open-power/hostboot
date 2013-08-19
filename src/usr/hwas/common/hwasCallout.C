@@ -100,10 +100,9 @@ void processCallout(errlHndl_t &io_errl,
         uint64_t i_Size,
         bool i_DeferredOnly)
 {
-    HWAS_INF("processCallout entry. data %p size %lld",
-            i_pData, i_Size);
-
     callout_ud_t *pCalloutUD = (callout_ud_t *)i_pData;
+    HWAS_INF("processCallout entry. data %p size %lld type 0x%x",
+            i_pData, i_Size, pCalloutUD->type);
 
     if (i_DeferredOnly)
     {
@@ -141,7 +140,7 @@ void processCallout(errlHndl_t &io_errl,
                                         pCalloutUD->gardErrorType);
                 if (errl)
                 {
-                    HWAS_ERR("HW callout: error from platHandlHWCallout");
+                    HWAS_ERR("processCallout: error from platHandlHWCallout");
                     errlCommit(errl, HWAS_COMP_ID);
                 }
             }
@@ -156,11 +155,11 @@ void processCallout(errlHndl_t &io_errl,
                             pCalloutUD->procedure, pCalloutUD->priority);
             if (errl)
             {
-                HWAS_ERR("HW callout: error from platHandlProcedureCallout");
+                HWAS_ERR("processCallout: error from platHandlProcedureCallout");
                 errlCommit(errl, HWAS_COMP_ID);
             }
             break;
-        }
+        } // PROCEDURE_CALLOUT
         case (BUS_CALLOUT):
         {
             TARGETING::Target *pTarget1 = NULL;
@@ -179,12 +178,33 @@ void processCallout(errlHndl_t &io_errl,
                                         io_errl);
                 if (errl)
                 {
-                    HWAS_ERR("HW callout: error from platHandlBusCallout");
+                    HWAS_ERR("processCallout: error from platHandlBusCallout");
                     errlCommit(errl, HWAS_COMP_ID);
                 }
             }
             break;
         } // BUS_CALLOUT
+        case (CLOCK_CALLOUT):
+        {
+            TARGETING::Target *pTarget = NULL;
+            uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
+            bool l_err = retrieveTarget(l_uData, pTarget, io_errl);
+
+            if (!l_err)
+            {
+                errlHndl_t errl = platHandleClockCallout(
+                                        pTarget,
+                                        pCalloutUD->clockType,
+                                        pCalloutUD->priority,
+                                        io_errl);
+                if (errl)
+                {
+                    HWAS_ERR("processCallout: error from platHandleClockCallout");
+                    errlCommit(errl, HWAS_COMP_ID);
+                }
+            }
+            break;
+        } // CLOCK_CALLOUT
         default:
         {
             HWAS_ERR("bad data in Callout UD %x", pCalloutUD->type);

@@ -38,6 +38,34 @@ namespace ERRORLOG
 extern TARGETING::TARG_TD_t g_trac_errl;
 
 //------------------------------------------------------------------------------
+// Clock callout
+ErrlUserDetailsCallout::ErrlUserDetailsCallout(
+        const void *i_pTargetData,
+        uint32_t i_targetDataLength,
+        const HWAS::clockTypeEnum i_clockType,
+        const HWAS::callOutPriority i_priority)
+{
+    TRACDCOMP(g_trac_errl, "ClockCallout entry");
+
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = ERRL_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = ERRL_UDT_CALLOUT;
+
+    uint32_t pDataLength = sizeof(HWAS::callout_ud_t) + i_targetDataLength;
+    HWAS::callout_ud_t *pData;
+    pData = reinterpret_cast<HWAS::callout_ud_t *>
+                (reallocUsrBuf(pDataLength));
+    pData->type = HWAS::CLOCK_CALLOUT;
+    pData->clockType = i_clockType;
+    pData->priority = i_priority;
+    memcpy(pData + 1, i_pTargetData, i_targetDataLength);
+
+    TRACDCOMP(g_trac_errl, "ClockCallout exit; pDataLength %d", pDataLength);
+
+} // Clock callout
+
+//------------------------------------------------------------------------------
 // Bus callout
 ErrlUserDetailsCallout::ErrlUserDetailsCallout(
         const void *i_pTarget1Data,

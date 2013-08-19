@@ -73,6 +73,28 @@ public:
 
         switch (pData->type)
         {
+            case HWAS::CLOCK_CALLOUT:
+            {
+                switch (ntohl(pData->clockType))
+                {
+#define case_CLOCK_TYPE(_type) \
+case HWAS::_type: i_parser.PrintString( "Clock Type", #_type); break;
+                    case_CLOCK_TYPE(TODCLK_TYPE)
+                    case_CLOCK_TYPE(MEMCLK_TYPE)
+                    case_CLOCK_TYPE(OSCREFCLK_TYPE)
+                    case_CLOCK_TYPE(OSCPCICLK_TYPE)
+                    default:
+                        i_parser.PrintNumber( "Clock Type", "UNKNOWN: 0x%X",
+                                        ntohl(pData->clockType) );
+                } // switch clockType
+
+                // what follows the pData structure is one entity path
+                // print it out
+                uint8_t *l_ptr = reinterpret_cast<uint8_t *>(pData+1);
+                printEntityPath(l_ptr, i_parser, "Target");
+
+                break; // CLOCK_CALLOUT
+            }
             case HWAS::BUS_CALLOUT:
             {
                 switch (ntohl(pData->busType))
@@ -144,6 +166,7 @@ case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                 break; // HW_CALLOUT
             }
             case HWAS::PROCEDURE_CALLOUT:
+            {
                 i_parser.PrintString( "Callout type", "Procedure Callout");
                 switch (ntohl(pData->procedure))
                 {
@@ -174,6 +197,7 @@ case HWAS::_type: i_parser.PrintString( "Procedure", #_type); break;
                         break;
                 } // switch procedure
                 break; // PROCEDURE_CALLOUT
+            }
             default:
                 i_parser.PrintNumber( "Callout type", "UNKNOWN: 0x%X",
                                             ntohl(pData->type) );
