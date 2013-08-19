@@ -39,19 +39,34 @@ namespace RUNTIME
 //------------------------------------------------------------------------------
 UdNaca::UdNaca(hdatNaca_t* i_naca)
 {
-    if( 0 == mm_virt_to_phys(reinterpret_cast<void*>(i_naca)) )
-    {
-        return;
-    }
-
-    char * l_pBuf = reinterpret_cast<char *>(
-                          reallocUsrBuf(sizeof(hdatNaca_t)));
-    memcpy(l_pBuf, i_naca, sizeof(hdatNaca_t));
-    
     // Set up Ud instance variables
     iv_CompId = RUNTIME_COMP_ID;
     iv_Version = 1;
     iv_SubSection = RUNTIME_UDT_NACA;
+
+    //***** Memory Layout *****
+    // 8 bytes  : Physical Address
+    // 8 bytes  : Virtual Address
+    // XX bytes : NACA data
+
+    uint64_t phys_addr = mm_virt_to_phys(reinterpret_cast<void*>(i_naca));
+    if( 0 == phys_addr )
+    {
+        uint64_t* l_pBuf64 = reinterpret_cast<uint64_t *>(
+                                       reallocUsrBuf(sizeof(uint64_t)*2));
+        l_pBuf64[0] = phys_addr;
+        l_pBuf64[1] = 0;
+        return;
+    }
+
+    char * l_pBuf = reinterpret_cast<char *>(
+                          reallocUsrBuf(sizeof(hdatNaca_t)
+                                        +sizeof(uint64_t)*2));
+    memcpy(l_pBuf, &phys_addr, sizeof(uint64_t));
+    l_pBuf += sizeof(uint64_t);
+    memcpy(l_pBuf, &i_naca, sizeof(uint64_t));
+    l_pBuf += sizeof(uint64_t);
+    memcpy(l_pBuf, i_naca, sizeof(hdatNaca_t));
 }
 
 //------------------------------------------------------------------------------
@@ -66,19 +81,34 @@ UdNaca::~UdNaca()
 //------------------------------------------------------------------------------
 UdSpira::UdSpira(hdatSpira_t* i_spira)
 {
-    if( 0 == mm_virt_to_phys(reinterpret_cast<void*>(i_spira)) )
-    {
-        return;
-    }
-
-    char * l_pBuf = reinterpret_cast<char *>(
-                          reallocUsrBuf(sizeof(hdatSpira_t)));
-    memcpy(l_pBuf, i_spira, sizeof(hdatSpira_t));
-    
     // Set up Ud instance variables
     iv_CompId = RUNTIME_COMP_ID;
     iv_Version = 1;
     iv_SubSection = RUNTIME_UDT_SPIRA;
+
+    //***** Memory Layout *****
+    // 8 bytes  : Physical Address
+    // 8 bytes  : Virtual Address
+    // XX bytes : SPIRA data
+
+    uint64_t phys_addr = mm_virt_to_phys(reinterpret_cast<void*>(i_spira));
+    if( 0 == phys_addr )
+    {
+        uint64_t* l_pBuf64 = reinterpret_cast<uint64_t *>(
+                                       reallocUsrBuf(sizeof(uint64_t)*2));
+        l_pBuf64[0] = phys_addr;
+        l_pBuf64[1] = 0;
+        return;
+    }
+
+    char * l_pBuf = reinterpret_cast<char *>(
+                          reallocUsrBuf(sizeof(hdatSpira_t)
+                                        +sizeof(uint64_t)*2));
+    memcpy(l_pBuf, &phys_addr, sizeof(uint64_t));
+    l_pBuf += sizeof(uint64_t);
+    memcpy(l_pBuf, &i_spira, sizeof(uint64_t));
+    l_pBuf += sizeof(uint64_t);
+    memcpy(l_pBuf, i_spira, sizeof(hdatSpira_t));
 }
 
 //------------------------------------------------------------------------------
@@ -93,19 +123,34 @@ UdSpira::~UdSpira()
 //------------------------------------------------------------------------------
 UdTuple::UdTuple(hdat5Tuple_t* i_tuple)
 {
-    if( 0 == mm_virt_to_phys(reinterpret_cast<void*>(i_tuple)) )
-    {
-        return;
-    }
-
-    char * l_pBuf = reinterpret_cast<char *>(
-                          reallocUsrBuf(sizeof(hdat5Tuple_t)));
-    memcpy(l_pBuf, i_tuple, sizeof(hdat5Tuple_t));
-    
     // Set up Ud instance variables
     iv_CompId = RUNTIME_COMP_ID;
     iv_Version = 1;
     iv_SubSection = RUNTIME_UDT_TUPLE;
+
+    //***** Memory Layout *****
+    // 8 bytes  : Physical Address
+    // 8 bytes  : Virtual Address
+    // XX bytes : Tuple data
+
+    uint64_t phys_addr = mm_virt_to_phys(reinterpret_cast<void*>(i_tuple));
+    if( 0 == phys_addr )
+    {
+        uint64_t* l_pBuf64 = reinterpret_cast<uint64_t *>(
+                                       reallocUsrBuf(sizeof(uint64_t)*2));
+        l_pBuf64[0] = phys_addr;
+        l_pBuf64[1] = 0;
+        return;
+    }
+
+    char * l_pBuf = reinterpret_cast<char *>(
+                          reallocUsrBuf(sizeof(hdat5Tuple_t)
+                                        +sizeof(uint64_t)*2));
+    memcpy(l_pBuf, &phys_addr, sizeof(uint64_t));
+    l_pBuf += sizeof(uint64_t);
+    memcpy(l_pBuf, &i_tuple, sizeof(uint64_t));
+    l_pBuf += sizeof(uint64_t);
+    memcpy(l_pBuf, i_tuple, sizeof(hdat5Tuple_t));
 }
 
 //------------------------------------------------------------------------------

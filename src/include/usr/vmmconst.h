@@ -146,8 +146,11 @@ enum BlockPriority
 #define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE)
 
 /** Chunk of physical memory to use for HostServices Attributes */
-#define HSVC_TEST_MEMORY_ADDR  (VMM_MEMORY_SIZE + 32*MEGABYTE)
-#define HSVC_TEST_MEMORY_SIZE  (2*MEGABYTE)
+#define HSVC_TEST_MEMORY_ADDR   (VMM_MEMORY_SIZE + 32*MEGABYTE)
+#define HSVC_TEST_SYSDATA_SIZE  (4*KILOBYTE)  /* match FSP HDAT code */
+#define HSVC_TEST_NODEDATA_SIZE (256000)      /* match FSP HDAT code */
+#define HSVC_TEST_MEMORY_SIZE   \
+   ALIGN_PAGE((HSVC_TEST_SYSDATA_SIZE+HSVC_TEST_NODEDATA_SIZE))
 
 /* Chunk of physical memory used for Dump Source Table */
 #define DUMP_TEST_MEMORY_ADDR (HSVC_TEST_MEMORY_ADDR + HSVC_TEST_MEMORY_SIZE)

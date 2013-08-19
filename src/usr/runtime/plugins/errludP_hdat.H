@@ -24,10 +24,9 @@
 #define ERRL_UDP_NACA_H
 
 /**
- *  @file errludstring.H
+ *  @file errludP_hdat.H
  *
- *  Defines the ErrlUserDetailsParserString class that parser string FFDC
- *  user detail in an error log
+ *  Defines the ErrlUserDetailsParser classes that parse HDAT structures
  */
 
 #include "errluserdetails.H"
@@ -40,6 +39,9 @@
 #define TO_UINT16(ptr)  (ntohs(*(reinterpret_cast<uint16_t*>(ptr))))
 #define TO_UINT32(ptr)  (ntohl(*(reinterpret_cast<uint32_t*>(ptr))))
 #define TO_UINT64(ptr)  (ntohll(*(reinterpret_cast<uint64_t*>(ptr))))
+
+//@todo: RTC:81826 - Support 64-bit numbers
+// Combine Hi/Lo entries into a single 64-bit number
 
 namespace RUNTIME
 {
@@ -75,36 +77,55 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
         i_parser.PrintHeading("NACA");
         i_parser.PrintBlank();
 
+        // Print out the memory addresses
+        i_parser.PrintNumber("Phys Addr Hi","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Phys Addr Lo","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Virt Addr Hi","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Virt Addr Lo","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Byte Size","%.8lX",i_buflen);
+
+        // Skip the rest if we don't have the data
+        uint32_t l_buflen = i_buflen - sizeof(uint64_t)*2;
+        if( l_buflen == 0 )
+        {
+            return;
+        }
+
         // Dump the whole thing first
-        i_parser.PrintHexDump(i_pBuffer,i_buflen);
+        i_parser.PrintHexDump(l_databuf,l_buflen);
         i_parser.PrintBlank();
 
         char* tmp = NULL;
         // 0x0000 Spira-H offset (if non-zero)
-        if( i_buflen >= 8 )
+        if( l_buflen >= 0x0008 )
         {
-            tmp = static_cast<char *>(i_pBuffer) + 0x0000;
+            tmp = static_cast<char *>(l_databuf) + 0x0000;
             i_parser.PrintNumber("SPIRA-H","%.16llX",TO_UINT64(tmp));
         }
         // 0x0030 Legacy SPIRA offset
-        if( i_buflen >= 0x0038 )
+        if( l_buflen >= 0x0038 )
         {
-            tmp = static_cast<char *>(i_pBuffer) + 0x0030;
+            tmp = static_cast<char *>(l_databuf) + 0x0030;
             i_parser.PrintNumber("Legacy Spira","%.16llX",TO_UINT64(tmp));
         }
         // 0x00A0 Actual Legacy SPIRA size in bytes
-        if( i_buflen >= 0x00A4 )
+        if( l_buflen >= 0x00A4 )
         {
-            tmp = static_cast<char *>(i_pBuffer) + 0x00A0;
+            tmp = static_cast<char *>(l_databuf) + 0x00A0;
             i_parser.PrintNumber("Legacy SPIRA size","%.8X",TO_UINT32(tmp));
         }
         // 0x01B7 PHYP supports PCIA format
-        if( i_buflen >= 0x01B8 )
+        if( l_buflen >= 0x01B8 )
         {
-            tmp = static_cast<char *>(i_pBuffer) + 0x01B7;
+            tmp = static_cast<char *>(l_databuf) + 0x01B7;
             i_parser.PrintNumber("Legacy Spira","%.16llX",TO_UINT8(tmp));
         }
     }
@@ -179,16 +200,35 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
         i_parser.PrintHeading("Tuple");
         i_parser.PrintBlank();
 
+        // Print out the memory addresses
+        i_parser.PrintNumber("Phys Addr Hi","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Phys Addr Lo","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Virt Addr Hi","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Virt Addr Lo","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Byte Size","%.8lX",i_buflen);
+
+        // Skip the rest if we don't have the data
+        uint32_t l_buflen = i_buflen - sizeof(uint64_t)*2;
+        if( l_buflen < 0x0018 )
+        {
+            return;
+        }
+
         // Dump the whole thing first
-        i_parser.PrintHexDump(i_pBuffer,i_buflen);
+        i_parser.PrintHexDump(l_databuf,l_buflen);
         i_parser.PrintBlank();
 
-        if( i_buflen >= 0x0020 )
+        if( l_buflen >= 0x0020 )
         {
-            UdParserTuple::parse( i_parser, i_pBuffer );
+            UdParserTuple::parse( i_parser, l_databuf );
         }
     }
 
@@ -229,37 +269,56 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
         i_parser.PrintHeading("SPIRA");
         i_parser.PrintBlank();
 
+        // Print out the memory addresses
+        i_parser.PrintNumber("Phys Addr Hi","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Phys Addr Lo","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Virt Addr Hi","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Virt Addr Lo","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Byte Size","%.8lX",i_buflen);
+
+        // Skip the rest if we don't have the data
+        uint32_t l_buflen = i_buflen - sizeof(uint64_t)*2;
+        if( l_buflen == 0 )
+        {
+            return;
+        }
+
         // Dump the whole thing first
-        i_parser.PrintHexDump(i_pBuffer,i_buflen);
+        i_parser.PrintHexDump(l_databuf,l_buflen);
         i_parser.PrintBlank();
 
         char* tmp = NULL;
         //** 0x0000 Common HDIF header
         // 0x0002 Structure eye catcher
-        if( i_buflen >= 0x0008 )
+        if( l_buflen >= 0x0008 )
         {
-            tmp = static_cast<char *>(i_pBuffer) + 0x0002;
+            tmp = static_cast<char *>(l_databuf) + 0x0002;
             char tmp1[7];
             tmp1[6] = '\0';
             memcpy( tmp1, tmp, 6 );
             i_parser.PrintString("Eyecatcher",tmp1);
         }
         // 0x000A Structure version
-        if( i_buflen >= 0x000C )
+        if( l_buflen >= 0x000C )
         {
-            tmp = static_cast<char *>(i_pBuffer) + 0x000A;
+            tmp = static_cast<char *>(l_databuf) + 0x000A;
             i_parser.PrintNumber("Version","%.8X",TO_UINT32(tmp));
         }
 
         //** 0x0030 Info on 5-tuple array
         // 0x0004 Number of array entries
         uint32_t num_tuples = 0;
-        if( i_buflen >= 0x0038 )
+        if( l_buflen >= 0x0038 )
         {
-            tmp = static_cast<char *>(i_pBuffer) + 0x0034;
+            tmp = static_cast<char *>(l_databuf) + 0x0034;
             num_tuples = TO_UINT32(tmp);
             i_parser.PrintNumber("Num Tuples","%.8X",num_tuples);
         }
@@ -270,9 +329,9 @@ public:
              tuple++ )
         {
             i_parser.PrintNumber("  Tuple#","%d",tuple);
-            void* tuple_ptr = static_cast<char *>(i_pBuffer)
+            void* tuple_ptr = static_cast<char *>(l_databuf)
               + 0x0040 + (tuple * 0x20);
-            if( i_buflen < (0x0040 + (tuple * 0x20)) )
+            if( l_buflen < (0x0040 + (tuple * 0x20)) )
             {
                 break;
             }

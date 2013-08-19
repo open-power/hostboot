@@ -46,6 +46,7 @@ namespace RUNTIME
         MOD_TCE_MAP                     = 0x0E,   /**< tce.C */
         MOD_HDATSERVICE_FINDSPIRA       = 0x0F, /** hdatservice.C */
         MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL = 0x10, /**< hdatservice.C */
+        MOD_HDATSERVICE_MAPREGION       = 0x11, /**< hdatservice.C */
     };
 
     enum RuntimeReasonCode
@@ -56,7 +57,7 @@ namespace RUNTIME
         RC_BAD_HDAT_TUPLE           = RUNTIME_COMP_ID | 0x03,
         RC_INVALID_STANDALONE       = RUNTIME_COMP_ID | 0x04,
         RC_CANNOT_MAP_MEMORY        = RUNTIME_COMP_ID | 0x05,
-        RC_WRONG_PAYLOAD_ATTRS      = RUNTIME_COMP_ID | 0x06,
+        //RC_XXX                    = RUNTIME_COMP_ID | 0x06,
         RC_CANNOT_MAP_MEMORY2       = RUNTIME_COMP_ID | 0x07,
         RC_INVALID_PAYLOAD_KIND     = RUNTIME_COMP_ID | 0x08,
         RC_NO_HSVC_NODE_DATA_FOUND  = RUNTIME_COMP_ID | 0x09,
@@ -74,6 +75,7 @@ namespace RUNTIME
         RC_TCE_ENTRY_NOT_CONTIGUOUS   = RUNTIME_COMP_ID | 0x15,
         RC_NO_SPIRA                 = RUNTIME_COMP_ID | 0x16,
         RC_CANNOT_MAP_HDAT          = RUNTIME_COMP_ID | 0x17,
+        RC_NOT_ENOUGH_SPACE         = RUNTIME_COMP_ID | 0x18,
     };
 
     enum UserDetailsTypes

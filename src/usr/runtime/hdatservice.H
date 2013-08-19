@@ -107,6 +107,18 @@ namespace RUNTIME
         errlHndl_t updateHostDataSectionActual( SectionId i_section,
                                                 uint16_t i_count );
 
+        /**
+         * @brief  Retrieve and log FFDC data relevant to a given section of
+         *         host data memory
+         *
+         * @param[in] i_section  Relevant section
+         * @param[inout] io_errlog  Log to append FFDC to
+         *
+         * @return errlHndl_t  NULL on success
+         */
+        void addFFDC( SectionId i_section,
+                      errlHndl_t& io_errlog );
+
       protected:
         /**
          * @brief Constructor

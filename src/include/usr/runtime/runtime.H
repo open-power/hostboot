@@ -124,6 +124,17 @@ void update_MDRT_Count(uint16_t i_count);
  */
 errlHndl_t write_MDRT_Count(void);
 
+/*
+ * @brief  Retrieve and log FFDC data relevant to a given section of
+ *         host data memory
+ *
+ * @param[in] i_section  Relevant section
+ * @param[inout] io_errlog  Log to append FFDC to
+ *
+ * @return errlHndl_t  NULL on success
+ */
+void add_host_data_ffdc( SectionId i_section,
+                         errlHndl_t& io_errlog );
 
 }
 

@@ -37,6 +37,8 @@
 #include "errlud_hdat.H"
 #include <errl/errlmanager.H>
 
+//#define REAL_HDAT_TEST
+
 extern trace_desc_t* g_trac_runtime;
 
 #define TRACUCOMP TRACDCOMP
@@ -99,7 +101,7 @@ errlHndl_t hdatService::verify_hdat_address( void* i_addr,
                        + i_size;
 
     // Make sure that the entire range is within the memory
-    //  space that we mapped
+    //  space that we allocated
     for(memRegionItr region = iv_mem_regions.begin();
         (region != iv_mem_regions.end()) && !found; ++region)
     {
@@ -140,6 +142,13 @@ errlHndl_t hdatService::verify_hdat_address( void* i_addr,
                             reinterpret_cast<uint64_t>(i_addr),
                             reinterpret_cast<uint64_t>(i_size));
         errhdl->collectTrace("RUNTIME",1024);
+
+        // most likely this is a HB code bug
+        errhdl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                    HWAS::SRCI_PRIORITY_HIGH);
+        // but it could also be a FSP bug in setting up the HDAT data
+        errhdl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                    HWAS::SRCI_PRIORITY_HIGH);
     }
 
     return errhdl;
@@ -248,13 +257,13 @@ errlHndl_t hdatService::get_standalone_section(
     if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
     {
         o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[0].virt_addr);
-        o_dataSize = 512*KILOBYTE;
+        o_dataSize = HSVC_TEST_SYSDATA_SIZE;
     }
     else if( RUNTIME::HSVC_NODE_DATA == i_section )
     {
         o_dataAddr = reinterpret_cast<uint64_t>(iv_mem_regions[0].virt_addr)
-                     + 512*KILOBYTE;
-        o_dataSize = HSVC_TEST_MEMORY_SIZE - 512*KILOBYTE;
+                     + HSVC_TEST_SYSDATA_SIZE;
+        o_dataSize = HSVC_TEST_NODEDATA_SIZE;
     }
     else if( RUNTIME::MS_DUMP_SRC_TBL == i_section )
     {
@@ -341,7 +350,7 @@ errlHndl_t hdatService::mapRegion(uint64_t i_addr, size_t i_bytes,
                        l_mem.virt_addr );
             /*@
              * @errortype
-             * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
+             * @moduleid     RUNTIME::MOD_HDATSERVICE_MAPREGION
              * @reasoncode   RUNTIME::RC_CANNOT_MAP_MEMORY
              * @userdata1    Starting Address
              * @userdata2    Size
@@ -349,7 +358,7 @@ errlHndl_t hdatService::mapRegion(uint64_t i_addr, size_t i_bytes,
              */
             errhdl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA,
+                                        RUNTIME::MOD_HDATSERVICE_MAPREGION,
                                         RUNTIME::RC_CANNOT_MAP_MEMORY,
                                         l_mem.phys_addr,
                                         l_mem.size );
@@ -785,6 +794,10 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             if( !foundit )
             {
                 TRACFCOMP( g_trac_runtime, "getHostDataSection> HSVC_NODE_DATA instance %d of section %d is unallocated", i_instance, i_section );
+                // Go get the physical address we mapped in
+                uint64_t phys_addr =
+                  mm_virt_to_phys(reinterpret_cast<void*>(node_data_headers));
+
                 /*@
                  * @errortype
                  * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
@@ -799,7 +812,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                   RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                                   RUNTIME::RC_NO_HSVC_NODE_DATA_FOUND,
-                                  reinterpret_cast<uint64_t>(node_data_headers),
+                                  phys_addr,
                                   TWO_UINT32_TO_UINT64(i_instance,
                                                        found_instances));
                 errhdl->collectTrace("RUNTIME",1024);
@@ -1007,6 +1020,10 @@ errlHndl_t hdatService::findSpira( void )
             TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
               = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
+            // Go get the physical address we mapped in
+            uint64_t phys_addr =
+              mm_virt_to_phys(reinterpret_cast<void*>(naca));
+
             /*@
              * @errortype
              * @moduleid     RUNTIME::MOD_HDATSERVICE_FINDSPIRA
@@ -1020,7 +1037,7 @@ errlHndl_t hdatService::findSpira( void )
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             RUNTIME::MOD_HDATSERVICE_FINDSPIRA,
                             RUNTIME::RC_BAD_NACA,
-                            reinterpret_cast<uint64_t>(naca),
+                            reinterpret_cast<uint64_t>(phys_addr),
                             TWO_UINT32_TO_UINT64(payload_base,
                                                  payload_kind));
             errhdl->collectTrace("RUNTIME",1024);
@@ -1266,6 +1283,90 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
     return errhdl;
 }
 
+/**
+ * @brief  Retrieve and log FFDC data relevant to a given section of
+ *         host data memory
+ */
+void hdatService::addFFDC( SectionId i_section,
+                           errlHndl_t& io_errlog )
+{
+    uint64_t addr = 0;
+    uint64_t size = 0;
+    errlHndl_t errlog = NULL;
+
+    if( RUNTIME::NACA == i_section )
+    {
+        errlog = getHostDataSection( NACA, 0, addr, size );
+        if( errlog )
+        {
+            delete errlog;
+        }
+        else if( (addr != 0) && (size != 0) )
+        {
+            hdatNaca_t* naca = reinterpret_cast<hdatNaca_t*>(addr);
+            RUNTIME::UdNaca(naca).addToLog(io_errlog);
+        }
+        return;
+    }
+    else if( (RUNTIME::SPIRA_L == i_section)
+             || (RUNTIME::SPIRA_S == i_section)
+             || (RUNTIME::SPIRA_H == i_section) )
+    {
+        // grab the NACA first
+        addFFDC( NACA, io_errlog );
+
+        errlog = getHostDataSection( i_section, 0, addr, size );
+        if( errlog )
+        {
+            delete errlog;
+        }
+        else if( (addr != 0) && (size != 0) )
+        {
+            hdatSpira_t* spira = reinterpret_cast<hdatSpira_t*>(addr);
+            RUNTIME::UdSpira(spira).addToLog(io_errlog);
+        }
+        return;
+    }
+    else if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
+    {
+        // grab the SPIRA data
+        if( iv_spiraL) { addFFDC( SPIRA_L, io_errlog ); }
+        if( iv_spiraH) { addFFDC( SPIRA_H, io_errlog ); }
+        if( iv_spiraS) { addFFDC( SPIRA_S, io_errlog ); }
+
+        // grab the Tuple it is part of
+        hdat5Tuple_t* tuple = NULL;
+        if( iv_spiraS )
+        {
+            tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HSVC_DATA]);
+        }
+        else if( unlikely(iv_spiraL != NULL) )
+        {
+            tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
+        }
+        if( tuple ) { RUNTIME::UdTuple(tuple).addToLog(io_errlog); }
+    }
+    else if( RUNTIME::HSVC_NODE_DATA == i_section )
+    {
+        // grab the SPIRA data
+        if( iv_spiraL) { addFFDC( SPIRA_L, io_errlog ); }
+        if( iv_spiraH) { addFFDC( SPIRA_H, io_errlog ); }
+        if( iv_spiraS) { addFFDC( SPIRA_S, io_errlog ); }
+
+        // grab the Tuple it is part of
+        hdat5Tuple_t* tuple = NULL;
+        if( iv_spiraS )
+        {
+            tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HSVC_DATA]);
+        }
+        else if( unlikely(iv_spiraL != NULL) )
+        {
+            tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
+        }
+        if( tuple ) { RUNTIME::UdTuple(tuple).addToLog(io_errlog); }
+    }
+}
+
 /********************
  Public Methods
  ********************/
@@ -1308,6 +1409,17 @@ errlHndl_t write_MDRT_Count( void )
 {
     return Singleton<hdatService>::instance().writeMdrtCount();
 }
+
+/**
+ * @brief  Retrieve and log FFDC data relevant to a given section of
+ *         host data memory
+ */
+void add_host_data_ffdc( SectionId i_section,
+                         errlHndl_t& io_errlog )
+{
+    return Singleton<hdatService>::instance().addFFDC(i_section,io_errlog);
+}
+
 };
 
 /********************

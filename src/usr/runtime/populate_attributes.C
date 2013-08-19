@@ -241,11 +241,47 @@ errlHndl_t populate_system_attributes( void )
                                           RUNTIME::RC_INVALID_SECTION,
                                           sys_data_addr,
                                           sys_data_size );
+            // most likely this is a HB code bug
+            errhdl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                        HWAS::SRCI_PRIORITY_HIGH);
+            // but it could also be a FSP bug in setting up the HDAT data
+            errhdl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                        HWAS::SRCI_PRIORITY_HIGH);
+            // save some of the HDAT data for FFDC
+            RUNTIME::add_host_data_ffdc( RUNTIME::HSVC_SYSTEM_DATA, errhdl );
+
             break;
         }
+        else if( sizeof(system_data_t) > sys_data_size )
+        {
+            TRACFCOMP( g_trac_runtime, "Not enough space allocated by HDAT for HostServices System Data" );
+            /*@
+             * @errortype
+             * @reasoncode       RUNTIME::RC_NOT_ENOUGH_SPACE
+             * @moduleid         RUNTIME::MOD_RUNTIME_POP_SYS_ATTR
+             * @userdata1        Required size
+             * @userdata2        Available size
+             * @devdesc          Not enough space allocated by HDAT for
+             *                   HostServices System Data
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          RUNTIME::MOD_RUNTIME_POP_SYS_ATTR,
+                                          RUNTIME::RC_NOT_ENOUGH_SPACE,
+                                          sizeof(system_data_t),
+                                          sys_data_size );
+            // need to update the FSP code
+            errhdl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                        HWAS::SRCI_PRIORITY_HIGH);
+
+            // save some of the HDAT data for FFDC
+            RUNTIME::add_host_data_ffdc( RUNTIME::HSVC_SYSTEM_DATA, errhdl );
+
+            break;
+        }
+
         system_data_t* sys_data = reinterpret_cast<system_data_t*>(sys_data_addr);
         memset( sys_data, 'A', sizeof(system_data_t) );
-        //@fixme - Should test that we aren't going out of bounds
 
         // These variables are used by the HSVC_LOAD_ATTR macros directly
         uint64_t* _num_attr = NULL; //pointer to numAttr in struct
@@ -361,9 +397,36 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
                                           node_data_size );
             break;
         }
+        else if( sizeof(node_data_t) > node_data_size )
+        {
+            TRACFCOMP( g_trac_runtime, "Not enough space allocated by HDAT for HostServices Node Data" );
+            /*@
+             * @errortype
+             * @reasoncode       RUNTIME::RC_NOT_ENOUGH_SPACE
+             * @moduleid         RUNTIME::MOD_RUNTIME_POP_NODE_ATTR
+             * @userdata1        Required size
+             * @userdata2        Available size
+             * @devdesc          Not enough space allocated by HDAT for
+             *                   HostServices Node Data
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          RUNTIME::MOD_RUNTIME_POP_NODE_ATTR,
+                                          RUNTIME::RC_NOT_ENOUGH_SPACE,
+                                          sizeof(node_data_t),
+                                          node_data_size );
+            // need to update the FSP code
+            errhdl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                        HWAS::SRCI_PRIORITY_HIGH);
+
+            // save some of the HDAT data for FFDC
+            RUNTIME::add_host_data_ffdc( RUNTIME::HSVC_NODE_DATA, errhdl );
+
+            break;
+        }
+
         node_data_t* node_data = reinterpret_cast<node_data_t*>(node_data_addr);
         memset( node_data, 'A', sizeof(node_data) );
-        //@fixme - Should test that we aren't going out of bounds
 
         // These variables are used by the HSVC_LOAD_ATTR macros directly
         uint64_t* _num_attr = NULL; //pointer to numAttr in struct

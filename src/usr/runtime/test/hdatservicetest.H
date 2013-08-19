@@ -418,6 +418,19 @@ class HdatServiceTest: public CxxTest::TestSuite
             TS_FAIL("testSpira> Size of SPIRA_H data too small");
         }
 
+        errhdl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            RUNTIME::MOD_HDATSERVICE_VERIFY_HDAT_ADDRESS,
+                            RUNTIME::RC_BAD_HDAT_HEADER,
+                            0,0 );
+        add_host_data_ffdc(RUNTIME::HSVC_NODE_DATA,errhdl);
+        add_host_data_ffdc(RUNTIME::HSVC_SYSTEM_DATA,errhdl);
+        add_host_data_ffdc(RUNTIME::NACA,errhdl);
+        add_host_data_ffdc(RUNTIME::SPIRA_L,errhdl);
+        add_host_data_ffdc(RUNTIME::SPIRA_S,errhdl);
+        add_host_data_ffdc(RUNTIME::SPIRA_H,errhdl);
+        errlCommit(errhdl,RUNTIME_COMP_ID);
+
 
         TRACFCOMP( g_trac_runtime, "testSpira> finish" );
 #endif
