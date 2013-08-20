@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.25 2013/05/09 00:33:41 mwuu Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.26 2013/07/17 15:45:02 mwuu Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,9 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.26|mwuu    |07/17/13|Changed FAST_SIM_PC to use SIM attribute, changed
+#           |        |        |type1 define to use CUSTOM attribute as well.
+#           |        |        |Changed READ_CLOCK section to enable clocks for x4.
 #--     1.25|mwuu    |05/08/13|Fixed change in DDR4/DDR3 DIMM type
 #--     1.24|mwuu    |04/19/13|Changed to use ATTR_EFF_DIMM_SPARE instead of CDIMM
 #--     1.23|mwuu    |04/09/13|Fixed typo ENUM for 2N mode.
@@ -22,7 +25,7 @@
 #--     1.19|mwuu    |12/12/12|Commented out settings for SIM, changed attribute
 #           |        |        |to CEN.ATTR_CENTAUR_EC_WRITE_FIR_MASK_FEATURE
 #--		1.18|mwuu	 |12/03/12|Changed DP18_PLL_CONFIG1 VCO setting
-#--		1.17|mwuu	 |11/30/12|Changed DP18_PLL_CONFIG0/1 registers & 
+#--		1.17|mwuu	 |11/30/12|Changed DP18_PLL_CONFIG0/1 registers &
 #           |        |        |DP18_IO_TX_CONFIG0 INTERP_SIG_SLEW field
 #--		1.16|mwuu	 |11/28/12|Changed ADR TSYS to 0x70 and DP18 TSYS to 0x6B.
 #           |        |        |Changed ADR_PLL_VREG_CONFIG0/1 registers.
@@ -91,7 +94,7 @@ define CEN = TGT1;	# parent Centaur
 define def_is_sim		=	(SYS.ATTR_IS_SIMULATION == 1)	;
 
 # FAST_SIM_PER_CNTR for periodic calibrations
-define def_FAST_SIM_PC	=	1	;
+define def_FAST_SIM_PC	=	(SYS.ATTR_IS_SIMULATION == 1)	;
 
 # for real HW uncomment,  !!FIX once ATTR_EFF_DIMM_SPARE available [2][4][4] port, dimm, rank
 define def_p0_has_spare_full	=	(ATTR_EFF_DIMM_SPARE[0][0][0] == ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE)	;	# spare byte
@@ -106,7 +109,7 @@ define def_p1_no_spare			=	(ATTR_EFF_DIMM_SPARE[1][0][0] == ENUM_ATTR_EFF_DIMM_S
 
 # ports 0,1 must have functional dimms to be valid
 define def_valid_p0		=	(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR >> 4);		# ((def_is_mba01) || (def_is_mba23)) &&
-define def_valid_p1		=	(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR & 0x0F);	
+define def_valid_p1		=	(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR & 0x0F);
 
 # short test for MBA01 or MBA23
 define def_is_mba01		=	(ATTR_CHIP_UNIT_POS == 0)	;	# MBA01
@@ -279,17 +282,19 @@ define def_cdi_spcke_ohm20_p1	=	(ATTR_EFF_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_EFF_
 define def_cdi_spcke_ohm30_p1	=	(ATTR_EFF_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_EFF_CEN_DRV_IMP_SPCKE_OHM30)	;	# OHM30 = 0x1E (30)
 define def_cdi_spcke_ohm40_p1	=	(ATTR_EFF_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_EFF_CEN_DRV_IMP_SPCKE_OHM40)	;	# OHM40 = 0x28 (40)
 
-# define for glacier1(1), glacier2=normal(0)
-define def_is_type1	=	((ATTR_MSS_DQS_SWIZZLE_TYPE == 1) && (ATTR_EFF_DIMM_TYPE != ENUM_ATTR_EFF_DIMM_TYPE_CDIMM))	;
+# define for glacier1(1), glacier2=normal(0)   remove dimm_type != cdimm later
+define def_is_type1	=	((ATTR_MSS_DQS_SWIZZLE_TYPE == 1) && ((ATTR_EFF_CUSTOM_DIMM != ENUM_ATTR_EFF_CUSTOM_DIMM_YES) || (ATTR_EFF_DIMM_TYPE != ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)));
 
-define def_is_custom = (ATTR_EFF_CUSTOM_DIMM == ENUM_ATTR_EFF_CUSTOM_DIMM_YES);
+# remove dimm_type == cdimm later
+define def_is_custom = ((ATTR_EFF_CUSTOM_DIMM == ENUM_ATTR_EFF_CUSTOM_DIMM_YES) || (ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM));
 
 # define for 2 cycle addressing mode (2N)
 define def_2N_mode	= (ATTR_EFF_DRAM_2N_MODE_ENABLED == ENUM_ATTR_EFF_DRAM_2N_MODE_ENABLED_TRUE) ;
 
 # fix phase rotators due to NWELL issue
-define def_CL_adj = (CEN.ATTR_MSS_NWELL_MISPLACEMENT * 0x7F);
-define def_PR_adj = (CEN.ATTR_MSS_NWELL_MISPLACEMENT * 32);
+#define def_CL_adj = (CEN.ATTR_MSS_NWELL_MISPLACEMENT * 0x7F);
+#	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0[0] | (def_CL_adj))		,	(def_is_mba01)	;	# P0 L1	, A_A0	centerlane
+#define def_PR_adj = (CEN.ATTR_MSS_NWELL_MISPLACEMENT * 32);
 
 # SIMPLIFY
 # ================================================================================
@@ -298,7 +303,7 @@ define def_AL_ena	= (ATTR_EFF_DRAM_AL != 0);
 define def_AL_dis	= (ATTR_EFF_DRAM_AL == 0);
 
 # for calculating FW_RD_WR delay...  NOTE: AL could be disabled(=0)
-define def_TWTR_PLUS_OFF = (ATTR_EFF_DRAM_TWTR + 11)	;	# change from +8 on reg spec 
+define def_TWTR_PLUS_OFF = (ATTR_EFF_DRAM_TWTR + 11)	;	# change from +8 on reg spec
 define def_TRTP_PLUS_AL	= (ATTR_EFF_DRAM_TRTP + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL + 3)	;
 define def_TRTP_PLUS_NOAL = (ATTR_EFF_DRAM_TRTP + 3)	;
 
@@ -316,8 +321,8 @@ define def_tODTL_DDR4_NOAL	= (ATTR_EFF_DRAM_CWL - 3)	;	# DDR4 & 2tCK, no AL
 # def_1PR 			= 1000*1000 / (FREQ / 2)
 # def_dqs_offset 	= (10 + ((def_p2p_jitter / 2) / def_1PR) + 1)	# +1 for ceiling FN
 #define def_p2p_jitter		=	240										;	# DQS peak to peak jitter in ps
-define def_p2p_jitter		=	2600										;	# DQS peak to peak jitter in ps
-define def_dqs_offset		=	(11 + ((def_p2p_jitter * CEN.ATTR_MSS_FREQ) / 4000000))	;
+define def_p2p_jitter		=	2600									;	# DQS peak to peak jitter in ps
+define def_dqs_offset		=	(11 + (((def_p2p_jitter) * CEN.ATTR_MSS_FREQ) / 4000000))	;
 
 #---------------------------------------------------------------------------------
 
@@ -413,18 +418,20 @@ scom 0x800(0,1)C00C0301143F {	# _P[0:1]
 # PC_CONFIG1
 #
 # DPHY01.DDRPHY_PC_CONFIG1_P0
-scom 0x800(0,1)C00D0301143F {
+scom 0x8000C00D0301143F {
 	bits	,	scom_data	,	expr								;
 #	0:47	,	0x000000000000,	any		;	# reserved
 # 	# WLO is normally 0 except for RDIMM (RCD) configurations in which case it's set to 1
 # DD0 = PORT_BUFFER_LATENCY
- 	48:51	,	0x1			,	(def_is_rdimm)						;	# RDIMM
  	48:51	,	0xF			,	(def_is_lrdimm)						;	# LRDIMM  set WLO=-1
- 	48:51	,	0x0			,	any									;	# WLO=WRITE_LATENCY_OFFSET (2's complement -8 to 7)
+ 	48:51	,	(ATTR_EFF_WLO[0]),	any								;	# based on attribute now..
+# 	48:51	,	0x1			,	(def_is_rdimm)						;	# RDIMM
+# 	48:51	,	0x0			,	any									;	# WLO=WRITE_LATENCY_OFFSET (2's complement -8 to 7)
 # 	# 9.4.12.2	RLO = READ_LATENCY_OFFSET (2's complement -8 to 7) {0=CDIMM, 1=RDIMM, 2=LRDIMM}
- 	52:55	,	0x1			,	(def_is_rdimm)						;	# RDIMM
+# 	52:55	,	0x1			,	(def_is_rdimm)						;	# RDIMM
+# 	52:55	,	0x0			,	any									;	# CDIMM/UDIMM
  	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM
- 	52:55	,	0x0			,	any									;	# CDIMM/UDIMM
+ 	52:55	,	(ATTR_EFF_RLO[0]),	any								;	# based on attribute now..
  	56		,	0b0			,	any									;	# MEMCTL_CIC_FAST
  	57		,	0b0			,	any									;	# MEMCTL_CTRN_IGNORE
  	58		,	0b0			,	any									;	# DISABLE_MEMCTL_CAL
@@ -444,6 +451,39 @@ scom 0x800(0,1)C00D0301143F {
 # 	59:61	,	0b011		,	((def_is_lrdimm) && (def_is_ddr3))	;	# DDR3 LRDIMM
 # 	59:61	,	0b101		,	((def_is_rdimm) && (def_is_ddr4))	;	# DDR4 RDIMM
 # 	59:61	,	0b111		,	((def_is_lrdimm) && (def_is_ddr4))	;	# DDR4 LRDIMM
+#	62		,	0b1			,	any									;	# DDR4 Latency Chicken SW
+#	63		,	0b0			,	any									;	# Retain_Percal_SW
+}
+
+# DPHY01.DDRPHY_PC_CONFIG1_P1
+scom 0x8001C00D0301143F {
+	bits	,	scom_data	,	expr								;
+#	0:47	,	0x000000000000,	any		;	# reserved
+# 	# WLO is normally 0 except for RDIMM (RCD) configurations in which case it's set to 1
+# DD0 = PORT_BUFFER_LATENCY
+ 	48:51	,	0xF			,	(def_is_lrdimm)						;	# LRDIMM  set WLO=-1
+ 	48:51	,	(ATTR_EFF_WLO[1]),	any								;	# based on attribute now..
+# 	48:51	,	0x1			,	(def_is_rdimm)						;	# RDIMM
+# 	48:51	,	0x0			,	any									;	# WLO=WRITE_LATENCY_OFFSET (2's complement -8 to 7)
+# 	# 9.4.12.2	RLO = READ_LATENCY_OFFSET (2's complement -8 to 7) {0=CDIMM, 1=RDIMM, 2=LRDIMM}
+ 	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM
+ 	52:55	,	(ATTR_EFF_RLO[1]),	any								;	# based on attribute now..
+# 	52:55	,	0x1			,	(def_is_rdimm)						;	# RDIMM
+# 	52:55	,	0x0			,	any									;	# CDIMM/UDIMM
+ 	56		,	0b0			,	any									;	# MEMCTL_CIC_FAST
+ 	57		,	0b0			,	any									;	# MEMCTL_CTRN_IGNORE
+ 	58		,	0b0			,	any									;	# DISABLE_MEMCTL_CAL
+# 	Memory Type
+# 	# 59:61 , 000=DDR3/DDR4 CDIMM, DDR3 (001=RDIMM, 011=LRDIMM), DDR4 (101=RDIMM, 111=LRDIMM)
+	59		,	0b0			,	(def_is_custom)						;	# special for CDIMM
+	59		,	0b1			,	(def_is_ddr4)						;	# DDR4
+	59		,	0b0			,	any									;	# DDR3 or custom
+
+	60		,	0b1			,	(def_is_lrdimm)						;	# LRDIMM
+	60		,	0b0			,	any									;	# not LRDIMM
+
+	61		,	0b1			,	((def_is_lrdimm) || (def_is_rdimm))	;	# registered C/A
+	61		,	0b0			,	any									;	# unbuffered C/A
 #	62		,	0b1			,	any									;	# DDR4 Latency Chicken SW
 #	63		,	0b0			,	any									;	# Retain_Percal_SW
 }
@@ -500,7 +540,7 @@ scom 0x800(0,1)BC300301143F {		# PHY01 Port[0:1] broadcast ADR32S[0:1]
  	48:59	,	0x6A9		,	(CEN.ATTR_MSS_FREQ > 1459)		;	# >= 730 MHz, >=1460 MT/s
 
 	60:63	,	0x4			,	(def_is_ddr4)					;	# VCO = high for DDR4
-	60:63	,	0x0			,	any								;	# VCO = low for DDR3 
+	60:63	,	0x0			,	any								;	# VCO = low for DDR3
 
 }
 
@@ -571,11 +611,11 @@ scom 0x800(0,1)3C760301143F {			# CONFIG0_P[0:1] broadcast [0:4]
 #  	# 0b111 000 111011 00 00	20uA, gain 1, SE(200 ohms, 24pF, 3pF), VCO=low
 #	# 300-599.9 MHz, < 1200 MT/s
 #  	48:59	,	0xE3B		,	((def_is_sim) && (CEN.ATTR_MSS_FREQ < 1200))	;
-# 
+#
 #  	# 0b010 000 111000 00 00	40uA, gain 1, SE(200 ohms, 16pF, 2pF), VCO=low
 #	# 600-999.9 MHz, 1200-2000 MT/s
-#  	48:59	,	0x438		,	((def_is_sim) &&  (CEN.ATTR_MSS_FREQ < 2000))	;	
-# 
+#  	48:59	,	0x438		,	((def_is_sim) &&  (CEN.ATTR_MSS_FREQ < 2000))	;
+#
 # 	# 0b100 011 111011 01 00	28.57uA, gain 4, SE(200 ohms, 24pF, 3pF), VCO=high
 #	# 1000-1066 MHz, >=2000 MT/s
 #  	48:59	,	0x8FB		,	((def_is_sim) && (CEN.ATTR_MSS_FREQ >= 2000))	;
@@ -592,7 +632,7 @@ scom 0x800(0,1)3C760301143F {			# CONFIG0_P[0:1] broadcast [0:4]
 
 #	60:63	,	0x0			,	(def_is_sim)					;	# for SIM
 	60:63	,	0x4			,	(CEN.ATTR_MSS_FREQ > 1459)		;	# VCO = high for >= 730MHz or 1460 MT/s
-	60:63	,	0x0			,	any								;	# VCO = low for < 730MHz 
+	60:63	,	0x0			,	any								;	# VCO = low for < 730MHz
 }
 
 # ---------------------------------------------------------------------------------------
@@ -712,7 +752,7 @@ scom 0x80013C750301143F {				# CONFIG0_P1 broadcast [0:4]
  	48:51	,	0b0100		,	((CEN.ATTR_MSS_FREQ > 1200) && (CEN.ATTR_MSS_FREQ <= 1460))	;	# 1333
  	48:51	,	0b0010		,	((CEN.ATTR_MSS_FREQ > 1460) && (CEN.ATTR_MSS_FREQ <= 1732))	;	# 1600
  	48:51	,	0b1100		,	((CEN.ATTR_MSS_FREQ > 1732) && (CEN.ATTR_MSS_FREQ <= 1993))	;	# 1866
-	
+
 	# Post Cursor, tap coefficient for FFE, 0=no equalization
 	52:55	,	0b0001		,	(def_ffe1_p1)	;	# enable 1 FFE slice
 	52:55	,	0b0011		,	(def_ffe2_p1)	;	# enable 2 FFE slices
@@ -905,7 +945,7 @@ scom 0x80013C7(8,9)0301143F {	# [N:P]FET_SLICE_P1_[0:4]	broadcast
 #!scom 0x800(0,1)(40,44,48,4C)(10,11,12,13)0301143F {	# EN[0:3]_P[0:1]_ADR[0:3]
 #!scom 0x800(0,1)7C(10,11,12,13)0301143F {	# EN[0:3]_P[0:1]_ADR[0:3] via broadcast
 #!	bits	,	scom_data	;
-#	0:47	,	0x000000000000			;	# reserved
+##	0:47	,	0x000000000000			;	# reserved
 #!	48:63	,	0b1111111111110000		;
 #!}
 #!
@@ -917,7 +957,7 @@ scom 0x80013C7(8,9)0301143F {	# [N:P]FET_SLICE_P1_[0:4]	broadcast
 #!scom 0x800(0,1)(40,44,48,4C)(14,15,16,17)0301143F {	# EN[0:3]_P[0:1]_ADR[0:3]
 #!scom 0x800(0,1)7C(14,15,16,17)0301143F {	# EN[0:3]_P[0:1]_ADR[0:3] via broadcast
 #!	bits	,	scom_data	;
-#	0:47	,	0x000000000000			;	# reserved
+##	0:47	,	0x000000000000			;	# reserved
 #!	48:63	,	0b1111111111110000		;
 #!}
 #**********************************************************************************
@@ -1923,7 +1963,7 @@ scom 0x80014c210301143f {
 #scom 0x8000(40,44,48,4c)1A0301143f {	# VALUE_P0_ADR[0:3]
 #scom 0x800(0,1)7C1A0301143f {			# VALUE_P[0:1]_ADR[0:3] broadcast
 #	bits	,	scom_data	,	expr								;
-#	0:47	,	0x000000000000,	any									;	# reserved
+##	0:47	,	0x000000000000,	any									;	# reserved
 	# SLEW_CTL0, used for command (A0:15, BA0:3, ACT, PAR, CAS, RAS, WE)
 #	48:51	,	0b0000		,	(ATTR_EFF_CEN_SLEW_RATE_ADDR[0])	;
 	# SLEW_CTL1, used for control (CKE0:1, CKE4:5, ODT, CSN0:7)
@@ -2403,7 +2443,7 @@ scom 0x80014c2b0301143f {
 # DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0		0x006	0x800000060301143f
 # PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.RDDP18CNTL_MAC.RCVRPEAK_L2
 #scom 0x800(0,1)(00,04,08,0C,10)060301143f {	# _P[0:1]_[0:4]
-scom 0x80003C060301143f {	# _P[0:1]_[0:4] via broadcast
+scom 0x80003C060301143f {	# _P0_[0:4] via broadcast
 	bits	,	scom_data	,	expr			;
 #	0:47	,	0x000000000000,	any				;	# reserved
 	48:50	,	0b000		,	any				;	# PEAK_AMP_CTL_SIDE0, amp ctl bits
@@ -2900,6 +2940,7 @@ scom 0x800(0,1)c0330301143f {
 #
 # DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_0		0x037	0x800000370301143f
 # PHYW.PHYX.GEN_DP#0.DPX.HC.HC.RDDP18WRAP.RDDP18CNTL_MAC.DQSOFFSET_L2(0:6)
+#scom 0x8000(00,04,08,0C,10)370301143f {	# _P0_[0:4], all instances
 scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 	bits	,	scom_data		,	expr			;
 #	0:47	,	0x000000000000	,	any				;	# reserved
@@ -2910,11 +2951,11 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 }
 
 # ---------------------------------------------------------------------------------------
-# DP18 Write DQ offset value register	default=0		aka=windage
+# DP18 Write DQ offset value register	default=0
 #
-# Used to perform a pre-offset before write leveling starts.  Value will be used by the
-# Write centering calibration state machine.
-# NOTE:  Does NOT affect the data bit delay values if calibration is not run!
+# Used to shift(left/right) the Write Eye after Write centering calibration.
+# The value is 2's complement and can only move it in 2 tick increments.
+# NOTE:  Does NOT affect the data bit delay values if Write centering calibration is not run!
 #
 # 200 ps offset / # steps based on freq?
 #
@@ -2931,7 +2972,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # _RP[0:3]_P[0:1]_[0:4], all instances and rank pairs via broadcast, both ports
 # scom 0x800(0,1)3CFE0301143f {	# _RP[0:3]_P[0:1]_[0:4]
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	48:51	,	0x0			,	any				;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	any				;	# DQ_WR_OFFSET_N1
 # 	56:59	,	0x0			,	any				;	# DQ_WR_OFFSET_N2
@@ -2940,7 +2981,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 #
 # scom 0x80003C7E0301143f {	# _RP0_P0_[0:4], rank pair 0, all instances via broadcast
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	~~~~~~~~~~~~~~~  Port 0  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
@@ -2954,7 +2995,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # }
 # scom 0x80003D7E0301143f {	# _RP1_P0_[0:4], rank pair 1, all instances via broadcast
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	~~~~~~~~~~~~~~~  Port 0  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
@@ -2968,7 +3009,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # }
 # scom 0x80003E7E0301143f {	# _RP2_P0_[0:4], rank pair 2, all instances via broadcast
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	~~~~~~~~~~~~~~~  Port 0  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
@@ -2982,7 +3023,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # }
 # scom 0x80003F7E0301143f {	# _RP3_P0_[0:4], rank pair 3, all instances via broadcast
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	~~~~~~~~~~~~~~~  Port 0  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
@@ -2997,7 +3038,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # ===============================================================================
 # scom 0x80013C7E0301143f {	# _RP0_P1_[0:4], rank pair 0, all instances via broadcast
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	~~~~~~~~~~~~~~~  Port 1  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
@@ -3011,7 +3052,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # }
 # scom 0x80013D7E0301143f {	# _RP1_P1_[0:4], rank pair 1, all instances via broadcast
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	~~~~~~~~~~~~~~~  Port 1  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
@@ -3025,7 +3066,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # }
 # scom 0x80013E7E0301143f {	# _RP2_P1_[0:4], rank pair 2, all instances via broadcast
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	~~~~~~~~~~~~~~~  Port 1  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
@@ -3039,7 +3080,7 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # }
 # scom 0x80013F7E0301143f {	# _RP3_P1_[0:4], rank pair 3, all instances via broadcast
 # 	bits	,	scom_data	,	expr			;
-#	0:47	,	0x000000000000,	any				;	# reserved
+##	0:47	,	0x000000000000,	any				;	# reserved
 # 	~~~~~~~~~~~~~~~  Port 1  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 	48:51	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N0
 # 	52:55	,	0x0			,	(def_is_mba01)		;	# DQ_WR_OFFSET_N1
@@ -3141,19 +3182,17 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 scom 0x8000C0160301143F {	# Port 0
 	bits	,	scom_data	,	expr				;
 #	0:47	,	0x000000000000,	any					;	# reserved
-	48		,	0b1			,	any					;	# ENA_WR_LEVEL
-	49		,	0b0			,	any					;	# ENA_INITIAL_PAT_WR, for custom pattern
-	50		,	0b1			,	any					;	# ENA_DQS_ALIGN
-	51		,	0b1			,	any					;	# ENA_RDCLK_ALIGN
-
-	52		,	0b1			,	any					;	# ENA_READ_CTR
-	53		,	0b1			,	any					;	# ENA_WRITE_CTR
-	54		,	0b1			,	any					;	# ENA_INITIAL_COARSE_WR
-	55		,	0b1			,	any					;	# ENA_COARSE_RD
-
+#	48		,	0b1			,	(def_is_sim)		;	# ENA_WR_LEVEL
+#	49		,	0b0			,	(def_is_sim)		;	# ENA_INITIAL_PAT_WR, for custom pattern
+#	50		,	0b1			,	(def_is_sim)		;	# ENA_DQS_ALIGN
+#	51		,	0b1			,	(def_is_sim)		;	# ENA_RDCLK_ALIGN
+#	52		,	0b1			,	(def_is_sim)		;	# ENA_READ_CTR
+#	53		,	0b1			,	(def_is_sim)		;	# ENA_WRITE_CTR
+#	54		,	0b1			,	(def_is_sim)		;	# ENA_INITIAL_COARSE_WR
+#	55		,	0b1			,	(def_is_sim)		;	# ENA_COARSE_RD
 	56		,	0b0			,	any					;	# ENA_CUSTOM_RD
 	57		,	0b0			,	any					;	# ENA_CUSTOM_WR
-	58		,	0b1			,	any					;	# ABORT_ON_CAL_ERROR
+#	58		,	0b1			,	(def_is_sim)		;	# ABORT_ON_CAL_ERROR
 	59		,	0b0			,	any					;	# ENA_DIGITAL_EYE
 
 	# ENA_RANK_GROUP[0:3], 4 bits
@@ -3171,17 +3210,17 @@ scom 0x8000C0160301143F {	# Port 0
 scom 0x8001C0160301143F {	# Port 1
 	bits	,	scom_data	,	expr				;
 #	0:47	,	0x000000000000,	any					;	# reserved
-	48		,	0b1			,	(def_is_sim)		;	# ENA_WR_LEVEL
-	49		,	0b0			,	(def_is_sim)		;	# ENA_INITIAL_PAT_WR, for custom pattern
-	50		,	0b1			,	(def_is_sim)		;	# ENA_DQS_ALIGN
-	51		,	0b1			,	(def_is_sim)		;	# ENA_RDCLK_ALIGN
-	52		,	0b1			,	(def_is_sim)		;	# ENA_READ_CTR
-	53		,	0b1			,	(def_is_sim)		;	# ENA_WRITE_CTR
-	54		,	0b1			,	(def_is_sim)		;	# ENA_INITIAL_COARSE_WR
-	55		,	0b1			,	(def_is_sim)		;	# ENA_COARSE_RD
+#	48		,	0b1			,	(def_is_sim)		;	# ENA_WR_LEVEL
+#	49		,	0b0			,	(def_is_sim)		;	# ENA_INITIAL_PAT_WR, for custom pattern
+#	50		,	0b1			,	(def_is_sim)		;	# ENA_DQS_ALIGN
+#	51		,	0b1			,	(def_is_sim)		;	# ENA_RDCLK_ALIGN
+#	52		,	0b1			,	(def_is_sim)		;	# ENA_READ_CTR
+#	53		,	0b1			,	(def_is_sim)		;	# ENA_WRITE_CTR
+#	54		,	0b1			,	(def_is_sim)		;	# ENA_INITIAL_COARSE_WR
+#	55		,	0b1			,	(def_is_sim)		;	# ENA_COARSE_RD
 	56		,	0b0			,	any					;	# ENA_CUSTOM_RD
 	57		,	0b0			,	any					;	# ENA_CUSTOM_WR
-	58		,	0b1			,	(def_is_sim)		;	# ABORT_ON_CAL_ERROR
+#	58		,	0b1			,	(def_is_sim)		;	# ABORT_ON_CAL_ERROR
 	59		,	0b0			,	any					;	# ENA_DIGITAL_EYE
 	# ENA_RANK_GROUP[0:3], 4 bits
 	60		,	0b1			,	(def_val_prg0_p1)	;	# enable primary rank group 0
@@ -3434,7 +3473,7 @@ scom 0x8000c0090301143f {
 # PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG17_L2
 #scom 0x8000c0110301143f {
 #	bits	,	scom_data	,	expr		;
-#	0:47	,	0x000000000000,	any			;	# reserved
+##	0:47	,	0x000000000000,	any			;	# reserved
 #	48		,	0b0			,	any			;	# ADDR_MIRROR_RP0_PRI
 #	49		,	0b0			,	any			;	# ADDR_MIRROR_RP0_SEC
 #	50		,	0b0			,	any			;	# ADDR_MIRROR_RP1_PRI
@@ -3458,7 +3497,7 @@ scom 0x8000c0090301143f {
 # PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG53_L2
 #scom 0x8000c0350301143f {
 #	bits	,	scom_data	,	expr		;
-#	0:47	,	0x000000000000,	any			;	# reserved
+##	0:47	,	0x000000000000,	any			;	# reserved
 #	48		,	0b0			,	any			;	# ADDR_MIRROR_RP0_TER
 #	49		,	0b0			,	any			;	# ADDR_MIRROR_RP0_QUA
 #	50		,	0b0			,	any			;	# ADDR_MIRROR_RP1_TER
@@ -3704,7 +3743,7 @@ scom 0x8001c0310301143f {
 #
 # DPHY01_DDRPHY_RC_CONFIG0_P0		0x000	0x8000c8000301143f
 # PHYW.PHYX.SYNTHX.D3SIDEA.RCX.RC_CONFIG0_L2
-scom 0x800(0,1)C8000301143F {	# _P[0:1]
+scom 0x8000C8000301143F {	# _P0
 	bits	,	scom_data	,	expr			;
 #	0:47	,	0x000000000000,	any				;	# reserved
 	#
@@ -3719,9 +3758,39 @@ scom 0x800(0,1)C8000301143F {	# _P[0:1]
 	# min GPO = 5 + max(rndUp(System_delay)) - RLO + ADVANCE_RD_VALID + SPAM_EN
 	# max GPO = 11 if in 2:1, 13 if in 4:1
 	48:51	,	0b0111		,	(def_is_lrdimm)	;	# GLOBAL_PHY_OFFSET LRDIMM set to 7
-	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), ideally 2:1 max=11, 4:1 max=13
+	48:51	,	(ATTR_EFF_GPO[0]),	any			;	# GLOBAL_PHY_OFFSET (GPO), based on attribute now
+#	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), ideally 2:1 max=11, 4:1 max=13
 	52		,	0b0			,	any				;	# ADVANCE_RD_VALID	ask Yuen
-	53		,	0b0			,	any				;	# PER_DUTY_CYCLE_SW, 0=rd cmds 50% duty cycle during per.cal, 1=continuously 
+	53		,	0b0			,	any				;	# PER_DUTY_CYCLE_SW, 0=rd cmds 50% duty cycle during per.cal, 1=continuously
+	54:56	,	0b000		,	any				;	# NUM_PERIODIC_CAL, (value+1)=num bits per peridic cal
+	57		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP0
+	58		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP1
+	59		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP2
+	60		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP3
+	61		,	0b0			,	any				;	# ALIGN_ON_EVEN_CYCLES
+# !! switched to '1' to match SIM
+	62		,	0b1			,	any				;	# PERFORM_RDCLK_ALIGN
+	63		,	0b0			,	any				;	# STAGGERED_PATTERN		# for DDR4, 0=serial, 1=staggered
+}
+scom 0x8001C8000301143F {	# _P1
+	bits	,	scom_data	,	expr			;
+#	0:47	,	0x000000000000,	any				;	# reserved
+	#
+	# System_Delay = ( ( (ADR_DELAY - 64) +
+	# {wire delay from the PHY memory clock output to the DRAM module converted to units of 1/128th of a MEMINTCLKO clock cycle} +
+	# {delay of DQS at the memory module pin relative to memory clock at the memory module pin introduced by the memory module
+	# (that is, tDQSCK) converted to units of 1/128th of a MEMINTCLKO clock cycle} +
+	# {wire delay from the DRAM DQS output to the PHY converted to units of 1/128th of a MEMINTCLKO clock cycle}) / 128) +
+	# {number of pipeline stages in the addr/cmd path} +
+	# {number of pipeline stages in the read data path}
+	#
+	# min GPO = 5 + max(rndUp(System_delay)) - RLO + ADVANCE_RD_VALID + SPAM_EN
+	# max GPO = 11 if in 2:1, 13 if in 4:1
+	48:51	,	0b0111		,	(def_is_lrdimm)	;	# GLOBAL_PHY_OFFSET LRDIMM set to 7
+	48:51	,	(ATTR_EFF_GPO[1]),	any			;	# GLOBAL_PHY_OFFSET (GPO), based on attribute now
+#	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), ideally 2:1 max=11, 4:1 max=13
+	52		,	0b0			,	any				;	# ADVANCE_RD_VALID	ask Yuen
+	53		,	0b0			,	any				;	# PER_DUTY_CYCLE_SW, 0=rd cmds 50% duty cycle during per.cal, 1=continuously
 	54:56	,	0b000		,	any				;	# NUM_PERIODIC_CAL, (value+1)=num bits per peridic cal
 	57		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP0
 	58		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP1
@@ -4005,7 +4074,7 @@ scom 0x800(0,1)C4140301143F {	# _P[0:1]
 #DPHY01_DDRPHY_SEQ_LPT_ADDR2_P0		0x017	0x8000c4170301143f
 #scom 0x8000c4170301143f {
 #	bits	,	scom_data		;
-#	0:47	,	0x000000000000	;	# reserved
+##	0:47	,	0x000000000000	;	# reserved
 #	48:63	,	0xFFFF			;	# LPT_ADDR2
 #}
 
@@ -4034,7 +4103,7 @@ scom 0x800(0,1)CC000301143F {	# _P[0:1]
 	# FW_WR_RD [same formula as RD_WR? max(tWTR+11,AL+tRTP+3), ATTR_EFF_DRAM_AL(0,1,2)]
 	57:62	,	0b000000			,	(def_is_sim)							;   # is this max?
 	57:62	,	0b010001			,	any										;	# same as dd0, 17 clocks
-	
+
 	# AL={1,2};	max (TWTR + 11, TRTP + AL + 3)
 #	57:62	,	(def_TWTR_PLUS_OFF)	,	(def_AL_ena && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_AL) )	;	# TWTR + 11
 #	57:62	,	(def_TRTP_PLUS_AL)	,	(def_AL_ena && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_AL) )		;	# TRTP + AL + 3
@@ -4139,7 +4208,7 @@ scom 0x800(0,1)3C030301143f {	# DIR1_P[0:1]_[0:4] via broadcast
 
 # ---------------------------------------------------------------------------------------
 # ADR Output Driver Force and ATEST Control Register
-# 
+#
 # DPHY01_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P0_ADR32S0	0x035	0x800080350301143f
 #scom 0x800(0,1)(80,84)350301143f {	# P[0:1]_ADR32S[0:1]
 scom 0x800(0,1)BC350301143f {	# DIR1_P[0:1]_[0:4] via broadcast
@@ -4180,10 +4249,10 @@ scom 0x800(0,1)BC350301143f {	# DIR1_P[0:1]_[0:4] via broadcast
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_0		0x800000000301143f
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_2		0x800008000301143f
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_3		0x80000C000301143f
-# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P2_0		0x800000000301183f
-# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P2_2		0x800008000301183f
-# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P2_3		0x80000C000301183f
-scom 0x800(000,008,00C)000301143f {
+# DPHY23_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_0		0x800000000301183f
+# DPHY23_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_2		0x800008000301183f
+# DPHY23_DDRPHY_DP18_DATA_BIT_ENABLE0_P0_3		0x80000C000301183f
+scom 0x800(000,008,00C)000301143f {	# P0_0, P0_2, P0_3
 	bits	,	scom_data	,	expr			;
 #	0:47	,	0x000000000000,	any				;	# reserved
 	48:63	,	0xFFFF		,	(def_valid_p0)	;	# enable DATA_BIT_ENABLE_0_15
@@ -4193,10 +4262,10 @@ scom 0x800(000,008,00C)000301143f {
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_0		0x800100000301143f
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_3		0x80010C000301143f
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_4		0x800110000301143f
-# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P3_0		0x800100000301183f
-# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P3_3		0x80010C000301183f
-# DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P3_4		0x800110000301183f
-scom 0x800(100,10C,110)000301143f {
+# DPHY23_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_0		0x800100000301183f
+# DPHY23_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_3		0x80010C000301183f
+# DPHY23_DDRPHY_DP18_DATA_BIT_ENABLE0_P1_4		0x800110000301183f
+scom 0x800(100,10C,110)000301143f { # P1_0, P1_2, P1_3
 	bits	,	scom_data	,	expr			;
 #	0:47	,	0x000000000000,	any				;	# reserved
 	48:63	,	0xFFFF		,	(def_valid_p1)	;	# enable DATA_BIT_ENABLE_0_15
@@ -4247,8 +4316,8 @@ scom 0x800108000301143f {
 	bits	,	scom_data	,	expr												;	# spare = 8_15
 #	0:47	,	0x000000000000,	any													;	# reserved
 	48:63	,	0xFFFF		,	((def_is_mba01) && (def_valid_p1) && (def_p1_has_spare_full))	;	# PortB DATA_BIT_ENABLE_0_15
-	48:63	,	0xFFF0		,	((def_is_mba01) && (def_valid_p1) && (def_p1_has_spare_upper))	;	# PortB disable lower dq0:3*
-	48:63	,	0xFF0F		,	((def_is_mba01) && (def_valid_p1) && (def_p1_has_spare_lower))	;	# PortB disable upper dq4:7*
+	48:63	,	0xFFF0		,	((def_is_mba01) && (def_valid_p1) && (def_p1_has_spare_upper))	;	# PortB disable lower dq0:3
+	48:63	,	0xFF0F		,	((def_is_mba01) && (def_valid_p1) && (def_p1_has_spare_lower))	;	# PortB disable upper dq4:7
 	48:63	,	0xFF00		,	((def_is_mba01) && (def_valid_p1) && (def_p1_no_spare))			;	# PortB disable spare byte
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE0_P3_2		0x800108000301183f
 	48:63	,	0xFFFF		,	((def_is_mba23) && (def_valid_p1))					;	# P3_2
@@ -4258,14 +4327,15 @@ scom 0x800108000301143f {
 # ---------------------------------------------------------------------------------------
 # DP18 Data Bit Enable 1	(defaults to 0's)
 #
-# Centaur has mapped DP18 data bits 16:23 to be DQS, so 0's for this register is fine.
+# Centaur has mapped DP18 data bits 16:23 to be DQS, but this register bits 48:55 are for
+# changing these lanes to be dq bits, so we should leave them at 0's. (per Dave Stauffer)
 #
 # DPHY01_DDRPHY_DP18_DATA_BIT_ENABLE1_P0_0		0x001	0x800000010301143f
 #PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DATA_BIT_ENABLE1_L2
 #scom 0x800(0,1)(00,04,08,0C,10)010301143f {	# ENABLE1_P[0:1]_[0:4]
-# scom 0x800(0,1)3C010301143f {	# ENABLE0_P[0:1]_[0:4] via broadcast
+# scom 0x800(0,1)3C010301143f {	# ENABLE1_P[0:1]_[0:4] via broadcast
 # 	bits	,	scom_data		;
-#	0:47	,	0x000000000000	;	# reserved
+##	0:47	,	0x000000000000	;	# reserved
 # 	48:55	,	0b00000000		;	# data_bit_enable_16_23
 # 	56		,	0b0				;	# DFT_FORCE_OUTPUTS
 # 	57		,	0b0				;	# DFT_PRBS7_GEN_EN
@@ -4303,8 +4373,8 @@ scom 0x800108000301143f {
 # DPHY01_DDRPHY_ADR_BIT_ENABLE_P0_ADR0		0x000	0x800040000301143f
 # PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.ADRLOGX.CONTROL.TWRAP.P_REG_A_00_L2
 scom 0x800(040,044,140,144)000301143F {	# _P[0:1]_ADR[0:1]
-#	0:47	,	0x000000000000	;	# reserved
 	bits	,	scom_data		;
+#	0:47	,	0x000000000000	;	# reserved
 	48:63	,	0xFFF0			;	# bits 12:15 not used in ADR[0:1]
 }
 scom 0x800(048,04C,148,14C)000301143F {	# _P[0:1]_ADR[2:3]
@@ -4341,7 +4411,7 @@ scom 0x800(048,04C,148,14C)000301143F {	# _P[0:1]_ADR[2:3]
 # DPHY01_DDRPHY_ADR_DELAY0_P0_ADR0		0x004-00B	0x800040040301143f
 # PHYW.PHYX.ADRNEST.ADR32X0.HC.ADRLOGM.ADRLOGX.CONTROL.TWRAP.REG_A_09_L2
 #====================================================================================
-#   PORT 0 / 2 
+#   PORT 0 / 2
 #====================================================================================
 #-- Port 0/2  ADR 0 ------------------------------------------------------------
 scom 0x800040040301143F {	# DPHY01_DDRPHY_ADR_DELAY0_P0_ADR0
@@ -4447,7 +4517,6 @@ scom 0x800048040301143F {	# DPHY01_DDRPHY_ADR_DELAY0_P0_ADR2
 #	0:47	,	0x000000000000		,	any										;	# reserved
 	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12[0])		,	(def_is_mba01)	;	# P0 L0	, A_A12
 	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0[0])		,	(def_is_mba01)	;	# P0 L1	, A_A0	centerlane
-#	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0[0] | (def_CL_adj))		,	(def_is_mba01)	;	# P0 L1	, A_A0	centerlane
 	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1[0])		,	(def_is_mba23)	;	# P2 L0	, C_A1
 	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6[0])		,	(def_is_mba23)	;	# P2 L1	, C_A6
 }
@@ -4557,7 +4626,7 @@ scom 0x80004C0A0301143F {	# DPHY01.DDRPHY_ADR_DELAY6_P0_ADR3
 	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3[0])	,	(def_is_mba23)	;	# P2 L13, C0_CS3n
 }
 #====================================================================================
-#   PORT 1 / 3 
+#   PORT 1 / 3
 #====================================================================================
 #-- Port 1/3  ADR 0------------------------------------------------------------
 scom 0x800140040301143F {	# DPHY01_DDRPHY_ADR_DELAY0_P1_ADR0
@@ -5043,11 +5112,16 @@ scom 0x800(0,1)3C070301143F {					#_P[0:1]_[0:4] via broadcast
 #       ----------------------------------
 #       bits	0 1 2 3   4 5  6 7   8 9  10 11 (10:15 unused)
 #       ==============================================================
-#     possible spare (x4)
+#     possible spare (x4) Full[both nibbles]
 #       0x8640  1 0 0 0   0 1  1 0   0 1  0 0  = x4 no-swizzle, 			q0=16, q1=18, q2=20, q3=22
 #       0x4A40  0 1 0 0   1 0  1 0   0 1  0 0  = x4 swizzle quad0/1,		q0=18, q1=16, q2=20, q3=22
 #       0x8580  1 0 0 0   0 1  0 1   1 0  0 0  = x4 swizzle quad2/3,		q0=16, q1=18, q2=22, q3=20
 #       0x4980  0 1 0 0   1 0  0 1   1 0  0 0  = x4 swizzle quad0/1 & 2/3,	q0=18, q1=16, q2=22, q3=20
+#
+#       0x8600  1 0 0 0   0 1  1 0   0 0  0 0  = x4 no swizzle, disable upper nibble
+#       0x8440  1 0 0 0   0 1  0 0   0 1  0 0  = x4 no swizzle, disable lower nibble
+#       0x8480  1 0 0 0   0 1  0 0   1 0  0 0  = x4 swizzle quad2/3, disable upper nibble
+#       0x8500  1 0 0 0   0 1  0 1   0 0  0 0  = x4 swizzle quad2/3, disable lower nibble
 #
 #	  no spare (x4)
 #       0x8400  1 0 0 0   0 1  0 0   0 0  0 0  = x4 no-swizzle,				q0=16, q1=18, q2=n/a, q3=n/a
@@ -5110,12 +5184,26 @@ scom 0x8000008(4,5)0301143F {	# _RP[0:3] via broadcast bit
 }
 
 #   RANK_PAIR[0:3], RP[0:3] _P0_1
-# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_1		0x800004840301143F
-# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_1				0x800004850301143F
-scom 0x8000048(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_1		0x800004040301143F
+scom 0x800004840301143F {	# _RP[0:3] via broadcast bit
 # P0_1
 	bits	,	scom_data	,	expr														;
-#	0:47	,	0x000000000000,	any															;	# reserved
+#	0:47	,	0x000000000000,	any															;	# reserved		PORT A
+	48:63	,	0x8400		,	((def_is_mba01) && (def_p0_no_spare) && (def_is_x4))		;	# x4 no-spare no swizzle
+#	48:63	,	0x8580		,	((def_is_mba01) && (def_is_x4))								;	# x4 any spare swizzle quad2/3
+	48:63	,	0x8580		,	((def_is_mba01) && (def_is_x4) && ((def_p0_has_spare_upper) || (def_p0_has_spare_lower)));	# x4 spare set
+	48:63	,	0x0CC0		,	((def_is_mba01) && (def_p0_has_spare_full) && (def_is_x8))	;	# x8 swizzle quad0/1 & 2/3
+	48:63	,	0x0C00		,	((def_is_mba01) && (def_p0_no_spare) && (def_is_x8))		;	# x8 swizzle quad0/1
+# P2_1
+	48:63	,	0x8580		,	((def_is_mba23) && (def_is_x4))					;	# x4 swizzle quad2/3
+	48:63	,	0xC300		,	((def_is_mba23) && (def_is_x8))					;	# x8 no swizzle
+	48:63	,	0x0000		,	any												;
+}
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_1				0x800004050301143F
+scom 0x800004850301143F {	# _RP[0:3] via broadcast bit
+# P0_1
+	bits	,	scom_data	,	expr														;
+#	0:47	,	0x000000000000,	any															;	# reserved		PORT A
 	48:63	,	0x8580		,	((def_is_mba01) && (def_p0_has_spare_full) && (def_is_x4))	;	# x4 spare swizzle quad2/3
 	48:63	,	0x8500		,	((def_is_mba01) && (def_p0_has_spare_upper) && (def_is_x4))	;	# disable lower dqs
 	48:63	,	0x8480		,	((def_is_mba01) && (def_p0_has_spare_lower) && (def_is_x4))	;	# disable upper dqs
@@ -5129,8 +5217,8 @@ scom 0x8000048(4,5)0301143F {	# _RP[0:3] via broadcast bit
 }
 
 #   RANK_PAIR[0:3], RP[0:3] _P0_2
-# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_2		0x800008840301143F
-# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_2				0x800008850301143F
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_2		0x800008040301143F
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_2				0x800008050301143F
 scom 0x8000088(4,5)0301143F {	# _RP[0:3] via broadcast bit
 # P0_2
 	bits	,	scom_data	,	expr							;
@@ -5144,8 +5232,8 @@ scom 0x8000088(4,5)0301143F {	# _RP[0:3] via broadcast bit
 }
 
 #   RANK_PAIR[0:3], RP[0:3] _P0_3
-# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_3		0x80000C840301143F
-# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_3				0x80000C850301143F
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_3		0x80000C040301143F
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_3				0x80000C050301143F
 scom 0x80000C8(4,5)0301143F {	# _RP[0:3] via broadcast bit
 # P0_3
 	bits	,	scom_data	,	expr												;
@@ -5160,16 +5248,29 @@ scom 0x80000C8(4,5)0301143F {	# _RP[0:3] via broadcast bit
 }
 
 #   RANK_PAIR[0:3], RP[0:3] _P0_4
-# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_4		0x800010840301143F
-# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_4				0x800010850301143F
-scom 0x8000108(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P0_4		0x800010040301143F
+scom 0x800010840301143F {	# _RP[0:3] via broadcast bit
 # P0_4
 	bits	,	scom_data	,	expr											;
 #	0:47	,	0x000000000000,	any												;	# reserved
 	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4))					;	# x4 no swizzle
 	48:63	,	0x0F00		,	((def_is_mba01) && (def_is_x8))					;	# x8 swizzle quad0/1
 # P2_4
-	48:63	,	0x8640		,	((def_is_mba23) && (def_p0_has_spare_full) && (def_is_x4))	;	# x4 spare no swizzle
+	48:63	,	0x8400		,	((def_is_mba23) && (def_p0_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
+	48:63	,	0x8640		,	((def_is_mba23) && (def_is_x4) && ((def_p0_has_spare_upper) || (def_p0_has_spare_lower)));	# x4 spare no swizzle  PORT C
+	48:63	,	0x0F00		,	((def_is_mba23) && (def_p0_has_spare_full) && (def_is_x8))	;	# x8 swizzle quad0/1
+	48:63	,	0x0C00		,	((def_is_mba23) && (def_p0_no_spare) && (def_is_x8))	;	# x8 swizzle quad0/1
+	48:63	,	0x0000		,	any													;
+}
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P0_4				0x800010050301143F
+scom 0x800010850301143F {	# _RP[0:3] via broadcast bit
+# P0_4
+	bits	,	scom_data	,	expr											;
+#	0:47	,	0x000000000000,	any												;	# reserved
+	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4))					;	# x4 no swizzle
+	48:63	,	0x0F00		,	((def_is_mba01) && (def_is_x8))					;	# x8 swizzle quad0/1
+# P2_4
+	48:63	,	0x8640		,	((def_is_mba23) && (def_p0_has_spare_full) && (def_is_x4))	;	# x4 spare no swizzle  PORT C
 	48:63	,	0x8440		,	((def_is_mba23) && (def_p0_has_spare_upper) && (def_is_x4))	;	# disable lower dqs
 	48:63	,	0x8600		,	((def_is_mba23) && (def_p0_has_spare_lower) && (def_is_x4))	;	# disable upper dqs
 	48:63	,	0x8400		,	((def_is_mba23) && (def_p0_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
@@ -5195,9 +5296,8 @@ scom 0x8001008(4,5)0301143F {	# _RP[0:3] via broadcast bit
 }
 
 #   RANK_PAIR[0:3]_, P1_1
-# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_1		0x800104840301143F
-# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_1				0x800104850301143F
-scom 0x8001048(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_1		0x800104040301143F
+scom 0x800104840301143F {	# _RP[0:3] via broadcast bit
 # P1_1
 	bits	,	scom_data	,	expr												;
 #	0:47	,	0x000000000000,	any													;	# reserved
@@ -5205,7 +5305,22 @@ scom 0x8001048(4,5)0301143F {	# _RP[0:3] via broadcast bit
 	48:63	,	0x4A40		,	((def_is_mba01) && (def_is_x4))						;	# x4 swizzle quad0/1
 	48:63	,	0xC300		,	((def_is_mba01) && (def_is_x8))						;	# x8 no swizzle
 # P3_1
-	48:63	,	0x8640		,	((def_is_mba23) && (def_p1_has_spare_full) && (def_is_x4))	;	# x4 spare no swizzle
+	48:63	,	0x8400		,	((def_is_mba23) && (def_p1_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
+	48:63	,	0x8640		,	((def_is_mba23) && (def_is_x4) && ((def_p1_has_spare_upper) || (def_p1_has_spare_lower)));	# x4 spare no swizzle  PORT D
+	48:63	,	0xC300		,	((def_is_mba23) && (def_p1_has_spare_full) && (def_is_x8))	;	# x8 no swizzle
+	48:63	,	0xC000		,	((def_is_mba23) && (def_p1_no_spare) && (def_is_x8))	;	# x8 no swizzle
+	48:63	,	0x0000		,	any													;
+}
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_1				0x800104050301143F
+scom 0x800104850301143F {	# _RP[0:3] via broadcast bit
+# P1_1
+	bits	,	scom_data	,	expr												;
+#	0:47	,	0x000000000000,	any													;	# reserved
+	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4) && (def_is_type1))	;	# x4 no swizzle
+	48:63	,	0x4A40		,	((def_is_mba01) && (def_is_x4))						;	# x4 swizzle quad0/1
+	48:63	,	0xC300		,	((def_is_mba01) && (def_is_x8))						;	# x8 no swizzle
+# P3_1
+	48:63	,	0x8640		,	((def_is_mba23) && (def_p1_has_spare_full) && (def_is_x4))	;	# x4 spare no swizzle  PORT D
 	48:63	,	0x8440		,	((def_is_mba23) && (def_p1_has_spare_upper) && (def_is_x4))	;	# disable lower dqs
 	48:63	,	0x8600		,	((def_is_mba23) && (def_p1_has_spare_lower) && (def_is_x4))	;	# disable upper dqs
 	48:63	,	0x8400		,	((def_is_mba23) && (def_p1_no_spare) && (def_is_x4))	;	# x4 no-spare no swizzle
@@ -5215,9 +5330,22 @@ scom 0x8001048(4,5)0301143F {	# _RP[0:3] via broadcast bit
 }
 
 #   RANK_PAIR[0:3], RP[0:3] _P1_2
-# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_2		0x800108840301143F
-# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_2				0x800108850301143F
-scom 0x8001088(4,5)0301143F {	# _RP[0:3] via broadcast bit
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_2		0x800108040301143F
+scom 0x800108840301143F {	# _RP[0:3] via broadcast bit
+# P1_2
+	bits	,	scom_data	,	expr											;
+#	0:47	,	0x000000000000,	any												;	# reserved
+	48:63	,	0x8400		,	((def_is_mba01) && (def_p1_no_spare) && (def_is_x4))		;	# x4 no-spare no swizzle
+	48:63	,	0x8640		,	((def_is_mba01) && (def_is_x4) && ((def_p1_has_spare_upper) || (def_p1_has_spare_lower)));	# x4 spare no swizzle
+	48:63	,	0x0CC0		,	((def_is_mba01) && (def_p1_has_spare_full) && (def_is_x8))	;	# x8 swizzle quad0/1 & 2/3
+	48:63	,	0x0C00		,	((def_is_mba01) && (def_p1_no_spare) && (def_is_x8))		;	# x8 swizzle quad0/1
+# P3_2
+	48:63	,	0x8580		,	((def_is_mba23) && (def_is_x4))					;	# x4 swizzle quad2/3
+	48:63	,	0x0F00		,	((def_is_mba23) && (def_is_x8))					;	# x8 swizzle quad0/1
+	48:63	,	0x0000		,	any												;
+}
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_2				0x800108050301143F
+scom 0x800108850301143F {	# _RP[0:3] via broadcast bit
 # P1_2
 	bits	,	scom_data	,	expr											;
 #	0:47	,	0x000000000000,	any												;	# reserved
@@ -5234,8 +5362,8 @@ scom 0x8001088(4,5)0301143F {	# _RP[0:3] via broadcast bit
 }
 
 #   RANK_PAIR[0:3], RP[0:3] _P1_3
-# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_3		0x80010C840301143F
-# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_3				0x80010C850301143F
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_3		0x80010C040301143F
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_3				0x80010C050301143F
 scom 0x80010C8(4,5)0301143F {	# _RP[0:3] via broadcast bit
 # P1_3
 	bits	,	scom_data	,	expr												;
@@ -5250,8 +5378,8 @@ scom 0x80010C8(4,5)0301143F {	# _RP[0:3] via broadcast bit
 }
 
 #   RANK_PAIR[0:3], RP[0:3] _P1_4
-# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_4		0x800110840301143F
-# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_4				0x800110850301143F
+# DPHY01_DDRPHY_DP18_READ_CLOCK_RANK_PAIR0_P1_4		0x800110040301143F
+# DPHY01_DDRPHY_DP18_WRCLK_EN_RP0_P1_4				0x800110050301143F
 scom 0x8001108(4,5)0301143F {	# _RP[0:3] via broadcast bit
 # P1_4
 	bits	,	scom_data	,	expr							;
@@ -5263,4 +5391,3 @@ scom 0x8001108(4,5)0301143F {	# _RP[0:3] via broadcast bit
 	48:63	,	0x0CC0		,	((def_is_mba23) && (def_is_x8))	;	# x8 swizzle quad0/1 & 2/3
 	48:63	,	0x0000		,	any								;
 }
-

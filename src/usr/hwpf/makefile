@@ -102,7 +102,20 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_training/mss_scominit/memory_mss_scominit.xml \
     hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist_common.xml \
     hwp/dram_initialization/proc_setup_bars/memory_mss_setup_bars.xml \
-    hwp/slave_sbe/proc_cen_ref_clk_enable/proc_cen_ref_clk_enable_errors.xml
+    hwp/slave_sbe/proc_cen_ref_clk_enable/proc_cen_ref_clk_enable_errors.xml \
+    hwp/dmi_training/mss_getecid/memory_mss_get_cen_ecid.xml \
+    hwp/dram_initialization/mss_extent_setup/memory_mss_extent_setup.xml \
+    hwp/dram_initialization/mss_thermal_init/memory_mss_thermal_init.xml \
+    hwp/dram_training/mss_draminit/memory_mss_draminit.xml \
+    hwp/dram_training/mss_draminit_mc/memory_mss_draminit_mc.xml \
+    hwp/dram_training/mss_draminit_trainadv/memory_mss_access_delay_reg.xml \
+    hwp/dram_training/mss_draminit_trainadv/memory_mss_draminit_training_advanced.xml \
+    hwp/dram_training/mss_draminit_trainadv/memory_mss_generic_shmoo.xml \
+    hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist.xml \
+    hwp/mc_config/mss_eff_config/memory_mss_eff_config.xml \
+    hwp/mc_config/mss_eff_config/memory_mss_eff_config_cke_map.xml \
+    hwp/mc_config/mss_eff_config/memory_mss_eff_config_rank_group.xml \
+    hwp/mc_config/mss_eff_config/memory_mss_eff_config_termination.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \

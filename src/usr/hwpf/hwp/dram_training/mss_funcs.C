@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.C,v 1.30 2013/04/09 23:33:09 jdsloat Exp $
+// $Id: mss_funcs.C,v 1.31 2013/05/20 21:29:50 jdsloat Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.31   | jdsloat  | 05/20/13| Added ddr_gen determination in address mirror mode function
 //  1.30   | jdsloat  | 04/09/13| Moved Address mirror mode sub function in  from mss_draminit
 //  1.29   | jsabrow  | 11/19/12| added CCS data loader: mss_ccs_load_data_pattern
 //  1.28   | bellows  | 07/16/12|added in Id tag
@@ -131,6 +132,10 @@ ReturnCode mss_address_mirror_swizzle(
     ecmdDataBufferBase bank_post_swizzle_3(3);
     uint16_t mirror_mode_ba = 0;
     uint16_t mirror_mode_ad  = 0;
+    uint8_t dram_gen = 0;
+
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
+    if(rc) return rc;
 
 	FAPI_INF( "ADDRESS MIRRORING ON %s PORT%d DIMM%d RANK%d", i_target.toEcmdString(), i_port, i_dimm, i_rank);
 
@@ -143,21 +148,50 @@ ReturnCode mss_address_mirror_swizzle(
 	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 0, 16, 0);
 	rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 3, 0);
 
-	//Swap A3 and A4
-	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 4, 1, 3);
-	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 3, 1, 4);
+	if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) 
+	{
+		//Swap A3 and A4
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 4, 1, 3);
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 3, 1, 4);
 
-	//Swap A5 and A6
-	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 6, 1, 5);
-	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 5, 1, 6);
+		//Swap A5 and A6
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 6, 1, 5);
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 5, 1, 6);
 
-	//Swap A7 and A8
-	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 8, 1, 7);
-	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 7, 1, 8);
+		//Swap A7 and A8
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 8, 1, 7);
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 7, 1, 8);
 
-	//Swap BA0 and BA1
-	rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 1, 1, 0);
-	rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 1, 1);
+		//Swap BA0 and BA1
+		rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 1, 1, 0);
+		rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 1, 1);
+	}
+	else if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	{
+		//Swap A3 and A4
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 4, 1, 3);
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 3, 1, 4);
+
+		//Swap A5 and A6
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 6, 1, 5);
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 5, 1, 6);
+
+		//Swap A7 and A8
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 8, 1, 7);
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 7, 1, 8);
+
+		//Swap A11 and A13
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 13, 1, 11);
+		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 11, 1, 13);
+
+		//Swap BA0 and BA1
+		rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 1, 1, 0);
+		rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 1, 1);
+
+		//Swap BG0 and BG1 (BA2 and ADDR 15)
+		rc_num = rc_num | bank_post_swizzle_3.insert(io_address, 2, 1, 15);
+		rc_num = rc_num | address_post_swizzle_16.insert(io_bank, 15, 1, 2);
+	}
 
 	rc_num = rc_num | address_post_swizzle_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
 	FAPI_INF( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
@@ -688,7 +722,7 @@ ReturnCode mss_execute_zq_cal(
     ecmdDataBufferBase bank_buffer_8(8);
     rc_num = rc_num | bank_buffer_8.flushTo0();
     ecmdDataBufferBase activate_buffer_1(1);
-    rc_num = rc_num | activate_buffer_1.flushTo0();
+    rc_num = rc_num | activate_buffer_1.flushTo1();
     ecmdDataBufferBase rasn_buffer_1(1);
     rc_num = rc_num | rasn_buffer_1.flushTo1(); //For ZQCal rasn = 1; casn = 1; wen = 0;
     ecmdDataBufferBase casn_buffer_1(1);
@@ -741,7 +775,7 @@ ReturnCode mss_execute_zq_cal(
         rc.setEcmdError(rc_num);
         return rc;
     }
-    rc = fapiPutScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
+     rc = fapiPutScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
     if(rc) return rc;
 
     for(uint8_t dimm = 0; dimm < MAX_NUM_DIMM; dimm++)
@@ -764,6 +798,7 @@ ReturnCode mss_execute_zq_cal(
             rc = mss_ccs_inst_arry_1(i_target, instruction_number, num_idles_buffer_16, num_repeat_buffer_16, data_buffer_20, read_compare_buffer_1, rank_cal_buffer_3, ddr_cal_enable_buffer_1, ccs_end_buffer_1);
             if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
             rc = mss_execute_ccs_inst_array(i_target, NUM_POLL, 60);
+	    instruction_number = 0;
             if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
         }
     }

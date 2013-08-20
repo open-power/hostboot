@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_shmoo.C,v 1.5 2013/05/20 08:43:21 sauchadh Exp $
+// $Id: mss_eff_config_shmoo.C,v 1.6 2013/06/06 05:45:16 sauchadh Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_shmoo.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,7 +44,8 @@
 //   1.2   | sauchadh |13-Mar-13| Added Schmoo related attributes from mss_eff_config.C 
 //   1.3   | sauchadh |17-Apr-13| Changed mcbist_addr_modes value to 1
 //   1.4   | sauchadh |10-May-13| Fixed FW comments
-//   1.5   | sauchadh |15-May-13| Fixed FW comments  
+//   1.5   | sauchadh |15-May-13| Fixed FW comments
+//   1.6   | sauchadh |6-Jun-13 | Added some more attributes
 
 //----------------------------------------------------------------------
 //  My Includes
@@ -109,8 +110,18 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target & i_target_mba) {
    uint8_t cen_slew_rate_cntl_schmoo[2] = { 0x00, 0x00 };
    uint8_t cen_slew_rate_addr_schmoo[2] = { 0x00, 0x00 };
    uint8_t cen_slew_rate_clk_schmoo[2] = { 0x00, 0x00 };
-   uint8_t cen_slew_rate_spcke_schmoo[2] = { 0x00, 0x00 }; 
-      
+   uint8_t cen_slew_rate_spcke_schmoo[2] = { 0x00, 0x00 };
+   uint8_t mcb_print_disable=0;
+   uint8_t mcb_data_en=0;
+   uint8_t mcb_user_rank=0;
+   uint8_t mcb_user_bank=0;
+   uint8_t shmoo_mul_setup_call=0;
+   
+   rc = FAPI_ATTR_SET(ATTR_MCBIST_PRINTING_DISABLE, &i_target_mba, mcb_print_disable); if(rc) return rc; 
+   rc = FAPI_ATTR_SET(ATTR_MCBIST_DATA_ENABLE, &i_target_mba, mcb_data_en); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_MCBIST_USER_RANK, &i_target_mba, mcb_user_rank); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_MCBIST_USER_BANK, &i_target_mba, mcb_user_bank); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_SCHMOO_MULTIPLE_SETUP_CALL, &i_target_mba,shmoo_mul_setup_call); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_MCBIST_PATTERN, &i_target_mba, datapattern); if(rc) return rc; 
    rc = FAPI_ATTR_SET(ATTR_MCBIST_TEST_TYPE, &i_target_mba, testtype); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_MCBIST_ADDR_MODES, &i_target_mba, addr_modes); if(rc) return rc;
@@ -150,7 +161,9 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target & i_target_mba) {
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_CNTL_SCHMOO, &i_target_mba, cen_slew_rate_cntl_schmoo); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_ADDR_SCHMOO, &i_target_mba, cen_slew_rate_addr_schmoo); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_CLK_SCHMOO, &i_target_mba, cen_slew_rate_clk_schmoo); if(rc) return rc;
-   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO, &i_target_mba, cen_slew_rate_spcke_schmoo); if(rc) return rc; 
+   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO, &i_target_mba, cen_slew_rate_spcke_schmoo); if(rc) return rc;
+   
+
        
    FAPI_INF("%s on %s COMPLETE", PROCEDURE_NAME, i_target_mba.toEcmdString());
    return rc;
