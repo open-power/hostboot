@@ -88,7 +88,7 @@ public:
     };
 
     // enums to indicated non-error reason for a targets deconfiguration.
-    //  used in TARGETING::HwasSate.deconfiguredByPlid
+    //  used in TARGETING::HwasSate.deconfiguredByEid
     enum
     {
         DECONFIGURED_BY_CODE_BASE               = 0x0000FF00,
@@ -114,7 +114,7 @@ public:
     {
         uint32_t              iv_recordId;
         TARGETING::EntityPath iv_targetId;
-        uint32_t              iv_errlogPlid;
+        uint32_t              iv_errlogEid;
         uint8_t               iv_errorType; //from hwasCallout.H GARD_ErrorType
         uint8_t               iv_ResourceRecovery;
         uint8_t               iv_padding[6];
@@ -134,7 +134,7 @@ public:
     struct DeconfigureRecord
     {
         const TARGETING::Target * iv_target;
-        uint32_t            iv_errlogPlid; // plid OR deconfigReason value
+        uint32_t            iv_errlogEid; // plid OR deconfigReason value
     };
 
     typedef std::vector<DeconfigureRecord> DeconfigureRecords_t;
@@ -199,12 +199,12 @@ public:
      * By default, targets are NOT deconfigured if the system is at Runtime.
      *
      * @param[in] i_target   Reference to Target to deconfigure.
-     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
      * @param[in] i_evenAtRunTime Deconfigure even if at RunTime
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t deconfigureTarget(TARGETING::Target & i_target,
-                                 const uint32_t i_errlPlid,
+                                 const uint32_t i_errlEid,
                                  bool i_evenAtRunTime = false);
     /**
      * @brief Registers a Deferred Deconfigure
@@ -218,11 +218,11 @@ public:
      * TODO RTC: 45781
      *
      * @param[in] i_target   Reference to Target to deconfigure.
-     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
      *
      */
     void registerDeferredDeconfigure(const TARGETING::Target & i_target,
-                                 const uint32_t i_errlPlid);
+                                 const uint32_t i_errlEid);
 
     /**
      * @brief Creates a GARD Record for a Target.
@@ -235,13 +235,13 @@ public:
      * Any error creating the GARD Record will be returned to the user.
      *
      * @param[in] i_pTarget   Pointer to Target to create GARD Record for.
-     * @param[in] i_errlPlid Error log PLID to store in GARD Record.
+     * @param[in] i_errlEid Error log EID to store in GARD Record.
      * @param[in] i_errorType error type of the GARD Record.
      *
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t createGardRecord(const TARGETING::Target * const i_pTarget,
-                                const uint32_t i_errlPlid,
+                                const uint32_t i_errlEid,
                                 const GARD_ErrorType i_errorType);
 
     /**
@@ -249,13 +249,13 @@ public:
      *          Creates a GARD Record for a Target.
      *
      * @param[in] i_pTarget  Pointer to Target to create GARD Record for.
-     * @param[in] i_errlPlid Error log PLID to store in GARD Record.
+     * @param[in] i_errlEid Error log EID to store in GARD Record.
      * @param[in] i_errorType error type of the GARD Record.
      *
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t platCreateGardRecord(const TARGETING::Target * const i_pTarget,
-                                const uint32_t i_errlPlid,
+                                const uint32_t i_errlEid,
                                 const GARD_ErrorType i_errorType);
 
     /**
@@ -336,10 +336,10 @@ private:
      * @brief Deconfigures Targets by association.
      *
      * @param[in] i_target   Reference to base Target.
-     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
      */
     void _deconfigureByAssoc(TARGETING::Target & i_target,
-                             const uint32_t i_errlPlid);
+                             const uint32_t i_errlEid);
 
     /**
      * @brief Deconfigures a Target.
@@ -348,10 +348,10 @@ private:
      * Deconfigure actions and create a Deconfigure Record).
      *
      * @param[in] i_target   Reference to Target to deconfigure.
-     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
      */
     void _deconfigureTarget(TARGETING::Target & i_target,
-                            const uint32_t i_errlPlid);
+                            const uint32_t i_errlEid);
 
     /**
      * @brief Performs Deconfigure Actions.
@@ -364,10 +364,10 @@ private:
      * @brief Creates a Deconfigure Record
      *
      * @param[in] i_target   Reference to Target to create record for.
-     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
      */
     void _createDeconfigureRecord(const TARGETING::Target & i_target,
-                                  const uint32_t i_errlPlid);
+                                  const uint32_t i_errlEid);
 
 public:
 

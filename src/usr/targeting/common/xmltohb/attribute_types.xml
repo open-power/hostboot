@@ -783,10 +783,10 @@
     <complexType>
         <description>struct - 4 booleans and a PLID</description>
         <field>
-            <name>deconfiguredByPlid</name>
+            <name>deconfiguredByEid</name>
             <description>if this target was deconfigured,
                 this will be a special DECONFIGURED_BY_ enum,
-                OR it will be the errlog PLID that caused it,
+                OR it will be the errlog EID that caused it,
                 either directly or by association,
             </description>
             <type>uint32_t</type>

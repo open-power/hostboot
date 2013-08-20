@@ -177,11 +177,11 @@ errlHndl_t DeconfigGard::platGetGardRecords(
 
 errlHndl_t DeconfigGard::platCreateGardRecord(
         const Target * const i_pTarget,
-        const uint32_t i_errlPlid,
+        const uint32_t i_errlEid,
         const GARD_ErrorType i_errorType)
 {
     HWAS_INF("Creating GARD Record for %.8X, errl 0x%X",
-        get_huid(i_pTarget), i_errlPlid);
+        get_huid(i_pTarget), i_errlEid);
     errlHndl_t l_pErr = NULL;
 
     HWAS_MUTEX_LOCK(iv_mutex);
@@ -222,7 +222,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
                     l_duplicate = true;
                     l_pRecord = &(l_pGardRecords[i]);
                     HWAS_INF("Duplicate GARD Record from error 0x%X",
-                            l_pGardRecords[i].iv_errlogPlid);
+                            l_pGardRecords[i].iv_errlogEid);
                     break;
                 }
             }
@@ -237,7 +237,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
             if (l_pRecord->iv_errorType == GARD_User_Manual)
             {
                 HWAS_INF("Duplicate is GARD_User_Manual - overwriting");
-                l_pRecord->iv_errlogPlid = i_errlPlid;
+                l_pRecord->iv_errlogEid = i_errlEid;
                 l_pRecord->iv_errorType = i_errorType;
                 _flush((void *)l_pRecord);
             }
@@ -256,11 +256,11 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
              * @reasoncode   HWAS::RC_GARD_REPOSITORY_FULL
              * @devdesc      Attempt to create a GARD Record and the GARD
              *               Repository is full
-             * @userdata1    HUID of input target // GARD errlog PLID
+             * @userdata1    HUID of input target // GARD errlog EID
              */
             const uint64_t userdata1 =
                 (static_cast<uint64_t> (get_huid(i_pTarget)) << 32) |
-                i_errlPlid;
+                i_errlEid;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
                 HWAS::MOD_DECONFIG_GARD,
@@ -271,7 +271,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
 
         l_pRecord->iv_recordId = l_hbDeconfigGard->iv_nextGardRecordId++;
         l_pRecord->iv_targetId = l_targetId;
-        l_pRecord->iv_errlogPlid = i_errlPlid;
+        l_pRecord->iv_errlogEid = i_errlEid;
         l_pRecord->iv_errorType = i_errorType;
         l_pRecord->iv_padding[0] = 0;
         l_pRecord->iv_padding[1] = 0;

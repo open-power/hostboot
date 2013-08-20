@@ -90,7 +90,7 @@ errlHndl_t platHandleHWCallout(
             default:
             {
                 errl = HWAS::theDeconfigGard().createGardRecord(i_pTarget,
-                        io_errl->plid(),
+                        io_errl->eid(),
                         i_gardErrorType);
                 break;
             }
@@ -106,7 +106,7 @@ errlHndl_t platHandleHWCallout(
             {
                 // call HWAS common function
                 errl = HWAS::theDeconfigGard().deconfigureTarget(*i_pTarget,
-                            io_errl->plid());
+                            io_errl->eid());
                 break;
             }
             case (DELAYED_DECONFIG):

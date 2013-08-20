@@ -86,7 +86,7 @@ bool compareProcGroup(procRestrict_t t1, procRestrict_t t2)
  * @param[in]   i_target        pointer to target that we're looking at
  * @param[in]   i_present       boolean indicating present or not
  * @param[in]   i_functional    boolean indicating functional or not
- * @param[in]   i_errlPlid      errplid that caused change to non-funcational;
+ * @param[in]   i_errlEid       erreid that caused change to non-funcational;
  *                              0 if not associated with an error or if
  *                              functional is true
  *
@@ -95,13 +95,13 @@ bool compareProcGroup(procRestrict_t t1, procRestrict_t t2)
  */
 void enableHwasState(Target *i_target,
         bool i_present, bool i_functional,
-        uint32_t i_errlPlid)
+        uint32_t i_errlEid)
 {
     HwasState hwasState = i_target->getAttr<ATTR_HWAS_STATE>();
 
     if (i_functional == false)
-    {   // record the PLID as a reason that we're marking non-functional
-        hwasState.deconfiguredByPlid = i_errlPlid;
+    {   // record the EID as a reason that we're marking non-functional
+        hwasState.deconfiguredByEid = i_errlEid;
     }
     hwasState.poweredOn     = true;
     hwasState.present       = i_present;
@@ -121,7 +121,7 @@ errlHndl_t discoverTargets()
             ++target)
     {
         HwasState hwasState             = target->getAttr<ATTR_HWAS_STATE>();
-        hwasState.deconfiguredByPlid    = 0;
+        hwasState.deconfiguredByEid     = 0;
         hwasState.poweredOn             = false;
         hwasState.present               = false;
         hwasState.functional            = false;
@@ -202,7 +202,7 @@ errlHndl_t discoverTargets()
 
             bool chipPresent = true;
             bool chipFunctional = true;
-            uint32_t errlPlid = 0;
+            uint32_t errlEid = 0;
             uint16_t pgData[VPD_CP00_PG_DATA_LENGTH / sizeof(uint16_t)];
             bzero(pgData, sizeof(pgData));
 
@@ -213,10 +213,10 @@ errlHndl_t discoverTargets()
 
                 if (errl)
                 {   // read of ID/EC failed even tho we were present..
-                    HWAS_INF("pTarget %.8X - read IDEC failed (plid 0x%X) - bad",
-                        errl->plid(), pTarget->getAttr<ATTR_HUID>());
+                    HWAS_INF("pTarget %.8X - read IDEC failed (eid 0x%X) - bad",
+                        errl->eid(), pTarget->getAttr<ATTR_HUID>());
                     chipFunctional = false;
-                    errlPlid = errl->plid();
+                    errlEid = errl->eid();
 
                     // commit the error but keep going
                     errlCommit(errl, HWAS_COMP_ID);
@@ -229,10 +229,10 @@ errlHndl_t discoverTargets()
 
                     if (errl)
                     {   // read of PG failed even tho we were present..
-                        HWAS_INF("pTarget %.8X - read PG failed (plid 0x%X)- bad",
-                            errl->plid(), pTarget->getAttr<ATTR_HUID>());
+                        HWAS_INF("pTarget %.8X - read PG failed (eid 0x%X)- bad",
+                            errl->eid(), pTarget->getAttr<ATTR_HUID>());
                         chipFunctional = false;
-                        errlPlid = errl->plid();
+                        errlEid = errl->eid();
 
                         // commit the error but keep going
                         errlCommit(errl, HWAS_COMP_ID);
@@ -283,7 +283,7 @@ errlHndl_t discoverTargets()
                             HWAS_INF("pTarget %.8X - read PR failed - bad",
                                 pTarget->getAttr<ATTR_HUID>());
                             chipFunctional = false;
-                            errlPlid = errl->plid();
+                            errlEid = errl->eid();
 
                             // commit the error but keep going
                             errlCommit(errl, HWAS_COMP_ID);
@@ -411,7 +411,7 @@ errlHndl_t discoverTargets()
 
                 // for sub-parts, if it's not functional, it's not present.
                 enableHwasState(pDesc, descFunctional, descFunctional,
-                                errlPlid);
+                                errlEid);
                 HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
                     pDesc->getAttr<ATTR_HUID>(),
                     descFunctional ? "" : "NOT ",
@@ -419,7 +419,7 @@ errlHndl_t discoverTargets()
             }
 
             // set HWAS state to show CHIP is present, functional per above
-            enableHwasState(pTarget, chipPresent, chipFunctional, errlPlid);
+            enableHwasState(pTarget, chipPresent, chipFunctional, errlEid);
 
         } // for pTarget_it
 
@@ -689,8 +689,7 @@ errlHndl_t  checkMinimumHardware()
                                           SRCI_PRIORITY_HIGH );
             //  if we already have an error, link this one to the earlier plid.
             //  if not, set the common plid
-            hwasErrorUpdatePlid( l_errl,
-                                 l_commonPlid );
+            hwasErrorUpdatePlid( l_errl, l_commonPlid );
 
             //  finally, commit the log.
             errlCommit(l_errl, HWAS_COMP_ID);
@@ -731,8 +730,7 @@ errlHndl_t  checkMinimumHardware()
                                           SRCI_PRIORITY_HIGH );
             //  if we already have an error, link this one to the earlier plid.
             //  if not, set the common plid
-            hwasErrorUpdatePlid( l_errl,
-                                 l_commonPlid );
+            hwasErrorUpdatePlid( l_errl, l_commonPlid );
 
             errlCommit(l_errl, HWAS_COMP_ID);
             // errl is now NULL
@@ -777,8 +775,7 @@ errlHndl_t  checkMinimumHardware()
                                           EPUB_PRC_FIND_DECONFIGURED_PART,
                                           SRCI_PRIORITY_HIGH );
             //  if we already have an error, link this one to the earlier plid.
-            hwasErrorUpdatePlid( l_errl,
-                                 l_commonPlid );
+            hwasErrorUpdatePlid( l_errl, l_commonPlid );
         }
     }
     while (0);

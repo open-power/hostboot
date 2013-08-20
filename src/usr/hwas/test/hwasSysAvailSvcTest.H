@@ -96,7 +96,7 @@ public:
                 l_fakeState =   i_origStates[i];
                 TS_TRACE( "setTargetStates: HwasState fakeState: "
                           "deconf=0x%x,PO=0x%x,pres=0x%x,func=0x%x,dumpf=0x%x",
-                          l_fakeState.deconfiguredByPlid,
+                          l_fakeState.deconfiguredByEid,
                           l_fakeState.poweredOn,
                           l_fakeState.present,
                           l_fakeState.functional,

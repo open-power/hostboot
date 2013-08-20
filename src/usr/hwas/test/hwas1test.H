@@ -77,7 +77,7 @@ public:
 
             //  modify state
             l_hwasState     =   l_pTarget->getAttr<ATTR_HWAS_STATE>();
-            l_hwasState.deconfiguredByPlid    =   0x12345678;
+            l_hwasState.deconfiguredByEid     =   0x12345678;
             l_hwasState.poweredOn             =   true;
             l_hwasState.present               =   true;
             l_hwasState.functional            =   true;
@@ -86,12 +86,12 @@ public:
             l_pTarget->setAttr<ATTR_HWAS_STATE>( l_hwasState );
 
             // fetch and test new values
-            if ( l_pTarget->getAttr<ATTR_HWAS_STATE>().deconfiguredByPlid
+            if ( l_pTarget->getAttr<ATTR_HWAS_STATE>().deconfiguredByEid
                                 != 0x12345678 )
             {
-                TS_FAIL( " deconfiguredByPlid = 0x%x, should be 0x12345678",
+                TS_FAIL( " deconfiguredByEid = 0x%x, should be 0x12345678",
                         l_pTarget->getAttr<ATTR_HWAS_STATE>().
-                                deconfiguredByPlid );
+                                deconfiguredByEid );
             }
 
             if ( l_pTarget->getAttr<ATTR_HWAS_STATE>().poweredOn != true )

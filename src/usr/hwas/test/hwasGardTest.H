@@ -1120,11 +1120,11 @@ public:
                 break;
             }
 
-            if ((l_records[0].iv_errlogPlid != 0x46) ||
+            if ((l_records[0].iv_errlogEid != 0x46) ||
                 (l_records[0].iv_errorType != GARD_Fatal))
             {
                 TS_FAIL("testGard6: unexpected data - errl 0x%X type %x",
-                    l_records[0].iv_errlogPlid, l_records[0].iv_errorType);
+                    l_records[0].iv_errlogEid, l_records[0].iv_errorType);
                 break;
             }
 

@@ -117,8 +117,7 @@ void processCallout(errlHndl_t &io_errl,
             if (!l_err)
             {
                 HWAS::theDeconfigGard().registerDeferredDeconfigure(
-                            *pTarget,
-                            io_errl->plid());
+                            *pTarget, io_errl->eid());
             }
         }
         // else, no deferred deconfigures - all good.

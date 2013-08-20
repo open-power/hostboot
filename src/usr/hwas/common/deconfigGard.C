@@ -302,10 +302,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
-            // special case - use errlogPlid UNLESS it's a Manual Gard
-            const uint32_t l_errlogPlid =
+            // special case - use errlogEid UNLESS it's a Manual Gard
+            const uint32_t l_errlogEid =
                 (l_gardRecord.iv_errorType == GARD_User_Manual) ?
-                    DECONFIGURED_BY_MANUAL_GARD : l_gardRecord.iv_errlogPlid;
+                    DECONFIGURED_BY_MANUAL_GARD : l_gardRecord.iv_errlogEid;
 
             // all ok - do the work
             HWAS_MUTEX_LOCK(iv_mutex);
@@ -313,10 +313,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             // Deconfigure the Target
             // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
             //  here, it's because of a gard record on this target
-            _deconfigureTarget(*l_pTarget, l_errlogPlid);
+            _deconfigureTarget(*l_pTarget, l_errlogEid);
 
             // Deconfigure other Targets by association
-            _deconfigureByAssoc(*l_pTarget, l_errlogPlid);
+            _deconfigureByAssoc(*l_pTarget, l_errlogEid);
 
             HWAS_MUTEX_UNLOCK(iv_mutex);
         } // for
@@ -449,7 +449,7 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
 
 //******************************************************************************
 errlHndl_t DeconfigGard::createGardRecord(const Target * const i_pTarget,
-                                          const uint32_t i_errlPlid,
+                                          const uint32_t i_errlEid,
                                           const GARD_ErrorType i_errorType)
 {
     errlHndl_t l_pErr = NULL;
@@ -472,12 +472,11 @@ errlHndl_t DeconfigGard::createGardRecord(const Target * const i_pTarget,
              * @devdesc      Attempt to create a GARD Record for a target that
              *               is not GARDable
              *               (not DECONFIG_GARDABLE or not present)
-             * @userdata1    HUID of input target // GARD errlog PLID
+             * @userdata1    HUID of input target // GARD errlog EID
              * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
              */
             const uint64_t userdata1 =
-                (static_cast<uint64_t>(get_huid(i_pTarget)) << 32) |
-                i_errlPlid;
+                (static_cast<uint64_t>(get_huid(i_pTarget)) << 32) | i_errlEid;
             const uint64_t userdata2 =
                 (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
             l_pErr = hwasError(
@@ -522,7 +521,7 @@ errlHndl_t DeconfigGard::createGardRecord(const Target * const i_pTarget,
             break;
         }
 
-        l_pErr = platCreateGardRecord(i_pTarget, i_errlPlid, i_errorType);
+        l_pErr = platCreateGardRecord(i_pTarget, i_errlEid, i_errorType);
     }
     while (0);
 
@@ -548,7 +547,7 @@ errlHndl_t DeconfigGard::getGardRecords(
 
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTarget(Target & i_target,
-                                           const uint32_t i_errlPlid,
+                                           const uint32_t i_errlEid,
                                            bool i_evenAtRunTime)
 {
     HWAS_INF("Deconfigure Target");
@@ -581,12 +580,11 @@ errlHndl_t DeconfigGard::deconfigureTarget(Target & i_target,
              * @devdesc      Attempt to deconfigure a target that is not
              *               deconfigurable
              *               (not DECONFIG_GARDABLE or not present)
-             * @userdata1    HUID of input target // GARD errlog PLID
+             * @userdata1    HUID of input target // GARD errlog EID
              * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
              */
             const uint64_t userdata1 =
-                (static_cast<uint64_t>(get_huid(&i_target)) << 32) |
-                i_errlPlid;
+                (static_cast<uint64_t>(get_huid(&i_target)) << 32) | i_errlEid;
             const uint64_t userdata2 =
                 (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
             l_pErr = hwasError(
@@ -602,10 +600,10 @@ errlHndl_t DeconfigGard::deconfigureTarget(Target & i_target,
         HWAS_MUTEX_LOCK(iv_mutex);
 
         // Deconfigure the Target
-        _deconfigureTarget(i_target, i_errlPlid);
+        _deconfigureTarget(i_target, i_errlEid);
 
         // Deconfigure other Targets by association
-        _deconfigureByAssoc(i_target, i_errlPlid);
+        _deconfigureByAssoc(i_target, i_errlEid);
 
         HWAS_MUTEX_UNLOCK(iv_mutex);
 
@@ -625,14 +623,14 @@ errlHndl_t DeconfigGard::deconfigureTarget(Target & i_target,
 //******************************************************************************
 void DeconfigGard::registerDeferredDeconfigure(
         const Target & i_target,
-        const uint32_t i_errlPlid)
+        const uint32_t i_errlEid)
 {
-    HWAS_INF("registerDeferredDeconfigure Target %.8X, errlPlid 0x%X",
-            get_huid(&i_target), i_errlPlid);
+    HWAS_INF("registerDeferredDeconfigure Target %.8X, errlEid 0x%X",
+            get_huid(&i_target), i_errlEid);
 
     // Create a Deconfigure Record
     HWAS_MUTEX_LOCK(iv_mutex);
-    _createDeconfigureRecord(i_target, i_errlPlid);
+    _createDeconfigureRecord(i_target, i_errlEid);
     HWAS_MUTEX_UNLOCK(iv_mutex);
 }
 
@@ -769,7 +767,7 @@ void findMcsInGroup(const Target *i_startMcs, TargetHandleList &o_McsInGroup)
 
 //******************************************************************************
 void DeconfigGard::_deconfigureByAssoc(Target & i_target,
-                                       const uint32_t i_errlPlid)
+                                       const uint32_t i_errlEid)
 {
     HWAS_INF("deconfigByAssoc for %.8X", get_huid(&i_target));
 
@@ -790,9 +788,9 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
         TargetHandle_t pChild = *pChild_it;
 
         HWAS_INF("deconfigByAssoc CHILD: %.8X", get_huid(pChild));
-        _deconfigureTarget(*pChild, i_errlPlid);
+        _deconfigureTarget(*pChild, i_errlEid);
         // Deconfigure other Targets by association
-        _deconfigureByAssoc(*pChild, i_errlPlid);
+        _deconfigureByAssoc(*pChild, i_errlEid);
     } // for CHILD
 
     // find all CHILD_BY_AFFINITY matches for this target and deconfigure them
@@ -805,9 +803,9 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
         TargetHandle_t pChild = *pChild_it;
 
         HWAS_INF("deconfigByAssoc CHILD_BY_AFFINITY: %.8X", get_huid(pChild));
-        _deconfigureTarget(*pChild, i_errlPlid);
+        _deconfigureTarget(*pChild, i_errlEid);
         // Deconfigure other Targets by association
-        _deconfigureByAssoc(*pChild, i_errlPlid);
+        _deconfigureByAssoc(*pChild, i_errlEid);
     } // for CHILD_BY_AFFINITY
 
     // Memory deconfigureByAssociation rules
@@ -834,9 +832,9 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
             HWAS_INF("deconfigByAssoc MEMBUF parent MCS: %.8X",
                 get_huid(l_parentMcs));
             _deconfigureTarget(const_cast<Target &> (*l_parentMcs),
-                i_errlPlid);
+                i_errlEid);
             _deconfigureByAssoc(const_cast<Target &> (*l_parentMcs),
-                i_errlPlid);
+                i_errlEid);
 
             Target *pSys;
             targetService().getTopLevelTarget(pSys);
@@ -863,8 +861,8 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
 
                 HWAS_INF("deconfigByAssoc MCS (& MEMBUF) paired: %.8X",
                     get_huid(pMcs));
-                _deconfigureTarget(*pMcs, i_errlPlid);
-                _deconfigureByAssoc(*pMcs, i_errlPlid);
+                _deconfigureTarget(*pMcs, i_errlEid);
+                _deconfigureByAssoc(*pMcs, i_errlEid);
             } // for
             break;
         } // TYPE_MEMBUF
@@ -890,9 +888,9 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
                 HWAS_INF("deconfigByAssoc MEMBUF parent with no memory: %.8X",
                     get_huid(l_parentMembuf));
                 _deconfigureTarget(const_cast<Target &> (*l_parentMembuf),
-                    i_errlPlid);
+                    i_errlEid);
                 _deconfigureByAssoc(const_cast<Target &> (*l_parentMembuf),
-                    i_errlPlid);
+                    i_errlEid);
 
                 // and we're done, so break;
                 break;
@@ -995,7 +993,7 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
                         {
                             HWAS_INF("deconfigByAssoc MBA matched: %.8X",
                                 get_huid(pMba));
-                            _deconfigureTarget(*pMba, i_errlPlid);
+                            _deconfigureTarget(*pMba, i_errlEid);
                             l_deconfigList.push_back(pMba);
                             break; // only need to do 1 MBA - we're done.
                         }
@@ -1015,7 +1013,7 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
                 TargetHandle_t pMba = *pMba_it;
                 HWAS_INF("deconfigByAssoc MBA matched (bA): %.8X",
                     get_huid(pMba));
-                _deconfigureByAssoc(*pMba, i_errlPlid);
+                _deconfigureByAssoc(*pMba, i_errlEid);
             } // for
             break;
         } // TYPE_MBA
@@ -1036,9 +1034,9 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
                 HWAS_INF("deconfigByAssoc DIMM parent MBA: %.8X",
                     get_huid(l_parentMba));
                 _deconfigureTarget(const_cast<Target &> (*l_parentMba),
-                    i_errlPlid);
+                    i_errlEid);
                 _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
-                    i_errlPlid);
+                    i_errlEid);
             }
             break;
         } // TYPE_DIMM
@@ -1052,10 +1050,10 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
 
 //******************************************************************************
 void DeconfigGard::_deconfigureTarget(Target & i_target,
-                                      const uint32_t i_errlPlid)
+                                      const uint32_t i_errlEid)
 {
-    HWAS_INF("Deconfiguring Target %.8X, errlPlid 0x%X",
-            get_huid(&i_target), i_errlPlid);
+    HWAS_INF("Deconfiguring Target %.8X, errlEid 0x%X",
+            get_huid(&i_target), i_errlEid);
 
     // Set the Target state to non-functional. The assumption is that it is
     // not possible for another thread (other than deconfigGard) to be
@@ -1066,16 +1064,16 @@ void DeconfigGard::_deconfigureTarget(Target & i_target,
     if (!l_state.functional)
     {
         HWAS_DBG(
-        "Target HWAS_STATE already has functional=0; deconfiguredByPlid=0x%X",
-                l_state.deconfiguredByPlid);
+        "Target HWAS_STATE already has functional=0; deconfiguredByEid=0x%X",
+                l_state.deconfiguredByEid);
     }
     else
     {
         HWAS_INF(
-        "Setting Target HWAS_STATE: functional=0, deconfiguredByPlid=0x%X",
-            i_errlPlid);
+        "Setting Target HWAS_STATE: functional=0, deconfiguredByEid=0x%X",
+            i_errlEid);
         l_state.functional = 0;
-        l_state.deconfiguredByPlid = i_errlPlid;
+        l_state.deconfiguredByEid = i_errlEid;
         i_target.setAttr<ATTR_HWAS_STATE>(l_state);
 
         // Do any necessary Deconfigure Actions
@@ -1094,7 +1092,7 @@ void DeconfigGard::_doDeconfigureActions(Target & i_target)
 //******************************************************************************
 void DeconfigGard::_createDeconfigureRecord(
     const Target & i_target,
-    const uint32_t i_errlPlid)
+    const uint32_t i_errlEid)
 {
     // Look for an existing Deconfigure Record for the Target
     DeconfigureRecordsCItr_t l_itr = iv_deconfigureRecords.begin();
@@ -1103,8 +1101,8 @@ void DeconfigGard::_createDeconfigureRecord(
     {
         if ((*l_itr).iv_target == &i_target)
         {
-            HWAS_DBG("Not creating Deconfigure Record, one exists errlPlid 0x%X",
-                (*l_itr).iv_errlogPlid);
+            HWAS_DBG("Not creating Deconfigure Record, one exists errlEid 0x%X",
+                (*l_itr).iv_errlogEid);
             break;
         }
     }
@@ -1117,7 +1115,7 @@ void DeconfigGard::_createDeconfigureRecord(
 
         DeconfigureRecord l_record;
         l_record.iv_target = &i_target;
-        l_record.iv_errlogPlid = i_errlPlid;
+        l_record.iv_errlogEid = i_errlEid;
 
         iv_deconfigureRecords.push_back(l_record);
     }
@@ -1179,9 +1177,9 @@ bool DeconfigGard::_processDeferredDeconfig()
         // do the deconfigure
         DeconfigureRecord l_record = *l_itr;
         _deconfigureTarget(const_cast<Target &> (*(l_record.iv_target)),
-                l_record.iv_errlogPlid);
+                l_record.iv_errlogEid);
         _deconfigureByAssoc(const_cast<Target &> (*(l_record.iv_target)),
-                l_record.iv_errlogPlid);
+                l_record.iv_errlogEid);
     } // for
 
     // clear the list - handled them all
