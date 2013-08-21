@@ -39,6 +39,8 @@
 #include <prdfCenAddress.H>
 #include <prdfCenMarkstore.H>
 #include <prdfCenMbaCaptureData.H>
+#include <prdfCenMbaDataBundle.H>
+#include <prdfCenMbaTdCtlr_common.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfLaneRepair.H>
 
@@ -390,18 +392,17 @@ PRDF_PLUGIN_DEFINE( Membuf, checkSpareBit );
 //##############################################################################
 
 /**
- * @brief  MBSECCFIR[0-7] - Fetch Mark Placed Event (MPE).
+ * @brief  MBSECCFIR[0-7,20:27] - Fetch/Maintenance Mark Placed Event (MPE).
  * @param  i_membChip A Centaur chip.
  * @param  i_sc       The step code data struct.
  * @param  i_mbaPos   The MBA position.
  * @param  i_rank     The target rank.
  * @return SUCCESS
  */
-int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
-                         STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos,
-                         uint8_t i_rank )
+int32_t AnalyzeMpe( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc,
+                    uint32_t i_mbaPos, uint8_t i_rank, bool isFetchError )
 {
-    #define PRDF_FUNC "[AnalyzeFetchMpe] "
+    #define PRDF_FUNC "[AnalyzeMpe] "
 
     int32_t l_rc = SUCCESS;
 
@@ -419,13 +420,24 @@ int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
 
         mbaTrgt = mbaChip->GetChipHandle();
 
-        // Get the current marks in hardware.
+        // Add address to UE table.
+        if ( isFetchError )
+        {
+            // TODO: RTC 81713 Add fetch address to UE table.
+        }
+        else
+        {
+            // TODO: RTC 81713 Add maintenance address to UE table.
+        }
+
+        // Get the current mark in hardware.
         CenRank rank ( i_rank );
         CenMark mark;
-        if ( SUCCESS != mssGetMarkStore(mbaTrgt, rank, mark) )
+        l_rc = mssGetMarkStore( mbaTrgt, rank, mark );
+        if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
-            l_rc = FAIL; break;
+            break;
         }
 
         if ( !mark.getCM().isValid() )
@@ -436,6 +448,16 @@ int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
 
         // Callout the mark.
         CalloutUtil::calloutMark( mbaTrgt, rank, mark, i_sc );
+
+        // Tell TD controller to handle VCM event.
+        CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
+        l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
+                                               CenMbaTdCtlrCommon::VCM_EVENT );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"handleTdEvent() failed." );
+            break;
+        }
 
     } while (0);
 
@@ -674,33 +696,40 @@ PLUGIN_FETCH_ECC_ERROR( Ue,  1 )
 #undef PLUGIN_FETCH_ECC_ERROR
 
 // Define the plugins for memory MPE errors.
-#define PLUGIN_FETCH_MPE_ERROR( MBA, RANK ) \
+#define PLUGIN_MEMORY_MPE_ERROR( MBA, RANK ) \
 int32_t AnalyzeFetchMpe##MBA##_##RANK( ExtensibleChip * i_membChip, \
-                                     STEP_CODE_DATA_STRUCT & i_sc ) \
+                                       STEP_CODE_DATA_STRUCT & i_sc ) \
 { \
-    return AnalyzeFetchMpe( i_membChip, i_sc, MBA, RANK ); \
+    return AnalyzeMpe( i_membChip, i_sc, MBA, RANK, true ); \
 } \
-PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetchMpe##MBA##_##RANK );
+PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetchMpe##MBA##_##RANK ); \
+\
+int32_t AnalyzeMaintMpe##MBA##_##RANK( ExtensibleChip * i_membChip, \
+                                       STEP_CODE_DATA_STRUCT & i_sc ) \
+{ \
+    return AnalyzeMpe( i_membChip, i_sc, MBA, RANK, false ); \
+} \
+PRDF_PLUGIN_DEFINE( Membuf, AnalyzeMaintMpe##MBA##_##RANK );
 
-PLUGIN_FETCH_MPE_ERROR( 0, 0 )
-PLUGIN_FETCH_MPE_ERROR( 0, 1 )
-PLUGIN_FETCH_MPE_ERROR( 0, 2 )
-PLUGIN_FETCH_MPE_ERROR( 0, 3 )
-PLUGIN_FETCH_MPE_ERROR( 0, 4 )
-PLUGIN_FETCH_MPE_ERROR( 0, 5 )
-PLUGIN_FETCH_MPE_ERROR( 0, 6 )
-PLUGIN_FETCH_MPE_ERROR( 0, 7 )
+PLUGIN_MEMORY_MPE_ERROR( 0, 0 )
+PLUGIN_MEMORY_MPE_ERROR( 0, 1 )
+PLUGIN_MEMORY_MPE_ERROR( 0, 2 )
+PLUGIN_MEMORY_MPE_ERROR( 0, 3 )
+PLUGIN_MEMORY_MPE_ERROR( 0, 4 )
+PLUGIN_MEMORY_MPE_ERROR( 0, 5 )
+PLUGIN_MEMORY_MPE_ERROR( 0, 6 )
+PLUGIN_MEMORY_MPE_ERROR( 0, 7 )
 
-PLUGIN_FETCH_MPE_ERROR( 1, 0 )
-PLUGIN_FETCH_MPE_ERROR( 1, 1 )
-PLUGIN_FETCH_MPE_ERROR( 1, 2 )
-PLUGIN_FETCH_MPE_ERROR( 1, 3 )
-PLUGIN_FETCH_MPE_ERROR( 1, 4 )
-PLUGIN_FETCH_MPE_ERROR( 1, 5 )
-PLUGIN_FETCH_MPE_ERROR( 1, 6 )
-PLUGIN_FETCH_MPE_ERROR( 1, 7 )
+PLUGIN_MEMORY_MPE_ERROR( 1, 0 )
+PLUGIN_MEMORY_MPE_ERROR( 1, 1 )
+PLUGIN_MEMORY_MPE_ERROR( 1, 2 )
+PLUGIN_MEMORY_MPE_ERROR( 1, 3 )
+PLUGIN_MEMORY_MPE_ERROR( 1, 4 )
+PLUGIN_MEMORY_MPE_ERROR( 1, 5 )
+PLUGIN_MEMORY_MPE_ERROR( 1, 6 )
+PLUGIN_MEMORY_MPE_ERROR( 1, 7 )
 
-#undef PLUGIN_FETCH_MPE_ERROR
+#undef PLUGIN_MEMORY_MPE_ERROR
 
 } // end namespace Membuf
 

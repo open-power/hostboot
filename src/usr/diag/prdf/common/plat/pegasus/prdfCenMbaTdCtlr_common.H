@@ -49,6 +49,20 @@ class ExtensibleChip;
  */
 class CenMbaTdCtlrCommon
 {
+  public: // constants, enums
+
+    /**
+     * @brief This enum will be used to indicate type of TD event requested to
+     *        be handled.
+     * @note  The order of the enums values is important. It is used for
+     *        sorting the TdQueue by event type priority.
+     */
+    enum TdType
+    {
+        VCM_EVENT = 0, ///< A Verify Chip Mark event.
+        TPS_EVENT,     ///< A Two-Phase Scrub event.
+    };
+
   protected: // constants, enums
 
     /**
@@ -100,6 +114,28 @@ class CenMbaTdCtlrCommon
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     virtual int32_t handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+    /**
+     * @brief  Adds a TD procedure to the queue.
+     *
+     * TD events are only intended to be handled during FSP runtime, however, it
+     * is possible that a TD events could be triggered in Hostboot after it has
+     * been flushed from the cache to system memory. All requests to handle TD
+     * events during Hostboot will be ignored. Any chip marks placed at this
+     * time will be found when the FSP TD controller is initialized. The error
+     * log for the trigger will be committed and a trace statement will be made
+     * indicating which rank and TD procedure was requested.
+     *
+     * @param  io_sc   The step code data struct.
+     * @param  i_rank  The rank in which the event occurred.
+     * @param  i_event The event type (see enum TdType).
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     * @note   If no TD procedures are in progress, it will stop background
+     *         scrub and start the next TD procedure.
+     */
+    virtual int32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
+                                   const CenRank & i_rank,
+                                   const TdType i_event ) = 0;
 
   protected: // functions
 

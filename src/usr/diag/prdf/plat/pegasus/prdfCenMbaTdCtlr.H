@@ -62,6 +62,8 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
   public: // Overloaded functions
 
     int32_t handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
+                           const CenRank & i_rank, const TdType i_event );
 
   private: // Overloaded functions
 

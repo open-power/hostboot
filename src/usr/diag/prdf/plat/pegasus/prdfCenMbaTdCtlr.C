@@ -180,6 +180,46 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
 }
 
 //------------------------------------------------------------------------------
+
+int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
+                                     const CenRank & i_rank,
+                                     const CenMbaTdCtlrCommon::TdType i_event )
+{
+    #define PRDF_FUNC "[CenMbaTdCtlr::handleTdEvent] "
+
+    int32_t o_rc = SUCCESS;
+
+    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
+
+    do
+    {
+        o_rc = initialize();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"initialize() failed" );
+            break;
+        }
+
+        // This is a no-op in Hostboot. Instead, print a trace statement
+        // indicating the intended request.
+        PRDF_INF( PRDF_FUNC"TD request found during Hostboot: "
+                  "iv_mbaChip=0x%08x i_rank=%d i_event=%d",
+                  getHuid(mba), i_rank.flatten(), i_event );
+
+    } while(0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"iv_mbaChip:0x%08x iv_initialized:%c iv_tdState:%d",
+                  getHuid(mba), iv_initialized ? 'T' : 'F', iv_tdState );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 //                            Private Functions
 //------------------------------------------------------------------------------
 
