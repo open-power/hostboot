@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -73,8 +75,6 @@
 /**
  * @brief Interface to deconfig target at Runtime (Not valid in Hostboot)
  */
-// FIXME:RTC: 65609 will address this issue.
-// need to implement in Hostboot
 #define PRDF_RUNTIME_DECONFIG( i_pTarget, i_errl, i_dmp ) \
   SUCCESS
 

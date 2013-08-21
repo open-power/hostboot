@@ -244,6 +244,13 @@ class ErrDataService
      */
     void handleNxUnitCS( TARGETING::TargetHandle_t i_nxTarget );
 
+    /**
+     * @brief commits error log based on platform.
+     * @param io_errl       reference to error log handle.
+     * @param i_pfaData     Pfa struct
+     */
+    void commitErrLog( errlHndl_t & io_errl, const PfaData & i_pfaData );
+
   private:
 
     uint32_t iv_serviceActionCounter;

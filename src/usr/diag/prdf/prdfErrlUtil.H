@@ -203,14 +203,6 @@
 #define PRDF_RECONFIG_LOOP(o_deconfigEnum)
 
 /**
- * @brief Interface to request a Hardware Unit dump collection
- */
-// FIXME:RTC: 65609 will address this issue.
-// need to implement in Hostboot
-#define PRDF_HWUDUMP( i_errl, i_content, i_huid ) \
-  SUCCESS
-
-/**
  * @brief Interface to indicate errlog that hostboot need to do a
  *        soft terminate.
  */

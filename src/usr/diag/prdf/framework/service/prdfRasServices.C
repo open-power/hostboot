@@ -152,5 +152,15 @@ void ErrDataService::handleNxUnitCS( TargetHandle_t i_nxTarget )
     // No-op in Hostboot
 }
 
+//------------------------------------------------------------------------------
+
+void ErrDataService::commitErrLog( errlHndl_t & io_errl,
+                                   const PfaData & i_pfaData )
+
+{
+    errlCommit( io_errl, PRDF_COMP_ID );
+    io_errl = NULL;
+}
+
 } // end namespace PRDF
 
