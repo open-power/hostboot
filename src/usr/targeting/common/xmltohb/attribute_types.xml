@@ -13022,4 +13022,139 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>LAB_USE_JTAG_MODE</id>
+    <description>This attribute controls how the procedures operate in JTAG mode under an environment called cronus flex.  For normal operation, this attribute should be set to FALSE. Platforms should initialize this attribute to FALSE.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_LAB_USE_JTAG_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CONTROL_SWITCH</id>
+    <description>This attribute enables control switches in the memory code.  This is a one hot vector:  Bit 7 controls the Bad Bit Mask function in draminit_training. The platform should initialize this to BBM_ON except if ATTR_LAB_USE_JTAG_MODE == TRUE, then the platform should set this attribute to BBM_ OFF.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CONTROL_SWITCH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+    <description>runtime memory throttle values adjusted by the dimm power test
+        DIMM power test memory throttles for cfg_nm_n_per_mba</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <description>runtime memory throttle values adjusted by the dimm power test
+        DIMM power test memory throttles for cfg_nm_n_per_chip</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_DENOMINATOR</id>
+    <description>runtime memory throttle values adjusted by the dimm power test
+        DIMM power test memory throttles for cfg_nm_m</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_DENOMINATOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!--
+<attribute>
+    <id>MSS_DRAM_ACTIVATE_POWER_PERCENT</id>
+    <description>DRAM Activation power percentage to determine the ras and cas weights for throttle controls
+        will originates from VPD for custom DIMMs in the MW keyword byte 5 (MSB is on the left(big endian))
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DRAM_ACTIVATE_POWER_PERCENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+-->
+
+<attribute>
+    <id>MSS_THROTTLE_CONTROL_RAS_WEIGHT</id>
+    <description>RAS weight to use for memory throttle control</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_THROTTLE_CONTROL_CAS_WEIGHT</id>
+    <description>CAS weight to use for memory throttle control</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

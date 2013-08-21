@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.C,v 1.13 2013/06/10 22:09:49 jeshua Exp $
+// $Id: p8_image_help_base.C,v 1.14 2013-08-01 13:34:16 dcrowell Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help_base.c                                              */
 /* *! DESCRIPTION : Basic helper functions for building and extracting          */
@@ -486,7 +486,8 @@ int over_write_ring_data_in_image(  void            *io_image,
   hostVectorThis = (void*) ( (uint64_t)hostVectorBase + 
                              i_idxVector*8*(1+i_overridable) +
                              8*i_override*i_overridable );
-  hostRingBlock = (DeltaRingLayout*)(*(uintptr_t*)hostVectorThis);
+  uint64_t tmp1 = (*(uintptr_t*)hostVectorThis);
+  sbe_xip_pore2host( io_image, tmp1, (void**)&hostRingBlock);
   hostRingData = (void*)( (uint64_t)hostRingBlock + hostRingBlock->entryOffset );
 
   // Over write ringData onto existing ring data content in image.

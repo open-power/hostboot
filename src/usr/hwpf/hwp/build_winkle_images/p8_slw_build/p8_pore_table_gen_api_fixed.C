@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api_fixed.C,v 1.7 2013/05/08 20:16:18 cmolsen Exp $
+// $Id: p8_pore_table_gen_api_fixed.C,v 1.9 2013/05/29 18:58:28 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
@@ -41,7 +41,6 @@
 /*------------------------------------------------------------------------------*/
 
 #define __P8_PORE_TABLE_GEN_API_C
-#include <HvPlicModule.H>
 #include <p8_pore_api_custom.h>
 #include <p8_pore_table_gen_api.H>
 #include <p8_delta_scan_rw.h>
@@ -566,14 +565,14 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
   //   SCOM is replacing that NNNN sequence.
   hostScomEntryNext = hostScomTableThis;
   MY_DBG("hostScomEntryNext (addr): 0x%016llx\n ",(uint64_t)hostScomEntryNext);
-  while (memcmp(hostScomEntryNext, bufRET, sizeof(uint32_t))) {
+  while (memcmp(hostScomEntryNext, bufRET, sizeof(uint32_t)))  {
     entriesCount++;
     MY_DBG("Number of SCOM entries: %i\n ",entriesCount);
     if (*((uint32_t*)bufIIS+1)==*((uint32_t*)hostScomEntryNext+1) && entriesMatch==0)  {// +1 skips 1st word in Scom entry (which loads the PC in an LS operation.)
       hostScomEntryMatch = hostScomEntryNext;
       entriesMatch++;
     }
-    if ((0 == memcmp(hostScomEntryNext, bufNOP, sizeof(uint32_t))) && entriesNOP==0)  {
+    if (memcmp(hostScomEntryNext, bufNOP, sizeof(uint32_t))==0 && entriesNOP==0)  {
       hostScomEntryNOP = hostScomEntryNext;
       entriesNOP++;
     }

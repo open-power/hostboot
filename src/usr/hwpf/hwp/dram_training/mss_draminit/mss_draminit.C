@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.50 2013/07/17 15:50:58 mwuu Exp $
+// $Id: mss_draminit.C,v 1.51 2013/08/01 18:36:52 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.51   | jdsloat  | 08/01/13| Fixed dimm/rank conversion in address mirroring phy setting for a 4 rank dimm scenario
 //  1.50   | mwuu     | 07/17/13| Fixed CS when accessing RCD words on 1 rank RDIMMs
 //         |          |         | Added checks for invalid RTT_NOM, RTT_WR
 //  1.49   | jdsloat  | 06/11/13| Added several rc checks
@@ -300,13 +301,13 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 	    {
 
 	        // dimm 0, dimm_rank 0-3 = ranks 0-3; dimm 1, dimm_rank 0-3 = ranks 4-7
-	        pri_dimm = (primary_ranks_array[rank_pair_group][port_number] + 1) / 4;
+	        pri_dimm = (primary_ranks_array[rank_pair_group][port_number]) / 4;
 	        pri_dimm_rank = primary_ranks_array[rank_pair_group][port_number] - 4*pri_dimm;
-	        sec_dimm = (secondary_ranks_array[rank_pair_group][port_number] + 1) / 4;
+	        sec_dimm = (secondary_ranks_array[rank_pair_group][port_number]) / 4;
 	        sec_dimm_rank = secondary_ranks_array[rank_pair_group][port_number] - 4*sec_dimm;
-	        ter_dimm = (tertiary_ranks_array[rank_pair_group][port_number] + 1) / 4;
+	        ter_dimm = (tertiary_ranks_array[rank_pair_group][port_number]) / 4;
 	        ter_dimm_rank = tertiary_ranks_array[rank_pair_group][port_number] - 4*ter_dimm;
-	        qua_dimm = (quaternary_ranks_array[rank_pair_group][port_number] + 1) / 4;
+	        qua_dimm = (quaternary_ranks_array[rank_pair_group][port_number]) / 4;
 	        qua_dimm_rank = quaternary_ranks_array[rank_pair_group][port_number] - 4*qua_dimm;
 
 		// Set the rank pairs that will be affected.

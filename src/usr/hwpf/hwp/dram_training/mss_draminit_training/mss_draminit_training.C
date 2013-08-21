@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.62 2013/07/17 16:20:12 mwuu Exp $
+// $Id: mss_draminit_training.C,v 1.64 2013/08/01 18:32:48 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,7 +28,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
-//  1.62   | mwuu     |17-JUL-13| Fixed set_bbm function to disable0,disable1,wr_clk registers
+//  1.64   | jdsloat  |01-AUG-13| Fixed dimm/rank conversion in address mirroring mode for a 4 rank dimm scenario
+//  1.63   | jdsloat  |29-JUN-13| Added JTAG mode and CONTROL SWITCH attribute checks to bad bit mask function calls.
+//  1.62   | mwuu     |17-JUN-13| Fixed set_bbm function to disable0,disable1,wr_clk registers
 //         |          |         | In x4 single bit fails disables entire nibble in set/get_bbm FN
 //  1.61   | jdsloat  |13-JUN-13| Added a single RC check
 //  1.60   | jdsloat  |11-JUN-13| Added a single RC check
@@ -300,6 +302,14 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc = fapiGetParentChip(i_target, l_target_centaur);
     if(rc) return rc;
 
+    uint8_t control_switch = 0;
+    rc = FAPI_ATTR_GET(ATTR_MSS_CONTROL_SWITCH, NULL, control_switch);
+    if(rc) return rc;
+
+    uint8_t jtag_mode = 0;
+    rc = FAPI_ATTR_GET(ATTR_LAB_USE_JTAG_MODE, NULL, jtag_mode);
+    if(rc) return rc;
+
     uint8_t dram_gen = 0;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
     if(rc) return rc;
@@ -368,12 +378,14 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc = fapiPutScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
     if(rc) return rc;
 
-
-    rc = mss_set_bbm_regs (i_target);
-    if(rc)
+    if ( ( control_switch && 0x01 ) && (jtag_mode == 0) )
     {
-	FAPI_ERR( "Error Moving bad bit information to the Phy regs. Exiting.");
-	return rc;
+        rc = mss_set_bbm_regs (i_target);
+        if(rc)
+        {
+	   FAPI_ERR( "Error Moving bad bit information to the Phy regs. Exiting.");
+	   return rc;
+        }
     }
 
     if ( ( cal_steps_8.isBitSet(0) ) ||
@@ -713,12 +725,15 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		if(rc) return rc;
     }
 
-    rc = mss_get_bbm_regs(i_target);
-    if(rc)
+    if ( ( control_switch && 0x01 ) && (jtag_mode == 0) )
+    {
+    	rc = mss_get_bbm_regs(i_target);
+    	if(rc)
 	{
-	FAPI_ERR( "Error Moving bad bit information from the Phy regs. Exiting.");
-	return rc;
+		FAPI_ERR( "Error Moving bad bit information from the Phy regs. Exiting.");
+		return rc;
 	}
+    }
 
     if (complete_status == MSS_INIT_CAL_STALL)
     {
@@ -2527,7 +2542,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     uint8_t dimm_rank = 0;
 
     // dimm 0, dimm_rank 0-3 = ranks 0-3; dimm 1, dimm_rank 0-3 = ranks 4-7
-    dimm = (i_rank + 1) / 4;
+    dimm = (i_rank) / 4;
     dimm_rank = i_rank - 4*dimm;
 
 

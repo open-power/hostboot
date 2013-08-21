@@ -1,4 +1,4 @@
-#-- $Id: cen.dmi.scom.initfile,v 1.12 2013/04/18 19:20:14 jgrell Exp $ 
+#-- $Id: cen.dmi.scom.initfile,v 1.16 2013/07/30 20:47:07 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,14 +7,18 @@
 ##      Based on SETUP_ID_MODE DMI_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODNC_MB_TOP.IODNC_MB_TOP.figdb
 ##
-##   Created on Mon Apr 15 15:04:16 CDT 2013, by jgrell
+##   Created on Tue Jul 30 10:22:33 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jfg13072400| jfg     |07-24-13| HW253558: change pgooddly to MAX from lab feedback
+ ## -- mbs13071200| mbs     |07-12-13| Disable recal adjustment for allv1 (DFE bug)     
+ ## -- mbs13071100| mbs     |07-11-13| Updates for HW239870 and HW258990                
  ## -- jgr13041800| jgr     |04-18-13| Added rx_max_ber_check_count setting to 0x03
+ ## -- smr13032500| SMR     |03-25-13| Changed rx_dyn_recal_overall_timeout_sel init to 0b100 & rx_sls_timeout_sel init to 0b110
  ## -- jgr13031300| jgr     |03-13-13| Added missing entries from rel 0128
  ## -- mbs13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
  ## -- mbs13011000| mbs     |01-10-13| Added rx_prot_speed_slct and rx_c4_sel
@@ -91,7 +95,7 @@ scom 0x800B80000201043F {
 	bits, scom_data, expr;
      rx_ber_cfg,  0b100   , def_IS_HW;
      rx_ber_cfg,  0b000  , def_IS_VBU;
-     rx_dac_bo_cfg,  0b100   , def_IS_HW;
+     rx_dac_bo_cfg,  0b101   , def_IS_HW;
      rx_dac_bo_cfg,  0b000  , def_IS_VBU;
      rx_ddc_cfg,  0b10   , def_IS_HW;
      rx_ddc_cfg,  0b00  , def_IS_VBU;
@@ -104,7 +108,13 @@ scom 0x800B80000201043F {
 #RX.RXCTL.RX_CTL_REGS.RX_DYN_RECAL_CONFIG_PG
 scom 0x800A18000201043F { 
 	bits, scom_data, expr;
-	rx_dyn_recal_overall_timeout_sel, 0b001, any;
+	rx_dyn_recal_overall_timeout_sel, 0b100, any;
+}
+
+#RX.RXCTL.RX_CTL_REGS.RX_DYN_RECAL_TIMEOUTS_PP
+scom 0x800B40000201043F { 
+	bits, scom_data, expr;
+	rx_dyn_recal_interval_timeout_sel, 0b101, any;
 }
 
 #RX.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
@@ -198,13 +208,6 @@ scom 0x8009C0000201043F {
      rx_prot_speed_slct,  0b0  , def_IS_VBU;
 }
 
-#RX.RXCTL.RX_CTL_REGS.RX_MODE1_PP
-scom 0x800B08000201043F { 
-	bits, scom_data, expr;
-     rx_bit_lock_timeout_sel,  0b110   , def_IS_HW;
-     rx_bit_lock_timeout_sel,  0b101  , def_IS_VBU;
-}
-
 #RX.RXCTL.RX_CTL_REGS.RX_RC_STEP_CNTL_PG
 scom 0x800AB8000201043F { 
 	bits, scom_data, expr;
@@ -214,10 +217,8 @@ scom 0x800AB8000201043F {
      rx_rc_enable_ctle_cal,  0b0  , def_IS_VBU;
      rx_rc_enable_ddc,  0b1   , def_IS_HW;
      rx_rc_enable_ddc,  0b0  , def_IS_VBU;
-     rx_rc_enable_dfe_h1_cal,  0b1   , def_IS_HW;
-     rx_rc_enable_dfe_h1_cal,  0b0  , def_IS_VBU;
-     rx_rc_enable_h1ap_tweak,  0b1   , def_IS_HW;
-     rx_rc_enable_h1ap_tweak,  0b0  , def_IS_VBU;
+	rx_rc_enable_dfe_h1_cal, 0b0, any;
+	rx_rc_enable_h1ap_tweak, 0b0, any;
      rx_rc_enable_latch_offset_cal,  0b1   , def_IS_HW;
      rx_rc_enable_latch_offset_cal,  0b0  , def_IS_VBU;
      rx_rc_enable_result_check,  0b1   , def_IS_HW;
@@ -229,13 +230,15 @@ scom 0x800AB8000201043F {
 #RX.RXCTL.RX_CTL_REGS.RX_RECAL_TO1_PP
 scom 0x800B90000201043F { 
 	bits, scom_data, expr;
-     rx_recal_timeout_sel_b,  0b0100   , def_IS_HW;
+     rx_recal_timeout_sel_b,  0b0110   , def_IS_HW;
      rx_recal_timeout_sel_b,  0b1000  , def_IS_VBU;
 }
 
 #RX.RXCTL.RX_CTL_REGS.RX_RECAL_TO2_PP
 scom 0x800B98000201043F { 
 	bits, scom_data, expr;
+     rx_recal_timeout_sel_g,  0b0111   , def_IS_HW;
+     rx_recal_timeout_sel_g,  0b0100  , def_IS_VBU;
      rx_recal_timeout_sel_h,  0b1011   , def_IS_HW;
      rx_recal_timeout_sel_h,  0b1000  , def_IS_VBU;
 }
@@ -251,26 +254,21 @@ scom 0x800BA0000201043F {
      rx_recal_timeout_sel_k,  0b1000  , def_IS_VBU;
 }
 
-#RX.RXCTL.RX_CTL_REGS.RX_SCOPE_CNTL_PP
-scom 0x800BC0000201043F { 
-	bits, scom_data, expr;
-     rx_scope_control,  0b01   , def_IS_HW;
-     rx_scope_control,  0b00  , def_IS_VBU;
-}
-
 #RX.RXCTL.RX_CTL_REGS.RX_SERVO_TO1_PP
 scom 0x800B60000201043F { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_b,  0b1000   , def_IS_HW;
-     rx_servo_timeout_sel_b,  0b1010  , def_IS_VBU;
-     rx_servo_timeout_sel_d,  0b1001   , def_IS_HW;
+     rx_servo_timeout_sel_b,  0b1010   , def_IS_HW;
+     rx_servo_timeout_sel_b,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_d,  0b1010   , def_IS_HW;
      rx_servo_timeout_sel_d,  0b1000  , def_IS_VBU;
 }
 
 #RX.RXCTL.RX_CTL_REGS.RX_SERVO_TO2_PP
 scom 0x800B68000201043F { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_h,  0b1110   , def_IS_HW;
+     rx_servo_timeout_sel_g,  0b0111   , def_IS_HW;
+     rx_servo_timeout_sel_g,  0b0100  , def_IS_VBU;
+     rx_servo_timeout_sel_h,  0b1011   , def_IS_HW;
      rx_servo_timeout_sel_h,  0b1000  , def_IS_VBU;
 }
 
@@ -279,7 +277,7 @@ scom 0x800B70000201043F {
 	bits, scom_data, expr;
      rx_servo_timeout_sel_i,  0b1011   , def_IS_HW;
      rx_servo_timeout_sel_i,  0b1000  , def_IS_VBU;
-     rx_servo_timeout_sel_j,  0b1100   , def_IS_HW;
+     rx_servo_timeout_sel_j,  0b1101   , def_IS_HW;
      rx_servo_timeout_sel_j,  0b1000  , def_IS_VBU;
      rx_servo_timeout_sel_k,  0b1101   , def_IS_HW;
      rx_servo_timeout_sel_k,  0b1000  , def_IS_VBU;
@@ -307,7 +305,7 @@ scom 0x800898000201043F {
      rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
      rx_ds_timeout_sel,  0b110   , def_IS_HW;
      rx_ds_timeout_sel,  0b010  , def_IS_VBU;
-	rx_sls_timeout_sel, 0b001, any;
+	rx_sls_timeout_sel, 0b110, any;
      rx_wt_timeout_sel,  0b111   , def_IS_HW;
      rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
@@ -328,7 +326,7 @@ scom 0x800958000201043F {
 #RX.RXCTL.RX_CTL_REGS.RX_WIRETEST_PLL_CNTL_PG
 scom 0x800A30000201043F { 
 	bits, scom_data, expr;
-     rx_wt_cu_pll_pgooddly,  0b001   , def_IS_HW;
+     rx_wt_cu_pll_pgooddly,  0b110   , def_IS_HW;
      rx_wt_cu_pll_pgooddly,  0b000  , def_IS_VBU;
      rx_wt_cu_pll_reset,  0b0   , def_IS_HW;
      rx_wt_cu_pll_reset,  0b1  , def_IS_VBU;
@@ -446,6 +444,12 @@ scom 0x8000B0110201043F {
 scom 0x800CC4000201043F { 
 	bits, scom_data, expr;
 	tx_drv_clk_pattern_gcrmsg, 0b00, any;
+}
+
+#TX.TXCTL.TX_CTL_REGS.TX_DYN_RECAL_TIMEOUTS_PP
+scom 0x800EAC000201043F { 
+	bits, scom_data, expr;
+	tx_dyn_recal_interval_timeout_sel, 0b101, any;
 }
 
 #TX.TXCTL.TX_CTL_REGS.TX_ID1_PG
