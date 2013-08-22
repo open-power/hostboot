@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,18 +20,11 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_sbe_registers.xml,v 1.3 2013/04/25 19:55:25 jeshua Exp $ -->
 <!-- Definition of SBE registers to collect on some errors -->
 <hwpErrors>
   <registerFfdc>
     <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-    <cfamRegister>FSI_STATUS_0x1007</cfamRegister>
-    <cfamRegister> FSI_GP3_0x2812</cfamRegister>
-    <cfamRegister>FSI_GP4_0x2813</cfamRegister>
-    <cfamRegister>FSI_GP5_0x2814</cfamRegister>
-    <cfamRegister>FSI_GP6_0x2815</cfamRegister>
-    <cfamRegister>FSI_GP7_0x2816</cfamRegister>
-    <cfamRegister>FSI_GP8_0x2817</cfamRegister>
-    <cfamRegister>FSI_GP3MIR_0x281B</cfamRegister>
     <scomRegister>PORE_SBE_STATUS_0x000E0000</scomRegister>
     <scomRegister>PORE_SBE_CONTROL_0x000E0001</scomRegister>
     <scomRegister>PORE_SBE_RESET_0x000E0002</scomRegister>
@@ -58,7 +51,5 @@
     <scomRegister>PORE_SBE_I2C_E0_PARAM_0x000E0017</scomRegister>
     <scomRegister>PORE_SBE_I2C_E1_PARAM_0x000E0018</scomRegister>
     <scomRegister>PORE_SBE_I2C_E2_PARAM_0x000E0019</scomRegister>
-    <scomRegister>PIBMEM_STATUS_0x00088005</scomRegister>
-    <scomRegister>TP_CLK_STATUS_0x01030008</scomRegister>
   </registerFfdc>
 </hwpErrors>

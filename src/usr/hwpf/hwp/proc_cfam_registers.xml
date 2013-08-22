@@ -20,27 +20,27 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_cfam_registers.xml,v 1.3 2013/06/21 14:31:01 jeshua Exp $ -->
+<!-- $Id: proc_cfam_registers.xml,v 1.4 2013/08/22 19:41:45 mjjones Exp $ -->
 <!-- Definition of cfam registers to collect on some errors -->
 <hwpErrors>
   <!-- processor cfam registers -->
   <registerFfdc>
     <id>REG_FFDC_PROC_CFAM_REGISTERS</id>
-    <cfamRegister>FSI_STATUS_0x1007</cfamRegister>
-    <cfamRegister>FSI_GP3_0x2812</cfamRegister>
-    <cfamRegister>FSI_GP4_0x2813</cfamRegister>
-    <cfamRegister>FSI_GP5_0x2814</cfamRegister>
-    <cfamRegister>FSI_GP6_0x2815</cfamRegister>
-    <cfamRegister>FSI_GP7_0x2816</cfamRegister>
-    <cfamRegister>FSI_GP8_0x2817</cfamRegister>
-    <cfamRegister>FSI_GP3MIR_0x281B</cfamRegister>
+    <cfamRegister>CFAM_FSI_STATUS_0x00001007</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP3_0x00002812</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP4_0x00002813</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP5_0x00002814</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP6_0x00002815</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP7_0x00002816</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP8_0x00002817</cfamRegister>
+    <cfamRegister>CFAM_FSI_GP3_MIRROR_0x0000281B</cfamRegister>
     <cfamRegister>CFAM_FSI_SBE_VITAL_0x0000281C</cfamRegister>
     <cfamRegister>CFAM_FSI_WRITE_PROTECT_0x00002818</cfamRegister>
   </registerFfdc>
   <!-- Just the Status and SBE vital regs -->
   <registerFfdc>
     <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-    <cfamRegister>FSI_STATUS_0x1007</cfamRegister>
+    <cfamRegister>CFAM_FSI_STATUS_0x00001007</cfamRegister>
     <cfamRegister>CFAM_FSI_SBE_VITAL_0x0000281C</cfamRegister>
   </registerFfdc>
   <!-- processor mailbox registers -->

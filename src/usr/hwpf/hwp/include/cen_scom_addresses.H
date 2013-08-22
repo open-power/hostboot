@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_scom_addresses.H,v 1.63 2013/06/18 15:20:21 mwuu Exp $
+// $Id: cen_scom_addresses.H,v 1.64 2013/08/22 19:46:32 mjjones Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -709,8 +709,16 @@ CONST_UINT64_T( MBA01_MBA_WRD_MODE_0x03010449           , ULL(0x03010449) );
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBA01_MBARPC0Q_0x03010434		,ULL(0x03010434) );
 
-
-
+//------------------------------------------------------------------------------
+//      DMI FIR Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( CEN_DMIFIR_0x02010400                  , ULL(0x02010400) );
+CONST_UINT64_T( CEN_DMIFIR_MASK_0x02010403             , ULL(0x02010403) );
+CONST_UINT64_T( CEN_DMIFIR_MASK_AND_0x02010404         , ULL(0x02010404) );
+CONST_UINT64_T( CEN_DMIFIR_MASK_OR_0x02010405          , ULL(0x02010405) );
+CONST_UINT64_T( CEN_DMIFIR_ACT0_0x02010406             , ULL(0x02010406) );
+CONST_UINT64_T( CEN_DMIFIR_ACT1_0x02010407             , ULL(0x02010407) );
+CONST_UINT64_T( CEN_DMIFIR_WOF_0x02010408              , ULL(0x02010408) );
 
 //------------------------------------------------------------------------------
 //      Address Translate Control Registers
@@ -729,6 +737,7 @@ CONST_UINT64_T( MBS_ECC0_MBECCFIR_MASK_AND_0x02011444  , ULL(0x02011444) );
 CONST_UINT64_T( MBS_ECC0_MBECCFIR_MASK_OR_0x02011445   , ULL(0x02011445) );
 CONST_UINT64_T( MBS_ECC0_MBECCFIR_ACTION0_0x02011446   , ULL(0x02011446) );
 CONST_UINT64_T( MBS_ECC0_MBECCFIR_ACTION1_0x02011447   , ULL(0x02011447) );
+CONST_UINT64_T( MBS_ECC0_MBECCFIR_WOF_0x02011448       , ULL(0x02011448) );
 
 CONST_UINT64_T( MBS_ECC1_MBECCFIR_0x02011480           , ULL(0x02011480) );
 CONST_UINT64_T( MBS_ECC0_MBECCFIR_AND_0x02011481       , ULL(0x02011481) );
@@ -738,6 +747,7 @@ CONST_UINT64_T( MBS_ECC1_MBECCFIR_MASK_AND_0x02011484  , ULL(0x02011484) );
 CONST_UINT64_T( MBS_ECC1_MBECCFIR_MASK_OR_0x02011485   , ULL(0x02011485) );
 CONST_UINT64_T( MBS_ECC1_MBECCFIR_ACTION0_0x02011486   , ULL(0x02011486) );
 CONST_UINT64_T( MBS_ECC1_MBECCFIR_ACTION1_0x02011487   , ULL(0x02011487) );
+CONST_UINT64_T( MBS_ECC1_MBECCFIR_WOF_0x02011488       , ULL(0x02011488) );
 
 //------------------------------------------------------------------------------
 //      MBS ECC Error Report Hold Registers
@@ -991,6 +1001,7 @@ CONST_UINT64_T( MBS_FIR_MASK_REG_AND_0x02011404     , ULL(0x02011404) );
 CONST_UINT64_T( MBS_FIR_MASK_REG_OR_0x02011405      , ULL(0x02011405) );
 CONST_UINT64_T( MBS_FIR_ACTION0_REG_0x02011406      , ULL(0x02011406) );
 CONST_UINT64_T( MBS_FIR_ACTION1_REG_0x02011407      , ULL(0x02011407) );
+CONST_UINT64_T( MBS_FIR_WOF_REG_0x02011408          , ULL(0x02011408) );
 
 //------------------------------------------------------------------------------
 //      DDRPHY FIR Registers
@@ -1001,6 +1012,7 @@ CONST_UINT64_T( PHY01_DDRPHY_FIR_MASK_REG_AND_0x800200940301143f    , ULL(0x8002
 CONST_UINT64_T( PHY01_DDRPHY_FIR_MASK_REG_OR_0x800200950301143f     , ULL(0x800200950301143f) );
 CONST_UINT64_T( PHY01_DDRPHY_FIR_ACTION0_REG_0x800200960301143f     , ULL(0x800200960301143f) );
 CONST_UINT64_T( PHY01_DDRPHY_FIR_ACTION1_REG_0x800200970301143f     , ULL(0x800200970301143f) );
+CONST_UINT64_T( PHY01_DDRPHY_FIR_WOF_REG_0x800200980301143f         , ULL(0x800200980301143f) );
 
 //------------------------------------------------------------------------------
 //      MBA RRQ0 Register - DDR read command parameters
@@ -1025,6 +1037,7 @@ CONST_UINT64_T( MBS01_MBSFIRMASK_AND_0x02011604     , ULL(0x02011604) );
 CONST_UINT64_T( MBS01_MBSFIRMASK_OR_0x02011605      , ULL(0x02011605) );
 CONST_UINT64_T( MBS01_MBSFIRACT0_0x02011606         , ULL(0x02011606) );
 CONST_UINT64_T( MBS01_MBSFIRACT1_0x02011607         , ULL(0x02011607) );
+CONST_UINT64_T( MBS01_MBSFIRWOF_0x02011608          , ULL(0x02011608) );
 
 CONST_UINT64_T( MBS23_MBSFIRQ_0x02011700            , ULL(0x02011700) );
 CONST_UINT64_T( MBS23_MBSFIRMASK_0x02011703         , ULL(0x02011703) );
@@ -1032,6 +1045,7 @@ CONST_UINT64_T( MBS23_MBSFIRMASK_AND_0x02011704     , ULL(0x02011704) );
 CONST_UINT64_T( MBS23_MBSFIRMASK_OR_0x02011705      , ULL(0x02011705) );
 CONST_UINT64_T( MBS23_MBSFIRACT0_0x02011706         , ULL(0x02011706) );
 CONST_UINT64_T( MBS23_MBSFIRACT1_0x02011707         , ULL(0x02011707) );
+CONST_UINT64_T( MBS23_MBSFIRWOF_0x02011708          , ULL(0x02011708) );
 
 //------------------------------------------------------------------------------
 //      SCAC Registers
@@ -1042,6 +1056,7 @@ CONST_UINT64_T( SCAC_FIRMASK_AND_0x020115C4     , ULL(0x020115C4) );
 CONST_UINT64_T( SCAC_FIRMASK_OR_0x020115C5      , ULL(0x020115C5) );
 CONST_UINT64_T( SCAC_FIRACTION0_0x020115C6      , ULL(0x020115C6) );
 CONST_UINT64_T( SCAC_FIRACTION1_0x020115C7      , ULL(0x020115C7) );
+CONST_UINT64_T( SCAC_FIRWOF_0x020115C8          , ULL(0x020115C8) );
 
 //------------------------------------------------------------------------------
 //      DQ/DQS Slew Registers
@@ -1741,6 +1756,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.64  2013/08/22 19:46:32  mjjones
+Added DMI-FIR and WOF registers
+
 Revision 1.63  2013/06/18 15:20:21  mwuu
 Fixed naming of IO_FET_SLICE_EN_MAP1_P0_ADR0:3
 

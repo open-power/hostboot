@@ -56,6 +56,7 @@
 #                                      collectRegisterFfdc element
 #                  mjjones   05/20/13  Support Bus Callouts
 #                  mjjones   06/24/13  Support Children CDGs
+#                  mjjones   08/20/13  Use constants for Reg FFDC collection
 #
 # End Change Log ******************************************************
 
@@ -278,7 +279,8 @@ print CRFILE "#include <fapiCollectRegFfdc.H>\n";
 print CRFILE "#include <fapiTarget.H>\n";
 print CRFILE "#include <fapiReturnCode.H>\n";
 print CRFILE "#include <fapiHwAccess.H>\n";
-print CRFILE "#include <fapiPlatTrace.H>\n\n";
+print CRFILE "#include <fapiPlatTrace.H>\n";
+print CRFILE "#include <fapiPlatRegAddresses.H>\n\n";
 print CRFILE "namespace fapi\n";
 print CRFILE "{\n";
 print CRFILE "void fapiCollectRegFfdc(const fapi::Target & i_target,\n";
@@ -777,33 +779,15 @@ foreach my $argnum (1 .. $#ARGV)
         # Look for CFAM Register addresses
         foreach my $cfamRegister (@{$registerFfdc->{cfamRegister}})
         {
-            # Extract the address
-            if ($cfamRegister =~ m/(0x[\dA-Fa-f]+)/)
-            {
-                print CRFILE "            l_cfamAddresses.push_back($1);\n";
-                print CRFILE "            l_ffdcSize += sizeof(l_cfamData);\n";
-            }
-            else
-            {
-                print ("fapiParseErrorInfo.pl ERROR. CFAM address bad: $cfamRegister\n");
-                exit(1);
-            }
+            print CRFILE "            l_cfamAddresses.push_back($cfamRegister);\n";
+            print CRFILE "            l_ffdcSize += sizeof(l_cfamData);\n";
         }
 
         # Look for SCOM Register addresses
         foreach my $scomRegister (@{$registerFfdc->{scomRegister}})
         {
-            # Extract the address
-            if ($scomRegister =~ m/(0x[\dA-Fa-f]+)/)
-            {
-                print CRFILE "            l_scomAddresses.push_back($1ULL);\n";
-                print CRFILE "            l_ffdcSize += sizeof(l_scomData);\n";
-            }
-            else
-            {
-                print ("fapiParseErrorInfo.pl ERROR. SCOM address bad: $scomRegister\n");
-                exit(1);
-            }
+            print CRFILE "            l_scomAddresses.push_back($scomRegister);\n";
+            print CRFILE "            l_ffdcSize += sizeof(l_scomData);\n";
         }
 
         print CRFILE "            break;\n";

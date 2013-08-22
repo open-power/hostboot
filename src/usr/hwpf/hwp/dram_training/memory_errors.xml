@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_errors.xml,v 1.41 2013/06/19 18:27:28 bellows Exp $ -->
+<!-- $Id: memory_errors.xml,v 1.42 2013/08/22 19:44:10 mjjones Exp $ -->
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 <!-- *********************************************************************** -->
 
@@ -334,10 +334,10 @@
 
 <registerFfdc>
   <id>REG_FFDC_MBI_FIR_REGS</id>
-  <scomRegister>CEN_MBIFIRQ_0x02010800</scomRegister>
-  <scomRegister>CEN_MBIFIRMASK_0x02010803</scomRegister>
-  <scomRegister>CEN_MBIFIRACT0_0x02010806</scomRegister>
-  <scomRegister>CEN_MBIFIRACT1_0x02010807</scomRegister>
+  <scomRegister>MBI_FIR_0x02010800</scomRegister>
+  <scomRegister>MBI_FIRMASK_0x02010803</scomRegister>
+  <scomRegister>MBI_FIRACT0_0x02010806</scomRegister>
+  <scomRegister>MBI_FIRACT1_0x02010807</scomRegister>
 </registerFfdc>
 
 <registerFfdc>
@@ -360,35 +360,35 @@
   <scomRegister>MBS_ECC1_MBECCFIR_ACTION1_0x02011487</scomRegister>
   <scomRegister>MBS_ECC1_MBECCFIR_WOF_0x02011488</scomRegister>
 
-  <scomRegister>CEN_MBS01_MBSFIRQ_0x02011600</scomRegister>
-  <scomRegister>CEN_MBS01_MBSFIRMASK_0x02011603</scomRegister>
-  <scomRegister>CEN_MBS01_MBSFIRACT0_0x02011606</scomRegister>
-  <scomRegister>CEN_MBS01_MBSFIRACT1_0x02011607</scomRegister>
-  <scomRegister>CEN_MBS01_MBSFIRWOF_0x02011608</scomRegister>
+  <scomRegister>MBS01_MBSFIRQ_0x02011600</scomRegister>
+  <scomRegister>MBS01_MBSFIRMASK_0x02011603</scomRegister>
+  <scomRegister>MBS01_MBSFIRACT0_0x02011606</scomRegister>
+  <scomRegister>MBS01_MBSFIRACT1_0x02011607</scomRegister>
+  <scomRegister>MBS01_MBSFIRWOF_0x02011608</scomRegister>
 
-  <scomRegister>CEN_MBS23_MBSFIRQ_0x02011700</scomRegister>
-  <scomRegister>CEN_MBS23_MBSFIRMASK_0x02011703</scomRegister>
-  <scomRegister>CEN_MBS23_MBSFIRACT0_0x02011706</scomRegister>
-  <scomRegister>CEN_MBS23_MBSFIRACT1_0x02011707</scomRegister>
-  <scomRegister>CEN_MBS23_MBSFIRWOF_0x02011708</scomRegister>
+  <scomRegister>MBS23_MBSFIRQ_0x02011700</scomRegister>
+  <scomRegister>MBS23_MBSFIRMASK_0x02011703</scomRegister>
+  <scomRegister>MBS23_MBSFIRACT0_0x02011706</scomRegister>
+  <scomRegister>MBS23_MBSFIRACT1_0x02011707</scomRegister>
+  <scomRegister>MBS23_MBSFIRWOF_0x02011708</scomRegister>
 </registerFfdc>
 
 <registerFfdc>
   <id>REG_FFDC_SCAC_FIR_REGS</id>
-  <scomRegister>CEN_SCAC_LFIR_0x020115c0</scomRegister>
-  <scomRegister>CEN_SCAC_FIRMASK_0x020115c3</scomRegister>
-  <scomRegister>CEN_SCAC_FIRACTION0_0x020115c6</scomRegister>
-  <scomRegister>CEN_SCAC_FIRACTION1_0x020115c7</scomRegister>
-  <scomRegister>CEN_SCAC_FIRWOF_0x020115c8</scomRegister>
+  <scomRegister>SCAC_LFIR_0x020115C0</scomRegister>
+  <scomRegister>SCAC_FIRMASK_0x020115C3</scomRegister>
+  <scomRegister>SCAC_FIRACTION0_0x020115C6</scomRegister>
+  <scomRegister>SCAC_FIRACTION1_0x020115C7</scomRegister>
+  <scomRegister>SCAC_FIRWOF_0x020115C8</scomRegister>
 </registerFfdc>
 
 <registerFfdc>
   <id>REG_FFDC_DDR_PHY_FIR_REGS</id>
-  <scomRegister>PHY01_DDRPHY_FIR_REG_0x800200900301143fULL</scomRegister>
-  <scomRegister>PHY01_DDRPHY_FIR_MASK_REG_0x800200930301143fULL</scomRegister>
-  <scomRegister>PHY01_DDRPHY_FIR_ACTION0_REG_0x800200960301143fULL</scomRegister>
-  <scomRegister>PHY01_DDRPHY_FIR_ACTION1_REG_0x800200970301143fULL</scomRegister>
-  <scomRegister>PHY01_DDRPHY_FIR_WOF_REG_0x800200980301143fULL</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_REG_0x800200900301143f</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_MASK_REG_0x800200930301143f</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_ACTION0_REG_0x800200960301143f</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_ACTION1_REG_0x800200970301143f</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_WOF_REG_0x800200980301143f</scomRegister>
 </registerFfdc>
 
 <registerFfdc>
@@ -396,8 +396,8 @@
   <scomRegister>CEN_DMIFIR_0x02010400</scomRegister>
   <scomRegister>CEN_DMIFIR_MASK_0x02010403</scomRegister>
   <scomRegister>CEN_DMIFIR_ACT0_0x02010406</scomRegister>
-  <scomRegister>CEN_DMIFIR_ACT0_0x02010407</scomRegister>
-  <scomRegister>CEN_DMIFIR_ACT0_0x02010408</scomRegister>
+  <scomRegister>CEN_DMIFIR_ACT1_0x02010407</scomRegister>
+  <scomRegister>CEN_DMIFIR_WOF_0x02010408</scomRegister>
 </registerFfdc>
 
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
