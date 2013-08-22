@@ -469,7 +469,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                     case SRCI_PRIORITY_MED:  tmpStr = "MED";   break;
                     case SRCI_PRIORITY_HIGH: tmpStr = "HIGH";  break;
                 }
-                snprintf( header, 25, "   #%d %s", i+1, tmpStr );
+                snprintf( header, 25, " #%d %s", i+1, tmpStr );
 
                 snprintf( data, 50, "0x%08x ", pfa.mruList[i].callout );
 

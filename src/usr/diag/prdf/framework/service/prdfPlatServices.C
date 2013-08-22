@@ -199,11 +199,11 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
 
     errlHndl_t errl = NULL;
     PRD_FAPI_TO_ERRL( errl, mss_IPL_UE_isolation, getFapiTarget(i_mba),
-                      i_rank.flatten(), data );
+                      i_rank.getMaster(), data );
     if ( NULL != errl )
     {
         PRDF_ERR( PRDF_FUNC"mss_IPL_UE_isolation() failed: MBA=0x%08x "
-                  "rank=%d", getHuid(i_mba), i_rank.flatten() );
+                  "rank=%d", getHuid(i_mba), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }

@@ -54,12 +54,12 @@ class CenMark
     {}
 
     /** @brief Constructor from components */
-    CenMark( CenSymbol i_symbolMark, CenSymbol i_chipMark ) :
+    CenMark( const CenSymbol & i_symbolMark, const CenSymbol & i_chipMark ) :
         iv_symbolMark(i_symbolMark), iv_chipMark(i_chipMark)
     {}
 
     /** @brief Constructor from components */
-    CenMark( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
+    CenMark( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
              uint8_t i_symbolMark, uint8_t i_chipMark )
     {
         iv_symbolMark = CenSymbol::fromSymbol( i_mba, i_rank, i_symbolMark );
@@ -75,10 +75,11 @@ class CenMark
     CenSymbol getCM() const { return iv_chipMark; }
 
     /** @brief Sets the symbol mark to the given symbol. */
-    void setSM( CenSymbol i_symbolMark ) { iv_symbolMark = i_symbolMark; }
+    void setSM( const CenSymbol & i_symbolMark )
+    { iv_symbolMark = i_symbolMark; }
 
     /** @brief Sets the chip mark to the given symbol. */
-    void setCM( CenSymbol i_chipMark ) { iv_chipMark = i_chipMark; }
+    void setCM( const CenSymbol & i_chipMark ) { iv_chipMark = i_chipMark; }
 
     /** @brief Sets the symbol mark to an invalid symbol. */
     void clearSM() { iv_symbolMark = CenSymbol(); }

@@ -105,7 +105,9 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
 
 
         // Get the rank
-        iv_rank = CenRank( iv_memMruMeld.s.rank );
+        iv_rank = (0 == iv_memMruMeld.s.srankValid)
+                    ? CenRank( iv_memMruMeld.s.mrank )
+                    : CenRank( iv_memMruMeld.s.mrank, iv_memMruMeld.s.srank );
 
         // Get the symbol or special callout
         if ( (FIRST_SPECIAL_CALLOUT <= iv_memMruMeld.s.symbol) &&
@@ -115,24 +117,19 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
         }
         else
         {
-            if ( SYMBOLS_PER_RANK <= iv_memMruMeld.s.symbol)
+            if ( SYMBOLS_PER_RANK <= iv_memMruMeld.s.symbol )
             {
                 PRDF_ERR( PRDF_FUNC"Invalid symbol value :%u",
-                                    iv_memMruMeld.s.symbol);
+                                    iv_memMruMeld.s.symbol );
                 break;
             }
 
             iv_symbol = CenSymbol::fromSymbol( iv_mbaTarget, iv_rank,
                                                iv_memMruMeld.s.symbol,
                                                iv_memMruMeld.s.pins );
-
             if ( !iv_symbol.isValid() )
             {
-                PRDF_ERR( PRDF_FUNC"Can not create symbol from  symbol value"
-                                    " :%u, pins:%u, rank:%u",
-                                    iv_memMruMeld.s.symbol,
-                                    iv_memMruMeld.s.pins,
-                                    iv_memMruMeld.s.rank );
+                PRDF_ERR( PRDF_FUNC"fromSymbol() failed" );
                 break;
             }
 
@@ -195,12 +192,13 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
             break;
         }
 
-
         iv_memMruMeld.s.nodePos    = getTargetPosition( node );
         iv_memMruMeld.s.procPos    = getTargetPosition( proc );
         iv_memMruMeld.s.cenPos     = getTargetPosition( memBuff );
         iv_memMruMeld.s.mbaPos     = getTargetPosition( iv_mbaTarget );
-        iv_memMruMeld.s.rank       = iv_rank.flatten();
+        iv_memMruMeld.s.mrank      = iv_rank.getMaster();
+        iv_memMruMeld.s.srank      = iv_rank.getSlave();
+        iv_memMruMeld.s.srankValid = iv_rank.isSlaveValid();
         iv_memMruMeld.s.symbol     = iv_symbol.getSymbol();
         iv_memMruMeld.s.pins       = iv_symbol.getPins();
         iv_memMruMeld.s.dramSpared = 0; // manually set by setDramSpared()
@@ -252,12 +250,13 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
             break;
         }
 
-
         iv_memMruMeld.s.nodePos    = getTargetPosition( node );
         iv_memMruMeld.s.procPos    = getTargetPosition( proc );
         iv_memMruMeld.s.cenPos     = getTargetPosition( memBuff );
         iv_memMruMeld.s.mbaPos     = getTargetPosition( iv_mbaTarget );
-        iv_memMruMeld.s.rank       = iv_rank.flatten();
+        iv_memMruMeld.s.mrank      = iv_rank.getMaster();
+        iv_memMruMeld.s.srank      = iv_rank.getSlave();
+        iv_memMruMeld.s.srankValid = iv_rank.isSlaveValid();
         iv_memMruMeld.s.symbol     = iv_special;
 
         // If the code gets to this point the MemoryMru is valid.

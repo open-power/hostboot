@@ -132,7 +132,7 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
             iv_rankMap[rankKey]++;
 
              // In case of dimm Slct , rank select does not matter
-             CenRank dimmRank( dimmSlct, 0);
+             CenRank dimmRank( dimmSlct << DIMM_SLCT_PER_MBA );
              // Increment the soft CEs per half dimm select.
              HalfRankKey dsKey = { dimmRank, portSlct };
              iv_dsMap[dsKey]++;

@@ -60,14 +60,6 @@ namespace PlatServices
 {
 
 //##############################################################################
-//##                             Forward references
-//##############################################################################
-
-int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_rank,
-                         ecmdDataBufferBase & o_startAddr,
-                         ecmdDataBufferBase & o_endAddr );
-
-//##############################################################################
 //##                     Utility Functions (for this file only)
 //##############################################################################
 
@@ -128,7 +120,7 @@ int32_t readErepair(TargetHandle_t i_rxBusTgt,
                      getFapiTarget(i_rxBusTgt),
                      o_rxFailLanes);
 
-     if(NULL != err)
+    if(NULL != err)
     {
         PRDF_ERR( "[PlatServices::readErepair] HUID: 0x%08x io_read_erepair "
                   "failed", getHuid(i_rxBusTgt) );
@@ -234,24 +226,103 @@ int32_t setVpdFailedLanes(TargetHandle_t i_rxBusTgt,
 
 int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
 {
+    #define PRDF_FUNC "[PlatServices::erepairFirIsolation] "
+
     errlHndl_t err = NULL;
 
     PRD_FAPI_TO_ERRL(err, io_fir_isolation, getFapiTarget(i_rxBusTgt));
 
     if(NULL != err)
     {
-        PRDF_TRAC( "[PlatServices::setVpdFailedLanes] rxHUID: 0x%08x "
-                  "committing io_fir_isolation log",
+        PRDF_ERR( PRDF_FUNC"rxHUID: 0x%08x committing io_fir_isolation log",
                   getHuid(i_rxBusTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
     }
 
     // Return SUCCESS since we expect this procedure to generate an error
     return SUCCESS;
+
+    #undef PRDF_FUNC
 }
+
 //##############################################################################
 //##                        Memory specific functions
 //##############################################################################
+
+// Helper function for the for several other memory functions.
+int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
+                         ecmdDataBufferBase & o_startAddr,
+                         ecmdDataBufferBase & o_endAddr,
+                         uint8_t i_srank = 0, bool i_slaveOnly = false )
+{
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Check parameters.
+        if ( TYPE_MBA != getTargetType(i_mba) )
+        {
+            PRDF_ERR( PRDF_FUNC"The given target is not TYPE_MBA" );
+            o_rc = FAIL; break;
+        }
+
+        if ( (MSS_ALL_RANKS != i_mrank && MASTER_RANKS_PER_MBA <= i_mrank) ||
+             (SLAVE_RANKS_PER_MASTER_RANK <= i_srank) )
+        {
+            PRDF_ERR( PRDF_FUNC"The given rank is not valid" );
+            o_rc = FAIL; break;
+        }
+
+        errlHndl_t errl = NULL;
+
+        if ( i_slaveOnly )
+        {
+            // TODO: RTC 82157 Use new interface when available, for now use
+            //       current interface.
+//          PRD_FAPI_TO_ERRL( errl, mss_get_address_range, getFapiTarget(i_mba),
+//                            i_mrank, i_srank, o_startAddr, o_endAddr );
+            PRD_FAPI_TO_ERRL( errl, mss_get_address_range, getFapiTarget(i_mba),
+                              i_mrank, o_startAddr, o_endAddr );
+        }
+        else
+        {
+            PRD_FAPI_TO_ERRL( errl, mss_get_address_range, getFapiTarget(i_mba),
+                              i_mrank, o_startAddr, o_endAddr );
+        }
+
+        if ( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC"mss_get_address_range() failed" );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+        // Verify addresses are of the valid register size.
+        if ( 64 != o_startAddr.getBitLength() ||
+             64 != o_endAddr.getBitLength() )
+        {
+            PRDF_ERR( PRDF_FUNC"Addresses returned from "
+                      "mss_get_address_range() are not 64-bit" );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x i_mrank=%d i_srank=%d "
+                  "i_slaveOnly=%s", getHuid(i_mba), i_mrank, i_srank,
+                  i_slaveOnly ? "true" : "false" );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
                         CenDqBitmap & o_bitmap, bool i_allowNoDimm )
@@ -338,19 +409,20 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
                          CenMark & o_mark )
 {
+    #define PRDF_FUNC "[PlatServices::mssGetMarkStore] "
+
     int32_t o_rc = SUCCESS;
 
     errlHndl_t errl = NULL;
 
     uint8_t symbolMark, chipMark;
     PRD_FAPI_TO_ERRL( errl, mss_get_mark_store, getFapiTarget(i_mba),
-                      i_rank.flatten(), symbolMark, chipMark );
+                      i_rank.getMaster(), symbolMark, chipMark );
 
     if ( NULL != errl )
     {
-        PRDF_ERR( "[PlatServices::mssGetMarkStore] mss_get_mark_store() "
-                  "failed. HUID: 0x%08x rank: %d",
-                  getHuid(i_mba), i_rank.flatten() );
+        PRDF_ERR( PRDF_FUNC"mss_get_mark_store() failed. HUID: 0x%08x rank: %d",
+                  getHuid(i_mba), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -360,6 +432,8 @@ int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
     }
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -380,7 +454,7 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
                                                   : MSS_INVALID_SYMBOL;
 
     fapi::ReturnCode l_rc = mss_put_mark_store( getFapiTarget(i_mba),
-                                                i_rank.flatten(), symbolMark,
+                                                i_rank.getMaster(), symbolMark,
                                                 chipMark );
 
     if ( i_allowWriteBlocked &&
@@ -395,7 +469,7 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
         {
             PRDF_ERR( PRDF_FUNC"mss_put_mark_store() failed. HUID: 0x%08x "
                       "rank: %d sm: %d cm: %d", getHuid(i_mba),
-                      i_rank.flatten(), symbolMark, chipMark );
+                      i_rank.getMaster(), symbolMark, chipMark );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL;
         }
@@ -418,13 +492,13 @@ int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
 
     uint8_t port0Spare, port1Spare, eccSpare;
     PRD_FAPI_TO_ERRL( errl, mss_check_steering, getFapiTarget(i_mba),
-                      i_rank.flatten(), port0Spare, port1Spare, eccSpare );
+                      i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
 
     if ( NULL != errl )
     {
         PRDF_ERR( "[PlatServices::mssGetSteerMux] mss_check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
-                  getHuid(i_mba), i_rank.flatten() );
+                  getHuid(i_mba), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -448,13 +522,13 @@ int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
     errlHndl_t errl = NULL;
 
     PRD_FAPI_TO_ERRL( errl, mss_do_steering, getFapiTarget(i_mba),
-                      i_rank.flatten(), i_symbol.getSymbol(), i_x4EccSpare );
+                      i_rank.getMaster(), i_symbol.getSymbol(), i_x4EccSpare );
 
     if ( NULL != errl )
     {
         PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
                   "failed. HUID: 0x%08x rank: %d symbol: %d eccSpare: %c",
-                  getHuid(i_mba), i_rank.flatten(), i_symbol.getSymbol(),
+                  getHuid(i_mba), i_rank.getMaster(), i_symbol.getSymbol(),
                   i_x4EccSpare ? 'T' : 'F' );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
@@ -468,12 +542,13 @@ int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
 int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
                          CenAddr & o_endAddr )
 {
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
+
     ecmdDataBufferBase startAddr(64), endAddr(64);
     int32_t o_rc = getMemAddrRange( i_mba, MSS_ALL_RANKS, startAddr, endAddr );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( "[PlatServices::getMemAddrRange] failed: i_mba=0x%08x",
-                  getHuid(i_mba) );
+        PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x", getHuid(i_mba) );
     }
     else
     {
@@ -482,19 +557,27 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
     }
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
 int32_t getMemAddrRange( TargetHandle_t i_mba, const CenRank & i_rank,
-                         CenAddr & o_startAddr, CenAddr & o_endAddr )
+                         CenAddr & o_startAddr, CenAddr & o_endAddr,
+                         bool i_slaveOnly )
 {
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
+
     ecmdDataBufferBase startAddr(64), endAddr(64);
-    int32_t o_rc = getMemAddrRange(i_mba, i_rank.flatten(), startAddr, endAddr);
+    int32_t o_rc = getMemAddrRange( i_mba, i_rank.getMaster(),
+                                    startAddr, endAddr,
+                                    i_rank.getSlave(), i_slaveOnly );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( "[PlatServices::getMemAddrRange] failed: i_mba=0x%08x "
-                  "i_rank=%d", getHuid(i_mba), i_rank.flatten() );
+        PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x i_rank=M%dS%d i_slaveOnly=%s",
+                  getHuid(i_mba), i_rank.getMaster(), i_rank.getSlave(),
+                  i_slaveOnly ? "true" : "false" );
     }
     else
     {
@@ -503,6 +586,8 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, const CenRank & i_rank,
     }
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -611,61 +696,6 @@ int32_t mss_MaintCmdWrapper::cleanupCmd()
 
 //------------------------------------------------------------------------------
 
-// Helper function for the createMssCmd() functions.
-int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_rank,
-                         ecmdDataBufferBase & o_startAddr,
-                         ecmdDataBufferBase & o_endAddr )
-{
-    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Check parameters.
-        if ( TYPE_MBA != getTargetType(i_mba) )
-        {
-            PRDF_ERR( PRDF_FUNC"The given target is not TYPE_MBA" );
-            o_rc = FAIL; break;
-        }
-
-        if ( MSS_ALL_RANKS != i_rank && MAX_RANKS_PER_MBA <= i_rank )
-        {
-            PRDF_ERR( PRDF_FUNC"The given rank is not valid" );
-            o_rc = FAIL; break;
-        }
-
-        errlHndl_t errl = NULL;
-        PRD_FAPI_TO_ERRL( errl, mss_get_address_range, getFapiTarget(i_mba),
-                          i_rank, o_startAddr, o_endAddr );
-        if ( NULL != errl )
-        {
-            PRDF_ERR( PRDF_FUNC"mss_get_address_range() failed" );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-
-        // Verify addresses are of the valid register size.
-        if ( 64 != o_startAddr.getBitLength() ||
-             64 != o_endAddr.getBitLength() )
-        {
-            PRDF_ERR( PRDF_FUNC"Addresses returned from "
-                      "mss_get_address_range() are not 64-bit" );
-            o_rc = FAIL; break;
-        }
-
-    } while (0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC"Failed: 0x%08x 0x%02x", getHuid(i_mba), i_rank );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 // Helper function for the other createMssCmd() functions.
@@ -737,12 +767,13 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                     TargetHandle_t i_mba,
                                     const CenRank & i_rank, uint32_t i_stopCond,
-                                    bool i_isFastSpeed )
+                                    bool i_isFastSpeed, bool i_slaveOnly )
 {
     mss_MaintCmdWrapper * o_cmd = NULL;
 
     ecmdDataBufferBase sAddr(64), eAddr(64);
-    int32_t l_rc = getMemAddrRange( i_mba, i_rank.flatten(), sAddr, eAddr );
+    int32_t l_rc = getMemAddrRange( i_mba, i_rank.getMaster(), sAddr, eAddr,
+                                    i_rank.getSlave(), i_slaveOnly );
     if ( SUCCESS == l_rc )
     {
         o_cmd = createMssCmd( i_cmdType, i_mba, i_stopCond, i_isFastSpeed,

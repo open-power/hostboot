@@ -114,10 +114,14 @@ bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
     uint8_t cenPos  = (mm.s.procPos << 3) | mm.s.cenPos;
     uint8_t mbaPos  = mm.s.mbaPos;
 
+    char tmp[PARSER_HEADER_SIZE] = { '\0' };
+    if ( 1 == mm.s.srankValid )
+        snprintf( tmp, PARSER_HEADER_SIZE, "S%d", mm.s.srank );
+
     char header[PARSER_HEADER_SIZE];
-    snprintf( header, PARSER_HEADER_SIZE, "    mba(n%dp%dc%d)%s Rank: %d",
+    snprintf( header, PARSER_HEADER_SIZE, "  mba(n%dp%dc%d)%s Rank:M%d%s",
               nodePos, cenPos, mbaPos, (cenPos < 10) ? " " : "",
-              mm.s.rank );
+              mm.s.mrank, tmp );
 
     char data[PARSER_DATA_SIZE];
 
@@ -141,8 +145,8 @@ bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
     }
 
     // Ouptut should look like:
-    // |      mba(n0p0c0)  Rank: 0 : Special: CALLOUT_RANK                    |
-    // |      mba(n7p63c1) Rank: 7 : Symbol: 71 Pins: 3 Spared: false         |
+    // |   mba(n0p0c0)  Rank:M7   : Special: CALLOUT_RANK                    |
+    // |   mba(n7p63c1) Rank:M0S7 : Symbol: 71 Pins: 3 Spared: false         |
 
     i_parser.PrintString( header, data );
 

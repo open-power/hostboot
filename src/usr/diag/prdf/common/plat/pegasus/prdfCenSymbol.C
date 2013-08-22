@@ -235,9 +235,9 @@ int32_t CenSymbol::getSymbol( const CenRank & i_rank, WiringType i_wiringType,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_rank=%d i_wiringType=%d i_dimmDq=%d "
-                  "i_portSlct=%d", i_rank.flatten(), i_wiringType, i_dimmDq,
-                  i_portSlct );
+        PRDF_ERR( PRDF_FUNC"Failed: i_rank=M%dS%d i_wiringType=%d i_dimmDq=%d "
+                  "i_portSlct=%d", i_rank.getMaster(), i_rank.getSlave(),
+                  i_wiringType, i_dimmDq, i_portSlct );
     }
 
     return o_rc;

@@ -145,9 +145,10 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC"iv_mbaChip:0x%08x iv_initialized:%c iv_tdState:%d "
-                  "iv_rank:%d iv_mark:%2d %2d", getHuid(mba),
-                  iv_initialized ? 'T' : 'F', iv_tdState, iv_rank.flatten(),
-                  iv_mark.getCM().getSymbol(), iv_mark.getSM().getSymbol() );
+                  "iv_rank:M%dS%d iv_mark:%2d %2d", getHuid(mba),
+                  iv_initialized ? 'T' : 'F', iv_tdState, iv_rank.getMaster(),
+                  iv_rank.getSlave(), iv_mark.getCM().getSymbol(),
+                  iv_mark.getSM().getSymbol() );
 
         int32_t l_rc = cleanupPrevCmd(); // Just in case.
         if ( SUCCESS != l_rc )
@@ -203,8 +204,9 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         // This is a no-op in Hostboot. Instead, print a trace statement
         // indicating the intended request.
         PRDF_INF( PRDF_FUNC"TD request found during Hostboot: "
-                  "iv_mbaChip=0x%08x i_rank=%d i_event=%d",
-                  getHuid(mba), i_rank.flatten(), i_event );
+                  "iv_mbaChip=0x%08x i_rank=M%dS%d i_event=%d",
+                  getHuid(mba), i_rank.getMaster(), i_rank.getSlave(),
+                  i_event );
 
     } while(0);
 
@@ -983,7 +985,7 @@ int32_t CenMbaTdCtlr::startTpsPhase1()
                               mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
 
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  mba, iv_rank, stopCond );
+                                  mba, iv_rank, stopCond, true, true );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -1039,7 +1041,7 @@ int32_t CenMbaTdCtlr::startTpsPhase2()
                               mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
 
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  mba, iv_rank, stopCond );
+                                  mba, iv_rank, stopCond, true, true );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -1094,7 +1096,7 @@ int32_t CenMbaTdCtlr::checkEccErrors( uint16_t & o_eccErrorMask )
             break;
         }
 
-        if ( mbsEccFir->IsBitSet(20 + iv_rank.flatten()) )
+        if ( mbsEccFir->IsBitSet(20 + iv_rank.getMaster()) )
         {
             o_eccErrorMask |= MPE;
 
@@ -1633,7 +1635,7 @@ int32_t CenMbaTdCtlr::prepareNextCmd()
         firand->setAllBits();
 
         // Clear MPE bit for this rank.
-        firand->ClearBit( 20 + iv_rank.flatten() );
+        firand->ClearBit( 20 + iv_rank.getMaster() );
 
         // Clear NCE, SCE, MCE, RCE, SUE, UE bits (36-41)
         firand->SetBitFieldJustified( 36, 6, 0 );

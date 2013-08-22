@@ -76,6 +76,7 @@ union MemMruMeld
         //       version field so that the error log parser know which format to
         //       used.
 
+#ifndef ESW_SIM_COMPILE
         uint32_t valid      : 1; ///< Used to indicate nothing failed while
                                  ///< building the object (1=valid, 0=not valid)
         uint32_t procPos    : 3; ///< Proc position within node (0-7)
@@ -84,15 +85,31 @@ union MemMruMeld
 
         uint32_t pins       : 2; ///< Even and/or Odd symbol pins
         uint32_t nodePos    : 3; ///< Node position (0-7)
-        uint32_t rank       : 3; ///< Rank (0-7)
+        uint32_t mrank      : 3; ///< Master rank (0-7)
 
         uint32_t dramSpared : 1; ///< True if symbol is on spared DRAM
         uint32_t symbol     : 7; ///< Symbol or SpecialCallout
 
         // TODO: RTC 67376 Check if width for wiring type is enough
-        uint32_t wiringType : 5; ///< Wiring type
-
-        uint32_t unused     : 3; ///< Reserved for future use
+        uint32_t wiringType : 4; ///< Wiring type
+        uint32_t srankValid : 1; ///< TRUE if slave rank is valid
+        uint32_t srank      : 3; ///< Slave rank (0-7)
+#else
+        // Need to reverse this to make the uint32_t look right in the
+        // simulator.
+        uint32_t srank      : 3;
+        uint32_t srankValid : 1;
+        uint32_t wiringType : 4;
+        uint32_t symbol     : 7;
+        uint32_t dramSpared : 1;
+        uint32_t mrank      : 3;
+        uint32_t nodePos    : 3;
+        uint32_t pins       : 2;
+        uint32_t mbaPos     : 1;
+        uint32_t cenPos     : 3;
+        uint32_t procPos    : 3;
+        uint32_t valid      : 1;
+#endif
 
     } s; ///< A struct defining the 32-bit version of the MemoryMru
 };

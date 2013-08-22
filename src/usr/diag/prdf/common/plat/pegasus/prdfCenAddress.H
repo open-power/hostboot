@@ -48,54 +48,95 @@ class CenRank
   public: // constructor
 
     /** @brief Default constructor */
-    CenRank() { iv_rank.u = 0; }
+    CenRank() :
+        iv_slaveValid(false)
+    {
+        iv_rank.master.u = 0;
+        iv_rank.slave    = 0;
+    }
 
     /**
      * @brief Constructor from flattened rank.
-     * @param i_rank The 3-bit rank.
-     * @note  The rank format should be 0bDRR (D=DIMM select, R=rank select).
+     * @param i_mrank The 3-bit master rank.
+     * @note  The master rank format should be 0bDRR (D=DIMM select,
+     *        R=rank select).
      */
-    explicit CenRank( uint8_t i_rank ) { iv_rank.u = i_rank; }
+    explicit CenRank( uint8_t i_mrank ) :
+        iv_slaveValid(false)
+    {
+        iv_rank.master.u = i_mrank;
+        iv_rank.slave    = 0;
+    }
 
     /**
-     * @brief Constructor from components.
-     * @param i_dimmSlct The 1-bit DIMM select.
-     * @param i_rankSlct The 2-bit rank select.
+     * @brief Constructor from flattened rank.
+     * @param i_mrank The 3-bit master rank.
+     * @param i_srank The 3-bit slave rank.
+     * @note  The master rank format should be 0bDRR (D=DIMM select,
+     *        R=rank select).
      */
-    CenRank( uint8_t i_dimmSlct, uint8_t i_rankSlct )
+    explicit CenRank( uint8_t i_mrank, uint8_t i_srank ) :
+        iv_slaveValid(true)
     {
-        iv_rank.s.ds = i_dimmSlct;
-        iv_rank.s.rs = i_rankSlct;
+        iv_rank.master.u = i_mrank;
+        iv_rank.slave    = i_srank;
     }
 
     /** @return The 1-bit DIMM select. */
-    uint8_t getDimmSlct() const { return iv_rank.s.ds; }
+    uint8_t getDimmSlct() const { return iv_rank.master.s.ds; }
 
     /** @return The 2-bit rank select. */
-    uint8_t getRankSlct() const { return iv_rank.s.rs; }
+    uint8_t getRankSlct() const { return iv_rank.master.s.rs; }
 
     /**
-     * @brief  Converts internal data structure to a uint8_t.
+     * @return The 3-bit master rank.
      * @note   The format will be 0bDRR (D=DIMM select, R=rank select).
-     * @return A uint8_t version of the rank.
      */
-    uint8_t flatten() const { return iv_rank.u; }
+    uint8_t getMaster() const { return iv_rank.master.u; }
+
+    /** @return The 3-bit slave rank. */
+    uint8_t getSlave() const { return iv_rank.slave; }
+
+    /**
+     * There are a lot of cases where we only need to know the master rank,
+     * however, this object stores both the master and slave rank. This function
+     * will indicate whether it is intended to only be used for a master rank or
+     * both a master and slave rank.
+     *
+     * @return TRUE if slave rank is trusted to be valid, FALSE otherwise.
+     */
+    bool isSlaveValid() const { return iv_slaveValid; }
 
     /** @brief '==' operator */
     bool operator==( const CenRank & i_rank ) const
-    { return ( this->flatten() == i_rank.flatten() ); }
+    {
+        return ( (this->getMaster() == i_rank.getMaster()) &&
+                 (this->getSlave()  == i_rank.getSlave() ) );
+    }
 
     /** @brief '<' operator */
     bool operator<( const CenRank & i_rank ) const
-    { return ( this->flatten() < i_rank.flatten() ); }
+    {
+        return ( (this->getMaster() < i_rank.getMaster()) ||
+                 ( (this->getMaster() == i_rank.getMaster()) &&
+                   (this->getSlave()  <  i_rank.getSlave() ) ) );
+    }
 
   private: // data
 
-    union
+    struct
     {
-        struct { uint8_t unused : 5; uint8_t ds : 1; uint8_t rs : 2; } s;
-        uint8_t u;
+        union
+        {
+            struct { uint8_t unused : 5; uint8_t ds : 1; uint8_t rs : 2; } s;
+            uint8_t u;
+        } master;
+
+        uint8_t slave : 3;
+
     } iv_rank;
+
+    bool iv_slaveValid;
 };
 
 //------------------------------------------------------------------------------
@@ -147,16 +188,17 @@ class CenAddr
 
     /**
      * @brief Constructor from components.
-     * @param i_rank  The 3-bit master rank.
+     * @param i_mrank The 3-bit master rank.
+     * @param i_srank The 3-bit slave rank.
      * @param i_bank  The 4-bit bank.
      * @param i_row   The 17-bit row.
      * @param i_col   The 12-bit column.
      * @param i_types An OR of all error types associated with this address (see
      *                enum ErrorType).
      */
-    CenAddr( uint32_t i_rank, uint32_t i_bank, uint32_t i_row,
-             uint32_t i_col, uint32_t i_types = NONE ) :
-        iv_rank(i_rank), iv_types(i_types)
+    CenAddr( uint32_t i_mrank, uint32_t i_srank, uint32_t i_bank,
+             uint32_t i_row, uint32_t i_col, uint32_t i_types = NONE ) :
+        iv_rank(i_mrank, i_srank), iv_types(i_types)
     {
         iv_bankRowCol.bank = i_bank;
         iv_bankRowCol.row  = i_row;
@@ -171,7 +213,8 @@ class CenAddr
     static CenAddr fromReadAddr( uint64_t i_addr, uint32_t i_type )
     {
         return CenAddr(
-                  (i_addr >> 60) &     0x7,     // rank
+                  (i_addr >> 60) &     0x7,     // master rank
+                  (i_addr >> 57) &     0x7,     // slave rank
                   (i_addr >> 53) &     0xf,     // bank
                  ((i_addr >>  5) & 0x20000) | ((i_addr >> 36) & 0x1ffff), // row
                   (i_addr >> 24) &   0xfff,     // column
@@ -188,7 +231,8 @@ class CenAddr
      */
     uint64_t toReadAddr() const
     {
-        return ( ((uint64_t) iv_rank.flatten()             << 60) |
+        return ( ((uint64_t) iv_rank.getMaster()           << 60) |
+                 ((uint64_t) iv_rank.getSlave()            << 57) |
                  ((uint64_t) iv_bankRowCol.bank            << 53) |
                  ((uint64_t)(iv_bankRowCol.row & 0x1ffff)  << 36) |  // r16-r0
                  ((uint64_t) iv_bankRowCol.col             << 24) |
@@ -202,7 +246,8 @@ class CenAddr
     static CenAddr fromMaintStartAddr( uint64_t i_addr )
     {
         return CenAddr(
-                  (i_addr >> 60) &     0x7,     // rank
+                  (i_addr >> 60) &     0x7,     // master rank
+                  (i_addr >> 57) &     0x7,     // slave rank
                   (i_addr >> 53) &     0xf,     // bank
                  ((i_addr << 13) & 0x20000) | ((i_addr >> 36) & 0x1ffff), // row
                   (i_addr >> 24) &   0xfff,     // column
@@ -218,7 +263,8 @@ class CenAddr
      */
     uint64_t toMaintStartAddr() const
     {
-        return ( ((uint64_t) iv_rank.flatten()             << 60) |
+        return ( ((uint64_t) iv_rank.getMaster()           << 60) |
+                 ((uint64_t) iv_rank.getSlave()            << 57) |
                  ((uint64_t) iv_bankRowCol.bank            << 53) |
                  ((uint64_t)(iv_bankRowCol.row & 0x1ffff)  << 36) |  // r16-r0
                  ((uint64_t) iv_bankRowCol.col             << 24) |
@@ -232,7 +278,8 @@ class CenAddr
     static CenAddr fromMaintEndAddr( uint64_t i_addr )
     {
         return CenAddr(
-                  (i_addr >> 60) &     0x7,     // rank
+                  (i_addr >> 60) &     0x7,     // master rank
+                  (i_addr >> 57) &     0x7,     // slave rank
                   (i_addr >> 53) &     0xf,     // bank
                  ((i_addr >>  6) & 0x20000) | ((i_addr >> 36) & 0x1ffff), // row
                   (i_addr >> 24) &   0xfff );    // column
@@ -247,7 +294,8 @@ class CenAddr
      */
     uint64_t toMaintEndAddr() const
     {
-        return ( ((uint64_t) iv_rank.flatten()             << 60) |
+        return ( ((uint64_t) iv_rank.getMaster()           << 60) |
+                 ((uint64_t) iv_rank.getSlave()            << 57) |
                  ((uint64_t) iv_bankRowCol.bank            << 53) |
                  ((uint64_t)(iv_bankRowCol.row & 0x1ffff)  << 36) |  // r16-r0
                  ((uint64_t) iv_bankRowCol.col             << 24) |

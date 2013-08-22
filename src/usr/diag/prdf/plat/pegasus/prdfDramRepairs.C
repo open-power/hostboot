@@ -118,7 +118,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
 
     errlHndl_t errl = NULL; // Initially NULL, will create if needed.
 
-    for ( uint8_t r = 0; r < MAX_RANKS_PER_MBA; ++r )
+    for ( uint8_t r = 0; r < MASTER_RANKS_PER_MBA; ++r )
     {
         if ( 0 == (i_repairedRankMask & (1 << r)) )
         {
@@ -131,7 +131,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
         if ( SUCCESS != mssGetMarkStore(i_mba, rank, mark) )
         {
             PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mba), rank.flatten() );
+                      getHuid(i_mba), rank.getMaster() );
             analysisErrors = true;
             continue; // skip this rank
         }
@@ -141,7 +141,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
         if ( SUCCESS != mssGetSteerMux(i_mba, rank, sp0, sp1, sp))
         {
             PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mba), rank.flatten() );
+                      getHuid(i_mba), rank.getMaster() );
             analysisErrors = true;
             continue; // skip this rank
         }
@@ -257,7 +257,7 @@ bool screenBadDqs( TargetHandle_t i_mba )
 
     errlHndl_t errl = NULL; // Initially NULL, will create if needed.
 
-    for ( uint32_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
+    for ( uint32_t r = 0; r < MASTER_RANKS_PER_MBA; r++ )
     {
         CenRank rank ( r );
         CenDqBitmap bitmap;
@@ -270,7 +270,7 @@ bool screenBadDqs( TargetHandle_t i_mba )
         if ( SUCCESS != getBadDqBitmap(i_mba, rank, bitmap, true) )
         {
             PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mba), rank.flatten() );
+                      getHuid(i_mba), rank.getMaster() );
             analysisErrors = true;
             continue; // skip this rank
         }
@@ -295,7 +295,7 @@ void deployDramSpares( TargetHandle_t i_mba )
 {
     bool x4 = isDramWidthX4(i_mba);
 
-    for ( uint32_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
+    for ( uint32_t r = 0; r < MASTER_RANKS_PER_MBA; r++ )
     {
         CenRank rank ( r );
 

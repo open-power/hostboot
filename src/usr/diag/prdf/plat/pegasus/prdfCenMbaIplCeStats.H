@@ -123,7 +123,7 @@ class CenMbaIplCeStats
      */
     struct HalfRankKey
     {
-        CenRank rank;   ///< The rank
+        CenRank rank;     ///< The rank
         uint8_t portSlct; ///< The port select
 
         /** @brief Overrides the '==' operator. */
@@ -205,9 +205,6 @@ class CenMbaIplCeStats
 
     /** The MBA chip. */
     ExtensibleChip * iv_mbaChip;
-
-    /** The rank that this object is expecting to collect for. */
-    CenRank iv_rankToAnalyze;
 
     /** A map to keep track of which half ranks have all ready been called out.
      *  This helps reduce excessive callouts for the same hardware. */

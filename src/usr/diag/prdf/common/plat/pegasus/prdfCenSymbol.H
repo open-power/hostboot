@@ -81,7 +81,7 @@ class CenSymbol
     /**
      * @brief Constructor from components
      */
-    CenSymbol( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
+    CenSymbol( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                WiringType i_wiringType, uint8_t i_symbol, uint8_t i_pins,
                bool i_x4Dram ) :
         iv_mbaTarget(i_mba), iv_rank(i_rank), iv_wiringType(i_wiringType),

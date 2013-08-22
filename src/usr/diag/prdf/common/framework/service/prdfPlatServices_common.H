@@ -288,16 +288,18 @@ int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
                          CenAddr & o_endAddr );
 
 /**
- * @brief  Returns the start and end maintenance address of the given rank.
+ * @brief  Returns the start and end maintenance address of the given rank. By
+ *         default, will return the address range of the master rank.
  * @param  i_mba       Target MBA.
  * @param  i_rank      Target rank.
  * @param  o_startAddr The return start address.
  * @param  o_endAddr   The return end address.
+ * @param  i_slaveOnly true = slave rank only, false = master rank (default).
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
 int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenAddr & o_startAddr,
-                         CenAddr & o_endAddr );
+                         CenAddr & o_endAddr, bool i_slaveOnly = false );
 
 /**
  * @brief   Returns the memory buffer raw card type (i.e. R/C A).
@@ -410,6 +412,7 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
  * @param  i_mba         An MBA target.
  * @param  i_stopCond    Bit mask for conditions in which to stop command.
  * @param  i_isFastSpeed false = slow (12 H), true = fast (default).
+ * @param  i_slaveOnly   true = slave rank only, false = master rank (default).
  * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
  *         object. It is the caller's responsibilty to delete this object.
@@ -418,7 +421,8 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                     TARGETING::TargetHandle_t i_mba,
                                     const CenRank & i_rank, uint32_t i_stopCond,
-                                    bool i_isFastSpeed = true );
+                                    bool i_isFastSpeed = true,
+                                    bool i_slaveOnly = false );
 
 } // end namespace PlatServices
 

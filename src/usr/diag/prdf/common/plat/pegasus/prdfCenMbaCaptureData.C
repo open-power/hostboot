@@ -86,7 +86,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
     DramRepairMbaData mbaData;
 
     // Iterate all ranks to get DRAM repair data
-    for ( uint32_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
+    for ( uint32_t r = 0; r < MASTER_RANKS_PER_MBA; r++ )
     {
         CenRank rank ( r );
 
@@ -109,7 +109,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
         }
 
         // Add data
-        DramRepairRankData rankData = { rank.flatten(),
+        DramRepairRankData rankData = { rank.getMaster(),
                                         mark.getCM().getSymbol(),
                                         mark.getSM().getSymbol(),
                                         sp0.getSymbol(),
@@ -170,7 +170,7 @@ void captureDramRepairsVpd( TargetHandle_t i_mba, CaptureData & io_cd )
     static const size_t sz_word  = sizeof(CPU_WORD);
 
     // Get the maximum capture data size.
-    size_t sz_maxData = MAX_RANKS_PER_MBA * (sz_rank + sz_entry);
+    size_t sz_maxData = MASTER_RANKS_PER_MBA * (sz_rank + sz_entry);
 
     // Adjust the size for endianess.
     sz_maxData = ((sz_maxData + sz_word-1) / sz_word) * sz_word;
@@ -181,7 +181,7 @@ void captureDramRepairsVpd( TargetHandle_t i_mba, CaptureData & io_cd )
 
     // Get the data for each rank.
     uint32_t idx = 0;
-    for ( uint8_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
+    for ( uint8_t r = 0; r < MASTER_RANKS_PER_MBA; r++ )
     {
         CenRank rank ( r );
         CenDqBitmap bitmap;

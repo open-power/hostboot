@@ -329,7 +329,7 @@ int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
 
 void CenDqBitmap::getCaptureData( CaptureData & o_cd ) const
 {
-    uint8_t rank   = iv_rank.flatten();
+    uint8_t rank   = iv_rank.getMaster();
     size_t sz_rank = sizeof(rank);
 
     size_t sz_capData = sz_rank + sizeof(iv_data);
