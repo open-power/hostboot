@@ -101,6 +101,10 @@ public:
 
         // set by call_mss_getecid() in dmi_training.c
         DECONFIGURED_BY_MEMORY_CONFIG,          // BASE | 0x03
+
+        // set by discover_targets() when mcs is disabled b/c there
+        // is a non functional membuf
+        DECONFIGURED_BY_NO_CHILD_MEMBUF,        // BASE | 0x04
     };
 
     /**

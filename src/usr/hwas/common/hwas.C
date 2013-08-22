@@ -45,6 +45,7 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
+#include <hwas/common/deconfigGard.H>
 
 namespace HWAS
 {
@@ -443,6 +444,89 @@ errlHndl_t discoverTargets()
             HWAS_ERR("HWAS discoverTargets: checkMinimumHardware failed");
             break;
         }
+
+        HWAS_INF("HWAS discoverTargets:Find functional MCSs"
+                 " which should be non-functional ");
+
+        //get the membufs
+        TargetHandleList l_funcMembufTargetList;
+        getAllChips(l_funcMembufTargetList, TYPE_MEMBUF, true );
+
+        //get the mcss
+        TargetHandleList l_funcMCSTargetList;
+        getAllChiplets(l_funcMCSTargetList, TYPE_MCS, true );
+
+        TargetHandleList::iterator pMCSTarget_it = l_funcMCSTargetList.begin();
+        while (pMCSTarget_it != l_funcMCSTargetList.end())
+        {
+            TargetHandle_t l_MCSTarget = *pMCSTarget_it;
+            EntityPath l_MCSAffinityPath =
+                 l_MCSTarget->getAttr<ATTR_AFFINITY_PATH>();
+
+            bool l_functMembufFound = false;
+            HWAS_DBG("HWAS discoverTargets:  MCS huid 0x%X is functional "
+                     " with an affinity path of %s",
+                      l_MCSTarget->getAttr<ATTR_HUID>(),
+                      l_MCSAffinityPath.toString() );
+
+            for (TargetHandleList::iterator
+                pMembufTarget_it = l_funcMembufTargetList.begin();
+                pMembufTarget_it != l_funcMembufTargetList.end();
+                ++pMembufTarget_it)
+            {
+                TargetHandle_t l_MembufTarget = *pMembufTarget_it;
+                EntityPath l_MembufAffinityPath =
+                     l_MembufTarget->getAttr<ATTR_AFFINITY_PATH>();
+
+                l_functMembufFound =
+                     l_MCSAffinityPath.equals(l_MembufAffinityPath,
+                          l_MCSAffinityPath.size());
+                if (l_functMembufFound == true)
+                {
+                    //found a functional membuf so don't need to look further
+                    //can also remove the membuf from the list since a membuf
+                    //should not match two MCSs
+                    pMembufTarget_it=
+                        l_funcMembufTargetList.erase(pMembufTarget_it);
+                    HWAS_DBG("HWAS discoverTargets: this membuf huid 0x%X is "
+                             "functional and has an affinity path of %s and is"
+                             " assoicated with MCS HUID 0x%X",
+                              l_MembufTarget->getAttr<ATTR_HUID>(),
+                              l_MembufAffinityPath.toString(),
+                              l_MCSTarget->getAttr<ATTR_HUID>());
+                    break;
+                }
+
+            }
+            if (l_functMembufFound)
+            {
+                //remove functional MCS associated with functional membufs from
+                //the list of functional MCS
+                pMCSTarget_it=l_funcMCSTargetList.erase(pMCSTarget_it);
+            }
+            else
+            {
+                ++pMCSTarget_it;
+            }
+        }
+
+        //should now have a list of functional MCS that have no functional
+        //membufs
+        for (TargetHandleList::const_iterator
+                pMCSTarget_it = l_funcMCSTargetList.begin();
+                pMCSTarget_it != l_funcMCSTargetList.end();
+                ++pMCSTarget_it)
+        {
+            TargetHandle_t l_MCSTarget = *pMCSTarget_it;
+            //indicate that the MCS should be disabled because there is a
+            //non functional membuf or no membufs associated with this MCS
+            enableHwasState(l_MCSTarget,true,false,
+                          HWAS::DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF);
+            HWAS_INF("HWAS discoverTargets: MCS with huid 0x%X "
+                      "mark as present, not functional",
+                      l_MCSTarget->getAttr<ATTR_HUID>() );
+        }
+
 
     } while (0);
 
