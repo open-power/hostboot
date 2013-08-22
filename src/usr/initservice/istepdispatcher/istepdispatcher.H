@@ -40,6 +40,7 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
+#include    <time.h>
 #include    <util/singleton.H>
 #include    <sys/msg.h>
 #include    <sys/sync.h>
@@ -58,6 +59,12 @@ namespace   INITSERVICE
 // Globals/Constants
 /******************************************************************************/
 
+/**
+ * @brief the maximum time (seconds) runProgressThread() waits to send the next
+ *      progress code (FSP requires a message every 15 sec). Picking 10 sec
+ *      is a good choice because it is sufficiently less than 15.
+ */
+const uint64_t MAX_WAIT_TIME_SEC = 10;
 
 /******************************************************************************/
 // Typedef/Enumerations
@@ -82,7 +89,6 @@ enum IStepSync_t
     ISTEP_SYNC,
     ISTEP_ASYNC,
 };
-
 
 /******************************************************************************/
 //  Class IStepDispatcher
@@ -193,7 +199,15 @@ public:
      */
     bool getIStepMode( ) const;
 
-
+    /**
+     * @brief This function sends a progress message if an istep/substep takes
+     *      longer than MAX_WAIT_TIME_SEC. This function never returns and
+     *      should only be called on a new thread by the startProgressThread
+     *      function
+     *
+     *  @return NONE.
+     */
+    void runProgressThread ( void );
 
 protected:
 
@@ -303,12 +317,33 @@ private:
      */
     bool checkMpiplMode ( void ) const;
 
+    /**
+     * @brief This function is used to send a progress message from Hostboot
+     *      to Fsp.
+     *
+     * param[in]    -   flag to acquire mutex or not
+     *
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t sendProgressCode ( bool i_needsLock = true );
+
+    /**
+     * @brief This function spawns a thread for runProgressThread to run on
+     *
+     * param[in,out]    -   pointer to any args
+     *
+     * @return  NONE
+     */
+    static void * startProgressThread ( void * p);
 
     //  -----   internal vars   -----------------------------
 
     mutex_t iv_bkPtMutex;
     mutex_t iv_syncMutex;
-    mutex_t iv_stepMutex;
+    mutex_t iv_mutex;       //used to synchronize access to all instance
+                            //variables except iv_sync which is handled by
+                            //iv_syncMutex/iv_syncHit
     sync_cond_t iv_syncHit;
     uint8_t iv_curIStep;
     uint8_t iv_curSubStep;
@@ -317,6 +352,11 @@ private:
     msg_q_t iv_msgQ;
     msg_t* iv_workerMsg;    // More work Needed Msg from Worker
     msg_t* iv_Msg;          // All other Msgs that need to be saved
+    bool iv_progressThreadStarted;
+
+    //For progress code messages
+    timespec_t iv_lastProgressMsgTime;
+
 };  //  class IStepDispatcher
 
 

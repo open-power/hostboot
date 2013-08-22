@@ -54,6 +54,7 @@ enum
 {
     HWSVR_BREAKPOINT            = 0x00,
     HWSVR_SYNC_POINT            = 0x10,
+    HWSVR_IPL_PROGRESS_CODE     = 0x11,
     HWSVR_DO_IOVALID_PROCESSING = 0xC1,
 };
 
@@ -78,6 +79,8 @@ enum
                                 HWSVR_BREAKPOINT,
     PROCESS_IOVALID_REQUEST = MBOX::FIRST_UNSECURE_MSG |
                               HWSVR_DO_IOVALID_PROCESSING,
+    IPL_PROGRESS_CODE       = MBOX::FIRST_UNSECURE_MSG |
+                                HWSVR_IPL_PROGRESS_CODE,
 
     // --------------------------------------------------------------
     // Worker Thread Messages
@@ -88,7 +91,6 @@ enum
     BREAKPOINT_WORKER       = MBOX::FIRST_SECURE_MSG |
                                 ISTEP_WORKER_MSG |
                                 WORKER_BREAKPOINT,
-
 };
 
 }   // namespace

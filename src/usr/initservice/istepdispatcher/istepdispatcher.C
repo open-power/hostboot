@@ -36,6 +36,7 @@
 #include    <stdint.h>
 #include    <stdio.h>
 #include    <string.h>
+#include    <sys/time.h>                    //nanosleep
 
 #include    <kernel/console.H>              // printk status
 
@@ -87,6 +88,7 @@ trace_desc_t *g_trac_isteps_trace   =   NULL;
 namespace   INITSERVICE
 {
 
+
 using   namespace   ERRORLOG;           // IStepNameUserDetails
 using   namespace   SPLESS;             // SingleStepMode
 
@@ -110,12 +112,13 @@ IStepDispatcher::IStepDispatcher ()
 {
     mutex_init( &iv_bkPtMutex );
     mutex_init( &iv_syncMutex );
-    mutex_init( &iv_stepMutex );
+    mutex_init( &iv_mutex );
     sync_cond_init( &iv_syncHit );
 
-    iv_curIStep = 0x0;
-    iv_curSubStep = 0x0;
+    setIstepInfo(0);
     iv_sync = false;
+    iv_progressThreadStarted = false;
+    clock_gettime(CLOCK_MONOTONIC, &iv_lastProgressMsgTime);
 
     // Save flag indicating whether we're in MPIPL mode
     iv_mpipl_mode = checkMpiplMode();
@@ -132,6 +135,18 @@ IStepDispatcher::IStepDispatcher ()
 // ----------------------------------------------------------------------------
 IStepDispatcher::~IStepDispatcher ()
 {
+    TRACFCOMP( g_trac_initsvc, ENTER_MRK "IStepDispatcher::~IStepDispatcher "
+               "destructor" );
+
+    // Singleton destructor gets run when module gets unloaded.
+    // The istepdispatcher module never gets unloaded. So rather to send a
+    // message to error log daemon and tell it to shutdow and delete
+    // the queue we will assert here because the destructor never gets
+    // call.
+    assert(0);
+
+    TRACFCOMP( g_trac_initsvc, EXIT_MRK "IStepDispatcher::~IStepDispatcher "
+               "destructor." );
 }
 
 
@@ -285,8 +300,7 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
     errlHndl_t err = NULL;
     msg_t * theMsg = NULL;
 
-    TRACFCOMP( g_trac_initsvc,
-               ENTER_MRK"IStepDispatcher::executeAllISteps()" );
+    TRACFCOMP( g_trac_initsvc, ENTER_MRK"IStepDispatcher::executeAllISteps()");
 
     do
     {
@@ -294,17 +308,15 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
         // work needed msg from worker thread.
         uint32_t prevIstep = 0;
         uint32_t prevSubStep = 0;
+
         for( size_t istep = 0;
              istep < MaxISteps;
              istep++ )
         {
-            // Run until num items +1, to be sure we know the last step
-            // finished
             for( size_t substep = 0;
-                 substep < (g_isteps[istep].numitems+1) ;
-                 substep++ )
+                substep < (g_isteps[istep].numitems+1);
+                substep++ )
             {
-
 #if 0
                 //  @TODO reopen issue 70657
                 //  Check to see if this is a valid istep, if not, don't
@@ -319,7 +331,6 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                     continue;
                 }
 #endif
-
                 // Before we can do anything, we need to be sure that
                 //  the worker thread is ready to start
                 theMsg = msg_wait( iv_msgQ );
@@ -327,6 +338,7 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                 // check for sync msgs
                 if( theMsg->type == SYNC_POINT_REACHED )
                 {
+                    // Pause Progress Thread RTC: 84794
                     TRACFCOMP( g_trac_initsvc,
                                INFO_MRK"Got sync msg (0x%08x)",
                                theMsg->type );
@@ -361,11 +373,9 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                 }
 
                 TRACFCOMP( g_trac_initsvc,
-                           INFO_MRK"executeAllSteps: "
+                           INFO_MRK"executeAllISteps: "
                            "type: 0x%08x, istep: %d, substep: %d",
                            theMsg->type, istep, substep );
-
-
 
                 // Set the Istep info
                 prevIstep = istep;
@@ -373,10 +383,26 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                 uint16_t istepInfo = ((istep << 8 ) | substep);
                 setIstepInfo( istepInfo );
 
+                // Send Progress Code
+                err = this->sendProgressCode();
+                if( err )
+                {
+                    break;
+                }
+
                 // Put the step/substep into data[0] for the worker thread
                 theMsg->data[0] = istepInfo;
                 msg_respond( iv_msgQ,
                              theMsg );
+
+                // StartProgeressThread
+                // Done here to make sure istep and substep are valid
+                if ( !iv_progressThreadStarted )
+                {
+                    tid_t l_progTid = task_create(startProgressThread,this);
+                    assert( l_progTid > 0 );
+                    iv_progressThreadStarted = true;
+                }
 
                 theMsg = NULL;
             } // for substep
@@ -646,6 +672,15 @@ errlHndl_t IStepDispatcher::sendIstepCompleteMsg ( void )
 
     do
     {
+        //Send progress code and update clock in thread
+        /* 15 sec msg constraint not planned for GA1
+        err = this->sendProgressCode();
+        if( err )
+        {
+            break;
+        }
+        */
+
         // We just need to respond back to the outstanding iv_Msg we should
         // already have
         if( iv_Msg )
@@ -736,10 +771,10 @@ errlHndl_t IStepDispatcher::sendMboxMsg ( IStepSync_t i_sendSync,
 void IStepDispatcher::getIstepInfo ( uint8_t & o_iStep,
                                      uint8_t & o_subStep )
 {
-    mutex_lock( &iv_stepMutex );
+    mutex_lock( &iv_mutex );
     o_iStep = iv_curIStep;
     o_subStep = iv_curSubStep;
-    mutex_unlock( &iv_stepMutex );
+    mutex_unlock( &iv_mutex );
 }
 
 
@@ -748,10 +783,10 @@ void IStepDispatcher::getIstepInfo ( uint8_t & o_iStep,
 // ----------------------------------------------------------------------------
 void IStepDispatcher::setIstepInfo ( uint16_t i_type )
 {
-    mutex_lock( &iv_stepMutex );
+    mutex_lock( &iv_mutex );
     iv_curIStep = ((i_type & 0xFF00) >> 8);
     iv_curSubStep = (i_type & 0xFF);
-    mutex_unlock( &iv_stepMutex );
+    mutex_unlock( &iv_mutex );
 }
 
 
@@ -789,8 +824,7 @@ void IStepDispatcher::handleMoreWorkNeededMsg ( bool i_first )
 
     // Clear out current Istep/substep values.  Since worker thread told us
     // its done, nothing is running right now.
-    iv_curIStep = 0x0;
-    iv_curSubStep = 0x0;
+    setIstepInfo(0);
 
     // Only something to do if we've gotten a request from Fsp or SPLESS
     if( iv_Msg )
@@ -1052,7 +1086,79 @@ void IStepDispatcher::handleProcFabIovalidMsg(   )
     iv_Msg = NULL;
 }
 
+// ----------------------------------------------------------------------------
+// This method has a default of true for i_needsLock
+// ----------------------------------------------------------------------------
+errlHndl_t IStepDispatcher::sendProgressCode( bool i_needsLock )
+{
+    if (i_needsLock)
+    {
+        mutex_lock( &iv_mutex );
+    }
+
+    TRACDCOMP( g_trac_initsvc,ENTER_MRK"IStepDispatcher::sendProgressCode()");
+    errlHndl_t err = NULL;
+
+    // Put in rolling bit RTC: 84794
+
+    msg_t * myMsg = msg_allocate();
+    myMsg->type = IPL_PROGRESS_CODE;
+    myMsg->data[0] = iv_curIStep;
+    myMsg->data[1] = iv_curSubStep;
+    myMsg->extra_data = NULL;
+    err = sendMboxMsg( ISTEP_ASYNC, myMsg );
+    clock_gettime(CLOCK_MONOTONIC, &iv_lastProgressMsgTime);
+
+    TRACDCOMP( g_trac_initsvc,EXIT_MRK"IStepDispatcher::sendProgressCode()" );
+
+    if (i_needsLock)
+    {
+        mutex_unlock( &iv_mutex );
+    }
+
+    return err;
+}
+
+void IStepDispatcher::runProgressThread( void )
+{
+    TRACDCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::runProgressThread");
+
+    timespec_t l_CurTime;
+    timespec_t l_PrevTime;
+    //errlHndl_t err = NULL;
+
+    mutex_lock( &iv_mutex );
+    while(1)
+    {
+        l_PrevTime = iv_lastProgressMsgTime;
+        clock_gettime(CLOCK_MONOTONIC, &l_CurTime);
+        if( (l_CurTime.tv_sec - l_PrevTime.tv_sec) < MAX_WAIT_TIME_SEC )
+        {
+            mutex_unlock( &iv_mutex );
+            nanosleep( MAX_WAIT_TIME_SEC - (l_CurTime.tv_sec -
+                       l_PrevTime.tv_sec), 0 );
+            mutex_lock( &iv_mutex );
+        }
+
+        /* 15 sec msg constraint not planned for GA1
+        if( l_PrevTime.tv_sec == iv_lastProgressMsgTime.tv_sec &&
+            l_PrevTime.tv_nsec == iv_lastProgressMsgTime.tv_nsec)
+        {
+        err = this->sendProgressCode(false);
+        commit error in future
+        }
+        */
+    }
+
+    TRACDCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::runProgressThread");
+}
+
+void * IStepDispatcher::startProgressThread ( void * p)
+{
+    IStepDispatcher * l_pDispatcher = reinterpret_cast<IStepDispatcher *>(p);
+    TRACDCOMP(g_trac_initsvc,INFO_MRK"startProgressThread: runProgressThread");
+    l_pDispatcher->runProgressThread();
+    return NULL;
+}
 
 } // namespace
-
-
