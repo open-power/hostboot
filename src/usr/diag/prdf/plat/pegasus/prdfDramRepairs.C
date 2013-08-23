@@ -262,55 +262,17 @@ bool screenBadDqs( TargetHandle_t i_mba )
         CenRank rank ( r );
         CenDqBitmap bitmap;
 
+        // The HW procedure to read the bad DQ attribute will callout the DIMM
+        // if it has DRAM Repairs VPD and the DISABLE_DRAM_REPAIRS MNFG policy
+        // flag is set. PRD will simply need to iterate through all the ranks
+        // to ensure all DIMMs are screen and the procedure will do the rest.
+
         if ( SUCCESS != getBadDqBitmap(i_mba, rank, bitmap, true) )
         {
             PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x rank=%d",
                       getHuid(i_mba), rank.flatten() );
             analysisErrors = true;
             continue; // skip this rank
-        }
-
-        for ( uint32_t p = 0; p < PORT_SLCT_PER_MBA; p++ )
-        {
-            bool badDqs = false;
-            if ( SUCCESS != bitmap.badDqs(p, badDqs) )
-            {
-                PRDF_ERR( PRDF_FUNC"badDqs() failed: MBA=0x%08x rank=%d "
-                          "port=%d", getHuid(i_mba), rank.flatten(), p );
-                analysisErrors = true;
-                continue; // skip this DIMM
-            }
-
-            if ( !badDqs )
-            {
-                continue; // nothing to do, skip this DIMM
-            }
-
-            TargetHandleList list = CalloutUtil::getConnectedDimms( i_mba,
-                                                                    rank, p );
-            if ( 0 == list.size() )
-            {
-                PRDF_ERR( PRDF_FUNC"bad bits present but no connected DIMM: "
-                          "MBA=0x%08x rank=%d port=%d", getHuid(i_mba),
-                          rank.flatten(), p );
-                analysisErrors = true;
-                continue; // skip this DIMM
-            }
-
-            for ( TargetHandleList::iterator i = list.begin();
-                  i < list.end(); i++ )
-            {
-                if ( NULL == errl )
-                {
-                    errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_mba,
-                                       PRDFSIG_RdrScreenBadDqs );
-                }
-
-                o_calloutMade = true;
-                errl->addHwCallout( *i, SRCI_PRIORITY_HIGH,
-                                    HWAS::DELAYED_DECONFIG,
-                                    HWAS::GARD_Predictive );
-            }
         }
     }
 
