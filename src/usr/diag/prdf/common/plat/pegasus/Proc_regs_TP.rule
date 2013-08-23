@@ -78,6 +78,7 @@
         name        "EH.TPCHIP.TPC.LOCAL_FIR_AND";
         scomaddr    0x0104000b;
         capture     group never;
+        access      write_only;
     };
 
     register TP_LFIR_MASK
@@ -92,6 +93,7 @@
         name        "EH.TPCHIP.TPC.EPS.FIR.LOCAL_FIR_MASK_OR";
         scomaddr    0x0104000f;
         capture     group never;
+        access      write_only;
     };
 
     register TP_LFIR_ACT0
