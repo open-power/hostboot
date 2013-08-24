@@ -153,7 +153,7 @@ if( !($cfgSrcOutputDir =~ "none") )
       or fatal ("Trait file: \"$cfgSrcOutputDir"
         . "attributetraits.H\" could not be opened.");
     my $traitFile = *TRAIT_FILE;
-    writeTraitFileHeader($traitFile);
+    writeTraitFileHeader($attributes,$traitFile);
     writeTraitFileTraits($attributes,$traitFile);
     writeTraitFileFooter($traitFile);
     close $traitFile;
@@ -1476,7 +1476,7 @@ VERBATIM
 ################################################################################
 
 sub writeTraitFileHeader {
-    my($outFile) = @_;
+    my($attributes,$outFile) = @_;
 
 print $outFile <<VERBATIM;
 
@@ -1499,6 +1499,20 @@ print $outFile <<VERBATIM;
 // STD
 #include <stdint.h>
 #include <stdlib.h>
+VERBATIM
+
+foreach my $attribute (@{$attributes->{attribute}})
+{
+    #check if fspmutex is present?
+    if(   (exists $attribute->{simpleType})
+            && (exists $attribute->{simpleType}->{fspmutex}) )
+    {
+        print $outFile "#include <utilmutex.H>\n";
+        last; # don't need to look at any others.
+    }
+}
+
+print $outFile <<VERBATIM;
 #include <targeting/common/entitypath.H>
 
 namespace TARGETING
@@ -1568,6 +1582,17 @@ sub writeTraitFileTraits {
         else
         {
             $traits .= " notHbMutex,";
+        }
+
+        # Mark the attribute as being a fsp mutex or non-fsp mutex
+        if(   (exists $attribute->{simpleType})
+            && (exists $attribute->{simpleType}->{fspmutex}) )
+        {
+            $traits .= " fspMutex,";
+        }
+        else
+        {
+            $traits .= " notFspMutex,";
         }
 
         chop($traits);
@@ -1734,7 +1759,9 @@ sub writeAttrErrlCFile {
         # things we'll skip:
         if(!(exists $attribute->{readable}) ||  # write-only attributes
            !(exists $attribute->{writeable}) || # read-only attributes
-           (exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{hbmutex})) # mutex attributes
+           (exists $attribute->{simpleType} && (
+           (exists $attribute->{simpleType}->{hbmutex}) ||
+           (exists $attribute->{simpleType}->{fspmutex}))) # mutex attributes
           ) {
             print $outFile "        case (ATTR_",$attribute->{id},"): { break; }\n";
             next;
@@ -1900,7 +1927,9 @@ sub writeAttrErrlCFile {
         # things we'll skip:
         if(!(exists $attribute->{readable}) ||  # write-only attributes
            !(exists $attribute->{writeable}) || # read-only attributes
-           (exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{hbmutex})) # mutex attributes
+           (exists $attribute->{simpleType} && (
+           (exists $attribute->{simpleType}->{hbmutex}) ||
+           (exists $attribute->{simpleType}->{fspmutex}))) # mutex attributes
           ) {
             next;
         }
@@ -2015,7 +2044,9 @@ sub writeAttrErrlHFile {
         # things we'll skip:
         if(!(exists $attribute->{readable}) ||  # write-only attributes
            !(exists $attribute->{writeable}) || # read-only attributes
-           (exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{hbmutex})) # mutex attributes
+           (exists $attribute->{simpleType} && (
+           (exists $attribute->{simpleType}->{hbmutex}) ||
+           (exists $attribute->{simpleType}->{fspmutex}))) # mutex attributes
           ) {
             print $outFile "              //not readable\n";
         }
@@ -2045,6 +2076,12 @@ sub writeAttrErrlHFile {
         }
         # makes no sense to dump mutex attributes, so skipping
         elsif(exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{hbmutex}) ) {
+            print $outFile "            //Mutex attributes - skipping\n";
+        }
+        # makes no sense to dump fsp mutex attributes, so skipping
+        elsif(   (exists $attribute->{simpleType})
+              && (exists $attribute->{simpleType}->{fspmutex}) )
+        {
             print $outFile "            //Mutex attributes - skipping\n";
         }
         # any complicated types just get dumped as raw hex binary
@@ -3002,6 +3039,26 @@ sub null {
 }
 
 ################################################################################
+# Enforce special fsp mutex restrictions
+################################################################################
+
+sub enforceFspMutex {
+    my($attribute,$value) = @_;
+
+    if($value != 0)
+    {
+        fatal("FSP mutex attribute default must always be 0, "
+              . "was $value instead.");
+    }
+
+    if($attribute->{persistency} ne "volatile-zeroed")
+    {
+        fatal("FSP mutex attribute persistency must be volatile-zeroed, "
+              . "was $attribute->{persistency} instead");
+    }
+}
+
+################################################################################
 # Enforce special host boot mutex restrictions
 ################################################################################
 
@@ -3077,6 +3134,7 @@ sub simpleTypeProperties {
     $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum  , alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
     $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&pack8byte};
     $typesHoH{"Target_t"}    = { supportsArray => 0, canBeHex => 1, complexTypeSupport => 0, typeName => "TARGETING::Target*"         , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&null,           packfmt =>\&pack8byte};
+    $typesHoH{"fspmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "util::Mutex*"              , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceFspMutex, packfmt =>\&pack8byte};
 
     $g_simpleTypeProperties_cache = \%typesHoH;
 

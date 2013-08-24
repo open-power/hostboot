@@ -67,6 +67,11 @@ namespace fapi
     }
 }
 
+namespace util
+{
+    class Mutex;
+}
+
 namespace TARGETING
 {
 
@@ -83,6 +88,7 @@ typedef std::vector<Target>         TargetList;
 
 class Target
 {
+
     public: // Constructors and destructors
 
         /**
@@ -125,6 +131,7 @@ class Target
             // at compile time if the attribute is not readable) away
             if(AttributeTraits<A>::readable) { }
             if(AttributeTraits<A>::notHbMutex) { }
+            if(AttributeTraits<A>::notFspMutex) { }
             return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
         }
 
@@ -212,6 +219,20 @@ class Target
          */
         template<const ATTRIBUTE_ID A>
         mutex_t* getHbMutexAttr() const;
+
+        /**
+         *  @brief Returns pointer to fsp mutex attribute associated with the
+         *     target
+         *
+         *  @pre Target service must be initialized and the mutex attribute
+         *     must exist. If not initailized then it will be null pointer.
+         *
+         *  @post See brief section
+         *
+         *  @return Pointer to the specified mutex attribute
+         */
+        template<const ATTRIBUTE_ID A>
+        util::Mutex* getFspMutexAttr() const;
 
         /**
          *  @brief Returns pointer to a mutex attribute associated with the
@@ -394,6 +415,22 @@ class Target
             const ATTRIBUTE_ID i_attribute) const;
 
         /**
+         *  @brief Returns pointer to fsp mutex attribute associated with the
+         *     target
+         *
+         *  @param[in] i_attribute Mutex attribute to return
+         *
+         *  @pre Target service must be initialized and the mutex attribute
+         *      must exist
+         *
+         *  @post See brief section
+         *
+         *  @return Pointer to the specified mutex attribute
+         */
+        util::Mutex* _getFspMutexAttr(
+            const ATTRIBUTE_ID i_attribute) const;
+
+        /**
          *  @brief Returns pointer to a mutex attribute associated with the
          *     target, if it exists
          *
@@ -514,6 +551,15 @@ mutex_t* Target::getHbMutexAttr() const
     if(AttributeTraits<A>::readable) { }
     if(AttributeTraits<A>::writeable) { }
     return _getHbMutexAttr(A);
+}
+
+template<const ATTRIBUTE_ID A>
+util::Mutex* Target::getFspMutexAttr() const
+{
+    if(AttributeTraits<A>::fspMutex) { }
+    if(AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable) { }
+    return _getFspMutexAttr(A);
 }
 
 template<const ATTRIBUTE_ID A>
