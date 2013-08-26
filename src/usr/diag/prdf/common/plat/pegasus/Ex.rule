@@ -440,52 +440,87 @@ group gExLFir filter singlebit
     /** EX_LFIR[0]
      *  CFIR internal parity error
      */
-    (ExLFir, bit(0)) ? TBDDefaultCallout;
+    (ExLFir, bit(0)) ? calloutParentChipHighThr32;
 
     /** EX_LFIR[1]
      *  Local errors from GPIO (PCB error)
      */
-    (ExLFir, bit(1)) ? TBDDefaultCallout;
+    (ExLFir, bit(1)) ? defaultMaskedError;
 
     /** EX_LFIR[2]
      *  Local errors from CC (PCB error)
      */
-    (ExLFir, bit(2)) ? TBDDefaultCallout;
+    (ExLFir, bit(2)) ? defaultMaskedError;
 
     /** EX_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (ExLFir, bit(3)) ? TBDDefaultCallout;
+    (ExLFir, bit(3)) ? defaultMaskedError;
 
     /** EX_LFIR[4]
      *  Local errors from PSC (PCB error)
      */
-    (ExLFir, bit(4)) ? TBDDefaultCallout;
+    (ExLFir, bit(4)) ? defaultMaskedError;
 
     /** EX_LFIR[5]
      *  Local errors from PSC (parity error)
      */
-    (ExLFir, bit(5)) ? TBDDefaultCallout;
+    (ExLFir, bit(5)) ? defaultMaskedError;
 
     /** EX_LFIR[6]
      *  Local errors from Thermal (parity error)
      */
-    (ExLFir, bit(6)) ? TBDDefaultCallout;
+    (ExLFir, bit(6)) ? defaultMaskedError;
 
     /** EX_LFIR[7]
      *  Local errors from Thermal (PCB error)
      */
-    (ExLFir, bit(7)) ? TBDDefaultCallout;
+    (ExLFir, bit(7)) ? defaultMaskedError;
 
     /** EX_LFIR[8|9]
      *  Local errors from Thermal (Trip error)
      */
-    (ExLFir, bit(8|9)) ? TBDDefaultCallout;
+    (ExLFir, bit(8|9)) ? defaultMaskedError;
 
-    /** EX_LFIR[10|11]
+    /** EX_LFIR[10]
+     *  Local errors from trace array - error
+     */
+    (ExLFir, bit(10)) ? calloutParentChipHighThr32;
+
+    /** EX_LFIR[11]
      *  Local errors from Trace Array ( error)
      */
-    (ExLFir, bit(10|11)) ? TBDDefaultCallout;
+    (ExLFir, bit(11)) ? defaultMaskedError;
+
+    /** EX_LFIR[12|13]
+     *  Local errors from trial
+     */
+    (ExLFir, bit(12|13)) ? defaultMaskedError;
+
+    /** EX_LFIR[14]
+     *  Local errors from OHA - recov error
+     */
+    (ExLFir, bit(14)) ? defaultMaskedError;
+
+    /** EX_LFIR[15]
+     *  Local errors from OHA - checkstop
+     */
+    (ExLFir, bit(15)) ? defaultMaskedError;
+
+    /** EX_LFIR[16]
+     *  Local errors from skewadj
+     */
+    (ExLFir, bit(16)) ? calloutParentChipHighThr32;
+
+    /** EX_LFIR[17]
+     *  local errors from dcadj
+     */
+    (ExLFir, bit(17)) ? calloutParentChipHighThr32;
+
+    /** EX_LFIR[18:30]
+     *  Unused local errors
+     */
+    (ExLFir, bit(18|19|20|21|22|23|24|25|26|27|28|29|30)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -1501,4 +1536,17 @@ actionclass checkAttnThrldOrCallout
 {
     #FIXME RTC 23127 Need to clarify what is Threshold B
     TBDDefaultCallout;
+};
+
+/** callout connected parent proc with high priority.*/
+actionclass calloutParentProcHigh
+{
+    callout(connected(TYPE_PROC),MRU_HIGH);
+};
+
+/** callout parent proc. Threshold is 32 events per day */
+actionclass calloutParentChipHighThr32
+{
+    calloutParentProcHigh;
+    threshold32pday;
 };

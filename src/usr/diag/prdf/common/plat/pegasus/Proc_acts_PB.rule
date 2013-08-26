@@ -134,52 +134,88 @@ group gPbLFir filter singlebit
     /** PB_LFIR[0]
      *  CFIR internal parity error
      */
-    (PbLFir, bit(0)) ? TBDDefaultCallout;
+    (PbLFir, bit(0)) ? SelfHighThr32PerDay;
 
     /** PB_LFIR[1]
      *  Local errors from GPIO (PCB error)
      */
-    (PbLFir, bit(1)) ? TBDDefaultCallout;
+    (PbLFir, bit(1)) ? defaultMaskedError;
 
     /** PB_LFIR[2]
      *  Local errors from CC (PCB error)
      */
-    (PbLFir, bit(2)) ? TBDDefaultCallout;
+    (PbLFir, bit(2)) ? defaultMaskedError;
 
     /** PB_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (PbLFir, bit(3)) ? TBDDefaultCallout;
+    (PbLFir, bit(3)) ? SelfHighThr32PerDay;
 
     /** PB_LFIR[4]
      *  Local errors from PSC (PCB error)
      */
-    (PbLFir, bit(4)) ? TBDDefaultCallout;
+    (PbLFir, bit(4)) ? defaultMaskedError;
 
     /** PB_LFIR[5]
      *  Local errors from PSC (parity error)
      */
-    (PbLFir, bit(5)) ? TBDDefaultCallout;
+    (PbLFir, bit(5)) ? defaultMaskedError;
 
     /** PB_LFIR[6]
      *  Local errors from Thermal (parity error)
      */
-    (PbLFir, bit(6)) ? TBDDefaultCallout;
+    (PbLFir, bit(6)) ? defaultMaskedError;
 
     /** PB_LFIR[7]
      *  Local errors from Thermal (PCB error)
      */
-    (PbLFir, bit(7)) ? TBDDefaultCallout;
+    (PbLFir, bit(7)) ? defaultMaskedError;
 
     /** PB_LFIR[8|9]
      *  Local errors from Thermal (Trip error)
      */
-    (PbLFir, bit(8|9)) ? TBDDefaultCallout;
+    (PbLFir, bit(8|9)) ? defaultMaskedError;
 
-    /** PB_LFIR[10|11]
+    /** PB_LFIR[10]
      *  Local errors from Trace Array ( error)
      */
-    (PbLFir, bit(10|11)) ? TBDDefaultCallout;
+    (PbLFir, bit(10)) ? SelfHighThr32PerDay;
+
+    /** PB_LFIR[11]
+     *  Local errors from Trace Array ( error)
+     */
+    (PbLFir, bit(11)) ? defaultMaskedError;
+
+    /** PB_LFIR[12:15]
+     *  Local errors from io sense
+     */
+    (PbLFir, bit(12|13|14|15)) ? defaultMaskedError;
+
+    /** PB_LFIR[16]
+     *  Fast check stop fir
+     */
+    (PbLFir, bit(16)) ? defaultMaskedError;
+
+    /** PB_LFIR[17:20]
+     *  Unused local errors
+     */
+    (PbLFir, bit(17|18|19|20)) ? defaultMaskedError;
+
+    /** PB_LFIR[21:30]
+     *  Unused local errors
+     */
+    (PbLFir, bit(21|22|23|24|25|26|27|28|29|30)) ? defaultMaskedError;
+
+    /** PB_LFIR[31:39]
+     *  Unused local errors
+     */
+    (PbLFir, bit(31|32|33|34|35|36|37|38|39)) ? defaultMaskedError;
+
+    /** PB_LFIR[40]
+     *  Malfunction alert - local checkstop in another chiplet
+     */
+    (PbLFir, bit(40)) ? defaultMaskedError;
+
 };
 
 ################################################################################

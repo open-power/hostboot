@@ -66,52 +66,67 @@ group gAbusLFir filter singlebit
     /** ABUS_LFIR[0]
      *  CFIR internal parity error
      */
-    (AbusLFir, bit(0)) ? TBDDefaultCallout;
+    (AbusLFir, bit(0)) ? SelfHighThr32PerDay;
 
     /** ABUS_LFIR[1]
      *  Local errors from GPIO (PCB error)
      */
-    (AbusLFir, bit(1)) ? TBDDefaultCallout;
+    (AbusLFir, bit(1)) ? defaultMaskedError;
 
     /** ABUS_LFIR[2]
      *  Local errors from CC (PCB error)
      */
-    (AbusLFir, bit(2)) ? TBDDefaultCallout;
+    (AbusLFir, bit(2)) ? SelfHighThr32PerDay;
 
     /** ABUS_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (AbusLFir, bit(3)) ? TBDDefaultCallout;
+    (AbusLFir, bit(3)) ? callout2ndLvlThr32PerDay;
 
     /** ABUS_LFIR[4]
      *  Local errors from PSC (PCB error)
      */
-    (AbusLFir, bit(4)) ? TBDDefaultCallout;
+    (AbusLFir, bit(4)) ? defaultMaskedError;
 
     /** ABUS_LFIR[5]
      *  Local errors from PSC (parity error)
      */
-    (AbusLFir, bit(5)) ? TBDDefaultCallout;
+    (AbusLFir, bit(5)) ? defaultMaskedError;
 
     /** ABUS_LFIR[6]
      *  Local errors from Thermal (parity error)
      */
-    (AbusLFir, bit(6)) ? TBDDefaultCallout;
+    (AbusLFir, bit(6)) ? defaultMaskedError;
 
     /** ABUS_LFIR[7]
      *  Local errors from Thermal (PCB error)
      */
-    (AbusLFir, bit(7)) ? TBDDefaultCallout;
+    (AbusLFir, bit(7)) ? defaultMaskedError;
 
     /** ABUS_LFIR[8|9]
      *  Local errors from Thermal (Trip error)
      */
-    (AbusLFir, bit(8|9)) ? TBDDefaultCallout;
+    (AbusLFir, bit(8|9)) ? defaultMaskedError;
 
     /** ABUS_LFIR[10|11]
      *  Local errors from Trace Array ( error)
      */
-    (AbusLFir, bit(10|11)) ? TBDDefaultCallout;
+    (AbusLFir, bit(10|11)) ? defaultMaskedError;
+
+    /** ABUS_LFIR[12:20]
+     *  FIR_IN12: unused local errors
+     */
+    (AbusLFir, bit(12|13|14|15|16|17|18|19|20)) ? defaultMaskedError;
+
+    /** ABUS_LFIR[21:30]
+     *  FIR_IN12: unused local errors
+     */
+    (AbusLFir, bit(21|22|23|24|25|26|27|28|29|30)) ? defaultMaskedError;
+
+    /** ABUS_LFIR[31:39]
+     *  FIR_IN12: unused local errors
+     */
+    (AbusLFir, bit(31|32|33|34|35|36|37|38|39)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -545,3 +560,9 @@ actionclass tooManyBusErrors_abus1
 actionclass tooManyBusErrors_abus2
 { calloutAbus2InterfaceTh1; funccall("tooManyBusErrors_abus2"); };
 
+/** callout second level support if threshold exceeds 32 per day */
+actionclass callout2ndLvlThr32PerDay
+{
+    callout2ndLvlMed;
+    threshold32pday;
+};
