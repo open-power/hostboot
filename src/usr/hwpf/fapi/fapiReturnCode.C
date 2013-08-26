@@ -51,6 +51,7 @@
  *                          mjjones     03/22/2013  Support Procedure Callouts
  *                          mjjones     05/20/2013  Support Bus Callouts
  *                          mjjones     06/24/2013  Support Children CDGs
+ *                          mjjones     08/26/2013  Support HW Callouts
  */
 
 #include <fapiReturnCode.H>
@@ -282,6 +283,33 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 addEIFfdc(l_ffdcId, l_pObject, l_size);
             }
         }
+        else if (l_type == EI_TYPE_HW_CALLOUT)
+        {
+            HwCallouts::HwCallout l_hw = static_cast<HwCallouts::HwCallout>(
+                i_pEntries[i].hw_callout.iv_hw);
+            CalloutPriorities::CalloutPriority l_pri =
+                static_cast<CalloutPriorities::CalloutPriority>(
+                    i_pEntries[i].hw_callout.iv_calloutPriority);
+
+            // A refIndex of 0xff indicates that there is no reference target
+            uint8_t l_refIndex = i_pEntries[i].hw_callout.iv_refObjIndex;
+
+            if (l_refIndex != 0xff)
+            {
+                const Target * l_pRefTarget = static_cast<const Target *>(
+                    i_pObjects[l_refIndex]);
+                FAPI_ERR("addErrorInfo: Adding hw callout with ref, hw: %d, pri: %d",
+                     l_hw, l_pri);
+                addEIHwCallout(l_hw, l_pri, *l_pRefTarget);
+            }
+            else
+            {
+                Target l_emptyTarget;
+                FAPI_ERR("addErrorInfo: Adding hw callout with no ref, hw: %d, pri: %d",
+                     l_hw, l_pri);
+                addEIHwCallout(l_hw, l_pri, l_emptyTarget);
+            }
+        }
         else if (l_type == EI_TYPE_PROCEDURE_CALLOUT)
         {
             ProcedureCallouts::ProcedureCallout l_proc =
@@ -442,6 +470,21 @@ void ReturnCode::forgetData()
         }
         iv_pDataRef = NULL;
     }
+}
+
+//******************************************************************************
+// addEIHwCallout function
+//******************************************************************************
+void ReturnCode::addEIHwCallout(
+    const HwCallouts::HwCallout i_hw,
+    const CalloutPriorities::CalloutPriority i_priority,
+    const Target & i_refTarget)
+{
+    // Create an ErrorInfoHwCallout object and add it to the Error Information
+    ErrorInfoHwCallout * l_pCallout = new ErrorInfoHwCallout(
+        i_hw, i_priority, i_refTarget);
+    getCreateReturnCodeDataRef().getCreateErrorInfo().
+        iv_hwCallouts.push_back(l_pCallout);
 }
 
 //******************************************************************************

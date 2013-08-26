@@ -619,7 +619,7 @@ uint32_t rcTest12()
     // Add error information to the ReturnCode, the data is the same as that
     // produced by the fapiParseErrorInfo.pl script in fapiHwpErrorInfo.H
     const void * l_objects[] = {&l_ffdc, &l_target, &l_target2};
-    fapi::ReturnCode::ErrorInfoEntry l_entries[5];
+    fapi::ReturnCode::ErrorInfoEntry l_entries[6];
     l_entries[0].iv_type = fapi::ReturnCode::EI_TYPE_FFDC;
     l_entries[0].ffdc.iv_ffdcObjIndex = 0;
     l_entries[0].ffdc.iv_ffdcId = 0x22334455;
@@ -647,8 +647,11 @@ uint32_t rcTest12()
     l_entries[4].children_cdg.iv_gard = 0;
     l_entries[4].children_cdg.iv_calloutPriority =
         fapi::CalloutPriorities::HIGH;
+    l_entries[5].iv_type = fapi::ReturnCode::EI_TYPE_HW_CALLOUT;
+    l_entries[5].hw_callout.iv_hw = fapi::HwCallouts::MEM_REF_CLOCK;
+    l_entries[5].hw_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
 
-    l_rc.addErrorInfo(l_objects, l_entries, 5);
+    l_rc.addErrorInfo(l_objects, l_entries, 6);
 
     do
     {
@@ -844,6 +847,32 @@ uint32_t rcTest12()
         {
             FAPI_ERR("rcTest12. child cdg GARD set");
             l_result = 24;
+            break;
+        }
+
+        if (l_pErrInfo->iv_hwCallouts.size() != 1)
+        {
+            FAPI_ERR("rcTest12. %d hw-callouts",
+                     l_pErrInfo->iv_hwCallouts.size());
+            l_result = 25;
+            break;
+        }
+
+        if (l_pErrInfo->iv_hwCallouts[0]->iv_hw !=
+            HwCallouts::MEM_REF_CLOCK)
+        {
+            FAPI_ERR("rcTest12. hw callout mismatch (%d)",
+                     l_pErrInfo->iv_hwCallouts[0]->iv_hw);
+            l_result = 26;
+            break;
+        }
+
+        if (l_pErrInfo->iv_hwCallouts[0]->iv_calloutPriority !=
+            CalloutPriorities::LOW)
+        {
+            FAPI_ERR("rcTest12. hw callout priority mismatch (%d)",
+                     l_pErrInfo->iv_hwCallouts[0]->iv_calloutPriority);
+            l_result = 27;
             break;
         }
 

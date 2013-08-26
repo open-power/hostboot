@@ -57,6 +57,7 @@
 #                  mjjones   05/20/13  Support Bus Callouts
 #                  mjjones   06/24/13  Support Children CDGs
 #                  mjjones   08/20/13  Use constants for Reg FFDC collection
+#                  mjjones   08/26/13  Support HW Callouts
 #
 # End Change Log ******************************************************
 
@@ -482,7 +483,45 @@ foreach my $argnum (1 .. $#ARGV)
                 exit(1);
             }
 
-            if (exists $callout->{procedure})
+            if (exists $callout->{hw})
+            {
+                # HW Callout
+                if (! exists $callout->{hw}->{hwid})
+                {
+                    print ("fapiParseErrorInfo.pl ERROR. HW Callout hwid missing\n");
+                    exit(1);
+                }
+
+                # Check that those HW callouts that need reference targets have them
+                if (($callout->{hw}->{hwid} eq "TOD_CLOCK") ||
+                    ($callout->{hw}->{hwid} eq "MEM_REF_CLOCK") ||
+                    ($callout->{hw}->{hwid} eq "PROC_REF_CLOCK") ||
+                    ($callout->{hw}->{hwid} eq "PCI_REF_CLOCK"))
+                {
+                    if (! exists $callout->{hw}->{refTarget})
+                    {
+                        print ("fapiParseErrorInfo.pl ERROR. Callout missing refTarget\n");
+                        exit(1);
+                    }
+                }
+
+                # Add an EI entry to eiEntryStr
+                $eiEntryStr .= "  l_entries[$eiEntryCount].iv_type = fapi::ReturnCode::EI_TYPE_HW_CALLOUT; \\\n";
+                $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_hw = fapi::HwCallouts::$callout->{hw}->{hwid}; \\\n";
+                $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_calloutPriority = fapi::CalloutPriorities::$callout->{priority}; \\\n";
+                if (exists $callout->{hw}->{refTarget})
+                {
+                    # Add the Targets to the objectlist if they don't already exist
+                    my $objNum = addEntryToArray(\@eiObjects, $callout->{hw}->{refTarget});
+                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = $objNum; \\\n";
+                }
+                else
+                {
+                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = 0xff; \\\n";
+                }
+                $eiEntryCount++;
+            }
+            elsif (exists $callout->{procedure})
             {
                 # Procedure Callout
                 # Add an EI entry to eiEntryStr

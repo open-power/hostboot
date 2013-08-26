@@ -97,6 +97,16 @@
             </childTargets>
         </deconfigure>
     -->
+    <!-- Callout the PCI ref-clock -->
+    <!-- Commented out to avoid actually calling out the ref-clock in UT
+        <callout>
+            <hw>
+                <hwid>PCI_REF_CLOCK</hwid>
+                <refTarget>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</refTarget>
+            </hw>
+            <priority>MEDIUM</priority>
+        </callout>
+    -->
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

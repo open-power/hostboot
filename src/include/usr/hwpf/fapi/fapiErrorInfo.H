@@ -41,6 +41,7 @@
  *                          mjjones     03/22/2013  Support Procedure Callouts
  *                          mjjones     05/20/2013  Support Bus Callouts
  *                          mjjones     06/24/2013  Support Children CDGs
+ *                          mjjones     08/26/2013  Support HW Callouts
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -52,6 +53,30 @@
 
 namespace fapi
 {
+
+/**
+ * @enum HwCallout
+ *
+ * This enumeration defines the possible Hardware Callouts that are not
+ * represented by fapi::Targets
+ *
+ * Note that platform code may depend on the enum values starting at 0 and
+ * incrementing in order to efficiently convert to a platform callout value
+ * so do not reorder without consulting all platforms
+ */
+namespace HwCallouts
+{
+enum HwCallout
+{
+    // Where indicated, a HW Callout in FAPI Error XML must include a reference
+    // target that is used to identify the HW. e.g. for TOD_CLOCK, the proc chip
+    // that the clock is attached to must be specified
+    TOD_CLOCK             = 0, // Include proc-chip ref (or child chiplet)
+    MEM_REF_CLOCK         = 1, // Include membuf-chip ref (or child chiplet)
+    PROC_REF_CLOCK        = 2, // Include proc-chip ref (or child chiplet)
+    PCI_REF_CLOCK         = 3, // Include proc-chip ref (or child chiplet)
+};
+}
 
 /**
  * @enum ProcedureCallout
@@ -151,7 +176,6 @@ public:
     static void operator delete(void * i_ptr);
 #endif
 
-
 private:
 
     // FFDC Identifier
@@ -166,6 +190,54 @@ private:
     // Disabled
     ErrorInfoFfdc(const ErrorInfoFfdc &);
     ErrorInfoFfdc & operator=(const ErrorInfoFfdc &);
+};
+
+/**
+ * @struct ErrorInfoHwCallout
+ *
+ * This struct contains hardware to callout
+ */
+struct ErrorInfoHwCallout
+{
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] i_hw              Hardware to callout
+     * @param[in] i_calloutPriority Priority of callout
+     * @param[in] i_refTarget       Reference to reference target
+     */
+    ErrorInfoHwCallout(
+        const HwCallouts::HwCallout i_hw,
+        const CalloutPriorities::CalloutPriority i_calloutPriority,
+        const Target & i_refTarget);
+
+#ifdef FAPI_CUSTOM_MALLOC
+    /**
+     * @brief Overload new operator to use platform-specific allocator
+     *
+     * @param[in] i_sz  Size of memory to allocate in bytes
+     *
+     * @return  Pointer to allocated memory
+     */
+    static void * operator new(size_t i_sz);
+
+    /**
+     * @brief Overload delete operator to use platform-specific deallocator
+     *
+     * @param[in] i_ptr Pointer to memory previously allocated with new
+     */
+    static void operator delete(void * i_ptr);
+#endif
+
+    // The hw to callout
+    HwCallouts::HwCallout iv_hw;
+
+    // The callout priority
+    CalloutPriorities::CalloutPriority iv_calloutPriority;
+
+    // The reference target (needed for some HW callouts to identify what to
+    // callout). The target handle is NULL if there is no reference target.
+    Target iv_refTarget;
 };
 
 /**
@@ -228,6 +300,24 @@ struct ErrorInfoBusCallout
         const Target & i_target1,
         const Target & i_target2,
         const CalloutPriorities::CalloutPriority i_calloutPriority);
+
+#ifdef FAPI_CUSTOM_MALLOC
+    /**
+     * @brief Overload new operator to use platform-specific allocator
+     *
+     * @param[in] i_sz  Size of memory to allocate in bytes
+     *
+     * @return  Pointer to allocated memory
+     */
+    static void * operator new(size_t i_sz);
+
+    /**
+     * @brief Overload delete operator to use platform-specific deallocator
+     *
+     * @param[in] i_ptr Pointer to memory previously allocated with new
+     */
+    static void operator delete(void * i_ptr);
+#endif
 
     // The targets on each end of the bus to callout
     Target iv_target1;
@@ -315,6 +405,24 @@ struct ErrorInfoChildrenCDG
                          const bool i_gard,
                          const CalloutPriorities::CalloutPriority i_priority);
 
+#ifdef FAPI_CUSTOM_MALLOC
+    /**
+     * @brief Overload new operator to use platform-specific allocator
+     *
+     * @param[in] i_sz  Size of memory to allocate in bytes
+     *
+     * @return  Pointer to allocated memory
+    */
+    static void * operator new(size_t i_sz);
+
+    /**
+     * @brief Overload delete operator to use platform-specific deallocator
+     *
+     * @param[in] i_ptr Pointer to memory previously allocated with new
+     */
+    static void operator delete(void * i_ptr);
+#endif
+
     // The parent chip
     Target iv_parentChip;
 
@@ -367,6 +475,13 @@ struct ErrorInfo
     std::vector<ErrorInfoFfdc *> iv_ffdcs;
     typedef std::vector<ErrorInfoFfdc *>::iterator ErrorInfoFfdcItr_t;
     typedef std::vector<ErrorInfoFfdc *>::const_iterator ErrorInfoFfdcCItr_t;
+
+    // Vector of Hardware to callout
+    std::vector<ErrorInfoHwCallout *> iv_hwCallouts;
+    typedef std::vector<ErrorInfoHwCallout *>::iterator
+        ErrorInfoHwCalloutItr_t;
+    typedef std::vector<ErrorInfoHwCallout *>::const_iterator
+        ErrorInfoHwCalloutCItr_t;
 
     // Vector of procedures to callout
     std::vector<ErrorInfoProcedureCallout *> iv_procedureCallouts;

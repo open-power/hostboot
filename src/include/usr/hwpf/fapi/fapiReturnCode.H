@@ -49,6 +49,7 @@
  *                          mjjones     05/20/2013  Support Bus Callouts
  *                          mjjones     06/06/2013  Check FFDC size at compile time
  *                          mjjones     06/24/2013  Support Children CDGs
+ *                          mjjones     08/26/2013  Support Hw Callout
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -282,10 +283,11 @@ public:
     enum ErrorInfoType
     {
         EI_TYPE_FFDC              = 1,
-        EI_TYPE_PROCEDURE_CALLOUT = 2,
-        EI_TYPE_BUS_CALLOUT       = 3,
-        EI_TYPE_CDG               = 4, // Target Callout/Deconfig/GARD
-        EI_TYPE_CHILDREN_CDG      = 5, // Children Callout/Deconfig/GARD
+        EI_TYPE_HW_CALLOUT        = 2,
+        EI_TYPE_PROCEDURE_CALLOUT = 3,
+        EI_TYPE_BUS_CALLOUT       = 4,
+        EI_TYPE_CDG               = 5, // Target Callout/Deconfig/GARD
+        EI_TYPE_CHILDREN_CDG      = 6, // Children Callout/Deconfig/GARD
     };
 
     /**
@@ -305,6 +307,13 @@ public:
                 uint16_t iv_ffdcSize;
                 uint32_t iv_ffdcId;
             } ffdc;
+
+            struct
+            {
+                uint8_t iv_hw;
+                uint8_t iv_calloutPriority;
+                uint8_t iv_refObjIndex;
+            } hw_callout;
 
             struct
             {
@@ -417,6 +426,20 @@ private:
     void forgetData();
 
     /**
+     * @brief Add a HW callout to the ErrorInfo
+     *
+     * This is called by addErrorInfo
+     *
+     * @param[in] i_hw        The hardware to callout
+     * @param[in] i_priority  The priority of the callout
+     * @param[in] i_refTarget Reference to reference Target
+     */
+     void addEIHwCallout(
+         const HwCallouts::HwCallout i_hw,
+         const CalloutPriorities::CalloutPriority i_priority,
+         const Target & i_refTarget);
+
+    /**
      * @brief Add a procedure callout to the ErrorInfo
      *
      * This is called by addErrorInfo
@@ -435,7 +458,7 @@ private:
      *
      * @param[in] i_target1  Reference to endpoint1 Target
      * @param[in] i_target2  Reference to endpoint2 Target
-     * @param[in] i_priority  The priority of the callout
+     * @param[in] i_priority The priority of the callout
      */
      void addEIBusCallout(
          const Target & i_target1,

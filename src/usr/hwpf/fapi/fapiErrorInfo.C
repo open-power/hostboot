@@ -41,6 +41,7 @@
  *                          mjjones     03/22/2013  Support Procedure Callouts
  *                          mjjones     05/20/2013  Support Bus Callouts
  *                          mjjones     06/24/2013  Support Children CDGs
+ *                          mjjones     08/26/2013  Support HW Callouts
  */
 
 #include <fapiErrorInfo.H>
@@ -109,6 +110,38 @@ void ErrorInfoFfdc::operator delete(void * i_ptr)
 #endif
 
 //******************************************************************************
+// ErrorInfoHwCallout Constructor
+//******************************************************************************
+ErrorInfoHwCallout::ErrorInfoHwCallout(
+    const HwCallouts::HwCallout i_hw,
+    const CalloutPriorities::CalloutPriority i_calloutPriority,
+    const Target & i_refTarget)
+: iv_hw(i_hw), iv_calloutPriority(i_calloutPriority), iv_refTarget(i_refTarget)
+{
+
+}
+
+//******************************************************************************
+// ErrorInfoHwCallout new Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void * ErrorInfoHwCallout::operator new(size_t i_sz)
+{
+    return fapiMalloc(i_sz);
+}
+#endif
+
+//******************************************************************************
+// ErrorInfoProcedureCallout delete Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void ErrorInfoHwCallout::operator delete(void * i_ptr)
+{
+    fapiFree(i_ptr);
+}
+#endif
+
+//******************************************************************************
 // ErrorInfoProcedureCallout Constructor
 //******************************************************************************
 ErrorInfoProcedureCallout::ErrorInfoProcedureCallout(
@@ -117,18 +150,6 @@ ErrorInfoProcedureCallout::ErrorInfoProcedureCallout(
 : iv_procedure(i_procedure), iv_calloutPriority(i_calloutPriority)
 {
 
-}
-
-//******************************************************************************
-// ErrorInfoProcedureCallout Constructor
-//******************************************************************************
-ErrorInfoBusCallout::ErrorInfoBusCallout(
-    const Target & i_target1,
-    const Target & i_target2,
-    const CalloutPriorities::CalloutPriority i_calloutPriority)
-: iv_target1(i_target1), iv_target2(i_target2),
-  iv_calloutPriority(i_calloutPriority)
-{
 }
 
 //******************************************************************************
@@ -146,6 +167,38 @@ void * ErrorInfoProcedureCallout::operator new(size_t i_sz)
 //******************************************************************************
 #ifdef FAPI_CUSTOM_MALLOC
 void ErrorInfoProcedureCallout::operator delete(void * i_ptr)
+{
+    fapiFree(i_ptr);
+}
+#endif
+
+//******************************************************************************
+// ErrorInfoBusCallout Constructor
+//******************************************************************************
+ErrorInfoBusCallout::ErrorInfoBusCallout(
+    const Target & i_target1,
+    const Target & i_target2,
+    const CalloutPriorities::CalloutPriority i_calloutPriority)
+: iv_target1(i_target1), iv_target2(i_target2),
+  iv_calloutPriority(i_calloutPriority)
+{
+}
+
+//******************************************************************************
+// ErrorInfoBusCallout new Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void * ErrorInfoBusCallout::operator new(size_t i_sz)
+{
+    return fapiMalloc(i_sz);
+}
+#endif
+
+//******************************************************************************
+// ErrorInfoBusCallout delete Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void ErrorInfoBusCallout::operator delete(void * i_ptr)
 {
     fapiFree(i_ptr);
 }
@@ -202,12 +255,39 @@ ErrorInfoChildrenCDG::ErrorInfoChildrenCDG(
 }
 
 //******************************************************************************
+// ErrorInfoChildrenCDG new Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void * ErrorInfoChildrenCDG::operator new(size_t i_sz)
+{
+    return fapiMalloc(i_sz);
+}
+#endif
+
+//******************************************************************************
+// ErrorInfoCDG delete Operator Overload
+//******************************************************************************
+#ifdef FAPI_CUSTOM_MALLOC
+void ErrorInfoChildrenCDG::operator delete(void * i_ptr)
+{
+    fapiFree(i_ptr);
+}
+#endif
+
+//******************************************************************************
 // ErrorInfo Destructor
 //******************************************************************************
 ErrorInfo::~ErrorInfo()
 {
     for (ErrorInfo::ErrorInfoFfdcItr_t l_itr = iv_ffdcs.begin();
          l_itr != iv_ffdcs.end(); ++l_itr)
+    {
+        delete (*l_itr);
+        (*l_itr) = NULL;
+    }
+
+    for (ErrorInfoHwCalloutItr_t l_itr = iv_hwCallouts.begin();
+         l_itr != iv_hwCallouts.end(); ++l_itr)
     {
         delete (*l_itr);
         (*l_itr) = NULL;
@@ -221,8 +301,23 @@ ErrorInfo::~ErrorInfo()
         (*l_itr) = NULL;
     }
 
+    for (ErrorInfo::ErrorInfoBusCalloutItr_t l_itr =
+             iv_busCallouts.begin();
+         l_itr != iv_busCallouts.end(); ++l_itr)
+    {
+        delete (*l_itr);
+        (*l_itr) = NULL;
+    }
+
     for (ErrorInfo::ErrorInfoCDGItr_t l_itr = iv_CDGs.begin();
          l_itr != iv_CDGs.end(); ++l_itr)
+    {
+        delete (*l_itr);
+        (*l_itr) = NULL;
+    }
+
+    for (ErrorInfo::ErrorInfoChildrenCDGItr_t l_itr = iv_childrenCDGs.begin();
+         l_itr != iv_childrenCDGs.end(); ++l_itr)
     {
         delete (*l_itr);
         (*l_itr) = NULL;

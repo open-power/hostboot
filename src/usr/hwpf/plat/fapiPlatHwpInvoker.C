@@ -57,7 +57,7 @@ HWAS::callOutPriority xlateCalloutPriority(
 
     if (l_index < (sizeof(HWAS_PRI)/sizeof(HWAS::callOutPriority)))
     {
-        l_priority = HWAS_PRI[i_fapiPri];
+        l_priority = HWAS_PRI[l_index];
     }
     else
     {
@@ -67,6 +67,41 @@ HWAS::callOutPriority xlateCalloutPriority(
   
     return l_priority;
 }
+
+/**
+ * @brief Translates a FAPI Clock HW callout to an HWAS clock callout
+ *
+ * @param[i] i_fapiClock FAPI Clock HW callout
+ *
+ * @return HWAS Clock HW callout
+ */
+/* TODO Enable in RTC 82509 when ERRL interfaces are in place
+HWAS::clockTypeEnum xlateClockHwCallout(
+    const fapi::HwCallouts::Hw Callout i_fapiClock)
+{
+    // Use the HwCallout enum value as an index
+    HWAS::clockTypeEnum l_clock = HWAS::TODCLK_TYPE;
+    size_t l_index = i_fapiClock;
+
+    const HWAS::clockTypeEnum HWAS_CLOCK[] = {
+        HWAS::TODCLK_TYPE,
+        HWAS::MEMCLK_TYPE,
+        HWAS::OSCREFCLK_TYPE,
+        HWAS::OSCPCICLK_TYPE};
+
+    if (l_index < (sizeof(HWAS_CLOCK)/sizeof(HWAS::clockTypeEnum)))
+    {
+        l_clock = HWAS_CLOCK[l_index];
+    }
+    else
+    {
+        FAPI_ERR("fapi::xlateClockCallout: Unknown clock 0x%x, assuming TOD",
+            i_fapiClock);
+    }
+
+    return l_clock;
+}
+*/
 
 /**
  * @brief Translates a FAPI procedure callout to an HWAS procedure callout
@@ -89,7 +124,7 @@ HWAS::epubProcedureID xlateProcedureCallout(
 
     if (l_index < (sizeof(HWAS_PROC)/sizeof(HWAS::epubProcedureID)))
     {
-        l_proc = HWAS_PROC[i_fapiProc];
+        l_proc = HWAS_PROC[l_index];
     }
     else
     {
@@ -103,9 +138,9 @@ HWAS::epubProcedureID xlateProcedureCallout(
 /**
  * @brief Translates a FAPI target type to a Targeting target type
  *
- * @param[i] i_fapiProc FAPI procedure callout
+ * @param[i] i_targetType FAPI target type
  *
- * @return HWAS procedure callout
+ * @return TARGETING type
  */
 TARGETING::TYPE xlateTargetType(
     const fapi::TargetType i_targetType)
@@ -180,6 +215,53 @@ void processEIFfdcs(const ErrorInfo & i_errInfo,
         if (l_pUD)
         { 
             io_pError->appendToFFDC(l_pUD, l_pFfdc, l_size);
+        }
+    }
+}
+
+/**
+ * @brief Processes any HW callouts requests in the ReturnCode Error
+ *        Information and adds them to the error log
+ *
+ * @param[i] i_errInfo  Reference to ReturnCode Error Information
+ * @param[io] io_pError Errorlog Handle
+ */
+void processEIHwCallouts(const ErrorInfo & i_errInfo,
+                         errlHndl_t io_pError)
+{
+    // Iterate through the HW callout requests, adding each to the error log
+    for (ErrorInfo::ErrorInfoHwCalloutCItr_t l_itr =
+             i_errInfo.iv_hwCallouts.begin();
+         l_itr != i_errInfo.iv_hwCallouts.end(); ++l_itr)
+    {
+        HWAS::callOutPriority l_priority =
+            xlateCalloutPriority((*l_itr)->iv_calloutPriority);
+
+        HwCallouts::HwCallout l_hw = ((*l_itr)->iv_hw);
+
+        TARGETING::Target * l_pRefTarget =
+            reinterpret_cast<TARGETING::Target*>((*l_itr)->iv_refTarget.get());
+
+        if ( ((l_hw == HwCallouts::TOD_CLOCK) ||
+              (l_hw == HwCallouts::MEM_REF_CLOCK) ||
+              (l_hw == HwCallouts::PROC_REF_CLOCK) ||
+              (l_hw == HwCallouts::PCI_REF_CLOCK)) &&
+             l_pRefTarget != NULL)
+        {
+            /* TODO Enable in RTC 82509 when ERRL interfaces are in place
+            HWAS::clockTypeEnum l_clock =
+                xlateClockHwCallout((*l_itr)->iv_hw);
+
+            FAPI_ERR("processEIHwCallouts: Adding clock-callout (clock:%d, pri:%d)",
+                     l_clock, l_priority);
+            io_pError->addClockCallout(l_pRefTarget, l_clock, l_priority);
+            */
+            FAPI_ERR("processEIHwCallouts: Adding clock-callout TBD (hw:%d, pri:%d)",
+                     l_hw, l_priority);
+        }
+        else
+        {
+            FAPI_ERR("processEIHwCallouts: Unsupported HW callout (%d)", l_hw);
         }
     }
 }
@@ -430,6 +512,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
                 processEIBusCallouts(*l_pErrorInfo, l_pError);
                 processEICDGs(*l_pErrorInfo, l_pError);
                 processEIChildrenCDGs(*l_pErrorInfo, l_pError);
+                processEIHwCallouts(*l_pErrorInfo, l_pError);
             }
             else
             {
@@ -464,6 +547,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
                 processEIBusCallouts(*l_pErrorInfo, l_pError);
                 processEICDGs(*l_pErrorInfo, l_pError);
                 processEIChildrenCDGs(*l_pErrorInfo, l_pError);
+                processEIHwCallouts(*l_pErrorInfo, l_pError);
             }
         }
 
@@ -475,7 +559,6 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
         l_pError->collectTrace(FAPI_TRACE_NAME, 256 );
         l_pError->collectTrace(FAPI_IMP_TRACE_NAME, 256 );
         l_pError->collectTrace(FAPI_SCAN_TRACE_NAME, 256 );
-
     }
 
     return l_pError;
