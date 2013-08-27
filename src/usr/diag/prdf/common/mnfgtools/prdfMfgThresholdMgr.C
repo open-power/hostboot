@@ -49,30 +49,27 @@ MfgThresholdMgr * MfgThresholdMgr::getInstance()
     return &l_mgr;
 }
 
-uint16_t MfgThresholdMgr::getThreshold(uint32_t i_thrName)
+uint8_t MfgThresholdMgr::getThreshold(uint32_t i_thrName)
 {
     this->setupFile();
 
-    int l_thr = iv_file->getThreshold(i_thrName);
+    uint8_t l_thr = iv_file->getThreshold(i_thrName);
 
-    if (0 > l_thr)
+    if ((MfgThresholdFileCommon::INFINITE_LIMIT_THR) <= l_thr)
         return getThresholdDefault(i_thrName);
     else if (0 == l_thr) // zero is the "infinite" threshold.
-        return INFINITE_LIMIT_THR;
+        return (MfgThresholdFileCommon::INFINITE_LIMIT_THR);
     else
-        return (uint16_t) l_thr;
+        return l_thr;
 }
 
 ThresholdResolution::ThresholdPolicy*
     MfgThresholdMgr::getThresholdP(uint32_t i_thrName)
 {
-    uint16_t threshold = getThreshold(i_thrName);
+    uint8_t threshold = getThreshold(i_thrName);
     uint32_t interval = ThresholdResolution::NONE;
 
-    // FIXME - RTC: 72403 will address this issue
-    // if threshold >= 255 then set the interval to a very
-    // small number which will make it an infinite threshold
-    if( 255 <= threshold )
+    if( (MfgThresholdFileCommon::INFINITE_LIMIT_THR) <= threshold )
     {
         PRDF_TRAC("MfgThresholdMgr::getThresholdP: "
                   "infinite threshold: 0x%x", i_thrName);
@@ -95,20 +92,20 @@ void MfgThresholdMgr::reset()
     }
 }
 
-uint16_t MfgThresholdMgr::getThresholdDefault(uint32_t i_thrName)
+uint8_t MfgThresholdMgr::getThresholdDefault(uint32_t i_thrName)
 {
-    uint32_t l_value = 0;
+    uint8_t l_value = 0;
 
 #define PRDF_MFGTHRESHOLD_TABLE_BEGIN if
 #define PRDF_MFGTHRESHOLD_TABLE_END \
-        (true) l_value = INFINITE_LIMIT_THR;
+        (true) l_value = (MfgThresholdFileCommon::INFINITE_LIMIT_THR);
 #define PRDF_MFGTHRESHOLD_ENTRY(a,b,c) \
         (i_thrName == b) { l_value = c; } else if
 #include <prdfMfgThresholds.H>
 
     // zero is a special "infinite limit" value.
     if (0 == l_value)
-        l_value = INFINITE_LIMIT_THR;
+        l_value = (MfgThresholdFileCommon::INFINITE_LIMIT_THR);
 
     return l_value;
 }

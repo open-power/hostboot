@@ -73,6 +73,11 @@ class MfgThresholdFileCommon
         typedef std::map<uint32_t, uint8_t> Threshold_t;
 
         /**
+         * @brief Infinite threshold enum
+        */
+        enum { INFINITE_LIMIT_THR = 0xff };
+
+        /**
          *  @brief constructor
         */
         MfgThresholdFileCommon() {};
@@ -93,7 +98,7 @@ class MfgThresholdFileCommon
          *
          * @return corresponding threshold value
          */
-        int getThreshold(uint32_t i_thrName);
+        uint8_t getThreshold(uint32_t i_thrName);
 
         /**
          * @brief set threshold name/value

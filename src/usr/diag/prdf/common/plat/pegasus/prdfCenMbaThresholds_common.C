@@ -59,7 +59,7 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         if ( 0 == baseTh )
         {
             o_cePerDram = o_cePerHalfRank = o_cePerDimm =
-                                    MfgThresholdMgr::INFINITE_LIMIT_THR;
+                                    MfgThresholdFileCommon::INFINITE_LIMIT_THR;
             break;
         }
 

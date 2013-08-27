@@ -40,10 +40,10 @@
 namespace PRDF
 {
 
-int MfgThresholdFileCommon::getThreshold(uint32_t i_thrName)
+uint8_t MfgThresholdFileCommon::getThreshold(uint32_t i_thrName)
 {
     if (iv_thresholds.end() == iv_thresholds.find(i_thrName))
-        return -1;
+        return INFINITE_LIMIT_THR;
     else
         return iv_thresholds[i_thrName];
 }

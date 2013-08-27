@@ -24,16 +24,7 @@
 #ifndef __PRDF_PRDFMFGTHRESHOLDMGR_H
 #define __PRDF_PRDFMFGTHRESHOLDMGR_H
 
-#ifdef __HOSTBOOT_MODULE
-  #ifndef INT_MAX
-    #define INT_MAX 0xFFFFFFFF // FIXME: defined here for now
-  #endif
-#else
-  #include <limits>
-#endif
-
 #include <stdint.h>
-#include <limits.h>                //  for INT_MAX
 #include <prdfMfgThresholdFile.H>
 #include <prdfThresholdResolutions.H>
 #include <prdfFlyWeight.H>
@@ -68,7 +59,7 @@ class MfgThresholdMgr
          *
          * @return corresponding threshold value
          */
-        uint16_t getThreshold(uint32_t i_thrName);
+        uint8_t getThreshold(uint32_t i_thrName);
 
         /**
          * @brief get threshold policy from name
@@ -90,12 +81,6 @@ class MfgThresholdMgr
          */
         inline MfgThresholdFile * getMfgThresholdFile() { return iv_file; };
 
-
-        /**
-         *  @brief Infinite threshold enum
-        */
-        enum { INFINITE_LIMIT_THR = 0xffff };
-
     private:
 
         /**
@@ -104,7 +89,7 @@ class MfgThresholdMgr
          *
          * @return corresponding threshold value
          */
-        uint16_t getThresholdDefault(uint32_t i_thrName);
+        uint8_t getThresholdDefault(uint32_t i_thrName);
 
         /**
          *  @brief set up MfgThresholdFile
