@@ -220,32 +220,26 @@ void Target::_getAttrPtr(
     {   // only check for the attribute if we got a valid address from
         // the translateAddr function
 
-        // Iterate through all the target's attribute IDs
-        for (uint32_t i = 0; i < iv_attrs; ++i)
+        // Search for the attribute ID.
+        ATTRIBUTE_ID* ptr = std::lower_bound(pAttrId, pAttrId+iv_attrs, i_attr);
+        if ((ptr != pAttrId+iv_attrs) && (*ptr == i_attr))
         {
-            // Point to the ith attribute ID.  If it matches the requested
-            // attribute ID,
-            // look up the attribute's address
-            if (*(pAttrId+i) == i_attr)
+            // Locate the corresponding attribute address
+            l_pAttr =
+                TARG_TO_PLAT_PTR(*(ppAttrAddr+std::distance(pAttrId,ptr)));
+
+            // Only translate addresses on platforms where addresses are
+            // 4 byte wide (FSP).  The compiler should perform dead code
+            // elimination this path on platforms with 8 byte wide
+            // addresses (Hostboot), since the "if" check can be statically
+            // computed at compile time.
+            if(TARG_ADDR_TRANSLATION_REQUIRED)
             {
-                // Locate the corresponding attribute address
-                l_pAttr = TARG_TO_PLAT_PTR(*(ppAttrAddr+i));
-
-                // Only translate addresses on platforms where addresses are
-                // 4 byte wide (FSP).  The compiler should perform dead code
-                // elimination this path on platforms with 8 byte wide
-                // addresses (Hostboot), since the "if" check can be statically
-                // computed at compile time.
-                if(TARG_ADDR_TRANSLATION_REQUIRED)
-                {
-                    l_pAttr =
-                        TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
+                l_pAttr =
+                    TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
                             l_pAttr);
-                }
-
-                break;
             }
-        } // for
+        }
     }
     o_pAttr = l_pAttr;
 
@@ -407,7 +401,7 @@ Target* Target::getTargetFromHuid(
 {
     #define TARG_FN "getTargetFromHuid"
     Target* l_pTarget = NULL;
-    
+
     TARGETING::PredicateAttrVal<TARGETING::ATTR_HUID> huidMatches(i_huid);
 
     TARGETING::TargetRangeFilter targetsWithMatchingHuid(

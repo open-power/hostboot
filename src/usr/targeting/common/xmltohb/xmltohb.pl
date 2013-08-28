@@ -443,7 +443,7 @@ sub validateTargetInstances{
 sub handleTgtPtrAttributesFsp
 {
     my($attributes) = @_;
-    
+
     # replace PEER_TARGET attribute<PHYS_PATH> value with PEER's HUID
     foreach my $targetInstance (@{${$attributes}->{targetInstance}})
     {
@@ -451,17 +451,17 @@ sub handleTgtPtrAttributesFsp
         {
             if (exists $attr->{default})
             {
-                if(   ($attr->{default} ne "NULL") 
+                if(   ($attr->{default} ne "NULL")
                    && ($attr->{id} eq "PEER_TARGET"))
                 {
-                    my $peerHUID = getPeerHuid(${$attributes}, 
+                    my $peerHUID = getPeerHuid(${$attributes},
                                        $attr->{default});
                     if($peerHUID == INVALID_HUID)
                     {
                         fatal("HUID for Peer Target not found");
                     }
                     $attr->{default} = (hex($peerHUID) << 32);
-                    $attr->{default} = sprintf("0x%X",$attr->{default}); 
+                    $attr->{default} = sprintf("0x%X",$attr->{default});
                 }
             }
         }
@@ -524,7 +524,7 @@ sub handleTgtPtrAttributesHb{
     }
 }
 
-sub getPeerHuid 
+sub getPeerHuid
 {
     my($attributes, $peerPhysPath) = @_;
 
@@ -562,7 +562,7 @@ sub getPeerHuid
         }
     }
 
-    return $peerHUID;    
+    return $peerHUID;
 }
 
 sub SOURCE_FILE_GENERATION_FUNCTIONS { }
@@ -2715,6 +2715,15 @@ sub writeTargetErrlHFile {
 sub UTILITY_FUNCTIONS { }
 
 ################################################################################
+# Get the hash hex string for an attribute name (ID).
+################################################################################
+sub getAttributeIdHashStr
+{
+    my ($attrId) = @_;
+    return substr(md5_hex($attrId),0,7);
+}
+
+################################################################################
 # Get generated enumeration describing attribute IDs
 ################################################################################
 
@@ -2733,8 +2742,7 @@ sub getAttributeIdEnumeration {
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
-        my $attributeHexVal = md5_hex($attribute->{id});
-        my $attributeHexVal28bit =substr($attributeHexVal,0,7);
+        my $attributeHexVal28bit = getAttributeIdHashStr($attribute->{id});
 
         if(exists($attrValHash{$attributeHexVal28bit}))
         {
@@ -3423,14 +3431,14 @@ sub isFspTargetInstance {
 
     if(%g_fspTargetTypesCache)
     {
-        $fspTargetInstance = %g_fspTargetTypesCache->{$targetInstance->{type}};
+        $fspTargetInstance = $g_fspTargetTypesCache{$targetInstance->{type}};
     }
     else
     {
         %g_fspTargetTypesCache =
             map { $_->{id} => exists $_->{fspOnly} ? 1:0 }
                 @{$attributes->{targetType}};
-        $fspTargetInstance = %g_fspTargetTypesCache->{$targetInstance->{type}};
+        $fspTargetInstance = $g_fspTargetTypesCache{$targetInstance->{type}};
     }
 
     return $fspTargetInstance;
@@ -3984,8 +3992,14 @@ sub generateTargetingImage {
         getTargetAttributes($targetType, $attributes,\%attrhash);
 
         # Serialize per target type attribute list
+        #    Sort the list by attribute ID (hash value) so that we can do a
+        #    binary search at runtime.
         my $perTargetTypeAttrBinData;
-        for my $attributeId (sort(keys %attrhash))
+        for my $attributeId
+            (sort
+                { getAttributeIdHashStr($a) cmp getAttributeIdHashStr($b) }
+                (keys %attrhash)
+            )
         {
             $perTargetTypeAttrBinData .= packEnumeration(
                 $attributeIdEnumeration,
@@ -4141,7 +4155,12 @@ sub generateTargetingImage {
         my %attributeDefCache =
             map { $_->{id} => $_} @{$attributes->{attribute}};
 
-        for my $attributeId (sort(keys %attrhash))
+        # Must have the same order as the attribute list from above.
+        for my $attributeId
+            (sort
+                { getAttributeIdHashStr($a) cmp getAttributeIdHashStr($b) }
+                (keys %attrhash)
+            )
         {
             my $attributeDef = $attributeDefCache{$attributeId};
             if (not defined $attributeDef)
