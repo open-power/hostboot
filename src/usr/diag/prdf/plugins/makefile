@@ -24,7 +24,7 @@
 
 INCFLAGS += -I. -I.. \
 
-CFLAGS += -D PRDF_HOSTBOOT_ERRL_PLUGIN
+CFLAGS += -DPRDF_HOSTBOOT_ERRL_PLUGIN
 
 # This variable will be used in plugins.mk to generate
 # library names.
