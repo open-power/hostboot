@@ -90,8 +90,8 @@ enum MMIO_Scratch_Register
     MMIO_SCRATCH_RSVD_T3 = 0x18,
         /** Thread4 Scratch Register - Unused */
     MMIO_SCRATCH_RSVD_T4 = 0x20,
-        /** Thread5 Scratch Register - Unused */
-    MMIO_SCRATCH_RSVD_T5 = 0x28,
+        /** Thread5 Scratch Register - Unused (unit tests may modify) */
+    MMIO_SCRATCH_RSVD_T5_TESTCASES = 0x28,
         /** Thread6 Scratch Register - Identifies where hostboot currently
                                        resides and how large the space is */
     MMIO_SCRATCH_MEMORY_STATE = 0x30,

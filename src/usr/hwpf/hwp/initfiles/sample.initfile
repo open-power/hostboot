@@ -75,15 +75,6 @@ scom 0x0000000015010002              {
 }
 
 #--******************************************************************************
-#-- Basic SCOM with Expression and Attribute
-#--******************************************************************************
-
-scom 0x0000000015030007              {
-  scom_data,            expr                 ;
-  0x00000CDE00000000,   SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_2    ;
-}
-
-#--******************************************************************************
 #-- SCOM with Address and Data of Array Type, Range of Index, Bit Support
 #-- The following Scom is equivalent to:
 #scom 0x000000000006002B           {
