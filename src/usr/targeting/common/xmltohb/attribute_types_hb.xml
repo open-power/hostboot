@@ -161,6 +161,20 @@
 </attribute>
 
 <attribute>
+    <id>SCAN_MUTEX</id>
+    <description>Mutex for SCAN operations</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
     <id>SLW_IMAGE_ADDR</id>
     <description>
         Location of runtime winkle image for this processor chip.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -223,6 +223,9 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
     uint64_t l_wordsInChain = i_ringlength/32;
     size_t op_size = sizeof(uint64_t);
     uint32_t l_buffer[2];  // local scom buffer
+
+    mutex_t* l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SCAN_MUTEX>();
+    mutex_lock(l_mutex);
 
     do
     {
@@ -647,6 +650,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         }
     }while(0);
 
+    mutex_unlock(l_mutex);
 
     return l_err;
 }

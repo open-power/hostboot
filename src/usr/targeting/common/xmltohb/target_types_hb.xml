@@ -48,6 +48,7 @@
     <attribute>
         <id>SCOM_IND_MUTEX</id>
     </attribute>
+    <attribute><id>SCAN_MUTEX</id></attribute>
     <!-- new attribute for isteps 15 & 16 -->
     <attribute>
         <id>SLW_IMAGE_ADDR</id>
@@ -86,6 +87,7 @@
     <attribute>
         <id>SCOM_IND_MUTEX</id>
     </attribute>
+    <attribute><id>SCAN_MUTEX</id></attribute>
     <attribute>
         <id>IBSCOM_VIRTUAL_ADDR</id>
     </attribute>
