@@ -93,9 +93,10 @@ HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
-SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.bin}
-MURANO_SECT = HBD=simics_MURANO_targeting.bin,WINK=${SLW_IMG}
-VENICE_SECT = HBD=simics_VENICE_targeting.bin,WINK=${SLW_IMG}
+MURANO_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.bin}
+VENICE_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.bin}
+MURANO_SECT = HBD=simics_MURANO_targeting.bin,WINK=${MURANO_SLW_IMG}
+VENICE_SECT = HBD=simics_VENICE_targeting.bin,WINK=${VENICE_SLW_IMG}
 
 PNOR_IMG_INFO = \
    murano.pnor:defaultPnorLayout.xml:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
