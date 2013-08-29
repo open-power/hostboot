@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.27 2013/08/06 00:06:30 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.28 2013/08/06 23:38:34 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,7 +44,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.28  |          |         | 
+//   1.29  |          |         | 
+//   1.28  | asaetow  |06-AUG-13| Added call to mss_eff_pre_config().
+//         |          |         | Removed call to mss_eff_config_thermal().
+//         |          |         | NOTE: Do NOT pickup without mss_eff_pre_config.C v1.1 or newer.
 //   1.27  | asaetow  |05-AUG-13| Restored EFF_STACK_TYPE_DDP_QDP support v1.25.
 //         |          |         | NOTE: Do NOT pickup without mss_eff_config_termination.C v1.28 or newer, contains workaround for incorrect byte33 SPD data in early lab OLD 16G/32G CDIMMs.
 //   1.26  | bellows  |21-JUN-13| Removed last update because caused lab problems
@@ -141,7 +144,7 @@
 #include <mss_eff_config_rank_group.H>
 #include <mss_eff_config_cke_map.H>
 #include <mss_eff_config_termination.H>
-#include <mss_eff_config_thermal.H>
+#include <mss_eff_pre_config.H>
 #include <mss_eff_config_shmoo.H>
 
 
@@ -2016,6 +2019,10 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
 
     FAPI_INF("STARTING %s on %s \n", PROCEDURE_NAME,
             i_target_mba.toEcmdString());
+
+    // Added call to mss_eff_pre_config() for Mike Pardeik (power/thermal).
+    rc = mss_eff_pre_config(i_target_mba); if(rc) return rc;
+
     do
     {
 //------------------------------------------------------------------------------
@@ -2110,7 +2117,8 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         rc = mss_eff_config_rank_group(i_target_mba); if(rc) break;
         rc = mss_eff_config_cke_map(i_target_mba); if(rc) break;
         rc = mss_eff_config_termination(i_target_mba); if(rc) break;
-        rc = mss_eff_config_thermal(i_target_mba); if(rc) break;
+        // Removed call to mss_eff_config_thermal(), it is now called externally.
+        //rc = mss_eff_config_thermal(i_target_mba); if(rc) break;
         rc = mss_eff_config_shmoo(i_target_mba); if(rc) break;
 
 

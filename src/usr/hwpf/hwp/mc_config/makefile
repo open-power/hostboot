@@ -53,7 +53,8 @@ OBJS =  mc_config.o                \
         mss_bulk_pwr_throttles.o     \
         mss_throttle_to_power.o      \
         mss_eff_config_shmoo.o       \
-        mss_error_support.o
+        mss_error_support.o          \
+        mss_eff_pre_config.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
