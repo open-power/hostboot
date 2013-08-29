@@ -535,22 +535,79 @@
     };
 
     ############################################################################
-    # PB Chiplet EHHCAFIR and ENHCAFIR
-    # These FIRs are completely masked but they will be captured for FFDC.
+    # PB Chiplet EHHCAFIR
     ############################################################################
 
     register EHHCAFIR
     {
         name        "EH.TPC.HCA.EHHCA_FIR_REG";
         scomaddr    0x02010980;
+        reset       (&, 0x02010981);
+        mask        (|, 0x02010985);
         capture     group default;
     };
+
+    register EHHCAFIR_MASK
+    {
+        name        "EH.TPC.HCA.EHHCA_FIR_MASK_REG";
+        scomaddr    0x02010983;
+        capture     group default;
+    };
+
+    register EHHCAFIR_ACT0
+    {
+        name        "EH.TPC.HCA.EHHCA_FIR_ACTION0_REG";
+        scomaddr    0x02010986;
+        capture     type secondary;
+        capture     group default;
+        capture     req nonzero("EHHCAFIR");
+    };
+
+    register EHHCAFIR_ACT1
+    {
+        name        "EH.TPC.HCA.EHHCA_FIR_ACTION1_REG";
+        scomaddr    0x02010987;
+        capture     type secondary;
+        capture     group default;
+        capture     req nonzero("EHHCAFIR");
+    };
+
+    ############################################################################
+    # PB Chiplet ENHCAFIR
+    ############################################################################
 
     register ENHCAFIR
     {
         name        "EN.TPC.BRIDGE.HCA.ENHCA_FIR_REG";
         scomaddr    0x02010940;
+        reset       (&, 0x02010941);
+        mask        (|, 0x02010945);
         capture     group default;
+    };
+
+    register ENHCAFIR_MASK
+    {
+        name        "EN.TPC.BRIDGE.HCA.ENHCA_FIR_MASK_REG";
+        scomaddr    0x02010943;
+        capture     group default;
+    };
+
+    register ENHCAFIR_ACT0
+    {
+        name        "EN.TPC.BRIDGE.HCA.ENHCA_FIR_ACTION0_REG";
+        scomaddr    0x02010946;
+        capture     type secondary;
+        capture     group default;
+        capture     req nonzero("ENHCAFIR");
+    };
+
+    register ENHCAFIR_ACT1
+    {
+        name        "EN.TPC.BRIDGE.HCA.ENHCA_FIR_ACTION1_REG";
+        scomaddr    0x02010947;
+        capture     type secondary;
+        capture     group default;
+        capture     req nonzero("ENHCAFIR");
     };
 
     ############################################################################

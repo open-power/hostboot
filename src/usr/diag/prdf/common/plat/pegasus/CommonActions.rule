@@ -219,6 +219,12 @@ actionclass calloutProcHighThr1SUE
     threshold1;
 };
 
+/** Callout 2nd level support of afer 32 events per day */
+actionclass callout2ndLvlMedThr32perDay
+{
+    callout2ndLvlMed;
+    threshold32pday;
+};
 ################################################################################
 #                               Dump Types                                     #
 ################################################################################

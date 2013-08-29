@@ -83,7 +83,7 @@ group gPbChipletFir filter singlebit
     /** PB_CHIPLET_FIR[14]
      *  Attention from EHHCAFIR
      */
-    (PbChipletFir, bit(14)) ? defaultMaskedError;
+    (PbChipletFir, bit(14)) ? analyze(gEhHcaFir);
 
     /** PB_CHIPLET_FIR[15]
      *  Attention from NXASFIR
@@ -93,7 +93,7 @@ group gPbChipletFir filter singlebit
     /** PB_CHIPLET_FIR[16]
      *  Attention from ENHCAFIR
      */
-    (PbChipletFir, bit(16)) ? defaultMaskedError;
+    (PbChipletFir, bit(16)) ? analyze(gEnHcaFir);
 
     /** PB_CHIPLET_FIR[17|18|19]
      *  Attention from PCINESTFIRs
@@ -999,6 +999,8 @@ group gNxCxaFir filter singlebit
 ################################################################################
 # PB Chiplet MCDFIR
 ################################################################################
+# based on p8dd1_mss_FFDC_59.xls
+################################################################################
 
 rule McdFir
 {
@@ -1011,52 +1013,53 @@ group gMcdFir filter singlebit
     /** MCDFIR[0]
      *  MCD_ARRAY_ECC_UE_ERR
      */
-    (McdFir, bit(0)) ? TBDDefaultCallout;
+    (McdFir, bit(0)) ? SelfHighThr32PerDay;
 
     /** MCDFIR[1]
      *  MCD_ARRAY_ECC_CE_ERR
      */
-    (McdFir, bit(1)) ? TBDDefaultCallout;
+    (McdFir, bit(1)) ? SelfHighThr32PerDay;
 
     /** MCDFIR[2]
      *  MCD_REG_PARITY_ERR
      */
-    (McdFir, bit(2)) ? TBDDefaultCallout;
+    (McdFir, bit(2)) ? SelfHighThr32PerDay;
 
     /** MCDFIR[3]
      *  MCD_SM_ERR
      */
+    #FIXME RTC 23127 NX target not available as yet
     (McdFir, bit(3)) ? TBDDefaultCallout;
 
     /** MCDFIR[4]
      *  MCD_REC_HANG_ERR
      */
-    (McdFir, bit(4)) ? TBDDefaultCallout;
+    (McdFir, bit(4)) ? defaultMaskedError;
 
     /** MCDFIR[5]
      *  MCD_PB_PARITY_ERR
      */
-    (McdFir, bit(5)) ? TBDDefaultCallout;
+    (McdFir, bit(5)) ? defaultMaskedError;
 
     /** MCDFIR[6]
      *  MCD_UNSOLICITED_CRESP_ERR
      */
-    (McdFir, bit(6)) ? TBDDefaultCallout;
+    (McdFir, bit(6)) ? defaultMaskedError;
 
     /** MCDFIR[7]
      *  MCD_ACK_DEAD_ERR
      */
-    (McdFir, bit(7)) ? TBDDefaultCallout;
+    (McdFir, bit(7)) ? defaultMaskedError;
 
     /** MCDFIR[8]
      *  FIR_PARITY_ERR2
      */
-    (McdFir, bit(8)) ? TBDDefaultCallout;
+    (McdFir, bit(8)) ? defaultMaskedError;
 
     /** MCDFIR[9]
      *  FIR_PARITY_ERR
      */
-    (McdFir, bit(9)) ? TBDDefaultCallout;
+    (McdFir, bit(9)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -1999,6 +2002,264 @@ group gPbaFir filter singlebit
 };
 
 ################################################################################
+# PB Chiplet EHHCAFIR
+################################################################################
+# based on p8dd1_mss_FFDC_59.xls
+################################################################################
+rule EhHcaFir
+{
+    CHECK_STOP:  EHHCAFIR & ~EHHCAFIR_MASK & ~EHHCAFIR_ACT0 & ~EHHCAFIR_ACT1;
+    RECOVERABLE: EHHCAFIR & ~EHHCAFIR_MASK & ~EHHCAFIR_ACT0 &  EHHCAFIR_ACT1;
+};
+
+group gEhHcaFir filter singlebit
+{
+    /** EHHCAFIR[0]
+     *  CE1_0_OUT: array0_a CE
+     */
+    (EhHcaFir, bit(0)) ? defaultMaskedError;
+
+    /** EHHCAFIR[1]
+     *  CE2_0_OUT: array0_b CE
+     */
+    (EhHcaFir, bit(1)) ? defaultMaskedError;
+
+    /** EHHCAFIR[2]
+     *  UE1_0_OUT: array0_a ue
+     */
+    (EhHcaFir, bit(2)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[3]
+     *  UE2_0_OUT: array0_b ue
+     */
+    (EhHcaFir, bit(3)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[4]
+     *  CE1_1_OUT: array1_a CE
+     */
+    (EhHcaFir, bit(4)) ? defaultMaskedError;
+
+    /** EHHCAFIR[5]
+     *  CE2_1_OUT: array1_b CE
+     */
+    (EhHcaFir, bit(5)) ? defaultMaskedError;
+
+    /** EHHCAFIR[6]
+     *  UE1_1_OUT: array1_a ue
+     */
+    (EhHcaFir, bit(6)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[7]
+     *  UE2_1_OUT: array1_b ue
+     */
+    (EhHcaFir, bit(7)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[8]
+     *  CE1_2_OUT: array2_a CE
+     */
+    (EhHcaFir, bit(8)) ? defaultMaskedError;
+
+    /** EHHCAFIR[9]
+     *  CE2_2_OUT: array2_b CE
+     */
+    (EhHcaFir, bit(9)) ? defaultMaskedError;
+
+    /** EHHCAFIR[10]
+     *  UE1_2_OUT: array2_a ue
+     */
+    (EhHcaFir, bit(10)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[11]
+     *  UE2_2_OUT: array2_b ue
+     */
+    (EhHcaFir, bit(11)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[12]
+     *  CE1_3_OUT: array3_a CE
+     */
+    (EhHcaFir, bit(12)) ? defaultMaskedError;
+
+    /** EHHCAFIR[13]
+     *  CE2_3_OUT: array3_b CE
+     */
+    (EhHcaFir, bit(13)) ? defaultMaskedError;
+
+    /** EHHCAFIR[14]
+     *  UE1_3_OUT: array3_a ue
+     */
+    (EhHcaFir, bit(14)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[15]
+     *  UE2_3_OUT: array3_b ue
+     */
+    (EhHcaFir, bit(15)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[16]
+     *  CE1_4_OUT: array4_a CE
+     */
+    (EhHcaFir, bit(16)) ? defaultMaskedError;
+
+    /** EHHCAFIR[17]
+     *  CE2_4_OUT: array4_b CE
+     */
+    (EhHcaFir, bit(17)) ? defaultMaskedError;
+
+    /** EHHCAFIR[18]
+     *  UE1_4_OUT: array4_a ue
+     */
+    (EhHcaFir, bit(18)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[19]
+     *  UE2_4_OUT: array4_b ue
+     */
+    (EhHcaFir, bit(19)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[20]
+     *  CE1_5_OUT: array5_a CE
+     */
+    (EhHcaFir, bit(20)) ? defaultMaskedError;
+
+    /** EHHCAFIR[21]
+     *  CE2_5_OUT: array5_b CE
+     */
+    (EhHcaFir, bit(21)) ? defaultMaskedError;
+
+    /** EHHCAFIR[22]
+     *  UE1_5_OUT: array5_a ue
+     */
+    (EhHcaFir, bit(22)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[23]
+     *  UE2_5_OUT: array5_b ue
+     */
+    (EhHcaFir, bit(23)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[24]
+     *  CE1_6_OUT: array6_a CE
+     */
+    (EhHcaFir, bit(24)) ? defaultMaskedError;
+
+    /** EHHCAFIR[25]
+     *  CE2_6_OUT: array6_b CE
+     */
+    (EhHcaFir, bit(25)) ? defaultMaskedError;
+
+    /** EHHCAFIR[26]
+     *  UE1_6_OUT: array6_a ue
+     */
+    (EhHcaFir, bit(26)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[27]
+     *  UE2_6_OUT: array6_b ue
+     */
+    (EhHcaFir, bit(27)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[28]
+     *  CE1_7_OUT: array7_a CE
+     */
+    (EhHcaFir, bit(28)) ? defaultMaskedError;
+
+    /** EHHCAFIR[29]
+     *  CE2_7_OUT: array7_b CE
+     */
+    (EhHcaFir, bit(29)) ? defaultMaskedError;
+
+    /** EHHCAFIR[30]
+     *  UE1_7_OUT: array7_a ue
+     */
+    (EhHcaFir, bit(30)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[31]
+     *  UE2_7_OUT: array7_b ue
+     */
+    (EhHcaFir, bit(31)) ? SelfHighThr32PerDay;
+
+    /** EHHCAFIR[32]
+     *  DROP_COUNTER_FULL: Drop Counter Full
+     */
+    (EhHcaFir, bit(32)) ? defaultMaskedError;
+
+    /** EHHCAFIR[33]
+     *  INTERNAL_ERROR: Internal Error
+     */
+    (EhHcaFir, bit(33)) ? defaultMaskedError;
+
+    /** EHHCAFIR[34]
+     *  SCOM_ERROR
+     */
+    (EhHcaFir, bit(34)) ? defaultMaskedError;
+
+    /** EHHCAFIR[35]
+     *  FIR_PARITY_ERROR
+     */
+    (EhHcaFir, bit(35)) ? defaultMaskedError;
+};
+
+################################################################################
+# PB Chiplet ENHCAFIR
+################################################################################
+#action updated based on p8dd1_mss_FFDC_59.xls
+################################################################################
+
+rule EnHcaFir
+{
+    CHECK_STOP:  ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 & ~ENHCAFIR_ACT1;
+    RECOVERABLE: ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 &  ENHCAFIR_ACT1;
+};
+
+group gEnHcaFir filter singlebit
+{
+    /** ENHCAFIR[0]
+     *  DPX0_DAT_UE: PB0 data UE
+     */
+    (EnHcaFir, bit(0)) ? SelfHighThr32PerDay;
+
+    /** ENHCAFIR[1]
+     *  DPX0_DAT_SUE: PB0 data UE
+     */
+    (EnHcaFir, bit(1)) ? SelfHighThr32PerDay;
+
+    /** ENHCAFIR[2]
+     *  DPX0_DAT_CE: PB0 data ue
+     */
+    (EnHcaFir, bit(2)) ? SelfHighThr32PerDay;
+
+    /** ENHCAFIR[3]
+     *  Undefined
+     */
+    (EnHcaFir, bit(3)) ? defaultMaskedError;
+
+    /** ENHCAFIR[4]
+     *  CO_DROP_COUNTER_FULL: Castout Drop Counter Full
+     */
+    (EnHcaFir, bit(4)) ? defaultMaskedError;
+
+    /** ENHCAFIR[5]
+     *  DATA_HANG_DETECT: Castout Drop Counter Full
+     */
+    (EnHcaFir, bit(5)) ? defaultMaskedError;
+
+    /** ENHCAFIR[6]
+     *  UNEXPECTED_DATA_OR_CRESP: Castout Drop Counter Full
+     */
+    (EnHcaFir, bit(6)) ? defaultMaskedError;
+
+    /** ENHCAFIR[7]
+     *  INTERNAL_ERROR: Castout Drop Counter Full
+     */
+    (EnHcaFir, bit(7)) ? defaultMaskedError;
+
+    /** ENHCAFIR[8]
+     *  SCOM_ERROR
+     */
+    (EnHcaFir, bit(8)) ? defaultMaskedError;
+
+    /** ENHCAFIR[9]
+     *  FIR_PARITY_ERROR
+     */
+    (EnHcaFir, bit(9)) ? defaultMaskedError;
+};
+
 # PB Chiplet PCINESTFIRs
 ################################################################################
 
@@ -2831,13 +3092,6 @@ actionclass callout2ndLvlMedThr1
 {
     callout2ndLvlMed;
     threshold1;
-};
-
-/** Callout 2nd level support of afer 32 events per day */
-actionclass callout2ndLvlMedThr32perDay
-{
-    callout2ndLvlMed;
-    threshold32pday;
 };
 
 /** callout both ends of PSI Link.Threshold is 32 events per day.
