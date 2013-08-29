@@ -33,32 +33,19 @@
 
 #include <prdfDramRepairUsrData.H>
 #include <prdfMemoryMruData.H>
+#include <prdfParserEnums.H>
 
 namespace PRDF
 {
+
+using namespace PARSER;
+
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 namespace HOSTBOOT
 #else
 namespace FSP
 #endif
 {
-//------------------------------------------------------------------------------
-// Constants/structs/enums
-//------------------------------------------------------------------------------
-
-enum
-{
-    // This is defined in a file we can't include into the error log parser.
-    DIMM_DQ_RANK_BITMAP_SIZE = 10,
-
-    // Used for the several functions that parse bad DQ bitmaps.
-    BITMAP_RANK_SIZE  = sizeof(uint8_t),
-    BITMAP_DATA_SIZE  = PORT_SLCT_PER_MBA * DIMM_DQ_RANK_BITMAP_SIZE,
-    BITMAP_ENTRY_SIZE = BITMAP_RANK_SIZE + BITMAP_DATA_SIZE,
-
-    PARSER_HEADER_SIZE  = 25,
-    PARSER_DATA_SIZE    = 50,
-};
 
 //------------------------------------------------------------------------------
 // Helper functions
@@ -80,21 +67,21 @@ void getDramRepairSymbolStr( uint8_t i_value, char * o_str, uint32_t i_strSize )
 // Gets the string representation for a single bad DQ bitmap entry.
 void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
 {
-    UtilMem membuf( i_buffer, BITMAP_ENTRY_SIZE );
+    UtilMem membuf( i_buffer, DQ_BITMAP::ENTRY_SIZE );
 
     uint8_t rank; membuf >> rank;
-    snprintf( o_str, PARSER_DATA_SIZE, "R:%1d", rank );
+    snprintf( o_str, DATA_SIZE, "R:%1d", rank );
 
     for ( int32_t p = 0; p < PORT_SLCT_PER_MBA; p++ )
     {
-        char temp[PARSER_DATA_SIZE];
+        char temp[DATA_SIZE];
 
         strcat( o_str, "  " );
 
-        for ( int32_t b = 0; b < DIMM_DQ_RANK_BITMAP_SIZE; b++ )
+        for ( int32_t b = 0; b < DQ_BITMAP::BITMAP_SIZE; b++ )
         {
             uint8_t byte; membuf >> byte;
-            snprintf( temp, PARSER_DATA_SIZE, "%02x", byte );
+            snprintf( temp, DATA_SIZE, "%02x", byte );
             strcat( o_str, temp );
         }
     }
@@ -114,32 +101,32 @@ bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
     uint8_t cenPos  = (mm.s.procPos << 3) | mm.s.cenPos;
     uint8_t mbaPos  = mm.s.mbaPos;
 
-    char tmp[PARSER_HEADER_SIZE] = { '\0' };
+    char tmp[HEADER_SIZE] = { '\0' };
     if ( 1 == mm.s.srankValid )
-        snprintf( tmp, PARSER_HEADER_SIZE, "S%d", mm.s.srank );
+        snprintf( tmp, HEADER_SIZE, "S%d", mm.s.srank );
 
-    char header[PARSER_HEADER_SIZE];
-    snprintf( header, PARSER_HEADER_SIZE, "  mba(n%dp%dc%d)%s Rank:M%d%s",
+    char header[HEADER_SIZE];
+    snprintf( header, HEADER_SIZE, "  mba(n%dp%dc%d)%s Rank:M%d%s",
               nodePos, cenPos, mbaPos, (cenPos < 10) ? " " : "",
               mm.s.mrank, tmp );
 
-    char data[PARSER_DATA_SIZE];
+    char data[DATA_SIZE];
 
     switch ( mm.s.symbol )
     {
         case MemoryMruData::CALLOUT_RANK:
-            snprintf( data, PARSER_DATA_SIZE, "Special: CALLOUT_RANK" );
+            snprintf( data, DATA_SIZE, "Special: CALLOUT_RANK" );
             break;
         case MemoryMruData::CALLOUT_RANK_AND_MBA:
-            snprintf( data, PARSER_DATA_SIZE, "Special: CALLOUT_RANK_AND_MBA" );
+            snprintf( data, DATA_SIZE, "Special: CALLOUT_RANK_AND_MBA" );
             break;
         case MemoryMruData::CALLOUT_ALL_MEM:
-            snprintf( data, PARSER_DATA_SIZE, "Special: CALLOUT_ALL_MEM" );
+            snprintf( data, DATA_SIZE, "Special: CALLOUT_ALL_MEM" );
             break;
         default:
             // TODO: RTC 67358 Symbol, Pins, and Spared will be replaced with
             //       the DRAM Site Location and Wiring Type.
-            snprintf( data, PARSER_DATA_SIZE, "Symbol: %d Pins: %d Spared: %s",
+            snprintf( data, DATA_SIZE, "Symbol: %d Pins: %d Spared: %s",
                       mm.s.symbol, mm.s.pins,
                       (1 == mm.s.dramSpared) ? "true" : "false" );
     }
@@ -151,6 +138,82 @@ bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
     i_parser.PrintString( header, data );
 
     return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
+                      ErrlUsrParser & i_parser )
+{
+    using namespace UE_TABLE;
+
+    bool rc = true;
+
+    if ( NULL == i_buffer ) return false; // Something failed in parser.
+
+    const uint32_t entries = i_buflen / ENTRY_SIZE;
+
+    i_parser.PrintNumber( " MEM_UE_TABLE", "%d", entries );
+
+    const char * hh = "   Count Type";
+    const char * hd = "Rank Bank Row     Column";
+    i_parser.PrintString( hh, hd );
+    hh = "   ----- -------------";
+    hd = "---- ---- ------- ------";
+    i_parser.PrintString( hh, hd );
+
+    for ( uint32_t i = 0; i < entries; i++ )
+    {
+        uint32_t idx = i * ENTRY_SIZE;
+
+        uint32_t count = i_buffer[idx  ];                           //  8-bit
+        uint32_t type  = i_buffer[idx+1] >> 4;                      //  4-bit
+
+        uint32_t mrnk  = (i_buffer[idx+2] >> 5) & 0x7;              //  3-bit
+        uint32_t srnk  = (i_buffer[idx+2] >> 2) & 0x7;              //  3-bit
+        uint32_t svld  = (i_buffer[idx+2] >> 1) & 0x1;              //  1-bit
+
+        uint32_t row0    = i_buffer[idx+2] & 0x1;
+        uint32_t row1_8  = i_buffer[idx+3];
+        uint32_t row9_16 = i_buffer[idx+4];
+        uint32_t row     = (row0 << 16) | (row1_8 << 8) | row9_16;  // 17-bit
+
+        uint32_t bnk   = i_buffer[idx+5] >> 4;                      //  4-bit
+
+        uint32_t col0_3  = i_buffer[idx+5] & 0xf;
+        uint32_t col4_11 = i_buffer[idx+6];
+        uint32_t col     = (col0_3 << 8) | col4_11;                 // 12-bit
+
+        const char * type_str = "UNKNOWN      "; // 13 characters
+        switch ( type )
+        {
+            case SCRUB_MPE: type_str = "SCRUB_MPE    "; break;
+            case FETCH_MPE: type_str = "FETCH_MPE    "; break;
+            case SCRUB_UE:  type_str = "SCRUB_UE     "; break;
+            case FETCH_UE:  type_str = "FETCH_UE     "; break;
+        }
+
+        char rank_str[DATA_SIZE]; // 4 characters
+        if ( 1 == svld )
+        {
+            snprintf( rank_str, DATA_SIZE, "m%ds%d", mrnk, srnk );
+        }
+        else
+        {
+            snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );
+        }
+
+        char header[HEADER_SIZE] = { '\0' };
+        snprintf( header, HEADER_SIZE, "    0x%02x %s", count, type_str );
+
+        char data[DATA_SIZE]     = { '\0' };
+        snprintf( data, DATA_SIZE, "%s  0x%01x 0x%05x  0x%03x",
+                  rank_str, bnk, row, col );
+
+        i_parser.PrintString( header, data );
+    }
+
+    return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -169,7 +232,7 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
 
         uint8_t rankCount = mbaData.header.rankCount;
 
-        i_parser.PrintNumber( " DRAM_REPAIRS_DATA", "0x%02x", rankCount );
+        i_parser.PrintNumber( " DRAM_REPAIRS_DATA", "%d", rankCount );
 
         // Iterate over all ranks
         for ( uint8_t rankIdx = 0; rankIdx < rankCount; rankIdx++ )
@@ -230,14 +293,14 @@ bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
 
     if ( NULL == i_buffer ) return false; // Something failed in parser.
 
-    const uint32_t entries = i_buflen / BITMAP_ENTRY_SIZE;
+    const uint32_t entries = i_buflen / DQ_BITMAP::ENTRY_SIZE;
 
-    i_parser.PrintNumber( " DRAM_REPAIRS_VPD", "0x%02x", entries );
+    i_parser.PrintNumber( " DRAM_REPAIRS_VPD", "%d", entries );
 
     for ( uint32_t i = 0; i < entries; i++ )
     {
-        char data[PARSER_DATA_SIZE];
-        getBadDqBitmapEntry( &i_buffer[i*BITMAP_ENTRY_SIZE], data );
+        char data[DATA_SIZE];
+        getBadDqBitmapEntry( &i_buffer[i*DQ_BITMAP::ENTRY_SIZE], data );
 
         i_parser.PrintString( "", data );
     }
@@ -254,14 +317,14 @@ bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
 
     if ( NULL == i_buffer ) return false; // Something failed in parser.
 
-    if ( BITMAP_ENTRY_SIZE > i_buflen ) // Data is expected to be one entry.
+    if ( DQ_BITMAP::ENTRY_SIZE > i_buflen ) // Data is expected to be one entry.
     {
         i_parser.PrintString( " BAD_DQ_BITMAP", "" );
         i_parser.PrintHexDump(i_buffer, i_buflen);
     }
     else
     {
-        char data[PARSER_DATA_SIZE];
+        char data[DATA_SIZE];
         getBadDqBitmapEntry( i_buffer, data );
 
         i_parser.PrintString( " BAD_DQ_BITMAP", data );

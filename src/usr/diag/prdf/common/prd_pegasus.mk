@@ -45,11 +45,12 @@ prd_pegasus_specific = \
     prdfCenMbaCaptureData.o \
     prdfCenMbaTdCtlr.o \
     prdfCenMbaTdCtlr_common.o \
+    prdfCenMbaThresholds_common.o \
+    prdfCenMbaUeTable.o \
+    prdfCenMemUtils.o \
     prdfCenSymbol.o \
     prdfLaneRepair.o \
     prdfLineDelete.o \
     prdfMemoryMru.o \
     prdfPegasusConfigurator.o \
-    prdfCenMbaThresholds_common.o \
-    prdfCenMemUtils.o \
     prdfRegisterData.o

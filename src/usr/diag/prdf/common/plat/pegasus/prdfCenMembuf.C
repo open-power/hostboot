@@ -406,28 +406,45 @@ int32_t AnalyzeMpe( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc,
 
     int32_t l_rc = SUCCESS;
 
-    TargetHandle_t mbaTrgt = NULL;
+    ExtensibleChip * mbaChip = NULL;
 
     do
     {
         CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
-        ExtensibleChip * mbaChip = membdb->getMbaChip( i_mbaPos );
+        mbaChip = membdb->getMbaChip( i_mbaPos );
         if ( NULL == mbaChip )
         {
             PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
 
-        mbaTrgt = mbaChip->GetChipHandle();
+        CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
+        TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
 
         // Add address to UE table.
         if ( isFetchError )
         {
-            // TODO: RTC 81713 Add fetch address to UE table.
+            CenReadAddrReg reg = (0 == i_mbaPos) ? READ_MPE_ADDR_0
+                                                 : READ_MPE_ADDR_1;
+            CenAddr addr;
+            l_rc = getCenReadAddr( i_membChip, reg, addr );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+                break;
+            }
+            mbadb->iv_ueTable.addEntry( UE_TABLE::FETCH_MPE, addr );
         }
         else
         {
-            // TODO: RTC 81713 Add maintenance address to UE table.
+            CenAddr addr;
+            l_rc = getCenMaintStartAddr( mbaChip, addr );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"getCenMaintStartAddr() failed" );
+                break;
+            }
+            mbadb->iv_ueTable.addEntry( UE_TABLE::SCRUB_MPE, addr );
         }
 
         // Get the current mark in hardware.
@@ -450,7 +467,6 @@ int32_t AnalyzeMpe( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc,
         CalloutUtil::calloutMark( mbaTrgt, rank, mark, i_sc );
 
         // Tell TD controller to handle VCM event.
-        CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
         l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
                                                CenMbaTdCtlrCommon::VCM_EVENT );
         if ( SUCCESS != l_rc )
@@ -462,8 +478,8 @@ int32_t AnalyzeMpe( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    if ( NULL != mbaTrgt )
-        CenMbaCaptureData::addMemEccData( mbaTrgt, i_sc );
+    if ( NULL != mbaChip )
+        CenMbaCaptureData::addMemEccData( mbaChip, i_sc );
 
     if ( SUCCESS != l_rc )
     {
@@ -493,19 +509,17 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
 
     int32_t l_rc = SUCCESS;
 
-    TargetHandle_t mbaTrgt = NULL;
+    ExtensibleChip * mbaChip = NULL;
 
     do
     {
         CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
-        ExtensibleChip * mbaChip = membdb->getMbaChip( i_mbaPos );
+        mbaChip = membdb->getMbaChip( i_mbaPos );
         if ( NULL == mbaChip )
         {
             PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
-
-        mbaTrgt = mbaChip->GetChipHandle();
 
         CenReadAddrReg reg = (0 == i_mbaPos) ? READ_NCE_ADDR_0
                                              : READ_NCE_ADDR_1;
@@ -522,15 +536,15 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
         //        workaround but is it complicated. Need to check with Ken if it
         //        is ok to just callout the rank for DD1.x.
 
-        MemoryMru memmru ( mbaTrgt, addr.getRank(),
+        MemoryMru memmru ( mbaChip->GetChipHandle(), addr.getRank(),
                            MemoryMruData::CALLOUT_RANK );
         i_sc.service_data->SetCallout( memmru );
 
     } while (0);
 
     // Add ECC capture data for FFDC.
-    if ( NULL != mbaTrgt )
-        CenMbaCaptureData::addMemEccData( mbaTrgt, i_sc );
+    if ( NULL != mbaChip )
+        CenMbaCaptureData::addMemEccData( mbaChip, i_sc );
 
     if ( SUCCESS != l_rc )
     {
@@ -560,19 +574,17 @@ int32_t AnalyzeFetchRce( ExtensibleChip * i_membChip,
 
     int32_t l_rc = SUCCESS;
 
-    TargetHandle_t mbaTrgt = NULL;
+    ExtensibleChip * mbaChip = NULL;
 
     do
     {
         CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
-        ExtensibleChip * mbaChip = membdb->getMbaChip( i_mbaPos );
+        mbaChip = membdb->getMbaChip( i_mbaPos );
         if ( NULL == mbaChip )
         {
             PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
-
-        mbaTrgt = mbaChip->GetChipHandle();
 
         CenReadAddrReg reg = (0 == i_mbaPos) ? READ_RCE_ADDR_0
                                              : READ_RCE_ADDR_1;
@@ -592,8 +604,8 @@ int32_t AnalyzeFetchRce( ExtensibleChip * i_membChip,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    if ( NULL != mbaTrgt )
-        CenMbaCaptureData::addMemEccData( mbaTrgt, i_sc );
+    if ( NULL != mbaChip )
+        CenMbaCaptureData::addMemEccData( mbaChip, i_sc );
 
     if ( SUCCESS != l_rc )
     {
@@ -623,7 +635,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
 
     int32_t l_rc = SUCCESS;
 
-    TargetHandle_t mbaTrgt = NULL;
+    ExtensibleChip * mbaChip = NULL;
 
     do
     {
@@ -633,14 +645,12 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
         i_sc.service_data->SetServiceCall();
 
         CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
-        ExtensibleChip * mbaChip = membdb->getMbaChip( i_mbaPos );
+        mbaChip = membdb->getMbaChip( i_mbaPos );
         if ( NULL == mbaChip )
         {
             PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
-
-        mbaTrgt = mbaChip->GetChipHandle();
 
         CenReadAddrReg reg = (0 == i_mbaPos) ? READ_UE_ADDR_0
                                              : READ_UE_ADDR_1;
@@ -652,6 +662,10 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
             break;
         }
 
+        // Add address to UE table.
+        CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
+        mbadb->iv_ueTable.addEntry( UE_TABLE::FETCH_UE, addr );
+
         // Callout the rank.
         MemoryMru memmru ( mbaChip->GetChipHandle(), addr.getRank(),
                            MemoryMruData::CALLOUT_RANK );
@@ -660,8 +674,8 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    if ( NULL != mbaTrgt )
-        CenMbaCaptureData::addMemEccData( mbaTrgt, i_sc );
+    if ( NULL != mbaChip )
+        CenMbaCaptureData::addMemEccData( mbaChip, i_sc );
 
     if ( SUCCESS != l_rc )
     {

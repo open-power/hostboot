@@ -36,6 +36,7 @@
 
 // Pegasus includes
 #include <prdfCenMbaTdCtlr.H>
+#include <prdfCenMbaUeTable.H>
 
 namespace PRDF
 {
@@ -52,7 +53,8 @@ class CenMbaDataBundleCommon : public DataBundle
      * @param i_mbaChip The MBA chip.
      */
     explicit CenMbaDataBundleCommon( ExtensibleChip * i_mbaChip ) :
-        iv_mbaChip(i_mbaChip), iv_membChip(NULL), iv_tdCtlr(i_mbaChip)
+        iv_mbaChip(i_mbaChip), iv_membChip(NULL), iv_tdCtlr(i_mbaChip),
+        iv_ueTable()
     {}
 
     /**
@@ -88,11 +90,13 @@ class CenMbaDataBundleCommon : public DataBundle
     ExtensibleChip * iv_mbaChip;  ///< This MBA chip
 
   private: // instance variables
+
     ExtensibleChip * iv_membChip; ///< The connected MEMBUF chip
 
   public: // instance variables
 
-    CenMbaTdCtlr iv_tdCtlr;       ///< Targeted Diagnostics Controller
+    CenMbaTdCtlr  iv_tdCtlr;       ///< Targeted Diagnostics Controller
+    CenMbaUeTable iv_ueTable;      ///< UE table for FFDC
 
 };
 

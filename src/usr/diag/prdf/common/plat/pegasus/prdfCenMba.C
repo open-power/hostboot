@@ -87,14 +87,13 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
 
     int32_t l_rc = SUCCESS;
 
-    TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
     CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
 
     // Tell the TD controller that a maintenance command complete occurred.
     l_rc = mbadb->iv_tdCtlr.handleCmdCompleteEvent( i_sc );
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mbaChip=0x%08x", getHuid(mbaTarget) );
+        PRDF_ERR( PRDF_FUNC"Failed: i_mbaChip=0x%08x", i_mbaChip->GetId() );
         CalloutUtil::defaultError( i_sc );
     }
 
@@ -103,7 +102,7 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
     //       successful with no errors because the error log will not be
     //       committed.
     if ( !i_sc.service_data->IsDontCommitErrl() )
-        CenMbaCaptureData::addMemEccData( mbaTarget, i_sc );
+        CenMbaCaptureData::addMemEccData( i_mbaChip, i_sc );
 
     return PRD_NO_CLEAR_FIR_BITS; // FIR bits are cleared by this plugin
 

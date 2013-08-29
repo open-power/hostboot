@@ -29,13 +29,15 @@
 #include <prdfCenMbaCaptureData.H>
 
 // Framwork includes
+#include <iipServiceDataCollector.h>
+#include <prdfDramRepairUsrData.H>
+#include <prdfExtensibleChip.H>
+#include <prdfRasServices.H>
 #include <utilmem.H>
 #include <UtilHash.H>
-#include <prdfDramRepairUsrData.H>
-#include <iipServiceDataCollector.h>
-#include <prdfRasServices.H>
 
 // Pegasus includes
+#include <prdfCenMbaDataBundle.H>
 #include <prdfCenMarkstore.H>
 #include <prdfCenDqBitmap.H>
 
@@ -51,36 +53,42 @@ namespace CenMbaCaptureData
 
 //------------------------------------------------------------------------------
 
-void addMemEccData( TargetHandle_t i_mba, errlHndl_t io_errl )
+void addMemEccData( TargetHandle_t i_mbaTrgt, errlHndl_t io_errl )
 {
     CaptureData cd;
 
     // Add DRAM repairs data from hardware.
-    captureDramRepairsData( i_mba, cd );
+    captureDramRepairsData( i_mbaTrgt, cd );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd( i_mba, cd );
+    captureDramRepairsVpd( i_mbaTrgt, cd );
 
     ErrDataService::AddCapData( cd, io_errl );
 }
 
 //------------------------------------------------------------------------------
 
-void addMemEccData( TargetHandle_t i_mba, STEP_CODE_DATA_STRUCT & io_sc )
+void addMemEccData( ExtensibleChip * i_mbaChip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     CaptureData & cd = io_sc.service_data->GetCaptureData();
 
+    CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
+    TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
+
+    // Add UE table to capture data.
+    mbadb->iv_ueTable.addCapData( mbaTarget, cd );
+
     // Add DRAM repairs data from hardware.
-    captureDramRepairsData( i_mba, cd );
+    captureDramRepairsData( mbaTarget, cd );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd( i_mba, cd );
+    captureDramRepairsVpd( mbaTarget, cd );
 }
 
 //------------------------------------------------------------------------------
 
-void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
-                             CaptureData & o_cd )
+void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
+                             CaptureData & io_cd )
 {
     int32_t rc = SUCCESS;
     DramRepairMbaData mbaData;
@@ -92,7 +100,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
 
         // Get chip/symbol marks
         CenMark mark;
-        rc = PlatServices::mssGetMarkStore( i_mbaTarget, rank, mark );
+        rc = PlatServices::mssGetMarkStore( i_mbaTrgt, rank, mark );
         if ( SUCCESS != rc )
         {
             PRDF_ERR("Failed to get markstore data");
@@ -101,7 +109,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
 
         // Get DRAM spares
         CenSymbol sp0, sp1, ecc;
-        rc = PlatServices::mssGetSteerMux( i_mbaTarget, rank, sp0, sp1, ecc );
+        rc = PlatServices::mssGetSteerMux( i_mbaTrgt, rank, sp0, sp1, ecc );
         if ( SUCCESS != rc )
         {
             PRDF_ERR("Failed to get DRAM steer data");
@@ -125,9 +133,9 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
     {
         bool isCentaurDimm = true;
         mbaData.header.rankCount = mbaData.rankDataList.size();
-        PlatServices::isMembufOnDimm( i_mbaTarget, isCentaurDimm );
+        PlatServices::isMembufOnDimm( i_mbaTrgt, isCentaurDimm );
         mbaData.header.isIsDimm = !isCentaurDimm;
-        mbaData.header.isX4Dram = PlatServices::isDramWidthX4( i_mbaTarget );
+        mbaData.header.isX4Dram = PlatServices::isDramWidthX4( i_mbaTrgt );
         UtilMem dramStream;
         dramStream << mbaData;
 
@@ -153,14 +161,14 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
         // Allocate space for the capture data.
         BIT_STRING_ADDRESS_CLASS dramRepairData ( 0, ( dramStream.size() )*8,
                                                (CPU_WORD *) dramStream.base() );
-        o_cd.Add( i_mbaTarget, Util::hashString("DRAM_REPAIRS_DATA"),
-                  dramRepairData );
+        io_cd.Add( i_mbaTrgt, Util::hashString("DRAM_REPAIRS_DATA"),
+                   dramRepairData );
     }
 }
 
 //------------------------------------------------------------------------------
 
-void captureDramRepairsVpd( TargetHandle_t i_mba, CaptureData & io_cd )
+void captureDramRepairsVpd( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
 {
     #define PRDF_FUNC "[captureDramRepairsVpd] "
 
@@ -186,10 +194,10 @@ void captureDramRepairsVpd( TargetHandle_t i_mba, CaptureData & io_cd )
         CenRank rank ( r );
         CenDqBitmap bitmap;
 
-        if ( SUCCESS != getBadDqBitmap(i_mba, rank, bitmap, true) )
+        if ( SUCCESS != getBadDqBitmap(i_mbaTrgt, rank, bitmap, true) )
         {
             PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mba), r );
+                      getHuid(i_mbaTrgt), r );
             continue; // skip this rank
         }
 
@@ -209,7 +217,7 @@ void captureDramRepairsVpd( TargetHandle_t i_mba, CaptureData & io_cd )
 
     // Add data to capture data.
     BIT_STRING_ADDRESS_CLASS bs ( 0, sz_capData*8, (CPU_WORD *) &capData );
-    io_cd.Add( i_mba, Util::hashString("DRAM_REPAIRS_VPD"), bs );
+    io_cd.Add( i_mbaTrgt, Util::hashString("DRAM_REPAIRS_VPD"), bs );
 
     #undef PRDF_FUNC
 }
