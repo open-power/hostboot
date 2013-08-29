@@ -397,16 +397,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
 #endif  // if not __HOSTBOOT_MODULE
 
-        // For a Recoverable Attn with MPFatal and Cause_i_attnType not
-        // equal Special, make this a Predictive, Parable error.
         if (!sdc.IsLogging() )
         {
             // This is a Hidden Log
             severityParm = ERRL_SEV_INFORMATIONAL;
             actionFlag = (actionFlag | ERRL_ACTION_HIDDEN);
         }
-        else if ( sdc.IsServiceCall() || //At Thresold
-                  (sdc.GetCauseAttentionType() != SPECIAL) )
+        else if ( sdc.IsServiceCall() ) //At Thresold
         {
             severityParm = ERRL_SEV_PREDICTIVE;
         }
@@ -428,14 +425,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ////////////////////////////////////////////////////////////////
     else if (i_attnType == SPECIAL)
     {
-        //SMA path on Special attn
-        if ( sdc.IsLogging() || sdc.IsServiceCall() )
-        {
-            severityParm = ERRL_SEV_UNRECOVERABLE;
-            savedLatentSdc = true;  //Save this SDC as Latent SDC
-            latentSdc = i_sdc;
-        }
-        else if (sdc.IsServiceCall())
+        if (sdc.IsServiceCall())
         //Bit Steered already, or Bit Steer Not supported
         {
             severityParm = ERRL_SEV_PREDICTIVE;
