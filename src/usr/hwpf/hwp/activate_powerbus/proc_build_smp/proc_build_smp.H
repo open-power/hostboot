@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.H,v 1.9 2013/02/14 00:51:31 jmcgill Exp $
+// $Id: proc_build_smp.H,v 1.10 2013/07/30 20:51:20 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -50,14 +50,13 @@
 // *!             o init epsilon registers,
 // *!             o program FBC configuration dependent registers (switch C/D)
 // *!             o join all single chip 'island' fabrics into drawer level
-// *!                SMP (switch A/B)
+// *!               SMP (switch A/B)
 // *!
 // *!         SMP_ACTIVATE_PHASE2 (FSP):
 // *!             o join collection of drawer level SMPs into full system SMP
 // *!               (switch A/B)
 // *!
 //------------------------------------------------------------------------------
-// *! TODO:: epsilon: table updates for  Venice (current: Murano only)
 // *! TODO:: epsilon: need updated pre-epsilon values (current: P7 values)
 // *! TODO:: switch CD: hang rate for foreign links & other lab tuned settings
 // *!        (current: placeholder settings from Murano sim)

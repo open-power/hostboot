@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.8 2013/02/25 18:11:44 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.9 2013/07/30 20:51:09 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -273,6 +273,10 @@ fapi::ReturnCode proc_build_smp_process_system(
             case 2:
                 io_smp.eps_cfg.table_type = PROC_FAB_SMP_EPSILON_TABLE_TYPE_HE;
                 FAPI_DBG("proc_build_smp_process_system: ATTR_PROC_EPS_TABLE_TYPE = HE");
+                break;
+            case 3:
+                io_smp.eps_cfg.table_type = PROC_FAB_SMP_EPSILON_TABLE_TYPE_1S;
+                FAPI_DBG("proc_build_smp_process_system: ATTR_PROC_EPS_TABLE_TYPE = 1S");
                 break;
             default:
                 FAPI_ERR("proc_build_smp_process_system: Invalid epsilon table type attribute value 0x%02X",

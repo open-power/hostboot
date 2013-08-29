@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.C,v 1.6 2013/02/22 17:55:10 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.C,v 1.8 2013/07/30 23:52:27 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1169,6 +1169,22 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
                 io_smp.eps_cfg.w_f  = PROC_BUILD_SMP_EPSILON_W_F_LE[io_smp.core_floor_ratio];
                 io_smp.eps_cfg.p    = PROC_BUILD_SMP_EPSILON_P_LE[io_smp.core_floor_ratio];
                 break;
+            case PROC_FAB_SMP_EPSILON_TABLE_TYPE_1S:
+                if (io_smp.pump_mode == PROC_FAB_SMP_PUMP_MODE1)
+                {
+                    io_smp.eps_cfg.r_t0 = PROC_BUILD_SMP_EPSILON_R_T0_1S[io_smp.core_floor_ratio];
+                }
+                else
+                {
+                    io_smp.eps_cfg.r_t0 = PROC_BUILD_SMP_EPSILON_R_T1_1S[io_smp.core_floor_ratio];
+                }
+                io_smp.eps_cfg.r_t1 = PROC_BUILD_SMP_EPSILON_R_T1_1S[io_smp.core_floor_ratio];
+                io_smp.eps_cfg.r_t2 = PROC_BUILD_SMP_EPSILON_R_T2_1S[io_smp.core_floor_ratio];
+                io_smp.eps_cfg.r_f  = PROC_BUILD_SMP_EPSILON_R_F_1S[io_smp.core_floor_ratio];
+                io_smp.eps_cfg.w_t2 = PROC_BUILD_SMP_EPSILON_W_1S[io_smp.core_floor_ratio];
+                io_smp.eps_cfg.w_f  = PROC_BUILD_SMP_EPSILON_W_F_1S[io_smp.core_floor_ratio];
+                io_smp.eps_cfg.p    = PROC_BUILD_SMP_EPSILON_P_1S[io_smp.core_floor_ratio];
+                break;
             default:
                 FAPI_ERR("proc_build_smp_calc_epsilons: Invalid epsilon table type");
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_EPSILON_INVALID_TABLE_ERR);
@@ -1238,8 +1254,8 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
         //   write tier2 value is greater than write foreign value
         if ((io_smp.eps_cfg.r_t0 > io_smp.eps_cfg.r_t1) ||
             (io_smp.eps_cfg.r_t1 > io_smp.eps_cfg.r_t2) ||
-            (io_smp.eps_cfg.r_f  > io_smp.eps_cfg.r_t2) ||
-            (io_smp.eps_cfg.w_f  > io_smp.eps_cfg.w_t2))
+            ((io_smp.eps_cfg.r_f  > io_smp.eps_cfg.r_t2) && (io_smp.eps_cfg.table_type != PROC_FAB_SMP_EPSILON_TABLE_TYPE_1S)) ||
+            ((io_smp.eps_cfg.w_f  > io_smp.eps_cfg.w_t2) && (io_smp.eps_cfg.table_type != PROC_FAB_SMP_EPSILON_TABLE_TYPE_1S)))
         {
             FAPI_ERR("proc_build_smp_calc_epsilons: Invalid relationship between base epsilon values");
             FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_EPSILON_INVALID_TABLE_ERR);

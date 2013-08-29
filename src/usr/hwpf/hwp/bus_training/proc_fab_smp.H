@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fab_smp.H,v 1.6 2012/09/24 05:00:15 jmcgill Exp $
+// $Id: proc_fab_smp.H,v 1.7 2013/07/30 20:51:28 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -77,8 +77,9 @@ enum proc_fab_smp_chip_id
 // define set of supported epsilon table types
 enum proc_fab_smp_eps_table_type
 {
-    PROC_FAB_SMP_EPSILON_TABLE_TYPE_LE = 0,
-    PROC_FAB_SMP_EPSILON_TABLE_TYPE_HE = 1
+    PROC_FAB_SMP_EPSILON_TABLE_TYPE_LE = 1,
+    PROC_FAB_SMP_EPSILON_TABLE_TYPE_HE = 2,
+    PROC_FAB_SMP_EPSILON_TABLE_TYPE_1S = 3
 };
 
 // define set of supported broadcast/pump modes

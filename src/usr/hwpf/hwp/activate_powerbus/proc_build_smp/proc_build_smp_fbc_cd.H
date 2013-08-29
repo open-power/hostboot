@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.H,v 1.8 2013/06/20 21:19:05 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.H,v 1.9 2013/07/29 20:15:05 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -157,14 +157,14 @@ const uint32_t PB_SCONFIG_C6_RGP_LO_JUMP_END_BIT = 60;
 const uint32_t PB_SCONFIG_C6_RGP_HI_JUMP_START_BIT = 61;
 const uint32_t PB_SCONFIG_C6_RGP_HI_JUMP_END_BIT = 63;
 
-const uint32_t PB_SCONFIG_C6_GP_REQ_SAMPLE_TIME = 512;
-const uint32_t PB_SCONFIG_C6_SP_REQ_SAMPLE_TIME = 512;
-const uint32_t PB_SCONFIG_C6_GP_LO_JUMP = 0x3;
-const uint32_t PB_SCONFIG_C6_GP_HI_JUMP = 0x3;
-const uint32_t PB_SCONFIG_C6_SP_LO_JUMP = 0x3;
-const uint32_t PB_SCONFIG_C6_SP_HI_JUMP = 0x3;
-const uint32_t PB_SCONFIG_C6_RGP_LO_JUMP = 0x3;
-const uint32_t PB_SCONFIG_C6_RGP_HI_JUMP = 0x3;
+const uint32_t PB_SCONFIG_C6_GP_REQ_SAMPLE_TIME = 1024;
+const uint32_t PB_SCONFIG_C6_SP_REQ_SAMPLE_TIME = 1024;
+const uint32_t PB_SCONFIG_C6_GP_LO_JUMP = 0x2;
+const uint32_t PB_SCONFIG_C6_GP_HI_JUMP = 0x2;
+const uint32_t PB_SCONFIG_C6_SP_LO_JUMP = 0x2;
+const uint32_t PB_SCONFIG_C6_SP_HI_JUMP = 0x2;
+const uint32_t PB_SCONFIG_C6_RGP_LO_JUMP = 0x2;
+const uint32_t PB_SCONFIG_C6_RGP_HI_JUMP = 0x2;
 
 
 //
