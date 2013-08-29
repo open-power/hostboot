@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_clear_firs.H,v 1.7 2013/03/26 14:45:18 jaswamin Exp $
+// $Id: io_clear_firs.H,v 1.8 2013/08/01 12:57:19 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 2012, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -110,6 +110,18 @@ const uint32_t fir_clear_mask_reg_addr[FIR_INTERFACES]={0x04011004,
                                                   0x02011a04, 
                                                   0x02011e04, 
                                                   0x02010404  };
+// This is for Centaur Reconfig loop IO_CLEANUP  procedure
+const uint32_t scom_mode_pb_reg_addr[FIR_INTERFACES] ={ 0x04011020,
+                                                       0x04011420,
+                                                       0x04011C20,
+                                                       0x04011820,
+                                                       0x08010C20,
+                                                       0x02011A20,
+                                                       0x02011E20,
+                                                       0x02010420};
+    
+    
+    
                                                   
 
 enum fir_error_type{

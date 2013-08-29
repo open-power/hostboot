@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.51 2013/08/01 18:36:52 jdsloat Exp $
+// $Id: mss_draminit.C,v 1.52 2013/08/07 14:31:53 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.52   | jdsloat  | 08/07/13| Added a single rc_num check and edited a debug/error message to make firmware happy.
 //  1.51   | jdsloat  | 08/01/13| Fixed dimm/rank conversion in address mirroring phy setting for a 4 rank dimm scenario
 //  1.50   | mwuu     | 07/17/13| Fixed CS when accessing RCD words on 1 rank RDIMMs
 //         |          |         | Added checks for invalid RTT_NOM, RTT_WR
@@ -981,6 +982,14 @@ ReturnCode mss_rcd_load(
 
                 // Send out to the CCS array
                 rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 12, 0, 16);
+
+	        if (rc_num)
+	        {
+	           FAPI_ERR( "mss_rcd_load: Error setting up buffers");
+	           rc_buff.setEcmdError(rc_num);
+	           return rc_buff;
+	        }
+
                 rc = mss_ccs_inst_arry_0( i_target,
                                           io_ccs_inst_cnt,
                                           address_16,
@@ -1464,7 +1473,7 @@ ReturnCode mss_mrs_load(
                     }
                     else
                     {
-                        FAPI_ERR( "mss_mrs_load: Error determining ATTR_EFF_DRAM_RTT_NOM value from attribute");
+                        FAPI_ERR( "mss_mrs_load: Error determining ATTR_EFF_DRAM_RTT_NOM value: %d from attribute", dram_rtt_nom[i_port_number][dimm_number][rank_number]);
                         FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
                         return rc;
                     }
@@ -1507,9 +1516,9 @@ ReturnCode mss_mrs_load(
                     {
                         dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x40;
                     }
-					else
-					{
-                        FAPI_ERR( "mss_mrs_load: Error determining ATTR_EFF_DRAM_RTT_WR value from attribute");
+		    else
+		    {
+                        FAPI_ERR( "mss_mrs_load: Error determining ATTR_EFF_DRAM_RTT_WR value: %d from attribute", dram_rtt_wr[i_port_number][dimm_number][rank_number]);
                         FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
                         return rc;
                     }

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_xip_customize.C,v 1.10 2013/03/28 00:21:54 cmolsen Exp $
+// $Id: cen_xip_customize.C,v 1.11 2013/08/12 20:05:18 dcrowell Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : cen_xip_customize.C                                               */
 /* *! DESCRIPTION : Customizes Centaur images from a Centaur reference image.   */
@@ -37,7 +37,6 @@
 //
 /*------------------------------------------------------------------------------*/
 #define __CEN_XIP_CUSTOMIZE_C
-#include <HvPlicModule.H>
 #include <cen_xip_customize.H>
 #include <p8_delta_scan_rw.h>
 #include <p8_pore_table_gen_api.H>

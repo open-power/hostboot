@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.159 2013/06/28 16:50:17 stillgs Exp $
+// $Id: p8_scom_addresses.H,v 1.161 2013/08/21 15:11:23 gweber Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -148,11 +148,11 @@ CONST_UINT64_T( DEVICE_ID_REG_0x000F000F            , ULL(0x000F000F) );
  //------------------------------------------------------------------------------
  //      MULTICAST REGISTER DEFINITION
  //------------------------------------------------------------------------------
- CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_RWx690F0103                             , ULL(0x690F0103) );       
- CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_WANDx690F0104                           , ULL(0x690F0104) );       
- CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_WORx690F0105                            , ULL(0x690F0105) );       
- CONST_UINT64_T( WRITE_ALL_PCBSPM_MODE_REG_0x690F0156                             , ULL(0x690F0156) );       
- CONST_UINT64_T( WRITE_ALL_PCBS_Power_Management_Bounds_Reg_0x690F015D            , ULL(0x690F015D) );       
+ CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_RWx690F0103                             , ULL(0x690F0103) );
+ CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_WANDx690F0104                           , ULL(0x690F0104) );
+ CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_WORx690F0105                            , ULL(0x690F0105) );
+ CONST_UINT64_T( WRITE_ALL_PCBSPM_MODE_REG_0x690F0156                             , ULL(0x690F0156) );
+ CONST_UINT64_T( WRITE_ALL_PCBS_Power_Management_Bounds_Reg_0x690F015D            , ULL(0x690F015D) );
 
 
 //------------------------------------------------------------------------------
@@ -165,6 +165,8 @@ CONST_UINT32_T( CFAM_FSI_GP6_0x00002815               , ULL(0x00002815) );
 CONST_UINT32_T( CFAM_FSI_GP7_0x00002816               , ULL(0x00002816) );
 CONST_UINT32_T( CFAM_FSI_GP8_0x00002817               , ULL(0x00002817) );
 CONST_UINT32_T( CFAM_FSI_WRITE_PROTECT_0x00002818     , ULL(0x00002818) );
+CONST_UINT32_T( CFAM_OSCSW_SENSE1_0x00002819          , ULL(0x00002819) );
+CONST_UINT32_T( CFAM_OSCSW_SENSE2_0x0000281A          , ULL(0x0000281A) );
 CONST_UINT32_T( CFAM_FSI_GP3_MIRROR_0x0000281B        , ULL(0x0000281B) );
 CONST_UINT32_T( CFAM_FSI_SBE_VITAL_0x0000281C         , ULL(0x0000281C) );
 
@@ -1556,6 +1558,10 @@ CONST_UINT64_T( EX_NCU_FIR_OR_REG_0x10010C02           , ULL(0x10010C02) );
 CONST_UINT64_T( EX_NCU_FIR_MASK_REG_0x10010C03         , ULL(0x10010C03) );
 CONST_UINT64_T( EX_NCU_FIR_ACTION0_REG_0x10010C06      , ULL(0x10010C06) );
 CONST_UINT64_T( EX_NCU_FIR_ACTION1_REG_0x10010C07      , ULL(0x10010C07) );
+CONST_UINT64_T( EX_NCU_MODE_REG_0x10010C0A             , ULL(0x10010C0A) );
+
+//CHTM
+CONST_UINT64_T( EX_CHTM_MODE_REG_0x10011000            , ULL(0x10011000) );
 
 //L2
 CONST_UINT64_T( EX_L2_FIR_REG_0x10012800              , ULL(0x10012800) );
@@ -1729,11 +1735,11 @@ CONST_UINT64_T( EX_PERV_LFIR_ACT1_0x10040011          , ULL(0x10040011) );
 //      EX THERMAL
 //------------------------------------------------------------------------------
 CONST_UINT64_T( EX_THERM_0x10050000                   , ULL(0x10050000) );
-CONST_UINT64_T( EX_THERM_DTS_RESULT0_0x10050000       , ULL(0x10050000) ); 
-CONST_UINT64_T( EX_THERM_DTS_RESULT1_0x10050001       , ULL(0x10050001) ); 
-CONST_UINT64_T( EX_THERM_MODE_REG_0x1005000F          , ULL(0x1005000F) ); 
-CONST_UINT64_T( EX_THERM_CONTROL_REG_0x10050012       , ULL(0x10050012) ); 
-CONST_UINT64_T( EX_THERM_ERR_STATUS_REG_0x10050013    , ULL(0x10050013) ); 
+CONST_UINT64_T( EX_THERM_DTS_RESULT0_0x10050000       , ULL(0x10050000) );
+CONST_UINT64_T( EX_THERM_DTS_RESULT1_0x10050001       , ULL(0x10050001) );
+CONST_UINT64_T( EX_THERM_MODE_REG_0x1005000F          , ULL(0x1005000F) );
+CONST_UINT64_T( EX_THERM_CONTROL_REG_0x10050012       , ULL(0x10050012) );
+CONST_UINT64_T( EX_THERM_ERR_STATUS_REG_0x10050013    , ULL(0x10050013) );
 CONST_UINT64_T( EX_CPM_CONFIG_WRITE_REG0_0x10050000   , ULL(0x10050000) );
 CONST_UINT64_T( EX_CPM_CONFIG_WRITE_REG1_0x10050001   , ULL(0x10050001) );
 CONST_UINT64_T( EX_CPM_RAW_RESULT0_10050005           , ULL(0x10050005) );
@@ -1960,6 +1966,13 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.161  2013/08/21 15:11:23  gweber
+added CFAM_OSCSW_SENSE1,2
+
+Revision 1.160  2013/08/08 02:48:33  stillgs
+
+Add NCU and CHTM mode registers
+
 Revision 1.159  2013/06/28 16:50:17  stillgs
 
 Adde PBAX Push Control/Status 1 registers for pba_init -reset
