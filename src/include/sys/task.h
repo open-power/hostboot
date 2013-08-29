@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -85,7 +85,7 @@ void task_end2(void* retval) NO_RETURN;
  *  @brief End the calling task as if it crashed.
  *
  */
-#define task_crash() ((*(char*)NULL) = 'F')
+#define task_crash() ((*(volatile char*)NULL) = 'F')
 
 /** @fn task_gettid
  *  @brief Get task ID of calling task.
