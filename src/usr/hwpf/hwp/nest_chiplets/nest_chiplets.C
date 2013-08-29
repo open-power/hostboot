@@ -129,13 +129,46 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
                 "Running proc_a_x_pci_dmi_pll_initf HWP on "
                 "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
+        bool l_startXbusPll = false;
+        bool l_startAbusPll = false;
+        bool l_startPCIEPll = false;
+        bool l_startDMIPll = false;
+        
+        TARGETING::TargetHandleList l_xbus;
+        getChildChiplets( l_xbus, l_proc_target, TYPE_XBUS );
+        if (l_xbus.size() > 0)
+        {
+            l_startXbusPll = true;
+        }
+
+        TARGETING::TargetHandleList l_abus;
+        getChildChiplets( l_abus, l_proc_target, TYPE_ABUS );
+        if (l_abus.size() > 0)
+        {
+            l_startAbusPll = true;
+        }
+
+        TARGETING::TargetHandleList l_pci;
+        getChildChiplets( l_pci, l_proc_target, TYPE_PCI );
+        if (l_pci.size() > 0)
+        {
+            l_startPCIEPll = true;
+        }
+
+        TARGETING::TargetHandleList l_mcs;
+        getChildChiplets( l_mcs, l_proc_target, TYPE_MCS );
+        if (l_mcs.size() > 0)
+        {
+            l_startDMIPll = true;
+        }
+
         //  call proc_a_x_pci_dmi_pll_initf
         FAPI_INVOKE_HWP(l_err, proc_a_x_pci_dmi_pll_initf,
                         l_fapi_proc_target,
-                        true,   // xbus
-                        true,   // abus
-                        true,   // pcie
-                        true);  // dmi
+                        l_startXbusPll,   // xbus
+                        l_startAbusPll,   // abus
+                        l_startPCIEPll,   // pcie
+                        l_startDMIPll);   // dmi
 
         if (l_err)
         {
@@ -206,13 +239,46 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
                 "Running proc_a_x_pci_dmi_pll_setup HWP on "
                 "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
+        bool l_startXbusPll = false;
+        bool l_startAbusPll = false;
+        bool l_startPCIEPll = false;
+        bool l_startDMIPll = false;
+        
+        TARGETING::TargetHandleList l_xbus;
+        getChildChiplets( l_xbus, l_proc_target, TYPE_XBUS );
+        if (l_xbus.size() > 0)
+        {
+            l_startXbusPll = true;
+        }
+
+        TARGETING::TargetHandleList l_abus;
+        getChildChiplets( l_abus, l_proc_target, TYPE_ABUS );
+        if (l_abus.size() > 0)
+        {
+            l_startAbusPll = true;
+        }
+
+        TARGETING::TargetHandleList l_pci;
+        getChildChiplets( l_pci, l_proc_target, TYPE_PCI );
+        if (l_pci.size() > 0)
+        {
+            l_startPCIEPll = true;
+        }
+
+        TARGETING::TargetHandleList l_mcs;
+        getChildChiplets( l_mcs, l_proc_target, TYPE_MCS );
+        if (l_mcs.size() > 0)
+        {
+            l_startDMIPll = true;
+        }
+
         //  call proc_a_x_pci_dmi_pll_setup
         FAPI_INVOKE_HWP(l_err, proc_a_x_pci_dmi_pll_setup,
                         l_fapi_proc_target,
-                        true,   // xbus
-                        true,   // abus
-                        true,   // pcie
-                        true);  // dmi
+                        l_startXbusPll,   // xbus
+                        l_startAbusPll,   // abus
+                        l_startPCIEPll,   // pcie
+                        l_startDMIPll);   // dmi
 
         if (l_err)
         {
