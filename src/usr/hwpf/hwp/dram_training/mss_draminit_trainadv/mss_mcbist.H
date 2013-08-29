@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.H,v 1.30 2013/04/22 13:01:27 lapietra Exp $
+// $Id: mss_mcbist.H,v 1.37 2013/08/02 09:00:44 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,13 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.37  |aditya  |08/02/13 |Updated parameters in mcb_error_map_print function
+//   1.36  |aditya  |07/09/13 |Added l_random_addr_enable and l_fixed_addr_enable for struct Subtest_info
+//   1.35  |aditya  |06/11/13 |Added l_random_data_enable and l_fixed_data_enable for struct Subtest_info
+//   1.34  |aditya  |05/23/13 |Added TEST_RR and TEST_RF testtypes
+//   1.33  |aditya  |05/22/13 |updated parameters for Subtest Printing
+//   1.32  |aditya  |05/14/13 |updated parameters for cfg_mcb_dgen and random seed details
+//   1.31  |aditya  |05/07/13 |Changed Parameter Passing in Functions
 //   1.30  |aditya  |04/22/13 |updated testtypes
 //   1.27  |aditya  |02/13/13 |updated testtypes
 //   1.25  |aditya  |02/12/13 |updated testtypes
@@ -77,10 +84,6 @@ extern "C"
 using namespace fapi;
 
 //############### Global variables ################
-/*const uint8_t MAX_PORT = 2;
-const uint8_t MAX_BYTE = 10;
-const uint8_t MAX_RANK = 8;
-const uint8_t MAX_NIBBLE = 1;;;*/
 
 enum mcbist_test_mem
 {
@@ -122,7 +125,12 @@ enum mcbist_test_mem
     R_INFINITE_RF,
     MARCH,
     SIMPLE_FIX_RF,
-	SHMOO_STRESS
+	SHMOO_STRESS,
+	SIMPLE_RAND_RA,
+	SIMPLE_FIX_RA,
+	SIMPLE_FIX_RF_RA,
+	TEST_RR,
+	TEST_RF
 };
 
 enum mcbist_data_gen
@@ -172,7 +180,7 @@ enum mcbist_data_gen
     FIRST_XFER_X4MODE,
     MCBIST_LONG,
     PSEUDORANDOM,
-	CASTLE
+    CASTLE
 };
 
 enum mcbist_oper_type
@@ -261,21 +269,33 @@ enum shmoo_addr_mode
    FULL_ADDR = 3
 };
 
+struct Subtest_info
+{
+uint8_t l_operation_type;
+uint8_t l_data_mode;
+uint8_t l_addr_mode;
+uint8_t l_random_data_enable;
+uint8_t l_fixed_data_enable;
+uint8_t l_random_addr_enable;
+uint8_t l_fixed_addr_enable;
+};   
 
 
-
-
-
-fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_fail,uint8_t *o_mcb_status,uint64_t i_time);
-fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,uint8_t  o_error_map[][8][10][2],uint8_t i_port,uint8_t i_rank);
-fapi::ReturnCode mcb_write_test_mem(const fapi::Target & i_target_mba,const uint64_t i_reg_addr,mcbist_oper_type i_operation_type,uint8_t i_cfg_test_123_cmd,mcbist_addr_mode i_addr_mode,mcbist_data_mode i_data_mode,uint8_t i_done,mcbist_data_select_mode i_data_select_mode, mcbist_add_select_mode i_addr_select_mode,uint8_t i_testnumber);
-fapi::ReturnCode cfg_mcb_test_mem(const fapi::Target & i_target_mba,mcbist_test_mem i_test_type);
+fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_fail,uint8_t *o_mcb_status,struct Subtest_info l_sub_info[30],uint8_t i_flag);
+fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,uint8_t  o_error_map[][8][10][2]);
+fapi::ReturnCode mcb_write_test_mem(const fapi::Target & i_target_mba,const uint64_t i_reg_addr,mcbist_oper_type i_operation_type,uint8_t i_cfg_test_123_cmd,mcbist_addr_mode i_addr_mode,mcbist_data_mode i_data_mode,uint8_t i_done,mcbist_data_select_mode i_data_select_mode, mcbist_add_select_mode i_addr_select_mode,uint8_t i_testnumber,uint8_t i_testnumber1,uint8_t i_total_no,struct Subtest_info l_sub_info[30]);
+fapi::ReturnCode cfg_mcb_test_mem(const fapi::Target & i_target_mba,mcbist_test_mem i_test_type,struct Subtest_info l_sub_info[30]);
 fapi::ReturnCode mcb_reset_trap(const fapi::Target & i_target_mba);
-fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen i_datamode,uint8_t i_mcbrotate);
-fapi::ReturnCode cfg_byte_mask(const fapi::Target & i_target_mba,uint8_t i_rank,uint8_t i_port);
+fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen i_datamode,uint8_t i_mcbrotate,uint8_t i_seed_choice,uint32_t i_seed);
+fapi::ReturnCode cfg_byte_mask(const fapi::Target & i_target_mba);
 fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba);
-fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port,mcbist_data_gen i_mcbpatt,mcbist_test_mem i_mcbtest,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_pattern,uint8_t i_test_type,uint8_t i_rank,uint8_t i_bit32,uint64_t i_start,uint64_t i_end,uint8_t new_address_map);
+fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_seed_choice,uint32_t i_seed,struct Subtest_info l_sub_info[30]);
+//fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & i_mcb_fail_320,uint8_t i_port);
+fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & l_mcb_fail_160,uint8_t i_port,uint8_t l_array[200],uint8_t l_number);
+fapi::ReturnCode mss_conversion_testtype(const fapi::Target & i_target_mba,uint8_t l_pattern,mcbist_test_mem &i_mcbtest );
+fapi::ReturnCode mss_conversion_data(const fapi::Target & i_target_mba,uint8_t l_pattern,mcbist_data_gen  &i_mcbpatt);
 
-fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,uint8_t i_port,uint8_t i_rank,ecmdDataBufferBase & i_mcb_fail_320);
+
+
 }
 #endif

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.30 2013/04/24 13:41:57 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.35 2013/08/08 13:07:28 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -31,7 +31,7 @@
 // *! TITLE :mss_draminit_training_advanced.C
 // *! DESCRIPTION : Tools for centaur procedures
 // *! OWNER NAME : Saravanan Sethuraman          email ID:saravanans@in.ibm.com
-// *! BACKUP NAME: Mark D Bellows	 	 email ID:bellows@us.ibm.com
+// *! BACKUP NAME: Mark D Bellows	 			 email ID:bellows@us.ibm.com
 // #! ADDITIONAL COMMENTS :
 //
 // General purpose funcs
@@ -70,6 +70,12 @@
 //  1.28   | sasethur |22-Apr-13| Fixed fw comment 
 //  1.29   | sasethur |23-Apr-13| Fixed fw comment 
 //  1.30   | sasethur |24-Apr-13| Fixed fw comment 
+//  1.31   | sasethur |10-May-13| Added user input for test type, pattern from wrapper 
+//  1.32   | sasethur |04-Jun-13| Fixed for PortD cnfg, vref print for min setup, hold, fixed rdvref print, added set/reset mcbist attr
+//  1.33   | sasethur |12-Jun-13| Updated mcbist setup attribute 
+//  1.34   | sasethur |20-Jun-13| Fixed read_vref print, setup attribute
+//  1.35   | sasethur |08-Aug-13| Fixed fw comment.
+
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
@@ -93,10 +99,7 @@
 #include <mss_generic_shmoo.H>
 #include <mss_draminit_training_advanced.H>
 #include <mss_unmask_errors.H>
-//#include <mss_mcbist_common.C>
 
-const uint8_t PATTERN = 14;
-const uint8_t TESTTYPE = 13;
 const uint32_t MASK = 1;
 const uint32_t MAX_DIMM =2;
 
@@ -117,37 +120,36 @@ extern "C"
 
 using namespace fapi;
 
-fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_target_mba,
-			uint8_t i_pattern, uint8_t i_test_type);
+fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_target_mba);
 
 fapi::ReturnCode drv_imped_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
-			shmoo_type_t i_shmoo_type_valid, 
-			uint8_t i_pattern, uint8_t i_test_type);      
+			shmoo_type_t i_shmoo_type_valid); 
 
 fapi::ReturnCode slew_rate_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
-			shmoo_type_t i_shmoo_type_valid, 
-			uint8_t i_pattern, uint8_t i_test_type);
+			shmoo_type_t i_shmoo_type_valid); 
 
 fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
-			shmoo_type_t i_shmoo_type_valid, 
-			uint8_t i_pattern, uint8_t i_test_type);
+			shmoo_type_t i_shmoo_type_valid);
 
 fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
-			shmoo_type_t i_shmoo_type_valid, 
-			uint8_t i_pattern, uint8_t i_test_type);
+			shmoo_type_t i_shmoo_type_valid); 
 
 fapi::ReturnCode rcv_imp_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
-			shmoo_type_t i_shmoo_type_valid, 
-			uint8_t i_pattern, uint8_t i_test_type);
+			shmoo_type_t i_shmoo_type_valid);
 
 fapi::ReturnCode delay_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
 		    shmoo_type_t i_shmoo_type_valid, 
 		    uint32_t *o_left_margin, uint32_t *o_right_margin,
-			uint8_t i_pattern, uint8_t i_test_type, uint32_t i_shmoo_param);
+		     uint32_t i_shmoo_param);
 
 void find_best_margin(shmoo_param i_shmoo_param_valid,uint32_t i_left[], 
-			uint32_t i_right[], const uint8_t i_max, 
+			uint32_t i_right[], const uint8_t l_max, 
 			uint32_t i_param_nom, uint8_t& o_index);
+
+fapi::ReturnCode set_attribute(const fapi::Target & i_target_mba);
+
+fapi::ReturnCode reset_attribute(const fapi::Target & i_target_mba);
+
 
 //-----------------------------------------------------------------------------------
 //Function name: mss_draminit_training_advanced()
@@ -159,17 +161,12 @@ void find_best_margin(shmoo_param i_shmoo_param_valid,uint32_t i_left[],
 //	Default vlaues are Zero
 //-----------------------------------------------------------------------------------
 
-fapi::ReturnCode mss_draminit_training_advanced(const fapi::Target & i_target_mba, 
-					uint8_t i_pattern, 
-					uint8_t i_test_type)
+fapi::ReturnCode mss_draminit_training_advanced(const fapi::Target & i_target_mba)
 {
     // const fapi::Target is centaur.mba
-    i_pattern= PATTERN;        // MPR - Hard coded will be removed after attribute is assigned in firmware  
-    i_test_type= TESTTYPE;     // SIMPLE RAND - Hard coded will be removed after attribute is assigned in firmware 
     fapi::ReturnCode rc;
-    FAPI_INF(" pattern bit is %d and test_type_bit is %d",i_pattern,i_test_type);   
-    
-    rc = mss_draminit_training_advanced_cloned(i_target_mba,i_pattern,i_test_type);
+    //FAPI_INF(" pattern bit is %d and test_type_bit is %d");   
+    rc = mss_draminit_training_advanced_cloned(i_target_mba);
     if (rc) 
     {
 	FAPI_ERR("Advanced DRAM Init training procedure is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
@@ -199,9 +196,7 @@ fapi::ReturnCode mss_draminit_training_advanced(const fapi::Target & i_target_mb
 // Input : const fapi::Target MBA
 // i_pattern, i_test_type : Default = 0, mcbist lab function would use this arg
 //-----------------------------------------------------------------------------------
-fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_target_mba,
-						 uint8_t i_pattern,
-						 uint8_t i_test_type)
+fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_target_mba)
 {
     //const fapi::Target is centaur.mba
     fapi::ReturnCode rc;
@@ -277,13 +272,13 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 
     //Check for Shmoo Parameter, if anyof them is enabled then go into the loop else the procedure exit 
 
-    	    if (( l_num_ranks_per_dimm_u8array[l_port][0] > 0 ) || (l_num_ranks_per_dimm_u8array[l_port][1] > 0))
+    	    if (( l_num_ranks_per_dimm_u8array[0][0] > 0 ) || (l_num_ranks_per_dimm_u8array[0][1] > 0) || ( l_num_ranks_per_dimm_u8array[1][0] > 0 ) || (l_num_ranks_per_dimm_u8array[1][1] > 0))
             {
     		if((l_shmoo_param_valid != PARAM_NONE) || (l_shmoo_type_valid != TEST_NONE)) 
     		{
     		    if((l_shmoo_param_valid & DRV_IMP) != 0)
     		    { 
-    			rc = drv_imped_shmoo(i_target_mba, l_port, l_shmoo_type_valid, i_pattern,i_test_type); 
+    			rc = drv_imped_shmoo(i_target_mba, l_port, l_shmoo_type_valid); 
     			if (rc)
     			{
     			    FAPI_ERR("Driver Impedance Schmoo function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
@@ -292,7 +287,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     		    }
     		    if((l_shmoo_param_valid & SLEW_RATE) !=0) 
         	    {
-    			rc = slew_rate_shmoo(i_target_mba, l_port, l_shmoo_type_valid, i_pattern,i_test_type);
+    			rc = slew_rate_shmoo(i_target_mba, l_port, l_shmoo_type_valid);
     			if (rc)
     			{
     			    FAPI_ERR("Slew Rate Schmoo Function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
@@ -300,17 +295,17 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     			}
     		    }
     		    if((l_shmoo_param_valid & WR_VREF) != 0) 
-   		    {
-    			rc = wr_vref_shmoo(i_target_mba, l_port, l_shmoo_type_valid, i_pattern,i_test_type);
+	   		    {
+    			rc = wr_vref_shmoo(i_target_mba, l_port, l_shmoo_type_valid);
     			if (rc)
-   			{
+   				{
      			    FAPI_ERR("Write Vref Schmoo Function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
     			    return rc;
     			}
     		    }
     		    if((l_shmoo_param_valid & RD_VREF) !=0)
     		    {
-    			rc = rd_vref_shmoo(i_target_mba, l_port, l_shmoo_type_valid, i_pattern,i_test_type);
+    			rc = rd_vref_shmoo(i_target_mba, l_port, l_shmoo_type_valid);
     			if (rc)
     			{
     			    FAPI_ERR("Read Vref Schmoo Function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
@@ -319,16 +314,16 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 		    }
     		    if ((l_shmoo_param_valid & RCV_IMP) !=0)
     		    {	
-    			rc = rcv_imp_shmoo(i_target_mba, l_port, l_shmoo_type_valid, i_pattern,i_test_type);
+    			rc = rcv_imp_shmoo(i_target_mba, l_port, l_shmoo_type_valid);
     			if (rc)
     			{
     			    FAPI_ERR("Receiver Impedance Schmoo Function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
     			    return rc;
     			}
     		    }
-    		    if ((l_shmoo_param_valid & DELAY_REG) != 0) 
+    		    if (((l_shmoo_param_valid & DELAY_REG) != 0) || (l_shmoo_type_valid & TEST_NONE) != 0) 
     		    {
-    			rc = delay_shmoo(i_target_mba, l_port, l_shmoo_type_valid, &l_left_margin, &l_right_margin, i_pattern, i_test_type, l_shmoo_param); 
+    			rc = delay_shmoo(i_target_mba, l_port, l_shmoo_type_valid, &l_left_margin, &l_right_margin, l_shmoo_param); 
     			if (rc)
     			{
     			    FAPI_ERR("Delay Schmoo Function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
@@ -356,14 +351,12 @@ return rc;
 
 fapi::ReturnCode drv_imped_shmoo(const fapi::Target & i_target_mba,
 			   uint8_t i_port,
-			   shmoo_type_t i_shmoo_type_valid,
-			   uint8_t i_pattern,
-			   uint8_t i_test_type)
+			   shmoo_type_t i_shmoo_type_valid)
 {
     fapi::ReturnCode rc;
     uint8_t l_drv_imp_dq_dqs[MAX_PORT] = {0};
     uint8_t l_drv_imp_dq_dqs_nom[MAX_PORT] = {0};
-    uint8_t l_drv_imp_dq_dqs_new[MAX_PORT] = {0};
+    //uint8_t l_drv_imp_dq_dqs_new[MAX_PORT] = {0};
     uint8_t index=0;
     uint8_t l_slew_rate_dq_dqs[MAX_PORT] = {0};
     uint8_t l_slew_rate_dq_dqs_schmoo[MAX_PORT] = {0};
@@ -377,6 +370,7 @@ fapi::ReturnCode drv_imped_shmoo(const fapi::Target & i_target_mba,
     uint32_t l_left_margin = 0;
     uint32_t l_right_margin = 0;
     uint8_t count = 0;
+    uint8_t shmoo_param_count = 0;
     uint8_t l_slew_type = 0; // Hard coded since this procedure will touch only DQ_DQS and not address
        	
     rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target_mba, l_drv_imp_dq_dqs_nom); 
@@ -403,7 +397,7 @@ fapi::ReturnCode drv_imped_shmoo(const fapi::Target & i_target_mba,
     {   
 	for(index = 0; index< MAX_DRV_IMP; index+=1)   
 	{
-            if (l_drv_imp_dq_dqs_schmoo[i_port] & MASK) 
+        if (l_drv_imp_dq_dqs_schmoo[i_port] & MASK) 
 	    {
 	        l_drv_imp_dq_dqs[i_port] = drv_imp_array[index];
 		FAPI_INF("Current Driver Impedance Value = %d Ohms", drv_imp_array[index]);
@@ -415,11 +409,16 @@ fapi::ReturnCode drv_imped_shmoo(const fapi::Target & i_target_mba,
 	        rc = config_slew_rate(i_target_mba, i_port, l_slew_type, l_drv_imp_dq_dqs[i_port], l_slew_rate_dq_dqs[i_port]); 
 		if (rc) return rc;
 		FAPI_INF("Calling Shmoo for finding Timing Margin:");
+		if (shmoo_param_count) 
+		{
+			rc = set_attribute(i_target_mba); if(rc) return rc;
+		}
 		rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid, 
-				 &l_left_margin, &l_right_margin, i_pattern, i_test_type, l_drv_imp_dq_dqs_in);  
+				 &l_left_margin, &l_right_margin, l_drv_imp_dq_dqs_in);  
 		if (rc) return rc;
 		l_left_margin_drv_imp_array[index]= l_left_margin;
 	        l_right_margin_drv_imp_array[index]= l_right_margin;
+		 shmoo_param_count++;
 	    }
 	    else
 	    {
@@ -442,7 +441,7 @@ fapi::ReturnCode drv_imped_shmoo(const fapi::Target & i_target_mba,
 	else
 	{
 	   
-	   if(i_port == 0)
+	  /* if(i_port == 0)
 	   {
 	   l_drv_imp_dq_dqs_new[0] = drv_imp_array[count];
 	   l_drv_imp_dq_dqs_new[1] = l_drv_imp_dq_dqs_nom[1];  // This can be removed once the get/set attribute takes care of this
@@ -451,29 +450,35 @@ fapi::ReturnCode drv_imped_shmoo(const fapi::Target & i_target_mba,
 	   {
 	   l_drv_imp_dq_dqs_new[1] = drv_imp_array[count];
 	   l_drv_imp_dq_dqs_new[0] = l_drv_imp_dq_dqs_nom[0];
-	   }
+	   }*/
  
-	   if (l_drv_imp_dq_dqs_new[i_port] != l_drv_imp_dq_dqs_nom[i_port])
-	   {
+	  // if (l_drv_imp_dq_dqs_new[i_port] != l_drv_imp_dq_dqs_nom[i_port])
+	  // {
 	        //FAPI_INF("Better Margin found on %d Ohms on %s", l_drv_imp_dq_dqs_new[i_port], i_target_mba.toEcmdString());
-	        //rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target_mba, l_drv_imp_dq_dqs_new); 
-	        //if (rc) return rc;
+	       // rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target_mba, l_drv_imp_dq_dqs_new); 
+	       // if (rc) return rc;
 	        //FAPI_INF("Configuring New Driver Impedance Value to Registers:");
 	        //rc = config_drv_imp(i_target_mba, i_port, l_drv_imp_dq_dqs_new[i_port]);
 	        //if (rc) return rc;
 	        //rc = config_slew_rate(i_target_mba, i_port, l_slew_type, l_drv_imp_dq_dqs_new[i_port], l_slew_rate_dq_dqs[i_port]); 
 		//if (rc) return rc;
-	    }
-	    else
-	    {
-	        FAPI_INF("Nominal value will not be changed - Restoring the original values!");	
+	   // }
+	   // else
+	   // {
+	        //FAPI_INF("Nominal value will not be changed - Restoring the original values!");	
+	        FAPI_INF("Restoring the nominal values!");	
+	        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target_mba, l_drv_imp_dq_dqs_nom); 
+	        if (rc) return rc;
 	        rc = config_drv_imp(i_target_mba, i_port, l_drv_imp_dq_dqs_nom[i_port]);
+	        if (rc) return rc;
+	        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS, &i_target_mba, l_slew_rate_dq_dqs); 
 	        if (rc) return rc;
 	        rc = config_slew_rate(i_target_mba, i_port, l_slew_type, l_drv_imp_dq_dqs_nom[i_port], l_slew_rate_dq_dqs[i_port]); 
 		if (rc) return rc;
-	    } 
+	   // } 
 	}
-	
+    FAPI_INF("Restoring mcbist setup attribute...");
+	rc = reset_attribute(i_target_mba); if (rc) return rc;
 	FAPI_INF("++++ Driver impedance shmoo function executed successfully ++++");
     }
 return rc;
@@ -493,22 +498,21 @@ return rc;
 
 fapi::ReturnCode slew_rate_shmoo(const fapi::Target & i_target_mba,
 			   uint8_t i_port,
-			   shmoo_type_t i_shmoo_type_valid,
-			   uint8_t i_pattern,
-			   uint8_t i_test_type)
+			   shmoo_type_t i_shmoo_type_valid)
 {
     fapi::ReturnCode rc;
     uint8_t l_slew_rate_dq_dqs[MAX_PORT] = {0};
     uint8_t l_slew_rate_dq_dqs_nom[MAX_PORT] = {0};
     uint8_t l_slew_rate_dq_dqs_nom_fc = 0;
     uint8_t l_slew_rate_dq_dqs_in = 0;
-    uint8_t l_slew_rate_dq_dqs_new[MAX_PORT] = {0};
+    //uint8_t l_slew_rate_dq_dqs_new[MAX_PORT] = {0};
     uint32_t l_slew_rate_dq_dqs_schmoo[MAX_PORT] = {0};
     uint8_t l_drv_imp_dq_dqs_nom[MAX_PORT] = {0};
     i_shmoo_type_valid = WR_EYE; // Hard coded - Other shmoo type is not valid - Temporary
     
     uint8_t index = 0;
     uint8_t count = 0;
+    uint8_t shmoo_param_count = 0;
     uint32_t l_left_margin_slew_array[MAX_NUM_SLEW_RATES] = {0};
     uint32_t l_right_margin_slew_array[MAX_NUM_SLEW_RATES] = {0};
     uint32_t l_left_margin = 0;
@@ -546,11 +550,16 @@ fapi::ReturnCode slew_rate_shmoo(const fapi::Target & i_target_mba,
                 if (rc) return rc;
 		l_slew_rate_dq_dqs_in = l_slew_rate_dq_dqs[i_port];
 		FAPI_INF("Calling Shmoo for finding Timing Margin:");
+		if (shmoo_param_count)
+		{
+			rc = set_attribute(i_target_mba); if(rc) return rc;
+		}
 		rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid, 
-				 &l_left_margin, &l_right_margin, i_pattern, i_test_type, l_slew_rate_dq_dqs_in);  
+				 &l_left_margin, &l_right_margin, l_slew_rate_dq_dqs_in);  
                 if (rc) return rc;
 		l_left_margin_slew_array[index]= l_left_margin;
 		l_right_margin_slew_array[index]= l_right_margin;
+		 shmoo_param_count++;
 	    }
 	    else
 	    {
@@ -572,7 +581,7 @@ fapi::ReturnCode slew_rate_shmoo(const fapi::Target & i_target_mba,
 	else
 	{
 	   
-	   if(i_port == 0)
+	 /*  if(i_port == 0)
 	   {
 	       l_slew_rate_dq_dqs_new[0] = slew_rate_array[count];
 	       l_slew_rate_dq_dqs_new[1] = l_slew_rate_dq_dqs_nom[1]; 
@@ -581,25 +590,36 @@ fapi::ReturnCode slew_rate_shmoo(const fapi::Target & i_target_mba,
 	   {
 	       l_slew_rate_dq_dqs_new[1] = slew_rate_array[count];
 	       l_slew_rate_dq_dqs_new[0] = l_slew_rate_dq_dqs_nom[0];  
-	   }
+	   }*/
  
 				  
+	   FAPI_INF("Restoring the nominal values!");	
+	   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target_mba, l_drv_imp_dq_dqs_nom); 
+	   if (rc) return rc;
+	   rc = config_drv_imp(i_target_mba, i_port, l_drv_imp_dq_dqs_nom[i_port]);
+	   if (rc) return rc;
+	   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS, &i_target_mba, l_slew_rate_dq_dqs_nom); 
+	   if (rc) return rc;
+	   rc = config_slew_rate(i_target_mba, i_port, l_slew_type, l_drv_imp_dq_dqs_nom[i_port], l_slew_rate_dq_dqs_nom[i_port]); 
+   	   if (rc) return rc;
 	
-	    if (l_slew_rate_dq_dqs_new[i_port] != l_slew_rate_dq_dqs_nom[i_port])
+	   /* if (l_slew_rate_dq_dqs_new[i_port] != l_slew_rate_dq_dqs_nom[i_port])
 	    {
-	        //FAPI_INF("Better Margin found on Slew Rate: %d V/ns on %s", l_slew_rate_dq_dqs_new[i_port], i_target_mba.toEcmdString());
-	        //rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS, &i_target_mba, l_slew_rate_dq_dqs_new); 
+	        FAPI_INF("Better Margin found on Slew Rate: %d V/ns on %s", l_slew_rate_dq_dqs_new[i_port], i_target_mba.toEcmdString());
+	        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS, &i_target_mba, l_slew_rate_dq_dqs_new); 
 	        if (rc) return rc;
-	        //FAPI_INF("Configuring New Slew Rate Value to Registers:");
-	        //rc = config_slew_rate(i_target_mba, i_port, l_slew_type, l_drv_imp_dq_dqs_nom[i_port], l_slew_rate_dq_dqs_new[i_port]); 
+	        FAPI_INF("Configuring New Slew Rate Value to Registers:");
+	        rc = config_slew_rate(i_target_mba, i_port, l_slew_type, l_drv_imp_dq_dqs_nom[i_port], l_slew_rate_dq_dqs_new[i_port]); 
 	        if (rc) return rc;
 	    }
 	    else
 	    {
 	        FAPI_INF("Nominal value will not be changed!");	
 	        FAPI_INF("Slew Rate: %d V/ns on %s", l_slew_rate_dq_dqs_nom[i_port], i_target_mba.toEcmdString());
-	    }
+	    } */
 	}
+        FAPI_INF("Restoring mcbist setup attribute...");
+	rc = reset_attribute(i_target_mba); if (rc) return rc;
 	FAPI_INF("++++ Slew Rate shmoo function executed successfully ++++");
     }
 return rc;	
@@ -619,14 +639,12 @@ return rc;
 
 fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
 			 uint8_t i_port,
-			 shmoo_type_t i_shmoo_type_valid,
-			 uint8_t i_pattern,
-			 uint8_t i_test_type)
+			 shmoo_type_t i_shmoo_type_valid)
 {
     fapi::ReturnCode rc;
     uint32_t l_wr_dram_vref[MAX_PORT] = {0};
     uint32_t l_wr_dram_vref_nom[MAX_PORT] = {0};
-    uint32_t l_wr_dram_vref_new[MAX_PORT] = {0};
+    //uint32_t l_wr_dram_vref_new[MAX_PORT] = {0};
     uint32_t l_wr_dram_vref_schmoo[MAX_PORT] = {0}; 
     uint32_t l_wr_dram_vref_nom_fc = 0;
     uint32_t l_wr_dram_vref_in = 0;
@@ -634,6 +652,7 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
     
     uint8_t index = 0;
     uint8_t count = 0;
+    uint8_t shmoo_param_count = 0;
     uint32_t l_left_margin = 0;
     uint32_t l_right_margin = 0;
     uint32_t l_left_margin_wr_vref_array[MAX_WR_VREF]= {0};
@@ -660,17 +679,24 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
 	{
             if (l_wr_dram_vref_schmoo[i_port] & MASK) 
 	    {
-        	FAPI_INF("Current Vref multiplier value is %d", wr_vref_array[index]);
-		l_wr_dram_vref[i_port] = wr_vref_array[index];
-		rc = config_wr_dram_vref(i_target_mba, i_port, l_wr_dram_vref[i_port]); 
-                if (rc) return rc;
-		l_wr_dram_vref_in = l_wr_dram_vref[i_port];
-		//FAPI_INF(" Calling Shmoo for finding Timing Margin:");
-		rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid, 
-	 			 &l_left_margin, &l_right_margin, i_pattern, i_test_type, l_wr_dram_vref_in);  
-                if (rc) return rc;
-		l_left_margin_wr_vref_array[index]= l_left_margin;
-	        l_right_margin_wr_vref_array[index]= l_right_margin;
+				FAPI_INF("Current Vref multiplier value is %d", wr_vref_array[index]);
+			l_wr_dram_vref[i_port] = wr_vref_array[index];
+			rc = config_wr_dram_vref(i_target_mba, i_port, l_wr_dram_vref[i_port]); 
+					if (rc) return rc;
+			l_wr_dram_vref_in = l_wr_dram_vref[i_port];
+			//FAPI_INF(" Calling Shmoo for finding Timing Margin:");
+			if (shmoo_param_count) 
+			{
+				rc = set_attribute(i_target_mba);
+				if (rc) return rc;
+			}
+			rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid, 
+					 &l_left_margin, &l_right_margin, l_wr_dram_vref_in);  
+			if (rc) return rc;
+			l_left_margin_wr_vref_array[index]= l_left_margin;
+				l_right_margin_wr_vref_array[index]= l_right_margin;
+			 shmoo_param_count++;
+			FAPI_INF("Wr Vref = %d ; Min Setup time = %d; Min Hold time = %d", wr_vref_array[index],l_left_margin_wr_vref_array[index],  l_right_margin_wr_vref_array[index]); 
 	    }
 	    else
 	    {
@@ -678,7 +704,8 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
 	        l_right_margin_wr_vref_array[index]= 0;
 	    }
 	    l_wr_dram_vref_schmoo[i_port] = (l_wr_dram_vref_schmoo[i_port] >> 1);
-   	    FAPI_INF("Configuring Vref registers_2:, index %d , max value %d, schmoo %x mask %d ", index, MAX_WR_VREF, l_wr_dram_vref_schmoo[i_port], MASK);
+   	    //FAPI_INF("Wr Vref = %d ; Min Setup time = %d; Min Hold time = %d", wr_vref_array[index],l_left_margin_wr_vref_array[index],  l_right_margin_wr_vref_array[index]); 
+		//FAPI_INF("Configuring Vref registers_2:, index %d , max value %d, schmoo %x mask %d ", index, MAX_WR_VREF, l_wr_dram_vref_schmoo[i_port], MASK);
 	}
 	l_wr_dram_vref_nom_fc = l_wr_dram_vref_nom[i_port];
 	find_best_margin(WR_VREF, l_left_margin_wr_vref_array,
@@ -693,7 +720,7 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
 	else
 	{
 	   
-	    if(i_port == 0)
+	  /*  if(i_port == 0)
 	    {
 	        l_wr_dram_vref_new[0] = wr_vref_array_fitness[count];
                 l_wr_dram_vref_new[1] = l_wr_dram_vref_nom[1];
@@ -714,12 +741,17 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
                 //if (rc) return rc;	    
 	    }
 	    else
-	    {
-	        FAPI_INF("Nominal value will not be changed!- Restoring the original values!");	
+	    {*/
+	     //   FAPI_INF("Nominal value will not be changed!- Restoring the original values!");	
+	        FAPI_INF(" Restoring the nominal values!");	
+	        rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_WR_VREF, &i_target_mba, l_wr_dram_vref_nom); 
+	        if (rc) return rc;
 	        rc = config_wr_dram_vref(i_target_mba, i_port, l_wr_dram_vref_nom[i_port]); 
                 if (rc) return rc;	    
-	    }
+	   // }
         }
+    FAPI_INF("Restoring mcbist setup attribute...");
+    rc = reset_attribute(i_target_mba); if (rc) return rc;
     FAPI_INF("++++ Write DRAM Vref Shmoo function executed successfully ++++");
     }
     return rc;
@@ -740,19 +772,18 @@ fapi::ReturnCode wr_vref_shmoo(const fapi::Target & i_target_mba,
        
 fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
 			 uint8_t i_port,
-			 shmoo_type_t i_shmoo_type_valid,
-			 uint8_t i_pattern,
-			 uint8_t i_test_type) 
+			 shmoo_type_t i_shmoo_type_valid)
 {
     fapi::ReturnCode rc;
     uint32_t l_rd_cen_vref[MAX_PORT] = {0};
     uint32_t l_rd_cen_vref_nom[MAX_PORT] = {0};
     uint32_t l_rd_cen_vref_nom_fc = 0;
     uint32_t l_rd_cen_vref_in = 0;
-    uint32_t l_rd_cen_vref_new[MAX_PORT] ={0};
+    //uint32_t l_rd_cen_vref_new[MAX_PORT] ={0};
     uint32_t l_rd_cen_vref_schmoo[MAX_PORT] = {0};
     uint8_t index  = 0;
     uint8_t count  = 0;
+    uint8_t shmoo_param_count = 0;
     i_shmoo_type_valid = RD_EYE; // Hard coded - Temporary
     
     uint32_t l_left_margin = 0;
@@ -768,7 +799,7 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
     
     FAPI_INF("+++++++++++++++++CENTAUR VREF Read Shmoo Attributes values+++++++++++++++");
     FAPI_INF("CEN_RD_VREF[0]  = %d CEN_RD_VREF[1]  = %d on %s", l_rd_cen_vref_nom[0],l_rd_cen_vref_nom[1], i_target_mba.toEcmdString());
-    FAPI_INF("CEN_RD_VREF_SCHMOO[0] = [%d], CEN_RD_VREF_SCHMOO[1] = [%d] on %s", l_rd_cen_vref_schmoo[0], l_rd_cen_vref_schmoo[1],i_target_mba.toEcmdString());
+    FAPI_INF("CEN_RD_VREF_SCHMOO[0] = [%x], CEN_RD_VREF_SCHMOO[1] = [%x] on %s", l_rd_cen_vref_schmoo[0], l_rd_cen_vref_schmoo[1],i_target_mba.toEcmdString());
     FAPI_INF("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     
     if(l_rd_cen_vref_schmoo[i_port] == 0)
@@ -787,10 +818,17 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
 		rc = config_rd_cen_vref(i_target_mba, i_port, l_rd_cen_vref[i_port]); if (rc) return rc;
 		l_rd_cen_vref_in = l_rd_cen_vref[i_port];
 		//FAPI_INF(" Calling Shmoo function to find out Timing Margin:");
-		rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid, &l_left_margin, &l_right_margin,i_pattern,i_test_type, l_rd_cen_vref_in);
+		if (shmoo_param_count) 
+		{
+			rc = set_attribute(i_target_mba);
+                	if (rc) return rc;
+		}
+		rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid, &l_left_margin, &l_right_margin, l_rd_cen_vref_in);
 		if (rc) return rc;
 		l_left_margin_rd_vref_array[index]= l_left_margin;
 	        l_right_margin_rd_vref_array[index]= l_right_margin;
+		 shmoo_param_count++;
+		 FAPI_INF("Read Vref = %d ; Min Setup time = %d; Min Hold time = %d", rd_cen_vref_array[index],l_left_margin_rd_vref_array[index],  l_right_margin_rd_vref_array[index]); 
 	    }
 	    else
 	    {
@@ -798,6 +836,7 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
 	        l_right_margin_rd_vref_array[index]= 0;
 	    }
    	    l_rd_cen_vref_schmoo[i_port] = (l_rd_cen_vref_schmoo[i_port] >> 1);
+   	    /* FAPI_INF("Read Vref = %d ; Min Setup time = %d; Min Hold time = %d", rd_cen_vref_array[index],l_left_margin_rd_vref_array[index],  l_right_margin_rd_vref_array[index]);  */
 	}
 	l_rd_cen_vref_nom_fc = l_rd_cen_vref_nom[i_port];
 	find_best_margin(RD_VREF, l_left_margin_rd_vref_array,
@@ -812,7 +851,7 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
 	else
 	{
 	   
-	    if(i_port == 0)
+	 /* if(i_port == 0)
 	    {
 	        l_rd_cen_vref_new[0] = rd_cen_vref_array_fitness[count];
                 l_rd_cen_vref_new[1] = l_rd_cen_vref_nom[1];
@@ -833,12 +872,17 @@ fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
                 //if (rc) return rc;
 	    }
 	    else
-	    {
-	        FAPI_INF("Nominal value will not be changed!- Restoring the original values!");	
+	    {*/
+	       // FAPI_INF("Nominal value will not be changed!- Restoring the original values!");	
+	        FAPI_INF("Restoring Nominal values!");	
+	        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_RD_VREF, &i_target_mba, l_rd_cen_vref_nom); 
+	        if (rc) return rc;
 	        rc = config_rd_cen_vref(i_target_mba, i_port, l_rd_cen_vref_nom[i_port]); 
                 if (rc) return rc;
-	    }
+	   // }
 	}
+    FAPI_INF("Restoring mcbist setup attribute...");
+	rc = reset_attribute(i_target_mba); if (rc) return rc;
     FAPI_INF("++++ Centaur Read Vref Shmoo function executed successfully ++++");
     }
 return rc;
@@ -855,19 +899,18 @@ return rc;
 //------------------------------------------------------------------------------
 fapi::ReturnCode rcv_imp_shmoo(const fapi::Target & i_target_mba,
 			 uint8_t i_port,
-			 shmoo_type_t i_shmoo_type_valid,
-			 uint8_t i_pattern,
-			 uint8_t i_test_type)
+			 shmoo_type_t i_shmoo_type_valid)
 {
     fapi::ReturnCode rc;
     uint8_t l_rcv_imp_dq_dqs[MAX_PORT] = {0};
     uint8_t l_rcv_imp_dq_dqs_nom[MAX_PORT] = {0};
     uint8_t l_rcv_imp_dq_dqs_nom_fc = 0;
     uint8_t l_rcv_imp_dq_dqs_in = 0;
-    uint8_t l_rcv_imp_dq_dqs_new[MAX_PORT] = {0};
+    //uint8_t l_rcv_imp_dq_dqs_new[MAX_PORT] = {0};
     uint32_t l_rcv_imp_dq_dqs_schmoo[MAX_PORT] = {0};
     uint8_t index = 0;
     uint8_t count  = 0;
+    uint8_t shmoo_param_count = 0;
     i_shmoo_type_valid = RD_EYE;   //Hard coded since no other shmoo is applicable - Temporary
     
     uint32_t l_left_margin = 0;
@@ -901,12 +944,18 @@ fapi::ReturnCode rcv_imp_shmoo(const fapi::Target & i_target_mba,
 		FAPI_INF("Configuring Receiver impedance registers:");
   	        rc = config_rcv_imp(i_target_mba, i_port, l_rcv_imp_dq_dqs[i_port]); if (rc) return rc;
 		l_rcv_imp_dq_dqs_in = l_rcv_imp_dq_dqs[i_port];
-		FAPI_INF("Calling Shmoo function to find out timing margin:");
+		//FAPI_INF("Calling Shmoo function to find out timing margin:");
+		if (shmoo_param_count) 
+		{
+			rc = set_attribute(i_target_mba);
+  	                if (rc) return rc;
+		}
 	        rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid, 
-			     &l_left_margin, &l_right_margin, i_pattern, i_test_type, l_rcv_imp_dq_dqs_in);
+			     &l_left_margin, &l_right_margin, l_rcv_imp_dq_dqs_in);
 	        if (rc) return rc;
 		l_left_margin_rcv_imp_array[index]= l_left_margin;
 	        l_right_margin_rcv_imp_array[index]= l_right_margin;
+		 shmoo_param_count++;
 	    }
 	    else
 	    {
@@ -928,7 +977,7 @@ fapi::ReturnCode rcv_imp_shmoo(const fapi::Target & i_target_mba,
 	else
 	{
 	   
-	    if(i_port == 0)
+	  /*  if(i_port == 0)
 	    {
 	        l_rcv_imp_dq_dqs_new[0] = rcv_imp_array[count];
 	        l_rcv_imp_dq_dqs_new[1] = l_rcv_imp_dq_dqs_nom[1];  // This can be removed once the get/set attribute takes care of this
@@ -937,23 +986,27 @@ fapi::ReturnCode rcv_imp_shmoo(const fapi::Target & i_target_mba,
 	    {
 	        l_rcv_imp_dq_dqs_new[1] = rcv_imp_array[count];
 	        l_rcv_imp_dq_dqs_new[0] = l_rcv_imp_dq_dqs_nom[0];
-	    }
- 
-	    if (l_rcv_imp_dq_dqs_new[i_port] != l_rcv_imp_dq_dqs_nom[i_port])
-	    {
+	    }*/
+	   // if (l_rcv_imp_dq_dqs_new[i_port] != l_rcv_imp_dq_dqs_nom[i_port])
+	   // {
 	        //FAPI_INF("Better Margin found on %d on %s", l_rcv_imp_dq_dqs_new[i_port], i_target_mba.toEcmdString());
 	        //rc = FAPI_ATTR_SET(ATTR_EFF_CEN_RCV_IMP_DQ_DQS, &i_target_mba, l_rcv_imp_dq_dqs_new); 
 	        //if (rc) return rc;
 	        //rc = config_rcv_imp(i_target_mba, i_port, l_rcv_imp_dq_dqs_new[i_port]);
 	        //if (rc) return rc;
-	    }
-	    else
-	    {
-	        FAPI_INF("Nominal value will not be changed!- Restoring the original values!");	
+	   // }
+	   // else
+	   // {
+	     //   FAPI_INF("Nominal value will not be changed!- Restoring the original values!");	
+	        FAPI_INF("Restoring the nominal values!");	
+	        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_RCV_IMP_DQ_DQS, &i_target_mba, l_rcv_imp_dq_dqs_nom); 
+	        if (rc) return rc;
 	        rc = config_rcv_imp(i_target_mba, i_port, l_rcv_imp_dq_dqs_nom[i_port]);
                 if (rc) return rc;
-	    }
+	   // }
 	}
+    FAPI_INF("Restoring mcbist setup attribute...");
+	rc = reset_attribute(i_target_mba); if (rc) return rc;
     FAPI_INF("++++ Receiver Impdeance Shmoo function executed successfully ++++");
     }
 return rc;  
@@ -974,22 +1027,49 @@ fapi::ReturnCode delay_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
 		       shmoo_type_t i_shmoo_type_valid,
 		       uint32_t *o_left_margin,
 		       uint32_t *o_right_margin,
-		       uint8_t i_pattern,
-		       uint8_t i_test_type,
 		       uint32_t i_shmoo_param)
 {
     fapi::ReturnCode rc;
-    FAPI_INF(" Inside the delay shmoo " );
+    //FAPI_INF(" Inside the delay shmoo " );
     //Constructor CALL: generic_shmoo::generic_shmoo(uint8_t i_port, uint32_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm)
     //generic_shmoo mss_shmoo=generic_shmoo(i_port,2,SEQ_LIN);
     generic_shmoo mss_shmoo=generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
-    rc = mss_shmoo.run(i_target_mba, o_left_margin, o_right_margin,i_pattern,i_test_type,i_shmoo_param);
+    rc = mss_shmoo.run(i_target_mba, o_left_margin, o_right_margin,i_shmoo_param);
     if(rc)
     {
         FAPI_ERR("Delay Schmoo Function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
 	return rc;
     }
 return rc;
+}
+
+
+//------------------------------------------------------------------------------
+//Function name: set_attributes()
+//Description: Sets the attribute used  by all functions
+//------------------------------------------------------------------------------
+
+fapi::ReturnCode set_attribute(const fapi::Target & i_target_mba)
+{
+   fapi::ReturnCode rc;
+   uint8_t l_mcbist_setup_multiple_set = 1;  //Hard coded it wont change
+   FAPI_ATTR_SET(ATTR_SCHMOO_MULTIPLE_SETUP_CALL, &i_target_mba, l_mcbist_setup_multiple_set);
+   if (rc) return rc;
+   return rc;
+}
+
+//------------------------------------------------------------------------------
+//Function name: reset_attributes()
+//Description: Sets the attribute used  by all functions
+//------------------------------------------------------------------------------
+
+fapi::ReturnCode reset_attribute(const fapi::Target & i_target_mba)
+{
+   fapi::ReturnCode rc;
+   uint8_t l_mcbist_setup_multiple_reset = 0; //Hard coded it wont change
+   FAPI_ATTR_SET(ATTR_SCHMOO_MULTIPLE_SETUP_CALL, &i_target_mba, l_mcbist_setup_multiple_reset);
+   if (rc) return rc;
+   return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -1092,7 +1172,7 @@ void find_best_margin(shmoo_param i_shmoo_param_valid,
 	    {
  	        o_index = index2;
 		//wont break this loop, since the purpose is to find the best parameter value & best timing margin The enum is constructed to do that
-	      //  FAPI_INF("Best Value found on index %d,  Setup Margin: %d, Hold Margin: %d", o_index, i_left[index2], i_right[index2]);
+	    //  FAPI_INF("Index value %d, Min Setup Margin: %d, Min Hold Margin: %d", o_index, i_left[index2], i_right[index2]);
   	    }
 	}
     }

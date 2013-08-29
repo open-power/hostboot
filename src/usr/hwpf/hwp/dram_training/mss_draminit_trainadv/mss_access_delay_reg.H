@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//$Id: mss_access_delay_reg.H,v 1.7 2013/01/07 17:16:49 sasethur Exp $
+//$Id: mss_access_delay_reg.H,v 1.9 2013/07/18 06:23:03 sauchadh Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -128,7 +128,12 @@ enum input_type_t {
    RAW_DQSCLK_2,
    RAW_DQSCLK_3,
    RAW_DQSCLK_4,
-   DQSCLK
+   DQSCLK,
+   COMMAND,
+   CONTROL,
+   CLOCK,
+   ADDRESS,
+   DATA_DISABLE
    };
 
 enum ip_type_t {
@@ -152,7 +157,12 @@ enum ip_type_t {
    RDCLK_t,
    RAW_RDCLK,
    DQSCLK_t,
-   RAW_DQSCLK
+   RAW_DQSCLK,
+   COMMAND_t,
+   CONTROL_t,
+   CLOCK_t,
+   ADDRESS_t,
+   DATA_DISABLE_t
 };
 
 

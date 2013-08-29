@@ -783,8 +783,6 @@ void*    call_mss_draminit_trainadv( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
     IStepError l_stepError;
-    uint8_t l_pattern = 0;
-    uint8_t l_test_type = 0;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_draminit_trainadv entry" );
@@ -815,8 +813,7 @@ void*    call_mss_draminit_trainadv( void *io_pArgs )
                     (const_cast<TARGETING::Target*>(l_mba_target)) );
 
         //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP(l_err, mss_draminit_training_advanced, l_fapi_mba_target,
-                        l_pattern, l_test_type);
+        FAPI_INVOKE_HWP(l_err, mss_draminit_training_advanced, l_fapi_mba_target);
 
         if (l_err)
         {

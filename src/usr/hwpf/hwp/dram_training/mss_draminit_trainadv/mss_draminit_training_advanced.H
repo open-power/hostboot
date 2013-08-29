@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.H,v 1.13 2012/12/06 11:13:42 lapietra Exp $
+// $Id: mss_draminit_training_advanced.H,v 1.16 2013/08/08 14:54:08 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur Sept 28 2011. */
 
 //------------------------------------------------------------------------------
@@ -51,7 +51,9 @@
 //  1.11   | 26-Oct-12 | sasethur | Updated fapi:: and const Target & for HB environment
 //  1.12   | 15-Nov-12 | sasethur | Updated fw review comments
 //  1.13   | 07-Dec-12 | sasethur | Updated for fw review in comment section
-
+//  1.14   | 10-May-13 | sasethur | Added user input for test type, pattern from wrapper
+//  1.15   | 10-May-13 | sasethur | changed uint8_t to uint32_t for test type, pattern
+//  1.16   | 08-Aug-13 | sasethur | Removed Pattern and testype
 
 #ifndef _MSS_DRAMINIT_TRAINING_ADVANCED_H
 #define _MSS_DRAMINIT_TRAINING_ADVANCED_H
@@ -61,7 +63,7 @@
 //----------------------------------------------------------------------
 #include <fapi.H>
 
-typedef fapi::ReturnCode (*mss_draminit_training_advanced_FP_t)(const fapi::Target &,uint8_t i_pattern,uint8_t i_test_type);
+typedef fapi::ReturnCode (*mss_draminit_training_advanced_FP_t)(const fapi::Target &);
 
 
 extern "C"
@@ -75,7 +77,7 @@ extern "C"
 * @return ReturnCode
 */
 
-fapi::ReturnCode mss_draminit_training_advanced(const fapi::Target & i_target_mba,uint8_t i_pattern,uint8_t i_test_type);
+fapi::ReturnCode mss_draminit_training_advanced(const fapi::Target & i_target_mba);
 
 } // extern C
 

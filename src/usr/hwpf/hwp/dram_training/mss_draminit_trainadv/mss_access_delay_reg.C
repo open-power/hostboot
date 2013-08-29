@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.14 2013/01/10 14:32:39 sasethur Exp $
+// $Id: mss_access_delay_reg.C,v 1.17 2013/07/18 06:22:49 sauchadh Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -49,7 +49,10 @@
 //   1.11  | sauchadh |18-Dec-12| Fixed Frimware comments and removed print statements in between
 //   1.12  | sauchadh |18-Dec-12| Added support for unused DQS in x8 mode
 //   1.13  | sauchadh |7-Jan-12 | Added DQSCLK and RDCLK in phase select register
-//   1.14  | sauchadh |8-Jan-12 | Fixed Firmware comments 
+//   1.14  | sauchadh |8-Jan-12 | Fixed Firmware comments
+//   1.15  | sauchadh |20-may-13| Fixed swizzle issue in DQSCLK phase rotators
+//   1.16  | sauchadh |12-jun-13| ADDED	 CAC registers for read dqs
+//   1.17  | sauchadh |18-Jul-13| Added data bit disable registers
 
 
 //----------------------------------------------------------------------
@@ -110,10 +113,50 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    uint8_t l_mbapos=0;
    const uint8_t l_ISDIMM_dqmax=71;
    const uint8_t l_CDIMM_dqmax=79;
+   uint8_t l_adr=0;
+    const uint8_t addr_max=19;
+   const uint8_t cmd_max=3;
+   const uint8_t cnt_max=20;
+   const uint8_t clk_max=8;
+   const uint8_t addr_lanep0[addr_max]={1,5,3,7,10,6,4,10,13,12,9,9,0,0,6,4,1,4,8};
+   const uint8_t addr_adrp0[addr_max]={2,1,1,3,1,3,1,3,3,3,2,3,2,3,1,0,3,3,3};
+   const uint8_t addr_lanep1[addr_max]={7,10,3,6,8,12,6,1,5,8,2,0,13,4,5,9,6,11,9};
+   const uint8_t addr_adrp1[addr_max]={2,1,2,2,1,3,1,1,1,3,1,3,2,3,3,0,0,1,3};
+   const uint8_t addr_lanep2[addr_max]={8,0,7,1,12,10,1,5,9,5,13,5,4,2,4,9,10,9,0};
+   const uint8_t addr_adrp2[addr_max]={2,2,3,0,3,1,2,0,1,3,2,1,0,2,3,3,3,2,1};
+   const uint8_t addr_lanep3[addr_max]={6,2,9,9,2,3,4,10,0,5,1,5,4,1,8,11,5,12,1};
+   const uint8_t addr_adrp3[addr_max]={3,0,2,3,2,0,3,3,1,2,2,1,0,1,3,3,0,3,0};
+   
+   const uint8_t cmd_lanep0[cmd_max]={2,11,5};
+   const uint8_t cmd_adrp0[cmd_max]={3,1,3};
+   const uint8_t cmd_lanep1[cmd_max]={2,10,10};
+   const uint8_t cmd_adrp1[cmd_max]={2,3,2};
+   const uint8_t cmd_lanep2[cmd_max]={3,11,3};
+   const uint8_t cmd_adrp2[cmd_max]={1,3,0};
+   const uint8_t cmd_lanep3[cmd_max]={7,10,7};
+   const uint8_t cmd_adrp3[cmd_max]={1,1,3};
+   
+   const uint8_t cnt_lanep0[cnt_max]={0,7,3,1,7,8,8,3,8,6,7,2,2,0,9,1,3,6,9,2};
+   const uint8_t cnt_adrp0[cnt_max]={1,0,3,0,2,2,1,2,0,0,1,2,0,0,1,1,0,2,0,1};
+   const uint8_t cnt_lanep1[cnt_max]={5,4,0,5,11,9,10,7,1,11,0,4,12,3,6,8,1,4,7,7};
+   const uint8_t cnt_adrp1[cnt_max]={2,1,2,0,2,1,0,1,3,0,1,0,2,1,3,0,2,2,3,0};
+   const uint8_t cnt_lanep2[cnt_max]={0,4,7,13,11,5,12,2,3,6,11,6,7,1,10,8,8,2,4,1};
+   const uint8_t cnt_adrp2[cnt_max]={0,1,1,3,1,2,2,0,2,2,0,1,2,1,0,3,1,1,2,3};
+   const uint8_t cnt_lanep3[cnt_max]={0,11,9,8,4,7,0,3,8,6,13,8,7,0,6,6,1,2,9,5};
+   const uint8_t cnt_adrp3[cnt_max]={2,1,0,2,1,0,3,2,0,1,3,1,2,0,0,2,3,1,1,3};
+   
+   const uint8_t clk_lanep0[clk_max]={10,11,11,10,4,5,13,12};
+   const uint8_t clk_adrp0[clk_max]={0,0,2,2,2,2,2,2};
+   const uint8_t clk_lanep1[clk_max]={3,2,8,9,1,0,3,2};
+   const uint8_t clk_adrp1[clk_max]={3,3,2,2,0,0,0,0};
+   const uint8_t clk_lanep2[clk_max]={11,10,6,7,2,3,8,9};
+   const uint8_t clk_adrp2[clk_max]={2,2,0,0,3,3,0,0};
+   const uint8_t clk_lanep3[clk_max]={3,2,13,12,10,11,11,10};
+   const uint8_t clk_adrp3[clk_max]={3,3,2,2,0,0,2,2};
    
    
-   rc = mss_getrankpair(i_target_mba,i_port_u8,i_rank_u8,&l_rank_pair,l_rankpair_table);  if(rc) return rc;
-     
+   rc = mss_getrankpair(i_target_mba,i_port_u8,i_rank_u8,&l_rank_pair,l_rankpair_table);   if(rc) return rc;
+   
    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
    
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
@@ -197,6 +240,246 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       l_len=l_out.bit_length;
 	 
    }
+   
+   else if(i_input_type_e==ADDRESS)
+   {
+      if(i_input_index_u8<=18) // 19 delay values for Address
+      {
+         if((i_port_u8==0) && (l_mbapos==0))
+         {
+            l_lane=addr_lanep0[i_input_index_u8];
+            l_adr=addr_adrp0[i_input_index_u8];
+         }
+         else if((i_port_u8==1) && (l_mbapos==0))
+         {
+            l_lane=addr_lanep1[i_input_index_u8];
+            l_adr=addr_adrp1[i_input_index_u8]; 
+         }
+         else if((i_port_u8==0) && (l_mbapos==1))
+         {
+            l_lane=addr_lanep2[i_input_index_u8];
+            l_adr=addr_adrp2[i_input_index_u8]; 
+         }
+         else
+         {
+            l_lane=addr_lanep3[i_input_index_u8];
+            l_adr=addr_adrp3[i_input_index_u8]; 
+         }
+         
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=ADDRESS_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("ADR=%d",l_adr);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      l_block=l_adr;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==DATA_DISABLE)
+   {
+      if(i_input_index_u8<=4) // 5 delay values for data bits disable register
+      {
+         l_block=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=DATA_DISABLE_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+      }
+      l_lane=0;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   
+   else if(i_input_type_e==COMMAND)
+   {
+      if(i_input_index_u8<=2) // 3 delay values for Command
+      {
+         if((i_port_u8==0) && (l_mbapos==0))
+         {
+            l_lane=cmd_lanep0[i_input_index_u8];
+            l_adr=cmd_adrp0[i_input_index_u8];
+         }
+         else if((i_port_u8==1) && (l_mbapos==0))
+         {
+            l_lane=cmd_lanep1[i_input_index_u8];
+            l_adr=cmd_adrp1[i_input_index_u8]; 
+         }
+         else if((i_port_u8==0) && (l_mbapos==1))
+         {
+            l_lane=cmd_lanep2[i_input_index_u8];
+            l_adr=cmd_adrp2[i_input_index_u8]; 
+         }
+         else
+         {
+            l_lane=cmd_lanep3[i_input_index_u8];
+            l_adr=cmd_adrp3[i_input_index_u8]; 
+         }
+         
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=COMMAND_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("ADR=%d",l_adr);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      l_block=l_adr;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }   
+   
+    else if(i_input_type_e==CONTROL)
+   {
+      if(i_input_index_u8<=19) // 20 delay values for Control
+      {
+         if((i_port_u8==0) && (l_mbapos==0))
+         {
+            l_lane=cnt_lanep0[i_input_index_u8];
+            l_adr=cnt_adrp0[i_input_index_u8];
+         }
+         else if((i_port_u8==1) && (l_mbapos==0))
+         {
+            l_lane=cnt_lanep1[i_input_index_u8];
+            l_adr=cnt_adrp1[i_input_index_u8]; 
+         }
+         else if((i_port_u8==0) && (l_mbapos==1))
+         {
+            l_lane=cnt_lanep2[i_input_index_u8];
+            l_adr=cnt_adrp2[i_input_index_u8]; 
+         }
+         else
+         {
+            l_lane=cnt_lanep3[i_input_index_u8];
+            l_adr=cnt_adrp3[i_input_index_u8]; 
+         }
+         
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=CONTROL_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("ADR=%d",l_adr);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      l_block=l_adr;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==CLOCK)
+   {
+      if(i_input_index_u8<=7) // 8 delay values for CLK
+      {
+         if((i_port_u8==0) && (l_mbapos==0))
+         {
+            l_lane=clk_lanep0[i_input_index_u8];
+            l_adr=clk_adrp0[i_input_index_u8];
+         }
+         else if((i_port_u8==1) && (l_mbapos==0))
+         {
+            l_lane=clk_lanep1[i_input_index_u8];
+            l_adr=clk_adrp1[i_input_index_u8]; 
+         }
+         else if((i_port_u8==0) && (l_mbapos==1))
+         {
+            l_lane=clk_lanep2[i_input_index_u8];
+            l_adr=clk_adrp2[i_input_index_u8]; 
+         }
+         else
+         {
+            l_lane=clk_lanep3[i_input_index_u8];
+            l_adr=clk_adrp3[i_input_index_u8]; 
+         }
+         
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=CLOCK_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("ADR=%d",l_adr);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      l_block=l_adr;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }   
+   
     
    else if (i_input_type_e==RD_DQS || i_input_type_e==WR_DQS || i_input_type_e==DQS_ALIGN ||  i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
    {
@@ -832,7 +1115,7 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
         return rc;
       }    
       io_value_u32=l_output;
-      FAPI_INF("Delay value=%d",io_value_u32);
+     // FAPI_INF("Delay value=%d",io_value_u32);
    }
    
    else if(i_access_type_e==WRITE)
@@ -841,7 +1124,7 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       if(i_input_type_e==RD_DQ || i_input_type_e==RD_DQS || i_input_type_e==RAW_RD_DQ_0 || i_input_type_e==RAW_RD_DQ_1 || i_input_type_e==RAW_RD_DQ_2 || i_input_type_e==RAW_RD_DQ_3 || i_input_type_e==RAW_RD_DQ_4 || i_input_type_e==RAW_RD_DQS_0 || i_input_type_e==RAW_RD_DQS_1 || i_input_type_e==RAW_RD_DQS_2 || i_input_type_e==RAW_RD_DQS_3 || i_input_type_e==RAW_RD_DQS_4
       || i_input_type_e==RAW_SYS_ADDR_CLK || i_input_type_e==RAW_SYS_CLK_0 || i_input_type_e==RAW_SYS_CLK_1 || i_input_type_e==RAW_SYS_CLK_2 || i_input_type_e==RAW_SYS_CLK_3 || i_input_type_e==RAW_SYS_CLK_4 || i_input_type_e==RAW_WR_CLK_0 || i_input_type_e==RAW_WR_CLK_1 || i_input_type_e==RAW_WR_CLK_2 || i_input_type_e==RAW_WR_CLK_3 || i_input_type_e==RAW_WR_CLK_4
       || i_input_type_e==RAW_ADDR_0 || i_input_type_e==RAW_ADDR_1 || i_input_type_e==RAW_ADDR_2 || i_input_type_e==RAW_ADDR_3 || i_input_type_e==RAW_DQS_ALIGN_0 || i_input_type_e==RAW_DQS_ALIGN_1 || i_input_type_e==RAW_DQS_ALIGN_2 || i_input_type_e==RAW_DQS_ALIGN_3 || i_input_type_e==RAW_DQS_ALIGN_4
-      || i_input_type_e==DQS_ALIGN )   
+      || i_input_type_e==DQS_ALIGN || i_input_type_e==COMMAND || i_input_type_e==ADDRESS || i_input_type_e==CONTROL || i_input_type_e==CLOCK )   
       {
          l_start=25;   // l_start is starting bit of delay value in the register. There are different registers and each register has a different field for delay
       }
@@ -860,12 +1143,22 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          l_start=30;  
       }
       
+      else if(i_input_type_e==DATA_DISABLE)
+      {
+         l_start=16;
+      }
+      
       else
       {
          FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
          FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
          return rc;      
       }
+      if(i_verbose==1)
+      {
+         FAPI_INF("value given=%d",io_value_u32);
+      }
+      
       rc=fapiGetScom(i_target_mba,l_scom_add,data_buffer_64);if(rc) return rc;	  
       rc_num=data_buffer_64.insert(io_value_u32,l_sbit,l_len,l_start);
       if(rc_num)
@@ -978,9 +1271,8 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
       out.bit_length=l_len; 
    }
    
-   else if (i_input_type_e==RD_DQS || i_input_type_e==WR_DQS ||  i_input_type_e==DQS_ALIGN)	    
+   else if (i_input_type_e==WR_DQS ||  i_input_type_e==DQS_ALIGN)	    
    {
-	   
       if(i_port==0 && l_mbapos==0)
       {
          l_dq=dqs_dq_lane_p0[i_input_index];
@@ -1298,11 +1590,7 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
          }   
       }  
       
-      if (i_input_type_e==RD_DQS)
-      {
-         l_input_type=RD_DQS_t;
-      }
-      else if(i_input_type_e==WR_DQS)	  		  
+      if(i_input_type_e==WR_DQS)	  		  
       {
          l_input_type=WR_DQS_t;  
       }
@@ -1318,9 +1606,10 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
    }   
       
     
-   else if (i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
+   else if (i_input_type_e==RD_DQS || i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
    {
-	   
+      
+      
       if(i_port==0 && l_mbapos==0)
       {
          l_dq=dqs_dq_lane_p0[i_input_index];
@@ -1366,16 +1655,22 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
       else
       {
          l_lane=22;
-      }  
+      }
+      //FAPI_INF("here");
       
       if (i_input_type_e==DQS_GATE)
       {
-         l_input_type=DQS_GATE_t;   
+         l_input_type=DQS_GATE_t;
       }
       
       else if(i_input_type_e==RDCLK)
       {
          l_input_type=RDCLK_t;
+      }
+      
+      else if(i_input_type_e==RD_DQS)
+      {
+         l_input_type=RD_DQS_t;
       }
       
       else
@@ -1386,7 +1681,8 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
       if(i_verbose==1)
       {
          FAPI_INF("lane is=%d",l_lane);
-      }   
+      }
+      
       rc=get_address(i_target_mba,i_port,i_rank_pair,l_input_type,l_block,l_lane,l_scom_address_64,l_start_bit,l_len); if(rc) return rc; 		 
       out.scom_addr=l_scom_address_64;
       out.start_bit=l_start_bit;
@@ -1611,14 +1907,18 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, u
    uint8_t l_lane=0;
    const uint64_t l_port01_st=0x8000000000000000ull;
    const uint64_t l_port23_st=0x8001000000000000ull;
+   const uint64_t l_port01_adr_st=0x8000400000000000ull;
+   const uint64_t l_port23_adr_st=0x8001400000000000ull;
    const uint32_t l_port01_en=0x0301143f;
    const uint64_t l_rd_port01_en=0x040301143full;
    const uint64_t l_sys_clk_en=0x730301143full;
    const uint64_t l_wr_clk_en =0x740301143full;
    const uint64_t l_adr02_st=0x8000400000000000ull;
    const uint64_t l_adr13_st=0x8001400000000000ull;
-   const uint64_t l_dqs_gate_en=0x130301143full;
+   const uint64_t l_dqs_gate_en=0x000000130301143full;
    const uint64_t l_dqsclk_en=0x090301143full;
+   const uint64_t l_data_ds_en=0x7c0301143full;
+   uint8_t l_tmp=0;
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos); if(rc) return rc;
    
    if(i_input_type_e==WR_DQ_t || i_input_type_e==RAW_WR_DQ)
@@ -1686,6 +1986,38 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, u
       
       o_scom_address_64=l_scom_address_64; 
      
+   }
+   
+   else if(i_input_type_e==COMMAND_t || i_input_type_e==CLOCK_t ||  i_input_type_e==CONTROL_t ||  i_input_type_e==ADDRESS_t )
+   {
+      l_tmp|=4;       
+      l_lane=i_lane/2;           
+      l_temp=l_lane+l_tmp;
+      l_temp|=(i_block*4)<<8;     
+      l_temp=l_temp<<32;
+      if((i_port==0 && l_mbapos==0) || (i_port==0 && l_mbapos==1))
+      {
+         l_scom_address_64|= l_port01_adr_st | l_temp | l_port01_en;
+      }
+      else 
+      { 
+         l_scom_address_64|= l_port23_adr_st | l_temp | l_port01_en;
+      }
+            
+      if((i_lane % 2) == 0)
+      {
+         o_start_bit=49;
+         o_len=7;
+      }
+      else
+      {
+         o_start_bit=57;
+         o_len=7;
+      }
+   
+      
+      o_scom_address_64=l_scom_address_64; 
+     
    }    
         
        
@@ -1746,7 +2078,26 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, u
       o_scom_address_64=l_scom_address_64; 
       
    }
+   
+   else if(i_input_type_e==DATA_DISABLE_t)    
+   {
+      l_temp|=(i_block*4)<<8;     
+      l_temp|=i_rank_pair<<8;     
+      l_temp=l_temp<<32;
+      if((i_port==0 && l_mbapos==0) || (i_port==0 && l_mbapos==1))
+      {
+         l_scom_address_64|= l_port01_st | l_temp | l_data_ds_en;
+      }
+      else
+      { 
+         l_scom_address_64|= l_port23_st | l_temp | l_data_ds_en;
+      }
      
+      o_start_bit=48; 
+      o_len=16;  
+      o_scom_address_64=l_scom_address_64; 
+   }
+   
    else if(i_input_type_e==RD_CLK_t)
    {  
       l_temp|=(i_block*4)<<8;     
@@ -2139,22 +2490,20 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, u
    
    else if(i_input_type_e==RAW_DQS_GATE ||  i_input_type_e==DQS_GATE_t)
    {
-      //l_lane=i_lane;
-      l_lane=i_lane/4;    
-      l_temp|=l_lane;
+      if(i_input_type_e==RAW_DQS_GATE)
+      {
+         l_lane=i_lane/4;    
+         l_temp|=l_lane;
+      }
+      if(i_input_type_e==DQS_GATE_t)
+      {
+         l_lane=i_lane;    
+      }
+      
       l_temp|=(i_block*4)<<8;     
       l_temp|=i_rank_pair<<8;     
       l_temp=l_temp<<32;
      
-      if((i_port==0 && l_mbapos==0) || (i_port==0 && l_mbapos==1))
-      {
-         l_scom_address_64|= l_port01_st | l_temp | l_dqs_gate_en;
-      }
-      else 
-      { 
-         l_scom_address_64|= l_port23_st | l_temp | l_dqs_gate_en;
-      }
-      
       if(i_input_type_e==RAW_DQS_GATE)
       {
          if((i_lane % 4) == 0)
@@ -2208,6 +2557,15 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, u
          
       }
       
+      if((i_port==0 && l_mbapos==0) || (i_port==0 && l_mbapos==1))
+      {
+         l_scom_address_64|= l_port01_st | l_temp | l_dqs_gate_en;
+      }
+      else 
+      { 
+         l_scom_address_64|= l_port23_st | l_temp | l_dqs_gate_en;
+      }
+                 
       o_scom_address_64=l_scom_address_64; 
       
    } 

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_shmoo.C,v 1.6 2013/06/06 05:45:16 sauchadh Exp $
+// $Id: mss_eff_config_shmoo.C,v 1.7 2013/08/09 17:54:08 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_shmoo.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -46,12 +46,11 @@
 //   1.4   | sauchadh |10-May-13| Fixed FW comments
 //   1.5   | sauchadh |15-May-13| Fixed FW comments
 //   1.6   | sauchadh |6-Jun-13 | Added some more attributes
+//   1.7   | bellows  |09-Aug-13| Set default pattern to 0, per Sarvanan Req
 
 //----------------------------------------------------------------------
 //  My Includes
 //----------------------------------------------------------------------
-
-
 
 //----------------------------------------------------------------------
 //  Includes
@@ -71,7 +70,7 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target & i_target_mba) {
    const char * const PROCEDURE_NAME = "mss_eff_config_shmoo";
    FAPI_INF("*** Running %s on %s ... ***", PROCEDURE_NAME, i_target_mba.toEcmdString());
 
-   uint32_t datapattern=8;
+   uint32_t datapattern=0; // mdb - type 8 is not valid per Saravanan's Sametime
    uint32_t testtype=1;
    uint8_t addr_modes=1;
    uint8_t  rank=0;
