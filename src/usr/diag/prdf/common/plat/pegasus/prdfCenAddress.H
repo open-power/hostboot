@@ -348,35 +348,32 @@ class CenAddr
 
 typedef const char * const CenReadAddrReg;
 
-extern CenReadAddrReg READ_NCE_ADDR_0; ///< For the MBA0_MBNCER register
-extern CenReadAddrReg READ_RCE_ADDR_0; ///< For the MBA0_MBRCER register
-extern CenReadAddrReg READ_MPE_ADDR_0; ///< For the MBA0_MBMPER register
-extern CenReadAddrReg READ_UE_ADDR_0;  ///< For the MBA0_MBUER register
-
-extern CenReadAddrReg READ_NCE_ADDR_1; ///< For the MBA1_MBNCER register
-extern CenReadAddrReg READ_RCE_ADDR_1; ///< For the MBA1_MBRCER register
-extern CenReadAddrReg READ_MPE_ADDR_1; ///< For the MBA1_MBMPER register
-extern CenReadAddrReg READ_UE_ADDR_1;  ///< For the MBA1_MBUER register
+extern CenReadAddrReg READ_NCE_ADDR; ///< For the MBNCER register
+extern CenReadAddrReg READ_RCE_ADDR; ///< For the MBRCER register
+extern CenReadAddrReg READ_MPE_ADDR; ///< For the MBMPER register
+extern CenReadAddrReg READ_UE_ADDR;  ///< For the MBUER register
 
 /**
  * @brief  Reads the specified mainline memory read address from hardware.
  * @param  i_membChip A Centaur chip.
+ * @param  i_mbaPos   The target MBA position.
  * @param  i_addrReg  The target address register.
  * @param  o_addr     The returned address from hardware.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t getCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
-                        CenAddr & o_addr );
+int32_t getCenReadAddr( ExtensibleChip * i_membChip, uint32_t i_mbaPos,
+                        CenReadAddrReg i_addrReg, CenAddr & o_addr );
 
 /**
  * @brief  Writes the specified mainline memory read address to hardware.
  * @param  i_membChip A Centaur chip.
+ * @param  i_mbaPos   The target MBA position.
  * @param  i_addrReg  The target address register.
  * @param  i_addr     The address to write to hardware.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t setCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
-                        const CenAddr & i_addr );
+int32_t setCenReadAddr( ExtensibleChip * i_membChip, uint32_t i_mbaPos,
+                        CenReadAddrReg i_addrReg, const CenAddr & i_addr );
 
 //------------------------------------------------------------------------------
 //                       MBA Address Registers

@@ -424,10 +424,8 @@ int32_t AnalyzeMpe( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc,
         // Add address to UE table.
         if ( isFetchError )
         {
-            CenReadAddrReg reg = (0 == i_mbaPos) ? READ_MPE_ADDR_0
-                                                 : READ_MPE_ADDR_1;
             CenAddr addr;
-            l_rc = getCenReadAddr( i_membChip, reg, addr );
+            l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_MPE_ADDR, addr );
             if ( SUCCESS != l_rc )
             {
                 PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
@@ -521,10 +519,8 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
             l_rc = FAIL; break;
         }
 
-        CenReadAddrReg reg = (0 == i_mbaPos) ? READ_NCE_ADDR_0
-                                             : READ_NCE_ADDR_1;
         CenAddr addr;
-        l_rc = getCenReadAddr( i_membChip, reg, addr );
+        l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_NCE_ADDR, addr );
         if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
@@ -586,10 +582,8 @@ int32_t AnalyzeFetchRce( ExtensibleChip * i_membChip,
             l_rc = FAIL; break;
         }
 
-        CenReadAddrReg reg = (0 == i_mbaPos) ? READ_RCE_ADDR_0
-                                             : READ_RCE_ADDR_1;
         CenAddr addr;
-        l_rc = getCenReadAddr( i_membChip, reg, addr );
+        l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_RCE_ADDR, addr );
         if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
@@ -652,10 +646,8 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
             l_rc = FAIL; break;
         }
 
-        CenReadAddrReg reg = (0 == i_mbaPos) ? READ_UE_ADDR_0
-                                             : READ_UE_ADDR_1;
         CenAddr addr;
-        l_rc = getCenReadAddr( i_membChip, reg, addr );
+        l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_UE_ADDR, addr );
         if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );

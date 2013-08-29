@@ -43,20 +43,15 @@ using namespace PlatServices;
 //                       MBS Address Registers
 //------------------------------------------------------------------------------
 
-CenReadAddrReg READ_NCE_ADDR_0 = "MBA0_MBNCER";
-CenReadAddrReg READ_RCE_ADDR_0 = "MBA0_MBRCER";
-CenReadAddrReg READ_MPE_ADDR_0 = "MBA0_MBMPER";
-CenReadAddrReg READ_UE_ADDR_0  = "MBA0_MBUER";
-
-CenReadAddrReg READ_NCE_ADDR_1 = "MBA1_MBNCER";
-CenReadAddrReg READ_RCE_ADDR_1 = "MBA1_MBRCER";
-CenReadAddrReg READ_MPE_ADDR_1 = "MBA1_MBMPER";
-CenReadAddrReg READ_UE_ADDR_1  = "MBA1_MBUER";
+CenReadAddrReg READ_NCE_ADDR = "MBNCER";
+CenReadAddrReg READ_RCE_ADDR = "MBRCER";
+CenReadAddrReg READ_MPE_ADDR = "MBMPER";
+CenReadAddrReg READ_UE_ADDR  = "MBUER";
 
 //------------------------------------------------------------------------------
 
-int32_t getCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
-                        CenAddr & o_addr )
+int32_t getCenReadAddr( ExtensibleChip * i_membChip, uint32_t i_mbaPos,
+                        CenReadAddrReg i_addrReg, CenAddr & o_addr )
 {
     #define PRDF_FUNC "[getCenReadAddr] "
 
@@ -73,26 +68,32 @@ int32_t getCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
             o_rc = FAIL; break;
         }
 
+        if ( MAX_MBA_PER_MEMBUF <= i_mbaPos )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid MBA position" );
+            o_rc = FAIL; break;
+        }
+
+        // Build register string
+        char reg_str[64];
+        sprintf( reg_str, "MBA%d_%s", i_mbaPos, i_addrReg );
+
         // Read from hardware
-        SCAN_COMM_REGISTER_CLASS * reg = i_membChip->getRegister(i_addrReg);
+        SCAN_COMM_REGISTER_CLASS * reg = i_membChip->getRegister(reg_str);
         o_rc = reg->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on %s", i_addrReg );
+            PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
             break;
         }
         uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
 
         // Get the address type.
         uint32_t type = CenAddr::NONE;
-        if      ( READ_NCE_ADDR_0 == i_addrReg || READ_NCE_ADDR_1 == i_addrReg )
-            type = CenAddr::NCE;
-        else if ( READ_RCE_ADDR_0 == i_addrReg || READ_RCE_ADDR_1 == i_addrReg )
-            type = CenAddr::RCE;
-        else if ( READ_MPE_ADDR_0 == i_addrReg || READ_MPE_ADDR_1 == i_addrReg )
-            type = CenAddr::MPE;
-        else if ( READ_UE_ADDR_0  == i_addrReg || READ_UE_ADDR_1  == i_addrReg )
-            type = CenAddr::UE;
+        if      ( READ_NCE_ADDR == i_addrReg ) type = CenAddr::NCE;
+        else if ( READ_RCE_ADDR == i_addrReg ) type = CenAddr::RCE;
+        else if ( READ_MPE_ADDR == i_addrReg ) type = CenAddr::MPE;
+        else if ( READ_UE_ADDR  == i_addrReg ) type = CenAddr::UE;
         else
         {
             PRDF_ERR( PRDF_FUNC"Unsupported register" );
@@ -105,8 +106,8 @@ int32_t getCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x addrReg='%s'",
-                  getHuid(membTrgt), i_addrReg );
+        PRDF_ERR( PRDF_FUNC"Failed: i_membChip=0x%08x i_mbaPos=%d i_addrReg=%s",
+                  i_membChip->GetId(), i_mbaPos, i_addrReg );
     }
 
     return o_rc;
@@ -116,8 +117,8 @@ int32_t getCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
 
 //------------------------------------------------------------------------------
 
-int32_t setCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
-                        const CenAddr & i_addr )
+int32_t setCenReadAddr( ExtensibleChip * i_membChip, uint32_t i_mbaPos,
+                        CenReadAddrReg i_addrReg, const CenAddr & i_addr )
 {
     #define PRDF_FUNC "[setCenReadAddr] "
 
@@ -134,13 +135,23 @@ int32_t setCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
             o_rc = FAIL; break;
         }
 
+        if ( MAX_MBA_PER_MEMBUF <= i_mbaPos )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid MBA position" );
+            o_rc = FAIL; break;
+        }
+
+        // Build register string
+        char reg_str[64];
+        sprintf( reg_str, "MBA%d_%s", i_mbaPos, i_addrReg );
+
         // Write to hardware
-        SCAN_COMM_REGISTER_CLASS * reg = i_membChip->getRegister(i_addrReg);
+        SCAN_COMM_REGISTER_CLASS * reg = i_membChip->getRegister(reg_str);
         reg->SetBitFieldJustified( 0, 64, i_addr.toReadAddr() );
         o_rc = reg->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", i_addrReg );
+            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
             break;
         }
 
@@ -148,8 +159,8 @@ int32_t setCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x addrReg='%s'",
-                  getHuid(membTrgt), i_addrReg );
+        PRDF_ERR( PRDF_FUNC"Failed: i_membChip=0x%08x i_mbaPos=%d i_addrReg=%s",
+                  i_membChip->GetId(), i_mbaPos, i_addrReg );
     }
 
     return o_rc;
