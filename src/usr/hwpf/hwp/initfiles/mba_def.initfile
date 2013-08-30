@@ -1,9 +1,10 @@
 
-#-- $Id: mba_def.initfile,v 1.46 2013/07/17 18:23:53 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.47 2013/08/15 19:20:23 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.47|tschang | 8/15/13| HW259719 - dd2 only fix - ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL to turn on clock gates
 #--     1.46|tschang | 7/17/13|updated refresh interval and refresh check interval calculations
 #--     1.45|tschang | 6/04/13|using ATTR_EFF_DRAM_RRD, etc timing parms for settings
 #--                            setting RD ODT according to Menlo's equation
@@ -268,7 +269,7 @@ define def_has_spare    =   (SYS.ATTR_IS_SIMULATION==0) ;
 #define  def_ATTR_EFF_DRAM_2N_MODE = (0);
 #define def_ATTR_EFF_IBM_TYPE           = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
 #define def_ATTR_EFF_NUM_DROPS_PER_PORT = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_ATTR_EFF_DRAM_2N_MODE       = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+#define def_ATTR_EFF_DRAM_2N_MODE       = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 
 define CENTAUR = TGT1;
 
@@ -1703,6 +1704,19 @@ scom 0x03010416     {
 
 # ATTR_EFF_DIMM_TYPE
 # CDIMM = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+
+###################################
+# TRACE_TRCTRL_CONFIG MBA01 Trace Control Configuration Register
+#
+# HW259719 - lcl_clk_gate_ctrl needs to be turned on and left on
+# DD2 fixed ONLY
+###################################
+
+scom 0x03010882      {
+    bits    ,   scom_data    ,       ATTR_FUNCTIONAL,   expr;
+   12:13    ,   0b11         ,          1            ,    (CENTAUR.ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL == 1); # turn on lcl_clk_gate_ctrl
+}
+
 ###################################
 # Turn on DDR PHY clks
 ###################################

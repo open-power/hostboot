@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_cke_map.C,v 1.3 2012/11/16 14:39:15 asaetow Exp $
+// $Id: mss_eff_config_cke_map.C,v 1.4 2013/08/16 13:45:30 kcook Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_cke_map.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,7 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.4   |          |         |
+//   1.4   | kcook    |16-AUG-12| Added LRDIMM support.
 //   1.3   | asaetow  |14-NOV-12| Added ATTR_EFF_SPCKE_MAP. 
 //   1.2   | asaetow  |13-NOV-12| Added FAPI_ERR for else "Undefined IBM_TYPE". 
 //         |          |         | Removed outter NUM_DROPS_PER_PORT check.
@@ -98,7 +98,7 @@ const uint8_t l_cke_map_u8array[IBM_TYPE_SIZE][DIMM_SIZE][RANK_SIZE] = {
    {{0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}},  // TYPE_5A <-- UNDEFINED
    {{0x80, 0x40, 0x00, 0x00}, {0x08, 0x04, 0x00, 0x00}},  // TYPE_5B
    {{0x80, 0x40, 0x80, 0x40}, {0x08, 0x04, 0x08, 0x04}},  // TYPE_5C
-   {{0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}},  // TYPE_5D <-- NOT YET SUPPORTED for LRDIMM DDR3
+   {{0x80, 0x40, 0x00, 0x00}, {0x08, 0x04, 0x00, 0x00}},  // TYPE_5D 
    {{0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}},  // TYPE_6A <-- UNDEFINED
    {{0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}},  // TYPE_6B <-- UNDEFINED
    {{0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}},  // TYPE_6C <-- UNDEFINED
@@ -240,8 +240,9 @@ fapi::ReturnCode mss_eff_config_cke_map(const fapi::Target i_target_mba) {
                FAPI_ERR("Invalid IBM_TYPE for CDIMM on %s!", i_target_mba.toEcmdString());
                FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
             }
-            FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            FAPI_INF("WIP 8Rank LRDIMM IBM_TYPE on %s!", i_target_mba.toEcmdString());
+//            FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
+//            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
          } else if ( l_ibm_type_u8array[l_cur_port][l_cur_dimm] == fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_6A ) {
             l_ibm_type_index = 18;
             FAPI_ERR("Undefined IBM_TYPE on %s!", i_target_mba.toEcmdString());

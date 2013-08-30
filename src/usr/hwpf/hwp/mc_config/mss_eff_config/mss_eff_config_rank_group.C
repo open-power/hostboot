@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_rank_group.C,v 1.10 2013/04/17 11:26:02 asaetow Exp $
+// $Id: mss_eff_config_rank_group.C,v 1.11 2013/08/16 13:45:45 kcook Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_rank_group.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -46,7 +46,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.11  |          |         |
+//   1.11  | kcook    |16-AUG-13| Added LRDIMM support.
 //   1.10  | asaetow  |17-APR-13| Removed 32G CDIMM 1R dualdrop workaround.
 //         |          |         | NOTE: Needs mss_draminit_training.C v1.57 or newer.
 //   1.9   | asaetow  |01-APR-13| Added 32G CDIMM 1R dualdrop workaround.
@@ -160,23 +160,77 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
          //quanternary_rank_group3_u8array[cur_port] = INVALID;
       //} else if (dimm_type_u8 == LRDIMM) {
       if (dimm_type_u8 == LRDIMM) {
-         // HERE: NOT correct, need to account for ATTR_EFF_DIMM_RANKS_CONFIGED for LRDIMMs /w multi master ranks
-         primary_rank_group0_u8array[cur_port] = 0;
-         primary_rank_group1_u8array[cur_port] = 4;
-         primary_rank_group2_u8array[cur_port] = 8;
-         primary_rank_group3_u8array[cur_port] = 12;
-         secondary_rank_group0_u8array[cur_port] = 1;
-         secondary_rank_group1_u8array[cur_port] = 5;
-         secondary_rank_group2_u8array[cur_port] = 9;
-         secondary_rank_group3_u8array[cur_port] = 13;
-         tertiary_rank_group0_u8array[cur_port] = 2;
-         tertiary_rank_group1_u8array[cur_port] = 6;
-         tertiary_rank_group2_u8array[cur_port] = 10;
-         tertiary_rank_group3_u8array[cur_port] = 14;
-         quanternary_rank_group0_u8array[cur_port] = 3;
-         quanternary_rank_group1_u8array[cur_port] = 7;
-         quanternary_rank_group2_u8array[cur_port] = 11;
-         quanternary_rank_group3_u8array[cur_port] = 15;
+         primary_rank_group2_u8array[cur_port] = INVALID;
+         secondary_rank_group2_u8array[cur_port] = INVALID;
+         tertiary_rank_group2_u8array[cur_port] = INVALID;
+         quanternary_rank_group2_u8array[cur_port] = INVALID;
+
+         primary_rank_group3_u8array[cur_port] = INVALID;
+         secondary_rank_group3_u8array[cur_port] = INVALID;
+         tertiary_rank_group3_u8array[cur_port] = INVALID;
+         quanternary_rank_group3_u8array[cur_port] = INVALID;
+
+         // dimm 0 (far socket)
+         switch (num_ranks_per_dimm_u8array[cur_port][0]) {
+           case 4:               // 4 rank lrdimm
+                 primary_rank_group0_u8array[cur_port] = 0;
+                 secondary_rank_group0_u8array[cur_port] = 1;
+                 tertiary_rank_group0_u8array[cur_port] = 2;
+                 quanternary_rank_group0_u8array[cur_port] = 3;
+                 break;
+           case 8:               // 8 rank lrdimm falls through to 2 rank case
+         // Rank Multiplication mode needed, CS2 & CS3 used as address lines into LRBuffer
+         // RM=4 -> only 2 CS valid, each CS controls 4 ranks with CS2 & CS3 as address
+         // CS0 = rank 0, 2, 4, 6;  CS1 = rank 1, 3, 5, 7
+           case 2:               // 2 rank lrdimm
+                 primary_rank_group0_u8array[cur_port] = 0;
+                 secondary_rank_group0_u8array[cur_port] = 1;
+                 tertiary_rank_group0_u8array[cur_port] = INVALID;
+                 quanternary_rank_group0_u8array[cur_port] = INVALID;
+                 break;
+           case 1:               // 1 rank lrdimm
+                 primary_rank_group0_u8array[cur_port] = 0;
+                 secondary_rank_group0_u8array[cur_port] = INVALID;
+                 tertiary_rank_group0_u8array[cur_port] = INVALID;
+                 quanternary_rank_group0_u8array[cur_port] = INVALID;
+                 break;
+           default:              // not 1, 2, 4, or 8 ranks
+                 primary_rank_group0_u8array[cur_port] = INVALID;
+                 secondary_rank_group0_u8array[cur_port] = INVALID;
+                 tertiary_rank_group0_u8array[cur_port] = INVALID;
+                 quanternary_rank_group0_u8array[cur_port] = INVALID;
+         }
+         // dimm 1 (near socket)
+         switch (num_ranks_per_dimm_u8array[cur_port][1]) {
+           case 4:               // 4 rank lrdimm
+                 primary_rank_group1_u8array[cur_port] = 4;
+                 secondary_rank_group1_u8array[cur_port] = 5;
+                 tertiary_rank_group1_u8array[cur_port] = 6;
+                 quanternary_rank_group1_u8array[cur_port] = 7;
+                 break;
+           case 8:               // 8 rank lrdimm falls through to case 2
+         // Rank Multiplication mode needed, CS6 & CS7 used as address lines into LRBuffer
+         // RM=4 -> only 2 CS valid, each CS controls 4 ranks with CS6 & CS7 as address
+         // CS4 = rank 0, 2, 4, 6;  CS5 = rank 1, 3, 5, 7
+           case 2:               // 2 rank lrdimm, RM=0
+                 primary_rank_group1_u8array[cur_port] = 4;
+                 secondary_rank_group1_u8array[cur_port] = 5;
+                 tertiary_rank_group1_u8array[cur_port] = INVALID;
+                 quanternary_rank_group1_u8array[cur_port] = INVALID;
+                 break;
+           case 1:               // 1 rank lrdimm
+                 primary_rank_group1_u8array[cur_port] = 4;
+                 secondary_rank_group1_u8array[cur_port] = INVALID;
+                 tertiary_rank_group1_u8array[cur_port] = INVALID;
+                 quanternary_rank_group1_u8array[cur_port] = INVALID;
+                 break;
+           default:              // not 1, 2, 4, or 8 ranks
+                 primary_rank_group1_u8array[cur_port] = INVALID;
+                 secondary_rank_group1_u8array[cur_port] = INVALID;
+                 tertiary_rank_group1_u8array[cur_port] = INVALID;
+                 quanternary_rank_group1_u8array[cur_port] = INVALID;
+         }
+
       } else { // RDIMM or CDIMM
          if ((num_ranks_per_dimm_u8array[cur_port][0] > 0) && (num_ranks_per_dimm_u8array[cur_port][1] == 0)) {
             primary_rank_group0_u8array[cur_port] = 0;

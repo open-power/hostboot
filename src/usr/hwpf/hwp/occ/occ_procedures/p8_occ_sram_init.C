@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_occ_sram_init.C,v 1.3 2013/04/01 04:11:52 stillgs Exp $
+// $Id: p8_occ_sram_init.C,v 1.4 2013/08/13 18:17:02 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_occ_sram_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -122,6 +122,7 @@ p8_occ_sram_init(const Target& i_target, uint32_t mode)
   {
   
     FAPI_ERR("Unknown mode passed to p8_occ_sram_init. Mode %x ....", mode);
+    const uint32_t& MODE = mode;
     FAPI_SET_HWP_ERROR(rc, RC_PROCPM_OCCSRAM_CODE_BAD_MODE);
     
   }

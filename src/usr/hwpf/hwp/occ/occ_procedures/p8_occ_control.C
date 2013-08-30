@@ -20,24 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_occ_control.C,v 1.1 2012/08/21 16:17:31 jimyac Exp $
+// $Id: p8_occ_control.C,v 1.2 2013/08/13 18:16:59 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_occ_control.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -120,6 +103,7 @@ p8_occ_control(const Target& i_target, const uint8_t i_ppc405_reset_ctrl, const 
   // check ppc405_reset_ctrl
   if (!(i_ppc405_reset_ctrl <= PPC405_RESET_ON) ) {
     FAPI_ERR("Bad PPC405 Reset Setting Passed to Procedure => %d", i_ppc405_reset_ctrl);
+    const uint8_t& RESET_PARM = i_ppc405_reset_ctrl;
     FAPI_SET_HWP_ERROR(rc, RC_PROCPM_OCC_CONTROL_BAD_405RESET_PARM);
     return rc;
   }
@@ -127,6 +111,7 @@ p8_occ_control(const Target& i_target, const uint8_t i_ppc405_reset_ctrl, const 
   // check sram_bv_ctrl
   if (!(i_ppc405_boot_ctrl <= PPC405_BOOT_OLD) ) {
     FAPI_ERR("Bad Boot Vector Setting Passed to Procedure => %d", i_ppc405_boot_ctrl);
+    const uint8_t& BOOT_PARM = i_ppc405_boot_ctrl;
     FAPI_SET_HWP_ERROR(rc, RC_PROCPM_OCC_CONTROL_BAD_405BOOT_PARM);
     return rc;
   }

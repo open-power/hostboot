@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.2 2013/05/06 20:58:08 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.3 2013/08/20 02:05:06 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -50,7 +50,10 @@ using namespace fapi;
 // Constant definitions
 //------------------------------------------------------------------------------
 
+// lock polling constants
 const uint32_t PROC_A_X_PCI_DMI_PLL_UTILS_MAX_LOCK_POLLS = 50;
+const uint32_t PROC_A_X_PCI_DMI_PLL_UTILS_POLL_DELAY_HW = 2000000;
+const uint32_t PROC_A_X_PCI_DMI_PLL_UTILS_POLL_DELAY_SIM = 1;
 
 // OPCG/Clock Region Register values
 const uint64_t OPCG_REG0_FOR_SETPULSE  = 0x818C000000000000ull;
@@ -430,6 +433,13 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_release_pll(
                 if (rc)
                 {
                     FAPI_ERR("Error reading PLL lock register");
+                    break;
+                }
+                rc = fapiDelay(PROC_A_X_PCI_DMI_PLL_UTILS_POLL_DELAY_HW,
+                               PROC_A_X_PCI_DMI_PLL_UTILS_POLL_DELAY_SIM);
+                if (rc)
+                {
+                    FAPI_ERR("Error from fapiDelay");
                     break;
                 }
             } while (!timeout &&
