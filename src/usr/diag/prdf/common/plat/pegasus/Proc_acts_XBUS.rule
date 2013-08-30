@@ -163,6 +163,11 @@ group gXbusLFir filter singlebit
 # XBUS Chiplet PBENFIR
 ################################################################################
 
+#FIXME RTC 23127 We need to revisit the Firmware action
+#FabricBus_CE_With_Repair. Description is same as P7 but
+#it appears it may need change.This appilies to PBEN FIR.
+#calloutXbus0InterfaceTh5pDay may need modification.
+
 rule PbenFir
 {
     CHECK_STOP:  PBENFIR & ~PBENFIR_MASK & ~PBENFIR_ACT0 & ~PBENFIR_ACT1;
@@ -174,112 +179,122 @@ group gPbenFir filter singlebit
     /** PBENFIR[0]
      *  X0_LINK_RCV_CE: x0 link rcv ce
      */
-    (PbenFir, bit(0)) ? TBDDefaultCallout;
+    (PbenFir, bit(0)) ? calloutXbus0InterfaceTh5pDay;
 
     /** PBENFIR[1]
      *  X0_LINK_RCV_DERR: x0 link rcv derr
      */
-    (PbenFir, bit(1)) ? TBDDefaultCallout;
+    (PbenFir, bit(1)) ? defaultMaskedError;
 
     /** PBENFIR[2]
      *  X0_LINK_RCV_UE: x0 link rcv ue
      */
-    (PbenFir, bit(2)) ? TBDDefaultCallout;
+    (PbenFir, bit(2)) ? calloutXbus0InterfaceTh1;
 
     /** PBENFIR[3]
      *  X1_LINK_RCV_CE: x1 link rcv ce
      */
-    (PbenFir, bit(3)) ? TBDDefaultCallout;
+    (PbenFir, bit(3)) ? calloutXbus1InterfaceTh5pDay;
 
     /** PBENFIR[4]
      *  X1_LINK_RCV_DERR: x1 link rcv derr
      */
-    (PbenFir, bit(4)) ? TBDDefaultCallout;
+    (PbenFir, bit(4)) ? defaultMaskedError;
 
     /** PBENFIR[5]
      *  X1_LINK_RCV_UE: x1 link rcv ue
      */
-    (PbenFir, bit(5)) ? TBDDefaultCallout;
+    (PbenFir, bit(5)) ? calloutXbus1InterfaceTh1;
 
     /** PBENFIR[6]
      *  X2_LINK_RCV_CE: x2 link rcv ce
      */
-    (PbenFir, bit(6)) ? TBDDefaultCallout;
+    (PbenFir, bit(6)) ? calloutXbus2InterfaceTh5pDay;
 
     /** PBENFIR[7]
      *  X2_LINK_RCV_DERR: x2 link rcv derr
      */
-    (PbenFir, bit(7)) ? TBDDefaultCallout;
+    (PbenFir, bit(7)) ? defaultMaskedError;
 
     /** PBENFIR[8]
      *  X2_LINK_RCV_UE: x2 link rcv ue
      */
-    (PbenFir, bit(8)) ? TBDDefaultCallout;
+    (PbenFir, bit(8)) ? calloutXbus2InterfaceTh1;
 
     /** PBENFIR[9]
      *  X3_LINK_RCV_CE: x3 link rcv ce
      */
-    (PbenFir, bit(9)) ? TBDDefaultCallout;
+    (PbenFir, bit(9)) ? calloutXbus3InterfaceTh5pDay;
 
     /** PBENFIR[10]
      *  X3_LINK_RCV_DERR: x3 link rcv derr
      */
-    (PbenFir, bit(10)) ? TBDDefaultCallout;
+    (PbenFir, bit(10)) ? defaultMaskedError;
 
     /** PBENFIR[11]
      *  X3_LINK_RCV_UE: x3 link rcv ue
      */
-    (PbenFir, bit(11)) ? TBDDefaultCallout;
+    (PbenFir, bit(11)) ? calloutXbus3InterfaceTh1;
 
     /** PBENFIR[12]
      *  X_LINK_SND_CE: x link rcv ce
      */
-    (PbenFir, bit(12)) ? TBDDefaultCallout;
+    (PbenFir, bit(12)) ? SelfHighThr5PerHour;
 
     /** PBENFIR[13]
      *  X_LINK_SND_SUE: x link rcv sue
      */
-    (PbenFir, bit(13)) ? TBDDefaultCallout;
+    (PbenFir, bit(13)) ? defaultMaskedError;
 
     /** PBENFIR[14]
      *  X_LINK_SND_UE: x link rcv ue
      */
-    (PbenFir, bit(14)) ? TBDDefaultCallout;
+    (PbenFir, bit(14)) ? SelfHighThr1;
 
     /** PBENFIR[15]
      *  X_LINK_CR_OVERFLOW: x link command/response/data buffer overflow
      */
-    (PbenFir, bit(15)) ? TBDDefaultCallout;
+    (PbenFir, bit(15)) ? callout2ndLvlMed;
 
     /** PBENFIR[16]
      *  X0_LINK_FMR_ERR: x0 link framer error
      */
-    (PbenFir, bit(16)) ? TBDDefaultCallout;
+    (PbenFir, bit(16)) ? SelfHighThr1;
 
     /** PBENFIR[17]
      *  X1_LINK_FMR_ERR: x1 link framer error
      */
-    (PbenFir, bit(17)) ? TBDDefaultCallout;
+    (PbenFir, bit(17)) ? SelfHighThr1;
 
     /** PBENFIR[18]
      *  X2_LINK_FMR_ERR: x2 link framer error
      */
-    (PbenFir, bit(18)) ? TBDDefaultCallout;
+    (PbenFir, bit(18)) ? SelfHighThr1;
 
     /** PBENFIR[19]
      *  X3_LINK_FMR_ERR: x3 link framer error
      */
-    (PbenFir, bit(19)) ? TBDDefaultCallout;
+    (PbenFir, bit(19)) ? SelfHighThr1;
 
     /** PBENFIR[20]
      *  X_LINK_PSR_ERR: x link parser error
      */
-    (PbenFir, bit(20)) ? TBDDefaultCallout;
+    (PbenFir, bit(20)) ? SelfHighThr1;
 
-    /** PBENFIR[36]
+    /** PBENFIR[21:30]
+     *  Reserved
+     */
+    (PbenFir, bit(21|22|23|24|25|26|27|28|29|30)) ? defaultMaskedError;
+
+    /** PBENFIR[31:35]
+     *  Reserved
+     */
+    (PbenFir, bit(31|32|33|34|35)) ? defaultMaskedError;
+
+    /** PBENFIR[36:37]
      *  FIR_SCOM_ERR: pben iox fir_scom_err
      */
-    (PbenFir, bit(36)) ? TBDDefaultCallout;
+    (PbenFir, bit(36|37)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -658,6 +673,14 @@ group gIoxFir_3 filter singlebit
 # Actions specific to XBUS chiplet
 ################################################################################
 
+/** Callout the XBUS 0 interface */
+actionclass calloutXbus0Interface
+{
+    callout(connected(TYPE_XBUS, 0), MRU_MEDA);
+    funccall("calloutPeerBus_xbus0");
+    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+};
+
 /** Callout the XBUS 1 interface */
 actionclass calloutXbus1Interface
 {
@@ -666,8 +689,33 @@ actionclass calloutXbus1Interface
     callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
 };
 
+/** Callout the XBUS 2 interface */
+actionclass calloutXbus2Interface
+{
+    callout(connected(TYPE_XBUS, 2), MRU_MEDA);
+    funccall("calloutPeerBus_xbus2");
+    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+};
+
+/** Callout the XBUS 3 interface */
+actionclass calloutXbus3Interface
+{
+    callout(connected(TYPE_XBUS, 3), MRU_MEDA);
+    funccall("calloutPeerBus_xbus3");
+    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+};
+
+/** Callout the XBUS 0 interface, threshold 1 */
+actionclass calloutXbus0InterfaceTh1 { calloutXbus0Interface; threshold1; };
+
 /** Callout the XBUS 1 interface, threshold 1 */
 actionclass calloutXbus1InterfaceTh1 { calloutXbus1Interface; threshold1; };
+
+/** Callout the XBUS 2 interface, threshold 1 */
+actionclass calloutXbus2InterfaceTh1 { calloutXbus2Interface; threshold1; };
+
+/** Callout the XBUS 3 interface, threshold 1 */
+actionclass calloutXbus3InterfaceTh1 { calloutXbus3Interface; threshold1; };
 
 /** Lane Repair: spare deployed - XBUS 1 */
 actionclass spareDeployed_xbus1
@@ -681,3 +729,29 @@ actionclass maxSparesExceeded_xbus1
 actionclass tooManyBusErrors_xbus1
 { calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus1"); };
 
+/** Callout the XBUS 0 interface, threshold 5 per day */
+actionclass calloutXbus0InterfaceTh5pDay
+{
+    calloutXbus0Interface;
+    threshold5pday;
+};
+
+/** Callout the XBUS 1 interface, threshold 5 per day */
+actionclass calloutXbus1InterfaceTh5pDay
+{
+    calloutXbus1Interface;
+    threshold5pday;
+};
+
+/** Callout the XBUS 2 interface, threshold 5 per day */
+actionclass calloutXbus2InterfaceTh5pDay
+{   calloutXbus2Interface;
+    threshold5pday;
+};
+
+/** Callout the XBUS 3 interface, threshold 5 per day */
+actionclass calloutXbus3InterfaceTh5pDay
+{
+    calloutXbus3Interface;
+    threshold5pday;
+};

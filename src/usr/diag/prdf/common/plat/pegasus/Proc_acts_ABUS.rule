@@ -134,6 +134,12 @@ group gAbusLFir filter singlebit
 ################################################################################
 # based on p8dd1_mss_FFDC_37_ reviewd.xls
 ################################################################################
+
+#FIXME RTC 23127 We need to revisit the Firmware action
+#FabricBus_CE_With_Repair. Description is same as P7 but
+#it appears it may need change.This appilies to PBES FIR.
+#calloutAbus0InterfaceTh5 may need modification.
+
 rule PbesFir
 {
     CHECK_STOP:
@@ -481,6 +487,7 @@ group gIoaFir filter singlebit
 ################################################################################
 # Actions specific to ABUS chiplet
 ################################################################################
+
 
 /** Callout the ABUS 0 interface */
 actionclass calloutAbus0Interface

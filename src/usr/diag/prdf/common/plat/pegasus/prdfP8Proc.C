@@ -619,7 +619,10 @@ int32_t calloutPeerBus_##BUS##POS( ExtensibleChip * i_chip, \
 { return calloutPeerBus( i_chip, i_sc, TYPE, POS ); } \
 PRDF_PLUGIN_DEFINE( Proc, calloutPeerBus_##BUS##POS );
 
+PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 0 )
 PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 1 )
+PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 2 )
+PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 3 )
 
 PLUGIN_CALLOUT_PEER_BUS( abus, TYPE_ABUS, 0 )
 PLUGIN_CALLOUT_PEER_BUS( abus, TYPE_ABUS, 1 )

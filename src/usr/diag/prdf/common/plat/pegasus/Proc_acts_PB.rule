@@ -1888,8 +1888,9 @@ group gPbaFir filter singlebit
     /** PBAFIR[3]
      *  PBAFIR_PB_SUE_FW
      */
-     #FIXME RTC 23127 Action "Foreign LinkIPP" not clear
-    (PbaFir, bit(3)) ? TBDDefaultCallout;
+     # FIXME RTC 23127 Foreign Link shall be removed. It shall be changed to
+     # Chip + Level2 in spread sheet.
+    (PbaFir, bit(3)) ? calloutProcLevel2MedThr1;
 
     /** PBAFIR[4]
      *  PBAFIR_PB_UE_FW

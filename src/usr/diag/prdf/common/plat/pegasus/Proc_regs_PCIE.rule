@@ -163,10 +163,10 @@
     };
 
     ############################################################################
-    # PCIE Chiplet IOPPCIFIR_0
+    # PCIE Chiplet IOPCIFIR_0
     ############################################################################
 
-    register IOPPCIFIR_0
+    register IOPCIFIR_0
     {
         name        "IOP.IOP_X880.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_STATUS_REG";
         scomaddr    0x09011400;
@@ -175,36 +175,36 @@
         capture     group default;
     };
 
-    register IOPPCIFIR_0_MASK
+    register IOPCIFIR_0_MASK
     {
         name        "IOP.IOP_X880.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_MASK_REG";
         scomaddr    0x09011403;
         capture     group default;
     };
 
-    register IOPPCIFIR_0_ACT0
+    register IOPCIFIR_0_ACT0
     {
         name        "IOP.IOP_X880.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION0_REG";
         scomaddr    0x09011406;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("IOPPCIFIR_0");
+        capture     req nonzero("IOPCIFIR_0");
     };
 
-    register IOPPCIFIR_0_ACT1
+    register IOPCIFIR_0_ACT1
     {
         name        "IOP.IOP_X880.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION1_REG";
         scomaddr    0x09011407;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("IOPPCIFIR_0");
+        capture     req nonzero("IOPCIFIR_0");
     };
 
     ############################################################################
-    # PCIE Chiplet IOPPCIFIR_1
+    # PCIE Chiplet IOPCIFIR_1
     ############################################################################
 
-    register IOPPCIFIR_1
+    register IOPCIFIR_1
     {
         name        "IOP.IOP_X881.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_STATUS_REG";
         scomaddr    0x09011840;
@@ -213,28 +213,28 @@
         capture     group default;
     };
 
-    register IOPPCIFIR_1_MASK
+    register IOPCIFIR_1_MASK
     {
         name        "IOP.IOP_X881.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_MASK_REG";
         scomaddr    0x09011843;
         capture     group default;
     };
 
-    register IOPPCIFIR_1_ACT0
+    register IOPCIFIR_1_ACT0
     {
         name        "IOP.IOP_X881.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION0_REG";
         scomaddr    0x09011846;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("IOPPCIFIR_1");
+        capture     req nonzero("IOPCIFIR_1");
     };
 
-    register IOPPCIFIR_1_ACT1
+    register IOPCIFIR_1_ACT1
     {
         name        "IOP.IOP_X881.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION1_REG";
         scomaddr    0x09011847;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("IOPPCIFIR_1");
+        capture     req nonzero("IOPCIFIR_1");
     };
 

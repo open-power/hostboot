@@ -638,52 +638,58 @@ group gPbamFir filter singlebit
     /** PBAMFIR[0]
      *  INVALID_TRANSFER_SIZE
      */
-    (PbamFir, bit(0)) ? TBDDefaultCallout;
+    (PbamFir, bit(0)) ? SelfHighThr1;
 
     /** PBAMFIR[1]
      *  INVALID_COMMAND
      */
-    (PbamFir, bit(1)) ? TBDDefaultCallout;
+    (PbamFir, bit(1)) ? SelfHighThr1;
 
     /** PBAMFIR[2]
      *  INVALID_ADDRESS_ALIGNMENT
      */
-    (PbamFir, bit(2)) ? TBDDefaultCallout;
+    (PbamFir, bit(2)) ? SelfHighThr1;
 
     /** PBAMFIR[3]
      *  OPB_ERROR
      */
-    (PbamFir, bit(3)) ? TBDDefaultCallout;
+    (PbamFir, bit(3)) ? SelfHighThr1;
 
     /** PBAMFIR[4]
      *  OPB_TIMEOUT
      */
-    (PbamFir, bit(4)) ? TBDDefaultCallout;
+    (PbamFir, bit(4)) ? SelfHighThr1;
 
     /** PBAMFIR[5]
      *  OPB_MASTER_HANG_TIMEOUT
      */
-    (PbamFir, bit(5)) ? TBDDefaultCallout;
+    (PbamFir, bit(5)) ? SelfHighThr1;
 
     /** PBAMFIR[6]
      *  CMD_BUFFER_PAR_ERR
      */
-    (PbamFir, bit(6)) ? TBDDefaultCallout;
+    (PbamFir, bit(6)) ? SelfHighThr1;
 
     /** PBAMFIR[7]
      *  DAT_BUFFER_PAR_ERR
      */
-    (PbamFir, bit(7)) ? TBDDefaultCallout;
+    (PbamFir, bit(7)) ? SelfHighThr1;
 
-    /** PBAMFIR[10]
-     *  FIR_PARITY_ERR2
+    /** PBAMFIR[8]
+     *  RETURNQ_ERROR
      */
-    (PbamFir, bit(10)) ? TBDDefaultCallout;
+    (PbamFir, bit(8)) ? defaultMaskedError;
 
-    /** PBAMFIR[11]
+    /** PBAMFIR[9]
+     *  RESERVED
+     */
+    (PbamFir, bit(9)) ? defaultMaskedError;
+
+    /** PBAMFIR[10|11]
      *  FIR_PARITY_ERR
      */
-    (PbamFir, bit(11)) ? TBDDefaultCallout;
+    (PbamFir, bit(10|11)) ? defaultMaskedError;
+
 };
 
 ################################################################################

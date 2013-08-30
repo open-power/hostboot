@@ -51,7 +51,7 @@ group gPcieChipletFir filter singlebit
     (PcieChipletFir, bit(8)) ? analyze(gPbfFir);
 
     /** PCIE_CHIPLET_FIR[9|10]
-     *  Attention from IOPPCIFIR (0-1)
+     *  Attention from IOPCIFIR (0-1)
      */
     (PcieChipletFir, bit(9|10)) ? analyze(gIopPciFir);
 };
@@ -135,6 +135,8 @@ group gPcieLFir filter singlebit
 ################################################################################
 # PCIE Chiplet PBFFIR
 ################################################################################
+# based on p8dd1_mss_FFDC_59.xls
+################################################################################
 
 rule PbfFir
 {
@@ -142,399 +144,434 @@ rule PbfFir
     RECOVERABLE: PBFFIR & ~PBFFIR_MASK & ~PBFFIR_ACT0 &  PBFFIR_ACT1;
     SPECIAL:     PBFFIR & ~PBFFIR_MASK &  PBFFIR_ACT0 & ~PBFFIR_ACT1;
 };
-
+# Foreign Link and similar entries in MRU List shall be removed. Plan is to
+# replace these with Chip + Level2. So bit 7,8,28,29,60,61 have action different
+# from what is specified in RAS spread sheet.
 group gPbfFir filter singlebit
 {
     /** PBFFIR[0|1|2|3]
      *  F0_MAILBOX_WRITTEN
      */
-    (PbfFir, bit(0|1|2|3)) ? TBDDefaultCallout;
+    (PbfFir, bit(0|1|2|3)) ? defaultMaskedError;
 
     /** PBFFIR[4]
      *  F0_RX_DETECT
      */
-    (PbfFir, bit(4)) ? TBDDefaultCallout;
+    (PbfFir, bit(4)) ? defaultMaskedError;
 
     /** PBFFIR[5]
      *  F0_LINK_TRAINING_DONE
      */
-    (PbfFir, bit(5)) ? TBDDefaultCallout;
+    (PbfFir, bit(5)) ? defaultMaskedError;
 
     /** PBFFIR[6]
      *  F0LINK_TRAINED
      */
-    (PbfFir, bit(6)) ? TBDDefaultCallout;
+    (PbfFir, bit(6)) ? defaultMaskedError;
 
     /** PBFFIR[7]
      *  F0LINK_FIR_ERR
      */
-    (PbfFir, bit(7)) ? TBDDefaultCallout;
+    (PbfFir, bit(7)) ? calloutProcLevel2MedThr1;
 
     /** PBFFIR[8]
      *  F0LINK_FMR_PSR_OBS_ERR
      */
-    (PbfFir, bit(8)) ? TBDDefaultCallout;
+    (PbfFir, bit(8)) ? calloutProcLevel2MedThr1;
 
     /** PBFFIR[9]
      *  F0LINK_FMR_COR_ERR
      */
-    (PbfFir, bit(9)) ? TBDDefaultCallout;
+    (PbfFir, bit(9)) ? SelfHighThr32PerDay;
 
     /** PBFFIR[10]
      *  F0LINK_FMR_SUE_ERR
      */
-    (PbfFir, bit(10)) ? TBDDefaultCallout;
+    (PbfFir, bit(10)) ? defaultMaskedError;
 
     /** PBFFIR[11]
      *  F0LINK_FMR_UNC_ERR
      */
-    (PbfFir, bit(11)) ? TBDDefaultCallout;
+    (PbfFir, bit(11)) ? calloutProcHighThr1SUE;
 
     /** PBFFIR[12]
      *  F0_EQ_FAILED
      */
-    (PbfFir, bit(12)) ? TBDDefaultCallout;
+    (PbfFir, bit(12)) ? defaultMaskedError;
 
     /** PBFFIR[13]
      *  F0_REPLAY_THRESHOLD
      */
-    (PbfFir, bit(13)) ? TBDDefaultCallout;
+    (PbfFir, bit(13)) ? SelfHighThr1;
 
     /** PBFFIR[14]
      *  F0_CRC_ERROR
      */
-    (PbfFir, bit(14)) ? TBDDefaultCallout;
+    (PbfFir, bit(14)) ? SelfHighThr1;
 
     /** PBFFIR[15]
      *  F0_LOST_PACKET
      */
-    (PbfFir, bit(15)) ? TBDDefaultCallout;
+    (PbfFir, bit(15)) ? SelfHighThr1;
 
     /** PBFFIR[16]
      *  F0_NAK_RECEIVED
      */
-    (PbfFir, bit(16)) ? TBDDefaultCallout;
+    (PbfFir, bit(16)) ? SelfHighThr1;
 
     /** PBFFIR[17]
      *  F0_REPLAY_TIMER_ERROR
      */
-    (PbfFir, bit(17)) ? TBDDefaultCallout;
+    (PbfFir, bit(17)) ? SelfHighThr1;
 
     /** PBFFIR[18]
      *  F0_RETRAIN_THRESHOLD
      */
-    (PbfFir, bit(18)) ? TBDDefaultCallout;
+    (PbfFir, bit(18)) ? defaultMaskedError;
 
     /** PBFFIR[19]
      *  F0_REPLAY_NUM_RETRAIN
      */
-    (PbfFir, bit(19)) ? TBDDefaultCallout;
+    (PbfFir, bit(19)) ? SelfHighThr1;
 
     /** PBFFIR[20]
      *  F0_RX_ERROR
      */
-    (PbfFir, bit(20)) ? TBDDefaultCallout;
+    (PbfFir, bit(20)) ? SelfHighThr1;
 
     /** PBFFIR[21]
      *  F0_DESKEW_ERROR
      */
-    (PbfFir, bit(21)) ? TBDDefaultCallout;
+    (PbfFir, bit(21)) ? SelfHighThr1;
 
     /** PBFFIR[22]
      *  F0_FRAMING_ERROR
      */
-    (PbfFir, bit(22)) ? TBDDefaultCallout;
+    (PbfFir, bit(22)) ? SelfHighThr1;
 
     /** PBFFIR[23]
      *  F0_OS_RECEIVED
      */
-    (PbfFir, bit(23)) ? TBDDefaultCallout;
+    (PbfFir, bit(23)) ? SelfHighThr1;
 
     /** PBFFIR[24]
      *  F0_ECC_CE_ERR
      */
-    (PbfFir, bit(24)) ? TBDDefaultCallout;
+    (PbfFir, bit(24)) ? SelfHighThr32PerDay;
 
     /** PBFFIR[25]
      *  F0_ECC_UE_ERR
      */
-    (PbfFir, bit(25)) ? TBDDefaultCallout;
+    (PbfFir, bit(25)) ? SelfHighThr1;
 
     /** PBFFIR[26]
      *  F0_RETRAIN_ERR
      */
-    (PbfFir, bit(26)) ? TBDDefaultCallout;
+    (PbfFir, bit(26)) ? defaultMaskedError;
 
     /** PBFFIR[27]
      *  F0_TRAINING_ERR
      */
-    (PbfFir, bit(27)) ? TBDDefaultCallout;
+    (PbfFir, bit(27)) ? defaultMaskedError;
 
     /** PBFFIR[28]
      *  F0_UNRECOV_ERR
      */
-    (PbfFir, bit(28)) ? TBDDefaultCallout;
+    (PbfFir, bit(28)) ? calloutProcLevel2MedThr1;
 
     /** PBFFIR[29]
      *  F0_INTERNAL_ERR
      */
-    (PbfFir, bit(29)) ? TBDDefaultCallout;
+    (PbfFir, bit(29)) ? calloutProcLevel2MedThr1;
 
-    /** PBFFIR[32|33|34|35]
+    /** PBFFIR[30|31]
+     *  FIR_SPARE
+     */
+    (PbfFir, bit(30|31)) ? defaultMaskedError;
+
+    /** PBFFIR[32:35]
      *  F1_MAILBOX_WRITTEN
      */
-    (PbfFir, bit(32|33|34|35)) ? TBDDefaultCallout;
+    (PbfFir, bit(32|33|34|35)) ? defaultMaskedError;
 
     /** PBFFIR[36]
      *  F1_RX_DETECT
      */
-    (PbfFir, bit(36)) ? TBDDefaultCallout;
+    (PbfFir, bit(36)) ? defaultMaskedError;
 
     /** PBFFIR[37]
      *  F1_LINK_TRAINING_DONE
      */
-    (PbfFir, bit(37)) ? TBDDefaultCallout;
+    (PbfFir, bit(37)) ? defaultMaskedError;
 
     /** PBFFIR[38]
      *  F1LINK_TRAINED
      */
-    (PbfFir, bit(38)) ? TBDDefaultCallout;
+    (PbfFir, bit(38)) ? defaultMaskedError;
 
     /** PBFFIR[39]
      *  F1LINK_FIR_ERR
      */
-    (PbfFir, bit(39)) ? TBDDefaultCallout;
+    (PbfFir, bit(39)) ? calloutProcLevel2MedThr1;
 
     /** PBFFIR[40]
      *  F1LINK_FMR_PSR_OBS_ERR
      */
-    (PbfFir, bit(40)) ? TBDDefaultCallout;
+    (PbfFir, bit(40)) ? calloutProcLevel2MedThr1;
 
     /** PBFFIR[41]
      *  F1LINK_FMR_COR_ERR
      */
-    (PbfFir, bit(41)) ? TBDDefaultCallout;
+    (PbfFir, bit(41)) ? SelfHighThr32PerDay;
 
     /** PBFFIR[42]
      *  F1LINK_FMR_SUE_ERR
      */
-    (PbfFir, bit(42)) ? TBDDefaultCallout;
+    (PbfFir, bit(42)) ? defaultMaskedError;
 
     /** PBFFIR[43]
      *  F1LINK_FMR_UNC_ERR
      */
-    (PbfFir, bit(43)) ? TBDDefaultCallout;
+    (PbfFir, bit(43)) ? calloutProcHighThr1SUE;
 
     /** PBFFIR[44]
      *  F1_EQ_FAILED
      */
-    (PbfFir, bit(44)) ? TBDDefaultCallout;
+    (PbfFir, bit(44)) ? defaultMaskedError;
 
     /** PBFFIR[45]
      *  F1_REPLAY_THRESHOLD
      */
-    (PbfFir, bit(45)) ? TBDDefaultCallout;
+    (PbfFir, bit(45)) ? SelfHighThr1;
 
     /** PBFFIR[46]
      *  F1_CRC_ERROR
      */
-    (PbfFir, bit(46)) ? TBDDefaultCallout;
+    (PbfFir, bit(46)) ? SelfHighThr1;
 
     /** PBFFIR[47]
      *  F1_LOST_PACKET
      */
-    (PbfFir, bit(47)) ? TBDDefaultCallout;
+    (PbfFir, bit(47)) ? SelfHighThr1;
 
     /** PBFFIR[48]
      *  F1_NAK_RECEIVED
      */
-    (PbfFir, bit(48)) ? TBDDefaultCallout;
+    (PbfFir, bit(48)) ? SelfHighThr1;
 
     /** PBFFIR[49]
      *  F1_REPLAY_TIMER_ERROR
      */
-    (PbfFir, bit(49)) ? TBDDefaultCallout;
+    (PbfFir, bit(49)) ? SelfHighThr1;
 
     /** PBFFIR[50]
      *  F1_RETRAIN_THRESHOLD
      */
-    (PbfFir, bit(50)) ? TBDDefaultCallout;
+    (PbfFir, bit(50)) ? defaultMaskedError;
 
     /** PBFFIR[51]
      *  F1_REPLAY_NUM_RETRAIN
      */
-    (PbfFir, bit(51)) ? TBDDefaultCallout;
+    (PbfFir, bit(51)) ? SelfHighThr1;
 
     /** PBFFIR[52]
      *  F1_RX_ERROR
      */
-    (PbfFir, bit(52)) ? TBDDefaultCallout;
+    (PbfFir, bit(52)) ? SelfHighThr1;
 
     /** PBFFIR[53]
      *  F1_DESKEW_ERROR
      */
-    (PbfFir, bit(53)) ? TBDDefaultCallout;
+    (PbfFir, bit(53)) ? SelfHighThr1;
 
     /** PBFFIR[54]
      *  F1_FRAMING_ERROR
      */
-    (PbfFir, bit(54)) ? TBDDefaultCallout;
+    (PbfFir, bit(54)) ? SelfHighThr1;
 
     /** PBFFIR[55]
      *  F1_OS_RECEIVED
      */
-    (PbfFir, bit(55)) ? TBDDefaultCallout;
+    (PbfFir, bit(55)) ? SelfHighThr1;
 
     /** PBFFIR[56]
      *  F1_ECC_CE_ERR
      */
-    (PbfFir, bit(56)) ? TBDDefaultCallout;
+    (PbfFir, bit(56)) ? SelfHighThr32PerDay;
 
     /** PBFFIR[57]
      *  F1_ECC_UE_ERR
      */
-    (PbfFir, bit(57)) ? TBDDefaultCallout;
+    (PbfFir, bit(57)) ? SelfHighThr1;
 
     /** PBFFIR[58]
      *  F1_RETRAIN_ERR
      */
-    (PbfFir, bit(58)) ? TBDDefaultCallout;
+    (PbfFir, bit(58)) ? defaultMaskedError;
 
     /** PBFFIR[59]
      *  F1_TRAINING_ERR
      */
-    (PbfFir, bit(59)) ? TBDDefaultCallout;
+    (PbfFir, bit(59)) ? defaultMaskedError;
 
     /** PBFFIR[60]
      *  F1_UNRECOV_ERR
      */
-    (PbfFir, bit(60)) ? TBDDefaultCallout;
+    (PbfFir, bit(60)) ? calloutProcLevel2MedThr1;
 
     /** PBFFIR[61]
      *  F1_INTERNAL_ERR
      */
-    (PbfFir, bit(61)) ? TBDDefaultCallout;
+    (PbfFir, bit(61)) ? calloutProcLevel2MedThr1;
+
+    /** PBFFIR[62|63]
+     *  F1_INTERNAL_ERR
+     */
+    (PbfFir, bit(62|63)) ? defaultMaskedError;
+
 };
 
 ################################################################################
-# PCIE Chiplet IOPPCIFIRs
+# PCIE Chiplet IOPCIFIRs
 ################################################################################
 
 # TODO - All these FIRs should have the same bit definition. Idealy, we will
 #        only want to have one copy of the bit definition. Unfortuately, the
 #        rule code parser does not have the support for something like this.
 #        Maybe we can add this as a later feature.
+################################################################################
+# based on p8dd1_mss_FFDC_59.xls
+################################################################################
 
 rule IopPciFir_0
 {
   CHECK_STOP:
-    IOPPCIFIR_0 & ~IOPPCIFIR_0_MASK & ~IOPPCIFIR_0_ACT0 & ~IOPPCIFIR_0_ACT1;
+    IOPCIFIR_0 & ~IOPCIFIR_0_MASK & ~IOPCIFIR_0_ACT0 & ~IOPCIFIR_0_ACT1;
   RECOVERABLE:
-    IOPPCIFIR_0 & ~IOPPCIFIR_0_MASK & ~IOPPCIFIR_0_ACT0 &  IOPPCIFIR_0_ACT1;
+    IOPCIFIR_0 & ~IOPCIFIR_0_MASK & ~IOPCIFIR_0_ACT0 &  IOPCIFIR_0_ACT1;
 };
 
 rule IopPciFir_1
 {
   CHECK_STOP:
-    IOPPCIFIR_1 & ~IOPPCIFIR_1_MASK & ~IOPPCIFIR_1_ACT0 & ~IOPPCIFIR_1_ACT1;
+    IOPCIFIR_1 & ~IOPCIFIR_1_MASK & ~IOPCIFIR_1_ACT0 & ~IOPCIFIR_1_ACT1;
   RECOVERABLE:
-    IOPPCIFIR_1 & ~IOPPCIFIR_1_MASK & ~IOPPCIFIR_1_ACT0 &  IOPPCIFIR_1_ACT1;
+    IOPCIFIR_1 & ~IOPCIFIR_1_MASK & ~IOPCIFIR_1_ACT0 &  IOPCIFIR_1_ACT1;
 };
 
 group gIopPciFir filter singlebit
 {
-    /** IOPPCIFIR_0[0]
+    /** IOPCIFIR_0[0]
      * FIR_STATUS_REG_G2_PLL_CCERR_STATUS
      */
-    (IopPciFir_0, bit(0)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(0)) ? calloutPHB0Thr1;
 
-    /** IOPPCIFIR_1[0]
+    /** IOPCIFIR_1[0]
      * FIR_STATUS_REG_G2_PLL_CCERR_STATUS
      */
-    (IopPciFir_1, bit(0)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(0)) ? calloutPHB1Thr1;
 
-    /** IOPPCIFIR_0[1]
+    /** IOPCIFIR_0[1]
      *  FIR_STATUS_REG_G3_PLL_CCERR_STATUS
      */
-    (IopPciFir_0, bit(1)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(1)) ? calloutPHB0Thr1;
 
-    /** IOPPCIFIR_1[1]
+    /** IOPCIFIR_1[1]
      *  FIR_STATUS_REG_G3_PLL_CCERR_STATUS
      */
-    (IopPciFir_1, bit(1)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(1)) ? calloutPHB1Thr1;
 
-    /** IOPPCIFIR_0[2]
+    /** IOPCIFIR_0[2]
      *  FIR_STATUS_REG_TX_A_ERR_STATUS
      */
-    (IopPciFir_0, bit(2)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(2)) ? calloutPHB0Thr1;
 
-    /** IOPPCIFIR_1[2]
+    /** IOPCIFIR_1[2]
      *  FIR_STATUS_REG_TX_A_ERR_STATUS
      */
-    (IopPciFir_1, bit(2)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(2)) ? calloutPHB1Thr1;
 
-    /** IOPPCIFIR_0[3]
+    /** IOPCIFIR_0[3]
      *  FIR_STATUS_REG_TX_B_ERR_STATUS
      */
-    (IopPciFir_0, bit(3)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(3)) ? calloutPHB0Thr1;
 
-    /** IOPPCIFIR_1[3]
+    /** IOPCIFIR_1[3]
      *  FIR_STATUS_REG_TX_B_ERR_STATUS
      */
-    (IopPciFir_1, bit(3)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(3)) ? calloutPHB1Thr1;
 
-    /** IOPPCIFIR_0[4]
+    /** IOPCIFIR_0[4]
      *  FIR_STATUS_REG_RX_A_ERR_STATUS
      */
-    (IopPciFir_0, bit(4)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(4)) ? calloutPHB0Thr1;
 
-    /** IOPPCIFIR_1[4]
+    /** IOPCIFIR_1[4]
      *  FIR_STATUS_REG_RX_A_ERR_STATUS
      */
-    (IopPciFir_1, bit(4)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(4)) ? calloutPHB1Thr1;
 
-    /** IOPPCIFIR_0[5]
+    /** IOPCIFIR_0[5]
      *  FIR_STATUS_REG_RX_B_ERR_STATUS
      */
-    (IopPciFir_0, bit(5)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(5)) ? calloutPHB0Thr1;
 
-    /** IOPPCIFIR_1[5]
+    /** IOPCIFIR_1[5]
      *  FIR_STATUS_REG_RX_B_ERR_STATUS
      */
-    (IopPciFir_1, bit(5)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(5)) ? calloutPHB1Thr1;
 
-    /** IOPPCIFIR_0[6]
+    /** IOPCIFIR_0[6]
      *  FIR_STATUS_REG_ZCAL_B_ERR_STATUS
      */
-    (IopPciFir_0, bit(6)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(6)) ? calloutPHB0Thr1;
 
-    /** IOPPCIFIR_1[6]
+    /** IOPCIFIR_1[6]
      *  FIR_STATUS_REG_ZCAL_B_ERR_STATUS
      */
-    (IopPciFir_1, bit(6)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(6)) ? calloutPHB1Thr1;
 
-    /** IOPPCIFIR_0[7]
+    /** IOPCIFIR_0[7]
      *  FIR_STATUS_REG_SCOM_FIR_PERR0_STATUS
      */
-    (IopPciFir_0, bit(7)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(7)) ? calloutPHB0Thr1;
 
-    /** IOPPCIFIR_1[7]
+    /** IOPCIFIR_1[7]
      *  FIR_STATUS_REG_SCOM_FIR_PERR0_STATUS
      */
-    (IopPciFir_1, bit(7)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(7)) ? calloutPHB1Thr1;
 
-    /** IOPPCIFIR_0[8]
+    /** IOPCIFIR_0[8]
      *  FIR_STATUS_REG_SCOM_FIR_PERR1_STATUS
      */
-    (IopPciFir_0, bit(8)) ? TBDDefaultCallout;
+    (IopPciFir_0, bit(8)) ? defaultMaskedError;
 
-    /** IOPPCIFIR_1[8]
+    /** IOPCIFIR_1[8]
      *  FIR_STATUS_REG_SCOM_FIR_PERR1_STATUS
      */
-    (IopPciFir_1, bit(8)) ? TBDDefaultCallout;
+    (IopPciFir_1, bit(8)) ? defaultMaskedError;
 };
 
 ################################################################################
 # Actions specific to PCIE chiplet
 ################################################################################
 
+/**Determine relevant PCI endpoints associated with PHB0
+ * and callout it on first instance.
+ */
+actionclass calloutPHB0Thr1
+{
+    #FIXME RTC 23127 Investigation required to determine which PCI endpoint
+    # should be blamed.
+    TBDDefaultCallout;
+};
+
+/**Determine relevant PCI endpoints associated with PHB1
+ * and callout it on first instance.
+ */
+actionclass calloutPHB1Thr1
+{
+    #FIXME RTC 23127 Investigation required to determine which PCI endpoint
+    # should be blamed.
+    TBDDefaultCallout;
+};
