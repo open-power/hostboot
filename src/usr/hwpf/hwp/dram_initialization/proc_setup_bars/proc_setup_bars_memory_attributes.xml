@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_setup_bars_memory_attributes.xml,v 1.9 2013/07/09 16:26:28 bellows Exp $ -->
 <!-- proc_setup_bars_memory_attributes.xml -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -77,6 +78,21 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_PROC_MEM_BASES_ACK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Non-mirrored memory base addresses
+      creator: mss_setup_bars
+      consumer: opt_mem_map
+      Mem opt map uses this for the bases of the non-mirror ranges.
+        (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>8</array>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_PROC_MEM_SIZES</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>Size of non-mirrored memory regions
@@ -87,6 +103,20 @@
         from ATTR_PROC_MEM_BASES value at matching index
         eight independent non-mirrored segments are supported
         (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>8</array>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MEM_SIZES_ACK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Size of non-mirrored memory regions up to a power of 2
+      creator: mss_setup_bars
+      consumer: opt_mem_map
+      Mem opt map uses this to stack mirror ranges.  The real amount of memory behind the mirror group maybe less than the number reported here if there are memory holes
     </description>
     <valueType>uint64</valueType>
     <array>8</array>
@@ -126,6 +156,21 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_PROC_MIRROR_BASES_ACK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Mirrored memory base addresses
+      creator: mss_setup_bars
+      consumer: consumer: opt_mem_map
+      Mem opt map uses this for the bases of the mirror ranges.  
+        (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>4</array>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_PROC_MIRROR_SIZES</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>Size of mirrored memory region
@@ -136,6 +181,20 @@
         from ATTR_PROC_MIRROR_BASES value at matching index
         four independent mirrored segments are supported
         (max number based on Venice design)
+    </description>
+    <valueType>uint64</valueType>
+    <array>4</array>
+    <writeable/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MIRROR_SIZES_ACK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Size of mirrored memory region up to a power of 2
+      creator: mss_setup_bars
+      consumer: opt_mem_map
+      Mem opt map uses this to stack mirror ranges.  The real amount of memory behind the mirror group maybe less than the number reported here if there are memory holes
     </description>
     <valueType>uint64</valueType>
     <array>4</array>

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.H,v 1.6 2013/05/23 11:19:17 gpaulraj Exp $
+// $Id: mss_eff_grouping.H,v 1.7 2013/08/12 16:29:18 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -41,6 +41,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.7    | gpaulraj | 08/12/13| moved constants to C file
 //  1.6    | gpaulraj | 05/22/13| added constants for debugging purpose
 //  1.5    | bellows  | 09/25/12| review updates made
 //  1.4    | bellows  | 08/31/12| object updated, call updated
@@ -61,16 +62,16 @@
 //  Constant definitions
 //------------------------------------------------------------------------------
 
-const uint8_t MCS_SIZE         = 0;
-const uint8_t MCS_IN_GROUP     = 1;
-const uint8_t GROUP_SIZE       = 2;
-const uint8_t BASE_ADDR        = 3;
-const uint8_t MEMBERS_START_ID = 4;
-const uint8_t MEMBERS_END      = 11;
-const uint8_t ALT_VALID        = 12;
-const uint8_t ALT_SIZE         = 13;
-const uint8_t ALT_BASE_ADDR    = 14;
-const uint8_t LARGEST_MBA_SIZE = 15;
+//const uint8_t MCS_SIZE         = 0;
+//const uint8_t MCS_IN_GROUP     = 1;
+//const uint8_t GROUP_SIZE       = 2;
+///const uint8_t BASE_ADDR        = 3;
+//const uint8_t MEMBERS_START_ID = 4;
+//const uint8_t MEMBERS_END      = 11;
+//const uint8_t ALT_VALID        = 12;
+//const uint8_t ALT_SIZE         = 13;
+//const uint8_t ALT_BASE_ADDR    = 14;
+//const uint8_t LARGEST_MBA_SIZE = 15;
 
 //------------------------------------------------------------------------------
 // Class declaration

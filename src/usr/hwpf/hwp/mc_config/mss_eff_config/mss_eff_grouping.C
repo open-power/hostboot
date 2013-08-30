@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.25 2013/05/23 11:18:45 gpaulraj Exp $
+// $Id: mss_eff_grouping.C,v 1.27 2013/08/13 09:52:18 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.27   | gpaulraj | 08-13-13| Fixed alternate BAR settings for Mirror
+//  1.26   | gpaulraj | 08-12-13| added mirror policy and HTM/OCC Bar setup
+//  1.25   | gpaulraj | 05-23-13| Fixed FW review feedback
 //  1.24   | bellows  | 04-09-13| Updates that really allow checkboard and all group sizes.  Before, group size of 1 was all that was possible
 //  1.23   | bellows  | 03-26-13| Allow for checkboard mode with more than one mcs per group
 //  1.22   | bellows  | 03-21-13| Error Logging support
@@ -112,6 +115,17 @@ extern "C" {
 // MSS EFF GROUPING Variables..........
 //----------------------------------------------------
 
+const uint8_t MCS_SIZE         = 0;
+const uint8_t MCS_IN_GROUP     = 1;
+const uint8_t GROUP_SIZE       = 2;
+const uint8_t BASE_ADDR        = 3;
+const uint8_t MEMBERS_START_ID = 4;
+const uint8_t MEMBERS_END      = 11;
+const uint8_t ALT_VALID        = 12;
+const uint8_t ALT_SIZE         = 13;
+const uint8_t ALT_BASE_ADDR    = 14;
+const uint8_t LARGEST_MBA_SIZE = 15;
+
 
 
   ReturnCode mss_eff_grouping(
@@ -125,6 +139,10 @@ extern "C" {
     //uint32_t pos=0;
     uint64_t mss_base_address;
     uint64_t mirror_base;
+    uint64_t occ_sandbox_base;
+    uint64_t occ_sandbox_size;
+    uint64_t htm_bar_base;
+    uint64_t htm_bar_size;
         //uint32_t MBA_size[8][2]={{0}};
         //uint32_t MCS_size[8]={0};
     uint32_t l_unit_pos =0;
@@ -229,8 +247,7 @@ extern "C" {
         uint8_t pos1=0;
         uint8_t pos2=0;
         uint8_t allowed=0;
-
-
+        uint8_t selective_mode=2;
 
         for(uint8_t i=0;i<6;i++)
           config4_pos[i]=0;
@@ -239,6 +256,8 @@ extern "C" {
 	if(!rc.ok()) {FAPI_ERR("MSS_INTERLEAVE_ENABLE is not available"); return rc; }
 	rc = FAPI_ATTR_GET(ATTR_ALL_MCS_IN_INTERLEAVING_GROUP, NULL,check_board); // system level attribute
 	if (!rc.ok()) { FAPI_ERR("Error reading ATTR_ALL_MCS_IN_INTERLEAVING_GROUP"); return rc; }
+        rc = FAPI_ATTR_GET(ATTR_MEM_MIRROR_PLACEMENT_POLICY, NULL,selective_mode);
+	if (!rc.ok()) { FAPI_ERR("Error reading ATTR_MEM_MIRROR_PLACEMENT_POLICY"); return rc; }
 
         if(check_board) // this is a 1 when interleaving is required to be on  Only acceptable > 1MCS per group
         {
@@ -280,9 +299,6 @@ extern "C" {
                if(!(groups_allowed & 0x04)){FAPI_INF("4MCS/GROUP");}
                if(!(groups_allowed & 0x08)){FAPI_INF("8MCS/GROUP");}
                if((groups_allowed & 0x02) || (groups_allowed & 0x04)||(groups_allowed & 0x08)){FAPI_INF("FABRIC IS IN CHECKER BOARD MODE BUT YOU ARE ASKING FOR MORE THAN 1MCS/GROUP. YOU ARE NOT GOING TO HAVE PERFOMRANCE YOU COULD GET IF YOU WERE IN CHECKERBOARD MODE");}
-
-
-
 
             }
             else
@@ -547,7 +563,7 @@ extern "C" {
 
     uint64_t total_size_non_mirr =0;
     for(pos=0;pos<=gp_pos;pos++)
-      {
+    {
         eff_grouping_data.groupID[pos][GROUP_SIZE] = eff_grouping_data.groupID[pos][MCS_SIZE]*eff_grouping_data.groupID[pos][MCS_IN_GROUP];
         //eff_grouping_data.groupID[pos+8][2]= eff_grouping_data.groupID[pos][2]/2; // group size when mirrored
 
@@ -565,6 +581,7 @@ extern "C" {
             //eff_grouping_data.groupID[pos+8][GROUP_SIZE] = eff_grouping_data.groupID[pos][GROUP_SIZE]/2;  //group size with alternate bars
             //eff_grouping_data.groupID[pos+8][ALT_SIZE] = eff_grouping_data.groupID[pos][ALT_SIZE]/2;
              eff_grouping_data.groupID[pos][ALT_VALID] =1;
+            // eff_grouping_data.groupID[pos+8][ALT_VALID] =1;
         }
 
         total_size_non_mirr += eff_grouping_data.groupID[pos][GROUP_SIZE];
@@ -598,29 +615,51 @@ extern "C" {
         if(eff_grouping_data.groupID[pos][MCS_SIZE]!=0 && eff_grouping_data.groupID[pos][MCS_IN_GROUP]>1 )
         {
           eff_grouping_data.groupID[pos+8][GROUP_SIZE]= eff_grouping_data.groupID[pos][GROUP_SIZE]/2; // group size when mirrored
-
-
           if(eff_grouping_data.groupID[pos][ALT_VALID])
           {
             FAPI_INF("Mirrored group pos %d needs alternate bars defintation group Size %d\n",pos,eff_grouping_data.groupID[pos][GROUP_SIZE]);
             //mirrored group
             eff_grouping_data.groupID[pos+8][GROUP_SIZE] = eff_grouping_data.groupID[pos][GROUP_SIZE]/2;  //group size with alternate bars
             eff_grouping_data.groupID[pos+8][ALT_SIZE] = eff_grouping_data.groupID[pos][ALT_SIZE]/2;
+            eff_grouping_data.groupID[pos+8][ALT_VALID] =1;
 
           }
         }
       }
 
+      if ( selective_mode == 2)
+      {
+	    mss_base_address = 0;
+            rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASE,&i_target,mss_base_address);
+            mss_base_address =   mss_base_address >> 30;
+            if(!rc.ok()) return rc;
 
+            rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASE,&i_target,mirror_base);
+            mirror_base =  mirror_base >> 30;
+            if(!rc.ok()) return rc;
 
-      rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASE,&i_target,mss_base_address);
-      mss_base_address =   mss_base_address >> 30;
-      if(!rc.ok()) return rc;
+            rc = FAPI_ATTR_GET(ATTR_PROC_HTM_BAR_SIZE,&i_target,htm_bar_size);
+            if(!rc.ok()) return rc;
 
-      rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASE,&i_target,mirror_base);
-      mirror_base =   mirror_base >> 30;
+            rc = FAPI_ATTR_GET(ATTR_PROC_OCC_SANDBOX_SIZE,&i_target,occ_sandbox_size);
+            if(!rc.ok()) return rc;
+      }
 
-      if(!rc.ok()) return rc;
+      else{
+            rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASE,&i_target,mss_base_address);
+            mss_base_address =   mss_base_address >> 30;
+            if(!rc.ok()) return rc;
+
+            rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASE,&i_target,mirror_base);
+            mirror_base =  mirror_base >> 30;
+
+            if(!rc.ok()) return rc;
+            rc = FAPI_ATTR_GET(ATTR_PROC_HTM_BAR_SIZE,&i_target,htm_bar_size);
+            if(!rc.ok()) return rc;
+
+            rc = FAPI_ATTR_GET(ATTR_PROC_OCC_SANDBOX_SIZE,&i_target,occ_sandbox_size);
+            if(!rc.ok()) return rc;
+       }
 
       if( mss_base_address > (mirror_base + total_size_non_mirr/2)  || mirror_base > (mss_base_address + total_size_non_mirr))
       {
@@ -650,7 +689,6 @@ extern "C" {
 
                  }
               }
-
               if(eff_grouping_data.groupID[pos][MCS_IN_GROUP]>1 )
               {
                  eff_grouping_data.groupID[pos+8][BASE_ADDR]=mirror_base;
@@ -658,6 +696,7 @@ extern "C" {
                  if(eff_grouping_data.groupID[pos][ALT_VALID])
                   {
                      eff_grouping_data.groupID[pos+8][ALT_BASE_ADDR] = eff_grouping_data.groupID[pos+8][BASE_ADDR]+ eff_grouping_data.groupID[pos+8][GROUP_SIZE]/2; //mirrored base address with alternate bars
+                     eff_grouping_data.groupID[pos+8][ALT_VALID] =1;
                   }
 
                }
@@ -708,10 +747,13 @@ extern "C" {
 
 
       uint64_t mem_bases[8];
+      uint64_t mem_bases_ack[8];
       uint64_t l_memory_sizes[8];
-      //uint64_t mirror_base;
+      uint64_t l_memory_sizes_ack[8];
       uint64_t mirror_bases[4];
+      uint64_t mirror_bases_ack[4];
       uint64_t l_mirror_sizes[4];
+      uint64_t l_mirror_sizes_ack[4];
         //uint32_t temp[8];
       for(uint8_t i=0;i<8;i++)
       {
@@ -749,22 +791,344 @@ extern "C" {
       }
 
   // base addresses for distinct non-mirrored ranges
+
       mem_bases[0]=eff_grouping_data.groupID[0][BASE_ADDR];
-      mem_bases[0] = mem_bases[0] <<30;
       mem_bases[1]=eff_grouping_data.groupID[1][BASE_ADDR];
-      mem_bases[1] =  mem_bases[1] <<30;
       mem_bases[2]=eff_grouping_data.groupID[2][BASE_ADDR];
-      mem_bases[2] =  mem_bases[2] <<30;
       mem_bases[3]=eff_grouping_data.groupID[3][BASE_ADDR];
-      mem_bases[3] =  mem_bases[3] <<30;
       mem_bases[4]=eff_grouping_data.groupID[4][BASE_ADDR];
-      mem_bases[4] =  mem_bases[4] <<30;
       mem_bases[5]=eff_grouping_data.groupID[5][BASE_ADDR];
-      mem_bases[5] =  mem_bases[5] <<30;
       mem_bases[6]=eff_grouping_data.groupID[6][BASE_ADDR];
-      mem_bases[6] =  mem_bases[6] <<30;
       mem_bases[7]=eff_grouping_data.groupID[7][BASE_ADDR];
-      mem_bases[7] =  mem_bases[7] <<30;
+
+      mem_bases_ack[0]=eff_grouping_data.groupID[0][BASE_ADDR];
+      mem_bases_ack[1]=eff_grouping_data.groupID[1][BASE_ADDR];
+      mem_bases_ack[2]=eff_grouping_data.groupID[2][BASE_ADDR];
+      mem_bases_ack[3]=eff_grouping_data.groupID[3][BASE_ADDR];
+      mem_bases_ack[4]=eff_grouping_data.groupID[4][BASE_ADDR];
+      mem_bases_ack[5]=eff_grouping_data.groupID[5][BASE_ADDR];
+      mem_bases_ack[6]=eff_grouping_data.groupID[6][BASE_ADDR];
+      mem_bases_ack[7]=eff_grouping_data.groupID[7][BASE_ADDR];
+
+  if(selective_mode == 2)
+  {
+      l_memory_sizes[0]=eff_grouping_data.groupID[0][GROUP_SIZE]/2;
+      l_memory_sizes[1]=eff_grouping_data.groupID[1][GROUP_SIZE]/2;
+      l_memory_sizes[2]=eff_grouping_data.groupID[2][GROUP_SIZE]/2;
+      l_memory_sizes[3]=eff_grouping_data.groupID[3][GROUP_SIZE]/2;
+      l_memory_sizes[4]=eff_grouping_data.groupID[4][GROUP_SIZE]/2;
+      l_memory_sizes[5]=eff_grouping_data.groupID[5][GROUP_SIZE]/2;
+      l_memory_sizes[6]=eff_grouping_data.groupID[6][GROUP_SIZE]/2;
+      l_memory_sizes[7]=eff_grouping_data.groupID[7][GROUP_SIZE]/2;
+
+  }
+  else
+  {
+        // sizes for distinct non-mirrored ranges
+      l_memory_sizes[0]=eff_grouping_data.groupID[0][MCS_SIZE]* eff_grouping_data.groupID[0][MCS_IN_GROUP];
+      l_memory_sizes[1]=eff_grouping_data.groupID[1][MCS_SIZE]* eff_grouping_data.groupID[1][MCS_IN_GROUP];
+      l_memory_sizes[2]=eff_grouping_data.groupID[2][MCS_SIZE]* eff_grouping_data.groupID[2][MCS_IN_GROUP];
+      l_memory_sizes[3]=eff_grouping_data.groupID[3][MCS_SIZE]* eff_grouping_data.groupID[3][MCS_IN_GROUP];
+      l_memory_sizes[4]=eff_grouping_data.groupID[4][MCS_SIZE]* eff_grouping_data.groupID[4][MCS_IN_GROUP];
+      l_memory_sizes[5]=eff_grouping_data.groupID[5][MCS_SIZE]* eff_grouping_data.groupID[5][MCS_IN_GROUP];
+      l_memory_sizes[6]=eff_grouping_data.groupID[6][MCS_SIZE]* eff_grouping_data.groupID[6][MCS_IN_GROUP];
+      l_memory_sizes[7]=eff_grouping_data.groupID[7][MCS_SIZE]* eff_grouping_data.groupID[7][MCS_IN_GROUP];
+   }
+
+   l_memory_sizes_ack[0]=eff_grouping_data.groupID[0][GROUP_SIZE];
+   l_memory_sizes_ack[1]=eff_grouping_data.groupID[1][GROUP_SIZE];
+   l_memory_sizes_ack[2]=eff_grouping_data.groupID[2][GROUP_SIZE];
+   l_memory_sizes_ack[3]=eff_grouping_data.groupID[3][GROUP_SIZE];
+   l_memory_sizes_ack[4]=eff_grouping_data.groupID[4][GROUP_SIZE];
+   l_memory_sizes_ack[5]=eff_grouping_data.groupID[5][GROUP_SIZE];
+   l_memory_sizes_ack[6]=eff_grouping_data.groupID[6][GROUP_SIZE];
+   l_memory_sizes_ack[7]=eff_grouping_data.groupID[7][GROUP_SIZE];
+
+  // process mirrored ranges
+  //
+  if(selective_mode == 2)
+  {
+      uint8_t groupcount =0;
+      for(i=0;i<8;i++)
+      {
+       if(eff_grouping_data.groupID[i][GROUP_SIZE] > 1) { groupcount++;}
+      }
+      if(groupcount<7)
+      {
+      	mem_bases[groupcount+0] = eff_grouping_data.groupID[8][BASE_ADDR]  + (eff_grouping_data.groupID[8][GROUP_SIZE]/2);
+      	mem_bases[groupcount+1] = eff_grouping_data.groupID[9][BASE_ADDR]  + (eff_grouping_data.groupID[9][GROUP_SIZE]/2);
+      	mem_bases[groupcount+2] = eff_grouping_data.groupID[10][BASE_ADDR] + (eff_grouping_data.groupID[10][GROUP_SIZE]/2);
+      	mem_bases[groupcount+3] = eff_grouping_data.groupID[11][BASE_ADDR] + (eff_grouping_data.groupID[11][GROUP_SIZE]/2);
+      }
+
+      mirror_bases[0] = 0; //grouping_data.groupID[8][BASE_ADDR];
+      mirror_bases[1] = 0; //eff_grouping_data.groupID[9][BASE_ADDR];
+      mirror_bases[2] = 0; //eff_grouping_data.groupID[10][BASE_ADDR];
+      mirror_bases[3] = 0; //eff_grouping_data.groupID[11][BASE_ADDR];
+  }
+  else
+  {
+
+        // base addresses for distinct mirrored ranges
+      mirror_bases[0] = eff_grouping_data.groupID[8][BASE_ADDR];
+      mirror_bases[1] = eff_grouping_data.groupID[9][BASE_ADDR];
+      mirror_bases[2] = eff_grouping_data.groupID[10][BASE_ADDR];
+      mirror_bases[3] = eff_grouping_data.groupID[11][BASE_ADDR];
+   }
+      mirror_bases_ack[0] = eff_grouping_data.groupID[8][BASE_ADDR];
+      mirror_bases_ack[1] = eff_grouping_data.groupID[9][BASE_ADDR];
+      mirror_bases_ack[2] = eff_grouping_data.groupID[10][BASE_ADDR];
+      mirror_bases_ack[3] = eff_grouping_data.groupID[11][BASE_ADDR];
+
+
+   if(selective_mode == 2)
+   {
+      uint8_t groupcount =0;
+      for(i=0;i<8;i++)
+      {
+       if(eff_grouping_data.groupID[i][MCS_IN_GROUP] > 1 ) { groupcount++;}
+      }
+      if(groupcount<7)
+      {
+      	l_memory_sizes[groupcount+0] = eff_grouping_data.groupID[8][GROUP_SIZE]/2;
+      	l_memory_sizes[groupcount+1] = eff_grouping_data.groupID[9][GROUP_SIZE]/2;
+      	l_memory_sizes[groupcount+2] = eff_grouping_data.groupID[10][GROUP_SIZE]/2;
+      	l_memory_sizes[groupcount+3] = eff_grouping_data.groupID[11][GROUP_SIZE]/2;
+      }	
+          l_mirror_sizes[0] =0;
+          l_mirror_sizes[1] =0;
+          l_mirror_sizes[2] =0;
+          l_mirror_sizes[3] =0;
+    }
+    else
+    {
+      // sizes for distinct mirrored ranges
+      for(i=0;i<4;i++)
+      {
+       if(eff_grouping_data.groupID[i][MCS_IN_GROUP] > 1 )
+   	   l_mirror_sizes[i]=   (eff_grouping_data.groupID[i][MCS_SIZE] *eff_grouping_data.groupID[0][MCS_IN_GROUP]) / 2;
+      else
+      {
+             l_mirror_sizes[i] =0;
+        }
+      }
+    }
+      l_mirror_sizes_ack[0]=eff_grouping_data.groupID[8][GROUP_SIZE];
+      l_mirror_sizes_ack[1]=eff_grouping_data.groupID[9][GROUP_SIZE];
+      l_mirror_sizes_ack[2]=eff_grouping_data.groupID[10][GROUP_SIZE];
+      l_mirror_sizes_ack[3]=eff_grouping_data.groupID[11][GROUP_SIZE];
+
+      mem_bases[0] = mem_bases[0] <<30;
+      mem_bases[1] = mem_bases[1] <<30;
+      mem_bases[2] = mem_bases[2] <<30;
+      mem_bases[3] = mem_bases[3] <<30;
+      mem_bases[4] = mem_bases[4] <<30;
+      mem_bases[5] = mem_bases[5] <<30;
+      mem_bases[6] = mem_bases[6] <<30;
+      mem_bases[7] = mem_bases[7] <<30;
+
+
+      mem_bases_ack[0] = mem_bases_ack[0] <<30;
+      mem_bases_ack[1] = mem_bases_ack[1] <<30;
+      mem_bases_ack[2] = mem_bases_ack[2] <<30;
+      mem_bases_ack[3] = mem_bases_ack[3] <<30;
+      mem_bases_ack[4] = mem_bases_ack[4] <<30;
+      mem_bases_ack[5] = mem_bases_ack[5] <<30;
+      mem_bases_ack[6] = mem_bases_ack[6] <<30;
+      mem_bases_ack[7] = mem_bases_ack[7] <<30;
+
+      l_memory_sizes[0] =  l_memory_sizes[0] <<30;
+      l_memory_sizes[1] =  l_memory_sizes[1] <<30;
+      l_memory_sizes[2] =  l_memory_sizes[2] <<30;
+      l_memory_sizes[3] =  l_memory_sizes[3] <<30;
+      l_memory_sizes[4] =  l_memory_sizes[4] <<30;
+      l_memory_sizes[5] =  l_memory_sizes[5] <<30;
+      l_memory_sizes[6] =  l_memory_sizes[6] <<30;
+      l_memory_sizes[7] =  l_memory_sizes[7] <<30;
+
+
+      l_memory_sizes_ack[0] =  l_memory_sizes_ack[0] <<30;
+      l_memory_sizes_ack[1] =  l_memory_sizes_ack[1] <<30;
+      l_memory_sizes_ack[2] =  l_memory_sizes_ack[2] <<30;
+      l_memory_sizes_ack[3] =  l_memory_sizes_ack[3] <<30;
+      l_memory_sizes_ack[4] =  l_memory_sizes_ack[4] <<30;
+      l_memory_sizes_ack[5] =  l_memory_sizes_ack[5] <<30;
+      l_memory_sizes_ack[6] =  l_memory_sizes_ack[6] <<30;
+      l_memory_sizes_ack[7] =  l_memory_sizes_ack[7] <<30;
+
+      mirror_bases[0] = mirror_bases[0]<<30;
+      mirror_bases[1] = mirror_bases[1]<<30;
+      mirror_bases[2] = mirror_bases[2]<<30;
+      mirror_bases[3] = mirror_bases[3]<<30;
+
+
+      mirror_bases_ack[0] = mirror_bases_ack[0]<<30;
+      mirror_bases_ack[1] = mirror_bases_ack[1]<<30;
+      mirror_bases_ack[2] = mirror_bases_ack[2]<<30;
+      mirror_bases_ack[3] = mirror_bases_ack[3]<<30;
+
+      l_mirror_sizes[0] = l_mirror_sizes[0]<<30;
+      l_mirror_sizes[1] = l_mirror_sizes[1]<<30;
+      l_mirror_sizes[2] = l_mirror_sizes[2]<<30;
+      l_mirror_sizes[3] = l_mirror_sizes[3]<<30;
+
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[0]: %016llx", l_mirror_sizes[0]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[1]: %016llx", l_mirror_sizes[1]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[2]: %016llx", l_mirror_sizes[2]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[3]: %016llx", l_mirror_sizes[3]);
+
+      l_mirror_sizes_ack[0] = l_mirror_sizes_ack[0]<<30;
+      l_mirror_sizes_ack[1] = l_mirror_sizes_ack[1]<<30;
+      l_mirror_sizes_ack[2] = l_mirror_sizes_ack[2]<<30;
+      l_mirror_sizes_ack[3] = l_mirror_sizes_ack[3]<<30;
+
+      ReturnCode ungroup_rc;
+      if (selective_mode == 0x02)
+      {
+          if (htm_bar_size != 0 || occ_sandbox_size != 0)
+          {
+              FAPI_ERR("Selective mode does not support the HTM and OCC SANDBOX BARS");
+          //    FAPI_SET_HWP_ERROR(ungroup_rc,RC_OPT_MEMMAP_ALLOC_ERR);
+              break;
+          }
+      }
+      else if(selective_mode == 0x00)
+      {
+          uint64_t total_size = 0;
+          uint8_t memhole =0;
+          for(i=0;i<8;i++)
+          {
+             total_size +=  l_memory_sizes[i];
+             if (eff_grouping_data.groupID[i][ALT_VALID]) {   memhole++;  }
+          }
+          if ((total_size >= (htm_bar_size+occ_sandbox_size)) && ((htm_bar_size+occ_sandbox_size)>0))
+          {
+             uint64_t other_bar_size =0;
+             other_bar_size =  htm_bar_size+occ_sandbox_size ;
+             uint64_t non_mirroring_size = total_size - other_bar_size;
+             uint64_t temp_size = 0;
+             uint8_t done =0;
+             uint8_t j;
+             i=0;
+             while(!done)
+             {
+                 if ((temp_size <= non_mirroring_size) && ( non_mirroring_size <= (temp_size += l_memory_sizes[i++])))
+                 {
+                   done = 1;
+                 }
+             }
+             j =i;
+//             if ( (other_bar_size >  l_memory_sizes[i-1]) && (memhole==0))
+//             {
+//             	l_memory_sizes[i-1] = l_memory_sizes[i-1] - (temp_size - non_mirroring_size);
+//                for(;i<8;i++){  if (l_memory_sizes[i])  l_memory_sizes[i] =0;}
+//             }
+             if (memhole)
+             {
+                if( l_memory_sizes[j-1] < other_bar_size )
+                {
+                   FAPI_ERR(" MEMORY HTM/OCC BAR not possible ");
+                   FAPI_DBG(" TOTAL MEMORY %016llx", l_memory_sizes[j-1]);
+                   break;
+                }
+                 else{ 	l_memory_sizes[i-1] = l_memory_sizes[i-1] - (temp_size - non_mirroring_size);}
+             }
+             else{ 	l_memory_sizes[i-1] = l_memory_sizes[i-1] - (temp_size - non_mirroring_size);  for(;i<8;i++){  if (l_memory_sizes[i])  l_memory_sizes[i] =0;}}
+
+             if( htm_bar_size < occ_sandbox_size)
+             {
+	         occ_sandbox_base = mem_bases[j-1]+l_memory_sizes[j-1];
+                 htm_bar_base =  occ_sandbox_base + occ_sandbox_size;
+             }
+             else
+             {
+             	 htm_bar_base = mem_bases[j-1]+l_memory_sizes[j-1];
+                 occ_sandbox_base =  htm_bar_base + htm_bar_size;
+             }
+
+             FAPI_DBG(" TOTAL MEMORY %016llx", total_size);
+             FAPI_DBG("  MIRRORING SIZE: %016llx & %d", l_mirror_sizes[j-1], j);
+             FAPI_DBG("  Requitred MIRRORING SIZE: %016llx ", non_mirroring_size);
+             FAPI_DBG("  HTM_BASE : %016llx", htm_bar_base) ;
+             FAPI_DBG("  OCC_BASE : %016llx", occ_sandbox_base);
+
+          }
+          else if ((total_size >= (htm_bar_size+occ_sandbox_size)) && ((htm_bar_size+occ_sandbox_size) ==0))  {}
+          else
+          {
+
+              FAPI_ERR(" Required memory space for the HTM and OCC SANDBOX BARS is not available ");
+              // FAPI_SET_HWP_ERROR((ungroup_rc,RC_OPT_MEMMAP_ALLOC_ERR);
+              break;
+          }
+      }
+      else if(selective_mode == 0x01)
+      {
+          uint64_t total_size = 0;
+          uint8_t memhole =0;
+          uint8_t j=0;
+          for(i=0;i<4;i++)
+          {
+             total_size +=  l_mirror_sizes[i];
+             if (eff_grouping_data.groupID[i][ALT_VALID]) {   memhole++;  }
+          }
+          //if (total_size >= (htm_bar_size+occ_sandbox_size))
+          if ((total_size >= (htm_bar_size+occ_sandbox_size)) && ((htm_bar_size+occ_sandbox_size)>0))
+          {
+             uint64_t other_bar_size =0;
+             other_bar_size =  htm_bar_size+occ_sandbox_size ;
+             uint64_t non_mirroring_size = total_size - other_bar_size;
+             uint64_t temp_size = 0;
+             uint8_t done =0;
+             i=0;
+             while(!done)
+             {
+                 if ((temp_size <= non_mirroring_size) && ( non_mirroring_size <= (temp_size += l_mirror_sizes[i++])))
+                 {
+                   done = 1;
+                 }
+             }
+             j = i;
+//             if ( (other_bar_size >  l_mirror_sizes[i-1]) && (memhole==0))
+//             {
+//             	l_mirror_sizes[i-1] = l_mirror_sizes[i-1] - (temp_size - non_mirroring_size);
+///                for(;i<4;i++){  if (l_mirror_sizes[i])  l_mirror_sizes[i] =0;}
+//             }
+             if (memhole)
+             {
+                if( l_mirror_sizes[j-1] < other_bar_size )
+                {
+                   FAPI_ERR(" MEMORY HTM/OCC BAR not possible ");
+                   FAPI_DBG(" TOTAL MEMORY %016llx", l_memory_sizes[j-1]);
+                   break;
+                }
+                else{ 	l_mirror_sizes[i-1] = l_mirror_sizes[i-1] - (temp_size - non_mirroring_size);}
+             }
+             else{ 	l_mirror_sizes[i-1] = l_mirror_sizes[i-1] - (temp_size - non_mirroring_size); for(;i<8;i++){  if (l_memory_sizes[i])  l_memory_sizes[i] =0;}}
+             if( htm_bar_size < occ_sandbox_size)
+             {
+	        occ_sandbox_base = mirror_bases[j-1]+ l_mirror_sizes[j-1];
+                htm_bar_size =  occ_sandbox_base + occ_sandbox_size;
+             }
+             else
+             {
+                 htm_bar_base = mirror_bases[j-1]+ l_mirror_sizes[j-1];
+                 occ_sandbox_base =  htm_bar_base + htm_bar_size;
+             }
+             FAPI_DBG(" TOTAL MEMORY %016llx", total_size);
+             FAPI_DBG("  MIRRORING SIZE: %016llx & %d", l_mirror_sizes[j-1], j);
+             FAPI_DBG("  Requitred MIRRORING SIZE: %016llx ", non_mirroring_size);
+             FAPI_DBG("  HTM_BASE : %016llx", htm_bar_base) ;
+             FAPI_DBG("  OCC_BASE : %016llx", occ_sandbox_base);
+          }
+          else if ((total_size >= (htm_bar_size+occ_sandbox_size)) && ((htm_bar_size+occ_sandbox_size) ==0))  {}
+          else
+          {
+              FAPI_ERR(" Required memory space for the HTM and OCC SANDBOX BARS is not available ");
+            //  FAPI_SET_HWP_ERROR((ungroup_rc,RC_OPT_MEMMAP_ALLOC_ERR);
+              break;
+          }
+      }
 
       FAPI_DBG("  ATTR_PROC_MEM_BASES[0]: %016llx", mem_bases[0]);
       FAPI_DBG("  ATTR_PROC_MEM_BASES[1]: %016llx", mem_bases[1]);
@@ -782,23 +1146,23 @@ extern "C" {
             break;
       }
 
-        // sizes for distinct non-mirrored ranges
-      l_memory_sizes[0]=eff_grouping_data.groupID[0][GROUP_SIZE];
-      l_memory_sizes[0] =  l_memory_sizes[0] <<30;
-      l_memory_sizes[1]=eff_grouping_data.groupID[1][GROUP_SIZE];
-      l_memory_sizes[1] =  l_memory_sizes[1] <<30;
-      l_memory_sizes[2]=eff_grouping_data.groupID[2][GROUP_SIZE];
-      l_memory_sizes[2] =  l_memory_sizes[2] <<30;
-      l_memory_sizes[3]=eff_grouping_data.groupID[3][GROUP_SIZE];
-      l_memory_sizes[3] =  l_memory_sizes[3] <<30;
-      l_memory_sizes[4]=eff_grouping_data.groupID[4][GROUP_SIZE];
-      l_memory_sizes[4] =  l_memory_sizes[4] <<30;
-      l_memory_sizes[5]=eff_grouping_data.groupID[5][GROUP_SIZE];
-      l_memory_sizes[5] =  l_memory_sizes[5] <<30;
-      l_memory_sizes[6]=eff_grouping_data.groupID[6][GROUP_SIZE];
-      l_memory_sizes[6] =  l_memory_sizes[6] <<30;
-      l_memory_sizes[7]=eff_grouping_data.groupID[7][GROUP_SIZE];
-      l_memory_sizes[7] =  l_memory_sizes[7] <<30;
+
+      FAPI_DBG("  ATTR_PROC_MEM_BASES_ACK[0]: %016llx", mem_bases_ack[0]);
+      FAPI_DBG("  ATTR_PROC_MEM_BASES_ACK[1]: %016llx", mem_bases_ack[1]);
+      FAPI_DBG("  ATTR_PROC_MEM_BASES_ACK[2]: %016llx", mem_bases_ack[2]);
+      FAPI_DBG("  ATTR_PROC_MEM_BASES_ACK[3]: %016llx", mem_bases_ack[3]);
+      FAPI_DBG("  ATTR_PROC_MEM_BASES_ACK[4]: %016llx", mem_bases_ack[4]);
+      FAPI_DBG("  ATTR_PROC_MEM_BASES_ACK[5]: %016llx", mem_bases_ack[5]);
+      FAPI_DBG("  ATTR_PROC_MEM_BASES_ACK[6]: %016llx", mem_bases_ack[6]);
+      FAPI_DBG("  ATTR_PROC_MEM_BASES_ACK[7]: %016llx", mem_bases_ack[7]);
+
+      rc = FAPI_ATTR_SET(ATTR_PROC_MEM_BASES_ACK, &i_target, mem_bases_ack);
+      if (!rc.ok())
+      {
+        FAPI_ERR("Error writing ATTR_PROC_MEM_BASES_ACK");
+            break;
+      }
+
 
       FAPI_DBG("  ATTR_PROC_MEM_SIZES[0]: %016llx", l_memory_sizes[0]);
       FAPI_DBG("  ATTR_PROC_MEM_SIZES[1]: %016llx", l_memory_sizes[1]);
@@ -808,21 +1172,27 @@ extern "C" {
       FAPI_DBG("  ATTR_PROC_MEM_SIZES[5]: %016llx", l_memory_sizes[5]);
       FAPI_DBG("  ATTR_PROC_MEM_SIZES[6]: %016llx", l_memory_sizes[6]);
       FAPI_DBG("  ATTR_PROC_MEM_SIZES[7]: %016llx", l_memory_sizes[7]);
-
       rc = FAPI_ATTR_SET(ATTR_PROC_MEM_SIZES, &i_target, l_memory_sizes);
       if (!rc.ok())
       {
         FAPI_ERR("Error writing ATTR_PROC_MEM_SIZES");
         break;
       }
-      FAPI_DBG("  ATTR_PROC_MEM_SIZES[0]: %016llx", l_memory_sizes[0]);
-      FAPI_DBG("  ATTR_PROC_MEM_SIZES[1]: %016llx", l_memory_sizes[1]);
-      FAPI_DBG("  ATTR_PROC_MEM_SIZES[2]: %016llx", l_memory_sizes[2]);
-      FAPI_DBG("  ATTR_PROC_MEM_SIZES[3]: %016llx", l_memory_sizes[3]);
-      FAPI_DBG("  ATTR_PROC_MEM_SIZES[4]: %016llx", l_memory_sizes[4]);
-      FAPI_DBG("  ATTR_PROC_MEM_SIZES[5]: %016llx", l_memory_sizes[5]);
-      FAPI_DBG("  ATTR_PROC_MEM_SIZES[6]: %016llx", l_memory_sizes[6]);
-      FAPI_DBG("  ATTR_PROC_MEM_SIZES[7]: %016llx", l_memory_sizes[7]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES_ACK[0]: %016llx", l_memory_sizes_ack[0]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES_ACK[1]: %016llx", l_memory_sizes_ack[1]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES_ACK[2]: %016llx", l_memory_sizes_ack[2]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES_ACK[3]: %016llx", l_memory_sizes_ack[3]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES_ACK[4]: %016llx", l_memory_sizes_ack[4]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES_ACK[5]: %016llx", l_memory_sizes_ack[5]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES_ACK[6]: %016llx", l_memory_sizes_ack[6]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES_ACK[7]: %016llx", l_memory_sizes_ack[7]);
+
+      rc = FAPI_ATTR_SET(ATTR_PROC_MEM_SIZES_ACK, &i_target, l_memory_sizes_ack);
+      if (!rc.ok())
+      {
+        FAPI_ERR("Error writing ATTR_PROC_MEM_SIZES_ACK");
+        break;
+      }
 
       rc = FAPI_ATTR_SET(ATTR_MSS_MCS_GROUP_32,&i_target, eff_grouping_data.groupID);
       if (!rc.ok())
@@ -830,20 +1200,8 @@ extern "C" {
         FAPI_ERR("Error writing ATTR_MSS_MCS_GROUP");
         break;
       }
-          // process mirrored ranges
-        //
 
 
-        // base addresses for distinct mirrored ranges
-      mirror_bases[0] = eff_grouping_data.groupID[8][BASE_ADDR];
-      mirror_bases[1] = eff_grouping_data.groupID[9][BASE_ADDR];
-      mirror_bases[2] = eff_grouping_data.groupID[10][BASE_ADDR];
-      mirror_bases[3] = eff_grouping_data.groupID[11][BASE_ADDR];
-
-      mirror_bases[0] = mirror_bases[0]<<30;
-      mirror_bases[1] = mirror_bases[1]<<30;
-      mirror_bases[2] = mirror_bases[2]<<30;
-      mirror_bases[3] = mirror_bases[3]<<30;
       FAPI_DBG("  ATTR_PROC_MIRROR_BASES[0]: %016llx", mirror_bases[0]);
       FAPI_DBG("  ATTR_PROC_MIRROR_BASES[1]: %016llx", mirror_bases[1]);
       FAPI_DBG("  ATTR_PROC_MIRROR_BASES[2]: %016llx", mirror_bases[2]);
@@ -856,16 +1214,17 @@ extern "C" {
         break;
       }
 
-        // sizes for distinct mirrored ranges
-      l_mirror_sizes[0]=eff_grouping_data.groupID[8][GROUP_SIZE];
-      l_mirror_sizes[1]=eff_grouping_data.groupID[9][GROUP_SIZE];
-      l_mirror_sizes[2]=eff_grouping_data.groupID[10][GROUP_SIZE];
-      l_mirror_sizes[3]=eff_grouping_data.groupID[11][GROUP_SIZE];
+      FAPI_DBG("  ATTR_PROC_MIRROR_BASES[0]: %016llx", mirror_bases_ack[0]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_BASES[1]: %016llx", mirror_bases_ack[1]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_BASES[2]: %016llx", mirror_bases_ack[2]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_BASES[3]: %016llx", mirror_bases_ack[3]);
 
-      l_mirror_sizes[0] = l_mirror_sizes[0]<<30;
-      l_mirror_sizes[1] = l_mirror_sizes[1]<<30;
-      l_mirror_sizes[2] = l_mirror_sizes[2]<<30;
-      l_mirror_sizes[3] = l_mirror_sizes[3]<<30;
+      rc = FAPI_ATTR_SET(ATTR_PROC_MIRROR_BASES_ACK, &i_target, mirror_bases_ack);
+      if (!rc.ok())
+      {
+        FAPI_ERR("Error writing ATTR_PROC_MIRROR_BASES_ACK");
+        break;
+      }
 
       FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[0]: %016llx", l_mirror_sizes[0]);
       FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[1]: %016llx", l_mirror_sizes[1]);
@@ -877,6 +1236,31 @@ extern "C" {
       {
         FAPI_ERR("Error writing ATTR_PROC_MIRROR_SIZES");
         break;
+       }
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES_ACK[0]: %016llx", l_mirror_sizes_ack[0]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES_ACK[1]: %016llx", l_mirror_sizes_ack[1]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES_ACK[2]: %016llx", l_mirror_sizes_ack[2]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES_ACK[3]: %016llx", l_mirror_sizes_ack[3]);
+      rc = FAPI_ATTR_SET(ATTR_PROC_MIRROR_SIZES_ACK, &i_target, l_mirror_sizes_ack);
+      if (!rc.ok())
+      {
+        FAPI_ERR("Error writing ATTR_PROC_MIRROR_SIZES_ACK");
+        break;
+      }
+      rc = FAPI_ATTR_SET(ATTR_PROC_HTM_BAR_BASE_ADDR, &i_target, htm_bar_base);
+      if (!rc.ok())
+      {
+        FAPI_ERR("Error writing ATTR_PROC_HTM_BAR_BASE_ADDR");
+        break;
+
+       }
+
+      rc = FAPI_ATTR_SET( ATTR_PROC_OCC_SANDBOX_BASE_ADDR, &i_target, occ_sandbox_base);
+      if (!rc.ok())
+      {
+        FAPI_ERR("Error writing  ATTR_PROC_OCC_SANDBOX_BASE_ADDR");
+        break;
+
        }
     }while(0);
     return rc;			

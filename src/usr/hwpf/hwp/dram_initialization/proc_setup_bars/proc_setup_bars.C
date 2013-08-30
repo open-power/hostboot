@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.15 2013/06/21 15:13:44 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.18 2013/08/28 22:00:50 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -201,7 +201,8 @@ fapi::ReturnCode proc_setup_bars_memory_get_non_mirrored_attrs(
     // return code
     fapi::ReturnCode rc;
     // temporary attribute storage used to build procedure data structures
-    uint32_t mss_mcs_group_32[OPT_MEMMAP_GROUP_32_DIM1][OPT_MEMMAP_GROUP_32_DIM2];
+    uint64_t mem_bases_ack[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
+    uint64_t mem_sizes_ack[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
     proc_setup_bars_addr_range non_mirrored_ranges[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
 
     // mark function entry
@@ -209,13 +210,22 @@ fapi::ReturnCode proc_setup_bars_memory_get_non_mirrored_attrs(
 
     do
     {
-        // retrieve non-mirrored memory base address/size attributes
-        rc = FAPI_ATTR_GET(ATTR_MSS_MCS_GROUP_32,
+        // retrieve non-mirrored memory base address/size ack attributes
+        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASES_ACK,
                            i_target,
-                           mss_mcs_group_32);
+                           mem_bases_ack);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error querying ATTR_MSS_MCS_GROUP_32");
+            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error querying ATTR_PROC_MEM_BASES_ACK");
+            break;
+        }
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_SIZES_ACK,
+                           i_target,
+                           mem_sizes_ack);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error querying ATTR_PROC_MEM_SIZES_ACK");
             break;
         }
 
@@ -223,10 +233,8 @@ fapi::ReturnCode proc_setup_bars_memory_get_non_mirrored_attrs(
         for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES; r++)
         {
             // build range content
-            non_mirrored_ranges[r].base_addr =
-                (mss_mcs_group_32[OPT_MEMMAP_GROUP_32_NM_START_INDEX+r][OPT_MEMMAP_GROUP_32_BASE_INDEX])*OPT_MEMMAP_GB;
-            non_mirrored_ranges[r].size =
-                (mss_mcs_group_32[OPT_MEMMAP_GROUP_32_NM_START_INDEX+r][OPT_MEMMAP_GROUP_32_SIZE_INDEX])*OPT_MEMMAP_GB;
+            non_mirrored_ranges[r].base_addr = mem_bases_ack[r];
+            non_mirrored_ranges[r].size = mem_sizes_ack[r];
             // consider range enabled if size is non-zero
             non_mirrored_ranges[r].enabled = (non_mirrored_ranges[r].size != 0x0);
             // check attribute content
@@ -318,7 +326,8 @@ fapi::ReturnCode proc_setup_bars_memory_get_mirrored_attrs(
     // return code
     fapi::ReturnCode rc;
     // temporary attribute storage used to build procedure data structures
-    uint32_t mss_mcs_group_32[OPT_MEMMAP_GROUP_32_DIM1][OPT_MEMMAP_GROUP_32_DIM2];
+    uint64_t mirror_bases_ack[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
+    uint64_t mirror_sizes_ack[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
     proc_setup_bars_addr_range mirrored_ranges[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
 
     // mark function entry
@@ -326,13 +335,22 @@ fapi::ReturnCode proc_setup_bars_memory_get_mirrored_attrs(
 
     do
     {
-        // retrieve mirrored memory base address/size attributes
-        rc = FAPI_ATTR_GET(ATTR_MSS_MCS_GROUP_32,
+        // retrieve mirrored memory base address/size ack attributes
+        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASES_ACK,
                            i_target,
-                           mss_mcs_group_32);
+                           mirror_bases_ack);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error querying ATTR_MSS_MCS_GROUP_32");
+            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error querying ATTR_PROC_MIRROR_BASES_ACK");
+            break;
+        }
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_SIZES_ACK,
+                           i_target,
+                           mirror_sizes_ack);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error querying ATTR_PROC_MIRROR_SIZES_ACK");
             break;
         }
 
@@ -340,10 +358,8 @@ fapi::ReturnCode proc_setup_bars_memory_get_mirrored_attrs(
         for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_MIRRORED_RANGES; r++)
         {
             // build range content
-            mirrored_ranges[r].base_addr =
-                (mss_mcs_group_32[OPT_MEMMAP_GROUP_32_M_START_INDEX+r][OPT_MEMMAP_GROUP_32_BASE_INDEX])*OPT_MEMMAP_GB;
-            mirrored_ranges[r].size =
-                (mss_mcs_group_32[OPT_MEMMAP_GROUP_32_M_START_INDEX+r][OPT_MEMMAP_GROUP_32_SIZE_INDEX])*OPT_MEMMAP_GB;
+            mirrored_ranges[r].base_addr = mirror_bases_ack[r];
+            mirrored_ranges[r].size = mirror_sizes_ack[r];
             // consider range enabled if size is non-zero
             mirrored_ranges[r].enabled = (mirrored_ranges[r].size != 0x0);
             // check attribute content
@@ -1380,57 +1396,12 @@ fapi::ReturnCode proc_setup_bars_insert_chip(
         io_smp.nodes[node_id].chips[chip_id] = i_smp_chip;
 
         // update node address regions
-        // before merging, check that non-mirrored & mirrored ranges
-        // are non-overlapping with new ranges from this chip
-        FAPI_DBG("proc_setup_bars_insert_chip: Non-mirrored ranges prior to merging:");
-        io_smp.nodes[node_id].non_mirrored_range.print();
+        io_smp.nodes[node_id].non_mirrored_ranges.push_back(&(io_smp.nodes[node_id].chips[chip_id].non_mirrored_range));
         i_smp_chip.non_mirrored_range.print();
-        if (io_smp.nodes[node_id].non_mirrored_range.overlaps(
-                i_smp_chip.non_mirrored_range))
-        {
-            FAPI_ERR("proc_setup_bars_insert_chip: Existing node non-mirrored range overlaps chip non-mirrored range");
-            const uint64_t& NODE_BASE_ADDR =
-                io_smp.nodes[node_id].non_mirrored_range.base_addr;
-            const uint64_t& NODE_SIZE =
-                io_smp.nodes[node_id].non_mirrored_range.size;
-            const uint64_t& CHIP_BASE_ADDR =
-                i_smp_chip.non_mirrored_range.base_addr;
-            const uint64_t& CHIP_SIZE =
-                i_smp_chip.non_mirrored_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-                RC_PROC_SETUP_BARS_NODE_NON_MIRRORED_RANGE_OVERLAP_ERR);
-            break;
-        }
 
-        FAPI_DBG("proc_setup_bars_insert_chip: Mirrored ranges prior to merging:");
-        io_smp.nodes[node_id].mirrored_range.print();
+        io_smp.nodes[node_id].mirrored_ranges.push_back(&(io_smp.nodes[node_id].chips[chip_id].mirrored_range));
         i_smp_chip.mirrored_range.print();
-        if (io_smp.nodes[node_id].mirrored_range.overlaps(
-                i_smp_chip.mirrored_range))
-        {
-            FAPI_ERR("proc_setup_bars_insert_chip: Existing node mirrored range overlaps chip mirrored range");
-            const uint64_t& NODE_BASE_ADDR =
-                io_smp.nodes[node_id].mirrored_range.base_addr;
-            const uint64_t& NODE_SIZE =
-                io_smp.nodes[node_id].mirrored_range.size;
-            const uint64_t& CHIP_BASE_ADDR =
-                i_smp_chip.mirrored_range.base_addr;
-            const uint64_t& CHIP_SIZE =
-                i_smp_chip.mirrored_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-                RC_PROC_SETUP_BARS_NODE_MIRRORED_RANGE_OVERLAP_ERR);
-            break;
-        }
 
-        // update node address ranges (non-mirrored & mirrored)
-        FAPI_DBG("proc_setup_bars_insert_chip: Ranges after merging:");
-        io_smp.nodes[node_id].non_mirrored_range.merge(
-            i_smp_chip.non_mirrored_range);
-        io_smp.nodes[node_id].non_mirrored_range.print();
-
-        io_smp.nodes[node_id].mirrored_range.merge(
-            i_smp_chip.mirrored_range);
-        io_smp.nodes[node_id].mirrored_range.print();
     } while(0);
 
     // mark function exit
@@ -1492,17 +1463,60 @@ fapi::ReturnCode proc_setup_bars_process_chips(
             break;
         }
 
-        // perform final power of two adjustment on node specific resources once
+        // perform final adjustment on node specific resources once
         // all chips have been processed
         std::map<proc_fab_smp_node_id, proc_setup_bars_smp_node>::iterator n_iter;
         for (n_iter = io_smp.nodes.begin();
              n_iter != io_smp.nodes.end();
              n_iter++)
         {
+            FAPI_DBG("Performing final adjustment on n%d", n_iter->first);
+
+            // merge into single range
+            for (uint8_t r = 0; r < n_iter->second.non_mirrored_ranges.size(); r++)
+            {
+                n_iter->second.non_mirrored_ranges[r]->print();
+            }
+
+            // before merging, check that non-mirrored & mirrored ranges are non-overlapping
+            if (proc_setup_bars_common_do_ranges_overlap(n_iter->second.non_mirrored_ranges))
+            {
+                FAPI_ERR("proc_setup_bars_process_chips: Existing node non-mirrored range overlaps chip non-mirrored range");
+                const uint8_t& NODE_ID = n_iter->first;
+                FAPI_SET_HWP_ERROR(rc,
+                    RC_PROC_SETUP_BARS_NODE_NON_MIRRORED_RANGE_OVERLAP_ERR);
+                break;
+            }
+
+            if (proc_setup_bars_common_do_ranges_overlap(n_iter->second.mirrored_ranges))
+            {
+                FAPI_ERR("proc_setup_bars_process_chips: Existing node mirrored range overlaps chip mirrored range");
+                const uint8_t& NODE_ID = n_iter->first;
+                FAPI_SET_HWP_ERROR(rc,
+                    RC_PROC_SETUP_BARS_NODE_MIRRORED_RANGE_OVERLAP_ERR);
+                break;
+            }
+
+            // merge into single range
+            for (uint8_t r = 0; r < n_iter->second.non_mirrored_ranges.size(); r++)
+            {
+                n_iter->second.non_mirrored_range.merge(*(n_iter->second.non_mirrored_ranges[r]));
+            }
+
+            for (uint8_t r = 0; r < n_iter->second.mirrored_ranges.size(); r++)
+            {
+                n_iter->second.mirrored_range.merge(*(n_iter->second.mirrored_ranges[r]));
+            }
+
             // update node address ranges (non-mirrored & mirrored)
+            FAPI_DBG("proc_setup_bars_process_chips: Ranges after merging:");
+            n_iter->second.non_mirrored_range.print();
+            n_iter->second.mirrored_range.print();
+
+            // update node address ranges (non-mirrored & mirrored) t
+            // ensure ranges are power of 2 aligned
             FAPI_DBG("proc_setup_bars_process_chips: Node %d ranges after power of two alignment:",
                      n_iter->first);
-            // ensure range is power of 2 aligned
             if (n_iter->second.non_mirrored_range.enabled &&
                 !n_iter->second.non_mirrored_range.is_power_of_2())
             {
@@ -3513,10 +3527,29 @@ fapi::ReturnCode proc_setup_bars_config_mcd(
 
                 if (config_mcd)
                 {
+                    uint64_t mcd_fir_mask;
+                    uint8_t mcd_hang_poll_bug;
+                    rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG,
+                                       &(p_iter->second.chip->this_chip),
+                                       mcd_hang_poll_bug);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_setup_bars_config_mcd: Error querying ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG");
+                    }
+
+                    if (mcd_hang_poll_bug != 0)
+                    {
+                        mcd_fir_mask = MCD_FIR_MASK_RUNTIME_VAL_MCD_HANG_POLL_BUG;
+                    }
+                    else
+                    {
+                        mcd_fir_mask = MCD_FIR_MASK_RUNTIME_VAL_NO_MCD_HANG_POLL_BUG;
+                    }
+
                     // unmask MCD FIR
                     rc_ecmd |= mcd_fir_mask_data.setDoubleWord(
                         0,
-                        MCD_FIR_MASK_RUNTIME_VAL);
+                        mcd_fir_mask);
 
                     // check buffer manipulation return codes
                     if (rc_ecmd)

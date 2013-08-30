@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.H,v 1.9 2013/06/13 13:21:37 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.12 2013/08/28 22:00:54 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -98,7 +98,6 @@
 #include <map>
 #include <fapi.H>
 #include "proc_fab_smp.H"
-#include "opt_memmap.H"
 #include "p8_scom_addresses.H"
 
 
@@ -347,9 +346,11 @@ struct proc_setup_bars_smp_node
     // fabric node ID
     proc_fab_smp_node_id node_id;
     // real address ranges covered for mirrored & non-mirrored regions
-    // considering all chips in node)
+    // (considering all chips in node)
     proc_setup_bars_addr_range non_mirrored_range;
+    std::vector<proc_setup_bars_addr_range*> non_mirrored_ranges;
     proc_setup_bars_addr_range mirrored_range;
+    std::vector<proc_setup_bars_addr_range*> mirrored_ranges;
 };
 
 // structure to represent collection of nodes in SMP topology
@@ -996,7 +997,8 @@ const proc_setup_bars_bar_reg_def mcd_f1_bar_reg_def =
 };
 
 // MCD FIR Register constants
-const uint64_t MCD_FIR_MASK_RUNTIME_VAL = 0x2700000000000000ULL;
+const uint64_t MCD_FIR_MASK_RUNTIME_VAL_MCD_HANG_POLL_BUG    = 0x2F00000000000000ULL;
+const uint64_t MCD_FIR_MASK_RUNTIME_VAL_NO_MCD_HANG_POLL_BUG = 0x2700000000000000ULL;
 
 // MCD Evn/Odd Recovery Control Register field/bit definitions
 const uint8_t PROC_SETUP_BARS_NUM_MCD_CFG = 4;

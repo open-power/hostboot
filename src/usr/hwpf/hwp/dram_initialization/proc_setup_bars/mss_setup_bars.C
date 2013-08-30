@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.28 2013/05/23 14:54:28 jmcgill Exp $
+// $Id: mss_setup_bars.C,v 1.32 2013/08/16 17:23:27 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.32   | gpaulraj | 08/16/13| fixed code
+//  1.31   | gpaulraj | 08/13/13| fix HW259884 Mirror BAR Scom Parity Error
+//  1.30   | gpaulraj | 08/13/13| added fix HW259884 Mirror BAR Scom Parity Error
+//  1.29   | gpaulraj | 08/12/13| fixed mirror BAR issues
 //  1.27   | jmcgill  | 05/21/13| address FW review issues
 //  1.26   | jmcgill  | 04/22/13| rewrite to line up with attribute changes
 //  1.23   | bellows  | 12/04/12| more updates
@@ -235,10 +239,37 @@ fapi::ReturnCode mss_setup_bars_init_m_bars(
     ecmdDataBufferBase MCFGPM(64);
     ecmdDataBufferBase MCFGPMA(64);
 
+    // Defect HW259884 (AddNote by retter) P8 Lab Brazos: Mirror BAR Scom Parity Error - workaround
+    ecmdDataBufferBase MCIFIR(64);
+    ecmdDataBufferBase MCIFIRMASK(64);
+    ecmdDataBufferBase MCSMODE4(64);
     do
     {
+
+        rc = fapiGetScom(i_mcs_target, MCS_MCIFIRMASK_0x02011843, MCIFIRMASK);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiGetScom (MCS_MCIFIRMASK_0x02011843");
+             break;
+        }
+        // Mask MCIFIR bit 25
+        rc_ecmd |= MCIFIRMASK.setBit(25);
+        if (rc_ecmd)
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error 0x%X setting up MCIFIRMASK data buffer",
+                         rc_ecmd);
+             rc.setEcmdError(rc_ecmd);
+             break;
+        }
+        rc = fapiPutScom(i_mcs_target, MCS_MCIFIRMASK_0x02011843, MCIFIRMASK);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiPutScom (MCS_MCIFIRMASK_0x02011843");
+             break;
+        }
         if (i_pri_valid)
         {
+
             // MCFGPMQ_VALID
             rc_ecmd |= MCFGPM.setBit(MCFGPM_VALID_BIT);
             // MCFGPMQ_GROUP_SIZE
@@ -317,6 +348,59 @@ fapi::ReturnCode mss_setup_bars_init_m_bars(
         {
             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiPutScom (MCS_MCFGPMA_0x02011815");
             break;
+        }
+
+        rc = fapiGetScom(i_mcs_target, MCS_MCSMODE4_0x0201181A, MCSMODE4);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiGetScom (MCS_MCSMODE4_0x0201181A");
+             break;
+        }
+        // set MCSMODE4 bit 0
+        rc_ecmd |= MCSMODE4.setBit(0);
+        rc = fapiPutScom(i_mcs_target, MCS_MCSMODE4_0x0201181A, MCSMODE4);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiPutScom (MCS_MCSMODE4_0x0201181A");
+             break;
+        }
+        // Clear MCSMODE4 bit 0
+        rc_ecmd |= MCSMODE4.clearBit(0);
+        rc = fapiPutScom(i_mcs_target, MCS_MCSMODE4_0x0201181A, MCSMODE4);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiPutScom (MCS_MCSMODE4_0x0201181A");
+             break;
+        }
+
+        rc = fapiGetScom(i_mcs_target, MCS_MCIFIR_0x02011840, MCIFIR);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiGetScom (MCS_MCIFIR_0x02011840");
+             break;
+        }
+        // Reset MCIFIR bit 25
+        rc_ecmd |= MCIFIR.clearBit(25);
+        rc = fapiPutScom(i_mcs_target, MCS_MCIFIR_0x02011840, MCIFIR);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiPutScom (MCS_MCIFIR_0x02011840");
+             break;
+        }
+
+        rc = fapiGetScom(i_mcs_target, MCS_MCIFIRMASK_0x02011843, MCIFIRMASK);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiGetScom (MCS_MCIFIRMASK_0x02011843");
+             break;
+        }
+        // Unmask MCIFIR bit 25
+        rc_ecmd |= MCIFIRMASK.clearBit(25);
+        rc = fapiPutScom(i_mcs_target, MCS_MCIFIRMASK_0x02011843, MCIFIRMASK);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_m_bars: Error from fapiPutScom (MCS_MCIFIRMASK_0x02011843");
+             break;
         }
     } while(0);
 
@@ -435,18 +519,18 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
                  i++)
             {
                 // only process valid groups
-                if (group_data[i][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
+                if (group_data[i-8][MSS_MCS_GROUP_32_SIZE_INDEX] == 0)
                 {
                     continue;
                 }
 
-                uint32_t mcs_in_group = group_data[i][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
+                uint32_t mcs_in_group = group_data[i-8][MSS_MCS_GROUP_32_MCS_IN_GROUP_INDEX];
                 for (size_t j = MSS_MCS_GROUP_32_MEMBERS_START_INDEX;
                      (j < MSS_MCS_GROUP_32_MEMBERS_START_INDEX+mcs_in_group) &&
                      (rc.ok());
                      j++)
                 {
-                    if (mcs_pos == group_data[i][j])
+                    if (mcs_pos == group_data[i-8][j])
                     {
                         if (m_bar_valid)
                         {
@@ -469,7 +553,6 @@ fapi::ReturnCode mss_setup_bars(const fapi::Target& i_pu_target)
             {
                 break;
             }
-
             // write mirrored BARs based on group configuration
             rc = mss_setup_bars_init_m_bars(
                 *iter,

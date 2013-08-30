@@ -376,6 +376,13 @@
 <!-- TODO RTC 62291. This next attribute moves to hostboot only
      with this story  -->
     <attribute><id>PROC_SECURITY_SETUP_VECTOR</id></attribute>
+
+    <attribute><id>PROC_MIRROR_BASES_ACK</id></attribute>
+    <attribute><id>PROC_MIRROR_SIZES_ACK</id></attribute>
+    <attribute><id>PROC_MEM_BASES_ACK</id></attribute>
+    <attribute><id>PROC_MEM_SIZES_ACK</id></attribute>
+
+
 </targetType>
 
 <targetType>

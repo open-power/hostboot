@@ -1,4 +1,4 @@
-#-- $Id: p8.fbc.scom.initfile,v 1.12 2013/06/19 18:58:32 jmcgill Exp $
+#-- $Id: p8.fbc.scom.initfile,v 1.13 2013/08/28 22:03:30 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -27,6 +27,7 @@ define def_x_is_4b = (SYS.ATTR_PROC_X_BUS_WIDTH == ENUM_ATTR_PROC_X_BUS_WIDTH_W4
 define xbus_enabled = (ATTR_PROC_X_ENABLE == ENUM_ATTR_PROC_X_ENABLE_ENABLE);
 define abus_enabled = (ATTR_PROC_A_ENABLE == ENUM_ATTR_PROC_A_ENABLE_ENABLE);
 define pcie_enabled = (ATTR_PROC_PCIE_ENABLE == ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
+define mcd_hang_poll_bug = (ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG != 0);
 
 
 #--------------------------------------------------------------------------------
@@ -104,8 +105,12 @@ scom 0x02013406 {
 
 #-- MCD FIR Action1 Register (MCDCTL.FIR_ACTION1_REG / 0x02013407)
 scom 0x02013407 {
-    bits,                       scom_data;
-    0:63,                       0xC800000000000000;
+    bits,                      scom_data,        expr;
+    0:3,                       0xC,              any;
+    4,                         0b1,              (!mcd_hang_poll_bug);
+    4,                         0b0,              (mcd_hang_poll_bug);
+    5:7,                       0b000,            any;
+    8:63,                      0x00000000000000, any;
 }
 
 

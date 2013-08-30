@@ -13157,4 +13157,86 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>PROC_MIRROR_BASES_ACK</id>
+  <description>Mirrored memory base addresses
+      creator: mss_setup_bars
+      consumer: consumer: opt_mem_map
+      Mem opt map uses this for the bases of the mirror ranges.  
+        (max number based on Venice design)
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>4</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_MIRROR_BASES_ACK</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_MIRROR_SIZES_ACK</id>
+  <description>Size of mirrored memory region up to a power of 2
+      creator: mss_setup_bars
+      consumer: opt_mem_map
+      Mem opt map uses this to stack mirror ranges.  The real amount of memory behind the mirror group maybe less than the number reported here if there are memory holes
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>4</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_MIRROR_SIZES_ACK</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_MEM_BASES_ACK</id>
+  <description>Non-mirrored memory base addresses
+    creator: mss_setup_bars
+    consumer: opt_mem_map
+    Mem opt map uses this for the bases of the non-mirror ranges.
+      (max number based on Venice design)
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>8</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_MEM_BASES_ACK</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_MEM_SIZES_ACK</id>
+  <description>Size of non-mirrored memory regions up to a power of 2
+    creator: mss_setup_bars
+    consumer: opt_mem_map
+    Mem opt map uses this to stack mirror ranges.  The real amount of memory behind the mirror group maybe less than the number reported here if there are memory holes
+  </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+      <array>8</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_MEM_SIZES_ACK</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_setup_bars_errors.xml,v 1.4 2013/05/23 19:41:05 jmcgill Exp $ -->
+<!-- $Id: proc_setup_bars_errors.xml,v 1.5 2013/08/12 22:16:32 jmcgill Exp $ -->
 <!-- Error definitions for proc_setup_bars -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -128,18 +128,12 @@
   <hwpError>
     <rc>RC_PROC_SETUP_BARS_NODE_NON_MIRRORED_RANGE_OVERLAP_ERR</rc>
     <description>Existing node non-mirrored range overlaps chip non-mirrored range.</description>
-    <ffdc>NODE_BASE_ADDR</ffdc>
-    <ffdc>NODE_SIZE</ffdc>
-    <ffdc>CHIP_BASE_ADDR</ffdc>
-    <ffdc>CHIP_SIZE</ffdc>
+    <ffdc>NODE_ID</ffdc>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_SETUP_BARS_NODE_MIRRORED_RANGE_OVERLAP_ERR</rc>
     <description>Existing node mirrored range overlaps chip mirrored range.</description>
-    <ffdc>NODE_BASE_ADDR</ffdc>
-    <ffdc>NODE_SIZE</ffdc>
-    <ffdc>CHIP_BASE_ADDR</ffdc>
-    <ffdc>CHIP_SIZE</ffdc>
+    <ffdc>NODE_ID</ffdc>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_SETUP_BARS_INVALID_BAR_REG_DEF</rc>
