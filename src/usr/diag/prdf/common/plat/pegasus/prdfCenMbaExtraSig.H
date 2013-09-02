@@ -40,12 +40,19 @@ PRDR_ERROR_SIGNATURE(StartRankScrub,  0xffff0007, "", "Starting rank scrub");
 PRDR_ERROR_SIGNATURE(EndRankScrub,    0xffff0008, "", "Rank scrub completed");
 
 PRDR_ERROR_SIGNATURE(MaintUE,         0xffff0010, "", "Maintenance UE");
+PRDR_ERROR_SIGNATURE(MaintMPE,        0xffff0011, "", "Maintenance MPE");
+PRDR_ERROR_SIGNATURE(MaintHARD_CTE,   0xffff0012, "", "Maintenance HARD CTE");
+PRDR_ERROR_SIGNATURE(MaintSOFT_CTE,   0xffff0013, "", "Maintenance SOFT CTE");
+PRDR_ERROR_SIGNATURE(MaintINTER_CTE,  0xffff0014, "", "Maintenance INTER CTE");
+PRDR_ERROR_SIGNATURE(MaintRETRY_CTE,  0xffff0015, "", "Maintenance RETRY CTE");
 
 PRDR_ERROR_SIGNATURE(VcmVerified,     0xffff0020, "", "VCM: verified");
 PRDR_ERROR_SIGNATURE(VcmFalseAlarm,   0xffff0021, "", "VCM: false alarm");
 PRDR_ERROR_SIGNATURE(VcmBadSpare,     0xffff0022, "", "VCM: bad DRAM spare");
 PRDR_ERROR_SIGNATURE(VcmMarksUnavail, 0xffff0023, "",
                      "VCM: No more marks available");
+PRDR_ERROR_SIGNATURE(VcmFalseAlarmExceeded, 0xffff0024, "",
+                     "VCM: false alarm threshold exceeded");
 
 PRDR_ERROR_SIGNATURE(DsdDramSpared,   0xffff0030, "", "DSD: DRAM spared");
 PRDR_ERROR_SIGNATURE(DsdBadSpare,     0xffff0031, "", "DSD: DRAM spare is bad");

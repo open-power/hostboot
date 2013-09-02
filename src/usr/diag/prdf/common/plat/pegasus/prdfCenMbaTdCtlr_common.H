@@ -183,7 +183,7 @@ class CenMbaTdCtlrCommon
      *         ensure the TD controller is initialized.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t initialize() = 0;
+    virtual int32_t initialize();
 
     /**
      * @brief Analyzes a non-TD command complete event.
@@ -317,9 +317,13 @@ class CenMbaTdCtlrCommon
      * @brief  Checks if ECC errors have occurred during a maintenance command.
      * @param  o_eccErrorMask Bitwise mask indicating which ECC errors have
      *         occurred.
+     * @param  io_sc Service data collector.
+     * @note   This function also updates SDC Multi-Signature list for each
+     *         ECC error.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t checkEccErrors( uint16_t & o_eccErrorMask );
+    virtual int32_t checkEccErrors( uint16_t & o_eccErrorMask,
+                                    STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
      * @brief  Handle MCE event during VCM Phase 2
@@ -358,6 +362,18 @@ class CenMbaTdCtlrCommon
      */
     virtual void badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc );
 
+    /**
+     * @brief  Add signature to SDC
+     * @param  io_sc Service data collector.
+     * @param  i_sig Error Signature.
+     * @note   All signatures in TD controller are scoped to the targeted MBA.
+     *         However, it is possible that the attention that triggered this
+     *         TD request came from one of the MBSECCFIRs, which are on the
+     *         MEMBUF. So, change the chip ID in the signature to the targeted
+     *         MBA to avoid an "Undefined error code".
+     */
+    void setTdSignature( STEP_CODE_DATA_STRUCT & io_sc, uint32_t i_sig );
+
   protected: // instance variables
 
     /** The MBA chip that this TD controller acts on. */
@@ -365,6 +381,9 @@ class CenMbaTdCtlrCommon
 
     /** The MEMBUF chip connected iv_mbaChip. */
     ExtensibleChip * iv_membChip;
+
+    /** The MBA target associated with iv_mbaChip. */
+    TARGETING::TargetHandle_t iv_mbaTrgt;
 
     /** The position number (0-1) relative to the connected MEMBUF. */
     uint32_t iv_mbaPos;

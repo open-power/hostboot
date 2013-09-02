@@ -75,8 +75,6 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( !isInMdiaMode() )
@@ -95,7 +93,7 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Immediately inform MDIA that the command has finished.
-        o_rc = mdiaSendEventMsg( mba, MDIA::RESET_TIMER );
+        o_rc = mdiaSendEventMsg( iv_mbaTrgt, MDIA::RESET_TIMER );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(RESET_TIMER) failed" );
@@ -159,7 +157,7 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR( PRDF_FUNC"cleanupPrevCmd() failed" );
 
         // Tell MDIA to skip further analysis on this MBA.
-        l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );
+        l_rc = mdiaSendEventMsg( iv_mbaTrgt, MDIA::SKIP_MBA );
         if ( SUCCESS != l_rc )
             PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(SKIP_MBA) failed" );
     }
@@ -206,8 +204,6 @@ int32_t CenMbaTdCtlr::startInitialBgScrub()
     //       chip marks will then be verified after the initial fast scrub is
     //       complete.
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         // Should have been initialized during MDIA. If not, there is a serious
@@ -238,7 +234,7 @@ int32_t CenMbaTdCtlr::startInitialBgScrub()
 
         // Need the first rank in memory.
         CenAddr startAddr, junk;
-        o_rc = getMemAddrRange( mba, startAddr, junk );
+        o_rc = getMemAddrRange( iv_mbaTrgt, startAddr, junk );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"getMemAddrRange() failed" );
@@ -247,7 +243,8 @@ int32_t CenMbaTdCtlr::startInitialBgScrub()
 
         // Start the initial fast scrub.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  mba, startAddr.getRank(), COND_TARGETED_CMD,
+                                  iv_mbaTrgt, startAddr.getRank(),
+                                  COND_TARGETED_CMD,
                                   mss_MaintCmdWrapper::END_OF_MEMORY );
         if ( NULL == iv_mssCmd )
         {
@@ -292,36 +289,19 @@ int32_t CenMbaTdCtlr::initialize()
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( iv_initialized ) break; // nothing to do
 
-        // Check for valid MBA.
-        if ( TYPE_MBA != getTargetType(mba) )
+        // Initialize common instance variables
+        o_rc = CenMbaTdCtlrCommon::initialize();
+        if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"iv_mbaChip is not TYPE_MBA" );
-            o_rc = FAIL; break;
+            PRDF_ERR( PRDF_FUNC"CenMbaTdCtlrCommon::initialize() failed" );
+            break;
         }
 
-        // Set iv_membChip.
-        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-        iv_membChip = mbadb->getMembChip();
-        if ( NULL == iv_membChip )
-        {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
-            o_rc = FAIL; break;
-        }
-
-        // Set iv_mbaPos.
-        iv_mbaPos = getTargetPosition( mba );
-        if ( MAX_MBA_PER_MEMBUF <= iv_mbaPos )
-        {
-            PRDF_ERR( PRDF_FUNC"iv_mbaPos=%d is invalid", iv_mbaPos );
-            o_rc = FAIL; break;
-        }
-
+        // At this point, the TD controller is initialized.
         iv_initialized = true;
 
     } while (0);
@@ -359,7 +339,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask );
+        o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
@@ -420,8 +400,6 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( VCM_PHASE_1 != iv_tdState )
@@ -431,11 +409,11 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Add the mark to the callout list.
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+        CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask );
+        o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
@@ -478,8 +456,6 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( VCM_PHASE_2 != iv_tdState )
@@ -489,11 +465,11 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Add the mark to the callout list.
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+        CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask );
+        o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
@@ -528,7 +504,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
             iv_tdState = NO_OP; // Abort the TD procedure.
 
-            io_sc.service_data->SetErrorSig( PRDFSIG_VcmFalseAlarm );
+            setTdSignature( io_sc, PRDFSIG_VcmFalseAlarm );
 
             // In the field, this error log will be recoverable for now, but we
             // may have to add thresholding later if they become a problem. In
@@ -540,7 +516,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
             // Remove chip mark from hardware.
             iv_mark.clearCM();
             bool junk;
-            o_rc = mssSetMarkStore( mba, iv_rank, iv_mark, junk );
+            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, junk );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
@@ -563,8 +539,6 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( DSD_PHASE_1 != iv_tdState )
@@ -574,11 +548,11 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Add the mark to the callout list.
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+        CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask );
+        o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc)
         {
             PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
@@ -621,8 +595,6 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( DSD_PHASE_2 != iv_tdState )
@@ -632,11 +604,11 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Add the mark to the callout list.
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+        CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask );
+        o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
@@ -669,12 +641,12 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         {
             // The chip mark has successfully been steered to the spare.
 
-            io_sc.service_data->SetErrorSig( PRDFSIG_DsdDramSpared );
+            setTdSignature( io_sc, PRDFSIG_DsdDramSpared );
 
             // Remove chip mark from hardware.
             iv_mark.clearCM();
             bool junk;
-            o_rc = mssSetMarkStore( mba, iv_rank, iv_mark, junk );
+            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, junk );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
@@ -718,7 +690,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask );
+        o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
@@ -789,7 +761,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask );
+        o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
@@ -817,7 +789,8 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else
         {
-            io_sc.service_data->SetErrorSig( PRDFSIG_EndTpsPhase2 );
+            io_sc.service_data->AddSignatureList( iv_mbaTrgt,
+                                                  PRDFSIG_EndTpsPhase2 );
             iv_tdState = NO_OP;
         }
 
@@ -836,10 +809,8 @@ int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_StartVcmPhase1 );
+    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartVcmPhase1 );
     iv_tdState = VCM_PHASE_1;
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
 
     do
     {
@@ -852,7 +823,7 @@ int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Start phase 1.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP,
-                                  mba, iv_rank, COND_TARGETED_CMD );
+                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -881,10 +852,8 @@ int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_StartVcmPhase2 );
+    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartVcmPhase2 );
     iv_tdState = VCM_PHASE_2;
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
 
     do
     {
@@ -897,7 +866,7 @@ int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Start phase 2.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::SUPERFAST_READ,
-                                  mba, iv_rank, COND_TARGETED_CMD );
+                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -926,10 +895,8 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_StartDsdPhase1 );
+    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartDsdPhase1 );
     iv_tdState = DSD_PHASE_1;
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
 
     do
     {
@@ -941,7 +908,7 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Set the steer mux
-        o_rc = mssSetSteerMux( mba, iv_rank, iv_mark.getCM(), false );
+        o_rc = mssSetSteerMux( iv_mbaTrgt, iv_rank, iv_mark.getCM(), false );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"mssSetSteerMux() failed" );
@@ -950,7 +917,7 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Start phase 1.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP,
-                                  mba, iv_rank, COND_TARGETED_CMD );
+                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -979,10 +946,8 @@ int32_t CenMbaTdCtlr::startDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_StartDsdPhase2 );
+    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartDsdPhase2 );
     iv_tdState = DSD_PHASE_2;
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
 
     do
     {
@@ -995,7 +960,7 @@ int32_t CenMbaTdCtlr::startDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Start phase 2.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::SUPERFAST_READ,
-                                  mba, iv_rank, COND_TARGETED_CMD );
+                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -1024,10 +989,8 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase1 );
+    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartTpsPhase1 );
     iv_tdState = TPS_PHASE_1;
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
 
     do
     {
@@ -1049,7 +1012,7 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Start phase 1.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  mba, iv_rank, COND_TARGETED_CMD,
+                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD,
                                   mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
         if ( NULL == iv_mssCmd )
         {
@@ -1079,10 +1042,8 @@ int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase2 );
+    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartTpsPhase2 );
     iv_tdState = TPS_PHASE_2;
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
 
     do
     {
@@ -1104,7 +1065,7 @@ int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Start phase 2.
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  mba, iv_rank, COND_TARGETED_CMD,
+                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD,
                                   mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
         if ( NULL == iv_mssCmd )
         {
@@ -1138,10 +1099,9 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
 
     iv_tdState = NO_OP; // Abort the TD procedure.
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_MaintUE );
+    setTdSignature( io_sc, PRDFSIG_MaintUE );
     io_sc.service_data->SetServiceCall();
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
     CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
 
     do
@@ -1157,7 +1117,7 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Look for all failing bits on this rank.
         CenDqBitmap bitmap;
-        o_rc = mssIplUeIsolation( mba, iv_rank, bitmap );
+        o_rc = mssIplUeIsolation( iv_mbaTrgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"mssIplUeIsolation() failed" );
@@ -1181,7 +1141,7 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
 
             if ( !badDqs ) continue; // nothing to do.
 
-            TargetHandleList dimms = getConnectedDimms( mba, iv_rank, ps );
+            TargetHandleList dimms = getConnectedDimms(iv_mbaTrgt, iv_rank, ps);
             if ( 0 == dimms.size() )
             {
                 PRDF_ERR( PRDF_FUNC"getConnectedDimms(%d) failed", ps );
@@ -1207,7 +1167,7 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
             // just don't know where.
             // NOTE: If this condition happens because of a DD2.0+ bug, the
             //       mssIplUeIsolation procedure will callout the Centaur.
-            callouts = getConnectedDimms( mba, iv_rank );
+            callouts = getConnectedDimms( iv_mbaTrgt, iv_rank );
             if ( 0 == callouts.size() )
             {
                 PRDF_ERR( PRDF_FUNC"getConnectedDimms() failed" );
@@ -1244,12 +1204,12 @@ int32_t CenMbaTdCtlr::handleMPE( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
+    setTdSignature( io_sc, PRDFSIG_MaintMPE );
 
     do
     {
         // Get the current marks in hardware.
-        o_rc = mssGetMarkStore( mba, iv_rank, iv_mark );
+        o_rc = mssGetMarkStore( iv_mbaTrgt, iv_rank, iv_mark );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
@@ -1262,7 +1222,7 @@ int32_t CenMbaTdCtlr::handleMPE( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+        CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
 
         // Start VCM procedure
         o_rc = startVcmPhase1( io_sc );
@@ -1294,7 +1254,7 @@ int32_t CenMbaTdCtlr::signalMdiaCmdComplete()
 
         // Get the last address of the last rank in memory.
         CenAddr junk, allEndAddr;
-        o_rc = getMemAddrRange( iv_mbaChip->GetChipHandle(), junk, allEndAddr );
+        o_rc = getMemAddrRange( iv_mbaTrgt, junk, allEndAddr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"getMemAddrRange() failed" );

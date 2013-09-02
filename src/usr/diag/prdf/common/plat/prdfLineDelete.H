@@ -98,7 +98,7 @@ namespace LineDelete
          * @param i_thPolicy A pointer to a ThresholdPolicy struct.
          */
         explicit PrdfCacheCETable(
-                    const ThresholdResolution::ThresholdPolicy & i_thPolicy ) :
+                    const ThresholdResolution::ThresholdPolicy i_thPolicy ) :
             iv_thPolicy(i_thPolicy), cv_flushTimerInited(false), cv_total(0)
         {}
 
@@ -172,7 +172,7 @@ namespace LineDelete
 
       private:
 
-        const ThresholdResolution::ThresholdPolicy  iv_thPolicy;
+        ThresholdResolution::ThresholdPolicy iv_thPolicy;
         PrdfCacheAddressTable cv_ceTable;
         Timer cv_flushTimer;
         bool cv_flushTimerInited;

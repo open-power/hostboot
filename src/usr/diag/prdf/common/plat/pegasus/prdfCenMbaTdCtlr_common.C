@@ -40,6 +40,50 @@ using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 
+int32_t CenMbaTdCtlrCommon::initialize()
+{
+    #define PRDF_FUNC "[CenMbaTdCtlrCommon::initialize] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Set iv_mbaTrgt
+        iv_mbaTrgt = iv_mbaChip->GetChipHandle();
+
+        // Validate iv_mbaChip.
+        if ( TYPE_MBA != getTargetType(iv_mbaTrgt) )
+        {
+            PRDF_ERR( PRDF_FUNC"iv_mbaChip is not TYPE_MBA" );
+            o_rc = FAIL; break;
+        }
+
+        // Set iv_membChip.
+        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
+        iv_membChip = mbadb->getMembChip();
+        if ( NULL == iv_membChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
+            o_rc = FAIL; break;
+        }
+
+        // Set iv_mbaPos.
+        iv_mbaPos = getTargetPosition( iv_mbaTrgt );
+        if ( MAX_MBA_PER_MEMBUF <= iv_mbaPos )
+        {
+            PRDF_ERR( PRDF_FUNC"iv_mbaPos=%d is invalid", iv_mbaPos );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 bool CenMbaTdCtlrCommon::isInTdMode()
 {
     return ( (NO_OP != iv_tdState) && (MAX_TD_STATE > iv_tdState) );
@@ -171,7 +215,7 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd()
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"Write() failed on MBASPA_AND" );
-            o_rc = FAIL; break;
+            break;
         }
 
     } while (0);
@@ -214,7 +258,8 @@ int32_t CenMbaTdCtlrCommon::chipMarkCleanup()
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlrCommon::checkEccErrors( uint16_t & o_eccErrorMask )
+int32_t CenMbaTdCtlrCommon::checkEccErrors( uint16_t & o_eccErrorMask,
+                                            STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlrCommon::checkEccErrors] "
 
@@ -238,6 +283,7 @@ int32_t CenMbaTdCtlrCommon::checkEccErrors( uint16_t & o_eccErrorMask )
         if ( mbsEccFir->IsBitSet(20 + iv_rank.getMaster()) )
         {
             o_eccErrorMask |= MPE;
+            io_sc.service_data->AddSignatureList(iv_mbaTrgt, PRDFSIG_MaintMPE);
 
             // Clean up side-effect FIRs that may be set due to the chip mark.
             o_rc = chipMarkCleanup();
@@ -248,8 +294,18 @@ int32_t CenMbaTdCtlrCommon::checkEccErrors( uint16_t & o_eccErrorMask )
             }
         }
 
-        if ( mbsEccFir->IsBitSet(38) ) o_eccErrorMask |= MCE;
-        if ( mbsEccFir->IsBitSet(41) ) o_eccErrorMask |= UE;
+        if ( mbsEccFir->IsBitSet(38) )
+        {
+            // No need to add error signature. MCE is not error. It will be
+            // handled only in VCM/DSD phase 2.
+            o_eccErrorMask |= MCE;
+        }
+
+        if ( mbsEccFir->IsBitSet(41) )
+        {
+            o_eccErrorMask |= UE;
+            io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_MaintUE );
+        }
 
         SCAN_COMM_REGISTER_CLASS * mbaSpaFir =
                             iv_mbaChip->getRegister("MBASPA");
@@ -260,10 +316,33 @@ int32_t CenMbaTdCtlrCommon::checkEccErrors( uint16_t & o_eccErrorMask )
             break;
         }
 
-        if ( mbaSpaFir->IsBitSet(1) ) o_eccErrorMask |= HARD_CTE;
-        if ( mbaSpaFir->IsBitSet(2) ) o_eccErrorMask |= SOFT_CTE;
-        if ( mbaSpaFir->IsBitSet(3) ) o_eccErrorMask |= INTER_CTE;
-        if ( mbaSpaFir->IsBitSet(4) ) o_eccErrorMask |= RETRY_CTE;
+        if ( mbaSpaFir->IsBitSet(1) )
+        {
+            o_eccErrorMask |= HARD_CTE;
+            io_sc.service_data->AddSignatureList( iv_mbaTrgt,
+                                                  PRDFSIG_MaintHARD_CTE );
+        }
+
+        if ( mbaSpaFir->IsBitSet(2) )
+        {
+            o_eccErrorMask |= SOFT_CTE;
+            io_sc.service_data->AddSignatureList( iv_mbaTrgt,
+                                                  PRDFSIG_MaintSOFT_CTE );
+        }
+
+        if ( mbaSpaFir->IsBitSet(3) )
+        {
+            o_eccErrorMask |= INTER_CTE;
+            io_sc.service_data->AddSignatureList( iv_mbaTrgt,
+                                                  PRDFSIG_MaintINTER_CTE );
+        }
+
+        if ( mbaSpaFir->IsBitSet(4) )
+        {
+            o_eccErrorMask |= RETRY_CTE;
+            io_sc.service_data->AddSignatureList( iv_mbaTrgt,
+                                                  PRDFSIG_MaintRETRY_CTE );
+        }
 
     } while(0);
 
@@ -280,8 +359,6 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( VCM_PHASE_2 != iv_tdState )
@@ -290,7 +367,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
-        io_sc.service_data->SetErrorSig( PRDFSIG_VcmVerified );
+        setTdSignature( io_sc, PRDFSIG_VcmVerified );
 
         if ( areDramRepairsDisabled() )
         {
@@ -301,11 +378,25 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
             break; // nothing else to do.
         }
 
+        // If there is a symbol mark on the same DRAM as the newly verified chip
+        // mark, remove the symbol mark.
+        if ( iv_mark.getCM().getDram() == iv_mark.getSM().getDram() )
+        {
+            iv_mark.clearSM();
+            bool junk;
+            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, junk );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
+                break;
+            }
+        }
+
         bool startDsdProcedure = false;
 
         // Read VPD.
         CenDqBitmap bitmap;
-        o_rc = getBadDqBitmap( mba, iv_rank, bitmap );
+        o_rc = getBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
@@ -327,7 +418,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
         // assume IS DIMMs are on low end systems and Centaur DIMMs are on
         // mid/high end systems.
         bool isCenDimm = false;
-        o_rc = isMembufOnDimm( mba, isCenDimm );
+        o_rc = isMembufOnDimm( iv_mbaTrgt, isCenDimm );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"isMembufOnDimm() failed" );
@@ -355,7 +446,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                 // Verify the spare is not already used.
                 CenSymbol sp0, sp1, ecc;
                 // TODO: RTC 68096 need to support ECC spare.
-                o_rc = mssGetSteerMux( mba, iv_rank, sp0, sp1, ecc );
+                o_rc = mssGetSteerMux( iv_mbaTrgt, iv_rank, sp0, sp1, ecc );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed" );
@@ -371,12 +462,12 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                 else if ( iv_mark.getCM().getDram() ==
                           (0 == ps ? sp0.getDram() : sp1.getDram()) )
                 {
-                    io_sc.service_data->SetErrorSig( PRDFSIG_VcmBadSpare );
+                    setTdSignature( io_sc, PRDFSIG_VcmBadSpare );
 
                     // The chip mark was on the spare DRAM and it is bad, so
                     // call it out and set it in VPD.
 
-                    MemoryMru memmru ( mba, iv_rank, iv_mark.getCM() );
+                    MemoryMru memmru ( iv_mbaTrgt, iv_rank, iv_mark.getCM() );
                     memmru.setDramSpared();
                     io_sc.service_data->SetCallout( memmru );
                     io_sc.service_data->SetServiceCall();
@@ -391,14 +482,14 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                 else
                 {
                     // Chip mark and DRAM spare are both used.
-                    io_sc.service_data->SetErrorSig( PRDFSIG_VcmMarksUnavail );
+                    setTdSignature( io_sc, PRDFSIG_VcmMarksUnavail );
                     io_sc.service_data->SetServiceCall();
                 }
             }
             else
             {
                 // Chip mark is in place and sparing is not possible.
-                io_sc.service_data->SetErrorSig( PRDFSIG_VcmMarksUnavail );
+                setTdSignature( io_sc, PRDFSIG_VcmMarksUnavail );
                 io_sc.service_data->SetServiceCall();
             }
         }
@@ -409,13 +500,13 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
             // predictive.
             if ( iv_mark.getSM().isValid() )
             {
-                io_sc.service_data->SetErrorSig( PRDFSIG_VcmMarksUnavail );
+                setTdSignature( io_sc, PRDFSIG_VcmMarksUnavail );
                 io_sc.service_data->SetServiceCall();
             }
         }
 
         // Write VPD.
-        o_rc = setBadDqBitmap( mba, iv_rank, bitmap );
+        o_rc = setBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"setBadDqBitmap() failed" );
@@ -452,11 +543,6 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_DsdBadSpare );
-    io_sc.service_data->SetServiceCall();
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( DSD_PHASE_2 != iv_tdState )
@@ -465,10 +551,11 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
-        // Callout mark and spare DRAM.
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+        setTdSignature( io_sc, PRDFSIG_DsdBadSpare );
+        io_sc.service_data->SetServiceCall();
 
-        MemoryMru memmru ( mba, iv_rank, iv_mark.getCM() );
+        // Callout spare DRAM.
+        MemoryMru memmru ( iv_mbaTrgt, iv_rank, iv_mark.getCM() );
         memmru.setDramSpared();
         io_sc.service_data->SetCallout( memmru );
 
@@ -477,7 +564,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
         // verified.
 
         CenDqBitmap bitmap;
-        o_rc = getBadDqBitmap( mba, iv_rank, bitmap );
+        o_rc = getBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
@@ -491,7 +578,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        o_rc = setBadDqBitmap( mba, iv_rank, bitmap );
+        o_rc = setBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"setBadDqBitmap() failed" );
@@ -565,17 +652,15 @@ void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlrCommon::badPathErrorHandling] "
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     PRDF_ERR( PRDF_FUNC"iv_mbaChip:0x%08x iv_initialized:%c iv_tdState:%d "
-            "iv_rank:M%dS%d iv_mark:%2d %2d", getHuid(mba),
-            iv_initialized ? 'T' : 'F', iv_tdState, iv_rank.getMaster(),
-            iv_rank.getSlave(), iv_mark.getCM().getSymbol(),
-            iv_mark.getSM().getSymbol() );
+              "iv_rank:M%dS%d iv_mark:%2d %2d", iv_mbaChip->GetId(),
+              iv_initialized ? 'T' : 'F', iv_tdState, iv_rank.getMaster(),
+              iv_rank.getSlave(), iv_mark.getCM().getSymbol(),
+              iv_mark.getSM().getSymbol() );
 
     iv_tdState = NO_OP;
 
-    io_sc.service_data->SetErrorSig( PRDFSIG_MaintCmdComplete_ERROR );
+    setTdSignature( io_sc, PRDFSIG_MaintCmdComplete_ERROR );
     io_sc.service_data->SetServiceCall();
 
     // There may have been a code bug, callout 2nd level support.
@@ -587,7 +672,7 @@ void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
     // was targeted with low priority.
     if ( 1 == io_sc.service_data->GetMruList().size() )
     {
-        MemoryMru memmru ( mba, iv_rank, MemoryMruData::CALLOUT_RANK );
+        MemoryMru memmru ( iv_mbaTrgt, iv_rank, MemoryMruData::CALLOUT_RANK );
         io_sc.service_data->SetCallout( memmru, MRU_LOW );
     }
 
@@ -596,6 +681,17 @@ void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->ClearFlag(ServiceDataCollector::DONT_COMMIT_ERRL);
 
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+void CenMbaTdCtlrCommon::setTdSignature( STEP_CODE_DATA_STRUCT & io_sc,
+                                         uint32_t i_sig )
+{
+    HUID mbaId = iv_mbaChip->GetId();
+    (io_sc.service_data->GetErrorSignature())->setChipId(mbaId);
+    io_sc.service_data->SetErrorSig( i_sig );
+
 }
 
 } // end namespace PRDF
