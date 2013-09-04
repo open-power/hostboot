@@ -63,8 +63,8 @@ errlHndl_t getMbaDiagnosticMode(
 
     // Only need to check hw changed state attributes
     // when not already set to standard or exhaustive
-    if((FOUR_PATTERNS != o_mode) ||
-       (NINE_PATTERNS != o_mode))
+    if(!((FOUR_PATTERNS == o_mode) ||
+         (NINE_PATTERNS == o_mode)))
     {
         if(isHWStateChanged(i_mba))
         {
