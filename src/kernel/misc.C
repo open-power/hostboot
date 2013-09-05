@@ -226,6 +226,13 @@ namespace KernelMisc
         updateScratchReg(MMIO_SCRATCH_MEMORY_STATE,
                          kernel_hbDescriptor.kernelMemoryState);
 
+        // @TODO: Remove this workaround with RTC 84029.
+        // Set scratch register to indicate Hostboot is [still] active.
+        const char * hostboot_string = "hostboot";
+        updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
+                         *reinterpret_cast<const uint64_t*>(hostboot_string));
+        // -- end workaround.
+
         // Restore caller of cpu_master_winkle().
         iv_caller->state = TASK_STATE_RUNNING;
         TaskManager::setCurrentTask(iv_caller);
