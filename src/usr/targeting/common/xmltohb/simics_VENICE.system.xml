@@ -337,7 +337,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -1458,7 +1458,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -2579,7 +2579,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -3699,7 +3699,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -4818,7 +4818,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -5906,7 +5906,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -6992,7 +6992,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -8079,7 +8079,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -16093,7 +16093,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b111</default><!-- REDUNDANT -->
+        <default>0x7</default><!-- REDUNDANT -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>

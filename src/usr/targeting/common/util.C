@@ -32,6 +32,7 @@
 //******************************************************************************
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 
 namespace TARGETING
 {
@@ -192,6 +193,44 @@ bool is_avp_load(void)
 
     return ((mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_AVP_ENABLE)
        || (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE));
+}
+
+/**
+ * @brief Utility function to obtain the highest known address in the system
+ */
+uint64_t get_top_mem_addr(void)
+{
+    uint64_t top_addr = 0;
+
+    do
+    {
+        // Get all functional proc chip targets
+        TARGETING::TargetHandleList l_cpuTargetList;
+        TARGETING::getAllChips(l_cpuTargetList, TYPE_PROC);
+
+        for ( size_t proc = 0; proc < l_cpuTargetList.size(); proc++ )
+        {
+            TARGETING::Target * l_pProc = l_cpuTargetList[proc];
+
+            //Not checking success here as fail results in no change to
+            // top_addr
+            uint64_t l_mem_bases[8] = {0,};
+            uint64_t l_mem_sizes[8] = {0,};
+            l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_mem_bases);
+            l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_mem_sizes);
+
+            for (size_t i=0; i< 8; i++)
+            {
+                if(l_mem_sizes[i]) //non zero means that there is memory present
+                {
+                    top_addr = std::max(top_addr,
+                                        l_mem_bases[i] + l_mem_sizes[i]);
+                }
+            }
+        }
+    }while(0);
+
+    return top_addr;
 }
 
 

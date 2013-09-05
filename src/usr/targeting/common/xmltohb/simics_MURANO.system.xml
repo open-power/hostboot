@@ -211,7 +211,7 @@
         <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>0b11</default>
+        <default>0x3</default>
     </attribute>
     <!-- End pm_plat_attributes.xml -->
     <attribute><id>MAX_EXS_PER_PROC_CHIP</id>
@@ -364,7 +364,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b100</default><!-- PORT0NONRED -->
+        <default>0x4</default><!-- PORT0NONRED -->
     </attribute>
     <attribute><id>PM_SLEEP_TYPE</id></attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
@@ -1119,7 +1119,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b000</default><!-- NONE -->
+        <default>0x0</default><!-- NONE -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -2636,7 +2636,7 @@
         <default>1250</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0b000</default><!-- NONE -->
+        <default>0x0</default><!-- NONE -->
     </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>

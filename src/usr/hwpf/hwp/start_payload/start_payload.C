@@ -224,10 +224,11 @@ void*    call_host_runtime_setup( void    *io_pArgs )
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
 
-        //Only run OCC in AVP mode.  Run the rest in !AVP mode
-        if( is_avp_load() )
+        //Start OCC in AVP (or Sapphire mode for now)
+        if( is_avp_load() || is_sapphire_load() )
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Skipping host_runtime_setup in AVP mode.  Starting OCC" );
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Starting OCC" );
+
             //Load modules needed by OCC
             bool occ_loaded = false;
 
@@ -274,8 +275,9 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             }
             break;
         }
-        else if( is_sapphire_load() &&
-                 INITSERVICE::spLess())
+
+        if( is_sapphire_load() &&
+            INITSERVICE::spLess())
         {
             // Write the devtree out when in SPLess
             // Sapphire mode
@@ -288,19 +290,16 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 break;
             }
         }
-        else //PHYP or SAPPHIRE with FSP
+        else if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
         {
-            //If PHYP then clean the PORE BARs
-            if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
+            //If PHYP then clear out the PORE BARs
+            l_err = clearPoreBars();
+            if( l_err )
             {
-                l_err = clearPoreBars();
-                if( l_err )
-                {
-                    break;
-                }
+                break;
             }
 
-            //Update the MDRT value
+            //Update the MDRT value (for MS Dump)
             l_err = RUNTIME::write_MDRT_Count();
             if(l_err != NULL)
             {
@@ -319,6 +318,20 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 break;
             }
         }
+        else if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
+        {
+            // Write the HostServices attributes into mainstore
+            //  for our testcases
+            l_err = RUNTIME::populate_attributes();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Could not populate attributes" );
+                // break from do loop if error occured
+                break;
+            }
+        }
+
 
         //  - Update HDAT/DEVTREE with tpmd logs
 

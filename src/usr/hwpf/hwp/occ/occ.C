@@ -36,6 +36,7 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/targetservice.H>
+#include    <targeting/common/util.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -185,12 +186,16 @@ namespace HBOCC
      * @param[in] i_target   Target proc to load
      * @param[in] i_homerVirtAddrBase Virtual
      *                       address of current
-     *                       procs HOMER
+     *                       proc's HOMER
+     * @param[in] i_homerPhysAddrBase Physical
+     *                       address of current
+     *                       proc's HOMER
      *
      * @return errlHndl_t  Error log image load failed
      */
     errlHndl_t load(Target* i_target,
-                    void* i_homerVirtAddrBase)
+                    void* i_homerVirtAddrBase,
+                    uint64_t i_homerPhysAddrBase)
     {
         errlHndl_t  l_errl  =   NULL;
         uint64_t targHomer = 0;
@@ -202,15 +207,13 @@ namespace HBOCC
                    ENTER_MRK"HBOCC:load()" );
 
         do{
-
             //Figure out OCC image offset for Target
             //OCC image offset = HOMER_SIZE*ProcPosition +
             //       OCC offset within HOMR (happens to be zero)
             uint8_t tmpPos = i_target->getAttr<ATTR_POSITION>();
             tmpOffset = tmpPos*VMM_HOMER_INSTANCE_SIZE +
               HOMER_OFFSET_TO_OCC_IMG;
-            targHomer = VMM_HOMER_REGION_START_ADDR +
-              tmpOffset;
+            targHomer = i_homerPhysAddrBase + tmpOffset;
             occVirt =
               reinterpret_cast<void *>
               (reinterpret_cast<uint64_t>(i_homerVirtAddrBase)
@@ -284,7 +287,8 @@ namespace HBOCC
            // BAR3 is the OCC Common Area
             // Bar size is in MB, obtained value of 8MB from Tim Hallett
             const uint64_t bar3_size_MB = VMM_OCC_COMMON_SIZE_IN_MB;
-            const uint64_t occ_common_addr = VMM_OCC_COMMON_START_ADDR;
+            const uint64_t occ_common_addr = i_homerPhysAddrBase
+              + VMM_HOMER_REGION_SIZE;
 
             TRACUCOMP( g_fapiImpTd,
                        INFO_MRK"OCC Common Address: 0x%.8X, size=0x%.8X",
@@ -349,12 +353,16 @@ namespace HBOCC
      * @param[in] i_homerVirtAddrBase Base Virtual
      *                       address of all HOMER
      *                       images
+     * @param[in] i_homerPhysAddrBase Base Physical
+     *                       address of all HOMER
+     *                       images
      *
      * @return errlHndl_t  Error log image load failed
      */
     errlHndl_t loadnStartOcc(Target* i_target0,
                              Target* i_target1,
-                             void* i_homerVirtAddrBase)
+                             void* i_homerVirtAddrBase,
+                             uint64_t i_homerPhysAddrBase)
     {
         errlHndl_t  l_errl  =   NULL;
 
@@ -386,7 +394,8 @@ namespace HBOCC
             //==============================
 
             l_errl = load(i_target0,
-                          i_homerVirtAddrBase);
+                          i_homerVirtAddrBase,
+                          i_homerPhysAddrBase);
             if(l_errl != NULL)
             {
                 TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartOcc: load failed for target 0" );
@@ -396,7 +405,8 @@ namespace HBOCC
             if(i_target1 != NULL)
             {
                 l_errl = load(i_target1,
-                              i_homerVirtAddrBase);
+                              i_homerVirtAddrBase,
+                              i_homerPhysAddrBase);
                 if(l_errl != NULL)
                 {
                     TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartOcc: load failed for target 1" );
@@ -525,9 +535,20 @@ namespace HBOCC
             assert(VMM_HOMER_REGION_SIZE <= THIRTYTWO_GB,
                    "loadnStartAllOccs: Unsupported HOMER Region size");
 
+            //If running Sapphire need to place this at the top of memory
+            uint64_t homerPhysAddrBase = VMM_HOMER_REGION_START_ADDR;
+            if(TARGETING::is_sapphire_load())
+            {
+                homerPhysAddrBase = TARGETING::get_top_mem_addr();
+                assert (homerPhysAddrBase != 0,
+                        "loadnStartAllOccs: Top of memory was 0!");
+                homerPhysAddrBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+            }
+            TRACFCOMP( g_fapiTd, "HOMER is at %.16X", homerPhysAddrBase );
+
             //Map entire homer region into virtual memory
             homerVirtAddrBase =
-              mm_block_map(reinterpret_cast<void*>(VMM_HOMER_REGION_START_ADDR),
+              mm_block_map(reinterpret_cast<void*>(homerPhysAddrBase),
                            VMM_HOMER_REGION_SIZE);
 
             TargetHandleList procChips;
@@ -565,7 +586,8 @@ namespace HBOCC
                 {
                     l_errl =  loadnStartOcc(*itr,
                                             NULL,
-                                            homerVirtAddrBase);
+                                            homerVirtAddrBase,
+                                            homerPhysAddrBase);
                     if(l_errl)
                     {
                         TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOccs: loadnStartOcc failed!" );
@@ -614,7 +636,8 @@ namespace HBOCC
                     TRACUCOMP( g_fapiImpTd, INFO_MRK"loadnStartAllOccs: calling loadnStartOcc." );
                     l_errl =  loadnStartOcc(targ0,
                                             targ1,
-                                            homerVirtAddrBase);
+                                            homerVirtAddrBase,
+                                            homerPhysAddrBase);
                     if(l_errl)
                     {
                         TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOccs: loadnStartOcc failed!" );

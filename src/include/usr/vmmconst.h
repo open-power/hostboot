@@ -130,6 +130,10 @@ enum BlockPriority
 #define VMM_OCC_COMMON_END \
  (VMM_OCC_COMMON_START_ADDR + VMM_OCC_COMMON_SIZE)
 
+/** Total Memory required for HOMERs and OCC Common */
+#define VMM_ALL_HOMER_OCC_MEMORY_SIZE \
+ (VMM_OCC_COMMON_SIZE+VMM_HOMER_REGION_SIZE)
+
 
 /**
  * Test Constants

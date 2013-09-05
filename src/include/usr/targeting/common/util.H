@@ -113,6 +113,11 @@ bool is_sapphire_load(void);
  */
 bool is_avp_load(void);
 
+/**
+ * @brief Utility function to obtain the highest known address in the system
+ */
+uint64_t get_top_mem_addr(void);
+
 }
 
 #endif // __TARGETING_COMMON_UTIL_H

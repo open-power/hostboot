@@ -382,7 +382,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
             l_memBase = get_top_mem_addr();
             assert (l_memBase != 0,
                     "host_build_winkle: Top of memory was 0!");
-            l_memBase -= VMM_HOMER_REGION_SIZE;
+            l_memBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;
         }
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "HOMER base = %x", l_memBase);
