@@ -2826,6 +2826,11 @@
         <name>MNFG_DMI_DEPLOY_LANE_SPARES</name>
         <value>0x00004000</value>
     </enumerator>
+    <enumerator>
+        <!-- Forcibly run PSI diagnostics -->
+        <name>MNFG_PSI_DIAGNOSTIC</name>
+        <value>0x00008000</value>
+    </enumerator>
 </enumerationType>
 
 <!-- Support for pm_hwp_attributes.xml -->
