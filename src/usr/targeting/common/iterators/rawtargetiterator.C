@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/targeting/common/iterators/rangefilter.C $            */
+/* $Source: src/usr/targeting/common/iterators/rawtargetiterator.C $      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,11 +22,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /**
- *  @file common/targeting/iterators/rangefilter.C
+ *  @file targeting/common/iterators/rawtargetiterator.C
  *
- *  @brief Implementation of an object which takes an iterator range and
- *      allows caller to iterate through the elements which match a supplied
- *      predicate (filter)
+ *  @brief Implementation of raw iterator/const raw iterator used to iterate
+ *      through all target service targets
  */
 
 //******************************************************************************
@@ -39,7 +38,7 @@
 
 // Targeting Component
 #include <targeting/common/iterators/iterators.H>
-#include <targeting/common/trace.H>
+#include <targeting/common/targetservice.H>
 
 //******************************************************************************
 // Macros
@@ -58,72 +57,34 @@ namespace TARGETING
 
 #define TARG_NAMESPACE "TARGETING::"
 
-#define TARG_CLASS "RangeFilter<IteratorType>::"
+#define TARG_CLASS "_TargetRawIterator<T>::"
 
 //******************************************************************************
-// RangeFilter<IteratorType>::advance
+// TargetIterator::advance
 //******************************************************************************
 
-template<typename IteratorType>
-void RangeFilter<IteratorType>::advance()
+template<typename T>
+void _TargetRawIterator<T>::advance()
 {
-    #define TARG_FN "RangeFilter<IteratorType>::advance()"
+    static TargetService& l_targetService = targetService();
 
-    if(iv_current != iv_end)
+    // If cursor points to end()/NULL, do nothing.  Otherwise, check to see if
+    // it should advance (possibly to NULL)
+    if(iv_pCurrent != NULL)
     {
-        while( (++iv_current) != iv_end )
-        {
-            if(   (!iv_pPredicate)
-               || ((*iv_pPredicate)(*iv_current)))
-            {
-                break;
-            }
-        }
+        iv_pCurrent = l_targetService.getNextTarget(iv_pCurrent);
     }
-
-    #undef TARG_FN
-}
-
-//******************************************************************************
-// RangeFilter<IteratorType>::advanceIfNoMatch
-//******************************************************************************
-
-template<typename IteratorType>
-void RangeFilter<IteratorType>::advanceIfNoMatch()
-{
-    if(   (iv_current != iv_end)
-       && (   (iv_pPredicate)
-           && (!((*iv_pPredicate)(*iv_current)))))
-    {
-        advance();
-    }
-}
-
-//******************************************************************************
-// RangeFilter<IteratorType>::operator fake_bool
-//******************************************************************************
-
-template<typename IteratorType>
-RangeFilter<IteratorType>::operator fake_bool() const
-{
-    return (iv_current != iv_end)
-        ? &RangeFilter::notComparable : NULL;
 }
 
 //******************************************************************************
 // Explicit template class member function instantiations
 //******************************************************************************
 
-template void RangeFilter<TargetIterator>::advance();
-template void RangeFilter<ConstTargetIterator>::advance();
-
-template void RangeFilter<TargetIterator>::advanceIfNoMatch();
-template void RangeFilter<ConstTargetIterator>::advanceIfNoMatch();
-
-template RangeFilter<TargetIterator>::operator fake_bool() const;
-template RangeFilter<ConstTargetIterator>::operator fake_bool() const;
+template void _TargetRawIterator<Target*>::advance();
+template void _TargetRawIterator<const Target*>::advance();
 
 #undef TARG_CLASS
+
 #undef TARG_NAMESPACE
 
 } // End namespace TARGETING

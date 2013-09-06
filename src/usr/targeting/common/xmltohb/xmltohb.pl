@@ -115,6 +115,8 @@ if($cfgVerbose)
 ################################################################################
 
 use constant INVALID_HUID=>0xffffffff;
+use constant PEER_HUID_NOT_PRESENT=>0xfffffffe;
+
 my $xml = new XML::Simple (KeyAttr=>[]);
 use Digest::MD5 qw(md5_hex);
 
@@ -264,6 +266,22 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeAttrMetadataMapCFile($attributes,$attrMetadataMapCFile);
     writeAttrMetadataMapCFileFooter($attrMetadataMapCFile);
     close $attrMetadataMapCFile;
+
+    open(MAP_ATTR_SIZE_H_FILE,">$cfgSrcOutputDir"."mapsystemattrsize.H")
+      or fatal ("Attribute size map file Header: \"$cfgSrcOutputDir"
+        . "mapsystemattrsize.H\" could not be opened.");
+    my $attrSizeMapHFile = *MAP_ATTR_SIZE_H_FILE;
+    writeAttrSizeMapHFile($attrSizeMapHFile);
+    close $attrSizeMapHFile;
+
+    open(MAP_ATTR_SIZE_C_FILE,">$cfgSrcOutputDir"."mapsystemattrsize.C")
+      or fatal ("Attribute size map file: \"$cfgSrcOutputDir"
+        . "mapsystemattrsize.C\" could not be opened.");
+    my $attrSizeMapCFile = *MAP_ATTR_SIZE_C_FILE;
+    writeAttrSizeMapCFileHeader($attrSizeMapCFile);
+    writeAttrSizeMapCFile($attributes,$attrSizeMapCFile);
+    writeAttrSizeMapCFileFooter($attrSizeMapCFile);
+    close $attrSizeMapCFile;
 }
 
 if( !($cfgImgOutputDir =~ "none") )
@@ -468,16 +486,27 @@ sub handleTgtPtrAttributesFsp
             if (exists $attr->{default})
             {
                 if(   ($attr->{default} ne "NULL")
-                   && ($attr->{id} eq "PEER_TARGET"))
+                   && ($attr->{id} eq "PEER_TARGET") )
                 {
-                    my $peerHUID = getPeerHuid(${$attributes},
-                                       $attr->{default});
+                    my $peerHUID = INVALID_HUID;
+                    $peerHUID = getPeerHuid($targetInstance);
                     if($peerHUID == INVALID_HUID)
                     {
-                        fatal("HUID for Peer Target not found");
+                        fatal("HUID for Peer Target not found for "
+                            . "Peer Target [$attr->{default}]\n");
                     }
-                    $attr->{default} = (hex($peerHUID) << 32);
-                    $attr->{default} = sprintf("0x%X",$attr->{default});
+                    elsif($peerHUID == PEER_HUID_NOT_PRESENT)
+                    {
+                        # Might require this for debug, so keeping it.
+                        #print STDOUT "****PEER HUID Attribut not present for "
+                        #    . "Peer Target [$attr->{default}]... Skip\n";
+                        $attr->{default} = "NULL";
+                    }
+                    else
+                    {
+                        $attr->{default} =
+                            sprintf("0x%X",(hex($peerHUID) << 32));
+                    }
                 }
             }
         }
@@ -531,9 +560,10 @@ sub handleTgtPtrAttributesHb{
                 }
                 else
                 {
-                    fatal("$attr->{id} attribute has an unknown value "
-                          . "$attr->{default}\n"
-                          . "It must be NULL or a valid PHYS_PATH\n");
+                    print STDOUT ("$attr->{id} attribute has an unknown value "
+                        . "$attr->{default}\n"
+                        . "It must be NULL or a valid PHYS_PATH\n");
+                    $attr->{default} = "NULL";
                 }
             }
         }
@@ -542,42 +572,27 @@ sub handleTgtPtrAttributesHb{
 
 sub getPeerHuid
 {
-    my($attributes, $peerPhysPath) = @_;
+    my($targetInstance) = @_;
 
     my $peerHUID = INVALID_HUID;
-    my $found = 0;
-    foreach my $targetInstance (@{$attributes->{targetInstance}})
+    if(exists $targetInstance->{compileAttribute}->{id})
     {
-        foreach my $attr (@{$targetInstance->{attribute}})
+        if ($targetInstance->{compileAttribute}->{id} eq "PEER_HUID")
         {
-            if ($attr->{id} eq "PHYS_PATH")
-            {
-                if ($attr->{default} eq $peerPhysPath)
-                {
-                    # $attr->{id} for HUID might have been lost in the iteration
-                    # Need to repeat iteration
-                    foreach my $attr1 (@{$targetInstance->{attribute}})
-                    {
-                        if ($attr1->{id} eq "HUID")
-                        {
-                            $peerHUID = $attr1->{default};
-                            $found = 1;
-                            last;
-                        }
-                    }
-                    if($found)
-                    {
-                        last;
-                    }
-                }
-            }
+            $peerHUID = $targetInstance->{compileAttribute}->{default};
         }
-        if($found)
+        else
         {
-            last;
+            fatal("We should have only PEER_HUID as compileAttribute. "
+                    . "Don't know how to handle this Attribute "
+                    . "$targetInstance->{compileAttribute}->{id}\n");
         }
     }
-
+    else
+    {
+        # PEER HUID doesn't exist, Return an pre-defined HUID which is invalid
+        $peerHUID = PEER_HUID_NOT_PRESENT;
+    }
     return $peerHUID;
 }
 
@@ -3093,6 +3108,302 @@ sub writeTargetErrlHFile {
     print $outFile "#endif\n";
 } # sub writeTargetErrlHFile
 
+################################################################################
+# Writes the map system attr size C file header
+################################################################################
+
+sub writeAttrSizeMapCFileHeader {
+    my($outFile) = @_;
+
+print $outFile <<VERBATIM;
+
+/**
+ *  \@file mapsystemattrsize.C
+ *
+ *  \@brief Interface to get the map of system target attributes with respective
+ *  attribute size
+ */
+
+// STD
+#include <map>
+
+// TARG
+#include <mapsystemattrsize.H>
+
+
+//******************************************************************************
+// Macros
+//******************************************************************************
+
+#undef TARG_NAMESPACE
+#undef TARG_CLASS
+#undef TARG_FUNC
+
+//******************************************************************************
+// Implementation
+//******************************************************************************
+
+namespace TARGETING
+{
+
+
+#define TARG_NAMESPACE "TARGETING::"
+#define TARG_CLASS "MapSystemAttrSize::"
+
+//******************************************************************************
+// TARGETING::mapSystemAttrSize
+//******************************************************************************
+
+TARGETING::MapSystemAttrSize& mapSystemAttrSize()
+{
+    #define TARG_FN "mapSystemAttrSize()"
+
+    return TARG_GET_SINGLETON(TARGETING::theMapSystemAttrSize);
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TARGETING::MapSystemAttrSize::~MapSystemAttrSize
+//******************************************************************************
+
+MapSystemAttrSize::~MapSystemAttrSize()
+{
+    #define TARG_FN "~MapSystemAttrSize()"
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TARGETING::MapSystemAttrSize::getMapForWriteableSystemAttributes
+//******************************************************************************
+
+const AttrSizeMapper&
+MapSystemAttrSize::getMapForWriteableSystemAttributes() const
+{
+    #define TARG_FN "getMapForWriteableSystemAttributes()"
+    TARG_ENTER();
+
+    TARG_EXIT();
+    return iv_mapSysAttrSize;
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TARGETING::MapSystemAttrSize::MapSystemAttrSize
+//******************************************************************************
+
+MapSystemAttrSize::MapSystemAttrSize()
+{
+    #define TARG_FN "MapSystemAttrSize()"
+VERBATIM
+
+}
+
+######
+# Create a .C file to put System Target Attributes along with there respective
+# Size in a map file
+######
+sub writeAttrSizeMapCFile{
+    my($attributes,$outFile) = @_;
+    my %finalAttrhash = ();
+
+    # look for type sys-sys-power8 and store all attributes associated
+    foreach my $targetType (@{$attributes->{targetType}})
+    {
+        if($targetType->{id} =~ m/^sys-sys-/)
+        {
+            my %attrhash = ();
+            getTargetAttributes($targetType->{id}, $attributes,\%attrhash);
+            foreach my $key ( keys %attrhash )
+            {
+                foreach my $attr (@{$attributes->{attribute}})
+                {
+                    if($attr->{id} eq $key)
+                    {
+                        if((exists $attr->{writeable}) &&
+                            (!(exists $attr->{hbOnly})))
+                        {
+                            # we have the attr here.. calculate the size
+                            my $keyVal = "ATTR_"."$key"."_type";
+                            if(exists $attr->{simpleType})
+                            {
+                                if(exists $attr->{simpleType}->{array})
+                                {
+                                    my @splitArrSize = split(',',
+                                            $attr->{simpleType}->{array});
+                                    foreach my $num (@splitArrSize)
+                                    {
+                                        $keyVal = "$keyVal"."[$num]";
+                                    }
+                                }
+                                elsif(exists $attr->{simpleType}->{string})
+                                {
+                                    if(exists $attr->{simpleType}->{string}->
+                                        {sizeInclNull})
+                                    {
+                                        $keyVal = "$keyVal"."[$attr->
+                                            {simpleType}->{string}->
+                                            {sizeInclNull}]";
+                                    }
+                                }
+                                $finalAttrhash{$key} = $keyVal;
+                            }
+                            elsif(exists $attr->{complexType})
+                            {
+                                $finalAttrhash{$key} = $keyVal;
+                            }
+                            elsif(exists $attr->{nativeType})
+                            {
+                                $finalAttrhash{$key} = $keyVal;
+                            }
+                            else
+                            {
+                                print STDOUT "\t// Attribute $key is writable "
+                                    . "& Not Supported \n";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    print $outFile "\n";
+    foreach my $key ( keys %finalAttrhash)
+    {
+        print $outFile "    iv_mapSysAttrSize[ATTR_"
+            . "$key] = sizeof($finalAttrhash{$key});\n";
+    }
+    print $outFile "\n";
+}
+
+################################################################################
+# Writes the map system attr size C file Footer
+################################################################################
+
+sub writeAttrSizeMapCFileFooter {
+    my($outFile) = @_;
+
+    print $outFile <<VERBATIM;
+    #undef TARG_FN
+}
+
+}// namespace TARGETING
+
+VERBATIM
+}
+
+######
+# Create a .H file to put System Target Attributes along with their respective
+# Size in a map file
+######
+sub writeAttrSizeMapHFile{
+    my($outFile) = @_;
+    print $outFile <<VERBATIM;
+
+#ifndef MAPSYSTEMATTRSIZE_H
+#define MAPSYSTEMATTRSIZE_H
+
+/**
+ *  \@file mapsystemattrsize.H
+ *
+ *  \@brief Interface to get the map of system target attributes with respective
+ *  attribute size
+ */
+
+// STD
+#include <map>
+
+// TARG
+#include <targeting/common/trace.H>
+#include <targeting/common/target.H>
+
+//******************************************************************************
+// Macros
+//******************************************************************************
+
+#undef TARG_NAMESPACE
+#undef TARG_CLASS
+#undef TARG_FUNC
+
+//******************************************************************************
+// Interface
+//******************************************************************************
+
+namespace TARGETING
+{
+
+class MapSystemAttrSize;
+
+/**
+ *  \@brief Return the MapSystemAttrSize singleton instance
+ *
+ *  \@return Reference to the MapSystemAttrSize singleton
+ */
+TARGETING::MapSystemAttrSize& mapSystemAttrSize();
+
+
+#define TARG_NAMESPACE "MAPSYSTEMATTRSIZE::"
+
+#define TARG_CLASS "MapSystemAttrSize::"
+
+/*
+ * \@brief Typedef map <attr, attSize>
+ */
+typedef map<ATTRIBUTE_ID, uint32_t> AttrSizeMapper;
+
+class MapSystemAttrSize
+{
+
+    public:
+        /**
+         *  \@brief Destroy the MapSystemAttrSize class
+         */
+        ~MapSystemAttrSize();
+
+        /**
+         *  \@brief Create the MapSystemAttrSize class
+         */
+        MapSystemAttrSize();
+
+        /*
+         *  \@brief returns the map of Writeable System attributes as Key and
+         *  size of the attributes as value.
+         *
+         *  \@return, returns the map which has the Writeable Sytem attributes
+         *  as key and size as value pair, variable <SYSTEM_ATTRIBUTE_ID::Size>
+         */
+         const AttrSizeMapper& getMapForWriteableSystemAttributes() const;
+
+     private:
+
+        /* Map variable for System Attribute Ids Vs the Size */
+        AttrSizeMapper iv_mapSysAttrSize;
+
+        /* Disable Copy constructor and assignment operator */
+        MapSystemAttrSize(
+            const MapSystemAttrSize& i_right);
+
+        MapSystemAttrSize& operator = (
+            const MapSystemAttrSize& i_right);
+};
+
+/**
+ *  \@brief Provide singleton access to the MapSystemAttrSize
+ */
+TARG_DECLARE_SINGLETON(TARGETING::MapSystemAttrSize, theMapSystemAttrSize);
+
+#undef TARG_CLASS
+#undef TARG_NAMESPACE
+
+
+}// namespace TARGETING
+
+#endif // MAPSYSTEMATTRSIZE_H
+
+VERBATIM
+
+}
 
 sub UTILITY_FUNCTIONS { }
 
@@ -3409,13 +3720,25 @@ sub getInstantiatedTargetTypes {
 
     my %seen = ();
     my @uniqueTargetTypes = ();
+    my $targetCount = 0;
+    my $moveSysTarget = 0;
 
+    # To simplify the iterator code, always move a system target that appears as
+    # the first target to the next position
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
+        if(($targetInstance->{type} =~ m/^sys-sys-/) && ($targetCount == 0))
+        {
+            $targetCount = $targetCount + 1;
+            $moveSysTarget = 1;
+        }
         push (@uniqueTargetTypes, $targetInstance->{type})
             unless $seen{$targetInstance->{type}}++;
     }
-
+    if($moveSysTarget == 1)
+    {
+        @uniqueTargetTypes[0,1] = @uniqueTargetTypes[1,0];
+    }
     return @uniqueTargetTypes;
 }
 
@@ -4412,9 +4735,27 @@ sub generateTargetingImage {
     # for code update.  At minimum, ensure that we always process at this level
     # in the given order
     my @targetsAoH = ();
+    my $targetCount = 0;
+    my $moveSysTarget = 0;
+
+    # To support the iterator code, we dont want sys target to be the
+    # first in order. So we have specifically moved system target to second,
+    # if it is in first place.
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
+        # for the first Target, check if Sys Target
+        if(($targetCount == 0) && ($targetInstance->{id} eq "sys0"))
+        {
+            # mark a flag here that we need to interchange 1&2 targets,
+            # so as to push system target to second place
+            $moveSysTarget = 1;
+            $targetCount = $targetCount + 1;
+        }
         push(@targetsAoH, $targetInstance);
+    }
+    if($moveSysTarget == 1)
+    {
+        @targetsAoH[0,1] = @targetsAoH[1,0];
     }
     my $numTargets = @targetsAoH;
 

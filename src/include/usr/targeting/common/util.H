@@ -54,6 +54,24 @@ class Target;
 #define TARG_ADDR_TRANSLATION_REQUIRED (1)
 #endif
 
+namespace PLAT
+{
+
+/**
+ *  @brief PLAT::PROPERTIES namespace contains constants that control platform
+ *      specific behaviors
+ */
+namespace PROPERTIES
+{
+#ifdef __HOSTBOOT_MODULE
+    static const bool MULTINODE_AWARE = false;
+#else
+    static const bool MULTINODE_AWARE = true;
+#endif
+}
+
+}
+
 /**
  * @brief Checks to see if we are running in a hardware simulation
  *    environment, i.e. VPO/VBU  (not Simics)

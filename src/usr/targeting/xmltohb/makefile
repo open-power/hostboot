@@ -121,12 +121,12 @@ ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}: \
 # generic XML is created from the generic sources only
 ${GENDIR}/${XMLTOHB_GENERIC_XML}: \
         ${XMLTOHB_MERGE_SCRIPT} ${XMLTOHB_GENERIC_SOURCES}
-	$< $^ > $@
+	$< $(wordlist 2,$(words $^),$^) > $@
 
 # merge all FAPI attribute files into one
 ${GENDIR}/${XMLTOHB_FAPI_XML}: ${XMLTOHB_MERGE_SCRIPT} \
         ${XMLTOHB_FAPIATTR_SOURCES}
-	$< $^ > $@
+	$< $(wordlist 2,$(words $^),$^) > $@
 
 # create the header files, only needs generic xml
 $(call GENTARGET,$(XMLTOHB_TARGETS)) : $(XMLTOHB_RAN_INDICATION)

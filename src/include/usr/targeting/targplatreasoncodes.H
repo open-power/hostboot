@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/targeting/common/iterators/iterators.H $      */
+/* $Source: src/include/usr/targeting/targplatreasoncodes.H $             */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,20 +21,53 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __TARGETING_COMMON_ITERATORS_H
-#define __TARGETING_COMMON_ITERATORS_H
+#ifndef TARGPLATREASONCODES_H
+#define TARGPLATREASONCODES_H
 
 /**
- *  @file targeting/common/iterators/iterators.H
+ *  @file targeting/targplatreasoncodes.H
  *
- *  @brief Header file which aggregates all the iterator header files.
+ *  @brief Provides reason codes for various platform specific targeting errors
  */
 
-#include <targeting/common/iterators/targetiterator.H>
-#include <targeting/common/iterators/rawtargetiterator.H>
-#include <targeting/common/iterators/rangefilter.H>
+//******************************************************************************
+// Includes
+//******************************************************************************
 
-// please keep up to date...
+#include <targeting/adapters/types.H>
 
-#endif // __TARGETING_COMMON_ITERATORS_H
+//******************************************************************************
+// Constants
+//******************************************************************************
+
+namespace TARGETING
+{
+
+/**
+ *  @brief Platform specific targeting module IDs
+ *
+ *  @note Must always start @ 0x80, since common module IDs occupy 0x00 -> 0x7F
+ *     range
+ */
+enum PlatTargetingModuleId
+{
+    TARG_MOD_QUERY_MASTER_PROC_CHIP               = 0x80,
+    TARG_MOD_SET_MASTER_NODE                      = 0x81,
+};
+
+/**
+ *  @brief Platform specific targeting reason codes
+ *
+ *  @note Must always start @ 0x80, since common reasons codes occupy
+ *      0x00 -> 0x7F range
+ */
+enum PlatTargetingReasonCode
+{
+    TARG_RC_INVALID_NODE        = TARG_COMP_ID | 0x80,
+    TARG_RC_TARGET_NOT_FOUND    = TARG_COMP_ID | 0x81,
+};
+
+} // End TARGETING namespace
+
+#endif // TARGPLATREASONCODES_H
 

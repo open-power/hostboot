@@ -557,16 +557,17 @@ class Target
         static AttributeTank cv_overrideTank;
         static AttributeTank cv_syncTank;
 
-      friend class PnorBuilderService;
+        friend class PnorBuilderService;
+        friend class TargetCloner;
 
-      // Friend functions to allow FAPI Attribute code to directly call
-      // _tryGetAttr and _trySetAttr for code size optimization
-      friend fapi::ReturnCode fapi::platAttrSvc::getTargetingAttr(
-          const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
-          void *);
-      friend fapi::ReturnCode fapi::platAttrSvc::setTargetingAttr(
-          const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
-          void *);
+        // Friend functions to allow FAPI Attribute code to directly call
+        // _tryGetAttr and _trySetAttr for code size optimization
+        friend fapi::ReturnCode fapi::platAttrSvc::getTargetingAttr(
+            const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
+            void *);
+        friend fapi::ReturnCode fapi::platAttrSvc::setTargetingAttr(
+            const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
+            void *);
 
       /*
        * @brief allow targetattrbulksync access to the target class store.

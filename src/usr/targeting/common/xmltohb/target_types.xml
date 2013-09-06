@@ -260,6 +260,10 @@
         <default>PROC</default>
     </attribute>
     <attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>NOT_MASTER</default>
+    </attribute>
+    <attribute>
         <id>PRIMARY_CAPABILITIES</id>
         <default>
             <field><id>supportsFsiScom</id><value>1</value></field>

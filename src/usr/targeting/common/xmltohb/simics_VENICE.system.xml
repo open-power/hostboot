@@ -237,6 +237,10 @@
 <targetInstance>
     <id>sys0node0proc0</id>
     <type>chip-processor-venice</type>
+    <attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>ACTING_MASTER</default>
+    </attribute>
     <attribute><id>HUID</id><default>0x00050000</default></attribute>
     <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>

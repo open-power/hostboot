@@ -40,7 +40,6 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/attrsync.H>
 
-
 namespace TARGETING
 {
 
@@ -61,14 +60,15 @@ struct AttrRP_Section;
  */
 class AttrRP
 {
-    
+
     // add some friends for the attribute sync features
-    friend  bool TargetService::writeSectionData( 
+    friend  bool TargetService::writeSectionData(
                            const std::vector<sectionRefData>& i_pages );
 
-    friend  void TargetService::readSectionData( 
+    friend  void TargetService::readSectionData(
                            std::vector<sectionRefData>& o_pages,
-                           const SECTION_TYPE i_sectionId);
+                           const SECTION_TYPE i_sectionId,
+                           const TARGETING::NODE_ID i_nodeId);
 
     public:
 
@@ -76,10 +76,14 @@ class AttrRP
          *  @brief Returns base address of the RO section containing the
          *      targets
          *
+         *  @param[in] i_nodeIdUnused
+         *      Node ID to get base address for, ignored by Hostboot, which
+         *      always gets base address of local node
+         *
          *  @return Base address of the RO section containing the targets as
          *      a void*
          */
-        void* getBaseAddress();
+        void* getBaseAddress(const NODE_ID i_nodeIdUnused);
 
         /**
          *  @brief Translates given address, according to the resource
@@ -87,6 +91,9 @@ class AttrRP
          *
          * @param[in] i_pAddress
          *     Address to translate
+         *
+         * @param[in] i_pUnused
+         *     Node target used by common code, unused in Hostboot
          *
          * @return void* Returns the translated address.  Common attribute
          *     code has a static, compile time check that is used to
@@ -96,7 +103,32 @@ class AttrRP
          *     it does it will always get a no-op translation.
          */
         void* translateAddr(
-            void* i_pAddress)
+            void* i_pAddress,
+            const Target* i_pUnused)
+        {
+            return i_pAddress;
+        }
+
+        /**
+         *  @brief Translates given address, according to the resource
+         *      provider's translation algorithm
+         *
+         * @param[in] i_pAddress
+         *     Address to translate
+         *
+         * @param[in] i_unused
+         *     Node ID used by common code, unused in Hostboot
+         *
+         * @return void* Returns the translated address.  Common attribute
+         *     code has a static, compile time check that is used to
+         *     determine whether to call this function, however the Hostboot
+         *     compiler complains when this is not provided.  Therefore
+         *     while this method exists, Hostboot will never call it, and if
+         *     it does it will always get a no-op translation.
+         */
+        void* translateAddr(
+            void* i_pAddress,
+            const TARGETING::NODE_ID i_unused)
         {
             return i_pAddress;
         }
@@ -125,7 +157,7 @@ class AttrRP
          */
         AttrRP()
             : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0)
-        { 
+        {
         };
 
         /**
@@ -159,12 +191,16 @@ class AttrRP
          *         for the data pages specified by the selected section
          *
          *  @param[out] o_pages, vector of sectionRefData struct
+         *  @param[in] i_sectionType
+         *      Type of section to read
+         *  @param[in] Node associated with the section, unused in HB
          *
          *  @return void
          */
         void readSectionData(
-                std::vector <sectionRefData>& o_pages,
-                const SECTION_TYPE i_sectionType);
+                  std::vector <sectionRefData>& o_pages,
+            const SECTION_TYPE                  i_sectionType,
+            const NODE_ID                       i_nodeId = 0) const;
 
 
     private:
@@ -203,7 +239,7 @@ class AttrRP
          *
          *  @return errlHndl_t
          *      Returns an error log handle that is NULL on success or !NULL
-         *      on failure 
+         *      on failure
          */
         errlHndl_t parseAttrSectHeader();
 
@@ -226,7 +262,7 @@ class AttrRP
          *
          *  @par Detailed Description:
          *      This function, being static, can be called from task_create
-         *      and is used to enter the daemon thread's msgServiceTask 
+         *      and is used to enter the daemon thread's msgServiceTask
          *      loop to process messages.
          *
          *  @param[in] i_pInstance

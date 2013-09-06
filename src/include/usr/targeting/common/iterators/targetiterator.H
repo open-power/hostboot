@@ -95,6 +95,9 @@ class _TargetIterator
          *
          *  @param[in] i_pTarget Target handle (pointer or const pointer
          *      depending on flavor) the iterator should reference
+         *
+         *  @note User should not assign a hidden system target to the iterator,
+         *      as it does not support hidden targets
          */
         ALWAYS_INLINE inline
         explicit _TargetIterator(T i_pTarget)

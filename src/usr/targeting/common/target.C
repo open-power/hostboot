@@ -219,9 +219,11 @@ void Target::_getAttrPtr(
     if(TARG_ADDR_TRANSLATION_REQUIRED)
     {
         pAttrId = static_cast<ATTRIBUTE_ID*>(
-            TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(pAttrId));
+            TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(pAttrId,
+                static_cast<const Target*>(this)));
         ppAttrAddr = static_cast<AbstractPointer<void>*>(
-            TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(ppAttrAddr));
+            TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(ppAttrAddr,
+                static_cast<const Target*>(this)));
     }
 
     if ((pAttrId != NULL) && (ppAttrAddr != NULL))
@@ -245,7 +247,7 @@ void Target::_getAttrPtr(
             {
                 l_pAttr =
                     TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
-                            l_pAttr);
+                            l_pAttr, static_cast<const Target*>(this));
             }
         }
     }

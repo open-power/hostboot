@@ -154,118 +154,13 @@ foreach my $targetInstance (@{$sysInfo->{targetInstance}})
         my $nodeValue = $targetId;
         $nodeValue =~ s/.*node(\d?).*/$1/;
 
-        #TODO: revisit when doing multi-node 
-        #for now the in a multi-node/drawer system the abus goes outside
-        #the node/drawer boundry.  So will remove the peer nodes since there
-        #in no current method of reaching the peer
         if ($nodeValue < $#nodeFD ) 
         {
-            if ($targetId =~ m/abus/)
-            {
-                #make the peer target null
-                my $count =0;
-                foreach my $attrValue (@{$targetInstance->{'attribute'}})
-                {
-                    if ($attrValue->{'id'}[0] eq "PEER_TARGET")
-                    {
-                        splice @{$targetInstance->{'attribute'}},$count,1;
-                        last;
-                    }
-                    $count++;
-
-                } 
-                my $xmlDataNoPeer= XMLout($targetInstance,RootName => "targetInstance");  
-                #print Dumper($xmlDataNoPeer);
-                print {$nodeFD[$nodeValue]} $xmlDataNoPeer;
-            }
-            elsif ($targetId =~ m/psi/)
-            {
-                #TODO: revisit when doing multi-node 
-                #if the psi link is going to node 0 or belongs to node 0 keep
-                #else set to default.  
-
-                my $count =0;
-                my $nodePeer =-1;
-                my $spliceLoc =0;
-                foreach my $attrValue (@{$targetInstance->{'attribute'}})
-                {
-                    if($attrValue->{'id'}[0] eq "PEER_TARGET")
-                    {
-                        $nodePeer = $attrValue->{'default'}[0];
-                        $nodePeer =~ s/.*node-(\d?).*/$1/;
-                        if ($nodePeer == 4)
-                        {
-                            $nodePeer =0;
-                        }
-                        last;
-                    }
-
-                    $count++;
-                }
-
-                if ($nodePeer == $nodeValue )
-                {
-                    #in this case the target and peer are pointing to same node
-                    #print Dumper($xmlData);
-                    print {$nodeFD[$nodeValue]} $xmlData;
-                }
-                else
-                {
-                    #the target or the peer is pointing off the node
-                    #so need to remove the peer target
-                    splice @{$targetInstance->{'attribute'}},$count,1;
-                    my $xmlDataNoPeer= XMLout($targetInstance,RootName => "targetInstance");
-                    #print Dumper($xmlDataNoPeer);
-                    print {$nodeFD[$nodeValue]} $xmlDataNoPeer;
-                }
-            }
-            else
-            {
-                print {$nodeFD[$nodeValue]} $xmlData;
-            }
-            
+            print {$nodeFD[$nodeValue]} $xmlData;
         }
         elsif ($nodeValue == $#nodeFD)
         {
-            #TODO: revisit when doing multi-node 
-            #there should not be node 4 targeting data for node 4
-            #because node 4 is a FSP(maxdale) not a node.  However
-            #do need to include node 4 psi info for node 0
-
-            my $psiValue = $targetId;
-            #print("psiValue from targ = ",$psiValue,"\n");
-            if ($targetId=~ m/psi/)
-            {
-                my $count =0;
-                foreach my $attrValue (@{$targetInstance->{'attribute'}})
-                {
-                    if($attrValue->{'id'}[0] eq "PEER_TARGET")
-                    {
-                        if ($attrValue->{'default'}[0] =~ m/node-0/)
-                        {
-                            #print Dumper($xmlData);
-                            #all node-4 targets go into the node 0 targeting binary
-                            print {$nodeFD[0]} $xmlData;
-                        }
-                        else
-                        {
-                            #if not going to node 4 then need to remove the peer target
-                            splice @{$targetInstance->{'attribute'}},$count,1;
-                            my $xmlDataNoPeer= XMLout($targetInstance,RootName => "targetInstance");  
-                            #print Dumper($xmlDataNoPeer);
-                            print {$nodeFD[0]} $xmlDataNoPeer;
-                        }
-                        last;
-                    }
-                    $count++;
-                }
-            }
-            else
-            {
-                #this is node 4 information that does not contain psi information
-                print {$nodeFD[0]} $xmlData;
-            }
-
+            print {$nodeFD[0]} $xmlData;
         }
         else
         {

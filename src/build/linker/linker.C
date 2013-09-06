@@ -374,8 +374,10 @@ int main(int argc, char** argv)
                 j != all_symbols.end();
                 ++j)
             {
-                if ((string::npos != j->find(sym_name)) &&
-                    (*i != *j))
+                if (   (string::npos != j->find(sym_name))
+                    && (   string::npos
+                        == j->find("traceData_codeInfo"))
+                    && (*i != *j))
                 {
                     cout << "\tDuplicate member found: " << *j << endl;
                     throw std::runtime_error(

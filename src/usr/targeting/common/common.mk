@@ -41,6 +41,7 @@ PREDICATES_OBJS =           \
 
 ITERATORS_OBJS =        \
     targetiterator.o    \
+    rawtargetiterator.o \
     rangefilter.o
 
 TARGET_OBJS =       \

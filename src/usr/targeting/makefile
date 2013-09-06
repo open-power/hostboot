@@ -43,7 +43,8 @@ VPATH = \
 
 ATTR_RP_OBJS = \
     attrrp.o   \
-    attrsync.o
+    attrsync.o \
+    targplatutil.o
 
 ENTRY_POINT_OBJS =       \
     targetservicestart.o

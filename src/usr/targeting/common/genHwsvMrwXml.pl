@@ -865,6 +865,9 @@ my $Mproc = 0;
 my $fru_id = 0;
 my @fru_paths;
 my $hasProc = 0;
+my $hash_ax_buses;
+my $axBusesHuidInit = 0;
+
 
 for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++)
 {
@@ -907,6 +910,32 @@ if ($hasProc == 0)
     next;
 }
 
+#preCalculate HUID for A-Bus
+if($axBusesHuidInit == 0)
+{
+    $axBusesHuidInit = 1;
+    for (my $my_curnode = 0; $my_curnode <= $MAXNODE; $my_curnode++)
+    {
+        for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
+        {
+            if ($STargets[$i][NODE_FIELD] != $my_curnode)
+            {
+                next;
+            }
+            if ($STargets[$i][NAME_FIELD] eq "mcs")
+            {
+                my $proc = $STargets[$i][POS_FIELD];
+                if (($STargets[$i+1][NAME_FIELD] eq "pu") ||
+                        ($STargets[$i+1][NAME_FIELD] eq "memb"))
+                {
+                    preCalculateAxBusesHUIDs($my_curnode, $proc, "A");
+                    preCalculateAxBusesHUIDs($my_curnode, $proc, "X");
+                }
+            }
+        }
+    }
+}
+
 # Fourth, generate the proc, occ, ex-chiplet, mcs-chiplet
 # unit-tp (if on fsp), pcie bus and A/X-bus.
 my $ex_count = 0;
@@ -916,6 +945,7 @@ my $proc_ordinal_id =0;
 #my $fru_id = 0;
 #my @fru_paths;
 my $hwTopology =0;
+
 for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 {
     if ($STargets[$i][NODE_FIELD] != $node)
@@ -1192,6 +1222,30 @@ print "\n</attributes>\n";
 exit 0;
 
 ##########   Subroutines    ##############
+
+################################################################################
+# utility function used to preCalculate the AX Buses HUIDs
+################################################################################
+
+sub preCalculateAxBusesHUIDs
+{
+    my ($my_node, $proc, $type) = @_;
+
+    my ($minbus, $maxbus, $numperchip, $typenum, $type) =
+            getBusInfo($type, $CHIPNAME);
+
+    for my $i ( $minbus .. $maxbus )
+    {
+        my $uidstr = sprintf( "0x%02X%02X%04X",
+            ${my_node},
+            $typenum,
+            $i+$proc*($numperchip)+${my_node}*8*($numperchip));
+        my $phys_path =
+            "physical:sys-$sys/node-$my_node/proc-$proc/${type}bus-$i";
+        $hash_ax_buses->{$phys_path} = $uidstr;
+        #print STDOUT "Phys Path = $phys_path, HUID = $uidstr\n";
+    }
+}
 
 ################################################################################
 # utility function used to call plugins. if none exists, call is skipped.
@@ -1850,9 +1904,20 @@ sub generate_proc
         <default>$dcm_installed</default>
     </attribute>";
 
+    if ($master)
+    {
+        print "
+    <!-- Master Proc attribute -->
+    <attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>ACTING_MASTER</default>
+    </attribute>";
+
+    }
     if ($slave)
     {
         print "
+    <!-- Slave Proc attribute -->
     <!-- FSI is connected via node${node}:proc${Mproc}:MFSI-$fsi -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
@@ -2221,23 +2286,31 @@ sub generate_a_pcie
 ";
 }
 
+sub getBusInfo
+{
+    my($type, $chipName) = @_;
+
+    my $minbus = ($type eq "A") ? 0 : ($chipName eq "murano") ? 1 : 0;
+    my $maxbus = ($type eq "A") ? 2 : ($chipName eq "murano") ? 1 : 3;
+    my $numperchip = ($type eq "A") ? 3 : 4;
+    my $typenum = ($type eq "A") ? 0x0F : 0x0E;
+    $type = lc( $type );
+
+    return ($minbus, $maxbus, $numperchip, $typenum, $type);
+}
+
 sub generate_ax_buses
 {
     my ($proc, $type, $ordinalId) = @_;
 
     my $proc_name = "n${node}p${proc}";
     print "\n<!-- $SYSNAME $proc_name ${type}BUS units -->\n";
-    my $minbus = ($type eq "A") ? 0 : ($CHIPNAME eq "murano") ? 1 : 0;
-    my $maxbus = ($type eq "A") ? 2 : ($CHIPNAME eq "murano") ? 1 : 3;
-    my $numperchip = ($type eq "A") ? 3 : 4;
-    my $typenum = ($type eq "A") ? 0x0F : 0x0E;
-    $type = lc( $type );
+
+    my ($minbus, $maxbus, $numperchip, $typenum, $type) =
+            getBusInfo($type, $CHIPNAME);
+
     for my $i ( $minbus .. $maxbus )
     {
-        my $uidstr = sprintf( "0x%02X%02X%04X",
-            ${node},
-            $typenum,
-            $i+$proc*($numperchip)+${node}*8*($numperchip));
         my $c_ordinalId = $i+($ordinalId*($numperchip));
 
         my $peer = 0;
@@ -2279,14 +2352,19 @@ sub generate_ax_buses
                 last;
             }
         }
+        my $phys_path =
+            "physical:sys-${sys}/node-${node}/proc-${proc}/${type}bus-${i}";
         print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}${type}bus$i</id>
     <type>unit-${type}bus-$CHIPNAME</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>$hash_ax_buses->{$phys_path}</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/${type}bus-$i</default>
+        <default>$phys_path</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2302,12 +2380,17 @@ sub generate_ax_buses
     </attribute>";
         if ($peer)
         {
+            my $peerPhysPath = "physical:sys-${sys}/node-${p_node}/"
+                ."proc-${p_proc}/${type}bus-${p_port}";
             print "
     <attribute>
         <id>PEER_TARGET</id>
-        <default>physical:sys-$sys/node-$p_node/proc-$p_proc/"
-            . "${type}bus-$p_port</default>
-    </attribute>";
+        <default>$peerPhysPath</default>
+    </attribute>
+    <compileAttribute>
+        <id>PEER_HUID</id>
+        <default>$hash_ax_buses->{$peerPhysPath}</default>
+    </compileAttribute>";
             if ($type eq "a")
             {
                 print "

@@ -12697,4 +12697,39 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>PROC_MASTER_TYPE</id>
+    <description>
+        Enumeration indicating the role of proc as master/alt_master/not_master
+    </description>
+    <enumerator>
+        <name>ACTING_MASTER</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>MASTER_CANDIDATE</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>NOT_MASTER</name>
+        <value>2</value>
+    </enumerator>
+    <default>NOT_MASTER</default>
+</enumerationType>
+
+<attribute>
+    <id>PROC_MASTER_TYPE</id>
+    <description>Type of Master, ACTING_MASTER or MASTER_CANDIDATE or
+      NOT_MASTER</description>
+    <simpleType>
+        <enumeration>
+            <id>PROC_MASTER_TYPE</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <hasStringConversion/>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

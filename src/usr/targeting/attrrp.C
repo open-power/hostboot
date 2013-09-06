@@ -73,7 +73,7 @@ namespace TARGETING
         Singleton<AttrRP>::instance().startup(io_taskRetErrl);
     }
 
-    void* AttrRP::getBaseAddress()
+    void* AttrRP::getBaseAddress(const NODE_ID i_nodeIdUnused)
     {
         return reinterpret_cast<void*>(VMM_VADDR_ATTR_RP);
     }
@@ -568,10 +568,11 @@ namespace TARGETING
     }
 
     void AttrRP::readSectionData(
-                        std::vector<TARGETING::sectionRefData>& o_pages,
-                        const TARGETING::SECTION_TYPE i_sectionId)
+              std::vector<TARGETING::sectionRefData>& o_pages,
+        const TARGETING::SECTION_TYPE                 i_sectionId,
+        const NODE_ID                                 i_nodeId) const
     {
-        sectionRefData sectionData  = {0};
+        sectionRefData sectionData;
         uint16_t count              =  0;
         uint16_t pages              =  0;
 
