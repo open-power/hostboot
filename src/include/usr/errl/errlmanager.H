@@ -179,16 +179,16 @@ private:
      * @enum  ERRORLOG_PLID_OFFSET
      *
      * Base ID of Hostboot PLIDs.  The hostboot plid range is 0x90 to 0x93
-     * (For each instance running on a multinode system.  Eventually the
-     * offset will need to be offset for the proper node and possibly some
-     * other initializer sent from FSP to keep PLIDs unique across IPLs.
+     * for each instance running on a multinode system.
      *
-     * NOTE: Changes to this define may require changes to
+     * NOTE: Changes to this define (if '9' changes) will require changes to
      *       CpuManager::requestShutdown
      */
     enum ERRORLOG_PLID_OFFSET
     {
-        ERRLOG_PLID_BASE    = 0x90000000, /**< Hostboot Base PLID Offset */
+        ERRLOG_PLID_BASE        = 0x90000000,// Hostboot Base PLID Offset
+        ERRLOG_PLID_NODE_SHIFT  = 24,        // shift to put node number 0x9#
+        ERRLOG_PLID_MASK        = 0x00FFFFFF,// mask to find log number
     };
 
     /**

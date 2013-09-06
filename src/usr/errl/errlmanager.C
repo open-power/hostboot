@@ -36,7 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mbox/mbox_queues.H>
-#include <mbox/mboxif.H> 
+#include <mbox/mboxif.H>
 #include <initservice/initserviceif.H>
 #include <pnor/pnorif.H>
 #include <sys/mm.h>
@@ -78,12 +78,9 @@ char* g_ErrlStorage = new char[ ERRL_STORAGE_SIZE ];
 ///////////////////////////////////////////////////////////////////////////////
 ErrlManager::ErrlManager()
 {
-    // PNOR will be reinitialized every time hostboot runs
-    iv_currLogId = ERRLOG_PLID_BASE;
+    TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
 
     iv_hwasProcessCalloutFn = NULL;
-
-    TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
 
     // Scaffolding.
     // For now, put error logs in a 64KB buffer in L3 RAM
@@ -104,9 +101,49 @@ ErrlManager::ErrlManager()
     l_pMarker->offsetNext = 0;
     l_pMarker->length     = 0;
 
+    // to determine the starting log ID, we need to look thru PNOR and see
+    //  what error records are there; ours will be 1 after the highest found.
+
+    // first, determine our node
+    TARGETING::Target* l_pMasterProcChip = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+    assert(l_pMasterProcChip != NULL);
+
+    const uint64_t l_node =
+        l_pMasterProcChip->getAttr<TARGETING::ATTR_PHYS_PATH>().
+            pathElementOfType(TARGETING::TYPE_NODE).instance;
+
+    // current log id is 0x9# where # is the node instance.
+    iv_currLogId = ERRLOG_PLID_BASE + (l_node << ERRLOG_PLID_NODE_SHIFT);
+
+    // now walk thru memory, finding error logs and determine the highest ID
+    uint32_t l_maxId = 0;
+
+    // Follow the markers.  The start-of-list marker:
+    marker_t* pMarker = OFFSET2MARKER(iv_pStorage->offsetStart);
+    while (pMarker->offsetNext)
+    {
+        pelPrivateHeaderSection_t * pPrivateHdr =
+            reinterpret_cast<pelPrivateHeaderSection_t*>(pMarker+1);
+
+        if (pPrivateHdr->eid > l_maxId)
+        {
+            l_maxId = pPrivateHdr->eid;
+        }
+
+        // next marker/error log
+        pMarker = OFFSET2MARKER(pMarker->offsetNext);
+    } // while
+
+    // bump the current plid to 1 past the max eid found
+    iv_currLogId += (l_maxId & ERRLOG_PLID_MASK) + 1;
+
+    TRACFCOMP( g_trac_errl, INFO_MRK"ErrlManager on proc %.8X, LogId 0x%X",
+        get_huid(l_pMasterProcChip), iv_currLogId);
+
     // Create and register error log message queue.
     msgQueueInit();
-    
+
     // Startup the error log processing thread.
     task_create( ErrlManager::startup, this );
 
@@ -119,11 +156,11 @@ ErrlManager::~ErrlManager()
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager destructor" );
 
-    // Singleton destructor gets run when module gets unloaded. 
+    // Singleton destructor gets run when module gets unloaded.
     // This errorlog module never gets unloaded. So rather to send a
-    // message to error log daemon and tell it to shutdow and delete 
+    // message to error log daemon and tell it to shutdow and delete
     // the queue we will assert here because the destructor never gets
-    // call. 
+    // call.
     assert(0);
 
     TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::ErrlManager destructor." );
@@ -135,7 +172,7 @@ ErrlManager::~ErrlManager()
 void ErrlManager::msgQueueInit ( void )
 {
     errlHndl_t l_err = NULL;
-    
+
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::msgQueueInit ..." );
 
     do
@@ -149,12 +186,12 @@ void ErrlManager::msgQueueInit ( void )
         if( l_err )
         {
             TRACFCOMP(g_trac_errl, ERR_MRK "Msg queue already registered");
-            
+
             delete( l_err );
             l_err = NULL;
 
             //If we got an error then it means the message queue is
-            //registered with mailbox. This should not happen. 
+            //registered with mailbox. This should not happen.
             //So assert here.
             assert(0);
 
@@ -162,7 +199,7 @@ void ErrlManager::msgQueueInit ( void )
         }
 
         // Register for error log manager shutdown event
-        INITSERVICE::registerShutdownEvent( iv_msgQ, ERRLOG_SHUTDOWN, 
+        INITSERVICE::registerShutdownEvent( iv_msgQ, ERRLOG_SHUTDOWN,
                                                   INITSERVICE::NO_PRIORITY );
 
     } while (0);
@@ -186,7 +223,7 @@ void * ErrlManager::startup ( void* i_self )
     TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::startup" );
 
     return NULL;
-}  
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -202,9 +239,9 @@ void ErrlManager::errlogMsgHndlr ( void )
     while( 1 )
     {
         theMsg = msg_wait( iv_msgQ );
-        TRACFCOMP( g_trac_errl, INFO_MRK"Got an error log Msg - Type: 0x%08x", 
+        TRACFCOMP( g_trac_errl, INFO_MRK"Got an error log Msg - Type: 0x%08x",
                                                                theMsg->type );
-        //Process message just received 
+        //Process message just received
         switch( theMsg->type )
         {
             case ERRLOG_NEEDS_TO_BE_COMMITTED_TYPE:
@@ -213,14 +250,14 @@ void ErrlManager::errlogMsgHndlr ( void )
                 //Extract error log handle from the message. We need the error
                 //log handle to pass along to saveErrlogEntry and sendMboxMsg
                 l_err = (errlHndl_t) theMsg->extra_data;
-                
+
                 //Ask the ErrlEntry to assign commit component, commit time
                 l_err->commit( (compId_t) theMsg->data[0] );
 
-                //Write the error log to L3 memory till PNOR is implemented 
+                //Write the error log to L3 memory till PNOR is implemented
                 //RTC #47517 for future task to write error log to PNOR
                 saveErrLogEntry ( l_err );
-           
+
                 //Create a mbox message with the error log and send it to FSP
                 //We only send error log to FSP when mailbox is enabled
                 if( MBOX::mailbox_enabled() )
@@ -238,17 +275,17 @@ void ErrlManager::errlogMsgHndlr ( void )
                 //We are done with the msg
                 msg_free(theMsg);
 
-                // else go back and wait for a next msg 
+                // else go back and wait for a next msg
                 break;
                 }
             case ERRLOG_COMMITTED_ACK_RESPONSE_TYPE:
-                //Hostboot must keep track and clean up hostboot error 
-                //logs in PNOR after it is committed by FSP. 
+                //Hostboot must keep track and clean up hostboot error
+                //logs in PNOR after it is committed by FSP.
 
                 //TODO: We have an RTC 47517 for this work. New code need
                 //to be added to mark the error log in PNOR as committed.
 
-                TRACFCOMP( g_trac_errl, INFO_MRK"Got a acked msg - Type: 0x%08x", 
+                TRACFCOMP( g_trac_errl, INFO_MRK"Got a acked msg - Type: 0x%08x",
                                                                   theMsg->type );
                 msg_free(theMsg);
                 break;
@@ -263,7 +300,7 @@ void ErrlManager::errlogMsgHndlr ( void )
 
             default:
                 // Default Message
-                TRACFCOMP( g_trac_errl, ERR_MRK "Unexpected message type 0x%08x", 
+                TRACFCOMP( g_trac_errl, ERR_MRK "Unexpected message type 0x%08x",
                                                                   theMsg->type );
 
                 msg_free(theMsg);
@@ -281,7 +318,7 @@ void ErrlManager::errlogMsgHndlr ( void )
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::sendMboxMsg()
 ///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::sendMboxMsg ( errlHndl_t& io_err ) 
+void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 {
     errlHndl_t l_err = NULL;
     msg_t  *  msg  = NULL;
@@ -292,7 +329,7 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
          //Create a mailbox message to send to FSP
          msg = msg_allocate();
          msg->type = ERRLOG_SEND_TO_FSP_TYPE;
-    
+
          uint32_t l_msgSize = io_err->flattenedSize();
 
          //Data[0] will be hostboot error log ID so Hostboot can
@@ -306,7 +343,7 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
          io_err->flatten ( temp_buff, l_msgSize );
          msg->extra_data = temp_buff;
 
-        TRACDCOMP( g_trac_errl, INFO_MRK"Send msg to FSP for errlogId [0x%08x]", 
+        TRACDCOMP( g_trac_errl, INFO_MRK"Send msg to FSP for errlogId [0x%08x]",
                                                                io_err->plid() );
 
         l_err = MBOX::send( MBOX::FSP_ERROR_MSGQ, msg );
@@ -354,10 +391,10 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
         //Ask ErrlEntry to check for any special deferred deconfigure callouts
         io_err->deferredDeconfigure();
 
-        //Offload the error log to the errlog message queue 
+        //Offload the error log to the errlog message queue
         sendErrlogToMessageQueue ( io_err, i_committerComp );
         io_err = NULL;
-    
+
    } while( 0 );
 
    TRACDCOMP( g_trac_errl, EXIT_MRK"ErrlManager::commitErrLog" );
@@ -366,7 +403,7 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ErrlManager::saveErrLogEntry() 
+// ErrlManager::saveErrLogEntry()
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::saveErrLogEntry( errlHndl_t& io_err )
 {
@@ -444,13 +481,13 @@ void errlCommit(errlHndl_t& io_err, compId_t i_committerComp )
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::sendErrlogToMessageQueue()
 ///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::sendErrlogToMessageQueue ( errlHndl_t& io_err, 
+void ErrlManager::sendErrlogToMessageQueue ( errlHndl_t& io_err,
                                              compId_t i_committerComp )
 {
     msg_t  *  msg     = NULL;
 
     TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendErrlogToMessageQueue" );
-    
+
     do
     {
         //Create a message to send to Host boot error message queue.
@@ -473,7 +510,7 @@ void ErrlManager::sendErrlogToMessageQueue ( errlHndl_t& io_err,
         int rc = msg_send ( iv_msgQ, msg );
 
         //Return code is non-zero when the message queue is invalid
-        //or the message type is invalid. 
+        //or the message type is invalid.
         if ( rc )
         {
             TRACFCOMP( g_trac_errl, ERR_MRK "Failed to send mailbox message"
@@ -496,21 +533,21 @@ void ErrlManager::errlogShutdown(void)
 
     // Ensure that all the error logs are pushed out to PNOR
     // prior to the PNOR resource provider shutting down.
- 
+
     l_err = PNOR::getSectionInfo(PNOR::HB_ERRLOGS, PNOR::CURRENT_SIDE,
                                     l_section);
- 
+
     if(l_err)
     {
         TRACFCOMP(g_trac_errl, ERR_MRK "Error in getting PNOR section info");
         //We are shutting the error log manager so we can not commit
         //error. So just log the error trace for the error.
         delete l_err;
-        l_err = NULL;        
+        l_err = NULL;
     }
     else
     {
-        int l_rc = mm_remove_pages(FLUSH, (void *) l_section.vaddr, 
+        int l_rc = mm_remove_pages(FLUSH, (void *) l_section.vaddr,
                                                    l_section.size);
         if( l_rc )
         {
@@ -520,7 +557,7 @@ void ErrlManager::errlogShutdown(void)
         }
     }
 
-    // Un-register error log message queue from the shutdown 
+    // Un-register error log message queue from the shutdown
     INITSERVICE::unregisterShutdownEvent( iv_msgQ);
 
     // Un-register error log message queue from the mailbox service
