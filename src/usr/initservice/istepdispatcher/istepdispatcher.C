@@ -460,7 +460,7 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
                 TRACFCOMP( g_trac_initsvc,
                            "msgHndlr : PROCESS_IOVALID_REQUEST" );
 
-                // make sure the library is loaded
+                // make sure the needed libraries are loaded
                 err = VFS::module_load("libestablish_system_smp.so");
 
                 // if the module loaded ok, do the processing
@@ -1012,22 +1012,42 @@ void IStepDispatcher::handleProcFabIovalidMsg(   )
     TRACDCOMP( g_trac_initsvc,
                ENTER_MRK"IStepDispatcher::handleProcFabIovalidMsg()" );
 
-    // do hostboot processing for istep
-    // sys_proc_fab_ipvalid
-    ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing( iv_Msg );
+    // make sure the needed libraries are loaded, we are in step 18
+    // but hostboot does not actually load any libs until step 18.12
+    // since all previous sub steps are run by the fsp.
+    errlHndl_t err = VFS::module_load("libedi_ei_initialization.so");
 
-    // Send the message back as a response
-    msg_respond(iv_msgQ, iv_Msg);
-
-    // if there was an error don't winkle ?
-    if( iv_Msg->data[0] == HWSVR_MSG_SUCCESS )
+    // if the module loaded ok, do the processing
+    if( err == NULL )
     {
-        TRACFCOMP( g_trac_initsvc,
-                   "$TODO RTC:71447 - winkle all cores");
+        // do hostboot processing for istep
+        // sys_proc_fab_ipvalid
+        ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing( iv_Msg );
+
+        // Send the message back as a response
+        msg_respond(iv_msgQ, iv_Msg);
+
+        // if there was an error don't winkle
+        if( iv_Msg->data[0] == HWSVR_MSG_SUCCESS )
+        {
+            TRACFCOMP( g_trac_initsvc,
+                    "$TODO RTC:71447 - winkle all cores");
+        }
+    }
+    else
+    {
+        // Send the elog id back in the message
+        iv_Msg->data[0] = err->eid();
+
+        // commmit the log so it gets to the FSP
+        errlCommit(err, INITSVC_COMP_ID);
+
+        msg_respond(iv_msgQ, iv_Msg);
+
     }
 
     TRACDCOMP( g_trac_initsvc,
-               EXIT_MRK"IStepDispatcher::handleProcFabIovalidMsg()" );
+            EXIT_MRK"IStepDispatcher::handleProcFabIovalidMsg()" );
 
     iv_Msg = NULL;
 }
