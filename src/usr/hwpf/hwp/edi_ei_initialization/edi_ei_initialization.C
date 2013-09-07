@@ -246,7 +246,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
                           " restored Rx lane %d, of %s, of endpoint %s",
-                          l_endp1_txFaillanes[l_count],
+                          l_endp1_rxFaillanes[l_count],
                           l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
                           "A-Bus", l_fapi_endp1_target.toEcmdString());
             }
@@ -306,7 +306,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
                           " restored Rx lane %d, of %s, of endpoint %s",
-                          l_endp2_txFaillanes[l_count],
+                          l_endp2_rxFaillanes[l_count],
                           l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
                           "A-Bus", l_fapi_endp2_target.toEcmdString());
             }

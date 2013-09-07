@@ -684,7 +684,7 @@ void* call_dmi_erepair( void *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
                           " restored Rx lane %d, of DMI-Bus, of endpoint %s",
-                          l_endp1_txFaillanes[l_count],
+                          l_endp1_rxFaillanes[l_count],
                           l_fapi_endp1_target.toEcmdString());
             }
         } // end of if(l_endp1_txFaillanes.size() || l_endp1_rxFaillanes.size())
@@ -748,7 +748,7 @@ void* call_dmi_erepair( void *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
                           " restored Rx lane %d, of DMI-Bus, of endpoint %s",
-                          l_endp2_txFaillanes[l_count],
+                          l_endp2_rxFaillanes[l_count],
                           l_fapi_endp2_target.toEcmdString());
             }
         } // end of if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
