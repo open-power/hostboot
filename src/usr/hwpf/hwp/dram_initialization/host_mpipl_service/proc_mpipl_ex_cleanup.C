@@ -20,8 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_ex_cleanup.C,v 1.5 2013/07/18 13:38:04 stillgs Exp $
-// $Source: /afs/awd.austin.ibm.com/proj/p9/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_ex_cleanup.C,v $
+// $Id: proc_mpipl_ex_cleanup.C,v 1.6 2013/08/20 17:31:41 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_ex_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012

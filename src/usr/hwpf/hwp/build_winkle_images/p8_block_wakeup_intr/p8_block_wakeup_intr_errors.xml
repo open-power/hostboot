@@ -1,0 +1,34 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/p8_block_wakeup_intr/p8_block_wakeup_intr_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: p8_block_wakeup_intr_errors.xml,v 1.1 2013/08/27 16:14:07 stillgs Exp $ -->
+<!-- Error definitions for p8_block_wakeup_intr procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_BLKWKUP_CODE_BAD_OP</rc>
+    <description>An invalid operation (eg besides Set or Clear ENUM) was passed to p8_block_wakeup_intr</description>
+    <ffdc>EX_TARGET</ffdc>
+   <ffdc>OPERATION</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+</hwpErrors>

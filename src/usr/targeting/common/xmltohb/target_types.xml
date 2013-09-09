@@ -1044,6 +1044,8 @@
     <attribute><id>MSS_DIMM_POWER_TEST_MEM_THROTTLE_DENOMINATOR</id></attribute>
     <attribute><id>MSS_THROTTLE_CONTROL_RAS_WEIGHT</id></attribute>
     <attribute><id>MSS_THROTTLE_CONTROL_CAS_WEIGHT</id></attribute>
+    <attribute><id>MCBIST_RANDOM_SEED_VALUE</id></attribute>
+    <attribute><id>MCBIST_RANDOM_SEED_TYPE</id></attribute>
 </targetType>
 
 <targetType>
@@ -1194,6 +1196,7 @@
     <attribute><id>CDIMM_SENSOR_MAP_PRIMARY</id></attribute>
     <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
+    <attribute><id>L4_BANK_DELETE_VPD</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->

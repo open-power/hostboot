@@ -116,7 +116,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/mc_config/mss_eff_config/memory_mss_eff_config.xml \
     hwp/mc_config/mss_eff_config/memory_mss_eff_config_cke_map.xml \
     hwp/mc_config/mss_eff_config/memory_mss_eff_config_rank_group.xml \
-    hwp/mc_config/mss_eff_config/memory_mss_eff_config_termination.xml
+    hwp/mc_config/mss_eff_config/memory_mss_eff_config_termination.xml \
+    hwp/build_winkle_images/p8_block_wakeup_intr/p8_block_wakeup_intr_errors.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
