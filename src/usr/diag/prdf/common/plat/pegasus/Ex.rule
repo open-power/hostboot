@@ -545,7 +545,6 @@ group gCoreFir filter singlebit
     /** COREFIR[1]
      *  IF_SETDELETE_ERR: set deleted
      */
-    #FIXME RTC 23127 a comment observed against bit 1
     (CoreFir, bit(1)) ? SelfHighThr1;
 
     /** COREFIR[2]
@@ -571,7 +570,7 @@ group gCoreFir filter singlebit
     /** COREFIR[6]
      *  IF_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(6)) ? checkAttnThrldOrCallout;
+    (CoreFir, bit(6)) ? SelfMedThr32PerDay;
 
     /** COREFIR[7]
      *  IF_CHKSTOP_ERR: system check stop
@@ -606,13 +605,11 @@ group gCoreFir filter singlebit
     /** COREFIR[13]
      *  SD_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(13)) ? checkAttnThrldOrCallout;
+    (CoreFir, bit(13)) ? SelfMedThr32PerDay;
 
     /** COREFIR[14]
      *  SD_MCHK_AND_ME_EQ_0: MCHK received while ME=0 non recoverable
      */
-    #FIXME RTC 23127  A side note observed against this bit regarding
-    # it's better handling
     (CoreFir, bit(14)) ? SelfHighThr1;
 
     /** COREFIR[15]
@@ -653,7 +650,7 @@ group gCoreFir filter singlebit
     /** COREFIR[22]
      *  FX_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(22)) ? checkAttnThrldOrCallout;
+    (CoreFir, bit(22)) ? SelfMedThr32PerDay;
 
     /** COREFIR[23]
      *  VS_VRF_REC_ERR: VRF recoverable error
@@ -693,7 +690,6 @@ group gCoreFir filter singlebit
     /** COREFIR[30]
      *  LS_SETDELETE_ERR: set deleted
      */
-    #FIXME RTC 23127  Observed ??? against this bit in spreadsheet
     (CoreFir, bit(30)) ? SelfHighThr1;
 
     /** COREFIR[31]
@@ -739,12 +735,12 @@ group gCoreFir filter singlebit
     /** COREFIR[39]
      *  LS_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(39)) ? checkAttnThrldOrCallout;
+    (CoreFir, bit(39)) ? SelfMedThr32PerDay;
 
     /** COREFIR[40]
      *  LS_NOT_CI_REC_ERR: recoverable if not in CI window
      */
-    (CoreFir, bit(40)) ? checkAttnThrldOrCallout;
+    (CoreFir, bit(40)) ? SelfMedThr32PerDay;
 
     /** COREFIR[41]
      *  LS_CHKSTOP_ERR: system check stop
@@ -849,7 +845,6 @@ group gCoreFir filter singlebit
     /** COREFIR[63]
      *  SPRD_PHYP_ERR_INJ: Phyp Xstop via SPRC / SPRD
      */
-    #FIXME RTC 23127  Needto clarify action Chip+SW Level 2IPP
     (CoreFir, bit(63)) ? callout2ndLvlMed;
 };
 
@@ -1526,15 +1521,6 @@ actionclass spareOrSelfHighThr1
 {
     #FIXME RTC 23127  Need to figure out extension bit to determine if sparing
     #      is  done
-    TBDDefaultCallout;
-};
-
-/** if attention is recoverable then threshold else callout and gard on first
- * instance*/
-
-actionclass checkAttnThrldOrCallout
-{
-    #FIXME RTC 23127 Need to clarify what is Threshold B
     TBDDefaultCallout;
 };
 

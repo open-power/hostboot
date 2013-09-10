@@ -224,8 +224,6 @@ group gTpLFir filter singlebit
     /** TP_LFIR[10]
      *  Local errors from Trace Array ( error)
      */
-    #FIXME RTC 23127 bit action suggests threshold 32per day but commnet on bit
-    # 10 suggests threshold of 1
     (TpLFir, bit(10)) ? SelfHighThr32PerDay;
 
     /** TP_LFIR[11]
@@ -241,7 +239,6 @@ group gTpLFir filter singlebit
     /** TP_LFIR[14]
      *  Local errors from PCB
      */
-    #FIXME RTC 23127 Comments not clear
     (TpLFir, bit(14)) ? SelfHighThr32PerDay;
 
     /** TP_LFIR[15]
@@ -355,7 +352,7 @@ rule OccFir
     SPECIAL:     OCCFIR & ~OCCFIR_MASK &  OCCFIR_ACT0 & ~OCCFIR_ACT1;
 };
 
-#based on spreadsheet p8dd1_mss_FFDC_51.xls
+#based on spreadsheet p8dd1_mss_FFDC_51/60.xls
 group gOccFir filter singlebit
 {
     /** OCCFIR[0]
@@ -381,8 +378,7 @@ group gOccFir filter singlebit
     /** OCCFIR[4]
      *  OCC_SCOM_OCCFIR_PMC_PORE_SW_MALF
      */
-    #RTC 23127 ? found in RAS spread sheet.Action need to be updated.
-    (OccFir, bit(4)) ? TBDDefaultCallout;
+    (OccFir, bit(4)) ? defaultMaskedError;
 
     /** OCCFIR[5]
      *  OCC_SCOM_OCCFIR_PMC_OCC_HB_MALF

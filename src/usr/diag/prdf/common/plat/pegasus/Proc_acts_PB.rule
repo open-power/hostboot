@@ -1891,8 +1891,6 @@ group gPbaFir filter singlebit
     /** PBAFIR[3]
      *  PBAFIR_PB_SUE_FW
      */
-     # FIXME RTC 23127 Foreign Link shall be removed. It shall be changed to
-     # Chip + Level2 in spread sheet.
     (PbaFir, bit(3)) ? calloutProcLevel2MedThr1;
 
     /** PBAFIR[4]
@@ -2315,18 +2313,17 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[1]
      *  NONBAR_PE
      */
-    # FIXME RTC 23127 Should Phyp Threshold
-    (PciNestFir_0, bit(1)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(1)) ? calloutConnPci0Th32;
 
     /** PCINESTFIR_1[1]
      *  NONBAR_PE
      */
-    (PciNestFir_1, bit(1)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(1)) ? calloutConnPci1Th32;
 
     /** PCINESTFIR_2[1]
      *  NONBAR_PE
      */
-    (PciNestFir_2, bit(1)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(1)) ? calloutConnPci2Th32;
 
     /** PCINESTFIR_0[2]
      *  PB_TO_PEC_CE
@@ -2651,18 +2648,17 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[23]
      *  AIB_PE
      */
-    # FIXME RTC 23127 Should Phyp Threshold ?
-    (PciNestFir_0, bit(23)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(23)) ? calloutConnPci0Th32;
 
     /** PCINESTFIR_1[23]
      *  AIB_PE
      */
-    (PciNestFir_1, bit(23)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(23)) ? calloutConnPci1Th32;
 
     /** PCINESTFIR_2[23]
      *  AIB_PE
      */
-    (PciNestFir_2, bit(23)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(23)) ? calloutConnPci2Th32;
 
     /** PCINESTFIR_0[24]
      *  ASB_ERROR
@@ -2682,50 +2678,47 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[25]
      *  FOREIGN_LINK_FAIL
      */
-     # FIXME RTC 23127 Action TBD
-    (PciNestFir_0, bit(25)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(25)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[25]
      *  FOREIGN_LINK_FAIL
      */
-    (PciNestFir_1, bit(25)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(25)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[25]
      *  FOREIGN_LINK_FAIL
      */
-    (PciNestFir_2, bit(25)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(25)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[26]
      *  FOREIGN_PB_HANG
      */
-    # FIXME RTC 23127 Action TBD
-    (PciNestFir_0, bit(26)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(26)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[26]
      *  FOREIGN_PB_HANG
      */
-    (PciNestFir_1, bit(26)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(26)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[26]
      *  FOREIGN_PB_HANG
      */
-    (PciNestFir_2, bit(26)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(26)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[27]
      *  CAPP_ERROR
      */
-    # FIXME RTC 23127 Action TBD
-    (PciNestFir_0, bit(27)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(27)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[27]
      *  CAPP_ERROR
      */
-    (PciNestFir_1, bit(27)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(27)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[27]
      *  CAPP_ERROR
      */
-    (PciNestFir_2, bit(27)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(27)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[28]
      *  SYNC_SCOM_ERR
@@ -3098,6 +3091,10 @@ actionclass callout2ndLvlMedThr1
  */
 actionclass  calloutPsiThr32
 {
+#FIXME RTC 23127 Discussion in progress on this.Based on the outcome of
+# discussion, there are chances that we may replace this and calloutPsiThr1
+# with default masked error.
+
     calloutPsiLink;
     threshold32pday;
 };
