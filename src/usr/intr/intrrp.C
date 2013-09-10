@@ -662,7 +662,7 @@ errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target, uint32_t& o_irsn)
         o_irsn = ((static_cast<uint32_t>(reg >> NX_IRSN_COMP_SHIFT)
                    & NX_IRSN_COMP_MASK) &
                   ((static_cast<uint32_t>(reg >> NX_IRSN_MASK_SHIFT)
-                    & NX_IRSN_MASK_MASK) || NX_IRSN_UPPER_MASK));
+                    & NX_IRSN_MASK_MASK) | NX_IRSN_UPPER_MASK));
     }while(0);
 
 

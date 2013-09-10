@@ -283,8 +283,8 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
             while (cur_reg_cntr < l_numRegsToRead)
             {
                 l_err = deviceOp(DeviceFW::READ,i_target,
-                        l_data,l_64bitSize,
-                        DEVICE_XSCOM_ADDRESS(MBOX_DATA_LBUS_START+cur_reg_cntr));
+                                 l_data,l_64bitSize,
+                                 DEVICE_XSCOM_ADDRESS(MBOX_DATA_LBUS_START+cur_reg_cntr));
                 if (l_err)
                 {
                     TRACFCOMP(g_trac_mbox, ERR_MRK "mboxRead> Unable to read Data Area Register 0x%X",MBOX_DATA_LBUS_START+cur_reg_cntr);
@@ -295,17 +295,17 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
                 // buffer.
 
                 // If this is the last register we need to read and we are not word aligned
-                if ((cur_reg_cntr -1 == l_numRegsToRead) &&
-                   (l_numBytesLeft != 0))
+                if (((cur_reg_cntr + 1) == l_numRegsToRead) &&
+                    (l_numBytesLeft != 0))
                 {
-                // Only copy the number of bytes remaining..
-                memcpy( local_buf + cur_reg_cntr,
-                        &l_data[0], l_numBytesLeft);
+                    // Only copy the number of bytes remaining..
+                    memcpy( local_buf + cur_reg_cntr,
+                            &l_data[0], l_numBytesLeft);
                 }
                 // normal copy path.. copy the entire word.
                 else
                 {
-                 memcpy( local_buf + cur_reg_cntr, &l_data[0], sizeof(uint32_t));
+                    memcpy( local_buf + cur_reg_cntr, &l_data[0], sizeof(uint32_t));
                 }
 
                 cur_reg_cntr++;
@@ -457,7 +457,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
             {
 
                 // If this is the last register we need to write and are not word aligned
-                if ((cur_reg_cntr -1 == l_numRegsToWrite) &&
+                if (((cur_reg_cntr + 1) == l_numRegsToWrite) &&
                     (l_numBytesLeft != 0))
                 {
                     // zero out the data reg.

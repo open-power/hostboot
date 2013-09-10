@@ -879,6 +879,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                 // Tell the FSP mbox about it and log an error
                 invalidMsgResponder(i_mbox_msg);
                 free(msg->extra_data); // toss this if it exists
+                msg->extra_data = NULL;
             }
             msg_free(msg);
         }
