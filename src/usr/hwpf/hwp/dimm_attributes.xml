@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- XML file specifying DIMM attributes used by HW Procedures. -->
-<!-- $Id: dimm_attributes.xml,v 1.3 2013/08/13 20:26:21 mjjones Exp $ -->
+<!-- $Id: dimm_attributes.xml,v 1.4 2013/10/03 20:40:52 dedahle Exp $ -->
 <attributes>
 
 <attribute>

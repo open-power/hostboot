@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSpareDramData.C,v 1.3 2013/09/12 14:12:39 mjjones Exp $
+// $Id: getMBvpdSpareDramData.C,v 1.4 2013/10/03 20:40:52 dedahle Exp $
 #include  <stdint.h>
 
 //  fapi support

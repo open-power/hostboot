@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSpareDramData.H,v 1.1 2013/08/13 20:35:10 mjjones Exp $
+// $Id: getMBvpdSpareDramData.H,v 1.2 2013/10/03 20:40:52 dedahle Exp $
 #ifndef GETMBVPDSPAREDRAMDATA_H_
 #define GETMBVPDSPAREDRAMDATA_H_
 
