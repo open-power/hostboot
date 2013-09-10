@@ -1,4 +1,4 @@
-#-- $Id: p8.nx.scom.initfile,v 1.6 2013/04/08 13:48:09 jmcgill Exp $
+#-- $Id: p8.nx.scom.initfile,v 1.8 2013/05/30 04:06:42 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -143,11 +143,12 @@ scom 0x0201309D {
 
 
 #-- NX Miscellaneous Control Register (0x020130A8)
-#scom 0x020130A8 {
-#    bits  ,  scom_data     ;
-#     0    ,  0b1           ;  #-- enable NX interrupts to PowerBus. reset value = 0b1
-#     1    ,  0b1           ;  #-- enable AS interrupts to PowerBus. reset value = 0b1
-#}
+scom 0x020130A8 {
+    bits  ,  scom_data , expr;
+    4:7   ,  0b0000    , (ATTR_CHIP_EC_FEATURE_NX_HANG_CONTROL_ON_SCOM != 0)    ;  #-- HANG_POLL_SCALE
+    8:11  ,  0b0011    , (ATTR_CHIP_EC_FEATURE_NX_HANG_CONTROL_ON_SCOM != 0)    ;  #-- HANG_DATA_SCALE
+   12:15  ,  0b1011    , (ATTR_CHIP_EC_FEATURE_NX_HANG_CONTROL_ON_SCOM != 0)    ;  #-- HANG_SHM_SCALE
+}
 
 
 #-- PBI FIR Mask Register (0x02013083)
