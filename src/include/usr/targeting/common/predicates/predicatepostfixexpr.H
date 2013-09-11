@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/targeting/predicates/predicatepostfixexpr.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/targeting/common/predicates/predicatepostfixexpr.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 #ifndef __TARGETING_COMMON_PREDICATEPOSTFIXEXPR_H
 #define __TARGETING_COMMON_PREDICATEPOSTFIXEXPR_H
@@ -45,7 +45,7 @@
 #include <targeting/common/predicates/predicatebase.H>
 
 //******************************************************************************
-// Macros 
+// Macros
 //******************************************************************************
 
 #undef TARG_NAMESPACE
@@ -53,7 +53,7 @@
 #undef TARG_FN
 
 //******************************************************************************
-// Interface 
+// Interface
 //******************************************************************************
 
 namespace TARGETING
@@ -74,17 +74,17 @@ class PredicatePostfixExpr : public PredicateBase
 
         /**
          *  @brief Create empty postfix predicate expression which will always
-         *      evaluate true if not otherwise modified.  Any updates to the 
+         *      evaluate true if not otherwise modified.  Any updates to the
          *      expression completely replace the initial "always true"
          *      behavior.
-         */ 
+         */
         PredicatePostfixExpr();
- 
+
         /**
          *  @brief Destroy a postfix predicate expression
          *
          *  @note: Nothing extra to do here since object does not own the
-         *      predicates  
+         *      predicates
          */
         virtual ~PredicatePostfixExpr();
 
@@ -92,18 +92,18 @@ class PredicatePostfixExpr : public PredicateBase
          *  @brief Updates the postfix predicate expression by pushing the given
          *      predicate onto the expression stack
          *
-         *  @param[in] i_pPredicate Pointer to existing concrete predicate.  
+         *  @param[in] i_pPredicate Pointer to existing concrete predicate.
          *      Passing a NULL predicate is not allowed (results in assert)
          *
          *  @verbatim
          *      Example:
          *
-         *      Stack before calling push(&P2): P1 
+         *      Stack before calling push(&P2): P1
          *      Stack after calling push(&P2):  P1 P2
-         *  @endverbatim 
+         *  @endverbatim
          *
          *  @return Reference to the same predicate expression, for chaining
-         */ 
+         */
         PredicatePostfixExpr& push(
             const PredicateBase* i_pPredicate);
 
@@ -116,11 +116,11 @@ class PredicatePostfixExpr : public PredicateBase
          *
          *      Stack before calling And(): P1 P2
          *      Stack after calling And():  P1 P2 AND
-         *      Stack after evaluation:     (P1 && P2) 
-         *  @endverbatim 
+         *      Stack after evaluation:     (P1 && P2)
+         *  @endverbatim
          *
          *  @return Reference to the same predicate expression, for chaining
-         */ 
+         */
         PredicatePostfixExpr& And();
 
         /**
@@ -130,13 +130,13 @@ class PredicatePostfixExpr : public PredicateBase
          *  @verbatim
          *      Example:
          *
-         *      Stack before calling Not(): P1 
+         *      Stack before calling Not(): P1
          *      Stack after calling Not():  P1 NOT
          *      Stack after evaluation:     (!P1)
          *  @endverbatim
          *
          *  @return Reference to the same predicate expression, for chaining
-         */ 
+         */
         PredicatePostfixExpr& Not();
 
         /**
@@ -144,29 +144,29 @@ class PredicatePostfixExpr : public PredicateBase
          *      logical "OR" operation onto the expression stack.
          *
          *  @verbatim
-         *      Example: 
+         *      Example:
          *
-         *      Stack before calling Or(): P1 P2 
+         *      Stack before calling Or(): P1 P2
          *      Stack after calling Or():  P1 P2 OR
          *      Stack after evaluation:    (P1 || P2)
-         *  @endverbatim 
+         *  @endverbatim
          *
          *  @return Reference to the same predicate expression for chaining
          */
         PredicatePostfixExpr& Or();
 
         /**
-         *  @brief Returns whether the given target matches the criteria 
+         *  @brief Returns whether the given target matches the criteria
          *      specified by the postfix predicate expression
-         * 
+         *
          *  @par Detailed Description:
-         *      Returns whether the given target matches the criteria 
-         *      specified by the postfix predicate expression.  The routine 
+         *      Returns whether the given target matches the criteria
+         *      specified by the postfix predicate expression.  The routine
          *      sequentially evaluates a predicate against the supplied target
          *      or applies a logical operation to one or more prior predicate
          *      evaluations using a postfix algorithm.  Routine will assert
          *      if postfix expression is not formatted properly, final result
-         *      stack does not have exactly one result, target is NULL, or 
+         *      stack does not have exactly one result, target is NULL, or
          *      invalid logical operator was requested.  See PredicateBase class
          *      for parameter/return description.
          *
@@ -191,11 +191,18 @@ class PredicatePostfixExpr : public PredicateBase
          */
         virtual bool operator()(
             const Target* i_pTarget) const;
-     
+
     private:
 
+        static const uint64_t ALREADY_EVALUATED_UPPER_BOUND = 1;
+
+        bool alreadyEvaluated(const uint64_t i_stackItem) const
+        {
+            return(i_stackItem <= ALREADY_EVALUATED_UPPER_BOUND);
+        }
+
         /**
-         *  @brief Enumeration describing the type of logical operator to 
+         *  @brief Enumeration describing the type of logical operator to
          *      apply to one or more previous predicate evaluations
          */
         enum LogicalOperator
@@ -205,9 +212,9 @@ class PredicatePostfixExpr : public PredicateBase
             OR,   ///< Logically OR the result of the preceding two evaluations
             NOT,  ///< Logically negate the result of the preceding evaluation
         };
-  
+
         /**
-         *  @brief Structure describing one unit of the postfix predicate 
+         *  @brief Structure describing one unit of the postfix predicate
          *      expression under evaluation
          */
         struct Operation
@@ -216,10 +223,10 @@ class PredicatePostfixExpr : public PredicateBase
                                              ///< apply to result stack
             const PredicateBase* pPredicate; ///< Predicate to evaluate,
                                              ///< if logicalOp == EVAL
-        };        
+        };
 
         std::vector<Operation> iv_ops; ///< Expression operations to perform
- 
+
         TARG_DISABLE_COPY_AND_ASSIGNMENT_OPERATORS(PredicatePostfixExpr);
 };
 
