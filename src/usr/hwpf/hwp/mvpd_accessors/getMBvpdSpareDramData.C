@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSpareDramData.C,v 1.1 2013/08/13 20:35:13 mjjones Exp $
+// $Id: getMBvpdSpareDramData.C,v 1.3 2013/09/12 14:12:39 mjjones Exp $
 #include  <stdint.h>
 
 //  fapi support
@@ -69,9 +69,6 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
         MbaSpareData iv_mbaSpareData[NUM_MBAS];
     };
 
-    // Old VPD without the Spare Data
-    const uint8_t VPD_WITHOUT_SPARE_DATA_SIZE = sizeof(MirrorData);
-
     // Current VPD AM keyword size
     const uint32_t AM_KEYWORD_SIZE = sizeof(AmKeyword);
     fapi::ReturnCode l_rc;
@@ -80,6 +77,11 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
     // MBvpd AM keyword buffer
     AmKeyword * l_pAmBuffer = NULL;
     uint32_t  l_AmBufSize = sizeof(AmKeyword);
+
+    // For old VPD without spare DRAM data
+    // Store data for all 4 ranks of this DIMM
+    const uint8_t VPD_WITHOUT_SPARE_LOW_NIBBLE = 0x55;
+    const uint8_t VPD_WITHOUT_SPARE_FULL_BYTE = 0xFF;
 
     do
     {
@@ -115,55 +117,40 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
                                  reinterpret_cast<uint8_t *>(l_pAmBuffer),
                                  l_AmBufSize);
 
-        if (l_rc)
+        // Check for error or incorrect amount of data returned
+        if (l_rc || (l_AmBufSize < AM_KEYWORD_SIZE))
         {
-            FAPI_ERR("getMBvpdSpareDramData: Read of AM keyword failed");
-            break;
-        }
-
-        // Check correct amount of data returned
-        if (l_AmBufSize < AM_KEYWORD_SIZE)
-        {
-
-            // If Old VPD
-            if (VPD_WITHOUT_SPARE_DATA_SIZE == l_AmBufSize)
-            {
-                // Because prior VPD AM keyword does not contain
-                // spare DRAM data, the ATTR_SPD_DRAM_WIDTH
-                // attribute is used to determine spare DRAM availability.
-                // If x4 configuration, assume LOW_NIBBLE.
-                // Otherwise, FULL_BYTE.
-                uint8_t l_dramWidth = 0;
-                l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_WIDTH, &i_dimm, l_dramWidth);
-                if (l_rc)
-                {
-                    FAPI_ERR("getMBvpdSpareDramData: "
-                             "Error getting DRAM spare data");
-                    break;
-                }
-                // If x4 configuration, low nibble.
-                if (fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4 == l_dramWidth)
-                {
-                    o_data = fapi::ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE;
-                    break;
-                }
-                // Else, full spare.
-                else
-                {
-                    o_data = fapi::ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE;
-                    break;
-                }
-            }
-
-            else
+            // This handles two scenarios:
+            // 1. fapiGetMBvpdField has returned an error because
+            //    the AM keyword is not present in this DIMM's
+            //    VPD.
+            // 2. This DIMM does have the AM Keyword, however it
+            //    is in an old version of VPD and does not contain
+            //    any spare DRAM information.
+            // In both cases, the ATTR_SPD_DRAM_WIDTH
+            // attribute is used to determine spare DRAM availability.
+            // If x4 configuration, assume LOW_NIBBLE.
+            // Otherwise, FULL_BYTE.
+            // TODO RTC 84278: Undo the workaround for scenario 1 once the
+            // C-DIMM VPD is updated on all DIMMs to the current version.
+            uint8_t l_dramWidth = 0;
+            l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_WIDTH, &i_dimm, l_dramWidth);
+            if (l_rc)
             {
                 FAPI_ERR("getMBvpdSpareDramData: "
-                         "Insufficient amount of data returned:"
-                         " %u < %u", l_AmBufSize, AM_KEYWORD_SIZE);
-                const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_AM;
-                const uint32_t & RETURNED_SIZE = l_AmBufSize;
-                FAPI_SET_HWP_ERROR(l_rc,
-                                   RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
+                         "Error getting DRAM spare data");
+                break;
+            }
+            // If x4 configuration, low nibble.
+            if (fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4 == l_dramWidth)
+            {
+                o_data = VPD_WITHOUT_SPARE_LOW_NIBBLE;
+                break;
+            }
+            // Else, full spare.
+            else
+            {
+                o_data = VPD_WITHOUT_SPARE_FULL_BYTE;
                 break;
             }
         }
