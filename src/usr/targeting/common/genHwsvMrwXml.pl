@@ -1531,7 +1531,7 @@ sub generate_sys
         <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>0b11</default>
+        <default>0x1</default>
     </attribute>
 ";
     # HDAT drawer number (physical node) to
@@ -1970,11 +1970,11 @@ sub generate_proc
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>\n";
     if( $proc % 2 == 0 ) # proc0 of DCM
     {
-        print "        <default>0b100</default><!-- PORT0NONRED -->";
+        print "        <default>0x4</default><!-- PORT0NONRED -->";
     }
     else # proc1 of DCM
     {
-        print "        <default>0b000</default><!-- NONE -->";
+        print "        <default>0x0</default><!-- NONE -->";
     }
     print "
     </attribute>
