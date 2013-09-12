@@ -52,7 +52,16 @@ BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
 BASE_W_HEADER_IMAGE = hostboot.header.bin
 BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
-
+EXT_PAD_IMAGE = hostboot_extended.bin.pad
+EXT_ECC_IMAGE = hostboot_extended.bin.ecc
+TESTDATA = hbtestdata.bin
+TESTDATA_ECC = hbtestdata.bin.ecc
+ALL_HB_IMAGES = ${BASE_IMAGES} \
+                ${BASE_W_HEADER_IMAGE} \
+                ${BASE_ECC_IMAGE} ${EXT_ECC_IMAGE} \
+                ${BASE_W_HEADER_ECC_IMAGE} \
+                ${EXT_PAD_IMAGE} \
+                ${TESTDATA} ${TESTDATA_ECC}
 
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f -u ${SRCPATH:F${image}} ${image};@}
@@ -64,9 +73,15 @@ cp_hbfiles: .SPECTARG
 	currentsb -chain
 	ecc --inject ${BASE_IMAGE} --output ${BASE_ECC_IMAGE} --p8
 	ecc --inject ${BASE_W_HEADER_IMAGE} --output ${BASE_W_HEADER_ECC_IMAGE} --p8
+	# dd command will pad image up to the next 4K page
+	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
+	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
+	# create data for a test partition in pnor
+	dd if=/dev/urandom of=${TESTDATA} bs=1 count=28K
+	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8
 
 clobber_cp_hbfiles:
-	rm -f ${BASE_IMAGES} ${BASE_W_HEADER_IMAGE} {BASE_W_HEADER_ECC_IMAGE} \
+	rm -f ${ALL_HB_IMAGES} \
 	      sbe.header secureboot.header hb.footer hostboot.stage.bin
 
 
@@ -89,7 +104,10 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_IMAGE}
+#uncomment the below line to enable ECC in the extended image
+#HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_IMAGE},HBRT=${HBRT_IMAGE},TEST=${TESTDATA_ECC}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_IMAGE},TEST=${TESTDATA_ECC}
+
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}

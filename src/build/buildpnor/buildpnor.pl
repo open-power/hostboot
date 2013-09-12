@@ -213,6 +213,8 @@ sub loadPnorLayout
         my $physicalOffset = $sectionEl->{physicalOffset}[0];
         my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
         my $side = $sectionEl->{side}[0];
+        my $testonly = $sectionEl->{testonly}[0];
+        my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
 
         if (($emitTestSections == 0) && ($sectionEl->{testonly}[0] eq "yes"))
         {
@@ -231,6 +233,7 @@ sub loadPnorLayout
         $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
 
     }
 
@@ -319,6 +322,7 @@ sub createPnorImage
             #Add Partition
             #f{fs,part} --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
             if ($g_ffsCmd eq "") {
+                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
                 my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
             } else {
                 my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
@@ -329,6 +333,31 @@ sub createPnorImage
                 trace(0, "$this_func: Call to add partition $eyeCatch failed.  rc=$rc.  Aborting!");
                 last;
             }
+
+            #ECC flag
+            my $chip = 0;
+            my $compress = 0;
+            my $ecc = 0;
+            if( ($sectionHash{$key}{ecc} eq "yes") )
+            {
+                $ecc = 0x8000;
+            };
+            #[1:chip][1:compression][2:ecc]
+            my $userflags0 = ($chip << 16)
+              | ($compress << 8)
+              | $ecc;
+            trace(0,"userflags0 = $userflags0");
+            if ($g_ffsCmd eq "") {
+                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 0 --name $eyeCatch --value $userflags0");
+                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 0 --name $eyeCatch --value $userflags0`;
+            }
+            $rc = $?;
+            if($rc)
+            {
+                trace(0, "$this_func: Call to add userdata to $eyeCatch failed.  rc=$rc.  Aborting!");
+                last;
+            }
+
 
             #Trunc Partition
             #f{fs,part} --target tuleta.pnor --partition-offset 0 --name HBI --trunc

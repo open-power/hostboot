@@ -42,21 +42,27 @@
  */
 
 /**
- * FFS Misc information flags
+ * FFS User Data flags
  */
 enum
 {
+    /* Chip Select : 1 byte */
     FFS_CHIPSEL_UNUSED     = 0xFF,    /**< Chip select not used */
+
+    /* Compression : 1 byte */
     FFS_COMPRESS_UNUSED    = 0xFF,    /**< Compression not used  */
 
+    /* Data Integrity : 2 bytes */
     FFS_INTEG_ECC_PROTECT  = 0x8000,  /**< Data Integrity: ECC protected */
     FFS_INTEG_UNUSED       = 0x1FFF,  /**< Unused Data Integrity Bits */
 
+    /* Version Checking : 1 byte */
     FFS_VERS_SHA512        = 0x80,    /**< SHA512 used for Version */
     FFS_VERS_SHA512_PER_EC = 0x40,    /**< SHA512 version per EC */
     FFS_VERS_UNUSED        = 0x3F,    /**< Unused Version bits */
 
-    FFS_MISC_PRESERVED      = 0x80,    /**< Preserved across code updates */
+    /* Miscellaneous Bits : 1 byte */
+    FFS_MISC_PRESERVED     = 0x80,    /**< Preserved across code updates */
     FFS_MISC_UNUSED        = 0x1F,    /**< Unused MISC Flags */
 };
 

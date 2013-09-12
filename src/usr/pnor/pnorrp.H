@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #include <builtins.h>
 #include <errl/errlentry.H>
 #include <vmmconst.h>
+#include <map>
 
 /**
  * PNOR Resource Provider
@@ -90,7 +91,7 @@ class PnorRP
         LAST_VADDR = BASE_VADDR + TOTAL_SIZE,  /**< End of our VA range */
 
         /** Real number of bytes required to read 1 logical page */
-        PAGESIZE_PLUS_ECC = PAGESIZE * (9/8),  // 8 bytes of data + 1 byte of ECC
+        PAGESIZE_PLUS_ECC = ((PAGESIZE * 9)/8),  // 8B data + 1B of ECC
 
         SUPPORTED_FFS_VERSION = 0x1,  /**< Supported FFS Version */
         FFS_TABLE_BASE_ADDR = 0x0,    /**< Currently only have FFS table */
@@ -106,8 +107,18 @@ class PnorRP
         uint32_t flashAddr;  /**< Address in flash */
         uint32_t size;  /**< Actual size of content in bytes (not including ECC) */
         uint8_t chip;  /**< Chip Select */
-        uint8_t miscFlags; /**<chip select, ECC Protect, sideless flags */
+        uint8_t version; /**< Version Checking */
+        uint16_t integrity; /**< Data Integrity */
+        uint8_t misc; /**< Misc Flags */
     } PACKED;
+
+    /**
+     * Flash statistics
+     */
+    struct FlashStats_t {
+        uint8_t numWrites;  /**< Number of writes to this page */
+        uint8_t numCEs;  /**< Number of ECC corrections made */
+    };
 
     /**
      * Cached copy of section data
@@ -130,6 +141,18 @@ class PnorRP
      *   something went wrong
      */
     uint64_t iv_startupRC;
+
+    /**
+     * Track some information related to flash wear and health
+     *  indexed by physical page number inside PNOR
+     */
+    std::map<uint64_t,FlashStats_t> iv_stats;
+
+    /**
+     * Remember that we got a UE and we are shutting down
+     */
+    bool iv_shutdownUE;
+
 
     /**
      * @brief Initialize the daemon, called by constructor
@@ -155,13 +178,16 @@ class PnorRP
      * @param[in] i_chip  Which PNOR chip
      * @param[in] i_ecc  true=apply ECC after reading
      * @param[out] o_dest  Buffer to copy data into
+     * @param[out] o_fatalError  true=fatal error encountered, but no
+     *                    log could be created
      *
      * @return Error from device
      */
     errlHndl_t readFromDevice( uint64_t i_offset,
                                uint64_t i_chip,
                                bool i_ecc,
-                               void* o_dest );
+                               void* o_dest,
+                               bool& o_fatalError );
 
     /**
      * @brief  Write 1 logical page of data to the PNOR device
@@ -205,26 +231,6 @@ class PnorRP
     errlHndl_t computeSection( uint64_t i_vaddr,
                                PNOR::SideSelect& o_side,
                                PNOR::SectionId& o_id );
-
-    /**
-     * @brief  Apply ECC algorithm to data
-     *
-     * @param[in] i_orig  Original data to write
-     * @param[in] o_ecc  Data after applying ECC
-     */
-    void applyECC( void* i_orig,
-                   void* o_ecc );
-
-    /**
-     * @brief  Apply ECC algorithm to data, assumes size of 1 page
-     *
-     * @param[in] i_orig  Original data that was read
-     * @param[in] o_data  Data after removing ECC
-     *
-     * @return Error if ECC is incorrect
-     */
-    errlHndl_t stripECC( void* i_orig,
-                         void* o_data );
 
     /**
      * @brief  Returns true if the initial startup failed for some reason

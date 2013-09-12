@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pnor/test/pnorrptest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pnor/test/pnorrptest.H $                              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PNORRPTEST_H
 #define __PNORRPTEST_H
 
@@ -36,6 +35,10 @@
 #include <pnor/pnorif.H>
 #include <sys/msg.h>
 #include <limits.h>
+#include <sys/mm.h>
+#include <targeting/common/targetservice.H>
+#include <devicefw/userif.H>
+#include <pnor/ecc.H>
 #include "../pnorrp.H"
 
 extern trace_desc_t* g_trac_pnor;
@@ -79,7 +82,7 @@ class PnorRpTest : public CxxTest::TestSuite
                           testSections[idx], errhdl->reasonCode() );
                 TS_FAIL( "PnorRpTest::test_getSectionInfo> ERROR : Unexpected error log" );
                 fails++;
-                errlCommit(errhdl,PNOR_COMP_ID);
+                ERRORLOG::errlCommit(errhdl,PNOR_COMP_ID);
             }
 
             // Look for non-zero size
@@ -108,6 +111,147 @@ class PnorRpTest : public CxxTest::TestSuite
     };
 
     /**
+     * @brief PNOR RP test - ECC
+     *        Verify ECC errors are handled
+     */
+    void test_ECC(void)
+    {
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC> Start" );
+        uint64_t fails = 0;
+        uint64_t total = 0;
+        errlHndl_t errhdl = NULL;
+
+        const uint64_t FIRST_VAL = 0x1122334455667788;
+        const size_t ECC_PAGESIZE = (PAGESIZE*9)/8;
+        const uint64_t LOG_OFFSET = PAGESIZE/4; //force a page crossing
+        const uint64_t PART_OFFSET = PAGESIZE*2 + LOG_OFFSET;
+        const uint64_t TEST_PHYS_OFFSET = 0x3590000 //see defaultPnorLayout.xml
+          + (ECC_PAGESIZE*2) //matches PART_OFFSET
+          + (LOG_OFFSET*9)/8;
+
+        // use the TEST partition as scratch space
+        PNOR::SectionInfo_t info;
+        errhdl = PNOR::getSectionInfo( PNOR::TEST, PNOR::SIDE_A, info );
+        if( errhdl )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRpTest::test_ECC> ERROR : getSectionInfo returned error for PNOR::TEST : RC=%X", errhdl->reasonCode() );
+            TS_FAIL( "PnorRpTest::test_ECC> ERROR : Unexpected error log" );
+            ERRORLOG::errlCommit(errhdl,PNOR_COMP_ID);
+            return;
+        }
+
+        // Use the 3rd page of data
+        uint64_t* dataptr = reinterpret_cast<uint64_t*>
+          (info.vaddr+PART_OFFSET);
+
+        // read some data
+        uint64_t* tmp1 = new uint64_t[PAGESIZE/sizeof(uint64_t)+1];
+        for( size_t i = 0; i < PAGESIZE/sizeof(uint64_t); i++ )
+        {
+            tmp1[i] = dataptr[i];
+        }
+
+        // write some data
+        for( size_t i = 0; i < PAGESIZE/sizeof(uint64_t); i++ )
+        {
+            dataptr[i] = FIRST_VAL+i;
+        }
+
+        // flush the page to make sure it gets out to the device
+        int rc = mm_remove_pages( RELEASE, dataptr, PAGESIZE );
+        total++;
+        if( rc )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRpTest::test_ECC> ERROR : error on RELEASE : rc=%X", rc );
+            TS_FAIL( "PnorRpTest::test_ECC> ERROR : error on RELEASE" );
+            fails++;
+        }
+
+        // manually read the data from the PNOR device
+        uint8_t* chip_data = new uint8_t[ECC_PAGESIZE];
+        size_t l_size = ECC_PAGESIZE;
+        errhdl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            chip_data,
+                            l_size,
+                            DEVICE_PNOR_ADDRESS(0, TEST_PHYS_OFFSET));
+        total++;
+        if( errhdl )
+        {
+            TS_FAIL("PnorRpTest::test_ECC: PNORDD deviceRead() failed! Error committed.");
+            ERRORLOG::errlCommit(errhdl,PNOR_COMP_ID);
+            fails++;
+        }
+
+        // compare the ECC-stripped data from the driver with the
+        //  data we wrote
+        uint64_t data_ecc = 0;
+        uint64_t data_noecc = 0;
+        uint8_t* chip_data_ptr = chip_data;
+        PNOR::ECC::eccStatus ecc_rc = PNOR::ECC::CLEAN;
+        for( size_t i = FIRST_VAL; i < PAGESIZE/sizeof(uint64_t); i++ )
+        {
+            memcpy( &data_ecc, chip_data_ptr, sizeof(uint64_t) );
+            uint8_t ecc_byte = chip_data_ptr[8];
+            ecc_rc = PNOR::ECC::removeECC( chip_data_ptr,
+                                  reinterpret_cast<uint8_t*>(&data_noecc),
+                                  sizeof(uint64_t) );
+            total++;
+            if( ecc_rc != PNOR::ECC::CLEAN )
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC: Error removing ECC from word %d : status=%d, orig=%.16X:%.2X", i, ecc_rc, data_ecc, ecc_byte)
+                TS_FAIL("PnorRpTest::test_ECC: Data mismatch.");
+                fails++;
+            }
+
+            total++;
+            if( data_noecc != FIRST_VAL + i )
+            {
+                TRACFCOMP( g_trac_pnor, "PnorRpTest::test_ECC: Data mismatch on word %d : exp=%.16X, act=%.16X, orig=%.16X:%.2X", i, FIRST_VAL+i, data_noecc, data_ecc, ecc_byte);
+                TS_FAIL("PnorRpTest::test_ECC: Data mismatch.");
+                fails++;
+            }
+            chip_data_ptr += 9;
+        }
+
+        // generate data with CEs
+        chip_data_ptr = chip_data;
+        for (int i = 0; i < 9; i++)
+        {
+            memcpy( &data_ecc, chip_data_ptr, sizeof(uint64_t) );
+            uint64_t bad_data = data_ecc ^ (1ul << (63 - i*5));
+            memcpy( chip_data_ptr, &bad_data, sizeof(uint64_t) );
+            chip_data_ptr += 9;
+        }
+
+        // write the bad data to the chip directly
+        errhdl = deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                             chip_data,
+                             l_size,
+                             DEVICE_PNOR_ADDRESS(0, TEST_PHYS_OFFSET));
+        total++;
+        if( errhdl )
+        {
+            TS_FAIL("PnorRpTest::test_ECC: PNORDD deviceWrite() failed! Error committed.");
+            ERRORLOG::errlCommit(errhdl,PNOR_COMP_ID);
+            fails++;
+        }
+
+        // read the same data through the RP, ECC errors should be corrected
+        for( size_t i = i; i < PAGESIZE/sizeof(uint64_t); i++ )
+        {
+            total++;
+            if( dataptr[i] != FIRST_VAL+i )
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC: Mismatch on readback from RP on word %d : exp=%.16X, act=%.16X", i, FIRST_VAL+i, dataptr[i] );
+                TS_FAIL("PnorRpTest::test_ECC: Mismatch on readback from RP.");
+                fails++;
+            }
+        }
+
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC> %d/%d fails", fails, total );
+    };
+
+    /**
      * @brief PNOR RP test - Read/Write Page
      *        Use message interface to read and write individual pages
      */
@@ -127,9 +271,9 @@ class PnorRpTest : public CxxTest::TestSuite
         uint64_t data2_r[PAGESIZE/sizeof(uint64_t)];
         uint64_t data_tmp[PAGESIZE/sizeof(uint64_t)];
 
-        // use the HB_DATA as scratch space
+        // use the TEST partition as scratch space
         PNOR::SectionInfo_t info;
-        PNOR::getSectionInfo( PNOR::HB_DATA, PNOR::SIDE_A, info );
+        PNOR::getSectionInfo( PNOR::TEST, PNOR::SIDE_A, info );
 
         msg_t* msg = msg_allocate();
 

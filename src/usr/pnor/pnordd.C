@@ -91,7 +91,7 @@ errlHndl_t ddRead(DeviceFW::OperationType i_opType,
     uint64_t l_addr = va_arg(i_args,uint64_t);
 
     do{
-        //@todo (RTC:34763) - add support for unaligned data
+        //@todo (RTC:36951) - add support for unaligned data
         // Ensure we are operating on a 32-bit (4-byte) boundary
         assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
         assert( io_buflen % 4 == 0 );
@@ -142,7 +142,7 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
     uint64_t l_addr = va_arg(i_args,uint64_t);
 
     do{
-        //@todo (RTC:34763) - add support for unaligned data
+        //@todo (RTC:36951) - add support for unaligned data
         // Ensure we are operating on a 32-bit (4-byte) boundary
         assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
         assert( io_buflen % 4 == 0 );
@@ -1487,7 +1487,6 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
 
     return l_err;
 }
-
 
 /**
  * @brief Compare the existing data in 1 erase block of the flash with

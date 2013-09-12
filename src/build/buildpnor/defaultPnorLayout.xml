@@ -108,6 +108,7 @@ Layout Description
         <physicalRegionSize>0x8000</physicalRegionSize>
         <side>A</side>  <!-- Choices: A, B -->
         <testonly/>
+        <ecc/>
     </section>
     <section>
         <description>Hostboot Data (1M)</description>

@@ -36,10 +36,12 @@
 #include "pnordd.H"
 #include "ffs.h"   //Common header file with BuildingBlock.
 #include "common/ffs_hb.H" //Hostboot definition of user data in ffs_entry struct.
+#include <pnor/ecc.H>
+#include <kernel/console.H>
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
-TRAC_INIT(&g_trac_pnor, "PNOR", 2*KILOBYTE, TRACE::BUFFER_SLOW); //2K
+TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW); //2K
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -48,7 +50,7 @@ TRAC_INIT(&g_trac_pnor, "PNOR", 2*KILOBYTE, TRACE::BUFFER_SLOW); //2K
 /**
  * Eyecatcher strings for PNOR TOC entries
  */
-const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
+const char* cv_EYECATCHER[] = {
     "part",   /**< PNOR::TOC           : Table of Contents */
     "HBI",    /**< PNOR::HB_EXT_CODE   : Hostboot Extended Image */
     "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
@@ -104,7 +106,7 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
 
     if( Singleton<PnorRP>::instance().didStartupFail(rc) )
     {
-        /*@     errorlog tag
+        /*@
          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
          *  @moduleid       PNOR::MOD_PNORRP_DIDSTARTUPFAIL
          *  @reasoncode     PNOR::RC_BAD_STARTUP_RC
@@ -119,6 +121,7 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
                                 PNOR::RC_BAD_STARTUP_RC,
                                 rc,
                                 0   );
+        l_errl->collectTrace(PNOR_COMP_NAME);
     }
 
     io_rtaskRetErrl=l_errl;
@@ -139,6 +142,18 @@ void* wait_for_message( void* unused )
     return NULL;
 }
 
+/**
+ * @brief  Static function wrapper to call doShutdown
+ *   to avoid deadlock in main task
+ */
+void* pnor_shutdown( void* unused )
+{
+    TRACFCOMP(g_trac_pnor, "pnor_shutdown> " );
+    printk( "PNOR errors causing shutdown\n" );
+    INITSERVICE::doShutdown( PNOR::RC_ECC_UE );
+    return NULL;
+}
+
 
 /********************
  Private/Protected Methods
@@ -150,6 +165,7 @@ void* wait_for_message( void* unused )
 PnorRP::PnorRP()
 : iv_msgQ(NULL)
 ,iv_startupRC(0)
+,iv_shutdownUE(false)
 {
     TRACFCOMP(g_trac_pnor, "PnorRP::PnorRP> " );
 
@@ -219,6 +235,7 @@ void PnorRP::initDaemon()
                                                PNOR::RC_INVALID_SECTION,
                                                TO_UINT64(BASE_VADDR),
                                                TO_UINT64(rc));
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
             break;
         }
 
@@ -284,6 +301,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                                PNOR::RC_STARTUP_FAIL,
                                                TO_UINT64(i_section),
                                                rc);
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
 
             // set the return section to our invalid data
             id = PNOR::INVALID_SECTION;
@@ -308,6 +326,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                                PNOR::RC_INVALID_SECTION,
                                                TO_UINT64(i_section),
                                                TO_UINT64(side));
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
 
             // set the return section to our invalid data
             id = PNOR::INVALID_SECTION;
@@ -325,7 +344,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         o_info.name = cv_EYECATCHER[id];
         o_info.vaddr = iv_TOC[side][id].virtAddr;
         o_info.size = iv_TOC[side][id].size;
-        o_info.eccProtected = (bool)(iv_TOC[side][id].miscFlags &
+        o_info.eccProtected = (bool)(iv_TOC[side][id].integrity &
                                      FFS_INTEG_ECC_PROTECT);
     }
 
@@ -343,6 +362,7 @@ errlHndl_t PnorRP::readTOC()
     uint8_t* tocBuffer = NULL;
 #define SIDELESS_VADDR_INDEX 2
     uint64_t nextVAddr[] = {SIDEA_VADDR, SIDEB_VADDR, SIDELESS_VADDR};
+    bool fatal_error = false;
 
     do{
         // Zero out my table
@@ -354,11 +374,7 @@ errlHndl_t PnorRP::readTOC()
             {
                 iv_TOC[side][id].id = (PNOR::SectionId)id;
                 iv_TOC[side][id].side = (PNOR::SideSelect)side;
-                iv_TOC[side][id].chip = 0;
-                iv_TOC[side][id].flashAddr = 0;
-                iv_TOC[side][id].virtAddr = 0;
-                iv_TOC[side][id].size = 0;
-                iv_TOC[side][id].miscFlags = 0;
+                //everything else should default to zero
             }
         }
 
@@ -369,7 +385,8 @@ errlHndl_t PnorRP::readTOC()
         // TOC starts at offset zero
 
         tocBuffer = new uint8_t[PAGESIZE];
-        l_errhdl = readFromDevice( FFS_TABLE_BASE_ADDR, 0, false, tocBuffer );
+        l_errhdl = readFromDevice( FFS_TABLE_BASE_ADDR, 0, false,
+                                   tocBuffer, fatal_error );
         if( l_errhdl ) { break; }
 
         ffs_hdr* l_ffs_hdr = (ffs_hdr*) tocBuffer;
@@ -461,7 +478,7 @@ errlHndl_t PnorRP::readTOC()
                 continue;
             }
 
-            ffsUserData = (ffs_hb_user_t*)&cur_entry->user;
+            ffsUserData = (ffs_hb_user_t*)&(cur_entry->user);
 
             //size
             iv_TOC[cur_side][secId].size = ((uint64_t)cur_entry->size)*PAGESIZE;
@@ -480,8 +497,10 @@ errlHndl_t PnorRP::readTOC()
             //chipSelect
             iv_TOC[cur_side][secId].chip = ffsUserData->chip;
 
-            //mics flags
-            iv_TOC[cur_side][secId].miscFlags = ffsUserData->miscFlags;
+            //user data
+            iv_TOC[cur_side][secId].integrity = ffsUserData->dataInteg;
+            iv_TOC[cur_side][secId].version = ffsUserData->verCheck;
+            iv_TOC[cur_side][secId].misc = ffsUserData->miscFlags;
 
             if((iv_TOC[cur_side][secId].flashAddr + iv_TOC[cur_side][secId].size) > (l_ffs_hdr->block_count*PAGESIZE))
             {
@@ -506,7 +525,7 @@ errlHndl_t PnorRP::readTOC()
     if(tocBuffer != NULL)
     {
         TRACUCOMP(g_trac_pnor, "Deleting tocBuffer");
-        delete tocBuffer;
+        delete[] tocBuffer;
     }
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::readTOC" );
@@ -531,6 +550,7 @@ void PnorRP::waitForMessage()
     bool needs_ecc = false;
     int rc = 0;
     uint64_t status_rc = 0;
+    bool fatal_error = false;
 
     while(1)
     {
@@ -556,8 +576,18 @@ void PnorRP::waitForMessage()
                 switch(message->type)
                 {
                     case( MSG_MM_RP_READ ):
-                        l_errhdl = readFromDevice( dev_offset, chip_select, needs_ecc, user_addr );
-                        if( l_errhdl )
+                        // do not allow reads in the shutdown path, only writes
+                        if( iv_shutdownUE )
+                        {
+                            status_rc = -EIO;
+                            break;
+                        }
+                        l_errhdl = readFromDevice( dev_offset,
+                                                   chip_select,
+                                                   needs_ecc,
+                                                   user_addr,
+                                                   fatal_error );
+                        if( l_errhdl || fatal_error )
                         {
                             status_rc = -EIO; /* I/O error */
                         }
@@ -584,6 +614,7 @@ void PnorRP::waitForMessage()
                                                         PNOR::RC_INVALID_MESSAGE_TYPE,
                                                         TO_UINT64(message->type),
                                                         (uint64_t)eff_addr);
+                        l_errhdl->collectTrace(PNOR_COMP_NAME);
                         status_rc = -EINVAL; /* Invalid argument */
                 }
             }
@@ -604,6 +635,7 @@ void PnorRP::waitForMessage()
                                                    PNOR::RC_INVALID_ASYNC_MESSAGE,
                                                    TO_UINT64(message->type),
                                                    (uint64_t)eff_addr);
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
                 status_rc = -EINVAL; /* Invalid argument */
             }
 
@@ -638,11 +670,13 @@ void PnorRP::waitForMessage()
 errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
                                    uint64_t i_chip,
                                    bool i_ecc,
-                                   void* o_dest )
+                                   void* o_dest,
+                                   bool& o_fatalError )
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readFromDevice> i_offset=0x%X, i_chip=%d", i_offset, i_chip );
     errlHndl_t l_errhdl = NULL;
     uint8_t* ecc_buffer = NULL;
+    o_fatalError = false;
 
     do
     {
@@ -655,7 +689,7 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
         // if we need to handle ECC we need to read more than 1 page
         if( i_ecc )
         {
-            ecc_buffer = new uint8_t[PAGESIZE_PLUS_ECC];
+            ecc_buffer = new uint8_t[PAGESIZE_PLUS_ECC]();
             data_to_read = ecc_buffer;
             read_size = PAGESIZE_PLUS_ECC;
         }
@@ -674,10 +708,49 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
         // remove the ECC data
         if( i_ecc )
         {
-            l_errhdl = stripECC( data_to_read, o_dest );
-            if( l_errhdl )
+            // remove the ECC and fix the original data if it is broken
+            PNOR::ECC::eccStatus ecc_stat =
+              PNOR::ECC::removeECC( reinterpret_cast<uint8_t*>(data_to_read),
+                                    reinterpret_cast<uint8_t*>(o_dest),
+                                    PAGESIZE );
+
+            // create an error if we couldn't correct things
+            if( ecc_stat == PNOR::ECC::UNCORRECTABLE )
             {
-                break;
+                TRACFCOMP( g_trac_pnor, "PnorRP::readFromDevice> Uncorrectable ECC error : chip=%d, offset=0x%.X", i_chip, i_offset );
+
+                // Need to shutdown here instead of creating an error log
+                //  because the bad page could be critical to the regular
+                //  error handling path and cause an infinite loop.
+                // Also need to spawn a separate task to do the shutdown
+                //  so that the regular PNOR task can service the writes
+                //  that happen during shutdown.
+                iv_shutdownUE = true;
+                o_fatalError = true;
+                task_create( pnor_shutdown, NULL );
+            }
+            // found an error so we need to fix something
+            else if( ecc_stat != PNOR::ECC::CLEAN )
+            {
+                TRACFCOMP( g_trac_pnor, "PnorRP::readFromDevice> Correctable ECC error : chip=%d, offset=0x%.X", i_chip, i_offset );
+
+                // need to write good data back to PNOR
+                l_errhdl = DeviceFW::deviceWrite(pnor_target,
+                                       data_to_read,//corrected data
+                                       read_size,
+                                       DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
+                if( l_errhdl )
+                {
+                    TRACFCOMP(g_trac_pnor, "PnorRP::readFromDevice> Error writing corrected data back to device : RC=%X", l_errhdl->reasonCode() );
+                    // we don't need to fail here since we can correct
+                    //  it the next time we read it again, instead just
+                    //  commit the log here
+                    errlCommit(l_errhdl,PNOR_COMP_ID);
+                }
+
+                // keep some stats here in case we want them someday
+                //no need for mutex since only ever 1 thread accessing this
+                iv_stats[i_offset/PAGESIZE].numCEs++;
             }
         }
     } while(0);
@@ -714,17 +787,22 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
         // apply ECC to data if needed
         if( i_ecc )
         {
-            ecc_buffer = new uint8_t[PAGESIZE];
-            applyECC( i_src, ecc_buffer );
-            data_to_write = (void*)ecc_buffer;
+            ecc_buffer = new uint8_t[PAGESIZE_PLUS_ECC];
+            PNOR::ECC::injectECC( reinterpret_cast<uint8_t*>(i_src),
+                                  PAGESIZE,
+                                  reinterpret_cast<uint8_t*>(ecc_buffer) );
+            data_to_write = reinterpret_cast<void*>(ecc_buffer);
             write_size = PAGESIZE_PLUS_ECC;
         }
 
+        //no need for mutex since only ever a singleton object
+        iv_stats[i_offset/PAGESIZE].numWrites++;
+
         // write the data out to the PNOR DD
-        errlHndl_t l_errhdl = DeviceFW::deviceWrite(pnor_target,
-                                                    data_to_write,
-                                                    write_size,
-                                                    DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
+        errlHndl_t l_errhdl = DeviceFW::deviceWrite( pnor_target,
+                                       data_to_write,
+                                       write_size,
+                                       DEVICE_PNOR_ADDRESS(i_chip,i_offset) );
         if( l_errhdl )
         {
             TRACFCOMP(g_trac_pnor, "PnorRP::writeToDevice> Error from device : RC=%X", l_errhdl->reasonCode() );
@@ -773,6 +851,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
                                         PNOR::RC_INVALID_ADDRESS,
                                         l_vaddr,
                                         BASE_VADDR);
+        l_errhdl->collectTrace(PNOR_COMP_NAME);
         return l_errhdl;
     }
 
@@ -787,42 +866,20 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
 
     // pull out the information we need to return from our global copy
     o_chip = iv_TOC[side][id].chip;
-    o_ecc = (bool)(iv_TOC[side][id].miscFlags & FFS_INTEG_ECC_PROTECT);
-    o_offset = l_vaddr - iv_TOC[side][id].virtAddr; //offset into pnor
+    o_ecc = (bool)(iv_TOC[side][id].integrity & FFS_INTEG_ECC_PROTECT);
+    o_offset = l_vaddr - iv_TOC[side][id].virtAddr; //offset into section
+
+    // for ECC we need to figure out where the ECC-enhanced offset is
+    //  before tacking on the offset to the section
+    if( o_ecc )
+    {
+        o_offset = (o_offset * 9) / 8;
+    }
+    // add on the offset of the section itself
     o_offset += iv_TOC[side][id].flashAddr;
 
-    TRACUCOMP( g_trac_pnor, "< PnorRP::computeDeviceAddr: o_offset=0x%X, o_chip=%d", o_offset, o_chip );
+    TRACUCOMP( g_trac_pnor, "< PnorRP::computeDeviceAddr: i_vaddr=%X, o_offset=0x%X, o_chip=%d", l_vaddr, o_offset, o_chip );
     return l_errhdl;
-}
-
-
-/**
- * @brief  Apply ECC algorithm to data, assumes size of 1 page
- */
-void PnorRP::applyECC( void* i_orig,
-                       void* o_ecc )
-{
-    TRACFCOMP(g_trac_pnor, "> PnorRP::applyECC" );
-
-    //@todo - fill this in  (Story 34763)
-    memcpy( o_ecc, i_orig, PAGESIZE );
-
-    TRACFCOMP(g_trac_pnor, "< PnorRP::applyECC" );
-}
-
-/**
- * @brief  Apply ECC algorithm to data, assumes logical size of 1 page
- */
-errlHndl_t PnorRP::stripECC( void* i_orig,
-                             void* o_data )
-{
-    TRACFCOMP(g_trac_pnor, "> PnorRP::stripECC" );
-
-    //@todo - fill this in  (Story 34763)
-    memcpy( o_data, i_orig, PAGESIZE );
-
-    TRACFCOMP(g_trac_pnor, "< PnorRP::stripECC" );
-    return NULL;
 }
 
 /**
@@ -898,6 +955,7 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
                                          PNOR::RC_INVALID_ADDRESS,
                                          i_vaddr,
                                          0);
+        errhdl->collectTrace(PNOR_COMP_NAME);
         return errhdl;
     }
 

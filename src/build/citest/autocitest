@@ -319,6 +319,8 @@ mods_started_addr=`grep "CxxTest::g_ModulesStarted" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 mods_completed_addr=`grep "CxxTest::g_ModulesCompleted" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+shutdown_status=`grep "CpuManager::cv_shutdown_status" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 
 #Adjust addresses for HRMOR
 HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
@@ -344,6 +346,9 @@ mods_started_addr=`echo "obase=16; $temp" | bc`
 temp=$(($HRMOR + 0x$mods_completed_addr))
 mods_completed_addr=`echo "obase=16; $temp" | bc`
 
+temp=$(($HRMOR + 0x$shutdown_status))
+shutdown_status=`echo "obase=16; $temp" | bc`
+
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
 declare -i timeout=0
@@ -368,6 +373,17 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     fi
 done
 
+echo "====> waiting for shutdown..."
+loopcount=0
+while [ "$loopcount" -lt 6 ]; do
+    autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$shutdown_status 0x08)"     1> $SBXHOME/shutdown_status.log  2> /dev/null
+    shutdown_yet=`cat $SBXHOME/shutdown_status.log |  awk '/0x/ {print strtonum($1)}'`
+    if [ "$shutdown_yet" -ne 0 ];  then
+        break
+    fi
+    sleep 5
+    ((loopcount++))     # increment loopcount
+done
 
 echo "====> dump totaltests..."
 autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$totaltests_addr 0x08)"     1> $SBXHOME/totaltests.log  2> /dev/null

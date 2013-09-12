@@ -77,6 +77,8 @@ namespace PNOR
         //RC_UNSUPPORTED_SFCRANGE can only be used in
         //   shutdown calls.
         RC_UNSUPPORTED_SFCRANGE      = PNOR_COMP_ID | 0x0E,
+        // Cannot change value of RC_ECC_UE, used by FSP
+        RC_ECC_UE                    = PNOR_COMP_ID | 0x0F,
     };
 };
 
