@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.25 2013/05/24 19:39:02 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.27 2013/09/03 19:57:39 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -73,6 +73,11 @@
 //   1.24  | 05/20/13 | gollub  | Updates from review.
 //   1.25  | 05/24/13 | gollub  | Added DDR4 support to mss_get_address_range
 //         |          |         | Disabled superfast increment mode if DDR4 - due to DD1 bug
+//   1.26  | 08/23/13 | gollub  | Added x4 ECC mode support
+//         |          |         | Clear inject type: MBECTLQ after atomic inject
+//         |          |         | Updated random data seed
+//         |          |         | Ordered display output by beat 0-7
+//   1.27  | 09/03/13 | gollub  | Removed unused variables
 
 //------------------------------------------------------------------------------
 //    Includes
@@ -395,26 +400,6 @@ static const uint8_t mss_eccSpareIndex_to_symbol[MSS_X4_ECC_STEER_OPTIONS]={
 // TODO: Update with actual patterns from Luis Lastras when they are ready
 static const uint32_t mss_maintBufferData[MSS_MAX_PATTERNS][16][2]={
 
-// PATTERN_0 DEBUG
-/*
-   {{0x00000000, 0x10000000},
-    {0x01000000, 0x11000000},
-    {0x02000000, 0x12000000},
-    {0x03000000, 0x13000000},
-    {0x04000000, 0x14000000},
-    {0x05000000, 0x15000000},
-    {0x06000000, 0x16000000},
-    {0x07000000, 0x17000000},
-    {0x08000000, 0x18000000},
-    {0x09000000, 0x19000000},
-    {0x0a000000, 0x1a000000},
-    {0x0b000000, 0x1b000000},
-    {0x0c000000, 0x1c000000},
-    {0x0d000000, 0x1d000000},
-    {0x0e000000, 0x1e000000},
-    {0x0f000000, 0x1f000000}},
-*/
-
 
 // PATTERN_0
    {{0x00000000, 0x00000000},
@@ -562,21 +547,21 @@ static const uint32_t mss_maintBufferData[MSS_MAX_PATTERNS][16][2]={
 
 // PATTERN_8: random seed
    {{0x12345678, 0x87654321},
+    {0x87654321, 0x12345678},
     {0x12345678, 0x87654321},
+    {0x87654321, 0x12345678},
     {0x12345678, 0x87654321},
+    {0x87654321, 0x12345678},
     {0x12345678, 0x87654321},
+    {0x87654321, 0x12345678},
     {0x12345678, 0x87654321},
+    {0x87654321, 0x12345678},
     {0x12345678, 0x87654321},
+    {0x87654321, 0x12345678},
     {0x12345678, 0x87654321},
+    {0x87654321, 0x12345678},
     {0x12345678, 0x87654321},
-    {0x12345678, 0x87654321},
-    {0x12345678, 0x87654321},
-    {0x12345678, 0x87654321},
-    {0x12345678, 0x87654321},
-    {0x12345678, 0x87654321},
-    {0x12345678, 0x87654321},
-    {0x12345678, 0x87654321},
-    {0x12345678, 0x87654321}}};
+    {0x87654321, 0x12345678}}};
 
 
 
@@ -1792,6 +1777,7 @@ fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
         l_timebase_sel = 0;
         l_timebase_burst_sel = 0;
         l_timebase_interval = 512;
+        //l_timebase_interval = 32; // DEBUG: speeds up testing
         l_burst_window = 0;
         l_burst_interval = 0;
     }
@@ -2259,15 +2245,18 @@ fapi::ReturnCode mss_SuperFastRead::setupAndExecuteCmd()
 
 
 
-    /*
+    
     // DEBUG. Set hard CE threshold to 1: MBSTRQ
+    /*
     FAPI_INF("\nDEBUG. Set hard CE threshold to 1: MBSTRQ");
-    ecmdDataBufferBase l_data(64);
+    //ecmdDataBufferBase l_data(64);
     uint32_t l_hardCEThreshold = 1;
     l_rc = fapiGetScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data);
     if(l_rc) return l_rc;
     l_data.insert( l_hardCEThreshold, 28, 12, 32-12 ); // 28:39 hard ce threshold
     l_data.setBit(2);   // Enable hard ce ETE special attention
+    l_data.setBit(55);  // Enable per-symbol counters to count soft ces
+    l_data.setBit(56);  // Enable per-symbol counters to count int ces
     l_data.setBit(57);  // Enable per-symbol counters to count hard ces
     l_rc = fapiPutScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data);
     if(l_rc) return l_rc;
@@ -2446,17 +2435,17 @@ fapi::ReturnCode mss_AtomicInject::setupAndExecuteCmd()
     l_rc = loadStopCondMask(); if(l_rc) return l_rc;
 
     // Load inject type: MBECTLQ
-    ecmdDataBufferBase l_injectType(64);
-    l_rc = fapiGetScom(iv_target, MBA01_MBECTLQ_0x03010610, l_injectType);
+    ecmdDataBufferBase l_mbectl(64);
+    l_rc = fapiGetScom(iv_target, MBA01_MBECTLQ_0x03010610, l_mbectl);
     if(l_rc) return l_rc;
-    l_ecmd_rc |= l_injectType.flushTo0();
-    l_ecmd_rc |= l_injectType.setBit(iv_injectType);
+    l_ecmd_rc |= l_mbectl.flushTo0();
+    l_ecmd_rc |= l_mbectl.setBit(iv_injectType);
     if(l_ecmd_rc)
     {
         l_rc.setEcmdError(l_ecmd_rc);
         return l_rc;
     }
-    l_rc = fapiPutScom(iv_target, MBA01_MBECTLQ_0x03010610, l_injectType);
+    l_rc = fapiPutScom(iv_target, MBA01_MBECTLQ_0x03010610, l_mbectl);
     if(l_rc) return l_rc;
 
     // Start the command: MBMCCQ
@@ -2468,21 +2457,20 @@ fapi::ReturnCode mss_AtomicInject::setupAndExecuteCmd()
 
     // Poll for command complete: MBMSRQ
     l_rc = pollForMaintCmdComplete(); if(l_rc) return l_rc;
-
-    // Collect FFDC
-    l_rc = collectFFDC(); if(l_rc) return l_rc;
-
-    // Clear MBECCFIR
-    ecmdDataBufferBase l_data(64);
-    l_ecmd_rc |= l_data.flushTo0();
+    
+    // Clear inject type: MBECTLQ
+    l_ecmd_rc |= l_mbectl.flushTo0();
     if(l_ecmd_rc)
     {
         l_rc.setEcmdError(l_ecmd_rc);
         return l_rc;
     }
-
-    l_rc = fapiPutScom(iv_targetCentaur, mss_mbeccfir[iv_mbaPosition], l_data);
+    l_rc = fapiPutScom(iv_target, MBA01_MBECTLQ_0x03010610, l_mbectl);
     if(l_rc) return l_rc;
+
+    // Collect FFDC
+    l_rc = collectFFDC(); if(l_rc) return l_rc;
+
 
     FAPI_INF("EXIT mss_AtomicInject::setupAndExecuteCmd()");
 
@@ -2558,25 +2546,26 @@ fapi::ReturnCode mss_Display::setupAndExecuteCmd()
     // Read the data from the display cmd: MBMSRQ
 
     static const uint32_t maintBufferReadDataRegs[16]={
-      MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655,
-      MAINT0_MBA_MAINT_BUFF0_DATA1_0x03010656,
-      MAINT0_MBA_MAINT_BUFF0_DATA2_0x03010657,
-      MAINT0_MBA_MAINT_BUFF0_DATA3_0x03010658,
+      // Port0                                    beat  double word
+      MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655, // 0     DW0
+      MAINT0_MBA_MAINT_BUFF2_DATA0_0x03010675, // 1     DW2
+      MAINT0_MBA_MAINT_BUFF0_DATA1_0x03010656, // 2     DW4
+      MAINT0_MBA_MAINT_BUFF2_DATA1_0x03010676, // 3     DW6
+      MAINT0_MBA_MAINT_BUFF0_DATA2_0x03010657, // 4     DW8
+      MAINT0_MBA_MAINT_BUFF2_DATA2_0x03010677, // 5     DW10
+      MAINT0_MBA_MAINT_BUFF0_DATA3_0x03010658, // 6     DW12
+      MAINT0_MBA_MAINT_BUFF2_DATA3_0x03010678, // 7     DW14
 
-      MAINT0_MBA_MAINT_BUFF1_DATA0_0x03010665,
-      MAINT0_MBA_MAINT_BUFF1_DATA1_0x03010666,
-      MAINT0_MBA_MAINT_BUFF1_DATA2_0x03010667,
-      MAINT0_MBA_MAINT_BUFF1_DATA3_0x03010668,
+      // Port1
+      MAINT0_MBA_MAINT_BUFF1_DATA0_0x03010665, // 0     DW1
+      MAINT0_MBA_MAINT_BUFF3_DATA0_0x03010685, // 1     DW3
+      MAINT0_MBA_MAINT_BUFF1_DATA1_0x03010666, // 2     DW5
+      MAINT0_MBA_MAINT_BUFF3_DATA1_0x03010686, // 3     DW7
+      MAINT0_MBA_MAINT_BUFF1_DATA2_0x03010667, // 4     DW9
+      MAINT0_MBA_MAINT_BUFF3_DATA2_0x03010687, // 5     DW11
+      MAINT0_MBA_MAINT_BUFF1_DATA3_0x03010668, // 6     DW13
+      MAINT0_MBA_MAINT_BUFF3_DATA3_0x03010688};// 7     DW15
 
-      MAINT0_MBA_MAINT_BUFF2_DATA0_0x03010675,
-      MAINT0_MBA_MAINT_BUFF2_DATA1_0x03010676,
-      MAINT0_MBA_MAINT_BUFF2_DATA2_0x03010677,
-      MAINT0_MBA_MAINT_BUFF2_DATA3_0x03010678,
-
-      MAINT0_MBA_MAINT_BUFF3_DATA0_0x03010685,
-      MAINT0_MBA_MAINT_BUFF3_DATA1_0x03010686,
-      MAINT0_MBA_MAINT_BUFF3_DATA2_0x03010687,
-      MAINT0_MBA_MAINT_BUFF3_DATA3_0x03010688};
 
     static const uint32_t maintBufferRead65thByteRegs[4]={
       MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x03010695,
@@ -2591,25 +2580,25 @@ fapi::ReturnCode mss_Display::setupAndExecuteCmd()
     //----------------------------------------------------
     // Read the data: 16 loops x 64bits = 128B cacheline
     //----------------------------------------------------
-    FAPI_INF("Read the data: 16 loops x 64bits = 128B cacheline");
+    FAPI_ERR("Read the data: 16 loops x 64bits = 128B cacheline");
 
     for(loop=0; loop<16; loop++ )
     {
         l_rc = fapiGetScom(iv_target, maintBufferReadDataRegs[loop], l_data);
         if(l_rc) return l_rc;
-        FAPI_INF("0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
+        FAPI_ERR("0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
     }
 
     //----------------------------------------------------
     // Read the 65th byte: 4 loops
     //----------------------------------------------------
-    FAPI_INF("Read the 65th byte: 4 loops");
+    FAPI_ERR("Read the 65th byte and ECC bits: 4 loops");
 
     for(loop=0; loop<4; loop++ )
     {
         l_rc = fapiGetScom(iv_target, maintBufferRead65thByteRegs[loop], l_data);
         if(l_rc) return l_rc;
-        FAPI_INF("0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
+        FAPI_ERR("0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
     }
 
     // Collect FFDC
@@ -3579,6 +3568,7 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
                 break;
             }
         }
+        // TODO: create error if x4 mode and symbol 0,1?
 
         if ( MSS_SYMBOLS_PER_RANK <= o_chipMark )
         {
@@ -3790,6 +3780,7 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_CHIP_INDEX);
         return l_rc;
     }
+    // TODO: create error if x4 mode and symbol 0,1?
     else // Convert from symbol index to galois field
     {
         l_chipMarkGalois = mss_symbol2Galois[i_chipMark];
@@ -3813,7 +3804,7 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
     if (l_mbeccfir.isBitSet(i_rank) || l_mbeccfir.isBitSet(20 + i_rank))
     {
         // TODO: Can FW distingish this rc from all the others
-        // so they know they just need to retry after clearing MPR FIR?
+        // so they know they just need to retry after clearing MPE FIR?
         
         FAPI_ERR("Markstore write may have been blocked due to MPE FIR set on %s.",i_target.toEcmdString());
 
@@ -4010,7 +4001,7 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
 
     //***************************************
     // Get l_eccSpareIndex
-    l_ecmd_rc |= l_steerMux.extractPreserve(&l_eccSpareIndex, 10, 5, 8-5);
+    l_ecmd_rc |= l_steerMux.extractPreserve(&l_eccSpareIndex, 10, 6, 8-6);
     if(l_ecmd_rc)
     {
         l_rc.setEcmdError(l_ecmd_rc);
@@ -4131,6 +4122,7 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_PUT_STEER_MUX_BAD_INPUT);
         return l_rc;        
     }
+    // TODO: add error if ecc_spare and symbol is 0 or 1?
 
 
     // Read steer mux register for the given rank and mux type (read or write).
@@ -4368,7 +4360,7 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
             return l_rc;
         }
 
-        l_ecmd_rc |= l_steerMux.insert( l_eccSpareIndex, 10, 5, 8-5 );
+        l_ecmd_rc |= l_steerMux.insert( l_eccSpareIndex, 10, 6, 8-6 );
     }
 
     if(l_ecmd_rc)
@@ -4559,6 +4551,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
     uint8_t l_dimm=0;
     uint8_t l_rank=0;
     uint8_t l_byte=0;
+    uint8_t l_nibble=0;    
     uint8_t l_dq_pair_index = 0;
     uint8_t l_bad_dq_pair_index = 0;
     uint8_t l_bad_dq_pair_count=0;
@@ -4567,20 +4560,22 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
     uint8_t l_bad_symbol = MSS_INVALID_SYMBOL;
     uint8_t l_symbol_mark = MSS_INVALID_SYMBOL;
     uint8_t l_chip_mark = MSS_INVALID_SYMBOL;
+    uint8_t l_dramSparePort0Symbol = MSS_INVALID_SYMBOL;
+    uint8_t l_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
+    uint8_t l_eccSpareSymbol = MSS_INVALID_SYMBOL;
     bool l_spare_exists = false;
     bool l_spare_used = false;
     bool l_chip_mark_used = false;
     bool l_symbol_mark_used = false;
     uint8_t l_valid_dimms  = 0;
-    uint8_t l_valid_dimm[2][2];
+    uint8_t l_valid_dimm[2][2];        
+    bool l_x4_DRAM_spare_low_exists = false;
+    bool l_x4_DRAM_spare_high_exists = false;
+    bool l_x4_DRAM_spare_used = false;
+    bool l_x4_ECC_spare_used = false;
 
-
-    // TODO: Fake this to show spares exist until attribute ready
     // NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3
-    uint8_t l_spare_dram[2][2][4]= { // Array defining if spare dram exits
-    {{3,3,3,3} , {3,3,3,3}},
-    {{3,3,3,3} , {3,3,3,3}}};
-
+    uint8_t l_spare_dram[2][2][4]; // Array defining if spare dram exit
 
     enum
     {
@@ -4615,17 +4610,16 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
     o_repairs_exceeded = 0;
 
 
-    // TODO: Fake this out for now since Anuwat is changing it.
     // Get array attribute that defines if spare dram exits
     //     l_spare_dram[port][dimm][rank]
     //     NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3
     //     NOTE: Typically will same value for whole Centaur.
-    //l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SPARE, &i_target, l_spare_dram);
-    //if(l_rc)
-    //{
-    //    FAPI_ERR("Error reading attribute to see if spare exists");
-    //    return l_rc;
-    //}
+    l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SPARE, &i_target, l_spare_dram);
+    if(l_rc)
+    {
+        FAPI_ERR("Error reading attribute to see if spare exists on %s.",i_target.toEcmdString());
+        return l_rc;
+    }
 
     // Get l_dramWidth
   	l_rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
@@ -5157,9 +5151,345 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                     // x4 ECC
                     // x4 chip mark, x4 ECC steer, spare x4 DRAM if CDIMM
                     else if (l_dramWidth == mss_MemConfig::X4)
-                    {
-                    } // End x4 ECC
+                    {                                           
+                        // Determine if spare x4 DRAM exists
+                        l_x4_DRAM_spare_low_exists = l_spare_dram[l_port][l_dimm][l_rank] == mss_MemConfig::LOW_NIBBLE;
+                        l_x4_DRAM_spare_high_exists = l_spare_dram[l_port][l_dimm][l_rank] == mss_MemConfig::HIGH_NIBBLE;                        
+                                         
+                        // Start with spare x4 DRAM not used
+                        l_x4_DRAM_spare_used = false;
+                        
+                        // Read mark store
+                        l_rc = mss_get_mark_store(
 
+                            i_target,               // MBA
+                            4*l_dimm + l_rank,      // Master rank: 0-7
+                            l_symbol_mark,          // MSS_INVALID_SYMBOL, since no symbol mark in x4 mode
+                            l_chip_mark );          // MSS_INVALID_SYMBOL if no chip mark
+
+                        if (l_rc)
+                        {
+                            FAPI_ERR("Error reading markstore on %s.",i_target.toEcmdString());
+                            return l_rc;
+                        }
+
+                        // Check if chip mark used (may have been used on other port)
+                        l_chip_mark_used = l_chip_mark != MSS_INVALID_SYMBOL;
+
+
+                        // READ steer mux
+                        l_rc = mss_check_steering(
+                        
+                            i_target,               // MBA
+                            4*l_dimm + l_rank,      // Master rank: 0-7
+                            l_dramSparePort0Symbol, // Should be MSS_INVALID_SYMBOL since not used yet
+                            l_dramSparePort1Symbol, // Should be MSS_INVALID_SYMBOL since not used yet
+                            l_eccSpareSymbol);      // MSS_INVALID_SYMBOL if no ECC steer in place yet
+
+                        if (l_rc)
+                        {
+                            FAPI_ERR("Error reading steer mux %s.",i_target.toEcmdString());
+                            return l_rc;
+                        }
+
+                        // Check if ECC spare used (may have been used on other port)
+                        l_x4_ECC_spare_used = l_eccSpareSymbol != MSS_INVALID_SYMBOL;                        
+
+                        // For each byte 0-9, where 9 is the spare
+                        for(l_byte=0; l_byte<DIMM_DQ_RANK_BITMAP_SIZE; l_byte++ )
+                        {                        
+                            // For each nibble
+                            for(l_nibble=0; l_nibble<2; l_nibble++ )
+                            {
+                                // If nibble bad
+                                if (l_dqBitmap[l_byte] & (0xf0 >> (4 * l_nibble)))
+                                {                                                                                             
+                                    // If ECC spare is bad and not used, not valid to try repair
+                                    if ((l_port==1) && (l_byte==8) && (l_nibble == 1) && !l_x4_ECC_spare_used)
+                                    {                                                                       
+                                        FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x", l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+                                        FAPI_ERR("WARNING: Bad unused x4 ECC spare - no valid repair on %s", i_target.toEcmdString());
+                                    }
+                                    
+                                    // Else if DRAM spare is bad and not used, not valid to try repair
+                                    else if (((l_byte==9) && (l_nibble == 0) && l_x4_DRAM_spare_low_exists && !l_x4_DRAM_spare_used) || 
+                                             ((l_byte==9) && (l_nibble == 1) && l_x4_DRAM_spare_high_exists && !l_x4_DRAM_spare_used))
+                                    {                                                                       
+                                        FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x", l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+                                        FAPI_ERR("WARNING: Bad unused x4 DRAM spare - no valid repair on %s", i_target.toEcmdString());
+                                    }
+
+                                    // Else if on the nibble not connected to a spare
+                                    else if (((l_byte==9) && (l_nibble == 0) && !l_x4_DRAM_spare_low_exists) || 
+                                             ((l_byte==9) && (l_nibble == 1) && !l_x4_DRAM_spare_high_exists))
+                                    {                                                                       
+                                        FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x", l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+                                        FAPI_ERR("WARNING: This nibble has no spare x4 DRAM connected on %s", i_target.toEcmdString());
+                                    }
+                                                                
+                                    // Else if spare x4 DRAM exists and not used yet (and not ECC spare)
+                                    else if (((l_x4_DRAM_spare_low_exists || l_x4_DRAM_spare_high_exists) && !l_x4_DRAM_spare_used) &&
+                                             !((l_port==1) && (l_byte==8) && (l_nibble == 1)))
+                                    {
+                                        // Find first symbol index for this bad nibble
+                                        l_bad_symbol = mss_centaurDQ_to_symbol(8*l_byte + 4*l_nibble, l_port) - 1;
+
+                                        // Update read mux
+                                        l_rc = mss_put_steer_mux(
+
+                                            i_target,               // MBA
+                                            4*l_dimm + l_rank,      // Master rank: 0-7
+                                            mss_SteerMux::READ_MUX, // read mux
+                                            l_port,                 // l_port: 0,1
+                                            l_bad_symbol);          // First symbol index of byte to steer
+
+                                        if (l_rc)
+                                        {
+                                            FAPI_ERR("Error updating read mux on %s.",i_target.toEcmdString());
+                                            return l_rc;
+
+                                        }
+
+                                        // Update write mux
+                                        l_rc = mss_put_steer_mux(
+
+                                            i_target,               // MBA
+                                            4*l_dimm + l_rank,      // Master rank: 0-7
+                                            mss_SteerMux::WRITE_MUX,// write mux
+                                            l_port,                 // l_port: 0,1
+                                            l_bad_symbol);          // First symbol index of byte to steer
+
+                                        if (l_rc)
+                                        {
+                                            FAPI_ERR("Error updating write mux on %s.",i_target.toEcmdString());
+                                            return l_rc;
+                                        }
+
+                                        // Spare now used on this port,dimm,rank
+                                        l_x4_DRAM_spare_used = true;
+
+                                        // Update which rank 0-7 has had repairs applied
+                                        o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
+
+                                        l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
+
+                                        // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
+                                        if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
+                                        {
+                                            o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
+                                        }
+
+                                        FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x", l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+                                        FAPI_ERR("WARNING: dq %d-%d, symbols %d-%d, FIXED CHIP WITH X4 DRAM STEER on %s",
+                                        8*l_byte + 4*l_nibble, 8*l_byte + 4*l_nibble + 3,l_bad_symbol, l_bad_symbol+1, i_target.toEcmdString());
+                                    }
+                                                                                                                                               
+                                    // Else if x4 ECC spare not used yet (and not DRAM spare)
+                                    else if (!l_x4_ECC_spare_used &&
+                                              !(((l_byte==9) && (l_nibble == 0) && l_x4_DRAM_spare_low_exists) ||
+                                                ((l_byte==9) && (l_nibble == 1) && l_x4_DRAM_spare_high_exists)))
+                                    {
+                                        // Find first symbol index for this bad nibble
+                                        l_bad_symbol = mss_centaurDQ_to_symbol(8*l_byte + 4*l_nibble, l_port) - 1;
+
+                                        // Update read mux
+                                        l_rc = mss_put_steer_mux(
+
+                                            i_target,               // MBA
+                                            4*l_dimm + l_rank,      // Master rank: 0-7
+                                            mss_SteerMux::READ_MUX, // read mux
+                                            mss_SteerMux::ECC_SPARE,// Use ECC spare
+                                            l_bad_symbol);          // First symbol index of byte to steer
+
+                                        if (l_rc)
+                                        {
+                                            FAPI_ERR("Error updating read mux on %s.",i_target.toEcmdString());
+                                            return l_rc;
+
+                                        }
+
+                                        // Update write mux
+                                        l_rc = mss_put_steer_mux(
+
+                                            i_target,               // MBA
+                                            4*l_dimm + l_rank,      // Master rank: 0-7
+                                            mss_SteerMux::WRITE_MUX,// write mux
+                                            mss_SteerMux::ECC_SPARE,// Use ECC spare
+                                            l_bad_symbol);          // First symbol index of byte to steer
+
+                                        if (l_rc)
+                                        {
+                                            FAPI_ERR("Error updating write mux on %s.",i_target.toEcmdString());
+                                            return l_rc;
+                                        }
+
+                                        // Spare now used on this port,dimm,rank
+                                        l_x4_ECC_spare_used = true;
+
+                                        // Update which rank 0-7 has had repairs applied
+                                        o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
+
+                                        l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
+
+                                        // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
+                                        if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
+                                        {
+                                            o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
+                                        }
+
+                                        FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x", l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+                                        FAPI_ERR("WARNING: dq %d-%d, symbols %d-%d, FIXED CHIP WITH X4 ECC STEER on %s",
+                                        8*l_byte + 4*l_nibble, 8*l_byte + 4*l_nibble + 3,l_bad_symbol, l_bad_symbol+1, i_target.toEcmdString());
+                                    }
+
+                                    // Else if x4 chip mark not used yet
+                                    else if (!l_chip_mark_used)
+                                    {
+                                                                            
+                                        // If this is a bad deployed ECC spare, the chip mark goes on the nibble being steered
+                                        if ((l_port==1) && (l_byte==8) && (l_nibble == 1) && l_x4_ECC_spare_used)
+                                        {
+                                            // Find first symbol index of the nibble being steered with the ECC spare
+                                            l_rc = mss_check_steering(
+                                            
+                                                i_target,               // MBA
+                                                4*l_dimm + l_rank,      // Master rank: 0-7
+                                                l_dramSparePort0Symbol, // don't care
+                                                l_dramSparePort1Symbol, // don't care
+                                                l_eccSpareSymbol);      // first symbol index of the nibble being steered with the ECC spare
+
+                                            if (l_rc)
+                                            {
+                                                FAPI_ERR("Error reading steer mux %s.",i_target.toEcmdString());
+                                                return l_rc;
+                                            }
+                                                
+                                            l_chip_mark = l_eccSpareSymbol;
+                                            FAPI_ERR("WARNING: bad deployed ECC spare, so chip mark goes on the nibble being steered, symbols %d-%d on %s",
+                                                      l_chip_mark, l_chip_mark+1, i_target.toEcmdString());
+
+                                            
+                                            //*******************************************************************************                                            
+                                            // DEBUG trace to show which port/byte/nibble we actually fixing with chip mark
+                                            /*
+                                            uint8_t l_port_index;
+                                            uint8_t l_byte_index;
+                                            uint8_t l_nibble_index;                                            
+                                            // For each port 0,1
+                                            for (l_port_index=0; l_port_index<2; l_port_index++ )
+                                            {
+                                                // For each byte 0-9, where 9 is the spare
+                                                for(l_byte_index=0; l_byte_index<DIMM_DQ_RANK_BITMAP_SIZE; l_byte_index++ )
+                                                {                        
+                                                    // For each nibble 0,1
+                                                    for(l_nibble_index=0; l_nibble_index<2; l_nibble_index++ )
+                                                    {
+                                                        if (l_eccSpareSymbol == mss_centaurDQ_to_symbol(8*l_byte + 4*l_nibble, l_port) - 1)
+                                                        {
+                                                            FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x",
+                                                                      l_port_index, l_dimm, l_rank, l_byte_index, l_dqBitmap[l_byte_index]);
+                                                            FAPI_ERR("WARNING: bad deployed ECC spare, so chip mark goes on the nibble being steered");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            */
+                                            // DEBUG
+                                            //*******************************************************************************
+                                        }
+                                        
+                                        
+                                        // Else if this is a bad deployed DRAM spare, the chip mark goes on the nibble being steered
+                                        else if (((l_byte==9) && (l_nibble == 0) && l_x4_DRAM_spare_low_exists && l_x4_DRAM_spare_used) || 
+                                                 ((l_byte==9) && (l_nibble == 1) && l_x4_DRAM_spare_high_exists && l_x4_DRAM_spare_used))
+                                        {                                                                       
+                                            // Find first symbol index of the nibble being steered with the DRAM spare
+                                            l_rc = mss_check_steering(
+                                            
+                                                i_target,               // MBA
+                                                4*l_dimm + l_rank,      // Master rank: 0-7
+                                                l_dramSparePort0Symbol, // first symbol index of the nibble being steered with the port0 DRAM spare
+                                                l_dramSparePort1Symbol, // first symbol index of the nibble being steered with the port1 DRAM spare
+                                                l_eccSpareSymbol);      // don't care
+
+                                            if (l_rc)
+                                            {
+                                                FAPI_ERR("Error reading steer mux %s.",i_target.toEcmdString());
+                                                return l_rc;
+                                            }
+
+                                            l_chip_mark = (l_port == 0) ? l_dramSparePort0Symbol:l_dramSparePort1Symbol;                                                
+                                            FAPI_ERR("WARNING: bad deployed DRAM spare, so chip mark goes on the nibble being steered, symbols %d-%d on %s",
+                                                      l_chip_mark, l_chip_mark+1, i_target.toEcmdString());
+                                        }
+                                        
+                                        // Else this is not a bad deployed ECC or DRAM spare
+                                        else
+                                        {
+                                            l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte + 4*l_nibble, l_port) - 1;
+                                        }
+
+                                        // Update mark store
+                                        l_rc = mss_put_mark_store(
+
+                                            i_target,               // MBA
+                                            4*l_dimm + l_rank,      // Master rank: 0-7
+                                            l_symbol_mark,          // MSS_INVALID_SYMBOL, since no symbol mark in x4 mode
+                                            l_chip_mark );          // First symbol index of byte getting chip mark
+
+                                        if (l_rc)
+                                        {
+                                            FAPI_ERR("Error updating markstore on %s.",i_target.toEcmdString());
+                                            return l_rc;
+                                        }
+
+                                        // Chip mark now used on this rank
+                                        l_chip_mark_used = true;
+
+                                        // Update which rank 0-7 has had repairs applied
+                                        o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
+
+                                        l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
+
+                                        // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
+                                        if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
+                                        {
+                                            o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
+                                        }
+
+                                        FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x", l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+                                        FAPI_ERR("WARNING: dq %d-%d, symbols %d-%d, FIXED CHIP WITH X4 CHIP MARK on %s",
+                                        8*l_byte + 4*l_nibble, 8*l_byte + 4*l_nibble + 3,l_chip_mark, l_chip_mark+1, i_target.toEcmdString());
+
+                                    }
+                                    
+                                    // Else, more bad bits than we can repair so update o_repairs_exceeded
+                                    else
+                                    {
+                                        o_repairs_exceeded |= l_repairs_exceeded_translation[l_port][l_dimm]; 
+
+                                        l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_EXCEEDED; 
+
+                                        // If port1 repairs exceeded and port0 had a repair, say port0 repairs exceeded too
+                                        if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_APPLIED))
+                                        {
+                                            o_repairs_exceeded |= l_repairs_exceeded_translation[0][l_dimm];
+                                        }
+
+                                        FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x",l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+                                        FAPI_ERR("WARNING: dq %d-%d, REPAIRS EXCEEDED %s", 8*l_byte + 4*l_nibble, 8*l_byte + 4*l_nibble + 3, i_target.toEcmdString());
+
+                                        // Break out of loop on nibbles
+                                        break;
+                                    }
+                                } // End if nibble bad
+                            } // End for each nibble
+                            
+                            // Break of of loop on bytes is we have already exceeded repairs on this port,dimm,rank
+                            if (l_repair_status[l_port][l_dimm][l_rank]==MSS_REPAIRS_EXCEEDED) break;
+                            
+                        } // End for each byte                    
+                    } // End x4 ECC
                 } // End loop on rank
             } // End if valid dimm
         } // End loop on dimm
@@ -5615,7 +5945,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     if ( l_dramSparePort0Symbol != 0xff)
     {
         // Find the byte being steered
-        l_byte = mss_chip_mark_to_centaurDQ[l_dramSparePort0Symbol/4][0]/8;
+        l_byte = mss_x8_chip_mark_to_centaurDQ[l_dramSparePort0Symbol/4][0]/8;
 
         // If that byte has any bad bits in it, copy them to byte9,
         if (o_bad_bits[0][l_byte])
@@ -5631,7 +5961,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     if ( l_dramSparePort1Symbol != 0xff)
     {
         // Find the byte being steered
-        l_byte = mss_chip_mark_to_centaurDQ[l_dramSparePort1Symbol/4][0]/8;
+        l_byte = mss_x8_chip_mark_to_centaurDQ[l_dramSparePort1Symbol/4][0]/8;
 
         // If that byte has any bad bits in it, copy them to byte9,
         if (o_bad_bits[1][l_byte])

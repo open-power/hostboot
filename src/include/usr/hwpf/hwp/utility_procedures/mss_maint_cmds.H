@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/dram_initialization/mss_memdiag/mss_maint_cmds.H $ */
+/* $Source: src/include/usr/hwpf/hwp/utility_procedures/mss_maint_cmds.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.H,v 1.16 2013/01/31 22:27:57 gollub Exp $
+// $Id: mss_maint_cmds.H,v 1.17 2013/08/23 19:44:02 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -53,7 +53,7 @@
 //         |          |         | Added mss_do_steering
 //         |          |         | Added mss_stopCmd
 //         |          |         | Changed setupAndExecuteCmd to pure virtual
-
+//   1.17  | 08/23/13 | gollub  | Added x4 ECC mode support: mss_x4_chip_mark_to_centaurDQ
 
 #ifndef _MSS_MAINT_CMDS_H
 #define _MSS_MAINT_CMDS_H
@@ -78,9 +78,9 @@
 //------------------------------------------------------------------------------
 
 /**
- * @brief For index into this table, use 1st symbol index of chip mark / 4.
+ * @brief For index into this table, use 1st symbol index of x8 chip mark / 4.
  */
-static const uint8_t mss_chip_mark_to_centaurDQ[18][2]={
+static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
     // centaurDQ  port  1st symbol index of chip mark
     {64,          1},   // 0
     {64,          0},   // 4
@@ -100,6 +100,49 @@ static const uint8_t mss_chip_mark_to_centaurDQ[18][2]={
     {16,          0},   // 60    
     {8,           0},   // 64    
     {0,           0}};  // 68    
+
+/**
+ * @brief For index into this table, use 1st symbol index of x4 chip mark / 2.
+ */
+static const uint8_t mss_x4_chip_mark_to_centaurDQ[36][2]={
+    // centaurDQ  port  1st symbol index of x4 chip mark
+    {68,          1},   // 0 - NOTE: not actually valid in x4 mode....
+    {64,          1},   // 2    
+    {68,          0},   // 4
+    {64,          0},   // 6    
+    {60,          1},   // 8
+    {56,          1},   // 10    
+    {52,          1},   // 12
+    {48,          1},   // 14
+    {44,          1},   // 16
+    {40,          1},   // 18        
+    {36,          1},   // 20    
+    {32,          1},   // 22        
+    {28,          1},   // 24    
+    {24,          1},   // 26    
+    {20,          1},   // 28    
+    {16,          1},   // 30           
+    {12,          1},   // 32    
+    {8,           1},   // 34    
+    {4,           1},   // 36    
+    {0,           1},   // 38            
+    {60,          0},   // 40    
+    {56,          0},   // 42    
+    {52,          0},   // 44    
+    {48,          0},   // 46    
+    {44,          0},   // 48    
+    {40,          0},   // 50    
+    {36,          0},   // 52    
+    {32,          0},   // 54    
+    {28,          0},   // 56    
+    {24,          0},   // 58    
+    {20,          0},   // 60    
+    {16,          0},   // 62    
+    {12,          0},   // 64    
+    {8,           0},   // 66    
+    {4,           0},   // 68    
+    {0,           0}};  // 70    
+
 
 
 /**
