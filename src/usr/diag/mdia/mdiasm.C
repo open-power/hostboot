@@ -178,19 +178,23 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
             break;
         }
 
-        // Enable soft, intermittent, hard and Retry CE threshold attention
-        buffer.setBit(0, 4);
+        // set 0-3 bits to  Enable soft, intermittent, hard and Retry CE
+        // threshold attention
+        // set error threshold to 1 ( set 15,27,39,51 bits ).
+        // Enable per-symbol error counters to count soft, intermittent
+        // and hard CEs ( set 55, 56, 57 bits ).
+        // First clear starting 52 bits and than set relevant bits.
 
-        buffer.clearBit(4,48);
-        // Set error thresold to 1
-        buffer.setBit(15);
-        buffer.setBit(27);
-        buffer.setBit(39);
-        buffer.setBit(51);
+        uint64_t data = ( buffer.getDoubleWord(0) & 0x0000000000000fff )
+                        | 0xf0010010010011c0;
 
-        //  Enable per-symbol error counters to count soft, intermittent
-        //  and hard CEs
-        buffer.setBit(55,3);
+        if( ECMD_DBUF_SUCCESS != buffer.setDoubleWord(0, data) )
+        {
+            MDIA_FAST("ceErrorSetup: setDoubleWord for 0x%08X failed"
+                      " HUID:0x%08X data:0x%16X",
+                      addr, get_huid(membuf), data);
+            break;
+        }
 
         fapirc = fapiPutScom( fapiMb, addr , buffer);
         err = fapiRcToErrl(fapirc);
@@ -622,8 +626,12 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                 }
                 if( calloutMade )
                 {
-                    // TODO via RTC 38371.
-                    // Update HCDB
+                    // There is no reason to update HCDB as we are doing
+                    // deferred deconfig. HCDB will be updated at end of istep
+                    // during deferred deconfig only. Just adding information
+                    // message here.
+                    MDIA_FAST("PRD performed HW callouts during"
+                              "analyzeIplCEStats");
                 }
 
             }
