@@ -179,12 +179,29 @@
         <value>25</value>
     </enumerator>
     <enumerator>
-        <name>TEST_FAIL</name>
+        <name>OSCREFCLK</name>
         <value>26</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>OSCPCICLK</name>
         <value>27</value>
+    </enumerator>
+    <enumerator>
+        <name>REFCLKENDPT</name>
+        <value>28</value>
+    </enumerator>
+    <enumerator>
+        <name>PCICLKENDPT</name>
+        <value>29</value>
+    </enumerator>
+    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
+    <enumerator>
+        <name>TEST_FAIL</name>
+        <value>30</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>31</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>

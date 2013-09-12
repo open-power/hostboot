@@ -1117,6 +1117,8 @@ for my $i ( 0 .. $#SMembuses )
 # call to do pnor attributes
 do_plugin('all_pnors', $node);
 
+# call to do refclk attributes
+do_plugin('all_refclk');
 }
 
 print "\n</attributes>\n";

@@ -348,6 +348,14 @@ const char* EntityPath::pathElementTypeAsString(
             return "OSC";
         case TYPE_TODCLK:
             return "TodClock";
+        case TYPE_OSCREFCLK:
+            return "OSCREFClock";
+        case TYPE_OSCPCICLK:
+            return "OSCPCIClock";
+        case TYPE_REFCLKENDPT:
+            return "REFClockEndPoint";
+        case TYPE_PCICLKENDPT:
+            return "PCIClockEndPoint";
         case TYPE_NA:
             return "NA";
 //        case TYPE_FSI_LINK:
