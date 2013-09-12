@@ -46,6 +46,8 @@ HSVC_LOAD_ATTR( ATTR_CHIP_UNIT_POS );
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_FSP );
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_OCC );
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_PHYP );
+HSVC_LOAD_ATTR( ATTR_PM_SPWUP_OHA_FLAG );
+HSVC_LOAD_ATTR( ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG );
 // -- Input: ../../xml/attribute_info/scratch_attributes.xml --
 // No attributes found
 // -- Input: ../../xml/attribute_info/pm_plat_attributes.xml --

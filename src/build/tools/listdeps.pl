@@ -170,6 +170,7 @@ else
         "libcore_activate.so" ,
         "libestablish_system_smp.so" ,
         "libstart_payload.so" ,
+        "libocc.so" ,
     );
 }
 
@@ -210,6 +211,7 @@ my %istepFiles = (
     "libmc_config.so"               => "istep12list.H" ,
     "libdram_training.so"           => "istep13list.H" ,
     "libdram_initialization.so"     => "istep14list.H" ,
+    "libocc.so"                     => "istep15list.H" ,
     "libbuild_winkle_images.so"     => "istep15list.H" ,
     "libcore_activate.so"           => "istep16list.H" ,
     "libestablish_system_smp.so"    => "istep18list.H" ,

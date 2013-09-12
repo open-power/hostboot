@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pss_init.H,v 1.4 2012/11/27 18:11:55 stillgs Exp $
+// $Id: p8_pss_init.H,v 1.5 2013/08/02 19:21:26 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pss_init.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -33,13 +33,18 @@
 // *!        Initializes the PSS macro , resets it and configures the required
 // *!        Attributes
 //------------------------------------------------------------------------------
-//  Calls
-
-/// \param[in] i_target Chip target
-/// \param[in] mode     
 
 
-// function pointer typedef definition for HWP call support
+/**
+ * p8_pss_init calls the underlying routine based on mode parameter
+ *
+ * @param[in] i_target Chip target
+ * @param[in] mode     Control mode for the procedure
+ *                     PM_INIT, PM_CONFIG, PM_RESET
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
 typedef fapi::ReturnCode (*p8_pss_init_FP_t) (const fapi::Target&, uint32_t);
 
 extern "C" {

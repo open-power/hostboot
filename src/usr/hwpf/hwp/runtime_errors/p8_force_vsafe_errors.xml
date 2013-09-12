@@ -20,44 +20,49 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_force_vsafe_errors.xml,v 1.2 2013/06/25 15:38:19 cswenson Exp $ -->
+<!-- $Id: p8_force_vsafe_errors.xml,v 1.3 2013/08/02 19:40:57 stillgs Exp $ -->
 <!-- Error definitions for proc_pmc_force_vsage procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_VLT_TIMEOUT</rc>
-    <description>voltage change timeout for the ongoing operation completion.</description>
+    <description>Voltage change timeout for the ongoing operation completion.</description>
+    <ffdc>PSTATETARGET</ffdc>
+    <ffdc>PSTATESTEPTARGET</ffdc>
+    <ffdc>PSTATEACTUAL</ffdc>
+    <ffdc>PMCSTATUS</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_VLT_ERROR</rc>
-    <description>voltage change not done because of  errors on the status register.</description>
+    <description>Voltage change not done because of  errors on the status register.</description>
+    <ffdc>PMCSTATUS</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_MONITOR_ERR</rc>
-    <description>voltage change done but expected pstate didnot match after completion.</description>
+    <description>Voltage change done but expected pstate did not match after completion.</description>
+    <ffdc>PSTATETARGET</ffdc>
+    <ffdc>PSTATESTEPTARGET</ffdc>
+    <ffdc>PSTATEACTUAL</ffdc>
+    <ffdc>PMCSTATUS</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
  <hwpError>
-    <rc>RC_PROCPM_VOLTAGE_CHAGE_MODE_ERR</rc>
+    <rc>RC_PROCPM_VOLTAGE_CHANGE_MODE_ERR</rc>
     <description>PMC is disabled for Voltage changes.</description>
+    <ffdc>PMCMODE</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
  <hwpError>
-    <rc>RC_PROCPM_INITAL_AUCTION_MODE_ERR</rc>
+    <rc>RC_PROCPM_INITIAL_AUCTION_MODE_ERR</rc>
     <description>PMC is not in HARDWARE or FIRMWARE AUCTION MODE.</description>
   </hwpError>
   <!-- *********************************************************************** -->
  <hwpError>
     <rc>RC_PROCPM_MST_SEQUENCER_STATE_ERR</rc>
     <description>PMC is disabled PMC_MASTER_SEQUENCER.</description>
+    <ffdc>PMCMODE</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
-
-
-
-
-
-
 </hwpErrors>

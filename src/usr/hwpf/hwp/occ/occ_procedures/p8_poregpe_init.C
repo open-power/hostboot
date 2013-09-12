@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poregpe_init.C,v 1.3 2013/04/01 04:11:56 stillgs Exp $
+
+// $Id: p8_poregpe_init.C,v 1.4 2013/08/02 19:09:35 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poregpe_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -36,17 +37,17 @@
 /// \todo add to required proc ENUM requests
 ///
 /// High-level procedure flow:
-/// \verbatim    
-///     
+/// \verbatim
+///
 ///     Check for valid parameters
 ///     if PM_CONFIG {
 ///        Do nothing (done by OCC programs)
-///     } else if PM_RESET {           
-///         for each GPE, 
+///     } else if PM_RESET {
+///         for each GPE,
 ///             set and then reset bit 0 in the GPEx_RESET_REGISTER
-///             
+///
 ///     }
-///     
+///
 ///  Procedure Prereq:
 ///     - System clocks are running
 /// \endverbatim
@@ -63,7 +64,7 @@
 
 #ifdef FAPIECMD
 extern "C" {
-#endif 
+#endif
 
 
 using namespace fapi;
@@ -88,23 +89,23 @@ fapi::ReturnCode poregpe_reset(const Target& i_target, const uint32_t engine);
 
 
 /// \param[in] i_target Chip target
-/// \param[in] mode     Control mode for the procedure 
+/// \param[in] mode     Control mode for the procedure
 ///                     (PM_CONFIG, PM_INIT, PM_RESET)
 /// \param[in] engine   Targeted engine:  GPE0, GPE1, GPEALL
 
-/// \retval FAPI_RC_SUCCESS             
-/// \retval ERROR defined in xml    
+/// \retval FAPI_RC_SUCCESS
+/// \retval ERROR defined in xml
 fapi::ReturnCode
 p8_poregpe_init(const Target& i_target, uint32_t mode, uint32_t engine)
 {
     fapi::ReturnCode    l_rc;
-       
+
     do
     {
         FAPI_INF("Executing p8_poregpe_init in mode %x for engine %x....",
                   mode, engine);
 
-        if (!(engine == GPE0 || engine == GPE1 || engine == GPEALL) ) 
+        if (!(engine == GPE0 || engine == GPE1 || engine == GPEALL) )
         {
 
           FAPI_ERR("Unknown engine passed to p8_poregpe_init. Engine %x ....",
@@ -116,49 +117,57 @@ p8_poregpe_init(const Target& i_target, uint32_t mode, uint32_t engine)
         /// -------------------------------
         /// Configuration:  perform translation of any Platform Attributes into
         /// Feature Attributes that are applied during Initalization
-        if (mode == PM_CONFIG) 
+        if (mode == PM_CONFIG)
         {
           FAPI_INF("PORE-GPE configuration...");
-          FAPI_INF("---> None is defined...done by OCC firmware");  
-        } 
+          FAPI_INF("---> None is defined...done by OCC firmware");
+        }
 
         /// -------------------------------
         /// Initialization:  perform order or dynamic operations to initialize
-        /// the GPEs using necessary Platform or Feature attributes. 
-        else if (mode == PM_INIT) 
+        /// the GPEs using necessary Platform or Feature attributes.
+        else if (mode == PM_INIT)
         {
           FAPI_INF("PORE-GPE initialization...");
-          FAPI_INF("---> None is defined...done by OCC firmware");  
-        } 
+          FAPI_INF("---> None is defined...done by OCC firmware");
+        }
 
         /// -------------------------------
-        /// Reset:  perform reset of GPE engines so that they can reconfigured 
-        /// and reinitialized 
-        else if (mode == PM_RESET) 
+        /// Reset:  perform reset of GPE engines so that they can reconfigured
+        /// and reinitialized
+        else if (mode == PM_RESET)
         {
             // GPE0
-            if (engine == GPE0 || engine == GPEALL) 
-            { 
+            if (engine == GPE0 || engine == GPEALL)
+            {
                 l_rc = poregpe_reset(i_target, GPE0);
+                if (!l_rc.ok())
+                {
+                    break;
+                }
             }
-            
-            if (engine == GPE1 || engine == GPEALL) 
-            { 
+
+            if (engine == GPE1 || engine == GPEALL)
+            {
                 l_rc = poregpe_reset(i_target, GPE1);
+                if (!l_rc.ok())
+                {
+                    break;
+                }
             }
-            
-        } 
+
+        }
 
         /// -------------------------------
         /// Unsupported Mode
 
-        else 
+        else
         {
           FAPI_ERR("Unknown mode passed to p8_poregpe_init. Mode %x ....", mode);
           FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_CODE_BAD_MODE);
         }
     } while(0);
-    
+
     return l_rc;
 }
 
@@ -179,22 +188,22 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
     uint64_t            control_reg;
     uint64_t            reset_reg;
     uint64_t            status_reg;
-    
 
-      
+
+
     FAPI_INF("PORE-GPE reset...Engine: %x", engine);
-    
+
     do
     {
         // Set the address offset values based on which engine is being operated
-        // on 
-        if (engine == GPE0) 
-        { 
+        // on
+        if (engine == GPE0)
+        {
             control_reg = PORE_GPE0_CONTROL_0x00060001;
             reset_reg   = PORE_GPE0_RESET_0x00060002;
             status_reg  = PORE_GPE0_STATUS_0x00060000;
         }
-        else if (engine == GPE1) 
+        else if (engine == GPE1)
         {
             control_reg = PORE_GPE1_CONTROL_0x00060021;
             reset_reg   = PORE_GPE1_RESET_0x00060022;
@@ -208,11 +217,11 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
         }
 
         //  Reset the GPEsusing the Reset Register bits 0 and 1.
-        //  Note:  This resets ALL registers (including debug registers) with 
+        //  Note:  This resets ALL registers (including debug registers) with
         //  the exception of Error Mask
 
         // set PORE run bit to stop
-        l_rc=fapiGetScom(i_target, control_reg, data); 
+        l_rc=fapiGetScom(i_target, control_reg, data);
         if(!l_rc.ok())
         {
            FAPI_ERR("Scom error reading PORE_GPE%x_CONTROL_%08llx", engine, control_reg);
@@ -234,8 +243,8 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
             break;
         }
 
-        // Reset PORE (state machines and PIBMS_DBG registers) and PIB2OCI 
-        // interface write Reset_Register(0:1) with 0b11 to trigger the reset.  
+        // Reset PORE (state machines and PIBMS_DBG registers) and PIB2OCI
+        // interface write Reset_Register(0:1) with 0b11 to trigger the reset.
         // Check that these are cleared to 0 to validate the reset occured.
         e_rc |= data.flushTo0();
         e_rc |= data.setBit(0, 2);
@@ -251,13 +260,13 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
         l_rc=fapiPutScom(i_target, reset_reg, data);
         if(!l_rc.ok())
         {
-            FAPI_ERR("Scom error writing PORE_GPE%x_CONTROL", engine);                     
+            FAPI_ERR("Scom error writing PORE_GPE%x_CONTROL", engine);
             break;
         }
 
         // poll until PORE has returned to WAIT state 3:6=0b0001
         wait_state_detected = false;
-        for (poll_count=0; poll_count<max_polls; poll_count++) 
+        for (poll_count=0; poll_count<max_polls; poll_count++)
         {
             l_rc=fapiGetScom(i_target, status_reg, polldata);
             if(l_rc)
@@ -276,13 +285,13 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
             {
               fapiDelay(1000, 10);
             }
-        }  
+        }
         // Break if a FAPI error occured in the polling loop
         if (poll_loop_error)
         {
              break;
         }
-         
+
         if(!wait_state_detected)
         {
           FAPI_ERR("GPE%x reset failed ", engine);
@@ -290,10 +299,10 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
         }
 
     } while(0);
-    
+
     return l_rc;
 }
 
 #ifdef FAPIECMD
 } //end extern C
-#endif 
+#endif

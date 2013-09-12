@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pmc_firinit.C,v 1.13 2013/04/12 01:17:27 stillgs Exp $
+// $Id: p8_pm_pmc_firinit.C,v 1.14 2013/08/02 19:19:40 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -150,8 +150,42 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
     {
         if (mode == PM_RESET)
         {
+            FAPI_INF("Hard reset detected.  Full PMC LFIR is masked");
             e_rc  = mask.flushTo0();
             e_rc |= mask.setBit(0,PMC_FIR_REGISTER_LENGTH);
+            if (e_rc)
+            {
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            //--******************************************************************************
+            //-- PMC_FIR_MASK (W0_OR_45) (WR_43) (WO_AND_44)
+            //--******************************************************************************
+            rc = fapiPutScom(i_target, PMC_LFIR_MASK_0x01010843, mask );
+            if (rc)
+            {
+	            FAPI_ERR("fapiPutScom(PMC_LFIR_MASK_0x01010843) failed.");
+                break;
+            }
+        }
+        else if (mode == PM_RESET_SOFT)
+        {
+            FAPI_INF("Soft reset detected.  Only non-idle PMC LFIR bits are masked");
+            // Only mask the bits that that do not deal with SLW
+            rc = fapiGetScom(i_target, PMC_LFIR_MASK_0x01010843, mask );
+            if (rc)
+            {
+	            FAPI_ERR("fapiGetScom(PMC_LFIR_MASK_0x01010843) failed.");
+                break;
+            }
+                                           
+            // The following is done to keep SIMICS model from complaining about
+            // setting non-implemented bits.
+
+            e_rc |= mask.setBit(0,IDLE_PORESW_FATAL_ERR);
+            e_rc |= mask.setBit(IDLE_INTERNAL_ERR+1,
+                                PMC_FIR_REGISTER_LENGTH-IDLE_INTERNAL_ERR);
             if (e_rc)
             {
                 rc.setEcmdError(e_rc);

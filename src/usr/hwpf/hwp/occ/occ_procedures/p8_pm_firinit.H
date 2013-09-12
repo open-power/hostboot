@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_firinit.H,v 1.9 2013/04/01 04:27:47 stillgs Exp $
+// $Id: p8_pm_firinit.H,v 1.10 2013/08/02 19:18:00 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_firinit.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -84,7 +84,7 @@
 #define SET_FIR_MASKED(b){SET_FIR_MASK(b,1);}
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*p8_pm_firinit_FP_t) (const fapi::Target& , uint32_t mode );
+typedef fapi::ReturnCode (*p8_pm_firinit_FP_t) (const fapi::Target& , uint32_t);
 
 
 extern "C" {
@@ -103,8 +103,20 @@ const uint32_t        PBA_FIR_REGISTER_LENGTH = 46 ;
 const uint32_t        OHA_FIR_REGISTER_LENGTH = 6 ;
 const uint32_t        OCC_FIR_REGISTER_LENGTH = 64 ;
 
-/// \  input chip_target
-fapi::ReturnCode p8_pm_firinit(const fapi::Target& i_target , uint32_t mode);
+//------------------------------------------------------------------------------
+/**
+ * p8_pm_firinit Call underlying FIR procedures to deal with the FIRs based on 
+ *       the mode
+ *
+ * @param[in] i_target   Chip target which will be passed to all the procedures
+ *
+ * @param[in] i_mode   Control mode for the procedure
+ *                     PM_INIT, PM_CONFIG, PM_RESET, PM_RESET_SOFT
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode p8_pm_firinit(const fapi::Target& i_target , uint32_t i_mode);
  
 
 } // extern "C"

@@ -572,6 +572,8 @@
     <attribute><id>OVERRIDE_MVPD_I_NEST_LAB_CURRENT</id></attribute>
     <attribute><id>OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id></attribute>
     <attribute><id>OVERRIDE_MVPD_I_CS_LAB_CURRENT</id></attribute>
+    <attribute><id>PM_SPWUP_OHA_FLAG</id></attribute>
+    <attribute><id>PM_SPWUP_IGNORE_XSTOP_FLAG</id></attribute>
 </targetType>
 
 <targetType>

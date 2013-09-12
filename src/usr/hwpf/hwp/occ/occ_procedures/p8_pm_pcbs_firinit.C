@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pcbs_firinit.C,v 1.10 2013/04/01 04:25:41 stillgs Exp $
+// $Id: p8_pm_pcbs_firinit.C,v 1.11 2013/08/02 19:08:41 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pcbs_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -137,37 +137,27 @@ p8_pm_pcbs_firinit(const fapi::Target &i_target , uint32_t mode )
 
             for (uint8_t c=0; c< l_exChiplets.size(); c++)
             {
-                rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[c], l_functional);
+              
+                rc = FAPI_ATTR_GET( ATTR_CHIP_UNIT_POS,
+                                    &l_exChiplets[c],
+                                    l_ex_number);
                 if (rc)
                 {
-                    FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL with rc = 0x%x", (uint32_t)rc);
-                    break;
+                   FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)rc);
+                   break;
                 }
 
-                if (l_functional)
+                FAPI_DBG("Core number = %d", l_ex_number);
+                // Use the l_ex_number to build the SCOM address;
+                rc = fapiPutScom(   i_target,
+                                    EX_PMErrMask_REG_0x100F010A +
+                                        (l_ex_number * 0x01000000),
+                                    mask );
+                if (rc)
                 {
-                    // The ex is functional let's build the SCOM address
-                    rc = FAPI_ATTR_GET( ATTR_CHIP_UNIT_POS,
-                                        &l_exChiplets[c],
-                                        l_ex_number);
-                    if (rc)
-                    {
-                       FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)rc);
-                       break;
-                    }
-
-                    FAPI_DBG("Core number = %d", l_ex_number);
-                    // Use the l_ex_number to build the SCOM address;
-                    rc = fapiPutScom(   i_target,
-                                        EX_PMErrMask_REG_0x100F010A +
-                                            (l_ex_number * 0x01000000),
-                                        mask );
-                    if (rc)
-                    {
-                        FAPI_ERR("fapiPutScom(EX_PMErrMask_REG_0x100F010A) failed.");
-                        break;
-                    }
-                } // Functional
+                    FAPI_ERR("fapiPutScom(EX_PMErrMask_REG_0x100F010A) failed.");
+                    break;
+                }
             } // Chiplet loop
         }
         else

@@ -43,6 +43,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/occ/occ_procedures
 
 CFLAGS += -D __FAPI
 

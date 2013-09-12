@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.H,v 1.9 2013/06/20 09:36:24 pchatnah Exp $
+// $Id: p8_pm_prep_for_reset.H,v 1.10 2013/08/02 19:13:48 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.H,v $
 
 //------------------------------------------------------------------------------
@@ -40,7 +40,6 @@
 #define UNIT_CONFIG     0x1
 #define UNIT_RESET      0x2
 
-// #include "proc_cpu_special_wakeup.H"
 #include "p8_pm.H"
 #include "p8_poregpe_init.H"
 #include "p8_pcbs_init.H"
@@ -48,7 +47,7 @@
 #include "p8_poreslw_init.H"
 #include "p8_poregpe_init.H"
 #include "p8_oha_init.H"
-#include "p8_pba_init.H"    //FIXME was not compiling check with Klaus
+#include "p8_pba_init.H"
 #include "p8_occ_sram_init.H"
 #include "p8_ocb_init.H"
 #include "p8_pss_init.H"
@@ -56,71 +55,34 @@
 #include "p8_occ_control.H"
 #include "p8_pm_firinit.H"
 
-
-/**
-* @brief Function pointer typedef.
-*/
-// typedef fapi::ReturnCode (*p8_occ_control_FP_t)       (Target i_target, uint32_t ppc405_reset_ctrl, uint32_t sram_bv_ctrl);
-// //typedef fapi::ReturnCode (*p8_cpu_special_wakeup_FP_t)(Target i_target, uint32_t mode);
-// //typedef fapi::ReturnCode (*p8_cpu_special_wakeup_FP_t)(Target i_target, uint8_t, uint8_t);
-
-// typedef fapi::ReturnCode (*p8_pmc_force_vsafe_FP_t)   (Target i_target);
-// typedef fapi::ReturnCode (*p8_pcbs_init_FP_t)         (const fapi::Target&, uint32_t );
-// typedef fapi::ReturnCode (*p8_pmc_init_FP_t)          (const fapi::Target&, uint32_t );
-// typedef fapi::ReturnCode (*p8_poreslw_init_FP_t)      (const fapi::Target&, uint32_t);
-// typedef fapi::ReturnCode (*p8_poregpe_init_FP_t)      (const fapi::Target&, uint32_t, uint32_t);
-// typedef fapi::ReturnCode (*p8_oha_init_FP_t)          (const fapi::Target&, uint32_t);
-// typedef fapi::ReturnCode (*p8_pba_init_FP_t)          (const fapi::Target&, uint32_t);
-// typedef fapi::ReturnCode (*p8_occ_sram_init_FP_t)     (const fapi::Target&, uint32_t);
-// typedef fapi::ReturnCode (*p8_ocb_init_FP_t)          (const fapi::Target&, uint32_t);
- typedef fapi::ReturnCode (*p8_pm_prep_for_reset_FP_t) (const fapi::Target &i_primary_chip_target , const fapi::Target &i_secondary_chip_target  );
+typedef fapi::ReturnCode (*p8_pm_prep_for_reset_FP_t) (const fapi::Target &, 
+                                                       const fapi::Target &,
+                                                       uint32_t);
 
 
 extern "C"
 {
 
-  /// \brief Prepare powermanagement components for reset
-  /// i_primary_chip_target                       Primary Chip target which will be passed to all the procedures
-  /// i_secondary_chip_target                     Secondary Chip target will be passed for pmc_init -reset only if it is DCM otherwise 
-
-  fapi::ReturnCode p8_pm_prep_for_reset(const fapi::Target &i_primary_chip_target , const fapi::Target &i_secondary_chip_target  );
+//------------------------------------------------------------------------------
+/**
+ * p8_pm_prep_for_reset Call underlying unit procedures to perform readiness for
+ *          reinitialization of PM complex.
+ *
+ * @param[in] i_primary_chip_target   Primary Chip target which will be passed
+ *        to all the procedures
+ * @param[in] i_secondary_chip_target Secondary Chip target will be passed for
+ *        pmc_init -reset only if it is DCM otherwise this should be NULL.
+ * @param[in] i_mode (PM_RESET (hard - will kill the PMC);
+ *                    PM_RESET_SOFT (will not fully reset the PMC))
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
   
+fapi::ReturnCode p8_pm_prep_for_reset(  const fapi::Target &i_primary_chip_target , 
+                                        const fapi::Target &i_secondary_chip_target,
+                                        uint32_t            i_mode);
   
-// p8_occ_control   
-// fapi::ReturnCode p8_occ_control(Target &i_target, uint32_t ppc405_reset_ctrl, uint32_t sram_bv_ctrl);
-
-// // p8_cpu_special_wakeup
-// //fapi::ReturnCode p8_cpu_special_wakeup(const Target &i_target, uint32_t mode);
-// //fapi::ReturnCode p8_cpu_special_wakeup(const Target &i_target, uint8_t entity, uint8_t operation);
-
-// // p8_pmc_force_vsafe
-// fapi::ReturnCode p8_pmc_force_vsafe(const Target &i_target);
-
-// // p8_pcbs_init
-// fapi::ReturnCode p8_pcbs_init(const Target &i_target, uint32_t mode);
-
-// // p8_pmc_init
-// fapi::ReturnCode p8_pmc_init(const Target &i_target, uint32_t mode);
-
-// //p8_poreslw_init
-// fapi::ReturnCode p8_poreslw_init(const fapi::Target& i_target, uint32_t mode);
-
-// //p8_poregpe_init
-// fapi::ReturnCode p8_poregpe_init(const fapi::Target& i_target, uint32_t mode, uint32_t engine);
-
-// //p8_oha_init
-// fapi::ReturnCode p8_oha_init(const fapi::Target& i_target, uint32_t mode);
-
-// //p8_pba_init
-// fapi::ReturnCode p8_pba_init(const fapi::Target& i_target, uint32_t mode);
-
-// //p8_occ_sram_init
-// fapi::ReturnCode p8_occ_sram_init(const fapi::Target& i_target, uint32_t mode);
-
-// //p8_ocb_init
-// fapi::ReturnCode p8_ocb_init(const fapi::Target& i_target, uint32_t mode);
-
-
 }
 
 

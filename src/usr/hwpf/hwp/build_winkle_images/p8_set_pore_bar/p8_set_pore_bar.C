@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: p8_set_pore_bar.C,v 1.4 2012/12/07 20:43:07 stillgs Exp $
+// $Id: p8_set_pore_bar.C,v 1.5 2013/08/02 19:34:02 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.C,v $
 //-------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -38,18 +38,18 @@
 /// \verbatim
 ///
 ///     Address and size of SLW image for the target (chip) is passed based on
-///     where the caller has placed the image for this target in the platform 
-///     memory.  
+///     where the caller has placed the image for this target in the platform
+///     memory.
 ///
 ///     The Base Address (BAR) and a mask for the region in which the SLW
 ///     image is placed is passed.  This is used to establish the PBA BAR and
 ///     mask hardware to set the legal bounds for SLW accesses.
 ///
-///     The BAR defines address bits 14:43 in natural bit alignment (eg no 
+///     The BAR defines address bits 14:43 in natural bit alignment (eg no
 ///     shifting)
 ///
 ///     The Size (in MB) of the region where image is located.
-///         If not a power of two value, the value will be rounded up to the 
+///         If not a power of two value, the value will be rounded up to the
 ///         next power of 2 for setting the hardware mask
 ///
 ///         If 0 is defined and the BAR is also defined as 0, then the BAR
@@ -130,9 +130,9 @@ fapi::ReturnCode pba_slave_reset(   const fapi::Target& i_target,
 ///                         located
 /// \param[in] i_mem_bar    Base address of the region where image is located
 /// \param[in] i_mem_size   Size (in MB) of the region where image is located
-///                         if not a power of two value, the value will be 
-///                         rounded up to the next power of 2 for setting the 
-///                         hardware mask.  The value of 0 is only legal if 
+///                         if not a power of two value, the value will be
+///                         rounded up to the next power of 2 for setting the
+///                         hardware mask.  The value of 0 is only legal if
 ///                         i_mem_bar is also 0;  else an error is indicated.
 /// \param[in] i_mem_type   Defines where the SLW image was loaded.  See
 ///                         p8_set_pore_bar.H enum for valid values.
@@ -163,7 +163,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
 //    uint64_t            computed_last_image_address;
 
     uint64_t            slw_branch_table_address;
-    
+
     pba_slvctln_t       ps;                         // PBA Slave
 
     // Hardcoded use of PBA BAR and Slave
@@ -180,14 +180,14 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         FAPI_INF("Executing p8_set_pore_bar...");
         image_address = (uint64_t) i_image;
         FAPI_DBG("Passed address 0x%16llX ", image_address);
-        
-        // Check if this is a BAR reset case. 
+
+        // Check if this is a BAR reset case.
         if (i_mem_size == 0)
         {
             if(i_mem_bar != 0)
             {
-                FAPI_ERR("SLW Size is 0 but BAR is non-zero:  0x%16llx", i_mem_bar );               
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_SIZE0_ERROR);  
+                FAPI_ERR("SLW Size is 0 but BAR is non-zero:  0x%16llx", i_mem_bar );
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_SIZE0_ERROR);
                 break;
             }
             else
@@ -201,16 +201,16 @@ p8_set_pore_bar(      const fapi::Target& i_target,
                                                        i_mem_bar,
                                                        i_mem_size,
                                                        slw_pba_cmd_scope);
-                                                       
+
                 // No rc check is made as we're exiting anyway.
-                
+
                 // Exit the procedure as we don't want to access the image nor
                 // touch the SLW TBA or MRR settings.
                 break;
-            }      
+            }
         }
-        
-  
+
+
         // Get the Table Base Address from the image
         l_ecmdRc = sbe_xip_get_scalar((void*)   i_image,
                                                 "slw_branch_table",
@@ -360,12 +360,12 @@ p8_set_pore_bar(      const fapi::Target& i_target,
             // Check that the bar address passed is 1MB aligned (eg bits 44:63 are zero)
             //
             region_masked_address = i_mem_bar & 0x00000000000FFFFF;
-            if (region_masked_address != 0 )                        
-            {                                                                
-                FAPI_ERR("SLW BAR address is not 1MB aligned:  0x%16llx", i_mem_bar );               
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_PBABAR_ERROR);  
+            if (region_masked_address != 0 )
+            {
+                FAPI_ERR("SLW BAR address is not 1MB aligned:  0x%16llx", i_mem_bar );
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_PBABAR_ERROR);
                 break;
-            }                                                                
+            }
 
 
             // The PBA Mask indicates which bits from 23:43 (1MB grandularity) are
@@ -459,8 +459,8 @@ p8_set_pore_bar(      const fapi::Target& i_target,
                                                    i_mem_bar,
                                                    i_mem_size,
                                                    slw_pba_cmd_scope);
-            if(rc) 
-            { 
+            if(rc)
+            {
                 break;
             }
 
@@ -532,7 +532,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
     return rc;
 }
 
-/// Reset a PBA slave with explicit timeout.  
+/// Reset a PBA slave with explicit timeout.
 ///
 /// \param id A PBA slave id in the range 0..3
 ///
@@ -550,23 +550,23 @@ p8_set_pore_bar(      const fapi::Target& i_target,
 fapi::ReturnCode
 pba_slave_reset(const fapi::Target& i_target, uint32_t id)
 {
-    
+
     uint32_t            poll_count = 0;
     pba_slvrst_t        psr;
     fapi::ReturnCode    rc;
     uint32_t            l_ecmdRc = 0;
     ecmdDataBufferBase  data(64);
 
-    
+
     // Tell PBA to reset the slave, then poll for completion with timeout.
     // The PBA is always polled at least twice to guarantee that we always
     // poll once after a timeout.
 
     psr.value = 0;
     psr.fields.set = PBA_SLVRST_SET(id);
-    
+
     FAPI_DBG("  PBA_SLVRST%x: 0x%16llx", id, psr.value);
-    
+
     l_ecmdRc |= data.setDoubleWord(0, psr.value);
     if(l_ecmdRc)
     {
@@ -574,7 +574,7 @@ pba_slave_reset(const fapi::Target& i_target, uint32_t id)
         rc.setEcmdError(l_ecmdRc);
         return rc;
     }
-        
+
     rc = fapiPutScom(i_target, PBA_SLVRST_0x00064001, data);
     if (rc)
     {
@@ -582,7 +582,7 @@ pba_slave_reset(const fapi::Target& i_target, uint32_t id)
     }
     else
     {
-        do 
+        do
         {
             rc = fapiGetScom(i_target, PBA_SLVRST_0x00064001, data);
             if (rc)
@@ -592,21 +592,14 @@ pba_slave_reset(const fapi::Target& i_target, uint32_t id)
             }
 
             psr.value = data.getDoubleWord(0);
-            if(l_ecmdRc)
-            {
-                FAPI_ERR("Error (0x%x) manipulating ecmdDataBufferBase for PBA_SLVRST", l_ecmdRc);
-                rc.setEcmdError(l_ecmdRc);
-                break;
-            }
 
-
-            if (!(psr.fields.in_prog & PBA_SLVRST_IN_PROG(id))) 
+            if (!(psr.fields.in_prog & PBA_SLVRST_IN_PROG(id)))
             {
 	            break;
 	        }
 
             poll_count++;
-	        if (poll_count == PBA_SLAVE_RESET_TIMEOUT) 
+	        if (poll_count == PBA_SLAVE_RESET_TIMEOUT)
             {
 	            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_SLVRST_TIMED_OUT);
                 break;

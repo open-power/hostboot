@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_oha_init.C,v 1.9 2013/04/30 18:17:25 mjjones Exp $
+// $Id: p8_oha_init.C,v 1.12 2013/08/02 19:00:04 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_oha_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -30,7 +30,7 @@
 // *! OWNER NAME: Ralf Maier         Email: ralf.maier@de.ibm.com
 // *!
 // *! General Description:
-// *!        
+// *!
 // *!    The purpose of this procedure is to do a initial setup of OHA
 // *!
 // *! Procedure Prereq:
@@ -38,12 +38,13 @@
 // *!
 //------------------------------------------------------------------------------
 /// \file p8_oha_init.C
-/// \brief Setup OHA ( AISS_HANG_DETECT_TIMER,  Power Proxy Trace Timer and Low Activity detect range)
-///
-///
-///
+/// \brief Setup OHA ( Power Proxy Trace Timer and Low Activity detect range)
 ///
 /// \version
+/// \version 1.12  stillgs 06/04/13 Fix Gerrit comment on e_rc setting into rc for OHA
+/// \version       Mode register access
+/// \version --------------------------------------------------------------------------
+/// \version 1.11  stillgs 05/20/13 Removed AISS reset call as unncessary for OCC reset use
 /// \version --------------------------------------------------------------------------
 /// \version 1.9  mjjones 04/30/13 Removed unused variable
 /// \version --------------------------------------------------------------------------
@@ -71,7 +72,7 @@
 /// \version --------------------------------------------------------------------------
 /// \version 1.4 rmaier 03/13/12 Added modes-structure
 /// \version --------------------------------------------------------------------------
-/// \version 1.0 rmaier 12/01/11 Initial Version 
+/// \version 1.0 rmaier 12/01/11 Initial Version
 /// \version ---------------------------------------------------------------------------
 ///
 /// High-level procedure flow:
@@ -83,36 +84,39 @@
 ///
 ///
 ///     if PM_CONFIG {
-///  
-///        convert_ppt_time() - Convert Power Proxy Trace Time to Power Proxy Trace Time Select and Match feature attributes 
+///
+///        convert_ppt_time() - Convert Power Proxy Trace Time to Power Proxy Trace Time Select and Match feature attributes
 ///        With ATTR_PM_POWER_PROXY_TRACE_TIMER (binary in nanoseconds) to produce  ATTR_PM_PPT_TIMER_MATCH_VALUE and ATTR_PM_PPT_TIMER_TICK
 ///          0=0.25us , 1=0.5us, 2=1us, and 3=2us
 ///
 ///     else if PM_INIT {
-///        loop over all valid chiplets {                                                                                                   
-///           Check if OHA is accessible as chiplet may not be enabled or are in winkle                                                     
+///        loop over all valid chiplets {
+///           Check if OHA is accessible as chiplet may not be enabled or are in winkle
 ///
-///           Setup aiss hang time  in oha_mode_reg                                                                                         
-///           Set aiss_timeout to max              --  oha_mode_reg (11:14) ,            ADR 1002000D (SCOM)                                
-///                                                --  9 => longest time  512 ms                                                            
-///           Setup low activity  in oha_low_activity_detect_mode_reg                                                                       
-///                                                -- oha_low_activity_detect_mode_reg,   ADR 10020003 (SCOM)                               
-///             \todo  when should we enable the low activity detection or just setup the ranges??                                                
-///           Set lad_enable = 1??                                                                                                          
-///           Set lad_entry = 16                  -- bit index of a 24 bit counter based on base counter  0: longest, 23: shortest interval 
-///           Set lad_exit  = 17                  -- bit index of a 24 bit counter based on base counter  0: longest, 23: shortest interval 
+///           Setup aiss hang time  in oha_mode_reg
+///           Set aiss_timeout to max              --  oha_mode_reg (11:14) ,            ADR 1002000D (SCOM)
+///                                                --  9 => longest time  512 ms
+///           Setup low activity  in oha_low_activity_detect_mode_reg
+///                                                -- oha_low_activity_detect_mode_reg,   ADR 10020003 (SCOM)
+///             \todo  when should we enable the low activity detection or just setup the ranges??
+///           Set lad_enable = 1??
+///           Set lad_entry = 16                  -- bit index of a 24 bit counter based on base counter  0: longest, 23: shortest interval
+///           Set lad_exit  = 17                  -- bit index of a 24 bit counter based on base counter  0: longest, 23: shortest interval
 ///
 ///
-///           Setup Power Proxy Trace  in activity_sample_mode_reg                                                                          
-///           Set  ppt_int_timer_select           -- activity_sample_mode_reg (36:37)    ADR 10020000 (SCOM)                                
-///                                                -- select precounter for ppt timer ( 0=0.25us, 1=0.5us, 2=1us, 3=2us )                   
+///           Setup Power Proxy Trace  in activity_sample_mode_reg
+///           Set  ppt_int_timer_select           -- activity_sample_mode_reg (36:37)    ADR 10020000 (SCOM)
+///                                                -- select precounter for ppt timer ( 0=0.25us, 1=0.5us, 2=1us, 3=2us )
 ///
 ///         )
 ///     } else if PM_RESET {
-///         loop over all valid chiplets {                                                                                                   
-///           Check if OHA is accessible as chiplet may not be enabled or are in winkle    
+///         loop over all valid chiplets {
+///           Check if OHA is accessible as chiplet may not be enabled or are
+//            in winkle
 ///
-///             AISS reset 
+///             Note: no function is defined!!!! AISS reset was here but this
+///             reset should not be associcated with OCC resets
+///
 ///         }
 ///       }   //end PM_RESET -mode
 ///
@@ -136,7 +140,7 @@
 
 
 extern "C" {
- 
+
 using namespace fapi;
 
  //------------------------------------------------------------------------------
@@ -149,6 +153,7 @@ using namespace fapi;
 // Function prototypes
 // ----------------------------------------------------------------------
 
+fapi::ReturnCode oha_aiss_inject_winkle_entry(const fapi::Target & i_ex_target);
 
 typedef struct {
   int8_t   AISS_HANG_DETECT_TIMER_SEL;     //  oha_mode_reg (11:14) - 0=1ms, 1=2ms, 3=4ms, ...9=512ms. others illegal
@@ -162,15 +167,15 @@ typedef struct {
 // Function definitions
 // ----------------------------------------------------------------------
 
-// Reset function   
-fapi::ReturnCode p8_oha_init_reset( const fapi::Target& i_target, 
+// Reset function
+fapi::ReturnCode p8_oha_init_reset( const fapi::Target& i_target,
                                     uint32_t i_mode);
 // Config function
 fapi::ReturnCode p8_oha_init_config(const fapi::Target&  i_target);
-// INIT 
-fapi::ReturnCode  p8_oha_init_init( const fapi::Target& i_target, 
-                                    struct_i_oha_val_init_type i_oha_val_init); 
 
+// Init function
+fapi::ReturnCode  p8_oha_init_init( const fapi::Target& i_target,
+                                    struct_i_oha_val_init_type i_oha_val_init);
 
 // ----------------------------------------------------------------------
 // p8_oha_init wrapper to fetch the attributes and pass it on to p8_oha_init_core
@@ -181,154 +186,182 @@ p8_oha_init(const fapi::Target &i_target, uint32_t i_mode)
 {
     fapi::ReturnCode rc;
 
-    if ( i_mode == PM_CONFIG ) 
-    {
-
-        FAPI_INF("<p8_oha_init> : MODE: CONFIG Calling p8_oha_init_config");
-        
-        rc=p8_oha_init_config(i_target);
-        if (rc) 
-        {
-            FAPI_ERR(" p8_oha_init_config failed. With rc = 0x%x", (uint32_t)rc); return rc;  
-        }                      
-
-    } else if ( i_mode == PM_INIT )  { 
-
-
-        FAPI_INF("<p8_oha_init> : MODE: INIT Calling p8_oha_init_init");
-
-        //Declare parms struct 
-        struct_i_oha_val_init_type i_oha_val_init;
-
-        //Assign values to parms in struct
-        // should come from MRWB
-        i_oha_val_init.AISS_HANG_DETECT_TIMER_SEL = 9;  //  oha_mode_reg (11:14) - 0=1ms, 1=2ms, 3=4ms, ...9=512ms. others illegal
-        i_oha_val_init.PPT_TIMER_SELECT = 3;            //  activity_sample_mode_reg (36:37) 0=0.25us, 1=0.5us, 2=1us, and 3=2us
-        i_oha_val_init.LAD_ENTRY = 16;
-        i_oha_val_init.LAD_EXIT = 17;
-
-        rc=p8_oha_init_init(i_target,  i_oha_val_init);
-        if (rc) 
-        {
-            FAPI_ERR(" p8_oha_init_init failed. With rc = 0x%x", (uint32_t)rc); 
-            return rc;  
-        }            
-
-    } 
-    else if ( i_mode == PM_RESET )  
+    FAPI_INF("Procedure start");
+    do
     {
      
-         FAPI_INF("<p8_oha_init> : MODE: RESET Calling p8_oha_init_reset");
+        if ( i_mode == PM_CONFIG )
+        {
 
-         //  ******************************************************************
-         /// \todo   should this values be attributes?? The get those attributes here
-         //      FAPI_ATTR_GET("IVRMS_ENABLED", i_target,(unit8_t) ivrms_enabled);   
-           
-         rc = p8_oha_init_reset( i_target, i_mode); 
-         if (rc) 
-         {
-            FAPI_ERR(" p8_oha_init_reset failed. With rc = 0x%x", (uint32_t)rc); 
-            return rc;  
-         }            
-    } 
-    else 
-    {
+            FAPI_INF("MODE: CONFIG Calling p8_oha_init_config");
 
-         FAPI_ERR("<p8_oha_init> : Unknown mode %x ....\n", i_mode);
-         FAPI_SET_HWP_ERROR(rc, RC_PROC_OHA_CODE_BAD_MODE);
+            rc=p8_oha_init_config(i_target);
+            if (rc)
+            {
+                FAPI_ERR(" p8_oha_init_config failed. With rc = 0x%x", (uint32_t)rc); 
+                break;
+            }
 
-    }; 
+        } else if ( i_mode == PM_INIT )  {
 
-    return rc; 
-  
-}  
+
+            FAPI_INF("MODE: INIT Calling p8_oha_init_init");
+
+            //Declare parms struct
+            struct_i_oha_val_init_type i_oha_val_init;
+
+            //Assign values to parms in struct
+            // should come from MRWB
+            i_oha_val_init.AISS_HANG_DETECT_TIMER_SEL = 9;  //  oha_mode_reg (11:14) - 0=1ms, 1=2ms, 3=4ms, ...9=512ms. others illegal
+            i_oha_val_init.PPT_TIMER_SELECT = 3;            //  activity_sample_mode_reg (36:37) 0=0.25us, 1=0.5us, 2=1us, and 3=2us
+            i_oha_val_init.LAD_ENTRY = 16;
+            i_oha_val_init.LAD_EXIT = 17;
+
+            rc=p8_oha_init_init(i_target,  i_oha_val_init);
+            if (rc)
+            {
+                FAPI_ERR(" p8_oha_init_init failed. With rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+
+        }
+        else if ( i_mode == PM_RESET )
+        {
+
+             FAPI_INF("MODE: RESET - none defined");
+             /*
+
+             GSS:  removed as this only resets (at this time) the AISS
+             functions which are not influenced by OCC FW and are detrimental
+             to operational chiplets
+
+             FAPI_INF("MODE: RESET Calling p8_oha_init_reset");
+             rc = p8_oha_init_reset( i_target, i_mode);
+             if (rc)
+             {
+                FAPI_ERR(" p8_oha_init_reset failed. With rc = 0x%x", (uint32_t)rc);
+                return rc;
+             }
+             */
+        }
+        else
+        {
+
+             FAPI_ERR("Unknown mode %x ....\n", i_mode);
+             FAPI_SET_HWP_ERROR(rc, RC_PROC_OHA_CODE_BAD_MODE);
+
+        }
+    } while (0);
+
+    FAPI_INF("Procedure end...\n");
+   
+    return rc;
+
+}
 
 
 //------------------------------------------------------------------------------
 // OHA Config Function
 //------------------------------------------------------------------------------
 fapi::ReturnCode
-p8_oha_init_config(const fapi::Target& i_target) 
+p8_oha_init_config(const fapi::Target& i_target)
 {
     fapi::ReturnCode rc;
-  
+
     uint8_t  attr_pm_aiss_timeout;
     uint32_t attr_pm_power_proxy_trace_timer;
     uint32_t attr_pm_ppt_timer_tick;
     uint32_t attr_pm_ppt_timer_match_value;
     
-    FAPI_INF("<p8_oha_init> : Executing config  ....\n");
+    FAPI_INF("OHA config start...");
+    do
+    {      
+
+        //  ******************************************************************
+        //  Get Attributes for OHA Timers Delay
+        //  ******************************************************************
+        //  set defaults  if not available
         
-    //  ******************************************************************
-    //  Get Attributes for OHA Timers Delay      
-    //  ******************************************************************     
-    //  set defaults  if not available        
+        // Write all the timer attributes with defaults.  This also allocates
+        // the attributes in Cronus environments.
+        // If overrides exist, the overridden values will be returned when 
+        // read back.
 
-    attr_pm_ppt_timer_tick           = 2;       // Default 2: 1us
+        attr_pm_ppt_timer_tick           = 2;       // Default 2: 1us
+        
+        SETATTR(rc,
+                ATTR_PM_PPT_TIMER_TICK,
+                "ATTR_PM_PPT_TIMER_TICK",
+                &i_target,
+                attr_pm_ppt_timer_tick);
+                
+        GETATTR(rc,
+                ATTR_PM_PPT_TIMER_TICK,
+                "ATTR_PM_PPT_TIMER_TICK",
+                &i_target,
+                attr_pm_ppt_timer_tick);
+        
+        attr_pm_aiss_timeout             = 5;       // Default 5: 32ms
+        
+        SETATTR(rc,
+                ATTR_PM_AISS_TIMEOUT,
+                "ATTR_PM_AISS_TIMEOUT",
+                &i_target,
+                attr_pm_aiss_timeout);
+                
+        GETATTR(rc,
+                ATTR_PM_AISS_TIMEOUT,
+                "ATTR_PM_AISS_TIMEOUT",
+                &i_target,
+                attr_pm_aiss_timeout);
+       
+        attr_pm_power_proxy_trace_timer  = 64000;   // Default 1us,,, 32us...64ms
+        
+        SETATTR(rc,
+                ATTR_PM_POWER_PROXY_TRACE_TIMER,
+                "ATTR_PM_POWER_PROXY_TRACE_TIMER",
+                &i_target,
+                attr_pm_power_proxy_trace_timer);
+                
+        GETATTR(rc,
+                ATTR_PM_POWER_PROXY_TRACE_TIMER,
+                "ATTR_PM_POWER_PROXY_TRACE_TIMER",
+                &i_target,
+                attr_pm_power_proxy_trace_timer);
 
-    /// \todo PLAT attr ... not there yet
-    attr_pm_aiss_timeout             = 5;       // Default 5: 32ms        
-    // rc = FAPI_ATTR_GET(ATTR_PM_AISS_TIMEOUT, &i_target, attr_pm_aiss_timeout); 
-    // if (rc) 
-    // { 
-    //      FAPI_ERR("fapiGetAttribute of ATTR_PM_AISS_TIMEOUT with rc = 0x%x", (uint32_t)rc);  
-    //      return rc; 
-    // }
-    //               
+        //  ******************************************************************
+        //  Calculate OHA timer settings
+        //  ******************************************************************
 
-    /// \todo PLAT attr ... not there yet
-    attr_pm_power_proxy_trace_timer  = 64000;   // Default 1us,,, 32us...64ms
-    //  rc = FAPI_ATTR_GET(ATTR_PM_POWER_PROXY_TRACE_TIMER, &i_target, attr_pm_power_proxy_trace_timer); 
-    //  if (rc) 
-    //..{ 
-    //      FAPI_ERR("fapiGetAttribute of ATTR_PM_POWER_PROXY_TRACE_TIMER with rc = 0x%x", (uint32_t)rc);  
-    //      return rc; 
-    //  }
+        FAPI_DBG("Calculate OHA timer settings");
+        FAPI_DBG("Calculate:");
+        FAPI_DBG("        ATTR_PM_PPT_TIMER_MATCH_VALUE");
+        FAPI_DBG("        ATTR_PM_PPT_TIMER_TICK");
+        FAPI_DBG("using:");
+        FAPI_DBG("        ATTR_PM_POWER_PROXY_TRACE_TIMER");
 
-    //  ******************************************************************
-    //  Calculate OHA timer settings      
-    //  ******************************************************************            
+        FAPI_DBG("Set  ATTR_PM_AISS_TIMEOUT to %X", attr_pm_aiss_timeout);
+        attr_pm_ppt_timer_match_value  = attr_pm_power_proxy_trace_timer / 32  ;    //time in us / 32us
 
-    FAPI_DBG("<p8_oha_init> : Calculate OHA timer settings");
-    FAPI_DBG("<p8_oha_init> : Calculate:");
-    FAPI_DBG("<p8_oha_init> :         ATTR_PM_PPT_TIMER_MATCH_VALUE");
-    FAPI_DBG("<p8_oha_init> :         ATTR_PM_PPT_TIMER_TICK");
-    FAPI_DBG("<p8_oha_init> : using:");
-    FAPI_DBG("<p8_oha_init> :         ATTR_PM_POWER_PROXY_TRACE_TIMER"); 
-            
-    FAPI_DBG("<p8_oha_init> : Set  ATTR_PM_AISS_TIMEOUT   to 5 (32ms)");
-    attr_pm_ppt_timer_match_value  = attr_pm_power_proxy_trace_timer / 32  ;    //time in us / 32us 
-
-    FAPI_DBG("<p8_oha_init> : attr_pm_aiss_timeout                    :  %X", attr_pm_aiss_timeout);
-    FAPI_DBG("<p8_oha_init> : attr_pm_ppt_timer_match_value           :  %X", attr_pm_ppt_timer_match_value);         
+        FAPI_DBG("Set ATTR_PM_PPT_TIMER_MATCH_VALUE to %X", attr_pm_ppt_timer_match_value);
 
 
-    //  ******************************************************************
-    //  Set Attributes for OHA timers      
-    //  ******************************************************************                  
+        //  ******************************************************************
+        //  Set Attributes for OHA timers
+        //  ******************************************************************
 
-    //     rc = FAPI_ATTR_SET(ATTR_PM_AISS_TIMEOUT, &i_target, attr_pm_aiss_timeout); 
-    //     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_AISS_TIMEOUT with rc = 0x%x", (uint32_t)rc);  return; }
+        SETATTR(rc,
+                ATTR_PM_PPT_TIMER_MATCH_VALUE,
+                "ATTR_PM_PPT_TIMER_MATCH_VALUE",
+                &i_target,
+                attr_pm_ppt_timer_match_value);       
 
-    rc = FAPI_ATTR_SET(ATTR_PM_PPT_TIMER_MATCH_VALUE, &i_target, attr_pm_ppt_timer_match_value); 
-    if (rc) 
-    { 
-        FAPI_ERR("fapiSetAttribute of ATTR_PM_PPT_TIMER_MATCH_VALUE with rc = 0x%x", (uint32_t)rc);  
-        return rc; 
-    }
+    } while (0);
     
-    rc = FAPI_ATTR_SET(ATTR_PM_PPT_TIMER_TICK, &i_target, attr_pm_ppt_timer_tick); 
-    if (rc) 
-    { 
-        FAPI_ERR("fapiSetAttribute of ATTR_PM_PPT_TIMER_TICK with rc = 0x%x", (uint32_t)rc);  
-        return rc; 
-    }  
- 
-    FAPI_INF("");
-    FAPI_INF("<p8_oha_init> : Finished config  ....\n");
- 
+    FAPI_INF("OHA config end...\n");
+     
     return rc;
-  
+
 }  //end CONFIG
 
 
@@ -337,100 +370,74 @@ p8_oha_init_config(const fapi::Target& i_target)
 // OHA Init Function
 //------------------------------------------------------------------------------
 fapi::ReturnCode
-p8_oha_init_init(const fapi::Target& i_target, struct_i_oha_val_init_type i_oha_val_init) 
+p8_oha_init_init(const fapi::Target& i_target, struct_i_oha_val_init_type i_oha_val_init)
 {
     fapi::ReturnCode rc;
     uint32_t l_rc;
- 
+
     ecmdDataBufferBase              data(64);
     ecmdDataBufferBase              mask(64);
-    
+
     std::vector<fapi::Target>       l_exChiplets;
 //    std::vector<Target>::iterator  itr;
-    uint8_t                         l_functional = 0;
     uint8_t                         l_ex_number = 0;
-    
-    uint8_t                         attr_pm_aiss_timeout;
+
+    uint8_t                         attr_pm_aiss_timeout = 0;
     uint32_t                        attr_pm_tod_pulse_count_match_val = 1024;
     uint32_t                        attr_pm_ppt_timer_tick;
     uint32_t                        attr_pm_ppt_timer_match_value;
-    
-    FAPI_INF("<p8_oha_init> : Executing init  ....\n");
+
+    FAPI_INF("OHA init start...");
+    do
+    {
+        
 
         //  ******************************************************************
-    //  Get Attributes for OHA Timers Delay      
-    //  ******************************************************************     
-    #ifndef ATTRIBUTES_AVAIL       
-    //  ******************************************************************
-    //  set defaults  if not available        
-    attr_pm_ppt_timer_tick           = 2;           // Default 2: 1us
-    attr_pm_ppt_timer_match_value    = 0x7FF;       // Default 0x7FF: 64ms
-    attr_pm_aiss_timeout             = 5;           // Default 5: 32ms       
-    #else    
-    /// \todo PLAT attr ... not there yet
-    //rc = FAPI_ATTR_GET(ATTR_PM_AISS_TIMEOUT, &i_target, attr_pm_aiss_timeout); 
-    //if (rc) 
-    //{ 
-    //     FAPI_ERR("fapiGetAttribute of ATTR_PM_AISS_TIMEOUT with rc = 0x%x", (uint32_t)rc);  
-    //     return rc; 
-    //}
+        //  Get Attributes for OHA Timers Delay
+        //  ******************************************************************
+        
+        GETATTR(rc,
+                ATTR_PM_PPT_TIMER_TICK,
+                "ATTR_PM_PPT_TIMER_TICK",
+                &i_target,
+                attr_pm_ppt_timer_tick);
+        
+        GETATTR(rc,
+                ATTR_PM_PPT_TIMER_MATCH_VALUE,
+                "ATTR_PM_PPT_TIMER_MATCH_VALUE",
+                &i_target,
+                attr_pm_ppt_timer_match_value);                    
 
-    rc = FAPI_ATTR_GET(ATTR_PM_PPT_TIMER_TICK, &i_target, attr_pm_ppt_timer_tick); 
-    if (rc) 
-    { 
-       FAPI_ERR("fapiGetAttribute of ATTR_PM_PPT_TIMER_TICK with rc = 0x%x", (uint32_t)rc); 
-       return rc; 
-    }
-    rc = FAPI_ATTR_GET(ATTR_PM_PPT_TIMER_MATCH_VALUE, &i_target, attr_pm_ppt_timer_match_value); 
-    if (rc) 
-    { 
-        FAPI_ERR("fapiGetAttribute of ATTR_PM_PPT_TIMER_MATCH_VALUE with rc = 0x%x", (uint32_t)rc);  
-        return rc; 
-    }
-    #endif    
-       
-    //  ******************************************************************
-    //  initialize all oha_reg with scan-zero values upfront
-    //  ******************************************************************
-    
-    rc = fapiGetChildChiplets ( i_target, 
-                                TARGET_TYPE_EX_CHIPLET, 
-                                l_exChiplets, 
-                                TARGET_STATE_FUNCTIONAL);
-	if (rc)
-	{
-	    FAPI_ERR("Error from fapiGetChildChiplets!");
-	    return rc;
-	}
-    FAPI_DBG("<p8_oha_init> : Number of chiplets  => %u", l_exChiplets.size());
-    
-    // Iterate through the returned chiplets
-    //for (itr = l_exChiplets.begin(); itr != l_exChiplets.end(); itr++) 
-    for (uint8_t c=0; c < l_exChiplets.size(); c++)
-    {
-        // Determine if it's functional
-        //rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, itr, l_functional);
-        rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[c], l_functional);
+        //  ******************************************************************
+        //  initialize all oha_reg with scan-zero values upfront
+        //  ******************************************************************
+
+        rc = fapiGetChildChiplets ( i_target,
+                                    TARGET_TYPE_EX_CHIPLET,
+                                    l_exChiplets,
+                                    TARGET_STATE_FUNCTIONAL);
         if (rc)
         {
-            FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
+            FAPI_ERR("Error from fapiGetChildChiplets!");
             break;
         }
-        
-        // With TARGET_STATE_FUNCTIONAL above, this check may be redundant
-        if ( l_functional )
-        {
+        FAPI_DBG("Number of chiplets  => %u", l_exChiplets.size());
+
+        // Iterate through the returned chiplets
+        //for (itr = l_exChiplets.begin(); itr != l_exChiplets.end(); itr++)
+        for (uint8_t c=0; c < l_exChiplets.size(); c++)
+        {          
             // Get the core number
-            //rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, itr, c); 
-            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);                  
+            //rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, itr, c);
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);
             if (rc)
             {
                 FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
                 break;
             }
 
-            FAPI_DBG("<p8_oha_init> : Processing core : %d ", l_ex_number);
-    
+            FAPI_DBG("Processing core : %d ", l_ex_number);
+
             //  ******************************************************************
             //  AISS hang timer setup
             //  ******************************************************************
@@ -443,29 +450,30 @@ p8_oha_init_init(const fapi::Target& i_target, struct_i_oha_val_init_type i_oha_
             // Read register content
             //rc = fapiGetScom( (*itr), EX_OHA_MODE_REG_RWx1002000D , data );
             rc = fapiGetScom( l_exChiplets[c], EX_OHA_MODE_REG_RWx1002000D , data );
-            if (rc) 
+            if (rc)
             {
-                FAPI_ERR("fapiGetScom(EX_OHA_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
-                return rc;    
+                FAPI_ERR("fapiGetScom(EX_OHA_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);
+                break;
             }
 
             FAPI_DBG ("Content of EX_OHA_MODE_REG_0x1002000D  :  %016llX", data.getDoubleWord(0));
 
             //data.flushTo0();
-            l_rc = data.insertFromRight(attr_pm_aiss_timeout    ,11,4);              
-	    l_rc |= data.insertFromRight(attr_pm_tod_pulse_count_match_val    ,17,14);              
-            if (l_rc) 
+            l_rc = data.insertFromRight(attr_pm_aiss_timeout    ,11,4);
+            l_rc |= data.insertFromRight(attr_pm_tod_pulse_count_match_val    ,17,14);
+            if (l_rc)
             {
-                FAPI_ERR("Bit operation failed. With rc = 0x%x", (uint32_t)l_rc);  rc.setEcmdError(l_rc); 
-                return rc;    
+                FAPI_ERR("Bit operation failed. With rc = 0x%x", (uint32_t)l_rc);  rc.setEcmdError(l_rc);
+                break;
             }
 
             // rc = fapiPutScom( (*itr), EX_OHA_MODE_REG_RWx1002000D , data );
             rc = fapiPutScom( l_exChiplets[c], EX_OHA_MODE_REG_RWx1002000D , data );
-            if (rc) 
+            if (rc)
             {
-                FAPI_ERR("fapiPutScom(EX_OHA_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc); return rc;  
-            }              
+                FAPI_ERR("fapiPutScom(EX_OHA_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc); 
+                break;
+            }
 
 
             //  ******************************************************************
@@ -476,37 +484,36 @@ p8_oha_init_init(const fapi::Target& i_target, struct_i_oha_val_init_type i_oha_
             //  - set LAD for entry
             //  - set LAD for exit
             //  ******************************************************************
-            //FAPI_DBG("**********************************************************************************************");
+
             FAPI_INF(" Setup Low Activity Detect (LAD) in oha_low_activity_detect_mode_reg 10020003, but NOT ENABLED");
-            //FAPI_DBG("**********************************************************************************************");
 
             // Read register content
             // rc = fapiGetScom( (*itr), EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG_RWx10020003 , data );
             rc = fapiGetScom( l_exChiplets[c], EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG_RWx10020003 , data );
-            if (rc) 
-            { 
-               FAPI_ERR("fapiGetScom(EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG_RWx10020003) failed. With rc = 0x%x", (uint32_t)rc); 
-               return rc;     
+            if (rc)
+            {
+               FAPI_ERR("fapiGetScom(EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG_RWx10020003) failed. With rc = 0x%x", (uint32_t)rc);
+               break;
             }
             FAPI_DBG(" Pre write content of EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG_RWx10020003  :  %016llX", data.getDoubleWord(0));
 
-            l_rc = data.setByte(0, i_oha_val_init.LAD_ENTRY);   // 16             
+            l_rc = data.setByte(0, i_oha_val_init.LAD_ENTRY);   // 16
             l_rc |= data.setByte(1, i_oha_val_init.LAD_EXIT);   // 17
-            l_rc |= data.shiftRight(1);                         // LAD entry/exit starts at bit 1              
+            l_rc |= data.shiftRight(1);                         // LAD entry/exit starts at bit 1
             l_rc |= data.clearBit(0);
-            if (l_rc) 
-            { 
-                FAPI_ERR("Bit operation failed. With rc = 0x%x", (uint32_t)l_rc);  
-                rc.setEcmdError(l_rc); 
-                return rc;    
+            if (l_rc)
+            {
+                FAPI_ERR("Bit operation failed. With rc = 0x%x", (uint32_t)l_rc);
+                rc.setEcmdError(l_rc);
+                break;
             }
 
             // rc = fapiPutScom((*itr), EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG_RWx10020003 , data );
             rc = fapiPutScom( l_exChiplets[c], EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG_RWx10020003 , data );
-            if (rc) 
+            if (rc)
             {
-                FAPI_ERR("fapiGetScom(EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
-                return rc;  
+                FAPI_ERR("fapiGetScom(EX_OHA_LOW_ACTIVITY_DETECT_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);
+                break;
             }
 
             FAPI_INF ("Done LAD setup. LAD Disabled " );
@@ -518,61 +525,61 @@ p8_oha_init_init(const fapi::Target& i_target, struct_i_oha_val_init_type i_oha_
             //  - set ppt_timer_select
             //  - set ppt_trace_timer_match_val
             //  ******************************************************************
-            //FAPI_DBG("********************************************************************************");
-            FAPI_INF(" Setup  Power Proxy Trace (PPT) in oha_activity_sample_mode_reg 10020000");
-            //FAPI_DBG("********************************************************************************");
 
-            // Read register content            
+            FAPI_INF(" Setup  Power Proxy Trace (PPT) in oha_activity_sample_mode_reg 10020000");
+
+            // Read register content
             // rc = fapiGetScom( (*itr), EX_OHA_ACTIVITY_SAMPLE_MODE_REG_RWx10020000 , data );
             rc = fapiGetScom( l_exChiplets[c], EX_OHA_ACTIVITY_SAMPLE_MODE_REG_RWx10020000 , data );
-            if (rc) 
+            if (rc)
             {
-                FAPI_ERR("fapiGetScom(EX_OHA_ACTIVITY_SAMPLE_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
-                return rc;  
+                FAPI_ERR("fapiGetScom(EX_OHA_ACTIVITY_SAMPLE_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);
+                break;
             }
             FAPI_DBG(" Pre write content of EX_OHA_ACTIVITY_SAMPLE_MODE_REG_RWx10020000  :  %016llX", data.getDoubleWord(0));
 
 
-            // set ppt_int_timer_select to longest interval "11" = 2us 
+            // set ppt_int_timer_select to longest interval "11" = 2us
             //l_rc = data.setBit(36);
-            //if (l_rc) 
+            //if (l_rc)
             //{
-            //      FAPI_ERR("Bit operation failed.");  
-            //      FAPI_SET_HWP_ERROR(rc, RC_PROC_OHA_CODE_BITOP_FAILED); 
-            //}              
-            //l_rc = data.setBit(37);
-            //if (l_rc) 
-            //{ 
-            //      FAPI_ERR("Bit operation failed.");  
+            //      FAPI_ERR("Bit operation failed.");
             //      FAPI_SET_HWP_ERROR(rc, RC_PROC_OHA_CODE_BITOP_FAILED);
-            //}              
+            //}
+            //l_rc = data.setBit(37);
+            //if (l_rc)
+            //{
+            //      FAPI_ERR("Bit operation failed.");
+            //      FAPI_SET_HWP_ERROR(rc, RC_PROC_OHA_CODE_BITOP_FAILED);
+            //}
 
-            l_rc = data.insertFromRight(attr_pm_ppt_timer_match_value    ,24,11);                                      
-            l_rc |= data.insertFromRight(attr_pm_ppt_timer_tick           ,36,2);             
-            if (l_rc) 
-            { 
-                FAPI_ERR("Bit operation failed. With rc = 0x%x", (uint32_t)l_rc);  
-                rc.setEcmdError(l_rc); 
-                return rc;    
+            l_rc = data.insertFromRight(attr_pm_ppt_timer_match_value    ,24,11);
+            l_rc |= data.insertFromRight(attr_pm_ppt_timer_tick           ,36,2);
+            if (l_rc)
+            {
+                FAPI_ERR("Bit operation failed. With rc = 0x%x", (uint32_t)l_rc);
+                rc.setEcmdError(l_rc);
+                break;
             }
 
             // rc = fapiPutScom((*itr), EX_OHA_ACTIVITY_SAMPLE_MODE_REG_RWx10020000 , data );
             rc = fapiPutScom( l_exChiplets[c], EX_OHA_ACTIVITY_SAMPLE_MODE_REG_RWx10020000 , data );
-            if (rc) 
+            if (rc)
             {
-                FAPI_ERR("fapiGetScom(EX_OHA_ACTIVITY_SAMPLE_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
-                return rc;  
+                FAPI_ERR("fapiGetScom(EX_OHA_ACTIVITY_SAMPLE_MODE_REG) failed. With rc = 0x%x", (uint32_t)rc);
+                 break;
             }
-            
-            FAPI_INF ("<p8_oha_init> : Done PPT timer setup." );
-        }
-    }
-  
-    FAPI_INF("<p8_oha_init> : Finished init  ....\n");
 
+            FAPI_INF ("Done PPT timer setup." );
+        } // Chiplet loop
+        
+        // Error break is naturally handled
+        
+    } while(0);
     
+    FAPI_INF("OHA init end...\n");
     return rc;
-  
+
 }  //end INIT
 
 
@@ -584,181 +591,157 @@ fapi::ReturnCode
 p8_oha_init_reset(const Target &i_target,  uint32_t i_mode)
 {
     fapi::ReturnCode                rc;
+    fapi::ReturnCode                e_rc;
     uint32_t                        l_rc = 0;
 
     ecmdDataBufferBase              data(64);
     ecmdDataBufferBase              mask(64);
 
-   
+
 //    std::vector<Target>::iterator   itr;
     std::vector<fapi::Target>       l_exChiplets;
-    uint8_t                         l_functional = 0;
     uint8_t                         l_ex_number = 0;
- 
-   
-    FAPI_INF("<p8_oha_init> : Executing reset  ....\n");;
     
-    rc = fapiGetChildChiplets ( i_target, 
-                                TARGET_TYPE_EX_CHIPLET, 
-                                l_exChiplets, 
-                                TARGET_STATE_FUNCTIONAL);
-	if (rc)
-	{
-	    FAPI_ERR("Error from fapiGetChildChiplets!");
-	    return rc;
-	}
-    FAPI_DBG("<p8_oha_init> : Number of chiplets  => %u", l_exChiplets.size());
+    uint8_t                         platform;
     
-    // Iterate through the returned chiplets
-    //for (itr = l_exChiplets.begin(); itr != l_exChiplets.end(); itr++)
-    for (uint8_t c=0; c < l_exChiplets.size(); c++)
+    FAPI_INF("OHA init start...");
+    do
     {
-        // Determine if it's functional
-        //rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, itr, l_functional);
-        rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[c], l_functional);
+        rc = fapiGetChildChiplets ( i_target,
+                                    TARGET_TYPE_EX_CHIPLET,
+                                    l_exChiplets,
+                                    TARGET_STATE_FUNCTIONAL);
         if (rc)
         {
-            FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
+            FAPI_ERR("Error from fapiGetChildChiplets!");
             break;
         }
-        
-        // With TARGET_STATE_FUNCTIONAL above, this check may be redundant
-        if ( l_functional )
+        FAPI_DBG("Number of chiplets  => %u", l_exChiplets.size());
+
+        // Iterate through the returned chiplets
+        //for (itr = l_exChiplets.begin(); itr != l_exChiplets.end(); itr++)
+        for (uint8_t c=0; c < l_exChiplets.size(); c++)
         {
+
             // Get the core number
-            //rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, itr, c); 
-            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);                  
+            //rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, itr, c);
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);
             if (rc)
             {
                 FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
                 break;
             }
 
-            FAPI_DBG("<p8_oha_init> : Processing core : %d ", l_ex_number);
-            
+            FAPI_DBG("Processing core : %d ", l_ex_number);
+
+            // --------------------------------------
+            // Check if SBE code has already cleared the OHA override.
+            // As chiplets may be enabled but offline (eg in Winkle)
+            // treat SCOM errors as off-line (eg skip it).  If online
+            // and set, clear the override.
+
+            //  GSS:  removed as Cronus always puts a message out of (PCB_OFFLINE)
+            //  even though this code is meant to handle it. As this message
+            //  can cause confusion in the lab, the check is being removed.
+            bool            oha_accessible = true;
+            uint32_t        fsierror = 0;
+            const uint32_t  IDLE_STATE_OVERRIDE_EN = 6;
 
 
-                    // --------------------------------------
-                    // Check if SBE code has already cleared the OHA override.
-                    // As chiplets may be enabled but offline (eg in Winkle)
-                    // treat SCOM errors as off-line (eg skip it).  If online 
-                    // and set, clear the override. 
-                    
-                    //  GSS:  removed as Cronus always puts a message out of (PCB_OFFLINE)
-	    //                         even though this code is meant to handle it. As this messge
-	    //                         can cause confusion in the lab, the check is being removed.
-	    bool oha_accessible = true;   
-	    uint32_t                        fsierror = 0;    
-	    const uint32_t                  IDLE_STATE_OVERRIDE_EN = 6;
-
-           
-	    rc = fapiGetScom(l_exChiplets[c], EX_OHA_MODE_REG_RWx1002000D, data);
-	    if(!rc.ok())
-	      {                                      
-		FAPI_ERR("Error reading EX_OHA_MODE_REG_RWx1002000D . Further debugging");
-		rc = fapiGetCfamRegister( i_target, CFAM_FSI_STATUS_0x00001007, data );
-		if(!rc.ok())
-		  { 
-		    FAPI_ERR("Error reading CFAM FSI Status Register");
-		    break;
-		  }
-		FAPI_INF( "CFAM_FSI_STATUS_0x00001007: 0x%X", data.getWord(0));
-		l_rc |= data.extractToRight( &fsierror, 17, 3 );
-		if ( l_rc ) 
-		  { 
-		    rc.setEcmdError(l_rc); 
-                            break;
-		  }
-		if (fsierror == PIB_OFFLINE_ERROR) 
-		  {
-		    FAPI_INF( "Chiplet offline error detected. Skipping OHA Override clearing"); 
-		    oha_accessible = false;
-		  }
-		else
-		  {
-		    FAPI_ERR("Scom reading OHA_MODE");
-		    break;
-		  }
-	      }
-	    // Process if OHA accessible.
-	    if (oha_accessible)
-	      {
-		if (data.isBitSet(IDLE_STATE_OVERRIDE_EN))
-		  {
-		    
-		    FAPI_INF("\tClear the OHA Idle State Override for EX %x", l_ex_number);
-		    l_rc |= data.clearBit(IDLE_STATE_OVERRIDE_EN);
-		    if (l_rc)
-		      {
-			FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", l_rc);
-			rc.setEcmdError(l_rc);
-			break;
-		      }
-		    
-		    rc = fapiPutScom(l_exChiplets[c], EX_OHA_MODE_REG_RWx1002000D, data);
-		    if(!rc.ok())
-		      {
-			FAPI_ERR("Scom error writing OHA_MODE");
-			break;
-		      }
-		  }
-	      }
-	    //	    End of check removal
-	      
-                           
-
-
-
-
-            FAPI_INF("Reset AISS  ");
-            FAPI_INF("Write to register OHA_ARCH_IDLE_STATE_REG  ");
-
-            // rc = fapiGetScom( (*itr), EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011, data); 
-            rc = fapiGetScom( l_exChiplets[c], EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011, data); 
-            if (rc) 
+            e_rc = fapiGetScom(l_exChiplets[c], EX_OHA_MODE_REG_RWx1002000D, data);
+            if(!e_rc.ok())
             {
-                FAPI_ERR("fapiGetScom(EX_OHA_ARCH_IDLE_STATE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
-                return rc;  
-            }
-            FAPI_DBG(" Pre write content of EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011 :  %016llX",  data.getDoubleWord(0) );                
+                FAPI_ERR("Error reading EX_OHA_MODE_REG_RWx1002000D . Further debugging");
 
-            l_rc = data.setBit(9);   //reset_idle_state_sequencer_in ... reset pulse gets generated. Not unsetting required
-            if (l_rc) 
-            { 
-                FAPI_ERR("Bit operation failed. With rc = 0x%x", (uint32_t)l_rc);  
-                rc.setEcmdError(l_rc); 
-                return rc;    
-            }
+                // Based on the execution platorm, access different facilities to 
+                // determine the error code
+                GETATTR(rc,
+                        ATTR_EXECUTION_PLATFORM,
+                        "ATTR_EXECUTION_PLATFORM",
+                        NULL,
+                        platform);
 
-            // rc = fapiPutScom((*itr), EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011 , data );
-            rc = fapiPutScom( l_exChiplets[c], EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011 , data );
-            if (rc) 
+                if( platform == fapi::ENUM_ATTR_EXECUTION_PLATFORM_FSP) 
+                {      
+                    rc = fapiGetCfamRegister( i_target, CFAM_FSI_STATUS_0x00001007, data );
+                    if(!rc.ok())
+                    {
+                        FAPI_ERR("Error reading CFAM FSI Status Register");
+                        break;
+                    }
+                    FAPI_INF( "CFAM_FSI_STATUS_0x00001007: 0x%X", data.getWord(0));
+                    l_rc |= data.extractToRight( &fsierror, 17, 3 );
+
+                    if ( l_rc )
+                    {
+                        rc.setEcmdError(l_rc);
+                        break;
+                    }
+                }
+                else if( platform == fapi::ENUM_ATTR_EXECUTION_PLATFORM_HOST )
+                {
+                    // Find the ADU status reg with the same PIB scresp
+
+                }
+                else
+                {
+                    FAPI_ERR("Invalid execution platform: %X", platform);
+                    // \todo Add CML point
+                    break;
+                }
+                if (fsierror == PIB_OFFLINE_ERROR)
+                {
+                    FAPI_INF( "Chiplet offline error detected. Skipping OHA Override clearing");
+                    oha_accessible = false;
+                }
+                else
+                {
+                    FAPI_ERR("Scom reading OHA_MODE");
+                    uint32_t & ERRORS = fsierror;
+                    rc = e_rc ;
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_OHA_CODE_PUTGETSCOM_FAILED);
+                    break;
+                }
+            }
+            // Process if OHA accessible.
+            if (oha_accessible)
             {
-                FAPI_ERR("fapiPutScom(EX_OHA_ARCH_IDLE_STATE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
-                return rc;  
+                if (data.isBitSet(IDLE_STATE_OVERRIDE_EN))
+                {
+
+                    FAPI_INF("\tClear the OHA Idle State Override for EX %x", l_ex_number);
+                    l_rc |= data.clearBit(IDLE_STATE_OVERRIDE_EN);
+                    if (l_rc)
+                    {
+                       FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", l_rc);
+                       rc.setEcmdError(l_rc);
+                       break;
+                    }
+
+                    rc = fapiPutScom(l_exChiplets[c], EX_OHA_MODE_REG_RWx1002000D, data);
+                    if(!rc.ok())
+                    {
+                        FAPI_ERR("Scom error writing OHA_MODE");
+                        break;
+                    }
+                }
             }
+            //        End of check removal
 
-             // rc = fapiGetScom( (*itr), EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011, data); 
-             rc = fapiGetScom( l_exChiplets[c], EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011, data); 
-             if (rc) return rc;
-             FAPI_DBG(" Post write content of EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011 :  %016llX",  data.getDoubleWord(0) );        
-            //}
-            if (rc) 
-            {
-                FAPI_ERR("fapiGetScom(EX_OHA_ARCH_IDLE_STATE_REG) failed. With rc = 0x%x", (uint32_t)rc);  
-                return rc;
-            }
-        }
-        else
-        {
-            FAPI_INF("<p8_oha_init> : Skipping non-functional core.  Number unknown at this time!");
-        }           
-    }                
+            // GSS: removed AISS reset as this should only be used for SLW
+            // recovery, not OCC reset.
+            //
+            // If this function were to ever be restored here (for whatever
+            // reason), a check for special wake-up state must be made.
+            // This, too, needs care in implementation as AISS reset affects
+            // the special wake-up condition and must be forced from the PCBS-PM
+            // via the override mechanism there.
 
-    FAPI_INF("<p8_oha_init> : Finished reset  ....\n");
+        } // chiplet loop
+    } while(0);
 
+    FAPI_INF("OHA reset end...\n");
     return rc;
 }
 
 } //end extern C
- 

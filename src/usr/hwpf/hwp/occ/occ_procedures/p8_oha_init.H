@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_oha_init.H,v 1.2 2012/11/27 18:11:53 stillgs Exp $
+// $Id: p8_oha_init.H,v 1.3 2013/08/02 19:00:26 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_oha_init.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -45,12 +45,13 @@ extern "C"
 
   /// \brief Initialize OHA
   /// 
-  /// \param[in]      &i_target           Chip target
-  /// \param[in]      i_mode                Mode 1:    CONFIG-Mode
-  ///                                     Mode 2:    RESET-Mode
-  ///                                     Mode 3:    INIT-Mode
+  /// \param[in]      &i_target Chip target
+  /// \param[in]      i_mode    CONFIG-Mode
+  ///                           RESET-Mode
+  ///                           INIT-Mode
+  ///                           defined in p8_pm.H, enum P8_PM_FLOW_MODE
   
-fapi::ReturnCode p8_oha_init          (const fapi::Target& i_target, uint32_t i_mode);
+fapi::ReturnCode p8_oha_init    (const fapi::Target& i_target, uint32_t i_mode);
 
 
 }
