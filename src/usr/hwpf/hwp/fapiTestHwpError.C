@@ -36,6 +36,8 @@
  *                          mjjones     10/06/2011  Major updates due to new
  *                                                  ErrorInfo design
  *                          mjjones     10/17/2011  Moved AnalyzeError to new file
+ *                          rjknight    09/28/2013  Added callout test for MBA
+ *                                                  dimm callout support
  *
  *
  *  HWP_IGNORE_VERSION_CHECK
@@ -49,7 +51,8 @@ extern "C"
 //******************************************************************************
 // hwpTestError function
 //******************************************************************************
-fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
+fapi::ReturnCode hwpTestError(const fapi::Target & i_procTarget,
+                              const fapi::Target & i_mbaTarget )
 {
     FAPI_INF("hwpTestError: Start HWP");
 
@@ -62,13 +65,13 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
     l_buf.setBit(64);
 
     FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_A");
-    const fapi::Target & UNIT_TEST_FFDC_MASTER_CHIP_TARGET = i_target;
+    const fapi::Target & UNIT_TEST_FFDC_MASTER_CHIP_TARGET = i_procTarget;
     uint32_t & UNIT_TEST_FFDC_DATA_INTEGER = l_ffdc;
     ecmdDataBufferBase & UNIT_TEST_FFDC_DATA_BUF = l_buf;
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
 
     // Log the error
-    fapiLogError(l_rc, fapi::FAPI_ERRL_SEV_PREDICTIVE);
+    fapiLogError(l_rc, fapi::FAPI_ERRL_SEV_PREDICTIVE, true);
 
     // Check that the return code is set to success
     if (!l_rc.ok())
@@ -77,7 +80,63 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
                  "expected success", static_cast<uint32_t>(l_rc));
     }
 
-    // Generate the same error again
+
+    FAPI_INF("Test calling out all DIMMs based on mba port 0");
+
+    // all dimms on a specific port
+    FAPI_ERR("Generating RC_TEST_DIMM_CALLOUT_MBA_A");
+
+    const fapi::Target & UNIT_TEST_MBA_TARGET = i_mbaTarget;
+    uint8_t UNIT_TEST_MBA_PORT_NUMBER = 0x0;
+
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_DIMM_CALLOUT_MBA_A);
+
+    fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
+
+    // specific dimm on a specific port
+    FAPI_INF("Test calling out DIMM3 based on port and dimm number");
+
+    UNIT_TEST_MBA_PORT_NUMBER = 0x1;
+    uint8_t UNIT_TEST_DIMM_NUMBER = 0x01;
+
+    FAPI_ERR("Generating RC_TEST_DIMM_CALLOUT_MBA_B");
+
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_DIMM_CALLOUT_MBA_B);
+
+    fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
+
+
+    FAPI_INF("Test calling out all dimms of an mba");
+    // all dimms on an mba target
+    FAPI_ERR("Generating RC_TEST_DIMM_CALLOUT_MBA_C");
+
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_DIMM_CALLOUT_MBA_C);
+
+    fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
+
+    // commented out due to ci test failing on deconfigured parts
+    FAPI_INF("Test deconfigure all dimms of mba with port 0 specified");
+    UNIT_TEST_MBA_PORT_NUMBER = 0x0;
+    // deconfigure all dimms on port 0
+    FAPI_ERR("Generating RC_TEST_DIMM_DECONFIGURE_MBA_A ");
+
+    FAPI_SET_HWP_ERROR(l_rc,RC_TEST_DIMM_DECONFIGURE_MBA_A);
+
+    fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
+
+    FAPI_INF("Test gard of DIMM2");
+    // gard dimm 0 onn port 1
+    UNIT_TEST_DIMM_NUMBER = 0x00;
+    UNIT_TEST_MBA_PORT_NUMBER = 0x01;
+
+    FAPI_ERR("Generating RC_TEST_DIMM_GARD_MBA_B ");
+
+    FAPI_SET_HWP_ERROR(l_rc, RC_TEST_DIMM_GARD_MBA_B);
+
+    fapiLogError( l_rc,fapi::FAPI_ERRL_SEV_PREDICTIVE, true );
+
+    // Generate the same error again need to return an error
+    // to make the test code happy
     FAPI_ERR("hwpTestError: Generating RC_TEST_ERROR_A again");
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
 

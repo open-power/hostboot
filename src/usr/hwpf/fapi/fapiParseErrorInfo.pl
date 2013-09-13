@@ -59,9 +59,10 @@
 #                  mjjones   08/20/13  Use constants for Reg FFDC collection
 #                  mjjones   08/26/13  Support HW Callouts
 #                  dedahle   09/30/13  Support chiplet register FFDC collection
+#                  rjknight  09/24/13  Allow callout/deconfigure/gard of
+#                                      DIMM(s) related to MBA
 #
-# End Change Log ******************************************************
-
+# End Change Log *****************************************************
 #
 # Usage:
 # fapiParseErrorInfo.pl <output dir> <filename1> <filename2> ...
@@ -580,6 +581,7 @@ foreach my $argnum (1 .. $#ARGV)
                 $cdgTargetHash{$callout->{target}}{callout} = 1;
                 $cdgTargetHash{$callout->{target}}{priority} =
                     $callout->{priority};
+
                 $elementsFound++;
             }
             if (exists $callout->{childTargets})
@@ -590,6 +592,7 @@ foreach my $argnum (1 .. $#ARGV)
                     print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Child Callout parent missing\n");
                     exit(1);
                 }
+
                 if (! exists $callout->{childTargets}->{childType})
                 {
                     print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Child Callout childType missing\n");
@@ -603,7 +606,22 @@ foreach my $argnum (1 .. $#ARGV)
                 $cdgChildHash{$parent}{$childType}{callout} = 1;
                 $cdgChildHash{$parent}{$childType}{priority} =
                     $callout->{priority};
+
                 $elementsFound++;
+
+                if (exists $callout->{childTargets}->{childPort})
+                {
+                    my $childPort = $callout->{childTargets}->{childPort};
+
+                    $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
+                }
+
+                if (exists $callout->{childTargets}->{childNumber})
+                {
+                    my $childNum = $callout->{childTargets}->{childNumber};
+                    $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
+                }
+
             }
             if ($elementsFound == 0)
             {
@@ -647,7 +665,22 @@ foreach my $argnum (1 .. $#ARGV)
                 my $parent = $deconfigure->{childTargets}->{parent};
                 my $childType = $deconfigure->{childTargets}->{childType};
                 $cdgChildHash{$parent}{$childType}{deconf} = 1;
+
                 $elementsFound++;
+
+                if ( exists $deconfigure->{childTargets}->{childPort})
+                {
+                    my $childPort = $deconfigure->{childTargets}->{childPort};
+
+                    $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
+                }
+
+                if ( exists $deconfigure->{childTargets}->{childNumber})
+                {
+                    my $childNum = $deconfigure->{childTargets}->{childNumber};
+                    $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
+
+                }
             }
             if ($elementsFound == 0)
             {
@@ -691,7 +724,22 @@ foreach my $argnum (1 .. $#ARGV)
                 my $parent = $gard->{childTargets}->{parent};
                 my $childType = $gard->{childTargets}->{childType};
                 $cdgChildHash{$parent}{$childType}{gard} = 1;
+
                 $elementsFound++;
+
+                if ( exists $gard->{childTargets}->{childPort})
+                {
+                    my $childPort = $gard->{childTargets}->{childPort};
+
+                    $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
+
+                }
+
+                if ( exists $gard->{childTargets}->{childNumber})
+                {
+                    my $childNum = $gard->{childTargets}->{childNumber};
+                    $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
+                }
             }
             if ($elementsFound == 0)
             {
@@ -758,6 +806,8 @@ foreach my $argnum (1 .. $#ARGV)
                 my $priority = 'LOW';
                 my $deconf = 0;
                 my $gard = 0;
+                my $childPort = 0xFF;
+                my $childNumber = 0xFF;
 
                 if (exists $cdgChildHash{$parent}{$childType}->{callout})
                 {
@@ -772,10 +822,21 @@ foreach my $argnum (1 .. $#ARGV)
                 {
                     $deconf = 1;
                 }
+                if (exists $cdgChildHash{$parent}->{$childType}->{childPort})
+                {
+                    $childPort =
+                        $cdgChildHash{$parent}->{$childType}->{childPort} ;
+                }
+                if (exists $cdgChildHash{$parent}->{$childType}->{childNumber})
+                {
+                    $childNumber =
+                        $cdgChildHash{$parent}->{$childType}->{childNumber} ;
+                }
                 if (exists $cdgChildHash{$parent}->{$childType}->{gard})
                 {
                     $gard = 1;
                 }
+
 
                 # Add the Target to the objectlist if it doesn't already exist
                 my $objNum = addEntryToArray(\@eiObjects, $parent);
@@ -784,13 +845,17 @@ foreach my $argnum (1 .. $#ARGV)
                 $eiEntryStr .=
                     "  l_entries[$eiEntryCount].iv_type = fapi::ReturnCode::EI_TYPE_CHILDREN_CDG; \\\n";
                 $eiEntryStr .=
-                    "  l_entries[$eiEntryCount].children_cdg.iv_parentChipObjIndex = $objNum; \\\n";
+                    "  l_entries[$eiEntryCount].children_cdg.iv_parentObjIndex = $objNum; \\\n";
                 $eiEntryStr .=
                     "  l_entries[$eiEntryCount].children_cdg.iv_callout = $callout; \\\n";
                 $eiEntryStr .=
                     "  l_entries[$eiEntryCount].children_cdg.iv_deconfigure = $deconf; \\\n";
                 $eiEntryStr .=
                     "  l_entries[$eiEntryCount].children_cdg.iv_childType = fapi::$childType; \\\n";
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].children_cdg.iv_childPort = $childPort; \\\n";
+                $eiEntryStr .=
+                    "  l_entries[$eiEntryCount].children_cdg.iv_childNumber = $childNumber; \\\n";
                 $eiEntryStr .=
                     "  l_entries[$eiEntryCount].children_cdg.iv_gard = $gard; \\\n";
                 $eiEntryStr .=

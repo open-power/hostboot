@@ -28,6 +28,7 @@
 
 #include <fapiTarget.H>
 #include <fapiReturnCode.H>
+#include <fapiSystemConfig.H>
 #include <fapiPlatTrace.H>
 #include <fapiErrorInfo.H>
 #include <hwpf/hwpf_reasoncodes.H>
@@ -132,6 +133,10 @@ HWAS::epubProcedureID xlateProcedureCallout(
 
     return l_proc;
 }
+void getChildTargetsForCDG(
+        TARGETING::Target * i_pParent, TARGETING::TYPE i_childType,
+        TARGETING::TargetHandleList & o_childTargets, uint8_t i_childPort,
+        uint8_t i_childNumber);
 
 /**
  * @brief Translates a FAPI target type to a Targeting target type
@@ -404,6 +409,10 @@ void processEIChildrenCDGs(const ErrorInfo & i_errInfo,
              i_errInfo.iv_childrenCDGs.begin();
          l_itr != i_errInfo.iv_childrenCDGs.end(); ++l_itr)
     {
+
+        uint8_t l_childNumber = (*l_itr)->iv_childNumber;
+        uint8_t l_childPort = (*l_itr)->iv_childPort;
+
         TARGETING::TYPE l_childType =
             xlateTargetType((*l_itr)->iv_childType);
 
@@ -414,9 +423,9 @@ void processEIChildrenCDGs(const ErrorInfo & i_errInfo,
         }
         else
         {
-            TARGETING::Target * l_pParentChip =
-                reinterpret_cast<TARGETING::Target*>(
-                    (*l_itr)->iv_parentChip.get());
+            TARGETING::Target * l_pParent =
+                reinterpret_cast<TARGETING::Target *>
+                ((*l_itr)->iv_parent.get());
 
             HWAS::callOutPriority l_priority =
                 xlateCalloutPriority((*l_itr)->iv_calloutPriority);
@@ -435,19 +444,95 @@ void processEIChildrenCDGs(const ErrorInfo & i_errInfo,
 
             // Get a list of functional children
             TARGETING::TargetHandleList l_children;
-            TARGETING::getChildChiplets(l_children, l_pParentChip, l_childType);
+
+            getChildTargetsForCDG( l_pParent, l_childType, l_children,
+                                   l_childPort, l_childNumber );
 
             // Callout/Deconfigure/GARD each child as appropriate
             for (TARGETING::TargetHandleList::const_iterator
                     l_itr = l_children.begin();
-                 l_itr != l_children.end(); ++l_itr)
+                    l_itr != l_children.end(); ++l_itr)
             {
-                FAPI_ERR("processEIChildrenCDGs: Calling out target (type: 0x%02x, pri:%d, deconf:%d, gard:%d)",
+
+                FAPI_ERR("processEIChildrenCDGs: Calling out target"
+                         " (type: 0x%02x, pri:%d, deconf:%d, gard:%d)",
                          l_childType, l_priority, l_deconfig, l_gard);
                 io_pError->addHwCallout(*l_itr, l_priority, l_deconfig, l_gard);
             }
         }
     }
+}
+
+void getChildTargetsForCDG(
+        TARGETING::Target * i_pParent, TARGETING::TYPE i_childType,
+        TARGETING::TargetHandleList & o_childTargets, uint8_t i_childPort,
+        uint8_t i_childNumber )
+{
+    o_childTargets.clear();
+    bool l_functional = true;
+
+    // dimms are not considered as a chiplet but
+    // a logical card so we need special processing here
+    if( i_childType == TARGETING::TYPE_DIMM )
+    {
+        TARGETING::TargetHandleList l_dimmList;
+
+        TARGETING:: getChildAffinityTargets( l_dimmList, i_pParent,
+                TARGETING::CLASS_LOGICAL_CARD,
+                TARGETING::TYPE_DIMM, l_functional);
+
+        for (TARGETING::TargetHandleList::const_iterator
+                l_itr = l_dimmList.begin();
+                l_itr != l_dimmList.end();
+                ++l_itr)
+        {
+
+            uint8_t l_mbaPort =
+                (*l_itr)->getAttr<TARGETING::ATTR_MBA_PORT>();
+
+            uint8_t l_mbaDimm =
+                (*l_itr)->getAttr<TARGETING::ATTR_MBA_DIMM>();
+
+            // if childPort was not set in the callout
+            // the caller is trying to callout either all dimms
+            // connected to this MBA or a specific dimm number on both
+            // ports
+            if( i_childPort == FAPI_ALL_MBA_PORTS )
+            {
+                // if the caller reqested all children on all ports
+                // or if this dimm matches the requested dimm on
+                // either port then add it
+                if( ( i_childNumber == FAPI_ALL_MBA_DIMMS ) ||
+                        ( i_childNumber == l_mbaDimm ))
+                {
+                    FAPI_DBG("adding callout for i_childNumber=%d "
+                            "and i_childPort %d ",
+                            i_childNumber, i_childPort );
+
+                    o_childTargets.push_back( *l_itr );
+                }
+            }
+            else
+            {
+                // if caller requested all dimms on a specific port or if this
+                // child is the one requested then add it
+                if((( i_childNumber == FAPI_ALL_MBA_DIMMS ) ||
+                            ( i_childNumber == l_mbaDimm )) &&
+                            ( i_childPort == l_mbaPort ))
+                {
+                    FAPI_DBG("adding callout for i_childNumber=%d "
+                            " and i_childPort %d",
+                            i_childNumber, i_childPort );
+
+                    o_childTargets.push_back( *l_itr );
+                }
+            }
+        }
+    }
+    else
+    {
+        TARGETING::getChildChiplets(o_childTargets, i_pParent, i_childType);
+   }
 }
 
 //******************************************************************************
@@ -468,7 +553,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc,
         {
             // PLAT error. Release the errlHndl_t
             FAPI_ERR("fapiRcToErrl: PLAT error: 0x%08x",
-                     static_cast<uint32_t>(io_rc));
+                    static_cast<uint32_t>(io_rc));
             l_pError = reinterpret_cast<errlHndl_t> (io_rc.releasePlatData());
         }
         else if (l_creator == ReturnCode::CREATOR_HWP)
@@ -492,7 +577,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc,
 
             // Add the rcValue as FFDC. This will explain what the error was
             l_pError->addFFDC(HWPF_COMP_ID, &l_rcValue, sizeof(l_rcValue), 1,
-                              HWPF_UDT_HWP_RCVALUE);
+                    HWPF_UDT_HWP_RCVALUE);
 
             // Get the Error Information Pointer
             const ErrorInfo * l_pErrorInfo = io_rc.getErrorInfo();

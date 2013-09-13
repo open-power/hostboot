@@ -42,6 +42,9 @@
  *                          mjjones     05/20/2013  Support Bus Callouts
  *                          mjjones     06/24/2013  Support Children CDGs
  *                          mjjones     08/26/2013  Support HW Callouts
+ *                          rjknight    09/19/2013  Allow callout/deconfigure
+ *                                                  /gard of DIMM(s) related
+ *                                                  to MBA
  */
 
 #ifndef FAPIERRORINFO_H_
@@ -150,7 +153,7 @@ public:
      * @return void *. Pointer to the FFDC
      */
     const void * getData(uint32_t & o_size) const;
-    
+
     /**
      * @brief Get the FFDC Identifier
      *
@@ -180,7 +183,7 @@ private:
 
     // FFDC Identifier
     uint32_t iv_ffdcId;
-    
+
     // Pointer to the FFDC
     uint8_t * iv_pFfdc;
 
@@ -326,7 +329,9 @@ struct ErrorInfoBusCallout
     // The callout priority
     CalloutPriorities::CalloutPriority iv_calloutPriority;
 };
-
+// defines used with MBA dimm callouts
+#define FAPI_ALL_MBA_PORTS 0xFF
+#define FAPI_ALL_MBA_DIMMS 0xFF
 /**
  * @struct ErrorInfoCDG
  *
@@ -391,19 +396,26 @@ struct ErrorInfoChildrenCDG
     /**
      * @brief Constructor.
      *
-     * @param[in] i_parentChip  Reference to the parent chip
-     * @oaram[in] i_childType   Child target types to c/d/g
+     * @param[in] i_parent      Reference to the parent target
+     * @oaram[in] i_childType   Child target type to c/d/g
      * @param[in] i_callout     True if Target should be called out
      * @param[in] i_deconfigure True if Target should be deconfigured
      * @param[in] i_gard        True if Target should be GARDed
      * @param[in] i_priority    The priority of any callout
+     * @param[in] i_childPort   Parent port number where child is
+     *                          connected
+     * @param[in] i_childNum    Chip number of child target
+     *
+     * @note i_childPort and i_childNum are valid only for MBA/DIMM
+     *       parent/child combination
      */
     ErrorInfoChildrenCDG(const Target & i_parentChip,
                          const TargetType i_childType,
                          const bool i_callout,
                          const bool i_deconfigure,
                          const bool i_gard,
-                         const CalloutPriorities::CalloutPriority i_priority);
+                         const CalloutPriorities::CalloutPriority i_priority,
+                         const uint8_t i_childPort, const uint8_t i_childNum);
 
 #ifdef FAPI_CUSTOM_MALLOC
     /**
@@ -424,7 +436,7 @@ struct ErrorInfoChildrenCDG
 #endif
 
     // The parent chip
-    Target iv_parentChip;
+    Target iv_parent;
 
     // The child target types to c/d/g
     TargetType iv_childType;
@@ -438,6 +450,12 @@ struct ErrorInfoChildrenCDG
 
     // GARD Information
     bool iv_gard;
+
+    // For MBA/DIMM parent/child, the MBA port
+    uint8_t iv_childPort;
+
+    // For MBA/DIMM parent/child, the MBA dimm number
+    uint8_t iv_childNumber;
 };
 
 /**

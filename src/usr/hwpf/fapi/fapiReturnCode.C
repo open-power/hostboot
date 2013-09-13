@@ -252,7 +252,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 // The FFDC is a ecmdDataBufferBase
                 const ecmdDataBufferBase * l_pDb =
                     static_cast<const ecmdDataBufferBase *>(l_pObject);
-                    
+
                 size_t byteLength = l_pDb->getWordLength() * sizeof(uint32_t);
                 uint32_t * l_pData =
                         reinterpret_cast<uint32_t*>(fapiMalloc(byteLength));
@@ -264,7 +264,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 // Deliberately not checking return code from extract
                 l_pDb->extract(l_pData, 0, l_pDb->getBitLength());
                 addEIFfdc(l_ffdcId, l_pData, (l_pDb->getWordLength() * 4));
-                
+
                 fapiFree(l_pData);
             }
             else if (l_size == ReturnCodeFfdc::EI_FFDC_SIZE_TARGET)
@@ -272,7 +272,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                 // The FFDC is a fapi::Target
                 const fapi::Target * l_pTarget =
                     static_cast<const fapi::Target *>(l_pObject);
-                
+
                 const char * l_ecmdString = l_pTarget->toEcmdString();
                 addEIFfdc(l_ffdcId, l_ecmdString, (strlen(l_ecmdString) + 1));
             }
@@ -363,26 +363,29 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
         }
         else if (l_type == EI_TYPE_CHILDREN_CDG)
         {
-            uint8_t l_parentChipIndex =
-                i_pEntries[i].children_cdg.iv_parentChipObjIndex;
+            uint8_t l_parentIndex =
+                i_pEntries[i].children_cdg.iv_parentObjIndex;
             TargetType l_childType = static_cast<TargetType>(
                 i_pEntries[i].children_cdg.iv_childType);
             uint8_t l_callout = i_pEntries[i].children_cdg.iv_callout;
             uint8_t l_deconf = i_pEntries[i].children_cdg.iv_deconfigure;
             uint8_t l_gard = i_pEntries[i].children_cdg.iv_gard;
+            uint8_t l_childPort = i_pEntries[i].children_cdg.iv_childPort;
+            uint8_t l_childNumber =
+                i_pEntries[i].children_cdg.iv_childNumber;
             CalloutPriorities::CalloutPriority l_pri =
                 static_cast<CalloutPriorities::CalloutPriority>(
                     i_pEntries[i].children_cdg.iv_calloutPriority);
 
             // Get the Parent Target of the children to cdg
-            const Target * l_pParentChip = static_cast<const Target *>(
-                i_pObjects[l_parentChipIndex]);
+            const Target * l_pParent = static_cast<const Target *>(
+                i_pObjects[l_parentIndex]);
 
             // Add the ErrorInfo
             FAPI_ERR("addErrorInfo: Adding children cdg (%d:%d:%d), type: 0x%08x, pri: %d",
                      l_callout, l_deconf, l_gard, l_childType, l_pri);
-            addEIChildrenCdg(*l_pParentChip, l_childType, l_callout, l_deconf,
-                             l_gard, l_pri);
+            addEIChildrenCdg(*l_pParent, l_childType, l_callout, l_deconf,
+                             l_gard, l_pri, l_childPort, l_childNumber );
         }
         else
         {
@@ -538,16 +541,19 @@ void ReturnCode::addEICdg(
 // addEIChildrenCdg function
 //******************************************************************************
 void ReturnCode::addEIChildrenCdg(
-    const Target & i_parentChip,
+    const Target & i_parent,
     const TargetType i_childType,
     const bool i_callout,
     const bool i_deconfigure,
     const bool i_gard,
-    const CalloutPriorities::CalloutPriority i_priority)
+    const CalloutPriorities::CalloutPriority i_priority,
+    const uint8_t i_childPort,
+    const uint8_t i_childNum)
 {
     // Create an ErrorInfoChildrenCDG object and add it to the Error Information
-    ErrorInfoChildrenCDG * l_pCdg = new ErrorInfoChildrenCDG(i_parentChip,
-        i_childType, i_callout, i_deconfigure, i_gard, i_priority);
+    ErrorInfoChildrenCDG * l_pCdg = new ErrorInfoChildrenCDG(i_parent,
+        i_childType, i_callout, i_deconfigure, i_gard, i_priority,
+        i_childPort, i_childNum);
     getCreateReturnCodeDataRef().getCreateErrorInfo().
         iv_childrenCDGs.push_back(l_pCdg);
 }

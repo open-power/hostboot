@@ -92,19 +92,14 @@ fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles)
 // fapiLogError
 //******************************************************************************
 void fapiLogError(fapi::ReturnCode & io_rc,
-                  fapi::fapiErrlSeverity_t i_sev)
+                  fapi::fapiErrlSeverity_t i_sev,
+                  bool i_unitTestError)
 {
     // ENUM CONVERSION FAPI to PLATFORM
 
     errlHndl_t l_pError = NULL;
-    bool l_unitTestError = false;
 
     FAPI_ERR("fapiLogError: logging error");
-
-    if (fapi::RC_TEST_ERROR_A == static_cast<uint32_t>(io_rc))
-    {
-        l_unitTestError = true;
-    }
 
     // Convert a FAPI severity to a ERRORLOG severity
     ERRORLOG::errlSeverity_t l_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
@@ -130,7 +125,7 @@ void fapiLogError(fapi::ReturnCode & io_rc,
 
     // Commit the error log. This will delete the error log and set the handle
     // to NULL.
-    if (l_unitTestError)
+    if (i_unitTestError)
     {
         errlCommit(l_pError, CXXTEST_COMP_ID);
     }

@@ -44,6 +44,8 @@
  *                                                  and doxygen changes;
  *                                                  needed by cronus
  *                          mjjones     08/13/2012  Add fapiSpecialWakeup
+ *                          mjjones     09/24/2013  Update fapiLogError to
+ *                                                  accept another parameter
  */
 
 #ifndef FAPIUTIL_H_
@@ -141,13 +143,16 @@ enum fapiErrlSeverity_t
  *            target are removed and rc value is set to success after
  *            function ends.)
  * @param[in] i_sev Fapi error log severity defaulted to unrecoverable
+ * @param[in] i_unitTestError - flag to log error which does not cause a unit
+ *                              test to fail.
  *
  * Example usage: <br>
  *     fapi::ReturnCode l_rc; <br>
+ *     fapi::fapiErrlSeverity_t l_sev = fapi::FAPI_ERRL_SEV_UNRECOVERABLE;<br>
  *     FAPI_EXEC_HWP(l_rc, function1, i_target); <br>
  *     if (!l_rc) <br>
  *     { <br>
- *         fapiLogError(l_rc); <br>
+ *         fapiLogError(l_rc, l_sev); <br>
  *     } <br>
  *
  *     FAPI_EXEC_HWP(l_rc, function2, i_target) <br>
@@ -155,7 +160,8 @@ enum fapiErrlSeverity_t
  */
 void fapiLogError(fapi::ReturnCode & io_rc,
                   fapi::fapiErrlSeverity_t i_sev =
-                  fapi::FAPI_ERRL_SEV_UNRECOVERABLE);
+                  fapi::FAPI_ERRL_SEV_UNRECOVERABLE,
+                  bool i_unitTestError=false);
 
 /**  @brief This function answers the question, is scand tracing turned on?
  *   The implementation of this function is specific to the platform.

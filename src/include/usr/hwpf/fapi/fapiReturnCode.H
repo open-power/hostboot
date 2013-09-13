@@ -50,6 +50,8 @@
  *                          mjjones     06/06/2013  Check FFDC size at compile time
  *                          mjjones     06/24/2013  Support Children CDGs
  *                          mjjones     08/26/2013  Support Hw Callout
+ *                          rjknight    09/10/2013  Support DIMM callout from
+ *                                                  MBA port and dimm number
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -339,10 +341,12 @@ public:
 
             struct
             {
-                uint8_t  iv_parentChipObjIndex;
+                uint8_t  iv_parentObjIndex;
                 uint8_t  iv_callout;
                 uint8_t  iv_deconfigure;
                 uint32_t iv_childType;
+                uint8_t  iv_childPort;
+                uint8_t  iv_childNumber;
                 uint8_t  iv_gard;
                 uint8_t  iv_calloutPriority;
             } children_cdg;
@@ -487,22 +491,27 @@ private:
       * @brief Add children target callout/deconfigure/GARDs to the ErrorInfo
       *
       * This is called by addErrorInfo to c/d/g all child Targets of a specified
-      * type.
+      * type. The function can take a chip/unit pair or an MBA/DIMM pair.  For
+      * the MBA/DIMM pair two additional parameters are used to identify which
+      * dimms should be called out.
       *
-      * @param[in] i_parentChip  Reference to the parent chip
+      * @param[in] i_parent      Reference to the parent chip
       * @param[in] i_childType   Child target types to c/d/g
       * @param[in] i_callout     True if Target should be called out
       * @param[in] i_deconfigure True if Target should be deconfigured
       * @param[in] i_gard        True if Target should be GARDed
       * @param[in] i_priority    The priority of any callout
+      * @param[in] i_childPort   MBA port where error was detected
+      * @param[in] i_childNum    MBA dimm number of failing chip
       */
       void addEIChildrenCdg(
-          const Target & i_parentChip,
+          const Target & i_parent,
           const TargetType i_childType,
           const bool i_callout,
           const bool i_deconfigure,
           const bool i_gard,
-          const CalloutPriorities::CalloutPriority i_priority);
+          const CalloutPriorities::CalloutPriority i_priority,
+          const uint8_t i_childPort, const uint8_t i_childNum);
 
     // The rcValue
     uint32_t iv_rcValue;

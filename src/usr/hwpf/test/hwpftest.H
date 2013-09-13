@@ -198,16 +198,25 @@ public:
         // Create a FAPI Target and invoke the hwpTestError HWP. The HWP
         // returns an error to test out error handling
         fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
-                                  reinterpret_cast<void *> (l_pTarget));
+                reinterpret_cast<void *> (l_pTarget));
 
-        FAPI_INVOKE_HWP(l_err, hwpTestError, l_fapiTarget);
+        TARGETING::TargetHandleList l_mbaTargetList;
+        TARGETING::getAllChiplets(l_mbaTargetList, TARGETING::TYPE_MBA);
+
+        // just grab the first one in the list.
+        TARGETING::Target * l_mbaTarget = l_mbaTargetList[0];
+        // Cast to a FAPI type of target.
+        fapi::Target l_fapiMbaTarget( fapi::TARGET_TYPE_MBA_CHIPLET,
+                (reinterpret_cast<void *>( l_mbaTarget)) );
+
+        FAPI_INVOKE_HWP(l_err, hwpTestError, l_fapiTarget, l_fapiMbaTarget);
 
         if (l_err)
         {
             // Delete the error rather than committing it to avoid it getting
             // interpreted as a real problem
             TS_TRACE("testHwpf2: Unit Test passed. "
-                     "hwpTestError failed. Error deleted");
+                    "hwpTestError failed. Error deleted");
             delete l_err;
             l_err = NULL;
         }
@@ -895,6 +904,7 @@ public:
 
         } while(0);
     }
+
 };
 
 #endif

@@ -640,7 +640,7 @@ uint32_t rcTest12()
     l_entries[3].target_cdg.iv_gard = 0;
     l_entries[3].target_cdg.iv_calloutPriority = fapi::CalloutPriorities::HIGH;
     l_entries[4].iv_type = fapi::ReturnCode::EI_TYPE_CHILDREN_CDG;
-    l_entries[4].children_cdg.iv_parentChipObjIndex = 1;
+    l_entries[4].children_cdg.iv_parentObjIndex = 1;
     l_entries[4].children_cdg.iv_callout = 0;
     l_entries[4].children_cdg.iv_deconfigure = 1;
     l_entries[4].children_cdg.iv_childType = fapi::TARGET_TYPE_ABUS_ENDPOINT;
@@ -804,7 +804,7 @@ uint32_t rcTest12()
             break;
         }
 
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_parentChip != l_target)
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_parent != l_target)
         {
             FAPI_ERR("rcTest12. parent chip mismatch");
             l_result = 19;
@@ -1174,7 +1174,7 @@ uint32_t rcTest16()
     l_entries[7].bus_callout.iv_endpoint2ObjIndex = 3;
     l_entries[7].bus_callout.iv_calloutPriority = fapi::CalloutPriorities::HIGH;
     l_entries[8].iv_type = fapi::ReturnCode::EI_TYPE_CHILDREN_CDG;
-    l_entries[8].children_cdg.iv_parentChipObjIndex = 2;
+    l_entries[8].children_cdg.iv_parentObjIndex = 2;
     l_entries[8].children_cdg.iv_callout = 1;
     l_entries[8].children_cdg.iv_deconfigure = 1;
     l_entries[8].children_cdg.iv_childType = fapi::TARGET_TYPE_ABUS_ENDPOINT;
@@ -1182,7 +1182,7 @@ uint32_t rcTest16()
     l_entries[8].children_cdg.iv_calloutPriority =
         fapi::CalloutPriorities::HIGH;
     l_entries[9].iv_type = fapi::ReturnCode::EI_TYPE_CHILDREN_CDG;
-    l_entries[9].children_cdg.iv_parentChipObjIndex = 3;
+    l_entries[9].children_cdg.iv_parentObjIndex = 3;
     l_entries[9].children_cdg.iv_callout = 1;
     l_entries[9].children_cdg.iv_deconfigure = 0;
     l_entries[9].children_cdg.iv_childType = fapi::TARGET_TYPE_MBA_CHIPLET;
@@ -1436,7 +1436,7 @@ uint32_t rcTest16()
             break;
         }
 
-        if (l_pErrInfo->iv_childrenCDGs[0]->iv_parentChip != l_target)
+        if (l_pErrInfo->iv_childrenCDGs[0]->iv_parent != l_target)
         {
             FAPI_ERR("rcTest16. parent chip mismatch 1");
             l_result = 31;

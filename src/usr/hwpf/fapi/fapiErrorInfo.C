@@ -42,6 +42,8 @@
  *                          mjjones     05/20/2013  Support Bus Callouts
  *                          mjjones     06/24/2013  Support Children CDGs
  *                          mjjones     08/26/2013  Support HW Callouts
+ *                          rjknight    09/24/2013  Support dimm callouts
+ *                                                  based on mba parent target
  */
 
 #include <fapiErrorInfo.H>
@@ -242,14 +244,16 @@ void ErrorInfoCDG::operator delete(void * i_ptr)
 // ErrorInfoChildrenCDG Constructor
 //******************************************************************************
 ErrorInfoChildrenCDG::ErrorInfoChildrenCDG(
-    const Target & i_parentChip,
+    const Target & i_parent,
     const TargetType i_childType,
     const bool i_callout,
     const bool i_deconfigure,
     const bool i_gard,
-    const CalloutPriorities::CalloutPriority i_priority)
-: iv_parentChip(i_parentChip), iv_childType(i_childType), iv_callout(i_callout),
-  iv_calloutPriority(i_priority), iv_deconfigure(i_deconfigure), iv_gard(i_gard)
+    const CalloutPriorities::CalloutPriority i_priority,
+    const uint8_t i_childPort, const uint8_t i_childNum )
+: iv_parent(i_parent), iv_childType(i_childType), iv_callout(i_callout),
+  iv_calloutPriority(i_priority), iv_deconfigure(i_deconfigure),
+  iv_gard(i_gard), iv_childPort(i_childPort), iv_childNumber(i_childNum)
 {
 
 }
