@@ -191,6 +191,7 @@ sub verifyCommitMsg
     open COMMIT_CONTENTS, "git log -n1 --pretty=format:%B |";
     my $lineCount = 0;
     my $rtcTag = "";
+    my $cqTag = "";
     my $taggedLine = "";
     my $untaggedLine = "";
 
@@ -227,6 +228,7 @@ sub verifyCommitMsg
             }
 
             $rtcTag = "";
+            $cqTag = "";
             $untaggedLine = "";
             $taggedLine = "";
         }
@@ -243,11 +245,33 @@ sub verifyCommitMsg
         # Verify format of RTC message.
         if ($line =~ m/^\s*RTC:\s*[0-9]+(.*)/)
         {
+            if ("" ne $rtcTag)
+            {
+                error("Commit Message",$line,$lineCount,
+                      "Duplicate RTC tag found.");
+            }
+
             $rtcTag = $line;
             if ("" ne $1)
             {
                 error("Commit Message",$line,$lineCount,
                         (sprintf "RTC tag format incorrect (%s).", $1));
+            }
+        }
+
+        if ($line =~ m/^\s*CQ: \s*[A-Z][A-Z][0-9]+(.*)/)
+        {
+            if ("" ne $cqTag)
+            {
+                error("Commit Message",$line,$lineCount,
+                      "Duplicate CQ tag found.");
+            }
+
+            $cqTag = $line;
+            if ("" ne $1)
+            {
+                error("Commit Message",$line,$lineCount,
+                        (sprintf "CQ tag format incorrect (%s).", $1));
             }
         }
 
@@ -269,10 +293,10 @@ sub verifyCommitMsg
     }
 
     # Warn for missing RTC tag.
-    if ("" eq $rtcTag)
+    if (("" eq $rtcTag) && ("" eq $cqTag))
     {
         warning("Commit Message","<end-of-file>",$lineCount,
-                "RTC tag not found.");
+                "Neither RTC nor CQ tag found.");
     }
 
     # Error for a mix of tag / untagged in the last section (ie. untagged

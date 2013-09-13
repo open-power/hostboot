@@ -520,7 +520,7 @@ STYLESHEET
     print RELNOTE "<h2>Included commits:</h2>\n";
     print RELNOTE "<table class='release'>\n";
     print RELNOTE "    <tr>\n";
-    print RELNOTE "        <th>RTC Number</th>\n";
+    print RELNOTE "        <th>RTC/CQ Number(s)</th>\n";
     print RELNOTE "        <th>Subject</th>\n";
     print RELNOTE "        <th>Git Commit</th>\n";
     print RELNOTE "    </tr>\n";
@@ -531,15 +531,27 @@ STYLESHEET
         my $subject = git_get_subject($commit);
         my $rtc = rtc_workitem_num($commit);
         my $rtc_hyper = "";
+        my $cq = cq_workitem_num($commit);
+        my $cq_hyper = "";
         
         if ($rtc ne "")
         {
             $rtc_hyper = rtc_hyperlink($rtc);
             $rtc_hyper = "<a href='$rtc_hyper' target='_blank'>$rtc</a>";
         }
+        if ($cq ne "")
+        {
+            $cq_hyper = cq_hyperlink($cq);
+            $cq_hyper = "<a href='$cq_hyper' target='_blank'>$cq</a>";
+
+            if ($rtc_hyper ne "")
+            {
+                $cq_hyper = "<br>$cq_hyper";
+            }
+        }
 
         print RELNOTE "    <tr>\n";
-        print RELNOTE "        <td>$rtc_hyper</td>\n";
+        print RELNOTE "        <td>$rtc_hyper $cq_hyper</td>\n";
         print RELNOTE "        <td>$subject</td>\n";
         print RELNOTE "        <td>$commit</td>\n";        
         print RELNOTE "    </tr>\n";
@@ -1366,6 +1378,30 @@ sub rtc_workitem_num
     }
 }
 
+# sub cq_workitem_num
+#
+# Determine the CQ WorkItem associated with a git commit.
+#
+# @param[in] commit - The git commit.
+#
+# @return string - CQ WorkItem number (or "").
+#
+sub cq_workitem_num
+{
+    my $commit = shift;    
+    my $message = git_commit_msg($commit);
+
+    if ($message =~ m/CQ:\s*([A-Z][A-Z][0-9]+)/)
+    {
+        return $1;
+    }
+    else
+    {
+        return "";
+    }
+}
+
+
 # sub rtc_hyperlink
 #
 # Turn an RTC WorkItem number into the https:// address to the RTC server.
@@ -1379,6 +1415,20 @@ sub rtc_hyperlink
     my $workitem = shift;
     return "https://jazz07.rchland.ibm.com:13443/jazz/oslc/workitems/".
            "$workitem.hover.html";
+}
+
+# sub cq_hyperlink
+#
+# Turn a CQ WorkItem number into the http:// address to the BQ server.
+#
+# @param[in] workitem - CQ workitem number.
+#
+# @return string - The http:// address of the CQ item on the server.
+#
+sub cq_hyperlink
+{
+    my $workitem = shift;
+    return "http://w3.rchland.ibm.com/projects/bestquest/?defect=$workitem";
 }
 
 # sub json_parse
