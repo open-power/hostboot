@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_oha_firinit.C,v 1.11 2013/04/01 04:25:38 stillgs Exp $
+// $Id: p8_pm_oha_firinit.C,v 1.12 2013/05/24 13:07:01 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_oha_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -97,7 +97,7 @@ fapi::ReturnCode
 p8_pm_oha_firinit(const fapi::Target &i_target , uint32_t mode )
 {
     fapi::ReturnCode                rc;
-    //TODO RTC: 71328 unused fapi::TargetState               l_state = TARGET_STATE_FUNCTIONAL; 
+    //    fapi::TargetState               l_state = TARGET_STATE_FUNCTIONAL; 
     ecmdDataBufferBase              mask(64);
     uint32_t                        e_rc = 0;
         
