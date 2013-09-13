@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_tod_setup.C,v 1.15 2013/03/05 23:21:12 jklazyns Exp $
+// $Id: proc_tod_setup.C,v 1.16 2013/05/17 15:53:47 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -218,11 +218,11 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
             {
                 rc_ecmd |= data.clearBit(TOD_S_PATH_CTRL_REG_PRI_S_PATH_SEL); // For primary slave, use slave path 0 (path_0_sel=OFF)
 
-                // Set CPS deviation to 50% (CPS deviation bits = 0x8, factor=1), 8 valid steps to enable step check
+                // Set CPS deviation to 75% (CPS deviation bits = 0xC, factor=1), 8 valid steps to enable step check
                 rc_ecmd |= data.insertFromRight(STEP_CHECK_CPS_DEVIATION_FACTOR_1,
                                                 TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR,
                                                 STEP_CHECK_CPS_DEVIATION_FACTOR_LEN);
-                rc_ecmd |= data.insertFromRight(STEP_CHECK_CPS_DEVIATION_50_00_PCENT,
+                rc_ecmd |= data.insertFromRight(STEP_CHECK_CPS_DEVIATION_75_00_PCENT,
                                                 TOD_S_PATH_CTRL_REG_S_PATH_0_STEP_CHECK_CPS_DEVIATION,
                                                 STEP_CHECK_CPS_DEVIATION_LEN);
                 rc_ecmd |= data.insertFromRight(STEP_CHECK_VALIDITY_COUNT_8,
@@ -233,11 +233,11 @@ fapi::ReturnCode configure_tod_node(tod_topology_node*           i_tod_node,
             {
                 rc_ecmd |= data.setBit(TOD_S_PATH_CTRL_REG_SEC_S_PATH_SEL);   // For secondary slave, use slave path 1 (path_1_sel=ON)
 
-                // Set CPS deviation to 50% (CPS deviation bits = 0x8, factor=1), 8 valid steps to enable step check
+                // Set CPS deviation to 75% (CPS deviation bits = 0xC, factor=1), 8 valid steps to enable step check
                 rc_ecmd |= data.insertFromRight(STEP_CHECK_CPS_DEVIATION_FACTOR_1,
                                                 TOD_S_PATH_CTRL_REG_S_PATH_STEP_CHECK_CPS_DEVIATION_FACTOR,
                                                 STEP_CHECK_CPS_DEVIATION_FACTOR_LEN);
-                rc_ecmd |= data.insertFromRight(STEP_CHECK_CPS_DEVIATION_50_00_PCENT,
+                rc_ecmd |= data.insertFromRight(STEP_CHECK_CPS_DEVIATION_75_00_PCENT,
                                                 TOD_S_PATH_CTRL_REG_S_PATH_1_STEP_CHECK_CPS_DEVIATION,
                                                 STEP_CHECK_CPS_DEVIATION_LEN);
                 rc_ecmd |= data.insertFromRight(STEP_CHECK_VALIDITY_COUNT_8,
@@ -768,10 +768,11 @@ fapi::ReturnCode calculate_node_link_delay(tod_topology_node* i_tod_node,
         }
         else // slave node
         {
-            uint32_t bus_mode_addr = 0;
+            // JK fixed compile issue
+            uint32_t bus_mode_addr  = 0;
             uint32_t bus_mode_sel = 0;
             uint32_t bus_freq = 0;
-            uint8_t  bus_delay;
+            uint8_t  bus_delay = 0;
             switch (i_tod_node->i_bus_rx)
             {
                 case(NONE):  FAPI_SET_HWP_ERROR(rc, RC_PROC_TOD_SETUP_INVALID_TOPOLOGY); break;

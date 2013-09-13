@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.13 2013/04/18 17:33:35 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.14 2013/04/29 16:38:51 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -61,6 +61,15 @@ const uint32_t AB_BNDY_PLL_RING_ADDR    = 0x08030088;
 const uint32_t PCI_BNDY_PLL_RING_ADDR   = 0x09030088;
 
 const uint32_t DMI_PLL_VCO_WORKAROUND_THRESHOLD_FREQ = 4800;
+
+const uint32_t PB_BNDY_DMIPLL_RING_CCALLOAD_OFFSET = 580;
+const uint32_t PB_BNDY_DMIPLL_RING_CCALFMIN_OFFSET = 581;
+
+const uint32_t AB_BNDY_PLL_RING_CCALLOAD_OFFSET = 278;
+const uint32_t AB_BNDY_PLL_RING_CCALFMIN_OFFSET = 279;
+
+const uint32_t PCI_BNDY_PLL_RING_CCALLOAD_OFFSET = 0x0;
+const uint32_t PCI_BNDY_PLL_RING_CCALFMIN_OFFSET = 0x0;
 
 
 //------------------------------------------------------------------------------
@@ -227,8 +236,8 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
                     AB_BNDY_PLL_RING_ADDR,
                     ring_data,
                     a_lctank_pll_vco_workaround,
-                    278,
-                    279);
+                    AB_BNDY_PLL_RING_CCALLOAD_OFFSET,
+                    AB_BNDY_PLL_RING_CCALFMIN_OFFSET);
             if (rc)
             {
                 FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_pll");
@@ -316,8 +325,8 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
                     PB_BNDY_DMIPLL_RING_ADDR,
                     ring_data,
                     dmi_lctank_pll_vco_workaround,
-                    580,
-                    581);
+                    PB_BNDY_DMIPLL_RING_CCALLOAD_OFFSET,
+                    PB_BNDY_DMIPLL_RING_CCALFMIN_OFFSET);
             if (rc)
             {
                 FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_pll");
@@ -397,8 +406,8 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
                     PCI_BNDY_PLL_RING_ADDR,
                     ring_data,
                     false,
-                    0x0,
-                    0x0);
+                    PCI_BNDY_PLL_RING_CCALLOAD_OFFSET,
+                    PCI_BNDY_PLL_RING_CCALFMIN_OFFSET);
             if (rc)
             {
                 FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_pll");
@@ -425,6 +434,9 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_initf.C,v $
+Revision 1.14  2013/04/29 16:38:51  jmcgill
+add constants for Murano DD1 ccalload/ccalfmin ring offsets used in workaround
+
 Revision 1.13  2013/04/18 17:33:35  jmcgill
 qualify workaround for DMI bus based on frequency
 

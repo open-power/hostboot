@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fab_iovalid.H,v 1.9 2013/03/05 02:53:21 jmcgill Exp $
+// $Id: proc_fab_iovalid.H,v 1.10 2013/05/15 04:18:04 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -112,6 +112,17 @@ const uint8_t PB_RAS_FIR_X3_BIT = 3;
 const uint8_t PB_RAS_FIR_A0_BIT = 4;
 const uint8_t PB_RAS_FIR_A1_BIT = 5;
 const uint8_t PB_RAS_FIR_A2_BIT = 6;
+
+// PB X FIR register bit/field definitions
+const uint64_t PB_X_FIR_X0_BIT_MASK = 0xA000800000000000ULL;
+const uint64_t PB_X_FIR_X1_BIT_MASK = 0x1400400000000000ULL;
+const uint64_t PB_X_FIR_X2_BIT_MASK = 0x0280200000000000ULL;
+const uint64_t PB_X_FIR_X3_BIT_MASK = 0x0050100000000000ULL;
+
+// PB A FIR register bit/field definitions
+const uint64_t PB_A_FIR_A0_BIT_MASK = 0x9281980040000000ULL;
+const uint64_t PB_A_FIR_A1_BIT_MASK = 0x4850066020000000ULL;
+const uint64_t PB_A_FIR_A2_BIT_MASK = 0x240A001990000000ULL;
 
 
 extern "C"

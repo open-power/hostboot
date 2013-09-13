@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fab_iovalid.C,v 1.10 2013/03/05 02:53:19 jmcgill Exp $
+// $Id: proc_fab_iovalid.C,v 1.12 2013/05/23 21:09:19 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -329,13 +329,10 @@ fapi::ReturnCode proc_fab_iovalid_manage_ras_fir(
     bool i_set_not_clear)
 {
     ecmdDataBufferBase mask_active(64);
-    ecmdDataBufferBase zero_data(64);
-    ecmdDataBufferBase action_mask(64);
 
     // return codes
     uint32_t rc_ecmd = 0;
     fapi::ReturnCode rc;
-
 
     // mark function entry
     FAPI_DBG("proc_fab_iovalid_manage_ras_fir: Start");
@@ -346,43 +343,36 @@ fapi::ReturnCode proc_fab_iovalid_manage_ras_fir(
         {
             FAPI_DBG("proc_fab_iovalid_manage_ras_fir: Configuring RAS FIR for link X0");
             rc_ecmd |= mask_active.setBit(PB_RAS_FIR_X0_BIT);
-            rc_ecmd |= action_mask.setBit(PB_RAS_FIR_X0_BIT);
         }
         if (i_proc_chip.x1)
         {
             FAPI_DBG("proc_fab_iovalid_manage_ras_fir: Configuring RAS FIR for link X1");
             rc_ecmd |= mask_active.setBit(PB_RAS_FIR_X1_BIT);
-            rc_ecmd |= action_mask.setBit(PB_RAS_FIR_X1_BIT);
         }
         if (i_proc_chip.x2)
         {
             FAPI_DBG("proc_fab_iovalid_manage_ras_fir: Configuring RAS FIR for link X2");
             rc_ecmd |= mask_active.setBit(PB_RAS_FIR_X2_BIT);
-            rc_ecmd |= action_mask.setBit(PB_RAS_FIR_X2_BIT);
         }
         if (i_proc_chip.x3)
         {
             FAPI_DBG("proc_fab_iovalid_manage_ras_fir: Configuring RAS FIR for link X3");
             rc_ecmd |= mask_active.setBit(PB_RAS_FIR_X3_BIT);
-            rc_ecmd |= action_mask.setBit(PB_RAS_FIR_X3_BIT);
         }
         if (i_proc_chip.a0)
         {
             FAPI_DBG("proc_fab_iovalid_manage_ras_fir: Configuring RAS FIR for link A0");
             rc_ecmd |= mask_active.setBit(PB_RAS_FIR_A0_BIT);
-            rc_ecmd |= action_mask.setBit(PB_RAS_FIR_A0_BIT);
         }
         if (i_proc_chip.a1)
         {
             FAPI_DBG("proc_fab_iovalid_manage_ras_fir: Configuring RAS FIR for link A1");
             rc_ecmd |= mask_active.setBit(PB_RAS_FIR_A1_BIT);
-            rc_ecmd |= action_mask.setBit(PB_RAS_FIR_A1_BIT);
         }
         if (i_proc_chip.a2)
         {
             FAPI_DBG("proc_fab_iovalid_manage_ras_fir: Configuring RAS FIR for link A2");
             rc_ecmd |= mask_active.setBit(PB_RAS_FIR_A2_BIT);
-            rc_ecmd |= action_mask.setBit(PB_RAS_FIR_A2_BIT);
         }
 
         // check aggregate return code from buffer manipulation operations
@@ -406,30 +396,169 @@ fapi::ReturnCode proc_fab_iovalid_manage_ras_fir(
             break;
         }
 
-        // set RAS FIR action registers (action0=0b0, action1=0b0 for checkstop)
-        rc = fapiPutScomUnderMask(i_proc_chip.this_chip,
-                                  PB_RAS_FIR_ACTION0_0x02010C74,
-                                  zero_data,
-                                  action_mask);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_fab_iovalid_manage_ras_fir: fapiPutScomUnderMask error (PB_RAS_FIR_ACTION0_0x02010C74)");
-            break;
-        }
-
-        rc = fapiPutScomUnderMask(i_proc_chip.this_chip,
-                                  PB_RAS_FIR_ACTION1_0x02010C75,
-                                  zero_data,
-                                  action_mask);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_fab_iovalid_manage_ras_fir: fapiPutScomUnderMask error (PB_RAS_FIR_ACTION1_0x02010C75)");
-            break;
-        }
     } while(0);
 
     // mark function exit
     FAPI_DBG("proc_fab_iovalid_manage_ras_fir: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
+// function: utility subroutine to manage PB A FIR setup
+// parameters: i_proc_chip     => structure providing:
+//                                o target for this chip
+//                                o A/X busses to act on
+//             i_set_not_clear => define desired iovalid operation (true=set,
+//                                false=clear)
+// returns: FAPI_RC_SUCCESS if operation was successful, else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_fab_iovalid_manage_a_fir(
+    proc_fab_iovalid_proc_chip& i_proc_chip,
+    bool i_set_not_clear)
+{
+    ecmdDataBufferBase or_data(64);
+    ecmdDataBufferBase mask_active(64);
+
+    // return codes
+    uint32_t rc_ecmd = 0;
+    fapi::ReturnCode rc;
+
+    // mark function entry
+    FAPI_DBG("proc_fab_iovalid_manage_a_fir: Start");
+
+    do
+    {
+         if (i_proc_chip.a0)
+        {
+            FAPI_DBG("proc_fab_iovalid_manage_a_fir: Configuring A FIR for link A0");
+            rc_ecmd |= or_data.flushTo0();
+            rc_ecmd |= or_data.setDoubleWord(0, PB_A_FIR_A0_BIT_MASK);
+            rc_ecmd |= mask_active.setOr(or_data, 0, 64);
+        }
+        if (i_proc_chip.a1)
+        {
+            FAPI_DBG("proc_fab_iovalid_manage_a_fir: Configuring A FIR for link A1");
+            rc_ecmd |= or_data.flushTo0();
+            rc_ecmd |= or_data.setDoubleWord(0, PB_A_FIR_A1_BIT_MASK);
+            rc_ecmd |= mask_active.setOr(or_data, 0, 64);
+        }
+        if (i_proc_chip.a2)
+        {
+            FAPI_DBG("proc_fab_iovalid_manage_a_fir: Configuring A FIR for link A2");
+            rc_ecmd |= or_data.flushTo0();
+            rc_ecmd |= or_data.setDoubleWord(0, PB_A_FIR_A2_BIT_MASK);
+            rc_ecmd |= mask_active.setOr(or_data, 0, 64);
+        }
+
+        // check aggregate return code from buffer manipulation operations
+        rc.setEcmdError(rc_ecmd);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_fab_iovalid_manage_a_fir: Error 0x%x setting up active link mask data buffers",
+                     rc_ecmd);
+            break;
+        }
+
+        // write appropriate RAS FIR mask register to perform desired operation
+        rc = proc_fab_iovalid_write_active_mask(i_proc_chip.this_chip,
+                                                mask_active,
+                                                !i_set_not_clear,
+                                                PB_A_FIR_MASK_AND_0x08010804,
+                                                PB_A_FIR_MASK_OR_0x08010805);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_fab_iovalid_manage_a_fir: Error from proc_fab_iovalid_write_active_mask");
+            break;
+        }
+
+    } while(0);
+
+    // mark function exit
+    FAPI_DBG("proc_fab_iovalid_manage_a_fir: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
+// function: utility subroutine to manage PB X FIR setup
+// parameters: i_proc_chip     => structure providing:
+//                                o target for this chip
+//                                o A/X busses to act on
+//             i_set_not_clear => define desired iovalid operation (true=set,
+//                                false=clear)
+// returns: FAPI_RC_SUCCESS if operation was successful, else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_fab_iovalid_manage_x_fir(
+    proc_fab_iovalid_proc_chip& i_proc_chip,
+    bool i_set_not_clear)
+{
+    ecmdDataBufferBase or_data(64);
+    ecmdDataBufferBase mask_active(64);
+
+    // return codes
+    uint32_t rc_ecmd = 0;
+    fapi::ReturnCode rc;
+
+    // mark function entry
+    FAPI_DBG("proc_fab_iovalid_manage_x_fir: Start");
+
+    do
+    {
+         if (i_proc_chip.x0)
+        {
+            FAPI_DBG("proc_fab_iovalid_manage_x_fir: Configuring X FIR for link X0");
+            rc_ecmd |= or_data.flushTo0();
+            rc_ecmd |= or_data.setDoubleWord(0, PB_X_FIR_X0_BIT_MASK);
+            rc_ecmd |= mask_active.setOr(or_data, 0, 64);
+        }
+        if (i_proc_chip.x1)
+        {
+            FAPI_DBG("proc_fab_iovalid_manage_x_fir: Configuring X FIR for link X1");
+            rc_ecmd |= or_data.flushTo0();
+            rc_ecmd |= or_data.setDoubleWord(0, PB_X_FIR_X1_BIT_MASK);
+            rc_ecmd |= mask_active.setOr(or_data, 0, 64);
+        }
+        if (i_proc_chip.x2)
+        {
+            FAPI_DBG("proc_fab_iovalid_manage_x_fir: Configuring X FIR for link X2");
+            rc_ecmd |= or_data.flushTo0();
+            rc_ecmd |= or_data.setDoubleWord(0, PB_X_FIR_X2_BIT_MASK);
+            rc_ecmd |= mask_active.setOr(or_data, 0, 64);
+        }
+        if (i_proc_chip.x3)
+        {
+            FAPI_DBG("proc_fab_iovalid_manage_x_fir: Configuring X FIR for link X3");
+            rc_ecmd |= or_data.flushTo0();
+            rc_ecmd |= or_data.setDoubleWord(0, PB_X_FIR_X3_BIT_MASK);
+            rc_ecmd |= mask_active.setOr(or_data, 0, 64);
+        }
+
+        // check aggregate return code from buffer manipulation operations
+        rc.setEcmdError(rc_ecmd);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_fab_iovalid_manage_x_fir: Error 0x%x setting up active link mask data buffers",
+                     rc_ecmd);
+            break;
+        }
+
+        // write appropriate RAS FIR mask register to perform desired operation
+        rc = proc_fab_iovalid_write_active_mask(i_proc_chip.this_chip,
+                                                mask_active,
+                                                !i_set_not_clear,
+                                                PB_X_FIR_MASK_AND_0x04010C04,
+                                                PB_X_FIR_MASK_OR_0x04010C05);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_fab_iovalid_manage_x_fir: Error from proc_fab_iovalid_write_active_mask");
+            break;
+        }
+
+    } while(0);
+
+    // mark function exit
+    FAPI_DBG("proc_fab_iovalid_manage_x_fir: End");
     return rc;
 }
 
@@ -492,6 +621,13 @@ fapi::ReturnCode proc_fab_iovalid(
                     break;
                 }
 
+                rc = proc_fab_iovalid_manage_x_fir(*iter, i_set_not_clear);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_fab_iovalid: Error from proc_fab_iovalid_manage_x_fir");
+                    break;
+                }
+
                 x_changed = true;
             }
 
@@ -521,6 +657,13 @@ fapi::ReturnCode proc_fab_iovalid(
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_fab_iovalid: Error from proc_fab_iovalid_manage_a_links");
+                    break;
+                }
+
+                rc = proc_fab_iovalid_manage_a_fir(*iter, i_set_not_clear);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_fab_iovalid: Error from proc_fab_iovalid_manage_a_fir");
                     break;
                 }
 
