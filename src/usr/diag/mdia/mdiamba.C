@@ -43,34 +43,46 @@ errlHndl_t getMbaDiagnosticMode(
 {
     o_mode = INIT_ONLY;
 
-    if(MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
-            & i_globals.mfgPolicy)
+    do
     {
-        o_mode = NINE_PATTERNS;
-    }
+        // Can't do any pattern testing in MPIPL since
+        // that may cause customers data corruption
+        if(i_globals.mpipl)
+        {
+            o_mode = SCRUB_ONLY;
+            break;
+        }
 
-    else if(MNFG_FLAG_BIT_MNFG_ENABLE_STANDARD_PATTERN_TEST
-            & i_globals.mfgPolicy)
-    {
-        o_mode = FOUR_PATTERNS;
-    }
+        if(MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
+           & i_globals.mfgPolicy)
+        {
+            o_mode = NINE_PATTERNS;
+        }
 
-    else if(MNFG_FLAG_BIT_MNFG_ENABLE_MINIMUM_PATTERN_TEST
-            & i_globals.mfgPolicy)
-    {
-        o_mode = ONE_PATTERN;
-    }
-
-    // Only need to check hw changed state attributes
-    // when not already set to standard or exhaustive
-    if(!((FOUR_PATTERNS == o_mode) ||
-         (NINE_PATTERNS == o_mode)))
-    {
-        if(isHWStateChanged(i_mba))
+        else if(MNFG_FLAG_BIT_MNFG_ENABLE_STANDARD_PATTERN_TEST
+                & i_globals.mfgPolicy)
         {
             o_mode = FOUR_PATTERNS;
         }
-    }
+
+        else if(MNFG_FLAG_BIT_MNFG_ENABLE_MINIMUM_PATTERN_TEST
+                & i_globals.mfgPolicy)
+        {
+            o_mode = ONE_PATTERN;
+        }
+
+        // Only need to check hw changed state attributes
+        // when not already set to standard or exhaustive
+        if(!((FOUR_PATTERNS == o_mode) ||
+             (NINE_PATTERNS == o_mode)))
+        {
+            if(isHWStateChanged(i_mba))
+            {
+                o_mode = FOUR_PATTERNS;
+            }
+        }
+
+    } while(0);
 
     MDIA_FAST("getMbaDiagnosticMode: mba: %x, o_mode: 0x%x",
               get_huid(i_mba), o_mode);
@@ -144,8 +156,13 @@ errlHndl_t getMbaWorkFlow(
         o_wf.push_back(ANALYZE_IPL_MNFG_CE_STATS);
     }
 
-    // clear HW changed state attribute
-    o_wf.push_back(CLEAR_HW_CHANGED_STATE);
+    // only clear HW changed state attribute
+    // after any pattern test
+    if(SCRUB_ONLY != i_mode)
+    {
+        o_wf.push_back(CLEAR_HW_CHANGED_STATE);
+    }
+
     return 0;
 }
 
