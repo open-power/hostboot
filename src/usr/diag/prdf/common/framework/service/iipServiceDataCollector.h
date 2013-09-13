@@ -134,6 +134,14 @@ public:
     PRDF_SDC_FLAG(FLOODING,                0x00001)
   PRDF_SDC_FLAGS_MAP_END
 
+   /** Defines Analysis pass related properties.
+     * Flags defined here will be used in framework Analyze leg */
+   enum AnalysisFlags
+   {
+       /** If this flag is set, We are mainly interested in getting signature
+        *  for attention. */
+       PASS_ISOLATION_ONLY = 0x01,
+   };
 #ifndef PRDF_SDC_FLAGS_MAP_ONLY
 
 
@@ -220,6 +228,15 @@ public:
    */
   void AddSignatureList(TARGETING::TargetHandle_t i_ptargetHandle =NULL,
                           uint32_t  i_signature = 0x00000000);
+
+    /**
+     * @brief Add input signature to signature list.
+     * @param i_sig Signature Object.
+     * @note  This is a costly operation as it uses reverse lookup from HUID
+     *        to target handle. If possible, use another variant of this
+     *        function which takes TargetHandle_t as input.
+     */
+    void AddSignatureList( ErrorSignature & i_sig );
 
   /**
    Access the list of Mrus
@@ -552,6 +569,21 @@ public:
    */
   bool IsFlooding(void) const { return (flags & FLOODING)!=0 ? true:false; }
 
+    /**
+     * @brief returns true if code is in isolation only pass.
+     */
+    bool IsIsolationOnlyPass(void) const { return ( ( analysisFlags &
+                                        PASS_ISOLATION_ONLY )!=0 ); }
+    /**
+     * @brief Sets isolation only flag.
+     */
+    void setIsolationOnlyPass() { analysisFlags |= PASS_ISOLATION_ONLY ;}
+
+    /**
+     * @brief Clears isolation only flag.
+     */
+    void clearIsolationOnlyPass() { analysisFlags &= !PASS_ISOLATION_ONLY ;}
+
   /**
    Set ErrorType for Gard
    <ul>
@@ -764,6 +796,7 @@ private:  // Data
   uint32_t       flags;        //mp01 c from  uint16_t
   uint8_t       hitCount;
   uint8_t       threshold;
+  uint8_t       analysisFlags;
   TARGETING::TargetHandle_t   startingPoint;
   GardAction::ErrorType errorType;
   Timer ivCurrentEventTime;

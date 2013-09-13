@@ -290,8 +290,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 }
                 else
                 {
+                    ErrorSignature secSig = *(sdc.GetErrorSignature());
                     //set the sdc to the Saved SDC for UE
                     sdc = sdcBuffer;
+                    // Add secondary signature
+                    sdc.AddSignatureList( secSig );
                     gardErrType = HWAS::GARD_Func;
                     causeAttnPreviouslyReported = true;
                 }
@@ -305,8 +308,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 }
                 else
                 {
+                    ErrorSignature secSig = *(sdc.GetErrorSignature());
                     //set the sdc to the Saved SDC for SUE
                     sdc = sdcBuffer;
+                    // Add secondary signature
+                    sdc.AddSignatureList( secSig );
                     gardErrType = HWAS::GARD_Func;
                     causeAttnPreviouslyReported = true;
                 }

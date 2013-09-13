@@ -259,9 +259,11 @@ void System::Initialize(void)
 int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                     ATTENTION_TYPE attentionType)
 {
+    #define PRDF_FUNC "[System::Analyze] "
     SYSTEM_DEBUG_CLASS sysdebug;
     Domain * domainAtAttentionPtr = NULL;
     ServiceDataCollector * l_saved_sdc = NULL;
+    ServiceDataCollector * l_temp_sdc = NULL;
 
     int rc = (prioritizedDomains.empty() ? NO_DOMAINS_IN_SYSTEM : SUCCESS);
     int l_saved_rc = 0;
@@ -273,6 +275,7 @@ int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         ATTENTION_TYPE startAttention = attentionType;
         if((attentionType == MACHINE_CHECK) || (attentionType == UNIT_CS))
             startAttention = RECOVERABLE;
+
         ATTENTION_TYPE atnType = startAttention;
         for(atnType = startAttention;
             domainAtAttentionPtr == NULL && atnType >= attentionType ;
@@ -302,18 +305,48 @@ int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
                         if(rc == PRD_POWER_FAULT)
                         {
-                            PRDF_ERR( "System::Analyze() Power Fault detected!" );
+                            PRDF_ERR( PRDF_FUNC"Power Fault detected!" );
                             break;
                         }
                     }
-                }
-            }
-        }
+                    else if ( ( attentionType == MACHINE_CHECK )
+                             && ( atnType != MACHINE_CHECK ) )
+                    {
+                        // We were asked to analyze MACHINE XTOP, but we found
+                        // another attention and did analyze that. In this case
+                        // we want to add additional signature of MACHINE XSTOP
+                        // attention to error log.
+
+                        // l_temp_sdc is not NULL. It is a code bug. Do not do
+                        // anything for error isolation pass.
+                        if ( NULL != l_temp_sdc )
+                        {
+                            PRDF_ERR( PRDF_FUNC"l_temp_sdc is not NULL" );
+                            continue;
+                        }
+
+                        // Do a setup for error isolation pass for MACHINE
+                        // XTOP. In this pass, we are only interested in
+                        // error signature.
+                        domainAtAttentionPtr = NULL;
+                        l_temp_sdc = new ServiceDataCollector (
+                                                    *serviceData.service_data );
+                        // Set up Error Isolation Pass Flag.
+                        serviceData.service_data->setIsolationOnlyPass();
+                        // Set the outer for loop iteration variable atnType so
+                        // that we analyze MACHINE XSTOP in next iteration.
+                        atnType = MACHINE_CHECK + 1;
+                        break;
+                    }
+
+                } // end domainAtAttentionPtr != NULL
+            } // end inner for loop
+        } // end outer for loop
 
         // if ptr is NULL && we don't have a saved SDC than we have noAttns
         // if ptr is NULL && we have a saved SDC then we have an attn with no-bits-on
         // otherwise we are done - aready did the analysis
-        if(domainAtAttentionPtr == NULL)
+        if ( domainAtAttentionPtr == NULL)
         {
             if(l_saved_sdc == NULL)
             {
@@ -326,16 +359,29 @@ int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 rc = l_saved_rc;
             }
         }
-        //else
-        //{
-        //  // mk442956 a Add atnType to CauseAttentionType in sdc
-        //  serviceData.service_data->SetCauseAttentionType(atnType+1);
-        //  rc = domainAtAttentionPtr->Analyze(serviceData, atnType+1); // jp01
-        //}
+
+        // l_temp_sdc will not be NULL if we go to ERROR ISOLATION ONLY PASS.
+        // In that case get the secondary signature and update this.
+        if ( NULL != l_temp_sdc )
+        {
+
+            // We are having only one secondary signature. Secondary signature
+            // here is mainly used for XSTOP error. XSTOP error can only happen
+            // on Fabric domain. For fabric domain, we use Fabric sorting which
+            // will give us first chip which is root cause for the XSTOP error.
+            // So signature we get after fabric sorting is enough for FFDC
+            // perspective.
+
+            l_temp_sdc->AddSignatureList(
+                           *( serviceData.service_data->GetErrorSignature() ));
+            *serviceData.service_data = *l_temp_sdc;
+            delete l_temp_sdc;
+        }
+
         if(l_saved_sdc != NULL) delete l_saved_sdc; //dg05a
 
     }
-
+    #undef PRDF_FUNC
     return(rc);
 }
 

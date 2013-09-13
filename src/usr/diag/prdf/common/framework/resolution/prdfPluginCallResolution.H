@@ -56,6 +56,12 @@ class PluginCallResolution : public Resolution
 
         virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & i_error)
         {
+            // In Isolation only pass, we are only interested in error
+            // signature. So we will not execute plugin resolution as it may
+            // call some HWP/update VPD etc which is not desired is isolation
+            // only pass.
+            if ( i_error.service_data->IsIsolationOnlyPass()) return SUCCESS;
+
             if (NULL == iv_function)
             {
                 return FAIL;

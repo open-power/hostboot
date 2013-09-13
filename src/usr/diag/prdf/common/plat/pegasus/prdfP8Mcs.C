@@ -154,7 +154,8 @@ int32_t PostAnalysis( ExtensibleChip * i_mcsChip,
 {
     int32_t l_rc = SUCCESS;
 
-    if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
+    if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) &&
+         (CHECK_STOP != i_sc.service_data->GetAttentionType()) )
     {
         P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
         ExtensibleChip * membChip = mcsdb->getMembChip();

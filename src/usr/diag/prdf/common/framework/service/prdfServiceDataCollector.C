@@ -194,6 +194,26 @@ void ServiceDataCollector::AddSignatureList( TargetHandle_t i_target,
 
 //------------------------------------------------------------------------------
 
+void ServiceDataCollector::AddSignatureList( ErrorSignature & i_sig )
+{
+    #define PRDF_FUNC "[ServiceDataCollector::AddSignatureList] "
+
+     TARGETING::TargetHandle_t tgt = PlatServices::getTarget(
+                                                  i_sig.getChipId());
+
+     if ( NULL != tgt )
+     {
+        AddSignatureList( tgt, i_sig.getSigId() );
+     }
+     else
+     {
+        PRDF_ERR( PRDF_FUNC"Failed to get target Handle for "
+                          "chip:0x%08X", i_sig.getChipId() );
+     }
+    #undef PRDF_FUNC
+}
+//------------------------------------------------------------------------------
+
 TARGETING::TargetHandle_t ServiceDataCollector::getTargetAnalyzed( )
 {
     ExtensibleChip * l_pChipAnalyzed = getChipAnalyzed();
