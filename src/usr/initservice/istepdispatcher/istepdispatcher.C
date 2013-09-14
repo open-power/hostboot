@@ -1140,14 +1140,20 @@ void IStepDispatcher::runProgressThread( void )
             mutex_lock( &iv_mutex );
         }
 
-        /* 15 sec msg constraint not planned for GA1
         if( l_PrevTime.tv_sec == iv_lastProgressMsgTime.tv_sec &&
             l_PrevTime.tv_nsec == iv_lastProgressMsgTime.tv_nsec)
         {
+#if 0
+        /* 15 sec msg constraint not planned for GA1
         err = this->sendProgressCode(false);
         commit error in future
-        }
         */
+#else
+        // Normally this would be done in sendProgressCode but do it here
+        // to prevent thread from becoming a CPU hog.
+        clock_gettime(CLOCK_MONOTONIC, &iv_lastProgressMsgTime);
+#endif
+        }
     }
 
     TRACDCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::runProgressThread");
