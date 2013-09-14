@@ -20,8 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-// $Id: p8_xip_customize.C,v 1.52 2013-08-06 18:47:46 jeshua Exp $
+// $Id: p8_xip_customize.C,v 1.55 2013/09/13 14:09:15 jeshua Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -53,6 +52,7 @@
 #include <p8_ring_identification.H>
 #include <p8_pore_table_gen_api.H>
 #include <p8_scom_addresses.H>
+#include <proc_mailbox_utils.H>
 
 #define min(a,b) ((a<b)?a:b)
 
@@ -61,6 +61,47 @@ extern "C"  {
 using namespace fapi;
 
   const uint32_t MINIMUM_VALID_EXS = 3;
+
+
+//------------------------------------------------------------------------------
+// function:
+//      Insert the 32-bit mailbox value into the correct spot in the image
+//
+// parameters: o_imageOut         The image to modify
+//             i_tocName          The name of the entry to modify
+//             i_value            The value to insert (in host byte order)
+// returns: FAPI_RC_SUCCESS if operation was successful, else error
+//------------------------------------------------------------------------------
+  ReturnCode p8_xip_customize_insert_mbox( void *o_imageOut, const char *i_tocName, uint32_t i_value )
+  {
+    void    *hostMboxVec;
+    uint8_t *byteVector;
+    fapi::ReturnCode rc;
+    uint32_t   rcLoc=0;
+    SbeXipItem xipTocItem;
+    SBE_XIP_ERROR_STRINGS(errorStrings);
+
+    rcLoc = sbe_xip_find( o_imageOut, i_tocName, &xipTocItem);
+    if (rcLoc)  {
+      FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+      FAPI_ERR("Probable cause:");
+      FAPI_ERR("\tThe keyword (=%s) was not found.",i_tocName);
+      uint32_t & RC_LOCAL = rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+      return rc;
+    }
+    sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostMboxVec);
+    FAPI_INF("%s: Before (in BE)=0x%016llX\n",i_tocName,*((uint64_t*)hostMboxVec));
+    byteVector = (uint8_t*)hostMboxVec;
+    // Copy the bytes over one by one
+    *(byteVector+0) = (uint8_t)((i_value & 0xFF000000) >> 24);
+    *(byteVector+1) = (uint8_t)((i_value & 0x00FF0000) >> 16);
+    *(byteVector+2) = (uint8_t)((i_value & 0x0000FF00) >> 8);
+    *(byteVector+3) = (uint8_t)((i_value & 0x000000FF) >> 0);
+    FAPI_INF("                         After (in BE)=0x%016llX\n",myRev64(*(uint64_t*)hostMboxVec));
+    FAPI_INF("    field value (in host)             =0x%08X\n",i_value);
+    return rc;
+  }
 
 #ifndef IMGBUILD_PPD_IGNORE_VPD
 
@@ -687,6 +728,71 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_INF("                         After (in BE)=0x%016llX\n",*(uint64_t*)hostNestSkewAdjVec);
     FAPI_INF("VPD field value (unaltered & in BE)   =0x%016llX\n",*(uint64_t*)bufVpdField);
   }
+
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Insert the standalone mbox 0-3 register values
+  // Retrieval method:  Attributes
+  // System phase:      IPL sysPhase
+  // ==========================================================================
+
+  if (i_sysPhase==0)  {
+    uint32_t mboxValue = 0;
+
+    //MBOX 0 (Note: utils functions number them 1-4, not 0-3)
+    rc = proc_mailbox_utils_get_mbox1(i_target, mboxValue);
+    if( rc ) {
+      FAPI_ERR("Getting the MBOX 0 value failed, so returning the error");
+      return rc;
+    }
+
+    rc = p8_xip_customize_insert_mbox( o_imageOut, STANDALONE_MBOX0_VALUE_TOC_NAME, mboxValue );
+    if( rc ) {
+      FAPI_ERR("Putting the MBOX 0 value into the image failed, so returning the error");
+      return rc;
+    }
+
+    //MBOX 1 (Note: utils functions number them 1-4, not 0-3)
+    rc = proc_mailbox_utils_get_mbox2(i_target, mboxValue);
+    if( rc ) {
+      FAPI_ERR("Getting the MBOX 1 value failed, so returning the error");
+      return rc;
+    }
+
+    rc = p8_xip_customize_insert_mbox( o_imageOut, STANDALONE_MBOX1_VALUE_TOC_NAME, mboxValue );
+    if( rc ) {
+      FAPI_ERR("Putting the MBOX 1 value into the image failed, so returning the error");
+      return rc;
+    }
+
+    //MBOX 2 (Note: utils functions number them 1-4, not 0-3)
+    rc = proc_mailbox_utils_get_mbox3(i_target, mboxValue);
+    if( rc ) {
+      FAPI_ERR("Getting the MBOX 2 value failed, so returning the error");
+      return rc;
+    }
+
+    rc = p8_xip_customize_insert_mbox( o_imageOut, STANDALONE_MBOX2_VALUE_TOC_NAME, mboxValue );
+    if( rc ) {
+      FAPI_ERR("Putting the MBOX 2 value into the image failed, so returning the error");
+      return rc;
+    }
+
+    //MBOX 3 (Note: utils functions number them 1-4, not 0-3)
+    //Don't want to include the node info in the SBE image, because that would cause Stradale problems
+    rc = proc_mailbox_utils_get_mbox4(i_target, mboxValue, false);
+    if( rc ) {
+      FAPI_ERR("Getting the MBOX 3 value failed, so returning the error");
+      return rc;
+    }
+
+    rc = p8_xip_customize_insert_mbox( o_imageOut, STANDALONE_MBOX3_VALUE_TOC_NAME, mboxValue );
+    if( rc ) {
+      FAPI_ERR("Putting the MBOX 3 value into the image failed, so returning the error");
+      return rc;
+    }
+
+  } //IF sysPhase == 0
 #endif
 
 

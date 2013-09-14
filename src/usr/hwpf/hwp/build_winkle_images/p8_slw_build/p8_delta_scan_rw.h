@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.43 2013/06/10 22:19:36 jeshua Exp $
+// $Id: p8_delta_scan_rw.h,v 1.45 2013/09/06 18:18:37 dcrowell Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -46,6 +46,10 @@
 #define FUNC_L3_RING_TOC_NAME             "ex_func_l3_ring"
 #define MAX_CEN_PLL_RING_SIZE               80 // Bytes
 #define TP_PLL_BNDY_RING_ALT_TOC_NAME     "tp_pll_bndy_ring_alt"
+#define STANDALONE_MBOX0_VALUE_TOC_NAME   "standalone_mbox0_value"
+#define STANDALONE_MBOX1_VALUE_TOC_NAME   "standalone_mbox1_value"
+#define STANDALONE_MBOX2_VALUE_TOC_NAME   "standalone_mbox2_value"
+#define STANDALONE_MBOX3_VALUE_TOC_NAME   "standalone_mbox3_value"
 
 /*****  Scan setting  *****/
 #define OPCG_SCAN_RATIO                     4
@@ -192,7 +196,7 @@
 #undef __PORE_INLINE_ASSEMBLER_C__
 #include <pore_inline.h>
 
-#ifdef __cplusplus
+#if( defined(__cplusplus) && !defined(PLIC_MODULE) )
 extern "C" {
 #endif
 
@@ -440,6 +444,6 @@ inline uint64_t myByteAlign( const uint8_t nBytes, const uint64_t aos)
   return ((aos+nBytes-1)/nBytes)*nBytes;
 }
 
-#ifdef __cplusplus
+#if( defined(__cplusplus) && !defined(PLIC_MODULE) )
 }
 #endif

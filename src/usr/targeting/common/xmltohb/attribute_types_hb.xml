@@ -40,7 +40,7 @@
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_IS_MPIPL_HB</id>
+        <id>ATTR_IS_MPIPL</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
     <hbOnly/>

@@ -13120,4 +13120,102 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>PROC_BOOT_VOLTAGE_VID</id>
+    <description>
+        Proc Boot Voltage
+    </description>
+    <simpleType>     
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_BOOT_VOLTAGE_VID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap> 
+</attribute>
+
+<attribute>
+    <id>DISABLE_I2C_ACCESS</id>
+    <description>
+      Set to skip physical access to i2c interface in SBE execution.
+      Consumed by SBE hooks to permit skipping of selected code when
+      running on a test platform (i.e., wafer) which does not have a physical
+      SEEPROM connected.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <hasStringConversion/>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DISABLE_I2C_ACCESS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_REFCLOCK_RCVR_TERM</id>
+    <description>
+        Defines system specific value of processor refclock receiver termination (FSI GP4 bits 8:9)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <hasStringConversion/>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_REFCLOCK_RCVR_TERM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PCI_REFCLOCK_RCVR_TERM</id>
+    <description>
+        Defines system specific value of PCI refclock receiver termination (FSI GP4 bits 10:11)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <hasStringConversion/>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PCI_REFCLOCK_RCVR_TERM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEM_FILTER_PLL_SOURCE</id>
+    <description>
+        Defines source of MEM filter PLL input (FSI GP4 bit 23)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <hasStringConversion/>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEM_FILTER_PLL_SOURCE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

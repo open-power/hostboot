@@ -1,0 +1,48 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils/proc_mailbox_utils_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_mailbox_utils_errors.xml,v 1.1 2013/08/12 22:04:34 jeshua Exp $ -->
+<!-- Error definitions for proc_mailbox_utils procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_MAILBOX_UTILS_PROC_REFCLK_ZERO_ERROR</rc>
+    <description>
+      Procedure: proc_mailbox_utils (proc_mailbox_utils_get_mbox1)
+      The ATTR_FREQ_PROC_REFCLOCK specified a zero for proc refclk, which is invalid
+    </description>
+    <ffdc>REF_FREQ</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_MAILBOX_UTILS_FREQ_MULT_OOB_ERROR</rc>
+    <description>
+      Procedure: proc_mailbox_utils (proc_mailbox_utils_get_mbox1)
+      The calculated DPLL frequency multiplier is too bit to fit in the bit field
+    </description>
+    <ffdc>BOOT_FREQ</ffdc>
+    <ffdc>REF_FREQ</ffdc>
+    <ffdc>DPLL_DIV</ffdc>
+    <ffdc>FREQ_MULT</ffdc>
+    <ffdc>MAX_BITS</ffdc>
+  </hwpError>
+</hwpErrors>

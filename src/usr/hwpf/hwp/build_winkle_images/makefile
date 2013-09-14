@@ -45,6 +45,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/occ/occ_procedures
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_block_wakeup_intr
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils
 
 CFLAGS += -D __FAPI
 
@@ -67,7 +68,8 @@ OBJS =  build_winkle_images.o   \
         p8_image_help_base.o    \
         p8_pfet_init.o          \
         p8_pfet_control.o       \
-        p8_block_wakeup_intr.o
+        p8_block_wakeup_intr.o \
+        proc_mailbox_utils.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
@@ -75,6 +77,7 @@ OBJS =  build_winkle_images.o   \
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_block_wakeup_intr
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils
 
 include ${ROOTPATH}/config.mk
 
