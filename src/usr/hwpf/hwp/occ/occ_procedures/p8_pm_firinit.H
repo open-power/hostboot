@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_firinit.H,v 1.10 2013/08/02 19:18:00 stillgs Exp $
+// $Id: p8_pm_firinit.H,v 1.11 2013/08/26 12:42:40 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_firinit.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -82,6 +82,7 @@
 #define SET_RECOV_INTR(b){SET_FIR_ACTION(b, 1, 0);}
 #define SET_MALF_ALERT(b){SET_FIR_ACTION(b, 1, 1);}
 #define SET_FIR_MASKED(b){SET_FIR_MASK(b,1);}
+#define CLEAR_FIR_MASK(b){SET_FIR_MASK(b,0);}
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*p8_pm_firinit_FP_t) (const fapi::Target& , uint32_t);
@@ -97,11 +98,11 @@ extern "C" {
 /// \calls p8_pm_occ_firinit
 
 
-const uint32_t        PCB_FIR_REGISTER_LENGTH = 43 ;
-const uint32_t        PMC_FIR_REGISTER_LENGTH = 49 ;
-const uint32_t        PBA_FIR_REGISTER_LENGTH = 46 ;
-const uint32_t        OHA_FIR_REGISTER_LENGTH = 6 ;
-const uint32_t        OCC_FIR_REGISTER_LENGTH = 64 ;
+//const uint32_t        PCB_FIR_REGISTER_LENGTH = 43 ;
+//const uint32_t        PMC_FIR_REGISTER_LENGTH = 49 ;
+//const uint32_t        PBA_FIR_REGISTER_LENGTH = 46 ;
+//const uint32_t        OHA_FIR_REGISTER_LENGTH = 6 ;
+//const uint32_t        OCC_FIR_REGISTER_LENGTH = 64 ;
 
 //------------------------------------------------------------------------------
 /**

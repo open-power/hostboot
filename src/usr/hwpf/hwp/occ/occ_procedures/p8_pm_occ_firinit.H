@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_occ_firinit.H,v 1.6 2013/04/01 04:27:49 stillgs Exp $
+// $Id: p8_pm_occ_firinit.H,v 1.7 2013/08/26 12:44:32 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_occ_firinit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -42,6 +42,9 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*p8_pm_occ_firinit_FP_t) (const fapi::Target& , uint32_t mode);
+
+const uint32_t        OCC_FIR_REGISTER_LENGTH = 64 ;
+
 
 extern "C" {
 //------------------------------------------------------------------------------

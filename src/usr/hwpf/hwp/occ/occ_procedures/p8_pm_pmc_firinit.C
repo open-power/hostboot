@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pmc_firinit.C,v 1.14 2013/08/02 19:19:40 stillgs Exp $
+// $Id: p8_pm_pmc_firinit.C,v 1.15 2013/08/26 12:44:38 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -102,49 +102,7 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
     ecmdDataBufferBase  mask(64);
     uint32_t            e_rc = 0;
 
-    enum PMC_FIRS
-    {
-	    PSTATE_OCI_MASTER_RDERR                     =0  ,
-	    PSTATE_OCI_MASTER_RDDATA_PARITY_ERR         =1  ,
-	    PSTATE_GPST_CHECKBYTE_ERR                   =2  ,
-	    PSTATE_GACK_TO_ERR                          =3  ,
-	    PSTATE_PIB_MASTER_NONOFFLINE_ERR            =4  ,
-	    PSTATE_PIB_MASTER_OFFLINE_ERR               =5  ,
-	    PSTATE_OCI_MASTER_TO_ERR                    =6  ,
-	    PSTATE_INTERCHIP_UE_ERR                     =7  ,
-	    PSTATE_INTERCHIP_ERRORFRAME_ERR             =8  ,
-	    PSTATE_MS_FSM_ERR                           =9  ,
-	    MS_COMP_PARITY_ERR                          =10 ,
-	    IDLE_PORESW_FATAL_ERR                       =11 ,
-	    IDLE_PORESW_STATUS_RC_ERR                   =12 ,
-	    IDLE_PORESW_STATUS_VALUE_ERR                =13 ,
-	    IDLE_PORESW_WRITE_WHILE_INACTIVE_ERR        =14 ,
-	    IDLE_PORESW_TIMEOUT_ERR                     =15 ,
-	    IDLE_OCI_MASTER_WRITE_TIMEOUT_ERR           =16 ,
-	    IDLE_INTERNAL_ERR                           =17 ,
-	    INT_COMP_PARITY_ERR                         =18 ,
-	    PMC_OCC_HEARTBEAT_TIMEOUT                   =19 ,
-	    SPIVID_CRC_ERROR0                           =20 ,
-	    SPIVID_CRC_ERROR1                           =21 ,
-	    SPIVID_CRC_ERROR2                           =22 ,
-	    SPIVID_RETRY_TIMEOUT                        =23 ,
-	    SPIVID_FSM_ERR                              =24 ,
-	    SPIVID_MAJORITY_DETECTED_A_MINORITY         =25 ,
-	    O2S_CRC_ERROR0                              =26 ,
-	    O2S_CRC_ERROR1                              =27 ,
-	    O2S_CRC_ERROR2                              =28 ,
-	    O2S_RETRY_TIMEOUT                           =29 ,
-	    O2S_WRITE_WHILE_BRIDGE_BUSY_ERR             =30 ,
-	    O2S_FSM_ERR                                 =31 ,
-	    O2S_MAJORITY_DETECTED_A_MINORITY            =32 ,
-	    O2P_WRITE_WHILE_BRIDGE_BUSY_ERR             =33 ,
-	    O2P_FSM_ERR                                 =34 ,
-	    OCI_SLAVE_ERR                               =35 ,
-	    IF_COMP_PARITY_ERR                          =36 ,
-	    FIR_PARITY_ERR_DUP                          =47 ,
-	    FIR_PARITY_ERR                              =48
-    };
-
+   
     FAPI_DBG("Executing p8_pm_pmc_firinit  ...");
     do
     {

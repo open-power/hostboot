@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_oha_firinit.H,v 1.5 2013/03/29 14:22:52 stillgs Exp $
+// $Id: p8_pm_oha_firinit.H,v 1.6 2013/08/26 12:44:33 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_oha_firinit.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -40,6 +40,17 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*p8_pm_oha_firinit_FP_t) (const fapi::Target& , uint32_t mode );
+
+const uint32_t        OHA_FIR_REGISTER_LENGTH = 6;
+enum OHA_FIRS 
+{    
+    OHA21_PPT_TIMEOUT_ERR       = 0,
+    NOT_CPM_BIT_SYNCED          = 1,
+    AISS_HANG_CONDITION         = 2,
+    TC_TC_THERM_TRIP0           = 3,
+    TC_TC_THERM_TRIP1           = 4,
+    PCB_ERR_TO_FIR              = 5    
+};
 
 extern "C" {
 
