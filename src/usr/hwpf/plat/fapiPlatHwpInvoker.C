@@ -64,7 +64,7 @@ HWAS::callOutPriority xlateCalloutPriority(
         FAPI_ERR("fapi::xlateCalloutPriority: Unknown priority 0x%x, assuming HIGH",
             i_fapiPri);
     }
-  
+
     return l_priority;
 }
 
@@ -131,7 +131,7 @@ HWAS::epubProcedureID xlateProcedureCallout(
         FAPI_ERR("fapi::xlateProcedureCallout: Unknown proc 0x%x, assuming CODE",
             i_fapiProc);
     }
- 
+
     return l_proc;
 }
 
@@ -213,7 +213,7 @@ void processEIFfdcs(const ErrorInfo & i_errInfo,
             HWPF_COMP_ID, &l_ffdcId, sizeof(l_ffdcId), 1, HWPF_UDT_HWP_FFDC);
 
         if (l_pUD)
-        { 
+        {
             io_pError->appendToFFDC(l_pUD, l_pFfdc, l_size);
         }
     }
@@ -459,7 +459,8 @@ void processEIChildrenCDGs(const ErrorInfo & i_errInfo,
 //******************************************************************************
 // fapiRcToErrl function. Converts a fapi::ReturnCode to an error log
 //******************************************************************************
-errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
+errlHndl_t fapiRcToErrl(ReturnCode & io_rc,
+                        ERRORLOG::errlSeverity_t i_sev)
 {
     errlHndl_t l_pError = NULL;
 
@@ -482,8 +483,6 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
             uint32_t l_rcValue = static_cast<uint32_t>(io_rc);
             FAPI_ERR("fapiRcToErrl: HWP error: 0x%08x", l_rcValue);
 
-            // TODO What should the severity be? Should it be in the error info?
-
             /*@
              * @errortype
              * @moduleid     MOD_HWP_RC_TO_ERRL
@@ -492,7 +491,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
              * @userdata2    <unused>
              * @devdesc      HW Procedure generated error. See User Data.
              */
-            l_pError = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            l_pError = new ERRORLOG::ErrlEntry(i_sev,
                                                MOD_HWP_RC_TO_ERRL,
                                                RC_HWP_GENERATED_ERROR,
                                                TO_UINT64(l_rcValue));
@@ -532,7 +531,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
             l_reasonCode |= HWPF_COMP_ID;
 
             // HostBoot errlog tags for FAPI errors are in hwpfReasonCodes.H
-            l_pError = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            l_pError = new ERRORLOG::ErrlEntry(i_sev,
                                                MOD_FAPI_RC_TO_ERRL,
                                                l_reasonCode);
 

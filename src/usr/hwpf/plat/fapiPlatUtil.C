@@ -36,6 +36,7 @@
 #include <fapiPlatHwpInvoker.H>
 #include <vfs/vfs.H>
 #include <initservice/initsvcbreakpoint.H>
+#include <errl/errlentry.H>
 
 
 //******************************************************************************
@@ -90,8 +91,11 @@ fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles)
 //******************************************************************************
 // fapiLogError
 //******************************************************************************
-void fapiLogError(fapi::ReturnCode & io_rc)
+void fapiLogError(fapi::ReturnCode & io_rc,
+                  fapi::fapiErrlSeverity_t i_sev)
 {
+    // ENUM CONVERSION FAPI to PLATFORM
+
     errlHndl_t l_pError = NULL;
     bool l_unitTestError = false;
 
@@ -102,10 +106,27 @@ void fapiLogError(fapi::ReturnCode & io_rc)
         l_unitTestError = true;
     }
 
+    // Convert a FAPI severity to a ERRORLOG severity
+    ERRORLOG::errlSeverity_t l_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+    switch (i_sev)
+    {
+        case fapi::FAPI_ERRL_SEV_RECOVERED:
+            l_sev = ERRORLOG::ERRL_SEV_RECOVERED;
+            break;
+        case fapi::FAPI_ERRL_SEV_PREDICTIVE:
+            l_sev = ERRORLOG::ERRL_SEV_PREDICTIVE;
+            break;
+        case fapi::FAPI_ERRL_SEV_UNRECOVERABLE:
+            // l_sev set above
+            break;
+        default:
+            FAPI_ERR("severity (i_sev) of %d is unknown",i_sev);
+    }
+
     // Convert the return code to an error log.
     // This will set the return code to FAPI_RC_SUCCESS and clear any PLAT Data,
     // HWP FFDC data, and Error Target associated with it.
-    l_pError = fapiRcToErrl(io_rc);
+    l_pError = fapiRcToErrl(io_rc, l_sev);
 
     // Commit the error log. This will delete the error log and set the handle
     // to NULL.

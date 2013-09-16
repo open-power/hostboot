@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -68,7 +68,7 @@ fapi::ReturnCode hwpTestError(const fapi::Target & i_target)
     FAPI_SET_HWP_ERROR(l_rc, RC_TEST_ERROR_A);
 
     // Log the error
-    fapiLogError(l_rc);
+    fapiLogError(l_rc, fapi::FAPI_ERRL_SEV_PREDICTIVE);
 
     // Check that the return code is set to success
     if (!l_rc.ok())

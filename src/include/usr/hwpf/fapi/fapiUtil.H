@@ -54,7 +54,7 @@
 #include <fapiReturnCode.H>
 #include <fapiPlatUtil.H>
 
-// Defines for endian convertion 
+// Defines for endian convertion
 #define FAPI_BE16TOH(x) FAPI_PLAT_BE16TOH(x)
 #define FAPI_LE16TOH(x) FAPI_PLAT_LE16TOH(x)
 #define FAPI_HTOBE16(x) FAPI_PLAT_HTOBE16(x)
@@ -95,26 +95,40 @@ void fapiAssert(bool i_expression);
  * task.  When the delay time expires, the task becomes runnable and will soon
  * return from the syscall.  Callers of delay() in the hostboot environment
  * will likely have to know the mHz clock speed they are running on and
- * compute a non-zero value for i_nanoSeconds. 
- * 
+ * compute a non-zero value for i_nanoSeconds.
+ *
  * On the FSP, it was sometimes acceptable to just provide zero for the
  * sleep delay time, causing the task to yield its time slice. By the
  * time the calling task could run again, it was pretty certain enough
  * host cycles had past.  This is probably not acceptable in
  * the hostboot environment. Callers should calculate and provide a
- * sleep value in nanoseconds relative to host clock speed.  
+ * sleep value in nanoseconds relative to host clock speed.
  *
  * On FSP when VBU is the target, then the i_simCycles parameter will be
  * used instead.  The FSP needs to use the simdispatcher client/server
  * API and issue a command to the awan to advance the simulation the
- * specified number of cycles. 
- * 
- * @param[in] i_nanoSeconds    nanoseconds to sleep 
+ * specified number of cycles.
+ *
+ * @param[in] i_nanoSeconds    nanoseconds to sleep
  * @param[in] i_simCycles      count of Awan cycles to advance
- * 
+ *
  * @return ReturnCode. Zero on success, else platform specified error.
  */
 fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles);
+
+namespace fapi
+{
+/**
+ * @brief Enumeration of error log severity.
+ */
+enum fapiErrlSeverity_t
+{
+    FAPI_ERRL_SEV_RECOVERED     = 0x10, //Not seen by customer
+    FAPI_ERRL_SEV_PREDICTIVE    = 0x20, //Error recovered but customer will see
+    FAPI_ERRL_SEV_UNRECOVERABLE = 0x40  //Unrecoverable, general
+};
+
+}
 
 /**
  * @brief Log an error.
@@ -126,6 +140,7 @@ fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles);
  * @param[in,out] io_rc Reference to ReturnCode (Any references to data and error
  *            target are removed and rc value is set to success after
  *            function ends.)
+ * @param[in] i_sev Fapi error log severity defaulted to unrecoverable
  *
  * Example usage: <br>
  *     fapi::ReturnCode l_rc; <br>
@@ -138,7 +153,9 @@ fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles);
  *     FAPI_EXEC_HWP(l_rc, function2, i_target) <br>
  *     return rc; <br>
  */
-void fapiLogError(fapi::ReturnCode & io_rc);
+void fapiLogError(fapi::ReturnCode & io_rc,
+                  fapi::fapiErrlSeverity_t i_sev =
+                  fapi::FAPI_ERRL_SEV_UNRECOVERABLE);
 
 /**  @brief This function answers the question, is scand tracing turned on?
  *   The implementation of this function is specific to the platform.
@@ -160,7 +177,7 @@ void platSetScanTrace(bool i_enable);
  * This function can be called by a HWP to load an initfile.
  *
  * @note Implemented by platform code.  Platform code is
- * responsible for allocating any memory needed to load 
+ * responsible for allocating any memory needed to load
  * the initfile.
  *
  * @param[in]  i_Target reference to the target
@@ -188,7 +205,7 @@ fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
  *
  * @return ReturnCode. Zero on success, else platform specified error.
  */
-fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr, 
+fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
     size_t & io_size);
 
 /**  @brief Set a break point in the current procedure
