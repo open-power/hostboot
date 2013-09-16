@@ -548,6 +548,8 @@ group gNxCqFir filter singlebit
 ################################################################################
 # PB Chiplet NXASFIR
 ################################################################################
+# based on p8dd1_mss_FFDC_60.xls
+################################################################################
 
 rule NxAsFir
 {
@@ -705,12 +707,12 @@ group gNxAsFir filter singlebit
     /** NXASFIR[29]
      *  INTR_RTY_CNT_EXP
      */
-    (NxAsFir, bit(29)) ? TBDDefaultCallout;
+    (NxAsFir, bit(29)) ? callout2ndLvlMedThr1;
 
     /** NXASFIR[30]
      *  EG_OVFLW
      */
-    (NxAsFir, bit(30)) ? TBDDefaultCallout;
+    (NxAsFir, bit(30)) ? callout2ndLvlMedThr1;
 
     /** NXASFIR[31]
      *  MULT_PM_HIT
@@ -823,7 +825,7 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[7]
      *  PSL_CMD_SUE
      */
-    (NxCxaFir, bit(7)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(7)) ? callout2ndLvlMedThr1;
 
     /** NXCXAFIR[8]
      *  SNOOP_ARRAY_CE
@@ -923,12 +925,12 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[29]
      *  LD_CLASS_CMD_ADDR_ERR
      */
-    (NxCxaFir, bit(29)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(29)) ? callout2ndLvlMedThr1;
 
     /** NXCXAFIR[30]
      *  ST_CLASS_CMD_ADDR_ERR
      */
-    (NxCxaFir, bit(30)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(30)) ? callout2ndLvlMedThr1;
 
     /** NXCXAFIR[31]
      *  PHB_LINK_DOWN
@@ -2573,32 +2575,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_0, bit(18)) ? callout2ndLvlMed;
+    (PciNestFir_0, bit(18)) ? callout2ndLvlMedThr1;
 
     /** PCINESTFIR_1[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_1, bit(18)) ? callout2ndLvlMed;
+    (PciNestFir_1, bit(18)) ? callout2ndLvlMedThr1;
 
     /** PCINESTFIR_2[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_2, bit(18)) ? callout2ndLvlMed;
+    (PciNestFir_2, bit(18)) ? callout2ndLvlMedThr1;
 
     /** PCINESTFIR_0[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_0, bit(19)) ? callout2ndLvlMed;
+    (PciNestFir_0, bit(19)) ? callout2ndLvlMedThr1;
 
     /** PCINESTFIR_1[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_1, bit(19)) ? callout2ndLvlMed;
+    (PciNestFir_1, bit(19)) ? callout2ndLvlMedThr1;
 
     /** PCINESTFIR_2[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_2, bit(19)) ? callout2ndLvlMed;
+    (PciNestFir_2, bit(19)) ? callout2ndLvlMedThr1;
 
     /** PCINESTFIR_0[20]
      *  INVALIDCRESP

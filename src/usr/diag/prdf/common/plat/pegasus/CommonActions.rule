@@ -225,6 +225,15 @@ actionclass callout2ndLvlMedThr32perDay
     callout2ndLvlMed;
     threshold32pday;
 };
+
+/** Callout 2nd Level support on first occurrence */
+actionclass callout2ndLvlMedThr1
+{
+    callout2ndLvlMed;
+    threshold1;
+
+};
+
 ################################################################################
 #                               Dump Types                                     #
 ################################################################################

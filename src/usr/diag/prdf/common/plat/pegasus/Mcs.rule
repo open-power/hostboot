@@ -309,12 +309,12 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[26]
      *  MCIFIRQ_POWERBUS_PROTOCOL_ERROR
      */
-    (MciFir, bit(26)) ? callout2ndLvlMed;
+    (MciFir, bit(26)) ? callout2ndLvlMedThr1;
 
     /** MCIFIR[27]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
      */
-    (MciFir, bit(27)) ? callout2ndLvlMed;
+    (MciFir, bit(27)) ? callout2ndLvlMedThr1;
 
     /** MCIFIR[28]
      *  MCIFIRQ_MULTIPLE_RCMD_OR_CRESP_ACTIVE
@@ -348,7 +348,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[33]
      *  MCIFIRQ_NONFOREIGN_ACCESS_TO_FOREIGN_BAR
      */
-    (MciFir, bit(33)) ? callout2ndLvlMed;
+    (MciFir, bit(33)) ? callout2ndLvlMedThr1;
 
     /** MCIFIR[34]
      *  MCIFIRQ_CENTAUR_SYNC_COMMAND_DETECTED
@@ -373,12 +373,12 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[38]
      *  MCIFIRQ_HA_ILLEGAL_CONSUMER_ACCESS_ERROR
      */
-    (MciFir, bit(38)) ? callout2ndLvlMed;
+    (MciFir, bit(38)) ? callout2ndLvlMedThr1;
 
     /** MCIFIR[39]
      *  MCIFIRQ_HA_ILLEGAL_PRODUCER_ACCESS_ERROR
      */
-    (MciFir, bit(39)) ? callout2ndLvlMed;
+    (MciFir, bit(39)) ? callout2ndLvlMedThr1;
 
     /** MCIFIR[40]
      *  CHANNEL TIMEOUT ERROR

@@ -998,22 +998,22 @@ group gL2Fir filter singlebit
     /** L2FIR[27]
      *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
      */
-    (L2Fir, bit(27)) ? callout2ndLvlMed;
+    (L2Fir, bit(27)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[28]
      *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN1
      */
-    (L2Fir, bit(28)) ? callout2ndLvlMed;
+    (L2Fir, bit(28)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[29]
      *  RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
      */
-    (L2Fir, bit(29)) ? callout2ndLvlMed;
+    (L2Fir, bit(29)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[30]
      *  RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN1
      */
-    (L2Fir, bit(30)) ? callout2ndLvlMed;
+    (L2Fir, bit(30)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[31]
      *  ILLEGAL_MPALOG_TPID_SW_ERR
@@ -1166,22 +1166,22 @@ group gL3Fir filter singlebit
     /** L3FIR[19]
      *  Reserved field (Access type is l3_flink_0_load_ack_dead)
      */
-    (L3Fir, bit(19)) ? callout2ndLvlMed;
+    (L3Fir, bit(19)) ? callout2ndLvlMedThr1;
 
     /** L3FIR[20]
      *  Reserved field (Access type is l3_flink_0_store_ack_dead)
      */
-    (L3Fir, bit(20)) ? callout2ndLvlMed;
+    (L3Fir, bit(20)) ? callout2ndLvlMedThr1;
 
     /** L3FIR[21]
      *  Reserved field (Access type is l3_flink_1_load_ack_dead)
      */
-    (L3Fir, bit(21)) ? callout2ndLvlMed;
+    (L3Fir, bit(21)) ? callout2ndLvlMedThr1;
 
     /** L3FIR[22]
      *  Reserved field (Access type is l3_flink_1_store_ack_dead)
      */
-    (L3Fir, bit(22)) ? callout2ndLvlMed;
+    (L3Fir, bit(22)) ? callout2ndLvlMedThr1;
 
     /** L3FIR[23]
      *  L3 Machine Hang

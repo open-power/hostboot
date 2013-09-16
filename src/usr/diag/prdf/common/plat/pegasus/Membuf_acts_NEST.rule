@@ -390,7 +390,7 @@ group gScacFir filter singlebit
     /** SCACFIR[33]
      *  SCAC_LFIR_REGACCERR
      */
-    (ScacFir, bit(33)) ? TBDDefaultCallout;
+    (ScacFir, bit(33)) ? callout2ndLvlMedThr1;
 
     /** SCACFIR[34]
      *  SCAC_LFIR_RESETERR
@@ -569,7 +569,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[2]
      *  MBS_FIR_REG_INVALID_ADDRESS_ERROR
      */
-    (MbsFir, bit(2)) ? callout2ndLvlMed;
+    (MbsFir, bit(2)) ? callout2ndLvlMedThr1;
 
     /** MBSFIR[3]
      *  MBS_FIR_REG_EXTERNAL_TIMEOUT

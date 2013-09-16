@@ -81,7 +81,7 @@ group gAbusLFir filter singlebit
     /** ABUS_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (AbusLFir, bit(3)) ? callout2ndLvlThr32PerDay;
+    (AbusLFir, bit(3)) ? callout2ndLvlMedThr32perDay;
 
     /** ABUS_LFIR[4]
      *  Local errors from PSC (PCB error)
@@ -567,9 +567,3 @@ actionclass tooManyBusErrors_abus1
 actionclass tooManyBusErrors_abus2
 { calloutAbus2InterfaceTh1; funccall("tooManyBusErrors_abus2"); };
 
-/** callout second level support if threshold exceeds 32 per day */
-actionclass callout2ndLvlThr32PerDay
-{
-    callout2ndLvlMed;
-    threshold32pday;
-};
