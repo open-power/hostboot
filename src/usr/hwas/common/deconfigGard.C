@@ -360,7 +360,7 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
 
         TargetHandleList pNodeList;
         targetService().getAssociated(pNodeList, pSys,
-                        TargetService::CHILD, TargetService::ALL,
+                        TargetService::CHILD, TargetService::IMMEDIATE,
                         &nodeCheckExpr);
 
         // sort the list by ATTR_HUID to ensure that we
@@ -728,7 +728,7 @@ void findMcsInGroup(const Target *i_startMcs, TargetHandleList &o_McsInGroup)
         PredicatePostfixExpr checkExpr;
         checkExpr.push(&predMcs).push(&isFunctional).And();
         targetService().getAssociated(o_McsInGroup, l_proc,
-            TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+            TargetService::CHILD_BY_AFFINITY, TargetService::IMMEDIATE,
             &checkExpr);
 
         for (TargetHandleList::iterator pMcs_it = o_McsInGroup.begin();
