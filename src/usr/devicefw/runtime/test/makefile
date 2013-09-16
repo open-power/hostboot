@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/scom/makefile $
+# $Source: src/usr/devicefw/runtime/test/makefile $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2013
 #
 # p1
 #
@@ -20,15 +20,11 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = scom
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../../..
 
-#include common ojects between hostboot and runtime hostboot
-include scom.mk
+MODULE = testdevicefw_rt
 
-#include unique object modules - currently none
-# OBJS +=
-
-SUBDIRS = test.d runtime.d
+TESTS = ../../test/*.H
 
 include ${ROOTPATH}/config.mk

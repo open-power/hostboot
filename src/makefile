@@ -71,9 +71,12 @@ TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
 
 RUNTIME_OBJECTS = rt_start.o rt_main.o rt_console.o rt_stdlib.o rt_sync.o \
                   rt_assert.o rt_vfs.o
-RUNTIME_MODULES = trace_rt targeting_rt errl_rt
+
+RUNTIME_MODULES = trace_rt errl_rt targeting_rt devicefw_rt xscom_rt scom_rt
+
 RUNTIME_DATA_MODULES =
-RUNTIME_TESTCASE_MODULES = cxxtest_rt testsyslib_rt testtargeting_rt testerrl_rt
+RUNTIME_TESTCASE_MODULES = cxxtest_rt testsyslib_rt testtargeting_rt \
+                           testxscom_rt testerrl_rt testdevicefw_rt testscom_rt
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

@@ -67,6 +67,22 @@ typedef struct hostInterfaces
      */
     int (*sendErrorLog)(uint32_t,uint32_t,void *); 
 
+    /** Scan communication read
+     * @param[in] chip_id (based on devtree defn)
+     * @param[in] address
+     * @param[in] pointer to 8-byte data buffer
+     * @return 0 on success else return code
+     */
+    int (*scom_read)(uint32_t, uint32_t, void*);
+
+    /** Scan communication write
+     * @param[in] chip_id (based on devtree defn)
+     * @param[in] address
+     * @param[in] pointer to 8-byte data buffer
+     * @return 0 on success else return code
+     */
+    int (*scom_write)(uint32_t, uint32_t, void* );
+
 } hostInterfaces_t;
 
 typedef struct runtimeInterfaces

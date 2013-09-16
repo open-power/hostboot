@@ -37,6 +37,9 @@ namespace XSCOM
         XSCOM_COLLECT_FFDC          = 0x05,
         XSCOM_RESET                 = 0x06,
         XSCOM_DO_OP                 = 0x07,
+        XSCOM_RT_DO_OP              = 0x08,
+        XSCOM_RT_SANITY_CHECK       = 0x09,
+        XSCOM_RT_GET_TARGET         = 0x0A,
     };
 
     enum xscomReasonCode
@@ -46,6 +49,10 @@ namespace XSCOM
         XSCOM_INVALID_OP_TYPE      = XSCOM_COMP_ID | 0x03,
         XSCOM_DATA_UNMATCHED       = XSCOM_COMP_ID | 0x04,
         XSCOM_MMIO_UNMAP_ERR       = XSCOM_COMP_ID | 0x05,
+        XSCOM_RUNTIME_ERR          = XSCOM_COMP_ID | 0x06,
+        XSCOM_RUNTIME_INTERFACE_ERR = XSCOM_COMP_ID | 0x07,
+        XSCOM_RT_NO_MCS_TARGET     = XSCOM_COMP_ID | 0x08,
+        XSCOM_RT_NO_PROC_TARGET    = XSCOM_COMP_ID | 0x09,
     };
 };
 

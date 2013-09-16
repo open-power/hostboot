@@ -25,6 +25,6 @@ MODULE = xscom
 
 OBJS = xscom.o piberror.o
 
-SUBDIRS = test.d
+SUBDIRS = test.d runtime.d
 
 include ${ROOTPATH}/config.mk

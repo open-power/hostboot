@@ -26,8 +26,11 @@
 #include <pnor/pnorif.H>
 #include <util/align.H>
 #include <sys/mm.h>
-#include <errl/errlentry.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/common/attributes.H>
+#include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
+#include <map>
 
 #include <runtime/interface.h>
 
@@ -100,6 +103,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->realloc = realloc;
                 intf->assert = rt_assert;
                 intf->sendErrorLog = rt_logErr;
+                intf->scom_read = rt_scom_read;
+                intf->scom_write = rt_scom_write;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -163,6 +168,62 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             assert(false);
         }
 
+
+
+
+        static int rt_scom_read(uint32_t chipid,
+                                 uint32_t addr,
+                                 void* data)
+        {
+            int rc = 0;
+
+            TRACFCOMP(g_trac_test,
+                      "RUNTIME MSG: Scom read chipid: 0x%08x Address: 0x%08x",
+                      chipid,
+                      addr);
+
+            uint64_t * data64 = static_cast<uint64_t *>(data);
+
+            SCOM_KEY scomKey(chipid,addr);
+            SCOM_MAP::iterator it = cv_scomMap.find(scomKey);
+
+            if(it != cv_scomMap.end())
+            {
+                *data64 = it->second;
+            }
+            else
+            {
+                *data64 = 0;
+            }
+
+            return rc;
+        }
+
+
+
+
+        static int rt_scom_write(uint32_t chipid,
+                                  uint32_t addr,
+                                  void* data)
+        {
+            int rc = 0;
+ 
+            TRACFCOMP(g_trac_test,
+                      "RUNTIME MSG: Scom write chipid: 0x%08x Address: 0x%08x",
+                      chipid,
+                      addr);
+
+            uint64_t * data64 = static_cast<uint64_t *>(data);
+
+            SCOM_KEY scomKey(chipid,addr);
+            cv_scomMap[scomKey] = *data64;
+
+            return rc;
+        }
+
+
+
+
         static int rt_logErr(uint32_t plid,
                              uint32_t data_len,
                              void * data)
@@ -185,5 +246,14 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             return rc;
         }
+
+
+        typedef std::pair<uint32_t,uint32_t> SCOM_KEY;
+        typedef std::map<SCOM_KEY,uint64_t> SCOM_MAP;
+        static SCOM_MAP cv_scomMap;
 };
+
+
+RuntimeLoaderTest::SCOM_MAP RuntimeLoaderTest::cv_scomMap;
+
 #endif
