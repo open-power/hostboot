@@ -39,6 +39,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_volt
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_freq
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_lrdimm_funcs
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_pre_config
 
 OBJS =  mc_config.o                \
         mss_volt.o                 \
@@ -61,6 +63,6 @@ OBJS =  mc_config.o                \
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_volt
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_freq
-
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_pre_config
 
 include ${ROOTPATH}/config.mk

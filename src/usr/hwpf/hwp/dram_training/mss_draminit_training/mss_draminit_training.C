@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.64 2013/08/01 18:32:48 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.68 2013/09/16 13:56:31 bellows Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,12 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.68   | bellows  |16-SEP-13| Hostboot compile update
+//  1.67   | kcook    |13-SEP-13| Updated define FAPI_LRDIMM token.
+//  1.66   | kcook    |27-AUG-13| Moved main LRDIMM sections into separate file. 
+//         |          |         | Removed reference to ATTR_LAB_USE_JTAG_MODE.
+//         | mwuu     |         | Added ATTR_MSS_DISABLE1_REG_FIXED for bbm FN for DD2.
+//  1.65   | kcook    |16-AUG-13| Added LRDIMM support. Use with mss_funcs.C v1.32.
 //  1.64   | jdsloat  |01-AUG-13| Fixed dimm/rank conversion in address mirroring mode for a 4 rank dimm scenario
 //  1.63   | jdsloat  |29-JUN-13| Added JTAG mode and CONTROL SWITCH attribute checks to bad bit mask function calls.
 //  1.62   | mwuu     |17-JUN-13| Fixed set_bbm function to disable0,disable1,wr_clk registers
@@ -137,6 +143,24 @@
 #include <mss_funcs.H>
 #include <dimmBadDqBitmapFuncs.H>
 #include <mss_unmask_errors.H>
+#include <mss_lrdimm_funcs.H>
+
+
+
+
+#ifndef FAPI_LRDIMM
+using namespace fapi;
+fapi::ReturnCode mss_execute_lrdimm_mb_dram_training(Target& i_target)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+#endif
+
 
 //------------End My Includes-------------------------------------------
 
@@ -302,12 +326,12 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc = fapiGetParentChip(i_target, l_target_centaur);
     if(rc) return rc;
 
-    uint8_t control_switch = 0;
-    rc = FAPI_ATTR_GET(ATTR_MSS_CONTROL_SWITCH, NULL, control_switch);
+    uint8_t dimm_type;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type); 
     if(rc) return rc;
 
-    uint8_t jtag_mode = 0;
-    rc = FAPI_ATTR_GET(ATTR_LAB_USE_JTAG_MODE, NULL, jtag_mode);
+    uint8_t control_switch = 0;
+    rc = FAPI_ATTR_GET(ATTR_MSS_CONTROL_SWITCH, NULL, control_switch);
     if(rc) return rc;
 
     uint8_t dram_gen = 0;
@@ -378,7 +402,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc = fapiPutScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
     if(rc) return rc;
 
-    if ( ( control_switch && 0x01 ) && (jtag_mode == 0) )
+    if ( ( control_switch && 0x01 )  )
     {
         rc = mss_set_bbm_regs (i_target);
         if(rc)
@@ -402,6 +426,15 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	    rc = mss_execute_zq_cal(i_target, port);
 	    if(rc) return rc;
 	}
+
+        if ( dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+        {
+            FAPI_INF("Performing LRDIMM MB-DRAM training");
+
+            // Execute MB-DRAM training
+            rc = mss_execute_lrdimm_mb_dram_training(i_target);
+            if (rc) return rc;
+        }
 
     }
 
@@ -607,15 +640,19 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		        // Before WR_LVL --- Change the RTT_NOM to RTT_WR pre-WR_LVL
 			if ( (cur_cal_step == 1) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
 			{
-			    dram_rtt_nom_original = 0xFF;
-			    rc = mss_rtt_nom_rtt_wr_swap(i_target,
-							 mbaPosition,
-							 port,
-							 primary_ranks_array[group][port],
-							 group,
-							 instruction_number,
-							 dram_rtt_nom_original);
-			    if(rc) return rc;
+                            if ( dimm_type != fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+                            {
+
+			       dram_rtt_nom_original = 0xFF;
+			       rc = mss_rtt_nom_rtt_wr_swap(i_target,
+			           			 mbaPosition,
+			           			 port,
+			           			 primary_ranks_array[group][port],
+			           			 group,
+			           			 instruction_number,
+			           			 dram_rtt_nom_original);
+			       if(rc) return rc;
+                            }
 			}
 
 
@@ -694,15 +731,18 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			// Following WR_LVL -- Restore RTT_NOM to orignal value post-wr_lvl
 			if ((cur_cal_step == 1) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
 			{
-			    rc = mss_rtt_nom_rtt_wr_swap(i_target,
-							 mbaPosition,
-							 port,
-							 primary_ranks_array[group][port],
-							 group,
-							 instruction_number,
-							 dram_rtt_nom_original);
-			    if(rc) return rc;
+                            if ( dimm_type != fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+                            {
 
+			       rc = mss_rtt_nom_rtt_wr_swap(i_target,
+			           			 mbaPosition,
+			           			 port,
+			           			 primary_ranks_array[group][port],
+			           			 group,
+			           			 instruction_number,
+			           			 dram_rtt_nom_original);
+			       if(rc) return rc;
+                            }
 			}
 
 			// Following Read Centering -- Enter into READ CENTERING WORKAROUND
@@ -725,14 +765,14 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		if(rc) return rc;
     }
 
-    if ( ( control_switch && 0x01 ) && (jtag_mode == 0) )
+    if ( ( control_switch && 0x01 )  )
     {
     	rc = mss_get_bbm_regs(i_target);
     	if(rc)
-	{
+		{
 		FAPI_ERR( "Error Moving bad bit information from the Phy regs. Exiting.");
 		return rc;
-	}
+		}
     }
 
     if (complete_status == MSS_INIT_CAL_STALL)
@@ -3150,7 +3190,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 		0x8800, 0x4400, 0x2280, 0x1140
 	};
 
-	uint8_t l_dram_width, l_mbaPos;
+	uint8_t l_dram_width, l_mbaPos, l_disable1_fixed;
 	uint64_t l_addr;
 	// 0x8000007d0301143f
 	const uint64_t l_disable1_addr_offset = 0x0000000100000000ull;	// from disable0 register
@@ -3186,6 +3226,13 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	if(rc) return rc;
 
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &mba_target, l_dram_width);
+	if(rc) return rc;
+
+    fapi::Target l_target_centaur;
+    rc = fapiGetParentChip(mba_target, l_target_centaur);
+    if(rc) return rc;
+
+	rc = FAPI_ATTR_GET(ATTR_MSS_DISABLE1_REG_FIXED, &l_target_centaur, l_disable1_fixed);
 	if(rc) return rc;
 
 	switch (l_dram_width)
@@ -3316,7 +3363,9 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 						mask = bn_mask >> (4*q);
 						if ((l_data & mask) == mask) {
 							disable1_data |= disable1_mask_lookup[aport][i][q];
-							wrclk_mask |= wrclk_disable_mask[q];
+							if ( !l_disable1_fixed ) {
+								wrclk_mask |= wrclk_disable_mask[q];
+							}
 	FAPI_DBG("x4 disable1_data=0x%04X, wrclk_mask=0x%04X",disable1_data,wrclk_mask);
 						}
 					}
@@ -3328,7 +3377,9 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 						if ((l_data & mask) == mask) {
 							disable1_data |= disable1_mask_lookup[aport][i][q] |
 								disable1_mask_lookup[aport][i][q+1];
-							wrclk_mask |= wrclk_disable_mask[q] | wrclk_disable_mask[q+1];
+							if ( !l_disable1_fixed ) {
+								wrclk_mask |= wrclk_disable_mask[q] | wrclk_disable_mask[q+1];
+							}
 	FAPI_DBG("x8 disable1_data=0x%04X, wrclk_mask=0x%04X",disable1_data,wrclk_mask);
 						}
 					}
@@ -3369,36 +3420,39 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 					}
 
 //  for DD1.X chips since disable1 register not fully working... can take out wrclk stuff for DD2+
-					l_addr &= l_wrclk_en_addr_mask;		// set address for wrclk_en register
-
-					l_ecmdRc = data_buffer.flushTo0();	// clear buffer
-					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					if ( !l_disable1_fixed )
 					{
-						 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
-								 "- rc 0x%.8X", l_ecmdRc);
+						l_addr &= l_wrclk_en_addr_mask;		// set address for wrclk_en register
 
-						 rc.setEcmdError(l_ecmdRc);
-						 return rc;
-					}
+						l_ecmdRc = data_buffer.flushTo0();	// clear buffer
+						if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+						{
+							 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
+									 "- rc 0x%.8X", l_ecmdRc);
 
-					ecmdDataBufferBase put_mask(64);
-					l_ecmdRc = put_mask.setHalfWord(3, wrclk_mask);
-					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-					{
-						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() for wrclk_mask"
-								 "- rc 0x%.8X", l_ecmdRc);
+							 rc.setEcmdError(l_ecmdRc);
+							 return rc;
+						}
 
-						 rc.setEcmdError(l_ecmdRc);
-						 return rc;
-					}
-					// clear(0) out the unused quads
-					rc = fapiPutScomUnderMask(mba_target, l_addr, data_buffer, put_mask);
-					if (rc)
-					{
-						FAPI_ERR("Error from fapiPutScomUnderMask writing wrclk_en reg");
-						return rc;
-					}
-				}
+						ecmdDataBufferBase put_mask(64);
+						l_ecmdRc = put_mask.setHalfWord(3, wrclk_mask);
+						if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+						{
+							 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() for wrclk_mask"
+									 "- rc 0x%.8X", l_ecmdRc);
+
+							 rc.setEcmdError(l_ecmdRc);
+							 return rc;
+						}
+						// clear(0) out the unused quads
+						rc = fapiPutScomUnderMask(mba_target, l_addr, data_buffer, put_mask);
+						if (rc)
+						{
+							FAPI_ERR("Error from fapiPutScomUnderMask writing wrclk_en reg");
+							return rc;
+						}
+					} // if not disable1_fixed 
+				} // if disable1 data != 0
 			} // end DP18 instance loop
 		} // end primary rank loop
 	} // end port loop
@@ -3804,6 +3858,7 @@ ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t 
 
 	return rc;
 }
+
 
 } //end extern C
 

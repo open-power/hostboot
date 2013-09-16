@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.28 2013/08/06 23:38:34 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.33 2013/09/16 13:56:33 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,7 +44,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.29  |          |         | 
+//   1.33  | bellows  |16-SEP-13| Hostboot compile update
+//   1.32  | kcook    |13-SEP-13| Added using namespace fapi.
+//   1.31  | kcook    |13-SEP-13| Updated define FAPI_LRDIMM token.
+//   1.30  | kcook    |27-AUG-13| Removed LRDIMM support to mss_lrdimm_funcs.C.
+//   1.29  | kcook    |16-AUG-13| Added LRDIMM support.
 //   1.28  | asaetow  |06-AUG-13| Added call to mss_eff_pre_config().
 //         |          |         | Removed call to mss_eff_config_thermal().
 //         |          |         | NOTE: Do NOT pickup without mss_eff_pre_config.C v1.1 or newer.
@@ -136,6 +140,7 @@
 //   1.1   | asaetow  |01-NOV-11| First Draft.
 //------------------------------------------------------------------------------
 
+#include <fapi.H>
 
 //------------------------------------------------------------------------------
 // My Includes
@@ -143,15 +148,18 @@
 #include <mss_eff_config.H>
 #include <mss_eff_config_rank_group.H>
 #include <mss_eff_config_cke_map.H>
-#include <mss_eff_config_termination.H>
 #include <mss_eff_pre_config.H>
 #include <mss_eff_config_shmoo.H>
+
+#include <mss_lrdimm_funcs.H>
+
+#include <mss_eff_config_termination.H>
+
 
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include <fapi.H>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -162,6 +170,22 @@ const uint32_t TWO_MHZ = 2000000;
 const uint8_t PORT_SIZE = 2;
 const uint8_t DIMM_SIZE = 2;
 const uint8_t RANK_SIZE = 4;
+
+#ifndef FAPI_LRDIMM
+using namespace fapi;
+fapi::ReturnCode mss_lrdimm_eff_config( const Target& i_target_mba,
+                                  uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE],
+                                  uint32_t mss_freq, 
+                                  uint8_t eff_num_ranks_per_dimm[PORT_SIZE][DIMM_SIZE])
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target_mba.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+#endif
 
 //------------------------------------------------------------------------------
 // Structure
@@ -236,8 +260,8 @@ struct mss_eff_config_spd_data
     uint8_t fine_offset_trcdmin[PORT_SIZE][DIMM_SIZE];
     uint8_t fine_offset_trpmin[PORT_SIZE][DIMM_SIZE];
     uint8_t fine_offset_trcmin[PORT_SIZE][DIMM_SIZE];
-    // HERE uint8_t module_specific_section[PORT_SIZE][DIMM_SIZE]
-    //                                              [SPD_ATTR_SIZE_57];
+
+    //uint8_t module_specific_section[PORT_SIZE][DIMM_SIZE][57];         
     //uint32_t module_id_module_manufacturers_jedec_id_code
     //                                              [PORT_SIZE][DIMM_SIZE];
     //uint8_t module_id_module_manufacturing_location[PORT_SIZE]
@@ -554,7 +578,9 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         rc = FAPI_ATTR_GET(ATTR_SPD_FINE_OFFSET_TRCMIN, &i_target_dimm,
             p_o_spd_data->fine_offset_trcmin[i_port][i_dimm]);
         if(rc) break;
-        // HERE rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_SPECIFIC_SECTION,
+
+
+        //rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_SPECIFIC_SECTION,                    // LRDIMM needed.
             //&i_target_dimm,
             //p_o_spd_data->module_specific_section[i_port][i_dimm]);
         //if(rc) break;
@@ -1574,7 +1600,16 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
           if (p_i_mss_eff_config_data->
               cur_dimm_spd_valid_u8array[l_cur_mba_port][l_cur_mba_dimm] == MSS_EFF_VALID)
           {
-            if (p_i_data->num_ranks[l_cur_mba_port]
+             if (p_i_data->num_ranks[l_cur_mba_port]
+                    [l_cur_mba_dimm] == 0x04)                 // for 8R LRDIMM  since no ENUM defined yet for SPD of 8R
+//                    [l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R8)
+            {
+                p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
+                    [l_cur_mba_dimm] = 8;
+                p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port]
+                    [l_cur_mba_dimm] = 0x80;                            // DD0/1: 1 master rank
+            }
+            else if (p_i_data->num_ranks[l_cur_mba_port]
                     [l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R4)
             {
                 p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
@@ -1654,6 +1689,9 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
                   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
                }
+            } else if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ) {
+               FAPI_INF("Will set LR atts after orig eff_config functions");
+
             } else {
                p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                FAPI_ERR("Currently unsupported DIMM_TYPE on %s!", i_target_mba.toEcmdString());
@@ -1722,12 +1760,24 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                     [l_cur_mba_dimm] = 0;
             }
 
-            // AST HERE: Needs SPD byte33[7,1:0],
-            //  currently hard coded to no stacking
-            p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
-                [l_cur_mba_dimm] =
-                p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
-                [l_cur_mba_dimm];
+
+            if ( (p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) &&
+                    (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] ==
+                                              fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) &&
+                       (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8) )
+            {
+                p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
+                        [l_cur_mba_dimm] = 1;
+            } 
+            else 
+            {
+                // AST HERE: Needs SPD byte33[7,1:0],
+                //  currently hard coded to no stacking
+                p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
+                    [l_cur_mba_dimm] =
+                    p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
+                    [l_cur_mba_dimm];
+            }
 
             // DEBUG HERE:
             //FAPI_INF("size=%d density=%d ranks=%d width=%d on %s",
@@ -2113,6 +2163,20 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
             break;
         }
 
+        // LRDIMM attributes
+        if ( p_l_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+        {
+           rc = mss_lrdimm_eff_config(i_target_mba, p_l_mss_eff_config_data->cur_dimm_spd_valid_u8array,
+                                      p_l_mss_eff_config_data->mss_freq, p_l_atts->eff_num_ranks_per_dimm);
+           if(rc)
+           {
+               FAPI_ERR("Error from mss_lrdimm_eff_config()");
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+               break;
+           }
+
+        }
+ 
         // Calls to sub-procedures
         rc = mss_eff_config_rank_group(i_target_mba); if(rc) break;
         rc = mss_eff_config_cke_map(i_target_mba); if(rc) break;

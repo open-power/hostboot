@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.C,v 1.31 2013/05/20 21:29:50 jdsloat Exp $
+// $Id: mss_funcs.C,v 1.33 2013/08/27 22:22:46 kcook Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.33   | kcook    | 08/27/13| Removed LRDIMM functions to mss_lrdimm_funcs.C. Use with mss_funcs.H v1.16.
+//  1.32   | kcook    | 08/16/13| Added LRDIMM support. Use with mss_funcs.H v1.15.
 //  1.31   | jdsloat  | 05/20/13| Added ddr_gen determination in address mirror mode function
 //  1.30   | jdsloat  | 04/09/13| Moved Address mirror mode sub function in  from mss_draminit
 //  1.29   | jsabrow  | 11/19/12| added CCS data loader: mss_ccs_load_data_pattern
@@ -115,6 +117,7 @@ ReturnCode mss_ccs_set_end_bit(
 
     return rc;
 }
+
 
 ReturnCode mss_address_mirror_swizzle(
             Target& i_target,
@@ -762,8 +765,12 @@ ReturnCode mss_execute_zq_cal(
     uint8_t current_rank = 0;
     uint8_t start_rank = 0;
     uint8_t num_ranks_array[2][2]; //num_ranks_array[port][dimm]
+    uint8_t dimm_type;
+    uint8_t lrdimm_rank_mult_mode;
 
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
     if(rc) return rc;
 
     //Set up CCS Mode Reg for ZQ cal long and Init cal
@@ -781,6 +788,18 @@ ReturnCode mss_execute_zq_cal(
     for(uint8_t dimm = 0; dimm < MAX_NUM_DIMM; dimm++)
     {
         start_rank=(4 * dimm);
+
+        if (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) 
+        {
+           rc = FAPI_ATTR_GET(ATTR_LRDIMM_RANK_MULT_MODE, &i_target, lrdimm_rank_mult_mode);
+           if(rc) return rc;
+           
+           if ( num_ranks_array[i_port][dimm] == 8 && lrdimm_rank_mult_mode == 4)
+           { // For LRDIMM 8 Rank, RM=4, CS0 and CS1 to execute ZQ cal
+              num_ranks_array[i_port][dimm] = 2;
+           }
+        }
+
         for(current_rank = start_rank; current_rank < start_rank + num_ranks_array[i_port][dimm]; current_rank++) {
             FAPI_INF( "+++++++++++++++ Sending zqcal to port: %d rank: %d +++++++++++++++", i_port, current_rank);
             rc_num = rc_num | csn_buffer_8.flushTo1();

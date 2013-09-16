@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.52 2013/08/07 14:31:53 jdsloat Exp $
+// $Id: mss_draminit.C,v 1.56 2013/09/16 13:56:28 bellows Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.56   | bellows  | 09/16/13| Hostboot compile fix
+//  1.55   | kcook    | 09/13/13| Updated define FAPI_LRDIMM token.
+//  1.54   | kcook    | 08/27/13| Removed LRDIMM support to mss_lrdimm_funcs.C. 
+//         |          |         | Added check for valid rank when flagging address mirroring.
+//  1.53   | kcook    | 08/16/13| Added LRDIMM support. Use with mss_funcs.C v1.32.
 //  1.52   | jdsloat  | 08/07/13| Added a single rc_num check and edited a debug/error message to make firmware happy.
 //  1.51   | jdsloat  | 08/01/13| Fixed dimm/rank conversion in address mirroring phy setting for a 4 rank dimm scenario
 //  1.50   | mwuu     | 07/17/13| Fixed CS when accessing RCD words on 1 rank RDIMMs
@@ -103,6 +108,31 @@
 #include <mss_funcs.H>
 #include "cen_scom_addresses.H"
 #include <mss_unmask_errors.H>
+#include <mss_lrdimm_funcs.H>
+
+
+
+#ifndef FAPI_LRDIMM
+using namespace fapi;
+fapi::ReturnCode mss_lrdimm_rcd_load(Target& i_target, uint32_t port_number, uint32_t& ccs_inst_cnt)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+ReturnCode mss_lrdimm_mrs_load(Target& i_target, uint32_t i_port_number, uint32_t dimm_number, uint32_t& io_ccs_inst_cnt)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+#endif
 
 //----------------------------------------------------------------------
 //  Constants
@@ -110,6 +140,7 @@
 const uint8_t MAX_NUM_DIMMS = 2;
 const uint8_t MAX_NUM_PORTS = 2;
 const uint8_t MAX_NUM_RANK_PAIR = 4;
+const uint8_t MAX_NUM_LR_RANKS = 8;
 const uint8_t MRS0_BA = 0;
 const uint8_t MRS1_BA = 1;
 const uint8_t MRS2_BA = 2;
@@ -310,11 +341,10 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 	        ter_dimm_rank = tertiary_ranks_array[rank_pair_group][port_number] - 4*ter_dimm;
 	        qua_dimm = (quaternary_ranks_array[rank_pair_group][port_number]) / 4;
 	        qua_dimm_rank = quaternary_ranks_array[rank_pair_group][port_number] - 4*qua_dimm;
-
 		// Set the rank pairs that will be affected.
 		if ( port_number == 0 )
 		{
-		    if ( address_mirror_map[port_number][pri_dimm] & (0x08 >> pri_dimm_rank) )
+                    if ( ( ( address_mirror_map[port_number][pri_dimm] & (0x08 >> pri_dimm_rank) ) ) && (primary_ranks_array[rank_pair_group][port_number] != 0xff ) )
 		    {
 			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 48;
@@ -325,8 +355,8 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
 			if(rc) return rc;
 		    }
-		    if ( address_mirror_map[port_number][sec_dimm] & (0x08 >> sec_dimm_rank) )
-		    {
+		    if ( ( ( address_mirror_map[port_number][sec_dimm] & (0x08 >> sec_dimm_rank) ) ) && (secondary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                    {
 			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 49;
 			FAPI_INF( "Setting bit %d", bit_position);
@@ -336,7 +366,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
 			if(rc) return rc;
 		    }
-		    if ( address_mirror_map[port_number][ter_dimm] & (0x08 >> ter_dimm_rank) )
+		    if ( ( ( address_mirror_map[port_number][ter_dimm] & (0x08 >> ter_dimm_rank) ) ) && (tertiary_ranks_array[rank_pair_group][port_number] != 0xff ) )
 		    {
 			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 48;
@@ -347,8 +377,8 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
 			if(rc) return rc;
 		    }
-		    if ( address_mirror_map[port_number][qua_dimm] & (0x08 >> qua_dimm_rank) )
-		    {
+		    if ( ( ( address_mirror_map[port_number][qua_dimm] & (0x08 >> qua_dimm_rank) ) ) && (quaternary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                    {
 			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 49;
 			FAPI_INF( "Setting bit %d", bit_position);
@@ -361,7 +391,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		}
 		if ( port_number == 1 )
 		{
-		    if ( address_mirror_map[port_number][pri_dimm] & (0x08 >> pri_dimm_rank) )
+		    if ( ( ( address_mirror_map[port_number][pri_dimm] & (0x08 >> pri_dimm_rank) ) ) && (primary_ranks_array[rank_pair_group][port_number] != 0xff ) )
 		    {
 			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 48;
@@ -372,8 +402,8 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
 			if(rc) return rc;
 		    }
-		    if ( address_mirror_map[port_number][sec_dimm] & (0x08 >> sec_dimm_rank) )
-		    {
+		    if ( ( ( address_mirror_map[port_number][sec_dimm] & (0x08 >> sec_dimm_rank) ) ) && (secondary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                    {
 			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 49;
 			FAPI_INF( "Setting bit %d", bit_position);
@@ -383,7 +413,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
 			if(rc) return rc;
 		    }
-		    if ( address_mirror_map[port_number][ter_dimm] & (0x08 >> ter_dimm_rank) )
+		    if ( ( ( address_mirror_map[port_number][ter_dimm] & (0x08 >> ter_dimm_rank) ) ) && (tertiary_ranks_array[rank_pair_group][port_number] != 0xff ) )
 		    {
 			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 48;
@@ -394,8 +424,8 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
 			if(rc) return rc;
 		    }
-		    if ( address_mirror_map[port_number][qua_dimm] & (0x08 >> qua_dimm_rank) )
-		    {
+		    if ( ( ( address_mirror_map[port_number][qua_dimm] & (0x08 >> qua_dimm_rank) ) ) && (quaternary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                    {
 			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 49;
 			FAPI_INF( "Setting bit %d", bit_position);
@@ -411,7 +441,8 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 	}
     }
 
-    if ((!(dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
+    //if ((!(dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
+    if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
     {
         //Commented because Master Attention Reg Check not written yet.
         //Master Attntion Reg Check... Need to add appropriate call below.
@@ -455,6 +486,18 @@ ReturnCode mss_draminit_cloned(Target& i_target)
                     FAPI_ERR(" rcd_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
                     return rc;
                 }
+
+                if ( dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+                {
+                   // Set Function 1-13 rcd words
+                   rc = mss_lrdimm_rcd_load(i_target, port_number, ccs_inst_cnt);
+                   if(rc)
+                   {
+                       FAPI_ERR(" LRDIMM rcd_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+                       return rc;
+                   }
+                }
+     
             }
         }
 
@@ -887,7 +930,10 @@ ReturnCode mss_rcd_load(
 
     uint8_t num_ranks_array[2][2]; //[port][dimm]
     uint64_t rcd_array[2][2]; //[port][dimm]
-
+    uint8_t dimm_type;
+            
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
+    if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target, rcd_array);
@@ -946,7 +992,12 @@ ReturnCode mss_rcd_load(
 
             // ALL active CS lines at a time.
             rc_num = rc_num | csn_8.setBit(0,8);
-            if ((num_ranks == 1) || (num_ranks == 2))
+            if (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)
+            {
+                // for dimm0 use CS0,1 (active low); for dimm1 use CS4,5 (active low)
+                rc_num = rc_num | csn_8.clearBit((4*dimm_number), 2 );
+            }
+            else if ((num_ranks == 1) || (num_ranks == 2))
             {
                 rc_num = rc_num | csn_8.clearBit(0+4*dimm_number);
                 rc_num = rc_num | csn_8.clearBit(1+4*dimm_number);
@@ -981,7 +1032,15 @@ ReturnCode mss_rcd_load(
                 rc_num = rc_num | bank_3.insert(rcd_cntl_wrd_4, 1, 1, 0);
 
                 // Send out to the CCS array
-                rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 12, 0, 16);
+                if ( dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM && (rcd_number == 2 || rcd_number == 10) )
+                {
+                   rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 4000, 0 , 16 ); // wait tStab for clock timing rcd words
+                }
+                else
+                {
+                   rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 12, 0, 16);
+                }
+
 
 	        if (rc_num)
 	        {
@@ -1084,6 +1143,8 @@ ReturnCode mss_mrs_load(
     uint16_t MRS3 = 0;
 
     uint16_t num_ranks = 0;
+    uint8_t lrdimm_rank_mult_mode = 0;
+
 
     FAPI_INF( "+++++++++++++++++++++ LOADING MRS SETTINGS FOR %s PORT %d +++++++++++++++++++++", i_target.toEcmdString(), i_port_number);
 
@@ -1427,6 +1488,18 @@ ReturnCode mss_mrs_load(
         }
         else
         {
+          
+            if (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)
+            {
+                rc = FAPI_ATTR_GET(ATTR_LRDIMM_RANK_MULT_MODE, &i_target, lrdimm_rank_mult_mode);
+                if(rc) return rc;
+
+                if ( (lrdimm_rank_mult_mode == 4) && (num_ranks == 8) ) 
+                {
+                   num_ranks = 2;
+                }
+            }
+
             // Rank 0-3
             for ( rank_number = 0; rank_number < num_ranks; rank_number++)
             {
@@ -1447,7 +1520,11 @@ ReturnCode mss_mrs_load(
 
 	            rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
 
-                    if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_DISABLE)
+                    if ( lrdimm_rank_mult_mode != 0 )
+                    {
+                        dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x00;
+                    }
+                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_DISABLE)
                     {
                         dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x00;
                     }
@@ -1504,7 +1581,11 @@ ReturnCode mss_mrs_load(
         	    rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
 
 
-                    if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_WR_DISABLE)
+                    if ( (lrdimm_rank_mult_mode != 0) && (rank_number > 1) )
+                    {
+                        dram_rtt_wr[i_port_number][dimm_number][rank_number] = dram_rtt_wr[i_port_number][dimm_number][0];
+                    }
+                    else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_WR_DISABLE)
                     {
                         dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x00;
                     }
@@ -1662,10 +1743,17 @@ ReturnCode mss_mrs_load(
                                           ccs_end_1);
                         if(rc) return rc;
                         io_ccs_inst_cnt ++;
-                    }
-            }
-        }
-    }
+                    } // end mrs loop
+            } // end rank loop
+
+            // For LRDIMM  Set Rtt_nom, rtt_wr, driver impedance for R0 and R1
+            if ( (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) && lrdimm_rank_mult_mode != 0 )
+            {
+                 mss_lrdimm_mrs_load(i_target, i_port_number, dimm_number, io_ccs_inst_cnt);
+            } // end LRDIMM 8R dir MRS 1
+
+        } // end if has ranks
+    } // end dimm loop
 
     return rc;
 }

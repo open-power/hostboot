@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_termination.C,v 1.30 2013/08/07 15:57:38 lapietra Exp $
+// $Id: mss_eff_config_termination.C,v 1.32 2013/08/27 22:25:29 kcook Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_termination.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,6 +42,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.32  | kcook    |27-AUG-13| Removed LRDIMM support to mss_lrdimm_funcs.C.       
+//   1.31  | kcook    |16-AUG-13| Added LRDIMM support.       
 //   1.30  | dcadiga  |07-AUG-13| Fixed hostboot compile issue
 //   1.29  | dcadiga  |05-AUG-13| KG3 allowed, ifdef removed for lab card uint declaration, added 4R support to 1600, changed 4Rx4 / 4Rx8 RCD Drive Settings
 //   1.28  | asaetow  |05-AUG-13| Added temp workaround for incorrect byte33 SPD data in early lab OLD 16G/32G CDIMMs.
@@ -90,7 +92,34 @@
 //----------------------------------------------------------------------
 #include <fapi.H>
 
+#include <mss_lrdimm_funcs.H>
 
+
+
+
+#ifndef LRDIMM
+using namespace fapi;
+ReturnCode mss_lrdimm_rewrite_odt( const Target& i_target_mba,
+                                  uint32_t *p_b_var_array,
+                                  uint32_t *var_array_p_array[5])
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target_mba.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba) 
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of LRDIMM function on %s!", i_target_mba.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+#endif
 
 //----------------------------------------------------------------------
 // ENUMs and CONSTs
@@ -690,6 +719,8 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    uint8_t l_dimm_custom_u8;
    uint8_t l_num_drops_per_port;
    uint8_t l_dram_width_u8;
+
+// this statement makes only lab version of this code have a raw card attribute
 #ifdef FAPIECMD
    uint8_t l_lab_raw_card_u8 = 0;
 #endif
@@ -720,7 +751,6 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target_mba, l_num_drops_per_port); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width_u8); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SIZE, &i_target_mba, l_dimm_size_u8array); if(rc) return rc;
- 
  
    // Temp workaround for incorrect byte33 SPD data "ATTR_EFF_STACK_TYPE" in early lab CDIMMs.
    uint8_t l_stack_type_modified = 0;
@@ -783,16 +813,19 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
       //KG3
       //FAPI_ERR("RUNNING AS KG3 LAB CARD TYPE, KG3 IS DISABLED UNTIL THE INITIAL SETTINGS ARE VERIFIED\n");
       //FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
-      
       if( l_target_mba_pos == 0){
          if ( l_mss_freq <= 1466 ) { // 1333Mbps
-	 
-            if((l_num_ranks_per_dimm_u8array[0][0] == 2) && (l_num_ranks_per_dimm_u8array[0][1] == 0)  && (l_dram_width_u8 == 4)){
+            if( l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ) {     
+               //Removed Width Check, use settings for either x8 or x4, use 1600 settings for 1333!
+               memcpy(base_var_array,rdimm_kg3_1333_r1_mba0,210*sizeof(uint32_t));
+               FAPI_INF("LRDIMM: Base - KG3 RDIMM r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+            }
+            else if((l_num_ranks_per_dimm_u8array[0][0] == 2) && (l_num_ranks_per_dimm_u8array[0][1] == 0)  && (l_dram_width_u8 == 4)){
                memcpy(base_var_array,rdimm_kg3_1333_r2e_mba0,210*sizeof(uint32_t));
                FAPI_INF("KG3 r2e %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
-	    else if((l_num_ranks_per_dimm_u8array[0][0] == 1) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
-	       //Removed Width Check, use settings for either x8 or x4, use 1600 settings for 1333!
+            else if((l_num_ranks_per_dimm_u8array[0][0] == 1) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
+               //Removed Width Check, use settings for either x8 or x4, use 1600 settings for 1333!
                memcpy(base_var_array,rdimm_kg3_1333_r1_mba0,210*sizeof(uint32_t));
                FAPI_INF("KG3 r1 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
@@ -811,23 +844,28 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
 
 
          } else if ( l_mss_freq <= 1733 ) { // 1600Mbps
-            if((l_num_ranks_per_dimm_u8array[0][0] == 1) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
-	       //Removed Width Check, use settings for either x8 or x4
+            if( l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ) {     
+               //Removed Width Check, use settings for either x8 or x4
+               memcpy(base_var_array,rdimm_kg3_1600_r1_mba0,210*sizeof(uint32_t)); 
+               FAPI_INF("LRDIMM: Base - KG3 LRDIMM r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+            }
+            else if((l_num_ranks_per_dimm_u8array[0][0] == 1) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
+               //Removed Width Check, use settings for either x8 or x4
                memcpy(base_var_array,rdimm_kg3_1600_r1_mba0,210*sizeof(uint32_t));
                FAPI_INF("KG3 r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
             else if((l_num_ranks_per_dimm_u8array[0][0] == 2) && (l_num_ranks_per_dimm_u8array[0][1] == 0)  && (l_dram_width_u8 == 4)){
-		
+        	
                memcpy(base_var_array,rdimm_kg3_1600_r2e_mba0,210*sizeof(uint32_t));
                FAPI_INF("KG3 r20e %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
-	       
+               
             }
             else if((l_num_ranks_per_dimm_u8array[0][0] == 2) && (l_num_ranks_per_dimm_u8array[0][1] == 0)  && (l_dram_width_u8 == 8)){
                memcpy(base_var_array,rdimm_kg3_1600_r2b_mba0,210*sizeof(uint32_t));
                FAPI_INF("KG3 r20b %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
-	    else if((l_num_ranks_per_dimm_u8array[0][0] == 4) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
-	       memcpy(base_var_array,rdimm_kg3_1600_r4_mba0,210*sizeof(uint32_t));
+            else if((l_num_ranks_per_dimm_u8array[0][0] == 4) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
+               memcpy(base_var_array,rdimm_kg3_1600_r4_mba0,210*sizeof(uint32_t));
                FAPI_INF("KG3 r40 %d MBA%s Using 1333 Settings\n",l_mss_freq,i_target_mba.toEcmdString());
             }
 
@@ -839,13 +877,17 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
       }//MBA0
       else{
          if ( l_mss_freq <= 1466 ) { // 1333Mbps
-	 
-            if((l_num_ranks_per_dimm_u8array[0][0] == 2) && (l_num_ranks_per_dimm_u8array[0][1] == 0)  && (l_dram_width_u8 == 4)){
+            if( l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ) {     
+               //Removed Width Check, use settings for either x8 or x4,
+               memcpy(base_var_array,rdimm_kg3_1333_r1_mba1,210*sizeof(uint32_t));
+               FAPI_INF("LRDIMM: Base - KG3 RDIMM r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+            } 
+            else if((l_num_ranks_per_dimm_u8array[0][0] == 2) && (l_num_ranks_per_dimm_u8array[0][1] == 0)  && (l_dram_width_u8 == 4)){
                memcpy(base_var_array,rdimm_kg3_1333_r2e_mba1,210*sizeof(uint32_t));
                FAPI_INF("KG3 r2e %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
-	    else if((l_num_ranks_per_dimm_u8array[0][0] == 1) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
-	       //Removed Width Check, use settings for either x8 or x4, use 1600 settings for 1333!
+            else if((l_num_ranks_per_dimm_u8array[0][0] == 1) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
+               //Removed Width Check, use settings for either x8 or x4, use 1600 settings for 1333!
                memcpy(base_var_array,rdimm_kg3_1333_r1_mba1,210*sizeof(uint32_t));
                FAPI_INF("KG3 r1 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
@@ -864,23 +906,28 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
 
 
          } else if ( l_mss_freq <= 1733 ) { // 1600Mbps
-            if((l_num_ranks_per_dimm_u8array[0][0] == 1) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
-	       //Removed Width Check, use settings for either x8 or x4
+            if( l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ) {     
+               //Removed Width Check, use settings for either x8 or x4
+               memcpy(base_var_array,rdimm_kg3_1600_r1_mba1,210*sizeof(uint32_t));
+               FAPI_INF("LRDIMM: Base - KG3 RDIMM r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+            }
+            else if((l_num_ranks_per_dimm_u8array[0][0] == 1) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
+               //Removed Width Check, use settings for either x8 or x4
                memcpy(base_var_array,rdimm_kg3_1600_r1_mba1,210*sizeof(uint32_t));
                FAPI_INF("KG3 r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
             else if((l_num_ranks_per_dimm_u8array[0][0] == 2) && (l_num_ranks_per_dimm_u8array[0][1] == 0)  && (l_dram_width_u8 == 4)){
-		
+        	
                memcpy(base_var_array,rdimm_kg3_1600_r2e_mba1,210*sizeof(uint32_t));
                FAPI_INF("KG3 r20e %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
-	       
+               
             }
             else if((l_num_ranks_per_dimm_u8array[0][0] == 2) && (l_num_ranks_per_dimm_u8array[0][1] == 0)  && (l_dram_width_u8 == 8)){
                memcpy(base_var_array,rdimm_kg3_1600_r2b_mba1,210*sizeof(uint32_t));
                FAPI_INF("KG3 r20b %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
             }
-	    else if((l_num_ranks_per_dimm_u8array[0][0] == 4) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
-	       memcpy(base_var_array,rdimm_kg3_1600_r4_mba1,210*sizeof(uint32_t));
+            else if((l_num_ranks_per_dimm_u8array[0][0] == 4) && (l_num_ranks_per_dimm_u8array[0][1] == 0)){
+               memcpy(base_var_array,rdimm_kg3_1600_r4_mba1,210*sizeof(uint32_t));
                FAPI_INF("KG3 r40 %d MBA%s Using 1333 Settings\n",l_mss_freq,i_target_mba.toEcmdString());
             }
 
@@ -890,7 +937,6 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
             }
          }//1600      
       }//MBA1
-      
    }
 #endif
 
@@ -1312,11 +1358,75 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
       }//MBA1
    }//End RDIMM
    else if( l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ){
-      FAPI_ERR("Invalid Dimm Type LRDIMM FREQ %d MBA0\n",l_mss_freq);
-      FAPI_ERR("Invalid Dimm Type LRDIMM FREQ %d MBA1\n",l_mss_freq);
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      l_dimm_rc_u8 = 7;
+      // Set LRDIMM base var array as 1Rank RDIMM
+      if( l_target_mba_pos == 0){
+         if ( l_mss_freq <= 1466 ) { // 1333Mbps
+            //Removed Width Check, use settings for either x8 or x4, use 1600 settings for 1333!
+            memcpy(base_var_array,rdimm_glacier_1600_r10_mba0,200*sizeof(uint32_t));
+            FAPI_INF("LRDIMM: Base - RDIMM r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
 
-   }
+         } else if ( l_mss_freq <= 1733 ) { // 1600Mbps
+            //Removed Width Check, use settings for either x8 or x4
+            memcpy(base_var_array,rdimm_glacier_1600_r10_mba0,200*sizeof(uint32_t));
+            FAPI_INF("LRDIMM: Base - LRDIMM r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+         }
+      }//MBA0
+      else{
+         if ( l_mss_freq <= 1466 ) { // 1333Mbps
+            if( (l_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_SINGLE)){
+               memcpy(base_var_array,rdimm_glacier_1333_r10_mba1,200*sizeof(uint32_t));
+               FAPI_INF("LRDIMM: Base - RDIMM r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+            }
+            else if( (l_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL)){
+               memcpy(base_var_array,rdimm_glacier_1333_r11_mba1,200*sizeof(uint32_t));
+               FAPI_INF("LRDIMM: Base - RDIMM r11 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+            }
+            else{
+               FAPI_ERR("Invalid Dimm Type LRDIMM FREQ %d HERE MBA1\n",l_mss_freq);
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            }
+         } else if ( l_mss_freq <= 1733 ) { // 1600Mbps
+
+            if( (l_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_SINGLE)){
+               memcpy(base_var_array,rdimm_glacier_1600_r10_mba1,200*sizeof(uint32_t));
+               FAPI_INF("LRDIMM: Base - RDIMM r10 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+            }
+            else if( (l_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL)){
+               memcpy(base_var_array,rdimm_glacier_1600_r11_mba1,200*sizeof(uint32_t));
+               FAPI_INF("LRDIMM: Base - RDIMM r11 %d MBA%s\n",l_mss_freq,i_target_mba.toEcmdString());
+            }
+            else{
+               FAPI_ERR("Invalid Dimm Type LRDIMM FREQ %d MBA1\n",l_mss_freq);
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            }
+         }
+      }//MBA1
+
+//----------------------------------------------------------------------------------------------------------------
+
+      // For dual drop, Set ODT_RD as 2rank (8R LRDIMM) or 4rank (4R LRDIMM)
+      if ( l_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL ) {
+         uint32_t *p_1066_mba1_array = &rdimm_glacier_1066_r44_mba1[0];
+         uint32_t *p_1333_x4_mba1_array = &rdimm_glacier_1333_r22e_mba1[0];
+         uint32_t *p_1333_x8_mba1_array = &rdimm_glacier_1333_r22b_mba1[0];
+         uint32_t *p_1600_x4_mba1_array = &rdimm_glacier_1600_r22e_mba1[0];
+         uint32_t *p_1600_x8_mba1_array = &rdimm_glacier_1600_r22b_mba1[0];
+
+         uint32_t *p_b_var_array = &base_var_array[0];
+
+         uint32_t *var_array_p_array[] = {p_1066_mba1_array, p_1333_x4_mba1_array, p_1333_x8_mba1_array, 
+                                          p_1600_x4_mba1_array, p_1600_x8_mba1_array};
+
+         rc = mss_lrdimm_rewrite_odt(i_target_mba, p_b_var_array, var_array_p_array);
+
+         if(rc)
+         {
+            FAPI_ERR("FAILED LRDIMM rewrite ODT_RD");
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+         }
+      }
+   } // LRDIMM
    else{
       FAPI_ERR("Invalid Dimm Type");
       FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
@@ -1608,7 +1718,6 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    attr_eff_cen_phase_rot_m1_cntl_odt0[1] = base_var_array[i++];
    attr_eff_cen_phase_rot_m1_cntl_odt1[1] = base_var_array[i++];
    attr_eff_dram_2n_mode_enabled = base_var_array[i++];
-   
 
   //Now Setup the RCD - Done Here to Steal Code From Anuwats Version Of Eff Config Termination
 
@@ -1688,14 +1797,17 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
       }
    }
 
-
-
-   // For DUAL DROP CDIMM
+   // Address mirroring
    uint8_t attr_eff_dram_address_mirroring[PORT_SIZE][DIMM_SIZE];
    for( int l_port = 0; l_port < PORT_SIZE; l_port += 1 ) {
       for( int l_dimm = 0; l_dimm < DIMM_SIZE; l_dimm += 1 ) {
          if ((l_dimm_custom_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (l_num_drops_per_port == fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL) && (l_dimm == 1) && (l_dimm_rc_u8 !=3) && (l_stack_type_u8array[l_port][l_dimm] == fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE)) {
+            // For DUAL DROP CDIMM
             attr_eff_dram_address_mirroring[l_port][l_dimm] = 0x0F;
+         } else  if ( (l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) && (l_attr_eff_dimm_rcd_cntl_word_0_15[l_port][l_dimm] & 0x0000000000000010LL) ) {
+           // For LRDIMM SPD file , == 1 Odd ranks are mirrored
+           attr_eff_dram_address_mirroring[l_port][l_dimm] = 0x05;
+
          } else {
             attr_eff_dram_address_mirroring[l_port][l_dimm] = 0x00;
          }
@@ -1791,6 +1903,17 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
        attr_eff_wlo[1] = (uint8_t)1;
        attr_eff_gpo[0] = (uint8_t)5;
        attr_eff_gpo[1] = (uint8_t)5;
+
+  }
+  else if(l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM){
+       //LRDIMM
+       attr_eff_rlo[0] = (uint8_t)6;
+       attr_eff_rlo[1] = (uint8_t)6;
+       //Set WLO and GPO
+       attr_eff_wlo[0] = (uint8_t)255; // WLO = -1, 2's complement
+       attr_eff_wlo[1] = (uint8_t)255; 
+       attr_eff_gpo[0] = (uint8_t)7;
+       attr_eff_gpo[1] = (uint8_t)7;
 
   }
   else{
@@ -1928,6 +2051,15 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    
    rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target_mba, attr_eff_dram_address_mirroring); if(rc) return rc;
 
+   if(l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)
+   { 
+      rc = mss_lrdimm_term_atts(i_target_mba);
+      if (rc)
+      {
+        FAPI_ERR("Setting LR term atts failed \n");
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+      }
+   }
 
    FAPI_INF("%s on %s COMPLETE", PROCEDURE_NAME, i_target_mba.toEcmdString());
    return rc;

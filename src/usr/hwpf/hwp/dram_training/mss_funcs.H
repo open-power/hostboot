@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.H,v 1.14 2013/04/09 23:34:27 jdsloat Exp $
+// $Id: mss_funcs.H,v 1.16 2013/08/27 22:23:53 kcook Exp $
 /* File mss_funcs.H created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.16   | kcook    | 08/27/13| Removed LRDIMM functions to mss_lrdimm_funcs.H. Use with mss_funcs.C v1.33.
+//  1.15   | kcook    | 08/16/13| Added LRDIMM support. Use with mss_funcs.C v1.32.
 //  1.14   | jdsloat  | 04/09/13| Moved Address mirror mode sub function in  from mss_draminit
 //  1.13   | jsabrow  | 11/19/12| added CCS data loader: mss_ccs_load_data_pattern
 //  1.12   | 07/16/12 | bellows | added in Id tag
@@ -244,6 +246,7 @@ uint8_t mss_reverse_8bits(uint8_t i_number);
 //-----------------------------------------
 fapi::ReturnCode mss_execute_zq_cal(fapi::Target& i_target, 
                                     uint8_t i_port);
+
 
 //-----------------------------------------
 // mss_address_mirror_swizzle
