@@ -62,6 +62,7 @@ void createTracingError(
     const uint32_t    i_userData4,
           errlHndl_t& io_pError)
 {
+#ifndef __HOSTBOOT_RUNTIME // TODO: RTC 87716
     errlHndl_t pNewError = new ERRORLOG::ErrlEntry(
                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                    i_modId,
@@ -81,6 +82,7 @@ void createTracingError(
         io_pError = pNewError;
         pNewError = NULL;
     }
+#endif
 
     return;
 }

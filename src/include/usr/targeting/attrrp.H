@@ -133,6 +133,7 @@ class AttrRP
             return i_pAddress;
         }
 
+#ifndef __HOSTBOOT_RUNTIME
         /**
          *  @brief Initializes and starts the AttrRP daemon.
          *
@@ -146,6 +147,7 @@ class AttrRP
          *        service.
          */
         static void init(errlHndl_t& io_taskRetErrl);
+#endif
 
     protected:
 
@@ -156,7 +158,11 @@ class AttrRP
          *      Ensures member variables are initialized to sane values.
          */
         AttrRP()
+#ifndef __HOSTBOOT_RUNTIME
             : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0)
+#else
+            : iv_sections(NULL), iv_sectionCount(0)
+#endif
         {
         };
 
@@ -205,6 +211,7 @@ class AttrRP
 
     private:
 
+#ifndef __HOSTBOOT_RUNTIME
         /**
          *  @brief Performs the startup of the daemon instance.
          *
@@ -272,7 +279,7 @@ class AttrRP
 
         // Message Queue for VMM requests
         msg_q_t iv_msgQ;
-
+#endif
         // Parsed structures of the attribute sections.
         AttrRP_Section* iv_sections;
 

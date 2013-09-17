@@ -616,7 +616,9 @@ void TargetService::masterProcChipTargetHandle(
     {
         /* Error is already traced w.r.t api called, not repeating here*/
         TARG_ERR("Not able to find the Master Proc Chip Target Handle");
+#ifndef __HOSTBOOT_RUNTIME // TODO: RTC 87716
         delete pError;
+#endif
         pError = NULL;
         o_masterProcChipTargetHandle = NULL;
     }

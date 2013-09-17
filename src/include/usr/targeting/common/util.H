@@ -42,14 +42,18 @@ class Target;
  *
  *  @par Detailed Description:
  *      If PPC platform (FSP or Hostboot), if 8 byte pointers then it's
- *      Hostboot, so don't translate.   If 4 byte pointers then it's FSP so 
+ *      Hostboot, so don't translate.   If 4 byte pointers then it's FSP so
  *      translate.  If !PPC (x86 32 or 64 bit), then always translate
  *
  *  @note List of preprocessor macros defined can be determined by calling:
  *      ppc64-mcp6-gcc -dM -E - < /dev/null
  */
 #ifdef __PPC__
+#ifndef __HOSTBOOT_RUNTIME
 #define TARG_ADDR_TRANSLATION_REQUIRED (sizeof(void*)==4)
+#else
+#define TARG_ADDR_TRANSLATION_REQUIRED (1)
+#endif
 #else
 #define TARG_ADDR_TRANSLATION_REQUIRED (1)
 #endif

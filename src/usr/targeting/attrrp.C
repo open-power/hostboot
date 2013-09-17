@@ -47,26 +47,10 @@
 using namespace INITSERVICE;
 using namespace ERRORLOG;
 
+#include "attrrp_common.C"
+
 namespace TARGETING
 {
-    /** @struct AttrRP_Section
-     *  @brief Contains parsed information about each attribute section.
-     */
-    struct AttrRP_Section
-    {
-        // Section type
-        SECTION_TYPE type;
-
-        // Desired address in Attribute virtual address space
-        uint64_t     vmmAddress;
-
-        // Location in PNOR virtual address space
-        uint64_t     pnorAddress;
-
-        // Section size
-        uint64_t     size;
-    };
-
     void AttrRP::init(errlHndl_t &io_taskRetErrl)
     {
         // Call startup on singleton instance.
@@ -86,17 +70,6 @@ namespace TARGETING
         return NULL;
     }
 
-    AttrRP::~AttrRP()
-    {
-        if (iv_sections)
-        {
-            delete[] iv_sections;
-        }
-        msg_q_destroy(iv_msgQ);
-
-        TARG_ASSERT(false);
-    }
-
     void AttrRP::startup(errlHndl_t& io_taskRetErrl)
     {
         errlHndl_t l_errl = NULL;
@@ -105,7 +78,7 @@ namespace TARGETING
         {
             // Parse PNOR headers.
             l_errl = this->parseAttrSectHeader();
-            if (l_errl) 
+            if (l_errl)
             {
                 break;
             }
@@ -342,7 +315,7 @@ namespace TARGETING
             {
                 iv_sections[i].type = l_section->sectionType;
 
-                // Conversion cast for templated abstract pointer object only 
+                // Conversion cast for templated abstract pointer object only
                 // works when casting to pointer of the templated type.  Since
                 // cache is of a different type, we first cast to extract the
                 // real pointer, then recast it into the cache
@@ -402,7 +375,7 @@ namespace TARGETING
                         break;
 
                     default:
-                    
+
                         /*@
                          *   @errortype
                          *   @moduleid   TARG_MOD_ATTRRP
@@ -422,7 +395,7 @@ namespace TARGETING
                 {
                     break;
                 }
-                
+
                 int rc = 0;
                 msg_q_t l_msgQ = iv_msgQ;
 
@@ -494,7 +467,7 @@ namespace TARGETING
                     break;
                 }
 
-            } // End iteration through each section 
+            } // End iteration through each section
 
             if(l_errl)
             {
@@ -504,122 +477,6 @@ namespace TARGETING
         } while (false);
 
         return l_errl;
-    }
-
-    bool AttrRP::writeSectionData(
-        const std::vector<TARGETING::sectionRefData>& i_pages) const
-    {
-        TARG_INF(ENTER_MRK "AttrRP::writeSectionData");
-
-        uint8_t * l_dataPtr = NULL; // ptr to Attribute virtual address space
-        bool      l_rc = true;      // true if write to section is successful
-
-        // for each page
-        for (std::vector<TARGETING::sectionRefData>::const_iterator
-                pageIter = i_pages.begin();
-                (pageIter != i_pages.end()) && (true == l_rc);
-                ++pageIter)
-        {
-            // search for the section we need
-            for ( size_t j = 0; j < iv_sectionCount; ++j )
-            {
-                if ( iv_sections[j].type == (*pageIter).sectionId )
-                {
-                    // found it..
-                    TARG_DBG( "Writing Attribute Section: ID: %u, "
-                        "address: 0x%lx size: 0x%lx page: %u",
-                        iv_sections[j].type,
-                        iv_sections[j].vmmAddress,
-                        iv_sections[j].size,
-                        (*pageIter).pageNumber);
-
-                    // check that page number is within range
-                    uint64_t l_pageOffset = (*pageIter).pageNumber * PAGESIZE;
-                    if ( iv_sections[j].size < (l_pageOffset + PAGESIZE) )
-                    {
-                        TARG_ERR("page offset 0x%lx is greater than "
-                            "size 0x%lx of section %u",
-                            l_pageOffset,
-                            iv_sections[j].size,
-                            iv_sections[j].type);
-
-                        l_rc = false;
-                        break;
-                    }
-
-                    // adjust the pointer out by page size * page number
-                    l_dataPtr =
-                        reinterpret_cast<uint8_t *>
-                        (iv_sections[j].vmmAddress) + l_pageOffset;
-
-                    memcpy( l_dataPtr, (*pageIter).dataPtr, PAGESIZE );
-                    break;
-                }
-            }
-
-            if (false == l_rc)
-            {
-                break;
-            }
-        }
-
-        TARG_INF( EXIT_MRK "AttrRP::writeSectionData" );
-        return l_rc;
-    }
-
-    void AttrRP::readSectionData(
-              std::vector<TARGETING::sectionRefData>& o_pages,
-        const TARGETING::SECTION_TYPE                 i_sectionId,
-        const NODE_ID                                 i_nodeId) const
-    {
-        sectionRefData sectionData;
-        uint16_t count              =  0;
-        uint16_t pages              =  0;
-
-        // search for the section we need
-        for (size_t i = 0; i < iv_sectionCount; ++i )
-        {
-            if ( iv_sections[i].type == i_sectionId )
-            {
-                // found it..
-                // now figure out how many pages - rounding up to the
-                // the next full page and dividing by the page size
-                pages = ALIGN_PAGE( iv_sections[i].size )/PAGESIZE;
-
-                TRACFCOMP(g_trac_targeting,
-                        "Reading Attribute Section: ID: %d, \
-                        address: 0x%lx size: 0x%lx pages: %d",
-                        iv_sections[i].type,
-                        iv_sections[i].vmmAddress,
-                        iv_sections[i].size,
-                        pages);
-
-                // populate and push the structure for each page
-                while( count != pages  )
-                {
-                    // duplicate the same section id in each structure
-                    sectionData.sectionId = i_sectionId;
-
-                    // update the current page number
-                    sectionData.pageNumber = count;
-
-                    // addjust the pointer out by page size * count each
-                    // iteration
-                    sectionData.dataPtr =
-                             reinterpret_cast<uint8_t *>
-                             (iv_sections[i].vmmAddress) + (count * PAGESIZE );
-
-                    count++;
-
-                    // pushing the actual structure to the vector
-                    o_pages.push_back( sectionData );
-
-                }
-
-                break;
-            }
-        }
-        // $TODO what if we dont find it??
     }
 
 };

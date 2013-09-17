@@ -31,15 +31,8 @@
 ROOTPATH = ../../..
 MODULE = targeting
 
-COMMON_TARGETING_REL_PATH = common
-COMMON_TARGETING_MAKEFILE = ${COMMON_TARGETING_REL_PATH}/common.mk
-
-include ${COMMON_TARGETING_MAKEFILE}
-
-VPATH = \
-    adapters \
-    ${COMMON_TARGETING_REL_PATH} \
-    ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}
+TARGETING_REL_PATH = .
+include ${TARGETING_REL_PATH}/hostboot_common.mk
 
 ATTR_RP_OBJS = \
     attrrp.o   \
@@ -68,7 +61,7 @@ HOSTBOOT_SPECIFIC_OBJS =    \
 
 OBJS = ${COMMON_TARGETING_OBJS} ${HOSTBOOT_SPECIFIC_OBJS}
 
-SUBDIRS = test.d xmltohb.d
+SUBDIRS = test.d xmltohb.d runtime.d
 
 include ${ROOTPATH}/config.mk
 
