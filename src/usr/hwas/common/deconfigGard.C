@@ -198,10 +198,20 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                         l_pErr->plid());
                 break;
             }
-
-            // now clear our 'changed' bit
-            clear_hwas_changed_bit(l_pTarget,HWAS_CHANGED_BIT_GARD);
         } // for
+
+        // now we need to go thru and clear all of the GARD bits in the
+        // changed flags for all targets
+        for (TargetIterator t_iter = targetService().begin();
+                t_iter != targetService().end();
+                ++t_iter)
+        {
+            Target* l_pTarget = *t_iter;
+            if (l_predicateHwasChanged(l_pTarget))
+            {
+                clear_hwas_changed_bit(l_pTarget,HWAS_CHANGED_BIT_GARD);
+            }
+        }
     }
     while (0);
 
