@@ -32,9 +32,3 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $HOSTBOOTROOT/src/build/citest/etc/patches/my_patch_File
 
-echo "+++ Updating scomm address ranges for p8_pfet_control in simcs"
-mkdir -p $sb/simu/data/cec-chip/
-cp $BACKING_BUILD/src/simu/data/cec-chip/s1.chip  $sb/simu/data/cec-chip/
-cp $BACKING_BUILD/src/simu/data/cec-chip/p8.chip  $sb/simu/data/cec-chip/
-patch -p0 $sb/simu/data/cec-chip/s1.chip $HOSTBOOTROOT/src/build/citest/etc/patches/s1.chip.p8_pfet_control.patch
-patch -p0 $sb/simu/data/cec-chip/p8.chip $HOSTBOOTROOT/src/build/citest/etc/patches/p8.chip.p8_pfet_control.patch
