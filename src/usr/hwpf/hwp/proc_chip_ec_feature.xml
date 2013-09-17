@@ -506,4 +506,29 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CFAM_RESET_SBE_START_WA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC less than 0x20
+        Venice EC less than 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
 </attributes>

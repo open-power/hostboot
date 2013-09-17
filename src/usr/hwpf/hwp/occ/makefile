@@ -70,7 +70,9 @@ OBJS =  occ.o \
 #they can implement OCC Reset.
 OBJS+=  p8_pm_prep_for_reset.o \
         proc_cpu_special_wakeup.o \
-        p8_pmc_force_vsafe.o
+        p8_pmc_force_vsafe.o \
+        p8_ocb_indir_access.o \
+        p8_ocb_indir_setup_linear.o 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:

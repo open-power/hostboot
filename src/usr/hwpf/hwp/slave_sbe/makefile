@@ -40,6 +40,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_revert_sbe_mcs_setup
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_getecid
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_spless_sbe_startWA
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils
 
 
 ##  NOTE: add new object files when you add a new HWP
@@ -49,13 +51,16 @@ OBJS =  slave_sbe.o \
         proc_extract_sbe_rc.o   \
         proc_read_seeprom.o \
         proc_getecid.o \
-        proc_cen_ref_clk_enable.o
+        proc_cen_ref_clk_enable.o \
+        proc_spless_sbe_startWA.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_revert_sbe_mcs_setup
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_getecid
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_spless_sbe_startWA
+
 
 include ${ROOTPATH}/config.mk
 

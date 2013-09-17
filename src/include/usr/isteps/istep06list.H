@@ -227,6 +227,7 @@ const   TaskInfo    g_istep06[]  =   {
 
 const DepModInfo  g_istep06Dependancies = {
     {
+      DEP_LIB(libbuild_winkle_images.so), //proc_mailbox_utils
       DEP_LIB(libslave_sbe.so),
       { 0 },
     }

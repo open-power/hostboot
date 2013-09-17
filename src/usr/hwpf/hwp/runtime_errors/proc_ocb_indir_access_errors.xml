@@ -1,0 +1,67 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_errors/proc_ocb_indir_access_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_ocb_indir_access procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_OCB_ACCESS_PUT_SCOM</rc>
+    <description>Put to OCB indirect channel failed</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_OCB_ACCESS_GET_SCOM</rc>
+    <description>Get from OCB indirect channel failed.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_OCB_ACCESS_LENGTH_CHECK</rc>
+    <description>Input length of data transfered via indirect channel did not match 
+    the output length</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_OCB_ACCESS_CHANNEL</rc>
+    <description>Invalid OCB indirect channel passed to proc_ocb_indir_access. </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_OCB_ACCESS_OP</rc>
+    <description>Invalid OCB indirect operation to proc_ocb_indir_access. </description>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_OCB_PUT_DATA_LENGTH_ERROR</rc>
+    <description>No data passed for Put operation. </description>
+  </hwpError> <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_OCB_ACCESS_GET_BUFFER</rc>
+    <description>Get of OCB data reg had non-zero response code. </description>
+  </hwpError>
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_OCB_PUT_DATA_POLL_NOT_FULL_ERROR</rc>
+    <description>Indicates that a timeout occured waiting for a push queue to be non-full
+    before writing data.  Is likely due to OCC firmware not pulling entries off of the 
+    queue in a timely manner. </description>
+  </hwpError>
+</hwpErrors>

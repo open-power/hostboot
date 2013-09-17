@@ -38,6 +38,8 @@
 #include <initservice/taskargs.H>
 #include <errl/errlentry.H>
 #include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
+#include <sys/time.h>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -52,11 +54,13 @@
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H>
 
-#include "proc_cen_ref_clk_enable/proc_cen_ref_clk_enable.H"
+#include "proc_cen_ref_clk_enable.H"
 #include "slave_sbe.H"
-#include "proc_revert_sbe_mcs_setup/proc_revert_sbe_mcs_setup.H"
+#include "proc_revert_sbe_mcs_setup.H"
 #include "proc_check_slave_sbe_seeprom_complete.H"
 #include "proc_getecid.H"
+#include "proc_spless_sbe_startWA.H"
+
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -157,11 +161,113 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 //******************************************************************************
 void* call_host_sbe_start( void *io_pArgs )
 {
+    errlHndl_t  l_errl = NULL;
     IStepError  l_stepError;
+    bool        l_needDelay = false;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start entry" );
 
-    // call proc_sbe_start.C
+    //
+    //  get the master Proc target, we want to IGNORE this one.
+    //
+    TARGETING::Target* l_pMasterProcTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        "host_sbe_start: %d procs in the system.",
+        l_procTargetList.size() );
+
+    // loop thru all the cpu's
+    for (TargetHandleList::const_iterator
+            l_proc_iter = l_procTargetList.begin();
+            l_proc_iter != l_procTargetList.end();
+            ++l_proc_iter)
+    {
+        //  make a local copy of the Processor target
+        TARGETING::Target* l_pProcTarget = *l_proc_iter;
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X",
+                TARGETING::get_huid(l_pProcTarget));
+
+        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
+                                       l_pProcTarget    );
+
+
+        if (l_pProcTarget  ==  l_pMasterProcTarget )
+        {
+            // we are just checking the Slave SBE's, skip the master
+            continue;
+        }
+        else if (INITSERVICE::spLess())
+        {
+            //Need to issue SBE start workaround on all slave chips
+            // Invoke the HWP
+            FAPI_INVOKE_HWP(l_errl,
+                            proc_spless_sbe_startWA,
+                            l_fapiProcTarget);
+
+            l_needDelay = true;
+        }
+        else
+        {
+            //Eventually for secureboot will need to kick off
+            //SBE here (different HWP), but for now not needed
+            //so do nothing
+        }
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : sbe_start",
+                      "failed, returning errorlog" );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_SLAVE_SBE_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_SBE_START
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to HWP to start SBE
+             *              returned an error
+             *
+             */
+            l_stepError.addErrorDetails(
+                            ISTEP_SLAVE_SBE_FAILED,
+                            ISTEP_PROC_SBE_START,
+                            l_errl );
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS : sbe_start",
+                      "completed ok");
+
+        }
+    }   // endfor
+
+    //TODO RTC 87845  Should really move this delay to
+    // check_slave_sbe_seeprom_complete to delay/poll instead
+    // of one big delay here.  For now if we started the slaves
+    // delay ~2.5 sec for them to complete
+    if(l_needDelay)
+    {
+        nanosleep( 2, 500000000 ); //sleep for 2.5 seconds
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start exit" );
 

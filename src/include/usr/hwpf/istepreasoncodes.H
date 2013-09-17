@@ -124,6 +124,7 @@ enum istepModuleId
     ISTEP_DMI_POST_TRAINADV                             = 0x4C,
     ISTEP_FABRIC_PRE_TRAINADV                           = 0x4D,
     ISTEP_FABRIC_POST_TRAINADV                          = 0x4E,
+    ISTEP_PROC_SBE_START                                = 0x4F,
 };
 
 /**
