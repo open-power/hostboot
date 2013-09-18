@@ -123,6 +123,12 @@ errlHndl_t PegasusConfigurator::build()
         // System should be enough to clean up th partial model.
 
         // Add chips to domains.
+        errl = addDomainChips( TYPE_MEMBUF, l_membufDomain, &l_membPllDomains );
+        if ( NULL != errl ) break;
+
+        errl = addDomainChips( TYPE_MBA, l_mbaDomain );
+        if ( NULL != errl ) break;
+
         errl = addDomainChips( TYPE_PROC, l_procDomain, &l_fabricPllDomains );
         if ( NULL != errl ) break;
 
@@ -130,12 +136,6 @@ errlHndl_t PegasusConfigurator::build()
         if ( NULL != errl ) break;
 
         errl = addDomainChips( TYPE_MCS, l_mcsDomain );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MEMBUF, l_membufDomain, &l_membPllDomains );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MBA, l_mbaDomain );
         if ( NULL != errl ) break;
 
     } while (0);
@@ -151,11 +151,15 @@ errlHndl_t PegasusConfigurator::build()
 
         addPllDomainsToSystem( l_fabricPllDomains, l_membPllDomains );
 
-        //Proc domain added after PLL domain
+        //MemBuf domain added after PLL domain
+        sysDmnLst.push_back( l_membufDomain );
+        //Proc domain added after Membuf domain
         sysDmnLst.push_back( l_procDomain   );
+        //In real HW, ATTN only calls PRD with Centaur or Proc chip. For
+        //performance improvement during System::Analyze add all domains
+        //after membuf/Proc domain.
         sysDmnLst.push_back( l_exDomain );
         sysDmnLst.push_back( l_mcsDomain );
-        sysDmnLst.push_back( l_membufDomain );
         sysDmnLst.push_back( l_mbaDomain );
 
         // Add chips to the system.

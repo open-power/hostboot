@@ -610,7 +610,8 @@ group gCoreFir filter singlebit
     /** COREFIR[14]
      *  SD_MCHK_AND_ME_EQ_0: MCHK received while ME=0 non recoverable
      */
-    (CoreFir, bit(14)) ? SelfHighThr1;
+    # FIXME: RTC 85697: Make sure this is SUE-CS bit
+    (CoreFir, bit(14)) ? calloutSelfHighSUE;
 
     /** COREFIR[15]
      *  SD_PC_L2_UE_ERR: UE from L2
@@ -815,7 +816,8 @@ group gCoreFir filter singlebit
     /** COREFIR[55]
      *  NEST_HANG_DETECT: External Hang detected
      */
-    (CoreFir, bit(55)) ? calloutProcLow2ndLvlMedThr1;
+    # FIXME: RTC 85697: Make sure this is SUE-CS bit
+    (CoreFir, bit(55)) ? calloutProcLow2ndLvlMedThr1SUE;
 
     /** COREFIR[56|57|58]
      *  RESERVED
@@ -1488,6 +1490,12 @@ actionclass L2ChipLevel2
     threshold1;
 };
 
+actionclass calloutSelfHighSUE
+{
+    SelfHighThr1;
+    flag(SUE);
+};
+
 actionclass calloutParentProcLow
 {
     callout(connected(TYPE_PROC),MRU_LOW);
@@ -1502,11 +1510,12 @@ actionclass SelfAndLevel2MedThr5PerHr
 };
 
 /** callouts Proc on first instance. Calls for second level support as well*/
-actionclass calloutProcLow2ndLvlMedThr1
+actionclass calloutProcLow2ndLvlMedThr1SUE
 {
     calloutParentProcLow;
     callout2ndLvlMed;
     threshold1;
+    flag(SUE);
 };
 
 /** Callouts core with high priority on first instance if sparing not done */

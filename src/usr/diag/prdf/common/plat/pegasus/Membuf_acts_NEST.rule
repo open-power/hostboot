@@ -425,7 +425,7 @@ group gMbiFir filter singlebit
     /** MBIFIR[0]
      *  MBIFIRQ_REPLAY_TIMEOUT
      */
-    (MbiFir, bit(0)) ? calloutDmiBusTh1;
+    (MbiFir, bit(0)) ? calloutDmiBusTh1UE;
 
     /** MBIFIR[1]
      *  MBIFIRQ_CHANNEL_FAIL
@@ -455,7 +455,7 @@ group gMbiFir filter singlebit
     /** MBIFIR[6]
      *  MBIFIRQ_REPLAY_BUFFER_ECC_UE
      */
-    (MbiFir, bit(6)) ? SelfMedThr1;
+    (MbiFir, bit(6)) ? SelfMedThr1UE;
 
     /** MBIFIR[7]
      *  MBIFIRQ_MBI_STATE_MACHINE_TIMEOUT
@@ -465,12 +465,12 @@ group gMbiFir filter singlebit
     /** MBIFIR[8]
      *  MBIFIRQ_MBI_INTERNAL_CONTROL_PARITY_ERROR
      */
-    (MbiFir, bit(8)) ? SelfMedThr1;
+    (MbiFir, bit(8)) ? SelfMedThr1UE;
 
     /** MBIFIR[9]
      *  MBIFIRQ_MBI_DATA_FLOW_PARITY_ERROR
      */
-    (MbiFir, bit(9)) ? SelfMedThr1;
+    (MbiFir, bit(9)) ? SelfMedThr1UE;
 
     /** MBIFIR[10]
      *  MBIFIRQ_CRC_PERFORMANCE_DEGRADATION
@@ -520,12 +520,12 @@ group gMbiFir filter singlebit
     /** MBIFIR[19]
      *  MBIFIRQ_MBICFG_PARITY_SCOM_ERROR
      */
-    (MbiFir, bit(19)) ? SelfMedThr1;
+    (MbiFir, bit(19)) ? SelfMedThr1UE;
 
     /** MBIFIR[20]
      *  MBIFIRQ_BUFFER_OVERRUN_ERROR
      */
-    (MbiFir, bit(20)) ? calloutDmiBusTh1;
+    (MbiFir, bit(20)) ? calloutDmiBusTh1UE;
 
     /** MBIFIR[21:24]
      *  Reserved
@@ -559,27 +559,27 @@ group gMbsFir filter singlebit
     /** MBSFIR[0]
      *  MBS_FIR_REG_HOST_PROTOCOL_ERROR
      */
-    (MbsFir, bit(0)) ? calloutDmiBusTh1;
+    (MbsFir, bit(0)) ? calloutDmiBusTh1UE;
 
     /** MBSFIR[1]
      *  MBS_FIR_REG_INT_PROTOCOL_ERROR
      */
-    (MbsFir, bit(1)) ? SelfMedThr1;
+    (MbsFir, bit(1)) ? SelfMedThr1UE;
 
     /** MBSFIR[2]
      *  MBS_FIR_REG_INVALID_ADDRESS_ERROR
      */
-    (MbsFir, bit(2)) ? callout2ndLvlMedThr1;
+    (MbsFir, bit(2)) ? callout2ndLvlMedThr1UE;
 
     /** MBSFIR[3]
      *  MBS_FIR_REG_EXTERNAL_TIMEOUT
      */
-    (MbsFir, bit(3)) ? CalloutMcsHighAndThr1;
+    (MbsFir, bit(3)) ? CalloutMcsHighAndThr1UE;
 
     /** MBSFIR[4]
      *  MBS_FIR_REG_INTERNAL_TIMEOUT
      */
-    (MbsFir, bit(4)) ? SelfMedThr1;
+    (MbsFir, bit(4)) ? SelfMedThr1UE;
 
     /** MBSFIR[5]
      *  MBS_FIR_REG_INT_BUFFER_CE
@@ -599,7 +599,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[8]
      *  MBS_FIR_REG_INT_PARITY_ERROR
      */
-    (MbsFir, bit(8)) ? SelfMedThr1;
+    (MbsFir, bit(8)) ? SelfMedThr1UE;
 
     /** MBSFIR[9]
      *  MBS_FIR_REG_CACHE_SRW_CE
@@ -641,7 +641,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[16]
      *  MBS_FIR_REG_DIR_UE
      */
-    (MbsFir, bit(16)) ? SelfMedThr1;
+    (MbsFir, bit(16)) ? SelfMedThr1UE;
 
     /** MBSFIR[17]
      *  MBS_FIR_REG_DIR_MEMBER_DELETED
@@ -651,7 +651,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[18]
      *  MBS_FIR_REG_DIR_ALL_MEMBERS_DELETED
      */
-    (MbsFir, bit(18)) ? SelfMedThr1;
+    (MbsFir, bit(18)) ? SelfMedThr1UE;
 
     /** MBSFIR[19]
      *  MBS_FIR_REG_LRU_ERROR
@@ -661,7 +661,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[20]
      *  MBS_FIR_REG_EDRAM_ERROR
      */
-    (MbsFir, bit(20)) ? SelfMedThr1;
+    (MbsFir, bit(20)) ? SelfMedThr1UE;
 
     /** MBSFIR[21]
      *  MBS_FIR_REG_EMERGENCY_THROTTLE_SET
@@ -1076,12 +1076,12 @@ group gMbsEccFir filter priority(19,41) # UEs highest priority
     /** MBA0_MBSECCFIR[47]
      *  MBECCFIR_UNRECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (Mba0_MbsEccFir, bit(47)) ? SelfMedThr1;
+    (Mba0_MbsEccFir, bit(47)) ? SelfMedThr1UE;
 
     /** MBA1_MBSECCFIR[47]
      *  MBECCFIR_UNRECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (Mba1_MbsEccFir, bit(47)) ? SelfMedThr1;
+    (Mba1_MbsEccFir, bit(47)) ? SelfMedThr1UE;
 
     /** MBA0_MBSECCFIR[48]
      *  MBECCFIR_MASKABLE_CONFIGURATION_REGISTER_PARITY_ERROR
@@ -1096,12 +1096,12 @@ group gMbsEccFir filter priority(19,41) # UEs highest priority
     /** MBA0_MBSECCFIR[49]
      *  MBECCFIR_ECC_DATAPATH_PARITY_ERROR
      */
-    (Mba0_MbsEccFir, bit(49)) ? SelfMedThr1;
+    (Mba0_MbsEccFir, bit(49)) ? SelfMedThr1UE;
 
     /** MBA1_MBSECCFIR[49]
      *  MBECCFIR_ECC_DATAPATH_PARITY_ERROR
      */
-    (Mba1_MbsEccFir, bit(49)) ? SelfMedThr1;
+    (Mba1_MbsEccFir, bit(49)) ? SelfMedThr1UE;
 
     /** MBA0_MBSECCFIR[50]
      *  MBECCFIR_INTERNAL_SCOM_ERROR
@@ -1164,12 +1164,12 @@ group gMcbistFir filter singlebit
     /** MBA0_MCBISTFIR[1]
      *  MBSFIRQ_MBX_PAR_ERRORS
      */
-    (Mba0_McbistFir, bit(1)) ? calloutSelfMed;
+    (Mba0_McbistFir, bit(1)) ? SelfMedThr1UE;
 
     /** MBA1_MCBISTFIR[1]
      *  MBSFIRQ_MBX_PAR_ERRORS
      */
-    (Mba1_McbistFir, bit(1)) ? calloutSelfMed;
+    (Mba1_McbistFir, bit(1)) ? SelfMedThr1UE;
 
     /** MBA0_MCBISTFIR[2:14]
      *  Reserved
@@ -1254,6 +1254,13 @@ actionclass calloutDmiBus
 };
 
 /** Callout the DMI bus, threshold 1 */
+actionclass calloutDmiBusTh1UE
+{
+    calloutDmiBusTh1;
+    SUEGenerationPoint;
+};
+
+/** Callout the DMI bus, threshold 1 */
 actionclass calloutDmiBusTh1 { calloutDmiBus; threshold1; };
 
 /** Callout the DMI bus, threshold 2 per day */
@@ -1262,10 +1269,11 @@ actionclass calloutDmiBusTh2pday { calloutDmiBus; threshold2pday; };
 /** Callout the DMI bus and 2nd Level (LOW), threshold 1 */
 actionclass calloutDmiBusLvl2Th1 { calloutDmiBusTh1; callout2ndLvlLow; };
 
-actionclass CalloutMcsHighAndThr1
+actionclass CalloutMcsHighAndThr1UE
 {
     callout(connected(TYPE_MCS),MRU_HIGH);
     threshold1;
+    SUEGenerationPoint;
 };
 
 actionclass analyzeSpareBitAndThr
@@ -1403,4 +1411,8 @@ actionclass analyzeMaintUe0 { funccall("AnalyzeMaintUe0"); threshold1; };
 
 /** Analyze a maintenance UE on MBA1 */
 actionclass analyzeMaintUe1 { funccall("AnalyzeMaintUe1"); threshold1; };
+
+/** Callout 2nd Level Medium,  set SUE generation point */
+actionclass callout2ndLvlMedThr1UE
+{ callout2ndLvlMed; threshold1;SUEGenerationPoint; };
 

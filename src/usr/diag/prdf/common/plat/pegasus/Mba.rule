@@ -463,7 +463,7 @@ group gMbaFir filter singlebit
     /** MBAFIR[6]
      *  MBAFIRQ_CHANNEL_CHKSTP_ERR
      */
-    (MbaFir, bit(6)) ? SelfMedThr1;
+    (MbaFir, bit(6)) ? SelfMedThr1UE;
 
     /** MBAFIR[7]
      *  MBAFIRQ_WRD_CAW2_DATA_CE_UE_ERR
@@ -549,12 +549,12 @@ group gMbaDdrPhyFir filter singlebit
     /** MBADDRPHYFIR[48]
      *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_CKSTP
      */
-    (MbaDdrPhyFir, bit(48)) ? SelfMedThr1;
+    (MbaDdrPhyFir, bit(48)) ? SelfMedThr1UE;
 
     /** MBADDRPHYFIR[49]
      *  PHY01_DDRPHY_FIR_REG_DDR0_PARITY_CKSTP
      */
-    (MbaDdrPhyFir, bit(49)) ? SelfMedThr1;
+    (MbaDdrPhyFir, bit(49)) ? SelfMedThr1UE;
 
     /** MBADDRPHYFIR[50]
      *  PHY01_DDRPHY_FIR_REG_DDR0_CALIBRATION_ERROR
@@ -584,12 +584,12 @@ group gMbaDdrPhyFir filter singlebit
     /** MBADDRPHYFIR[56]
      *  PHY01_DDRPHY_FIR_REG_DDR1_FSM_CKSTP
      */
-    (MbaDdrPhyFir, bit(56)) ? SelfMedThr1;
+    (MbaDdrPhyFir, bit(56)) ? SelfMedThr1UE;
 
     /** MBADDRPHYFIR[57]
      *  PHY01_DDRPHY_FIR_REG_DDR1_PARITY_CKSTP
      */
-    (MbaDdrPhyFir, bit(57)) ? SelfMedThr1;
+    (MbaDdrPhyFir, bit(57)) ? SelfMedThr1UE;
 
     /** MBADDRPHYFIR[58]
      *  PHY01_DDRPHY_FIR_REG_DDR1_CALIBRATION_ERROR
@@ -629,7 +629,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[1]
      *  MBACALFIRQ_MBA_NONRECOVERABLE_ERROR
      */
-    (MbaCalFir, bit(1)) ? SelfMedThr1;
+    (MbaCalFir, bit(1)) ? SelfMedThr1UE;
 
     /** MBACALFIR[2]
      *  MBACALFIRQ_REFRESH_OVERRUN
@@ -664,7 +664,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[8]
      *  MBACALFIRQ_MBX_TO_MBA_PAR_ERROR
      */
-    (MbaCalFir, bit(8)) ? SelfMedThr1;
+    (MbaCalFir, bit(8)) ? SelfMedThr1UE;
 
     /** MBACALFIR[9]
      *  MBACALFIRQ_MBA_WRD_UE
@@ -689,7 +689,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[13]
      *  MBACALFIRQ_DDR_CAL_RESET_TIMEOUT
      */
-    (MbaCalFir, bit(13)) ? SelfMedThr1;
+    (MbaCalFir, bit(13)) ? SelfMedThr1UE;
 
     /** MBACALFIR[14]
      *  MBACALFIRQ_WRQ_DATA_CE
