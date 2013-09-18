@@ -163,7 +163,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         if(g_prd_errlHndl != NULL) rc = PRD_NOT_INITIALIZED;
     }
 
-    bool latent_check_stop = false;
     ServiceDataCollector serviceData;
     STEP_CODE_DATA_STRUCT sdc;
     sdc.service_data = &serviceData;
@@ -210,39 +209,33 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
         serviceData.SetAttentionType(i_attentionType);
 
-        // Check to see if this is a latent machine check.- capture time of day
-        serviceGenerator.SetErrorTod( i_attentionType, &latent_check_stop,
-                                      serviceData );
+        // capture time of day
+        serviceGenerator.SetErrorTod( i_attentionType, serviceData );
 
         if(serviceGenerator.QueryLoggingBufferFull())
         {
             serviceData.SetFlooding();
         }
 
-        // If the checkstop is latent than Service Generator Will use the scd
-        // from the last call to PRD - no further analysis needed.
-        if (!latent_check_stop)
+        int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
+        // flush Cache to free up the memory
+        RegDataCache::getCachedRegisters().flush();
+        ScanFacility      & l_scanFac = ScanFacility::Access();
+        //delete all the wrapper register objects since these were created
+        //just for plugin code
+        l_scanFac.ResetPluginRegister();
+        SystemSpecific::postAnalysisWorkarounds(sdc);
+        if(analyzeRc != SUCCESS && g_prd_errlHndl == NULL)
         {
-            int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
-            // flush Cache to free up the memory
-            RegDataCache::getCachedRegisters().flush();
-            ScanFacility      & l_scanFac = ScanFacility::Access();
-            //delete all the wrapper register objects since these were created
-            //just for plugin code
-            l_scanFac.ResetPluginRegister();
-            SystemSpecific::postAnalysisWorkarounds(sdc);
-            if(analyzeRc != SUCCESS && g_prd_errlHndl == NULL)
-            {
-                // We have a bad RC, but no error log - Fill out SDC and have
-                // service generator make one
-                (serviceData.GetErrorSignature())->setErrCode(
-                                                        (uint16_t)analyzeRc );
-                serviceData.SetCallout(SP_CODE);
-                serviceData.SetServiceCall();
-                // mk438901 a We don't want to gard unless we have a good
-                // return code
-                serviceData.Gard(GardAction::NoGard);
-            }
+            // We have a bad RC, but no error log - Fill out SDC and have
+            // service generator make one
+            (serviceData.GetErrorSignature())->setErrCode(
+                                                    (uint16_t)analyzeRc );
+            serviceData.SetCallout(SP_CODE);
+            serviceData.SetServiceCall();
+            // We don't want to gard unless we have a good
+            // return code
+            serviceData.Gard(GardAction::NoGard);
         }
     }
 

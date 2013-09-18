@@ -29,11 +29,8 @@
 //  Description: Service interface for PRD
 //  Usage:
 //  ServiceGenerator serv_generator
-//  bool latent_machine_check_flag = false;
 //  ATTENTION_TYPE attentionType = MACHINE_CHECK;  (see iipsdbug.h)
 //
-//  ///// Set time + see if latent machine check
-//  serv_generator.SetErrorTod(attentionType, &latent_machine_check_flag);
 //
 //  ///// Query for flooding condition
 //  if(serv_generator.QueryLoggingBufferFull())
@@ -130,16 +127,16 @@ public:
   virtual void setErrDataService(ErrDataService & i_errDataService)=0;
 
   /**
-   Set the TOD of the current error and check for latent Machine check
+   Set the TOD of the current error
    <ul>
    <br><b>Parameter:   </b> the_attention (see iipsdbug.h)
-   <br><b>Returns:     </b> is_latent [true | false]
    <br><b>Requirements:</b> None.
    <br><b>Promises:    </b> Error timestamped with TOD, latency state modifed
    <br><b>Notes:       </b> Uses the SPC interface to get the TOD
    </ul><br>
    */
-  virtual void SetErrorTod(ATTENTION_TYPE the_attention,bool *is_latent,ServiceDataCollector & sdc)=0;
+  virtual void SetErrorTod( ATTENTION_TYPE the_attention,
+                            ServiceDataCollector & sdc)=0;
 
   /**
    Query if logging buffer full - indicates attention flooding

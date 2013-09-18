@@ -63,7 +63,6 @@ class ErrDataService
      */
     inline ErrDataService() :
         loggingBufferFull(false),
-        savedLatentSdc(false),
         iv_serviceActionCounter(0),
         savedPrdReturnCode(0)
     {}
@@ -91,15 +90,15 @@ class ErrDataService
     virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type, ServiceDataCollector & sdc);
 
     /**
-      @brief Set the TOD of the current error and check for latent Machine check
+      @brief Set the TOD of the current error
       @param[in] the_attention (see iipsdbug.h)
-      @param[in,out] is_latent [true | false]
       @param[in,out] sdc
       @pre None.
       @post Error timestamped with TOD, latency state modifed
       @note Uses the SPC interface to get the TOD
       */
-    virtual void SetErrorTod(ATTENTION_TYPE the_attention,bool *is_latent,ServiceDataCollector & sdc);
+    virtual void SetErrorTod( ATTENTION_TYPE the_attention,
+                              ServiceDataCollector & sdc );
 
     /**
       @brief Query if logging buffer full - indicates attention flooding
@@ -204,15 +203,12 @@ class ErrDataService
   private:
 
     bool loggingBufferFull;
-    bool latentMachineCheck;
-    bool savedLatentSdc;
 
     uint32_t iv_serviceActionCounter;
 
     int32_t savedPrdReturnCode;
 
     ServiceDataCollector sdc;
-    ServiceDataCollector latentSdc;
 
     static bool terminateOnCheckstop;
 
@@ -247,15 +243,15 @@ public:
   virtual void setErrDataService(ErrDataService & i_ErrDataService);
 
   /**
-   @brief Set the TOD of the current error and check for latent Machine check
+   @brief Set the TOD of the current error and check for Machine check
    @param[in] the_attention (see iipsdbug.h)
-   @param[in,out] is_latent [true | false]
    @param[in,out] sdc
    @pre None.
    @post Error timestamped with TOD, latency state modifed
    @note Uses the SPC interface to get the TOD
    */
-  virtual void SetErrorTod(ATTENTION_TYPE the_attention,bool *is_latent,ServiceDataCollector & sdc);
+  virtual void SetErrorTod( ATTENTION_TYPE the_attention,
+                            ServiceDataCollector & sdc );
 
   /**
    @brief Query if logging buffer full - indicates attention flooding

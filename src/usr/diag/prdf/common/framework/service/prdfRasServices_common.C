@@ -74,9 +74,6 @@ char  * ThermalFilename = NULL;
 #endif
 
 bool ErrDataService::terminateOnCheckstop = true;
-bool previousWasRecovered = false;
-Timer previousEventTime;
-const double LATENT_MCK_WINDOW = 2;   // two seconds to determin latency
 RasServices thisServiceGenerator;
 
 //------------------------------------------------------------------------------
@@ -112,7 +109,6 @@ RasServices::~RasServices()
 
 void ErrDataService::Initialize()
 {
-    savedLatentSdc = false;
     iv_serviceActionCounter = 0;
 }
 
@@ -140,45 +136,17 @@ void RasServices::setErrDataService(ErrDataService & i_ErrDataService)
 //------------------------------------------------------------------------------
 
 void ErrDataService::SetErrorTod(ATTENTION_TYPE the_attention,
-                                 bool *is_latent,
                                  ServiceDataCollector & sdc)
 {
-  *is_latent = false;
-  latentMachineCheck = false;
-
   Timer l_curEventTime;
   PlatServices::getCurrentTime(l_curEventTime);
-
-  if(previousWasRecovered && (MACHINE_CHECK == the_attention))
-  {
-    // check for latent machine check
-    if ( LATENT_MCK_WINDOW > (l_curEventTime - previousEventTime))
-    {
-      *is_latent = true;
-      latentMachineCheck = true;
-    }
-    previousWasRecovered = false; // in case of multiple calls for same cstop
-  }
-  else if (RECOVERABLE == the_attention)
-  {
-    previousWasRecovered = true;
-  }
-  else
-  {
-    previousWasRecovered = false;
-  }
-
-  previousEventTime = l_curEventTime;
   sdc.SetTOE(l_curEventTime);
 }
 
 void RasServices::SetErrorTod(ATTENTION_TYPE the_attention,
-                              bool *is_latent,
                               ServiceDataCollector & sdc)
 {
-    iv_ErrDataService->SetErrorTod(the_attention,
-                                   is_latent,
-                                   sdc);
+    iv_ErrDataService->SetErrorTod(the_attention, sdc);
 }
 
 //------------------------------------------------------------------------------
@@ -256,7 +224,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     HWSV::hwsvHCDBUpdate hcdbUpdate = HWSV::HWSV_HCDB_DO_UPDATE;
 
-    //Use this SDC unless determined in Check Stop processing to use a Latent, UE, or SUE saved SDC
+    // Use this SDC unless determined in Check Stop processing to use a UE,
+    // or SUE saved SDC
     sdc = i_sdc;
 
     GardAction::ErrorType prdGardErrType;
@@ -300,63 +269,49 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
         severityParm = ERRL_SEV_UNRECOVERABLE;
 
-        if // No special UE-SUE flags.
-            ((!sdc.IsUERE() ) &&
-             (!sdc.IsSUE()  )   )
+        // Check for SUE-CS condition flags.
+        if ((!sdc.IsUERE() ) &&
+            ( sdc.IsSUE()  )   )
         {
-            // If LtntMck and last recoverable Stored use it.
-            if ( latentMachineCheck && savedLatentSdc )
+            //Read current sdc state flags from registry
+            errlHndl_t errorLog = UtilReg::read ( "prdf/RasServices",
+                                                  &sdcSaveFlags, sz_uint8 );
+            if (errorLog)
             {
-                gardErrType = HWAS::GARD_Func;
-                sdc = latentSdc;
-                causeAttnPreviouslyReported = true;
+                PRDF_ERR( PRDF_FUNC"Failure in SDC flag Registry read" );
+                PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
             }
-            //else set no flags, use this sdc
+            else if (sdcSaveFlags & SDC_SAVE_UE_FLAG) //check if UE log stored
+            {                                         // then use it.
+                bool l_rc = SdcRetrieve(SDC_SAVE_UE_FLAG, sdcBuffer);
+                if (l_rc)
+                {
+                    PRDF_ERR( PRDF_FUNC"Failure in UE SDC Retrieve Function" );
+                }
+                else
+                {
+                    //set the sdc to the Saved SDC for UE
+                    sdc = sdcBuffer;
+                    gardErrType = HWAS::GARD_Func;
+                    causeAttnPreviouslyReported = true;
+                }
+            }
+            else if (sdcSaveFlags & SDC_SAVE_SUE_FLAG ) //else check if SUE log
+            {                                           // stored then use it.
+                bool l_rc = SdcRetrieve(SDC_SAVE_SUE_FLAG, sdcBuffer);
+                if (l_rc)
+                {
+                    PRDF_ERR( PRDF_FUNC"Failure in SUE SDC Retrieve Function" );
+                }
+                else
+                {
+                    //set the sdc to the Saved SDC for SUE
+                    sdc = sdcBuffer;
+                    gardErrType = HWAS::GARD_Func;
+                    causeAttnPreviouslyReported = true;
+                }
+            }
         }
-        else //This is a SUE-CS condition check flags.
-            if ((!sdc.IsUERE() ) &&
-                ( sdc.IsSUE()  )   )
-            {
-                //Read current sdc state flags from registry
-                errlHndl_t errorLog = UtilReg::read ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
-                if (errorLog)
-                {
-                    PRDF_ERR( PRDF_FUNC"Failure in SDC flag Registry read" );
-                    PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
-                }
-                else if (sdcSaveFlags & SDC_SAVE_UE_FLAG) //check if UE log stored then use it.
-                {
-                    bool l_rc = SdcRetrieve(SDC_SAVE_UE_FLAG, sdcBuffer);
-                    if (l_rc)
-                    {
-                        PRDF_ERR( PRDF_FUNC"Failure in UE SDC Retrieve Function" );
-                    }
-                    else
-                    {
-                        //set the sdc to the Saved SDC for UE
-                        sdc = sdcBuffer;
-                        gardErrType = HWAS::GARD_Func;
-                        causeAttnPreviouslyReported = true;
-                    }
-                }
-                else if (sdcSaveFlags & SDC_SAVE_SUE_FLAG ) //else check if SUE log stored then use it.
-                {
-                    bool l_rc = SdcRetrieve(SDC_SAVE_SUE_FLAG, sdcBuffer);
-                    if (l_rc)
-                    {
-                        PRDF_ERR( PRDF_FUNC"Failure in SUE SDC Retrieve Function" );
-                    }
-                    else
-                    {
-                        //set the sdc to the Saved SDC for SUE
-                        sdc = sdcBuffer;
-                        gardErrType = HWAS::GARD_Func;
-                        causeAttnPreviouslyReported = true;
-                    }
-                }
-                //else, set no flags, use this sdc
-            }
-        //else Normal Mck, set no flags, use this sdc
 #endif  // if not __HOSTBOOT_MODULE
     }
     ////////////////////////////////////////////////////////////////
@@ -365,13 +320,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     else if (i_attnType == RECOVERABLE  || i_attnType == UNIT_CS )
     {
 #ifndef  __HOSTBOOT_MODULE
-        // FIXME: I don't think Hostboot needs latent SDC and UE/SUE support
-        if (!sdc.IsUsingSavedSdc() )  // Don't save File if we are Re-Syncing an sdc
-        {
-            savedLatentSdc = true;  //Save this SDC as Latent SDC
-            latentSdc = i_sdc;
-        }
-
         if //Ue-Re RECOVERABLE condition.
             ((sdc.IsUERE()   ) &&
              (!sdc.IsSUE()   ) &&
@@ -450,7 +398,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     gardState = HWSV::HWSV_DECONFIG_GARD;
 
-    // If gardErrType was determined during latent/UE/SUE processing for Check Stop,
+    // If gardErrType was determined during UE/SUE processing for Check Stop,
     // use that and not determine gardErrType from the sdc values.
     if (gardErrType != HWAS::GARD_Func)
     {
@@ -491,7 +439,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     }
     else
     {
-        // gardErrType is GARD_Func, set in latent/UE/SUE processing for Check Stop.
+        // gardErrType is GARD_Func, set in UE/SUE processing for Check Stop.
         // If NoGard was specified in this switched sdc, then keep the NoGard
         if ( sdc.QueryGard() == GardAction::NoGard )
         {
@@ -1336,8 +1284,7 @@ void ErrDataService::printDebugTraces( )
                     i->callout.flatten(), tmp );
     }
 
-    GardAction::ErrorType et = sdc.QueryGard();
-    PRDF_DTRAC ("GardType: %s", GardAction::ToString( et ) );
+    PRDF_DTRAC ("GardType: %s", GardAction::ToString( sdc.QueryGard() ) );
 
     PRDF_DTRAC( "PRDTRACE: Flag Values" );
     if( sdc.IsSUE() )          PRDF_DTRAC( "PRDTRACE: SUE Flag Set" );
