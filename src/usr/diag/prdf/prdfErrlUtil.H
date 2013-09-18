@@ -220,8 +220,7 @@
 /**
  * @brief  indicate whether an abort is active or not
  */
-// FIXME:RTC: 65609 will address this issue.
-// not available in Hostboot?
+// no-op in Hostboot
 #define PRDF_ABORTING(o_abort) \
   o_abort = false;
 
