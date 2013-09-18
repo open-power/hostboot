@@ -500,6 +500,15 @@ public:
     void addProcedureCallout(const HWAS::epubProcedureID i_procedure,
                              const HWAS::callOutPriority i_priority);
 
+    /**
+     * @brief  Import flatened error log
+     *
+     * @param[in] i_buffer, pointer to flat data
+     * @param[in] i_len length of flat data
+     * @return Status  0==SUCCESS
+     */
+    uint64_t unflatten( const void * i_buffer, uint64_t i_len);
+
 private:
 
      /**

@@ -165,4 +165,22 @@ uint64_t ErrlUD::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
     return l_rc;
 }
 
+
+
+uint64_t ErrlUD::unflatten( const void * i_buf )
+{
+    const uint8_t * p =
+        static_cast<const uint8_t *>(i_buf);
+
+    p += iv_header.unflatten(p);
+
+    iv_Size = iv_header.iv_slen - iv_header.flatSize();
+    
+    iv_pData = static_cast<uint8_t*>(realloc(iv_pData, iv_Size));
+
+    memcpy(iv_pData,p,iv_Size);
+
+    return flatSize();
+}
+
 } //namespace

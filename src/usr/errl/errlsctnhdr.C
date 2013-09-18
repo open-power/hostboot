@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/errl/errlsctnhdr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/errlsctnhdr.C $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file errlsctnhdr.C
  *
@@ -100,5 +100,18 @@ uint64_t ErrlSctnHdr::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
     return l_rc;
 };
 
+uint64_t ErrlSctnHdr::unflatten( const void * i_buf )
+{
+    const pelSectionHeader_t * p =
+        static_cast<const pelSectionHeader_t *>(i_buf);
+
+    iv_sid      = p->sid;
+    iv_slen     = p->len;
+    iv_ver      = p->ver;
+    iv_sst      = p->sst;
+    iv_compId   = p->compId;
+
+    return sizeof( pelSectionHeader_t );
+}
 
 } // End namespace

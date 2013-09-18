@@ -26,6 +26,8 @@
 #include <pnor/pnorif.H>
 #include <util/align.H>
 #include <sys/mm.h>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 
 #include <runtime/interface.h>
 
@@ -97,6 +99,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->free = free;
                 intf->realloc = realloc;
                 intf->assert = rt_assert;
+                intf->sendErrorLog = rt_logErr;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -159,6 +162,28 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         {
             assert(false);
         }
-};
 
+        static int rt_logErr(uint32_t plid,
+                             uint32_t data_len,
+                             void * data)
+        {
+            uint64_t rc = 0;
+            TRACFCOMP(g_trac_test,
+                      "RUNTIME MSG: Log error. Plid: %d  len: %d",
+                      plid,
+                      data_len);
+
+            TRACDBIN(g_trac_test, "RUNTIME ERROR LOG:",data,data_len);
+
+            
+            errlHndl_t err =
+                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                        0,0);
+            rc = err->unflatten(data, data_len);
+
+            errlCommit(err,CXXTEST_COMP_ID);
+
+            return rc;
+        }
+};
 #endif

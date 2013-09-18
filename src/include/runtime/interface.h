@@ -59,6 +59,14 @@ typedef struct hostInterfaces
     /** realloc */
     void* (*realloc)(void*, size_t);
 
+    /** sendErrorLog 
+     * @param[in] plid Platform Log identifier
+     * @param[in] data size in bytes
+     * @param[in] pointer to data
+     * @return 0 on success else error code
+     */
+    int (*sendErrorLog)(uint32_t,uint32_t,void *); 
+
 } hostInterfaces_t;
 
 typedef struct runtimeInterfaces

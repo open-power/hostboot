@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/errl/errluh.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/errluh.C $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file errluh.C
  *
@@ -106,9 +106,22 @@ uint64_t ErrlUH::flatten( void * io_pBuffer, const uint64_t i_cbBuffer )
     return l_rc;
 }
 
+uint64_t ErrlUH::unflatten(const void * i_buf )
+{
+    const pelUserHeaderSection_t * p =
+        static_cast<const pelUserHeaderSection_t *>(i_buf);
 
+    iv_header.unflatten(&(p->sectionheader));
+    iv_ssid         = (epubSubSystem_t)p->ssid;
+    iv_severity     = (errlSeverity_t)p->sev;
 
+    iv_scope        = (errlScope_t)p->scope;
+    iv_etype        = (errlEventType_t)p->etype;
+    iv_domain       = (errlDomain_t)p->domain;
+    iv_vector       = (errlVector_t)p->vector;
+    iv_actions      = p->actions;
 
-
+    return flatSize();
+}
 
 }  // namespace

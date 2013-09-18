@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -99,6 +99,13 @@ private:
      *           is that the buffer is of insufficient size.
      */
     uint64_t flatten( void * o_pBuffer, const uint64_t i_cbBuffer );
+
+    /**
+     * @brief Import flattened data
+     * @parm[in] i_buf, pointer to the flattened data
+     * @return The number of bytes consumed
+     */
+    uint64_t unflatten( const void * i_buf );
 
 
 

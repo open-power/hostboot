@@ -956,7 +956,59 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
 }
 
 
+uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
+{
+    const uint8_t * l_buf = static_cast<const uint8_t *>(i_buffer);
+    uint64_t consumed = 0;
+    uint64_t bytes_used = 0;
+    uint64_t rc = 0;
 
+    TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten private section...");
+    bytes_used = iv_Private.unflatten(l_buf);
+    consumed    += bytes_used;
+    l_buf       += bytes_used;
+
+    TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten User header section...");
+    bytes_used = iv_User.unflatten(l_buf);
+    consumed    += bytes_used;
+    l_buf       += bytes_used;
+
+    TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten SRC section...");
+    bytes_used = iv_Src.unflatten(l_buf);
+    consumed    += bytes_used;
+    l_buf       += bytes_used;
+
+    iv_SectionVector.clear();
+    iv_btAddrs.clear();
+    removeBackTrace();
+
+    while(consumed < i_len)
+    {
+        TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten User data section...");
+        const ERRORLOG::pelSectionHeader_t * p =
+            reinterpret_cast<const ERRORLOG::pelSectionHeader_t *>(l_buf);
+
+        if(p->sid != ERRORLOG::ERRL_SID_USER_DEFINED) // 'UD'
+        {
+            // yikes - bad section
+            TRACFCOMP(g_trac_errl, ERR_MRK"Bad UserData section found while "
+                      "importing flattened data into error log. plid=%08x",
+                      iv_Private.iv_plid);
+            rc = -1;
+            break;
+        }
+        const void * data = l_buf + sizeof(p);
+        uint64_t d_size = p->len - sizeof(p);
+
+        ErrlUD * ud = new ErrlUD(data,d_size,p->compId,p->ver,p->sst);
+        consumed    += p->len;
+        l_buf       += p->len;
+
+        iv_SectionVector.push_back(ud);
+    }
+
+    return rc;
+}
 
 } // End namespace
 

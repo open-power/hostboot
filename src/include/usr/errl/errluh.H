@@ -93,6 +93,13 @@ private:
     uint64_t flatten(  void * io_pBuffer, const uint64_t i_cbBuffer );
 
     /**
+     * @brief Import data
+     * @param[in] i_buf, the pointer to the flattened data
+     * @return number of bytes consumed
+     */
+    uint64_t unflatten( const void * i_buf );
+
+    /**
      *  @brief return the failing subsystem id value
      *
      *  @return  Failing subsystem ID

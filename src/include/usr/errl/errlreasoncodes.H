@@ -40,6 +40,7 @@ namespace ERRORLOG
         ERRL_FIRST_MODULE_ID        = 0x00,
         ERRL_USERDATA_TEST_MOD_ID   = 0x01,
         ERRL_TEST_MOD_ID            = 0x02,
+        ERRL_RT_TEST_MOD_ID         = 0x03,
         //........
         ERRL_LAST_MODULE_ID         = 0xFF
     };

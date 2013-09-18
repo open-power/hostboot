@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -128,6 +128,21 @@ uint64_t ErrlPrvt::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
     return l_rc;
 }
 
+uint64_t ErrlPrvt::unflatten( const void * i_buf )
+{
+    const pelPrivateHeaderSection_t * p =
+        static_cast<const pelPrivateHeaderSection_t *>(i_buf);
 
+    iv_header.unflatten(&(p->sectionheader));
+
+    iv_created          = p->creationTime;
+    iv_committed        = p->commitTime;
+    iv_cid              = p->creatorId;
+    iv_sctns            = p->sectionCount;
+    iv_plid             = p->plid;
+    iv_eid              = p->eid;
+
+    return flatSize();
+}
 
 } // namespace

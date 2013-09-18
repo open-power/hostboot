@@ -168,6 +168,33 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
     return l_rc;
 }
 
+uint64_t ErrlSrc::unflatten( const void * i_buf)
+{
+    const pelSRCSection_t * p =
+        static_cast<const pelSRCSection_t *>(i_buf);
+
+    iv_header.unflatten(&(p->sectionheader));
+
+    iv_srcType      = (srcType_t)((16 * aschex2bin(p->srcString[0])) +
+                        aschex2bin(p->srcString[1]));
+    iv_modId        = p->moduleId;
+    iv_reasonCode   = p->reserved1;
+    iv_ssid         = (epubSubSystem_t)((16 * aschex2bin(p->srcString[2])) +
+                       aschex2bin(p->srcString[3]));
+    iv_user1        = p->word6;
+    iv_user2        = p->word8;
+
+    return flatSize();
+}
+
+uint64_t ErrlSrc::aschex2bin(char c)
+{
+    if(c >= 'a') c = c + 10 - 'a';
+    else if (c >= 'A') c = c + 10 - 'A';
+    else c -= '0';
+
+    return c;
+}
 
 }  // namespace
 

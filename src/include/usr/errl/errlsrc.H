@@ -116,6 +116,13 @@ private:
     uint64_t flatSize() const;
 
     /**
+     * @brief Import data
+     * @param[in] i_buf, pointer to the flattened data
+     * @return number of bytes consumed
+     */
+    uint64_t unflatten( const void * i_buf );
+    
+    /**
      *  @brief return the failing subsystem id value
      *
      *  @return  Failing subsystem ID
@@ -130,6 +137,15 @@ private:
      */
     void setSubSys( epubSubSystem_t i_ssid ){ iv_ssid = i_ssid; };
 
+
+    /**
+     * Convert ascii hex digit to binary
+     * @param[in] c, the ascii hex digit
+     * @return the binary value 0-15
+     * @note return value is only valid if input is valid hex digit
+     * '0'-'9', 'A'-'F', 'a'='f'
+     */
+    uint64_t aschex2bin(char c);
 
     // Instance data
     srcType_t       iv_srcType : 8; // SRC type, the ?? in SRC ??xxxxxx

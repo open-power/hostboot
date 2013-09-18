@@ -122,7 +122,11 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
                 (reallocUsrBuf(pDataLength));
     pData->type = HWAS::HW_CALLOUT;
     pData->priority = i_priority;
+#ifndef __HOSTBOOT_RUNTIME
     pData->cpuid = task_getcpuid();
+#else
+    pData->cpuid = (uint32_t)(-1);
+#endif
     pData->deconfigState = i_deconfigState;
     pData->gardErrorType = i_gardErrorType;
     memcpy(pData + 1, i_pTargetData, i_targetDataLength);
