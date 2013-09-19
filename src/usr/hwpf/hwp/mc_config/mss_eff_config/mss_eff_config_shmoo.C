@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_shmoo.C,v 1.7 2013/08/09 17:54:08 bellows Exp $
+// $Id: mss_eff_config_shmoo.C,v 1.8 2013/09/02 08:33:13 sasethur Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_shmoo.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -47,10 +47,13 @@
 //   1.5   | sauchadh |15-May-13| Fixed FW comments
 //   1.6   | sauchadh |6-Jun-13 | Added some more attributes
 //   1.7   | bellows  |09-Aug-13| Set default pattern to 0, per Sarvanan Req
+//   1.8   | sauchadh |2- Sep-13| Added random seed attribute 
 
 //----------------------------------------------------------------------
 //  My Includes
 //----------------------------------------------------------------------
+
+
 
 //----------------------------------------------------------------------
 //  Includes
@@ -115,6 +118,10 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target & i_target_mba) {
    uint8_t mcb_user_rank=0;
    uint8_t mcb_user_bank=0;
    uint8_t shmoo_mul_setup_call=0;
+   uint32_t rand_seed_val=0;
+   uint8_t rand_seed_type=0x01;
+   
+  
    
    rc = FAPI_ATTR_SET(ATTR_MCBIST_PRINTING_DISABLE, &i_target_mba, mcb_print_disable); if(rc) return rc; 
    rc = FAPI_ATTR_SET(ATTR_MCBIST_DATA_ENABLE, &i_target_mba, mcb_data_en); if(rc) return rc;
@@ -161,6 +168,8 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target & i_target_mba) {
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_ADDR_SCHMOO, &i_target_mba, cen_slew_rate_addr_schmoo); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_CLK_SCHMOO, &i_target_mba, cen_slew_rate_clk_schmoo); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO, &i_target_mba, cen_slew_rate_spcke_schmoo); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_MCBIST_RANDOM_SEED_VALUE, &i_target_mba, rand_seed_val); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_MCBIST_RANDOM_SEED_TYPE, &i_target_mba, rand_seed_type); if(rc) return rc;
    
 
        

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.36 2013/08/23 13:09:34 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.37 2013/09/04 08:50:49 lapietra Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -31,7 +31,7 @@
 // *! TITLE :mss_draminit_training_advanced.C
 // *! DESCRIPTION : Tools for centaur procedures
 // *! OWNER NAME : Saravanan Sethuraman          email ID:saravanans@in.ibm.com
-// *! BACKUP NAME: Mark D Bellows	 			 email ID:bellows@us.ibm.com
+// *! BACKUP NAME: Mark D Bellows	 	 email ID:bellows@us.ibm.com
 // #! ADDITIONAL COMMENTS :
 //
 // General purpose funcs
@@ -74,8 +74,9 @@
 //  1.32   | sasethur |04-Jun-13| Fixed for PortD cnfg, vref print for min setup, hold, fixed rdvref print, added set/reset mcbist attr
 //  1.33   | sasethur |12-Jun-13| Updated mcbist setup attribute 
 //  1.34   | sasethur |20-Jun-13| Fixed read_vref print, setup attribute
-//  1.35   | sasethur |08-Aug-13| Fixed fw comment.
+//  1.35   | sasethur |08-Aug-13| Fixed fw comment
 //  1.36   | sasethur |23-Aug-13| Ability to run MCBIST is enabled.
+//  1.37   | sasethur |04-Sep-13| Fixed fw review comment
 
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
@@ -84,7 +85,7 @@
 // Internal Vref controlled by this function & external vref platform to provide function we return value
 
 // Not supported
-// DDR4, DIMM Types 
+// DDR4, DIMM Types
 //----------------------------------------------------------------------
 //  Includes - FAPI
 //----------------------------------------------------------------------
@@ -1053,8 +1054,7 @@ fapi::ReturnCode set_attribute(const fapi::Target & i_target_mba)
 {
    fapi::ReturnCode rc;
    uint8_t l_mcbist_setup_multiple_set = 1;  //Hard coded it wont change
-   FAPI_ATTR_SET(ATTR_SCHMOO_MULTIPLE_SETUP_CALL, &i_target_mba, l_mcbist_setup_multiple_set);
-   if (rc) return rc;
+   rc =  FAPI_ATTR_SET(ATTR_SCHMOO_MULTIPLE_SETUP_CALL, &i_target_mba, l_mcbist_setup_multiple_set);
    return rc;
 }
 
@@ -1067,8 +1067,7 @@ fapi::ReturnCode reset_attribute(const fapi::Target & i_target_mba)
 {
    fapi::ReturnCode rc;
    uint8_t l_mcbist_setup_multiple_reset = 0; //Hard coded it wont change
-   FAPI_ATTR_SET(ATTR_SCHMOO_MULTIPLE_SETUP_CALL, &i_target_mba, l_mcbist_setup_multiple_reset);
-   if (rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_SCHMOO_MULTIPLE_SETUP_CALL, &i_target_mba, l_mcbist_setup_multiple_reset);
    return rc;
 }
 

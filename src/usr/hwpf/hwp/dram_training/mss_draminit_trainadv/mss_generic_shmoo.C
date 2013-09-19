@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: mss_generic_shmoo.C,v 1.66 2013/08/12 10:07:23 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.67 2013/09/04 09:21:33 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.67  |abhijit	|4-sep-13 | fixed fw comments for the host boot  
 //   1.65  |abhijit	|8-aug-13 | added binary schmoo first phase and modified training call 
 //   1.64  |abhijit	|17-jul-13| added rd dqs phase 2 
 //   1.63  |abhijit	|19-jun-13| fixed warnings in schmoo  
@@ -237,7 +238,7 @@ fapi::ReturnCode generic_shmoo::shmoo_save_rest(const fapi::Target & i_target,ui
 	if(i_mode == 0)
 	{
 		FAPI_INF(" Saving DP18 data bit direction register contents");
-		for(l_index = 0;l_index<9;l_index++)
+		for(l_index = 0;l_index<10;l_index++)
 		{ 	
 			l_value = l_Databitdir[l_index];
 			rc = fapiGetScom(i_target,l_value,l_shmoo1ab); if(rc) return rc;
@@ -252,7 +253,7 @@ fapi::ReturnCode generic_shmoo::shmoo_save_rest(const fapi::Target & i_target,ui
 	else if(i_mode == 1)
 	{
 		FAPI_INF(" Restoring DP18 data bit direction register contents");	
-		for(l_index = 0;l_index<9;l_index++)
+		for(l_index = 0;l_index<10;l_index++)
 		{ 	
 			l_val_u64 = i_content_array[l_index];
 			l_value = l_Databitdir[l_index];
