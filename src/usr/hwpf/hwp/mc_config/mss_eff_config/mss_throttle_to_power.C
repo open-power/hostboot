@@ -117,8 +117,7 @@ extern "C" {
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
-	char procedure_name[32];
-	sprintf(procedure_name, "mss_throttle_to_power");
+	const char* procedure_name = "mss_throttle_to_power";
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	uint32_t throttle_n_per_mba;
@@ -194,8 +193,7 @@ extern "C" {
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
-	char procedure_name[32];
-	sprintf(procedure_name, "mss_throttle_to_power_calc");
+	const char* procedure_name = "mss_throttle_to_power_calc";
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	const uint8_t MAX_NUM_PORTS = 2;

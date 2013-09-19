@@ -151,8 +151,7 @@ extern "C" {
     {
 	fapi::ReturnCode rc;
 
-	char procedure_name[32];
-	sprintf(procedure_name, "mss_bulk_pwr_throttles");
+	const char* procedure_name = "mss_bulk_pwr_throttles";
 	FAPI_IMP("*** Running %s on %s ***", procedure_name,
 		 i_target_mba.toEcmdString());
 

@@ -201,8 +201,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 {
     //const fapi::Target is centaur.mba
     fapi::ReturnCode rc;
-    char procedure_name[32]; 
-    sprintf(procedure_name, "mss_draminit_training_advanced");
+    const char* procedure_name = "mss_draminit_training_advanced";
     FAPI_INF("+++++++ Executing %s +++++++", procedure_name);
 	
     // Define attribute variables

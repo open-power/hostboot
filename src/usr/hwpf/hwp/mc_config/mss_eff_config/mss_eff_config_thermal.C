@@ -202,8 +202,7 @@ extern "C" {
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
-	char procedure_name[32];
-	sprintf(procedure_name, "mss_eff_config_thermal");
+	const char* procedure_name = "mss_eff_config_thermal";
 	FAPI_IMP("*** Running %s on %s ***", procedure_name,
 		 i_target_mba.toEcmdString());
 
@@ -1197,8 +1196,7 @@ extern "C" {
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
-	char procedure_name[32];
-	sprintf(procedure_name, "mss_eff_config_thermal_term");
+	const char* procedure_name = "mss_eff_config_thermal_term";
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	uint8_t number_nets_term_rd;
@@ -2045,8 +2043,7 @@ extern "C" {
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
-	char procedure_name[32];
-	sprintf(procedure_name, "mss_eff_config_thermal_get_cen_drv_value");
+	const char* procedure_name = "mss_eff_config_thermal_get_cen_drv_value";
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	switch (i_cen_dq_dqs_drv_imp)
