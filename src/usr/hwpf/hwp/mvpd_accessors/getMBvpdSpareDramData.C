@@ -33,18 +33,16 @@ extern "C"
 using namespace fapi;
 
 fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
-                                       const fapi::Target &i_dimm,
-                                       uint8_t &o_data)
-
+                                       uint8_t (&o_data)[DIMM_DQ_MAX_MBA_PORTS]
+                                                    [DIMM_DQ_MAX_MBAPORT_DIMMS]
+                                                    [DIMM_DQ_MAX_DIMM_RANKS])
 {
     // AM keyword layout
     const uint8_t NUM_MBAS =  2; // Two MBAs per Centaur
-    const uint8_t NUM_PORTS =  2; // Two ports per MBA
-    const uint8_t NUM_DIMMS = 2; // Two DIMMS per port
     const uint8_t NUM_MIRR_BYTES = 4; // Size of address mirror data
 
     // Struct for AM Keyword buffer
-    // Contains a simple array for the address mirror data and
+    // Contains a 1D array for the address mirror data and
     // a 2D array for the spare DRAM data.
     struct MirrorData
     {
@@ -57,11 +55,11 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
     };
     struct PortSpareData
     {
-        DimmSpareData iv_dimmSpareData[NUM_DIMMS];
+        DimmSpareData iv_dimmSpareData[DIMM_DQ_MAX_MBAPORT_DIMMS];
     };
     struct MbaSpareData
     {
-        PortSpareData iv_portSpareData[NUM_PORTS];
+        PortSpareData iv_portSpareData[DIMM_DQ_MAX_MBA_PORTS];
     };
     struct AmKeyword
     {
@@ -69,40 +67,19 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
         MbaSpareData iv_mbaSpareData[NUM_MBAS];
     };
 
-    // Current VPD AM keyword size
+    // AM keyword size
     const uint32_t AM_KEYWORD_SIZE = sizeof(AmKeyword);
     fapi::ReturnCode l_rc;
-    // Centaur target
+    // Centaur memory buffer target
     fapi::Target l_mbTarget;
     // MBvpd AM keyword buffer
     AmKeyword * l_pAmBuffer = NULL;
     uint32_t  l_AmBufSize = sizeof(AmKeyword);
 
-    // For old VPD without spare DRAM data
-    // Store data for all 4 ranks of this DIMM
-    const uint8_t VPD_WITHOUT_SPARE_LOW_NIBBLE = 0x55;
-    const uint8_t VPD_WITHOUT_SPARE_FULL_BYTE = 0xFF;
-
     do
     {
-        // Check to see if IS-DIMM
-        uint8_t l_dimmType = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_SPD_CUSTOM, &i_dimm, l_dimmType);
-        if (l_rc)
-        {
-            FAPI_ERR("getMBvpdSpareDramData: "
-                     "Error getting ATTR_SPD_CUSTOM");
-            break;
-        }
-        if (fapi::ENUM_ATTR_SPD_CUSTOM_NO == l_dimmType)
-        {
-            //IS-DIMM, return NO_SPARE
-            o_data = fapi::ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE;
-            break;
-        }
-
         // find the Centaur memory buffer from the passed MBA
-        l_rc = fapiGetParentChip (i_mba,l_mbTarget);
+        l_rc = fapiGetParentChip (i_mba, l_mbTarget);
         if (l_rc)
         {
             FAPI_ERR("getMBvpdSpareDramData: Finding the parent mb failed ");
@@ -110,84 +87,68 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
         }
 
         // Read AM keyword field
-        l_pAmBuffer = new AmKeyword;
+        l_pAmBuffer = new AmKeyword();
         l_rc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VSPD,
                                  fapi::MBVPD_KEYWORD_AM,
                                  l_mbTarget,
                                  reinterpret_cast<uint8_t *>(l_pAmBuffer),
                                  l_AmBufSize);
-
-        // Check for error or incorrect amount of data returned
-        if (l_rc || (l_AmBufSize < AM_KEYWORD_SIZE))
+        if (l_rc)
         {
-            // This handles two scenarios:
-            // 1. fapiGetMBvpdField has returned an error because
-            //    the AM keyword is not present in this DIMM's
-            //    VPD.
-            // 2. This DIMM does have the AM Keyword, however it
-            //    is in an old version of VPD and does not contain
-            //    any spare DRAM information.
-            // In both cases, the ATTR_SPD_DRAM_WIDTH
-            // attribute is used to determine spare DRAM availability.
-            // If x4 configuration, assume LOW_NIBBLE.
-            // Otherwise, FULL_BYTE.
-            // TODO RTC 84278: Undo the workaround for scenario 1 once the
-            // C-DIMM VPD is updated on all DIMMs to the current version.
-            uint8_t l_dramWidth = 0;
-            l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_WIDTH, &i_dimm, l_dramWidth);
-            if (l_rc)
-            {
-                FAPI_ERR("getMBvpdSpareDramData: "
-                         "Error getting DRAM spare data");
-                break;
-            }
-            // If x4 configuration, low nibble.
-            if (fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4 == l_dramWidth)
-            {
-                o_data = VPD_WITHOUT_SPARE_LOW_NIBBLE;
-                break;
-            }
-            // Else, full spare.
-            else
-            {
-                o_data = VPD_WITHOUT_SPARE_FULL_BYTE;
-                break;
-            }
+            FAPI_ERR("getMBvpdSpareDramData: "
+                     "Read of AM Keyword failed");
+            break;
         }
 
+        // Check for error or incorrect amount of data returned
+        if (l_AmBufSize < AM_KEYWORD_SIZE)
+        {
+            FAPI_ERR("getMBvpdSpareDramData:"
+                     " less AM keyword returned than expected %d < %d",
+                       l_AmBufSize, AM_KEYWORD_SIZE);
+            const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_AM;
+            const uint32_t & RETURNED_SIZE = l_AmBufSize;
+            FAPI_SET_HWP_ERROR(l_rc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
+            break;
+        }
 
-        // Return the spare DRAM availability for particular dimm
         // Find the position of the passed mba on the centuar
         uint8_t l_mba = 0;
         l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_mba, l_mba);
+
         if (l_rc)
         {
             FAPI_ERR("getMBvpdSpareDramData: Get MBA position failed ");
             break;
         }
-        // Find the mba port this dimm is connected to
-        uint8_t l_mbaPort = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &i_dimm, l_mbaPort);
-        if (l_rc)
+        // Data in the AM Keyword contains information for both MBAs and
+        // is stored in [mba][port][dimm] ([2][2][2]) format, where the
+        // third (dimm) dimension contains a byte where each two bits of that
+        // byte are the spare status for a particular rank.
+        // The caller expects data returned for a particular MBA,
+        // and where the ranks for each dimm are separately indexed,
+        // so conversion to a [port][dimm][rank] ([2][2][4]) format
+        // is necessary.
+        for (uint8_t i = 0; i < DIMM_DQ_MAX_MBA_PORTS; i++)
         {
-            FAPI_ERR("getMBvpdSpareDramData: "
-                     "Error getting MBA port number");
-            break;
+            for (uint8_t j = 0; j < DIMM_DQ_MAX_MBAPORT_DIMMS; j++)
+            {
+                // Mask to pull of two bits at a time from iv_dimmSpareData
+                uint8_t l_dimmMask = 0xC0;
+                // Shift amount decrements each time as l_dimmMask is shifted
+                // to the right
+                uint8_t l_rankBitShift = 6;
+                for (uint8_t k = 0; k < DIMM_DQ_MAX_DIMM_RANKS; k++)
+                {
+                    o_data[i][j][k] = ((l_pAmBuffer->iv_mbaSpareData[l_mba].
+                                       iv_portSpareData[i].iv_dimmSpareData[j].
+                                       iv_dimmSpareData & l_dimmMask) >>
+                                       l_rankBitShift);
+                    l_dimmMask >>= 2;
+                    l_rankBitShift -= 2;
+                }
+            }
         }
-        // Find the dimm number associated with this dimm
-        uint8_t l_dimm = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &i_dimm, l_dimm);
-        if (l_rc)
-        {
-            FAPI_ERR("getMBvpdSpareDramData: "
-                     "Error getting dimm number");
-            break;
-        }
-
-        o_data = l_pAmBuffer->iv_mbaSpareData[l_mba].\
-                 iv_portSpareData[l_mbaPort].\
-                 iv_dimmSpareData[l_dimm].iv_dimmSpareData;
-
     }while(0);
 
     delete l_pAmBuffer;

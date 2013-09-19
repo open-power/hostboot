@@ -514,13 +514,13 @@ fapi::ReturnCode fapiPlatGetSlopeInterceptData (
  * the Bad DQ Bitmap attribute
  * It should not be called directly.
  *
- *  @param[in]  i_pTarget   Target pointer
+ *  @param[in]  i_pTarget   DIMM target pointer
  *  @param[out] o_data      Bad DIMM DQ Bitmap
  *  @return     ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiPlatDimmGetBadDqBitmap (
                                    const fapi::Target * i_pTarget,
-                                   uint8_t (&o_data)[DIMM_DQ_MAX_DIMM_RANKS]\
+                                   uint8_t (&o_data)[DIMM_DQ_MAX_DIMM_RANKS]
                                                     [DIMM_DQ_RANK_BITMAP_SIZE]);
 
 /**
@@ -528,13 +528,13 @@ fapi::ReturnCode fapiPlatDimmGetBadDqBitmap (
  * the Bad DQ Bitmap attribute
  * It should not be called directly.
  *
- *  @param[in]  i_pTarget   Target pointer
+ *  @param[in]  i_pTarget   DIMM target pointer
  *  @param[in]  i_data      Bad DIMM DQ Bitmap
  *  @return     ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiPlatDimmSetBadDqBitmap (
                                    const fapi::Target * i_pTarget,
-                                   uint8_t (&i_data)[DIMM_DQ_MAX_DIMM_RANKS]\
+                                   uint8_t (&i_data)[DIMM_DQ_MAX_DIMM_RANKS]
                                                     [DIMM_DQ_RANK_BITMAP_SIZE]);
 
 //------------------------------------------------------------------------------
@@ -547,13 +547,15 @@ fapi::ReturnCode fapiPlatDimmSetBadDqBitmap (
  * the VPD DIMM Spare attribute
  * It should not be called directly.
  *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_data      Spare DRAM availability for DIMM
+ *  @param[in]  i_pTarget   MBA target pointer
+ *  @param[out] o_data      Spare DRAM availability for all DIMMs on MBA
  *  @return     ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiPlatDimmGetSpareDram (
                                     const fapi::Target * i_pTarget,
-                                    uint8_t &o_data);
+                                    uint8_t (&o_data)[DIMM_DQ_MAX_MBA_PORTS]
+                                                 [DIMM_DQ_MAX_MBAPORT_DIMMS]
+                                                    [DIMM_DQ_MAX_DIMM_RANKS]);
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting

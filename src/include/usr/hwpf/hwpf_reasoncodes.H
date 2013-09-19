@@ -62,6 +62,8 @@ namespace fapi
         MOD_VDDR_SEND_MSG                          = 0x17,
         MOD_PLAT_ATTR_SVC_GET_MIRR_DATA            = 0x18,
         MOD_PLAT_ATTR_SVC_GET_SPARE_DATA           = 0x19,
+        MOD_PLAT_ATTR_SVC_GET_BADDQ_DATA           = 0x1A,
+        MOD_PLAT_ATTR_SVC_SET_BADDQ_DATA           = 0x1B,
     };
 
     /**

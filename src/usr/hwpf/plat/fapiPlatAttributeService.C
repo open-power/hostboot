@@ -1349,7 +1349,7 @@ fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,
  * the Bad DQ Bitmap attribute
  * It should not be called directly.
  *
- *  @param[in]  i_pTarget   Target pointer
+ *  @param[in]  i_pTarget   DIMM target pointer
  *  @param[out] o_data      Bad DIMM DQ Bitmap
  *  @return     ReturnCode. Zero on success, else platform specified error
  */
@@ -1359,62 +1359,6 @@ fapi::ReturnCode fapiPlatDimmGetBadDqBitmap (
                                                      [DIMM_DQ_RANK_BITMAP_SIZE])
 {
     fapi::ReturnCode l_rc;
-    FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp, *i_pTarget, o_data, true);
-
-    if (l_rc)
-    {
-        FAPI_ERR("dimmGetBadDqBitmap: "
-                 "Error from dimmBadDqBitmapAccessHwp (get)");
-    }
-    return l_rc;
-}
-
-
-/**
- * @brief This function is called by the FAPI_ATTR_SET macro when setting
- * the Bad DQ Bitmap attribute
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[in]  i_data      Bad DIMM DQ Bitmap
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatDimmSetBadDqBitmap (
-                                    const fapi::Target * i_pTarget,
-                                    uint8_t (&i_data)[DIMM_DQ_MAX_DIMM_RANKS]\
-                                                     [DIMM_DQ_RANK_BITMAP_SIZE])
-{
-    fapi::ReturnCode l_rc;
-    FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp, *i_pTarget, i_data, false);
-
-    if (l_rc)
-    {
-        FAPI_ERR("dimmSetBadDqBitmap: "
-                 "Error from dimmBadDqBitmapAccessHwp (set)");
-    }
-    return l_rc;
-}
-
-//------------------------------------------------------------------------------
-// Function to support VPD_DIMM_SPARE attribute
-//  See dimm_spd_attributes.xml for detailed description
-//------------------------------------------------------------------------------
-
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * the VPD DIMM Spare attribute
- * It should not be called directly.
- *
- *  @param[in]  i_pTarget   Target pointer
- *  @param[out] o_data      Spare DRAM availability for DIMM
- *  @return     ReturnCode. Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatDimmGetSpareDram (
-                                    const fapi::Target * i_pTarget,
-                                    uint8_t &o_data)
-{
-
-    fapi::ReturnCode l_rc;
     TARGETING::Target * l_pTarget = NULL;
     TARGETING::TargetHandleList l_mbaList;
     do
@@ -1423,7 +1367,7 @@ fapi::ReturnCode fapiPlatDimmGetSpareDram (
         l_rc = getTargetingTarget(i_pTarget, l_pTarget);
         if (l_rc)
         {
-            FAPI_ERR("fapiPlatDimmGetSpareDram:Error from getTargetingTarget");
+            FAPI_ERR("fapiPlatDimmGetBadDqBitmap:Error from getTargetingTarget");
             break;
         }
 
@@ -1434,20 +1378,20 @@ fapi::ReturnCode fapiPlatDimmGetSpareDram (
 
         if (l_mbaList.size() != 1 )
         {
-            FAPI_ERR("fapiPlatDimmGetSpareDram: expect 1 mba %d ",
+            FAPI_ERR("fapiPlatDimmGetBadDqBitmap: expect 1 mba %d ",
                l_mbaList.size());
 
             /*@
              * @errortype
-             * @moduleid     fapi::MOD_PLAT_ATTR_SVC_GET_SPARE_DATA
+             * @moduleid     fapi::MOD_PLAT_ATTR_SVC_GET_BADDQ_DATA
              * @reasoncode   fapi::RC_NO_SINGLE_MBA
              * @userdata1    Number of MBAs
-             * @devdesc      fapiPlatDimmGetSpareDram could not find the
+             * @devdesc      fapiPlatDimmGetBadDqBitmap could not find the
              *               expected 1 mba from the passed dimm target
              */
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                fapi::MOD_PLAT_ATTR_SVC_GET_SPARE_DATA,
+                fapi::MOD_PLAT_ATTR_SVC_GET_BADDQ_DATA,
                 fapi::RC_NO_SINGLE_MBA,
                 l_mbaList.size());
 
@@ -1462,8 +1406,120 @@ fapi::ReturnCode fapiPlatDimmGetSpareDram (
                                  static_cast<void *>(l_mbaList[0]));
 
 
-        FAPI_EXEC_HWP(l_rc, getMBvpdSpareDramData, l_mbaTarget, *i_pTarget,
-                      o_data);
+        FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp,
+                      l_mbaTarget, *i_pTarget, o_data, true);
+
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatDimmGetBadDqBitmap: "
+                     "Error from dimmBadDqBitmapAccessHwp (get)");
+        }
+
+    }while(0);
+    return l_rc;
+}
+
+
+/**
+ * @brief This function is called by the FAPI_ATTR_SET macro when setting
+ * the Bad DQ Bitmap attribute
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   DIMM target pointer
+ *  @param[in]  i_data      Bad DIMM DQ Bitmap
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatDimmSetBadDqBitmap (
+                                    const fapi::Target * i_pTarget,
+                                    uint8_t (&i_data)[DIMM_DQ_MAX_DIMM_RANKS]\
+                                                     [DIMM_DQ_RANK_BITMAP_SIZE])
+{
+    fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pTarget = NULL;
+    TARGETING::TargetHandleList l_mbaList;
+    do
+    {
+        // Get the Targeting Target
+        l_rc = getTargetingTarget(i_pTarget, l_pTarget);
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatDimmSetBadDqBitmap:Error from getTargetingTarget");
+            break;
+        }
+
+        // Find MBA target from DIMM target
+        getParentAffinityTargets(l_mbaList, l_pTarget, TARGETING::CLASS_UNIT,
+                                 TARGETING::TYPE_MBA, false);
+
+
+        if (l_mbaList.size() != 1 )
+        {
+            FAPI_ERR("fapiPlatDimmSetBadDqBitmap: expect 1 mba %d ",
+               l_mbaList.size());
+
+            /*@
+             * @errortype
+             * @moduleid     fapi::MOD_PLAT_ATTR_SVC_SET_BADDQ_DATA
+             * @reasoncode   fapi::RC_NO_SINGLE_MBA
+             * @userdata1    Number of MBAs
+             * @devdesc      fapiPlatDimmSetBadDqBitmap could not find the
+             *               expected 1 mba from the passed dimm target
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_PLAT_ATTR_SVC_SET_BADDQ_DATA,
+                fapi::RC_NO_SINGLE_MBA,
+                l_mbaList.size());
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+            break;
+        }
+
+
+        // Create the Fapi Target
+        fapi::Target l_mbaTarget(TARGET_TYPE_MBA_CHIPLET,
+                                 static_cast<void *>(l_mbaList[0]));
+
+
+        FAPI_EXEC_HWP(l_rc, dimmBadDqBitmapAccessHwp,
+                      l_mbaTarget, *i_pTarget, i_data, false);
+
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatdimmSetBadDqBitmap: "
+                     "Error from dimmBadDqBitmapAccessHwp (set)");
+        }
+
+    }while(0);
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------
+// Function to support VPD_DIMM_SPARE attribute
+//  See dimm_spd_attributes.xml for detailed description
+//------------------------------------------------------------------------------
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the VPD DIMM Spare attribute
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   MBA target pointer
+ *  @param[out] o_data      Spare DRAM availability for MBA
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatDimmGetSpareDram (
+                                    const fapi::Target * i_pTarget,
+                                    uint8_t (&o_data)[DIMM_DQ_MAX_MBA_PORTS]
+                                                 [DIMM_DQ_MAX_MBAPORT_DIMMS]
+                                                    [DIMM_DQ_MAX_DIMM_RANKS])
+{
+
+    fapi::ReturnCode l_rc;
+    do
+    {
+        FAPI_EXEC_HWP(l_rc, getMBvpdSpareDramData, *i_pTarget, o_data);
 
         if (l_rc)
         {

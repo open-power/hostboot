@@ -35,6 +35,8 @@
  *                          mjjones     01/30/2013  Cope with platform endian
  *                                                  differences
  *                          dedahle     06/22/2013  Show unconnected DQ lines
+ *                          dedahle     09/20/2013  Temporarily use
+ *                                                  ATTR_EFF_DIMM_SPARE
  */
 
 #include <dimmBadDqBitmapAccessHwp.H>
@@ -60,10 +62,11 @@ extern "C"
 {
 
 /**
- * @brief Called by dimmBadDqBitmapAccessHwp() to query ATR_VPD_DIMM_SPARE
+ * @brief Called by dimmBadDqBitmapAccessHwp() to query ATTR_EFF_DIMM_SPARE
  * and set bits for unconnected spare DRAM in caller's data.
  *
  *
+ * @param[in] i_mba       Reference to MBA Target.
  * @param[in] i_dimm      Reference to DIMM Target.
  * @param[o]  o_data      Reference to Bad DQ Bitmap set by
  *                        the caller.  Only the SPARE_DRAM_DQ_BYTE_NUMBER_INDEX
@@ -73,6 +76,7 @@ extern "C"
  */
 
 fapi::ReturnCode dimmUpdateDqBitmapSpareByte(
+    const fapi::Target & i_mba,
     const fapi::Target & i_dimm,
     uint8_t (&o_data)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE])
 {
@@ -80,27 +84,42 @@ fapi::ReturnCode dimmUpdateDqBitmapSpareByte(
 
     do
     {
-        // Spare DRAM Attribute
-        uint8_t l_dimmSpare = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_SPARE, &i_dimm, l_dimmSpare);
+        // Spare DRAM Attribute: Returns spare DRAM availability for
+        // all DIMMs associated with the target MBA.
+        uint8_t l_mbaSpare[DIMM_DQ_MAX_MBA_PORTS][DIMM_DQ_MAX_MBAPORT_DIMMS]
+                                                 [DIMM_DQ_MAX_DIMM_RANKS] = {};
+        // TODO RTC 84506 Change to use ATTR_VPD_DIMM_SPARE once Cronus
+        // makes transition to reading VPD.
+        l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SPARE, &i_mba, l_mbaSpare);
         if (l_rc)
         {
-            FAPI_ERR("dimmCheckSpareDram: "
+            FAPI_ERR("dimmUpdateDqBitmapSpareByte: "
                      "Error getting DRAM Spare data");
             break;
         }
-
-        // Bitmask and beginning bit shift values for decoding
-        // ATTR_VPD_DIMM_SPARE attribute as described in
-        // dimm_spd_attributes.xml.
-        uint8_t l_dimmMask = 0xC0;
-        uint8_t l_rankBitShift = 6;
-
+        // Find the mba port this dimm is connected to
+        uint8_t l_mbaPort = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &i_dimm, l_mbaPort);
+        if (l_rc)
+        {
+            FAPI_ERR("dimmUpdateDqBitmapSpareByte: "
+                     "Error getting MBA port number");
+            break;
+        }
+        // Find the dimm number associated with this dimm
+        uint8_t l_dimm = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &i_dimm, l_dimm);
+        if (l_rc)
+        {
+            FAPI_ERR("dimmUpdateDqBitmapSpareByte: "
+                     "Error getting dimm number");
+            break;
+        }
         // Iterate through each rank of this DIMM
         for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
         {
             // Handle spare DRAM configuration cases
-            switch ((l_dimmSpare & l_dimmMask) >> l_rankBitShift)
+            switch (l_mbaSpare[l_mbaPort][l_dimm][i])
             {
                 case fapi::ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE:
                     // Set DQ bits reflecting unconnected
@@ -122,9 +141,6 @@ fapi::ReturnCode dimmUpdateDqBitmapSpareByte(
                     o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] = 0x00;
                     break;
             }
-
-            l_dimmMask >>= 2;
-            l_rankBitShift -= 2;
         }
     }while(0);
     return l_rc;
@@ -136,6 +152,7 @@ extern "C"
 {
 
 fapi::ReturnCode dimmBadDqBitmapAccessHwp(
+    const fapi::Target & i_mba,
     const fapi::Target & i_dimm,
     uint8_t (&io_data)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE],
     const bool i_get)
@@ -156,12 +173,12 @@ fapi::ReturnCode dimmBadDqBitmapAccessHwp(
     // Centaur DQ to DIMM Connector DQ Wiring attribute.
     uint8_t (&l_wiringData)[DIMM_DQ_NUM_DQS] =
         *(reinterpret_cast<uint8_t(*)[DIMM_DQ_NUM_DQS]>
-            (new uint8_t[DIMM_DQ_NUM_DQS]));
+            (new uint8_t[DIMM_DQ_NUM_DQS]()));
 
     // DQ SPD Attribute
     uint8_t (&l_spdData)[DIMM_DQ_SPD_DATA_SIZE] =
         *(reinterpret_cast<uint8_t(*)[DIMM_DQ_SPD_DATA_SIZE]>
-            (new uint8_t[DIMM_DQ_SPD_DATA_SIZE]));
+            (new uint8_t[DIMM_DQ_SPD_DATA_SIZE]()));
 
     // Memory Bus Width Attribute
     uint8_t l_eccBits = 0;
@@ -274,7 +291,7 @@ fapi::ReturnCode dimmBadDqBitmapAccessHwp(
                 }
             }
             // Check spare DRAM
-            l_rc = dimmUpdateDqBitmapSpareByte(i_dimm, io_data);
+            l_rc = dimmUpdateDqBitmapSpareByte(i_mba, i_dimm, io_data);
             if (l_rc)
             {
                 FAPI_ERR("dimmBadDqBitmapAccessHwp: "
