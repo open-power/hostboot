@@ -1850,7 +1850,7 @@ sub generate_proc
 
     # fsp-specific proc attributes
     do_plugin('fsp_proc', $scompath, $scomsize, $scanpath, $scansize,
-            $proc, $fruid, $ipath, $hwTopology, $mboxpath, $mboxsize,
+            $node, $proc, $fruid, $ipath, $hwTopology, $mboxpath, $mboxsize,
             $ordinalId );
 
     # Data from PHYP Memory Map
