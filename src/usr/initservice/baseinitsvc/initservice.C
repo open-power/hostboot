@@ -615,6 +615,52 @@ void InitService::registerBlock(void* i_vaddr, uint64_t i_size,
     }
 }
 
+
+void Shutdown(uint64_t i_status )
+{
+    void * plid = new uint64_t;
+
+    *((uint64_t *)plid) = i_status;
+
+    // spawn a detached thread to handle the shutdown
+    // request - need to do this because the initservice
+    // is going to try and send a sync message to the errl
+    // manager to shutdown
+    tid_t l_tid = task_create(
+            &InitService::Shutdown, plid );
+
+    TRACFCOMP( g_trac_initsvc,
+            INFO_MRK"shutdown tid=%d", l_tid );
+
+}
+
+void * InitService::Shutdown( void * i_args )
+{
+
+    TRACFCOMP( g_trac_initsvc, ENTER_MRK"Shutdown()" );
+
+    // detach the process from the calling process.
+    task_detach();
+
+    uint64_t plid = *(reinterpret_cast<uint64_t*>(i_args));
+
+    TRACDCOMP( g_trac_initsvc, "plid 0x%x", plid );
+    // request a shutdown, passing in the terminating
+    // error plid as the status.
+    INITSERVICE::doShutdown( plid );
+
+    // delete the storage for the plid;
+    delete ((uint64_t *)i_args);
+
+    i_args = NULL;
+
+    TRACFCOMP( g_trac_initsvc, EXIT_MRK"Shutdown()" );
+
+    return i_args;
+}
+
+
+
 void doShutdown ( uint64_t i_status,
                   uint64_t i_payload_base,
                   uint64_t i_payload_entry,

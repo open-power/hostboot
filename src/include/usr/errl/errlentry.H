@@ -312,6 +312,14 @@ public:
     void setTermState(const errlTermState_t i_termState);
 
     /**
+     * @brief Helper function to determine if log is a terminating error
+     *
+     *
+     * @return  returns true if error will result in system termination.
+     */
+    bool isTerminateLog() const;
+
+    /**
      *  @brief Add data to the iv_Src user data words.
      *
      *  @param[in] i_data - information to add to the user data word 1.
@@ -615,8 +623,8 @@ private:
     std::vector<uint64_t> iv_btAddrs;       // list of addresses for the backtrace
     ErrlUserDetailsBackTrace * iv_pBackTrace; // Pointer to back trace
 
-    // TODO need to interpret term state and terminate accordingly.
-    // TODO termstate is presently not being flattend into PEL
+    // termstate will not be flattend into PEL, its only used by
+    // hostboot.
     errlTermState_t iv_termState;
 
 };

@@ -287,11 +287,12 @@ enum epubSubSystem_t
 /**
  * @brief Terminating flag definitions
  * Needs to fit into 1 word (32-bits) for flattening purposes.
- * TODO Termination state and termination action.
  */
 enum errlTermState_t
 {
     TERM_STATE_NO_FLAGS        = 0x00000000,
+    TERM_STATE_MNFG            = 0x10000000,
+    TERM_STATE_SOFT            = 0x20000000,
     TERM_STATE_UNKNOWN         = 0xFFFFFFFF,
 };
 

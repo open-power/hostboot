@@ -99,6 +99,20 @@ void doShutdown ( uint64_t i_status,
                   uint64_t i_payload_entry = 0,
                   uint64_t i_payload_data = 0) NO_RETURN;
 
+
+/**
+ * @brief Creates a separate thread and calls doShutdown
+ *
+ * @param[in] i_status - Shutdown status to be passed along on shutdown
+ *
+ * @return Nothing
+ *
+ * @Note: added for errlmanager to call so errlmanager continues
+ * to run in case there are errors in the shutdown path
+ *
+ */
+void Shutdown( uint64_t i_status );
+
 /**
  * @brief This function will return whether or not we are SPless
  *

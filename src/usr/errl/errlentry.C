@@ -570,6 +570,32 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
 
 }
 ///////////////////////////////////////////////////////////////////////////////
+// Determine if this log should cause a termination
+bool ErrlEntry::isTerminateLog() const
+{
+    bool l_terminate = false;
+
+    switch( iv_termState )
+    {
+        case TERM_STATE_MNFG:
+            l_terminate = true;
+            break;
+
+        case TERM_STATE_SOFT:
+            l_terminate = true;
+            break;
+
+        default:
+            l_terminate = false;
+            break;
+
+    }
+
+    return l_terminate;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Map the target type to correct subsystem ID using a binary search
 epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_target )
 {

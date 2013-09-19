@@ -245,38 +245,55 @@ void ErrlManager::errlogMsgHndlr ( void )
         switch( theMsg->type )
         {
             case ERRLOG_NEEDS_TO_BE_COMMITTED_TYPE:
-            {
-
-                //Extract error log handle from the message. We need the error
-                //log handle to pass along to saveErrlogEntry and sendMboxMsg
-                l_err = (errlHndl_t) theMsg->extra_data;
-
-                //Ask the ErrlEntry to assign commit component, commit time
-                l_err->commit( (compId_t) theMsg->data[0] );
-
-                //Write the error log to L3 memory till PNOR is implemented
-                //RTC #47517 for future task to write error log to PNOR
-                saveErrLogEntry ( l_err );
-
-                //Create a mbox message with the error log and send it to FSP
-                //We only send error log to FSP when mailbox is enabled
-                if( MBOX::mailbox_enabled() )
                 {
-                    sendMboxMsg ( l_err );
-                }
 
-                //Ask the ErrlEntry to process any callouts
-                l_err->processCallout();
+                    //Extract error log handle from the message. We need the
+                    // error log handle to pass along to saveErrlogEntry and
+                    // sendMboxMsg
+                    l_err = (errlHndl_t) theMsg->extra_data;
 
-                //We are done with the error log handle so delete it.
-                delete l_err;
-                l_err = NULL;
+                    //Ask the ErrlEntry to assign commit component, commit time
+                    l_err->commit( (compId_t) theMsg->data[0] );
 
-                //We are done with the msg
-                msg_free(theMsg);
+                    //Write the error log to L3 memory till PNOR is implemented
+                    //RTC #47517 for future task to write error log to PNOR
+                    saveErrLogEntry ( l_err );
 
-                // else go back and wait for a next msg
-                break;
+                    //Create a mbox message with the error log and send it to
+                    // FSP.
+                    // We only send error log to FSP when mailbox is enabled
+                    if( MBOX::mailbox_enabled() )
+                    {
+                        sendMboxMsg ( l_err );
+                    }
+
+                    //Ask the ErrlEntry to process any callouts
+                    l_err->processCallout();
+
+                    //Ask if it is a terminating log
+                    if( l_err->isTerminateLog() )
+                    {
+
+                        TRACFCOMP( g_trac_errl, INFO_MRK
+                                   "Terminating error was commited"
+                                   " errlmanager is reqesting a shutdown.");
+
+                        INITSERVICE::Shutdown(l_err->plid());
+
+                        TRACDCOMP( g_trac_errl,
+                                INFO_MRK"shutdown in progress" );
+
+                    }
+
+                    //We are done with the error log handle so delete it.
+                    delete l_err;
+                    l_err = NULL;
+
+                    //We are done with the msg
+                    msg_free(theMsg);
+
+                    // else go back and wait for a next msg
+                    break;
                 }
             case ERRLOG_COMMITTED_ACK_RESPONSE_TYPE:
                 //Hostboot must keep track and clean up hostboot error
@@ -293,9 +310,13 @@ void ErrlManager::errlogMsgHndlr ( void )
             case ERRLOG_SHUTDOWN:
                 TRACFCOMP( g_trac_errl, INFO_MRK "Shutdown event received" );
 
+                // respond before shutting down our queue etc..
+                msg_respond ( iv_msgQ, theMsg );
                 //Start shutdown process for error log
                 errlogShutdown();
-                msg_respond ( iv_msgQ, theMsg );
+
+                TRACFCOMP( g_trac_errl, INFO_MRK "Shutdown event processed" );
+
                 break;
 
             default:

@@ -219,6 +219,18 @@ public:
                       uint64_t i_payload_entry = 0,
                       uint64_t i_payload_data = 0);
 
+    /**
+     * @brief Creates detatched thread and calls doShutdown
+     *
+     * @param[in] i_status - Shutdown status to be passed along on shutdown
+     *
+     * @return Nothing
+     * @note Added to enable errl manager to continue to run in termination
+     * path
+     */
+
+static void * Shutdown( void * io_args );
+
 
 protected:
 
