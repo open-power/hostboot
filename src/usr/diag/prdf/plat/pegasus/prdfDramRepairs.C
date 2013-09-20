@@ -246,7 +246,7 @@ bool processBadDimms( TargetHandle_t i_mba, uint8_t i_badDimmMask )
 
 //------------------------------------------------------------------------------
 
-bool screenBadDqs( TargetHandle_t i_mba )
+bool screenBadDqs( TargetHandle_t i_mba, const std::vector<CenRank> & i_ranks )
 {
     #define PRDF_FUNC "[screenBadDqs] "
 
@@ -257,20 +257,19 @@ bool screenBadDqs( TargetHandle_t i_mba )
 
     errlHndl_t errl = NULL; // Initially NULL, will create if needed.
 
-    for ( uint32_t r = 0; r < MASTER_RANKS_PER_MBA; r++ )
+    for ( std::vector<CenRank>::const_iterator rank = i_ranks.begin();
+          rank != i_ranks.end(); rank++ )
     {
-        CenRank rank ( r );
-        CenDqBitmap bitmap;
-
         // The HW procedure to read the bad DQ attribute will callout the DIMM
         // if it has DRAM Repairs VPD and the DISABLE_DRAM_REPAIRS MNFG policy
         // flag is set. PRD will simply need to iterate through all the ranks
         // to ensure all DIMMs are screen and the procedure will do the rest.
 
-        if ( SUCCESS != getBadDqBitmap(i_mba, rank, bitmap, true) )
+        CenDqBitmap bitmap;
+        if ( SUCCESS != getBadDqBitmap(i_mba, *rank, bitmap, true) )
         {
             PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mba), rank.getMaster() );
+                      getHuid(i_mba), rank->getMaster() );
             analysisErrors = true;
             continue; // skip this rank
         }
@@ -291,28 +290,28 @@ bool screenBadDqs( TargetHandle_t i_mba )
 
 //------------------------------------------------------------------------------
 
-void deployDramSpares( TargetHandle_t i_mba )
+void deployDramSpares( TargetHandle_t i_mba,
+                       const std::vector<CenRank> & i_ranks )
 {
     bool x4 = isDramWidthX4(i_mba);
 
-    for ( uint32_t r = 0; r < MASTER_RANKS_PER_MBA; r++ )
+    for ( std::vector<CenRank>::const_iterator rank = i_ranks.begin();
+          rank != i_ranks.end(); rank++ )
     {
-        CenRank rank ( r );
-
         // Doesn't matter which DRAM is spared as long as they are all spared.
         // Also, make sure the ECC spare is on a different DRAM than the spare
         // DRAM.
-        CenSymbol symPort0 = CenSymbol::fromDimmDq( i_mba, rank, 0, 0 );
-        CenSymbol symPort1 = CenSymbol::fromDimmDq( i_mba, rank, 0, 1 );
-        CenSymbol symEccSp = CenSymbol::fromDimmDq( i_mba, rank, 8, 0 );
+        CenSymbol symPort0 = CenSymbol::fromDimmDq( i_mba, *rank, 0, 0 );
+        CenSymbol symPort1 = CenSymbol::fromDimmDq( i_mba, *rank, 0, 1 );
+        CenSymbol symEccSp = CenSymbol::fromDimmDq( i_mba, *rank, 8, 0 );
 
         int32_t l_rc = SUCCESS;
 
-        l_rc  = mssSetSteerMux( i_mba, rank, symPort0, false );
-        l_rc |= mssSetSteerMux( i_mba, rank, symPort1, false );
+        l_rc  = mssSetSteerMux( i_mba, *rank, symPort0, false );
+        l_rc |= mssSetSteerMux( i_mba, *rank, symPort1, false );
 
         if ( x4 )
-            l_rc |= mssSetSteerMux( i_mba, rank, symEccSp, true );
+            l_rc |= mssSetSteerMux( i_mba, *rank, symEccSp, true );
 
         if ( SUCCESS != l_rc )
         {
@@ -347,19 +346,31 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
             break;
         }
 
+        std::vector<CenRank> ranks;
+        int32_t l_rc = getMasterRanks( i_mba, ranks );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( "["PRDF_FUNC"] getMasterRanks() failed" );
+
+            RDR::commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_mba,
+                                  PRDFSIG_RdrInternalFail, true );
+
+            break; // Assume user meant to disable DRAM repairs.
+        }
+
         bool spareDramDeploy = mnfgSpareDramDeploy();
 
         if ( spareDramDeploy )
         {
             // Deploy all spares for MNFG corner tests.
-            RDR::deployDramSpares(i_mba);
+            RDR::deployDramSpares( i_mba, ranks );
         }
 
         if ( areDramRepairsDisabled() )
         {
             // DRAM Repairs are disabled in MNFG mode, so screen all DIMMs with
             // VPD information.
-            if ( RDR::screenBadDqs(i_mba) ) calloutMade = true;
+            if ( RDR::screenBadDqs(i_mba, ranks) ) calloutMade = true;
 
             // No need to continue because there will not be anything to
             // restore.

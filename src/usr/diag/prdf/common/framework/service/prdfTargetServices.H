@@ -44,6 +44,8 @@
 namespace PRDF
 {
 
+class CenRank;
+
 enum PositionBounds
 {
     MAX_NODE_PER_SYS    = 8,
@@ -278,16 +280,13 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target );
 //##############################################################################
 
 /**
- * @brief   Returns the list of master ranks for a logical DIMM.
- * @param   i_memTarget MBA target or child of MBA.
- * @param   i_portSlct  Port select (0-1).
- * @param   i_dimmSlct  DIMM select (0-1).
- * @param   o_ranks     List of master ranks for a logical DIMM.
+ * @brief   Returns the list of configured master ranks for an MBA.
+ * @param   i_memTrgt MBA target or child of MBA.
+ * @param   o_ranks   The returned list.
  * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
  */
-int32_t getMasterRanks( TARGETING::TargetHandle_t i_memTarget,
-                        uint32_t i_portSlct, uint32_t i_dimmSlct,
-                        std::vector<uint32_t> & o_ranks );
+int32_t getMasterRanks( TARGETING::TargetHandle_t i_memTrgt,
+                        std::vector<CenRank> & o_ranks );
 
 /**
  * @brief   Returns the DMI bus channel for the given memory target.
