@@ -1,4 +1,4 @@
-#-- $Id: p8.dmi.scom.initfile,v 1.22 2013/07/30 20:45:32 jgrell Exp $ 
+#-- $Id: p8.dmi.scom.initfile,v 1.23 2013/08/21 18:35:16 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,13 +7,14 @@
 ##      Based on SETUP_ID_MODE DMI_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODPV_MC_WRAP.IODPV_MC_WRAP.figdb
 ##
-##   Created on Tue Jul 30 10:22:10 CDT 2013, by jgrell
+##   Created on Wed Aug 21 12:18:17 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jgr13082100| jgr     |08-21-13| Added tx_zcal inits so they can be removed from scan
  ## -- jfg13072400| jfg     |07-24-13| HW253558: change pgooddly to MAX from lab feedback
  ## -- mbs13071200| mbs     |07-12-13| Updates for HW239870 and HW258990                
  ## --            |         |        | Disable recal adjustment for allv1 (DFE bug)     
@@ -74,6 +75,20 @@ define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 7));
 define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 6));
 
 
+
+#BUSCTL.BUS_CTL_REGS.TX_IMPCAL_P_4X_PB
+scom 0x800F1C6002011A3F { 
+	bits, scom_data, expr;
+	tx_zcal_p_4x, 0b00100, any;
+}
+
+#BUSCTL.BUS_CTL_REGS.TX_IMPCAL_SWO2_PB
+scom 0x800F2C6002011A3F { 
+	bits, scom_data, expr;
+	tx_zcal_sm_max_val, 0b1000110, any;
+     tx_zcal_sm_min_val,  0b0010101   , def_IS_HW;
+     tx_zcal_sm_min_val,  0b0010110  , def_IS_VBU;
+}
 
 #RX3.RXCTL.RX_CTL_REGS.RX_BER_CHK_PG
 scom 0x800AF06002011A3F { 

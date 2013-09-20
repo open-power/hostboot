@@ -1,8 +1,10 @@
-#-- $Id: p8.dmi.custom.scom.initfile,v 1.12 2013/06/27 15:07:02 jgrell Exp $
+#-- $Id: p8.dmi.custom.scom.initfile,v 1.16 2013/09/17 22:28:51 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.15|jgrell  |09/17/13|Added DD2 specific inits
+#--     1.13|jgrell  |09/12/13|Re-added "Override" settings
 #--     1.9 |thomsen |04/30/13|Added TGT1. to ATTR_CHIP_EC* attribute instances to reference a chip target rather than a chiplet target
 #--     1.8 |jgrell  |04/18/13|Added EC level control of the Recal DFE, DDC, and CTLE enable bits. ('0' when EC < 20)
 #--     1.7 |jgrell  |03/14/13|Added temporary masking of the GCR Buffer Parity Checkers in the GCR Master until the source of the error can be found. This ungates the lab.
@@ -254,18 +256,64 @@ scom 0x800.0b(tx_mode_pg)(tx_grp3)(lane_na).0x(dmi0_gcr_addr) {
     tx_msbswap,      (ATTR_EI_BUS_TX_MSBSWAP & 0x01);
 }
 
-#--**************************************************************************************************************
-#----------------------------------------------------------------------------------------------------------------
-# Recal 
-#----------------------------------------------------------------------------------------------------------------
-#--**************************************************************************************************************
-# HW235842
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+# Recal  (and part of DMI DFE Override)
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+# HW235842 and HW244323
 
 scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
 bits,                         	scom_data, 	expr;
-rx_rc_enable_dfe_h1_cal,      	0b0,       	TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0;
-rx_rc_enable_ddc,		0b0,		TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
-rx_rc_enable_ctle_cal,		0b0,		TGT1.ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
+#@thi - fix compiler error
+rx_rc_enable_dfe_h1_cal,      	0b0,       	any; #temp for DD2 testing. Previously -->  TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0 || ATTR_DMI_DFE_OVERRIDE==1;
+rx_rc_enable_ddc,		0b0,		any; #temp for DD2 testing. Previously -->  TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
+rx_rc_enable_ctle_cal,		0b0,		any; #temp for DD2 testing. Previously -->  TGT1.ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
+rx_rc_enable_h1ap_tweak,        0b0,            ATTR_DMI_DFE_OVERRIDE==1;
+}
+
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+# DMI DFE Override  (HW244323)
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+
+#scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
+#bits,                         	scom_data, 	expr;
+#rx_rc_enable_dfe_h1_cal,      	0b0,       	ATTR_DMI_DFE_OVERRIDE==1;
+#rx_rc_enable_h1ap_tweak,        0b0,            ATTR_DMI_DFE_OVERRIDE==1;
+#}
+
+scom 0x800.0b(rx_eo_step_cntl_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
+bits,                         	scom_data, 	expr;
+rx_eo_enable_dfe_h1_cal,      	0b0,       	ATTR_DMI_DFE_OVERRIDE==1;
+rx_eo_enable_h1ap_tweak,      	0b0,       	ATTR_DMI_DFE_OVERRIDE==1;
+}
+
+scom 0x800.0b(rx_amax_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
+bits,                         	scom_data, 	expr;
+rx_amax_high,		      	0b01101110,	ATTR_DMI_DFE_OVERRIDE==1;
+rx_amax_low,		      	0b01010000,	ATTR_DMI_DFE_OVERRIDE==1;
+}
+
+scom 0x800.0b(rx_amp_val_pl)(rx_grp3)(def_all_lanes).0x(dmi0_gcr_addr) {
+bits,                         	scom_data, 	expr;
+rx_amp_gain,		      	0b1001,		ATTR_DMI_DFE_OVERRIDE==1;
+}
+
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+#-- DD2 Murano
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+
+scom 0x800.0b(rx_timeout_sel_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_sls_timeout_sel_dd2,       0b1010,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+    rx_ds_bl_timeout_sel_dd2,     0b101,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+    rx_cl_timeout_sel_dd2,        0b010,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+    rx_wt_timeout_sel_dd2,        0b111,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+    rx_ds_timeout_sel_dd2,        0b110,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
 }
 
 ############################################################################################

@@ -339,10 +339,15 @@ define rx_recal_status=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_wt_check_count=48:52; 	 #start_bit=48, number_of_bit=5
 define rx_wt_check_lanes=53:54; 	 #start_bit=53, number_of_bit=2
 define rx_sls_timeout_sel=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_sls_timeout_sel_dd2=48:51; 	 #start_bit=49, number_of_bit=4
 define rx_ds_bl_timeout_sel=51:53; 	 #start_bit=51, number_of_bit=3
+define rx_ds_bl_timeout_sel_dd2=52:54; 	 #start_bit=52, number_of_bit=3
 define rx_cl_timeout_sel=54:56; 	 #start_bit=54, number_of_bit=3
+define rx_cl_timeout_sel_dd2=55:57; 	 #start_bit=55, number_of_bit=3
 define rx_wt_timeout_sel=57:59; 	 #start_bit=57, number_of_bit=3
+define rx_wt_timeout_sel_dd2=58:60; 	 #start_bit=58, number_of_bit=3
 define rx_ds_timeout_sel=60:62; 	 #start_bit=60, number_of_bit=3
+define rx_ds_timeout_sel_dd2=61:63; 	 #start_bit=61, number_of_bit=3
 define rx_eo_offset_timeout_sel=48:50; 	 #start_bit=48, number_of_bit=3
 define rx_eo_amp_timeout_sel=51:53; 	 #start_bit=51, number_of_bit=3
 define rx_eo_ctle_timeout_sel=54:56; 	 #start_bit=54, number_of_bit=3

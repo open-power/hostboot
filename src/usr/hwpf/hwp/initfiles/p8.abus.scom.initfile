@@ -1,4 +1,4 @@
-#-- $Id: p8.abus.scom.initfile,v 1.14 2013/07/30 20:45:32 jgrell Exp $ 
+#-- $Id: p8.abus.scom.initfile,v 1.15 2013/08/21 18:35:16 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,13 +7,14 @@
 ##      Based on SETUP_ID_MODE A_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODUV_ABUS_WRAP.IODUV_ABUS_WRAP.figdb
 ##
-##   Created on Tue Jul 30 10:22:22 CDT 2013, by jgrell
+##   Created on Wed Aug 21 12:18:29 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jgr13082100| jgr     |08-21-13| Added tx_zcal inits so they can be removed from scan
  ## -- jfg13072400| jfg     |07-24-13| HW253558: change pgooddly to MAX from lab feedback
  ## -- mbs13071200| mbs     |07-12-13| Updates for HW239870 and HW258990
  ## -- jgr13062500| jgr     |06-25-13| Added DFE override settings (HW244323)
@@ -62,6 +63,24 @@ define def_is_master = (prim_id < conn_id);
 define def_is_slave  = (prim_id > conn_id);
 
 
+
+#BUSCTL.BUS_CTL_REGS.TX_IMPCAL_P_4X_PB
+#@thi - hack
+#scom 0x800F1C6008010C3F { 
+scom 0x800F1C0008010C3F { 
+	bits, scom_data, expr;
+	tx_zcal_p_4x, 0b00100, any;
+}
+
+#BUSCTL.BUS_CTL_REGS.TX_IMPCAL_SWO2_PB
+#@thi - hack
+#scom 0x800F2C6008010C3F { 
+scom 0x800F2C0008010C3F { 
+	bits, scom_data, expr;
+	tx_zcal_sm_max_val, 0b1000110, any;
+     tx_zcal_sm_min_val,  0b0010101   , def_IS_HW;
+     tx_zcal_sm_min_val,  0b0010110  , def_IS_VBU;
+}
 
 #RX0.RXCTL.RX_CTL_REGS.RX_AMAX_PG
 scom 0x800A680008010C3F { 

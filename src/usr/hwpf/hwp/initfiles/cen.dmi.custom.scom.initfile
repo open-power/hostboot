@@ -1,8 +1,13 @@
-#-- $Id: cen.dmi.custom.scom.initfile,v 1.9 2013/06/27 15:07:47 jgrell Exp $
+#-- $Id: cen.dmi.custom.scom.initfile,v 1.14 2013/09/17 22:29:16 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.13|jgrell  |09/17/13|Added DD2 specific inits
+#--     1.11|jgrell  |09/12/13|Re-added "Override" scoms
+#--     1.10|jgrell  |08/21/13|Removed "Override" scoms
+#--     1.9 |jgrell  |06/27/13|Removed previous change and will debug
+#--     1.8 |jgrell  |06/25/13|Added DFE override settings and updated sls and dyn_recal_overall timeout settings
 #--     1.7 |jgrell  |04/18/13|Added EC level control of the Recal DFE, DDC, and CTLE enable bits. ('0' when EC < 20)
 #--     1.6 |jgrell  |03/14/13|Added temporary masking of the GCR Buffer Parity Checkers in the GCR Master until the source of the error can be found. This ungates the lab.
 #--     1.5 |thomsen |03/07/13|Temporarily mask the GCR Buffer Parity Checker until the source of the error can be found. This ungates the lab.
@@ -51,73 +56,6 @@ define def_IS_VBU = (SYS.ATTR_IS_SIMULATION == 1);
 
 define def_all_lanes=11111;
 
-
-#--***********************************************************************************
-#-------------------------------------------------------------------------------------
-#-- Overrides
-#-------------------------------------------------------------------------------------
-#--***********************************************************************************
-
-# ./iotk put rx_servo_timeout_sel_D=1001
-# 0x800B60000201043F
-scom 0x800.0b(rx_servo_to1_pp)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
-bits,                     scom_data;
-rx_servo_timeout_sel_d,   0b1001;
-}
-# ./iotk put rx_servo_timeout_sel_H=1110
-# 0x800B68000201043F
-scom 0x800.0b(rx_servo_to2_pp)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
-bits,                     scom_data;
-rx_servo_timeout_sel_h,   0b1110;
-}
-# ./iotk put rx_servo_timeout_sel_I=1011
-# ./iotk put rx_servo_timeout_sel_J=1100
-# 0x800B70000201043F
-scom 0x800.0b(rx_servo_to3_pp)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
-bits,                     scom_data;
-rx_servo_timeout_sel_i,   0b1011;
-rx_servo_timeout_sel_j,   0b1100;
-rx_servo_timeout_sel_k,   0b1101;
-}
-# ./iotk put rx_wt_timeout_sel=111
-# ./iotk put rx_ds_bl_timeout_sel=101
-# ./iotk put rx_ds_timeout_sel=110
-#./iotk put rx_sls_timeout_sel=111
-# 0x800898000201043F
-scom 0x800.0b(rx_timeout_sel_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
-bits,                     scom_data;
-rx_wt_timeout_sel,        0b111;
-rx_ds_bl_timeout_sel,     0b101;
-rx_ds_timeout_sel,        0b110;
-rx_sls_timeout_sel,       0b001;
-}
-
-# ./iotk put rx_bit_lock_timeout_sel=110
-# 0x800B08000201043F
-scom 0x800.0b(rx_mode1_pp)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
-bits,                     scom_data;
-rx_bit_lock_timeout_sel,  0b110;
-}
-# ./iotk put rx_eo_offset_timeout_sel=111
-# ./iotk put rx_eo_amp_timeout_sel=111
-# ./iotk put rx_eo_ctle_timeout_sel=111
-# ./iotk put rx_eo_h1ap_timeout_sel=111
-# ./iotk put rx_eo_ddc_timeout_sel=111
-# 0x800910000201043F
-scom 0x800.0b(rx_timeout_sel1_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
-bits,                     scom_data;
-rx_eo_offset_timeout_sel, 0b111;
-rx_eo_amp_timeout_sel,    0b111;
-rx_eo_ctle_timeout_sel,   0b111;
-rx_eo_h1ap_timeout_sel,   0b111;
-rx_eo_ddc_timeout_sel,    0b111;
-}
-
-
-scom 0x800.0b(rx_eo_convergence_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
-bits,                               scom_data;
-rx_eo_converged_end_count,          0b111;
-}
 #--***********************************************************************************
 #-------------------------------------------------------------------------------------
 #     __                        ____                             __  __
@@ -377,16 +315,62 @@ scom_data;
 
 #--**************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------
-# Recal 
+# Recal  (and part of DMI DFE Override)
 #----------------------------------------------------------------------------------------------------------------
 #--**************************************************************************************************************
-# HW235842
+# HW235842 and HW244323
 
 scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
 bits,                         	scom_data, 	expr;
-rx_rc_enable_dfe_h1_cal,      	0b0,       	ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0;
-rx_rc_enable_ddc,		0b0,		ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
-rx_rc_enable_ctle_cal,		0b0,		ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
+#@thi - fix compiler error
+rx_rc_enable_dfe_h1_cal,      	0b0,       	any;  #ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0 || ATTR_DMI_DFE_OVERRIDE==1;
+rx_rc_enable_ddc,		0b0,		any;  #ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
+rx_rc_enable_ctle_cal,		0b0,		any;  #ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
+rx_rc_enable_h1ap_tweak,        0b0,            ATTR_DMI_DFE_OVERRIDE==1;
+}
+
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+# DMI DFE Override  (HW244323)
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+
+#scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0)(lane_na).0x(dmi0_gcr_addr) {
+#bits,                         	scom_data, 	expr;
+#rx_rc_enable_dfe_h1_cal,      	0b0,       	ATTR_DMI_DFE_OVERRIDE==1;
+#rx_rc_enable_h1ap_tweak,        0b0,            ATTR_DMI_DFE_OVERRIDE==1;
+#}
+
+scom 0x800.0b(rx_eo_step_cntl_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
+bits,                         	scom_data, 	expr;
+rx_eo_enable_dfe_h1_cal,      	0b0,       	ATTR_DMI_DFE_OVERRIDE==1;
+rx_eo_enable_h1ap_tweak,      	0b0,       	ATTR_DMI_DFE_OVERRIDE==1;
+}
+
+scom 0x800.0b(rx_amax_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
+bits,                         	scom_data, 	expr;
+rx_amax_high,		      	0b01101110,	ATTR_DMI_DFE_OVERRIDE==1;
+rx_amax_low,		      	0b01010000,	ATTR_DMI_DFE_OVERRIDE==1;
+}
+
+scom 0x800.0b(rx_amp_val_pl)(rx_grp0)(def_all_lanes).0x(cn_gcr_addr) {
+bits,                         	scom_data, 	expr;
+rx_amp_gain,		      	0b1001,		ATTR_DMI_DFE_OVERRIDE==1;
+}
+
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+#-- DD2 Murano
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+
+scom 0x800.0b(rx_timeout_sel_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_sls_timeout_sel_dd2,       0b1010,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
+    rx_ds_bl_timeout_sel_dd2,     0b101,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
+    rx_cl_timeout_sel_dd2,        0b010,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
+    rx_wt_timeout_sel_dd2,        0b111,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
+    rx_ds_timeout_sel_dd2,        0b110,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
 }
 
 ############################################################################################

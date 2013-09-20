@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: ei_bus_attributes.xml,v 1.12 2013/09/06 20:04:08 dcrowell Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with chips.
@@ -100,7 +101,6 @@
     <platInit/>
   </attribute>
 
-<!-- Not yet supported by firmware
   <attribute>
     <id>ATTR_DMI_DFE_OVERRIDE</id>
     <targetType>TARGET_TYPE_MCS_CHIPLET,TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -110,6 +110,5 @@
     <valueType>uint8</valueType>
     <platInit/>
   </attribute>
--->
 
 </attributes>

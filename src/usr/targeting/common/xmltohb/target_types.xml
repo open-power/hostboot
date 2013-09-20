@@ -1068,6 +1068,7 @@
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
     <attribute><id>DMI_REFCLOCK_SWIZZLE</id></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
+    <attribute><id>DMI_DFE_OVERRIDE</id></attribute>
 </targetType>
 
 <targetType>
@@ -1202,6 +1203,7 @@
     <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
     <attribute><id>L4_BANK_DELETE_VPD</id></attribute>
+    <attribute><id>DMI_DFE_OVERRIDE</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->
