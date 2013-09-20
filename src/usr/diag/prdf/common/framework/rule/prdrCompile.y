@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,6 +56,7 @@
 using namespace PRDR_COMPILER;
 
 %}
+
 
 /* Union for the 'yylval' variable in lex or $$ variables in yacc code.  Used
  * to store the data associated with a parsed token.
@@ -157,6 +160,7 @@ using namespace PRDR_COMPILER;
 %token PRDR_FILTER
 %token PRDR_FILTER_SINGLE_BIT
 %token PRDR_FILTER_PRIORITY
+%token PRDR_FILTER_SECONDARY
 
     /* Terminal tokens for Doxygen-style comments */
 %token <str_ptr> PRDR_DOX_COMMENT
@@ -596,6 +600,12 @@ grpfilt_item: PRDR_FILTER_PRIORITY '(' bitandlist ')'
     }
 ;
 
+grpfilt_item: PRDR_FILTER_SECONDARY '(' bitandlist ')'
+    {
+        $$ = new std::list<Group_Filter *>;
+        $$->push_back(new Group_Filter_Secondary($3));
+    }
+;
 
 
 grouplines:     { $$ = new Group(); }

@@ -253,7 +253,36 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         PlatServices::getCurrentTime( timeOfError );
         serviceData.SetTOE( timeOfError );
 
-        int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
+        ServiceDataCollector l_tempSdc = serviceData;
+        l_tempSdc.setPrimaryPass();
+        sdc.service_data = &l_tempSdc;
+
+        int32_t analyzeRc = systemPtr->Analyze( sdc, i_attentionType );
+
+        if( PRD_SCAN_COMM_REGISTER_ZERO == analyzeRc )
+        {
+            // So, the first pass has failed. Hence, there are no primary
+            // bits set. We must start second pass to see if there are any
+            //secondary bits set.
+            sdc.service_data = &serviceData;
+
+            // starting the second pass
+            PRDF_INF( "PRDF::main() No bits found set in first pass,"
+                      " starting second pass" );
+            analyzeRc = systemPtr->Analyze( sdc, i_attentionType );
+
+            // merging capture data of primary pass with capture data of
+            // secondary pass for better FFDC.
+            serviceData.GetCaptureData().mergeData(
+                                    l_tempSdc.GetCaptureData());
+
+        }
+        else
+        {
+            serviceData = l_tempSdc;
+            sdc.service_data = &serviceData;
+        }
+
         // flush Cache to free up the memory
         RegDataCache::getCachedRegisters().flush();
         ScanFacility      & l_scanFac = ScanFacility::Access();
@@ -262,8 +291,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         l_scanFac.ResetPluginRegister();
         if(analyzeRc != SUCCESS && g_prd_errlHndl == NULL)
         {
-            // We have a bad RC, but no error log - Fill out SDC and have
-            // service generator make one
             (serviceData.GetErrorSignature())->setErrCode(
                                                     (uint16_t)analyzeRc );
             serviceData.SetCallout(SP_CODE);

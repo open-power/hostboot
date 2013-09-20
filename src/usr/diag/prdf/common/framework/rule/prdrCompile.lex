@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -147,6 +149,7 @@ day         { return PRDR_TIME_DAY; }
 filter      { return PRDR_FILTER; }
 singlebit   { return PRDR_FILTER_SINGLE_BIT; }
 priority    { return PRDR_FILTER_PRIORITY; }
+secondarybits   { return PRDR_FILTER_SECONDARY; }
 
 "\<\<"      { return PRDR_OP_LEFTSHIFT; }
 "\>\>"      { return PRDR_OP_RIGHTSHIFT; }

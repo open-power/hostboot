@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -80,28 +82,36 @@ namespace PRDF
 int32_t ErrorRegister::SetErrorSignature( STEP_CODE_DATA_STRUCT & error,
                                           BitKey & bl )
 {
-  int32_t rc = SUCCESS;
-  ErrorSignature * esig = error.service_data->GetErrorSignature();
-  uint32_t blen = bl.size();
-  switch(blen)
-  {
-    case 0:
-      (error.service_data->GetErrorSignature())->setErrCode(PRD_SCAN_COMM_REGISTER_ZERO);
-      if(xNoErrorOnZeroScr != true) rc = PRD_SCAN_COMM_REGISTER_ZERO;
-      break;
+    int32_t rc = SUCCESS;
+    ErrorSignature * esig = error.service_data->GetErrorSignature();
+    uint32_t blen = bl.size();
+    switch( blen )
+    {
+        case 0:
+            (error.service_data->GetErrorSignature())->setErrCode(
+                                                PRD_SCAN_COMM_REGISTER_ZERO );
+            if( error.service_data->isPrimaryPass() )
+            {
+                rc = PRD_SCAN_COMM_REGISTER_ZERO;
+            }
+            else if( !xNoErrorOnZeroScr )
+            {
+                rc = PRD_SCAN_COMM_REGISTER_ZERO;
+            }
+            break;
 
-    case 1:
-      esig->setErrCode(bl.getListValue(0));
-      break;
+        case 1:
+            esig->setErrCode(bl.getListValue(0));
+            break;
 
-    default:
-      for(uint32_t index = 0; index < blen; ++index)  //dg01a
-      {                                                             //dg01a
-        esig->setErrCode(bl.getListValue(index));                 //dg01a
-      }                                                             //dg01a
-      esig->setErrCode(PRD_MULTIPLE_ERRORS);
-  };
-  return rc;
+        default:
+            for( uint32_t index = 0; index < blen; ++index )
+            {
+                esig->setErrCode(bl.getListValue(index));
+            }
+            esig->setErrCode(PRD_MULTIPLE_ERRORS);
+    };
+    return rc;
 }
 
 /*---------------------------------------------------------------------*/
@@ -119,113 +129,114 @@ ErrorRegister::ErrorRegister( SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm,
 
 int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
 {
-  int32_t rc = SUCCESS;
+    int32_t rc = SUCCESS;
 
-  uint32_t l_savedErrSig = 0;  // @pw01
+    uint32_t l_savedErrSig = 0;
 
-  if(xScrId == 0x0fff)
-  {
-    (error.service_data->GetErrorSignature())->setRegId(scr.GetAddress());
-  }
-  else
-  {
-    (error.service_data->GetErrorSignature())->setRegId(xScrId);
-  }
-
-  // Get Data from hardware
-  const BIT_STRING_CLASS &bs = Read(error.service_data->GetCauseAttentionType()); // @pw02
-  BitKey bl;     // null bit list has length 0
-
-  if (scr_rc == SUCCESS)
-  {
-    bl = Filter(bs);
-    rc = SetErrorSignature(error,bl);  //dg02c - made function of this block of code
-    // @pw01
-    // Save signature to determine if it changes during resolution execution.
-    l_savedErrSig = (error.service_data->GetErrorSignature())->getSigId();
-  }
-
-  uint32_t res_rc = Lookup(error, bl); // lookup and execute the resolutions
-  if(SUCCESS == rc) rc = res_rc; // previous rc has prioity over res_rc
-
-
-  // @pw01
-  // If we had a DD02 and the signature changes, ignore DD02.
-  if ((rc == PRD_SCAN_COMM_REGISTER_ZERO) &&
-      ((error.service_data->GetErrorSignature())->getSigId()
-        != l_savedErrSig)
-     )
-  {
-      // Found a better answer during the DD02 analysis.
-      rc = res_rc;
-  }
-
-
-  if(scr_rc == SUCCESS)
-  {
-    FilterUndo(bl); // dg03a
-    // NOTE:  This is an unusual work-a-round for NOT clearing
-    //        particular FIR bits in a register because they are cleared
-    //        in another part of the plugin code.  jl01
-    if(rc == PRD_NO_CLEAR_FIR_BITS)
+    if(xScrId == 0x0fff)
     {
-        rc = SUCCESS;  //Return success to indicate that we understand the DDFF
+        ( error.service_data->GetErrorSignature() )->setRegId(scr.GetAddress());
     }
     else
     {
-        int32_t reset_rc;
-        reset_rc = Reset(bl,error);
-        if(rc == SUCCESS)rc = reset_rc;
+        ( error.service_data->GetErrorSignature() )->setRegId( xScrId );
     }
-  }
-  else // scr read failed
-  {
-    (error.service_data->GetErrorSignature())->setErrCode(PRD_SCANCOM_FAILURE);
-    rc = scr_rc;
-  }
 
-  return(rc);
+    // Get Data from hardware
+    const BIT_STRING_CLASS &bs =
+                Read( error.service_data->GetCauseAttentionType() );
+    BitKey bl;     // null bit list has length 0
+
+    if ( scr_rc == SUCCESS )
+    {
+        bl = Filter( bs );
+        rc = SetErrorSignature( error,bl );
+
+        // Save signature to determine if it changes during resolution
+        // execution.
+        l_savedErrSig = (error.service_data->GetErrorSignature())->getSigId();
+    }
+
+    uint32_t res_rc = Lookup(error, bl); // lookup and execute the resolutions
+    if(SUCCESS == rc) rc = res_rc; // previous rc has prioity over res_rc
+
+    // If we had a DD02 and the signature changes, ignore DD02.
+    if ( rc == PRD_SCAN_COMM_REGISTER_ZERO )
+    {
+        uint32_t l_currentSig =
+                    error.service_data->GetErrorSignature()->getSigId();
+        if( l_currentSig != l_savedErrSig )
+        {
+            // Found a better answer during the DD02 analysis.
+            rc = res_rc;
+        }
+    }
+
+    if( scr_rc == SUCCESS )
+    {
+        FilterUndo( bl );
+        // NOTE:  This is an unusual work-a-round for NOT clearing
+        //        particular FIR bits in a register because they are cleared
+        //        in another part of the plugin code.
+        if( rc == PRD_NO_CLEAR_FIR_BITS )
+        {
+            //Return success to indicate that we understand the DDFF
+            rc = SUCCESS;
+        }
+        else
+        {
+            int32_t reset_rc;
+            reset_rc = Reset(bl,error);
+            if( rc == SUCCESS ) rc = reset_rc;
+        }
+    }
+    else // scr read failed
+    {
+        ( error.service_data->GetErrorSignature() )->setErrCode(
+                                                        PRD_SCANCOM_FAILURE );
+        rc = scr_rc;
+    }
+    return(rc);
 }
 
 /*---------------------------------------------------------------------*/
 
 const BIT_STRING_CLASS & ErrorRegister::Read(ATTENTION_TYPE i_attn)
 {
-  scr_rc = scr.Read();
-  return (*scr.GetBitString(i_attn));
+    scr_rc = scr.Read();
+    return (*scr.GetBitString(i_attn));
 }
 
 /*---------------------------------------------------------------------*/
 
-BitKey ErrorRegister::Filter
-(const BIT_STRING_CLASS & bs)
+BitKey ErrorRegister::Filter( const BIT_STRING_CLASS & bs )
 {
-  BitKey bit_list;
-  bit_list = bs;
-  return(bit_list);
+    BitKey bit_list;
+    bit_list = bs;
+    return( bit_list );
 }
 
 /*---------------------------------------------------------------------*/
 
-int32_t ErrorRegister::Lookup(STEP_CODE_DATA_STRUCT & sdc, BitKey & bl) // dg02c dg03c
+int32_t ErrorRegister::Lookup(STEP_CODE_DATA_STRUCT & sdc, BitKey & bl)
 {
-  int32_t rc = SUCCESS;
-//  if (bl.GetListLength() == 0) return(rMap.GetDefault());  /dg00d
-  ResolutionList rList;
-  rMap.LookUp(rList,bl,sdc); // dg04c
-  // SetErrorSignature(sdc,bl);   // LookUp may have changed bl dg02a dg04d
-  for(ResolutionList::iterator i = rList.begin(); i != rList.end(); ++i)
-  {
-    rc |= (*i)->Resolve(sdc);
-  }
-  return rc;
+    int32_t rc = SUCCESS;
+    ResolutionList rList;
+    rc = rMap.LookUp( rList,bl,sdc );
+    for( ResolutionList::iterator i = rList.begin(); i != rList.end(); ++i )
+    {
+        rc |= (*i)->Resolve( sdc );
+    }
+
+    return rc;
 }
 
 /*---------------------------------------------------------------------*/
 
-int32_t ErrorRegister::Reset(const BitKey & bit_list, STEP_CODE_DATA_STRUCT & error)
+int32_t ErrorRegister::Reset( const BitKey & bit_list,
+                              STEP_CODE_DATA_STRUCT & error )
 {
-  return(SUCCESS);
+    return(SUCCESS);
 }
 
 } // end namespace PRDF

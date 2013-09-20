@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -124,18 +126,13 @@ public:
 protected:  // functions
 
   /**
-   Filter the bit string (if a filter is provided) & convert it to a BitList
-   <ul>
-   <br><b>Parameters:  </b> Bit String
-   <br><b>Returns:     </b> Bit List
-   <br><b>Requirements:</b> Read()
-   <br><b>Promises:    </b> Bit list representation of the (filtered) bit string
-   <br><b>Exceptions:  </b> None.
-   <br><b>Notes:       </b> filter is called only if provided
-                            - DEFINTION in iipErrorRegisterMask.C
-   </ul><br>
+   * @brief Filter the bit string and  convert it to a BitList
+   * @param   i_bs      bit string
+   * @param   io_sdc    reference to STEP_CODE_DATA struct
+   * @return  bit key
    */
-  virtual BitKey Filter(const BIT_STRING_CLASS & bs);
+  virtual BitKey Filter( const BIT_STRING_CLASS & bs,
+                         STEP_CODE_DATA_STRUCT & io_sdc );
 
   /**
    * Certain filters need to be reversed in order for Reset() to work right

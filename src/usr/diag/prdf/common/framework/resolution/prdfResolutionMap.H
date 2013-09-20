@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -178,17 +180,18 @@ public:
   void AddRange(const char *i_ble,
                 Resolution * r1, Resolution * r2, Resolution * r3,
                 Resolution * r4, Resolution * r5, Resolution * r6) { Add(i_ble,r1,r2,r3,r4,r5,r6); }
-  /**
-   Look up a Resolution for a bitlist
-   @param bitList
-   @returns List of all Resolutions that match
-   @pre none
-   @post Resolution returned is only valid until the next call to LookUp or this object is destroyed.
-   i_bitList may be modified
-   @notes if the bitList does not have a match then the defaultResolution is returned.
-   */
-    void LookUp( ResolutionList & o_list, BitKey & io_bitList,
-                 STEP_CODE_DATA_STRUCT & scd );
+   /**
+    * @brief    Look up resolutions associated with a bitlist
+    * @param    o_list     list of resolution.
+    *                      All the resolutions associated with a particular bit
+    *                      is stacked in this list.
+    * @param    io_bitList bit key under analysis.
+    * @param    scd        reference to STEP_CODE_STRUCT
+    * @return   PRD_SCAN_COMM_REGISTER_ZERO, if filter returns bitkey of zero
+    *           size, SUCCESS otherwise.
+    */
+   int32_t  LookUp( ResolutionList & o_list, BitKey & io_bitList,
+                    STEP_CODE_DATA_STRUCT & scd );
 
   /**
    * @brief Get the stored filter associated with this resolution map.

@@ -143,6 +143,9 @@ public:
        /** If this flag is set, We are mainly interested in getting signature
         *  for attention. */
        PASS_ISOLATION_ONLY = 0x01,
+       /** If this flag is set, only bits not marked as secondary
+        *  meaning ( primary ) are taken up for analysis. */
+       PASS_PRIMARY        = 0x02,
    };
 #ifndef PRDF_SDC_FLAGS_MAP_ONLY
 
@@ -561,6 +564,21 @@ public:
      * @brief Clears isolation only flag.
      */
     void clearIsolationOnlyPass() { analysisFlags &= !PASS_ISOLATION_ONLY ;}
+
+    /**
+     * @brief Returns true if it is a primary analysis phase, false otherwise.
+     */
+    bool isPrimaryPass(void) const
+    { return ( ( analysisFlags & PASS_PRIMARY ) != 0 ) ; }
+    /**
+     * @brief sets status bit meant for primary analysis pass.
+     */
+    void setPrimaryPass() { analysisFlags |= PASS_PRIMARY ; }
+
+    /**
+     * @brief clears status bit meant for primary analysis pass.
+     */
+    void clearPrimaryPass() { analysisFlags &= ~PASS_PRIMARY; }
 
   /**
    Set ErrorType for Gard

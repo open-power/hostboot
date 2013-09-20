@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,7 +38,6 @@
 #if !defined(PRDFBITLKEY_H)
 #include <prdfBitKey.H>
 #endif
-
 #include <vector>
 
 namespace PRDF
@@ -46,157 +47,159 @@ namespace PRDF
 /*--------------------------------------------------------------------*/
 
 class BitKey;
+struct STEP_CODE_DATA_STRUCT;
 
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */
 /*--------------------------------------------------------------------*/
 
 /**
- FilterClass Specifies and interface for removing unwanted bits from a BitKey.
- Abstract base class
- @see BitKey
-*/
+ * @brief Defines FilterClass
+ * Describes  interface for removing unwanted bits from a BitKey.
+ * It is a abstract base class.
+ * see BitKey
+ */
 class FilterClass
 {
-public:
+    public:
 
+    /**
+     * @brief Destructor. This implementation does nothing
+     */
+    virtual ~FilterClass(void);
 
-  /**
-   Destructor. This implementation does nothing
-   */
-  virtual ~FilterClass(void);
+    /**
+     * @brief  Applies filter on given bitkey
+     * @param  i_bitList  bitkey on which filter acts.
+     * @param  io_sdc      reference to STEP_CODE_DATA struct.
+     * @return true if bit key is modified false otherwise.
+     */
+    virtual bool Apply( BitKey & io_bit_list,
+                        STEP_CODE_DATA_STRUCT & io_sdc ) = 0;
 
+    /**
+     * Undo the filter effect (if possible)
+     * @post bit_list may be modified
+     * @Return tru if bit_list was modified, otherwise false
+     * @note: bit_lists are sometimes used to reset an error register based on
+     * the bit that was analyzed. If the Apply() function modifes the bit_list
+     * in such a way that make it unusable to reset the error register
+     * (eg. moves a bit to a new postition) than the Undo() function should put
+     * the bit_list back into a state that can be used to reset an error
+     * register.
+     */
+    virtual bool Undo(BitKey & io_bit_list) { return false; }
 
-  /**
-   Apply filter to the BitKey.
-   @post bit_list may be modified
-   @return true if bit_list was modified, otherwise false
-   */
-  virtual bool Apply(BitKey & io_bit_list) = 0;
+    protected:
 
-  /**
-   * Undo the filter effect (if possible)
-   * @post bit_list may be modified
-   * @Return tru if bit_list was modified, otherwise false
-   * @note: bit_lists are sometimes used to reset an error register based on the bit that was
-   * analyzed. If the Apply() function modifes the bit_list in such a way that make it unusable
-   * to reset the error register (eg. moves a bit to a new postition) than the Undo() function
-   * should put the bit_list back into a state that can be used to reset an error register.
-   */
-  virtual bool Undo(BitKey & io_bit_list) { return false; }
-
-protected:
-
-  /**
-   Default Constructor
-   @note The default compiler generated copy constructor and assignment operator
-   are adaquate.
-   */
-  FilterClass(void) {}
+    /**
+     * @brief  Default Constructor
+     * @note The default compiler generated copy constructor and assignment
+     *       operator are adaquate.
+     */
+    FilterClass(void) {}
 
 };
 
-//! FilterPriority
-/*!
- FilterPriority maintains a "subset" BitKey or a "priority" set of bits.
- When this filter is applied to a BitKey, If the "priority" BitKey is a subset of the
- BitKey than the BitKey becomes the priorty BitKey. (The non-priority bits are turned off);
- Otherwise the BitKey remains unchanged.
+/** @brief  description of FilterPriority filter.
 
- \verbatim
- Examples:
- Priority BitKey: ("1")
- Original BitKey: ("1", "5", "31")
- Filtered BitKey: ("1")
+ * FilterPriority maintains a "subset" BitKey or a "priority" set of bits.
+ * When this filter is applied to a BitKey, If the "priority" BitKey is a subset
+ * of the BitKey than the BitKey becomes the priorty BitKey. (The non-priority
+ * bits are turned off ).Otherwise the BitKey remains unchanged.
 
- Priority BitKey: ("1")
- Original BitKey: ("5", "31")
- Filtered BitKey: ("5", "31")
+ * Examples:
+ * Priority BitKey: ("1")
+ * Original BitKey: ("1", "5", "31")
+ * Filtered BitKey: ("1")
 
- Priority BitKey: ("2", "7")
- Original BitKey: ("2", "5", "31")
- Filtered BitKey: ("2", "5", "31")
+ * Priority BitKey: ("1")
+ * Original BitKey: ("5", "31")
+ * Filtered BitKey: ("5", "31")
 
- Priority BitKey: ("2", "7")
- Original BitKey: ("2", "7", "31")
- Filtered BitKey: ("2", "7")
- \endverbatim
+ * Priority BitKey: ("2", "7")
+ * Original BitKey: ("2", "5", "31")
+ * Filtered BitKey: ("2", "5", "31")
+
+ * Priority BitKey: ("2", "7")
+ * Original BitKey: ("2", "7", "31")
+ * Filtered BitKey: ("2", "7")
  */
 class FilterPriority : public FilterClass
 {
-public:
+    public:
 
-  /*!
-   Constructor
-   \param i_bld ptr bit list string encoding
-   */
-  FilterPriority(const char * i_ble)
-  : ivBitKey(i_ble)
-  {}
-
-
-  /*!
-   Constructor
-   \param iBitList BitKey
-   */
-  FilterPriority(const BitKey & iBitList)
-  : ivBitKey(iBitList)
-  {}
-
-  /*!
-   Apply the filter to a bit list
-   \param ioBitList to apply filter to
-   \returns true if iBitList modified otherwise false
-   */
-  virtual bool Apply(BitKey & ioBitList);
-
-protected:
+    /**
+     * @brief Constructor
+     * @param i_ble ptr bit list string encoding
+     */
+    FilterPriority(const char * i_ble)
+    : ivBitKey(i_ble)
+    {}
 
 
-  BitKey ivBitKey;
+    /*!
+    Constructor
+    \param iBitList BitKey
+    */
+    FilterPriority(const BitKey & iBitList)
+    : ivBitKey(iBitList)
+    {}
 
+    /**
+    * @brief  Applies priority filter on given bitkey.
+    * @param  i_bitList  bitkey on which filter acts.
+    * @param  io_sdc      reference to STEP_CODE_DATA struct.
+    * @return true if bit key is modified false otherwise.
+    */
+    virtual bool Apply( BitKey & ioBitList, STEP_CODE_DATA_STRUCT & io_sdc );
+
+    protected:
+
+    BitKey ivBitKey;
 };
 
 //! PrioritySingleBitFilter
 /*!
- PrioritySingleBitFilter removes all but one bit from a BitKey object.
- Priority (to not be removed) is given to the bits specified and in the order
- specified.
- @par Example
- @code
-      const char * const BIT_LIST_STRING_31_26 = "\x20\x1B"; // priority bits
-      PrioritySingleBitFilter psbFilter(BIT_LIST_STRING_31_26);
-      ScanCommRegisterChip scr(...);  // see iipScanCommRegisterChip.h
-      ResolutionMap resMap(...);      // see iipResolutionMap.h
+PrioritySingleBitFilter removes all but one bit from a BitKey object.
+Priority (to not be removed) is given to the bits specified and in the order
+specified.
+@par Example
+@code
+  const char * const BIT_LIST_STRING_31_26 = "\x20\x1B"; // priority bits
+  PrioritySingleBitFilter psbFilter(BIT_LIST_STRING_31_26);
+  ScanCommRegisterChip scr(...);  // see iipScanCommRegisterChip.h
+  ResolutionMap resMap(...);      // see iipResolutionMap.h
 
-      // when the error register is read, the resulting list of bits on
-      // is passed to psbFilter. the result is used to look up a resolution
-      // in the ResultionMapa resMap and the resolution is called
-      ErrorRegisterMask ereg(scr,resMap,&psbFilter);
-      ...
-      rc = ereg.Analyze(serviceData);  // See iipErrorRegisterMask.h
-      //   ereg will apply filter prioritizing bit 31 then bit 26
-      //   and finally any remaining bits
- @endcode
- @par functionality
- - if no priority bits exist in BitKey object then
-   - eliminate all but first entry in list
- - else if priority bits exist then
-   - eliminate all non-priority bit entries
-   - if multiple priority bit entries exist then elminate all but one,
-     favoring the first qualified entry found in the list.
+  // when the error register is read, the resulting list of bits on
+  // is passed to psbFilter. the result is used to look up a resolution
+  // in the ResultionMapa resMap and the resolution is called
+  ErrorRegisterMask ereg(scr,resMap,&psbFilter);
+  ...
+  rc = ereg.Analyze(serviceData);  // See iipErrorRegisterMask.h
+  //   ereg will apply filter prioritizing bit 31 then bit 26
+  //   and finally any remaining bits
+@endcode
+@par functionality
+- if no priority bits exist in BitKey object then
+- eliminate all but first entry in list
+- else if priority bits exist then
+- eliminate all non-priority bit entries
+- if multiple priority bit entries exist then elminate all but one,
+ favoring the first qualified entry found in the list.
 */
 class PrioritySingleBitFilter : public FilterClass
 {
-public:
+    public:
 
-  /**
-   Constructor
-   @param pbls  Priority bit list string: list of bit positions that have priority
-   @note bit position priority values in pbls are the bit position + 1 of the bit list,
-   thus to prioritize bit positions 0,1, & 2 in the bit list, pbls would = "\x01\x02\x03";
-   */
-  PrioritySingleBitFilter(const char * pbls = NULL)
+    /**
+     * @brief Constructor
+     * @param pbls  list of bit positions that have priority
+     * @note bit position priority values in pbls are the bit position + 1 of
+     * the bit list, thus to prioritize bit positions 0,1, & 2 in the bit list,
+     * pbls would = "\x01\x02\x03";
+     */
+    PrioritySingleBitFilter(const char * pbls = NULL)
     {
         if (NULL != pbls)
         {
@@ -208,243 +211,199 @@ public:
         }
     };
 
-  PrioritySingleBitFilter(const std::vector<uint8_t> & pbls)
+    PrioritySingleBitFilter(const std::vector<uint8_t> & pbls)
     {
         iv_bitList = pbls;
     };
 
 
-  /**
-   Apply filter to bit list
-   @param bit_list : the bit list to filter
-   @pre none
-   @post Bit list will only have one value - the one with the highest
-   priority. If multiple values have equally highest priority then the first
-   value in the list is used.
-   @return true of bit list was modified otherwise false
-   @note If the bit list is empty then it will be left empty.
-   */
-  virtual bool Apply(BitKey & bit_list);
+    /**
+     * @brief  Apply filter to bitkey.
+     *         Bit list will only have one value - the one with the highest
+     *         priority. If multiple values have equally highest priority then
+     *         the first value in the list is used.
+     * @param  i_bitList  bitkey on which seondary filter need to act.
+     * @param  io_sdc      reference to STEP_CODE_DATA struct.
+     * @return true if bit key is modified false otherwise.
+     */
+    virtual bool Apply( BitKey & ioBitList, STEP_CODE_DATA_STRUCT & io_sdc );
 
-private:  // functions
-private:  // Data
+    private:  // functions
+    private:  // Data
 
-  std::vector<uint8_t> iv_bitList;
+    std::vector<uint8_t> iv_bitList;
 
 };
 
-//! FilterTranspose
-/*!
- FilterTranspose transposes an exactly matching key to a single bit. If there is not an
- exact match, the key is not modified.
-*/
+/**
+ * @brief  FilterTranspose
+
+ * FilterTranspose transposes an exactly matching key to a single bit. If there
+ * is not an exact match, the key is not modified.
+ */
 class FilterTranspose : public FilterPriority
 {
-public:
+    public:
 
-  /**
-   Constructor
-   \param i_bitKey  bit list key
-   \param iBitPos  bit to set if i_bitKey matches target.
-   */
-  FilterTranspose(const BitKey &i_bitKey,uint32_t iBitPos)
-  : FilterPriority(i_bitKey),ivSingleBitPos(iBitPos)
-  {}
+    /**
+    Constructor
+    \param i_bitKey  bit list key
+    \param iBitPos  bit to set if i_bitKey matches target.
+    */
+    FilterTranspose(const BitKey &i_bitKey,uint32_t iBitPos)
+    : FilterPriority(i_bitKey),ivSingleBitPos(iBitPos)
+    {}
 
-  /**
-   Apply filter to bit list
-   \param bit_list : the bit list to filter
-   \pre none
-   \post If the provide BitList exactly matches the internal BitList than the provided
-   bitlist is modified such that all bits are cleared and ivSingleBitPos is set.
-   \return true of bit list was modified otherwise false
-   */
-  virtual bool Apply(BitKey & iBitList);
+    /**
+     * @brief  Applies transpose filter on given bitlist
+     *         If the provide BitList exactly matches the internal BitList than
+     *         the provid bitlist is modified such that all bits are cleared and
+     *         ivSingleBitPos is set.
+     * @param  i_bitList  bitkey on which filter acts.
+     * @param  io_sdc      reference to STEP_CODE_DATA struct.
+     * @return true if bit key is modified false otherwise.
+     */
+    virtual bool Apply( BitKey & ioBitList, STEP_CODE_DATA_STRUCT & io_sdc );
 
-  /**
-   * Undo the filter Apply()
-   * @post bit_list may be modified
-   * @Return true if bit_list was modified, otherwise false
-   * @Note This function will only Undo the transposition if the transposed result bit is on
-   */
-  virtual bool Undo(BitKey & iBitList);
+    /**
+     * Undo the filter Apply()
+     * @post bit_list may be modified
+     * @Return true if bit_list was modified, otherwise false
+     * @Note This function will only Undo the transposition if the transposed
+     *       result bit is on
+     */
+    virtual bool Undo(BitKey & iBitList);
 
-private:  // functions
-private:  // Data
+    private:  // functions
+    private:  // Data
 
-  uint32_t ivSingleBitPos;
+    uint32_t ivSingleBitPos;
 
 };
 
-//! SingleBitFilter
-/*!
- Reduces a BitKey to single bit
- \code
-   // usually in chip class header file
-   SingleBitFilter sbFilter;
-   ScanCommRegisterChip scr;  // @see iipScanCommRegisterChip.h
-   ResolutionMap resMap;      // @see prdfResolutionMap.H
-
-   // in ctor of chip class definition
-   ErrorRegisterMask ereg(scr,resMap,&sbFilter);
-   // ...
-   rc = ereg.Analyze(serviceData);  // See iipErrorRegisterMask.h
-   //   ereg will apply filter before analyzing the error
- \endcode
+/**
+ * @brief Description of interface for SingleBitFilter.
+ *
+ * reduces a BitKey to single bit e.g.
+ * ....
+ * ErrorRegisterMask ereg(scr,resMap,&sbFilter);
+ * rc = ereg.Analyze(serviceData); ( See iipErrorRegisterMask.h )
+ * ereg will apply filter before analyzing the error
  */
+
 class SingleBitFilter: public FilterClass
 {
-public:
-  /*!
-   Constructor
-   */
-  SingleBitFilter(): FilterClass() {}
+    public:
 
-  /*!
-   Remove all but one bit from bit_list
-   \param ioBitList Target bit list
-   \returns true if ioBitList was modified otherwise false
-   */
-  virtual bool Apply(BitKey & ioBitList);
+    /**
+    @param Constructor
+    */
+    SingleBitFilter(): FilterClass() {}
 
-private:  // functions
-private:  // Data
+    /**
+     * @brief  joins two different filter such that one acts after other.
+     * @param  i_bitList  bitkey on which SingleBitFilter filter acts.
+     * @param  io_sdc      reference to STEP_CODE_DATA struct.
+     * @return true if bit key is modified false otherwise.
+     */
+    virtual bool Apply( BitKey & ioBitList, STEP_CODE_DATA_STRUCT & io_sdc );
+
+    private:  // functions
+    private:  // Data
 
 };
 
 
 //! FilterLink
 /*!
- FilterLink links two FILTER_CLASS types together allowing two filters
- to act on a single BitKey object.
- @code
+FilterLink links two FILTER_CLASS types together allowing two filters
+to act on a single BitKey object.
+@code
 
-        Filter * foo(Filter & f1, Filter & f2)
-        {
-                Filter * joint = new FilterLink(f1,f2);
-                return joint;
-        }
- @endcode
- */
+    Filter * foo(Filter & f1, Filter & f2)
+    {
+            Filter * joint = new FilterLink(f1,f2);
+            return joint;
+    }
+@endcode
+*/
 class FilterLink: public FilterClass
 {
-public:
-  /**
-   Constructor
-   <ul>
-   <br><b>Parameters:  </b> Two FilterClasss to be linked
-   <br><b>Requirements:</b> parm filters objects must exist and be valid
-   <br><b>Promises:    </b> Object created
-   <br><b>Exceptions:  </b> N/A
-   <br><b>Notes:       </b>
-   </ul><br>
-   */
-  FilterLink(FilterClass & f1, FilterClass & f2);
+    public:
 
-  /*
-   Destructor
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> No value returned
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   <br><b>Notes:       </b> Default is sufficient
-   </ul><br>
-   */
-  //  ~xspprdFilterLink();
+    /**
+     * @brief  Constructor
+     * @param  i_f1     first filter. usually existing one.
+     * @param  i_f2     second filter. usually the new one.
+     */
+    FilterLink(FilterClass & f1, FilterClass & f2);
 
-  /**
-   Apply Filter(s)
-   <ul>
-   <br><b>Parameters:  </b> reference to a BIT_LIST (see iipbtlst.h)
-   <br><b>Returns:     </b> [TRUE | FALSE] - was bit list modified?
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> bit_list is modified (if rc == TRUE)
-   <br><b>Exceptions:  </b> N/A
-   <br><b>Notes:       </b> calls all the other associated filters
-   </ul><br>
-   */
-  virtual bool Apply ( BitKey & bit_list );
+    /**
+     * @brief  joins two different filter such that one can act after other.
+     * @param  i_bitList  bitkey on which seondary filter need to act.
+     * @param  io_sdc      reference to STEP_CODE_DATA struct.
+     * @return true if bit key is modified false otherwise.
+     */
+    virtual bool Apply( BitKey & ioBitList, STEP_CODE_DATA_STRUCT & io_sdc );
 
-  /**
-   * Undo the filter Apply()
-   * @post bit_list may be modified
-   * @Return true if bit_list was modified, otherwise false
-   */
-  virtual bool Undo(BitKey & iBitList);
+    /**
+     * Undo the filter Apply()
+     * @post bit_list may be modified
+     * @Return true if bit_list was modified, otherwise false
+     */
+    virtual bool Undo(BitKey & iBitList);
 
-private:  // functions
-private:  // Data
+    private:  // functions
+    private:  // Data
 
-  // may be extended to use a vector if needed
-  FilterClass & xFilter1;
-  FilterClass & xFilter2;
+    // may be extended to use a vector if needed
+    FilterClass & xFilter1;
+    FilterClass & xFilter2;
 };
-
-
-class SCAN_COMM_REGISTER_CLASS;
-
-//! ScanCommFilter
-/*!
- ScanCommFilter reads a HW scom register to determin which bits to
- removes bits from a BitKey object
- @par Base class Filter
- @code
- //   This class is useful for Error registers whose bits can be
- //   configured to report different ways depending on another
- //   enable register.
-
- ScanCommRegister enableScr(...);  // see iipScanCommRegisterChip.h
- ScanCommFilter scfFirXstop(enableScr,INVERT);
- ScanCommFilter scfFirRer(enableScr,NONINVERT);
- ScanCommRegister scr(...);  // see iipScanCommRegisterChip.h
- ResolutionMap resMap(...);      // see iipResolutionMap.h
- ErrorRegisterMask eregFirXstop(scr,resMap,&scfFirXstop);
- ErrorRegisterMask eregFirRer(scr,resMap,&scfFirRer);
- ...
- rc = eregFirXstop.Analyze(serviceData);  // See iipErrorRegisterMask.h
- //   ereg will apply filter
- @endcode
- */
-class ScanCommFilter: public FilterClass
-{
-public:
-
-  // Enum for use as the second parameter in the constructor.
-  enum InvertValue {
-    NONINVERT = 0x0,
-    INVERT    = 0x1
-  };
-
-  /*!
-   Constructor
-   \param r Reference to a scan comm register
-   \param invert whether or not to bit-wise invert the value from the scan comm read
-   */
-  ScanCommFilter(SCAN_COMM_REGISTER_CLASS & i_r, InvertValue invert = NONINVERT)
-    :
-    FilterClass(),
-  scr(i_r),
-  xInvert(invert)
-  { }
-
-  /*!
-   Turn off bits in bit list based on contents of scan com register
-   @post bit_list may be modified
-   @return true if bit_list was modified, otherwise false
-   */
-   virtual bool Apply(BitKey & bit_list);
-
-private:  // functions
-private:  // Data
-  SCAN_COMM_REGISTER_CLASS & scr;
-  InvertValue xInvert;
-};
-
 
 inline FilterLink::FilterLink(FilterClass & f1, FilterClass & f2)
 : xFilter1(f1), xFilter2(f2) {}
+
+class SecondaryBitsFilter: public FilterClass
+{
+
+  public:
+
+    /**
+     * @brief   constructor
+     * @param   i_bitList  list of bits identified as secondary in a FIR.
+     * @note    This filter maintains a list of bits which it
+     *          considers it as secondary. PRDF analysis is broken in to two
+     *          steps. The first pass is known as primary pass and second pass
+     *          is known as secondary pass. In first pass, secondary filter
+     *          gets activiated but in secondary pass it remains inactive.
+     *          In primary pass, filter ignores all the secondary bits for
+     *          analysis. If primary bits are on, due to action of
+     *          secondary filter, primary pass ends up with return code 0xdd02.
+     *          Inorder to make sure there are really no bits on, secondary
+     *          pass is launched. In this pass, secondary filter doesn't
+     *          operate so analysis continues as usual. Intention of this
+     *          pass is to identify and analyze secondary error bits which were
+     *          ignored during primary pass due to action of this filter.
+     */
+    SecondaryBitsFilter( const std::vector<uint8_t> & i_bitList )
+    {
+        iv_secBitList = i_bitList;
+    }
+
+    /**
+     * @brief  clears all the bits identified as secondary in the given BitKey.
+     * @param  i_bitList  bitkey on which seondary filter need to act.
+     * @param  io_sdc      reference to STEP_CODE_DATA struct.
+     * @return true if bit key is modified false otherwise.
+     */
+    virtual bool Apply( BitKey & ioBitList, STEP_CODE_DATA_STRUCT & io_sdc );
+
+  private: // data
+
+    std::vector<uint8_t> iv_secBitList; // list of bit pos marked as secondary
+
+};
 
 } //End namespace PRDF
 

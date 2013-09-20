@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -247,51 +249,73 @@ void ResolutionMap::Add(const uint8_t *i_ble,
 
 //------------------------------------------------------------------------------
 
-void ResolutionMap::LookUp( ResolutionList & o_list,
-                            BitKey & io_bitList,
-                            STEP_CODE_DATA_STRUCT & scd )
+int32_t ResolutionMap::LookUp( ResolutionList & o_list,
+                               BitKey & io_bitList,
+                               STEP_CODE_DATA_STRUCT & scd )
 {
     uint32_t lsize = o_list.size();
+    int32_t l_rc = SUCCESS;
 
     if(iv_filter != NULL)
     {
-        iv_filter->Apply(io_bitList);
+        iv_filter->Apply( io_bitList,scd );
     }
 
     ErrorSignature * esig = scd.service_data->GetErrorSignature();
-    switch(io_bitList.size())
+    switch( io_bitList.size() )
     {
+            // we are setting rc to PRD_SCAN_COMM_REGISTER_ZERO in case 0 below.
+            // But we don't set rc to bit found set ( case 1 ) or
+            // PRD_MULTIPLE_ERRORS. It's because for the code calling this
+            // function, one bit set or  multiple bit set make little
+            // difference. In both cases, it has to do same set of actions.
+            // We need to treat case 0 separately. It is because we want to
+            // know the outcome of action of secondary filter. If secondary
+            // filter yields 0xdd02, we know we need to launch one more pass
+            // with filter turned off.
         case 0:
-            esig->setErrCode(PRD_SCAN_COMM_REGISTER_ZERO);
+            esig->setErrCode( PRD_SCAN_COMM_REGISTER_ZERO );
+            l_rc = PRD_SCAN_COMM_REGISTER_ZERO;
             break;
         case 1:
-            esig->setErrCode(io_bitList.getListValue(0));
+            esig->setErrCode( io_bitList.getListValue(0) );
             break;
         default:
-            for(uint32_t index = 0; index < io_bitList.size(); ++index)
+            for( uint32_t index = 0; index < io_bitList.size(); ++index )
             {
-                esig->setErrCode(io_bitList.getListValue(index));
+                esig->setErrCode( io_bitList.getListValue(index) );
             }
-            esig->setErrCode(PRD_MULTIPLE_ERRORS);
+           esig->setErrCode( PRD_MULTIPLE_ERRORS );
     };
 
-    for(MapList::iterator i = iv_list.begin(); i != iv_list.end(); ++i)
+    for( MapList::iterator i = iv_list.begin(); i != iv_list.end(); ++i )
     {
-        if((i->iv_blist).isSubset(io_bitList))
+        if( ( i->iv_blist ).isSubset( io_bitList ) )
         {
-            o_list.push_back(i->iv_res);
+            o_list.push_back( i->iv_res );
         }
     }
-    if(lsize == o_list.size()) // we didn't find anything to add, so use default
+    // we didn't find anything to add, so use default
+    if( lsize == o_list.size() )
     {
-        o_list.push_back(defaultRes);
+        // if it is a primary pass and we haven't found any bit set, let us
+        // prevent default resolution from getting executed. It is primarily
+        // because end of primary pass doesn't necessarily mean end of analysis.
+        // There may be a case when a FIR has only a secondary bit on. In that
+        // case, primary pass shall fail to find any bit set and initiate
+        // secondary pass. In secondary pass, bits set shall be identified and
+        // associated resolution shall be executed.
+
+        if( !scd.service_data->isPrimaryPass() ) o_list.push_back( defaultRes );
     }
 
-    if(iv_filter != NULL)
+    if( iv_filter != NULL )
     {
         iv_filter->Undo(io_bitList); // so returned bit list will have proper
                                      // value for reset
     }
+
+    return l_rc;
 }
 
 //------------------------------------------------------------------------------

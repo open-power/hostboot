@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -153,13 +155,13 @@ int32_t ErrorRegisterMask::Reset(const BIT_LIST_CLASS & bit_list,
 
 // ***************************************************************************
 
-BIT_LIST_CLASS ErrorRegisterFilter::Filter
-(const BIT_STRING_CLASS & bs)
+BIT_LIST_CLASS ErrorRegisterFilter::Filter( const BIT_STRING_CLASS & bs,
+                                            STEP_CODE_DATA_STRUCT & io_sdc )
 {
-  BIT_LIST_CLASS bit_list;
-  bit_list = bs;
-  if(filter) filter->Apply(bit_list);
-  return bit_list;
+    BIT_LIST_CLASS bit_list;
+    bit_list = bs;
+    if( filter ) filter->Apply( bit_list, io_sdc );
+    return bit_list;
 }
 
 } //End namespace PRDF

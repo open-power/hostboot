@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -44,6 +46,7 @@ class Group
     public:
         std::list<Expr *> cv_rules;
         Expr * cv_priorityList;
+        Expr * cv_secondaryList;
 
         char cv_op;
         uint8_t cv_flags;
@@ -51,11 +54,13 @@ class Group
 
         Group() :
             cv_priorityList(NULL),
+            cv_secondaryList(NULL),
             cv_op(Prdr::GROUP),
             cv_flags(0),
             cv_doxcomment() {};
         Group(char o) :
             cv_priorityList(NULL),
+            cv_secondaryList(NULL),
             cv_op(o),
             cv_flags(0),
             cv_doxcomment() {};
@@ -73,6 +78,12 @@ class Group
             // Set Priority list.
             if (NULL != i_l->cv_priorityList)
                 i_r->cv_priorityList = i_l->cv_priorityList;
+
+            // Set Secondary bit list.
+            if ( NULL != i_l->cv_secondaryList )
+            {
+                i_r->cv_secondaryList = i_l->cv_secondaryList;
+            }
 
         };
 
@@ -180,18 +191,21 @@ class Group
                 if (Prdr::GROUP == cv_op)
                 {
                     PRDR_FWRITE(&cv_flags, 1, 1, i_file);
-                    if (Prdr::PRDR_GROUP_FILTER_PRIORITY & cv_flags)
+                    if ( Prdr::PRDR_GROUP_FILTER_PRIORITY & cv_flags )
                     {
-                        cv_priorityList->output(i_file);
+                        cv_priorityList->output( i_file );
+                    }
+                    if ( Prdr::PRDR_GROUP_FILTER_SECONDARY & cv_flags )
+                    {
+                        cv_secondaryList->output( i_file );
                     }
                 }
-
 
                 for (std::list<Expr *>::iterator i = cv_rules.begin();
                      i != cv_rules.end();
                      i++)
                 {
-                    (*i)->output(i_file);
+                    (*i)->output( i_file );
                 }
 
                 return 0;
@@ -235,6 +249,20 @@ class Group_Filter_Priority : public Group_Filter
         Expr * iv_list;
 };
 
+class Group_Filter_Secondary : public Group_Filter
+{
+    public:
+    Group_Filter_Secondary( Expr * i_list ) : iv_secList( i_list ) {};
+
+    void AddFilter( Group * i_group )
+    {
+        i_group->cv_flags |= Prdr::PRDR_GROUP_FILTER_SECONDARY;
+        i_group->cv_secondaryList = iv_secList;
+    };
+
+    private:
+    Expr * iv_secList;
+};
 } // end namespace PRDR_COMPILER
 
 #endif

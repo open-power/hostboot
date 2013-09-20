@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -229,12 +231,15 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
             o_chip.cv_groupSize = new uint16_t[o_chip.cv_groupCount];
             o_chip.cv_groupFlags = new uint8_t[o_chip.cv_groupCount];
             o_chip.cv_groupPriorityBits = new Expr * [o_chip.cv_groupCount];
+            o_chip.cv_groupSecondaryBits = new Expr * [o_chip.cv_groupCount];
             for (uint32_t i = 0; i < o_chip.cv_groupCount; i++)
             {
                 i_stream >> l_temp[0]; // should be 'G'
                 i_stream >> o_chip.cv_groupSize[i];
                 i_stream >> o_chip.cv_groupFlags[i];
-                if (PRDR_GROUP_FILTER_PRIORITY & o_chip.cv_groupFlags[i])
+
+                //check if priority filter has been specified
+                if ( PRDR_GROUP_FILTER_PRIORITY & o_chip.cv_groupFlags[i] )
                 {
                     o_chip.cv_groupPriorityBits[i] = new Expr();
                     ReadExpr(i_stream, *o_chip.cv_groupPriorityBits[i]);
@@ -242,6 +247,17 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
                 else
                 {
                     o_chip.cv_groupPriorityBits[i] = NULL;
+                }
+
+                //check if secondary filter has been specified
+                if( PRDR_GROUP_FILTER_SECONDARY & o_chip.cv_groupFlags[i] )
+                {
+                    o_chip.cv_groupSecondaryBits[i] = new Expr();
+                    ReadExpr(i_stream, *o_chip.cv_groupSecondaryBits[i]);
+                }
+                else
+                {
+                    o_chip.cv_groupSecondaryBits[i] = NULL;
                 }
                 if (0 != o_chip.cv_groupSize[i])
                 {

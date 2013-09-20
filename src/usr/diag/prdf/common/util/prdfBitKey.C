@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,17 +37,18 @@
 
 namespace PRDF
 {
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Local
-//-------------------------------------------------------------------------------------------------
-inline uint32_t getWordSize(uint32_t bitCount) // # of bit32's needed for this bit_count
+//------------------------------------------------------------------------------
+// # of bit32's needed for this bit_count
+inline uint32_t getWordSize(uint32_t bitCount)
 {
   return (bitCount/32) + ((bitCount%32)? 1:0);
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // member function definitions
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 BitKey::BitKey(void)
 : iv_Capacity(0), iv_storage1(0)
@@ -53,7 +56,7 @@ BitKey::BitKey(void)
   iv_rep.storage2 = 0;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 BitKey::BitKey(uint32_t i_bitPos)
 : iv_Capacity(0), iv_storage1(0)
@@ -62,7 +65,7 @@ BitKey::BitKey(uint32_t i_bitPos)
   setBit(i_bitPos);
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 BitKey::BitKey(const uint8_t * i_array,uint8_t i_size)
 : iv_Capacity(0), iv_storage1(0)
@@ -76,7 +79,21 @@ BitKey::BitKey(const uint8_t * i_array,uint8_t i_size)
   }
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+BitKey::BitKey( const std::vector <uint8_t> & i_bitList )
+    : iv_Capacity(0), iv_storage1(0)
+{
+    iv_rep.storage2 = 0;
+    std::vector< uint8_t >::const_iterator itList = i_bitList.begin();
+    while( itList != i_bitList.end() )
+    {
+        setBit( *itList );
+        itList++;
+    }
+}
+
+//------------------------------------------------------------------------------
 
 BitKey::BitKey(const char * i_ble)
 : iv_Capacity(0), iv_storage1(0)
@@ -89,14 +106,14 @@ BitKey::BitKey(const char * i_ble)
   }
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 BitKey::~BitKey(void)
 {
   if(!IsDirect()) delete [] iv_rep.buffer;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 BitKey::BitKey (const BitKey & bit_list)
 : iv_Capacity(bit_list.iv_Capacity), iv_storage1(bit_list.iv_storage1)
@@ -113,7 +130,7 @@ BitKey::BitKey (const BitKey & bit_list)
   }
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 BitKey & BitKey::operator=(const BitKey & bit_list)
 {
@@ -143,7 +160,7 @@ BitKey & BitKey::operator=(const BitKey & bit_list)
   return(*this);
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 BitKey & BitKey::operator=(const BitString & bit_string)
 {
@@ -158,7 +175,7 @@ BitKey & BitKey::operator=(const BitString & bit_string)
   return(*this);
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 BitKey & BitKey::operator=(const char * string_ptr)
 {
@@ -177,7 +194,7 @@ BitKey & BitKey::operator=(const char * string_ptr)
   return(*this);
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 bool BitKey::operator==(const BitKey & that) const
 {
@@ -212,7 +229,7 @@ bool BitKey::operator==(const BitKey & that) const
 }
 
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 // Candidate funciton for bs class
 bool BitKey::isSubset(const BitKey & that) const
@@ -223,9 +240,11 @@ bool BitKey::isSubset(const BitKey & that) const
   uint32_t mysize = getWordSize(iv_Capacity);
   uint32_t yosize = getWordSize(that.iv_Capacity);
   uint32_t smsize = (yosize < mysize)? yosize : mysize;
-  // size can be non-zero with no bits on - so if that has no bits than use operator==
+  // size can be non-zero with no bits on - so if that has no bits than use
+  // operator==
   BitKey zero;
-  if(that == zero) result = operator==(that); // only true if both are empty - eg not bits on"
+  // only true if both are empty - eg not bits on"
+  if(that == zero) result = operator==(that);
   // if yosize <= mysize than just match smallest amount of data
   // if yozize > mysize than extra yodata must be zero
   for(uint32_t i = 0; (i < smsize) && (result == true); ++i,++mydata,++yodata)
@@ -243,7 +262,7 @@ bool BitKey::isSubset(const BitKey & that) const
   return result;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 // get bit position of nth bit that is set
 uint32_t BitKey::getListValue(uint32_t n) const
@@ -265,7 +284,7 @@ uint32_t BitKey::getListValue(uint32_t n) const
   return bitPos;
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 uint32_t BitKey::size(void) const
 {
@@ -273,7 +292,7 @@ uint32_t BitKey::size(void) const
   return bs.GetSetCount();
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void BitKey::removeBit(uint32_t n)
 {
@@ -284,7 +303,7 @@ void BitKey::removeBit(uint32_t n)
   }
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void BitKey::removeBit(void)
 {
@@ -301,7 +320,7 @@ void BitKey::removeBit(void)
   }
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void BitKey::removeBits(const BitKey & i_bk)
 {
@@ -310,7 +329,7 @@ void BitKey::removeBits(const BitKey & i_bk)
   mybs.Mask(yobs);
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void BitKey::setBit(uint32_t i_bitValue)
 {
@@ -322,7 +341,7 @@ void BitKey::setBit(uint32_t i_bitValue)
   bs.Set(i_bitValue);
 }
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void BitKey::ReAllocate(uint32_t i_len)
 {

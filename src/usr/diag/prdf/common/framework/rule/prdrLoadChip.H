@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -191,24 +193,25 @@ namespace Prdr
             uint32_t        cv_dumpType;        // default dump content type.
             uint16_t        cv_scomLen;         // default scom length.
             uint16_t        cv_regCount;
-            Register *  cv_registers;
+            Register *      cv_registers;
             uint16_t        cv_ruleCount;
-            Expr *      cv_rules;
+            Expr *          cv_rules;
             uint16_t        cv_groupCount;
             uint16_t        cv_groupAttn[NUM_GROUP_ATTN];
             uint16_t *      cv_groupSize;
             uint8_t *       cv_groupFlags;
-            Expr **     cv_groupPriorityBits;
-            Expr **     cv_groups;
+            Expr **         cv_groupPriorityBits;
+            Expr **         cv_groupSecondaryBits;
+            Expr **         cv_groups;
             uint16_t        cv_actionCount;
             uint16_t *      cv_actionSize;
-            Expr **     cv_actions;
+            Expr **         cv_actions;
 
             Chip() : cv_regCount(0), cv_registers(NULL),
                          cv_ruleCount(0), cv_rules(NULL),
                          cv_groupCount(0), cv_groupSize(NULL),
                          cv_groupFlags(NULL), cv_groupPriorityBits(NULL),
-                         cv_groups(NULL),
+                         cv_groupSecondaryBits(NULL), cv_groups(NULL),
                          cv_actionCount(0), cv_actionSize(NULL),
                          cv_actions(NULL)
             {
@@ -222,6 +225,9 @@ namespace Prdr
                 {
                     if (NULL != cv_groupPriorityBits[i])
                         delete cv_groupPriorityBits[i];
+
+                    if ( NULL != cv_groupSecondaryBits[i] )
+                        delete cv_groupSecondaryBits[i];
                     if (NULL != cv_groups[i])
                         delete[] cv_groups[i];
                 }
@@ -229,6 +235,8 @@ namespace Prdr
                 if (NULL != cv_groupSize) delete[] cv_groupSize;
                 if (NULL != cv_groupFlags) delete[] cv_groupFlags;
                 if (NULL != cv_groupPriorityBits) delete[] cv_groupPriorityBits;
+                if ( NULL != cv_groupSecondaryBits )
+                    delete[] cv_groupSecondaryBits;
                 for (int i = 0; i < cv_actionCount; i++)
                     if (NULL != cv_actions[i]) delete[] cv_actions[i];
                 if (NULL != cv_actions) delete[] cv_actions;

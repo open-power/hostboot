@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +31,7 @@
 #define PRDFBITLKEY_H
 
 #include <prdf_types.h>
+#include <vector>
 
 namespace PRDF
 {
@@ -127,8 +130,13 @@ class BitKey
      */
     BitKey(const char * i_ble);
 
+    /**
+     * @brief constructor from vector of bits
+     * @param i_bitList list of FIR bit position
+     */
+    BitKey( const std::vector <uint8_t> & i_bitList );
     //! Copy Constructor
-    BitKey (const BitKey & bit_list);
+    BitKey ( const BitKey & bit_list );
 
     //! Destructor
     ~BitKey(void);

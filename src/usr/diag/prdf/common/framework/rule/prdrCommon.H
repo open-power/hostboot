@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -81,9 +83,11 @@ namespace Prdr
     enum GroupFlags
     {
             /** Single Bit Filter */
-        PRDR_GROUP_FILTER_SINGLE_BIT = 0x1,
+        PRDR_GROUP_FILTER_SINGLE_BIT  = 0x1,
             /** Priority Bit Filter */
-        PRDR_GROUP_FILTER_PRIORITY = 0x2,
+        PRDR_GROUP_FILTER_PRIORITY    = 0x2,
+            /** Secondary Bit Filter */
+        PRDR_GROUP_FILTER_SECONDARY   = 0x4,
     };
 
     /**
