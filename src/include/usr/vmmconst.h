@@ -80,6 +80,11 @@
 /** PNOR Resource Provider is at 2GB */
 #define VMM_VADDR_PNOR_RP  (2 * GIGABYTE)
 
+/** SBE Update process is at 3GB, uses 256KB */
+#define VMM_VADDR_SBE_UPDATE (3 * GIGABYTE)
+#define VMM_SBE_UPDATE_SIZE (256*KILOBYTE)
+#define VMM_VADDR_SBE_UPDATE_END (VMM_VADDR_SBE_UPDATE + VMM_SBE_UPDATE_SIZE)
+
 /** Attribute Resource Provider */
 // Note: Not simplified to make it easier to extract with the PNOR targeting
 // image generator script

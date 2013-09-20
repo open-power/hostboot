@@ -53,6 +53,7 @@
 #include "sbe_centaur_init.H"
 #include <hwpisteperror.H>
 #include <errl/errludtarget.H>
+#include <sbe/sbeif.H>
 #include "cen_xip_customize.H"
 
 extern fapi::ReturnCode fapiPoreVe(const fapi::Target i_target,
@@ -143,6 +144,14 @@ void*    call_sbe_centaur_init( void *io_pArgs )
          l_membuf_iter != l_membufTargetList.end();
          ++l_membuf_iter)
     {
+/*
+        //find SBE image in PNOR
+        // @todo RTC 77647
+        // Will use SBE::findSBEInPnor() function rather than
+        // VFS::module_load/address() function calls above
+
+*/
+
         // Make sure we have successfully retrieved the reference image
         if (l_errl)
         {

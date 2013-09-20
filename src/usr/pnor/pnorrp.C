@@ -218,8 +218,8 @@ void PnorRP::initDaemon()
              * @devdesc      PnorRP::initDaemon> Error from mm_alloc_block
              */
             l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               PNOR::MOD_PNORRP_GETSECTIONINFO,
-                                               PNOR::RC_INVALID_SECTION,
+                                               PNOR::MOD_PNORRP_INITDAEMON,
+                                               PNOR::RC_EXTERNAL_ERROR,
                                                TO_UINT64(BASE_VADDR),
                                                TO_UINT64(rc));
             l_errhdl->collectTrace(PNOR_COMP_NAME);

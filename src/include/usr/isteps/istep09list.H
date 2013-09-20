@@ -95,6 +95,8 @@ const DepModInfo  g_istep09Dependancies = {
     {
         DEP_LIB(libactivate_powerbus.so),
         DEP_LIB(libdram_initialization.so),
+        DEP_LIB(libsbe.so),
+        DEP_LIB(libbuild_winkle_images.so),
         { 0 },
     }
 };

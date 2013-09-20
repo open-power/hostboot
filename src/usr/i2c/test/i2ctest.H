@@ -113,7 +113,7 @@ class I2CTest: public CxxTest::TestSuite
 
 
                 // Read/Write SBE Primary:  Murano-0, port-0
-                // Safe to write to first 1K: 0x-0x400
+                // Safe to write to first 0x300: 0x0-0x2FF
 
                 { 0x00, 0x00, 0xAC, 0x0000ababcdcdefef,
                      8, false, TARGETING::TYPE_PROC }, // Write data to 0x0000
@@ -142,7 +142,7 @@ class I2CTest: public CxxTest::TestSuite
 
 
                 // Read/Write SBE Backup:  Murano-0, port-0
-                // Safe to write to first 1K: 0x-0x400
+                // Safe to write to first 0x300: 0x0-0x2FF
 
                 { 0x00, 0x00, 0xAE, 0x0000ababcdcdefef,
                      8, false, TARGETING::TYPE_PROC }, // Write data to 0x0000
@@ -371,12 +371,12 @@ class I2CTest: public CxxTest::TestSuite
                 // PROCESSOR TESTS
 
                 // Read/Write SBE Backup:  Murano-0, port-0
-                // Safe to write to first 1K: 0x-0x400
+                // Safe to write to first 0x300: 0x0-0x2FF
                 { 0x00, 0x00, 0xAE, 0x0123,
                   0xFEFEDADA57579191, 8, TARGETING::TYPE_PROC },
 
                 // Read/Write SBE Primary:  Murano-0, port-0
-                // Safe to write to first 1K: 0x-0x400
+                // Safe to write to first 0x300: 0x0-0x2FF
                 { 0x00, 0x00, 0xAC, 0x02FC,
                   0x5ABC310000000000, 3, TARGETING::TYPE_PROC },
             };

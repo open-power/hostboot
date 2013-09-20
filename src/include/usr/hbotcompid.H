@@ -282,7 +282,6 @@ const char VPD_COMP_NAME[] = "vpd";
 //@{
 const compId_t SECURE_COMP_ID = 0x1E00;
 const char SECURE_COMP_NAME[] = "secure";
-//@}
 
 /** @name IPC
  * IPC - Inter Processor Communication component
@@ -307,6 +306,15 @@ const char HSVC_COMP_NAME[] = "hsvc";
 const compId_t DEVTREE_COMP_ID = 0x2100;
 const char DEVTREE_COMP_NAME[] = "devtree";
 //@}
+
+/** @name SBE
+ *  SBE utility component
+ */
+//@{
+const compId_t SBE_COMP_ID = 0x2200;
+const char SBE_COMP_NAME[] = "sbe";
+//@}
+
 
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID

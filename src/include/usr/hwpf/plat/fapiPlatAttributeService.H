@@ -1025,6 +1025,7 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetEnableAttr ( fapi::ID, PTARGET, VAL )
 
+
 //------------------------------------------------------------------------------
 //  MACROS to support MVPD attributes
 //------------------------------------------------------------------------------

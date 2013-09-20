@@ -154,7 +154,7 @@ void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count);
  *
  *  @param[in] i_vaddr - Virtual address to translate
  *
- *  @return uint64_t - 0 if there is no associated address,
+ *  @return uint64_t - -EFAULT if there is no associated address,
  *      physical address otherwise
  */
 uint64_t mm_virt_to_phys( void* i_vaddr );

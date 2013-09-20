@@ -149,6 +149,7 @@
     <attribute><id>SBE_IMAGE_OFFSET</id></attribute>
     <attribute><id>BOOT_VOLTAGE</id></attribute>
     <attribute><id>SYNC_BETWEEN_STEPS</id></attribute>
+    <attribute><id>SBE_IMAGE_MINIMUM_VALID_EXS</id></attribute>
     <!-- End sbe_config_update attributes    -->
     <!--    proc_select_boot_master attributes  -->
     <attribute><id>PROC_SELECT_BOOT_MASTER</id></attribute>
@@ -398,7 +399,7 @@
      <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
      <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
      <!-- End Supporting poreve_memory_attributes.xml -->
-<!-- TODO RTC 62291. This next attribute moves to hostboot only
+<!-- TODO RTC 82688. This next attribute moves to hostboot only
      with this story  -->
     <attribute><id>PROC_SECURITY_SETUP_VECTOR</id></attribute>
 

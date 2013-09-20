@@ -1576,6 +1576,7 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor(
     return l_rc;
 }
 
+
 } // End platAttrSvc namespace
 
 } // End fapi namespace

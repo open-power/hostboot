@@ -27,7 +27,7 @@ SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d runtime.d
 IMGS = hbicore hbicore_test hbirt hbirt_test
 
 BASE_OBJECTS = string.o string_ext.o ctype.o math.o builtins.o stdio.o \
-	       splaytree.o cxxtest_data.o sprintf.o
+	       splaytree.o cxxtest_data.o sprintf.o crc32.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o
@@ -59,7 +59,7 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    establish_system_smp occ\
                    nest_chiplets start_payload thread_activate slave_sbe \
                    attn runtime ibscom dump tod_init secureboot_ext \
-                   devtree
+                   devtree sbe
 
 TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
@@ -67,7 +67,7 @@ TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testpnor testi2c testfsi testvfs testhwas testintr testvpd \
                    testpore testutil testmbox testmdia testprdf testattn \
                    testscan testruntime testibscom testdump testsecureboot \
-                   testfsiscom testrtloader
+                   testfsiscom testrtloader testsbe
 
 RUNTIME_OBJECTS = rt_start.o rt_main.o rt_console.o rt_stdlib.o rt_sync.o \
                   rt_assert.o rt_vfs.o

@@ -169,6 +169,7 @@ simics.tar_CONTENTS = \
 fsp.tar_CONTENTS = \
     obj/genfiles/hwp_id.html \
     src/build/mkrules/hbfw/fsp/makefile \
+    src/build/buildpnor/buildSbePart.pl \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/defaultPnorLayout.xml \
     img/simics_MURANO_targeting.bin \

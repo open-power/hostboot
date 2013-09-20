@@ -75,7 +75,7 @@
     </attribute>
     <attribute>
         <id>FREQ_PROC_REFCLOCK</id>
-        <default>200</default>
+        <default>133</default>
     </attribute>
     <attribute>
         <id>FREQ_MEM_REFCLOCK</id>
@@ -87,11 +87,11 @@
     </attribute>
     <attribute>
         <id>FREQ_PB</id>
-        <default>0x960</default>
+        <default>0x7D0</default>
     </attribute>
     <attribute>
         <id>FREQ_X</id>
-        <default>0x12C0</default>
+        <default>0xFA0</default>
     </attribute>
     <attribute>
         <id>FREQ_A</id>

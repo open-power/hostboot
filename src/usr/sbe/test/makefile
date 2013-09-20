@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/lib/makefile $
+# $Source: src/usr/sbe/test/makefile $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2013
 #
 # p1
 #
@@ -20,15 +20,9 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../..
+ROOTPATH = ../../../..
 
-OBJS = string.o string_ext.o stdlib.o ctype.o assert.o stdio.o math.o sprintf.o
-OBJS += syscall_stub.o syscall_task.o syscall_msg.o
-OBJS += syscall_mmio.o syscall_time.o sync.o syscall_misc.o
-OBJS += syscall_mm.o splaytree.o cxxtest_data.o crc32.o
-
-ifdef HOSTBOOT_MEMORY_LEAKS
-COMMONFLAGS += -DHOSTBOOT_MEMORY_LEAKS=1
-endif
+MODULE = testsbe
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

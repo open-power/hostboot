@@ -36,8 +36,13 @@ VPATH += ../fsp
 DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
-build_all: cp_hbfiles 
-install_all: build_pnor_images
+build_all: cp_hbfiles
+install_all: build_sbe_partitions build_pnor_images
+
+#Some useful search paths
+HBFW_OBJPATH = ${.PATH:M*obj*}
+ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
+
 
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
@@ -96,6 +101,57 @@ clobber_cp_hbfiles:
 	rm -f ${ALL_HB_IMAGES} \
 	      sbe.header secureboot.header hb.footer hostboot.stage.bin
 
+#################################################
+###  SAMPLE for building an SBE Partition with multiple ECs
+#################################################
+#S1_EC10_BIN = ${ENGD_OBJPATH:Fs1_10.sbe_seeprom.bin}
+#s1SbePartition.bin: ${SBE_BUILD_SCRIPT} ${S1_EC10_BIN}
+#	${buildSbePart.pl:P} --sbeOutBin s1SbePartition.bin \
+#		--ecImg_10 ${S1_EC10_BIN}
+#################################################
+SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
+
+S1_EC10_BIN = ${ENGD_OBJPATH:Fs1_10.sbe_seeprom.hdr.bin}
+S1_EC12_BIN = ${ENGD_OBJPATH:Fs1_12.sbe_seeprom.hdr.bin}
+S1_EC13_BIN = ${ENGD_OBJPATH:Fs1_13.sbe_seeprom.hdr.bin}
+S1_EC20_BIN = ${ENGD_OBJPATH:Fs1_20.sbe_seeprom.hdr.bin}
+P8_EC10_BIN = ${ENGD_OBJPATH:Fp8_10.sbe_seeprom.hdr.bin}
+CENT_EC10_BIN = ${ENGD_OBJPATH:Fcentaur_10.sbe_seeprom.hdr.bin}
+CENT_EC20_BIN = ${ENGD_OBJPATH:Fcentaur_20.sbe_seeprom.hdr.bin}
+
+SBE_PART_INFO = \
+  s1SbePartition.bin:10=${S1_EC10_BIN},12=${S1_EC12_BIN},13=${S1_EC13_BIN},20=${S1_EC20_BIN} \
+  p8SbePartition.bin:10=${P8_EC10_BIN} \
+  centSbePartition.bin:10=${CENT_EC10_BIN},20=${CENT_EC20_BIN}
+
+
+__SBE_PART_BUILD/% : .SPECTARG .PMAKE
+	@${MAKE:T:R} BUILD_SPECIFIC_SBEPART \
+	    "SBE_PART_PARAMS=${.TARGET:s/__SBE_PART_BUILD\///:s/:/ /g}"
+
+.ifdef SBE_PART_PARAMS
+
+SBEPART_TARGET = ${SBE_PART_PARAMS:xs/ .*//}
+SBEPART_SECTIONS = ${SBE_PART_PARAMS:xs/[^ ]* //:xs/ .*//}
+SBEPART_BINS = ${SBEPART_SECTIONS:s/,/ /g:xS/[^=]*=//g}
+SBEPART_BIN_OPTION = ${SBEPART_SECTIONS:s/,/ /g:S/^/--ecImg_/g:s/=/ /g:p}
+
+BUILD_SPECIFIC_SBEPART: .SPECTARG ${SBEPART_TARGET}
+	#@echo TARGET ${SBEPART_TARGET}
+	#@echo LAYOUT ${SBEPART_LAYOUT}
+	#@echo BINARIES ${SBEPART_BINS}
+	#@echo BIN_OPTION ${SBEPART_BIN_OPTION}
+
+${SBEPART_TARGET}: ${SBEPART_LAYOUT} ${SBEPART_BINS} ${PNOR_BUILD_SCRIPT}
+	 ${SBE_BUILD_SCRIPT}  --sbeOutBin ${SBEPART_TARGET} \
+		${SBEPART_BIN_OPTION}
+
+.endif
+
+build_sbe_partitions: .SPECTARG ${SBE_PART_INFO:S/^/__SBE_PART_BUILD\//g}
+
+clobber_build_sbe_partitions:
+	${SBE_PART_INFO:@image@${pnorimg:!rm -f ${image:s/:/ /g:xs/ .*//};!e}@}
 
 #################################################
 ###  SAMPLE for building a PNOR image
@@ -123,10 +179,16 @@ HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_HEADER_IMAG
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
+MURANO_TARG_IMG = simics_MURANO_targeting.bin
+VENICE_TARG_IMG = simics_VENICE_targeting.bin
 MURANO_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.bin}
 VENICE_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.bin}
-MURANO_SECT = HBD=simics_MURANO_targeting.bin,WINK=${MURANO_SLW_IMG}
-VENICE_SECT = HBD=simics_VENICE_targeting.bin,WINK=${VENICE_SLW_IMG}
+MURANO_SBE_IMG = s1SbePartition.bin
+VENICE_SBE_IMG = p8SbePartition.bin
+SBEC_IMG = centSbePartition.bin
+MURANO_SECT = HBD=${MURANO_TARG_IMG},SBE=${MURANO_SBE_IMG},SBEC=${SBEC_IMG},WINK=${MURANO_SLW_IMG}
+VENICE_SECT = HBD=${VENICE_TARG_IMG},SBE=${VENICE_SBE_IMG},SBEC=${SBEC_IMG},WINK=${VENICE_SLW_IMG}
+
 
 PNOR_IMG_INFO = \
    murano.pnor:defaultPnorLayout.xml:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
@@ -180,7 +242,7 @@ clobber_build_pnor_images:
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
 FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE}
 
-update_images_for_sandbox: build_pnor_images 
+update_images_for_sandbox: build_sbe_partitions build_pnor_images
 	mkdir -p ${FLASH_DEST}
 	#Copy hostboot base image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}

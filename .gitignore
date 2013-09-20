@@ -16,3 +16,4 @@ testdata
 *.csv
 .nfs*
 hbsandboxrc
+*.__afs*

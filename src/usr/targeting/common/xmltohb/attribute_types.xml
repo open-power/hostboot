@@ -5811,6 +5811,26 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
+    <id>SBE_IMAGE_MINIMUM_VALID_EXS</id>
+    <description>
+      The minimum number of valid EXs that is required to be used when
+      customizing a SBE image. The customization will fail if it cannot
+      create an image with at least this many EXs.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>3</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_IMAGE_MINIMUM_VALID_EXS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR</id>
     <description>
       PSI Untrusted BAR0 base address (secure mode)
@@ -5932,10 +5952,10 @@ firmware notes: Used as override attribute for pstate procedure
     <id>PROC_SECURITY_SETUP_VECTOR</id>
     <description>
       Secureboot 64-bit proc_sbe_security_setup_vector used
-      by proc_sbe_security_setup.S.  0s are an unsecure SBE image
+      by proc_sbe_security_setup.S. 0s are an unsecure SBE image
       creator: platform
       firmware notes:
-        64-bit proc_sbe_security_setup_vector
+      64-bit proc_sbe_security_setup_vector
     </description>
     <simpleType>
         <uint64_t>
@@ -9498,7 +9518,7 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
-            <default>4</default>
+            <default>2</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
