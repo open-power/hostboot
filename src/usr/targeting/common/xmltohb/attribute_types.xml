@@ -194,14 +194,18 @@
         <name>PCICLKENDPT</name>
         <value>29</value>
     </enumerator>
+    <enumerator>
+        <name>NX</name>
+        <value>30</value>
+    </enumerator>
     <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
     <enumerator>
         <name>TEST_FAIL</name>
-        <value>30</value>
+        <value>31</value>
     </enumerator>
     <enumerator>
         <name>LAST_IN_RANGE</name>
-        <value>31</value>
+        <value>32</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
@@ -2836,7 +2840,7 @@
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -2853,7 +2857,7 @@
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -2870,7 +2874,7 @@
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -2887,7 +2891,7 @@
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -2904,7 +2908,7 @@
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -2927,7 +2931,7 @@ Producer: proc_build_pstate_tables.C
 
 Consumer: OCC pstate_init()
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -2948,7 +2952,7 @@ A 4 bit field  selects one of the the upper 16bit of a 19bit counter (16+3) incr
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -2967,7 +2971,7 @@ Consumer: proc_pm.scominit
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -2988,7 +2992,7 @@ Producer:  proc_pm_init
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3010,7 +3014,7 @@ Producer:  proc_pm_init.C
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3031,7 +3035,7 @@ Supported values: 0x20 (32d)
 
 Chip Select assertion duration is spi_frame_size + 2
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3050,7 +3054,7 @@ Chip Select assertion duration is spi_frame_size + 2
 
 Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3069,7 +3073,7 @@ Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result i
 
 Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3086,7 +3090,7 @@ Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result i
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3103,7 +3107,7 @@ Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result i
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3121,7 +3125,7 @@ Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result i
       PROC_CHIP Attribute
 For a 2.4GHz nest clock, this means that the SPI clk can be theoretically adjusted between 600MHz and 0.29MHz (cycle time 1.66ns...3.41us, in 1.66ns steps). However, a practical range is 0.5...25MHz.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3139,7 +3143,7 @@ For a 2.4GHz nest clock, this means that the SPI clk can be theoretically adjust
       PROC_CHIP Attribute
 Consumer: proc_pmc_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3163,7 +3167,7 @@ Delay is computed as:  (value * ~100ns_hang_pulse)  +0/-~100ns_hang_pulse time
 
 For values greater than 0x00000, the actual delay is 1 SPI Clock + the time delay designated by the value defined. Max. delay at 0x1FFFF: 13.1ms + 1 SPI clock cycle.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3187,7 +3191,7 @@ Delay is computed as:  (value * ~100ns_hang_pulse)  +0/-~100ns_hang_pulse time
 
 For values greater than 0x00000, the actual delay is 1 SPI Clock + the time delay designated by the value defined. Max. delay at 0x1FFFF: 13.1ms + 1 SPI clock cycle.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3205,7 +3209,7 @@ For values greater than 0x00000, the actual delay is 1 SPI Clock + the time dela
       PROC_CHIP Attribute
 Consumer: proc_pmc_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3222,7 +3226,7 @@ Consumer: proc_pmc_init
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3239,7 +3243,7 @@ Consumer: proc_pmc_init
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3256,7 +3260,7 @@ Consumer: proc_pmc_init
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3276,7 +3280,7 @@ Consumer: proc_pmc_init
 0x00: No retry
 0x01 to 0x1F: 1 to 31 respectively
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3298,7 +3302,7 @@ An 8 bit mask vector to enable XORs in the CRC generation and checking LFSRs at 
 Planned CRC8 polynomial: x^8 + x^7 + x^6 + x^4 + x^2 + 1
 Value to enable planned polynomial: 0b1101_0101 (=0xD5)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3316,7 +3320,7 @@ Value to enable planned polynomial: 0b1101_0101 (=0xD5)
       PROC_CHIP Attribute
 Consumer: OCC FW
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3335,7 +3339,7 @@ Consumer: OCC FW
 
 Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by proc_pm..scominit  as a multiple of PM hang pulses.. Counter starts at 0, is increased with every tp_pmc_hang_pulse as long as PORE is busy and set the PMC local FIR bit 19 when count = threshold.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3358,7 +3362,7 @@ Producer: MRWB
 
 Consumer:  proc_pm_init and proc_pcbs_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3384,7 +3388,7 @@ Producer: MRWB
 
 Consumer:  proc_pm_init and proc_pcbs_init.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3406,7 +3410,7 @@ Producer: MRWB
 
 Consumer:  proc_pm_init and proc_pcbs_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3424,7 +3428,7 @@ Consumer:  proc_pm_init and proc_pcbs_init
       PROC_CHIP Attribute
 Selects which voltage level to place the Core and ECO domain PFETs upon Winkle entry. 0 = Vret (Fast Winkle Mode), 1 = Voff (Deep Winkle Mode)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3436,13 +3440,13 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 --> 
+<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERUP_CORE_DELAY0</id>
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -3461,7 +3465,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -3479,7 +3483,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3496,7 +3500,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3517,7 +3521,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 
 1 in the bit position:  use ATTR_PM_PFET_POWERUP_CORE_DELAY1
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3529,13 +3533,13 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 --> 
+<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERDOWN_CORE_DELAY0</id>
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -3548,13 +3552,13 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 --> 
+<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERDOWN_CORE_DELAY1</id>
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -3572,7 +3576,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3589,7 +3593,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3610,7 +3614,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 
 1 in the bit position:  use ATTR_PM_PFET_POWERUP_CORE_DELAY1
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3622,13 +3626,13 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 --> 
+<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERUP_ECO_DELAY0</id>
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -3641,13 +3645,13 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 --> 
+<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERUP_ECO_DELAY1</id>
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -3665,7 +3669,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3682,7 +3686,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3703,7 +3707,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 
 1 in the bit position:  use ATTR_PM_PFET_POWERUP_ECO_DELAY1
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3721,7 +3725,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -3740,7 +3744,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -3758,7 +3762,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3775,7 +3779,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3792,7 +3796,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3813,7 +3817,7 @@ Producer: proc_build_gpstate.C
 
 Consumers: proc_pcbs_init.C, proc_pcbs_lpst_init.C,
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3830,7 +3834,7 @@ Consumers: proc_pcbs_init.C, proc_pcbs_lpst_init.C,
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3865,7 +3869,7 @@ If psafe greater-than PMSR[global_actual_pstate], the  global_actual_pstate is f
 
 The value of Psafe needs to be at or below the nominal Pstate to make sure safe operation of all chiplets.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3882,7 +3886,7 @@ The value of Psafe needs to be at or below the nominal Pstate to make sure safe 
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3900,7 +3904,7 @@ The value of Psafe needs to be at or below the nominal Pstate to make sure safe 
       PROC_CHIP Attribute
 Defines the Pstate for the point at which clock sector buffers should be at full strength.  This is to support Vmin operation.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3917,7 +3921,7 @@ Defines the Pstate for the point at which clock sector buffers should be at full
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3934,7 +3938,7 @@ Defines the Pstate for the point at which clock sector buffers should be at full
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3951,7 +3955,7 @@ Defines the Pstate for the point at which clock sector buffers should be at full
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3968,7 +3972,7 @@ Defines the Pstate for the point at which clock sector buffers should be at full
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -3989,7 +3993,7 @@ Supported values: 0x10 (16d),
 
 Chip Select assertion duration is spi_frame_size + 2
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4008,7 +4012,7 @@ Chip Select assertion duration is spi_frame_size + 2
 
 Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size are ignored.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4027,7 +4031,7 @@ Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size are ign
 
 Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4046,7 +4050,7 @@ Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size result 
 
 Supported values: 0x000 to spi_frame_size.  The actual number of bits captured is spi_frame_size - spi_in_delay
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4063,7 +4067,7 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4080,7 +4084,7 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4097,7 +4101,7 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
     <description>
       PROC_CHIP Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4124,7 +4128,7 @@ Producer: proc_pm_init
 
 Consumer: proc_pss_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4145,7 +4149,7 @@ Consumer: proc_pm_init
 
 Produces ATTR_PM_SPIPSS_INTER_FRAME_DELAY_SETTING
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4172,7 +4176,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 . . .
 11111   divided hang pulse = PBAX hang pulse/31
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4190,7 +4194,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
       PROC_CHIP Attribute
 Mode bit to count overcommit retries for the send retry threshold when sending PBAX commands on the powerbus.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4214,7 +4218,7 @@ Defines the maximum number of retry attempts by the Send Engine for any phase of
 .etc.
 0xFF :  255 attempts
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4239,7 +4243,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 . . .
 11111   divided hang pulse = PBAX hang pulse/31
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4256,7 +4260,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <description>
       EX_CHIPLET Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4273,7 +4277,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <description>
       EX_CHIPLET Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4290,7 +4294,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <description>
       EX_CHIPLET Attribute
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4320,7 +4324,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4341,7 +4345,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4364,7 +4368,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4388,7 +4392,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4420,7 +4424,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
       TODO: Dean said this may either be provided by the Machine Readable
             Workbook or Todd R's power management def file.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4441,7 +4445,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4461,7 +4465,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4481,7 +4485,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4501,7 +4505,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4521,7 +4525,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4544,7 +4548,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4563,7 +4567,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4583,7 +4587,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4604,7 +4608,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4626,7 +4630,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -4652,7 +4656,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
             reading the super-turbo frequency from MVPD #V and set this attribute
             to the lowest value.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -5270,7 +5274,7 @@ firmware notes: Used as override attribute for pstate procedure
       consumer: proc_pcie_scominit
       notes:
         PCIe PLL Global Control Register 1.
-	ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
+    ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
         Array index: IOP number (0:1)
   </description>
   <simpleType>
@@ -5315,7 +5319,7 @@ firmware notes: Used as override attribute for pstate procedure
       consumer: proc_pcie_scominit
       notes:
         PCIe PCS Control Register 1.
-	RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
+    RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
         ADDDREMDELTA_128130_A/STARTUPDELTA_128130_A.
         Array index: IOP number (0:1)
   </description>
@@ -5338,7 +5342,7 @@ firmware notes: Used as override attribute for pstate procedure
       consumer: proc_pcie_scominit
       notes:
         PCIe TX FIFO Offset Register.
-	G3OFFSET/G2OFFSET/G1OFFSET.
+    G3OFFSET/G2OFFSET/G1OFFSET.
         First array index: IOP number (0:1)
         Second array index: Lane number (0:15)
   </description>
@@ -5430,7 +5434,7 @@ firmware notes: Used as override attribute for pstate procedure
       consumer: proc_pcie_scominit
       notes:
         PCIe RX Receiver Peaking Value Register.
-	PEAK1/PEAK2/PEAK3.
+    PEAK1/PEAK2/PEAK3.
         First array index: IOP number (0:1)
         Second array index: Lane number (0:15)
   </description>
@@ -5584,9 +5588,9 @@ firmware notes: Used as override attribute for pstate procedure
     <id>EX_GARD_BITS</id>
     <description>
       Vector to communicate the guarded EX chiplets to SBE
-			One Guard bit per EX chiplet, bit location aligned to chiplet ID
+            One Guard bit per EX chiplet, bit location aligned to chiplet ID
       (bit 16: EX00, bit 17: EX01, bit 18: EX02 ... bit 31: EX15)
-			Guarded EX chiplets are marked by a '1'.
+            Guarded EX chiplets are marked by a '1'.
     </description>
     <simpleType>
         <uint32_t>
@@ -9706,27 +9710,27 @@ Measured in GB</description>
     <id>EI_BUS_TX_MSBSWAP</id>
     <description>
         Source: MRW: Downstream MSB Swap and Upstream MSB Swap
-		Usage:  TX_MSBSWAP initfile setting for DMI and A buses
+        Usage:  TX_MSBSWAP initfile setting for DMI and A buses
 
-		This attribute represents whether or not a single clock group bus such as DMI and A bus was wired by the board designer using a feature
-		called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX chip where 'n' is the width of the bus. A basic description
-		of this capability is that the board designer can save layers on the board wiring by crossing the wiring between the two chips in
-		a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
-		If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1' of the RX chip, lane 1 to lane 'n-2', etc. Random or
-		arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
+        This attribute represents whether or not a single clock group bus such as DMI and A bus was wired by the board designer using a feature
+        called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX chip where 'n' is the width of the bus. A basic description
+        of this capability is that the board designer can save layers on the board wiring by crossing the wiring between the two chips in
+        a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
+        If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1' of the RX chip, lane 1 to lane 'n-2', etc. Random or
+        arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
 
         The Master Chip of two connected chips is defined as the chip with the smaller value of (100*Node + Pos).
-		The Slave Chip of two connected chips is defined as the chip with the larger value of (100*Node + Pos).
-		The Downstream direction is defined as the direction from the Master chip to the Slave chip.
-		The Upstream direction is defined as the direction from the Slave chip to the Master chip.
+        The Slave Chip of two connected chips is defined as the chip with the larger value of (100*Node + Pos).
+        The Downstream direction is defined as the direction from the Master chip to the Slave chip.
+        The Upstream direction is defined as the direction from the Slave chip to the Master chip.
 
-		The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Downstream bus is wired msb to lsb etc. and
-		0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
+        The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Downstream bus is wired msb to lsb etc. and
+        0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
 
-		The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Upstream bus is wired msb to lsb etc. and
-		0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
+        The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Upstream bus is wired msb to lsb etc. and
+        0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
 
-		It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP value for the correct target endpoints.
+        It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP value for the correct target endpoints.
 
     </description>
     <simpleType>
@@ -10247,7 +10251,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         If true, the chip is installed on a Dual Chip Module
         Provided by the Machine Readable Workbook
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -11942,7 +11946,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <description>Mirrored memory base addresses
       creator: mss_setup_bars
       consumer: consumer: opt_mem_map
-      Mem opt map uses this for the bases of the mirror ranges.  
+      Mem opt map uses this for the bases of the mirror ranges.
         (max number based on Venice design)
   </description>
   <simpleType>
@@ -12077,7 +12081,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <description>
         Proc Boot Voltage
     </description>
-    <simpleType>     
+    <simpleType>
         <uint32_t>
             <default>0</default>
         </uint32_t>
@@ -12088,7 +12092,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_BOOT_VOLTAGE_VID</id>
         <macro>DIRECT</macro>
-    </hwpfToHbAttrMap> 
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -12198,7 +12202,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
       Consumer: p8_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12219,7 +12223,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
       Consumer: p8_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12244,7 +12248,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12267,7 +12271,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
       Provided by the Machine Readable Workbook (via the power subsystem design
       per system)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12288,7 +12292,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
       Consumer: p8_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12309,7 +12313,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
       Consumer: p8_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12330,7 +12334,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
       Consumer: p8_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12354,7 +12358,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12378,7 +12382,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12393,7 +12397,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>VOLTAGE_EXT_VDD_BIAS_UP</id>
     <description>
      External VDD Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
-     is applied to each VPD point in generating the Global Pstate tables. Either 
+     is applied to each VPD point in generating the Global Pstate tables. Either
      this or ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN can have non-zero value concurrently due to
      the unsigned definition of attributes.
 
@@ -12403,7 +12407,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12418,7 +12422,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>VOLTAGE_EXT_VDD_BIAS_DOWN</id>
     <description>
      External VDD Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
-     is applied to each VPD point in generating the Global Pstate tables. Either 
+     is applied to each VPD point in generating the Global Pstate tables. Either
      this or ATTR_VOLTAGE_EXT_VDD_BIAS_UP can have non-zero value concurrently due to
      the unsigned definition of attributes.
 
@@ -12428,7 +12432,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12443,7 +12447,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>VOLTAGE_EXT_VCS_BIAS_UP</id>
     <description>
      External VCS Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
-     is applied to each VPD point in generating the Global Pstate tables. Either 
+     is applied to each VPD point in generating the Global Pstate tables. Either
      this or ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN can have non-zero value concurrently due to
      the unsigned definition of attributes.
 
@@ -12453,7 +12457,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12468,7 +12472,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>VOLTAGE_EXT_VCS_BIAS_DOWN</id>
     <description>
      External VCS Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
-     is applied to each VPD point in generating the Global Pstate tables. Either 
+     is applied to each VPD point in generating the Global Pstate tables. Either
      this or ATTR_VOLTAGE_EXT_VCS_BIAS_UP can have non-zero value concurrently due to
      the unsigned definition of attributes.
 
@@ -12478,7 +12482,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12493,9 +12497,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>VOLTAGE_INT_VDD_BIAS_UP</id>
     <description>
      Internal VDD Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
-     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
-     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias 
-     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_DOWN can have non-zero value 
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table
+     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias
+     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_DOWN can have non-zero value
      concurrently due to the unsigned definition of attributes.
 
      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
@@ -12504,7 +12508,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12519,9 +12523,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>VOLTAGE_INT_VDD_BIAS_DOWN</id>
     <description>
      Internal VDD Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
-     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
-     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias 
-     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_UP can have non-zero value 
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table
+     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias
+     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_UP can have non-zero value
      concurrently due to the unsigned definition of attributes.
 
      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
@@ -12530,7 +12534,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12545,9 +12549,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>VOLTAGE_INT_VCS_BIAS_UP</id>
     <description>
      Internal VCS Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
-     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
-     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias 
-     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_DOWN can have non-zero value 
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table
+     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias
+     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_DOWN can have non-zero value
      concurrently due to the unsigned definition of attributes.
 
      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
@@ -12556,7 +12560,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12571,9 +12575,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>VOLTAGE_INT_VCS_BIAS_DOWN</id>
     <description>
      Internal VCS Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
-     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
-     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias 
-     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_UP can have non-zero value 
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table
+     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias
+     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_UP can have non-zero value
      concurrently due to the unsigned definition of attributes.
 
      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
@@ -12582,7 +12586,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
      Platform default:  0
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12597,20 +12601,20 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
     <description>
       Override for Minimum frequency for which undervolting is allowed.
-      
-      If value = 0, the value of VPD CPMin data point is passed to OCC FW via 
+
+      If value = 0, the value of VPD CPMin data point is passed to OCC FW via
       Pstate SuperStructure.
-      
+
       If value != 0, this value will be passed to OCC FW via Pstate SuperStructure
       as the floor frequency for enabled CPMs.
-      
+
       Will be internally rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
 
       Consumer: OCC FW; OCC Lab Tools
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12625,20 +12629,20 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>
     <description>
       Override for Maximum frequency for which undervolting is allowed.
-      
-      If value = 0, the value of VPD Turbo data point is passed to OCC FW via 
+
+      If value = 0, the value of VPD Turbo data point is passed to OCC FW via
       Pstate SuperStructure.
-      
+
       If value != 0, this value will be passed to OCC FW via Pstate SuperStructure
       as the ceiling frequency for enabled CPMs.
-      
+
       Will be internally rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
 
       Consumer: OCC FW; OCC Lab Tools
 
       Provided by the Machine Readable Workbook.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -12653,15 +12657,15 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>PM_WINKLE_ENTRY</id>
     <description>Setting depends on di/dt charateristics of the system.
 
-        Set Assisted if power off serialization is needed and WINKLE_TYPE=Fast;  
-        Set to Hardware if the system can handle the unrelated powering off between cores.  
+        Set Assisted if power off serialization is needed and WINKLE_TYPE=Fast;
+        Set to Hardware if the system can handle the unrelated powering off between cores.
         Hardware setting decreases entry latency
 
         Producer: MRWB
 
         Consumer:  p8_poreslw_init.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12676,7 +12680,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>PM_WINKLE_EXIT</id>
     <description>Setting depends on di/dt charateristics of the system and the setting of ATTR_PM_WINKLE_TYPE.
 
-        Set to Assisted if power on serialization is needed and WINKLE_TYPE=Fast;  Set to Hardware if the system 
+        Set to Assisted if power on serialization is needed and WINKLE_TYPE=Fast;  Set to Hardware if the system
         can handle the unrelated powering off between cores.  Hardware setting decreases entry latency.
         Must be set to Assisted if ATTR_PM_WINKLE_TYPE=Deep as this necessary for restore.
 
@@ -12686,7 +12690,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
         Consumer:  p8_poreslw_init.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>

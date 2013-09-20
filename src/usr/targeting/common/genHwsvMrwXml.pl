@@ -1079,6 +1079,10 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             generate_pcies($proc,$proc_ordinal_id);
             generate_ax_buses($proc, "A",$proc_ordinal_id);
             generate_ax_buses($proc, "X",$proc_ordinal_id);
+            # TODO RTC: 87142
+            # instance path to be added
+            $ipath = "";
+            generate_nx($proc,$proc_ordinal_id,$ipath);
         }
     }
 }
@@ -2439,6 +2443,43 @@ sub generate_ax_buses
 
         print "\n</targetInstance>\n";
     }
+}
+
+sub generate_nx
+{
+    my ($proc, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X1E%04X",${node},$proc);
+    print "\n<!-- $SYSNAME n${node}p$proc NX units -->\n";
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}nx0</id>
+    <type>unit-nx-$CHIPNAME</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/nx-0</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>";
+        # TODO RTC: 87142
+        print "
+        <default>instance:TO_BE_ADDED</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>";
+
+    # call to do any fsp per-nx attributes
+    do_plugin('fsp_nx', $proc, $ordinalId );
+
+    print "
+</targetInstance>
+";
 }
 
 sub generate_centaur

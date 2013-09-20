@@ -300,42 +300,42 @@ const char* EntityPath::pathElementTypeAsString(
 
     switch (i_type)
     {
-        case TYPE_PROC:
-            return "Proc";
+        case TYPE_NA:
+            return "NA";
+        case TYPE_SYS:
+            return "Sys";
         case TYPE_NODE:
             return "Node";
-        case TYPE_CONTROL_NODE:
-            return "Control Node";
+        case TYPE_DIMM:
+            return "DIMM";
+        case TYPE_MEMBUF:
+            return "Membuf";
+        case TYPE_PROC:
+            return "Proc";
+        case TYPE_EX:
+            return "EX";
         case TYPE_CORE:
             return "Core";
         case TYPE_L2:
             return "L2";
-        case TYPE_MCS:
-            return "MCS";
-        case TYPE_MBA:
-            return "MBA";
         case TYPE_L3:
             return "L3";
         case TYPE_L4:
             return "L4";
-        case TYPE_MEMBUF:
-            return "Membuf";
-        case TYPE_SYS:
-            return "Sys";
-        case TYPE_EX:
-            return "EX";
-        case TYPE_PCI:
-            return "PCI";
-        case TYPE_DIMM:
-            return "DIMM";
+        case TYPE_MCS:
+            return "MCS";
+        case TYPE_MBA:
+            return "MBA";
         case TYPE_XBUS:
             return "XBUS";
         case TYPE_ABUS:
             return "ABUS";
-        case TYPE_APSS:
-            return "APSS";
+        case TYPE_PCI:
+            return "PCI";
         case TYPE_DPSS:
             return "DPSS";
+        case TYPE_APSS:
+            return "APSS";
         case TYPE_OCC:
             return "OCC";
         case TYPE_PSI:
@@ -348,6 +348,10 @@ const char* EntityPath::pathElementTypeAsString(
             return "OSC";
         case TYPE_TODCLK:
             return "TodClock";
+        case TYPE_CONTROL_NODE:
+            return "Control Node";
+        case TYPE_NX:
+            return "NX";
         case TYPE_OSCREFCLK:
             return "OSCREFClock";
         case TYPE_OSCPCICLK:
@@ -356,8 +360,6 @@ const char* EntityPath::pathElementTypeAsString(
             return "REFClockEndPoint";
         case TYPE_PCICLKENDPT:
             return "PCIClockEndPoint";
-        case TYPE_NA:
-            return "NA";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

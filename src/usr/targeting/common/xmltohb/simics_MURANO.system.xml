@@ -34,9 +34,9 @@
       * each MCS chiplet connects to 1 Centaur membuf chip
        * each Centaur membuf chip has 2 MBA chiplets
         * each MBA chiplet has 2 ports
-         * each MBA port connects to 2 logical dimms 
+         * each MBA port connects to 2 logical dimms
 
-     Values for pm_attributes_all_plat.xml attributes was provided by 
+     Values for pm_attributes_all_plat.xml attributes was provided by
          Greg Still on 10/17/1012.
      ================================================================= -->
 
@@ -132,7 +132,7 @@
         <id>HB_SETTINGS</id>
         <default>
             <field><id>traceContinuous</id><value>1</value></field>
-            <field><id>traceScanDebug</id><value>1</value></field>            
+            <field><id>traceScanDebug</id><value>1</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
@@ -969,6 +969,25 @@
     </attribute>
 </targetInstance>
 
+<!-- murano n0p0 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc0nx0</id>
+    <type>unit-nx-murano</type>
+    <attribute><id>HUID</id><default>0x001E0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
 
 <!-- Murano n0p1 processor chip -->
 
@@ -1701,6 +1720,25 @@
     </attribute>
 </targetInstance>
 
+<!-- murano n0p1 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc1nx0</id>
+    <type>unit-nx-murano</type>
+    <attribute><id>HUID</id><default>0x001E0001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
 
 <!-- Murano n0p2 processor chip -->
 
@@ -2432,6 +2470,25 @@
     </attribute>
 </targetInstance>
 
+<!-- murano n0p2 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc2nx0</id>
+    <type>unit-nx-murano</type>
+    <attribute><id>HUID</id><default>0x001E0002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
 
 <!-- Murano n0p3 processor chip -->
 
@@ -3160,6 +3217,26 @@
     <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-2/xbus-1</default>
+    </attribute>
+</targetInstance>
+
+<!-- murano n0p3 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc3nx0</id>
+    <type>unit-nx-murano</type>
+    <attribute><id>HUID</id><default>0x001E0003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 

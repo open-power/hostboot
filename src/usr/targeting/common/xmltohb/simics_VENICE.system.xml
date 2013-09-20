@@ -40,7 +40,7 @@
       relationship to the FSI ports:
         cMFSI Port 0-7 = Logical MCS Port 4,5,6,7,0,1,2,3
 
-     Values for pm_plat_attributes.xml attributes were provided by 
+     Values for pm_plat_attributes.xml attributes were provided by
          Greg Still on 10/17/1012.
      ================================================================= -->
 
@@ -1187,7 +1187,7 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-4/abus-1</default>
@@ -1265,7 +1265,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/xbus-1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -1308,6 +1308,25 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p0 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc0nx0</id>
+    <type>unit-nx-venice</type>
+    <attribute><id>HUID</id><default>0x001E0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
 
 <!-- Venice n0p1 processor chip -->
 
@@ -2276,7 +2295,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/abus-1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -2398,6 +2417,26 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p1 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc1nx0</id>
+    <type>unit-nx-venice</type>
+    <attribute><id>HUID</id><default>0x001E0001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -3340,7 +3379,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/abus-0</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -3487,13 +3526,32 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/xbus-3</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
     </attribute>
 </targetInstance>
 
+<!-- venice n0p2 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc2nx0</id>
+    <type>unit-nx-venice</type>
+    <attribute><id>HUID</id><default>0x001E0002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
 
 <!-- Venice n0p3 processor chip -->
 
@@ -4463,7 +4521,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/abus-1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -4585,6 +4643,26 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p3 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc3nx0</id>
+    <type>unit-nx-venice</type>
+    <attribute><id>HUID</id><default>0x001E0003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -5412,7 +5490,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-6</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
@@ -5434,7 +5512,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/mcs-7</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
@@ -5458,7 +5536,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/pci-0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5472,7 +5550,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/pci-1</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5486,7 +5564,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-4/pci-2</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 
@@ -5646,6 +5724,26 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p4 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc4nx0</id>
+    <type>unit-nx-venice</type>
+    <attribute><id>HUID</id><default>0x001E0004</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -6708,6 +6806,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p5 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc5nx0</id>
+    <type>unit-nx-venice</type>
+    <attribute><id>HUID</id><default>0x001E0005</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p6 processor chip -->
 
 <targetInstance>
@@ -7622,7 +7740,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/abus-0</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -7702,7 +7820,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/xbus-0</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -7724,7 +7842,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/xbus-1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -7742,7 +7860,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/xbus-2</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -7760,13 +7878,32 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-6/xbus-3</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
     </attribute>
 </targetInstance>
 
+<!-- venice n0p6 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc6nx0</id>
+    <type>unit-nx-venice</type>
+    <attribute><id>HUID</id><default>0x001E0006</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
 
 <!-- Venice n0p7 processor chip -->
 
@@ -8733,7 +8870,7 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-7/abus-2</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -8765,7 +8902,7 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-6/xbus-0</default>
@@ -8823,6 +8960,26 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p7 NX unit -->
+
+<targetInstance>
+    <id>sys0node0proc7nx0</id>
+    <type>unit-nx-venice</type>
+    <attribute><id>HUID</id><default>0x001E0007</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
