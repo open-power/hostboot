@@ -283,20 +283,33 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
              block < num_blocks;
              ++block )
         {
-            write_bytes = iv_erasesize_bytes;
-            if(bytes_left < iv_erasesize_bytes )
+            TRACDCOMP(g_trac_pnor,"cur_writeStart_addr=%X, cur_blkStart_addr=%X, cur_blkEnd_addr=%X, bytes_left=%X", cur_writeStart_addr, cur_blkStart_addr, cur_blkEnd_addr, bytes_left );
+            // writing at a block boundary, just write the whole thing
+            if( cur_writeStart_addr == cur_blkStart_addr )
             {
-                uint32_t end_waste = 0;
-                //deduct any unused space at the end of the erase block
-                if( cur_blkEnd_addr > (cur_writeStart_addr + bytes_left))
+                if( bytes_left > iv_erasesize_bytes )
                 {
-                    end_waste = cur_blkEnd_addr - (cur_writeStart_addr + bytes_left);
-                    write_bytes -= end_waste;
+                    write_bytes = iv_erasesize_bytes;
                 }
-
-                //deduct any unused space at the beginning of the erase block
-                write_bytes = write_bytes - (cur_writeStart_addr - cur_blkStart_addr);
+                else
+                {
+                    write_bytes = bytes_left;
+                }
             }
+            // writing the end of a block
+            else //cur_writeStart_addr > cur_blkStart_addr
+            {
+                uint32_t bytes_tail = cur_blkEnd_addr - cur_writeStart_addr;
+                if( bytes_left < bytes_tail )
+                {
+                    write_bytes = bytes_left;
+                }
+                else
+                {
+                    write_bytes = bytes_tail;
+                }
+            }
+            //note that writestart < blkstart can never happen
 
             // write a single block of data out to flash efficiently
             mutex_lock(&cv_mutex);
