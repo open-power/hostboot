@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,6 +40,7 @@ extern "C"
     char* strcpy(char* d, const char* s);
     int strcmp(const char* s1, const char* s2) __attribute__((pure));
     size_t strlen(const char* s1) __attribute__((pure));
+    size_t strnlen(const char* s1, size_t n) __attribute__((pure));
 
     char* strcat(char* d, const char* s);
     char* strncat(char* d, const char* s, size_t n);

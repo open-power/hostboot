@@ -84,13 +84,14 @@ namespace TRACE
     }
 
     void trace_adal_write_bin(ComponentDesc * io_td,
-                              const trace_hash_val i_hash,
+                              const traceCodeInfo* i_info,
                               const uint32_t i_line,
                               const void * i_ptr,
                               const uint32_t i_size,
                               const uint32_t i_type)
     {
-        Singleton<Service>::instance().writeBinEntry(io_td, i_hash, i_line,
+        Singleton<Service>::instance().writeBinEntry(io_td, i_info->hash,
+                                                     i_info->format, i_line,
                                                      i_ptr, i_size, i_type);
     }
 

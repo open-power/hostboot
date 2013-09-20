@@ -163,7 +163,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
     { \
         __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_bin((des), \
-                                    __traceData_codeInfo.hash, \
+                                    &__traceData_codeInfo, \
                                     __LINE__, \
                                     address, \
                                     len, \
@@ -218,7 +218,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
     { \
         __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_bin((des), \
-                                    __traceData_codeInfo.hash, \
+                                    &__traceData_codeInfo, \
                                     __LINE__, \
                                     address, \
                                     len, \

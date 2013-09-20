@@ -107,6 +107,7 @@ namespace TRACE
              *  @param[in] i_td - Component Descriptor to write to.
              *
              *  @param[in] i_hash - Hash value.
+             *  @param[in] i_fmt - Printf-style format string.
              *  @param[in] i_line - Line number.
              *  @param[in] i_ptr - Data to write.
              *  @param[in] i_size - Bytes to write.
@@ -114,6 +115,7 @@ namespace TRACE
              */
             void writeBinEntry(ComponentDesc* i_td,
                                trace_hash_val i_hash,
+                               const char * i_fmt,
                                uint32_t i_line,
                                const void* i_ptr,
                                uint32_t i_size,
