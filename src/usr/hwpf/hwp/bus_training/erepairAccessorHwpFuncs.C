@@ -270,6 +270,8 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
     bool                    l_sparesFound          = false;
     uint8_t                 l_threshold            = 0;
     uint64_t                l_allMnfgFlags         = 0;
+    uint32_t                l_numTxFailLanes       = 0;
+    uint32_t                l_numRxFailLanes       = 0;
     fapi::TargetType        l_endp1_tgtType = fapi::TARGET_TYPE_NONE;
     fapi::TargetType        l_endp2_tgtType = fapi::TARGET_TYPE_NONE;
 
@@ -504,85 +506,57 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             break;
         }
 
-        /*** We want to create eRepair threshold exceed error logs for   ***/
-        /*** each of the Tx and Rx sub-interfaces of both the end-points ***/
-
         // Check if the eRepair threshold has exceeded for Tx side of endp1
         if(o_endp1_txFaillanes.size() > l_threshold)
         {
             l_thresholdExceed = true;
+            l_numTxFailLanes  = o_endp1_txFaillanes.size();
 
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Tx of endp1 target. No.of lanes: %d",
-                     o_endp1_txFaillanes.size());
-
-            fapi::ReturnCode    l_rcLog;
-            const fapi::Target  &FFDC_ENDP_TARGET = i_endp1_target;
-            const interfaceType &FFDC_SUB_IFACE   = DRIVE;
-            const uint32_t      &FFDC_LANES       = o_endp1_txFaillanes.size();
-            FAPI_SET_HWP_ERROR(l_rcLog, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
-
-            fapiLogError(l_rcLog);
+                     l_numTxFailLanes);
         }
 
         // Check if the eRepair threshold has exceeded for Rx side of endp1
         if(o_endp1_rxFaillanes.size() > l_threshold)
         {
             l_thresholdExceed = true;
+            l_numRxFailLanes  = o_endp1_rxFaillanes.size();
 
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Rx of endp1 target. No.of lanes: %d",
-                     o_endp1_rxFaillanes.size());
-
-            fapi::ReturnCode    l_rcLog;
-            const fapi::Target  &FFDC_ENDP_TARGET = i_endp1_target;
-            const interfaceType &FFDC_SUB_IFACE   = RECEIVE;
-            const uint32_t      &FFDC_LANES       = o_endp1_rxFaillanes.size();
-            FAPI_SET_HWP_ERROR(l_rcLog, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
-
-            fapiLogError(l_rcLog);
+                     l_numRxFailLanes);
         }
 
         // Check if the eRepair threshold has exceeded for Tx side of endp2
         if(o_endp2_txFaillanes.size() > l_threshold)
         {
             l_thresholdExceed = true;
+            l_numTxFailLanes  = o_endp2_txFaillanes.size();
 
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Tx of endp2 target. No.of lanes: %d",
-                     o_endp2_txFaillanes.size());
-
-            fapi::ReturnCode    l_rcLog;
-            const fapi::Target  &FFDC_ENDP_TARGET = i_endp2_target;
-            const interfaceType &FFDC_SUB_IFACE   = DRIVE;
-            const uint32_t      &FFDC_LANES       = o_endp2_txFaillanes.size();
-            FAPI_SET_HWP_ERROR(l_rcLog, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
-
-            fapiLogError(l_rcLog);
+                     l_numTxFailLanes);
         }
 
         // Check if the eRepair threshold has exceeded for Rx side of endp2
         if(o_endp2_rxFaillanes.size() > l_threshold)
         {
             l_thresholdExceed = true;
+            l_numRxFailLanes  = o_endp2_rxFaillanes.size();
 
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Rx of endp2 target. No.of lanes: %d",
-                     o_endp2_rxFaillanes.size());
-
-            fapi::ReturnCode    l_rcLog;
-            const fapi::Target  &FFDC_ENDP_TARGET = i_endp2_target;
-            const interfaceType &FFDC_SUB_IFACE   = RECEIVE;
-            const uint32_t      &FFDC_LANES       = o_endp2_rxFaillanes.size();
-            FAPI_SET_HWP_ERROR(l_rcLog, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
-
-            fapiLogError(l_rcLog);
+                     l_numRxFailLanes);
         }
 
         if(l_thresholdExceed)
         {
             FAPI_ERR("erepairGetRestoreLanes: Threshold has Exceeded");
 
+            const uint32_t &FFDC_TX_NUM_LANES = l_numTxFailLanes;
+            const uint32_t &FFDC_RX_NUM_LANES = l_numRxFailLanes;
+            const uint32_t &FFDC_THRESHOLD    = l_threshold;
             FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_THRESHOLD_EXCEED);
             break;
         }
@@ -605,7 +579,8 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             {
                 FAPI_ERR("erepairGetRestoreLanes: CHARM IPL, Threshold Exceed");
 
-                FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_CHARM_THRESHOLD_EXCEED);
+                FAPI_SET_HWP_ERROR(l_rc,
+                                   RC_EREPAIR_RESTORE_CHARM_THRESHOLD_EXCEED);
                 break;
             }
         }
@@ -631,6 +606,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
 
             if(l_sparesFound)
             {
+                const fapi::Target &FFDC_TARGET = i_endp1_target;
                 FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD);
                 fapiLogError(l_rc);
             }
@@ -654,6 +630,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
 
             if(l_sparesFound)
             {
+                const fapi::Target &FFDC_TARGET = i_endp2_target;
                 FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD);
                 fapiLogError(l_rc);
             }

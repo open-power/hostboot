@@ -52,16 +52,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_EREPAIR_RESTORE_THRESHOLD_EXCEED</rc>
-    <description>
-        The threshold limit for eRepair has been crossed
-    </description>
-    <ffdc>FFDC_ENDP_TARGET</ffdc>
-    <ffdc>FFDC_SUB_IFACE</ffdc>
-    <ffdc>FFDC_LANES</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_EREPAIR_RESTORE_CHARM_THRESHOLD_EXCEED</rc>
     <description>
         The threshold limit for eRepair has been crossed during CHARM operation
@@ -73,6 +63,7 @@
     <description>
         There are spare lanes in the VPD. Spare lanes cannot be restored.
     </description>
+    <ffdc>FFDC_TARGET</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -87,6 +78,9 @@
     <description>
         The threshold limit for eRepair has been crossed
     </description>
+    <ffdc>FFDC_TX_NUM_LANES</ffdc>
+    <ffdc>FFDC_RX_NUM_LANES</ffdc>
+    <ffdc>FFDC_THRESHOLD</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
