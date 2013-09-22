@@ -86,6 +86,11 @@ typedef       Target* TargetHandle_t;
 typedef std::vector<TargetHandle_t> TargetHandleList;
 typedef std::vector<Target>         TargetList;
 
+// Function pointer declaration to install/uninstall the attribute write
+// callback
+typedef void (*pCallbackFuncPtr) (const Target* const, const ATTRIBUTE_ID, \
+    const uint32_t, const void* const);
+
 class Target
 {
 
@@ -210,7 +215,7 @@ class Target
          *  @brief Returns pointer to a mutex attribute associated with the
          *     target
          *
-         *  @pre Target service must be initialized and the mutex attribute 
+         *  @pre Target service must be initialized and the mutex attribute
          *      must exist
          *
          *  @post See brief section
@@ -242,7 +247,7 @@ class Target
          *      updated with the address of the mutex attribute if it exists
          *      (ignored otherwise)
          *
-         *  @pre Target service must be initialized 
+         *  @pre Target service must be initialized
          *
          *  @post See brief section
          *
@@ -250,7 +255,7 @@ class Target
          *
          *  @retval true Attribute was found (and returned)
          *  @retval false Attribute was not found, o_pMutex was not updated
-         */        
+         */
         template<const ATTRIBUTE_ID A>
         bool tryGetHbMutexAttr(
             mutex_t*& o_pMutex) const;
@@ -272,7 +277,7 @@ class Target
             typename AttributeTraits<A>::Type const& i_attrValue)
         {
             bool l_wrote = trySetAttr<A>(i_attrValue);
-            
+
             //@TODO: Remove assert once release has stabilized
             TARG_ASSERT(l_wrote,"TARGETING::Target::setAttr<0x%7x>: trySetAttr returned false",A);
         }
@@ -290,7 +295,7 @@ class Target
         uint8_t * targetFFDC( uint32_t & o_size ) const;
 
         /**
-         *  @brief Returns the target handle referencing a target whose HUID 
+         *  @brief Returns the target handle referencing a target whose HUID
          *      matches the caller supplied value
          *
          *  @param[in] i_huid HUID of target to find
@@ -303,9 +308,9 @@ class Target
          *  @retval !NULL Target handle referencing a target whose HUID matches
          *      the caller supplied value.
          *  @retval NULL No target found whose HUID matches the caller supplied
-         *      value. 
+         *      value.
          */
-        Target* getTargetFromHuid(const ATTR_HUID_type i_huid) const;
+        static Target* getTargetFromHuid(const ATTR_HUID_type i_huid);
 
         /**
          *  @brief Return the Targeting Override Attribute Tank
@@ -326,6 +331,34 @@ class Target
         {
             return cv_syncTank;
         }
+
+        /**
+         *  @brief Install the targeting attribute write callback,
+         *  provided by user. This gets triggered on every setAttr/trySetAttr
+         *  instantiation on the targeting interface. User might write a
+         *  method as per the callback function type provided, to have
+         *  use-case as per the requirement.
+         *
+         *  @param[in] i_callBackFunc, User defined callback function of the
+         *  type pCallbackFuncPtr.
+         *
+         *  @return bool, indicates the status of the request.
+         *  @retval true, if the callback installation is success
+         *  @retval false, if callback is already installed.
+         */
+        static bool installWriteAttributeCallback(
+                pCallbackFuncPtr & i_callBackFunc);
+
+        /**
+         *  @brief uninstall the targeting attribute write callback, provided
+         *  by user. which gets installed via installWriteAttributeCallback
+         *  method.
+         *
+         *  @return bool, indicates the status of the request.
+         *  @retval true, if the callback is uninstalled
+         *  @retval false, if the callback uninstall fails.
+         */
+        static bool uninstallWriteAttributeCallback();
 
     private: // Private helper interfaces
 
@@ -404,7 +437,7 @@ class Target
          *
          *  @param[in] i_attribute Mutex attribute to return
          *
-         *  @pre Target service must be initialized and the mutex attribute 
+         *  @pre Target service must be initialized and the mutex attribute
          *      must exist
          *
          *  @post See brief section
@@ -439,7 +472,7 @@ class Target
          *      updated with the address of the mutex attribute if it exists
          *      (ignored otherwise)
          *
-         *  @pre Target service must be initialized 
+         *  @pre Target service must be initialized
          *
          *  @post See brief section
          *
@@ -447,7 +480,7 @@ class Target
          *
          *  @retval true Attribute was found (and returned)
          *  @retval false Attribute was not found, o_pMutex was not updated
-         */  
+         */
         bool _tryGetHbMutexAttr(
             const ATTRIBUTE_ID i_attribute,
                   mutex_t*&    o_pMutex) const;
@@ -485,11 +518,15 @@ class Target
          */
         uint8_t getAttrTankTargetUnitPos() const;
 
+    private: // Function pointer variable declaration
+
+        static pCallbackFuncPtr cv_pCallbackFuncPtr;
+
     private: // Private instance variables
 
         uint32_t       iv_attrs;          ///< Total attributes allowed for this
                                           ///< instance
-        
+
         // Pointer to  array of valid attributes
         TARGETING::AbstractPointer<ATTRIBUTE_ID> iv_pAttrNames;
 
@@ -531,6 +568,11 @@ class Target
           const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
           void *);
 
+      /*
+       * @brief allow targetattrbulksync access to the target class store.
+       */
+      friend class TargetAttrBulkSync;
+
 } PACKED;
 
 template<const ATTRIBUTE_ID A>
@@ -538,8 +580,8 @@ typename AttributeTraits<A>::Type Target::getAttr() const
 {
     typename AttributeTraits<A>::Type l_attrValue;
     bool l_read = tryGetAttr<A>(l_attrValue);
-    
-    //@TODO Remove assert once release has stablized 
+
+    //@TODO Remove assert once release has stablized
     TARG_ASSERT(l_read,"TARGETING::Target::getAttr<0x%7x>: tryGetAttr returned false",A);
     return l_attrValue;
 }

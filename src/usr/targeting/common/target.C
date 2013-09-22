@@ -51,6 +51,9 @@ namespace TARGETING
 #define TARG_NAMESPACE "TARGETING::"
 #define TARG_CLASS "Target::"
 
+// Static function pointer variable allocation
+pCallbackFuncPtr Target::cv_pCallbackFuncPtr = NULL;
+
 //******************************************************************************
 // Target::~Target
 //******************************************************************************
@@ -180,6 +183,10 @@ bool Target::_trySetAttr(
     if (l_pAttrData)
     {
         memcpy(l_pAttrData, i_pAttrData, i_size);
+        if( unlikely(cv_pCallbackFuncPtr != NULL) )
+        {
+            cv_pCallbackFuncPtr(this, i_attr, i_size, i_pAttrData);
+        }
     }
     return (l_pAttrData != NULL);
 
@@ -398,7 +405,7 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
 //******************************************************************************
 
 Target* Target::getTargetFromHuid(
-    const ATTR_HUID_type i_huid) const
+    const ATTR_HUID_type i_huid)
 {
     #define TARG_FN "getTargetFromHuid"
     Target* l_pTarget = NULL;
@@ -503,6 +510,38 @@ uint8_t Target::getAttrTankTargetUnitPos() const
     }
 
     return l_targetUnitPos;
+}
+
+//******************************************************************************
+// Target::installWriteAttributeCallback
+//******************************************************************************
+bool Target::installWriteAttributeCallback(
+    TARGETING::pCallbackFuncPtr & i_callBackFunc)
+{
+    #define TARG_FN "installWriteAttributeCallback"
+    TARG_ENTER();
+
+    return __sync_bool_compare_and_swap(&cv_pCallbackFuncPtr,
+                                        NULL, i_callBackFunc);
+    TARG_EXIT();
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// Target::uninstallWriteAttributeCallback
+//******************************************************************************
+bool Target::uninstallWriteAttributeCallback()
+{
+    #define TARG_FN "uninstallWriteAttributeCallback"
+    TARG_ENTER();
+
+    __sync_synchronize();
+    cv_pCallbackFuncPtr = NULL;
+    __sync_synchronize();
+    return true;
+
+    TARG_EXIT();
+    #undef TARG_FN
 }
 
 //******************************************************************************

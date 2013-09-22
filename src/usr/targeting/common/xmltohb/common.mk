@@ -36,13 +36,15 @@ XMLTOHB_HEADER_TARGETS =        \
     attributestructs.H          \
     pnortargeting.H             \
     fapiplatattrmacros.H        \
-    test_ep.H
+    test_ep.H                   \
+    mapattrmetadata.H
 
 XMLTOHB_SOURCE_TARGETS = \
     attributestrings.C   \
     attributedump.C      \
     errludattribute.C    \
-    errludtarget.C
+    errludtarget.C       \
+    mapattrmetadata.C
 
 XMLTOHB_SYSTEM_BINARIES =       \
    vbu_VENICE_targeting.bin     \
