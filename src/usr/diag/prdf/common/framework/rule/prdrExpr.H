@@ -865,16 +865,19 @@ class ExprAct_Callout : public Expr
             CALLOUT_SELF = 's',
             CALLOUT_CHIP = 'c',
             CALLOUT_PROC = 'p',
+            CALLOUT_PEER = 'r',
         };
 
         Callout_type cv_type;
 
         ExprAct_Callout(std::string * i_1,
-                            std::string * i_2 = NULL,
-                            Callout_type  i_t = CALLOUT_SELF,
-                            uint32_t      i_3 = 0xffffffff,
-                            Expr *    i_alt = NULL) :
-            cv_1(i_1), cv_2(i_2), cv_3(i_3), cv_alt(i_alt), cv_type(i_t)
+                        std::string * i_2 = NULL,
+                        Callout_type  i_t = CALLOUT_SELF,
+                        uint32_t      i_3 = 0xffffffff,
+                        Expr        * i_alt = NULL):
+                                            cv_1(i_1), cv_2(i_2),
+                                            cv_3(i_3), cv_alt(i_alt),
+                                            cv_type(i_t)
         {}
 
         int output(FILE * i_file)
@@ -904,6 +907,14 @@ class ExprAct_Callout : public Expr
                 // Write ALT resolution.
                 if (NULL != cv_alt)
                     cv_alt->output(i_file);
+
+                // Write peer connection type
+                if(CALLOUT_PEER == cv_type)
+                    l_arg = htonl(prdrActionArgMap(*cv_2));
+                else
+                    l_arg = htonl(prdrActionArgMap("TYPE_NA"));
+
+                PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
             }
 
             return 0;
@@ -924,9 +935,17 @@ class ExprAct_Callout : public Expr
             }
             else
             {
-                o_stream << "connected ( " << *cv_2 ;
+                if(CALLOUT_PEER == cv_type)
+                {
+                    o_stream << "connected_peer ( " << *cv_2 ;
+                }
+                else
+                {
+                    o_stream << "connected ( " << *cv_2 ;
+                }
                 if ( 0xffffffff != cv_3 )
                     o_stream << ", " << cv_3;
+
                 o_stream << " ), " << *cv_1 << " ) ";
             }
         }

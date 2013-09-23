@@ -434,6 +434,9 @@ void ReadExpr(UtilStream & i_stream, Expr & o_expr)
                 }
                 else
                     o_expr.cv_value[4].p = NULL;
+
+                // Read peer connection type
+                i_stream >> o_expr.cv_value[5].i;
             }
             break;
 

@@ -677,7 +677,7 @@ group gIoxFir_3 filter singlebit
 actionclass calloutXbus0Interface
 {
     callout(connected(TYPE_XBUS, 0), MRU_MEDA);
-    funccall("calloutPeerBus_xbus0");
+    callout(connected_peer(TYPE_XBUS, 0), MRU_MEDA);
     callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
 };
 
@@ -685,7 +685,7 @@ actionclass calloutXbus0Interface
 actionclass calloutXbus1Interface
 {
     callout(connected(TYPE_XBUS, 1), MRU_MEDA);
-    funccall("calloutPeerBus_xbus1");
+    callout(connected_peer(TYPE_XBUS, 1), MRU_MEDA);
     callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
 };
 
@@ -693,7 +693,7 @@ actionclass calloutXbus1Interface
 actionclass calloutXbus2Interface
 {
     callout(connected(TYPE_XBUS, 2), MRU_MEDA);
-    funccall("calloutPeerBus_xbus2");
+    callout(connected_peer(TYPE_XBUS, 2), MRU_MEDA);
     callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
 };
 
@@ -701,7 +701,7 @@ actionclass calloutXbus2Interface
 actionclass calloutXbus3Interface
 {
     callout(connected(TYPE_XBUS, 3), MRU_MEDA);
-    funccall("calloutPeerBus_xbus3");
+    callout(connected_peer(TYPE_XBUS, 3), MRU_MEDA);
     callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
 };
 

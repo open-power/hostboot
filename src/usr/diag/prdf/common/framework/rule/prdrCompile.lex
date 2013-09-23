@@ -127,6 +127,7 @@ flag        { return PRDR_ACT_FLAG; }
 capture     { return PRDR_ACT_CAPTURE; }
 
 connected   { return PRDR_CONNECTED; }
+connected_peer   { return PRDR_CONNECTED_PEER; }
 nonzero     { return PRDR_ACT_NONZERO; }
 alternate   { return PRDR_ALTERNATE; }
 procedure   { return PRDR_PROCEDURE; }

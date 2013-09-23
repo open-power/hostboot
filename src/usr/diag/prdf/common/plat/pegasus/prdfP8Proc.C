@@ -597,68 +597,6 @@ PRDF_PLUGIN_DEFINE( Proc, isVeniceProc );
 //------------------------------------------------------------------------------
 
 /**
- * @brief  Callout the peer end point on the given bus (priority MRU_MEDA).
- * @param  i_chip A P8 chip.
- * @param  i_sc   The step code data struct.
- * @param  i_type Bus type (TYPE_XBUS or TYPE_ABUS).
- * @param  i_pos  Bus position.
- * @return SUCCESS
- */
-int32_t calloutPeerBus( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & i_sc,
-                        TYPE i_type, uint32_t i_pos )
-{
-    #define PRDF_FUNC "[Proc::calloutPeerBus] "
-
-    // FIXME RTC 72645 Can removed plugins once callout(connected()) is fixed.
-
-    do
-    {
-        TargetHandle_t srcEndPoint = getConnectedChild( i_chip->GetChipHandle(),
-                                                        i_type, i_pos );
-        if ( NULL == srcEndPoint )
-        {
-            PRDF_ERR( PRDF_FUNC"getConnectedChild(0x%08x,%d,%d) failed",
-                      i_chip->GetId(), i_type, i_pos );
-            break;
-        }
-
-        TargetHandle_t destEndPoint = getConnectedPeerTarget( srcEndPoint );
-        if ( NULL == destEndPoint )
-        {
-            PRDF_ERR( PRDF_FUNC"getConnectedPeerTarget(0x%08x) failed",
-                      getHuid(srcEndPoint) );
-            break;
-        }
-
-        i_sc.service_data->SetCallout( destEndPoint, MRU_MEDA );
-
-    } while (0);
-
-    return SUCCESS;
-
-    #undef PRDF_FUNC
-}
-
-#define PLUGIN_CALLOUT_PEER_BUS( BUS, TYPE, POS ) \
-int32_t calloutPeerBus_##BUS##POS( ExtensibleChip * i_chip, \
-                                   STEP_CODE_DATA_STRUCT & i_sc ) \
-{ return calloutPeerBus( i_chip, i_sc, TYPE, POS ); } \
-PRDF_PLUGIN_DEFINE( Proc, calloutPeerBus_##BUS##POS );
-
-PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 0 )
-PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 1 )
-PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 2 )
-PLUGIN_CALLOUT_PEER_BUS( xbus, TYPE_XBUS, 3 )
-
-PLUGIN_CALLOUT_PEER_BUS( abus, TYPE_ABUS, 0 )
-PLUGIN_CALLOUT_PEER_BUS( abus, TYPE_ABUS, 1 )
-PLUGIN_CALLOUT_PEER_BUS( abus, TYPE_ABUS, 2 )
-
-#undef PLUGIN_CALLOUT_PEER_BUS
-
-//------------------------------------------------------------------------------
-
-/**
  * @brief Call to check for configured PHB (before capturing FFDC)
  * @param  i_chip             P8 chip
  * @param  i_phbPos           PHB position

@@ -454,6 +454,7 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         g_ActionArgMap["TYPE_L4"]       = TARGETING::TYPE_L4;
         g_ActionArgMap["TYPE_MBA"]      = TARGETING::TYPE_MBA;
         g_ActionArgMap["TYPE_OCC"]      = TARGETING::TYPE_OCC;
+        g_ActionArgMap["TYPE_NA"]       = TARGETING::TYPE_NA;
 
         // Initialize symbolic callouts.
         for ( SymCallout_t * i = symCalloutArray; NULL != i->str; i++ )

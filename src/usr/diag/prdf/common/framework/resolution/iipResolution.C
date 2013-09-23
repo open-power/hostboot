@@ -228,43 +228,53 @@ int32_t CalloutConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     using namespace TARGETING;
 
-    TargetHandle_t sourceTrgt = ServiceDataCollector::getTargetAnalyzed();
-    TargetHandle_t connTrgt   = NULL;
+    TargetHandle_t sourceTrgt  = ServiceDataCollector::getTargetAnalyzed();
+    TargetHandle_t connTrgt    = NULL;
+    TargetHandle_t srcEndPoint = NULL;
 
-    TargetHandleList list = getConnected( sourceTrgt, iv_targetType );
+    if(TYPE_NA == iv_peerConnType)
+    {
+        TargetHandleList list = getConnected( sourceTrgt, iv_targetType );
 
-    if ( 0xffffffff == iv_idx )
-    {
-        if ( 0 < list.size() )
-            connTrgt = list[0];
-    }
-    else
-    {
-        for (TargetHandleList::iterator i = list.begin(); i != list.end(); i++)
+        if ( 0xffffffff == iv_idx )
         {
-            if ( iv_idx == getTargetPosition(*i) )
-            {
-                connTrgt = *i;
-                break;
-            }
-        }
-    }
-
-    if ( NULL != connTrgt )
-    {
-        io_serviceData.service_data->SetCallout( connTrgt, iv_priority );
-    }
-    else
-    {
-        if ( NULL != iv_altResolution )
-        {
-            iv_altResolution->Resolve( io_serviceData );
+            if ( 0 < list.size() )
+                connTrgt = list[0];
         }
         else
         {
-            PRDF_ERR( "[CalloutConnected::Resolve] No connected chip found: "
-                      "sourceTrgt=0x%08x iv_targetType=0x%x",
-                      getHuid(sourceTrgt), iv_targetType );
+            for (TargetHandleList::iterator i = list.begin();
+                 i != list.end();
+                 i++)
+            {
+                if ( iv_idx == getTargetPosition(*i) )
+                {
+                    connTrgt = *i;
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        srcEndPoint = getConnectedChild( sourceTrgt, iv_peerConnType, iv_idx );
+
+        if ( NULL != srcEndPoint )
+            connTrgt = getConnectedPeerTarget( srcEndPoint );
+    }
+
+    if ( NULL != connTrgt )
+        io_serviceData.service_data->SetCallout( connTrgt, iv_priority );
+    else
+    {
+        if ( NULL != iv_altResolution )
+            iv_altResolution->Resolve( io_serviceData );
+        else
+        {
+            PRDF_ERR( "[CalloutConnected::Resolve] No connected chip found:"
+                      " sourceTrgt=0x%08x, iv_peerConnType=0x%x",
+                        getHuid(sourceTrgt), iv_peerConnType);
+
             io_serviceData.service_data->SetCallout( sourceTrgt );
         }
     }

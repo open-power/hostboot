@@ -138,6 +138,7 @@ using namespace PRDR_COMPILER;
 %token PRDR_ACT_CAPTURE
 
 %token PRDR_CONNECTED
+%token PRDR_CONNECTED_PEER
 %token PRDR_ACT_NONZERO
 %token PRDR_ALTERNATE
 %token PRDR_PROCEDURE
@@ -949,6 +950,10 @@ action_callout: PRDR_ACT_CALLOUT '(' PRDR_ID ')'
         | PRDR_ACT_CALLOUT '(' PRDR_PROCEDURE '(' PRDR_ID ')' ',' PRDR_ID ')'
     {
         $$ = new ExprAct_Callout($8, $5, ExprAct_Callout::CALLOUT_PROC);
+    }
+        | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED_PEER '(' PRDR_ID  ',' PRDR_INTEGER action_callout_alt ')' ',' PRDR_ID ')'
+    {
+        $$ = new ExprAct_Callout($11, $5, ExprAct_Callout::CALLOUT_PEER, $7, $8);
     }
 
 ;

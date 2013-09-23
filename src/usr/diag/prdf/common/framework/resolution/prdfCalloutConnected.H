@@ -80,12 +80,15 @@ public:
    * @param[in]   i_altResolution   to use if the connection does not exist or
    *                                is invalid.
    *                                If NULL than source is called out
+   * @param[i]    i_peerConnType    type of unit that is peer connected to
+   *                                i_targetType
    * @note        Don't use this class to callout clocks - use ClockResolution
    */
   CalloutConnected( TARGETING::TYPE i_targetType,
                     uint32_t i_idx =0xffffffff ,
                     PRDpriority i_priority = MRU_MED,
-                    Resolution * i_altResolution = NULL );
+                    Resolution * i_altResolution = NULL,
+                    TARGETING::TYPE i_peerConnType = TARGETING::TYPE_NA );
 
   // ~CalloutConnected(); default dtor is sufficient
 
@@ -109,23 +112,27 @@ private:  // Data
   uint32_t iv_idx;
   PRDF::PRDpriority iv_priority;
   Resolution * iv_altResolution;
+  TARGETING::TYPE iv_peerConnType;
 };
 
 inline CalloutConnected::CalloutConnected(void)
 : iv_targetType(TARGETING::TYPE_NA),
   iv_idx(0xffffffff ),
   iv_priority(MRU_LOW),
-  iv_altResolution(NULL)
+  iv_altResolution(NULL),
+  iv_peerConnType(TARGETING::TYPE_NA)
 {}
 
 inline CalloutConnected::CalloutConnected( TARGETING::TYPE i_targetType,
                                            uint32_t i_idx,
                                            PRDpriority i_priority,
-                                           Resolution * i_altResolution ):
+                                           Resolution * i_altResolution,
+                                           TARGETING::TYPE i_peerConnType ):
                                            iv_targetType( i_targetType ),
                                            iv_idx( i_idx ),
                                            iv_priority( i_priority ),
-                                           iv_altResolution( i_altResolution )
+                                           iv_altResolution( i_altResolution ),
+                                           iv_peerConnType(i_peerConnType)
 { }
 
 inline bool CalloutConnected::operator == ( const CalloutConnected & r ) const
@@ -133,7 +140,8 @@ inline bool CalloutConnected::operator == ( const CalloutConnected & r ) const
     return ( ( iv_targetType == r.iv_targetType ) && ( iv_idx == r.iv_idx ) &&
             ( iv_priority == r.iv_priority ) &&
             ( ( iv_altResolution == r.iv_altResolution ) ||
-            ( &iv_altResolution == &r.iv_altResolution ) ) );
+            ( &iv_altResolution == &r.iv_altResolution ) ) &&
+            ( iv_peerConnType == r.iv_peerConnType) );
 }
 
 } // end namespace PRDF

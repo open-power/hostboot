@@ -187,12 +187,14 @@ Resolution & ResolutionFactory::GetConnectedCalloutResolution(
                                     TARGETING::TYPE i_targetType,
                                     uint32_t i_idx,
                                     PRDpriority i_priority,
-                                    Resolution * i_altResolution )
+                                    Resolution * i_altResolution,
+                                    TARGETING::TYPE i_peerConnType )
 {
     CalloutConnected key(   i_targetType,
                             i_idx,
                             i_priority,
-                            i_altResolution );
+                            i_altResolution,
+                            i_peerConnType );
 
     return iv_connectedCallouts.get(key);
 }

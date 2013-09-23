@@ -918,6 +918,17 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                                 (CalloutPriorityEnum) i_action->cv_value[1].i );
                     break;
 
+                case 'r': // PEER
+                    l_rc = &i_data.cv_reslFactory.GetConnectedCalloutResolution(
+                                (TARGETING::TYPE)       i_action->cv_value[2].i,
+                                                        i_action->cv_value[3].i,
+                                (CalloutPriorityEnum)   i_action->cv_value[1].i,
+                                ( NULL == i_action->cv_value[4].p ? NULL :
+                                    ( this->createResolution(
+                                        i_action->cv_value[4].p, i_data ) ) ),
+                                (TARGETING::TYPE)      i_action->cv_value[5].i);
+                    break;
+
                 case 's': // SELF
                 default:
                     l_rc = &i_data.cv_reslFactory.GetCalloutResolution(

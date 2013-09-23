@@ -145,6 +145,8 @@ public:
    * @param[in]      idx          index in GetConnected list to use
    * @param[in]      i_priority   @see prdfCallouts.H
    * @param[in]      i_altResolution resolution for failure scenarios
+   * @param[in]      i_peerConnType Type of target which connects to peer
+                                    of i_targetType
    * @return         reference to a resolution
    * @note           Don't use this to callout clocks - use prdfClockResolution
    */
@@ -152,7 +154,9 @@ public:
                                         TARGETING::TYPE i_targetType,
                                         uint32_t i_idx = 0,
                                         PRDpriority i_priority = MRU_MED,
-                                        Resolution * i_altResolution = NULL );
+                                        Resolution * i_altResolution = NULL,
+                                        TARGETING::TYPE i_peerConnType
+                                                       = TARGETING::TYPE_NA );
   // dg04a - end
 
   // dg05a - start
