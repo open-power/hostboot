@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.32 2013/08/16 17:23:27 gpaulraj Exp $
+// $Id: mss_setup_bars.C,v 1.33 2013/09/20 14:07:42 jmcgill Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -100,8 +100,35 @@ fapi::ReturnCode mss_setup_bars_init_nm_bars(
     ecmdDataBufferBase MCFGP(64);
     ecmdDataBufferBase MCFGPA(64);
 
+    // Defect HW259884 (AddNote by retter) P8 Lab Brazos: Mirror BAR Scom Parity Error - workaround
+    ecmdDataBufferBase MCIFIR(64);
+    ecmdDataBufferBase MCIFIRMASK(64);
+    ecmdDataBufferBase MCSMODE4(64);
+
     do
     {
+        rc = fapiGetScom(i_mcs_target, MCS_MCIFIRMASK_0x02011843, MCIFIRMASK);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiGetScom (MCS_MCIFIRMASK_0x02011843");
+             break;
+        }
+        // Mask MCIFIR bit 25
+        rc_ecmd |= MCIFIRMASK.setBit(25);
+        if (rc_ecmd)
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error 0x%X setting up MCIFIRMASK data buffer",
+                         rc_ecmd);
+             rc.setEcmdError(rc_ecmd);
+             break;
+        }
+        rc = fapiPutScom(i_mcs_target, MCS_MCIFIRMASK_0x02011843, MCIFIRMASK);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiPutScom (MCS_MCIFIRMASK_0x02011843");
+             break;
+        }
+
         // establish base content for MCFGP register
         rc_ecmd |= MCFGP.setBit(MCFGP_ENABLE_RCMD0_BIT);
         rc_ecmd |= MCFGP.setBit(MCFGP_ENABLE_RCMD1_BIT);
@@ -210,6 +237,59 @@ fapi::ReturnCode mss_setup_bars_init_nm_bars(
         {
             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiPutScom (MCS_MCFGPA_0x02011814)");
             break;
+        }
+
+        rc = fapiGetScom(i_mcs_target, MCS_MCSMODE4_0x0201181A, MCSMODE4);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiGetScom (MCS_MCSMODE4_0x0201181A");
+             break;
+        }
+        // set MCSMODE4 bit 0
+        rc_ecmd |= MCSMODE4.setBit(0);
+        rc = fapiPutScom(i_mcs_target, MCS_MCSMODE4_0x0201181A, MCSMODE4);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiPutScom (MCS_MCSMODE4_0x0201181A");
+             break;
+        }
+        // Clear MCSMODE4 bit 0
+        rc_ecmd |= MCSMODE4.clearBit(0);
+        rc = fapiPutScom(i_mcs_target, MCS_MCSMODE4_0x0201181A, MCSMODE4);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiPutScom (MCS_MCSMODE4_0x0201181A");
+             break;
+        }
+
+        rc = fapiGetScom(i_mcs_target, MCS_MCIFIR_0x02011840, MCIFIR);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiGetScom (MCS_MCIFIR_0x02011840");
+             break;
+        }
+        // Reset MCIFIR bit 25
+        rc_ecmd |= MCIFIR.clearBit(25);
+        rc = fapiPutScom(i_mcs_target, MCS_MCIFIR_0x02011840, MCIFIR);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiPutScom (MCS_MCIFIR_0x02011840");
+             break;
+        }
+
+        rc = fapiGetScom(i_mcs_target, MCS_MCIFIRMASK_0x02011843, MCIFIRMASK);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiGetScom (MCS_MCIFIRMASK_0x02011843");
+             break;
+        }
+        // Unmask MCIFIR bit 25
+        rc_ecmd |= MCIFIRMASK.clearBit(25);
+        rc = fapiPutScom(i_mcs_target, MCS_MCIFIRMASK_0x02011843, MCIFIRMASK);
+        if (!rc.ok())
+        {
+             FAPI_ERR("mss_setup_bars_init_nm_bars: Error from fapiPutScom (MCS_MCIFIRMASK_0x02011843");
+             break;
         }
     } while(0);
 

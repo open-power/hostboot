@@ -154,9 +154,9 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         }
      
         // Create a FAPI Target
-        const TARGETING::Target* l_membuf_target = *l_membuf_iter;
+        TARGETING::Target* l_membuf_target = *l_membuf_iter;
         const fapi::Target l_fapiTarget( fapi::TARGET_TYPE_MEMBUF_CHIP,
-                        (const_cast<TARGETING::Target*>(l_membuf_target)));
+                                         l_membuf_target);
 
         // Expand buffer for new image size
         const uint32_t l_customizedMaxSize = MAX_SBE_IMG_SIZE;
@@ -198,20 +198,19 @@ void*    call_sbe_centaur_init( void *io_pArgs )
             "Running call_sbe_centaur_init on Centaur "
             " target HUID %.8X", TARGETING::get_huid(l_membuf_target));
 
-        if (!TARGETING::is_vpo())
-        {
-            uint8_t l_data[80];
-            TARGETING::Target* l_pTarget = *l_membuf_iter;
-            l_pTarget->tryGetAttr<
-               TARGETING::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA>(l_data);
-            l_pTarget->setAttr<TARGETING::ATTR_MEMB_TP_BNDY_PLL_DATA>(l_data);
-        }
+        // XIP customize is going to look for a PLL ring with a "stub"
+        // mem freq -- so set to a default, then clear it (so as not
+        // to mess up MSS HWP later
+        l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(1600);
+
 
         FAPI_INVOKE_HWP( l_errl, cen_xip_customize,
                          l_fapiTarget, (void *)l_sbePnorAddr,
                          l_pCustomizedImage, l_customizedSize,
                          l_pBuf1, l_buf1Size,
                          l_pBuf2, l_buf2Size );
+
+        l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(0);
 
         if (l_errl)
         {

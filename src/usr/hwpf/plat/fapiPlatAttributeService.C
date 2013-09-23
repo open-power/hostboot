@@ -47,6 +47,8 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
+#include <fapiPllRingAttr.H>
+#include <getPllRingAttr.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -1474,6 +1476,34 @@ fapi::ReturnCode fapiPlatDimmGetSpareDram (
 
     return l_rc;
 }
+
+//******************************************************************************
+// fapi::platAttrSvc::fapiPlatGetPllAttr function
+//******************************************************************************
+fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_targAttrId,
+                                    const fapi::Target * const i_pChipTarget,
+                                    uint8_t * o_data )
+{
+    // Call a PLL Ring Attribute HWP to get the data
+    fapi::ReturnCode l_rc;
+    uint32_t l_ringLength = 0;
+    FAPI_EXEC_HWP(l_rc, getPllRingAttr, i_targAttrId, *i_pChipTarget,
+                  l_ringLength, o_data);
+    return l_rc;
+}
+
+fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_targAttrId,
+                                    const fapi::Target * const i_pChipTarget,
+                                    uint32_t (&o_pllRingLength))
+{
+    // Call a PLL Ring Attribute HWP to get the data
+    fapi::ReturnCode l_rc;
+    uint8_t l_data[MAX_PLL_RING_SIZE_BYTES] = {};
+    FAPI_EXEC_HWP(l_rc, getPllRingAttr, i_targAttrId, *i_pChipTarget,
+                  o_pllRingLength, l_data);
+    return l_rc;
+}
+
 
 } // End platAttrSvc namespace
 

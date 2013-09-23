@@ -456,21 +456,6 @@
     <attribute><id>PROC_PSI_UNTRUSTED_BAR0_SIZE</id></attribute>
     <attribute><id>PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR</id></attribute>
     <attribute><id>PROC_PSI_UNTRUSTED_BAR1_SIZE</id></attribute>
-    <!-- PROC_PLL_RING attributes -->
-    <attribute><id>PROC_PERV_BNDY_PLL_DATA</id></attribute>
-    <attribute><id>PROC_PB_BNDY_DMIPLL_DATA</id></attribute>
-    <attribute><id>PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id></attribute>
-    <attribute><id>PROC_AB_BNDY_PLL_DATA</id></attribute>
-    <attribute><id>PROC_AB_BNDY_PLL_FOR_DCCAL_DATA</id></attribute>
-    <attribute><id>PROC_PCI_BNDY_PLL_DATA</id></attribute>
-    <attribute><id>PROC_PERV_BNDY_PLL_LENGTH</id></attribute>
-    <attribute><id>PROC_PB_BNDY_DMIPLL_LENGTH</id></attribute>
-    <attribute><id>PROC_AB_BNDY_PLL_LENGTH</id></attribute>
-    <attribute><id>PROC_PCI_BNDY_PLL_LENGTH</id></attribute>
-    <attribute><id>PROC_PERV_BNDY_PLL_FLUSH</id></attribute>
-    <attribute><id>PROC_PB_BNDY_DMIPLL_FLUSH</id></attribute>
-    <attribute><id>PROC_AB_BNDY_PLL_FLUSH</id></attribute>
-    <attribute><id>PROC_PCI_BNDY_PLL_FLUSH</id></attribute>
     <attribute><id>PROC_PERV_BNDY_PLL_CHIPLET_ID</id></attribute>
     <attribute><id>PROC_PB_BNDY_DMIPLL_CHIPLET_ID</id></attribute>
     <attribute><id>PROC_AB_BNDY_PLL_CHIPLET_ID</id></attribute>
@@ -1176,28 +1161,7 @@
     <attribute><id>MSS_NWELL_MISPLACEMENT</id></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
     <attribute><id>MSS_FREQ_OVERRIDE</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_FLUSH</id></attribute>
     <attribute><id>MEMB_TP_BNDY_PLL_SCAN_SELECT</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id></attribute>
-    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH</id></attribute>
     <attribute><id>MSS_FREQ_BIAS_PERCENTAGE</id></attribute>
     <attribute><id>CDIMM_SENSOR_MAP_PRIMARY</id></attribute>
     <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>

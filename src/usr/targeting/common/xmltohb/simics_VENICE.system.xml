@@ -277,27 +277,6 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0003FFE000000000</default>
@@ -1398,27 +1377,6 @@
         <default>1</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0000000000000000</default>
@@ -2519,27 +2477,6 @@
         <default>2</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0000000000000000</default>
@@ -3639,27 +3576,6 @@
         <default>3</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0000000000000000</default>
@@ -4758,27 +4674,6 @@
         <default>4</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0000000000000000</default>
@@ -5846,27 +5741,6 @@
         <default>5</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0000000000000000</default>
@@ -6932,27 +6806,6 @@
         <default>6</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0000000000000000</default>
@@ -8019,27 +7872,6 @@
         <default>7</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0000000000000000</default>
@@ -16033,27 +15865,6 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
-    <attribute>
-      <id>PROC_AB_BNDY_PLL_LENGTH</id>
-        <default>536</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
-        <default>1848</default>
-    </attribute>
-    <attribute>
-    <id>PROC_EX_FUNC_L3_LENGTH</id>
-        <default>49020</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
-        <default>855</default>
-    </attribute>
-    <attribute>
-    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
-        <default>565</default>
-    </attribute>
 
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0003FFE000000000</default>

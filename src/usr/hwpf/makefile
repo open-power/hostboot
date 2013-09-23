@@ -154,6 +154,16 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/proc_chip_ec_feature.xml
 
 #------------------------------------------------------------------------------
+# PLL files
+#------------------------------------------------------------------------------
+HWP_PLL_FILES = hwp/pll_attributes/s1_10_pll_ring.attributes \
+                hwp/pll_attributes/s1_13_pll_ring.attributes \
+                hwp/pll_attributes/s1_20_pll_ring.attributes \
+                hwp/pll_attributes/p8_10_pll_ring.attributes \
+                hwp/pll_attributes/centaur_10_pll_ring.attributes \
+                hwp/pll_attributes/centaur_20_pll_ring.attributes
+
+#------------------------------------------------------------------------------
 # Initfiles
 #------------------------------------------------------------------------------
 HWP_INITFILES = hwp/initfiles/sample.initfile \
@@ -221,6 +231,9 @@ PLAT_HWP_ERR_PARSER = fapiPlatHwpErrParser.H
 # The FAPI attribute id file generated from Attribute XML files
 FAPI_ATTR_ID_TARGET = fapiAttributeIds.H
 
+# The FAPI PLL attribute file generated from pll files
+FAPI_PLL_TARGET = fapiPllRingAttr.H
+
 # The FAPI files generated from Attribute XML files
 FAPI_ATTR_TARGETS = fapiChipEcFeature.C fapiAttributePlatCheck.H \
                     fapiAttributesSupported.html fapiAttrInfo.csv \
@@ -248,7 +261,8 @@ GENFILES = ${IF_CMP_YACC_C_TARGET} \
            ${FAPI_ATTR_ID_TARGET} \
            ${FAPI_ATTR_TARGETS} \
            ${HWP_IF_ALL_TARGETS} \
-           ${FAPI_ATTR_IF_TARGET}
+           ${FAPI_ATTR_IF_TARGET} \
+           ${FAPI_PLL_TARGET}
 
 GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER}
 
@@ -318,6 +332,13 @@ $(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER}) : \
 $(call GENTARGET, ${FAPI_ATTR_ID_TARGET} ${FAPI_ATTR_TARGETS}) : \
         fapi/fapiParseAttributeInfo.pl ${HWP_ATTR_XML_FILES}
 	$< $(dir $@) ${HWP_ATTR_XML_FILES}
+
+#------------------------------------------------------------------------------
+# The PLL attribute file
+#------------------------------------------------------------------------------
+$(call GENTARGET, ${FAPI_PLL_TARGET}) : \
+        fapi/fapiCreatePllRingAttrVals.pl ${HWP_PLL_FILES}
+	$< $(dir $@) ${HWP_PLL_FILES}
 
 #------------------------------------------------------------------------------
 # The binary, list and attr files generated from Initfiles
