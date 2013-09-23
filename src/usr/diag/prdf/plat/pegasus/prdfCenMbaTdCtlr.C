@@ -307,21 +307,19 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
                 break;
             }
         }
-        else if ( isMfgCeCheckingEnabled() )
+        else if ( isMfgCeCheckingEnabled() && (eccErrorMask & HARD_CTE) )
         {
             // During MNFG IPL CE, we will get this condition.
             // During SF read, all CE are reported as Hard CE.
             // So we will only check for Hard CE threshold.
-            if ( eccErrorMask & HARD_CTE )
+
+            // Start TPS Phase 1
+            io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase1 );
+            o_rc = startTpsPhase1();
+            if ( SUCCESS != o_rc )
             {
-                io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase1 );
-                // Start TPS Phase 1
-                o_rc = startTpsPhase1();
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC"startTpsPhase1() failed" );
-                    break;
-                }
+                PRDF_ERR( PRDF_FUNC"startTpsPhase1() failed" );
+                break;
             }
         }
         else
