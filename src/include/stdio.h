@@ -24,6 +24,7 @@
 #define __STDIO_H
 
 #include <stdarg.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -31,8 +32,9 @@ extern "C"
 #endif
 
 int sprintf(char *str, const char * format, ...);
+int snprintf(char *str, size_t size, const char * format, ...);
 int vsprintf(char *str, const char * format, va_list);
-
+int vsnprintf(char *str, size_t size, const char * format, va_list);
 
 #ifdef __cplusplus
 }

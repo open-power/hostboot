@@ -1,29 +1,28 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/console.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/console.C $                                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <util/singleton.H>
 #include <kernel/console.H>
 #include <util/sprintf.H>
-#include <util/functor.H>
 #include <stdarg.h>
 
 char kernel_printk_buffer[Console::BUFFER_SIZE];
@@ -48,15 +47,13 @@ int Console::putc(int c)
 
 void printk(const char* str, ...)
 {
-    using Util::mem_ptr_fun;
     using Util::vasprintf;
 
     va_list args;
     va_start(args, str);
 
     Console& console = Singleton<Console>::instance();
-    vasprintf(mem_ptr_fun(console, &Console::putc),
-	      str, args);
+    vasprintf(console, str, args);
 
     va_end(args);
 }

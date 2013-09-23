@@ -22,7 +22,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
 
-OBJS = string.o string_ext.o stdlib.o ctype.o assert.o stdio.o math.o
+OBJS = string.o string_ext.o stdlib.o ctype.o assert.o stdio.o math.o sprintf.o
 OBJS += syscall_stub.o syscall_task.o syscall_msg.o
 OBJS += syscall_mmio.o syscall_time.o sync.o syscall_misc.o
 OBJS += syscall_mm.o splaytree.o cxxtest_data.o

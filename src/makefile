@@ -27,7 +27,7 @@ SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d runtime.d
 IMGS = hbicore hbicore_test hbirt hbirt_test
 
 BASE_OBJECTS = string.o string_ext.o ctype.o math.o builtins.o stdio.o \
-	       splaytree.o cxxtest_data.o
+	       splaytree.o cxxtest_data.o sprintf.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o

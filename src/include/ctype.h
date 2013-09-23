@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -37,6 +37,71 @@ extern "C"
  * @return int. Uppercase letter
  */
 int toupper(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a digit (0-9).
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not a digit, non-zero if is a digit.
+ */
+int isdigit(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a lower-case character.
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not, non-zero if so.
+ */
+int islower(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a upper-case character.
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not, non-zero if so.
+ */
+int islower(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a alphabetic character.
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not, non-zero if so.
+ */
+int isalpha(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a alpha-numeric character.
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not, non-zero if so.
+ */
+int isalnum(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a punctuation character.
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not, non-zero if so.
+ */
+int ispunct(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a space character.
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not, non-zero if so.
+ */
+int isspace(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a printable character.
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not, non-zero if so.
+ */
+int isprint(int) __attribute__((const));
+
 
 #ifdef __cplusplus
 };
