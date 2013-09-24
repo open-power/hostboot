@@ -1,0 +1,67 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/spd_accessors/getDimmSpdDataErrors.xml $     -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_SPD_ACCESSOR_INVALID_ATTRIBUTE_ID</rc>
+    <description>
+      Request to get DIMM SPD field with invalid attribute ID. Code bug
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_SPD_ACCESSOR_INVALID_OUTPUT_SIZE</rc>
+    <description>
+      Request to get DIMM SPD field with invalid output buffer size. Code bug
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>EXPECTED_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_SPD_ACCESSOR_INVALID_DDR_TYPE</rc>
+    <description>
+      Request to get DIMM SPD field from DIMM with incorrect DDR Type
+      Only DDR3 and DDR4 supported
+    </description>
+    <ffdc>DIMM</ffdc>
+    <ffdc>TYPE</ffdc>
+    <callout>
+      <target>DIMM</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM</target>
+    </deconfigure>
+  </hwpError>
+</hwpErrors>

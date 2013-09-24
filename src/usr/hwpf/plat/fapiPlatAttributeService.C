@@ -268,7 +268,8 @@ fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_pFapiTarget,
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("fapiPlatGetSpdAttr: deviceRead() returns error");
+            FAPI_ERR("fapiPlatGetSpdAttr: Error from deviceRead, keyword 0x%04x, len %d",
+                     i_keyword, i_len);
             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
         }
         else
@@ -316,7 +317,8 @@ fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_pFapiTarget,
         if (l_err)
         {
             // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("fapiPlatSetSpdAttr: deviceWrite() returns error");
+            FAPI_ERR("fapiPlatSetSpdAttr: Error from deviceWrite, keyword 0x%04x, len %d",
+                     i_keyword, i_len);
             l_rc.setPlatError(reinterpret_cast<void *> (l_err));
         }
     }
@@ -1560,6 +1562,17 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_targAttrId,
     return l_rc;
 }
 
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetSpdAttrAccessor(
+    const fapi::Target * i_pDimm,
+    const fapi::getSpdAttr::Attr i_attr,
+    void  * o_pVal,
+    const size_t i_len)
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getSpdAttrAccessor, *i_pDimm, i_attr, o_pVal, i_len);
+    return l_rc;
+}
 
 } // End platAttrSvc namespace
 

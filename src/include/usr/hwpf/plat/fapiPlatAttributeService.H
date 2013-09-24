@@ -29,18 +29,6 @@
  *  Note that platform code must provide the code.
  */
 
-/*
- * Change Log ******************************************************************
- * Flag     Defect/Feature  User        Date        Description
- * ------   --------------  ----------  ----------- ----------------------------
- *                          mjjones     06/27/2011  Created.
- *                          bofferdn    09/13/2011  Support fapi->hb mapping
- *                          thi         01/28/2013  Add SPD CUSTOM attr
- *                          dedahle     06/20/2013  Add Bad DIMM DQ Bitmap attr
- *                          whs         08/15/2013  79615 Clock Mapping,
- *                                                  DIMM timing and TSYS
- */
-
 #ifndef FAPIPLATATTRIBUTESERVICE_H_
 #define FAPIPLATATTRIBUTESERVICE_H_
 
@@ -61,6 +49,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
+#include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
 #include <vpd/spdenums.H>
 #include <dimmConsts.H>
 #include <util/singleton.H>
@@ -581,6 +570,23 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
                                     const fapi::Target * const i_pChipTarget,
                                     uint32_t (&o_pllRingLength));
 
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ *        DIMM SPD Attributes that are handled by an Accessor HWP
+ *        It should not be called directly.
+ *
+ *  @param[in]  i_pDimm DIMM target pointer
+ *  @param[in]  i_attr  Attribute ID
+ *  @param[out] o_pVal  Pointer to output variable
+ *  @param[in]  i_len   Size of o_pVal
+ *  @return     ReturnCode. Zero on success, else error
+ */
+fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
+    const fapi::Target * i_pDimm,
+    const fapi::getSpdAttr::Attr i_attr,
+    void * o_pVal,
+    size_t i_len);
+
 } // namespace platAttrSvc
 
 } // namespace fapi
@@ -628,9 +634,6 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
 #define ATTR_SPD_MODULE_TYPE_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_TYPE, &(VAL), sizeof(VAL) )
-#define ATTR_SPD_SDRAM_BANKS_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::BANK_ADDRESS_BITS, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_SDRAM_DENSITY_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::DENSITY, &(VAL), sizeof(VAL) )
@@ -640,9 +643,6 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
 #define ATTR_SPD_SDRAM_COLUMNS_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::COL_ADDRESS, &(VAL), sizeof(VAL) )
-#define ATTR_SPD_MODULE_NOMINAL_VOLTAGE_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_NOMINAL_VOLTAGE, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_NUM_RANKS_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_RANKS, &(VAL), sizeof(VAL) )
@@ -667,9 +667,6 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
 #define ATTR_SPD_TCKMIN_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET,  SPD::TCK_MIN, &(VAL), sizeof(VAL) )
-#define ATTR_SPD_CAS_LATENCIES_SUPPORTED_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::CAS_LATENCIES_SUPPORTED, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_TAAMIN_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MIN_CAS_LATENCY, &(VAL), sizeof(VAL) )
@@ -763,9 +760,6 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
 #define ATTR_SPD_MODULE_PART_NUMBER_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_PART_NUMBER, &(VAL), sizeof(VAL) )
-#define ATTR_SPD_MODULE_REVISION_CODE_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_REVISION_CODE, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::DRAM_MANUFACTURER_ID, &(VAL), sizeof(VAL) )
@@ -847,6 +841,18 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
 #define ATTR_SPD_LR_MR12_FOR_1866_2133_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::LRMM_MR12_FOR_1866_2133, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_SDRAM_BANKS_DDR3_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::BANK_ADDRESS_BITS, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_CAS_LATENCIES_SUPPORTED_DDR3_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::CAS_LATENCIES_SUPPORTED, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_MODULE_REVISION_CODE_DDR3_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_REVISION_CODE, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_MODULE_NOMINAL_VOLTAGE_DDR3_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_NOMINAL_VOLTAGE, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_SDRAM_BANKGROUPS_DDR4_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::BANK_GROUP_BITS, &(VAL), sizeof(VAL) )
@@ -1773,4 +1779,19 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
         ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
           ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH, PTARGET, VAL ))
 
+//------------------------------------------------------------------------------
+//  MACROs to support DIMM SPD Attributes that are handled by an Accessor HWP
+//------------------------------------------------------------------------------
+#define ATTR_SPD_SDRAM_BANKS_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttrAccessor(PTARGET, fapi::getSpdAttr::SPD_SDRAM_BANKS, &VAL, sizeof(VAL))
+#define ATTR_SPD_MODULE_NOMINAL_VOLTAGE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttrAccessor(PTARGET, fapi::getSpdAttr::SPD_MODULE_NOMINAL_VOLTAGE, &VAL, sizeof(VAL))
+#define ATTR_SPD_CAS_LATENCIES_SUPPORTED_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttrAccessor(PTARGET, fapi::getSpdAttr::SPD_CAS_LATENCIES_SUPPORTED, &VAL, sizeof(VAL))
+#define ATTR_SPD_MODULE_REVISION_CODE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetSpdAttrAccessor(PTARGET, fapi::getSpdAttr::SPD_MODULE_REVISION_CODE, &VAL, sizeof(VAL))
 #endif // FAPIPLATATTRIBUTESERVICE_H_

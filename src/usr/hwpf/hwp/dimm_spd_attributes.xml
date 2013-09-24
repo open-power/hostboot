@@ -25,7 +25,9 @@
 <attributes>
 
 <!--
+*******************************************************************************
 The following attributes can be queried from both DDR3 and DDR4 DIMMs
+*******************************************************************************
 -->
 
 <attribute>
@@ -82,6 +84,22 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
 </attribute>
 
 <attribute>
+    <id>ATTR_SPD_SDRAM_BANKS</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Number of banks.
+        Located in DDR3 SPD byte 4, bits 6-4.
+        Located in DDR4 SPD byte 4, bits 5-4.
+        The raw data has different meanings for DDR3 and DDR4.
+        HWPs must use this DDR neutral enumeration to decode.
+        Platform support must call an Accessor HWP.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>B8 = 0x00, B16 = 0x01, B32 = 0x02, B64 = 0x03, B4 = 0x04, UNKNOWN = 0xff</enum>
+    <platInit/>
+</attribute>
+
+<attribute>
     <id>ATTR_SPD_SDRAM_ROWS</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
@@ -104,6 +122,28 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>C9 = 0x00, C10 = 0x01, C11 = 0x02, C12 = 0x03</enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_MODULE_NOMINAL_VOLTAGE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Nominal voltage (bitmap).
+        Located in DDR3 SPD byte 6, bits 2-0.
+        Located in DDR4 SPD byte 11, bits 5-0.
+        The raw data has different meanings for DDR3 and DDR4.
+        HWPs must use this DDR neutral enumeration to decode.
+        Platform support must call an Accessor HWP.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+         NOTOP1_5 = 0x01,
+         OP1_35 = 0x02,
+         OP1_2X = 0x04,
+         OP1_2V = 0x08,
+         END1_2V = 0x10
+    </enum>
     <platInit/>
 </attribute>
 
@@ -160,6 +200,44 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 18.
     </description>
     <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_CAS_LATENCIES_SUPPORTED</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        CAS Latencies supported (bitmap).
+        Located in DDR3 SPD byte 14 (LSB) and byte 15.
+        Located in DDR4 SPD byte 20 (LSB) through byte 23
+        The raw data has different meanings for DDR3 and DDR4.
+        HWPs must use this DDR neutral enumeration to decode.
+        Platform support must call an Accessor HWP.
+    </description>
+    <valueType>uint32</valueType>
+    <enum>
+        CL_24 = 0x00100000,
+        CL_23 = 0x00080000,
+        CL_22 = 0x00040000,
+        CL_21 = 0x00020000,
+        CL_20 = 0x00010000,
+        CL_19 = 0x00008000,
+        CL_18 = 0x00004000,
+        CL_17 = 0x00002000,
+        CL_16 = 0x00001000,
+        CL_15 = 0x00000800,
+        CL_14 = 0x00000400,
+        CL_13 = 0x00000200,
+        CL_12 = 0x00000100,
+        CL_11 = 0x00000080,
+        CL_10 = 0x00000040,
+        CL_9  = 0x00000020,
+        CL_8  = 0x00000010,
+        CL_7  = 0x00000008,
+        CL_6  = 0x00000004,
+        CL_5  = 0x00000002,
+        CL_4  = 0x00000001
+    </enum>
     <platInit/>
 </attribute>
 
@@ -470,6 +548,21 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
 </attribute>
 
 <attribute>
+    <id>ATTR_SPD_MODULE_REVISION_CODE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Revision Code.
+        Located in DDR3 SPD bytes 146 (LSB) to 147.
+        Located in DDR4 SPD byte 349
+        The raw data has a different size for DDR3 and DDR4.
+        HWPs must use this DDR neutral attribute.
+        Platform support must call an Accessor HWP.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
     <id>ATTR_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
@@ -498,33 +591,11 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
 </attribute>
 
 <!--
+*******************************************************************************
 The following attributes can be queried from DDR3 DIMMs only
 Querying them from DDR4 DIMMs will result in an error
+*******************************************************************************
 -->
-
-<attribute>
-    <id>ATTR_SPD_SDRAM_BANKS</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        Number of banks.
-        Located in DDR3 SPD byte 4, bits 6-4.
-    </description>
-    <valueType>uint8</valueType>
-    <enum>B8 = 0x00, B16 = 0x01, B32 = 0x02, B64 = 0x03</enum>
-    <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_SPD_MODULE_NOMINAL_VOLTAGE</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        Nominal voltage (bitmap).
-        Located in DDR3 SPD byte 6, bits 2-0.
-    </description>
-    <valueType>uint8</valueType>
-    <enum>NOTOP1_5 = 0x01, OP1_35 = 0x02, OP1_2X = 0x04</enum>
-    <platInit/>
-</attribute>
 
 <attribute>
     <id>ATTR_SPD_FTB_DIVIDEND</id>
@@ -567,34 +638,6 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 11.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_SPD_CAS_LATENCIES_SUPPORTED</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        CAS Latencies supported (bitmap).
-        Located in DDR3 SPD byte 14 (LSB) and byte 15.
-    </description>
-    <valueType>uint32</valueType>
-    <enum>
-        CL_18 = 0x00004000,
-        CL_17 = 0x00002000,
-        CL_16 = 0x00001000,
-        CL_15 = 0x00000800,
-        CL_14 = 0x00000400,
-        CL_13 = 0x00000200,
-        CL_12 = 0x00000100,
-        CL_11 = 0x00000080,
-        CL_10 = 0x00000040,
-        CL_9  = 0x00000020,
-        CL_8  = 0x00000010,
-        CL_7  = 0x00000008,
-        CL_6  = 0x00000004,
-        CL_5  = 0x00000002,
-        CL_4  = 0x00000001
-    </enum>
     <platInit/>
 </attribute>
 
@@ -650,17 +693,6 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 27.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_SPD_MODULE_REVISION_CODE</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        Module Revision Code.
-        Located in DDR3 SPD bytes 146 (LSB) to 147.
-    </description>
-    <valueType>uint32</valueType>
     <platInit/>
 </attribute>
 
@@ -956,8 +988,10 @@ Querying them from DDR4 DIMMs will result in an error
 </attribute>
 
 <!--
+*******************************************************************************
 The following attributes can be queried from DDR4 DIMMs only
 Querying them from DDR3 DIMMs will result in an error
+*******************************************************************************
 -->
 <attribute>
     <id>ATTR_SPD_SDRAM_BANKGROUPS_DDR4</id>
@@ -968,34 +1002,6 @@ Querying them from DDR3 DIMMs will result in an error
     </description>
     <valueType>uint8</valueType>
     <enum>BG0 = 0x00, BG2 = 0x01, BG4 = 0x02</enum>
-    <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_SPD_SDRAM_BANKS_DDR4</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        Number of banks.
-        Located in DDR4 SPD byte 4, bits 5-4.
-    </description>
-    <valueType>uint8</valueType>
-    <enum>B4 = 0x00, B8 = 0x01</enum>
-    <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_SPD_MODULE_NOMINAL_VOLTAGE_DDR4</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        Nominal voltage (bitmap).
-        Located in DDR4 SPD byte 11, bits 5-0.
-    </description>
-    <valueType>uint8</valueType>
-    <enum>
-        OP1_2V = 0x01, END1_2V = 0x02,
-        OPTBD1V = 0x04, ENDTBD1V = 0x08,
-        OPTBD2V = 0x10, ENDTBD2V = 0x20
-    </enum>
     <platInit/>
 </attribute>
 
@@ -1035,37 +1041,6 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 19.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_SPD_CAS_LATENCIES_SUPPORTED_DDR4</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        CAS Latencies supported (bitmap).
-        Located in DDR4 SPD byte 20 (LSB) through byte 23.
-    </description>
-    <valueType>uint32</valueType>
-    <enum>
-        CL_24 = 0x00020000,
-        CL_23 = 0x00010000,
-        CL_22 = 0x00008000,
-        CL_21 = 0x00004000,
-        CL_20 = 0x00002000,
-        CL_19 = 0x00001000,
-        CL_18 = 0x00000800,
-        CL_17 = 0x00000400,
-        CL_16 = 0x00000200,
-        CL_15 = 0x00000100,
-        CL_14 = 0x00000080,
-        CL_13 = 0x00000040,
-        CL_12 = 0x00000020,
-        CL_11 = 0x00000010,
-        CL_10 = 0x00000008,
-        CL_9  = 0x00000004,
-        CL_8  = 0x00000002,
-        CL_7  = 0x00000001
-    </enum>
     <platInit/>
 </attribute>
 
@@ -1212,17 +1187,6 @@ Querying them from DDR3 DIMMs will result in an error
 </attribute>
 
 <attribute>
-    <id>ATTR_SPD_MODULE_REVISION_CODE_DDR4</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
-        Module Revision Code.
-        Located in DDR4 SPD byte 349
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-</attribute>
-
-<attribute>
     <id>ATTR_SPD_DRAM_STEPPING_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
@@ -1261,8 +1225,174 @@ Querying them from DDR3 DIMMs will result in an error
 -->
 
 <!--
+*******************************************************************************
+The following attributes are DDR3 specific. Regular HWPs should query the DDR
+neutral attribute, these attributes should only be queried by the Accessor HWP
+that handles the DDR neutral attribute.
+*******************************************************************************
+-->
+<attribute>
+    <id>ATTR_SPD_SDRAM_BANKS_DDR3</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Number of banks.
+        Located in DDR3 SPD byte 4, bits 6-4.
+        This attribute must only be used by an Accessor HWP.
+        Regular HWPs must use ATTR_SPD_SDRAM_BANKS.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>B8 = 0x00, B16 = 0x01, B32 = 0x02, B64 = 0x03</enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_MODULE_NOMINAL_VOLTAGE_DDR3</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Nominal voltage (bitmap).
+        Located in DDR3 SPD byte 6, bits 2-0.
+        This attribute must only be used by an Accessor HWP.
+        Regular HWPs must use ATTR_SPD_MODULE_NOMINAL_VOLTAGE.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NOTOP1_5 = 0x01, OP1_35 = 0x02, OP1_2X = 0x04</enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_CAS_LATENCIES_SUPPORTED_DDR3</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        CAS Latencies supported (bitmap).
+        Located in DDR3 SPD byte 14 (LSB) and byte 15.
+        This attribute must only be used by an Accessor HWP.
+        Regular HWPs must use ATTR_SPD_CAS_LATENCIES_SUPPORTED.
+    </description>
+    <valueType>uint32</valueType>
+    <enum>
+        CL_18 = 0x00004000,
+        CL_17 = 0x00002000,
+        CL_16 = 0x00001000,
+        CL_15 = 0x00000800,
+        CL_14 = 0x00000400,
+        CL_13 = 0x00000200,
+        CL_12 = 0x00000100,
+        CL_11 = 0x00000080,
+        CL_10 = 0x00000040,
+        CL_9  = 0x00000020,
+        CL_8  = 0x00000010,
+        CL_7  = 0x00000008,
+        CL_6  = 0x00000004,
+        CL_5  = 0x00000002,
+        CL_4  = 0x00000001
+    </enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_MODULE_REVISION_CODE_DDR3</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Revision Code.
+        Located in DDR3 SPD bytes 146 (LSB) to 147.
+        This attribute must only be used by an Accessor HWP.
+        Regular HWPs must use ATTR_SPD_MODULE_REVISION_CODE.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<!--
+*******************************************************************************
+The following attributes are DDR4 specific. Regular HWPs should query the DDR
+neutral attribute, these attributes should only be queried by the Accessor HWP
+that handles the DDR neutral attribute.
+*******************************************************************************
+-->
+<attribute>
+    <id>ATTR_SPD_SDRAM_BANKS_DDR4</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Number of banks.
+        Located in DDR4 SPD byte 4, bits 5-4.
+        This attribute must only be used by an Accessor HWP.
+        Regular HWPs must use ATTR_SPD_SDRAM_BANKS.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>B4 = 0x00, B8 = 0x01</enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_MODULE_NOMINAL_VOLTAGE_DDR4</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Nominal voltage (bitmap).
+        Located in DDR4 SPD byte 11, bits 5-0.
+        This attribute must only be used by an Accessor HWP.
+        Regular HWPs must use ATTR_SPD_MODULE_NOMINAL_VOLTAGE.
+    </description>
+    <valueType>uint8</valueType>
+    <!-- Note that current DDR4 spec has TBD for bits 2-5 -->
+    <enum>
+        OP1_2V = 0x01, END1_2V = 0x02,
+        OPTBD1V = 0x04, ENDTBD1V = 0x08,
+        OPTBD2V = 0x10, ENDTBD2V = 0x20
+    </enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_CAS_LATENCIES_SUPPORTED_DDR4</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        CAS Latencies supported (bitmap).
+        Located in DDR4 SPD byte 20 (LSB) through byte 23.
+        This attribute must only be used by an Accessor HWP.
+        Regular HWPs must use ATTR_SPD_CAS_LATENCIES_SUPPORTED.
+    </description>
+    <valueType>uint32</valueType>
+    <enum>
+        CL_24 = 0x00020000,
+        CL_23 = 0x00010000,
+        CL_22 = 0x00008000,
+        CL_21 = 0x00004000,
+        CL_20 = 0x00002000,
+        CL_19 = 0x00001000,
+        CL_18 = 0x00000800,
+        CL_17 = 0x00000400,
+        CL_16 = 0x00000200,
+        CL_15 = 0x00000100,
+        CL_14 = 0x00000080,
+        CL_13 = 0x00000040,
+        CL_12 = 0x00000020,
+        CL_11 = 0x00000010,
+        CL_10 = 0x00000008,
+        CL_9  = 0x00000004,
+        CL_8  = 0x00000002,
+        CL_7  = 0x00000001
+    </enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_MODULE_REVISION_CODE_DDR4</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Module Revision Code.
+        Located in DDR4 SPD byte 349
+        This attribute must only be used by an Accessor HWP.
+        Regular HWPs must use ATTR_SPD_MODULE_REVISION_CODE.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<!--
+*******************************************************************************
 The following attributes are from Centaur VPD. Consider moving them from this
 file
+*******************************************************************************
 -->
 
 <attribute>
