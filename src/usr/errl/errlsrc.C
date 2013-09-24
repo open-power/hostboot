@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/errl/errlsrc.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/errlsrc.C $                                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file errlsrc.C
  *
@@ -120,9 +120,9 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
 
 
         // Place data into the flat structure.
-        psrc->ver         = ErrlSrc::SRCVER;    // 2; See p.69
-        // psrc->flags    = 0;                  // p.69
-        psrc->wordcount   = ErrlSrc::WORDCOUNT; // 9; See p.69
+        psrc->ver         = ErrlSrc::SRCVER;    // 2;
+        // psrc->flags    = 0;                  //
+        psrc->wordcount   = ErrlSrc::WORDCOUNT; // 9;
 
         // TODO FSP firmware puts zero here. Cheat and put reasonCode here.
         // Makes for easier retrieval than teasing it out of the SRC
@@ -132,11 +132,11 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         CPPASSERT( ErrlSrc::SLEN == sizeof(pelSRCSection_t)-iv_header.flatSize());
         psrc->srcLength   = ErrlSrc::SLEN;
 
-        // SRC format p.71 of PEL reference.
-        psrc->word2       =  0xF0;
+        // SRC format
+        psrc->word2       =  0x000000E0; // SRCI_HBT_FORMAT
 
         // Stash the Hostboot module id into hex word 3
-        psrc->moduleId    = iv_modId;   // p.71
+        psrc->moduleId    = iv_modId;
 
         // Stash the Hostboot long long words into the hexwords of the SRC.
         psrc->word6       = iv_user1;    // spans 6-7

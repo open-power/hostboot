@@ -311,7 +311,7 @@ public:
         }
 
         c_target = *pProc;
-        ErrlUserDetailsTarget(c_target).addToLog(errl);
+        ErrlUserDetailsTarget(c_target, "Target: pProc").addToLog(errl);
 
         // 1-shot way first - each will have HUID before register data
         ErrlUserDetailsLogRegister(c_target,
@@ -413,7 +413,7 @@ public:
                 DEVICE_MBOX_ADDRESS(0)).addToLog(errl);
 
         c_target = *pMembuf;
-        ErrlUserDetailsTarget(c_target).addToLog(errl);
+        ErrlUserDetailsTarget(c_target, "Target: pMembuf").addToLog(errl);
 
         // HUID then each register
         {
@@ -424,7 +424,7 @@ public:
         }
 
         c_target = *pDimm;
-        ErrlUserDetailsTarget(c_target).addToLog(errl);
+        ErrlUserDetailsTarget(c_target, "Target: pDimm").addToLog(errl);
 
         // HUID then each register
         {

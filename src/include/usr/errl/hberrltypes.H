@@ -511,20 +511,20 @@ typedef struct pelsrcsection
   uint8_t    wordcount;  // usually 9
   uint16_t   reserved1;  // usually 0, but I put reasonCode here
   uint16_t   srcLength;  // usually 72
-  // "Hex word 2" is the legacy nomenclature. p. 71.
-  // Low byte of this word is SRC format 0xF0.
+  // "Hex word 2"
+  // Low byte of this word is SRC format 0xE0.
   uint32_t   word2;
-  // "Hex word 3" p. 71
+  // "Hex word 3"
   uint16_t   word3;
   uint8_t    moduleId;
   uint8_t    reserved2;
-  // "Hex word 4" p. 71  last progress code
+  // "Hex word 4" last progress code
   uint32_t   word4;
-  // "Hex word 5" p. 72  error status flags, etc.
+  // "Hex word 5" error status flags, etc.
   uint32_t   word5;
-  // "Hex word 6-7" p. 72  optional, iv_user1
+  // "Hex word 6-7" optional, iv_user1
   uint64_t   word6;
-  // "Hex word 8-9" p. 72  optional, iv_user2
+  // "Hex word 8-9" optional, iv_user2
   uint64_t   word8;
   char       srcString[32];
 } __attribute__((packed)) pelSRCSection_t;
