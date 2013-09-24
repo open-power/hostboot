@@ -208,6 +208,55 @@ int32_t checkSpareBit( ExtensibleChip * i_mcsChip,
 }
 PRDF_PLUGIN_DEFINE( Mcs, checkSpareBit );
 
+/**
+ * @fn ClearMbsSecondaryBits
+ * @brief Clears MBS secondary Fir bits which may come up because of MCIFIR
+ * @param  i_chip       The Mcs chip.
+ * @param  i_sc         ServiceDataColector.
+ * @return SUCCESS.
+
+ */
+int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc  )
+{
+    #define PRDF_FUNC "[ClearMbsSecondaryBits] "
+
+    int32_t l_rc = SUCCESS;
+    do
+    {
+        P8McsDataBundle * mcsdb = getMcsDataBundle( i_chip );
+        ExtensibleChip * membChip = mcsdb->getMembChip();
+
+        if ( NULL == membChip ) break;
+
+        // Not checking if MBSFIR bits are set or not.
+        // Clearing them blindly as it will give better performance.
+        SCAN_COMM_REGISTER_CLASS * mbsAndFir =
+                                membChip->getRegister("MBSFIR_AND");
+
+        if( NULL == mbsAndFir )
+        {
+            PRDF_ERR( PRDF_FUNC"Can not find MBSFIR_AND "
+                       "for 0x%08x", membChip->GetId());
+            break;
+        }
+        mbsAndFir->setAllBits();
+
+        mbsAndFir->ClearBit(3);
+        mbsAndFir->ClearBit(4);
+        l_rc = mbsAndFir->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MBSFIR_AND write failed"
+                       "for 0x%08x", membChip->GetId());
+            break;
+        }
+    }while( 0 );
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+} PRDF_PLUGIN_DEFINE( Mcs, ClearMbsSecondaryBits );
+
 } // end namespace Mcs
 } // end namespace PRDF
 

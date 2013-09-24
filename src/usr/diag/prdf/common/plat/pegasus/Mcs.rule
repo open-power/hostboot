@@ -177,7 +177,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[0]
      *  MCIFIRQ_REPLAY_TIMEOUT
      */
-    (MciFir, bit(0)) ? calloutDmiBusTh1;
+    (MciFir, bit(0)) ?  clearSecMbsBitsCalloutDmiBusTh1;
 
     /** MCIFIR[1]
      *  MCIFIRQ_CHANNEL_FAIL
@@ -468,6 +468,13 @@ actionclass calloutDmiBus
     calloutSelfMedA;
     callout(connected(TYPE_MEMBUF), MRU_MEDA);
     calloutDmiBusSymFru;
+};
+
+/** Clear MBS SecondaryBits and calloutDmiBusTh1 */
+actionclass clearSecMbsBitsCalloutDmiBusTh1
+{
+    funccall("ClearMbsSecondaryBits");
+    calloutDmiBusTh1;
 };
 
 /** Callout the DMI bus (MEDA), threshold 1 */

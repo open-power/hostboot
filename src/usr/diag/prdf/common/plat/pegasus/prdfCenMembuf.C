@@ -779,6 +779,235 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
 
 //------------------------------------------------------------------------------
 
+/**
+ * @fn ClearMbsSecondaryBits
+ * @brief Clears MBS secondary Fir bits which may come up because of primary
+ *        MBS/MBI FIR bits.
+ * @param  i_chip       The Centaur chip.
+ * @param  i_sc         ServiceDataColector.
+ * @return SUCCESS.
+
+ */
+int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc  )
+{
+    #define PRDF_FUNC "[ClearMbsSecondaryBits] "
+
+    int32_t l_rc = SUCCESS;
+    do
+    {
+        SCAN_COMM_REGISTER_CLASS * mbsFir = i_chip->getRegister("MBSFIR");
+        SCAN_COMM_REGISTER_CLASS * mbsFirMask =
+                                        i_chip->getRegister("MBSFIR_MASK");
+        SCAN_COMM_REGISTER_CLASS * mbsFirAnd =
+                                        i_chip->getRegister("MBSFIR_AND");
+        l_rc = mbsFir->Read();
+        l_rc |= mbsFirMask->Read();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MBSFIR/MBSFIR_MASK read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
+
+        mbsFirAnd->setAllBits();
+
+        if ( mbsFir->IsBitSet(26)
+             && mbsFir->IsBitSet(9) && ( ! mbsFirMask->IsBitSet(9)))
+        {
+            mbsFirAnd->ClearBit(26);
+        }
+
+        if ( mbsFir->IsBitSet(27)
+             && mbsFir->IsBitSet(10) && ( ! mbsFirMask->IsBitSet(10)))
+        {
+            mbsFirAnd->ClearBit(27);
+        }
+
+        if( mbsFir->IsBitSet(3) ||  mbsFir->IsBitSet(4) )
+        {
+            SCAN_COMM_REGISTER_CLASS * mbiFir = i_chip->getRegister("MBIFIR");
+            SCAN_COMM_REGISTER_CLASS * mbiFirMask =
+                                            i_chip->getRegister("MBIFIR_MASK");
+            l_rc = mbiFir->Read();
+            l_rc |= mbiFirMask->Read();
+            if ( SUCCESS != l_rc )
+            {
+                // Do not break from here, just print error trace.
+                // If there are other secondary bits ( e.g. 26, 27 ),
+                // we want to clear them.
+                PRDF_ERR( PRDF_FUNC"MBIFIR/MASK read failed"
+                         "for 0x%08x", i_chip->GetId());
+            }
+            else if ( mbiFir->IsBitSet( 0 ) && ( ! mbiFirMask->IsBitSet( 0 )) )
+            {
+                mbsFirAnd->ClearBit(3);
+                mbsFirAnd->ClearBit(4);
+            }
+        }
+
+        l_rc = mbsFirAnd->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MBSFIR_AND write failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
+
+    }while( 0 );
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+} PRDF_PLUGIN_DEFINE( Membuf, ClearMbsSecondaryBits );
+//------------------------------------------------------------------------------
+
+/**
+ * @fn ClearMbaCalSecondaryBits
+ * @brief Clears MBACAL secondary Fir bits which may come up because of MBSFIR
+ * @param  i_chip       The Centaur chip.
+ * @param  i_sc         ServiceDataColector.
+ * @return SUCCESS.
+
+ */
+int32_t ClearMbaCalSecondaryBits( ExtensibleChip * i_chip,
+                                  STEP_CODE_DATA_STRUCT & i_sc  )
+{
+    #define PRDF_FUNC "[ClearMbaCalSecondaryBits ] "
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        SCAN_COMM_REGISTER_CLASS * mbsFir = i_chip->getRegister("MBSFIR");
+        SCAN_COMM_REGISTER_CLASS * mbsFirMask =
+                                        i_chip->getRegister("MBSFIR_MASK");
+        l_rc = mbsFir->Read();
+        l_rc |= mbsFirMask->Read();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MBSFIR/MBSFIR_MASK read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
+
+        CenMembufDataBundle * membdb = getMembufDataBundle( i_chip );
+
+        for( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
+        {
+            ExtensibleChip * mbaChip = membdb->getMbaChip(i);
+            if ( NULL == mbaChip ) continue;
+
+            SCAN_COMM_REGISTER_CLASS * mbaCalAndFir =
+                                mbaChip->getRegister("MBACALFIR_AND");
+
+            if( NULL == mbaCalAndFir ) continue;
+
+            mbaCalAndFir->setAllBits();
+
+            // Not checking if MBACALFir bits are set or not.
+            // Clearing them blindly as it will give better performance.
+
+            if( mbsFir->IsBitSet(12) && ( ! mbsFirMask->IsBitSet(12) ) )
+            {
+                 mbaCalAndFir->ClearBit(10);
+                 mbaCalAndFir->ClearBit(14);
+            }
+
+            if( mbsFir->IsBitSet(13) && ( ! mbsFirMask->IsBitSet(13) ) )
+            {
+                 mbaCalAndFir->ClearBit(9);
+                 mbaCalAndFir->ClearBit(15);
+            }
+
+            l_rc = mbaCalAndFir->Write();
+            if ( SUCCESS != l_rc )
+            {
+                // Do not break. Just print error trace and look for
+                // other MBA.
+                PRDF_ERR( PRDF_FUNC"MBACALFIR_AND write failed"
+                              "for 0x%08x", mbaChip->GetId());
+            }
+        }
+
+    }while( 0 );
+
+    return SUCCESS;
+    #undef PRDF_FUNC
+
+} PRDF_PLUGIN_DEFINE( Membuf, ClearMbaCalSecondaryBits );
+
+/**
+ * @fn checkChnlReplayTimeOut
+ * @brief Check if channel Replay Timeout is present
+ *
+ * @param  i_chip       The Centaur chip.
+ * @param  i_sc         ServiceDataColector.
+ *
+ * @return SUCCESS if Channel replay Timout bits are set, FAIL otherwise.
+
+ */
+int32_t checkChnlReplayTimeOut( ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc  )
+{
+    #define PRDF_FUNC "[checkChnlReplayTimeOut] "
+
+    // We will return FAIL from this function if high priority bits are
+    // not set. This will trigger rule code to execute alternate resolution
+
+    int32_t l_rc = SUCCESS;
+    do
+    {
+        SCAN_COMM_REGISTER_CLASS * mbiFir = i_chip->getRegister("MBIFIR");
+        SCAN_COMM_REGISTER_CLASS * mbiFirMask =
+                                        i_chip->getRegister("MBIFIR_MASK");
+
+        l_rc = mbiFir->Read();
+        l_rc |= mbiFirMask->Read();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MBIFIR/MBIFIR_MASK read failed"
+                     "for 0x%08x", i_chip->GetId());
+            break;
+        }
+
+        if( ( mbiFir->IsBitSet(0)) && ( !  mbiFirMask->IsBitSet(0)) ) break;
+
+        CenMembufDataBundle * mbdb = getMembufDataBundle( i_chip );
+        ExtensibleChip * mcsChip = mbdb->getMcsChip();
+
+        if( NULL == mcsChip )
+        {
+            l_rc = FAIL;
+            break;
+        }
+
+        SCAN_COMM_REGISTER_CLASS * mciFir = mcsChip->getRegister("MCIFIR");
+        SCAN_COMM_REGISTER_CLASS * mciFirMask =
+                                            mcsChip->getRegister("MCIFIR_MASK");
+        l_rc = mciFir->Read();
+        l_rc |= mciFirMask->Read();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MCIFIR/MCIFIR_MASK read failed"
+                     "for 0x%08x", mcsChip->GetId());
+            break;
+        }
+        if( ( mciFir->IsBitSet(0)) && ( ! mciFirMask->IsBitSet(0)) ) break;
+
+        l_rc = FAIL;
+
+    }while( 0 );
+
+    // Do not commit error log as primary ( high priority )
+    // FIR bits are set and this is just a side effect.
+    if( SUCCESS == l_rc)
+        i_sc.service_data->DontCommitErrorLog();
+
+    return l_rc;
+    #undef PRDF_FUNC
+} PRDF_PLUGIN_DEFINE( Membuf, checkChnlReplayTimeOut );
+
+//------------------------------------------------------------------------------
+
 // Define the plugins for memory ECC errors.
 #define PLUGIN_FETCH_ECC_ERROR( TYPE, MBA ) \
 int32_t AnalyzeFetch##TYPE##MBA( ExtensibleChip * i_membChip, \

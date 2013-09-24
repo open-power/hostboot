@@ -425,7 +425,7 @@ group gMbiFir filter singlebit
     /** MBIFIR[0]
      *  MBIFIRQ_REPLAY_TIMEOUT
      */
-    (MbiFir, bit(0)) ? calloutDmiBusTh1UE;
+    (MbiFir, bit(0)) ? clearSecMbsBitsCalloutDmiBusTh1UE;
 
     /** MBIFIR[1]
      *  MBIFIRQ_CHANNEL_FAIL
@@ -574,12 +574,12 @@ group gMbsFir filter singlebit
     /** MBSFIR[3]
      *  MBS_FIR_REG_EXTERNAL_TIMEOUT
      */
-    (MbsFir, bit(3)) ? CalloutMcsHighAndThr1UE;
+    (MbsFir, bit(3)) ? chkChnlReplTOCalloutMcsSelfThr1UE;
 
     /** MBSFIR[4]
      *  MBS_FIR_REG_INTERNAL_TIMEOUT
      */
-    (MbsFir, bit(4)) ? SelfMedThr1UE;
+    (MbsFir, bit(4)) ? chkChnlReplTOSelfMedThr1UE;
 
     /** MBSFIR[5]
      *  MBS_FIR_REG_INT_BUFFER_CE
@@ -605,12 +605,12 @@ group gMbsFir filter singlebit
      *  MBS_FIR_REG_CACHE_SRW_CE
      */
     #TODO via RTC 22872 ( L4 Line Delete )
-    (MbsFir, bit(9)) ? TBDDefaultCallout;
+    (MbsFir, bit(9)) ? clearSecMbsBitsAndLineDelete;
 
     /** MBSFIR[10]
      *  MBS_FIR_REG_CACHE_SRW_UE
      */
-    (MbsFir, bit(10)) ? SelfMedThr1;
+    (MbsFir, bit(10)) ? clearSecMbsBitsAndSelfMedThr1;
 
     /** MBSFIR[11]
      *  MBS_FIR_REG_CACHE_SRW_SUE
@@ -621,12 +621,12 @@ group gMbsFir filter singlebit
      *  MBS_FIR_REG_CACHE_CO_CE
      */
     #TODO via RTC 22872 ( L4 Line Delete )
-    (MbsFir, bit(12)) ? TBDDefaultCallout;
+    (MbsFir, bit(12)) ? clearSecMbaCalBitsAndLineDelete;
 
     /** MBSFIR[13]
      *  MBS_FIR_REG_CACHE_CO_UE
      */
-    (MbsFir, bit(13)) ? SelfMedThr1;
+    (MbsFir, bit(13)) ? clearSecMbaCalBitsAndSelfMedThr1;
 
     /** MBSFIR[14]
      *  MBS_FIR_REG_CACHE_CO_SUE
@@ -1253,6 +1253,13 @@ actionclass calloutDmiBus
     calloutDmiBusSymFru;
 };
 
+/** Clear MBS SecondaryBits and calloutDmiBusTh1UE */
+actionclass clearSecMbsBitsCalloutDmiBusTh1UE
+{
+    funccall("ClearMbsSecondaryBits");
+    calloutDmiBusTh1UE;
+};
+
 /** Callout the DMI bus, threshold 1 */
 actionclass calloutDmiBusTh1UE
 {
@@ -1269,13 +1276,30 @@ actionclass calloutDmiBusTh2pday { calloutDmiBus; threshold2pday; };
 /** Callout the DMI bus and 2nd Level (LOW), threshold 1 */
 actionclass calloutDmiBusLvl2Th1 { calloutDmiBusTh1; callout2ndLvlLow; };
 
-actionclass CalloutMcsHighAndThr1UE
+/** Callout MCS, centaur, threshold 1 and set SUE genreation point */
+actionclass CalloutMcsMedSelfLowThr1UE
 {
-    callout(connected(TYPE_MCS),MRU_HIGH);
+    callout(connected(TYPE_MCS),MRU_MED);
+    calloutSelfLow;
     threshold1;
     SUEGenerationPoint;
 };
 
+/** If channel Replay Timeout do nothing else
+ *  execute CalloutMcsMedSelfLowThr1UE
+ */
+actionclass chkChnlReplTOCalloutMcsSelfThr1UE
+{
+    try( funccall("checkChnlReplayTimeOut"), CalloutMcsMedSelfLowThr1UE );
+};
+
+/** If no channel Replay Timeout, execute SelfMedThr1UE */
+actionclass chkChnlReplTOSelfMedThr1UE
+{
+    try( funccall("checkChnlReplayTimeOut"), SelfMedThr1UE );
+};
+
+/** If no sparebit is set, execute SelfMedThr1UE */
 actionclass analyzeSpareBitAndThr
 {
     try( funccall("checkSpareBit"), calloutDmiBusTh2pday );
@@ -1416,3 +1440,32 @@ actionclass analyzeMaintUe1 { funccall("AnalyzeMaintUe1"); threshold1; };
 actionclass callout2ndLvlMedThr1UE
 { callout2ndLvlMed; threshold1;SUEGenerationPoint; };
 
+/** Clear MBS SecondaryBits and Line Delete*/
+actionclass clearSecMbsBitsAndLineDelete
+{
+    funccall("ClearMbsSecondaryBits");
+    #TODO via RTC 22872 ( L4 Line Delete )
+    TBDDefaultCallout;
+};
+
+/** Clear MBACAL SecondaryBits and Line Delete*/
+actionclass clearSecMbaCalBitsAndLineDelete
+{
+    funccall("ClearMbaCalSecondaryBits");
+    #TODO via RTC 22872 ( L4 Line Delete )
+    TBDDefaultCallout;
+};
+
+/** Clear MBACAL SecondaryBits and Line SelfMedThr1*/
+actionclass clearSecMbaCalBitsAndSelfMedThr1
+{
+    funccall("ClearMbaCalSecondaryBits");
+    SelfMedThr1;
+};
+
+/** Clear MBS SecondaryBits and Line SelfMedThr1*/
+actionclass clearSecMbsBitsAndSelfMedThr1
+{
+    funccall("ClearMbsSecondaryBits");
+    SelfMedThr1;
+};

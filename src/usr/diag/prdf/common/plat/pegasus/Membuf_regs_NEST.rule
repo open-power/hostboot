@@ -189,6 +189,14 @@
         capture     group FirRegs;
     };
 
+    register MBSFIR_AND
+    {
+        name        "MBU.MBS.MBS_FIR_REG AND";
+        scomaddr    0x02011401;
+        capture     group never;
+        access      write_only;
+    };
+
     register MBSFIR_MASK
     {
         name        "MBU.MBS.MBS_FIR_MASK_REG";
