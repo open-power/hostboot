@@ -487,9 +487,9 @@ namespace TARGETING
         errlHndl_t l_errl = NULL;
 
         do{
-            // if no FSP then skip attribute sync
+            // If no SP Base Services then skip attribute sync
             // let the test case force message creation/sending
-            if( INITSERVICE::spLess() )
+            if( !INITSERVICE::spBaseServicesEnabled() )
             {
                 break;
             }
@@ -532,10 +532,10 @@ namespace TARGETING
         errlHndl_t l_errl = NULL;
 
         do{
-            // if the mailbox is not enabled then skip attribute sync
-            if( INITSERVICE::spLess() )
+            // If no SP Base Services then skip attribute sync
+            if( !INITSERVICE::spBaseServicesEnabled() )
             {
-                TARG_INF( "Mailbox is not enabled, skipping attribute sync" );
+                TARG_INF( "SP Base Services not enabled, skipping attribute sync" );
                 break;
             }
 

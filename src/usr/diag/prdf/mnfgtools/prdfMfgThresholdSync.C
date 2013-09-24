@@ -31,7 +31,7 @@ namespace PRDF
 
 MfgThresholdSync::MfgThresholdSync()
 {
-    iv_MailboxEnabled = !INITSERVICE::spLess();
+    iv_MailboxEnabled = INITSERVICE::spBaseServicesEnabled();
 }
 
 MfgThresholdSync::~MfgThresholdSync()

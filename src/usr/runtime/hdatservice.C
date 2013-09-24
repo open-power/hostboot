@@ -473,10 +473,10 @@ errlHndl_t hdatService::loadHostData(void)
         payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
 #endif
 
-        //If PHYP or Sapphire w/FSP
+        //If PHYP or Sapphire w/SP Base Services
         if( (TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
             ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
-             !INITSERVICE::spLess()))
+             INITSERVICE::spBaseServicesEnabled()))
         {
             // PHYP
             TARGETING::ATTR_PAYLOAD_BASE_type payload_base
@@ -578,10 +578,10 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             // we're all done
             break;
         }
-        //If payload is not (PHYP or Sapphire w/fsp)
+        //If payload is not (PHYP or Sapphire w/SP Base Services )
         else if( !((TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
             ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
-             !INITSERVICE::spLess())))
+             INITSERVICE::spBaseServicesEnabled())))
         {
             TRACFCOMP( g_trac_runtime, "getHostDataSection> There is no host data for PAYLOAD_KIND=%d", payload_kind );
             /*@
@@ -1202,10 +1202,10 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
             // we're all done -- don't need to do anything
             break;
         }
-        //If payload is not (PHYP or Sapphire w/fsp)
+        //If payload is not (PHYP or Sapphire w/SP Base Services)
         else if( !((TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
             ((TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) &&
-             !INITSERVICE::spLess())))
+             INITSERVICE::spBaseServicesEnabled())))
         {
             TRACFCOMP( g_trac_runtime, "get_host_data_section> There is no host data for PAYLOAD_KIND=%d", payload_kind );
             /*@

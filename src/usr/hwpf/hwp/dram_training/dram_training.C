@@ -95,7 +95,7 @@ void*    call_host_disable_vddr( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr entry" );
 
-    if( !INITSERVICE::spLess() )
+    if(INITSERVICE::spBaseServicesEnabled())
     {
         IStepError l_StepError;
 
@@ -395,7 +395,7 @@ void*    call_host_enable_vddr( void *io_pArgs )
 
     errlHndl_t l_err = NULL;
 
-    if( !INITSERVICE::spLess() )
+    if(INITSERVICE::spBaseServicesEnabled())
     {
         IStepError l_StepError;
 

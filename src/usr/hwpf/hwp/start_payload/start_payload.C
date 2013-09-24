@@ -276,11 +276,10 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             break;
         }
 
-        if( is_sapphire_load() &&
-            INITSERVICE::spLess())
+        if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
         {
-            // Write the devtree out when in SPLess
-            // Sapphire mode
+            // Write the devtree out in Sapphire mode when SP Base Services not
+            // enabled
             l_err = DEVTREE::build_flatdevtree();
             if ( l_err )
             {
@@ -541,9 +540,8 @@ errlHndl_t callShutdown ( void )
             break;
         }
 
-        // Load payload data if in SPLess SAPPHIRE mode
-        if( is_sapphire_load() &&
-            INITSERVICE::spLess())
+        // Load payload data in Sapphire mode when SP Base Services not enabled
+        if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
         {
             payloadData = DEVTREE::get_flatdevtree_phys_addr();
         }

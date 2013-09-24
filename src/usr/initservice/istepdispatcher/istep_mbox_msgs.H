@@ -35,8 +35,6 @@ namespace   INITSERVICE
 {
 
 const uint32_t SPLESS_MSG   = 0x000F0000;
-const uint32_t ISTEP_WORKER_MSG = 0x00F00000;
-
 const uint32_t ISTEP_MSG_SUCCESS     = 0x00F00000;
 const uint32_t ISTEP_INVALID_MESSAGE = 0x00F00000;
 
@@ -52,18 +50,13 @@ enum
 // HwSvr Msg Type Enums
 enum
 {
+    // Secure
+    HWSVR_ISTEP_MSG_TYPE        = 0x00,
+    // Unsecure
     HWSVR_BREAKPOINT            = 0x00,
     HWSVR_SYNC_POINT            = 0x10,
     HWSVR_IPL_PROGRESS_CODE     = 0x11,
     HWSVR_DO_IOVALID_PROCESSING = 0xC1,
-};
-
-// ------------------------------------------------------------------
-// Worker Thread Msg Type Enums
-enum
-{
-    WORKER_MORE_WORK_NEEDED     = 0x00,
-    WORKER_BREAKPOINT           = 0x01,
 };
 
 // ------------------------------------------------------------------
@@ -73,6 +66,8 @@ enum
     // --------------------------------------------------------------
     // General Messages from all sources
     // --------------------------------------------------------------
+    ISTEP_MSG_TYPE          = MBOX::FIRST_SECURE_MSG |
+                                HWSVR_ISTEP_MSG_TYPE,
     SYNC_POINT_REACHED      = MBOX::FIRST_UNSECURE_MSG |
                                 HWSVR_SYNC_POINT,
     BREAKPOINT              = MBOX::FIRST_UNSECURE_MSG |
@@ -82,15 +77,6 @@ enum
     IPL_PROGRESS_CODE       = MBOX::FIRST_UNSECURE_MSG |
                                 HWSVR_IPL_PROGRESS_CODE,
 
-    // --------------------------------------------------------------
-    // Worker Thread Messages
-    // --------------------------------------------------------------
-    MORE_WORK_NEEDED        = MBOX::FIRST_SECURE_MSG |
-                                ISTEP_WORKER_MSG |
-                                WORKER_MORE_WORK_NEEDED,
-    BREAKPOINT_WORKER       = MBOX::FIRST_SECURE_MSG |
-                                ISTEP_WORKER_MSG |
-                                WORKER_BREAKPOINT,
 };
 
 }   // namespace

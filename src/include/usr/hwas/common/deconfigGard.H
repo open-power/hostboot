@@ -228,6 +228,19 @@ public:
     errlHndl_t deconfigureTarget(TARGETING::Target & i_target,
                                  const uint32_t i_errlEid,
                                  bool i_evenAtRunTime = false);
+
+    /**
+     * @brief Get the Deconfigure Status
+     *
+     * This function returns a uint32_t counter that can be used to indicate
+     * whether Targets have been deconfigured. The counter wraps, so the user
+     * should just check for != to determine if a deconfigure has happened
+     * since the last time this was called.
+     *
+     * @return uint32_t 'counter' of deconfigure events
+     */
+    uint32_t getDeconfigureStatus();
+
     /**
      * @brief Registers a Deferred Deconfigure
      *
@@ -567,6 +580,9 @@ private:
      * and _invokeDeconfigureAssocProc will break and return.
      */
     bool iv_XABusEndpointDeconfigured;
+
+    // counter, used to tell if there were deconfigure 'events'.
+    uint32_t iv_deconfigCount;
 
 }; // DeconfigGard
 HWAS_DECLARE_SINGLETON(HWAS::DeconfigGard,theDeconfigGardSingleton);

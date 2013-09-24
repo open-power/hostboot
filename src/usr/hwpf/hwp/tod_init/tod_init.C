@@ -52,7 +52,7 @@ void * call_tod_setup(void *dummy)
 {
     errlHndl_t l_errl;
 
-    if (INITSERVICE::spLess())
+    if (!INITSERVICE::spBaseServicesEnabled())
     {
         l_errl = TodSvc::getTheInstance().todSetup();
 
@@ -70,7 +70,7 @@ void * call_tod_init(void *dummy)
 {
     errlHndl_t l_errl;
 
-    if (INITSERVICE::spLess())
+    if (!INITSERVICE::spBaseServicesEnabled())
     {
         l_errl = TodSvc::getTheInstance().todInit();
 

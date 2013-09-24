@@ -30,7 +30,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
 OBJS =  istepdispatcher.o initsvcudistep.o      \
-        sptask.o splesscommon.o istepWorker.o
+        sptask.o splesscommon.o
 
 ## SUBDIRS = test.d
 

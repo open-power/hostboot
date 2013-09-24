@@ -114,24 +114,27 @@ void doShutdown ( uint64_t i_status,
 void Shutdown( uint64_t i_status );
 
 /**
- * @brief This function will return whether or not we are SPless
+ * @brief Returns if Service Processor Base Services are available
  *
- * @return bool - whether we are SPLESS.
+ * If true then the Hostboot<->SP mailbox is enabled and HWSV is
+ * providing base services
+ *
+ * @return bool - true if SP Base Services are available
  */
-inline bool spLess ( void )
+inline bool spBaseServicesEnabled()
 {
-    bool spless = false;
+    bool spBaseServicesEnabled = false;
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
     TARGETING::SpFunctions spfuncs;
     if( sys &&
         sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
-        !spfuncs.baseServices )
+        spfuncs.baseServices )
     {
-        spless = true;
+        spBaseServicesEnabled = true;
     }
 
-    return spless;
+    return spBaseServicesEnabled;
 }
 }
 

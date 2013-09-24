@@ -265,6 +265,9 @@ public:
             // Get the current HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
 
+            // get the current status/counter
+            uint32_t l_origStatus = theDeconfigGard().getDeconfigureStatus();
+
             // Deconfigure the target.
             l_pErr = theDeconfigGard().
                     deconfigureTarget(*l_pTarget, 0xA);
@@ -272,6 +275,12 @@ public:
             {
                 TS_FAIL("testDeconfigure4: Error from deconfigureTarget");
                 break;
+            }
+
+            // confirm the counter changed
+            if (l_origStatus == theDeconfigGard().getDeconfigureStatus())
+            {
+                TS_FAIL("testDeconfigure4: unchanged deconfigureStatus");
             }
 
             // Deconfigure the target again
@@ -685,9 +694,18 @@ public:
             // Get the original HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
 
+            // get the current status/counter
+            uint32_t l_origStatus = theDeconfigGard().getDeconfigureStatus();
+
             // create a deconfigure record
             theDeconfigGard().
                     registerDeferredDeconfigure(*l_pTarget, 0x12);
+
+            // confirm the counter changed
+            if (l_origStatus == theDeconfigGard().getDeconfigureStatus())
+            {
+                TS_FAIL("testDefDeconfig1: unchanged deconfigureStatus");
+            }
 
             // call function to process deferred deconfigure records
             bool l_processed = processDeferredDeconfig();

@@ -280,10 +280,10 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                    i_record.rec_num,
                    i_record.offset );
 
-        //We only send VPD update when we have an FSP
-        if( INITSERVICE::spLess() )
+        //We only send VPD update when we have SP Base Services
+        if( !INITSERVICE::spBaseServicesEnabled() )
         {
-            TRACFCOMP(g_trac_vpd, INFO_MRK "Mailbox is disabled, skipping VPD write");
+            TRACFCOMP(g_trac_vpd, INFO_MRK "No SP Base Services, skipping VPD write");
             TRACFBIN( g_trac_vpd, "msg=", msg, sizeof(msg_t) );
             TRACFBIN( g_trac_vpd, "extra=", msg->extra_data, i_numBytes );
             break;

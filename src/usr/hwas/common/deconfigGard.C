@@ -122,7 +122,8 @@ DeconfigGard & theDeconfigGard()
 //******************************************************************************
 DeconfigGard::DeconfigGard()
 : iv_platDeconfigGard(NULL),
-  iv_XABusEndpointDeconfigured(false)
+  iv_XABusEndpointDeconfigured(false),
+  iv_deconfigCount(0)
 {
     HWAS_INF("DeconfigGard Constructor");
     HWAS_MUTEX_INIT(iv_mutex);
@@ -650,7 +651,9 @@ void DeconfigGard::registerDeferredDeconfigure(
 
     // Create a Deconfigure Record
     HWAS_MUTEX_LOCK(iv_mutex);
+
     _createDeconfigureRecord(i_target, i_errlEid);
+
     HWAS_MUTEX_UNLOCK(iv_mutex);
 }
 
@@ -1325,6 +1328,15 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
 } // _deconfigByAssoc
 
 //******************************************************************************
+uint32_t DeconfigGard::getDeconfigureStatus()
+{
+    // no lock needed - just return the value.
+    uint32_t l_deconfigCount = iv_deconfigCount;
+    HWAS_INF("getDeconfigureStatus returning %u", l_deconfigCount);
+    return l_deconfigCount;
+}
+
+//******************************************************************************
 void DeconfigGard::_deconfigureTarget(Target & i_target,
                                       const uint32_t i_errlEid)
 {
@@ -1351,6 +1363,9 @@ void DeconfigGard::_deconfigureTarget(Target & i_target,
         l_state.functional = 0;
         l_state.deconfiguredByEid = i_errlEid;
         i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+
+        // increment the counter
+        iv_deconfigCount++;
 
         // Do any necessary Deconfigure Actions
         _doDeconfigureActions(i_target);

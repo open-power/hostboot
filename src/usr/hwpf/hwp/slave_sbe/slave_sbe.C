@@ -205,7 +205,7 @@ void* call_host_sbe_start( void *io_pArgs )
             // we are just checking the Slave SBE's, skip the master
             continue;
         }
-        else if (INITSERVICE::spLess())
+        else if (!INITSERVICE::spBaseServicesEnabled())
         {
             //Need to issue SBE start workaround on all slave chips
             // Invoke the HWP

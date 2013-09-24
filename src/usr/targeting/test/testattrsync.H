@@ -77,7 +77,7 @@ class AttrSyncTestSuite : public CxxTest::TestSuite
 
         if( err )
         {
-            if( !INITSERVICE::spLess() )
+            if( INITSERVICE::spBaseServicesEnabled() )
             {
                 TS_FAIL(" Error returned when syncing SECTION_TYPE_PNOR_RW");
             }
@@ -92,7 +92,7 @@ class AttrSyncTestSuite : public CxxTest::TestSuite
 
         if( err )
         {
-            if( !INITSERVICE::spLess() )
+            if( INITSERVICE::spBaseServicesEnabled() )
             {
                 TS_FAIL(" Error returned when syncing SECTION_TYPE_HEAP_PNOR_INIT"); 
             }
@@ -107,7 +107,7 @@ class AttrSyncTestSuite : public CxxTest::TestSuite
 
         if( err )
         {
-           if( !INITSERVICE::spLess() )
+           if( INITSERVICE::spBaseServicesEnabled() )
            {
                TS_FAIL(" Error returned when syncing SECTION_TYPE_HEAP_ZERO_INIT"); 
            }
@@ -165,7 +165,7 @@ class AttrSyncTestSuite : public CxxTest::TestSuite
 
                 if (l_errl)
                 {
-                    if( !INITSERVICE::spLess() )
+                    if( INITSERVICE::spBaseServicesEnabled() )
                     {
                         TS_FAIL( "Error returned when syncing section type %d "
                         "from FSP", section_type[i]);
