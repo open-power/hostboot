@@ -1558,12 +1558,12 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[5]
      *  FSP_ECC_ERR_CE
      */
-    (PsiHbFir, bit(5)) ? calloutPsiThr32;
+    (PsiHbFir, bit(5)) ? defaultMaskedError;
 
     /** PSIHBFIR[6]
      *  FSP_ECC_ERR_UE
      */
-    (PsiHbFir, bit(6)) ? calloutPsiThr1;
+    (PsiHbFir, bit(6)) ? defaultMaskedError;
 
     /** PSIHBFIR[7]
      *  ERROR_STATE
@@ -3097,28 +3097,3 @@ actionclass callout2ndLvlMedThr1
     threshold1;
 };
 
-/** callout both ends of PSI Link.Threshold is 32 events per day.
- */
-actionclass  calloutPsiThr32
-{
-#FIXME RTC 23127 Discussion in progress on this.Based on the outcome of
-# discussion, there are chances that we may replace this and calloutPsiThr1
-# with default masked error.
-
-    calloutPsiLink;
-    threshold32pday;
-};
-
-/** callout both ends of PSI Link on first instance.*/
-actionclass  calloutPsiThr1
-{
-    calloutPsiLink;
-    threshold1;
-};
-
-/** callout both ends of PSI link */
-actionclass  calloutPsiLink
-{
-    callout(connected(TYPE_PSI, 0), MRU_MEDA);
-    funccall("calloutPeerBus_psi0");
-};
