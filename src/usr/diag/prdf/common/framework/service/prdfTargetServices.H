@@ -152,6 +152,14 @@ void printTargetInfo( TARGETING::TargetHandle_t i_target );
 uint8_t getChipLevel( TARGETING::TargetHandle_t i_target );
 
 /**
+ * @brief set hw changed state for a target
+ *
+ * @param i_target target handle
+ *
+ */
+void setHWStateChanged(TARGETING::TargetHandle_t i_target);
+
+/**
  * @brief   Get the chip ID (P7, P7+, etc.) of this target.
  * @param   i_target Any chip or unit target.
  * @return  The chip ID or 0 function failed.

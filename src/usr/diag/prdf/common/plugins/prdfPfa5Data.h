@@ -34,11 +34,19 @@
 
 namespace PRDF
 {
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+namespace HOSTBOOT
+{
+#endif
+
+#ifdef PRDF_FSP_ERRL_PLUGIN
+namespace FSP
+{
+#endif
 
 const uint32_t PFA5_Format = 0x50464135;
 
 const uint32_t MruListLIMIT  = 8;
-const uint32_t HcdbListLIMIT = 8;
 const uint32_t SigListLIMIT  = 8;
 
 // Size of PRD Capture Data
@@ -48,7 +56,6 @@ const uint32_t CaptureDataSize = 2048;
 #else
 const uint32_t CaptureDataSize = 4096*2;
 #endif
-
 enum ErrlVersion
 {
     ErrlVer1    = 1,
@@ -103,27 +110,6 @@ struct PfaMruListStruct
                                    PfaMruListStruct& i_right )
     {
         i_left >> i_right.callout >> i_right.type >> i_right.priority;
-        return i_left;
-    };
-};
-
-struct PfaHcdbListStruct
-{
-    HUID     hcdbId;
-    uint32_t compSubType;
-    uint32_t compType;
-
-    friend UtilStream& operator<<( UtilStream& i_left,
-                                   PfaHcdbListStruct& i_right )
-    {
-        i_left << i_right.hcdbId << i_right.compSubType << i_right.compType;
-        return i_left;
-    };
-
-    friend UtilStream& operator>>( UtilStream& i_left,
-                                   PfaHcdbListStruct& i_right )
-    {
-        i_left >> i_right.hcdbId >> i_right.compSubType >> i_right.compType;
         return i_left;
     };
 };
@@ -193,9 +179,6 @@ struct PfaData
     uint32_t mruListCount;                  // Total number of MRUs.
     PfaMruListStruct mruList[MruListLIMIT]; // Full list of MRUs.
 
-    uint32_t hcdbListCount;                    // Total number of MRUs.
-    PfaHcdbListStruct hcdbList[HcdbListLIMIT]; // Full list of HCDB changes.
-
     uint32_t sigListCount;                  // Total number of multi-signatures.
     PfaSigListStruct sigList[SigListLIMIT]; // Full list of multi-signatures.
 
@@ -205,7 +188,6 @@ struct PfaData
     PfaData()
     {
         memset( &mruList[0],  0x00, sizeof(PfaMruListStruct)  * MruListLIMIT  );
-        memset( &hcdbList[0], 0x00, sizeof(PfaHcdbListStruct) * HcdbListLIMIT );
         memset( &sigList[0],  0x00, sizeof(PfaSigListStruct)  * SigListLIMIT  );
     }
 
@@ -246,10 +228,6 @@ struct PfaData
         i_left << i_right.mruListCount;
         for ( uint32_t i = 0; i < i_right.mruListCount; i++ )
             i_left << i_right.mruList[i];
-
-        i_left << i_right.hcdbListCount;
-        for ( uint32_t i = 0; i < i_right.hcdbListCount; i++ )
-            i_left << i_right.hcdbList[i];
 
         i_left << i_right.sigListCount;
         for ( uint32_t i = 0; i < i_right.sigListCount; i++ )
@@ -300,10 +278,6 @@ struct PfaData
         for ( uint32_t i = 0; i < i_right.mruListCount; i++ )
             i_left >> i_right.mruList[i];
 
-        i_left >> i_right.hcdbListCount;
-        for ( uint32_t i = 0; i < i_right.hcdbListCount; i++ )
-            i_left >> i_right.hcdbList[i];
-
         i_left >> i_right.sigListCount;
         for ( uint32_t i = 0; i < i_right.sigListCount; i++ )
             i_left >> i_right.sigList[i];
@@ -319,6 +293,13 @@ struct CaptureDataClass
   uint8_t CaptureData[CaptureDataSize]; // MAKMAK Can this be variable size?
 };
 
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+} // end namespace HOSTBOOT
+#endif
+
+#ifdef PRDF_FSP_ERRL_PLUGIN
+} // end namespace FSP
+#endif
 } // end namespace PRDF
 
 #endif // prdfPfa5Data_h

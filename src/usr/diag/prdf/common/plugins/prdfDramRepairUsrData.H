@@ -35,6 +35,15 @@
 
 namespace PRDF
 {
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+namespace HOSTBOOT
+{
+#endif
+
+#ifdef PRDF_FSP_ERRL_PLUGIN
+namespace FSP
+{
+#endif
 
 /* @brief Represent the header information for DRAM Repair data of a MBA
  */
@@ -187,6 +196,13 @@ struct DramRepairMbaData
     }
 };
 
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+} // end namespace HOSTBOOT
+#endif
+
+#ifdef PRDF_FSP_ERRL_PLUGIN
+} // end namespace FSP
+#endif
 } // end namespace PRDF
 
 #endif // end PRDF_DRAM_REPAIR_DATA_H

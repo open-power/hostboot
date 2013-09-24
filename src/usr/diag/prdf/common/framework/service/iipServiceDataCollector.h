@@ -64,12 +64,6 @@
 
 #include <hdctContent.H>
 
-#if( !defined(CONTEXT_x86_nfp) && !defined(_NFP) ) //only for ppc context (@54)
-#include <hcdbEntryStates.H>
-#include <hcdbCompSubType.H>
-#include <fips_comp_id.H>
-#endif
-
 #endif
 #include <list>
 #include <prdfExtensibleChip.H>
@@ -91,28 +85,6 @@ struct SdcCallout {
 };
 
 typedef std::vector<SdcCallout> SDC_MRU_LIST;
-
-#ifndef __HOSTBOOT_MODULE
-
-struct HcdbChangeItem
-{
-    TARGETING::TargetHandle_t target;
-    hcdb::comp_subtype_t      compSubType;
-    comp_id_t                 compType;
-
-    HcdbChangeItem() :
-        target(NULL), compSubType(hcdb::LBST_ABIST)
-    {}
-
-    HcdbChangeItem( TARGETING::TargetHandle_t i_target,
-                    hcdb::comp_subtype_t i_compSubType, comp_id_t i_compType ) :
-        target(i_target), compSubType(i_compSubType), compType(i_compType)
-    {}
-};
-
-typedef std::vector<HcdbChangeItem> HCDB_CHANGE_LIST;
-
-#endif
 
 struct SignatureList
 {
@@ -779,7 +751,6 @@ private:  // functions
 private:  // Data
 
   #ifndef __HOSTBOOT_MODULE
-  HCDB_CHANGE_LIST   iv_HcdbChangeList;
   hwTableContent ivDumpRequestContent;
   #endif
 
@@ -853,19 +824,6 @@ public:
 // --------------------------------------
 // FSP only functions begin
 // --------------------------------------
-#ifndef __HOSTBOOT_MODULE
-
-  /**
-    * @brief Add a change to the Hcdb Change List
-    */
-  void AddChangeForHcdb(TARGETING::TargetHandle_t i_ptargetHandle = NULL,//Need top level target
-                        hcdb::comp_subtype_t i_testType = hcdb::SUBTYPE_NONE,
-                        comp_id_t i_compType = MDIA_COMP_ID);
-
-  HCDB_CHANGE_LIST & GetHcdbList(void);
-
-  void ClearHcdbList(void);
-#endif
 
   /**
    SetDump - Specifiy dump of a callout

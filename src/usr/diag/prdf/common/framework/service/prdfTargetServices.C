@@ -301,6 +301,42 @@ uint8_t getChipLevel( TARGETING::TargetHandle_t i_target )
 
 //------------------------------------------------------------------------------
 
+void setHWStateChanged(TARGETING::TargetHandle_t i_target)
+{
+    #define PRDF_FUNC "[PlatServices::setHWStateChanged] "
+    if(NULL != i_target)
+    {
+        TYPE type = getTargetType(i_target);
+        if( (TYPE_DIMM   == type) ||
+            (TYPE_MEMBUF == type) ||
+            (TYPE_MCS    == type) )
+        {
+            ATTR_HWAS_STATE_CHANGED_FLAG_type hwcf;
+            hwcf = i_target->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+
+            if( !(HWAS_CHANGED_BIT_MEMDIAG & hwcf) )
+            {
+                // FIXME - RTC: 87893
+                //Use new set_hwas_changed_bit() when available
+                hwcf |= HWAS_CHANGED_BIT_MEMDIAG;
+                i_target->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(hwcf);
+            }
+        }
+        else
+        {
+            PRDF_ERR(PRDF_FUNC"invalid target type: 0x%08x", type);
+        }
+    }
+    else
+    {
+        PRDF_ERR(PRDF_FUNC"i_target is null");
+    }
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 /* TODO: getChipId() may be available in an attribute, but this design has not
  *       been solidified. Instead, we may need to query for 'reason' attributes
  *       to determine the reason we need to do the checks. Since we don't have

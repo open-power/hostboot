@@ -502,22 +502,6 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
             }
         }
 
-        // HCDB info
-        if ( 0 < pfa.hcdbListCount )
-        {
-            i_parser.PrintNumber( "HCDB List", "%d", pfa.hcdbListCount );
-
-            for ( uint32_t i = 0; i < pfa.hcdbListCount; ++i )
-            {
-                i_parser.PrintNumber( "   HUID", "0x%08x",
-                                      pfa.hcdbList[i].hcdbId );
-                i_parser.PrintNumber( "   Component Type", "0x%04x",
-                                      pfa.hcdbList[i].compType );
-                i_parser.PrintNumber( "   Component Sub Type", "0x%04x",
-                                      pfa.hcdbList[i].compSubType );
-            }
-        }
-
         // Multi-signatures
         if ( 0 < pfa.sigListCount )
         {

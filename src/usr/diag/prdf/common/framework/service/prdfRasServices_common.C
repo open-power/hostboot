@@ -734,43 +734,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
     }
 
-#ifndef  __HOSTBOOT_MODULE
-    // FIXME: RTC 51618 Need to add HCDB to Hostboot
-
-    //**************************************************************
-    //  setChangeState for HomIds in the HCDB change list
-    //**************************************************************
-    HCDB_CHANGE_LIST hcdbList = sdc.GetHcdbList();
-    for (HCDB_CHANGE_LIST::iterator i = hcdbList.begin(); i < hcdbList.end(); ++i)
-    {
-        //FIXME  comp_id_t, l_pchipHandle commented to avoid warning
-        //TargetHandle_t l_pchipHandle = (*i).iv_phcdbtargetHandle;
-       // comp_id_t thisCompId = (*i).iv_compType;
-        hcdb::comp_subtype_t thisCompSubType = i->compSubType;
-        if (hcdb::SUBTYPE_ANY == thisCompSubType)
-        {
-            //PlatServices::setHcdbChangeState(l_pchipHandle);//FIXME functions commneted for now in wrapper
-            // false means don't set the HOM objects derived from this ohject.
-        }
-        else
-        {
-            //PlatServices::setHcdbChangeState(l_pchipHandle , thisCompId, thisCompSubType);
-            //TODO TargetHandle Conversion may shall change for P8
-            // false means don't set the HOM objects derived from this ohject.
-        }
-    }
-
-    //**************************************************************
-    //  setChangeState for System if needed
-    //**************************************************************
-    // If Second Level callout with no hardware called out, setChangeState for System
-    if ( (HW == false) && (SecondLevel == true))
-    {
-        //PlatServices::setHcdbChangeStateSystem();FIXME functions commneted for now in wrapper
-        PRDF_INF( PRDF_FUNC"initiating a HCDB setChangeState for System." );
-    }
-#endif // if not __HOSTBOOT_MODULE
-
     //**************************************************************
     // Build Dump Flags and PFA5 data
     //**************************************************************
@@ -1192,23 +1155,6 @@ void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
         o_pfa.mruList[i].priority = (uint8_t)fspmrulist[i].priority;
     }
     o_pfa.mruListCount = i;
-
-    // FIXME: RTC 51618 Need add HCDB support in Hostboot
-#ifdef __HOSTBOOT_MODULE
-    o_pfa.hcdbListCount = 0;
-#else
-
-    // Build the HCDB list into PFA data
-    HCDB_CHANGE_LIST hcdbList = i_sdc.GetHcdbList();
-    for ( i = 0; i < hcdbList.size() && i < HcdbListLIMIT; i++ )
-    {
-        o_pfa.hcdbList[i].hcdbId      = getHuid(hcdbList[i].target);
-        o_pfa.hcdbList[i].compSubType = hcdbList[i].compSubType;
-        o_pfa.hcdbList[i].compType    = hcdbList[i].compType;
-    }
-    o_pfa.hcdbListCount = i;
-
-#endif // __HOSTBOOT_MODULE
 
     // Build the signature list into PFA data
     PRDF_SIGNATURES sigList = i_sdc.GetSignatureList();

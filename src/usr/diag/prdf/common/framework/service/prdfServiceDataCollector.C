@@ -212,14 +212,14 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
 {
     uint32_t max_size = io_size;
     uint32_t rc = SUCCESS;
-    //getting the actual size of prdfHcdbChangeItem and SignatureList that gets saved in memory. since
-    //instead of handle we save the entity path
-    uint32_t l_sizeHcdbChange = iv_HcdbChangeList.size() * sizeof(HcdbChangeItem);
+    //getting the actual size of SignatureList that gets saved in memory.
     uint32_t l_sizeSignList   = iv_SignatureList.size()  * sizeof(SignatureList);
     uint32_t l_sizeMruList    = xMruList.size()          * sizeof(SdcCallout);
-    // approximate space needed for essentials.  This estimate is slightly higher than actual
-    const uint32_t MIN_FLAT_SIZE = sizeof(ServiceDataCollector) + sizeof(struct Timer::prdftm_t)
-                                   + l_sizeMruList + l_sizeHcdbChange + l_sizeSignList;
+    // approximate space needed for essentials.
+    // This estimate is slightly higher than actual
+    const uint32_t MIN_FLAT_SIZE = sizeof(ServiceDataCollector) +
+                                   sizeof(struct Timer::prdftm_t) +
+                                   l_sizeMruList + l_sizeSignList;
 
     uint8_t * current_ptr = i_buffer;
 
@@ -238,14 +238,7 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
             buffer_append( current_ptr, i->callout.flatten()           );
             buffer_append( current_ptr, (uint32_t)i->priority          );
         }
-        buffer_append(current_ptr, iv_HcdbChangeList.size());
-        for(HCDB_CHANGE_LIST::const_iterator i = iv_HcdbChangeList.begin();
-            i != iv_HcdbChangeList.end(); ++i)
-        {
-            buffer_append( current_ptr, i->target );
-            buffer_append( current_ptr, (uint32_t)i->compSubType );
-            buffer_append( current_ptr, (uint32_t)i->compType );
-        }
+
         buffer_append(current_ptr, iv_SignatureList.size());
         for(PRDF_SIGNATURES::const_iterator i = iv_SignatureList.begin();
             i != iv_SignatureList.end(); ++i)
@@ -311,22 +304,8 @@ ServiceDataCollector & ServiceDataCollector::operator=(
         xMruList.push_back( SdcCallout(callout, priority) );
     }
 
-    ClearHcdbList();
-    value = buffer_get32(i_flatdata);  // number of HcdbEntries.
-    for(uint32_t i = 0; i < value; ++i)
-    {
-        TARGETING::TargetHandle_t l_pChipHandle = buffer_getTarget(i_flatdata);
-        hcdb::comp_subtype_t l_compSubType = (hcdb::comp_subtype_t)buffer_get32(i_flatdata);
-        comp_id_t            l_compType =    (comp_id_t)buffer_get32(i_flatdata);
-        if(NULL !=l_pChipHandle)
-        {
-            HcdbChangeItem l_item(l_pChipHandle, l_compSubType, l_compType);
-            iv_HcdbChangeList.push_back(l_item);
-
-        }
-    }
     ClearSignatureList();
-    value = buffer_get32(i_flatdata);  // number of HcdbEntries.
+    value = buffer_get32(i_flatdata);  // number of signatures
     for(uint32_t i = 0; i < value; ++i)
     {
         TARGETING::TargetHandle_t l_pChipHandle = buffer_getTarget(i_flatdata);
@@ -364,46 +343,6 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     captureData = i_flatdata;
 
     return *this;
-}
-
-//------------------------------------------------------------------------------
-
-void ServiceDataCollector::AddChangeForHcdb( TargetHandle_t i_target,
-                                             hcdb::comp_subtype_t i_testType,
-                                             comp_id_t i_compType )
-{
-    #define PRDF_FUNC "[ServiceDataCollector::AddChangeForHcdb] "
-
-    do
-    {
-        if ( NULL == i_target )
-        {
-            PRDF_ERR( PRDF_FUNC"Given target is NULL" );
-            break;
-        }
-
-        bool found = false;
-        for ( HCDB_CHANGE_LIST::iterator i = iv_HcdbChangeList.begin();
-              i != iv_HcdbChangeList.end(); i++ )
-        {
-            if ( (i->target      == i_target  ) &&
-                 (i->compSubType == i_testType) &&
-                 (i->compType    == i_compType) )
-            {
-                found = true;
-                break;
-            }
-        }
-
-        if ( !found )
-        {
-            iv_HcdbChangeList.push_back( HcdbChangeItem(i_target, i_testType,
-                                                        i_compType) );
-        }
-
-    } while (0);
-
-    #undef PRDF_FUNC
 }
 
 #endif // #ifndef __HOSTBOOT_MODULE

@@ -135,20 +135,5 @@ PRDF_SIGNATURES & ServiceDataCollector::GetSignatureList(void)
   return iv_SignatureList;
 }
 
-#ifndef __HOSTBOOT_MODULE
-
-inline
-HCDB_CHANGE_LIST & ServiceDataCollector::GetHcdbList(void)
-{
-  return iv_HcdbChangeList;
-}
-
-inline
-void ServiceDataCollector::ClearHcdbList(void)
-{
-  iv_HcdbChangeList.erase(iv_HcdbChangeList.begin(),iv_HcdbChangeList.end());  // jl00
-}
-
-#endif
 
 } // end namespace PRDF
