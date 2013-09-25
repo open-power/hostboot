@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_firinit.C,v 1.11 2013/08/02 19:06:46 stillgs Exp $
+// $Id: p8_pm_firinit.C,v 1.12 2013-09-25 21:26:09 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -197,7 +197,7 @@ p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
         //  PBA
         //  ******************************************************************
     ;
-        FAPI_EXEC_HWP(rc, p8_pm_pba_firinit , i_target , PM_RESET );
+        FAPI_EXEC_HWP(rc, p8_pm_pba_firinit , i_target , i_mode );
         if (rc)
         {
             FAPI_ERR("ERROR: p8_pm_pba_firinit detected failed result");
@@ -208,7 +208,7 @@ p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
         //  OHA
         //  ******************************************************************
 
-        FAPI_EXEC_HWP(rc, p8_pm_oha_firinit , i_target , PM_RESET );
+        FAPI_EXEC_HWP(rc, p8_pm_oha_firinit , i_target , i_mode );
         if (rc)
         {
             FAPI_ERR("ERROR: p8_pm_oha_firinit detected failed result");
@@ -219,7 +219,7 @@ p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
         //  PCBS
         //  ******************************************************************
 
-        FAPI_EXEC_HWP(rc, p8_pm_pcbs_firinit , i_target , PM_RESET );
+        FAPI_EXEC_HWP(rc, p8_pm_pcbs_firinit , i_target , i_mode );
         if (rc)
         {
             FAPI_ERR("ERROR: p8_pm_pcbs_firinit detected failed result");
@@ -230,7 +230,7 @@ p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
         //  OCC
         //  ******************************************************************
 
-        FAPI_EXEC_HWP(rc,  p8_pm_occ_firinit , i_target , PM_RESET );
+        FAPI_EXEC_HWP(rc,  p8_pm_occ_firinit , i_target , i_mode );
         if (rc)
         {
             FAPI_ERR("ERROR: p8_pm_occ_firinit detected failed result");

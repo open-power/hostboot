@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_occ_firinit.C,v 1.13 2013/08/06 18:07:35 jimyac Exp $
+// $Id: p8_pm_occ_firinit.C,v 1.14 2013/09/20 19:04:51 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_occ_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -151,7 +151,7 @@ p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
             SET_RECOV_ATTN(7);  SET_FIR_MASKED(7);        //  7 = pore_gpe1_fatal_err
             SET_RECOV_ATTN(8);  SET_FIR_MASKED(8);        //  8 = ocb_error
             SET_RECOV_ATTN(9);                            //  9 = srt_ue
-            SET_RECOV_ATTN(10); SET_FIR_MASKED(10);       //  10 = srt_ce
+            SET_RECOV_ATTN(10);                           //  10 = srt_ce
             SET_RECOV_ATTN(11);                           //  11 = srt_read_error
             SET_RECOV_ATTN(12);                           //  12 = srt_write_error
             SET_RECOV_ATTN(13);                           //  13 = srt_dataout_perr
@@ -180,7 +180,7 @@ p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
             SET_RECOV_ATTN(36); SET_FIR_MASKED(36);       //  36 = jtagacc_err
             SET_RECOV_ATTN(37); SET_FIR_MASKED(37);       //  37 = spare_err_37
             SET_RECOV_ATTN(38);                           //  38 = c405_ecc_ue
-            SET_RECOV_ATTN(39); SET_FIR_MASKED(39);       //  39 = c405_ecc_ce
+            SET_RECOV_ATTN(39);                           //  39 = c405_ecc_ce
             SET_RECOV_ATTN(40); SET_FIR_MASKED(40);       //  40 = c405_oci_machinecheck
             SET_RECOV_ATTN(41);                           //  41 = sram_spare_direct_error0
             SET_RECOV_ATTN(42);                           //  42 = sram_spare_direct_error1
