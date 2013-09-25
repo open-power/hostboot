@@ -367,7 +367,7 @@ foreach my $argnum (1 .. $#ARGV)
 
         if (! exists $err->{description})
         {
-            print ("fapiParseErrorInfo.pl ERROR. description missing\n");
+            print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. description missing\n");
             exit(1);
         }
 
@@ -422,13 +422,13 @@ foreach my $argnum (1 .. $#ARGV)
             #------------------------------------------------------------------
             if (! exists $collectRegisterFfdc->{id}[0])
             {
-                print ("fapiParseErrorInfo.pl ERROR. id(s) missing from collectRegisterFfdc\n");
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. id(s) missing from collectRegisterFfdc\n");
                 exit(1);
             }
 
             if (! exists $collectRegisterFfdc->{target})
             {
-                print ("fapiParseErrorInfo.pl ERROR. target missing from collectRegisterFfdc\n");
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. target missing from collectRegisterFfdc\n");
                 exit(1);
             }
 
@@ -479,16 +479,17 @@ foreach my $argnum (1 .. $#ARGV)
         {
             if (! exists $callout->{priority})
             {
-                print ("fapiParseErrorInfo.pl ERROR. Callout priority missing\n");
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Callout priority missing\n");
                 exit(1);
             }
 
+            my $elementsFound = 0;
             if (exists $callout->{hw})
             {
                 # HW Callout
                 if (! exists $callout->{hw}->{hwid})
                 {
-                    print ("fapiParseErrorInfo.pl ERROR. HW Callout hwid missing\n");
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. HW Callout hwid missing\n");
                     exit(1);
                 }
 
@@ -500,7 +501,7 @@ foreach my $argnum (1 .. $#ARGV)
                 {
                     if (! exists $callout->{hw}->{refTarget})
                     {
-                        print ("fapiParseErrorInfo.pl ERROR. Callout missing refTarget\n");
+                        print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Callout missing refTarget\n");
                         exit(1);
                     }
                 }
@@ -520,8 +521,9 @@ foreach my $argnum (1 .. $#ARGV)
                     $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = 0xff; \\\n";
                 }
                 $eiEntryCount++;
+                $elementsFound++;
             }
-            elsif (exists $callout->{procedure})
+            if (exists $callout->{procedure})
             {
                 # Procedure Callout
                 # Add an EI entry to eiEntryStr
@@ -529,8 +531,9 @@ foreach my $argnum (1 .. $#ARGV)
                 $eiEntryStr .= "  l_entries[$eiEntryCount].proc_callout.iv_procedure = fapi::ProcedureCallouts::$callout->{procedure}; \\\n";
                 $eiEntryStr .= "  l_entries[$eiEntryCount].proc_callout.iv_calloutPriority = fapi::CalloutPriorities::$callout->{priority}; \\\n";
                 $eiEntryCount++;
+                $elementsFound++;
             }
-            elsif (exists $callout->{bus})
+            if (exists $callout->{bus})
             {
                 # A Bus Callout consists of two targets separated by
                 # commas/spaces
@@ -538,7 +541,7 @@ foreach my $argnum (1 .. $#ARGV)
 
                 if (scalar @targets != 2)
                 {
-                    print ("fapiParseErrorInfo.pl ERROR. did not find two targets in bus callout\n");
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. did not find two targets in bus callout\n");
                     exit(1);
                 }
 
@@ -556,26 +559,28 @@ foreach my $argnum (1 .. $#ARGV)
                 $eiEntryStr .= "  l_entries[$eiEntryCount].bus_callout.iv_endpoint2ObjIndex = $objNum2; \\\n";
                 $eiEntryStr .= "  l_entries[$eiEntryCount].bus_callout.iv_calloutPriority = fapi::CalloutPriorities::$callout->{priority}; \\\n";
                 $eiEntryCount++;
+                $elementsFound++;
             }
-            elsif (exists $callout->{target})
+            if (exists $callout->{target})
             {
                 # Add the Target to cdgTargetHash to be processed with any
                 # deconfigure and GARD requests
                 $cdgTargetHash{$callout->{target}}{callout} = 1;
                 $cdgTargetHash{$callout->{target}}{priority} =
                     $callout->{priority};
+                $elementsFound++;
             }
-            elsif (exists $callout->{childTargets})
+            if (exists $callout->{childTargets})
             {
                 # Check that the parent and childType subelements exist
                 if (! exists $callout->{childTargets}->{parent})
                 {
-                    print ("fapiParseErrorInfo.pl ERROR. Child Callout parent missing\n");
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Child Callout parent missing\n");
                     exit(1);
                 }
                 if (! exists $callout->{childTargets}->{childType})
                 {
-                    print ("fapiParseErrorInfo.pl ERROR. Child Callout childType missing\n");
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Child Callout childType missing\n");
                     exit(1);
                 }
 
@@ -586,34 +591,42 @@ foreach my $argnum (1 .. $#ARGV)
                 $cdgChildHash{$parent}{$childType}{callout} = 1;
                 $cdgChildHash{$parent}{$childType}{priority} =
                     $callout->{priority};
+                $elementsFound++;
             }
-            else
+            if ($elementsFound == 0)
             {
-                print ("fapiParseErrorInfo.pl ERROR. Callout incomplete\n");
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Callout incomplete\n");
                 exit(1);
             }
-        }
+            elsif ($elementsFound > 1)
+            {
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Callout has multiple elements\n");
+                exit(1);
+            }
+        } # callout
 
         # Target/Child deconfigures
         foreach my $deconfigure (@{$err->{deconfigure}})
         {
+            my $elementsFound = 0;
             if (exists $deconfigure->{target})
             {
                 # Add the Target to cdgTargetHash to be processed with any
                 # callout and GARD requests
                 $cdgTargetHash{$deconfigure->{target}}{deconf} = 1;
+                $elementsFound++;
             }
-            elsif (exists $deconfigure->{childTargets})
+            if (exists $deconfigure->{childTargets})
             {
                 # Check that the parent and childType subelements exist
                 if (! exists $deconfigure->{childTargets}->{parent})
                 {
-                    print ("fapiParseErrorInfo.pl ERROR. Child Deconfigure parent missing\n");
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Child Deconfigure parent missing\n");
                     exit(1);
                 }
                 if (! exists $deconfigure->{childTargets}->{childType})
                 {
-                    print ("fapiParseErrorInfo.pl ERROR. Child Deconfigure childType missing\n");
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Child Deconfigure childType missing\n");
                     exit(1);
                 }
 
@@ -622,34 +635,42 @@ foreach my $argnum (1 .. $#ARGV)
                 my $parent = $deconfigure->{childTargets}->{parent};
                 my $childType = $deconfigure->{childTargets}->{childType};
                 $cdgChildHash{$parent}{$childType}{deconf} = 1;
+                $elementsFound++;
             }
-            else
+            if ($elementsFound == 0)
             {
-                print ("fapiParseErrorInfo.pl ERROR. Deconfigure incomplete\n");
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Deconfigure incomplete\n");
                 exit(1);
             }
-        }
+            elsif ($elementsFound > 1)
+            {
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Deconfigure has multiple elements\n");
+                exit(1);
+            }
+        } # deconfigure
 
         # Target/Child Gards
         foreach my $gard (@{$err->{gard}})
         {
+            my $elementsFound = 0;
             if (exists $gard->{target})
             {
                 # Add the Target to cdgTargetHash to be processed with any
                 # callout and deconfigure requests
                 $cdgTargetHash{$gard->{target}}{gard} = 1;
+                $elementsFound++;
             }
-            elsif (exists $gard->{childTargets})
+            if (exists $gard->{childTargets})
             {
                 # Check that the parent and childType subelements exist
                 if (! exists $gard->{childTargets}->{parent})
                 {
-                    print ("fapiParseErrorInfo.pl ERROR. Child GARD parent missing\n");
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Child GARD parent missing\n");
                     exit(1);
                 }
                 if (! exists $gard->{childTargets}->{childType})
                 {
-                    print ("fapiParseErrorInfo.pl ERROR. Child GARD childType missing\n");
+                    print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. Child GARD childType missing\n");
                     exit(1);
                 }
 
@@ -658,13 +679,19 @@ foreach my $argnum (1 .. $#ARGV)
                 my $parent = $gard->{childTargets}->{parent};
                 my $childType = $gard->{childTargets}->{childType};
                 $cdgChildHash{$parent}{$childType}{gard} = 1;
+                $elementsFound++;
             }
-            else
+            if ($elementsFound == 0)
             {
-                print ("fapiParseErrorInfo.pl ERROR. GARD incomplete\n");
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. GARD incomplete\n");
                 exit(1);
             }
-        }
+            elsif ($elementsFound > 1)
+            {
+                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. GARD has multiple elements\n");
+                exit(1);
+            }
+        } # gard
 
         # Process the callout, deconfigures and GARDs for each Target
         foreach my $cdg (keys %cdgTargetHash)
