@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/mvpd_accessors/mvpdRingFuncs.C $             */
+/* $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/hwp/mvpd_accessors/mvpdRingFuncs.C,v $             */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: mvpdRingFuncs.C,v 1.5 2013/09/26 17:28:18 bwieman Exp $ 
 /**
  *  @file mvpdRingFuncs.C
  *
@@ -414,7 +415,7 @@ fapi::ReturnCode mvpdRingFuncFind( const uint8_t    i_chipletId,
     }  while ( 0 );
 
 
-    FAPI_DBG("mvpdRingFuncFind: exit *ring= 0x%x size=0x%x RC=0x%x",
+    FAPI_DBG("mvpdRingFuncFind: exit *ring= 0x%p size=0x%x RC=0x%x",
                           o_rpRing,
                           o_rRingLen,
                           static_cast<uint32_t>(l_fapirc) );
@@ -478,7 +479,7 @@ fapi::ReturnCode mvpdRingFuncGet ( uint8_t     *i_pRing,
             break;
         }
        //  we're good, copy data into the passed-in buffer
-       FAPI_DBG( "mvpdRingFuncGet: memcpy 0x%x 0x%x 0x%x",
+       FAPI_DBG( "mvpdRingFuncGet: memcpy 0x%p 0x%p 0x%x",
                     i_pCallerRingBuf,
                     i_pRing,
                     i_ringLen );
@@ -510,7 +511,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
     uint32_t         l_len = 0;
     uint8_t          *l_pRingEnd; // pointer into record to start of pad at end
 
-    FAPI_DBG( "mvpdRingFuncSet: pRing=0x%x Len=0x%x pCaller=0x%x Len=0x%x",
+    FAPI_DBG( "mvpdRingFuncSet: pRing=0x%p Len=0x%x pCaller=0x%p Len=0x%x",
                        i_pRing,
                        i_ringLen,
                        i_pCallerRingBuf,
@@ -523,7 +524,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing;
             l_fr = i_pCallerRingBuf;
             l_len = i_callerRingBufLen;
-            FAPI_DBG( "mvpdRingFuncSet: update in place-memcpy 0x%x 0x%x 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: update in place-memcpy 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -547,7 +548,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
             //  break out with fapirc
             break;
         }
-        FAPI_DBG( "mvpdRingFuncSet: end= 0x%x",
+        FAPI_DBG( "mvpdRingFuncSet: end= 0x%p",
                                  l_pRingEnd);
 
         // if not there, then append if it fits
@@ -564,7 +565,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing;
             l_fr = i_pCallerRingBuf;
             l_len = i_callerRingBufLen;
-            FAPI_DBG( "mvpdRingFuncSet: append-memcpy 0x%x 0x%x 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: append-memcpy 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -580,7 +581,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing;
             l_fr = i_pCallerRingBuf;
             l_len = i_callerRingBufLen;
-            FAPI_DBG( "mvpdRingFuncSet: shrink-memcpy 0x%x 0x%x 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: shrink-memcpy 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -589,7 +590,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing+i_callerRingBufLen;
             l_fr = i_pRing+i_ringLen;
             l_len = (l_pRingEnd)-(i_pRing+i_ringLen);
-            FAPI_DBG( "mvpdRingFuncSet: shrink-memmove 0x%x 0x%x 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: shrink-memmove 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -597,7 +598,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
 
             l_to = (l_pRingEnd)-(i_ringLen-i_callerRingBufLen);
             l_len = i_ringLen-i_callerRingBufLen;
-            FAPI_DBG( "mvpdRingFuncSet: shrink-memset 0x%x 0x%x 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: shrink-memset 0x%p 0x%x 0x%x",
                        l_to,
                        0x00,
                        l_len);
@@ -612,8 +613,8 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
         if (i_callerRingBufLen > i_ringLen)
         {
             // ensure the padding can contain the growth
-            if ( (i_callerRingBufLen - i_ringLen) >
-                              ((i_pRecordBuf+i_recordLen)-l_pRingEnd)) 
+            if ((l_pRingEnd + (i_callerRingBufLen - i_ringLen))  >
+                (i_pRecordBuf + i_recordLen)) 
             {
                 FAPI_ERR( "mvpdRingFuncSet: not enough room to insert ");
                 FAPI_SET_HWP_ERROR(l_fapirc,
@@ -625,7 +626,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing+i_callerRingBufLen;
             l_fr = i_pRing+i_ringLen;
             l_len = l_pRingEnd-(i_pRing+i_ringLen);
-            FAPI_DBG( "mvpdRingFuncSet: insert-memmove 0x%x 0x%x 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: insert-memmove 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -634,7 +635,7 @@ fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing;
             l_fr = i_pCallerRingBuf;
             l_len = i_callerRingBufLen;
-            FAPI_DBG( "mvpdRingFuncSet: insert-memcpy 0x%x 0x%x 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: insert-memcpy 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
