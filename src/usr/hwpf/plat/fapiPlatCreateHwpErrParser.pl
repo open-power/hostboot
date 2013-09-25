@@ -142,6 +142,7 @@ print TGFILE "                      const uint32_t i_buflen)\n";
 print TGFILE "{\n";
 print TGFILE "    const uint32_t CFAM_DATA_LEN = 4;\n";
 print TGFILE "    const uint32_t SCOM_DATA_LEN = 8;\n";
+print TGFILE "    const uint32_t POS_LEN = 4;\n";
 print TGFILE "    uint8_t * l_pBuffer = static_cast<uint8_t *>(i_pBuffer);\n";
 print TGFILE "    int32_t l_buflen = i_buflen;\n\n";
 print TGFILE "    // The first uint32_t is the FFDC ID\n";
@@ -208,29 +209,38 @@ foreach my $argnum (1 .. $#ARGV)
         my $ffdcHash32Bit = substr($ffdcHash128Bit, 0, 8);
         print TGFILE "    case 0x$ffdcHash32Bit:\n";
         print TGFILE "        i_parser.PrintString(\"Register FFDC:\", \"$ffdcName\");\n";
-
+        print TGFILE "        while (l_buflen > 0)\n";
+        print TGFILE "        {\n";
+        print TGFILE "            if (l_buflen >= POS_LEN)\n";
+        print TGFILE "            {\n";
+        print TGFILE "                uint32_t * l_pBufferTemp = reinterpret_cast<uint32_t *>(l_pBuffer);\n";
+        print TGFILE "                i_parser.PrintNumber(\"Chip Position:\",\"%X\",ntohl(*l_pBufferTemp));\n";
+        print TGFILE "                l_pBufferTemp = NULL;\n";
+        print TGFILE "                l_pBuffer+= POS_LEN;\n";
+        print TGFILE "                l_buflen -= POS_LEN;\n";
+        print TGFILE "            }\n";
         foreach my $cfamRegister (@{$registerFfdc->{cfamRegister}})
         {
-            print TGFILE "        if (l_buflen >= CFAM_DATA_LEN)\n";
-            print TGFILE "        {\n";
-            print TGFILE "            i_parser.PrintString(NULL, \"$cfamRegister\");\n";
-            print TGFILE "            i_parser.PrintHexDump(l_pBuffer, CFAM_DATA_LEN);\n";
-            print TGFILE "        }\n";
-            print TGFILE "        l_pBuffer+= CFAM_DATA_LEN;\n";
-            print TGFILE "        l_buflen -= CFAM_DATA_LEN;\n";
+            print TGFILE "            if (l_buflen >= CFAM_DATA_LEN)\n";
+            print TGFILE "            {\n";
+            print TGFILE "                i_parser.PrintString(\"CFAM Register:\", \"$cfamRegister\");\n";
+            print TGFILE "                i_parser.PrintHexDump(l_pBuffer, CFAM_DATA_LEN);\n";
+            print TGFILE "                l_pBuffer+= CFAM_DATA_LEN;\n";
+            print TGFILE "                l_buflen -= CFAM_DATA_LEN;\n";
+            print TGFILE "            }\n";
         }
-
         foreach my $scomRegister (@{$registerFfdc->{scomRegister}})
         {
-            print TGFILE "        if (l_buflen >= SCOM_DATA_LEN)\n";
-            print TGFILE "        {\n";
-            print TGFILE "            i_parser.PrintString(NULL, \"$scomRegister\");\n";
-            print TGFILE "            i_parser.PrintHexDump(l_pBuffer, SCOM_DATA_LEN);\n";
-            print TGFILE "        }\n";
-            print TGFILE "        l_pBuffer+= SCOM_DATA_LEN;\n";
-            print TGFILE "        l_buflen -= SCOM_DATA_LEN;\n";
-        }
 
+            print TGFILE "            if (l_buflen >= SCOM_DATA_LEN)\n";
+            print TGFILE "            {\n";
+            print TGFILE "                i_parser.PrintString(\"SCOM Register:\", \"$scomRegister\");\n";
+            print TGFILE "                i_parser.PrintHexDump(l_pBuffer, SCOM_DATA_LEN);\n";
+            print TGFILE "                l_pBuffer+= SCOM_DATA_LEN;\n";
+            print TGFILE "                l_buflen -= SCOM_DATA_LEN;\n";
+            print TGFILE "            }\n";
+        }
+        print TGFILE "        }\n";
         print TGFILE "        break;\n";
     }
 }

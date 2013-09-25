@@ -39,6 +39,18 @@
        <id>REG_FFDC_TEST_X_PROC_REGISTERS</id>
        <target>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</target>
     </collectRegisterFfdc>
+
+<!-- Collect child chiplet register FFDC -->
+<!--
+    <collectRegisterFfdc>
+       <id>REG_FFDC_TEST_X_PROC_REGISTERS</id>
+       <childTargets>
+         <parent>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</parent>
+         <childType>TARGET_TYPE_EX_CHIPLET</childType>
+       </childTargets>
+    </collectRegisterFfdc>
+-->
+
     <!-- Call hwpTestFfdc1 to collect additional FFDC from the master chip -->
     <collectFfdc>hwpTestFfdc1, UNIT_TEST_FFDC_MASTER_CHIP_TARGET</collectFfdc>
     <!-- Add some integer data as FFDC -->

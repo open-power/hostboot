@@ -58,6 +58,7 @@
 #                  mjjones   06/24/13  Support Children CDGs
 #                  mjjones   08/20/13  Use constants for Reg FFDC collection
 #                  mjjones   08/26/13  Support HW Callouts
+#                  dedahle   09/30/13  Support chiplet register FFDC collection
 #
 # End Change Log ******************************************************
 
@@ -282,11 +283,13 @@ print CRFILE "#include <fapiReturnCode.H>\n";
 print CRFILE "#include <fapiHwAccess.H>\n";
 print CRFILE "#include <fapiPlatTrace.H>\n";
 print CRFILE "#include <fapiPlatRegAddresses.H>\n\n";
+print CRFILE "#include <fapiPlatAttributeService.H>\n\n";
 print CRFILE "namespace fapi\n";
 print CRFILE "{\n";
 print CRFILE "void fapiCollectRegFfdc(const fapi::Target & i_target,\n";
 print CRFILE "                        const fapi::HwpFfdcId i_ffdcId,\n";
-print CRFILE "                        fapi::ReturnCode & o_rc)\n";
+print CRFILE "                        fapi::ReturnCode & o_rc,\n";
+print CRFILE "                        fapi::TargetType i_child)\n";
 print CRFILE "{\n";
 print CRFILE "    FAPI_INF(\"fapiCollectRegFfdc. FFDC ID: 0x%x\", i_ffdcId);\n";
 print CRFILE "    fapi::ReturnCode l_rc;\n";
@@ -425,17 +428,26 @@ foreach my $argnum (1 .. $#ARGV)
                 print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. id(s) missing from collectRegisterFfdc\n");
                 exit(1);
             }
-
-            if (! exists $collectRegisterFfdc->{target})
-            {
-                print ("fapiParseErrorInfo.pl ERROR in $err->{rc}. target missing from collectRegisterFfdc\n");
-                exit(1);
-            }
-
             foreach my $id (@{$collectRegisterFfdc->{id}})
             {
-                print EIFILE "fapiCollectRegFfdc($collectRegisterFfdc->{target}, ";
-                print EIFILE "fapi::$id, RC); ";
+                #------------------------------------------------------------------
+                # If collecting chiplet register FFDC, insert childType parameter
+                #------------------------------------------------------------------
+                if (exists $collectRegisterFfdc->{childTargets})
+                {
+                    print EIFILE "fapiCollectRegFfdc($collectRegisterFfdc->{childTargets}->{parent}, ";
+                    print EIFILE "fapi::$id, RC, fapi::$collectRegisterFfdc->{childTargets}->{childType}); ";
+                }
+                else
+                {
+                    if (! exists $collectRegisterFfdc->{target})
+                    {
+                        print ("fapiParseErrorInfo.pl ERROR. target missing from collectRegisterFfdc\n");
+                        exit(1);
+                    }
+                    print EIFILE "fapiCollectRegFfdc($collectRegisterFfdc->{target}, ";
+                    print EIFILE "fapi::$id, RC); ";
+                }
             }
         }
 
@@ -869,41 +881,96 @@ print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: Invalid FFDC ID 0x%x\
 print CRFILE                     "i_ffdcId);\n";
 print CRFILE "            return;\n";
 print CRFILE "    }\n\n";
-print CRFILE "    uint8_t * l_pBuf = new uint8_t[l_ffdcSize];\n";
-print CRFILE "    uint8_t * l_pData = l_pBuf;\n\n";
-print CRFILE "    for (std::vector<uint32_t>::const_iterator cfamIter = l_cfamAddresses.begin();\n";
-print CRFILE "         cfamIter != l_cfamAddresses.end(); ++cfamIter)\n";
+print CRFILE "    uint8_t * l_pBuf = NULL;\n";
+print CRFILE "    uint8_t * l_pData = NULL;\n";
+print CRFILE "    std::vector<fapi::Target> l_targets;\n";
+print CRFILE "    uint32_t l_chipletPos32 = 0;\n";
+print CRFILE "    l_ffdcSize += sizeof(l_chipletPos32);\n";
+print CRFILE "    if (fapi::TARGET_TYPE_NONE != i_child)\n";
 print CRFILE "    {\n";
-print CRFILE "        l_rc = fapiGetCfamRegister(i_target, *cfamIter, l_buf);\n";
+print CRFILE "        l_rc = fapiGetChildChiplets(i_target, i_child, l_targets, TARGET_STATE_FUNCTIONAL);\n";
 print CRFILE "        if (l_rc)\n";
 print CRFILE "        {\n";
-print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: CFAM error for 0x%x\",";
-print CRFILE                     "*cfamIter);\n";
-print CRFILE "            l_cfamData = 0xbaddbadd;\n";
+print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: Error: fapiGetChildChiplets: failed to get chiplets.\");\n";
+print CRFILE "            return;\n";
 print CRFILE "        }\n";
-print CRFILE "        else\n";
+print CRFILE "        if (l_targets.empty())\n";
 print CRFILE "        {\n";
-print CRFILE "            l_cfamData = l_buf.getWord(0);\n";
+print CRFILE "            FAPI_INF(\"fapiCollectRegFfdc.C: Error: No functional chiplets found. \");\n";
+print CRFILE "            return;\n";
 print CRFILE "        }\n";
-print CRFILE "        *(reinterpret_cast<uint32_t *>(l_pData)) = l_cfamData;\n";
-print CRFILE "        l_pData += sizeof(l_cfamData);\n";
+print CRFILE "        l_ffdcSize *= l_targets.size();\n";
+print CRFILE "        l_pBuf = new uint8_t[l_ffdcSize];\n";
+print CRFILE "        l_pData = l_pBuf;\n";
+print CRFILE "    }\n";
+print CRFILE "    else\n";
+print CRFILE "    {\n";
+print CRFILE "        l_pBuf = new uint8_t[l_ffdcSize];\n";
+print CRFILE "        l_pData = l_pBuf;\n";
+print CRFILE "        l_targets.push_back(i_target);\n";
 print CRFILE "    }\n\n";
-print CRFILE "    for (std::vector<uint64_t>::const_iterator scomIter = l_scomAddresses.begin();\n";
-print CRFILE "         scomIter != l_scomAddresses.end(); ++scomIter)\n";
+print CRFILE "    for (std::vector<fapi::Target>::const_iterator targetIter = l_targets.begin();\n";
+print CRFILE "        targetIter != l_targets.end(); ++targetIter)\n";
 print CRFILE "    {\n";
-print CRFILE "        l_rc = fapiGetScom(i_target, *scomIter, l_buf);\n";
-print CRFILE "        if (l_rc)\n";
+print CRFILE "        if (fapi::TARGET_TYPE_NONE != i_child)\n";
 print CRFILE "        {\n";
-print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: SCOM error for 0x%llx\",";
-print CRFILE                     "*scomIter);\n";
-print CRFILE "            l_scomData = 0xbaddbaddbaddbaddULL;\n";
+print CRFILE "            uint8_t l_chipletPos = 0;\n";
+print CRFILE "            l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*targetIter), l_chipletPos);\n";
+print CRFILE "            if (l_rc)\n";
+print CRFILE "            {\n";
+print CRFILE "                FAPI_ERR(\"fapiCollectRegFfdc.C: Error getting chiplet position\");\n";
+print CRFILE "                l_chipletPos = 0xFF;\n";
+print CRFILE "            }\n";
+print CRFILE "            // We print the target's position in the error log whether the target is a\n";
+print CRFILE "            // chip or chiplet, so we need to store the chiplet position in a uint32_t\n";
+print CRFILE "            // to have consitency in the buffer as ATTR_POS below returns a uint32_t\n";
+print CRFILE "            l_chipletPos32 = l_chipletPos;\n";
 print CRFILE "        }\n";
 print CRFILE "        else\n";
 print CRFILE "        {\n";
-print CRFILE "            l_scomData = l_buf.getDoubleWord(0);\n";
+print CRFILE "            l_rc = FAPI_ATTR_GET(ATTR_POS, &(*targetIter), l_chipletPos32);\n";
+print CRFILE "            if (l_rc)\n";
+print CRFILE "            {\n";
+print CRFILE "                FAPI_ERR(\"fapiCollectRegFfdc.C: Error getting chip position\");\n";
+print CRFILE "                l_chipletPos32 = 0xFFFFFFFF;\n";
+print CRFILE "            }\n";
 print CRFILE "        }\n";
-print CRFILE "        *(reinterpret_cast<uint64_t *>(l_pData)) = l_scomData;\n";
-print CRFILE "        l_pData += sizeof(l_scomData);\n";
+print CRFILE "        *(reinterpret_cast<uint32_t *>(l_pData)) = l_chipletPos32;\n";
+print CRFILE "        l_pData += sizeof(l_chipletPos32);\n";
+print CRFILE "        for (std::vector<uint32_t>::const_iterator cfamIter = l_cfamAddresses.begin();\n";
+print CRFILE "             cfamIter != l_cfamAddresses.end(); ++cfamIter)\n";
+print CRFILE "        {\n";
+print CRFILE "            l_rc = fapiGetCfamRegister(*targetIter, *cfamIter, l_buf);\n";
+print CRFILE "            if (l_rc)\n";
+print CRFILE "            {\n";
+print CRFILE "                FAPI_ERR(\"fapiCollectRegFfdc.C: CFAM error for 0x%x\",";
+print CRFILE                          "*cfamIter);\n";
+print CRFILE "                l_cfamData = 0xbaddbadd;\n";
+print CRFILE "            }\n";
+print CRFILE "            else\n";
+print CRFILE "            {\n";
+print CRFILE "                l_cfamData = l_buf.getWord(0);\n";
+print CRFILE "            }\n";
+print CRFILE "            *(reinterpret_cast<uint32_t *>(l_pData)) = l_cfamData;\n";
+print CRFILE "            l_pData += sizeof(l_cfamData);\n";
+print CRFILE "        }\n\n";
+print CRFILE "        for (std::vector<uint64_t>::const_iterator scomIter = l_scomAddresses.begin();\n";
+print CRFILE "            scomIter != l_scomAddresses.end(); ++scomIter)\n";
+print CRFILE "        {\n";
+print CRFILE "            l_rc = fapiGetScom(*targetIter, *scomIter, l_buf);\n";
+print CRFILE "            if (l_rc)\n";
+print CRFILE "            {\n";
+print CRFILE "                FAPI_ERR(\"fapiCollectRegFfdc.C: SCOM error for 0x%llx\",";
+print CRFILE                         "*scomIter);\n";
+print CRFILE "                l_scomData = 0xbaddbaddbaddbaddULL;\n";
+print CRFILE "            }\n";
+print CRFILE "            else\n";
+print CRFILE "            {\n";
+print CRFILE "                 l_scomData = l_buf.getDoubleWord(0);\n";
+print CRFILE "            }\n";
+print CRFILE "            *(reinterpret_cast<uint64_t *>(l_pData)) = l_scomData;\n";
+print CRFILE "            l_pData += sizeof(l_scomData);\n";
+print CRFILE "        }\n";
 print CRFILE "    }\n\n";
 print CRFILE "    o_rc.addEIFfdc(i_ffdcId, l_pBuf, l_ffdcSize);\n";
 print CRFILE "    delete [] l_pBuf;\n";
