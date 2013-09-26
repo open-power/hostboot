@@ -193,14 +193,18 @@
 
 /**
  * @brief Error log interface to add a HW callout to an existing error log.
+ * @note  convert immediate deconfig to delayed deconfig in HB.
  */
 #define PRDF_HW_ADD_CALLOUT(i_target, i_priority,         \
                             i_deconfigState, i_gardState,             \
                             io_errl, i_writeVpd,                      \
                             i_gardErrType, i_severity, i_hcdb_update) \
+  HWAS::DeconfigEnum deconfigState =                                 \
+                        (i_deconfigState == HWAS::DECONFIG ?         \
+                        HWAS::DELAYED_DECONFIG : i_deconfigState);   \
   io_errl->addHwCallout(i_target,                                    \
                         (const HWAS::callOutPriority)i_priority,     \
-                        (const HWAS::DeconfigEnum)i_deconfigState,   \
+                        deconfigState,                               \
                         (const HWAS::GARD_ErrorType)i_gardErrType);  \
   (void)(i_hcdb_update)
 
