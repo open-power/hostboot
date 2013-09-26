@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/vpd/cvpdenums.H $                             */
+/* $Source: src/usr/hwpf/hwp/mvpd_accessors/getMBvpdRing.C $              */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,56 +20,50 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __CVPDENUMS_H
-#define __CVPDENUMS_H
+// $Id: getMBvpdRing.C,v 1.1 2013/10/09 20:52:37 mjjones Exp $
+/**
+ *  @file getMBvpdRing.C
+ *
+ *  @brief function to fetch repair rings from MBVPD  records
+ *
+ */
 
-namespace CVPD
+#include    <stdint.h>
+#include    <fapi.H> //  fapi support
+#include    <getMBvpdRing.H>
+#include    <mvpdRingFuncs.H>
+
+extern "C"
 {
+using   namespace   fapi;
 
-    /**
-     * @brief Enumeration for the CVPD Records that contain
-     *       the keyword enumerations below.
-     */
-    enum cvpdRecord
-    {
-        CVPD_FIRST_RECORD   = 0x00,
-        VEIR        = CVPD_FIRST_RECORD,
-        VER0        = 0x01,
-        MER0        = 0x02,
-        VSPD        = 0x03,
-        VINI        = 0x04,
-        // Last Record
-        CVPD_LAST_RECORD,
-        CVPD_TEST_RECORD,   // Test purposes ONLY!
-        CVPD_INVALID_RECORD = 0xFFFF,
-    };
+// getMBvpdRing: Wrapper to call common function mbvpdRingFunc
+fapi::ReturnCode getMBvpdRing(fapi::MBvpdRecord   i_record,
+                              fapi::MBvpdKeyword  i_keyword,
+                              const fapi::Target &i_fapiTarget,
+                              const uint8_t       i_chipletId,
+                              const uint8_t       i_ringId,
+                              uint8_t             *i_pRingBuf,
+                              uint32_t            &io_rRingBufsize)
+{
+    fapi::ReturnCode  l_fapirc;
 
-    /**
-     * @brief Enumerations for CVPD keywords that can be
-     *       accessed in the CVPD.
-     */
-    enum cvpdKeyword
-    {
-        CVPD_FIRST_KEYWORD      = 0x00,
-        pdI          = CVPD_FIRST_KEYWORD,
-        PF           = 0x01,
-        MT           = 0x02,
-        MR           = 0x03,
-        pdA          = 0x04,
-        EL           = 0x05,
-        LM           = 0x06,
-        MW           = 0x07,
-        MV           = 0x08,
-        AM           = 0x09,
-        VZ           = 0x0a,
-        pdD          = 0x0b,
+    FAPI_INF("getMBvpdRing: entry ringId=0x%x, chipletId=0x%x, size=0x%x",
+             i_ringId, i_chipletId, io_rRingBufsize );
 
-        // Last Keyword
-        CVPD_LAST_KEYWORD,
-        CVPD_TEST_KEYWORD,  // Test purposes ONLY!
-        CVPD_INVALID_KEYWORD    = 0xFFFF,
-    };
+    // Pass the parameters into mbvpdRingFunc
+    l_fapirc = mbvpdRingFunc(MBVPD_RING_GET,
+                            i_record,
+                            i_keyword,
+                            i_fapiTarget,
+                            i_chipletId,
+                            i_ringId,
+                            i_pRingBuf,
+                            io_rRingBufsize );
 
-};  // end CVPD
+    FAPI_INF("getMBvpdRing: exit rc=0x%x", static_cast<uint32_t>(l_fapirc));
 
-#endif
+    return  l_fapirc;
+}
+
+}   // extern "C"

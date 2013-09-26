@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.7 2013/07/18 15:32:12 whs Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.8 2013/10/09 20:54:58 mjjones Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -115,5 +115,12 @@
         The Module ID in the #I keyword is not in the list of supplier provided entries in the MV keyword.
     </description>
     <ffdc>MODULE_ID</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_RING_FUNC_INVALID_PARAMETER</rc>
+    <description>
+        An invalid parameter was passed to a mbvpd ring function.
+    </description>
   </hwpError>
 </hwpErrors>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiMBvpdAccess.H,v 1.3 2013/06/11 15:15:16 whs Exp $
+// $Id: fapiMBvpdAccess.H,v 1.5 2013/10/09 20:45:47 mjjones Exp $
 /**
  *  @file fapiMBvpdAccess.H
  *
@@ -69,6 +69,7 @@ namespace fapi
         MBVPD_KEYWORD_MV  = 0x08,
         MBVPD_KEYWORD_AM  = 0x09,
         MBVPD_KEYWORD_VZ  = 0x0a,
+        MBVPD_KEYWORD_PDD  = 0x0b,
     };
 
 }

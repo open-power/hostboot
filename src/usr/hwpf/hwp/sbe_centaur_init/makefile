@@ -43,6 +43,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/porevesrc
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/sbe_centaur_init
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
 
 
 OBJS =  sbe_centaur_init.o cen_xip_customize.o

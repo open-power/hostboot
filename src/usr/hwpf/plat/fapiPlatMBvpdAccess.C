@@ -120,6 +120,7 @@ fapi::ReturnCode MBvpdKeywordXlate(const fapi::MBvpdKeyword i_fapiKeyword,
         CVPD::MV,
         CVPD::AM,
         CVPD::VZ,
+        CVPD::pdD,
     };
     const uint8_t NUM_MBVPD_KEYWORDS =
      sizeof(mbvpdFapiKeywordToHbKeyword)/sizeof(mbvpdFapiKeywordToHbKeyword[0]);
@@ -204,7 +205,7 @@ fapi::ReturnCode fapiGetMBvpdField(const fapi::MBvpdRecord i_record,
             i_pBuffer,
             l_fieldLen,
             DEVICE_CVPD_ADDRESS(l_hbRecord, l_hbKeyword));
- 
+
         if (l_errl)
         {
             FAPI_ERR("fapGetMBvpdField: ERROR: deviceRead : errorlog PLID=0x%x",
@@ -256,7 +257,7 @@ fapi::ReturnCode fapiSetMBvpdField(const fapi::MBvpdRecord i_record,
         CVPD::cvpdKeyword l_hbKeyword = CVPD::CVPD_INVALID_KEYWORD;
 
         l_rc = fapi::MBvpdKeywordXlate(i_keyword, l_hbKeyword);
- 
+
         if (l_rc)
         {
             break;

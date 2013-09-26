@@ -1,30 +1,30 @@
- /*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/hwpf/hwp/mvpdRingFuncs.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mvpd_accessors/mvpdRingFuncs.H $             */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mvpdRingFuncs.H,v 1.3 2013/10/09 20:54:13 mjjones Exp $
 /**
  *  @file mvpdRingFuncs.H
  *
- *  @brief Prototype for mvpdRingFuncs() 
+ *  @brief Prototype for mvpdRingFuncs()
  */
 
  #ifndef    _HWP_MVPDRINGFUNCS_
@@ -34,9 +34,15 @@
 
 // mvpdRingFunc can be used for get and set
 enum mvpdRingFuncOp
-{ 
+{
     MVPD_RING_GET,
     MVPD_RING_SET,
+};
+
+// Only get operation for mbvpd Rings
+enum mbvpdRingFuncOp
+{
+    MBVPD_RING_GET,
 };
 
 extern "C"
@@ -46,22 +52,22 @@ extern "C"
  * @brief   get or set the requested ring for the record and keyword
  *          for the specified target CPU.
  *
- *          detailed comments on get and set are in the 
+ *          detailed comments on get and set are in the
  *          getMvpdRing.H and setMvpdRing.H and apply here as well.
  *
  * @param i_mvpdRingFuncOp  -   indicate get or set via enum mvpdRingFuncOp
- * @param i_record          -   Record enumerator 
- * @param i_keyword         -   Keyword enumerator 
+ * @param i_record          -   Record enumerator
+ * @param i_keyword         -   Keyword enumerator
  * @param i_fapiTarget      -   cpu target
- * @param i_chipletId       -   Chiplet ID 
- * @param i_ringId          -   Ring ID 
+ * @param i_chipletId       -   Chiplet ID
+ * @param i_ringId          -   Ring ID
  * @param i_pRingBuf        -   The buffer to receive or send the ring
  * @param io_rRingBufsize   -   Size of ring / ring buffer
  *
  * @return fapi::ReturnCode -   FAPI_RC_SUCCESS if success,
  *                              relevant error code for failure.
  */
-fapi::ReturnCode mvpdRingFunc(  mvpdRingFuncOp       i_mvpdRingFuncOp, 
+fapi::ReturnCode mvpdRingFunc(  mvpdRingFuncOp       i_mvpdRingFuncOp,
                                 fapi::MvpdRecord     i_record,
                                 fapi::MvpdKeyword    i_keyword,
                                 const fapi::Target   &i_fapiTarget,
@@ -70,7 +76,35 @@ fapi::ReturnCode mvpdRingFunc(  mvpdRingFuncOp       i_mvpdRingFuncOp,
                                 uint8_t              *i_pRingBuf,
                                 uint32_t             &io_rRingBufsize);
 
+/**
+ * @brief   get the requested ring for the record and keyword
+ *          for the specified target CPU.
+ *
+ *          detailed comments on get are in getMbvpdRing.H
+ *          and apply here as well.
+ *
+ * @param i_mbvpdRingFuncOp  -  indicate get or set via enum mbvpdRingFuncOp
+ * @param i_record          -   Record enumerator
+ * @param i_keyword         -   Keyword enumerator
+ * @param i_fapiTarget      -   cpu target
+ * @param i_chipletId       -   Chiplet ID
+ * @param i_ringId          -   Ring ID
+ * @param i_pRingBuf        -   The buffer to receive or send the ring
+ * @param io_rRingBufsize   -   Size of ring / ring buffer
+ *
+ * @return fapi::ReturnCode -   FAPI_RC_SUCCESS if success,
+ *                              relevant error code for failure.
+ */
+fapi::ReturnCode mbvpdRingFunc( mbvpdRingFuncOp i_mbvpdRingFuncOp,
+                                fapi::MBvpdRecord i_record,
+                                fapi::MBvpdKeyword i_keyword,
+                                const fapi::Target &i_fapiTarget,
+                                const uint8_t i_chipletId,
+                                const uint8_t i_ringId,
+                                uint8_t *i_pRingBuf,
+                                uint32_t &io_rRingBufsize);
+
 
 } // extern "C"
 
-#endif // _HWP_REPAIRRINGFUNC
+#endif
