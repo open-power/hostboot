@@ -201,7 +201,7 @@ sub writeData
     print $file $value;
     close $file;
 
-    my $command = sprintf("cipputmempba -cft -fb %s %x -quiet > %s",
+    my $command = sprintf("cipputmempba -cft -fb %s %x -quiet -mode inj > %s",
                           $filename,
                           $addr,
                           $debugfile);

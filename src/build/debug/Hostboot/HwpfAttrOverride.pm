@@ -629,7 +629,7 @@ sub main
             #     uint32_t iv_valSize;    // Size of the attribute value in bytes
             # };
             my $addr = $overrideHeaderAddr;
-            ::write32($addr, hex $attrIdVal);
+            ::write32($addr, $attrIdVal);
             $addr += 4;
             ::write32($addr, $targType);
             $addr += 4;
