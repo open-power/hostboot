@@ -144,6 +144,23 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", KILOBYTE);
     (*_num_attr)++; }
 
 /**
+ * @brief Read the PLID attribute from targeting
+ *        and stick it into mainstore
+ */
+#define ADD_PLID(__targ) \
+   { TARGETING::AttributeTraits \
+       <TARGETING::ATTR_HOSTSVC_PLID>::Type plid_temp; \
+    _rc = !(__targ->tryGetAttr \
+       <TARGETING::ATTR_HOSTSVC_PLID>(plid_temp)); \
+    _cur_header = &(_all_headers[(*_num_attr)]); \
+    _cur_header->id = HSVC_PLID; \
+    _cur_header->sizeBytes = sizeof(uint32_t); \
+    _cur_header->offset = (_output_ptr - _beginning); \
+    memcpy( _output_ptr, &plid_temp,  _cur_header->sizeBytes ); \
+    _output_ptr +=  _cur_header->sizeBytes; \
+    (*_num_attr)++; }
+
+/**
  * @brief Insert a terminator into the attribute list
  */
 #define EMPTY_ATTRIBUTE \
@@ -313,6 +330,7 @@ errlHndl_t populate_system_attributes( void )
         // Fill up the attributes
         ADD_HUID( sys ); // for debug
         ADD_PHYS_PATH( sys );
+        ADD_PLID( sys );
         // Use a generated file for the list of attributes to load
         #include "common/hsvc_sysdata.C"
 
