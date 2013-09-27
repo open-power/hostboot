@@ -420,10 +420,22 @@ public:
             deconfigCount++;
             gardCount++;
 
+            errlCommit(errl, CXXTEST_COMP_ID);
+            errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE);
+
             errl->addHwCallout(pTarget,
                     HWAS::SRCI_PRIORITY_MED,
                     HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_NULL);
+
+            errlCommit(errl, CXXTEST_COMP_ID);
+            errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE);
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_LOW,
@@ -431,15 +443,33 @@ public:
                     HWAS::GARD_PHYP);
             gardCount++;
 
+            errlCommit(errl, CXXTEST_COMP_ID);
+            errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE);
+
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_MED,
                     HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_NULL);
             deconfigCount++;
 
+            errlCommit(errl, CXXTEST_COMP_ID);
+            errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE);
+
             errl->addProcedureCallout(
                     HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
                     HWAS::SRCI_PRIORITY_HIGH);
+
+            errlCommit(errl, CXXTEST_COMP_ID);
+            errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE);
 
             errl->addClockCallout(
                 pExList[0],

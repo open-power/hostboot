@@ -66,9 +66,10 @@ ErrlSrc::ErrlSrc( srcType_t i_srcType,
     iv_reasonCode( i_reasonCode ),
     iv_ssid( EPUB_FIRMWARE_SUBSYS ),
     iv_user1( i_user1 ),
-    iv_user2( i_user2 )
+    iv_user2( i_user2 ),
+    iv_deconfig(false),
+    iv_gard(false)
 {
-
 
 }
 
@@ -137,6 +138,16 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
 
         // Stash the Hostboot module id into hex word 3
         psrc->moduleId    = iv_modId;
+
+        // set deconfigure and/or gard bits
+        if (iv_deconfig)
+        {
+            psrc->word5 |= 0x02000000; // deconfigure - bit 6
+        }
+        if (iv_gard)
+        {
+            psrc->word5 |= 0x01000000; // GARD - bit 7
+        }
 
         // Stash the Hostboot long long words into the hexwords of the SRC.
         psrc->word6       = iv_user1;    // spans 6-7

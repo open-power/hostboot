@@ -417,6 +417,14 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         ErrlUserDetailsCallout(&ep, size1,
                 i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
     }
+    if (i_gardErrorType != GARD_NULL)
+    {
+        setGardBit();
+    }
+    if (i_deconfigState != NO_DECONFIG)
+    {
+        setDeconfigBit();
+    }
 } // addHwCallout
 
 

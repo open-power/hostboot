@@ -138,6 +138,8 @@ private:
     epubSubSystem_t iv_ssid : 8 ;   // subsystem type, the ?? in SRC xx??xxxx
     uint64_t        iv_user1;       // user data 1
     uint64_t        iv_user2;       // user data 2
+    bool            iv_deconfig;    // true if there is a deconfigure callout
+    bool            iv_gard;        // true if there is a gard callout
 
 
 };

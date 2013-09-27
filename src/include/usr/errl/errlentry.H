@@ -331,6 +331,15 @@ public:
     void addUserData2( const uint64_t i_data );
 
     /**
+     *  @brief set Deconfigure and GARD bits in Hex Word 5
+     *
+     *  @return void
+     *
+     */
+    void setDeconfigBit();
+    void setGardBit();
+
+    /**
      *  @brief Return iv_Src user data words.
      *
      *  @return data1 word from SRC
@@ -694,6 +703,17 @@ inline void ErrlEntry::addUserData1( const uint64_t i_data )
 inline void ErrlEntry::addUserData2( const uint64_t i_data )
 {
     iv_Src.iv_user2 = i_data;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline void ErrlEntry::setDeconfigBit()
+{
+    iv_Src.iv_deconfig = true;
+}
+inline void ErrlEntry::setGardBit()
+{
+    iv_Src.iv_gard = true;
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
