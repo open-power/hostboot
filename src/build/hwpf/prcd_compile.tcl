@@ -261,7 +261,7 @@ proc start_patch_server_on_fsp { fspip fsppassword } {
 # MAIN
 # ------------------------
 set userid $::env(USER)
-set version "1.5"
+set version "1.6"
 
 set files [list]
 set directories [list]
@@ -294,7 +294,7 @@ foreach arg $argv {
                        puts {    src/usr/hwpf/hwp }
                        puts {    src/include/usr/hwpf/hwp }
                        puts {}
-                       puts {The files can either be in the local current working directory, or in a local sub-directory mirroring the hostboot tree. }
+                       puts {The files can either be in the local current working directory, or in some other directory. }
                        puts {}
                        puts {Without the -n parameter, the file MUST be an existing files in the hostboot sandbox.}
                        puts {If they are not found in the sandbox, an error will be returned.}
@@ -319,7 +319,8 @@ foreach arg $argv {
                        puts {examples }
                        puts {> prcd_compile.tcl -d hb0216a_1307.810 -o ./output fapiTestHwp.C fapiTestHwp.C sample.initfile}
                        puts {> prcd_compile.tcl -d hb0216a_1307.810 -o ./output/ proc_cen_framelock.C }
-                       puts {> prcd_compile.tcl -f b0211a_1307.810 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
+                       puts {> prcd_compile.tcl -f b0211a_1307.810 -o output chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.H }
+                       puts {> prcd_compile.tcl -O chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.* }
                        puts {}
                        puts "Version: $version"
                        puts {}
@@ -327,6 +328,7 @@ foreach arg $argv {
                      }
                  *\.initfile     { lappend files $arg }
                  *\.C            { lappend files $arg }
+                 *\.c            { lappend files $arg }
                  *\.H            { lappend files $arg }
                  *\.h            { lappend files $arg }
                  *\.xml          { lappend files $arg }
@@ -457,6 +459,10 @@ if {[info exists directory]}  {
   # Generate command to send each input file
   ##########################################################
   foreach filen $files {
+       if {![file exists $filen]} {
+                puts "File not found: $filen "
+                exit
+       }
        set file_size [file size $filen]
        set filesource($filen) $filen
        lappend cmds "$hwp_file_cmd $filen $file_size"
@@ -523,9 +529,12 @@ if {[llength $cmds] > 0 } {
             if {[string compare $cmd {quit}] == 0 } {
                 puts $sockid {quit}
                 break
-            } elseif {[regexp {^:HWP_FILE.* +(.+) +(.+)} $cmd a hwpfilename filesize]} {
-                puts $sockid $cmd
-                set hwpfile [open $filesource($hwpfilename) r]
+            } elseif {[regexp {^:HWP_FILE*} $cmd a ]} {
+                regexp {^(.+) +(.+) +(.+)} $cmd a hwpcmd filename filesize
+                set basename [file tail $filename]
+                set newcmd "$hwpcmd $basename $filesize"
+                puts $sockid $newcmd
+                set hwpfile [open $filesource($filename) r]
                 fconfigure $sockid -translation binary
                 fconfigure $hwpfile -translation binary
                 fcopy $hwpfile $sockid -size $filesize
