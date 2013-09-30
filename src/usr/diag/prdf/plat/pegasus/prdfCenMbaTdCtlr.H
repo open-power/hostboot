@@ -77,12 +77,12 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     int32_t analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc );
     int32_t analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc );
 
-    int32_t startVcmPhase1();
-    int32_t startVcmPhase2();
-    int32_t startDsdPhase1();
-    int32_t startDsdPhase2();
-    int32_t startTpsPhase1();
-    int32_t startTpsPhase2();
+    int32_t startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t startDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc );
 
   private: // functions
 

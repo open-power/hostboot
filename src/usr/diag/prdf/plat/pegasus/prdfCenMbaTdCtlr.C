@@ -314,8 +314,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             // So we will only check for Hard CE threshold.
 
             // Start TPS Phase 1
-            io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase1 );
-            o_rc = startTpsPhase1();
+            o_rc = startTpsPhase1( io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"startTpsPhase1() failed" );
@@ -374,12 +373,10 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else
         {
-            io_sc.service_data->SetErrorSig( PRDFSIG_StartVcmPhase2 );
-
             CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
             // Start VCM Phase 2
-            o_rc = startVcmPhase2();
+            o_rc = startVcmPhase2( io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"startVcmPhase2() failed" );
@@ -517,12 +514,10 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else
         {
-            io_sc.service_data->SetErrorSig( PRDFSIG_StartDsdPhase2 );
-
             CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
             // Start DSD Phase 2
-            o_rc = startDsdPhase2();
+            o_rc = startDsdPhase2( io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"startDsdPhase2() failed" );
@@ -670,8 +665,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         else
         {
             // Start TPS Phase 2
-            io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase2 );
-            o_rc = startTpsPhase2();
+            o_rc = startTpsPhase2( io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"startTpsPhase2() failed" );
@@ -754,12 +748,13 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::startVcmPhase1()
+int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::startVcmPhase1] "
 
     int32_t o_rc = SUCCESS;
 
+    io_sc.service_data->SetErrorSig( PRDFSIG_StartVcmPhase1 );
     iv_tdState = VCM_PHASE_1;
 
     TargetHandle_t mba = iv_mbaChip->GetChipHandle();
@@ -801,12 +796,13 @@ int32_t CenMbaTdCtlr::startVcmPhase1()
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::startVcmPhase2()
+int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::startVcmPhase2] "
 
     int32_t o_rc = SUCCESS;
 
+    io_sc.service_data->SetErrorSig( PRDFSIG_StartVcmPhase2 );
     iv_tdState = VCM_PHASE_2;
 
     TargetHandle_t mba = iv_mbaChip->GetChipHandle();
@@ -848,12 +844,13 @@ int32_t CenMbaTdCtlr::startVcmPhase2()
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::startDsdPhase1()
+int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::startDsdPhase1] "
 
     int32_t o_rc = SUCCESS;
 
+    io_sc.service_data->SetErrorSig( PRDFSIG_StartDsdPhase1 );
     iv_tdState = DSD_PHASE_1;
 
     TargetHandle_t mba = iv_mbaChip->GetChipHandle();
@@ -903,12 +900,13 @@ int32_t CenMbaTdCtlr::startDsdPhase1()
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::startDsdPhase2()
+int32_t CenMbaTdCtlr::startDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::startDsdPhase2] "
 
     int32_t o_rc = SUCCESS;
 
+    io_sc.service_data->SetErrorSig( PRDFSIG_StartDsdPhase2 );
     iv_tdState = DSD_PHASE_2;
 
     TargetHandle_t mba = iv_mbaChip->GetChipHandle();
@@ -950,12 +948,13 @@ int32_t CenMbaTdCtlr::startDsdPhase2()
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::startTpsPhase1()
+int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::startTpsPhase1] "
 
     int32_t o_rc = SUCCESS;
 
+    io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase1 );
     iv_tdState = TPS_PHASE_1;
 
     TargetHandle_t mba = iv_mbaChip->GetChipHandle();
@@ -1006,12 +1005,13 @@ int32_t CenMbaTdCtlr::startTpsPhase1()
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::startTpsPhase2()
+int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::startTpsPhase2] "
 
     int32_t o_rc = SUCCESS;
 
+    io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase2 );
     iv_tdState = TPS_PHASE_2;
 
     TargetHandle_t mba = iv_mbaChip->GetChipHandle();
@@ -1267,12 +1267,10 @@ int32_t CenMbaTdCtlr::handleMPE( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
-        io_sc.service_data->SetErrorSig( PRDFSIG_StartVcmPhase1 );
-
         CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
         // Start VCM procedure
-        o_rc = startVcmPhase1();
+        o_rc = startVcmPhase1( io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"startVcmPhase1() failed" );
@@ -1440,9 +1438,7 @@ int32_t CenMbaTdCtlr::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
         // Start DSD Phase 1, if possible.
         if ( startDsdProcedure )
         {
-            io_sc.service_data->SetErrorSig( PRDFSIG_StartDsdPhase1 );
-
-            o_rc = startDsdPhase1();
+            o_rc = startDsdPhase1( io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"startDsdPhase1() failed" );

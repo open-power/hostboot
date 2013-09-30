@@ -211,39 +211,45 @@ class CenMbaTdCtlrCommon
 
     /**
      * @brief  Starts VCM Phase 1.
+     * @param  io_sc The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t startVcmPhase1() = 0;
+    virtual int32_t startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
 
     /**
      * @brief  Starts VCM Phase 2.
+     * @param  io_sc The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t startVcmPhase2() = 0;
+    virtual int32_t startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
 
     /**
      * @brief  Starts DSD Phase 1.
+     * @param  io_sc The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t startDsdPhase1() = 0;
+    virtual int32_t startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
 
     /**
      * @brief  Starts DSD Phase 2.
+     * @param  io_sc The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t startDsdPhase2() = 0;
+    virtual int32_t startDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
 
     /**
      * @brief  Starts Tps Phase 1.
+     * @param  io_sc The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t startTpsPhase1() = 0;
+    virtual int32_t startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
 
     /**
      * @brief  Starts Tps Phase 2.
+     * @param  io_sc The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t startTpsPhase2() = 0;
+    virtual int32_t startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
 
     /**
      * @return TRUE if currently running a targeted diagnositics procedure,
