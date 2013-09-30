@@ -37,6 +37,7 @@
 // Pegasus includes
 #include <prdfCenMbaTdCtlr.H>
 #include <prdfCenMbaUeTable.H>
+#include <prdfCenMbaCeTable.H>
 
 namespace PRDF
 {
@@ -97,6 +98,7 @@ class CenMbaDataBundleCommon : public DataBundle
 
     CenMbaTdCtlr  iv_tdCtlr;       ///< Targeted Diagnostics Controller
     CenMbaUeTable iv_ueTable;      ///< UE table for FFDC
+    CenMbaCeTable iv_ceTable;      ///< CE table for FFDC
 
 };
 

@@ -57,12 +57,12 @@ void CenMbaUeTable::addEntry( UE_TABLE::Type i_type, const CenAddr & i_addr )
         iv_table.erase( it );
     }
 
-    // Pop off the oldest entry if the table is full.
-    if ( MAX_ENTRIES == iv_table.size() )
-        iv_table.pop_front();
-
     // Add the new entry to the end of the list.
     iv_table.push_back( data );
+
+    // Pop off the oldest entry if the table is full.
+    if ( MAX_ENTRIES < iv_table.size() )
+        iv_table.pop_front();
 }
 
 //------------------------------------------------------------------------------

@@ -70,6 +70,18 @@ namespace UE_TABLE
 
 } // namespace UE_TABLE
 
+namespace CE_TABLE
+{
+    enum
+    {
+        MAX_ENTRIES = 32, ///< Maximum number of entries allow in table.
+        ENTRY_SIZE  =  9, ///< Number of bytes per entry.
+
+        MAX_SIZE = MAX_ENTRIES * ENTRY_SIZE, ///< Maximum table size.
+    };
+
+} // namespace UE_TABLE
+
 namespace DQ_BITMAP
 {
     enum

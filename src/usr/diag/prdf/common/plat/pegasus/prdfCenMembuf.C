@@ -41,7 +41,9 @@
 #include <prdfCenMbaCaptureData.H>
 #include <prdfCenMbaDataBundle.H>
 #include <prdfCenMbaTdCtlr_common.H>
+#include <prdfCenMbaThresholds.H>
 #include <prdfCenMembufDataBundle.H>
+#include <prdfCenMembufExtraSig.H>
 #include <prdfLaneRepair.H>
 
 using namespace TARGETING;
@@ -510,6 +512,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
             PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
+        TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
 
         CenAddr addr;
         l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_NCE_ADDR, addr );
@@ -518,15 +521,105 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
             PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
             break;
         }
+        CenRank rank = addr.getRank();
 
-        // FIXME: RTC 47289 Need to read MBSEVR to get the symbol. There is a
-        //        bug in DD1.x so we can't use this register. There is a
-        //        workaround but is it complicated. Need to check with Ken if it
-        //        is ok to just callout the rank for DD1.x.
+        if ( 0x20 > getChipLevel(i_membChip->GetChipHandle()) )
+        {
+            // There is a bug in DD1.x where the value of MBSEVR cannot be
+            // trusted. The workaround is too complicated for its value so
+            // callout the rank instead.
+            MemoryMru memmru ( mbaTrgt, rank, MemoryMruData::CALLOUT_RANK );
+            i_sc.service_data->SetCallout( memmru );
+        }
+        else // DD2.0+
+        {
+            // Get the failing symbol
+            const char * reg_str = (0 == i_mbaPos) ? "MBA0_MBSEVR"
+                                                   : "MBA1_MBSEVR";
+            SCAN_COMM_REGISTER_CLASS * reg = i_membChip->getRegister(reg_str);
+            l_rc = reg->Read();
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
+                break;
+            }
 
-        MemoryMru memmru ( mbaChip->GetChipHandle(), addr.getRank(),
-                           MemoryMruData::CALLOUT_RANK );
-        i_sc.service_data->SetCallout( memmru );
+            uint8_t galois = reg->GetBitFieldJustified( 40, 8 );
+            uint8_t mask   = reg->GetBitFieldJustified( 32, 8 );
+
+            CenSymbol symbol = CenSymbol::fromGalois( mbaTrgt, rank, galois,
+                                                      mask );
+            if ( !symbol.isValid() )
+            {
+                PRDF_ERR( PRDF_FUNC"Failed to create symbol: galois=0x%02x "
+                          "mask=0x%02x", galois, mask );
+                break;
+            }
+
+            // Add the DIMM to the callout list
+            MemoryMru memmru ( mbaTrgt, rank, symbol );
+            i_sc.service_data->SetCallout( memmru );
+
+            // Add to CE table
+            CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
+            bool doTps = mbadb->iv_ceTable.addEntry( addr, symbol );
+
+            if ( mfgMode() )
+            {
+                // Get the MNFG CE thresholds.
+                uint16_t dramTh, hrTh, dimmTh;
+                l_rc = getMnfgMemCeTh( mbaChip, rank, dramTh, hrTh, dimmTh );
+                if ( SUCCESS != l_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC"getMnfgMemCeTh() failed: rank=m%ds%d",
+                              rank.getMaster(), rank.getSlave() );
+                    break;
+                }
+
+                // Get counts from CE table.
+                uint32_t dramCount, hrCount, dimmCount;
+                mbadb->iv_ceTable.getMnfgCounts( addr.getRank(), symbol,
+                                                 dramCount, hrCount,
+                                                 dimmCount );
+
+                if ( dramTh < dramCount )
+                {
+                    i_sc.service_data->SetErrorSig( PRDFSIG_MnfgDramCte );
+                    i_sc.service_data->AddSignatureList( mbaTrgt,
+                                                         PRDFSIG_MnfgDramCte );
+                    i_sc.service_data->SetServiceCall();
+                }
+
+                if ( hrTh < hrCount )
+                {
+                    i_sc.service_data->SetErrorSig( PRDFSIG_MnfgHrCte );
+                    i_sc.service_data->AddSignatureList( mbaTrgt,
+                                                         PRDFSIG_MnfgHrCte );
+                    i_sc.service_data->SetServiceCall();
+                }
+
+                if ( dimmTh < dimmCount )
+                {
+                    i_sc.service_data->SetErrorSig( PRDFSIG_MnfgDimmCte );
+                    i_sc.service_data->AddSignatureList( mbaTrgt,
+                                                         PRDFSIG_MnfgDimmCte );
+                    i_sc.service_data->SetServiceCall();
+                }
+            }
+
+            // Initiate a TPS procedure, if needed.
+            if ( doTps )
+            {
+                l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
+                                                CenMbaTdCtlrCommon::TPS_EVENT );
+                if ( SUCCESS != l_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC"handleTdEvent() failed: rank=m%ds%d",
+                              rank.getMaster(), rank.getSlave() );
+                    break;
+                }
+            }
+        }
 
     } while (0);
 
@@ -645,15 +738,26 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
             PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
             break;
         }
+        CenRank rank = addr.getRank();
 
         // Add address to UE table.
         CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
         mbadb->iv_ueTable.addEntry( UE_TABLE::FETCH_UE, addr );
 
         // Callout the rank.
-        MemoryMru memmru ( mbaChip->GetChipHandle(), addr.getRank(),
+        MemoryMru memmru ( mbaChip->GetChipHandle(), rank,
                            MemoryMruData::CALLOUT_RANK );
         i_sc.service_data->SetCallout( memmru );
+
+        // Add a TPS request to the TD queue.
+        l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
+                                               CenMbaTdCtlrCommon::TPS_EVENT );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"handleTdEvent() failed: rank=m%ds%d",
+                      rank.getMaster(), rank.getSlave() );
+            break;
+        }
 
     } while (0);
 

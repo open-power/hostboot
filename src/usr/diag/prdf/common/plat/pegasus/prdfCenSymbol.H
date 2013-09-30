@@ -122,6 +122,19 @@ class CenSymbol
                                  uint8_t i_portSlct );
 
     /**
+     * @brief  Creates a CenSymbol from a Galois field.
+     * @param  i_mba    The MBA target.
+     * @param  i_rank   The rank this symbol is on.
+     * @param  i_galois The Galois field.
+     * @param  i_mask   The bit mask.
+     * @return A CenSymbol. Must call isValid() to determine if the function was
+     *         successful in creating a valid object.
+     */
+    static CenSymbol fromGalois( TARGETING::TargetHandle_t i_mba,
+                                 const CenRank & i_rank, uint8_t i_galois,
+                                 uint8_t i_mask = 0 );
+
+    /**
      * @brief  Returns the dimm's wiring type.
      * @param  i_mba        MBA Target handle.
      * @param  i_rank       The rank this symbol is on.
@@ -141,7 +154,7 @@ class CenSymbol
     /** @return This symbol's numerical value (0-71). */
     uint8_t getSymbol() const { return iv_symbol; }
 
-    /** @return The bad pins associated with this symbol. */
+    /** @return The bad pins associated with this symbol (2-bits). */
     uint8_t getPins() const { return iv_pins; }
 
     /** @return The even Centaur DQ of this symbol. */
@@ -152,6 +165,10 @@ class CenSymbol
 
     /** @return The DRAM index for this symbol. */
     uint8_t getDram() const { return symbol2Dram( iv_symbol, iv_x4Dram ); }
+
+    /** @return The bad pins associated with this symbol in relation to the DRAM
+     *          (x4 mode is 4-bits, x8 mode is 8-bits,). */
+    uint8_t getDramPins() const;
 
     /** @return rank associated with this symbol. */
     CenRank getRank() const { return iv_rank; };

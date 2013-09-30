@@ -62,6 +62,15 @@ bool parseMemUeTable( uint8_t * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser );
 
 /**
+ * @brief Parses Memory CE table.
+ * @param i_buffer The data buffer.
+ * @param i_buflen The buffer length.
+ * @param i_parser The error log parser.
+ */
+bool parseMemCeTable( uint8_t * i_buffer, uint32_t i_buflen,
+                      ErrlUsrParser & i_parser );
+
+/**
  * @brief Parses DRAM Repairs data (actual chip/symbol marks and DRAM repairs in
  *        hardware).
  * @param i_buffer The data buffer.

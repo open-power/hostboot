@@ -160,6 +160,9 @@ void addMemEccData( ExtensibleChip * i_mbaChip, STEP_CODE_DATA_STRUCT & io_sc )
     // Add UE table to capture data.
     mbadb->iv_ueTable.addCapData( mbaTarget, cd );
 
+    // Add CE table to capture data.
+    mbadb->iv_ceTable.addCapData( mbaTarget, cd );
+
     // Add DRAM repairs data from hardware.
     captureDramRepairsData( mbaTarget, cd );
 

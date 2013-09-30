@@ -218,6 +218,90 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
+bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
+                      ErrlUsrParser & i_parser )
+{
+    using namespace CE_TABLE;
+
+    bool rc = true;
+
+    if ( NULL == i_buffer ) return false; // Something failed in parser.
+
+    const uint32_t entries = i_buflen / ENTRY_SIZE;
+
+    i_parser.PrintNumber( " MEM_CE_TABLE", "%d", entries );
+
+    const char * hh = "  A Count Type";
+    const char * hd = "Rank Bank Row     Column DRAM Pins";
+    i_parser.PrintString( hh, hd );
+    hh = "  - ----- -------------";
+    hd = "---- ---- ------- ------ ---- ----";
+    i_parser.PrintString( hh, hd );
+
+    for ( uint32_t i = 0; i < entries; i++ )
+    {
+        uint32_t idx = i * ENTRY_SIZE;
+
+        uint32_t count = i_buffer[idx  ];                           //  8-bit
+        uint32_t type  = i_buffer[idx+1] >> 4;                      //  4-bit
+
+        uint8_t  active = (i_buffer[idx+2] >> 6) & 0x1;             //  1-bit
+        uint8_t  dram   =  i_buffer[idx+2]       & 0x3f;            //  6-bit
+
+        uint32_t dramPins = i_buffer[idx+3];                        //  8-bit
+
+        uint32_t mrnk  = (i_buffer[idx+4] >> 5) & 0x7;              //  3-bit
+        uint32_t srnk  = (i_buffer[idx+4] >> 2) & 0x7;              //  3-bit
+        uint32_t svld  = (i_buffer[idx+4] >> 1) & 0x1;              //  1-bit
+
+        uint32_t row0    = i_buffer[idx+4] & 0x1;
+        uint32_t row1_8  = i_buffer[idx+5];
+        uint32_t row9_16 = i_buffer[idx+6];
+        uint32_t row     = (row0 << 16) | (row1_8 << 8) | row9_16;  // 17-bit
+
+        uint32_t bnk   = i_buffer[idx+7] >> 4;                      //  4-bit
+
+        uint32_t col0_3  = i_buffer[idx+7] & 0xf;
+        uint32_t col4_11 = i_buffer[idx+8];
+        uint32_t col     = (col0_3 << 8) | col4_11;                 // 12-bit
+
+        char active_char = ( 1 == active ) ? 'Y':'N';
+
+        const char * type_str = "UNKNOWN      "; // 13 characters
+        switch ( type )
+        {
+            // TODO: RTC 67358 card type will be determined from wiring type.
+            //       Also there will be string representation for dram.
+            //       Currently we will use integer number.
+            default: ;
+        }
+
+        char rank_str[DATA_SIZE]; // 4 characters
+        if ( 1 == svld )
+        {
+            snprintf( rank_str, DATA_SIZE, "m%ds%d", mrnk, srnk );
+        }
+        else
+        {
+            snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );
+        }
+
+        char header[HEADER_SIZE] = { '\0' };
+        snprintf( header, HEADER_SIZE, "  %c  0x%02x %s", active_char,
+                  count, type_str );
+
+        char data[DATA_SIZE]     = { '\0' };
+        snprintf( data, DATA_SIZE, "%s  0x%01x 0x%05x  0x%03x   %2d 0x%02x",
+                  rank_str, bnk, row, col, dram, dramPins );
+
+        i_parser.PrintString( header, data );
+    }
+
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+
 bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
                            ErrlUsrParser & i_parser )
 {

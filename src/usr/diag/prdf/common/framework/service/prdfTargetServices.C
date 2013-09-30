@@ -286,7 +286,7 @@ uint8_t getChipLevel( TARGETING::TargetHandle_t i_target )
         if ( !l_parentTarget->tryGetAttr<ATTR_EC>(o_chipLvl) )
         {
             PRDF_ERR( "[getChipLevel] Failed to get ATTR_EC" );
-            o_chipLvl = 0xff; // Just in case
+            o_chipLvl = 0; // Just in case
         }
 
     } while (0);

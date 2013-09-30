@@ -339,7 +339,7 @@ int32_t getMbaDimm( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm );
 bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget);
 
 /**
- * @brief   Obtain ranks per DIMM select on an MBA.
+ * @brief   Obtains number of ranks (including slave ranks) per DIMM select.
  * @param   i_mbaTarget MBA target.
  * @param   i_ds        DIMM select for DIMM.
  * @return  Number of ranks confgured per DIMM select. If internal function

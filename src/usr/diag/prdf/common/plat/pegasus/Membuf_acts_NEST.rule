@@ -1330,22 +1330,10 @@ actionclass analyzeFetchMpe0_7 { funccall("AnalyzeFetchMpe0_7"); };
 actionclass analyzeFetchMpe1_7 { funccall("AnalyzeFetchMpe1_7"); };
 
 /** Analyze a fetch NCE on MBA0 */
-actionclass analyzeFetchNce0
-{
-    funccall("AnalyzeFetchNce0");
-    # FIXME: RTC 47289 MNFG threshold temporarily set to 32/day until we add
-    #        actual support in the AnalyzeFetchNce plugins.
-    threshold( field(32 / day), mfg(32 / day) );
-};
+actionclass analyzeFetchNce0 { funccall("AnalyzeFetchNce0"); };
 
 /** Analyze a fetch NCE on MBA1 */
-actionclass analyzeFetchNce1
-{
-    funccall("AnalyzeFetchNce1");
-    # FIXME: RTC 47289 MNFG threshold temporarily set to 32/day until we add
-    #        actual support in the AnalyzeFetchNce plugins.
-    threshold( field(32 / day), mfg(32 / day) );
-};
+actionclass analyzeFetchNce1 { funccall("AnalyzeFetchNce1"); };
 
 # TODO: RTC 23125 The RAS spreadsheet action is RCE is: "Threshold per rank 8/24
 #       make a callout of DIMM pair". Needs discussion.

@@ -72,13 +72,13 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
             break;
         }
 
-        // Get number of ranks DIMM select.
+        // Get number of ranks per DIMM select.
         uint8_t rankCount = getRanksPerDimm( i_mbaChip->GetChipHandle(),
                                              i_rank.getDimmSlct() );
         if ( 0 == rankCount )
         {
             PRDF_ERR( PRDF_FUNC "PlatServices::getRanksPerDimm() failed" );
-            break;
+            o_rc = FAIL; break;
         }
 
         // Get number of allowed CEs.

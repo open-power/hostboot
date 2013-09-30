@@ -46,6 +46,8 @@ chip Membuf
     dump        DUMP_CONTENT_HWSUPERNOVA;
     scomlen     64;
 
+.include "prdfCenMembufExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
