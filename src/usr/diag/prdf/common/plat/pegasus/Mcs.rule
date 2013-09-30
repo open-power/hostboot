@@ -317,7 +317,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     (MciFir, bit(27)) ? callout2ndLvlMed;
 
     /** MCIFIR[28]
-     *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_EDI_CHANNEL
+     *  MCIFIRQ_MULTIPLE_RCMD_OR_CRESP_ACTIVE
      */
     (MciFir, bit(28)) ? SelfLowLevel2MedThr1;
 
@@ -376,7 +376,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     (MciFir, bit(38)) ? callout2ndLvlMed;
 
     /** MCIFIR[39]
-     *  MCIFIRQ_HA_ILLEGAL_CONSUMER_ACCESS_ERROR
+     *  MCIFIRQ_HA_ILLEGAL_PRODUCER_ACCESS_ERROR
      */
     (MciFir, bit(39)) ? callout2ndLvlMed;
 
