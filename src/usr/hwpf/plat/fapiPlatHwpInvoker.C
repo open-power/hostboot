@@ -75,9 +75,8 @@ HWAS::callOutPriority xlateCalloutPriority(
  *
  * @return HWAS Clock HW callout
  */
-/* TODO Enable in RTC 82509 when ERRL interfaces are in place
 HWAS::clockTypeEnum xlateClockHwCallout(
-    const fapi::HwCallouts::Hw Callout i_fapiClock)
+    const fapi::HwCallouts::HwCallout i_fapiClock)
 {
     // Use the HwCallout enum value as an index
     HWAS::clockTypeEnum l_clock = HWAS::TODCLK_TYPE;
@@ -95,13 +94,12 @@ HWAS::clockTypeEnum xlateClockHwCallout(
     }
     else
     {
-        FAPI_ERR("fapi::xlateClockCallout: Unknown clock 0x%x, assuming TOD",
+        FAPI_ERR("fapi::xlateClockHwCallout: Unknown clock 0x%x, assuming TOD",
             i_fapiClock);
     }
 
     return l_clock;
 }
-*/
 
 /**
  * @brief Translates a FAPI procedure callout to an HWAS procedure callout
@@ -248,16 +246,12 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
               (l_hw == HwCallouts::PCI_REF_CLOCK)) &&
              l_pRefTarget != NULL)
         {
-            /* TODO Enable in RTC 82509 when ERRL interfaces are in place
             HWAS::clockTypeEnum l_clock =
                 xlateClockHwCallout((*l_itr)->iv_hw);
 
             FAPI_ERR("processEIHwCallouts: Adding clock-callout (clock:%d, pri:%d)",
                      l_clock, l_priority);
             io_pError->addClockCallout(l_pRefTarget, l_clock, l_priority);
-            */
-            FAPI_ERR("processEIHwCallouts: Adding clock-callout TBD (hw:%d, pri:%d)",
-                     l_hw, l_priority);
         }
         else
         {
