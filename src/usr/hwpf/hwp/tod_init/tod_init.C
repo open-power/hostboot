@@ -36,6 +36,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
+#include <initservice/initserviceif.H>
 #include "TodTrace.H"
 #include "tod_init.H"
 #include "TodSvc.H"
@@ -47,27 +48,11 @@ const char TOD_TRACE_NAME[] = "TOD";
 trace_desc_t* g_trac_tod = NULL;
 TRAC_INIT(&g_trac_tod, TOD_TRACE_NAME, KILOBYTE, TRACE::BUFFER_SLOW);
 
-static bool is_spless()
-{
-    bool spless = true;
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    TARGETING::SpFunctions spfuncs;
-    if( sys &&
-        sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
-        spfuncs.mailboxEnabled )
-    {
-        spless = false;
-    }
-
-    return spless;
-}
-
 void * call_tod_setup(void *dummy)
 {
     errlHndl_t l_errl;
 
-    if (is_spless())
+    if (INITSERVICE::spLess())
     {
         l_errl = TodSvc::getTheInstance().todSetup();
 
@@ -85,7 +70,7 @@ void * call_tod_init(void *dummy)
 {
     errlHndl_t l_errl;
 
-    if (is_spless())
+    if (INITSERVICE::spLess())
     {
         l_errl = TodSvc::getTheInstance().todInit();
 

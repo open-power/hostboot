@@ -126,7 +126,7 @@ inline bool spLess ( void )
     TARGETING::SpFunctions spfuncs;
     if( sys &&
         sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
-        !spfuncs.mailboxEnabled )
+        !spfuncs.baseServices )
     {
         spless = true;
     }

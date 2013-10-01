@@ -1880,12 +1880,24 @@
          Applicable for System target only.  Structure is read-only.
         </description>
         <field>
+            <name>baseServices</name>
+            <description>
+             If this flag is set then mailboxEnabled MUST also be set
+
+             0b0: SP does not support for VPD, payload, ATTR sync, VDDR, TOD;
+             0b1: SP supports VPD, payload, ATTR sync, VDDR, TOD
+            </description>
+            <type>uint32_t</type>
+            <bits>1</bits>
+            <default>1</default>
+        </field>
+        <field>
             <name>fsiSlaveInit</name>
             <description>
              0b0: SP does not initialize FSI slave logic, Hostboot must;
              0b1: SP does initialize FSI slave logic so Hostboot should not
             </description>
-            <type>uint8_t</type>
+            <type>uint32_t</type>
             <bits>1</bits>
             <default>1</default>
         </field>
@@ -1895,7 +1907,7 @@
              0b0: There is no SP mailbox support;
              0b1: There is SP mailbox support
             </description>
-            <type>uint8_t</type>
+            <type>uint32_t</type>
             <bits>1</bits>
             <default>0</default>
         </field>
@@ -1905,7 +1917,7 @@
              0b0: SP does not initialize FSI master logic, Hostboot must;
              0b1: SP does initialize FSI master logic so Hostboot should not
             </description>
-            <type>uint8_t</type>
+            <type>uint32_t</type>
             <bits>1</bits>
             <default>1</default>
         </field>
@@ -1915,7 +1927,7 @@
              0b0: SP does not perform hardware change detection, Hostboot must;
              0b1: SP does perform hardware change detection (HCDB) so Hostboot should not
             </description>
-            <type>uint8_t</type>
+            <type>uint32_t</type>
             <bits>1</bits>
             <default>1</default>
         </field>
@@ -1925,15 +1937,15 @@
              0b0: SP does not perform Power Line Disturbance (PLD) detection, Hostboot must;
              0b1: SP does perform Power Line Disturbance (PLD) detection so Hostboot should not
             </description>
-            <type>uint8_t</type>
+            <type>uint32_t</type>
             <bits>1</bits>
             <default>1</default>
         </field>
         <field>
             <name>reserved</name>
             <description>Reserved for future use</description>
-            <type>uint8_t</type>
-            <bits>3</bits>
+            <type>uint32_t</type>
+            <bits>26</bits>
             <default>0</default>
         </field>
         </complexType>

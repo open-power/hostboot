@@ -53,6 +53,7 @@
 #include <errl/errludtarget.H>
 #include <targeting/common/trace.H>
 #include <kernel/console.H>
+#include <initservice/initserviceif.H>
 
 class AttrSyncTestSuite : public CxxTest::TestSuite
 {
@@ -76,7 +77,7 @@ class AttrSyncTestSuite : public CxxTest::TestSuite
 
         if( err )
         {
-            if( MBOX::mailbox_enabled() )
+            if( !INITSERVICE::spLess() )
             {
                 TS_FAIL(" Error returned when syncing SECTION_TYPE_PNOR_RW");
             }
@@ -91,7 +92,7 @@ class AttrSyncTestSuite : public CxxTest::TestSuite
 
         if( err )
         {
-            if( MBOX::mailbox_enabled() )
+            if( !INITSERVICE::spLess() )
             {
                 TS_FAIL(" Error returned when syncing SECTION_TYPE_HEAP_PNOR_INIT"); 
             }
@@ -106,7 +107,7 @@ class AttrSyncTestSuite : public CxxTest::TestSuite
 
         if( err )
         {
-           if( MBOX::mailbox_enabled() )
+           if( !INITSERVICE::spLess() )
            {
                TS_FAIL(" Error returned when syncing SECTION_TYPE_HEAP_ZERO_INIT"); 
            }
@@ -164,7 +165,7 @@ class AttrSyncTestSuite : public CxxTest::TestSuite
 
                 if (l_errl)
                 {
-                    if( MBOX::mailbox_enabled() )
+                    if( !INITSERVICE::spLess() )
                     {
                         TS_FAIL( "Error returned when syncing section type %d "
                         "from FSP", section_type[i]);

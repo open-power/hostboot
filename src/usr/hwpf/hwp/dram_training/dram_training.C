@@ -55,6 +55,7 @@
 
 //hb vddr support
 #include    <hbVddrMsg.H>
+#include <initservice/initserviceif.H>
 
 // Run on all Centaurs/MBAs, but needs to keep this one handy in case we
 // want to limit them in VPO
@@ -94,7 +95,7 @@ void*    call_host_disable_vddr( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr entry" );
 
-    if( MBOX::mailbox_enabled() )
+    if( !INITSERVICE::spLess() )
     {
         IStepError l_StepError;
 
@@ -139,7 +140,7 @@ void*    call_host_disable_vddr( void *io_pArgs )
     }
     else
     {
-        //no mailbox running so this is a fsp less system.  Right now the istep
+        //This is a fsp less system.  Right now the istep
         //only works when a FSP is present.  May add code in the future for
         //Stradale which is a FSP-less system
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_disable_vddr"
@@ -394,7 +395,7 @@ void*    call_host_enable_vddr( void *io_pArgs )
 
     errlHndl_t l_err = NULL;
 
-    if( MBOX::mailbox_enabled() )
+    if( !INITSERVICE::spLess() )
     {
         IStepError l_StepError;
 
@@ -438,7 +439,7 @@ void*    call_host_enable_vddr( void *io_pArgs )
     }
     else
     {
-        //no mailbox running so this is a fsp less system.  Right now the istep
+        //This is a fsp less system.  Right now the istep
         //only works when a FSP is present.  May add code in the future for
         //Stradale which is a FSP-less system
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_enable_vddr"

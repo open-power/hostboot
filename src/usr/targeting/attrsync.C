@@ -23,6 +23,7 @@
 #include <targeting/attrsync.H>
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/common/trace.H>
+#include <initservice/initserviceif.H>
 
 using namespace ERRORLOG;
 
@@ -486,9 +487,9 @@ namespace TARGETING
         errlHndl_t l_errl = NULL;
 
         do{
-            // if the mailbox is not enabled then skip attribute sync
+            // if no FSP then skip attribute sync
             // let the test case force message creation/sending
-            if( !(MBOX::mailbox_enabled()) )
+            if( INITSERVICE::spLess() )
             {
                 break;
             }
@@ -532,7 +533,7 @@ namespace TARGETING
 
         do{
             // if the mailbox is not enabled then skip attribute sync
-            if( !(MBOX::mailbox_enabled()) )
+            if( INITSERVICE::spLess() )
             {
                 TARG_INF( "Mailbox is not enabled, skipping attribute sync" );
                 break;

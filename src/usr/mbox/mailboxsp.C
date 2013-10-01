@@ -136,24 +136,14 @@ errlHndl_t MailboxSp::_init()
         return err;
     }
 
-    bool spless = true;
-
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    TARGETING::SpFunctions spfuncs;
-    if( sys &&
-        sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
-        spfuncs.mailboxEnabled)
-    {
-        spless = false;
-    }
+    bool mbxComm = mailbox_enabled();
 
     // create task before registering the msgQ so any waiting interrupts get
     // handled as soon as the msgQ is registered with the interrupt service
     // provider
     task_create(MailboxSp::msg_handler, NULL);
 
-    if(!spless)
+    if(mbxComm)
     {
         // Initialize the mailbox hardware
         err = mboxInit(iv_trgt);
@@ -178,7 +168,7 @@ errlHndl_t MailboxSp::_init()
                              INTR::ISN_INTERPROC);
 
 
-    if(!spless)
+    if(mbxComm)
     {
         // Send message to FSP on base DMA buffer zone
         msg_t * msg = msg_allocate();

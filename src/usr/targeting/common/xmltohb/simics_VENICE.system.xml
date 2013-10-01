@@ -101,6 +101,7 @@
             <field><id>fsiMasterInit</id><value>0</value></field>
             <field><id>hardwareChangeDetection</id><value>0</value></field>
             <field><id>powerLineDisturbance</id><value>0</value></field>
+            <field><id>baseServices</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>

@@ -25,6 +25,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <vpd/vpdreasoncodes.H>
+#include <initservice/initserviceif.H>
 #include "vpd.H"
 
 // ----------------------------------------------
@@ -279,13 +280,13 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                    i_record.rec_num,
                    i_record.offset );
 
-        //Create a mbox message with the error log and send it to FSP
-        //We only send error log to FSP when mailbox is enabled
-        if( !MBOX::mailbox_enabled() )
+        //We only send VPD update when we have an FSP
+        if( INITSERVICE::spLess() )
         {
             TRACFCOMP(g_trac_vpd, INFO_MRK "Mailbox is disabled, skipping VPD write");
             TRACFBIN( g_trac_vpd, "msg=", msg, sizeof(msg_t) );
             TRACFBIN( g_trac_vpd, "extra=", msg->extra_data, i_numBytes );
+            break;
         }
 
         l_err = MBOX::send( MBOX::FSP_VPD_MSGQ, msg );

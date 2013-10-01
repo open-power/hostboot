@@ -177,9 +177,10 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
 
     do
     {
-        if( !spLess() )
+        if( MBOX::mailbox_enabled() )
         {
-            //  register message Q with FSP Mailbox - only if Fsp attached.
+            //  register message Q with FSP Mailbox - only if mailbox
+            //  enabled
             err = MBOX::msgq_register( MBOX::HB_ISTEP_MSGQ,
                                        iv_msgQ );
 
@@ -187,6 +188,12 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
             {
                 break;
             }
+        }
+        else
+        {
+            assert(spLess()); // If the mailbox is disabled, we better be in
+                              // spLess mode.  Otherwise, attributes are set
+                              // incorrectly.
         }
 
         // Spawn off the Worker thread
@@ -233,7 +240,7 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
             TRACFCOMP( g_trac_initsvc,
                        "IStep run all" );
 
-            if(!spLess())
+            if(MBOX::mailbox_enabled())
             {
                 // Read the attribute indicating if the FSP has overrides
                 // and get the overrides if it does
@@ -915,7 +922,7 @@ void IStepDispatcher::handleBreakpoint ( uint32_t i_info )
     myMsg->data[1] = 0x0;
     myMsg->extra_data = NULL;
 
-    if( !spLess() )
+    if( MBOX::mailbox_enabled() )
     {
         // FSP Attached
         // Wait for Fsp to respond.

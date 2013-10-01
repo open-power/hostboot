@@ -1564,6 +1564,7 @@ sub generate_sys
     <attribute>
         <id>SP_FUNCTIONS</id>
         <default>
+            <field><id>baseServices</id><value>1</value></field>
             <field><id>fsiSlaveInit</id><value>1</value></field>
             <field><id>mailboxEnabled</id><value>1</value></field>
             <field><id>fsiMasterInit</id><value>1</value></field>

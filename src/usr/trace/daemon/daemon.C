@@ -426,8 +426,6 @@ namespace TRACEDAEMON
         TARGETING::Target* sys = NULL;
         TARGETING::targetService().getTopLevelTarget(sys);
 
-        TARGETING::SpFunctions spFunctions =
-            sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
         TARGETING::HbSettings hbSettings =
             sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
 
@@ -447,7 +445,7 @@ namespace TRACEDAEMON
         }
         else
         {
-            if (spFunctions.mailboxEnabled)
+            if (MBOX::mailbox_enabled())
             {
                 msg_t* msg = msg_allocate();
                 msg->type = DaemonIf::TRACE_CONT_TRACE_BUFFER;
