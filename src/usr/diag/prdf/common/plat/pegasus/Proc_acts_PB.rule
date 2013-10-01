@@ -2528,19 +2528,27 @@ group gPciNestFir filter singlebit
 
     /** PCINESTFIR_0[15]
      *  PCI_CLOCK_ERROR
+     *
+     *  These should never trigger directly themselves.
+     *  Should be handled by global PRD PLL code.
      */
-    # FIXME RTC 23127 Clock Isolate is under discussion
-    (PciNestFir_0, bit(15)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(15)) ? threshold32pday;
 
     /** PCINESTFIR_1[15]
      *  PCI_CLOCK_ERROR
+     *
+     *  These should never trigger directly themselves.
+     *  Should be handled by global PRD PLL code.
      */
-    (PciNestFir_1, bit(15)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(15)) ? threshold32pday;
 
     /** PCINESTFIR_2[15]
      *  PCI_CLOCK_ERROR
+     *
+     *  These should never trigger directly themselves.
+     *  Should be handled by global PRD PLL code.
      */
-    (PciNestFir_2, bit(15)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(15)) ? threshold32pday;
 
     /** PCINESTFIR_0[16]
      *  AIB_FENCE
