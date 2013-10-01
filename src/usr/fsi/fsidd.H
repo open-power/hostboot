@@ -31,20 +31,8 @@
 #include <attributestructs.H>
 #include <sys/task.h>
 #include <usr/fsi/fsiif.H>
-
-
-
-/* Defines for FsiDD::getFsiFFDC() */
-enum ErrlVersion
-{
-    FsiFFDC_Ver1    = 1,
-};
-
-enum ErrlSubsect
-{
-    FsiFFDC_CapData_1    = 1,
-};
-
+#include <usr/fsi/fsi_reasoncodes.H>
+namespace FSI { class UdPresence; }
 
 /** @file fsidd.H
  *  @brief Provides the definition of the FSI Device Driver class
@@ -98,34 +86,40 @@ class FsiDD
      * @param[in] i_fsiMaster  FSI Master chip
      * @param[in] i_type  FSI Master Type (MFSI or cMFSI)
      * @param[in] i_port  Slave port number
+     * @param[out] o_detected  Bitstring of detected slaves
      * 
      * @return bool  true if port sensed as active during FSI initialization
      */
     bool isSlavePresent( TARGETING::Target* i_fsiMaster,
                          TARGETING::FSI_MASTER_TYPE i_type,
-                         uint8_t i_port );
+                         uint8_t i_port,
+                         uint8_t& o_detected );
 
     /**
      * @brief Retrieves the FSI status of a given chip
      *
      * @param[in] i_target
+     * @param[out] o_detected  Bitstring of detected slaves
      * 
      * @return bool  true if port sensed as active during FSI initialization
      */
-    bool isSlavePresent( TARGETING::Target* i_target );
+    bool isSlavePresent( TARGETING::Target* i_target,
+                         uint8_t& o_detected  );
 
     /**
      * @brief Add FFDC for the target to an error log
      *
      * @param[in] i_ffdc_type   Type of FFDC to add
      * @param[in,out] io_log   Error Log to add FFDC to
-     * @param[in] i_target      FSI Target
+     * @param[in] i_target     Chip Target, for OPB_FAIL this should
+     *    be the FSI Master, otherwise it should be the target of
+     *    the FSI operation (i.e. the FSI Slave)
      *
      * @return void
      */
     void getFsiFFDC( FSI::fsiFFDCType_t  i_ffdc_type,
-                     errlHndl_t          &io_log ,
-                     TARGETING::Target*  i_target);
+                     errlHndl_t          &io_log,
+                     TARGETING::Target*  i_target );
 
   protected:
     /**
@@ -166,6 +160,35 @@ class FsiDD
                      uint32_t* i_buffer);
 
     /**
+     * Common id to identify a FSI position to use in error logs and traces
+     */
+    union FsiLinkId_t
+    {
+        uint32_t id;
+        struct
+        {
+            uint8_t node; ///< Physical Node of FSI Master processor
+            uint8_t proc; ///< Physical Position of FSI Master processor
+            uint8_t type; ///< FSI Master type (FSI_MASTER_TYPE)
+            uint8_t port; ///< Slave link/port number
+        };
+    };
+
+    /**
+     * @brief Structure which defines info necessary to access a chip via FSI
+     */
+    struct FsiChipInfo_t
+    {
+        TARGETING::Target* slave; //< FSI Slave chip
+        TARGETING::Target* master; ///< FSI Master
+        TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
+        uint8_t port; ///< Which port is this chip hanging off of
+        uint8_t cascade; ///< Slave cascade position
+        uint16_t flags; ///< Reserved for any special flags we might need
+        FsiLinkId_t linkid; ///< Id for traces and error logs
+    };
+
+    /**
      * @brief Holds a set of addressing information to describe the
      *   current FSI operation 
      */
@@ -174,6 +197,7 @@ class FsiDD
         TARGETING::Target* opbTarg; ///< OPB control reg target
         uint32_t relAddr; ///< Input FSI address (relative to fsiTarg)
         uint32_t absAddr; ///< Absolute FSI address (relative to opbTarg)
+        FsiChipInfo_t accessInfo; ///< FSI Access Info
 
         /** Input Arg Constructor */
         FsiAddrInfo_t( TARGETING::Target* i_target,
@@ -222,36 +246,6 @@ class FsiDD
      */
     errlHndl_t initMasterControl(TARGETING::Target* i_master,
                                  TARGETING::FSI_MASTER_TYPE i_type);
-
-    /**
-     * Common id to identify a FSI position to use in error logs and traces
-     */
-    union FsiLinkId_t
-    {
-        uint32_t id;
-        struct
-        {
-            uint8_t node; ///< Physical Node of FSI Master processor
-            uint8_t proc; ///< Physical Position of FSI Master processor
-            uint8_t type; ///< FSI Master type (FSI_MASTER_TYPE)
-            uint8_t port; ///< Slave link/port number
-        };
-    };
-
-    /**
-     * @brief Structure which defines info necessary to access a chip via FSI
-     */
-    struct FsiChipInfo_t
-    {
-        TARGETING::Target* slave; //< FSI Slave chip
-        TARGETING::Target* master; ///< FSI Master
-        TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
-        uint8_t port; ///< Which port is this chip hanging off of 
-        uint8_t cascade; ///< Slave cascade position
-        uint16_t flags; ///< Reserved for any special flags we might need
-        FsiLinkId_t linkid; ///< Id for traces and error logs
-    };
-
 
     /**
      * @brief Initializes the FSI link to allow slave access
@@ -393,6 +387,7 @@ class FsiDD
         // Bit masks
         OPB_STAT_BUSY       = 0x00010000, /**< Bit 15 is the Busy bit */
         OPB_STAT_READ_VALID = 0x00020000, /**< Bit 14 is the Valid Read bit */
+        OPB_STAT_ERRACK     = 0x00100000, /**< 11 is OPB errAck */
         OPB_STAT_ERR_OPB    = 0x09F00000, /**< 4,7-11 are OPB errors */
         OPB_STAT_ERR_CMFSI  = 0x0000FC00, /**< 16-21 are cMFSI errors */
         OPB_STAT_ERR_MFSI   = 0x000000FC, /**< 24-29 are MFSI errors */
@@ -435,7 +430,8 @@ class FsiDD
         FSI_MSCSB0_1D4  = 0x1D4,
         FSI_MATRB0_1D8  = 0x1D8,
         FSI_MDTRB0_1DC  = 0x1DC,
-        FSI_MECTRL_2E0  = 0x2E0
+        FSI_MECTRL_2E0  = 0x2E0,
+        FSI_CTLREG_MASK = 0x2FF
     };
 
 
@@ -486,11 +482,41 @@ class FsiDD
     /**
      * @brief Clear out the error indication so that we can do more FSI ops
      *
-     * @param[in] i_target  Target of FSI Slave in error
+     * @param[in] i_addrInfo  FSI Operation in error
+     * @param[in] i_errType  Which type of error is being recovered from
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t errorCleanup( TARGETING::Target* i_fsiTarg );
+    errlHndl_t errorCleanup( FsiAddrInfo_t& i_addrInfo,
+                             FSI::FSIReasonCode i_errType );
+
+    /**
+     * @brief Check for FSI errors anywhere in the system
+     *
+     * @param[in] i_chipInfo  FSI Chip Information
+     *
+     * @return errlHndl_t  NULL on success
+     */
+    errlHndl_t checkForErrors( FsiChipInfo_t& i_chipInfo );
+
+    /**
+     * @brief Check for FSI errors anywhere in the system
+     *
+     * @param[in] i_addrInfo  FSI Operation in error
+     *
+     * @return errlHndl_t  NULL on success
+     */
+    errlHndl_t checkForErrors( FsiAddrInfo_t& i_addrInfo );
+
+    /**
+     * @brief Verify that the slave target was detected
+     *
+     * @param[in] i_target  FSI Slave target
+     *
+     * @return errlHndl_t  NULL on success
+     */
+    errlHndl_t verifyPresent( TARGETING::Target* i_target );
+
 
     /********************************************
      * VARIABLES
@@ -522,7 +548,8 @@ class FsiDD
     // let my testcase poke around
     friend class FsiDDTest;
 
-
+    // let the UserDetails classes see internal structures
+    friend class FSI::UdPresence;
 };
 
 

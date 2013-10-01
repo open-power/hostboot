@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/runtime/errlud_hdat.H $                               */
+/* $Source: src/usr/fsi/errlud_fsi.H $                                    */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,108 +20,77 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef ERRL_UD_HDAT_H
-#define ERRL_UD_HDAT_H
+#ifndef ERRL_UD_FSI_H
+#define ERRL_UD_FSI_H
 
 /**
- *  @file errlud_hdat.H
+ *  @file errlud_fsi.H
  *
  *  Defines the classes that logs and parses various HDAT structures
  */
 
 #include <errl/errluserdetails.H>
-#include "hdatstructs.H"
 
-namespace RUNTIME
+namespace FSI
 {
 
 /**
- * @class UdNaca
+ * @class UdPresence
  *
- * Adds NACA FFDC to an error log as user detail data
+ * Adds FSI Link/Presence information to an error log as user detail data
  */
-class UdNaca : public ERRORLOG::ErrlUserDetails
+class UdPresence : public ERRORLOG::ErrlUserDetails
 {
-public:
+  public:
     /**
      *  @brief Constructor
      *  
-     *  Copies the NACA data into the FFDC data
-     *  
-     *  @param i_naca Pointer to NACA data to capture
+     *  @param i_target  Chip being detected/acted upon
      */
-    UdNaca(hdatNaca_t* i_naca);
+    UdPresence( TARGETING::Target* i_target );
 
     /**
      *  @brief Destructor
      */
-    virtual ~UdNaca();
+    virtual ~UdPresence();
 
-private:
+  private:
     // Disabled
-    UdNaca(UdNaca &);
-    UdNaca & operator=(UdNaca &);
+    UdPresence(UdPresence &);
+    UdPresence & operator=(UdPresence &);
 };
 
-
 /**
- * @class UdSpira
+ * @class UdOperation
  *
- * Adds SPIRA FFDC to an error log as user detail data
+ * Adds FSI Operation Information to an error log as user detail data
  */
-class UdSpira : public ERRORLOG::ErrlUserDetails
+class UdOperation : public ERRORLOG::ErrlUserDetails
 {
-public:
+  public:
     /**
      *  @brief Constructor
-     *  
-     *  Copies the SPIRA data into the FFDC data
-     *  
-     *  @param i_spira Pointer to Spira data to capture
+     *
+     *  @param i_target  Target of FSI Op
+     *  @param i_address  Address of FSI Op
+     *  @param i_readNotWrite  True=read, False=write
      */
-    UdSpira(hdatSpira_t* i_spira);
+    UdOperation( TARGETING::Target* i_target,
+                 uint64_t i_address,
+                 bool i_readNotWrite );
 
     /**
      *  @brief Destructor
      */
-    virtual ~UdSpira();
+    virtual ~UdOperation();
 
-private:
+  private:
     // Disabled
-    UdSpira(UdSpira &);
-    UdSpira & operator=(UdSpira &);
+    UdOperation(UdPresence &);
+    UdOperation & operator=(UdOperation &);
 };
 
-
-/**
- * @class UdSpira
- *
- * Adds a Tuple FFDC to an error log as user detail data
- */
-class UdTuple : public ERRORLOG::ErrlUserDetails
-{
-public:
-    /**
-     *  @brief Constructor
-     *  
-     *  Copies the SPIRA data into the FFDC data
-     *  
-     *  @param i_spira Pointer to Spira data to capture
-     */
-    UdTuple(hdat5Tuple_t* i_spira);
-
-    /**
-     *  @brief Destructor
-     */
-    virtual ~UdTuple();
-
-private:
-    // Disabled
-    UdTuple(UdSpira &);
-    UdTuple & operator=(UdSpira &);
-};
 
 }
 
 #endif
-

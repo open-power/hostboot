@@ -15,3 +15,4 @@ cxxtest_sb/
 testdata
 *.csv
 .nfs*
+hbsandboxrc

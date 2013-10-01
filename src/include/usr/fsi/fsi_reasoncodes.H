@@ -38,6 +38,8 @@ namespace FSI
         MOD_FSIDD_POLLFORCOMPLETE     = 0x06, /**< fsidd.C : FsiDD::pollForComplete */
         MOD_FSIDD_INITPORT            = 0x07, /**< fsidd.C : FsiDD::initPort */
         MOD_FSIDD_GENFULLFSIADDR      = 0x09, /**< fsidd.C : FsiDD::genFullFsiAddr */
+        MOD_FSIDD_CHECKFORERRORS      = 0x0A, /**< fsidd.C : FsiDD::checkForErrors */
+        MOD_FSIDD_VERIFYPRESENT       = 0x0B, /**< fsidd.C : FsiDD::verifyPresent */
 
         MOD_FSIPRES_PROCPRESENCEDETECT  = 0x20, /**< fsipres.C : procPresenceDetect */
         MOD_FSIPRES_MEMBPRESENCEDETECT  = 0x21, /**< fsipres.C : membPresenceDetect */
@@ -62,6 +64,14 @@ namespace FSI
         RC_TARGET_NEVER_DETECTED     = FSI_COMP_ID | 0x0E,
         RC_FSI_MVPD_MISMATCH         = FSI_COMP_ID | 0x0F,
         RC_FSI_CVPD_MISMATCH         = FSI_COMP_ID | 0x10,
+        RC_ERROR_IN_MAEB             = FSI_COMP_ID | 0x11,
+    };
+
+    enum UserDetailsTypes
+    {
+        FSI_UDT_NO_FORMAT       = 0x0,
+        FSI_UDT_PRESENCE        = 0x1,
+        FSI_UDT_OPERATION       = 0x2,
     };
 };
 

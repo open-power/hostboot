@@ -67,9 +67,10 @@ bool isSlavePresent( TARGETING::Target* i_target );
  */
 enum fsiFFDCType_t
 {
-    FFDC_PRESENCE_FAIL  = 0,
-    FFDC_READWRITE_FAIL = 1,
-    FFDC_PIB_FAIL       = 2
+    FFDC_PRESENCE_FAIL   = 0,
+    FFDC_READWRITE_FAIL  = 1,
+    FFDC_PIB_FAIL        = 2,
+    FFDC_OPB_FAIL        = 3,
 };
 
 /**
@@ -77,7 +78,9 @@ enum fsiFFDCType_t
  *
  * @param[in] i_ffdc_type   Type of FFDC to add
  * @param[in/out] i_log     Error Log to add FFDC to
- * @param[in] i_target      FSI Target
+ * @param[in] i_target     Chip Target, for OPB_FAIL this should
+ *    be the FSI Master, otherwise it should be the target of
+ *    the FSI operation (i.e. the FSI Slave)
  *
  * @return void
  */
