@@ -2509,8 +2509,8 @@ sub writeAttrMetadataMapCFile{
                     if(exists $finalAttrhash{$key}->{simpleType}->{string}->
                         {sizeInclNull})
                     {
-                        $keySize = "$keySize"."[$finalAttrhash{$key}->
-                            {simpleType}->{string}->{sizeInclNull}]";
+                        $keySize = "$keySize"."[". $finalAttrhash{$key}->
+                            {simpleType}->{string}->{sizeInclNull} . "]";
                     }
                 }
             }
