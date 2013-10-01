@@ -95,7 +95,7 @@ public:
 
     // enums to indicated non-error reason for a targets deconfiguration.
     //  used in TARGETING::HwasSate.deconfiguredByEid
-    enum
+    enum DeconfiguredByReason
     {
         DECONFIGURED_BY_CODE_BASE               = 0x0000FF00,
 
@@ -114,6 +114,15 @@ public:
 
         // set by deconfigureAssocProc() in hwas/common/deconfigGard.C
         DECONFIGURED_BY_BUS_DECONFIG,           // BASE | 0x05
+
+        // set by prd code, deconfigures at runtime
+        DECONFIGURED_BY_PRD,                    // BASE | 0x06
+
+        // set for PHYP initiated deconfigure
+        DECONFIGURED_BY_PHYP,                   // BASE | 0x07
+
+        // set for SPCN initiated deconfigure
+        DECONFIGURED_BY_SPCN,                   // BASE | 0x08
     };
 
     /**
