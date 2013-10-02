@@ -245,4 +245,19 @@
     <writeable/>
     <hbOnly/>
 </attribute>
+<attribute>
+    <id>HB_PM_SPWUP_OHA_FLAG</id>
+    <description>Flag storage to break the recursive calling loop for when accessing the OHA address space from the Special Wakeup procedure.</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SPWUP_OHA_FLAG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <hbOnly/>
+</attribute>
 </attributes>

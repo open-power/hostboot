@@ -11877,21 +11877,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>PM_SPWUP_OHA_FLAG</id>
-    <description>Flag storage to break the recursive calling loop for when accessing the OHA address space from the Special Wakeup procedure.</description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PM_SPWUP_OHA_FLAG</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>PM_SPWUP_IGNORE_XSTOP_FLAG</id>
     <description>Flag storage to have the Special Wakeup procedure ignore a checkstop condition.</description>
     <simpleType>

@@ -104,4 +104,11 @@
     </attribute>
 </targetTypeExtension>
 
+<targetTypeExtension>
+    <id>unit-ex-power8</id>
+    <attribute>
+        <id>HB_PM_SPWUP_OHA_FLAG</id>
+    </attribute>
+</targetTypeExtension>
+
 </attributes>

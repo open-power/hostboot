@@ -201,7 +201,6 @@
     <attribute><id>RUN_MAX_MEM_PATTERNS</id></attribute>
     <attribute><id>LAB_USE_JTAG_MODE</id></attribute>
     <attribute><id>MSS_CONTROL_SWITCH</id></attribute>
-    <attribute><id>IS_MPIPL_HB</id></attribute>
     <attribute><id>DISABLE_I2C_ACCESS</id></attribute>
     <attribute><id>PROC_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>PCI_REFCLOCK_RCVR_TERM</id></attribute>
@@ -562,7 +561,6 @@
     <attribute><id>OVERRIDE_MVPD_I_NEST_LAB_CURRENT</id></attribute>
     <attribute><id>OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id></attribute>
     <attribute><id>OVERRIDE_MVPD_I_CS_LAB_CURRENT</id></attribute>
-    <attribute><id>PM_SPWUP_OHA_FLAG</id></attribute>
     <attribute><id>PM_SPWUP_IGNORE_XSTOP_FLAG</id></attribute>
 </targetType>
 
