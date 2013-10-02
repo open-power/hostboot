@@ -20,14 +20,19 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.5 2013/05/03 16:10:11 jimyac Exp $ -->
+<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.7 2013/09/17 16:37:19 jimyac Exp $ -->
 <!-- Error definitions for p8_build_pstate_datablock procedure -->
 <hwpErrors>
  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_PSTATE_DATABLOCK_MVPD_BUFFER_SIZE_ERROR</rc>
-    <description>MVPD Buffer returned is wrong size</description>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PDV_BUFFER_SIZE_ERROR</rc>
+    <description>#V Buffer returned is wrong size</description>
   </hwpError> 
+ <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PDM_BUFFER_SIZE_ERROR</rc>
+    <description>#M Buffer returned is wrong size</description>
+  </hwpError>   
  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL</rc>
@@ -60,4 +65,28 @@
     <description>Procedure gpst_create() returned an error</description>
     <ffdc>RETURN_CODE</ffdc>
   </hwpError>  
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_ERROR</rc>
+    <description>Procedure lpst_create() returned an error</description>
+    <ffdc>RETURN_CODE</ffdc>
+  </hwpError>    
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PSTATE_MINMAX_BOUNDS_ERROR</rc>
+    <description>freq2pState returned error - computed pstate for freq is out of bounds of MAX/MIN possible</description>
+    <ffdc>RETURN_CODE</ffdc>
+  </hwpError>      
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PSTATE_GT_GPSTPMAX_ERROR</rc>
+    <description>pstate_minmax_chk returned error -  Computed pstate is greater than max pstate in gpst</description>
+    <ffdc>RETURN_CODE</ffdc>
+  </hwpError>        
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_ERROR</rc>
+    <description>Bad Return code</description>
+    <ffdc>RETURN_CODE</ffdc>
+  </hwpError>      
 </hwpErrors>

@@ -171,15 +171,6 @@
         <default>4</default>
     </attribute>
     <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PROC_R_LOADLINE</id>
-        <default>890</default>
-    </attribute>
-    <attribute><id>PROC_R_DISTLOSS</id>
-        <default>100</default>
-    </attribute>
-    <attribute><id>PROC_VRM_VOFFSET</id>
-        <default>1000</default>
-    </attribute>
     <attribute><id>FREQ_CORE_MAX</id>
         <default>4000</default>
     </attribute>
@@ -336,12 +327,6 @@
         <default>1</default>
     </attribute>
     <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
-        <default>900</default>
-    </attribute>
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
-        <default>1250</default>
-    </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0x4</default><!-- PORT0NONRED -->
     </attribute>
@@ -1070,12 +1055,6 @@
         <default>1</default>
     </attribute>
     <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
-        <default>900</default>
-    </attribute>
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
-        <default>1250</default>
-    </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0x0</default><!-- NONE -->
     </attribute>
@@ -1809,12 +1788,6 @@
         <default>1</default>
     </attribute>
     <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
-        <default>900</default>
-    </attribute>
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
-        <default>1250</default>
-    </attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
     <attribute><id>PM_SLEEP_TYPE</id></attribute>
@@ -2545,12 +2518,6 @@
         <default>1</default>
     </attribute>
     <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
-        <default>900</default>
-    </attribute>
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
-        <default>1250</default>
-    </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0x0</default><!-- NONE -->
     </attribute>

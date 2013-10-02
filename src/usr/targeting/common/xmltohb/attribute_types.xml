@@ -4353,52 +4353,6 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 </attribute>
 
 <attribute>
-    <id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
-    <description>
-      PROC_CHIP Attribute
-      Minimum frequency for which undervolting is allowed.  Will be internally
-      rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
-
-      Consumer: OCC FW; OCC Lab Tools
-
-      Provided by the Machine Readable Workbook.
-    </description>
-    <simpleType>	
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
-    <description>
-      PROC_CHIP Attribute
-      Maximum frequency for which undervolting is allowed.  Will be internally
-      rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
-
-      Consumer: OCC FW; OCC Lab Tools
-
-      Provided by the Machine Readable Workbook.
-    </description>
-    <simpleType>	
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>PM_SPIVID_FREQUENCY</id>
     <description>
       SYSTEM Attribute
@@ -4679,75 +4633,6 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_PBAX_BRDCST_ID_VECTOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PROC_R_LOADLINE</id>
-    <description>
-      SYSTEM Attribute
-      Impedance (binary microOhms) of the load line from a processor VRM to the
-      Processor Module pins.  This value is applied to each processor instance.
-
-      Consumers: proc_build_gpstate_table.C
-
-      Provided by the Machine Readable Workbook (via the power subsystem design
-      per system)
-    </description>
-    <simpleType>	
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_LOADLINE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PROC_R_DISTLOSS</id>
-    <description>
-      SYSTEM Attribute
-      Impedance (binary in microOhms) of the distribution loss the sense point
-      to the circuit. This value is applied to each processor instance.
-
-      Consumers: proc_build_gpstate_table.C
-
-      Provided by the Machine Readable Workbook (via the power subsystem design
-      per system)
-    </description>
-    <simpleType>	
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_DISTLOSS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PROC_VRM_VOFFSET</id>
-    <description>
-      SYSTEM Attribute
-      Offset voltage (binary in microvolts) to apply to the VRM distribution to
-      the processor module.  This value is applied to each processor instance.
-
-      Consumers: proc_build_gpstate_table.C
-
-      Provided by the Machine Readable Workbook (via the power subsystem design
-      per system)
-    </description>
-    <simpleType>	
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_VRM_VOFFSET</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -12299,6 +12184,514 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_DMI_DFE_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VDD</id>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VCS</id>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CPM_TURBO_BOOST_PERCENT</id>
+    <description>
+     Percent of Boost Above Turbo for CPMs - (binary in 0.1 percent steps)
+
+     Used in generating extra Pstate tables beyond those that would result from
+     #V data.
+
+     Producer:  DEF file as this is CCIN based
+
+     Consumers: p8_build_gpstate_table.C, p8_cpm_cal_load.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CPM_TURBO_BOOST_PERCENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_LOADLINE_VDD</id>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VDD VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+
+      Consumers: p8_build_gpstate_table.C
+
+      Provided by the Machine Readable Workbook (via the power subsystem design
+      per system)
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_LOADLINE_VCS</id>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VCS VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VDD</id>
+    <description>
+      Impedance (binary in microOhms) of the VDD distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VCS</id>
+    <description>
+      Impedance (binary in microOhms) of the VCS distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_EXT_BIAS_UP</id>
+    <description>
+     Frequency Bias - % of bias upward (binary in 0.5 percent steps) in generating
+     Pstate tables.  Either this or FREQ_EXT_BIAS_DOWN can have non-zero value
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_EXT_BIAS_UP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_EXT_BIAS_DOWN</id>
+    <description>
+     Frequency Bias - % of bias downward (binary in 0.5 percent steps) in generating
+     Pstate tables.  Either this or FREQ_EXT_BIAS_UP can have non-zero value
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_EXT_BIAS_DOWN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VDD_BIAS_UP</id>
+    <description>
+     External VDD Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
+     is applied to each VPD point in generating the Global Pstate tables. Either 
+     this or ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN can have non-zero value concurrently due to
+     the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_UP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VDD_BIAS_DOWN</id>
+    <description>
+     External VDD Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
+     is applied to each VPD point in generating the Global Pstate tables. Either 
+     this or ATTR_VOLTAGE_EXT_VDD_BIAS_UP can have non-zero value concurrently due to
+     the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VCS_BIAS_UP</id>
+    <description>
+     External VCS Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
+     is applied to each VPD point in generating the Global Pstate tables. Either 
+     this or ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN can have non-zero value concurrently due to
+     the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VCS_BIAS_UP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VCS_BIAS_DOWN</id>
+    <description>
+     External VCS Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
+     is applied to each VPD point in generating the Global Pstate tables. Either 
+     this or ATTR_VOLTAGE_EXT_VCS_BIAS_UP can have non-zero value concurrently due to
+     the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VDD_BIAS_UP</id>
+    <description>
+     Internal VDD Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
+     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias 
+     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_DOWN can have non-zero value 
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_UP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VDD_BIAS_DOWN</id>
+    <description>
+     Internal VDD Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
+     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias 
+     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_UP can have non-zero value 
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_DOWN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VCS_BIAS_UP</id>
+    <description>
+     Internal VCS Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
+     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias 
+     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_DOWN can have non-zero value 
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VCS_BIAS_UP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VCS_BIAS_DOWN</id>
+    <description>
+     Internal VCS Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
+     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias 
+     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_UP can have non-zero value 
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <simpleType>	
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VCS_BIAS_DOWN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
+    <description>
+      Override for Minimum frequency for which undervolting is allowed.
+      
+      If value = 0, the value of VPD CPMin data point is passed to OCC FW via 
+      Pstate SuperStructure.
+      
+      If value != 0, this value will be passed to OCC FW via Pstate SuperStructure
+      as the floor frequency for enabled CPMs.
+      
+      Will be internally rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
+
+      Consumer: OCC FW; OCC Lab Tools
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType>	
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_UNDERVOLTING_FRQ_MINIMUM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>
+    <description>
+      Override for Maximum frequency for which undervolting is allowed.
+      
+      If value = 0, the value of VPD Turbo data point is passed to OCC FW via 
+      Pstate SuperStructure.
+      
+      If value != 0, this value will be passed to OCC FW via Pstate SuperStructure
+      as the ceiling frequency for enabled CPMs.
+      
+      Will be internally rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
+
+      Consumer: OCC FW; OCC Lab Tools
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType>	
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_UNDERVOLTING_FREQ_MAXIMUM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_WINKLE_ENTRY</id>
+    <description>Setting depends on di/dt charateristics of the system.
+
+        Set Assisted if power off serialization is needed and WINKLE_TYPE=Fast;  
+        Set to Hardware if the system can handle the unrelated powering off between cores.  
+        Hardware setting decreases entry latency
+
+        Producer: MRWB
+
+        Consumer:  p8_poreslw_init.C
+    </description>
+    <simpleType>	
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_WINKLE_ENTRY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_WINKLE_EXIT</id>
+    <description>Setting depends on di/dt charateristics of the system and the setting of ATTR_PM_WINKLE_TYPE.
+
+        Set to Assisted if power on serialization is needed and WINKLE_TYPE=Fast;  Set to Hardware if the system 
+        can handle the unrelated powering off between cores.  Hardware setting decreases entry latency.
+        Must be set to Assisted if ATTR_PM_WINKLE_TYPE=Deep as this necessary for restore.
+
+        Setting to Hardware is a test mode for Fast only.
+
+        Producer: MRWB
+
+        Consumer:  p8_poreslw_init.C
+    </description>
+    <simpleType>	
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_WINKLE_EXIT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

@@ -23,7 +23,7 @@
 #ifndef __LAB_PSTATES_H__
 #define __LAB_PSTATES_H__
 
-// $Id: lab_pstates.h,v 1.4 2013/06/12 20:01:48 mjjones Exp $
+// $Id: lab_pstates.h,v 1.5 2013/08/13 17:12:56 jimyac Exp $
 
 /// \file lab_pstates.h
 /// \brief Lab-only (as opposed to product-procedure) support for Pstates.
@@ -66,19 +66,19 @@ ivid2vuv(uint8_t ivid, uint32_t *v_uv);
 int
 sprintf_10uv(char *s, uint32_t v_uv);
 
-int
-sprintf_ivid(char *s, uint8_t ivid);
-
-int
-sprintf_vrm11(char *s, uint8_t vrm11);
-
 #ifdef FAPIECMD
 
 int
 fprintf_10uv(FILE *stream, uint32_t v_uv);
 
 int
+sprintf_vrm11(char *s, uint8_t vrm11);
+
+int
 fprintf_vrm11(FILE *stream, uint8_t vrm11);
+
+int
+sprintf_ivid(char *s, uint8_t ivid);
 
 int
 fprintf_ivid(FILE *stream, uint8_t ivid);
@@ -90,10 +90,14 @@ void
 lpsa_print(FILE* stream, LocalPstateArray* lpsa);
 
 void
+cpmrange_print(FILE* stream, CpmPstateModeRanges* cpmrange);
+
+void
 resclk_print(FILE* stream, ResonantClockingSetup* resclk);
 
 void
 pss_print(FILE* stream, PstateSuperStructure* pss);
+
 #endif // FAPIECMD
 
 #endif // __ASSEMBLER__

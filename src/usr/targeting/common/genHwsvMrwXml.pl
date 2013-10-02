@@ -1495,15 +1495,6 @@ sub generate_sys
     #todo-RTC:52835
     print "
     <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PROC_R_LOADLINE</id>
-        <default>890</default>
-    </attribute>
-    <attribute><id>PROC_R_DISTLOSS</id>
-        <default>100</default>
-    </attribute>
-    <attribute><id>PROC_VRM_VOFFSET</id>
-        <default>1000</default>
-    </attribute>
     <attribute><id>FREQ_CORE_MAX</id>
         <default>4000</default>
     </attribute>
@@ -1929,12 +1920,6 @@ sub generate_proc
     #@todo-RTC:52835
     print "
     <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
-        <default>900</default>
-    </attribute>
-    <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
-        <default>1250</default>
-    </attribute>
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>

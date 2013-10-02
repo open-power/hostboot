@@ -23,7 +23,7 @@
 #ifndef __PSTATES_H__
 #define __PSTATES_H__
 
-// $Id: pstates.h,v 1.6 2013/05/02 17:33:33 jimyac Exp $
+// $Id: pstates.h,v 1.8 2013/09/17 16:36:40 jimyac Exp $
 
 /// \file pstates.h
 /// \brief Pstate structures and support routines for OCC product firmware
@@ -41,8 +41,11 @@
 /// The Global Pstate table has 128 * 8-byte entries
 #define GLOBAL_PSTATE_TABLE_ENTRIES 128
 
-/// The Local Pstate array has 96 x 64-bit entries
-#define LOCAL_PSTATE_ARRAY_ENTRIES 96
+/// The Local Pstate table has 32 x 64-bit entries
+#define LOCAL_PSTATE_ARRAY_ENTRIES 32
+
+/// The VDS/VIN table has 32 x 64-bit entries
+#define VDSVIN_ARRAY_ENTRIES       64 
 
 /// The VRM-11 VID base voltage in micro-Volts
 #define VRM11_BASE_UV 1612500
@@ -55,6 +58,9 @@
 
 /// The iVID step as an unsigned number (micro-Volts)
 #define IVID_STEP_UV 6250
+
+///  CPM Inflection Points
+#define CPM_RANGES 8
 
 // Error/Panic codes for support routines
 
@@ -78,10 +84,11 @@
 #define GPST_PSTATE_CLIPPED_LOW  0x00477804
 #define GPST_PSTATE_CLIPPED_HIGH 0x00477805
 #define GPST_BUG                 0x00477806
+#define GPST_PSTATE_GT_GPST_PMAX 0x00477807
 
 #define LPST_INVALID_OBJECT      0x00477901 
-
-
+#define LPST_GPST_WARNING        0x00477902 
+#define LPST_INCR_CLIP_ERROR     0x00477903
 
 /// PstateSuperStructure Magic Number
 ///
@@ -126,6 +133,8 @@
 #ifndef __ASSEMBLER__
 
 #include <stdint.h>
+
+#include <p8_ivrm.H>
 
 /// A Global Pstate Table Entry, in the form of a packed 'firmware register'
 ///
@@ -229,6 +238,50 @@ typedef union lpst_entry {
 
 } lpst_entry_t;
 
+
+/// A VDS/VIN table Entry
+
+typedef union vdsvin_entry {
+    uint64_t value;
+    struct {
+#ifdef _BIG_ENDIAN
+        uint32_t high_order;
+        uint32_t low_order;
+#else
+        uint32_t low_order;
+        uint32_t high_order;
+#endif // _BIG_ENDIAN
+    } words;
+    struct {
+#ifdef _BIG_ENDIAN
+    uint64_t ivid0             : 7;
+    uint64_t ivid1             : 7;
+    uint64_t reserved14        : 2;    
+    uint64_t pfet0             : 5; 
+    uint64_t pfet1             : 5; 
+    uint64_t pfet2             : 5; 
+    uint64_t pfet3             : 5; 
+    uint64_t pfet4             : 5; 
+    uint64_t pfet5             : 5; 
+    uint64_t pfet6             : 5; 
+    uint64_t pfet7             : 5;
+    uint64_t reserved_56       : 8;     
+#else
+    uint64_t reserved_56       : 8;
+    uint64_t pfet7             : 5;    
+    uint64_t pfet6             : 5;    
+    uint64_t pfet5             : 5;    
+    uint64_t pfet4             : 5;    
+    uint64_t pfet3             : 5;    
+    uint64_t pfet2             : 5;    
+    uint64_t pfet1             : 5;    
+    uint64_t pfet0             : 5;    
+    uint64_t reserved14        : 2;    
+    uint64_t ivid1             : 7;    
+    uint64_t ivid0             : 7;    
+#endif // _BIG_ENDIAN
+    } fields;
+} vdsvin_entry_t;
 
 /// Standard options controlling Pstate setup and GPSM procedures
 
@@ -366,7 +419,10 @@ typedef struct {
 
 typedef struct {
 
-    /// The array contents
+    /// The vdsvin table contents
+    vdsvin_entry_t vdsvin[VDSVIN_ARRAY_ENTRIES];
+
+    /// The local pstate table contents
     lpst_entry_t pstate[LOCAL_PSTATE_ARRAY_ENTRIES];
 
     /// The number of entries defined in the Local Pstate Table
@@ -416,6 +472,42 @@ typedef struct {
 
 } ResonantClockingSetup;
 
+/// CPM Pstate ranges per mode
+///
+/// These Pstate range specifications apply to all chiplets operating in the
+/// same mode. 
+
+typedef union {
+
+    /// Forces alignment
+    uint64_t quad[2];              
+
+    struct {
+
+        /// Lower limit of each CPM calibration range
+        ///
+        /// The entries in this table are Pstates representing the
+        /// lowest-numbered (lowest-voltage) Pstate of each range. This is the
+        /// inflection point between range N and range N+1.
+        Pstate inflectionPoint[CPM_RANGES];
+
+        /// The number of ranges valid in the \a inflectionPoint table
+        ///
+        /// Validity here is defined by the original characterization
+        /// data. Whether or not OCC will use any particular range is managed
+        /// by OCC.
+        uint8_t validRanges;
+
+        /// The Pstate corresponding to the upper limit of range 0.
+        ///
+        /// This is the "CPmax" for the mode. The "CPmin" for this
+        /// mode is the value of inflectionPoint[valid_ranges - 1].
+        Pstate pMax;
+        
+        uint8_t pad[6];
+    };
+
+} CpmPstateModeRanges;
 
 
 /// The layout of the data created by the Pstate table creation firmware
@@ -442,7 +534,10 @@ typedef struct {
 
     /// Resonant Clocking Setup
     ResonantClockingSetup resclk;
-
+    
+    /// CPM Pstate ranges
+    CpmPstateModeRanges cpmranges;
+    
 } PstateSuperStructure;
 
 
@@ -476,6 +571,9 @@ gpst_vdd2pstate(const GlobalPstateTable* gpst,
                 Pstate* pstate,
                 gpst_entry_t* entry);
 
+int
+pstate_minmax_chk (const GlobalPstateTable* gpst, 
+                   Pstate* pstate);
 
 /// Return the Pmin value associated with a GlobalPstateTable
 static inline Pstate

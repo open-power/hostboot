@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.8 2013/06/12 20:02:07 mjjones Exp $
+// $Id: pstate_tables.c,v 1.10 2013/09/17 16:36:39 jimyac Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -30,11 +30,11 @@
 /// always "given" to OCC either from the FSP (OCC product firmware), or by
 /// being built-in the image (lab images).
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "lab_pstates.h"
 #include "pstate_tables.h"
-
 
 #define MAX(X, Y)                               \
     ({                                          \
@@ -209,7 +209,7 @@ chip_characterization_create(ChipCharacterization *characterization,
 
             ops[gpst_points].idd_ma = vpd[i].idd_500ma * 500;
             ops[gpst_points].ics_ma = vpd[i].ics_500ma * 500;
- 
+
             ops[gpst_points].frequency_khz = vpd[i].frequency_mhz * 1000;
             
             // 'Corrected' voltages values add in the load-line & distribution IR drop
@@ -268,7 +268,9 @@ chip_characterization_create(ChipCharacterization *characterization,
 //
 // \retval -GPST_INVALID_ARGUMENT Either argument was invalid in some way.
 
-#define NEST_FREQUENCY_KHZ 2400000
+// jwy if we use this proc in future, do not use this value for nest freq
+// instead, use the value of attribute ATTR_FREQ_PB
+#define NEST_FREQ_KHZ 2400000
 
 int
 gpst_stepping_setup(GlobalPstateTable* gpst,
@@ -293,13 +295,15 @@ gpst_stepping_setup(GlobalPstateTable* gpst,
         // This is the frequency of the VRM stepper 'tick'. The base time
         // source for VRM stepping is therefore nest clock / 8.
 
-        cycles = (((NEST_FREQUENCY_KHZ / 1000) * vrm_delay_ns) / 1000) /
+        cycles = (((NEST_FREQ_KHZ / 1000) * vrm_delay_ns) / 1000) /
             (1 << LOG2_VRM_STEPDELAY_DIVIDER);
 
         // Normalize the exponential encoding
 
         sigbits = 32 - cntlz32(cycles);
-        stepdelay_range = (sigbits - VRM_STEPDELAY_RANGE_BITS);
+// jwy        stepdelay_range = MAX(0, sigbits - VRM_STEPDELAY_RANGE_BITS);
+       
+       stepdelay_range = (sigbits - VRM_STEPDELAY_RANGE_BITS);
 
         if (stepdelay_range < 0)
         {
@@ -364,12 +368,14 @@ gpst_entry_create(gpst_entry_t *entry, OperatingPoint *op)
     gpe.fields.gpe_field = vid;
 
         __SET(vrm11, ROUND_VOLTAGE_UP, evid_vdd, vdd_corrected_uv); 
-        __SET(vrm11, ROUND_VOLTAGE_UP, evid_vcs, vcs_corrected_uv);
-        __SET(ivid, ROUND_VOLTAGE_DOWN, evid_vdd_eff, vdd_ivrm_effective_uv);
-        __SET(ivid, ROUND_VOLTAGE_DOWN, evid_vcs_eff, vcs_ivrm_effective_uv);
-        __SET(ivid, ROUND_VOLTAGE_DOWN, maxreg_vdd, vdd_maxreg_uv);
-        __SET(ivid, ROUND_VOLTAGE_DOWN, maxreg_vcs, vcs_maxreg_uv);
+        __SET(vrm11, ROUND_VOLTAGE_UP, evid_vcs, vcs_corrected_uv); 
+        __SET(ivid, ROUND_VOLTAGE_DOWN, evid_vdd_eff, vdd_ivrm_effective_uv); 
+        __SET(ivid, ROUND_VOLTAGE_DOWN, evid_vcs_eff, vcs_ivrm_effective_uv); 
+        __SET(ivid, ROUND_VOLTAGE_DOWN, maxreg_vdd, vdd_maxreg_uv);  
+        __SET(ivid, ROUND_VOLTAGE_DOWN, maxreg_vcs, vcs_maxreg_uv); 
 
+       ;  
+        
         // Add the check byte
 
         uint8_t gpstCheckByte(uint64_t gpstEntry);
@@ -510,6 +516,8 @@ gpst_create(GlobalPstateTable *gpst,
  
         // Set the Pmin Pstate
 
+       for (i = 0; i < points; i++) 
+
         entry = 0;
         if (gpst_entry_create(&(gpst->pstate[entry]), &(ops[0]))) {
             rc = -GPST_INVALID_ENTRY;
@@ -576,52 +584,101 @@ gpst_create(GlobalPstateTable *gpst,
 }
 
 
+/// Create a local Pstate table  
+///
+/// \param gpst A pointer to a GlobalPstateTable structure for lookup.  
+///
+/// \param lpsa Apointer to a LocalPstateArray structure to populate
+///
+/// \param dead_zone_5mv dead zone value
+///
+/// \param evrm_delay_ns External VRM delay in nano-seconds
+///
+/// This routine creates a LocalPstateArray by using the dead zone value and
+/// data in the GlobalPstateTable
+///
+/// \retval 0 Success
+///
+/// \retval -LPST_INVALID_OBJECT Either the \a gpst or \a lpsa were NULL (0) or
+/// obviously invalid or incorrectly initialized.
+///
+/// \retval -LPST_INVALID_ARGUMENT indicates that the difference between 
+///  pmax & pmin in gpst is less than deadzone voltage (ie. no data to build lpsa)
 
 int
-lpst_create(const GlobalPstateTable *gpst, LocalPstateArray *lpsa, const uint8_t dead_zone_5mv)
+lpst_create(const GlobalPstateTable *gpst, 
+            LocalPstateArray *lpsa, 
+            const uint8_t dead_zone_5mv, 
+            double volt_int_vdd_bias, 
+            double volt_int_vcs_bias)
 {            
-  int          rc = 0;
+  int          rc  = 0;
   int          i,j;
   gpst_entry_t  entry;
   uint32_t      turbo_uv;              
+  uint32_t      gpst_uv;              
   uint32_t      v_uv;                  
   uint32_t      vdd_uv;                
-  uint8_t       v_ivid;                
+  uint8_t       v_ivid;
+  uint8_t       gpst_ivid;
+  int          lpst_max_found = 0;                
   uint32_t      lpst_max_uv;           
   uint8_t       lpst_entries;          
   uint8_t       lpst_entries_div4;          
   uint8_t       gpst_index;            
-  Pstate        lpst_pmin;             
+  Pstate        lpst_pmin;
+  Pstate        lpst_pstate;
+  Pstate        lpst_max_pstate = 0;             
   uint8_t       vid_incr[3] = {0,0,0}; 
+  uint8_t       steps_above_curr;
+  uint8_t       steps_below_curr; 
+  uint8_t       inc_step;
+  uint8_t       dec_step;
     
   do {
   
     // Basic pointer checks                            
-    if (lpsa == 0) {
+    if ((gpst == 0) || (lpsa == 0)) {
       rc = -LPST_INVALID_OBJECT;                    
       break;                                        
     }                                                 
-  
+
     // ------------------------------------------------------------------   
     // find lspt_max in gpst
     //  - lpst_max is gpst entry that is equal to (turbo_vdd - deadzone)
     // ------------------------------------------------------------------
     entry.value = revle64(gpst->pstate[(gpst->entries)-1].value); 
-    rc          = vrm112vuv(entry.fields.evid_vdd, &turbo_uv);
+    rc          = vrm112vuv(entry.fields.evid_vdd, &turbo_uv);  if (rc) break;  
+      
+    turbo_uv    = (uint32_t) (turbo_uv * volt_int_vdd_bias);
     lpst_max_uv = turbo_uv - (dead_zone_5mv * 5000);     
           
-    for (i = gpst->entries -1 ; i >= 0; i--) {
-       entry.value = revle64(gpst->pstate[i].value);   
-       vrm112vuv(entry.fields.evid_vdd, &v_uv);
+    for (i = gpst->entries - 1 ; i >= 0; i--) {
+      entry.value = revle64(gpst->pstate[i].value);   
+      rc         = vrm112vuv(entry.fields.evid_vdd, &v_uv);  if (rc) break;
+      v_uv        = (uint32_t) (v_uv * volt_int_vdd_bias); 
        
-       if (lpst_max_uv >= v_uv)
-         break;
+      if (lpst_max_uv >= v_uv) {
+        lpst_max_found = 1;
+        lpst_max_pstate = gpst_pmax(gpst) - (gpst->entries - i - 1);
+        break;
+      }  
     }
-
-    lpst_entries = i + 1;
-    lpst_pmin    = 0 - lpst_entries + 1;
     
-// jwy    printf("turbo_uv = %d lpst_max_uv = %d entries = %d lpst_pmin = %d\n", turbo_uv, lpst_max_uv, lpst_entries, lpst_pmin);
+    if (rc) break;    
+    
+    // generate a warning if lpst max not found 
+    //  - indicates that the difference between pmax & pmin in gpst is less than deadzone voltage
+    //  - no data will be in lpst (lpst entries = 0)
+    if (lpst_max_found == 0) {
+      rc = -LPST_GPST_WARNING;
+      break;                    
+    }
+    
+    lpst_entries = gpst->entries;
+    lpst_pmin    = gpst->pmin;
+    
+// jwy    printf("turbo_uv = %d lpst_max_uv = %d entries = %d lpst_pmin = %d lpst_max_pstate = %d i = %d\n", turbo_uv, lpst_max_uv, lpst_entries, lpst_pmin, lpst_max_pstate, i);
     
     // ----------------------------------------------------------------------------
     // now loop over gpst from 0 to lpst_entries and fill in lpst from data in gpst
@@ -631,18 +688,23 @@ lpst_create(const GlobalPstateTable *gpst, LocalPstateArray *lpsa, const uint8_t
     lpst_entries_div4 = lpst_entries/4;    
     if ( lpst_entries % 4 != 0)
        lpst_entries_div4++;
-
+    
+    // current lpst pstate value as table is created   
+    lpst_pstate = gpst_pmin(gpst);
+    
     for (i = 0 ; i < lpst_entries_div4; i++) {
       entry.value = revle64(gpst->pstate[gpst_index].value);
          
       // compute ivid_vdd
-      rc = vrm112vuv(entry.fields.evid_vdd, &vdd_uv);
-      rc = vuv2ivid(vdd_uv, ROUND_VOLTAGE_DOWN, &v_ivid);
+      rc = vrm112vuv(entry.fields.evid_vdd, &vdd_uv);      if (rc) break;
+      vdd_uv    = (uint32_t) (vdd_uv * volt_int_vdd_bias);
+      rc = vuv2ivid(vdd_uv, ROUND_VOLTAGE_DOWN, &v_ivid);  if (rc) break;
       lpsa->pstate[i].fields.ivid_vdd = v_ivid;
       
       // compute ivid_vcs
-      rc = vrm112vuv(entry.fields.evid_vcs, &v_uv);
-      rc = vuv2ivid(v_uv, ROUND_VOLTAGE_DOWN, &v_ivid);
+      rc = vrm112vuv(entry.fields.evid_vcs, &v_uv);     if (rc) break;
+      v_uv    = (uint32_t) (v_uv * volt_int_vcs_bias); 
+      rc = vuv2ivid(v_uv, ROUND_VOLTAGE_DOWN, &v_ivid); if (rc) break;
       lpsa->pstate[i].fields.ivid_vcs = v_ivid;       
       
       // --------------------------------------------------------------
@@ -654,14 +716,37 @@ lpst_create(const GlobalPstateTable *gpst, LocalPstateArray *lpsa, const uint8_t
       
       for (j = 0; j <= 2; j++) {
         gpst_index++;
-        if (gpst_index > lpst_entries)
-          break; 
+        if (gpst_index >= lpst_entries)  
+          break;                        
         
         entry.value = revle64(gpst->pstate[gpst_index].value);
-        rc          = vrm112vuv(entry.fields.evid_vdd, &vdd_uv);
-        rc          = vuv2ivid(vdd_uv, ROUND_VOLTAGE_DOWN, &v_ivid);
+        rc          = vrm112vuv(entry.fields.evid_vdd, &vdd_uv);      if (rc) break;
+        vdd_uv    = (uint32_t) (vdd_uv * volt_int_vdd_bias);        
+        rc          = vuv2ivid(vdd_uv, ROUND_VOLTAGE_DOWN, &v_ivid);  if (rc) break;
         vid_incr[j] = v_ivid - lpsa->pstate[i].fields.ivid_vdd;
+        
+        // point to next lpst pstate
+        lpst_pstate++;
+
+        // the max for this field is 7, so clip to 7 if it's > 7
+        if (vid_incr[j] > 7) {
+          vid_incr[j] = 7; 
+          
+          // if in regulation, return an error
+          if (lpst_pstate <= lpst_max_pstate) {
+            rc = -LPST_INCR_CLIP_ERROR ;
+            break;
+          }  
+         
+          // if not in regulation, return a warning
+          if (lpst_pstate > lpst_max_pstate) { 
+//            rc = 2;         
+//            break;
+          }  
+        }  
+                  
       }
+      if (rc) break;
       
       lpsa->pstate[i].fields.ps1_vid_incr = vid_incr[0]; 
       lpsa->pstate[i].fields.ps2_vid_incr = vid_incr[1];  
@@ -682,18 +767,78 @@ lpst_create(const GlobalPstateTable *gpst, LocalPstateArray *lpsa, const uint8_t
             
       // equations from Josh
       iac_wc     = 1.25 * ( 28.5 * 1.25 - 16 ) * ( 1 - 0.05 * 2) * 40/71;        // testsite equation & ratio of testsite to anticipated produ
-      iac        = 1.25 * (-15.78 -0.618 * sigma + 27.6 * vout/1000) * 40/64;  // product equation & ratio of testsite to actual product
+      iac        = 1.25 * (-15.78 -0.618 * sigma + 27.6 * vout/1000) * 40/64;    // product equation & ratio of testsite to actual product
       pwrratio_f = iac / iac_wc;
-      pwrratio   = (uint8_t)((pwrratio_f*64) + 0.5);
+      
+      if (pwrratio_f >= 1.0)
+        pwrratio   = 63;
+      else  
+        pwrratio   = (uint8_t)((pwrratio_f*64) + 0.5);
       
       lpsa->pstate[i].fields.vdd_core_pwrratio = pwrratio;   
       lpsa->pstate[i].fields.vcs_core_pwrratio = pwrratio;   
       lpsa->pstate[i].fields.vdd_eco_pwrratio  = pwrratio;   
       lpsa->pstate[i].fields.vcs_eco_pwrratio  = pwrratio;   
+      
+      // ------------------------------------
+      // compute increment step and decrement
+      // ------------------------------------
+      //  - look above current pstate to pstate that is >= 25 mV for inc_step  
+      //  - look below current pstate to pstate that is >= 25 mV for dec_step      
 
-      // ??? what should these be ??? set to 1 for now 
-      lpsa->pstate[i].fields.inc_step = 1;
-      lpsa->pstate[i].fields.dec_step = 1;
+      // find # steps above and below current lpst pstate
+      steps_above_curr = gpst_pmax(gpst) - lpst_pstate;
+      steps_below_curr = lpst_pstate     -  gpst_pmin(gpst);
+
+      
+      // start looking above in gpst to find inc_step
+      inc_step = 0; // default
+      
+      for (j = 1; j <= steps_above_curr; j++) {
+        inc_step = j - 1;
+// jwy        printf("%d %d %d\n", lpst_pstate,j, steps_above_curr);
+        entry.value = revle64(gpst->pstate[lpst_pstate - gpst_pmin(gpst) + j].value);       
+        rc         = vrm112vuv(entry.fields.evid_vdd, &gpst_uv);         if (rc) break;
+        gpst_uv     = (uint32_t) (gpst_uv * volt_int_vdd_bias);
+        rc         = vuv2ivid(gpst_uv, ROUND_VOLTAGE_DOWN, &gpst_ivid);  if (rc) break;
+        
+        if ( (gpst_ivid - v_ivid) >= 4)
+          break; 
+      } 
+      
+      if (rc) break;
+      
+      // clip inc_step 
+      if (inc_step > 7) 
+        inc_step = 7;
+      
+      
+      lpsa->pstate[i].fields.inc_step = inc_step;
+// jwy       lpsa->pstate[i].fields.inc_step = 0;               // FIXME - temporary patch!
+
+      // start looking below in gpst to find dec_step
+      dec_step = 0; // default
+      
+      for (j = 1; j <= steps_below_curr; j++) {
+        dec_step = j - 1;
+// jwy        printf("%d %d %d\n", lpst_pstate,j, steps_below_curr);
+        entry.value = revle64(gpst->pstate[lpst_pstate - gpst_pmin(gpst) - j].value);       
+        rc         = vrm112vuv(entry.fields.evid_vdd, &gpst_uv);         if (rc) break;
+        gpst_uv     = (uint32_t) (gpst_uv * volt_int_vdd_bias);
+        rc         = vuv2ivid(gpst_uv, ROUND_VOLTAGE_DOWN, &gpst_ivid);  if (rc) break;
+        
+        if ( (v_ivid - gpst_ivid ) >= 4)
+          break; 
+      } 
+      
+      if (rc) break;
+      
+      // clip dec_step 
+      if (dec_step > 7) 
+        dec_step = 7;      
+      
+      lpsa->pstate[i].fields.dec_step = dec_step;
+// jwy        lpsa->pstate[i].fields.dec_step = 0;             // FIXME - temporary patch!
 
 // jwy      printf (" %d %X %X %f %d %d %d %d\n", i, (uint32_t)lpsa->pstate[i].fields.ivid_vdd, (uint32_t)lpsa->pstate[i].fields.ivid_vcs, pwrratio_f, pwrratio, vid_incr[0], vid_incr[1], vid_incr[2]);
 
@@ -703,14 +848,413 @@ lpst_create(const GlobalPstateTable *gpst, LocalPstateArray *lpsa, const uint8_t
       gpst_index++;
       if (gpst_index > lpst_entries)
         break; 
+        
+       // point to next lpst pstate
+       lpst_pstate++;  
     }
 
     // set these fields in lpst structure    
-    lpsa->pmin    = lpst_pmin;
-    lpsa->entries = lpst_entries;
- 
+    if (lpst_max_found == 0) {
+      lpsa->pmin    = 0;
+      lpsa->entries = 0;
+    }  
+    else {
+      lpsa->pmin    = lpst_pmin;
+      lpsa->entries = lpst_entries;
+    }
+    
   } while (0);               
 
   return rc;            
                       
-} // end lpst_create        
+} // end lpst_create     
+
+// This routine will fully fill out the VDS region table even if 
+// some of the upper entries are not used.
+void
+build_vds_region_table( ivrm_parm_data_t*       i_ivrm_parms,
+                        PstateSuperStructure*   pss)
+{   
+    int         i;
+    uint32_t    vds;
+    uint64_t    beg_offset = 0;
+    uint64_t    end_offset = 0;
+    
+    vds = (i_ivrm_parms->vds_min_range_upper_bound*1000)/IVID_STEP_UV;
+    end_offset = (uint64_t)vds; 
+    
+    for (i = 0; i < i_ivrm_parms->vds_region_entries; i++)
+    {
+        pss->lpsa.vdsvin[i].fields.ivid0 = beg_offset;
+        pss->lpsa.vdsvin[i].fields.ivid1 = end_offset;
+// jwy        printf("  Vds_region[%x]: begin - %02llX, end - %02llX\n", i, beg_offset, end_offset);
+        
+        // Calculate offsets for next entry
+        beg_offset = end_offset + 1;
+        
+        // clip at 127
+        if (beg_offset >= 127)
+          beg_offset = 127;
+        
+        vds =(uint32_t)( (float)end_offset * (1 + ( (float)i_ivrm_parms->vds_step_percent/100)));
+        end_offset = (uint64_t)vds;
+        
+        // clip at 127
+        if (end_offset >= 127)
+          end_offset = 127;       
+    }    
+}
+
+// This routine will fully fill out the VDS region table even if 
+// some of the upper entries are not used.
+void
+fill_vin_table( ivrm_parm_data_t*       i_ivrm_parms,
+                PstateSuperStructure*   pss)
+{  
+    int         s;
+    int         i;
+    int         idx;
+//    uint8_t     pfetstr = 17;
+    
+    i = i_ivrm_parms->vin_table_setsperrow;
+    for (i = 0; i < i_ivrm_parms->vds_region_entries; i++)
+    {
+        for (s = 0; s < i_ivrm_parms->vin_table_setsperrow; s++) {
+            idx = (i*4) + s;
+            pss->lpsa.vdsvin[idx].fields.pfet0 = i_ivrm_parms->forced_pfetstr_value;
+            pss->lpsa.vdsvin[idx].fields.pfet1 = i_ivrm_parms->forced_pfetstr_value;
+            pss->lpsa.vdsvin[idx].fields.pfet2 = i_ivrm_parms->forced_pfetstr_value;
+            pss->lpsa.vdsvin[idx].fields.pfet3 = i_ivrm_parms->forced_pfetstr_value;
+            pss->lpsa.vdsvin[idx].fields.pfet4 = i_ivrm_parms->forced_pfetstr_value;
+            pss->lpsa.vdsvin[idx].fields.pfet5 = i_ivrm_parms->forced_pfetstr_value;
+            pss->lpsa.vdsvin[idx].fields.pfet6 = i_ivrm_parms->forced_pfetstr_value;
+            pss->lpsa.vdsvin[idx].fields.pfet7 = i_ivrm_parms->forced_pfetstr_value;
+
+// jwy            pss->lpsa.vdsvin[idx].fields.pfet0 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
+// jwy            pss->lpsa.vdsvin[idx].fields.pfet1 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17; 
+// jwy            pss->lpsa.vdsvin[idx].fields.pfet2 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17; 
+// jwy            pss->lpsa.vdsvin[idx].fields.pfet3 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
+// jwy            pss->lpsa.vdsvin[idx].fields.pfet4 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
+// jwy            pss->lpsa.vdsvin[idx].fields.pfet5 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
+// jwy            pss->lpsa.vdsvin[idx].fields.pfet6 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
+// jwy            pss->lpsa.vdsvin[idx].fields.pfet7 = pfetstr; pfetstr++; if (pfetstr%32 == 0) pfetstr = 17;
+
+// jwy            printf("  Vin[%d]{%d,%d}: %016llX\n", idx, i, s, pss->lpsa.vdsvin[idx].value);
+            
+            // Byte reverse the entry into the image.
+            pss->lpsa.vdsvin[idx].value = revle64(pss->lpsa.vdsvin[idx].value);                                    
+         } 
+    }
+}
+
+#undef  abs
+#define abs(x) (((x)<0.0)?(-(x)):(x))
+
+void simeq(int n, double A[], double Y[], double X[])
+{
+
+/*      PURPOSE : SOLVE THE LINEAR SYSTEM OF EQUATIONS WITH REAL     */
+/*                COEFFICIENTS   [A] * |X| = |Y|                     */
+/*                                                                   */
+/*      INPUT  : THE NUMBER OF EQUATIONS  n                          */
+/*               THE REAL MATRIX  A   should be A[i][j] but A[i*n+j] */
+/*               THE REAL VECTOR  Y                                  */
+/*      OUTPUT : THE REAL VECTOR  X                                  */
+/*                                                                   */
+/*      METHOD : GAUSS-JORDAN ELIMINATION USING MAXIMUM ELEMENT      */
+/*               FOR PIVOT.                                          */
+/*                                                                   */
+/*      USAGE  :     simeq(n,A,Y,X);                                 */
+/*                                                                   */
+/*                                                                   */
+/*    WRITTEN BY : JON SQUIRE , 28 MAY 1983                          */
+/*    ORIGINAL DEC 1959 for IBM 650, TRANSLATED TO OTHER LANGUAGES   */
+/*    e.g. FORTRAN converted to Ada converted to C                   */
+
+    double *B;           /* [n][n+1]  WORKING MATRIX */
+    int *ROW;            /* ROW INTERCHANGE INDICES */
+    int HOLD , I_PIVOT;  /* PIVOT INDICES */
+    double PIVOT;        /* PIVOT ELEMENT VALUE */
+    double ABS_PIVOT;
+    int i,j,k,m;
+
+    B = (double *)calloc((n+1)*(n+1), sizeof(double));
+    ROW = (int *)calloc(n, sizeof(int));
+    m = n+1;
+
+    /* BUILD WORKING DATA STRUCTURE */
+    for(i=0; i<n; i++){
+      for(j=0; j<n; j++){
+        B[i*m+j] = A[i*n+j];
+      }
+      B[i*m+n] = Y[i];
+    }
+    /* SET UP ROW  INTERCHANGE VECTORS */
+    for(k=0; k<n; k++){
+      ROW[k] = k;
+    }
+
+    /* BEGIN MAIN REDUCTION LOOP */
+    for(k=0; k<n; k++){
+
+      /* FIND LARGEST ELEMENT FOR PIVOT */
+      PIVOT = B[ROW[k]*m+k];
+      ABS_PIVOT = abs(PIVOT);
+      I_PIVOT = k;
+      for(i=k; i<n; i++){
+        if( abs(B[ROW[i]*m+k]) > ABS_PIVOT){
+          I_PIVOT = i;
+          PIVOT = B[ROW[i]*m+k];
+          ABS_PIVOT = abs ( PIVOT );
+        }
+      }
+
+      /* HAVE PIVOT, INTERCHANGE ROW POINTERS */
+      HOLD = ROW[k];
+      ROW[k] = ROW[I_PIVOT];
+      ROW[I_PIVOT] = HOLD;
+
+      /* CHECK FOR NEAR SINGULAR */
+      if( ABS_PIVOT < 1.0E-10 ){
+        for(j=k+1; j<n+1; j++){
+          B[ROW[k]*m+j] = 0.0;
+        }
+// jwy        printf("redundant row (singular) %d \n", ROW[k]);
+      } /* singular, delete row */
+      else{
+
+        /* REDUCE ABOUT PIVOT */
+        for(j=k+1; j<n+1; j++){
+          B[ROW[k]*m+j] = B[ROW[k]*m+j] / B[ROW[k]*m+k];
+        }
+
+        /* INNER REDUCTION LOOP */
+        for(i=0; i<n; i++){
+          if( i != k){
+            for(j=k+1; j<n+1; j++){
+              B[ROW[i]*m+j] = B[ROW[i]*m+j] - B[ROW[i]*m+k] * B[ROW[k]*m+j];
+            }
+          }
+        }
+      }
+      /* FINISHED INNER REDUCTION */
+    }
+
+    /* END OF MAIN REDUCTION LOOP */
+    /* BUILD  X  FOR RETURN, UNSCRAMBLING ROWS */
+    for(i=0; i<n; i++){
+      X[i] = B[ROW[i]*m+n];
+    }
+    free(B);
+    free(ROW);
+} /* end simeq */
+
+
+void fit_file(int n, uint8_t version, double C[], ivrm_cal_data_t* cal_data)
+{
+  int i, j, k;
+  int points;                            
+  double y;
+  double Vd, Vs;
+// jwy  double Vg;
+  double x[30];        /* at least 2n */
+  double A[2500];                             
+  double Y[50];                          
+
+  // -----------------------------------------------------------------------------------------
+  // initialize harcoded values to use for Vs & Vg for version1
+  //   version1 specifies Vd &Vs as uV and 16 bits is not enough to specify values about 65 mV
+  // -----------------------------------------------------------------------------------------  
+  double Vs_v1[13];
+  double Vd_v1[13];
+   Vd_v1[0]  = 700;    Vs_v1[0]  = 888;
+   Vd_v1[1]  = 831;    Vs_v1[1]  = 1033;
+   Vd_v1[2]  = 787;    Vs_v1[2]  = 1033;
+   Vd_v1[3]  = 718;    Vs_v1[3]  = 1033;
+   Vd_v1[4]  = 962;    Vs_v1[4]  = 1179;
+   Vd_v1[5]  = 918;    Vs_v1[5]  = 1179;
+   Vd_v1[6]  = 850;    Vs_v1[6]  = 1179;
+   Vd_v1[7]  = 750;    Vs_v1[7]  = 1179;
+   Vd_v1[8]  = 1093;   Vs_v1[8]  = 1325;
+   Vd_v1[9]  = 1050;   Vs_v1[9]  = 1325;
+   Vd_v1[10] = 981;    Vs_v1[10] = 1325;
+   Vd_v1[11] = 881;    Vs_v1[11] = 1325;
+   Vd_v1[12] = 731;    Vs_v1[12] = 1325;
+    
+  points = cal_data->point_valid;      
+  
+  for(i=0; i<n; i++)
+  {
+    for(j=0; j<n; j++)
+    {
+      A[i*n+j] = 0.0;
+    }
+    Y[i] = 0.0;
+  }
+  
+  x[0]=1.0;
+  
+  for (k = 0; k <= points-1; k++) {
+
+    if (version == 0) {   
+      Vd = Vd_v1[k]; 
+      Vs = Vs_v1[k]; 
+// jwy      Vg = (double)cal_data->point[k].gate_voltage/1000;         // uV
+      y  = ((double)cal_data->point[k].drain_current)/1000;      // uA 
+    } 
+    else if (version == 1 || version == 2){
+      Vd = (double)cal_data->point[k].drain_voltage;             // mV
+      Vs = (double)cal_data->point[k].source_voltage;            // mV
+// jwy      Vg = (double)cal_data->point[k].gate_voltage/1000;         // uV
+      y  = ((double)cal_data->point[k].drain_current)/1000;      // uA   
+    }
+    else {                                                       //simulation data
+      Vd = (double)cal_data->point[k].drain_voltage;             // mV
+      Vs = (double)cal_data->point[k].source_voltage;            // mV
+// jwy      Vg = (double)cal_data->point[k].gate_voltage;              // mV
+      y  = ((double)cal_data->point[k].drain_current)/1000;      // uA       
+    }
+   
+// jwy    printf (" %f %f %f %f\n", Vd, Vs, Vg, y );
+
+    x[1]=Vs/1.11;      // x[1] = target Vin = Vgs / 1.11
+    x[2]=Vs/1.11-Vd;   // x[2] = target Vds = Vin/1.11 - Vout = Vs/1.11 - Vd
+    x[3]=x[1]*x[2];    // x[3] = Vin*Vds
+    
+// jwy    if (Vg>20) { printf("ERROR:   gate voltage > 20mV:   current=%lf, Vd=%lf, Vs=%lf, Vg=%lf\n", y, Vd, Vs, Vg); }
+    
+    for(i=0; i<n; i++) {
+      for(j=0; j<n; j++) {
+        A[i*n+j] = A[i*n+j] + x[i]*x[j];
+      }
+      Y[i] = Y[i] + y*x[i];
+    }
+  }
+  
+  simeq(n, A, Y, C);
+  
+// jwy  for(i=0; i<n; i++) printf("C[%d]=%g \n", i, C[i]);
+} /* end fit_file */
+
+// jwy void dec2bin(int h, int n) {
+// jwy    int i;
+// jwy    char b[12];
+// jwy    if (n>12) { n = 12; }
+// jwy     for( i = n-1; i >= 0; i--) {
+// jwy         if( (1 << i) & h) {
+// jwy            b[n - i] = '1';
+// jwy            printf("%c",b[n-i]);
+// jwy         } else {
+// jwy            b[n - i] = '0';
+// jwy            printf("%c",b[n-i]);
+// jwy         }
+// jwy    }
+// jwy 
+// jwy    b[n] = 0; // ascii terminating character
+// jwy }
+
+
+void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
+                      double C[],
+                      PstateSuperStructure* pss)
+{
+  int i, j;
+  double VIN_MIN;
+  double VDS_MIN;
+  double Vin[40]; /* at least 2n */
+  double Vds[40];
+  int    NUM_VIN;
+  int    NUM_VDS;
+  double LSB_CURRENT;
+  double TEMP_UPLIFT;
+  double Ical[40][40];
+  double Iratio[40][40];
+  uint8_t Iratio_int[40][40];  
+  int temp;
+  uint8_t ratio_val;
+  uint8_t idx;
+  
+  NUM_VIN     = i_ivrm_parms->vin_entries_per_vds;
+  NUM_VDS     = i_ivrm_parms->vds_region_entries;
+  VIN_MIN     = 800;
+  VDS_MIN     = 100;
+  LSB_CURRENT = 4.1;
+  TEMP_UPLIFT = 1.1;
+
+  for(i=0; i<NUM_VIN; i++) { Vin[i] = VIN_MIN + i * 25; }
+  
+  Vds[0]=VDS_MIN;
+  for(i=1; i<NUM_VDS; i++) {
+     temp=(int) (Vds[i-1]*1.25/6.25);
+     Vds[i] = temp*6.25 ;
+  }
+
+// jwy  printf("\t");
+// jwy  for(i=0; i<NUM_VDS; i++) { printf("%lf\t", Vds[i]); }
+// jwy  printf("\n");
+
+  for(i=0; i<NUM_VIN; i++) {
+// jwy     printf("%lf\t", Vin[i]);
+     
+     for (j=0; j<NUM_VDS; j++) {
+        if(Vin[i]-Vds[j]>=700) {
+           Ical[i][j]   = C[0] + C[1]*Vin[i] + C[2]*Vds[j] + C[3]*Vin[i]*Vds[j]; // compute cal current
+           Iratio[i][j] = TEMP_UPLIFT * LSB_CURRENT / Ical[i][j];
+           
+           temp = (int) (Iratio[i][j]+1/16>3.875 ? 3.875 : Iratio[i][j]+1/16);
+// jwy           dec2bin(temp, 2);
+           ratio_val = 0;
+           ratio_val = (temp << 3) & 0x018;          // jwy shift temp left 3 and clear out lower 3 bits - this gets bits 0:1 of value
+           //printf(".");
+           
+           temp = (int) ((Iratio[i][j] - temp)*8 + 0.5);
+// jwy           dec2bin(temp, 3);
+           ratio_val = (temp & 0x07)| ratio_val;     // jwy OR lower 3 bits of temp with upper 2 bits already in 0:1 - this merges bits 2:4 with 0:1 for final value
+           Iratio_int[i][j] = ratio_val; 
+//           printf(" %u",ratio_val);
+// jwy           printf("\t");
+        } else {
+           Iratio[i][j]     = 0;
+           Iratio_int[i][j] = 0;
+// jwy           printf("0*\t");
+        }
+        //printf("%lf\t", Iratio[i][j]);
+     }
+// jwy     printf("\n");
+  }
+
+// jwy   for (i=0; i<NUM_VDS; i++) { 
+// jwy 
+// jwy     for(j=0; j<NUM_VIN; j++) {
+// jwy       printf("%u ",Iratio_int[i][j]);
+// jwy     }
+// jwy     printf("\n"); 
+// jwy   }
+
+  
+  // fill in Vin table with Iratio data
+  for (i=0; i<NUM_VDS; i++) {          // 16 rows
+  
+    for(j=0; j<4; j++) {               // 32 cols
+      idx = (i*4) + j;   
+      pss->lpsa.vdsvin[idx].fields.pfet0 = Iratio_int[j*8][i];
+      pss->lpsa.vdsvin[idx].fields.pfet1 = Iratio_int[(j*8)+1][i];
+      pss->lpsa.vdsvin[idx].fields.pfet2 = Iratio_int[(j*8)+2][i];
+      pss->lpsa.vdsvin[idx].fields.pfet3 = Iratio_int[(j*8)+3][i];
+      pss->lpsa.vdsvin[idx].fields.pfet4 = Iratio_int[(j*8)+4][i];
+      pss->lpsa.vdsvin[idx].fields.pfet5 = Iratio_int[(j*8)+5][i];
+      pss->lpsa.vdsvin[idx].fields.pfet6 = Iratio_int[(j*8)+6][i];
+      pss->lpsa.vdsvin[idx].fields.pfet7 = Iratio_int[(j*8)+7][i]; 
+      
+// jwy        for (k=0; k<8; k++) {
+// jwy        printf("%u ", Iratio_int[(j*8)+k][i]);
+// jwy        }
+// jwy        printf("\n");
+// jwy        printf("  Vin[%d]{%d,%d}: %016llX\n", idx, i, j, pss->lpsa.vdsvin[idx].value);
+
+      
+      // Byte reverse the entry into the image.
+      pss->lpsa.vdsvin[idx].value = revle64(pss->lpsa.vdsvin[idx].value);      
+    }
+  }  
+} /* end fit_file */

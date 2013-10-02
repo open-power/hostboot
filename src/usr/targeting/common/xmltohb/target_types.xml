@@ -130,9 +130,15 @@
     <attribute><id>PM_SAFE_FREQUENCY</id></attribute>
     <attribute><id>PM_SPIPSS_FREQUENCY</id></attribute>
     <attribute><id>PM_SPIVID_FREQUENCY</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS</id></attribute>
-    <attribute><id>PROC_R_LOADLINE</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET</id></attribute>
+
+    <attribute><id>CPM_TURBO_BOOST_PERCENT</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VDD</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VDD</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VDD</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
+
     <!-- End pm_plat_attributes.xml -->
     <!--    sbe_config_update attributes    -->
     <attribute><id>NEST_FREQ_MHZ</id></attribute>
@@ -305,8 +311,6 @@
      <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id></attribute>
      <attribute><id>PM_PBAX_CHIPID</id></attribute>
      <attribute><id>PM_PBAX_NODEID</id></attribute>
-     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id></attribute>
-     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id></attribute>
      <attribute><id>PM_SPIVID_PORT_ENABLE</id></attribute>
      <!-- End pm_plat_attributes.xml -->
      <!-- Start pm_hwp_attributes.xml -->
@@ -399,6 +403,21 @@
     <attribute><id>PROC_MEM_BASES_ACK</id></attribute>
     <attribute><id>PROC_MEM_SIZES_ACK</id></attribute>
 
+    <attribute><id>FREQ_EXT_BIAS_UP</id></attribute>
+    <attribute><id>FREQ_EXT_BIAS_DOWN</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VDD_BIAS_UP</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VDD_BIAS_DOWN</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VCS_BIAS_UP</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VCS_BIAS_DOWN</id></attribute>
+    <attribute><id>VOLTAGE_INT_VDD_BIAS_UP</id></attribute>
+    <attribute><id>VOLTAGE_INT_VDD_BIAS_DOWN</id></attribute>
+    <attribute><id>VOLTAGE_INT_VCS_BIAS_UP</id></attribute>
+    <attribute><id>VOLTAGE_INT_VCS_BIAS_DOWN</id></attribute>
+    <attribute><id>PM_UNDERVOLTING_FRQ_MINIMUM</id></attribute>
+    <attribute><id>PM_UNDERVOLTING_FREQ_MAXIMUM</id></attribute>
+    <attribute><id>CPM_INFLECTION_POINTS</id></attribute>
+    <attribute><id>PM_WINKLE_ENTRY</id></attribute>
+    <attribute><id>PM_WINKLE_EXIT</id></attribute>
 
 </targetType>
 

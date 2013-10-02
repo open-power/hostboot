@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: pm_plat_attributes.xml,v 1.6 2013/07/22 02:36:28 farrugia Exp $ -->
 <!--
     XML file specifying Power Management HWPF attributes.
     These attributes are initialized by the platform.
@@ -30,13 +31,14 @@
   <attribute>
     <id>ATTR_PM_EXTERNAL_VRM_STEPSIZE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <!-- <<<<<<< PROC_CHIP POSSIBLE -->
     <description>
       Step size (binary in microvolts) to take upon external VRM voltage
       transitions. The value set here must take into account where internal
       VRMs are enabled or not as, when they are enabled, the step size must
       account for the tracking (eg PFET strength recalculation) for the step.
 
-      Consumer: proc_build_pstate_tables.C, proc_pmc_init.C -config
+      Consumer: p8_build_gpstate_tables.C, p8_pmc_init.C
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
@@ -47,10 +49,11 @@
   <attribute>
     <id>ATTR_PM_EXTERNAL_VRM_STEPDELAY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <!-- <<<<<<< PROC_CHIP POSSIBLE -->
     <description>
       Step delay (binary in microseconds) after a voltage change
 
-      Consumer: proc_pmc_init -config
+      Consumer: p8_pmc_init
 
       Provided by the Machine Readable Workbook after system characterization.
     </description>
@@ -59,11 +62,18 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM</id>
+    <id>ATTR_PM_UNDERVOLTING_FRQ_MINIMUM</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Minimum frequency for which undervolting is allowed.  Will be internally
-      rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
+      Override for Minimum frequency for which undervolting is allowed.
+      
+      If value = 0, the value of VPD CPMin data point is passed to OCC FW via 
+      Pstate SuperStructure.
+      
+      If value != 0, this value will be passed to OCC FW via Pstate SuperStructure
+      as the floor frequency for enabled CPMs.
+      
+      Will be internally rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
 
       Consumer: OCC FW; OCC Lab Tools
 
@@ -74,11 +84,18 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
+    <id>ATTR_PM_UNDERVOLTING_FREQ_MAXIMUM</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Maximum frequency for which undervolting is allowed.  Will be internally
-      rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
+      Override for Maximum frequency for which undervolting is allowed.
+      
+      If value = 0, the value of VPD Turbo data point is passed to OCC FW via 
+      Pstate SuperStructure.
+      
+      If value != 0, this value will be passed to OCC FW via Pstate SuperStructure
+      as the ceiling frequency for enabled CPMs.
+      
+      Will be internally rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
 
       Consumer: OCC FW; OCC Lab Tools
 
@@ -91,14 +108,17 @@
   <attribute>
     <id>ATTR_PM_SPIVID_FREQUENCY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <!-- <<<<<<< PROC_CHIP POSSIBLE -->
     <description>
-      SPI Clock Frequency (binary in MHz)
+      SPI Clock Frequency (binary in KHz)
 
-      Consumer: proc_pm_effective
+      Consumer: p8_pmc_init
 
       Produces ATTR_PM_SPIVID_CLOCK_DIVIDER
 
-      Provided by the Machine Readable Workbook.
+      Overridden by the Machine Readable Workbook.
+
+      If default of 0 is read, HWP will set SPIVID frequency to 1MHz.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -114,7 +134,7 @@
                     configuration.
       - REDUNDANT means that all three are connected and considered redundant.
 
-      Provided by the Machine Readable Workbook.
+      Producer:  Machine Readable Workbook
     </description>
     <valueType>uint8</valueType>
     <enum>NONE = 0x00, PORT0NONRED = 0x04, PORT1NONRED = 0x02, PORT2NONRED = 0x01, REDUNDANT = 0x07</enum>
@@ -126,21 +146,19 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
       Indicates the frequency that the cores will be moved to in the event of
-      the loss of the OCC Heartbead.  This value needs to be at or below the
-      nominal frequency to make sure safe operation of all chiplets.
+      the loss of the OCC Heartbeat.  This value needs to be at or below the
+      boot frequency (as defined by ATTR_BOOT_FREQ_MHZ) to make sure safe operation
+      of all chiplets.
 
       Valid Values:-128 thru 127
 
       The value is translated to the Pstate space.
 
-      Consumer: proc_pm_effective.C
+      Producer:  Machine Readable Workbook
+
+      Consumers: p8_build_gpstate_table.C
 
       DYNAMIC_ATTRIBUTE: ATTR_PM_SAFE_PSTATE
-
-      Consumer: proc_pcbs_init.C
-
-      TODO: Dean said this may either be provided by the Machine Readable
-            Workbook or Todd R's power management def file.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -150,7 +168,7 @@
     <id>ATTR_PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Frequency (binary in MHz) for the point at which clock sector buffers
+      Frequency (binary in KHz) for the point at which clock sector buffers
       should be at full strength.  This is to support Vmin operation.
       Setting cannot overlap the Low or High bands.
 
@@ -164,7 +182,7 @@
     <id>ATTR_PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Frequency (binary in MHz)) for the lower end of the Low Frequency
+      Frequency (binary in KHz)) for the lower end of the Low Frequency
       Resonant band
 
       Provided by the Machine Readable Workbook after system characterization.
@@ -177,7 +195,7 @@
     <id>ATTR_PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Frequency (binary in MHz) for the upper end of the Low Frequency
+      Frequency (binary in KHz) for the upper end of the Low Frequency
       Resonant band
 
       Provided by the Machine Readable Workbook after system characterization.
@@ -190,7 +208,7 @@
     <id>ATTR_PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Frequency (binary in MHz) for the lower end of the High Frequency
+      Frequency (binary in KHz) for the lower end of the High Frequency
       Resonant band
 
       Provided by the Machine Readable Workbook after system characterization.
@@ -203,7 +221,7 @@
     <id>ATTR_PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Frequency (binary in MHz)) for the upper end of the High Frequency
+      Frequency (binary in KHz)) for the upper end of the High Frequency
       Resonant band
 
       Provided by the Machine Readable Workbook after system characterization.
@@ -216,13 +234,15 @@
     <id>ATTR_PM_SPIPSS_FREQUENCY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      SPIPSS Clock Frequency (binary in MHz)
+      SPIPSS Clock Frequency (binary in KHz)
 
-      Valid range: 0.5MHz to 25MHz
+      Valid range: 500KHz to 2500KHz
 
-      Consumer: proc_pmc_init
+      Consumer: p8_pss_init
 
-      Provided by the Machine Readable Workbook.
+      Overridden by the Machine Readable Workbook.
+
+      If default of 0 is read, HWP will set SPIPSS frequency to 10MHz.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -284,13 +304,13 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_R_LOADLINE</id>
+    <id>ATTR_PROC_R_LOADLINE_VDD</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Impedance (binary microOhms) of the load line from a processor VRM to the
+      Impedance (binary microOhms) of the load line from a processor VDD VRM to the
       Processor Module pins.  This value is applied to each processor instance.
 
-      Consumers: proc_build_gpstate_table.C
+      Consumers: p8_build_gpstate_table.C
 
       Provided by the Machine Readable Workbook (via the power subsystem design
       per system)
@@ -300,32 +320,75 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_R_DISTLOSS</id>
+    <id>ATTR_PROC_R_DISTLOSS_VDD</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Impedance (binary in microOhms) of the distribution loss the sense point
+      Impedance (binary in microOhms) of the VDD distribution loss sense point
       to the circuit. This value is applied to each processor instance.
 
-      Consumers: proc_build_gpstate_table.C
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
 
-      Provided by the Machine Readable Workbook (via the power subsystem design
-      per system)
+      Consumer: p8_build_gpstate_table.C
     </description>
     <valueType>uint32</valueType>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_VRM_VOFFSET</id>
+    <id>ATTR_PROC_VRM_VOFFSET_VDD</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Offset voltage (binary in microvolts) to apply to the VRM distribution to
+      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
       the processor module.  This value is applied to each processor instance.
 
-      Consumers: proc_build_gpstate_table.C
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
 
-      Provided by the Machine Readable Workbook (via the power subsystem design
-      per system)
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+    <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_LOADLINE_VCS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VCS VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_DISTLOSS_VCS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Impedance (binary in microOhms) of the VCS distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_VRM_VOFFSET_VCS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -340,7 +403,9 @@
       From this, the ATTR_PROCPM_PSTATE0_FREQUENCY is computed using
       ATTR_SYSTEM_REFCLK_FREQUENCY to determine the step size.
 
-      Consumers: proc_build_gpstate_table.C (among others)
+      Producer:  DEF file (per T. Rosedahl)
+
+      Consumers: p8_build_gpstate_table.C (among others)
 
       TODO: Dean's proposal is that each platform will iterate over all chips,
             reading the super-turbo frequency from MVPD #V and set this attribute
@@ -349,4 +414,317 @@
     <valueType>uint32</valueType>
     <platInit/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CPM_TURBO_BOOST_PERCENT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     Percent of Boost Above Turbo for CPMs - (binary in 0.1 percent steps)
+
+     Used in generating extra Pstate tables beyond those that would result from
+     #V data.
+
+     Producer:  DEF file as this is CCIN based
+
+     Consumers: p8_build_gpstate_table.C, p8_cpm_cal_load.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_EXT_BIAS_UP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Frequency Bias - % of bias upward (binary in 0.5 percent steps) in generating
+     Pstate tables.  Either this or FREQ_EXT_BIAS_DOWN can have non-zero value
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_EXT_BIAS_DOWN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Frequency Bias - % of bias downward (binary in 0.5 percent steps) in generating
+     Pstate tables.  Either this or FREQ_EXT_BIAS_UP can have non-zero value
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_EXT_VDD_BIAS_UP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     External VDD Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
+     is applied to each VPD point in generating the Global Pstate tables. Either 
+     this or ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN can have non-zero value concurrently due to
+     the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     External VDD Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
+     is applied to each VPD point in generating the Global Pstate tables. Either 
+     this or ATTR_VOLTAGE_EXT_VDD_BIAS_UP can have non-zero value concurrently due to
+     the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>    
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_EXT_VCS_BIAS_UP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     External VCS Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
+     is applied to each VPD point in generating the Global Pstate tables. Either 
+     this or ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN can have non-zero value concurrently due to
+     the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>    
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     External VCS Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
+     is applied to each VPD point in generating the Global Pstate tables. Either 
+     this or ATTR_VOLTAGE_EXT_VCS_BIAS_UP can have non-zero value concurrently due to
+     the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>    
+  </attribute>
+    <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_INT_VDD_BIAS_UP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Internal VDD Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
+     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias 
+     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_DOWN can have non-zero value 
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_INT_VDD_BIAS_DOWN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Internal VDD Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
+     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias 
+     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_UP can have non-zero value 
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_INT_VCS_BIAS_UP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Internal VCS Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
+     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias 
+     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_DOWN can have non-zero value 
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>    
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_INT_VCS_BIAS_DOWN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Internal VCS Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
+     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table 
+     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias 
+     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_UP can have non-zero value 
+     concurrently due to the unsigned definition of attributes.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p8_build_gpstate_table.C
+
+     Platform default:  0
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>    
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SLEEP_ENTRY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Setting depends on di/dt charateristics of the system.
+
+    Set Assisted if power off serialization is needed and SLEEP_TYPE=Fast;  Set to Hardware if the system can handle the unrelated powering off between cores.  Hardware setting decreases entry latency
+
+    Producer: MRWB
+
+    Consumer:  p8_poreslw_init.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>HARDWARE=0, ASSISTED=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SLEEP_EXIT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Setting depends on di/dt charateristics of the system and the setting of ATTR_PM_SLEEP_TYPE.
+
+    Set to Assisted if power on serialization is needed and SLEEP_TYPE=Fast;  Set to Hardware if the system can handle the unrelated powering off between cores.  Hardware setting decreases entry latency
+    Must be set to Assisted if ATTR_PM_SLEEP_TYPE=Deep as this necessary for restore.
+
+    Setting to Hardware is a test mode for Fast only.
+
+    Producer: MRWB
+
+    Consumer:  p8_poreslw_init.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>HARDWARE=0, ASSISTED=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SLEEP_TYPE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Sleep Power Off Select:
+    Selects which voltage level to place the Core domain PFETs upon Sleep entry. 0 = Vret (Fast Sleep Mode), 1 = Voff (Deep Sleep Mode)
+
+    Producer: MRWB
+
+    Consumer:  p8_poreslw_init.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FAST=0, DEEP=1</enum>
+    <platInit/>
+  </attribute>
+    <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_WINKLE_ENTRY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Setting depends on di/dt charateristics of the system.
+
+    Set Assisted if power off serialization is needed and WINKLE_TYPE=Fast;  
+    Set to Hardware if the system can handle the unrelated powering off between cores.  
+    Hardware setting decreases entry latency
+
+    Producer: MRWB
+
+    Consumer:  p8_poreslw_init.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>HARDWARE=0, ASSISTED=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_WINKLE_EXIT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Setting depends on di/dt charateristics of the system and the setting of ATTR_PM_WINKLE_TYPE.
+
+    Set to Assisted if power on serialization is needed and WINKLE_TYPE=Fast;  Set to Hardware if the system 
+    can handle the unrelated powering off between cores.  Hardware setting decreases entry latency.
+    Must be set to Assisted if ATTR_PM_WINKLE_TYPE=Deep as this necessary for restore.
+
+    Setting to Hardware is a test mode for Fast only.
+
+    Producer: MRWB
+
+    Consumer:  p8_poreslw_init.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>HARDWARE=0, ASSISTED=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_WINKLE_TYPE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Winkle Power Off Select:
+    Selects which voltage level to place the Core and ECO domain PFETs upon Winkle entry. 0 = Vret (Fast Winkle Mode), 1 = Voff (Deep Winkle Mode)
+    Producer: MRWB
+
+    Consumer:  p8_poreslw_init.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FAST=0, DEEP=1</enum>
+    <platInit/>
+  </attribute>
+   <!-- ********************************************************************* -->
 </attributes>

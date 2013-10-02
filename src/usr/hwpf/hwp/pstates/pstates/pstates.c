@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstates.c,v 1.4 2013/06/12 20:02:12 mjjones Exp $
+// $Id: pstates.c,v 1.6 2013/09/17 16:36:39 jimyac Exp $
 
 /// \file pstates.c
 /// \brief Pstate routines required by OCC product firmware
@@ -237,6 +237,10 @@ gpst_entry(const GlobalPstateTable *gpst,
     int rc, index;
     Pstate biased_pstate;
 
+// jwy    if (SSX_ERROR_CHECK_API) {
+// jwy      SSX_ERROR_IF(gpst == 0, GPST_INVALID_OBJECT);
+// jwy    }
+
     if (gpst == 0) {
         return -GPST_INVALID_OBJECT;
     }
@@ -325,8 +329,12 @@ gpst_vdd2pstate(const GlobalPstateTable* gpst,
     gpst_entry_t         entry_rev;       // jwy
     
     
+// jwy     if (SSX_ERROR_CHECK_API) {
+// jwy     SSX_ERROR_IF(gpst == 0, GPST_INVALID_OBJECT);
+// jwy     }
+
     if (gpst == 0) {
-        return -GPST_INVALID_OBJECT;
+         return -GPST_INVALID_OBJECT;
     }
 
     do {
@@ -393,3 +401,22 @@ int freq2pState (const GlobalPstateTable* gpst,
  
   return rc;
 }
+
+
+
+int pstate_minmax_chk (const GlobalPstateTable* gpst, 
+                       Pstate* pstate) 
+{
+  int rc = 0;
+  
+   // if pstate is greater than pmax, generate an error
+   if (*pstate > gpst_pmax(gpst))
+     rc = -GPST_PSTATE_GT_GPST_PMAX;                                                                                               
+   
+   // if pstate is less than than pmin, clip pstate to pmin
+   if (*pstate < gpst_pmin(gpst) )                                                                       
+     *pstate = gpst_pmin(gpst);                                      
+ 
+  return rc;
+}
+

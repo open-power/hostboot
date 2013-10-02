@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: lab_pstates.c,v 1.7 2013/06/12 20:01:35 mjjones Exp $
+// $Id: lab_pstates.c,v 1.8 2013/08/13 17:12:54 jimyac Exp $
 
 /// \file lab_pstates.c
 /// \brief Lab-only (as opposed to product-procedure) support for Pstates.
@@ -97,7 +97,7 @@ vrm112vuv(uint8_t vrm11_vid, uint32_t *v_uv)
 
 int
 vuv2ivid(uint32_t v_uv, int round, uint8_t *ivid)
-{  
+{
     int rc;
     int32_t offset, vid;
 
@@ -105,7 +105,7 @@ vuv2ivid(uint32_t v_uv, int round, uint8_t *ivid)
     vid = offset / IVID_STEP_UV;
 
     if (((offset % IVID_STEP_UV) != 0) && (round >= 0)) {
-        vid++;
+	    vid++;
     }
     
     *ivid = vid;
@@ -114,9 +114,8 @@ vuv2ivid(uint32_t v_uv, int round, uint8_t *ivid)
     } else {
         rc = 0;
     }
-    return rc;  
+    return rc;
 }
-    
     
 /// Convert an iVID code to a voltage in microvolts
 
@@ -141,38 +140,6 @@ sprintf_10uv(char *s, uint32_t v_uv)
     return sprintf(s, "%d.%05d", v_uv / 1000000, (v_uv % 1000000) / 10);
 }
 
-/// Format an IVID code as 10 microvolts into a user-supplied string. The
-/// string \a s must be able to store at least FORMAT_10UV_STRLEN characters.
-
-int
-sprintf_ivid(char *s, uint8_t ivid)
-{
-    int rc;
-    uint32_t v_uv;
-
-    if ((rc = ivid2vuv(ivid, &v_uv)) != 0) {
-    return rc;
-    }
-    return sprintf_10uv(s, v_uv);
-}
-
-/// Format a VRM-11 VID code as 10 microvolts into a user-supplied string. The
-/// string \a s must be able to store at least FORMAT_10UV_STRLEN characters.
-
-int
-sprintf_vrm11(char *s, uint8_t vrm11)
-{
-    int rc;
-    uint32_t v_uv;
-
-    if ((rc = vrm112vuv(vrm11, &v_uv)) != 0) {
-        strcpy(s, FORMAT_10UV_ERROR);
-    } else {
-        rc = sprintf_10uv(s, v_uv);
-    }
-    return rc;
-}
-
 #ifdef FAPIECMD
 
 /// Format a voltage in microvolts as 10 microvolts to a stream.
@@ -191,6 +158,24 @@ fprintf_10uv(FILE *stream, uint32_t v_uv)
 }
 
 
+/// Format a VRM-11 VID code as 10 microvolts into a user-supplied string. The
+/// string \a s must be able to store at least FORMAT_10UV_STRLEN characters.
+
+int
+sprintf_vrm11(char *s, uint8_t vrm11)
+{
+    int rc;
+    uint32_t v_uv;
+
+    if ((rc = vrm112vuv(vrm11, &v_uv)) != 0) {
+        strcpy(s, FORMAT_10UV_ERROR);
+    } else {
+        rc = sprintf_10uv(s, v_uv);
+    }
+    return rc;
+}
+
+
 /// Format a VRM-11 VID code as 10 microvolts to a stream.
 
 int
@@ -204,6 +189,22 @@ fprintf_vrm11(FILE *stream, uint8_t vrm11)
     rc = fputs(s, stream);
     }
     return rc;
+}
+
+
+/// Format an IVID code as 10 microvolts into a user-supplied string. The
+/// string \a s must be able to store at least FORMAT_10UV_STRLEN characters.
+
+int
+sprintf_ivid(char *s, uint8_t ivid)
+{
+    int rc;
+    uint32_t v_uv;
+
+    if ((rc = ivid2vuv(ivid, &v_uv)) != 0) {
+    return rc;
+    }
+    return sprintf_10uv(s, v_uv);
 }
 
 
@@ -400,32 +401,154 @@ void
 lpsa_print(FILE* stream, LocalPstateArray* lpsa)
 {
     int i;
+    uint8_t entries;
+    uint8_t entries_div4;
+    char ivid_vdd_str[FORMAT_10UV_STRLEN];
+    char ivid_vcs_str[FORMAT_10UV_STRLEN]; 
+    uint8_t ivid_vdd, ivid_vcs;
+    lpst_entry_t   lpst_entry;
+    vdsvin_entry_t vdsvin_entry;
 
     fprintf(stream, 
         "---------------------------------------------------------------------------------------------------------\n");    
     fprintf(stream, "Local Pstate Array @ %p\n", lpsa);
     fprintf(stream, 
         "---------------------------------------------------------------------------------------------------------\n");    
-    
     fprintf(stream, "%d Entries from %+d to %+d\n",
         lpsa->entries, lpst_pmin(lpsa), lpst_pmax(lpsa));
     fprintf(stream, "Step Delay Rising %u, Step Delay Falling %u\n",
-            lpsa->stepdelay_rising, 
+            lpsa->stepdelay_rising,
             lpsa->stepdelay_lowering);
+    fprintf(stream, 
+        "---------------------------------------------------------------------------------------------------------------------\n");    
+    fprintf(stream, 
+        " I  ivid_vdd(V)   ivid_vcs(V)   Core vdd  Core vcs  ECO vdd   ECO vcs   ps1 inc  ps2 inc  ps3 inc  inc step  dec step\n"
+        "                                pwrratio  pwrratio  pwrratio  pwrratio                                               \n"
+        "---------------------------------------------------------------------------------------------------------------------\n");
+        
+    entries      = lpsa->entries;
+    entries_div4 = entries/4;    
+    
+    if ( entries % 4 != 0)
+       entries_div4++;
+        
+    for (i = entries_div4-1  ; i >= 0; i--) {    
+      lpst_entry.value = revle64(lpsa->pstate[i].value);
+    
+      ivid_vdd = lpst_entry.fields.ivid_vdd;
+      sprintf_ivid(ivid_vdd_str, ivid_vdd);
 
-    fprintf(stream, "Array :\n");
-    for (i = 0; i < LOCAL_PSTATE_ARRAY_ENTRIES; i+= 4) {
-        fprintf(stream, "  0x%016llx 0x%016llx 0x%016llx 0x%016llx\n", 
-                (unsigned long long)(lpsa->pstate[i].value),
-                (unsigned long long)(lpsa->pstate[i + 1].value),
-                (unsigned long long)(lpsa->pstate[i + 2].value),
-                (unsigned long long)(lpsa->pstate[i + 3].value));
+      ivid_vcs = lpst_entry.fields.ivid_vcs;
+      sprintf_ivid(ivid_vcs_str, ivid_vcs);
+
+      fprintf(stream,
+           "%2u  "
+           "0x%02x %s  "
+           "0x%02x %s  "
+           "%-9u %-9u %-9u %-9u "
+           "%-8u %-8u %-8u "
+           "%-9u %-9u \n",
+           i,
+           ivid_vdd, ivid_vdd_str,
+           ivid_vcs, ivid_vcs_str,
+           (uint8_t)lpst_entry.fields.vdd_core_pwrratio,
+           (uint8_t)lpst_entry.fields.vcs_core_pwrratio,
+           (uint8_t)lpst_entry.fields.vdd_eco_pwrratio,
+           (uint8_t)lpst_entry.fields.vcs_eco_pwrratio,
+           (uint8_t)lpst_entry.fields.ps1_vid_incr,
+           (uint8_t)lpst_entry.fields.ps2_vid_incr,
+           (uint8_t)lpst_entry.fields.ps3_vid_incr,
+           (uint8_t)lpst_entry.fields.inc_step,
+           (uint8_t)lpst_entry.fields.dec_step);
     }
 
     fprintf(stream, 
-        "---------------------------------------------------------------------------------------------------------\n");    
+        "---------------------------------------------------------------------------------------------------------------------\n\n");   
+
+   fprintf(stream, 
+        "--------------------------------\n");
+   fprintf(stream,            
+        "VDS\n");    
+    fprintf(stream, 
+        " I    beg_offset  end_offset    \n"
+        "--------------------------------\n");     
+
+    for (i = 15  ; i >= 0; i--) {    
+      vdsvin_entry.value = revle64(lpsa->vdsvin[i].value);
+    
+      fprintf(stream,
+           "%2u    "
+           "%-10u  "
+           "%-10u   \n",
+           i,
+           (uint8_t)vdsvin_entry.fields.ivid0,
+           (uint8_t)vdsvin_entry.fields.ivid1);
+    }
+
+    fprintf(stream, 
+        "--------------------------------\n\n");   
+        
+
+   fprintf(stream, 
+        "-----------------------------------------------------\n");
+   fprintf(stream,        
+        "VIN\n");    
+    fprintf(stream, 
+        " I    ptef0 pfet1 pfet2 pfet3 pfet4 pfet5 pfet6 pfet7\n"
+        "-----------------------------------------------------\n");     
+
+    for (i = 63  ; i >= 0; i--) {    
+      vdsvin_entry.value = revle64(lpsa->vdsvin[i].value);
+
+      fprintf(stream,
+           "%2u    "
+           "%-5u %-5u %-5u %-5u %-5u %-5u %-5u %-5u\n",
+           i,
+           (uint8_t)vdsvin_entry.fields.pfet0, 
+           (uint8_t)vdsvin_entry.fields.pfet1, 
+           (uint8_t)vdsvin_entry.fields.pfet2, 
+           (uint8_t)vdsvin_entry.fields.pfet3, 
+           (uint8_t)vdsvin_entry.fields.pfet4, 
+           (uint8_t)vdsvin_entry.fields.pfet5, 
+           (uint8_t)vdsvin_entry.fields.pfet6, 
+           (uint8_t)vdsvin_entry.fields.pfet7);           
+    }  
+    
+    fprintf(stream, 
+        "-----------------------------------------------------\n\n");   
 }    
 
+/// Print CPM Pstate Range structure on a given stream
+///
+/// \param stream   The output stream
+///
+/// \param cpmrange The CPM Pstate Range structure to print
+
+void
+cpmrange_print(FILE* stream, CpmPstateModeRanges* cpmrange)
+{
+    int i;
+    
+    fprintf(stream, 
+        "---------------------------------------------------------------------------------------------------------\n");    
+    fprintf(stream, "CPM Pstate Range @ %p\n",  cpmrange);
+    fprintf(stream, 
+        "---------------------------------------------------------------------------------------------------------\n");    
+
+    fprintf(stream, "Valid Number of CPM Pstate Ranges : %u\n", 
+            cpmrange->validRanges);
+            
+    for (i == 0; i < 8; i++) {        
+      fprintf(stream, "  CPM Range %d Pstate : %d\n", 
+              i, cpmrange->inflectionPoint[i]);
+    }
+    
+    fprintf(stream, "  CPM Pmax : %d\n", 
+            cpmrange->pMax);    
+    
+    fprintf(stream, 
+        "---------------------------------------------------------------------------------------------------------\n");    
+}
 
 /// Print a Resonant Clocking Setup structure on a given stream
 ///
@@ -481,6 +604,5 @@ pss_print(FILE* stream, PstateSuperStructure* pss)
         "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");    
 }
 
-#endif // FAPIECMD
-   
     
+#endif // FAPIECMD    

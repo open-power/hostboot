@@ -23,7 +23,7 @@
 #ifndef __PSTATE_TABLES_H__
 #define __PSTATE_TABLES_H__
 
-// $Id: pstate_tables.h,v 1.6 2013/05/02 17:33:31 jimyac Exp $
+// $Id: pstate_tables.h,v 1.7 2013/08/13 17:13:03 jimyac Exp $
 
 /// \file pstate_tables.h 
 /// \brief Code used to generate Pstate tables from real or imagined chip
@@ -149,8 +149,49 @@ gpst_create(GlobalPstateTable *gpst,
 int
 lpst_create(const GlobalPstateTable *gpst,
             LocalPstateArray *lpsa, 
-            const uint8_t dead_zone_5mv);
+            const uint8_t dead_zone_5mv,
+            double volt_int_vdd_bias, 
+            double volt_int_vcs_bias);            
 
+typedef struct IVRM_PARM_DATA {
+    uint32_t vin_min;                   // Minimum input voltage
+    uint32_t vin_max;                   // Maximum input voltage
+    uint32_t vin_table_step_size;       // Granularity of Vin table entries
+    uint32_t vin_table_setsperrow;      // Vin sets per Vds row
+    uint32_t vin_table_pfetstrperset;   // PFET Strength values per Vin set    
+    uint32_t vout_min;                  // Minimum regulated output voltage
+    uint32_t vout_max;                  // Maximum regulated output voltage
+    uint32_t vin_entries_per_vds;       // Vin array entries per vds region
+    uint32_t vds_min_range_upper_bound; // Starting point for vds regions
+    uint32_t vds_step_percent;          // vds region step muliplier
+    uint32_t vds_region_entries;        // vds region array entries (in hardware)
+    uint32_t pfetstr_default;           // Default PFET Strength with no calibration
+    uint32_t positive_guardband;        // Plus side guardband (%)
+    uint32_t negative_guardband;        // Negative side guardband (%)
+    uint32_t number_of_coefficients;    // Number of coefficents in cal data
+    uint32_t force_pfetstr_values;      // 0 - calculated; 1 = forced
+    uint32_t forced_pfetstr_value;      // If force_pfetstr_values = 1, use this value
+                                        // 5b value used as it to fill in all entries
+} ivrm_parm_data_t;
+
+void
+build_vds_region_table(ivrm_parm_data_t* i_ivrm_parms,
+                       PstateSuperStructure* pss);
+  
+  
+void  
+fill_vin_table(ivrm_parm_data_t* i_ivrm_parms,
+               PstateSuperStructure* pss);
+
+
+void fit_file(int n, 
+               uint8_t version, 
+               double C[], 
+               ivrm_cal_data_t* cal_data);
+               
+void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
+                      double C[],
+                      PstateSuperStructure*   pss);
 
 #endif // __ASSEMBLER__
 

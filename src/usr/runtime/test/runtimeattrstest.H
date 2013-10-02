@@ -88,11 +88,11 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
         }
         bool freq_found = false;
 
-        fapi::ATTR_PROC_R_LOADLINE_Type loadline = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_PROC_R_LOADLINE,NULL,loadline);
+        fapi::ATTR_PROC_R_LOADLINE_VDD_Type loadline = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_PROC_R_LOADLINE_VDD,NULL,loadline);
         if( l_rc )
         {
-            TS_FAIL("Error getting fapi::ATTR_PROC_R_LOADLINE");
+            TS_FAIL("Error getting fapi::ATTR_PROC_R_LOADLINE_VDD");
         }
         bool loadline_found = false;
 
@@ -120,24 +120,24 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                     }
                 }
             }
-            else if( headers[attr].id == fapi::ATTR_PROC_R_LOADLINE )
+            else if( headers[attr].id == fapi::ATTR_PROC_R_LOADLINE_VDD )
             {
                 loadline_found = true;
                 if( headers[attr].sizeBytes !=
-                    sizeof(fapi::ATTR_PROC_R_LOADLINE_Type) )
+                    sizeof(fapi::ATTR_PROC_R_LOADLINE_VDD_Type) )
                 {
                     TRACFCOMP( g_trac_runtime, "size=%.16X", headers[attr].sizeBytes );
-                    TS_FAIL("Size of fapi::ATTR_PROC_R_LOADLINE data is wrong");
+                    TS_FAIL("Size of fapi::ATTR_PROC_R_LOADLINE_VDD data is wrong");
                 }
                 else
                 {
-                    fapi::ATTR_PROC_R_LOADLINE_Type* loadline_act =
-                      reinterpret_cast<fapi::ATTR_PROC_R_LOADLINE_Type*>
+                    fapi::ATTR_PROC_R_LOADLINE_VDD_Type* loadline_act =
+                      reinterpret_cast<fapi::ATTR_PROC_R_LOADLINE_VDD_Type*>
                       (beginning+headers[attr].offset);
                     if( *loadline_act != loadline )
                     {
                         TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", loadline, *loadline_act );
-                        TS_FAIL("fapi::ATTR_PROC_R_LOADLINE data is wrong");
+                        TS_FAIL("fapi::ATTR_PROC_R_LOADLINE_VDD data is wrong");
                     }
                 }
             }
@@ -156,7 +156,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
         }
         if( !loadline_found )
         {
-            TS_FAIL("Never found ATTR_PROC_R_LOADLINE in system attributes");
+            TS_FAIL("Never found ATTR_PROC_R_LOADLINE_VDD in system attributes");
         }
 
         TRACFCOMP( g_trac_runtime, "testVerifySystemAttributes> finish" );
