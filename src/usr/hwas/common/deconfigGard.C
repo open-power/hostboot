@@ -34,8 +34,6 @@
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 
-#include <hwas/common/hwas.H>                   // checkMinimumHardware()
-
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
@@ -66,11 +64,7 @@ namespace HWAS
 using namespace HWAS::COMMON;
 using namespace TARGETING;
 
-bool processDeferredDeconfig()
-{
-    return HWAS::theDeconfigGard()._processDeferredDeconfig();
-}
-
+//******************************************************************************
 errlHndl_t collectGard(const PredicateBase *i_pPredicate)
 {
     HWAS_INF("collectGard entry" );
@@ -111,7 +105,7 @@ errlHndl_t collectGard(const PredicateBase *i_pPredicate)
         HWAS_INF("collectGard completed successfully");
     }
     return errl;
-}
+} // collectGard
 
 //******************************************************************************
 DeconfigGard & theDeconfigGard()
@@ -341,19 +335,11 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             HWAS_ERR("Error from _invokeDeconfigureAssocProc ");
             break;
         }
-
-        //  check and see if we still have enough hardware to continue
-        l_pErr  =   checkMinimumHardware();
-        if ( l_pErr )
-        {
-            HWAS_ERR("Error from checkMinimumHardware ");
-            break;
-        }
     }
     while (0);
 
     return l_pErr;
-}
+} // deconfigureTargetsFromGardRecordsForIpl
 
 bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2)
 {
@@ -441,7 +427,7 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
 
                 // save info so that we can
                 //  restrict the number of EX units
-                HWAS_INF("pProc %.8X - pushing to proclist",
+                HWAS_DBG("pProc %.8X - pushing to proclist",
                     get_huid(pProc));
                 l_procEntry.target = pProc;
                 l_procEntry.group = 0;
@@ -645,14 +631,6 @@ errlHndl_t DeconfigGard::deconfigureTarget(Target & i_target,
         _deconfigureByAssoc(i_target, i_errlEid, i_evenAtRunTime);
 
         HWAS_MUTEX_UNLOCK(iv_mutex);
-
-        //  check and see if we still have enough hardware to continue
-        l_pErr  =   checkMinimumHardware();
-        if ( l_pErr )
-        {
-            HWAS_ERR("Error from checkMinimumHardware ");
-            break;
-        }
     }
     while (0);
 
@@ -1374,8 +1352,7 @@ void DeconfigGard::_deconfigureTarget(Target & i_target,
     // Set the Target state to non-functional. The assumption is that it is
     // not possible for another thread (other than deconfigGard) to be
     // updating HWAS_STATE concurrently.
-    HwasState l_state =
-        i_target.getAttr<ATTR_HWAS_STATE>();
+    HwasState l_state = i_target.getAttr<ATTR_HWAS_STATE>();
 
     if (!l_state.functional)
     {
@@ -1487,15 +1464,12 @@ void DeconfigGard::clearDeconfigureRecords(
 
 
 //******************************************************************************
-bool DeconfigGard::_processDeferredDeconfig()
+void DeconfigGard::processDeferredDeconfig()
 {
     HWAS_DBG(">processDeferredDeconfig");
 
     // get all deconfigure records, process them, and delete them.
     HWAS_MUTEX_LOCK(iv_mutex);
-
-    // we return true if there were targets to deconfigure.
-    bool rc = !iv_deconfigureRecords.empty();
 
     for (DeconfigureRecordsItr_t l_itr = iv_deconfigureRecords.begin();
             l_itr != iv_deconfigureRecords.end();
@@ -1514,9 +1488,8 @@ bool DeconfigGard::_processDeferredDeconfig()
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
 
-    HWAS_DBG("<processDeferredDeconfig returning %d", rc);
-    return rc;
-} // _processDeferredDeconfig
+    HWAS_DBG("<processDeferredDeconfig");
+} // processDeferredDeconfig
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_deconfigureAssocProc(

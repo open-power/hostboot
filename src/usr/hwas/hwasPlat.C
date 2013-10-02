@@ -314,7 +314,7 @@ errlHndl_t platGetFCO(const TargetHandle_t &i_node,
 
     o_fco = i_node->getAttr<ATTR_FIELD_CORE_OVERRIDE>();
 
-    HWAS_INF("FCO returned: %d", o_fco);
+    HWAS_DBG("FCO returned: %d", o_fco);
 
     return errl;
 } // platGetFCO
@@ -395,7 +395,7 @@ bool hwasPLDDetection()
     bool rc = false;
 
     // TODO: RTC: 76459
-    HWAS_INF("hwasPLDDetection");
+    HWAS_DBG("hwasPLDDetection");
 
     Target *l_pTopLevel = NULL;
     targetService().getTopLevelTarget( l_pTopLevel );
@@ -424,7 +424,7 @@ errlHndl_t hwasChangeDetection()
     errlHndl_t errl = NULL;
 
     // TODO: RTC: 70460
-    HWAS_INF("hwasChangeDetection");
+    HWAS_DBG("hwasChangeDetection");
 
     return errl;
 } // hwasChangeDetection

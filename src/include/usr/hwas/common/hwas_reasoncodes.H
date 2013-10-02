@@ -31,7 +31,7 @@ namespace HWAS
         MOD_PROCESS_CALLOUT       = 0x02,
         MOD_HOST_DISCOVER_TARGETS = 0x03,
         MOD_HOST_GARD             = 0x04,
-        MOD_SYS_AVAIL_SVC         = 0x05,
+        MOD_CHECK_MIN_HW          = 0x05,
     };
 
     enum HwasReasonCode
@@ -48,7 +48,6 @@ namespace HWAS
         //  System Availability Service codes
         //  The first is a blanket error that will be returned to the caller,
         //      further errors will be committed in the routine.
-        //
         RC_SYSAVAIL_INSUFFICIENT_HW         = 0x10,
         //  common with FSP
         RC_SYSAVAIL_NO_CORES_FUNC           = 0x11,

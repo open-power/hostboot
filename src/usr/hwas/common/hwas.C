@@ -305,6 +305,13 @@ errlHndl_t discoverTargets()
                                         (prData[2] & VPD_VINI_PR_B2_MASK)
                                             >> VPD_VINI_PR_B2_SHIFT;
                             l_procPRList.push_back(l_procEntry);
+
+                            if (l_procEntry.maxEXs == 0)
+                            {
+                                // this is PROBABLY bad PR, so YELL...
+                                HWAS_ERR("pTarget %.8X - PR VPD says 0 CORES",
+                                    pTarget->getAttr<ATTR_HUID>());
+                            }
                         }
                     }
                 } // TYPE_PROC
@@ -433,19 +440,11 @@ errlHndl_t discoverTargets()
 
         if (errl)
         {
-            HWAS_ERR("HWAS discoverTargets: restrictEXunits failed");
+            HWAS_ERR("discoverTargets: restrictEXunits failed");
             break;
         }
 
-        //  check for minimum hardware
-        errl = checkMinimumHardware();
-        if (errl)
-        {
-            HWAS_ERR("HWAS discoverTargets: checkMinimumHardware failed");
-            break;
-        }
-
-        HWAS_INF("HWAS discoverTargets:Find functional MCSs"
+        HWAS_INF("discoverTargets:Find functional MCSs"
                  " which should be non-functional ");
 
         //get the membufs
@@ -464,10 +463,8 @@ errlHndl_t discoverTargets()
                  l_MCSTarget->getAttr<ATTR_AFFINITY_PATH>();
 
             bool l_functMembufFound = false;
-            HWAS_DBG("HWAS discoverTargets:  MCS huid 0x%X is functional "
-                     " with an affinity path of %s",
-                      l_MCSTarget->getAttr<ATTR_HUID>(),
-                      l_MCSAffinityPath.toString() );
+            HWAS_DBG("discoverTargets:  MCS %.8X is functional",
+                      l_MCSTarget->getAttr<ATTR_HUID>());
 
             for (TargetHandleList::iterator
                 pMembufTarget_it = l_funcMembufTargetList.begin();
@@ -488,11 +485,9 @@ errlHndl_t discoverTargets()
                     //should not match two MCSs
                     pMembufTarget_it=
                         l_funcMembufTargetList.erase(pMembufTarget_it);
-                    HWAS_DBG("HWAS discoverTargets: this membuf huid 0x%X is "
-                             "functional and has an affinity path of %s and is"
-                             " assoicated with MCS HUID 0x%X",
+                    HWAS_DBG("discoverTargets: MEMBUF %.8X is "
+                             "functional, assoicated with MCS %.8X",
                               l_MembufTarget->getAttr<ATTR_HUID>(),
-                              l_MembufAffinityPath.toString(),
                               l_MCSTarget->getAttr<ATTR_HUID>());
                     break;
                 }
@@ -522,8 +517,7 @@ errlHndl_t discoverTargets()
             //non functional membuf or no membufs associated with this MCS
             enableHwasState(l_MCSTarget,true,false,
                           HWAS::DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF);
-            HWAS_INF("HWAS discoverTargets: MCS with huid 0x%X "
-                      "mark as present, not functional",
+            HWAS_INF("discoverTargets: MCS %.8X mark as present, not functional",
                       l_MCSTarget->getAttr<ATTR_HUID>() );
         }
 
@@ -709,113 +703,174 @@ errlHndl_t restrictEXunits(
     return errl;
 } // restrictEXunits
 
-errlHndl_t  checkMinimumHardware()
+errlHndl_t checkMinimumHardware()
 {
-    errlHndl_t  l_errl              =   NULL;
+    errlHndl_t l_errl = NULL;
     HWAS_INF("checkMinimumHardware entry");
 
     do
     {
-        uint32_t    l_reasonCode        =   0;
-        uint32_t    l_commonPlid        =   0;
-
-        // before we check, confirm that we're allowed to check right now.
-        bool l_minHwCheckingAllowed = false;
-        l_errl = platIsMinHwCheckingAllowed(l_minHwCheckingAllowed);
-
-        if (l_errl)
-        {
-            HWAS_ERR("platIsMinHwCheckingAllowed returned error - skipping");
-            break;
-        }
-
-        if (!l_minHwCheckingAllowed)
-        {
-            HWAS_INF("platIsMinHwCheckingAllowed returned false - skipping");
-            break;
-        }
-
         //*********************************************************************/
         //  Common present and functional hardware checks.
         //*********************************************************************/
+        uint32_t l_commonPlid = 0;
 
-        //  check for functional cores
-        TargetHandleList l_cores;
-        getAllChiplets(l_cores, TYPE_CORE, true );
-        HWAS_DBG( "checkMinimumHardware: %d functional cores",
-                  l_cores.size() );
-        if ( l_cores.empty() )
+        PredicateHwas l_present;
+        l_present.present(true);
+        PredicateIsFunctional l_functional;
+
+        // check for functional Master Proc
+        Target* l_pMasterProc = NULL;
+        targetService().masterProcChipTargetHandle(l_pMasterProc);
+
+        if ((l_pMasterProc == NULL) || (!l_functional(l_pMasterProc)))
         {
-            TargetHandleList l_presentCores;
-            getAllChiplets(l_presentCores, TYPE_CORE, false );
-            HWAS_ERR( "Insufficient HW to continue IPL: (func Cores)"
-                      ", %d cores are present",
-                      l_presentCores.size() );
+            HWAS_ERR("Insufficient HW to continue IPL: (no master proc)");
+
+            // determine some numbers to help figure out what's up..
+            Target* pSys;
+            targetService().getTopLevelTarget(pSys);
+            PredicateCTM l_proc(CLASS_CHIP, TYPE_PROC);
+            TargetHandleList l_plist;
+
+            PredicatePostfixExpr l_checkExprPresent;
+            l_checkExprPresent.push(&l_proc).push(&l_present).And();
+            targetService().getAssociated(l_plist, pSys,
+                    TargetService::CHILD, TargetService::ALL,
+                    &l_checkExprPresent);
+            uint32_t procs_present = l_plist.size();
+
+            PredicatePostfixExpr l_checkExprFunctional;
+            l_checkExprFunctional.push(&l_proc).push(&l_functional).And();
+            targetService().getAssociated(l_plist, pSys,
+                    TargetService::CHILD, TargetService::ALL,
+                    &l_checkExprFunctional);
+            uint32_t procs_functional = l_plist.size();
+
             /*@
              * @errortype
              * @severity     ERRL_SEV_UNRECOVERABLE
-             * @moduleid     MOD_SYS_AVAIL_SVC
-             * @reasoncode   RC_SYSAVAIL_NO_CORES_FUNC
-             * @devdesc      checkSystem availability check found no functional
-             *               processor cores.
-             * @userdata1    Number of present, nonfunctional cores.
-             * @userdata2    0
+             * @moduleid     MOD_CHECK_MIN_HW
+             * @reasoncode   RC_SYSAVAIL_NO_PROCS_FUNC
+             * @devdesc      checkMinimumHardware found no functional
+             *               master processor
+             * @userdata1    number of present, non-functional procs
+             * @userdata2    number of present, functional, non-master procs
              */
-            l_reasonCode = RC_SYSAVAIL_NO_CORES_FUNC;
-            l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
-                                    MOD_SYS_AVAIL_SVC,
-                                    l_reasonCode,
-                                    l_presentCores.size(),
-                                    0 );
-            //  call out the procedure to find the deconfigured part.
-            hwasErrorAddProcedureCallout( l_errl,
-                                          EPUB_PRC_FIND_DECONFIGURED_PART,
-                                          SRCI_PRIORITY_HIGH );
-            //  if we already have an error, link this one to the earlier plid.
-            //  if not, set the common plid
-            hwasErrorUpdatePlid( l_errl, l_commonPlid );
+            l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                MOD_CHECK_MIN_HW,
+                                RC_SYSAVAIL_NO_PROCS_FUNC,
+                                procs_present, procs_functional);
 
-            //  finally, commit the log.
+            // call out the procedure to find the deconfigured part.
+            hwasErrorAddProcedureCallout(l_errl,
+                                        EPUB_PRC_FIND_DECONFIGURED_PART,
+                                        SRCI_PRIORITY_HIGH);
+
+            //  if we already have an error, link this one to the earlier;
+            //  if not, set the common plid
+            hwasErrorUpdatePlid(l_errl, l_commonPlid);
             errlCommit(l_errl, HWAS_COMP_ID);
             // errl is now NULL
-        } // if no cores
+        }
+        else
+        {
+            // we have a Master Proc and it's functional
+            // check for at least 1 functional ex/core on Master Proc
+            TargetHandleList l_cores;
+            getChildChiplets(l_cores, l_pMasterProc, TYPE_EX, true);
+            HWAS_DBG( "checkMinimumHardware: %d functional cores",
+                      l_cores.size() );
+
+            if (l_cores.empty())
+            {
+                HWAS_ERR("Insufficient HW to continue IPL: (no func cores)");
+
+                // determine some numbers to help figure out what's up..
+                PredicateCTM l_ex(CLASS_UNIT, TYPE_EX);
+                TargetHandleList l_plist;
+
+                PredicatePostfixExpr l_checkExprPresent;
+                l_checkExprPresent.push(&l_ex).push(&l_present).And();
+                targetService().getAssociated(l_plist, l_pMasterProc,
+                        TargetService::CHILD, TargetService::IMMEDIATE,
+                        &l_checkExprPresent);
+                uint32_t exs_present = l_plist.size();
+
+                /*@
+                 * @errortype
+                 * @severity     ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     MOD_CHECK_MIN_HW
+                 * @reasoncode   RC_SYSAVAIL_NO_CORES_FUNC
+                 * @devdesc      checkMinimumHardware found no functional
+                 *               processor cores on the master proc
+                 * @userdata1    HUID of master proc
+                 * @userdata2    number of present, non-functional cores
+                 */
+                l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                    MOD_CHECK_MIN_HW,
+                                    RC_SYSAVAIL_NO_CORES_FUNC,
+                                    l_pMasterProc->getAttr<ATTR_HUID>(),
+                                    exs_present);
+
+                //  call out the procedure to find the deconfigured part.
+                hwasErrorAddProcedureCallout( l_errl,
+                                              EPUB_PRC_FIND_DECONFIGURED_PART,
+                                              SRCI_PRIORITY_HIGH );
+
+                //  if we already have an error, link this one to the earlier;
+                //  if not, set the common plid
+                hwasErrorUpdatePlid( l_errl, l_commonPlid );
+                errlCommit(l_errl, HWAS_COMP_ID);
+                // errl is now NULL
+            } // if no cores
+        }
 
         //  check here for functional dimms
         TargetHandleList l_dimms;
         getAllLogicalCards(l_dimms, TYPE_DIMM, true );
         HWAS_DBG( "checkMinimumHardware: %d functional dimms",
-                  l_dimms.size() );
-        if ( l_dimms.empty() )
+                  l_dimms.size());
+        if (l_dimms.empty())
         {
-            TargetHandleList    l_presentDimms;
-            getAllLogicalCards(l_presentDimms, TYPE_DIMM, false );
-            HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)"
-                      ", %d dimms present",
-                      l_presentDimms.size() );
+            HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)");
+
+            // determine some numbers to help figure out what's up..
+            Target* pSys;
+            targetService().getTopLevelTarget(pSys);
+            PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+            TargetHandleList l_plist;
+
+            PredicatePostfixExpr l_checkExprPresent;
+            l_checkExprPresent.push(&l_dimm).push(&l_present).And();
+            targetService().getAssociated(l_plist, pSys,
+                    TargetService::CHILD, TargetService::ALL,
+                    &l_checkExprPresent);
+            uint32_t dimms_present = l_plist.size();
+
             /*@
              * @errortype
              * @severity     ERRL_SEV_UNRECOVERABLE
-             * @moduleid     MOD_SYS_AVAIL_SVC
+             * @moduleid     MOD_CHECK_MIN_HW
              * @reasoncode   RC_SYSAVAIL_NO_MEMORY_FUNC
-             * @devdesc      checkSystem availability check found no
+             * @devdesc      checkMinimumHardware found no
              *               functional dimm cards.
-             * @userdata1    Number of present, nonfunctional dimms
+             * @userdata1    number of present, non-functional dimms
              * @userdata2    0
              */
-            l_reasonCode    =   RC_SYSAVAIL_NO_MEMORY_FUNC;
-            l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
-                                    MOD_SYS_AVAIL_SVC,
-                                    l_reasonCode,
-                                    l_presentDimms.size(),
-                                    0  );
+            l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                MOD_CHECK_MIN_HW,
+                                RC_SYSAVAIL_NO_MEMORY_FUNC,
+                                dimms_present, 0);
+
             //  call out the procedure to find the deconfigured part.
             hwasErrorAddProcedureCallout( l_errl,
                                           EPUB_PRC_FIND_DECONFIGURED_PART,
                                           SRCI_PRIORITY_HIGH );
-            //  if we already have an error, link this one to the earlier plid.
+
+            //  if we already have an error, link this one to the earlier;
             //  if not, set the common plid
             hwasErrorUpdatePlid( l_errl, l_commonPlid );
-
             errlCommit(l_errl, HWAS_COMP_ID);
             // errl is now NULL
         } // if no dimms
@@ -842,23 +897,23 @@ errlHndl_t  checkMinimumHardware()
             /*@
              * @errortype
              * @severity     ERRL_SEV_UNRECOVERABLE
-             * @moduleid     MOD_SYS_AVAIL_SVC
+             * @moduleid     MOD_CHECK_MIN_HW
              * @reasoncode   RC_SYSAVAIL_INSUFFICIENT_HW
              * @devdesc      Insufficient hardware to continue.
              * @userdata1    0
              * @userdata2    0
              */
-            l_reasonCode    =   RC_SYSAVAIL_INSUFFICIENT_HW;
             l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
-                                    MOD_SYS_AVAIL_SVC,
-                                    l_reasonCode,
+                                    MOD_CHECK_MIN_HW,
+                                    RC_SYSAVAIL_INSUFFICIENT_HW,
                                     0,
                                     0 );
             //  call out the procedure to find the deconfigured part.
             hwasErrorAddProcedureCallout( l_errl,
                                           EPUB_PRC_FIND_DECONFIGURED_PART,
                                           SRCI_PRIORITY_HIGH );
-            //  if we already have an error, link this one to the earlier plid.
+            //  if we already have an error, link this one to the earlier;
+            //  if not, set the common plid
             hwasErrorUpdatePlid( l_errl, l_commonPlid );
         }
     }
@@ -867,7 +922,7 @@ errlHndl_t  checkMinimumHardware()
     HWAS_INF("checkMinimumHardware exit - minimum hardware %s",
             (l_errl == NULL) ? "available" : "NOT available");
     return  l_errl ;
-}
+} // checkMinimumHardware
 
 };   // end namespace
 

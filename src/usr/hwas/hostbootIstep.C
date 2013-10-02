@@ -190,10 +190,17 @@ void* host_gard( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
 
             errl = collectGard();
+
+            // if no error,
+            if (errl == NULL)
+            {
+                //  check and see if we still have enough hardware to continue
+                errl = checkMinimumHardware();
+            }
         }
     }
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
     return errl;
 }
 

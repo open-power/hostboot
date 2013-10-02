@@ -55,6 +55,7 @@
 #include <diag/attn/attn.H>
 #include <hwpf/istepreasoncodes.H>
 #include <hwas/common/deconfigGard.H>
+#include <hwas/common/hwas.H>
 #include <hwas/hwasPlat.H>
 
 namespace ISTEPS_TRACE
@@ -277,17 +278,56 @@ errlHndl_t IStepDispatcher::executeAllISteps()
         {
             err = doIstep(istep, substep, l_deconfigs);
 
+            // there were HW deconfigures that happened during the istep
             if (l_deconfigs)
             {
-                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: Deconfigure(s) during IStep %d:%d",
+                TRACFCOMP(g_trac_initsvc,
+                    ERR_MRK"executeAllISteps: Deconfigure(s) during IStep %d:%d",
                           istep, substep);
+
+                // we had deconfigures lets see if we do the reconfigure loop
                 uint8_t newIstep = 0;
                 uint8_t newSubstep = 0;
 
                 if ((checkReconfig(istep, substep, newIstep, newSubstep)) &&
                     (numReconfigs < MAX_NUM_RECONFIG_ATTEMPTS))
                 {
-                    // Within the Reconfig Loop, loop back
+                    // Within the Reconfig Loop, going to loop back
+                    // first, check to make sure we still have a bootable system
+                    errlHndl_t l_errl = HWAS::checkMinimumHardware();
+                    if (l_errl)
+                    {
+                        // non-bootable system - we want to return our error.
+                        TRACFCOMP(g_trac_initsvc,
+                            ERR_MRK"Error from checkMinimumHardware");
+
+                        if (err == NULL)
+                        {
+                            err = l_errl;   // use this error
+                        }
+                        else
+                        {
+                            // The IStep returned an error, This is the generic
+                            // 'IStep failed' from the IStepError class, real
+                            // errors detailing the failure have already been
+                            // committed. Record the PLID and delete it. This
+                            // will be replaced by the checkMinimumHardware
+                            // error with the same plid that matches the real
+                            // errors
+                            const uint32_t l_plid = err->plid();
+                            delete err;
+
+                            // use this error instead
+                            err = l_errl;
+                            // and use the same plid as the IStep error
+                            err->plid(l_plid);
+                        }
+
+                        // Break out of the istep loop with the error
+                        break;
+                    } // if error from checkMinimumHardware
+
+                    // we have a bootable system, so loop back
                     numReconfigs++;
                     uint32_t l_plid = 0;
 
@@ -457,12 +497,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         {
             // There was no PLD, process any deferred deconfig records (i.e.
             // actually do the deconfigures)
-            bool deferredDeconfigs = HWAS::processDeferredDeconfig();
-
-            if (deferredDeconfigs)
-            {
-                TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Processed deferred deconfig records");
-            }
+            HWAS::theDeconfigGard().processDeferredDeconfig();
         }
 
         uint32_t postDeconfigs = HWAS::theDeconfigGard().getDeconfigureStatus();
@@ -957,11 +992,12 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 
     err = doIstep (istep, substep, l_deconfigs);
 
+    // If there was no IStep error, but there were deconfig(s)
     if ((!err) && l_deconfigs)
     {
-        // There was no IStep error, but there were deconfig(s)
         uint8_t newIstep = 0;
         uint8_t newSubstep = 0;
+
         if (checkReconfig(istep, substep, newIstep, newSubstep))
         {
             // Within the Reconfig Loop. In non-istep-mode it would loop back
@@ -992,7 +1028,7 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
             // a success so it is the same here
             TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: IStep success and deconfigs, returning success");
         }
-        
+
     }
 
     uint64_t status = 0;

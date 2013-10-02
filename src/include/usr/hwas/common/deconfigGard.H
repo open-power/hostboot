@@ -43,16 +43,6 @@ class HwasGardTest;
 
 namespace HWAS
 {
-/**
- *  @brief processDeferredDeconfig process any deferred deconfigure callouts
- *              that might have been 'queued' up.
- *
- *  This is outside of the DeconfigGard class because it is called
- *
- *  @return bool true if there were deferred deconfigure callouts;
- *               false if there were NO deferred deconfigure callouts;
- */
-bool processDeferredDeconfig();
 
 /**
  * @brief   collectGard   Common HWAS function to collect the GARD info
@@ -536,13 +526,11 @@ public:
 
 
     /**
-     *  @brief _processDeferredDeconfig process any deferred deconfigure
+     *  @brief processDeferredDeconfig process any deferred deconfigure
      *              callouts that might have been 'queued' up.
-     *
-     *  @return bool true if there were deferred deconfigure callouts;
-     *               false if there were NO deferred deconfigure callouts;
+     *              This is called from the istep dispatcher
      */
-    bool _processDeferredDeconfig();
+    void processDeferredDeconfig();
 
     /**
      *  @brief Starts deconfiguration of procs based on deconfigured

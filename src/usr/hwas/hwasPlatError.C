@@ -45,6 +45,7 @@ errlHndl_t hwasError(const uint8_t i_sev,
                     (ERRORLOG::errlSeverity_t)i_sev, i_modId,
                     HWAS_COMP_ID | i_reasonCode,
                     i_user1, i_user2);
+    l_pErr->collectTrace("HWAS_I");
     return l_pErr;
 }
 
