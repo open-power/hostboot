@@ -25,15 +25,19 @@
  *  @brief Contains all the plugin code for the PRD P8 MCS
  */
 
+// Framework includes
 #include <iipServiceDataCollector.h>
+#include <iipSystem.h>
 #include <prdfExtensibleChip.H>
+#include <prdfGlobal.H>
 #include <prdfPluginMap.H>
 #include <UtilHash.H>
-#include <prdfGlobal.H>
-#include <iipSystem.h>
-#include <prdfP8McsDataBundle.H>
+
+// Pegasus includes
+#include <prdfCenMbaCaptureData.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfLaneRepair.H>
+#include <prdfP8McsDataBundle.H>
 
 //##############################################################################
 //
@@ -108,8 +112,8 @@ int32_t CheckCentaurCheckstop( ExtensibleChip * i_mcsChip,
  * @param o_analyzed TRUE if analysis has been done on this chip
  * @return failure or success
  */
-int32_t PreAnalysis ( ExtensibleChip * i_mcsChip, STEP_CODE_DATA_STRUCT & i_sc,
-                      bool & o_analyzed )
+int32_t PreAnalysis( ExtensibleChip * i_mcsChip, STEP_CODE_DATA_STRUCT & i_sc,
+                     bool & o_analyzed )
 {
     o_analyzed = false;
 
@@ -122,16 +126,7 @@ int32_t PreAnalysis ( ExtensibleChip * i_mcsChip, STEP_CODE_DATA_STRUCT & i_sc,
         membChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
         membChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
 
-        CenMembufDataBundle * mbdb = getMembufDataBundle( membChip );
-        for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
-        {
-            ExtensibleChip * mbaChip = mbdb->getMbaChip(i);
-            if ( NULL != mbaChip )
-            {
-                mbaChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
-                mbaChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
-            }
-        }
+        CenMbaCaptureData::addMbaFirRegs( membChip, cd );
     }
 
     // Check for a Centaur Checkstop
