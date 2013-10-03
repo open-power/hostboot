@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.18 2013/09/19 19:02:12 bellows Exp $
+// $Id: mss_eff_config_thermal.C,v 1.19 2013/09/23 22:05:04 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -53,6 +53,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.19  | pardeik  |23-SEP-13| initial support for the ras/cas increments
 //   1.18  | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 //   1.17  | pardeik  |19-JUL-13| Use runtime throttles for IPL for scominit
 //         |          |         | Removed MRW safemode throttle stuff
@@ -332,6 +333,8 @@ extern "C" {
 	uint32_t cdimm_master_power_intercept;
 	uint32_t cdimm_supplier_power_slope;
 	uint32_t cdimm_supplier_power_intercept;
+	uint8_t ras_increment;
+	uint8_t cas_increment;
 
 	power_table_size = (sizeof(power_table))/(sizeof(power_data_t));
 
@@ -1083,6 +1086,11 @@ extern "C" {
 		return rc;
 	    }
 
+// Setup the RAS and CAS increments used in the throttling register
+// TODO:  base these values off of number of ranks and dram width
+	    ras_increment=0;
+	    cas_increment=1;
+
 // update output attributes
 	    rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
 			       &i_target_mba, runtime_throttle_n_per_mba);
@@ -1100,6 +1108,18 @@ extern "C" {
 			       &i_target_mba, runtime_throttle_d);
 	    if (rc) {
 		FAPI_ERR("Error writing attribute ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR");
+		return rc;
+	    }
+	    rc = FAPI_ATTR_SET(ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT,
+			       &i_target_mba, ras_increment);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT");
+		return rc;
+	    }
+	    rc = FAPI_ATTR_SET(ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT,
+			       &i_target_mba, cas_increment);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT");
 		return rc;
 	    }
 
