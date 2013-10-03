@@ -103,9 +103,9 @@ public:
         {
             /*@
              * @errortype
-             * @reasoncode  ERRL_TEST_REASON_CODE
+             * @reasoncode  ERRORLOG::ERRL_TEST_REASON_CODE
              * @severity    ERRORLOG::ERRL_SEV_INFORMATIONAL
-             * @moduleid    ERRL_TEST_MOD_ID
+             * @moduleid    ERRORLOG::ERRL_TEST_MOD_ID
              * @devdesc     Errl test. Error with non-decoded string
              *              and lots of trace buffers.
              */
@@ -113,8 +113,8 @@ public:
             // Create an error log
             errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE,
                                     l_userData1,
                                     l_userData2);
 
@@ -220,7 +220,7 @@ public:
                 break;
             }
 
-            if (l_err->reasonCode() != ERRL_TEST_REASON_CODE)
+            if (l_err->reasonCode() != ERRORLOG::ERRL_TEST_REASON_CODE)
             {
                 TS_FAIL("testErrl1: createErrlLog() returns incorrect reason code!");
                 break;
@@ -287,8 +287,8 @@ public:
         // Create an error log
         errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                ERRL_TEST_MOD_ID,
-                                ERRL_TEST_REASON_CODE,
+                                ERRORLOG::ERRL_TEST_MOD_ID,
+                                ERRORLOG::ERRL_TEST_REASON_CODE,
                                 l_userData1,
                                 l_userData2);
 
@@ -406,8 +406,8 @@ public:
             // Create an error log
             errlHndl_t errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE);
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
 
             // test the different callout types
             TS_TRACE("test callout target %.8X", TARGETING::get_huid(pTarget));
@@ -583,8 +583,8 @@ public:
             // Create an error log
             errlHndl_t errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE);
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
 
             // test the different callout types
             TS_TRACE( "test callout pEx %p", l_target);
@@ -669,8 +669,8 @@ public:
             // Create an error log
             errlHndl_t errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE);
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
 
             // test the different callout types
             TS_TRACE( "test callout pEx %p", l_target);

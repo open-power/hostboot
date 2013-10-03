@@ -49,7 +49,7 @@ class ErrlReportTest: public CxxTest::TestSuite
 public:
 
     /**
-     * @brief Send a small size error log to FSP 
+     * @brief Send a small size error log to FSP
      *  - Create an error log with only 192 bytes
      *  - Verify that hostbot created error log and sent it to FSP
      *  - Found an issue with FSI mailbox DMA code to realign data len
@@ -65,11 +65,11 @@ public:
         TS_TRACE( "test testErrlReport1");
         do
         {
-            // Create an error log 
+            // Create an error log
             l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE,
                                     l_userData1,
                                     l_userData2);
             if (l_err == NULL)
@@ -80,14 +80,14 @@ public:
 
             // Commit error log.
             errlCommit(l_err, CXXTEST_COMP_ID);
-            
+
         } while(0);
     }
 
 
     /**
      * @brief Send multiple error logs back to back to FSP
-     *  - Create several error logs and send them to FSP in a loop. 
+     *  - Create several error logs and send them to FSP in a loop.
      *  - Verify that error logs are created and sent to FSP
      *  - Verify that FSP received all the error logs and log them properly.
      */
@@ -103,11 +103,11 @@ public:
             for (l_loopi = 0; l_loopi < 5; l_loopi++)
             {
 
-                 // Create an error log 
+                 // Create an error log
                  l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE,
                                     l_loopi,
                                     l_loopi);
                  if (l_err == NULL)
@@ -118,7 +118,7 @@ public:
 
                  // Commit error log
                  errlCommit(l_err, CXXTEST_COMP_ID);
-           } 
+           }
         } while(0);
     }
 
@@ -129,7 +129,7 @@ public:
      *  - Verify that an error log with severity unrecoverable created successfully
      *  - Verify that the error log is sent to FSP
      *  - Verify that FSP log the error as unrecoverable one.
-     *  
+     *
      */
 
     void testErrlReport3(void)
@@ -144,8 +144,8 @@ public:
             // Create an error log
             l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE,
                                     l_userData1,
                                     l_userData2);
             if (l_err == NULL)
@@ -172,15 +172,15 @@ public:
         errlHndl_t l_err = NULL;
         uint64_t l_userData1 = 0xAAAAAAAA;
         uint64_t l_userData2 = 0xBBBBBBBB;
-        
+
         TS_TRACE( "test testErrlReport4");
         do
         {
             // Create an error log
             l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE,
                                     l_userData1,
                                     l_userData2);
             if (l_err == NULL)
@@ -197,8 +197,8 @@ public:
     /**
      * @brief Send a big size error log to FSP
      *  - Verfiy that an error log with ffdc and traces is created successfully
-     *  - Verify that the error log is sent to FSP 
-     *  - Verify that FSP logged the error with correct data successfully 
+     *  - Verify that the error log is sent to FSP
+     *  - Verify that FSP logged the error with correct data successfully
      */
     void testErrlReport5(void)
     {
@@ -213,8 +213,8 @@ public:
             // Create an error log
             errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE,
                                     l_userData1,
                                     l_userData2);
 
@@ -226,7 +226,7 @@ public:
                 break;
             }
 
-            // add FFDC 
+            // add FFDC
             const char * l_str = "Error log report testing.";
             pffdc = l_err->addFFDC( DEVFW_COMP_ID, l_str, strlen( l_str ), 0, 0);
             if ( NULL == pffdc )
@@ -258,9 +258,9 @@ public:
                 break;
             }
 
-            // Commit error log. 
+            // Commit error log.
             errlCommit(l_err, CXXTEST_COMP_ID);
-        
+
         } while(0);
     }
 

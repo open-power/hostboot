@@ -32,39 +32,42 @@
 
 #include <hbotcompid.H>
 
-// Module IDs for ERRL component
-enum errlModuleId
+namespace ERRORLOG
 {
-    ERRL_FIRST_MODULE_ID        = 0x00,
-    ERRL_USERDATA_TEST_MOD_ID   = 0x01,
-    ERRL_TEST_MOD_ID            = 0x02,
-    //........
-    ERRL_LAST_MODULE_ID         = 0xFF
-};
+    // Module IDs for ERRL component
+    enum errlModuleId
+    {
+        ERRL_FIRST_MODULE_ID        = 0x00,
+        ERRL_USERDATA_TEST_MOD_ID   = 0x01,
+        ERRL_TEST_MOD_ID            = 0x02,
+        //........
+        ERRL_LAST_MODULE_ID         = 0xFF
+    };
 
-// Reason codes for ERRL component
-enum errlReasonCode
-{
-    ERRL_FIRST_ERR            = ERRL_COMP_ID | 0x01,
-    ERRL_TEST_STRING_UD       = ERRL_COMP_ID | 0x02,
-    ERRL_TEST_REASON_CODE     = ERRL_COMP_ID | 0x03,
-    ERRL_TEST_ATTRIBUTE_UD    = ERRL_COMP_ID | 0x04,
-    ERRL_TEST_LOGREGISTER_UD  = ERRL_COMP_ID | 0x05,
-    ERRL_TEST_CALLOUT_UD      = ERRL_COMP_ID | 0x06,
-    //........
-    ERRL_LAST_ERR             = ERRL_COMP_ID | 0xFF
-};
+    // Reason codes for ERRL component
+    enum errlReasonCode
+    {
+        ERRL_FIRST_ERR            = ERRL_COMP_ID | 0x01,
+        ERRL_TEST_STRING_UD       = ERRL_COMP_ID | 0x02,
+        ERRL_TEST_REASON_CODE     = ERRL_COMP_ID | 0x03,
+        ERRL_TEST_ATTRIBUTE_UD    = ERRL_COMP_ID | 0x04,
+        ERRL_TEST_LOGREGISTER_UD  = ERRL_COMP_ID | 0x05,
+        ERRL_TEST_CALLOUT_UD      = ERRL_COMP_ID | 0x06,
+        //........
+        ERRL_LAST_ERR             = ERRL_COMP_ID | 0xFF
+    };
 
-// Identifiers for ERRL user data sections.
-enum errlUserDetailDataSubsection
-{
-    ERRL_UDT_NOFORMAT         = 0x00,
-    ERRL_UDT_STRING           = 0x01,
-    ERRL_UDT_TARGET           = 0x02,
-    ERRL_UDT_BACKTRACE        = 0x03,
-    ERRL_UDT_ATTRIBUTE        = 0x04,
-    ERRL_UDT_LOGREGISTER      = 0x05,
-    ERRL_UDT_CALLOUT          = 0x06,
+    // Identifiers for ERRL user data sections.
+    enum errlUserDetailDataSubsection
+    {
+        ERRL_UDT_NOFORMAT         = 0x00,
+        ERRL_UDT_STRING           = 0x01,
+        ERRL_UDT_TARGET           = 0x02,
+        ERRL_UDT_BACKTRACE        = 0x03,
+        ERRL_UDT_ATTRIBUTE        = 0x04,
+        ERRL_UDT_LOGREGISTER      = 0x05,
+        ERRL_UDT_CALLOUT          = 0x06,
+    };
 };
 
 #endif

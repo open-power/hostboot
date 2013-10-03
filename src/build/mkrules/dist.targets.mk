@@ -204,7 +204,8 @@ fsp.tar_CONTENTS = \
         $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/prdf/*)) \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*)) \
-    src/build/debug/fsp-memdump.sh:src/build/debug/
+    src/build/debug/fsp-memdump.sh:src/build/debug/ \
+    obj/genfiles/hbfw_term_rc.H
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

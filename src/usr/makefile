@@ -26,7 +26,7 @@ ROOTPATH = ../..
 HOSTBOOT_PROFILE_NO_INSTRUMENT = 1
 OBJS = module_init.o
 
-SUBDIRS = example.d trace.d cxxtest.d testcore.d errl.d devicefw.d  \
+SUBDIRS = trace.d cxxtest.d testcore.d errl.d devicefw.d  \
           scom.d xscom.d targeting.d initservice.d hwpf.d \
           ecmddatabuffer.d pnor.d i2c.d vfs.d fsi.d hwas.d fsiscom.d \
           intr.d pore.d util.d mbox.d diag.d vpd.d scan.d \

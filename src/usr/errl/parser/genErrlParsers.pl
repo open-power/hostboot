@@ -74,6 +74,7 @@ my $compIdFile = $base."/src/include/usr/hbotcompid.H";
 my $compPath = $base."/src/usr";
 my $compIncPath = $base."/src/include/usr";
 my $genFilesPath = $base."/obj/genfiles";
+my $hbfwTermRcFile = $genFilesPath."/hbfw_term_rc.H";
 
 #------------------------------------------------------------------------------
 # Call subroutines to populate the following arrays:
@@ -183,6 +184,30 @@ if ($DEBUG)
 my %modIdToValueHash;
 my %rcToValueHash;
 my %udIdToValueHash;
+open(TERM_RC_FILE, ">", "$hbfwTermRcFile") or die("Cannot open: $hbfwTermRcFile: $!");
+
+# print header of file
+print TERM_RC_FILE "#ifndef __HBFW_TERM_RC_H\n";
+print TERM_RC_FILE "#define __HBFW_TERM_RC_H\n\n";
+print TERM_RC_FILE "namespace HBFW\n{\n\n";
+
+# print body of file
+sub print_term_rc
+{
+    my ($namespace, $enumName, @taggedLines) = @_;
+
+    # spaces in front to ensure correct headerfile format
+    print TERM_RC_FILE "namespace $namespace\n";
+    print TERM_RC_FILE "{\n";
+    print TERM_RC_FILE "    $enumName\n";
+    print TERM_RC_FILE "    {\n";
+    foreach my $line (@taggedLines)
+    {
+        print TERM_RC_FILE "        $line\n";
+    }
+    print TERM_RC_FILE "    };\n";
+    print TERM_RC_FILE "};\n\n";
+}
 
 foreach my $file (@reasonCodeFiles)
 {
@@ -193,6 +218,10 @@ foreach my $file (@reasonCodeFiles)
     my $processingRcs = 2;
     my $processingUds = 3;
     my $compId = "";
+    my $term_rc_tag = 0;
+    my $printEnum = 0;
+    my $enumName = "";
+    my @taggedLines;
 
     while (my $line = <RC_FILE>)
     {
@@ -230,6 +259,20 @@ foreach my $file (@reasonCodeFiles)
         }
         elsif ($line =~ /enum.+ReasonCode/i)
         {
+            # avoids comment lines '@enum *ReasonCode'
+            if ($line !~ /\s*\@/ )
+            {
+                # requiring namespaces in reason code header files
+                if ($namespace eq "NO_NS")
+                {
+                    print ("No namespace in '$file'\n");
+                    exit(1);
+                }
+                # strip leading whitespace and trailing characters
+                $enumName = $line;
+                $enumName =~ s!^\s+!!;
+                chomp($enumName);
+            }
             $processing = $processingRcs;
             next;
         }
@@ -241,6 +284,11 @@ foreach my $file (@reasonCodeFiles)
         elsif ($line =~ /}/)
         {
             $processing = 0;
+            if ($printEnum)
+            {
+                print_term_rc($namespace, $enumName, @taggedLines);
+                $printEnum = 0;
+            }
             next;
         }
 
@@ -254,6 +302,11 @@ foreach my $file (@reasonCodeFiles)
         }
         elsif ($processing == $processingRcs)
         {
+            if ($line =~ /termination_rc/i)
+            {
+                $term_rc_tag = 1;
+                next;
+            }
             if ($compId ne "")
             {
                 # Reason code line does not contain Component ID
@@ -267,6 +320,16 @@ foreach my $file (@reasonCodeFiles)
                     }
                     $rcToValueHash{$namespace}->{$1} =
                         $compIdToValueHash{$compId} . $2;
+
+                    # if comment tag "termination_rc" is above enum
+                    # in reasoncode.H files
+                    if($term_rc_tag)
+                    {
+                        my $line = $1." = 0x".$rcToValueHash{$namespace}->{$1};
+                        push @taggedLines, $line;
+                        $printEnum = 1;
+                        $term_rc_tag = 0;
+                    }
                 }
             }
             else
@@ -282,6 +345,16 @@ foreach my $file (@reasonCodeFiles)
                     }
                     $rcToValueHash{$namespace}->{$1} =
                         $compIdToValueHash{$2} . $3;
+
+                    # if comment tag "termination_rc" is above enum
+                    # in reasoncode.H files
+                    if($term_rc_tag)
+                    {
+                        my $line = $1." = 0x".$rcToValueHash{$namespace}->{$1};
+                        push @taggedLines, $line;
+                        $printEnum = 1;
+                        $term_rc_tag = 0;
+                    }
                 }
             }
         }
@@ -304,9 +377,11 @@ foreach my $file (@reasonCodeFiles)
             }
         }
     }
-
     close(RC_FILE);
 }
+# print footer of file
+print TERM_RC_FILE "};\n#endif\n";
+close(TERM_RC_FILE);
 
 if ($DEBUG)
 {
