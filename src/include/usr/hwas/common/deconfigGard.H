@@ -239,7 +239,7 @@ public:
      *
      * @return uint32_t 'counter' of deconfigure events
      */
-    uint32_t getDeconfigureStatus();
+    uint32_t getDeconfigureStatus() const;
 
     /**
      * @brief Registers a Deferred Deconfigure
@@ -248,9 +248,8 @@ public:
      * by hwasCallout when the user requests a
      * Deferred Deconfigure request.
      *
-     * For now, just put a mark on the wall indicating that we got a deferred
-     * deconfigure callout
-     * TODO RTC: 45781
+     * Create a deconfigure record, which will be handled in the function
+     * processDeferredDeconfig().
      *
      * @param[in] i_target   Reference to Target to deconfigure.
      * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
@@ -405,9 +404,11 @@ private:
      *
      * @param[in] i_target   Reference to base Target.
      * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
+     * @param[in] i_atRunTime if true, at runtime - bypass some associations
      */
     void _deconfigureByAssoc(TARGETING::Target & i_target,
-                             const uint32_t i_errlEid);
+                             const uint32_t i_errlEid,
+                             bool i_atRunTime = false);
 
     /**
      * @brief Deconfigures a Target.
