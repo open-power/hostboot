@@ -276,13 +276,34 @@ foreach my $i (@{$powerbus->{'power-bus'}})
 {
     # Pull out the connection information from the description
     # example: n0:p0:A2 to n0:p2:A2
+
     my $endp1 = $i->{'description'};
-    my $endp2 = $endp1;
-    $endp1 =~ s/^(.*) to.*/$1/;
-    $endp2 =~ s/.* to (.*)\s*$/$1/;
-    # Grab the lane swap information
-    my $dwnstrm_swap = $i->{'downstream-n-p-lane-swap-mask'};
-    my $upstrm_swap =  $i->{'upstream-n-p-lane-swap-mask'};
+    my $endp2 = "null";
+    my $dwnstrm_swap = 0;
+    my $upstrm_swap = 0;
+
+    my $present = index $endp1, 'not connected';
+    if ($present eq -1)
+    {
+       $endp2 = $endp1;
+       $endp1 =~ s/^(.*) to.*/$1/;
+       $endp2 =~ s/.* to (.*)\s*$/$1/;
+
+       # Grab the lane swap information
+       $dwnstrm_swap = $i->{'downstream-n-p-lane-swap-mask'};
+       $upstrm_swap =  $i->{'upstream-n-p-lane-swap-mask'};
+    }
+    else
+    {
+       $endp1 =~ s/^(.*) unit.*/$1/;
+       $endp2 = "invalid";
+
+
+       # Set the lane swap information to 0 to avoid junk
+       $dwnstrm_swap = 0;
+       $upstrm_swap =  0;
+    }
+
     my $bustype = $endp1;
     $bustype =~ s/.*:p.*:(.).*/$1/;
     my $tx_swap = 0;
@@ -702,10 +723,12 @@ for my $i ( 0 .. $#SMembuses )
 #
 #   pu
 #   ex  (one or more EX of pu before it)
+#   core
 #   mcs (one or more MCS of pu before it)
 #   (Repeat for remaining pu)
 #   memb
 #   mba (to for membuf before it)
+#   L4
 #   (Repeat for remaining membuf)
 #
 
@@ -757,6 +780,20 @@ for my $i ( 0 .. $#SortedTargets )
 
         for my $j ( 0 .. $#SortedTargets )
         {
+            if (($SortedTargets[$j][NAME_FIELD] eq "core") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [ @fields ];
+            }
+        }
+
+        for my $j ( 0 .. $#SortedTargets )
+        {
             if (($SortedTargets[$j][NAME_FIELD] eq "mcs") &&
                 ($SortedTargets[$j][NODE_FIELD] eq $node) &&
                 ($SortedTargets[$j][POS_FIELD] eq $position))
@@ -793,6 +830,20 @@ for my $i ( 0 .. $#SortedTargets )
                 for my $k ( 0 .. PLUG_POS )
                 {
                     $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [ @fields ];
+            }
+        }
+
+        for my $p ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$p][NAME_FIELD] eq "L4") &&
+                ($SortedTargets[$p][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$p][POS_FIELD] eq $position))
+            {
+                for my $q ( 0 .. PLUG_POS )
+                {
+                    $fields[$q] = $SortedTargets[$p][$q];
                 }
                 push @STargets, [ @fields ];
             }
@@ -859,6 +910,7 @@ if ($hasProc == 0)
 # Fourth, generate the proc, occ, ex-chiplet, mcs-chiplet
 # unit-tp (if on fsp), pcie bus and A/X-bus.
 my $ex_count = 0;
+my $ex_core_count = 0;
 my $mcs_count = 0;
 my $proc_ordinal_id =0;
 #my $fru_id = 0;
@@ -952,34 +1004,32 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
     {
         my $proc = $STargets[$i][POS_FIELD];
         my $ex = $STargets[$i][UNIT_FIELD];
-        if ($do_core == 0)
+
+        if ($ex_count == 0)
         {
-            if ($ex_count == 0)
-            {
-                print "\n<!-- $SYSNAME n${node}p$proc EX units -->\n";
-            }
-            generate_ex($proc, $ex, $STargets[$i][ORDINAL_FIELD], $ipath);
-            $ex_count++;
-            if ($STargets[$i+1][NAME_FIELD] eq "mcs")
-            {
-                $do_core = 1;
-                $i -= $ex_count;
-                $ex_count = 0;
-            }
+            print "\n<!-- $SYSNAME n${node}p$proc EX units -->\n";
         }
-        else
+        generate_ex($proc, $ex, $STargets[$i][ORDINAL_FIELD], $ipath);
+        $ex_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "core")
         {
-            if ($ex_count == 0)
-            {
-                print "\n<!-- $SYSNAME n${node}p$proc core units -->\n";
-            }
-            generate_ex_core($proc,$ex,$STargets[$i][ORDINAL_FIELD]);
-            $ex_count++;
-            if ($STargets[$i+1][NAME_FIELD] eq "mcs")
-            {
-                $do_core = 0;
-                $ex_count = 0;
-            }
+            $ex_count = 0;
+        }
+    }
+    elsif ($STargets[$i][NAME_FIELD] eq "core")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $ex = $STargets[$i][UNIT_FIELD];
+
+        if ($ex_core_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc core units -->\n";
+        }
+        generate_ex_core($proc,$ex,$STargets[$i][ORDINAL_FIELD], $STargets[$i][PATH_FIELD]);
+        $ex_core_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "mcs")
+        {
+            $ex_core_count = 0;
         }
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mcs")
@@ -1072,6 +1122,18 @@ for my $i ( 0 .. $#STargets )
             $mba_count = 0;
             print "\n<!-- $SYSNAME Centaur n${node}p${memb} : end -->\n"
         }
+    }
+    elsif ($STargets[$i][NAME_FIELD] eq "L4")
+    {
+        print "\n";
+        print "<!-- $SYSNAME Centaur L4 affiliated with membuf$memb -->";
+        print "\n";
+
+        my $l4 = $STargets[$i][UNIT_FIELD];
+        generate_l4( $memb, $membMcs, $l4, $STargets[$i][ORDINAL_FIELD],
+                     $ipath );
+
+        print "\n<!-- $SYSNAME Centaur n${node}p${l4} : end -->\n"
     }
 }
 
@@ -1403,7 +1465,7 @@ sub generate_sys
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:sys-$sys</default>
+        <default>instance:system:TO_BE_ADDED</default>
     </compileAttribute>
     <attribute>
         <id>FREQ_PROC_REFCLOCK</id>
@@ -1674,7 +1736,7 @@ sub generate_system_node
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:TO_BE_ADDED</default>
+        <default>instance:node:TO_BE_ADDED</default>
     </compileAttribute>";
         # add fsp extensions
         do_plugin('fsp_node_add_extensions', $node);
@@ -1997,7 +2059,7 @@ sub generate_ex
 
 sub generate_ex_core
 {
-    my ($proc, $ex, $ordinalId) = @_;
+    my ($proc, $ex, $ordinalId, $ipath) = @_;
     my $uidstr = sprintf("0x%02X07%04X",${node},$ex+$proc*16);
     print "
 <targetInstance>
@@ -2014,7 +2076,7 @@ sub generate_ex_core
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:ex_core:TO_BE_ADDED</default>
+        <default>instance:$ipath</default>
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2384,35 +2446,6 @@ sub generate_centaur
 
     print "\n</targetInstance>\n";
 
-    $uidstr = sprintf("0x%02X0C%04X",${node},$mcs+$proc*8+${node}*8*8);
-    print "
-<!-- $SYSNAME Centaur L4 affiliated with membuf$ctaur -->
-
-<targetInstance>
-    <id>sys${sys}node${node}membuf${ctaur}l40</id>
-    <type>unit-l4-centaur</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/membuf-$ctaur/l4-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$ctaur/l4-0</default>
-    </attribute>
-    <compileAttribute>
-        <id>INSTANCE_PATH</id>
-        <default>instance:l4:TO_BE_ADDED</default>
-    </compileAttribute>"
-;
-
-    # call to do any fsp per-centaur_l4 attributes
-    do_plugin('fsp_centaur_l4', $ctaur, $ordinalId );
-
-    print "
-</targetInstance>
-";
 }
 
 sub generate_mba
@@ -2455,6 +2488,45 @@ sub generate_mba
     print "
 </targetInstance>
 ";
+}
+
+sub generate_l4
+{
+    my ($ctaur, $mcs, $l4, $ordinalId, $ipath) = @_;
+    my $proc = $mcs;
+    $proc =~ s/.*:p(.*):.*/$1/g;
+    $mcs =~ s/.*:.*:mcs(.*)/$1/g;
+
+    my $uidstr = sprintf("0x%02X0C%04X",${node},$mcs+$proc*8+${node}*8*8);
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}membuf${ctaur}l4${l4}</id>
+    <type>unit-l4-centaur</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/membuf-$ctaur/"
+            . "l4-$l4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$ctaur/l4-$l4</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$l4</default>
+    </attribute>";
+
+    # call to do any fsp per-centaur_l4 attributes
+    do_plugin('fsp_centaur_l4', $ctaur, $ordinalId );
+
+    print "</targetInstance>";
 }
 
 # Since each Centaur has only one dimm, it is assumed to be attached to port 0
