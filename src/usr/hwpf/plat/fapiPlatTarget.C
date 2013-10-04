@@ -96,14 +96,14 @@ const char * Target::toEcmdString() const
 //******************************************************************************
 void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
 {
-    // Extract the HostBoot target pointer
+    // Extract the Targeting target pointer
     TARGETING::Target* l_pTarget =
         reinterpret_cast<TARGETING::Target*>(iv_pHandle);
 
     if (l_pTarget == NULL)
     {
         FAPI_ERR("toString: Called on NULL target");
-        strcpy(o_ecmdString, "ecmd-no-target"); 
+        strcpy(o_ecmdString, "ecmd-no-target");
     }
     else
     {
@@ -125,13 +125,12 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
             // Chip:    <chip> kX:nX:sX:pXX
             // There is officially a tab character between ">" and "k", this is
             // replaced with the number of spaces seen in the Cronus trace
-            // If the k.. string is less than 18 chars, it is padded to 18 chars
-            // and a single space is added
+            // If the k.. string is less than 19 chars, it is padded to 19 chars
             //
             // <chip> = chip type ("p8" = processor, "centaur" = memory buffer)
             // <unit> = unit type ("ex", "mcs", "mba", "abus", "xbus")
             // kX     = cage number. Always zero
-            // nX     = node number. Always zero in HostBoot (right now)
+            // nX     = node number. Always zero (right now)
             // sX     = slot number. Always zero
             // pXX    = chip position
             // cX     = unit position
@@ -150,6 +149,7 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
             const char * const ECMD_CHIPLET_MBA  = "mba     ";
             const char * const ECMD_CHIPLET_XBUS = "xbus    ";
             const char * const ECMD_CHIPLET_ABUS = "abus    ";
+            const int K_STRING_LEN = 19;
 
             // Look for a chip in the path
             const char * l_pChipType = NULL;
@@ -241,37 +241,33 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
                 // Middle of the string
                 strcpy(l_pStr, "k0:n0:s0:p");
                 l_pStr += strlen("k0:n0:s0:p");
+                int l_kstringlen = strlen("k0:n0:s0:p");
 
-                // Chip Pos (Note that %02d does not appear to work)
-                if (l_chipPos >= 10)
-                {
-                    sprintf(l_pStr, "%d", l_chipPos / 10);
-                }
-                else
-                {
-                    *l_pStr = '0';
-                }
-                l_pStr++;
-
-                sprintf(l_pStr, "%d", l_chipPos % 10);
-                l_pStr++;
+                // Chip Pos.
+                int l_num = sprintf(l_pStr, "%02d", l_chipPos);
+                l_pStr += l_num;
+                l_kstringlen += l_num;
 
                 if (l_pChipletType != NULL)
                 {
                     // Chiplet Pos
                     strcpy(l_pStr, ":c");
                     l_pStr += strlen(":c");
-                    sprintf(l_pStr, "%d", l_chipletPos);
-                    l_pStr++;
+                    l_kstringlen += strlen(":c");
+                    int l_num = sprintf(l_pStr, "%d", l_chipletPos);
+                    l_pStr += l_num;
+                    l_kstringlen += l_num;
+                }
 
-                    // Pad to 18 chars and add a space
-                    sprintf(l_pStr, "    ");
-                }
-                else
+                // Pad the k-string to K_STRING_LEN characters
+                while (l_kstringlen < K_STRING_LEN)
                 {
-                    // Pad to 18 chars and add a space
-                    sprintf(l_pStr, "       ");
+                    *l_pStr = ' ';
+                    l_pStr++;
+                    l_kstringlen++;
                 }
+
+                *l_pStr = '\0';
             }
         }
         else
