@@ -1033,210 +1033,201 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     fapi::FAPI_RC_SUCCESS :\
     fapi::platAttrSvc::fapiPlatGetSingleMemberEnableAttr ( PTARGET, VAL )
 
-// TODO: RTC 69935 complete Phase Rotator Data.
-// Use this code to fully implements 59048.
-// Remove Phase Rotator attributes from attribute_types.xml
-// and target_types.xml then enable the following.
-// The "sets" are only needed to temporarily allow mss_eff_config_termination.C
-// to do FAPI_ATTR_SET, but need to be removed when fully complete.
-#define RTC69935 0
-#if RTC69935
 //------------------------------------------------------------------------------
 //  MACROS to support MBVPD Phase Rotator attributes
 //------------------------------------------------------------------------------
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CLK_P0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CLK_P0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CLK_P1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CLK_P1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CLK_P0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CLK_P0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CLK_P1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CLK_P1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A2_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A2_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A2, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A3_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A3_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A3, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A4_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A4, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A5_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A5_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A5, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A6_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A6, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A7_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A7, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A8_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A8, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A9_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A9, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A10_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A10_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A10, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A11_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A11_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A11, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A12_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A12, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A13_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A13_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A13, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A14_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A14_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A14, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A15_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_A15_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_A15, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_BA0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_BA0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_BA1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_BA1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA2_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_BA2_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_BA2, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_CASN_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_CASN, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_RASN_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_RASN_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_RASN, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_WEN_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_CMD_WEN_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_CMD_WEN, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_PAR_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_PAR_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_PAR, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M_ACTN_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M_ACTN_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M_ACTN, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CKE0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_CKE0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CKE1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_CKE1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE2_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CKE2_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_CKE2, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE3_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CKE3_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_CKE3, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CSN0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_CSN0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CSN1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_CSN1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN2_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CSN2_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_CSN2, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_CSN3_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_CSN3, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_ODT0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_ODT0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M0_CNTL_ODT1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M0_CNTL_ODT1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CKE0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_CKE0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CKE1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_CKE1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE2_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CKE2_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_CKE2, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE3_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CKE3_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_CKE3, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CSN0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_CSN0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CSN1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_CSN1, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN2_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CSN2_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_CSN2, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN3_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_CSN3_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_CSN3, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT0_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_ODT0_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_ODT0, VAL)
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_ODT1_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_M1_CNTL_ODT1, VAL)
-#endif
 #define ATTR_VPD_TSYS_ADR_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
@@ -1245,106 +1236,7 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetPhaseRotatorData\
         (PTARGET, PHASE_ROT_TSYS_DP18, VAL)
-#if RTC69935
-// TODO: RTC 69935: remove the no op sets once work around in
-//       mss_eff_config_termination.C is removed
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A2_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A3_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A5_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A10_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A11_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A13_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A14_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_A15_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA2_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_RASN_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_CMD_WEN_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_PAR_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M_ACTN_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE2_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE3_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN2_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE2_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE3_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN2_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN3_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT0_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1_SETMACRO(ID, PTARGET, VAL)\
-    fapi::FAPI_RC_SUCCESS
-#endif
+
 //------------------------------------------------------------------------------
 //  MACROS to support MBVPD Address Mirror attributes
 //------------------------------------------------------------------------------
@@ -1356,128 +1248,120 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
 //------------------------------------------------------------------------------
 //  MACROS to support MBVPD Termination Data attributes
 //------------------------------------------------------------------------------
-// TODO: RTC 69935 complete Termination Data.
-// Use this code to fully implements 50574.
-// Remove Termination Data attributes from attribute_types.xml
-// and target_types.xml then enable the following.
-// The "sets" are only needed to temporarily allow mss_eff_config_termination.C
-// to do FAPI_ATTR_SET, but need to be removed when fully complete.
-#if RTC69935
-#define ATTR_EFF_DRAM_RON_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_DRAM_RON_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_DRAM_RON>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_DRAM_RON , VAL, sizeof(VAL)))
-#define ATTR_EFF_DRAM_RTT_NOM_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_DRAM_RTT_NOM_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_DRAM_RTT_NOM>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_DRAM_RTT_NOM , VAL, sizeof(VAL)))
-#define ATTR_EFF_DRAM_RTT_WR_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_DRAM_RTT_WR_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_DRAM_RTT_WR>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_DRAM_RTT_WR , VAL, sizeof(VAL)))
-#define ATTR_EFF_ODT_RD_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_ODT_RD_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_ODT_RD>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_ODT_RD , VAL, sizeof(VAL)))
-#define ATTR_EFF_ODT_WR_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_ODT_WR_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_ODT_WR>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_ODT_WR , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_RD_VREF_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_RD_VREF_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_RD_VREF>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_RD_VREF , VAL, sizeof(VAL)))
-#define ATTR_EFF_DRAM_WR_VREF_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_DRAM_WR_VREF_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_DRAM_WR_VREF>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_DRAM_WR_VREF , VAL, sizeof(VAL)))
-#define ATTR_EFF_DRAM_WRDDR4_VREF_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_DRAM_WRDDR4_VREF_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_DRAM_WRDDR4_VREF>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_DRAM_WRDDR4_VREF , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_RCV_IMP_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_RCV_IMP_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_RCV_IMP_DQ_DQS>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_RCV_IMP_DQ_DQS , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_DRV_IMP_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_DRV_IMP_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_DQ_DQS>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_DQ_DQS , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_DRV_IMP_CNTL_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_DRV_IMP_CNTL_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_CNTL>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_CNTL , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_DRV_IMP_ADDR_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_DRV_IMP_ADDR_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_ADDR>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_ADDR , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_DRV_IMP_CLK_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_DRV_IMP_CLK_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_CLK>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_CLK , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_DRV_IMP_SPCKE_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_DRV_IMP_SPCKE_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_SPCKE>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_SPCKE , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_SLEW_RATE_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_DQ_DQS>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_DQ_DQS , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_SLEW_RATE_CNTL_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_SLEW_RATE_CNTL_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_CNTL>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_CNTL , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_SLEW_RATE_ADDR_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_SLEW_RATE_ADDR_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_ADDR>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_ADDR , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_SLEW_RATE_CLK_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_SLEW_RATE_CLK_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_CLK>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_CLK , VAL, sizeof(VAL)))
-#define ATTR_EFF_CEN_SLEW_RATE_SPCKE_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_CEN_SLEW_RATE_SPCKE_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE , VAL, sizeof(VAL)))
-#endif
 #define ATTR_VPD_RLO_GETMACRO(ID, PTARGET, VAL)\
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
@@ -1508,46 +1392,6 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     (checkTermDataType<fapi::TERM_DATA_CKE_PWR_MAP>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
            (PTARGET, fapi::TERM_DATA_CKE_PWR_MAP , VAL, sizeof(VAL)))
-#if RTC69935
-#define ATTR_EFF_DRAM_RON_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_DRAM_RTT_NOM_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_DRAM_RTT_WR_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_ODT_RD_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_ODT_WR_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_RD_VREF_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_DRAM_WR_VREF_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_DRAM_WRDDR4_VREF_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_DRV_IMP_CNTL_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_DRV_IMP_ADDR_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_DRV_IMP_CLK_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_DRV_IMP_SPCKE_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_SLEW_RATE_CNTL_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_SLEW_RATE_ADDR_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_SLEW_RATE_CLK_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#define ATTR_EFF_CEN_SLEW_RATE_SPCKE_SETMACRO(ID, PTARGET, VAL)\
-        fapi::FAPI_RC_SUCCESS
-#endif
 
 //------------------------------------------------------------------------------
 //  MACROS to support MBVPD Slope Intercept attributes

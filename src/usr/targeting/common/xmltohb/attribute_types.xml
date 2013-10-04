@@ -6359,9 +6359,9 @@ firmware notes: Used as override attribute for pstate procedure
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC 69935. These termination data  attributes need to come from
-     CDIMM VPD.  For now, they are setup by the mss_eff_config_termination HWP.
-     Remove these when valid vpd is on the CDIMMs  -->
+<!-- TODO RTC 87603. These termination data EFF attributes have corresponding
+     VPD attributes that come from CVPD. When all HWPs are using the VPD
+     versions, these EFF versions can be deleted -->
 
 <attribute>
     <id>EFF_ODT_RD</id>
@@ -6686,7 +6686,7 @@ firmware notes: Used as override attribute for pstate procedure
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC 69935 down to here -->
+<!-- TODO RTC 87603 down to here -->
 
 <attribute>
     <id>EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
@@ -8417,9 +8417,9 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC 69935. These phase rotator attributes need to come from CDIMM VPD
-     For now, they are setup by the mss_eff_config_termination HWP.
-     Remove these when valid vpd is on the CDIMMs  -->
+<!-- TODO RTC 87603. These phase rotator EFF attributes have corresponding
+     VPD attributes that come from CVPD. When all HWPs are using the VPD
+     versions, these EFF versions can be deleted -->
 
 <attribute>
     <id>EFF_CEN_PHASE_ROT_M0_CLK_P0</id>
@@ -9188,6 +9188,8 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<!-- TODO RTC 87603 down to here -->
 
 <attribute>
     <id>MSS_DQS_SWIZZLE_TYPE</id>
