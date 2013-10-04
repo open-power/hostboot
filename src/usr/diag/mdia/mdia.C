@@ -25,6 +25,11 @@
  * @brief mdia entry points, utility function implementations
  */
 
+// The following is required because MDIA implements its own version of these
+// hardware procedures:
+// $Id: mss_memdiags.H,v 1.6 2013/04/19 15:48:43 gollub Exp $
+// $Id: mss_memdiags.C,v 1.21 2013/08/23 19:40:42 gollub Exp $
+
 #include "mdiafwd.H"
 #include "mdiaglobals.H"
 #include "mdiatrace.H"
