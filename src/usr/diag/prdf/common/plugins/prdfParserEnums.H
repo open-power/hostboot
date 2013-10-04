@@ -80,7 +80,16 @@ namespace CE_TABLE
         MAX_SIZE = MAX_ENTRIES * ENTRY_SIZE, ///< Maximum table size.
     };
 
-} // namespace UE_TABLE
+} // namespace CE_TABLE
+
+namespace RCE_TABLE
+{
+    enum
+    {
+        ENTRY_SIZE  =  2, ///< Number of bytes per entry.
+    };
+
+} // namespace RCE_TABLE
 
 namespace DQ_BITMAP
 {

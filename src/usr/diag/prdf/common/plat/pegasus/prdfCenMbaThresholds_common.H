@@ -51,6 +51,11 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
                         uint16_t & o_cePerDram, uint16_t & o_cePerHalfRank,
                         uint16_t & o_cePerDimm );
 
+/**
+ * @brief  Returns RCE threshold policy.
+ */
+ThresholdResolution::ThresholdPolicy getRceThreshold();
+
 } // end namespace PRDF
 
 #endif /* __PRDF_CEN_MBA_COMMON_THRESHOLDS_H */

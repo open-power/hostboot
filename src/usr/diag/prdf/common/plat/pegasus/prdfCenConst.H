@@ -21,8 +21,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PRDF_CEN_MBA_CONST_H
-#define PRDF_CEN_MBA_CONST_H
+#ifndef PRDF_CEN_CONST_H
+#define PRDF_CEN_CONST_H
 
 /**
  *   @file prdfCenConst.H
@@ -61,5 +61,5 @@ enum
 
 } // end namespace PRDF
 
-#endif // PRDF_CEN_MBA_CAPTURE_DATA_H
+#endif // PRDF_CEN_CONST_H
 

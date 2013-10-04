@@ -45,6 +45,7 @@ prd_pegasus_specific = \
     prdfCenDqBitmap.o \
     prdfCenMbaCaptureData.o \
     prdfCenMbaCeTable.o \
+    prdfCenMbaRceTable.o \
     prdfCenMbaTdCtlr.o \
     prdfCenMbaTdCtlr_common.o \
     prdfCenMbaThresholds_common.o \

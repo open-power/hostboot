@@ -90,6 +90,9 @@ namespace LineDelete
     {
       public:
 
+        /** Default constructor */
+        PrdfCacheCETable() {}
+
         /**
          * @brief Constructor from ThresholdPolicy struct.
          * @param i_thPolicy A pointer to a ThresholdPolicy struct.

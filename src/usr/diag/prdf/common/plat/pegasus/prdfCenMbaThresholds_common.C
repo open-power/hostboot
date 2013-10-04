@@ -42,6 +42,26 @@ namespace PRDF
 
 using namespace PlatServices;
 
+// MNFG RCE threshold
+static uint32_t MBA_RCE_NON_MNFG_TH = 8;
+
+//-----------------------------------------------------------------------------
+
+ThresholdResolution::ThresholdPolicy getRceThreshold()
+{
+    uint32_t th = MBA_RCE_NON_MNFG_TH;
+    if ( mfgMode() )
+    {
+        th =  MfgThresholdMgr::getInstance()->
+                    getThreshold( PRDF_CEN_MBA_RT_RCE_PER_RANK );
+
+        if( th > MBA_RCE_NON_MNFG_TH ) th = MBA_RCE_NON_MNFG_TH;
+    }
+    return ThresholdResolution::ThresholdPolicy( th,
+                                            ThresholdResolution::ONE_DAY);
+}
+
+//-----------------------------------------------------------------------------
 int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
                         uint16_t & o_cePerDram, uint16_t & o_cePerHalfRank,
                         uint16_t & o_cePerDimm )
