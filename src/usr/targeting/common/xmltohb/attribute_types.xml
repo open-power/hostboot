@@ -12249,6 +12249,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_CPM_TURBO_BOOST_PERCENT</id>
         <macro>DIRECT</macro>
