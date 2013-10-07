@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.50 2013/08/08 07:14:25 sasethur Exp $
+// $Id: mss_mcbist_common.C,v 1.53 2013/10/04 06:32:33 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,9 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.53  |aditya  |10/05/13|Updated fw comments
+//   1.52  |aditya  |09/27/13|Updated for Host Boot Compile
+//   1.51  |aditya  |09/18/13|Updated parameters for random seed attribute and Error map masking
 //   1.50  |aditya  |08/08/13|Updated for Host Boot Compile
 //   1.49  |aditya  |08/02/13|Updated Error Map  function
 //   1.48  |aditya  |07/09/13|Added l_random_addr_enable and l_fixed_addr_enable for struct Subtest_info 
@@ -100,7 +103,7 @@ using namespace fapi;
 
 //const uint8_t MAX_PORT = 2;
 const uint8_t MAX_DRAM = 20;
-
+const uint8_t MAX_ISDIMM_DQ = 72;
 //const uint8_t MAX_BYTE = 10;
 //const uint8_t MAX_RANK = 8;
 //const uint8_t MAX_NIBBLE = 1;
@@ -139,7 +142,7 @@ const uint64_t FOUR = 0x0000000000000004ull;
 //uint8_t new_address_map				Flag to Enable Custom Address Map  
 //****************************************************************/
 
-fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_seed_choice,uint32_t i_seed,struct Subtest_info l_sub_info[30])
+fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,struct Subtest_info l_sub_info[30])
 //fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port,mcbist_data_gen i_mcbpatt,mcbist_test_mem i_mcbtest,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_pattern,uint8_t i_test_type,uint8_t i_rank,uint8_t i_bit32,uint64_t i_start,uint64_t i_end,uint8_t new_address_map)
 {
     
@@ -178,9 +181,14 @@ fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,mcbist_byte_mask
 	//uint64_t scom_array[24] = {0x03010440,0x03010441,0x03010442,0x03010443,0x03010444,0x03010445,0x03010446,0x03010447,0x0201145E,0x0201145F,0x02011460,0x02011461,0x02011462,0x02011463,0x02011464,0x02011465,0x0201149E,0x0201149F,0x020114A0,0x020114A1,0x020114A2,0x020114A3,0x020114A4,0x020114A5};	
 	uint64_t scom_array[24] = {MBA01_MBABS0_0x03010440,MBA01_MBABS1_0x03010441,MBA01_MBABS2_0x03010442,MBA01_MBABS3_0x03010443,MBA01_MBABS4_0x03010444,MBA01_MBABS5_0x03010445,MBA01_MBABS6_0x03010446 ,MBA01_MBABS7_0x03010447,MBS_ECC0_MBSBS0_0x0201145E  ,MBS_ECC0_MBSBS1_0x0201145F  ,MBS_ECC0_MBSBS2_0x02011460  ,MBS_ECC0_MBSBS3_0x02011461  ,MBS_ECC0_MBSBS4_0x02011462  ,MBS_ECC0_MBSBS5_0x02011463  ,MBS_ECC0_MBSBS6_0x02011464  ,MBS_ECC0_MBSBS7_0x02011465  ,MBS_ECC1_MBSBS0_0x0201149E  ,MBS_ECC1_MBSBS1_0x0201149F  ,MBS_ECC1_MBSBS2_0x020114A0  ,MBS_ECC1_MBSBS3_0x020114A1  ,MBS_ECC1_MBSBS4_0x020114A2  ,MBS_ECC1_MBSBS5_0x020114A3  ,MBS_ECC1_MBSBS6_0x020114A4  ,MBS_ECC1_MBSBS7_0x020114A5 } ;
 	
+	
+	Target i_target_centaur;
+	uint8_t l_attr_centaur_ec_mcbist_random_data_gen = 0;
+		rc = fapiGetParentChip(i_target_mba, i_target_centaur); if(rc) return rc;
+	
 	rc = FAPI_ATTR_GET(ATTR_MCBIST_PATTERN, &i_target_mba,i_mcbpatt); if(rc) return rc;//-----------i_mcbpatt------->run
 	rc = FAPI_ATTR_GET(ATTR_MCBIST_TEST_TYPE, &i_target_mba, i_mcbtest); if(rc) return rc;//---------i_mcbtest------->run
-	
+	rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_MCBIST_RANDOM_DATA_GEN, &i_target_centaur, l_attr_centaur_ec_mcbist_random_data_gen); if(rc) return rc;//---------i_mcbtest------->run
 
 	rc = mss_conversion_testtype(i_target_mba,i_mcbtest, i_mcbtest1);if(rc) return rc;
     rc = mss_conversion_data(i_target_mba,i_mcbpatt,i_mcbpatt1);if(rc) return rc;
@@ -204,30 +212,31 @@ rc = FAPI_ATTR_GET(ATTR_MCBIST_ERROR_CAPTURE, &i_target_mba,l_bit32); if(rc) ret
 	
 	}
 
-		
-//FIFO work around for random data	
-//###################################
-//# WRQ and RRQ set to FIFO mode OFF
-//###################################
-//#WRQ FIFO mode OFF
-		rc = fapiGetScom(i_target_mba,0x0301040d,l_data_buffer_64); if(rc) return rc; 
-		rc_num =  l_data_buffer_64.clearBit(5);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
-		
-		rc = fapiPutScom(i_target_mba,0x0301040d,l_data_buffer_64); if(rc) return rc;
-		
-//#RRQ FIFO Mode OFF
-		rc = fapiGetScom(i_target_mba,0x0301040e,l_data_buffer_64); if(rc) return rc; 
-		rc_num =  l_data_buffer_64.setBit(6);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
-		
-		rc_num =  l_data_buffer_64.setBit(7);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
-		
-		rc_num =  l_data_buffer_64.setBit(8);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
-		
-		rc_num =  l_data_buffer_64.setBit(9);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
-		
-		rc_num =  l_data_buffer_64.setBit(10);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
-		
-		rc = fapiPutScom(i_target_mba,0x0301040e,l_data_buffer_64); if(rc) return rc;
+   if(l_attr_centaur_ec_mcbist_random_data_gen == 0)
+   {    
+		//FIFO work around for random data	
+		//###################################
+		//# WRQ and RRQ set to FIFO mode OFF
+		//###################################
+		//#WRQ FIFO mode OFF
+				rc = fapiGetScom(i_target_mba,0x0301040d,l_data_buffer_64); if(rc) return rc; 
+				rc_num =  l_data_buffer_64.clearBit(5);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
+				
+				rc = fapiPutScom(i_target_mba,0x0301040d,l_data_buffer_64); if(rc) return rc;
+				
+		//#RRQ FIFO Mode OFF
+				rc = fapiGetScom(i_target_mba,0x0301040e,l_data_buffer_64); if(rc) return rc; 
+				rc_num =  l_data_buffer_64.setBit(6);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
+				
+				rc_num =  l_data_buffer_64.setBit(7);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
+				
+				rc_num =  l_data_buffer_64.setBit(8);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
+				
+				rc_num =  l_data_buffer_64.setBit(9);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
+				
+				rc_num =  l_data_buffer_64.setBit(10);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
+				
+				rc = fapiPutScom(i_target_mba,0x0301040e,l_data_buffer_64); if(rc) return rc;
 
 //End	
 //power bus ECC setting for random data
@@ -249,8 +258,8 @@ rc = FAPI_ATTR_GET(ATTR_MCBIST_ERROR_CAPTURE, &i_target_mba,l_bit32); if(rc) ret
 		rc_num =  l_data_buffer_64.setBit(1);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
 		rc = fapiPutScom(i_target_mba,0x0201148a,l_data_buffer_64); if(rc) return rc;
 
-//end of power bus ECC setting for random data
-	
+		//end of power bus ECC setting for random data
+	}
    
     rc = fapiGetScom(i_target_mba,MBA01_CCS_MODEQ_0x030106a7, l_data_buffer_64);  if(rc) return rc;   
     rc_num =  l_data_buffer_64.clearBit(29); if (rc_num){FAPI_ERR( "Error in function setup_mcb:");rc.setEcmdError(rc_num);return rc;}
@@ -311,7 +320,7 @@ rc = FAPI_ATTR_GET(ATTR_MCBIST_ERROR_CAPTURE, &i_target_mba,l_bit32); if(rc) ret
         
         //rc = cfg_mcb_test_mem(i_target_mba,i_mcbtest1); if(rc) return rc;
 		rc = cfg_mcb_test_mem(i_target_mba,i_mcbtest1,l_sub_info); if(rc) return rc;
-		rc = cfg_mcb_dgen(i_target_mba,i_mcbpatt1,i_mcbrotate,i_seed_choice,i_seed); if(rc) return rc;
+		rc = cfg_mcb_dgen(i_target_mba,i_mcbpatt1,i_mcbrotate); if(rc) return rc;
 	uint8_t i_port = 0;
 	uint8_t i_rank = 0;
 	
@@ -503,14 +512,14 @@ fapi::ReturnCode  start_mcb(const fapi::Target & i_target_mba)
 //                been completed, in progress or failed.
 // Input Parameters :
 //    const fapi::Target &             Centaur.mba
-//    bool           i_mcb_stop_on_fail       Whether MCBIST should stop on fail or not
+//    bool           l_mcb_stop_on_fail       Whether MCBIST should stop on fail or not
 //    uint64_t i_time                          Sets the max Time out value  
 // Output Parameter :
 //    uint32    status  = 1                 MCBIST done with fail or MCBIST not complete (default value)
 //                      = 0                 MCBIST Done without fail
 //****************************************************************/
-//fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_fail,uint8_t *o_mcb_status,uint64_t i_time)
-fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_fail,uint8_t *o_mcb_status,struct Subtest_info l_sub_info[30],uint8_t i_flag)
+//fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool l_mcb_stop_on_fail,uint8_t *o_mcb_status,uint64_t i_time)
+fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,uint8_t *o_mcb_status,struct Subtest_info l_sub_info[30],uint8_t i_flag)
 {
     fapi::ReturnCode  rc;             // return value after each SCOM access/buffer modification
     uint32_t rc_num = 0;
@@ -533,6 +542,7 @@ fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_
    uint32_t i_mcbtest = 0;
    uint32_t l_st_ln = 0;
    uint32_t	l_len = 0;
+   uint8_t l_mcb_stop_on_fail= 0;
 mcbist_test_mem i_mcbtest1;
 //uint8_t l_print = 0; 
 	//rc = FAPI_ATTR_GET(ATTR_MCBIST_PRINTING_DISABLE, &i_target_mba,l_print); if(rc) return rc;
@@ -546,6 +556,7 @@ uint8_t test_array_count[44] ={0,2,2,1,1,1,6,6,30,30,2,7,4,2,1,5,4,2,1,1,3,1,1,4
 	
     FAPI_DBG("%s:Function Poll_MCBIST",i_target_mba.toEcmdString());
 	rc = FAPI_ATTR_GET(ATTR_MCBIST_MAX_TIMEOUT, &i_target_mba, l_time); if(rc) return rc; 
+	rc = FAPI_ATTR_GET(ATTR_MCBIST_STOP_ON_ERROR, &i_target_mba, l_mcb_stop_on_fail); if(rc) return rc;
     
 	/*rc = fapiGetScom(i_target_mba,0x02011670,l_data_buffer_64);  if(rc) return rc;
 	l_reg = l_data_buffer_64.getDoubleWord (0);
@@ -655,7 +666,7 @@ uint8_t test_array_count[44] ={0,2,2,1,1,1,6,6,30,30,2,7,4,2,1,5,4,2,1,1,3,1,1,4
             l_mcb_fail = 1;
 			FAPI_DBG("%s:POLLING STATUS:MCBIST FAILED",i_target_mba.toEcmdString());
 			
-            if(i_mcb_stop_on_fail == true)          //if stop on error is 1, break after the current subtest completes 
+            if(l_mcb_stop_on_fail == 1)          //if stop on error is 1, break after the current subtest completes 
             {
                 rc = fapiGetScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_stop_on_fail_buffer_64);  if(rc) return rc;
                 rc_num =  l_stop_on_fail_buffer_64.setBit(62);if (rc_num){FAPI_ERR( "Error in function  poll_mcb:");rc.setEcmdError(rc_num);return rc;}                              // Set bit 61 to break after current subtest
@@ -703,7 +714,7 @@ uint8_t test_array_count[44] ={0,2,2,1,1,1,6,6,30,30,2,7,4,2,1,5,4,2,1,1,3,1,1,4
     l_count++;
     }
     
-    if((l_mcb_done == 1) && (l_mcb_fail == 1) && (i_mcb_stop_on_fail == true) )
+    if((l_mcb_done == 1) && (l_mcb_fail == 1) && (l_mcb_stop_on_fail == true) )
     {
         *o_mcb_status = 1;      /// MCB fail
         #ifdef MCB_DEBUG_2
@@ -750,9 +761,10 @@ uint8_t test_array_count[44] ={0,2,2,1,1,1,6,6,30,30,2,7,4,2,1,5,4,2,1,1,3,1,1,4
 
     return rc;    
 }
-fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & l_mcb_fail_160,uint8_t i_port,uint8_t l_array[200],uint8_t l_number)
+fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & i_mcb_fail_160,uint8_t i_port,uint8_t i_array[200],uint8_t i_number,ecmdDataBufferBase i_data_buf_port,ecmdDataBufferBase i_data_buf_spare)
 {	
 	ReturnCode rc;
+	uint32_t rc_num;
 	uint8_t l_num_ranks_per_dimm[MAX_PORT][MAX_PORT];
 	uint8_t l_rankpair_table[MAX_RANK] ;
 	uint8_t l_cur_rank =0;
@@ -772,6 +784,14 @@ fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdData
 	rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbaPosition);
 	rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, l_num_ranks_per_dimm); if(rc) return rc;   
     l_max_rank=l_num_ranks_per_dimm[i_port][0]+l_num_ranks_per_dimm[i_port][1];
+	
+
+	
+	//New code
+	uint64_t l_generic_buffer;
+	uint32_t l_sbit,l_len;
+	uint16_t l_output;
+	
 	
 	rc = mss_getrankpair(i_target_mba,i_port,0,&l_rank_pair,l_rankpair_table);  if(rc) return rc;
 	if(l_max_rank == 0)
@@ -798,13 +818,32 @@ fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdData
 	{
 		if(l_mbaPosition == 0)
 		{
+			
+			l_sbit = 0;
+			l_len = 16;
+			l_generic_buffer = i_data_buf_port.getDoubleWord (0);
+			//l_generic_buffer_spare = i_data_buf_spare.getDoubleWord (0);
+			rc_num= rc_num | i_data_buf_spare.extractToRight(&l_output,l_sbit,l_len);
+			
 			FAPI_DBG("%s:################# MBA01 ###########################\n",i_target_mba.toEcmdString());
 			FAPI_DBG("%s:################# PORT0  ERROR MAP #################\n",i_target_mba.toEcmdString());
+			FAPI_DBG("%s:Byte      00112233445566778899",i_target_mba.toEcmdString());
+            FAPI_DBG("%s:Nibble    01010101010101010101",i_target_mba.toEcmdString());
+			FAPI_DBG("%s:MASK      %016llX%04X\n",i_target_mba.toEcmdString(),l_generic_buffer,l_output);
 		}
 		else
 		{
+			l_sbit = 0;
+			l_len = 16;
+			l_generic_buffer = i_data_buf_port.getDoubleWord (0);
+			//l_generic_buffer_spare = i_data_buf_spare.getDoubleWord (0);
+			rc_num= rc_num | i_data_buf_spare.extractToRight(&l_output,l_sbit,l_len);
 			FAPI_DBG("%s:################# MBA23 ###########################\n",i_target_mba.toEcmdString());
 			FAPI_DBG("%s:################# PORT0 ERROR MAP #################\n",i_target_mba.toEcmdString());
+			FAPI_DBG("%s:Byte      00112233445566778899",i_target_mba.toEcmdString());
+            FAPI_DBG("%s:Nibble    01010101010101010101",i_target_mba.toEcmdString());			
+			
+			FAPI_DBG("%s:MASK      %016llX%04X\n",i_target_mba.toEcmdString(),l_generic_buffer,l_output);
 		}
 	
 	}
@@ -814,13 +853,29 @@ fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdData
 	
 		if(l_mbaPosition ==0)
 		{
+			l_sbit = 16;
+			l_len = 16;
+			l_generic_buffer = i_data_buf_port.getDoubleWord (0);
+			//l_generic_buffer_spare = i_data_buf_spare.getDoubleWord (0);
+			rc_num= rc_num | i_data_buf_spare.extractToRight(&l_output,l_sbit,l_len);
 			FAPI_DBG("%s:################# MBA01 ###########################\n",i_target_mba.toEcmdString());
 			FAPI_DBG("%s:################# PORT1 ERROR MAP #################\n",i_target_mba.toEcmdString());
+			FAPI_DBG("%s:Byte      00112233445566778899",i_target_mba.toEcmdString());
+            FAPI_DBG("%s:Nibble    01010101010101010101",i_target_mba.toEcmdString());
+			FAPI_DBG("%s:MASK      %016llX%04X\n",i_target_mba.toEcmdString(),l_generic_buffer,l_output);
 		}
 		else
 		{
+			l_sbit = 16;
+			l_len = 16;
+			l_generic_buffer = i_data_buf_port.getDoubleWord (0);
+			//l_generic_buffer_spare = i_data_buf_spare.getDoubleWord (0);
+			rc_num= rc_num | i_data_buf_spare.extractToRight(&l_output,l_sbit,l_len);
 			FAPI_DBG("%s:################# MBA23 ###########################\n",i_target_mba.toEcmdString());
-			FAPI_DBG("%s:################# PORT1 ERROR MAP #################\n",i_target_mba.toEcmdString());	
+			FAPI_DBG("%s:################# PORT1 ERROR MAP #################\n",i_target_mba.toEcmdString());
+			FAPI_DBG("%s:Byte      00112233445566778899",i_target_mba.toEcmdString());
+            FAPI_DBG("%s:Nibble    01010101010101010101",i_target_mba.toEcmdString());
+			FAPI_DBG("%s:MASK      %016llX%04X\n",i_target_mba.toEcmdString(),l_generic_buffer,l_output);	
 		}
     
 	
@@ -835,187 +890,48 @@ fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdData
 	
 	
 //uint8_t l_index,l_i,l_number,l_value,l_value1;
-//HB uint8_t l_index,l_i,l_value,l_value1;
-uint8_t  l_index,l_value,l_value1;
-uint32_t rc_num;
+ uint8_t l_index,l_value,l_value1;
+//uint8_t  l_index,l_value,l_value1;
+//uint32_t rc_num;
 //uint8_t l_array0[200],l_marray0[200];
 uint8_t l_marray0[200];
 ecmdDataBufferBase l_data_buffer1_64(64),l_data_buffer3_64(64);
-//HB l_i = 0;
+ 
 
-/*
-rc_num =  l_data_buffer1_64.setBit(12);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(32);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(35);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(63);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc = fapiPutScom(i_target_mba,MBS_MCBIST01_MCBCMA1Q_0x02011672,l_data_buffer1_64); if(rc) return rc;
-
-rc_num = l_data_buffer1_64.flushTo0();
-rc_num =  l_data_buffer1_64.setBit(13);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(45);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(39);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(56);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc = fapiPutScom(i_target_mba,0x02011673,l_data_buffer1_64); if(rc) return rc;
-rc_num = l_data_buffer1_64.flushTo0();
-rc_num =  l_data_buffer1_64.setBit(5);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(34);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(23);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(55);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc = fapiPutScom(i_target_mba,0x02011772,l_data_buffer1_64); if(rc) return rc;*/
 
 rc_num = l_data_buffer1_64.flushTo0();
 // for HB
-if(rc_num) {
+/*if(rc_num) {
   rc.setEcmdError(rc_num);
   return rc;
-}
-/*if(l_mbaPosition == 0)
-{
-	if(i_port == 0)
-	{
-		//FAPI_INF("l_array:%d",l_i);
-		l_i = 0;
-		rc = fapiGetScom(i_target_mba,MBS_MCBIST01_MCBCMA1Q_0x02011672,l_data_buffer1_64); if(rc) return rc;
-		rc = fapiGetScom(i_target_mba,MBS_MCBIST01_MCBCMABQ_0x02011674,l_data_buffer3_64); if(rc) return rc;
-		for(l_index=0;l_index<64;l_index++)
-		{
-			
-			if(l_data_buffer1_64.isBitSet(l_index))
-			{
-			l_array0[l_i] = l_index;
-			l_i++;
-			//FAPI_INF("l_array:%d",l_i);
-			}
-		}
-		for(l_index=0;l_index<16;l_index++)	
-		{
-			 
-			if(l_data_buffer3_64.isBitSet(l_index))
-			{ 
-			l_array0[l_i] = l_index+64;
-			l_i++;
-			//FAPI_INF("l_array:%d",l_i);
-			}
-		}
-		
-	}
-	else
-	{
-	//FAPI_INF("l_array:%d",l_i);
-		l_i = 0;
-		rc = fapiPutScom(i_target_mba,MBS_MCBIST01_MCBCMB1Q_0x02011673,l_data_buffer1_64); if(rc) return rc;
-		rc = fapiGetScom(i_target_mba,MBS_MCBIST01_MCBCMABQ_0x02011674,l_data_buffer3_64); if(rc) return rc;
-		for(l_index=0;l_index<64;l_index++)
-		{
-			if(l_data_buffer1_64.isBitSet(l_index))
-			{ 
-			l_array0[l_i] = l_index;
-			l_i++;//FAPI_INF("l_array:%d",l_i);
-			}
-			
-			
-			
-		
-		}	
-		for(l_index=16;l_index<32;l_index++)	
-		{
-			
-			if(l_data_buffer3_64.isBitSet(l_index))
-			{ 
-			l_array0[l_i] = l_index+64-16;
-			l_i++;//FAPI_INF("l_array:%d",l_i);
-			}
-			
-			
-		}
-	}
-}
-else
-{
-	if(i_port == 0)
-	{
-		//FAPI_INF("l_array:%d",l_i);
-		l_i = 0;
-		rc = fapiGetScom(i_target_mba,0x02011774,l_data_buffer3_64); if(rc) return rc;
-		rc = fapiGetScom(i_target_mba,0x02011772,l_data_buffer1_64); if(rc) return rc;
-		for(l_index=0;l_index<64;l_index++)
-		{
-			
-			
-			if(l_data_buffer1_64.isBitSet(l_index))
-			{ 
-			l_array0[l_i] = l_index;
-			l_i++;//FAPI_INF("l_array:%d",l_i);
-			}
-			
-			
-		
-		}
-		for(l_index=0;l_index<16;l_index++)	
-		{
-			if(l_data_buffer3_64.isBitSet(l_index))
-			{ 
-			l_array0[l_i] = l_index+64;
-			l_i++;//FAPI_INF("l_array:%d",l_i);
-			}
-		}	
-	}
-	else
-	{
-		l_i = 0;
-		//FAPI_INF("l_array:%d",l_i);
-		rc = fapiGetScom(i_target_mba,0x02011774,l_data_buffer3_64); if(rc) return rc;
-		rc = fapiGetScom(i_target_mba,0x02011773,l_data_buffer1_64); if(rc) return rc;
-		for(l_index=0;l_index<64;l_index++)
-		{
-			
-			if(l_data_buffer1_64.isBitSet(l_index))
-			{ 
-			l_array0[l_i] = l_index;
-			l_i++;//FAPI_INF("l_array:%d",l_i);
-			}
-		
-		}	
-		for(l_index=16;l_index<32;l_index++)	
-		{
-			if(l_data_buffer3_64.isBitSet(l_index))
-			{ 
-			l_array0[l_i] = l_index+64-16;
-			l_i++;//FAPI_INF("l_array:%d",l_i);
-			}
-		}	
-	}
-}
-
-l_number =  l_i;*/
+}*/
 
 
-uint8_t l_num,io_num,l_inter,l_num2;
+uint8_t l_num,io_num,l_inter,l_num2,l_index2;
 	l_num =0;
 	//FAPI_INF("%s:l_max_rank%d",i_target_mba.toEcmdString(),l_max_rank);
-	for(l_cur_rank = 0;l_cur_rank < l_max_rank;l_cur_rank++)
-	{
-		i_rank = l_rankpair_table[l_cur_rank];
+	
 		
 		
 		//FAPI_INF("%s:rank:%d",i_target_mba.toEcmdString(),i_rank);
 		
-		for(l_index=0;l_index<l_number;l_index++)
+		for(l_index=0;l_index<i_number;l_index++)
 		{
 		    
 			//l_value = l_array0[l_index];
-			l_value = l_array[l_index];
+			l_value = i_array[l_index];
 			l_inter = (l_value/4);
 			l_num2 = l_num-1;
 				if(l_inter == l_marray0[l_num2] &&(l_num != 0))
 				continue;
 			
-			l_value1=(i_rank*20)+l_inter;
+			//l_value1=(i_rank*20)+l_inter;
+			l_value1=l_inter;
 			l_marray0[l_num] = l_value1;
 			l_num++;
 			//FAPI_INF("%s:l_value,l_value1,l_num:%d,%d,%d",i_target_mba.toEcmdString(),l_value,l_value1,l_num);
 		}
-	}
+	
 	//FAPI_INF("%s:l_value,l_value1,l_num:%d,%d,%d",i_target_mba.toEcmdString(),l_value,l_value1,l_num);
 	io_num = l_num;
 
@@ -1023,18 +939,22 @@ uint8_t l_num,io_num,l_inter,l_num2;
 
 //Debug Prints
 /*
+uint8_t l_i;
+ l_i = 0;
+
+
 FAPI_INF("________________________________________________________________________________________________________");
-	for(l_i = 0;l_i < l_number;l_i++)
+	for(l_i = 0;l_i < i_number;l_i++)
 	{
-	FAPI_INF("%s:INITIAL ARRAY:%d",i_target_mba.toEcmdString(),l_array[l_i] );
+	FAPI_INF("%s:INITIAL ARRAY:%d",i_target_mba.toEcmdString(),i_array[l_i] );
 	}
 	FAPI_INF("________________________________________________________________________________________________________");
 	for(l_i = 0;l_i < io_num;l_i++)
 	{
 	FAPI_INF("%s:FINAL ARRAY:%d",i_target_mba.toEcmdString(),l_marray0[l_i] );
 	}
-	FAPI_INF("________________________________________________________________________________________________________");
-	*/
+	FAPI_INF("________________________________________________________________________________________________________");*/
+	
 	
 	
 l_cur_rank = 0;
@@ -1046,13 +966,15 @@ l_value = 0;
 	
 	
     //FAPI_DBG("%s:          --------------------",i_target_mba.toEcmdString());
-    FAPI_DBG("%s:Byte      00112233445566778899",i_target_mba.toEcmdString());
-    FAPI_DBG("%s:Nibble    01010101010101010101",i_target_mba.toEcmdString());
+    
+
     
 	rc = mss_getrankpair(i_target_mba,i_port,0,&l_rank_pair,l_rankpair_table);  if(rc) return rc;		
     for(l_cur_rank = 0;l_cur_rank < l_max_rank;l_cur_rank++)
     {	  
-	    i_rank = l_rankpair_table[l_cur_rank];	    		
+	    l_index2 = 0;
+		l_num = 0;
+		i_rank = l_rankpair_table[l_cur_rank];	    		
         sprintf(l_str1,"%s:%-4s%d%5s",i_target_mba.toEcmdString(),"RANK",i_rank,"");        
 	    for(l_byte = 0; l_byte < MAX_BYTE; l_byte++)
         {
@@ -1062,8 +984,9 @@ l_value = 0;
 			//FAPI_DBG("%s:l_value %d l_num %d",i_target_mba.toEcmdString(),l_value,l_num);		
 			l_index0 = (i_rank*20) + (l_byte*2) + l_nibble;
            // l_index1 = l_index0 + 160*(i_port);	
+		   l_index2 = (l_byte*2) + l_nibble;
             l_index1 = l_index0;
-			if((l_value == l_index1) &&(l_num < io_num))
+			if((l_value == l_index2) &&(l_num < io_num))
 			{
 			strcat(l_str1,"M");
 			
@@ -1072,7 +995,7 @@ l_value = 0;
 			}
 			else
 			{
-				if(l_mcb_fail_160.isBitSet(l_index1))
+				if(i_mcb_fail_160.isBitSet(l_index1))
 				{           
 					strcat(l_str1,"X");
 				}
@@ -1112,7 +1035,8 @@ fapi::ReturnCode  mcb_error_map(const fapi::Target & i_target_mba, uint8_t  o_er
 	ecmdDataBufferBase l_mcb_fail_160(160);
 	ecmdDataBufferBase l_mcb_fail1_160(160);
     ecmdDataBufferBase l_mcb(64);
- 
+	ecmdDataBufferBase l_ISDIMM_BUF1(64),l_ISDIMM_BUF0(64);
+    ecmdDataBufferBase l_ISDIMM_spare1(8),l_ISDIMM_spare0(8);
     uint8_t l_max_rank0,l_max_rank1;
 	
 	uint8_t i_rank,i_port;
@@ -1133,6 +1057,19 @@ fapi::ReturnCode  mcb_error_map(const fapi::Target & i_target_mba, uint8_t  o_er
 	//uint8_t l_print = 0; 
 	//rc = FAPI_ATTR_GET(ATTR_MCBIST_PRINTING_DISABLE, &i_target_mba,l_print); if(rc) return rc;
 	uint8_t rank_pair,i_byte,i_nibble,i_input_index_u8,o_val,i_byte1,i_nibble1;
+	
+	
+	uint8_t l_index,l_i,l_number,l_value,l_value1,l_number1;//l_cur_rank,
+	l_number1=0; //HB
+	uint8_t l_array[200],l_marray11[200],l_array0[200],l_marray0[200],l_array1[200],l_marray1[200],l_marray[200],cdimm_dq0[72],cdimm_dq1[72],cdimm_dq[72],l_ISarray1[200],l_ISarray0[200],l_ISarray[200];//,isdimm_dq[72]
+	//uint8_t isdimm_dq0[72],isdimm_dq1[72];
+	uint8_t l_rankpair_table[MAX_RANK] ;
+	ecmdDataBufferBase l_data_buffer1_64(64),l_data_buffer3_64(64),l_data_buf_port0(64),l_data_buf_port1(64),l_data_buf_spare(64);
+	uint64_t l_generic_buffer0,l_generic_buffer1,l_generic_buffer;
+	uint32_t l_sbit,l_len;
+	uint8_t l_output0,l_output1,l_output,l_j;
+	
+	
 	input_type l_input_type_e =  ISDIMM_DQ;
 	uint8_t valid_rank[MAX_RANK] ;
 	char l_str[200] = "";
@@ -1166,18 +1103,18 @@ fapi::ReturnCode  mcb_error_map(const fapi::Target & i_target_mba, uint8_t  o_er
     {
   
 	
-	rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMA1Q_0x0201166a,l_mcbem1ab); if(rc) return rc;
-    rc_num =  l_mcb_fail_160.insert(l_mcbem1ab,0,60,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
-    rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMA2Q_0x0201166b,l_mcbem2ab); if(rc) return rc;
-    rc_num =  l_mcb_fail_160.insert(l_mcbem2ab,60,60,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
-    rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMA3Q_0x0201166c,l_mcbem3ab); if(rc) return rc;
-    rc_num =  l_mcb_fail_160.insert(l_mcbem3ab,120,40,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
-    rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMB1Q_0x0201166d,l_mcbem1ab); if(rc) return rc;
-    rc_num =  l_mcb_fail1_160.insert(l_mcbem1ab,0,60,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
-    rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMB2Q_0x0201166e,l_mcbem2ab); if(rc) return rc;
-    rc_num =  l_mcb_fail1_160.insert(l_mcbem2ab,60,60,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
-    rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMB3Q_0x0201166f,l_mcbem3ab); if(rc) return rc;
-    rc_num =  l_mcb_fail1_160.insert(l_mcbem3ab,120,40,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
+		rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMA1Q_0x0201166a,l_mcbem1ab); if(rc) return rc;
+		rc_num =  l_mcb_fail_160.insert(l_mcbem1ab,0,60,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
+		rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMA2Q_0x0201166b,l_mcbem2ab); if(rc) return rc;
+		rc_num =  l_mcb_fail_160.insert(l_mcbem2ab,60,60,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
+		rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMA3Q_0x0201166c,l_mcbem3ab); if(rc) return rc;
+		rc_num =  l_mcb_fail_160.insert(l_mcbem3ab,120,40,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
+		rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMB1Q_0x0201166d,l_mcbem1ab); if(rc) return rc;
+		rc_num =  l_mcb_fail1_160.insert(l_mcbem1ab,0,60,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
+		rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMB2Q_0x0201166e,l_mcbem2ab); if(rc) return rc;
+		rc_num =  l_mcb_fail1_160.insert(l_mcbem2ab,60,60,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
+		rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBEMB3Q_0x0201166f,l_mcbem3ab); if(rc) return rc;
+		rc_num =  l_mcb_fail1_160.insert(l_mcbem3ab,120,40,0);if (rc_num){FAPI_ERR( "Error in function  mcb_error_map:");rc.setEcmdError(rc_num);return rc;}
     }
 	
     else if(l_mbaPosition==1) 
@@ -1261,26 +1198,37 @@ fapi::ReturnCode  mcb_error_map(const fapi::Target & i_target_mba, uint8_t  o_er
     }
    
    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_attr_eff_dimm_type_u8); if(rc) return rc;
+   
+   //Adi
+   //l_attr_eff_dimm_type_u8 = 0;
+   
    //ISDIMM error map
    //uint8_t l_max_ranks =8;	 
 	 	//Modified New Code
 	//ReturnCode rc;
-uint8_t l_index,l_i,l_number,l_value,l_value1,l_cur_rank,l_number1;
-l_number1=0; //HB
-uint8_t l_array[200],l_array0[200],l_marray0[200],l_array1[200],l_marray1[200],l_marray[200];
-uint8_t l_rankpair_table[MAX_RANK] ;
-ecmdDataBufferBase l_data_buffer1_64(64),l_data_buffer3_64(64);
+
 l_i = 0;
 
-
-/*rc_num =  l_data_buffer1_64.setBit(12);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(32);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(35);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc_num =  l_data_buffer1_64.setBit(61);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
-rc = fapiPutScom(i_target_mba,0x02011772,l_data_buffer1_64); if(rc) return rc;*/
-//rc = fapiPutScom(i_target_mba,0x02011773,l_data_buffer1_64); if(rc) return rc;
+/*
+rc_num =  l_data_buffer1_64.clearBit(12);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+rc_num =  l_data_buffer1_64.setBit(12);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+rc_num =  l_data_buffer1_64.setBit(31);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+rc_num =  l_data_buffer1_64.setBit(2);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+rc_num =  l_data_buffer1_64.setBit(5);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+rc_num =  l_data_buffer1_64.setBit(9);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+rc_num =  l_data_buffer1_64.setBit(7);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+rc = fapiPutScom(i_target_mba,0x02011674,l_data_buffer1_64); if(rc) return rc;
+rc = fapiPutScom(i_target_mba,0x02011672,l_data_buffer1_64); if(rc) return rc;*/
 rc_num = l_data_buffer1_64.flushTo0();
 i_port = 0;
+
+
+
+
+
+				
+
+
 while(i_port < 2)
 {
 rc_num = l_data_buffer1_64.flushTo0();
@@ -1291,12 +1239,12 @@ rc_num = l_data_buffer3_64.flushTo0();
 		{
 			//FAPI_INF("l_array:%d",l_i);
 			l_i = 0;
-			rc = fapiGetScom(i_target_mba,0x02011672,l_data_buffer1_64); if(rc) return rc;
-			rc = fapiGetScom(i_target_mba,0x02011674,l_data_buffer3_64); if(rc) return rc;
+			rc = fapiGetScom(i_target_mba,0x02011672,l_data_buf_port0); if(rc) return rc;
+			rc = fapiGetScom(i_target_mba,0x02011674,l_data_buf_spare); if(rc) return rc;
 			for(l_index=0;l_index<64;l_index++)
 			{
 				
-				if(l_data_buffer1_64.isBitSet(l_index))
+				if(l_data_buf_port0.isBitSet(l_index))
 				{
 				l_array0[l_i] = l_index;
 				l_i++;
@@ -1306,7 +1254,7 @@ rc_num = l_data_buffer3_64.flushTo0();
 			for(l_index=0;l_index<16;l_index++)	
 			{
 				 
-				if(l_data_buffer3_64.isBitSet(l_index))
+				if(l_data_buf_spare.isBitSet(l_index))
 				{ 
 				l_array0[l_i] = l_index+64;
 				l_i++;
@@ -1320,11 +1268,11 @@ rc_num = l_data_buffer3_64.flushTo0();
 		{
 		//FAPI_INF("l_array:%d",l_i);
 			l_i = 0;
-			rc = fapiGetScom(i_target_mba,0x02011673,l_data_buffer1_64); if(rc) return rc;
-			rc = fapiGetScom(i_target_mba,0x02011674,l_data_buffer3_64); if(rc) return rc;
+			rc = fapiGetScom(i_target_mba,0x02011673,l_data_buf_port1); if(rc) return rc;
+			rc = fapiGetScom(i_target_mba,0x02011674,l_data_buf_spare); if(rc) return rc;
 			for(l_index=0;l_index<64;l_index++)
 			{
-				if(l_data_buffer1_64.isBitSet(l_index))
+				if(l_data_buf_port1.isBitSet(l_index))
 				{ 
 				l_array1[l_i] = l_index;
 				l_i++;//FAPI_INF("l_array:%d",l_i);
@@ -1337,7 +1285,7 @@ rc_num = l_data_buffer3_64.flushTo0();
 			for(l_index=16;l_index<32;l_index++)	
 			{
 				
-				if(l_data_buffer3_64.isBitSet(l_index))
+				if(l_data_buf_spare.isBitSet(l_index))
 				{ 
 				l_array1[l_i] = l_index+64-16;
 				l_i++;//FAPI_INF("l_array:%d",l_i);
@@ -1355,13 +1303,13 @@ rc_num = l_data_buffer3_64.flushTo0();
 		{
 			//FAPI_INF("l_array:%d",l_i);
 			l_i = 0;
-			rc = fapiGetScom(i_target_mba,0x02011774,l_data_buffer3_64); if(rc) return rc;
-			rc = fapiGetScom(i_target_mba,0x02011772,l_data_buffer1_64); if(rc) return rc;
+			rc = fapiGetScom(i_target_mba,0x02011774,l_data_buf_spare); if(rc) return rc;
+			rc = fapiGetScom(i_target_mba,0x02011772,l_data_buf_port0); if(rc) return rc;
 			for(l_index=0;l_index<64;l_index++)
 			{
 				
 				
-				if(l_data_buffer1_64.isBitSet(l_index))
+				if(l_data_buf_port0.isBitSet(l_index))
 				{ 
 				l_array0[l_i] = l_index;
 				l_i++;//FAPI_INF("l_array:%d",l_i);
@@ -1372,7 +1320,7 @@ rc_num = l_data_buffer3_64.flushTo0();
 			}
 			for(l_index=0;l_index<16;l_index++)	
 			{
-				if(l_data_buffer3_64.isBitSet(l_index))
+				if(l_data_buf_spare.isBitSet(l_index))
 				{ 
 				l_array0[l_i] = l_index+64;
 				l_i++;//FAPI_INF("l_array:%d",l_i);
@@ -1385,12 +1333,12 @@ rc_num = l_data_buffer3_64.flushTo0();
 		{
 			l_i = 0;
 			//FAPI_INF("l_array:%d",l_i);
-			rc = fapiGetScom(i_target_mba,0x02011774,l_data_buffer3_64); if(rc) return rc;
-			rc = fapiGetScom(i_target_mba,0x02011773,l_data_buffer1_64); if(rc) return rc;
+			rc = fapiGetScom(i_target_mba,0x02011774,l_data_buf_spare); if(rc) return rc;
+			rc = fapiGetScom(i_target_mba,0x02011773,l_data_buf_port1); if(rc) return rc;
 			for(l_index=0;l_index<64;l_index++)
 			{
 				
-				if(l_data_buffer1_64.isBitSet(l_index))
+				if(l_data_buf_port1.isBitSet(l_index))
 				{ 
 				l_array1[l_i] = l_index;
 				l_i++;//FAPI_INF("l_array:%d",l_i);
@@ -1399,7 +1347,7 @@ rc_num = l_data_buffer3_64.flushTo0();
 			}	
 			for(l_index=16;l_index<32;l_index++)	
 			{
-				if(l_data_buffer3_64.isBitSet(l_index))
+				if(l_data_buf_spare.isBitSet(l_index))
 				{ 
 				l_array1[l_i] = l_index+64-16;
 				l_i++;//FAPI_INF("l_array:%d",l_i);
@@ -1412,9 +1360,35 @@ rc_num = l_data_buffer3_64.flushTo0();
 	i_port++;
 }
 
+
+//Conversion from CDIMM larray to ISDIMM larray
+//port 0
+				
+				for( l_i = 0;l_i < MAX_ISDIMM_DQ;l_i++)
+				{ 			  	
+						rc=rosetta_map(i_target_mba,0,l_input_type_e,l_i,0,o_val);if(rc) return rc;
+						//isdimm_dq0[l_i] = o_val;
+						cdimm_dq0[o_val] = l_i;
+						
+				}	
+				
+                //port 1
+				
+				for( l_i = 0;l_i < MAX_ISDIMM_DQ;l_i++)
+				{ 			 	
+						rc=rosetta_map(i_target_mba,1,l_input_type_e,l_i,0,o_val);if(rc) return rc;
+						//isdimm_dq1[l_i] = o_val;	
+                        cdimm_dq1[o_val] = l_i;						
+				}	
+
+
+
+
+
+
 uint8_t l_num,io_num,io_num0,io_num1,l_inter,l_flag,l_n;
-l_n=0;	 //HB
-io_num0=0;
+l_n=0;io_num0= 0;io_num1=0;
+	
 	//FAPI_INF("%s:l_max_rank%d",i_target_mba.toEcmdString(),l_max_rank);
 	l_port = 0;
 	while(l_port<2)
@@ -1429,6 +1403,15 @@ io_num0=0;
 			}
 			l_n = l_number1;
 			rc = mss_getrankpair(i_target_mba,l_port,0,&rank_pair,l_rankpair_table);if(rc) return rc;
+			
+			for( l_i = 0;l_i < MAX_ISDIMM_DQ;l_i++)
+				{ 			 	
+							
+                        cdimm_dq[l_i] = cdimm_dq0[l_i];						
+				}	
+			
+			
+			
 		}
 		else
 		{
@@ -1438,28 +1421,123 @@ io_num0=0;
 				l_n = l_number;
 			}
 			rc = mss_getrankpair(i_target_mba,l_port,0,&rank_pair,l_rankpair_table);if(rc) return rc;
+			
+			
+			for( l_i = 0;l_i < MAX_ISDIMM_DQ;l_i++)
+				{ 			 	
+							
+                        cdimm_dq[l_i] = cdimm_dq1[l_i];						
+				}	
+			
+			
 		}
-		for(l_cur_rank = 0;l_cur_rank < l_max_rank;l_cur_rank++)
+	//Getting array for converting CDIMM values as index and ISDIMM values as value of array for that index	
+		for(l_index=0;l_index<l_n;l_index++)
 		{
+				l_value = l_array[l_index] ;
+				
+				l_value1 = cdimm_dq[l_value];
+				if(l_value>=72)
+				{
+				l_value1 = 255;
+				}
+				
+				l_ISarray[l_index] =l_value1;
+				
+				//FAPI_INF("L_ISARRAY port %d index %d  value %d ",l_port,l_index,l_ISarray[l_index]);
+				
+	    }
 		
-			i_rank = l_rankpair_table[l_cur_rank];
+		
+		
+		
+		
+		//for(l_cur_rank = 0;l_cur_rank < l_max_rank;l_cur_rank++)
+		//{
+		
+			//i_rank = l_rankpair_table[l_cur_rank];
+			
+			
 			
 			//FAPI_INF("%s:rank:%d",i_target_mba.toEcmdString(),i_rank);
 			
-			for(l_index=0;l_index<l_n;l_index++)
+			
+			
+			if((l_attr_eff_dimm_type_u8 == 1) || (l_attr_eff_dimm_type_u8 == 3)) 
 			{
 				
-				l_value = l_array[l_index];
-				l_inter = (l_value/4);
-				//l_value1=(i_rank*20)+l_inter;
-				l_value1 = l_num-1;
-				if((l_inter*4 == l_marray[l_value1])&&(l_num != 0))
-				continue;
-				l_marray[l_num] = l_inter*4;
-				l_num++;
-				//FAPI_INF("%s:l_value,l_value1,l_num:%d,%d,%d",i_target_mba.toEcmdString(),l_value,l_value1,l_num);
+				//For ISDIMM marray
+				for(l_index=0;l_index<l_n;l_index++)
+				{
+					
+					l_value = l_ISarray[l_index];
+					l_inter = (l_value/4);
+					
+					
+					l_value1 = l_num-1;
+					
+					l_marray[l_num] = l_inter*4;
+					l_num++;
+					//FAPI_INF("%s:l_value,l_value1,l_num:%d,%d,%d",i_target_mba.toEcmdString(),l_value,l_value1,l_num);
+				}
+				
+				
 			}
+			else
+			{
+			//For CDIMM marray
+			for(l_index=0;l_index<l_n;l_index++)
+				{
+					
+					l_value = l_array[l_index];
+					l_inter = (l_value/4);
+					
+					l_value1 = l_num-1;
+					
+					l_marray[l_num] = l_inter*4;
+					l_num++;
+					//FAPI_INF("%s:l_value,l_value1,l_num:%d,%d,%d",i_target_mba.toEcmdString(),l_value,l_value1,l_num);
+				}
+			
+			}
+			
+			//Loop to sort Masked ISDIMM array
+		for(l_i=0; l_i<l_num-1; l_i++)
+		{
+			for(l_j=l_i+1;l_j<l_num;l_j++)
+			{
+				 if(l_marray[l_i]>l_marray[l_j])
+				 {
+					l_value = l_marray[l_j];
+					l_marray[l_j]=l_marray[l_i];
+					l_marray[l_i]=l_value;
+					//FAPI_INF("port %d value %d index %d",l_port,l_marray[l_i],l_i);
+				 }
+			}
+       }
+			
+		//loop to remove repetition elements
+        l_j = 0;
+		for(l_i = 0;l_i<l_num;l_i++)
+		{
+			l_flag = 0;
+			
+			if((l_marray[l_i] == l_marray[l_i+1])&&(l_num != 0))
+			{
+				l_flag = 1;
+			}
+				
+				if(l_flag == 0)
+				{
+				l_marray11[l_j] = l_marray[l_i];
+				l_j++;
+				}	
 		}
+		l_num = l_j;		
+		
+			
+			
+		//}
 		//FAPI_INF("%s:l_value,l_value1,l_num:%d,%d,%d",i_target_mba.toEcmdString(),l_value,l_value1,l_num);
 		//io_num = l_num;
 		if(l_port == 0)
@@ -1471,8 +1549,17 @@ io_num0=0;
 			}
 			for(l_index=0;l_index<io_num0;l_index++)
 			{
-				l_marray0[l_index] = l_marray[l_index];
+				l_marray0[l_index] = l_marray11[l_index];
 			}
+			
+			for(l_index=0;l_index<l_number1;l_index++)
+			{
+				
+				l_ISarray0[l_index] =l_ISarray[l_index];
+			}
+			
+			
+			
 		}
 		else
 		{
@@ -1483,15 +1570,37 @@ io_num0=0;
 			}
 			for(l_index=0;l_index<io_num1;l_index++)
 			{
-				l_marray1[l_index] = l_marray[l_index];
+				l_marray1[l_index] = l_marray11[l_index];
 			}
-			
+			for(l_index=0;l_index<l_number;l_index++)
+			{
+				
+				l_ISarray1[l_index] =l_ISarray[l_index];
+			}
 			
 		}		
 		l_port++;
 	}
+	
+	
+	
+	
+	
+	
 //DEBUG PRINTS
 /*
+for(l_i = 0;l_i < l_number1;l_i++)
+	{
+	FAPI_INF("%s:Port 0 FINAL ISDIMM ARRAY:%d and index %d",i_target_mba.toEcmdString(),l_ISarray0[l_i],l_i );
+	}
+	
+FAPI_INF("________________________________________________________________________________________________________");
+
+	for(l_i = 0;l_i < l_number;l_i++)
+	{
+	FAPI_INF("%s:Port 1 FINAL  ISDIMM ARRAY:%d and index %d",i_target_mba.toEcmdString(),l_ISarray1[l_i],l_i );
+	}
+
 FAPI_INF("________________________________________________________________________________________________________");
 	
 	for(l_i = 0;l_i < l_number1;l_i++)
@@ -1536,7 +1645,19 @@ FAPI_INF("______________________________________________________________________
 			{
 				l_marray[l_index] = l_marray0[l_index];
 			}
+			/*for(l_index=0;l_index<l_number1;l_index++)
+			{
+				l_ISarray[l_index] = l_ISarray0[l_index];
+			}*/
+			
 		
+			//l_sbit = 0;
+			//l_len = 8;
+			//l_generic_buffer = l_data_buf_port0.getDoubleWord (0);
+			//l_generic_buffer_spare = l_data_buf_spare.getDoubleWord (0);
+			//rc_num= rc_num | l_data_buf_spare.extractToRight(&l_output,l_sbit,l_len);
+			//l_n = l_number;
+		    //l_generic_buffer = l_generic_buffer0;
 		}
 		else
 		{
@@ -1548,29 +1669,181 @@ FAPI_INF("______________________________________________________________________
 				l_marray[l_index] = l_marray1[l_index];
 			}
 		
+			//l_sbit = 16;
+			//l_len = 8;
+			//l_generic_buffer = l_data_buf_port1.getDoubleWord (0);
+			//l_generic_buffer_spare = l_data_buf_spare.getDoubleWord (0);
+			//rc_num= rc_num | l_data_buf_spare.extractToRight(&l_output,l_sbit,l_len);
+			/*for(l_index=0;l_index<l_number;l_index++)
+			{
+				l_ISarray[l_index] = l_ISarray1[l_index];
+			}*/
+		//l_n = l_number;
 		}
+		
+		
+		
+		
 		if(l_max_rank == 0)
 		{
 			FAPI_DBG("%s: NO RANKS FOUND ON  PORT  %d",i_target_mba.toEcmdString(),l_port);
 		}
 		else
 		{ 
-			if(l_mbaPosition ==0)
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//To set the mask print in error map
+		
+		l_value =0;
+		
+		
+		if(l_port == 0)
+		{
+			//For Port 0
+			//rc_num =  l_ISDIMM_spare0.flushTo0();if (rc_num){FAPI_ERR( "Error in function  error_map:");rc.setEcmdError(rc_num);return rc;}
+			//rc_num =  l_ISDIMM_BUF0.flushTo0();if (rc_num){FAPI_ERR( "Error in function  error_map:");rc.setEcmdError(rc_num);return rc;}
+			
+			/*l_generic_buffer0 = 0;
+			l_output0 = 0;
+				l_generic_buffer0 = l_ISDIMM_BUF0.getDoubleWord (0);
+				l_sbit =0;
+				l_len=8;
+			rc_num= rc_num | l_ISDIMM_spare0.extractToRight(&l_output0,l_sbit,l_len);
+			
+			
+			FAPI_DBG("\n%s:BEFORE MASK      %016llX%02X \n",i_target_mba.toEcmdString(),l_generic_buffer0,l_output0);*/
+			for(l_index=0;l_index<l_number1;l_index++)
 			{
-				{FAPI_DBG("%s:################# MBA01 ###########################\n",i_target_mba.toEcmdString());
-				FAPI_DBG("%s:################# PORT%d ERROR MAP #################\n",i_target_mba.toEcmdString(),l_port);}
+				l_flag = 0;
+				l_value =l_ISarray0[l_index];
+				//FAPI_INF("Value is %d for index %d", l_value,l_index);
+				if(l_value>=72)
+				{
+					l_flag = 1;
+						//FAPI_INF("Value (72)is here for index %d",l_index);
+				}
+				if((l_value >= 64)&&(l_value<72))
+				{
+					l_value1 = l_value-64;
+					l_flag =2;
+					//FAPI_INF("Value (64)is here for index %d,l_value1 %d",l_index,l_value1);
+					rc_num =  l_ISDIMM_spare0.setBit(l_value1);if (rc_num){FAPI_ERR( "Error in function  Error Map:");rc.setEcmdError(rc_num);return rc;}
+				}
+				if(l_flag == 0)
+				{
+					rc_num =  l_ISDIMM_BUF0.setBit(l_value);if (rc_num){FAPI_ERR( "Error in function  Error Map:");rc.setEcmdError(rc_num);return rc;}
+				}
+				//FAPI_INF("VALUE OF FLAG %d",l_flag);
+			}
+			
+			l_generic_buffer0 = 0;
+			l_output0 = 0;
+				l_generic_buffer0 = l_ISDIMM_BUF0.getDoubleWord (0);
+				l_sbit =0;
+				l_len=8;
+			rc_num= rc_num | l_ISDIMM_spare0.extractToRight(&l_output0,l_sbit,l_len);
+			//FAPI_DBG("%s:MASK      %016llX%02X\n",i_target_mba.toEcmdString(),l_generic_buffer0,l_output0);
+			l_generic_buffer = l_generic_buffer0;
+			l_output = l_output0;
+        }
+		else
+		{
+		
+		//For Port 1
+			//rc_num =  l_ISDIMM_spare1.flushTo0();if (rc_num){FAPI_ERR( "Error in function  error_map:");rc.setEcmdError(rc_num);return rc;}
+			//rc_num =  l_ISDIMM_BUF1.flushTo0();if (rc_num){FAPI_ERR( "Error in function  error_map:");rc.setEcmdError(rc_num);return rc;}
+			
+			/*l_generic_buffer1 = 0;
+			l_output1 = 0;
+				l_generic_buffer1 = l_ISDIMM_BUF1.getDoubleWord (0);
+				l_sbit =0;
+				l_len=8;
+			rc_num= rc_num | l_ISDIMM_spare1.extractToRight(&l_output1,l_sbit,l_len);
+			
+			
+			FAPI_DBG("\n%s:BEFORE MASK      %016llX%02X \n",i_target_mba.toEcmdString(),l_generic_buffer1,l_output1);*/
+			for(l_index=0;l_index<l_number;l_index++)
+			{
+				l_flag = 0;
+				l_value =l_ISarray1[l_index];
+				//FAPI_INF("Value is %d for index %d", l_value,l_index);
+				if(l_value>=72)
+				{
+					l_flag = 1;
+						//FAPI_INF("Value (72)is here for index %d",l_index);
+				}
+				if((l_value >= 64)&&(l_value<72))
+				{
+					l_value1 = l_value-64;
+					l_flag =2;
+					//FAPI_INF("Value (64)is here for index %d,l_value1 %d",l_index,l_value1);
+					rc_num =  l_ISDIMM_spare1.setBit(l_value1);if (rc_num){FAPI_ERR( "Error in function  Error Map:");rc.setEcmdError(rc_num);return rc;}
+				}
+				if(l_flag == 0)
+				{
+					rc_num =  l_ISDIMM_BUF1.setBit(l_value);if (rc_num){FAPI_ERR( "Error in function  Error Map:");rc.setEcmdError(rc_num);return rc;}
+				}
+				//FAPI_INF("VALUE OF FLAG %d",l_flag);
+			}
+			
+			l_generic_buffer1 = 0;
+			l_output1 = 0;
+				l_generic_buffer1 = l_ISDIMM_BUF1.getDoubleWord (0);
+				l_sbit =0;
+				l_len=8;
+			rc_num= rc_num | l_ISDIMM_spare1.extractToRight(&l_output1,l_sbit,l_len);
+			//FAPI_DBG("%s:MASK      %016llX%02X\n",i_target_mba.toEcmdString(),l_generic_buffer1,l_output1);
+			l_generic_buffer = l_generic_buffer1;
+			l_output = l_output1;
+		
+		}
+		
+		//Mask calculation Ends
+		
+			
+			//l_generic_buffer(64),l_generic_buffer_spare(64),l_data_buf_port0(64),l_data_buf_port1(64),l_data_buf_spare(64);
+			//rc=fapiGetScom(i_target_mba,l_scom_add,data_buffer_64);if(rc) return rc;
+      //rc_num= rc_num | data_buffer_64.extractToRight(&l_output,l_sbit,l_len);
+			if(l_mbaPosition == 0)
+			{
+				
+				
+				
+				//FAPI_DBG("%s:MASK      %016llX%02X\n",i_target_mba.toEcmdString(),l_generic_buffer0,l_output0);
+				FAPI_DBG("%s:################# MBA01 ###########################\n",i_target_mba.toEcmdString());
+				FAPI_DBG("%s:################# PORT%d ERROR MAP #################\n",i_target_mba.toEcmdString(),l_port);
+				FAPI_DBG("%s:Byte      001122334455667788",i_target_mba.toEcmdString());
+                FAPI_DBG("%s:Nibble    010101010101010101",i_target_mba.toEcmdString());
+				
+				FAPI_DBG("%s:MASK      %016llX%02X\n",i_target_mba.toEcmdString(),l_generic_buffer,l_output);
+				
+				
 			}
 			else
 			{
-				{FAPI_DBG("%s:################# MBA23 ###########################\n",i_target_mba.toEcmdString());
-				FAPI_DBG("%s:################# PORT%d ERROR MAP #################\n",i_target_mba.toEcmdString(),l_port);}
+				
+				
+				//FAPI_DBG("%s:MASK      %016llX%02X\n",i_target_mba.toEcmdString(),l_generic_buffer1,l_output1);
+				FAPI_DBG("%s:################# MBA23 ###########################\n",i_target_mba.toEcmdString());
+				FAPI_DBG("%s:################# PORT%d ERROR MAP #################\n",i_target_mba.toEcmdString(),l_port);
+				FAPI_DBG("%s:Byte      001122334455667788",i_target_mba.toEcmdString());
+                FAPI_DBG("%s:Nibble    010101010101010101",i_target_mba.toEcmdString());
+				
+				FAPI_DBG("%s:MASK      %016llX%02X\n",i_target_mba.toEcmdString(),l_generic_buffer,l_output);
+				
 			}
-			//FAPI_DBG("%s:          ------------------",i_target_mba.toEcmdString());
-			{FAPI_DBG("%s:Byte      001122334455667788",i_target_mba.toEcmdString());
-			FAPI_DBG("%s:Nibble    010101010101010101",i_target_mba.toEcmdString());	}
+			
+			
 			for(l_rank = 0; l_rank < l_max_rank; l_rank++)
 			{	
-				//FAPI_DBG("%s:Rank %d",i_rank);
+				
 				l_num = 0;
 				rc = mss_getrankpair(i_target_mba,l_port,0,&rank_pair,valid_rank);if(rc) return rc;
 				i_rank=valid_rank[l_rank];
@@ -1631,11 +1904,12 @@ FAPI_INF("______________________________________________________________________
 	
 	else   //Calling CDIMM error Map print
 		{
+			FAPI_DBG("%s:################# CDIMM ERROR MAP ###########################\n",i_target_mba.toEcmdString());
 			i_port = 0;
-			mcb_error_map_print( i_target_mba , l_mcb_fail_160, i_port,l_array0,l_number1);
+			mcb_error_map_print( i_target_mba , l_mcb_fail_160, i_port,l_array0,l_number1,l_data_buf_port0,l_data_buf_spare);//ecmdDataBufferBase l_data_buffer1_64(64),l_data_buffer3_64(64),l_data_buf_port0(64),l_data_buf_port1(64),l_data_buf_spare(64);
 	 
 			i_port = 1;   
-			mcb_error_map_print(i_target_mba, l_mcb_fail1_160, i_port,l_array1,l_number); 
+			mcb_error_map_print(i_target_mba, l_mcb_fail1_160, i_port,l_array1,l_number,l_data_buf_port1,l_data_buf_spare); 
 		}
    
    //End
@@ -1689,7 +1963,6 @@ fapi::ReturnCode  mcb_write_test_mem(const fapi::Target & i_target_mba,const uin
 	l_sub_info[i_testnumber1].l_operation_type = l_operation_type;
 	l_sub_info[i_testnumber1].l_data_mode = l_data_mode;
 	l_sub_info[i_testnumber1].l_addr_mode = l_addr_mode; 
-		
 	
 	// Operation type
     
@@ -2221,3 +2494,4 @@ fapi::ReturnCode mss_conversion_data(const fapi::Target & i_target_mba, uint8_t 
 
    
 }
+

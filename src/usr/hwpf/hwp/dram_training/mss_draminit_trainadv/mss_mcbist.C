@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.C,v 1.41 2013/08/12 10:07:57 sasethur Exp $
+// $Id: mss_mcbist.C,v 1.43 2013/10/04 06:32:21 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.43  |aditya  |10/05/13|Updated fw comments
+//   1.42  |aditya  |09/18/13|Updated Call for functions
 //   1.41  |aditya  |08/10/13|Minor Fix for Hostboot compile
 //   1.40  |aditya  |06/11/13|Added attributes ATTR_MCBIST_PRINTING_DISABLE and ATTR_MCBIST_DATA_ENABLE
 //   1.39  |aditya  |05/22/13|updated parameters for Subtest Printing
@@ -271,7 +273,7 @@ fapi::ReturnCode  cfg_mcb_test_mem(const fapi::Target & i_target_mba,mcbist_test
 //     mcbist_data_gen i_datamode       MCBIST Data mode 
 //     uint8_t i_mcbrotate              Provides the number of bit to shift per burst
 //****************************************************************/
-fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen i_datamode,uint8_t i_mcbrotate,uint8_t i_seed_choice,uint32_t i_seed)
+fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen i_datamode,uint8_t i_mcbrotate)
 {
 	uint8_t l_print = 0; 
 	
@@ -279,7 +281,10 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
     uint8_t l_data_attr,l_random_flag,l_data_flag;
 	l_data_flag =1; l_random_flag = 1;
 	l_data_attr = 3;
-	
+	uint8_t l_seed_choice;
+	uint32_t i_seed;
+	i_seed = 0x20;
+	l_seed_choice = 1;
     ecmdDataBufferBase l_data_buffer_64(64);
 	ecmdDataBufferBase l_var_data_buffer_64(64);
 	ecmdDataBufferBase l_var1_data_buffer_64(64);
@@ -447,7 +452,7 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
 		{
 			l_rand_32 = 0xFFFFFFFF;//Hard Coded Temporary Fix till random function is fixed
 		  // srand(2);
-		   if(i_seed_choice == 1)
+		   if(l_seed_choice == 1)
 		   {
 				if(i_seed == 0)
 				{
