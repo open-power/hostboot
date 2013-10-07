@@ -231,7 +231,6 @@ actionclass callout2ndLvlMedThr1
 {
     callout2ndLvlMed;
     threshold1;
-
 };
 
 ################################################################################
@@ -242,6 +241,12 @@ actionclass callout2ndLvlMedThr1
 actionclass dumpSH
 {
     dump(DUMP_CONTENT_SH);
+};
+
+/** Dump SW */
+actionclass dumpSW
+{
+    dump(DUMP_CONTENT_SW);
 };
 
 ################################################################################

@@ -192,12 +192,15 @@ int32_t checkSpareBit( ExtensibleChip * i_mcsChip,
                        STEP_CODE_DATA_STRUCT & i_sc )
 {
     using namespace LaneRepair;
-    int32_t l_rc = FAIL;
+
+    int32_t l_rc = FAIL; // Default is to handle the attention (via rule code).
 
     ExtensibleChip * mbChip = getMcsDataBundle( i_mcsChip )->getMembChip();
 
-    if ( true == isSpareBitOnDMIBus( i_mcsChip, mbChip ))
+    if ( isSpareBitOnDMIBus(i_mcsChip, mbChip) )
     {
+        // Ignore attention and do not commit the error log.
+        i_sc.service_data->DontCommitErrorLog();
         l_rc = SUCCESS;
     }
 

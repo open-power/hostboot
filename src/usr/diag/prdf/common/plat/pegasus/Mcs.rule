@@ -113,6 +113,16 @@ chip Mcs
         capture     req nonzero("MCIFIR");
     };
 
+    register MCIFIR_WOF
+    {
+        name        "MC0.MCS0.RIGHT.MCI.SCOMFIR.MCIFIRWOF";
+        scomaddr    0x02011848;
+        capture     type secondary;
+        capture     group default;
+        capture     group FirRegs;
+        capture     req nonzero("MCIFIR");
+    };
+
     ############################################################################
     # Error Report Registers
     ############################################################################
@@ -148,9 +158,9 @@ chip Mcs
 
 ################################################################################
 # PB Chiplet MCIFIR
+# Reviewed p8dd1_mss_FFDC_59.xls on 10/07/13
 ################################################################################
-# MCIFIR updated based on p8dd1_mss_FFDC_37_ reviewd.xls
-###############################################################################
+
 rule MciFir
 {
     CHECK_STOP:  MCIFIR & ~MCIFIR_MASK & ~MCIFIR_ACT0 & ~MCIFIR_ACT1;
@@ -197,7 +207,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[6]
      *  MCIFIRQ_REPLAY_BUFFER_ECC_UE
      */
-    (MciFir, bit(6)) ? SelfHighThr1 ;
+    (MciFir, bit(6)) ? SelfHighThr1;
 
     /** MCIFIR[7]
      *  MCIFIRQ_MCI_CHINIT_STATE_MACHINE_TIMEOUT
@@ -309,7 +319,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[26]
      *  MCIFIRQ_POWERBUS_PROTOCOL_ERROR
      */
-    (MciFir, bit(26)) ? callout2ndLvlMedThr1;
+    (MciFir, bit(26)) ? callout2ndLvlDumpSW;
 
     /** MCIFIR[27]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
@@ -348,7 +358,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[33]
      *  MCIFIRQ_NONFOREIGN_ACCESS_TO_FOREIGN_BAR
      */
-    (MciFir, bit(33)) ? callout2ndLvlMedThr1;
+    (MciFir, bit(33)) ? callout2ndLvlDumpSW;
 
     /** MCIFIR[34]
      *  MCIFIRQ_CENTAUR_SYNC_COMMAND_DETECTED
@@ -373,18 +383,18 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[38]
      *  MCIFIRQ_HA_ILLEGAL_CONSUMER_ACCESS_ERROR
      */
-    (MciFir, bit(38)) ? callout2ndLvlMedThr1;
+    (MciFir, bit(38)) ? callout2ndLvlDumpSW;
 
     /** MCIFIR[39]
      *  MCIFIRQ_HA_ILLEGAL_PRODUCER_ACCESS_ERROR
      */
-    (MciFir, bit(39)) ? callout2ndLvlMedThr1;
+    (MciFir, bit(39)) ? callout2ndLvlDumpSW;
 
     /** MCIFIR[40]
      *  CHANNEL TIMEOUT ERROR
      */
-    # FIXME RTC 23127 No decision on MRU  as yet
-    (MciFir, bit(40)) ? defaultMaskedError;
+    # FIXME RTC 23127 No decision on MRU as yet
+    (MciFir, bit(40)) ? TBDDefaultCallout;
 
     /** MCIFIR[41]
      *  CENTAUR FAULT LINE
@@ -480,7 +490,17 @@ actionclass CalloutDmiBusAndThr2pd
     threshold2pday;
 };
 
+/** If there is a lane repair attention, do nothing. Otherwise, callout DMI bus
+    with threshold of 2/day. */
 actionclass analyzeSpareBitAndThr
 {
     try( funccall("checkSpareBit"), CalloutDmiBusAndThr2pd );
 };
+
+/** Callout 2nd Level and dump SW */
+actionclass callout2ndLvlDumpSW
+{
+    callout2ndLvlMedThr1;
+    dumpSW;
+};
+
