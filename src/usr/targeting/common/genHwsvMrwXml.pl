@@ -2249,7 +2249,9 @@ sub generate_ax_buses
         my $ipath = "abus_or_xbus:TO_BE_ADDED";
         foreach my $pbus ( @pbus )
         {
-            if ($pbus->[PBUS_FIRST_END_POINT_INDEX] eq "n${node}:p${proc}:${type}${i}")
+            if (($pbus->[PBUS_FIRST_END_POINT_INDEX] eq
+                "n${node}:p${proc}:${type}${i}" )&&
+                ($pbus->[PBUS_SECOND_END_POINT_INDEX] ne "invalid"))
             {
                 $peer = 1;
                 $p_proc = $pbus->[PBUS_SECOND_END_POINT_INDEX];
