@@ -266,7 +266,7 @@ set version "1.6"
 set files [list]
 set directories [list]
 set cmds  [list]
-set servers [list gfw160.austin.ibm.com]
+set servers [list gfw160.aus.stglabs.ibm.com]
 
 #-----------------------------------------------------------------------------------------
 # Parse ARGs
