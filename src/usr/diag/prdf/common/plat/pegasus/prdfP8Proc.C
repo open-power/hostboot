@@ -30,6 +30,7 @@
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
 #include <prdfLaneRepair.H>
+#include <prdfPhbUtils.H>
 
 using namespace TARGETING;
 
@@ -689,9 +690,97 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( Proc, ClearServiceCallFlag );
 
-
+//------------------------------------------------------------------------------
+//                   PHB Plugins for IOPCIFIR_x
 //------------------------------------------------------------------------------
 
+/**
+ * @brief  Calls out PHB targets associated with given processor.
+ * @param  i_procChip    Chip reporting attention.
+ * @param  io_sc         The step code data struct.
+ * @param  i_iopciIdx    IOPCIFIR instance number (0,1)
+ * @param  i_calloutPhbA True if error is from clock A, false otherwise.
+ * @param  i_calloutPhbB True if error is from clock B, false otherwise.
+ * @return Always SUCCESS.
+ */
+int32_t calloutPhb( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
+                    uint32_t i_iopciIdx, bool i_calloutPhbA, bool i_calloutPhbB)
+{
+    #define PRDF_FUNC "[Proc::calloutPhb] "
+
+    uint32_t l_rc = SUCCESS;
+
+    TargetHandle_t procTrgt = i_procChip->GetChipHandle();
+    TargetHandle_t phbATrgt = NULL;
+    TargetHandle_t phbBTrgt = NULL;
+
+    // Callout clock A
+    if ( i_calloutPhbA )
+    {
+        if ( SUCCESS != getConfiguredPHB(procTrgt, i_iopciIdx, 0, phbATrgt) )
+        {
+            PRDF_ERR( PRDF_FUNC"getConfiguredPHB(0) failed: i_procChip=0x%08x "
+                      "i_iopciIdx=%d", i_procChip->GetId(), i_iopciIdx );
+            l_rc = FAIL;
+        }
+        else if ( NULL != phbATrgt )
+        {
+            io_sc.service_data->SetCallout( phbATrgt );
+        }
+    }
+
+    // Callout clock B
+    if ( i_calloutPhbB )
+    {
+        if ( SUCCESS != getConfiguredPHB(procTrgt, i_iopciIdx, 1, phbBTrgt) )
+        {
+            PRDF_ERR( PRDF_FUNC"getConfiguredPHB(1) failed: i_procChip=0x%08x "
+                      "i_iopciIdx=%d", i_procChip->GetId(), i_iopciIdx );
+            l_rc = FAIL;
+        }
+        else if ( (NULL != phbBTrgt) && (phbATrgt != phbBTrgt) )
+        {
+            io_sc.service_data->SetCallout( phbBTrgt );
+        }
+    }
+
+    // If no PHBs called out, callout 2nd level support.
+    if ( (SUCCESS != l_rc) || (0 == io_sc.service_data->GetMruList().size()) )
+        io_sc.service_data->SetCallout( NextLevelSupport_ENUM );
+
+    return SUCCESS; // Intentionally returns SUCCESS so rule code does not get
+                    // confused by undefined error code.
+
+    #undef PRDF_FUNC
+}
+
+#define PLUGIN_CALLOUT_PHB( CLK,IOPCI,ERRA,ERRB ) \
+int32_t calloutPhbClk##CLK##_##IOPCI( ExtensibleChip * i_chip, \
+                                      STEP_CODE_DATA_STRUCT & i_sc ) \
+{ \
+    return calloutPhb( i_chip, i_sc, IOPCI, ERRA, ERRB );  \
+}\
+PRDF_PLUGIN_DEFINE( Proc, calloutPhbClk##CLK##_##IOPCI );
+
+PLUGIN_CALLOUT_PHB( A, 0, true, false )
+PLUGIN_CALLOUT_PHB( B, 0, false, true )
+PLUGIN_CALLOUT_PHB( A, 1, true, false )
+PLUGIN_CALLOUT_PHB( B, 1, false, true )
+
+#undef PLUGIN_CALLOUT_PHB
+
+#define PLUGIN_CALLOUT_PHB( IOPCI ) \
+int32_t calloutPhbBothClks_##IOPCI( ExtensibleChip * i_chip, \
+                                    STEP_CODE_DATA_STRUCT & i_sc ) \
+{ \
+    return calloutPhb( i_chip, i_sc, IOPCI, true, true );  \
+}\
+PRDF_PLUGIN_DEFINE( Proc, calloutPhbBothClks_##IOPCI );
+
+PLUGIN_CALLOUT_PHB( 0 )
+PLUGIN_CALLOUT_PHB( 1 )
+
+#undef PLUGIN_CALLOUT_PHB
 
 } // end namespace Proc
 

@@ -486,82 +486,82 @@ group gIopPciFir filter singlebit
     /** IOPCIFIR_0[0]
      * FIR_STATUS_REG_G2_PLL_CCERR_STATUS
      */
-    (IopPciFir_0, bit(0)) ? calloutPHB0Thr1;
+    (IopPciFir_0, bit(0)) ? calloutPhbBothClks_0;
 
     /** IOPCIFIR_1[0]
      * FIR_STATUS_REG_G2_PLL_CCERR_STATUS
      */
-    (IopPciFir_1, bit(0)) ? calloutPHB1Thr1;
+    (IopPciFir_1, bit(0)) ? calloutPhbBothClks_1;
 
     /** IOPCIFIR_0[1]
      *  FIR_STATUS_REG_G3_PLL_CCERR_STATUS
      */
-    (IopPciFir_0, bit(1)) ? calloutPHB0Thr1;
+    (IopPciFir_0, bit(1)) ? calloutPhbBothClks_0;
 
     /** IOPCIFIR_1[1]
      *  FIR_STATUS_REG_G3_PLL_CCERR_STATUS
      */
-    (IopPciFir_1, bit(1)) ? calloutPHB1Thr1;
+    (IopPciFir_1, bit(1)) ? calloutPhbBothClks_1;
 
     /** IOPCIFIR_0[2]
      *  FIR_STATUS_REG_TX_A_ERR_STATUS
      */
-    (IopPciFir_0, bit(2)) ? calloutPHB0Thr1;
+    (IopPciFir_0, bit(2)) ? calloutPhbClkA_0;
 
     /** IOPCIFIR_1[2]
      *  FIR_STATUS_REG_TX_A_ERR_STATUS
      */
-    (IopPciFir_1, bit(2)) ? calloutPHB1Thr1;
+    (IopPciFir_1, bit(2)) ? calloutPhbClkA_1;
 
     /** IOPCIFIR_0[3]
      *  FIR_STATUS_REG_TX_B_ERR_STATUS
      */
-    (IopPciFir_0, bit(3)) ? calloutPHB0Thr1;
+    (IopPciFir_0, bit(3)) ? calloutPhbClkB_0;
 
     /** IOPCIFIR_1[3]
      *  FIR_STATUS_REG_TX_B_ERR_STATUS
      */
-    (IopPciFir_1, bit(3)) ? calloutPHB1Thr1;
+    (IopPciFir_1, bit(3)) ? calloutPhbClkB_1;
 
     /** IOPCIFIR_0[4]
      *  FIR_STATUS_REG_RX_A_ERR_STATUS
      */
-    (IopPciFir_0, bit(4)) ? calloutPHB0Thr1;
+    (IopPciFir_0, bit(4)) ? calloutPhbClkA_0;
 
     /** IOPCIFIR_1[4]
      *  FIR_STATUS_REG_RX_A_ERR_STATUS
      */
-    (IopPciFir_1, bit(4)) ? calloutPHB1Thr1;
+    (IopPciFir_1, bit(4)) ? calloutPhbClkA_1;
 
     /** IOPCIFIR_0[5]
      *  FIR_STATUS_REG_RX_B_ERR_STATUS
      */
-    (IopPciFir_0, bit(5)) ? calloutPHB0Thr1;
+    (IopPciFir_0, bit(5)) ? calloutPhbClkB_0;
 
     /** IOPCIFIR_1[5]
      *  FIR_STATUS_REG_RX_B_ERR_STATUS
      */
-    (IopPciFir_1, bit(5)) ? calloutPHB1Thr1;
+    (IopPciFir_1, bit(5)) ? calloutPhbClkB_1;
 
     /** IOPCIFIR_0[6]
      *  FIR_STATUS_REG_ZCAL_B_ERR_STATUS
      */
-    (IopPciFir_0, bit(6)) ? calloutPHB0Thr1;
+    (IopPciFir_0, bit(6)) ? calloutPhbBothClks_0;
 
     /** IOPCIFIR_1[6]
      *  FIR_STATUS_REG_ZCAL_B_ERR_STATUS
      */
-    (IopPciFir_1, bit(6)) ? calloutPHB1Thr1;
+    (IopPciFir_1, bit(6)) ? calloutPhbBothClks_1;
 
     /** IOPCIFIR_0[7]
      *  FIR_STATUS_REG_SCOM_FIR_PERR0_STATUS
      */
-    (IopPciFir_0, bit(7)) ? calloutPHB0Thr1;
+    (IopPciFir_0, bit(7)) ? defaultMaskedError;
 
     /** IOPCIFIR_1[7]
      *  FIR_STATUS_REG_SCOM_FIR_PERR0_STATUS
      */
-    (IopPciFir_1, bit(7)) ? calloutPHB1Thr1;
+    (IopPciFir_1, bit(7)) ? defaultMaskedError;
 
     /** IOPCIFIR_0[8]
      *  FIR_STATUS_REG_SCOM_FIR_PERR1_STATUS
@@ -578,22 +578,45 @@ group gIopPciFir filter singlebit
 # Actions specific to PCIE chiplet
 ################################################################################
 
-/**Determine relevant PCI endpoints associated with PHB0
- * and callout it on first instance.
- */
-actionclass calloutPHB0Thr1
+/**callout PHB associated with IOPCIFIR0 clkA */
+actionclass calloutPhbClkA_0
 {
-    #FIXME RTC 23127 Investigation required to determine which PCI endpoint
-    # should be blamed.
-    TBDDefaultCallout;
+    funccall("calloutPhbClkA_0");
+    threshold1;
 };
 
-/**Determine relevant PCI endpoints associated with PHB1
- * and callout it on first instance.
- */
-actionclass calloutPHB1Thr1
+/**callout PHB associated with IOPCIFIR0 clkB */
+actionclass calloutPhbClkB_0
 {
-    #FIXME RTC 23127 Investigation required to determine which PCI endpoint
-    # should be blamed.
-    TBDDefaultCallout;
+    funccall("calloutPhbClkB_0");
+    threshold1;
 };
+
+/**callout PHB associated with IOPCIFIR1 clkA */
+actionclass calloutPhbClkA_1
+{
+    funccall("calloutPhbClkA_1");
+    threshold1;
+};
+
+/**callout PHB associated with IOPCIFIR1 clkB */
+actionclass calloutPhbClkB_1
+{
+    funccall("calloutPhbClkB_1");
+    threshold1;
+};
+
+/** callout all PHB associated with IOPCIFIR0 */
+actionclass calloutPhbBothClks_0
+{
+    funccall("calloutPhbBothClks_0");
+    threshold1;
+};
+
+/** callout all PHB associated with IOPCIFIR1 */
+actionclass calloutPhbBothClks_1
+{
+    funccall("calloutPhbBothClks_1");
+    threshold1;
+};
+

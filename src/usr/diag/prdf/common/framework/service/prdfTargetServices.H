@@ -59,6 +59,7 @@ enum PositionBounds
 
     MAX_XBUS_PER_PROC   = 4,
     MAX_ABUS_PER_PROC   = 3,
+    MAX_PHB_PER_PROC    = 3,
 
     MAX_MCS_PER_PROC    = 8,
     MAX_MEMBUF_PER_PROC = MAX_MCS_PER_PROC,
@@ -288,6 +289,15 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target );
  * @return  proc model if target is valid else MODEL_NA
  */
 TARGETING::MODEL getProcModel( TARGETING::TargetHandle_t i_proc );
+
+/**
+ * @brief   Returns Phb Config associated with the Proc target.
+ *          Config number indicates about slot bifurcation and
+ *          associated PHB with the slot.
+ * @param   i_proc Proc target
+ * @return  PCI Config info as uin32_t. value expected is from [0-12].
+ */
+uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc );
 
 //##############################################################################
 //##
