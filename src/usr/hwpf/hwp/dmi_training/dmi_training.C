@@ -101,6 +101,7 @@ void*    call_mss_getecid( void *io_pArgs )
     uint8_t    l_ddr_port_status = 0;
     uint8_t    l_cache_enable = 0;
     uint8_t    l_centaur_sub_revision = 0;
+    ecid_user_struct l_ecidUser;  // Do not need to be initalized by caller
 
     mss_get_cen_ecid_ddr_status l_mbaBadMask[2] =
        { MSS_GET_CEN_ECID_DDR_STATUS_MBA0_BAD,
@@ -135,7 +136,7 @@ void*    call_mss_getecid( void *io_pArgs )
         //  which is a portion of the ECID data.
         FAPI_INVOKE_HWP(l_err, mss_get_cen_ecid,
                         l_fapi_centaur, l_ddr_port_status,
-                        l_cache_enable, l_centaur_sub_revision);
+                        l_cache_enable, l_centaur_sub_revision, l_ecidUser);
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

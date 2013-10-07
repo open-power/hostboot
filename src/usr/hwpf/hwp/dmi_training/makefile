@@ -54,7 +54,8 @@ OBJS =  dmi_training.o  \
         mss_get_cen_ecid.o \
         dmi_io_dccal.o \
         proc_dmi_scominit.o \
-        cen_dmi_scominit.o
+        cen_dmi_scominit.o \
+        mss_get_cen_ecid_decode.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_framelock
