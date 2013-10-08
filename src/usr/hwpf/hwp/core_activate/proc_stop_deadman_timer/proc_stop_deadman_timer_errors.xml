@@ -20,13 +20,16 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_stop_deadman_timer_errors.xml,v 1.4 2013/04/25 22:04:00 jeshua Exp $ -->
+<!-- $Id: proc_stop_deadman_timer_errors.xml,v 1.5 2013/07/29 21:26:25 jeshua Exp $ -->
 <!-- Error definitions for proc_stop_deadman_timer procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_STOP_DEADMAN_TIMER_BAD_ISTEP_NUM</rc>
-    <description>The SBE is not at the correct istep number</description>
+    <description>
+      Procedure: proc_stop_deadman_timer
+      The SBE is not at the correct istep number to stop the deadman timer
+    </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
@@ -37,7 +40,10 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_STOP_DEADMAN_TIMER_BAD_SUBSTEP_NUM</rc>
-    <description>The SBE is not at the correct substep number</description>
+    <description>
+      Procedure: proc_stop_deadman_timer
+      The SBE is not at the correct substep number to stop the deadman timer
+    </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>

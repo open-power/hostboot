@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_sbe_rc.H,v 1.3 2013/06/21 14:23:33 jeshua Exp $
+// $Id: proc_extract_sbe_rc.H,v 1.4 2013/09/20 15:26:50 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -60,7 +60,7 @@ enum por_engine_t {
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*proc_extract_sbe_rc_FP_t)(const fapi::Target &,
-                                                     void *,
+                                                     const void *,
                                                      const por_engine_t);
 
 //------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ extern "C"
  *                             while trying to get the error code
  */
   fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
-                                       void               * i_pSEEPROM,
+                                       const void         * i_pSEEPROM,
                                        const por_engine_t   i_engine);
 
 } // extern "C"

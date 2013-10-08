@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr_phy_reset.C,v 1.25 2013/06/26 17:40:56 mwuu Exp $
+// $Id: mss_ddr_phy_reset.C,v 1.26 2013/09/16 20:17:57 mwuu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -74,30 +74,28 @@ ReturnCode mss_ddr_phy_flush(const fapi::Target & i_target);
 
 fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
 {
-
     // Target is centaur.mba
 
     fapi::ReturnCode rc;
-    fapi::ReturnCode slewcal_rc;
-    fapi::ReturnCode phyflush_rc;
 
     rc = mss_ddr_phy_reset_cloned(i_target);
-
-    slewcal_rc = mss_slew_cal(i_target);
-
-    // If mss_ddr_phy_reset returns an error
-    //      then log the error from mss_slew_cal (if any) and pass the error from mss_ddr_phy_reset
-    // If only mss_slew_cal returns an error
-    //      then move that error to RC and pass it along
-    if ((slewcal_rc) && (rc))
-    {
-        FAPI_ERR(" mss_slew_cal failed!   rc = 0x%08X (creator = %d)", uint32_t(slewcal_rc), slewcal_rc.getCreator());
-        fapiLogError(slewcal_rc);
+    if (rc) {
+        FAPI_ERR(" mss_ddr_phy_reset_cloned failed!  rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
     }
-    else if (slewcal_rc)
+    else	// reset successful
     {
-        rc = slewcal_rc;
-    }
+        rc = mss_slew_cal(i_target);
+        if (rc) {
+            FAPI_ERR(" mss_slew_cal failed!  rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+        }
+        else	// slew cal successful
+        {
+            rc = mss_ddr_phy_flush(i_target);
+            if (rc) {
+                FAPI_ERR(" mss_ddr_phy_flush failed!  rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+            }
+        }
+    }	// should exit early if any functions has a bad return code
 
     // If mss_unmask_ddrphy_errors gets it's own bad rc,
     // it will commit the passed in rc (if non-zero), and return it's own bad rc.
@@ -105,20 +103,8 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
     // it will just return the passed in rc.
     rc = mss_unmask_ddrphy_errors(i_target, rc);
 
-	phyflush_rc = mss_ddr_phy_flush(i_target);
-
-	if ((phyflush_rc) && (rc))
-	{
-		FAPI_ERR(" mss_ddr_phy_flush failed!  rc = 0x%08X (creator = %d)", uint32_t(phyflush_rc), phyflush_rc.getCreator());
-	}
-	else if (phyflush_rc)
-	{
-		rc = phyflush_rc;
-	}
-
     return rc;
 }
-
 
 fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
 {
@@ -1176,6 +1162,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: mss_ddr_phy_reset.C,v $
+Revision 1.26  2013/09/16 20:17:57  mwuu
+Cleanup of the calling functions so first fail will run unmask function.
+
 Revision 1.25  2013/06/26 17:40:56  mwuu
 Submitting Mark Fredrickson's clean up from FW review.
 

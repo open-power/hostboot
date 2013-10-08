@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_throttle_to_power.C,v 1.9 2012/12/12 20:10:47 pardeik Exp $
+// $Id: mss_throttle_to_power.C,v 1.10 2013/09/19 19:02:19 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_throttle_to_power.C,v $
 //------------------------------------------------------------------------------
@@ -47,6 +47,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.10  | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 //   1.9   | pardeik  |04-DEC-12| update lines to have a max width of 80 chars
 //         |          |         | added FAPI_ERR before return code lines
 //         |          |         | made trace statements for procedures FAPI_IMP
@@ -118,6 +119,7 @@ extern "C" {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
 	const char* procedure_name = "mss_throttle_to_power";
+
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	uint32_t throttle_n_per_mba;
@@ -194,6 +196,7 @@ extern "C" {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
 	const char* procedure_name = "mss_throttle_to_power_calc";
+
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	const uint8_t MAX_NUM_PORTS = 2;

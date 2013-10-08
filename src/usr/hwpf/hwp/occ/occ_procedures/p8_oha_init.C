@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_oha_init.C,v 1.12 2013/08/02 19:00:04 stillgs Exp $
+// $Id: p8_oha_init.C,v 1.13 2013/09/12 16:08:45 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_oha_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -382,7 +382,7 @@ p8_oha_init_init(const fapi::Target& i_target, struct_i_oha_val_init_type i_oha_
 //    std::vector<Target>::iterator  itr;
     uint8_t                         l_ex_number = 0;
 
-    uint8_t                         attr_pm_aiss_timeout = 0;
+    uint8_t                         attr_pm_aiss_timeout;
     uint32_t                        attr_pm_tod_pulse_count_match_val = 1024;
     uint32_t                        attr_pm_ppt_timer_tick;
     uint32_t                        attr_pm_ppt_timer_match_value;
@@ -406,7 +406,13 @@ p8_oha_init_init(const fapi::Target& i_target, struct_i_oha_val_init_type i_oha_
                 ATTR_PM_PPT_TIMER_MATCH_VALUE,
                 "ATTR_PM_PPT_TIMER_MATCH_VALUE",
                 &i_target,
-                attr_pm_ppt_timer_match_value);                    
+                attr_pm_ppt_timer_match_value);    
+
+        GETATTR(rc,
+                ATTR_PM_AISS_TIMEOUT,
+                "ATTR_PM_AISS_TIMEOUT",
+                &i_target,
+                attr_pm_aiss_timeout);                
 
         //  ******************************************************************
         //  initialize all oha_reg with scan-zero values upfront

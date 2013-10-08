@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.17 2013/07/22 14:09:20 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.18 2013/09/19 19:02:12 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -53,6 +53,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.18  | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 //   1.17  | pardeik  |19-JUL-13| Use runtime throttles for IPL for scominit
 //         |          |         | Removed MRW safemode throttle stuff
 //         |          |         | Always determine runtime throttles now
@@ -203,6 +204,7 @@ extern "C" {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
 	const char* procedure_name = "mss_eff_config_thermal";
+
 	FAPI_IMP("*** Running %s on %s ***", procedure_name,
 		 i_target_mba.toEcmdString());
 
@@ -1196,7 +1198,8 @@ extern "C" {
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
-	const char* procedure_name = "mss_eff_config_thermal_term";
+	const char*  procedure_name = "mss_eff_config_thermal_term";
+
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	uint8_t number_nets_term_rd;
@@ -1827,8 +1830,8 @@ extern "C" {
     {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
-	char procedure_name[32];
-	sprintf(procedure_name, "mss_eff_config_thermal_get_wc_term");
+	const char * procedure_name = "mss_eff_config_thermal_get_wc_term";
+
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	uint8_t l_cen_dq_dqs_rcv_imp[NUM_PORTS];
@@ -2044,6 +2047,7 @@ extern "C" {
 	fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
 
 	const char* procedure_name = "mss_eff_config_thermal_get_cen_drv_value";
+
 	FAPI_IMP("*** Running %s ***", procedure_name);
 
 	switch (i_cen_dq_dqs_drv_imp)

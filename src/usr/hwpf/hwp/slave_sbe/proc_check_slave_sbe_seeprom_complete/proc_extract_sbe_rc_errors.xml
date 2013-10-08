@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.6 2013/07/09 21:47:22 rjknight Exp $ -->
+<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.7 2013/09/19 19:29:07 jeshua Exp $ -->
 <!-- Error definitions for proc_extract_sbe_rc procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -253,5 +253,53 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SBE_NEVER_STARTED</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Procedure was called when no error bits were set and PC is all zeros. SBE
+      was probably never started.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_CFAM_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_EXTRACT_SBE_RC_SLW_NEVER_STARTED</rc>
+    <description>
+      Procedure: proc_extract_sbe_rc
+      Procedure was called when no error bits were set and PC is all zeros. SLW
+      was probably never started.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
+      <target>CHIP_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
 </hwpErrors>

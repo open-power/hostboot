@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.13 2013/07/22 14:10:45 pardeik Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.14 2013/09/19 19:02:06 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -70,6 +70,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.14  | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 //   1.13  | pardeik  |19-JUL-13| removed code to identify if throttles are 
 //         |          |         |   based on thermal or power reasons since the
 //         |          |         |   runtime throttles will now be determined
@@ -152,6 +153,7 @@ extern "C" {
 	fapi::ReturnCode rc;
 
 	const char* procedure_name = "mss_bulk_pwr_throttles";
+
 	FAPI_IMP("*** Running %s on %s ***", procedure_name,
 		 i_target_mba.toEcmdString());
 

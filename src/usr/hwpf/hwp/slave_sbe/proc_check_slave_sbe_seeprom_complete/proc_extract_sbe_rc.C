@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_extract_sbe_rc.C,v 1.6 2013/06/26 21:57:44 jeshua Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.8 2013/09/20 15:26:29 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -90,11 +90,10 @@ extern "C"
 //             i_address  => The SEEPROM address to read
 //             o_data     => A uint32_t to put the data into 
 //
-// returns: fapi::ReturnCode with the error
-//          This procedure will NEVER return SUCCESS
+// returns: fapi::ReturnCode with the error, or fapi::FAPI_RC_SUCCESS
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_extract_sbe_rc_read_SEEPROM(const fapi::Target & i_target,
-                                                      void               * i_pSEEPROM,
+                                                      const void         * i_pSEEPROM,
                                                       const uint32_t       i_address,
                                                       uint32_t           & o_data)
     {
@@ -134,7 +133,7 @@ extern "C"
 //             i_engine   => The type of engine that failed (SBE/SLW)
 //             o_pc       => Referenece to the uint64_t containing the PC
 //
-// returns: fapi::ReturnCode with the error
+// returns: fapi::ReturnCode with the error, or fapi::FAPI_RC_SUCCESS
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_extract_sbe_rc_get_pc(const fapi::Target & i_target,
                                                 por_engine_t         i_engine,
@@ -180,7 +179,7 @@ extern "C"
 
 //------------------------------------------------------------------------------
 // subroutine:
-//      Returns the return code for the given address
+//      Returns the return code indicated by the PC of the engine
 //
 // parameters: i_target   => Target of chip with failed SBE
 //             i_pSEEPROM => pointer to a memory-mapped SEEPROM image
@@ -190,7 +189,7 @@ extern "C"
 //          This procedure will NEVER return SUCCESS
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_extract_sbe_rc_from_address(const fapi::Target & i_target,
-                                                      void               * i_pSEEPROM,
+                                                      const void         * i_pSEEPROM,
                                                       por_engine_t         i_engine)
     {
         // return codes
@@ -292,7 +291,7 @@ extern "C"
 //          This procedure will NEVER return SUCCESS
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
-                                         void               * i_pSEEPROM,
+                                         const void         * i_pSEEPROM,
                                          const por_engine_t   i_engine)
     {
         // return codes
@@ -517,6 +516,23 @@ extern "C"
                     break;
                 }                    
                 break;
+            }
+            else if (((pc & SBE_ADDR_MASK) == 0x0000800000000000ull) ||
+                     ((pc & SBE_ADDR_MASK) == 0x0000000000000000ull))
+            {
+                //PC is all zeros, which means SBE was probably never started
+                FAPI_ERR("PC is all zeros, which means SBE was probably never started");
+                const fapi::Target & CHIP_IN_ERROR = i_target;
+                if(i_engine == SBE)
+                {
+                    FAPI_SET_HWP_ERROR(rc,RC_PROC_EXTRACT_SBE_RC_SBE_NEVER_STARTED);
+                    break;
+                }
+                else
+                {
+                    FAPI_SET_HWP_ERROR(rc,RC_PROC_EXTRACT_SBE_RC_SLW_NEVER_STARTED);
+                    break;
+                }
             }
 
         } while(0);

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.37 2013/09/04 08:50:49 lapietra Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.38 2013/09/19 19:02:10 bellows Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -77,6 +77,7 @@
 //  1.35   | sasethur |08-Aug-13| Fixed fw comment
 //  1.36   | sasethur |23-Aug-13| Ability to run MCBIST is enabled.
 //  1.37   | sasethur |04-Sep-13| Fixed fw review comment
+//  1.38   | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
@@ -202,7 +203,9 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 {
     //const fapi::Target is centaur.mba
     fapi::ReturnCode rc;
+
     const char* procedure_name = "mss_draminit_training_advanced";
+
     FAPI_INF("+++++++ Executing %s +++++++", procedure_name);
 	
     // Define attribute variables

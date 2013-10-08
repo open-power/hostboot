@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help.C,v 1.55 2013/04/01 21:32:16 cmolsen Exp $
+// $Id: p8_image_help.C,v 1.58 2013/10/07 14:29:08 jeshua Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help.C                                                   */
@@ -124,13 +124,13 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
                             uint32_t **o_wfInline,          // location of the PORE instructions data stream
                             uint32_t *o_wfInlineLenInWords, // final length of data stream
                             uint8_t  i_flushOptimization,   // flush optimize or not
-														uint32_t i_scanMaxRotate,       // Max rotate bit len on 38xxx, or polling threshold on 39xxx.
+                            uint32_t i_scanMaxRotate,       // Max rotate bit len on 38xxx, or polling threshold on 39xxx.
                             uint32_t i_waitsScanDelay)      // Temporary debug support.
 {
   uint32_t rc=0;
   uint32_t i=0;
   uint32_t scanSelectAddr=0;
-  uint32_t scanRing_baseAddr=0, __attribute__((unused)) scanRing_baseAddr_long=0; // HACK
+  uint32_t scanRing_baseAddr=0;
   uint32_t scanRing_poreAddr=0;
   uint32_t scanRingCheckWord=0;
   uint32_t bitShift=0;
@@ -158,8 +158,11 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   // Short: 0x00038000: port 3, addr bit 16 must be set to 1 and bit 19 to 0.
   scanRing_baseAddr = P8_PORE_SHIFT_REG;
   scanRing_poreAddr = scanRing_baseAddr;
+
+#ifdef IMGBUILD_PPD_WF_POLLING_PROT
   // Long (poll): 0x00039000: port 3, addr bit 16 must be set to 1 and bit 19 to 1.
-  scanRing_baseAddr_long = P8_PORE_SHIFT_REG | 0x00001000;
+  uint32_t scanRing_baseAddr_long = P8_PORE_SHIFT_REG | 0x00001000;
+#endif
 
   // Header check word for checking ring write was successful
   scanRingCheckWord = P8_SCAN_CHECK_WORD;
@@ -1568,27 +1571,31 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 	else
   	idxVector = 0;
 
-  // Write ring block to image.
-  sbe_xip_image_size( io_image, &sizeImage);
-	rc = write_ring_block_to_image(io_image,
-	                               i_ringName,
-	                               bufRs4RingBlock,
-	                               idxVector,
-	                               0,
-	                               0,
-	                               io_sizeImageOut,
-                                 i_xipSectionId,
-																 (void*)i_bufRs4Ring, // Reuse buffer as temp work buf.
-																 i_sizeBufTmp);
-  if (rc)  {
-  	MY_ERR("write_ring_block_to_image() failed w/rc=%i \n",rc);
-    MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code. \n");
-    MY_ERR("Ring name: %s\n ", i_ringName);
-    MY_ERR("Size of image before wrbti() call: %i\n ", sizeImage);
-    MY_ERR("Size of ring block being added: %i\n ", sizeRs4RingBlock);
-    MY_ERR("Max size of image allowed: %i\n ", io_sizeImageOut);
-    return IMGBUILD_ERR_RING_WRITE_TO_IMAGE;
-  }
+    // Write ring block to image.
+    sbe_xip_image_size( io_image, &sizeImage);
+    rc = write_ring_block_to_image(io_image,
+                                   i_ringName,
+                                   bufRs4RingBlock,
+                                   idxVector,
+                                   0,
+                                   0,
+                                   io_sizeImageOut,
+                                   i_xipSectionId,
+                                   (void*)i_bufRs4Ring, // Reuse buffer as temp work buf.
+                                   i_sizeBufTmp);
+    if (rc)  {
+      MY_ERR("write_ring_block_to_image() failed w/rc=%i \n",rc);
+      MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code. \n");
+      MY_ERR("Ring name: %s\n ", i_ringName);
+      MY_ERR("Size of image before wrbti() call: %i\n ", sizeImage);
+      MY_ERR("Size of ring block being added: %i\n ", sizeRs4RingBlock);
+      MY_ERR("Max size of image allowed: %i\n ", io_sizeImageOut);
+      if (rc==SBE_XIP_WOULD_OVERFLOW) {
+        return rc;
+      } else {
+        return IMGBUILD_ERR_RING_WRITE_TO_IMAGE;
+      }
+    }
 
 	MY_INF("\tSuccessful IPL image update; \n");
 
@@ -1757,27 +1764,31 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 	else
   	idxVector = 0;
 
-  // Write ring block to image.
-  sbe_xip_image_size( io_image, &sizeImage);
-	rc = write_ring_block_to_image(io_image,
-	                               i_ringName,
-	                               bufWfRingBlock,
-	                               idxVector,
-	                               0,
-	                               0,
-	                               io_sizeImageOut,
-                                 SBE_XIP_SECTION_RINGS,
-																 (void*)i_bufRs4Ring, // Reuse buffer as temp work buf.
-																 i_sizeBufTmp);
-  if (rc)  {
-  	MY_ERR("write_ring_block_to_image() failed w/rc=%i; \n",rc);
-    MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code; \n");
-    MY_ERR("Ring name: %s\n ", i_ringName);
-    MY_ERR("Size of image before wrbti() call: %i\n ", sizeImage);
-    MY_ERR("Size of ring block being added: %i\n ", sizeWfRingBlock);
-    MY_ERR("Max size of image allowed: %i\n ", io_sizeImageOut);
-    return IMGBUILD_ERR_RING_WRITE_TO_IMAGE;
-  }
+    // Write ring block to image.
+    sbe_xip_image_size( io_image, &sizeImage);
+    rc = write_ring_block_to_image(io_image,
+                                   i_ringName,
+                                   bufWfRingBlock,
+                                   idxVector,
+                                   0,
+                                   0,
+                                   io_sizeImageOut,
+                                   SBE_XIP_SECTION_RINGS,
+                                   (void*)i_bufRs4Ring, // Reuse buffer as temp work buf.
+                                   i_sizeBufTmp);
+    if (rc)  {
+      MY_ERR("write_ring_block_to_image() failed w/rc=%i; \n",rc);
+      MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code; \n");
+      MY_ERR("Ring name: %s\n ", i_ringName);
+      MY_ERR("Size of image before wrbti() call: %i\n ", sizeImage);
+      MY_ERR("Size of ring block being added: %i\n ", sizeWfRingBlock);
+      MY_ERR("Max size of image allowed: %i\n ", io_sizeImageOut);
+      if (rc==SBE_XIP_WOULD_OVERFLOW) {
+        return rc;
+      } else {
+        return IMGBUILD_ERR_RING_WRITE_TO_IMAGE;
+      }
+    }
 
 	MY_INF("Successful SLW image update; \n");
 
@@ -1901,37 +1912,79 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
 			return IMGBUILD_ERR_DATACARE_RING_MESS;
 		}
 
-		// Overlay io_buf2 bits according to care and data bits in io_buf1
-		uint32_t iWord, remBits32;
-		uint32_t dataVpd, dataDc, careDc, careDc1, careDc2;
+                // Overlay io_buf2 bits according to care and data bits in io_buf1
 
-		// Split apart the raw datacare ring into data (1st part) and care (2nd part).
-		// Note that the order is already in BE for both Datacare and Mvpd rings.
-		// Further note that the care part is fractured into two words that need to
-		//   be combined into a single word. (That's the black magic part below).
-		remBits32 = ringBitLen - (ringBitLen/32)*32;
-		for (iWord=0; iWord<(ringBitLen+31)/32; iWord++)  {
-			dataDc  = *((uint32_t*)io_buf1 + iWord); 										// Data part
-			// Split off the care part, do BE->LE, shift the two parts propoerly, and finally do
-			//   LE->BE again. It's f*kin' black magic...
-			careDc1 = myRev32(*((uint32_t*)io_buf1 + ringBitLen/32 + iWord)); 		// Care part a
-			careDc2 = myRev32(*((uint32_t*)io_buf1 + ringBitLen/32 + 1 + iWord)); // Care part b
-			careDc  = myRev32(careDc1<<remBits32 | careDc2>>(32-remBits32));
-			dataVpd = *((uint32_t*)io_buf2 + iWord);
-			MY_DBG("data: %08x  iWord=%i\n",dataDc,iWord);
-			MY_DBG("care: %08x\n",careDc);
-			MY_DBG("orig: %08x\n",dataVpd);
-			dataVpd = ( dataVpd & ~careDc ) | dataDc;
-			MY_DBG("new:  %08x\n",dataVpd);
-			*((uint32_t*)io_buf2 + iWord) = dataVpd;
-			// Check for data+care construction. I.e., a 1-bit in data is illegal if corresponding
-			//   care bit is a 0-bit.
-			if ((dataDc & ~careDc)!=0)  {
-				MY_ERR("DataCare ring construction error:\n");
-				MY_ERR("A data bit (in word i=%i) is set but the care bit is not set.\n",iWord);
-				return IMGBUILD_ERR_DATACARE_RING_MESS;
-			}
-		}
+                // Split apart the raw datacare ring into data (1st part) and care (2nd part).
+                // Note that the order is already in BE for both Datacare and Mvpd rings.
+                // Further note that the care part is fractured into two words that need to
+                //   be combined into a single word. (That's the black magic part below).
+                // Once there are less than two words left to process, care part will be
+                // less than two words from the buffer end, so go byte-by-byte at that point
+                uint32_t dataVpd, dataDc, careDc, careDc1, careDc2;
+                int32_t remBits = ringBitLen;
+                uint32_t * pDataWord = (uint32_t*)io_buf1;
+                uint32_t * pCareWord = (uint32_t*)io_buf1 + (ringBitLen/32);
+                uint32_t * pDataVPD  = (uint32_t*)io_buf2;
+                uint32_t careLeftShift = ringBitLen%32;
+                uint32_t careRightShift = 32-careLeftShift;
+                while (remBits > 64) {
+                    dataDc  = *pDataWord++;                         // Data part
+                    // Split off the care part, do BE->LE, shift the two parts properly, and finally do
+                    //   LE->BE again. It's f*kin' black magic...
+                    careDc1 = myRev32(*pCareWord++);                // Care part a
+                    careDc2 = myRev32(*pCareWord);                  // Care part b
+                    careDc  = myRev32(careDc1<<careLeftShift | careDc2>>careRightShift);
+                    dataVpd = *(pDataVPD);
+                    MY_DBG("data: %08x  remBits=%i\n",dataDc,remBits);
+                    MY_DBG("care: %08x\n",careDc);
+                    MY_DBG("orig: %08x\n",dataVpd);
+                    dataVpd = ( dataVpd & ~careDc ) | dataDc;
+                    MY_DBG("new:  %08x\n",dataVpd);
+                    *pDataVPD++ = dataVpd;
+                    // Check for data+care construction. I.e., a 1-bit in data is illegal if corresponding
+                    //   care bit is a 0-bit.
+                    if ((dataDc & ~careDc)!=0)  {
+                        MY_ERR("DataCare ring construction error:\n");
+                        MY_ERR("A data bit (in word i=%i) is set but the care bit is not set.\n",
+                               (ringBitLen-remBits)/32);
+                        return IMGBUILD_ERR_DATACARE_RING_MESS;
+                    }
+                    remBits-=32;
+                }
+                //Less than 64 bits left, so must do byte-by-byte modifications
+                uint8_t dataVpdByte, dataDcByte, careDcByte, careDc1Byte, careDc2Byte;
+                uint8_t * pDataByte = (uint8_t*)pDataWord;
+                uint8_t * pCareByte = (uint8_t*)pCareWord;
+                uint8_t * pDataVPDByte = (uint8_t*)pDataVPD;
+                careLeftShift = ringBitLen%8;
+                careRightShift = 8-careLeftShift;
+                while(remBits > 0) {
+                    dataDcByte = *pDataByte++;                     // Data part
+                    // Split off the care part and shift the two parts propoerly
+                    careDc1Byte = *pCareByte++;                    // Care part a
+                    if(remBits > 8) {
+                        careDc2Byte = *pCareByte;                  // Care part b
+                        careDcByte = ((careDc1Byte<<careLeftShift) | (careDc2Byte>>careRightShift));
+                    } else {
+                        careDcByte = careDc1Byte << careLeftShift; // There is no part b
+                    }
+                    dataVpdByte = *(pDataVPDByte);
+                    MY_DBG("data: %02x  remBits=%i\n",dataDcByte,remBits);
+                    MY_DBG("care: %02x\n",careDcByte);
+                    MY_DBG("orig: %02x\n",dataVpdByte);
+                    dataVpdByte = ( dataVpdByte & ~careDcByte ) | dataDcByte;
+                    MY_DBG("new:  %02x\n",dataVpdByte);
+                    *pDataVPDByte++ = dataVpdByte;
+                    // Check for data+care construction. I.e., a 1-bit in data is illegal if corresponding
+                    //   care bit is a 0-bit.
+                    if ((dataDcByte & ~careDcByte)!=0)  {
+                        MY_ERR("DataCare ring construction error:\n");
+                        MY_ERR("A data bit (in byte i=%i) is set but the care bit is not set.\n",
+                               (ringBitLen-remBits)/8);
+                        return IMGBUILD_ERR_DATACARE_RING_MESS;
+                    }
+                    remBits-=8;
+                  }
 
 		// Compress overlayed Mvpd ring.
 		rc = _rs4_compress(	(CompressedScanData*)io_buf1,

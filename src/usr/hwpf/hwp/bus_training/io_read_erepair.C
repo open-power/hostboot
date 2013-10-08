@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/io_read_erepair/io_read_erepair.C $          */
+/* $Source: src/usr/hwpf/hwp/bus_training/io_read_erepair.C $             */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_read_erepair.C,v 1.5 2013/02/05 06:06:06 varkeykv Exp $
+// $Id: io_read_erepair.C,v 1.6 2013/07/14 15:50:02 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -63,7 +63,7 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
   ecmdDataBufferBase data_one(16);
   ecmdDataBufferBase data_two(16);
   ecmdDataBufferBase mask(16);
-  uint8_t lane;
+  uint8_t lane=0;
 
   io_interface_t interface=CP_IOMC0_P0; // Since G
   uint32_t rc_ecmd=0;
@@ -108,18 +108,20 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 
     for(uint8_t clock_group=start_group;clock_group<=end_group;++clock_group){
       // This is only for X bus ..where multi groups are translated to consecutive lane numbers
-      if(clock_group==0){
-        lane=0;
-      }
-      else if(clock_group==1){
-        lane=20;
-      }
-      else if(clock_group==2){
-        lane=40;
-      }
-      else if(clock_group==3){
-        lane=60;
-      }
+      if(interface==CP_FABRIC_X0){
+          if(clock_group==0){
+            lane=0;
+          }
+          else if(clock_group==1){
+            lane=20;
+          }
+          else if(clock_group==2){
+            lane=40;
+          }
+          else if(clock_group==3){
+            lane=60;
+          }
+       }
 
       //Collect the RX bad lanes 
       rc_ecmd|=data_one.flushTo0();

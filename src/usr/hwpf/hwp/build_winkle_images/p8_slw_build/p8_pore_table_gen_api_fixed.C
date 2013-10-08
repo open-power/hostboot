@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api_fixed.C,v 1.9 2013/05/29 18:58:28 cmolsen Exp $
+// $Id: p8_pore_table_gen_api_fixed.C,v 1.10 2013/09/16 17:55:05 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
@@ -116,19 +116,17 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
   rcLoc = 0;
   
   // -------------------------------------------------------------------------
-  // Get pointer to SLW section where Ram table resides
-  // NB! Only needed for modeBuild==2 !
+  // Check slw section location and size. (Mainly needed for fixed image.)
   //
   if (i_modeBuild==P8_SLW_MODEBUILD_IPL ||
       i_modeBuild==P8_SLW_MODEBUILD_REBUILD)  {  // Fixed image.
-    // CMO-20130114: Remove this asap. Only for fixed img transition. - Begin
-    //               hostSlwSectionFixed isn't needed for modeBuild=0,1 !
     hostSlwSectionFixed = (void*)( (uintptr_t)io_image + 
                                    FIXED_SLW_IMAGE_SIZE -
                                    FIXED_FFDC_SECTION_SIZE -
                                    FIXED_SLW_SECTION_SIZE );
-    // We may want to continue calling this because it would be practical to 
-    // crosscheck the section size.  Though, the offset is NOT reliable !
+    // Even though we shouldn't call this api during a rebuild, it should be 
+    // safe to do so in this particular case since none of the info requested
+    // is supposed to be moved during a rebuild.
     rc = sbe_xip_get_section( io_image, SBE_XIP_SECTION_SLW, &xipSection);
     if (rc)  {
       MY_ERR("Probably invalid section name for SBE_XIP_SECTION_SLW.\n");
@@ -136,13 +134,12 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
     }
     hostSlwRamSection = (void*)((uintptr_t)io_image + xipSection.iv_offset);
     if (hostSlwSectionFixed!=hostSlwRamSection)  {
-      MY_DBG("hostSlwSectionFixed != hostSlwRamSection(from image).\n");
+      MY_ERR("hostSlwSectionFixed != hostSlwRamSection(from image api).\n");
+      return IMGBUILD_ERR_RAM_HDRS_NOT_SYNCED;
     }
     else  {
-      MY_DBG("hostSlwSectionFixed == hostSlwRamSection(from image).\n");
+      MY_DBG("hostSlwSectionFixed == hostSlwRamSection(from image api).\n");
     }
-    hostSlwRamSection = hostSlwSectionFixed;
-    // CMO-20130114: Remove this asap. Only for fixed img transition. - End
   }
   else  {  // SRAM non-fixed image.
     rc = sbe_xip_get_section( io_image, SBE_XIP_SECTION_SLW, &xipSection);
@@ -388,19 +385,17 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
   rcLoc = 0;
  
   // -------------------------------------------------------------------------
-  // Get pointer to SLW section where Scom table resides
-  // NB! Only needed for modeBuild==2 !
+  // Check slw section location and size. (Mainly needed for fixed image.)
   //
   if (i_modeBuild==P8_SLW_MODEBUILD_IPL ||
       i_modeBuild==P8_SLW_MODEBUILD_REBUILD)  {  // Fixed image.
-    // CMO-20130114: Remove this asap. Only for fixed img transition. - Begin
-    //               hostSlwSectionFixed isn't needed for modeBuild=0,1 !
     hostSlwSectionFixed = (void*)( (uintptr_t)io_image + 
                                    FIXED_SLW_IMAGE_SIZE -
                                    FIXED_FFDC_SECTION_SIZE -
                                    FIXED_SLW_SECTION_SIZE );
-    // We may want to continue calling this because it would be practical to 
-    // crosscheck the section size.  Though, the offset is NOT reliable !
+    // Even though we shouldn't call this api during a rebuild, it should be 
+    // safe to do so in this particular case since none of the info requested
+    // is supposed to be moved during a rebuild.
     rc = sbe_xip_get_section( io_image, SBE_XIP_SECTION_SLW, &xipSection);
     if (rc)  {
       MY_ERR("Probably invalid section name for SBE_XIP_SECTION_SLW.\n");
@@ -408,13 +403,12 @@ uint32_t p8_pore_gen_scom_fixed(  void       *io_image,
     }
     hostSlwSection = (void*)((uintptr_t)io_image + xipSection.iv_offset);
     if (hostSlwSectionFixed!=hostSlwSection)  {
-      MY_DBG("hostSlwSectionFixed != hostSlwSection(from image).\n");
+      MY_ERR("hostSlwSectionFixed != hostSlwSection(from image api).\n");
+      return IMGBUILD_ERR_SCOM_HDRS_NOT_SYNCD;
     }
     else  {
-      MY_DBG("hostSlwSectionFixed == hostSlwSection(from image).\n");
+      MY_DBG("hostSlwSectionFixed == hostSlwSection(from image api).\n");
     }
-    hostSlwSection = hostSlwSectionFixed;
-    // CMO-20130114: Remove this asap. Only for fixed img transition. - End
   }
   else  {                 // SRAM non-fixed image.
     rc = sbe_xip_get_section( io_image, SBE_XIP_SECTION_SLW, &xipSection);

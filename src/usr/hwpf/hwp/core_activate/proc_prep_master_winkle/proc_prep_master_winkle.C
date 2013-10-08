@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_prep_master_winkle.C,v 1.12 2013/07/01 18:41:34 stillgs Exp $
+// $Id: proc_prep_master_winkle.C,v 1.13 2013/07/30 15:23:25 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_prep_master_winkle.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -83,7 +83,7 @@ extern "C"
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_prep_master_winkle(const fapi::Target & i_ex_target, 
-                                             const bool & i_useRealSBE)
+                                             const bool & i_useRealSBE = true)
     {
         // data buffer to hold register values
         ecmdDataBufferBase data(64);
