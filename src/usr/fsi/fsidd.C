@@ -451,6 +451,15 @@ errlHndl_t FsiDD::initializeHardware()
             }
         }
 
+        //@fixme-RTC:87909 - temporary simics workaround
+        if( (iv_master->getAttr<TARGETING::ATTR_MODEL>()
+             == TARGETING::MODEL_VENICE) )
+        {
+            // Ignore bits 16 and 24
+            // 16: cMFSI any-master-error
+            // 24: MFSI any-master-error
+            iv_opbErrorMask &= 0xFFFF7F7F;
+        }
 
         typedef struct {
             TARGETING::Target* targ;
@@ -1427,7 +1436,11 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
         }
 
         //powerbus is alive
-        if( (fsi_info.master)->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom )
+        if( (fsi_info.master)->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom
+            &&
+            // do not use direct mastering on Brazos for now
+            !(iv_master->getAttr<TARGETING::ATTR_MODEL>()
+              == TARGETING::MODEL_VENICE) ) //@fixme-RTC:35041
         {
             io_addrInfo.opbTarg = fsi_info.master;
             // Note: no need to append the MFSI port since it is now local
