@@ -259,6 +259,20 @@ foreach ( @Files )
         next;
     }
 
+    ##
+    ##  text files are valid, but should generate a warning.
+    if  ("txt" eq $filetype)
+    {
+        print STDOUT    "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+        print STDOUT     "WARNING:: File $_ :  Filetype: $filetype\n";
+        print STDOUT     "         Skipping this file and continuing.\n";
+        print STDOUT     "         If needed, Please add the copyright \n";
+        print STDOUT     "         prolog manually.\n";
+        print STDOUT     "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+
+        next;
+    }
+
     ##  extract the existing copyright block
     ( $DelimiterBegin, $CopyrightBlock, $DelimiterEnd ) =   extractCopyrightBlock( $_ );
 
@@ -414,6 +428,10 @@ sub filetype
         # Specifically we are seeing "<!-- // ..." cause this trouble.
     {
         return "xml"
+    }
+    if ( $filename =~ m/\.txt$/i )
+    {
+        return "txt"
     }
     if ( ( $filename =~ m/\.[cht]$/i )
        ||( $filename =~ m/\.[cht]\+\+$/i )

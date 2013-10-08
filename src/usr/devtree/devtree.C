@@ -69,7 +69,8 @@ void devTree::initialize(uint64_t i_addr, size_t i_maxSize)
     TRACFCOMP( g_trac_devtree, "FDT located @ v:%p p:0x%x", mSpace, mPhysAddr);
 
     mHeader->magicNumber = DT_MAGIC;
-    mHeader->totalSize = sizeof(*mHeader) + (sizeof(dtReserveEntry_t) * 2);
+    mHeader->totalSize = (sizeof(*mHeader) +
+                          (sizeof(dtReserveEntry_t) * DT_MAX_MEM_RESERVE));
     mHeader->offsetStruct = mHeader->totalSize;
     mHeader->offsetStrings = mHeader->totalSize;
     mHeader->offsetReservedMemMap = sizeof(*mHeader);
@@ -92,26 +93,18 @@ void devTree::initialize(uint64_t i_addr, size_t i_maxSize)
     mHeader->sizeStruct += structSizeAdded;
     mHeader->totalSize += structSizeAdded;
 
-    /* Setup the memory reserve map to include the region that
-     Hostboot places the SLW and OCC images*/
-    dtReserveEntry* reserveMemMap = (dtReserveEntry*)
-      (mSpace + mHeader->offsetReservedMemMap);
-    reserveMemMap->address = 0x0A000000;  /*160MB-192MB*/;
-    reserveMemMap->size = MEGABYTE * 32;
-
     /* Add the standard root node properties. */
     dtOffset_t rootNode = findNode("/");
     addPropertyCell32(rootNode, "#address-cells", 2);
     addPropertyCell32(rootNode, "#size-cells", 2);
     addPropertyString(rootNode, "compatible", "ibm,powernv");
 
-    addPropertyString(rootNode, "model", "P8_Sim");
+    //TODO RTC:88056 - store model type in attributes?
+    addPropertyString(rootNode, "model", "rhesus");
 
-    addNode(rootNode, "chosen");
-
-    // Add the initial vpd and location code nodes.
-    addProperty(rootNode, "ibm,vpd");
-    addProperty(rootNode, "ibm,loc-code");
+    //"Get" the phandle -- this will add one to root node as
+    //it doesn't already have one
+    getPhandle(rootNode);
 }
 
 void devTree::setBootCpu(uint32_t pir)
@@ -684,6 +677,32 @@ void devTree::appendPropertyBytes(dtOffset_t parentNode,
             }
         }
     }
+}
+
+int devTree::populateReservedMem(uint64_t i_addrs[],
+                               uint64_t i_sizes[],
+                               size_t i_num)
+{
+    int rc = 1;
+
+    //if requested num is less than max, update
+    if(i_num < DT_MAX_MEM_RESERVE)
+    {
+        dtReserveEntry* reserveMemMap = reinterpret_cast<dtReserveEntry*>
+          (mSpace + mHeader->offsetReservedMemMap);
+
+        for(size_t i=0; i<i_num; i++)
+        {
+            reserveMemMap->address = i_addrs[i];
+            reserveMemMap->size = i_sizes[i];
+
+            reserveMemMap++;
+        }
+
+        rc = 0;
+    }
+
+    return rc;
 }
 
 

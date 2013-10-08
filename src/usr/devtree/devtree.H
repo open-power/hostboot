@@ -195,6 +195,17 @@ typedef size_t dtOffset_t;
                                  const uint8_t* propertyData,
                                  uint32_t numBytes);
 
+        /**
+         * Populate reserved memory regions
+         * @param[in] i_addrs    Array of addresses to set in reserved memory
+         * @param[in] i_sizes    Array of sizes to set in reserved memory
+         * @param[in] i_num      Number of elements in the arrays
+         * @return int, zero on sucesses otherwise non zero
+         */
+       int populateReservedMem(uint64_t i_addrs[],
+                               uint64_t i_sizes[],
+                               size_t i_num);
+
        /**
         * Return the current size of the FDT (not max)
         * @return uin32_t Size of the FDT
@@ -280,6 +291,9 @@ typedef size_t dtOffset_t;
             DT_NOP              =0x4,
             DT_END              =0x9,
             DT_INVALID_OFFSET   =0xFFFFFFFF,
+
+
+            DT_MAX_MEM_RESERVE  =16,
 
         };
 
