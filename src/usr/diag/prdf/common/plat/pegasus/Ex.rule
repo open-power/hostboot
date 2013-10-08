@@ -958,7 +958,7 @@ group gL2Fir filter singlebit
     /** L2FIR[19]
      *  RC_POWBUS_DATA_CE_ERR_FROM_F2CHK
      */
-    (L2Fir, bit(19)) ? L2PowerBusCE;
+    (L2Fir, bit(19)) ? SelfHighThr32PerDay;
 
     /** L2FIR[20]
      *  RC_POWBUS_DATA_UE_ERR_FROM_F2CHK
@@ -1485,13 +1485,6 @@ actionclass L2ChipLevel2
 {
     calloutParentProcLow;
     callout2ndLvlMed;
-    threshold1;
-};
-
-actionclass L2PowerBusCE
-{
-    #cannot callout L2 so calling out the chiplet
-    calloutSelfMed;
     threshold1;
 };
 
