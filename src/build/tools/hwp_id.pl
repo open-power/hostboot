@@ -406,7 +406,7 @@ sub findIdVersion
 ################################################################################
 #
 # checkDirs - find hwp files that should contain $Id:
-#  filetypes .C .c .H .h .xml .define .initfile
+#  filetypes .C .c .H .h .xml .define .initfile .attributes
 # and prints out their filename and version from the $Id: string.
 # This recursively searches the input directory passed in for all files.
 #
@@ -437,6 +437,7 @@ sub checkDirs
         if (($l_entry =~ /\.[H|h|C|c]$/) ||
             ($l_entry =~ /\.xml$/) ||
             ($l_entry =~ /\.define$/) ||
+            ($l_entry =~ /\.attributes$/) ||
             ($l_entry =~ /\.initfile$/))
         {
             findIdVersion($full_path);
