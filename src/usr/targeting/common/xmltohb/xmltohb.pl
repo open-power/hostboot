@@ -70,6 +70,7 @@ my $cfgVerbose = 0;
 my $cfgShortEnums = 0;
 my $cfgBigEndian = 1;
 my $cfgIncludeFspAttributes = 0;
+my $CfgSMAttrFile = "";
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -79,6 +80,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "vmm-consts-file:s" =>  \$cfgVmmConstsFile,
            "short-enums!" =>  \$cfgShortEnums,
            "big-endian!" =>  \$cfgBigEndian,
+           "smattr-output-file:s" => \$CfgSMAttrFile,
            "include-fsp-attributes!" =>  \$cfgIncludeFspAttributes,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
@@ -284,6 +286,11 @@ if( !($cfgSrcOutputDir =~ "none") )
     close $attrSizeMapCFile;
 }
 
+use constant ATTRID => 0;
+use constant HUID   => 1;
+use constant DATA   => 2;
+use constant SECTION => 3;
+my @attrDataforSM = ();
 if( !($cfgImgOutputDir =~ "none") )
 {
     my $Data = generateTargetingImage($cfgVmmConstsFile,$attributes,\%Target_t);
@@ -294,6 +301,11 @@ if( !($cfgImgOutputDir =~ "none") )
     binmode(PNOR_TARGETING_FILE);
     print PNOR_TARGETING_FILE "$Data";
     close(PNOR_TARGETING_FILE);
+    if ($CfgSMAttrFile ne "")
+    {
+        generateXMLforSM();
+    }
+
 }
 
 exit(0);
@@ -3242,9 +3254,9 @@ sub writeAttrSizeMapCFile{
                                     if(exists $attr->{simpleType}->{string}->
                                         {sizeInclNull})
                                     {
-                                        $keyVal = "$keyVal"."[$attr->
-                                            {simpleType}->{string}->
-                                            {sizeInclNull}]";
+                                        $keyVal = "$keyVal" . "[" .
+                                            $attr->{simpleType}->{string}->
+                                            {sizeInclNull} . "]";
                                     }
                                 }
                                 $finalAttrhash{$key} = $keyVal;
@@ -4870,6 +4882,8 @@ sub generateTargetingImage {
             }
         }
 
+        my $huidValue = $attrhash{HUID}->{default};
+
         # Flag if target is FSP specific; in that case store all of its
         # attributes in the FSP section, regardless of whether they are
         # themselves FSP specific.  Only need to do this 1x per target instance
@@ -4885,6 +4899,9 @@ sub generateTargetingImage {
                 (keys %attrhash)
             )
         {
+            my $attrValue =
+            enumNameToValue($attributeIdEnumeration,$attributeId);
+            $attrValue = sprintf ("%0x", $attrValue);
             my $attributeDef = $attributeDefCache{$attributeId};
             if (not defined $attributeDef)
             {
@@ -4999,6 +5016,9 @@ sub generateTargetingImage {
 
                 #print "Wrote to pnor-rw value ",$attributeDef->{id}, ",
                 #", $attrhash{$attributeId}->{default}," \n";
+                my $hex = unpack ("H*",$rwdata);
+
+                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($rwOffset % $alignment))
@@ -5117,6 +5137,10 @@ sub generateTargetingImage {
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
 
+                my $hex = unpack ("H*",$fspP3RwData);
+
+                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
+
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP3RwOffset
                             % $alignment)) % $alignment;
@@ -5136,6 +5160,10 @@ sub generateTargetingImage {
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
 
+                my $hex = unpack ("H*",$fspP1ZeroData);
+
+                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
+
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP1DefaultedFromZeroOffset
                             % $alignment)) % $alignment;
@@ -5154,6 +5182,10 @@ sub generateTargetingImage {
                 my ($fspP1FlashData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
+
+                my $hex = unpack ("H*",$fspP1FlashData);
+
+                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP1DefaultedFromP3Offset
@@ -5388,6 +5420,32 @@ sub generateTargetingImage {
     return $outFile;
 }
 
+sub generateXMLforSM {
+
+    open(SM_TARGET_FILE,">".$CfgSMAttrFile)
+        or fatal ("Targeting SM file: $CfgSMAttrFile "
+            . "could not be opened.");
+    my $Count = @attrDataforSM;
+
+print SM_TARGET_FILE "
+<attributes>";
+    for (my $i = 0; $i < $Count; $i++)
+    {
+        print SM_TARGET_FILE "
+<attribute>
+    <id>0x$attrDataforSM[$i][ATTRID]</id>
+    <HUID>$attrDataforSM[$i][HUID]</HUID>
+    <value>0x$attrDataforSM[$i][DATA]</value>
+    <section>$attrDataforSM[$i][SECTION]</section>";
+print SM_TARGET_FILE "\n</attribute>\n";
+
+    }
+print SM_TARGET_FILE"
+</attributes>";
+
+    close(SM_TARGET_FILE);
+}
+
 __END__
 
 =head1 NAME
@@ -5440,6 +5498,11 @@ Sets the file to receive the PNOR targeting image output (default
 Indicates the file containing the base virtual address of the attributes
 (default is src/include/usr/vmmconst.h).  Only used when generating the PNOR
 targeting image
+
+=item B<--smattr-output-file>=FILE
+
+Indicates the file to dump hex representation of attributes that are synced
+between system model and targeting.  Only used by FSP.
 
 =item B<--big-endian>
 
