@@ -109,6 +109,18 @@ void update_hwas_changed_mask(Target * i_target)
 }
 
 /**
+ * @brief set HWAS Changed flag to specific bits
+ *
+ *   This will be used by different services when the target needs processing.
+ */
+void update_hwas_changed_mask(Target * i_target, const uint64_t i_bits)
+{
+    i_target->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(
+            i_target->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>() &
+                i_bits);
+}
+
+/**
  * @brief clear bit in HWAS Changed Mask
  *
  *   This will be used by the appropriate services when they have handled

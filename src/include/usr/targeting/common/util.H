@@ -94,7 +94,14 @@ uint32_t get_huid( const Target* i_target );
 void update_hwas_changed_mask(Target * i_target);
 
 /**
- * @brief   Set HWAS Changed Mask to subscription mask
+ * @brief   Set HWAS Changed Mask to specific bits in subscription mask
+ * @param[in]   Pointer to a Target
+ * @param[in]   bit mask of bits to set
+ */
+void update_hwas_changed_mask(Target * i_target, const uint64_t i_bits);
+
+/**
+ * @brief   Clear bit in HWAS Changed Mask
  * @param[in]   Pointer to a Target
  * @param[in]   bit to clear
  */
