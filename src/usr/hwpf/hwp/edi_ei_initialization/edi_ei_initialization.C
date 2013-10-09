@@ -154,6 +154,10 @@ void*    call_fabric_erepair( void    *io_pArgs )
 
             // Get the repair lanes from the VPD
             fapi::ReturnCode l_rc;
+            l_endp1_txFaillanes.clear();
+            l_endp1_rxFaillanes.clear();
+            l_endp2_txFaillanes.clear();
+            l_endp2_rxFaillanes.clear();
             l_rc = erepairGetRestoreLanes(l_fapi_endp1_target,
                                           l_endp1_txFaillanes,
                                           l_endp1_rxFaillanes,

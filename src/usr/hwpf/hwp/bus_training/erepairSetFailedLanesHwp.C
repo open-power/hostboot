@@ -416,18 +416,19 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                                   uint8_t                    *o_buf)
 {
     ReturnCode       l_rc;
-    uint32_t         l_numRepairs         = 0;
-    uint32_t         l_newNumRepairs      = 0;
-    uint32_t         l_repairCnt          = 0;
-    uint32_t         l_bytesParsed        = 0;
-    uint8_t          l_repairLane         = 0;
-    uint32_t         l_repairDataSz       = 0;
-    uint8_t          *l_vpdPtr            = NULL;
-    uint8_t          *l_vpdDataPtr        = NULL;
-    eRepairHeader    *l_vpdHeadPtr        = NULL;
-    eRepairPowerBus  *l_overWritePtr      = NULL;
-    bool             l_overWrite          = false;
-    TargetType       l_tgtType            = TARGET_TYPE_NONE;
+    uint32_t         l_numRepairs           = 0;
+    uint32_t         l_newNumRepairs        = 0;
+    uint32_t         l_repairCnt            = 0;
+    uint32_t         l_bytesParsed          = 0;
+    uint8_t          l_repairLane           = 0;
+    uint32_t         l_repairDataSz         = 0;
+    uint8_t          *l_vpdPtr              = NULL;
+    uint8_t          *l_vpdDataPtr          = NULL;
+    uint8_t          *l_vpdWritePtr         = NULL;
+    eRepairHeader    *l_vpdHeadPtr          = NULL;
+    eRepairPowerBus  *l_overWritePtr        = NULL;
+    bool             l_overWrite            = false;
+    TargetType       l_tgtType              = TARGET_TYPE_NONE;
     Target           l_mcsTarget;
     Target           l_tgtHandle;
     std::vector<const uint8_t>::iterator l_it;
@@ -622,8 +623,9 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
             l_it != i_failLanes.end();
             l_it++, (l_vpdDataPtr += l_repairDataSz))
         {
-            l_repairLane = *l_it;
-            l_overWrite  = false;
+            l_repairLane  = *l_it;
+            l_overWrite   = false;
+            l_vpdWritePtr = NULL;
 
             // Parse the VPD for fabric and memory eRepair records
             for(;
@@ -684,7 +686,15 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                             break;
                         }
                     }
-                }
+
+                    // Check if we have a eRepair record that is invalidated
+                    // If yes, save the pointer so that we can overwrite it
+                    // if no matching record is found
+                    if(l_overWritePtr->failBit == INVALID_FAIL_LANE_NUMBER)
+                    {
+                        l_vpdWritePtr = l_vpdDataPtr;
+                    }
+                } // end of for(l_loop < 8)
 
                 if(l_overWrite == true)
                 {
@@ -694,7 +704,9 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
             } // end of for(vpd Parsing)
 
             // Check if we have parsed more bytes than the passed size
-            if((l_bytesParsed > i_bufSz) && (l_repairCnt < l_numRepairs))
+            if((l_vpdWritePtr == NULL)       &&
+               (l_bytesParsed > i_bufSz)     &&
+               (l_repairCnt < l_numRepairs))
             {
                 if((l_tgtType == TARGET_TYPE_XBUS_ENDPOINT) ||
                    (l_tgtType == TARGET_TYPE_ABUS_ENDPOINT))
@@ -712,6 +724,12 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
             // Add at the end
             if(l_overWrite == false)
             {
+                if(l_vpdWritePtr == NULL)
+                {
+                    // We are writing at the end
+                    l_vpdWritePtr = l_vpdDataPtr;
+                }
+
                 if((l_tgtType == TARGET_TYPE_XBUS_ENDPOINT) ||
                    (l_tgtType == TARGET_TYPE_ABUS_ENDPOINT))
                 {
@@ -724,7 +742,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                     }
 
                     eRepairPowerBus *l_fabricBus = 
-                             reinterpret_cast<eRepairPowerBus *>(l_vpdDataPtr);
+                             reinterpret_cast<eRepairPowerBus *>(l_vpdWritePtr);
 
                     l_fabricBus->device.processor_id = 0;
                     l_fabricBus->device.fabricBus    = l_busNum;
@@ -756,8 +774,8 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                     // We are on a Little Endian system.
                     // Need to swap the nibbles of structure - eRepairPowerBus
 
-                    l_vpdDataPtr[2] = ((l_vpdDataPtr[2] >> 4) |
-                                       (l_vpdDataPtr[2] << 4));
+                    l_vpdWritePtr[2] = ((l_vpdWritePtr[2] >> 4) |
+                                       (l_vpdWritePtr[2] << 4));
 #endif
                 }
                 else if((l_tgtType == TARGET_TYPE_MCS_CHIPLET) ||
@@ -772,7 +790,7 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                     }
 
                     eRepairMemBus *l_memBus =
-                                reinterpret_cast<eRepairMemBus *>(l_vpdDataPtr);
+                               reinterpret_cast<eRepairMemBus *>(l_vpdWritePtr);
 
                     l_memBus->device.proc_centaur_id = 0;
                     l_memBus->device.memChannel      = l_busNum;
@@ -810,8 +828,8 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
                     // We are on a Little Endian system.
                     // Need to swap the nibbles of structure - eRepairMemBus
 
-                    l_vpdDataPtr[2] = ((l_vpdDataPtr[2] >> 4) |
-                                       (l_vpdDataPtr[2] << 4));
+                    l_vpdWritePtr[2] = ((l_vpdWritePtr[2] >> 4) |
+                                       (l_vpdWritePtr[2] << 4));
 #endif 
                 }
             } // end of if(l_overWrite == false)

@@ -585,6 +585,10 @@ void* call_dmi_erepair( void *io_pArgs )
                                                l_mem_target);
 
         // Get the repair lanes from the VPD
+        l_endp1_txFaillanes.clear();
+        l_endp1_rxFaillanes.clear();
+        l_endp2_txFaillanes.clear();
+        l_endp2_rxFaillanes.clear();
         l_rc = erepairGetRestoreLanes(l_fapi_endp1_target,
                                       l_endp1_txFaillanes,
                                       l_endp1_rxFaillanes,
