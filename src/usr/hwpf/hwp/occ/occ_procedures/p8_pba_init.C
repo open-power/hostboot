@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pba_init.C,v 1.12 2013/08/02 19:30:40 stillgs Exp $
+// $Id: p8_pba_init.C,v 1.13 2013/10/08 18:33:01 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -28,6 +28,7 @@
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Klaus P. Gungl         Email: kgungl@de.ibm.com
+// *! BACKUP NAME: Greg Still            Email: stillgs@us.ibm.com
 // *!
 // *!
 /// \file p8_pba_init.C
@@ -102,9 +103,6 @@ fapi::ReturnCode p8_pba_init_PM_RESET ( const Target& i_target );
 fapi::ReturnCode pba_slave_setup_init ( const Target& i_target );
 fapi::ReturnCode pba_slave_setup_reset ( const Target& i_target );
 fapi::ReturnCode pba_slave_reset(const Target& i_target);
-
-// from pgp_pba.h
-//int pba_slave_reset(int id);
 
 
 // **********************************************************************************************
@@ -398,10 +396,12 @@ p8_pba_init_PM_INIT(const Target& i_target)
     ecmdDataBufferBase data(64);
     uint32_t l_rc;              // local returncode
 
+    // PBAX defaults
     uint8_t ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value = 0 ;
     uint8_t ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value = 0 ;
     uint8_t ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value = 0 ;
     uint8_t ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value = 0 ;
+
 
     pbaxcfg_t pbaxcfg_setup ;
     pbaxcfg_setup.value = 0;
@@ -420,7 +420,7 @@ p8_pba_init_PM_INIT(const Target& i_target)
         // initial hardware state.
         // For init, needs detailing for performance and/or CHSW enable/disable TODO
         // init case
-	        FAPI_INF("flusing PBA_CONFIG register ");
+        FAPI_INF("flushing PBA_CONFIG register ");
 
         rc = fapiPutScom(i_target, PBA_CONFIG_0x0201084B  , data);
         if (rc)
@@ -431,7 +431,7 @@ p8_pba_init_PM_INIT(const Target& i_target)
 
         // Clear the PBA FIR (Reset) only
         // data still 0
-	        FAPI_INF("flusing PBA_FIR register ");
+        FAPI_INF("flushing PBA_FIR register ");
         rc = fapiPutScom(i_target, PBA_FIR_0x02010840   , data);
         if (rc)
         {
@@ -467,39 +467,14 @@ p8_pba_init_PM_INIT(const Target& i_target)
         // PBA_BAR3_0x02013F03
         // PBA_TRUSTMODE_0x02013F08
 
-        // any checkreads => NO
 
-        rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_RCV_RESERV_TIMEOUT   , &i_target, ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value  );
-        if (rc)
-        {
-            FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_RCV_RESERV_TIMEOUT ) failed. With rc = 0x%x", (uint32_t)rc);
-            break;
-        } // end if
+        // Per SW223235 and other testing, the PBAX hardware timeout mechanism
+        // does not allow for durations that can cover all system topologies.
+        // Thus, these mechanisms are being disabled.  The original attributes
+        // for PBAX were to enable and control these settings but, given then
+        // will not be used for P8, are no longer needed. Therefore, the attribute
+        // use calls have been removed in favor of simple procedure disablement.
 
-        rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE , &i_target, ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value );
-        if (rc)
-        {
-            FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE ) failed. With rc = 0x%x", (uint32_t)rc);
-            break;
-        } // end if
-
-        rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RETRY_THRESHOLD , &i_target, ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value  );
-        if (rc)
-        {
-            FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RETRY_THRESHOLD ) failed. With rc = 0x%x", (uint32_t)rc);
-            break;
-        } // end if
-
-        rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RESERV_TIMEOUT  , &i_target, ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value );
-        if (rc)
-        {
-            FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RESERV_TIMEOUT ) failed. With rc = 0x%x", (uint32_t)rc);
-            break;
-        } // end if
-
-
-
-        // assemble the attributes
         // 20:24, ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value
         // 27; ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value
         // 28:35; ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value
@@ -547,11 +522,8 @@ fapi::ReturnCode
 p8_pba_init_PM_CONFIG(const Target& i_target)
 {
     fapi::ReturnCode rc;
-   
+
     FAPI_INF("mode = PM_CONFIG...");
- 
-    FAPI_INF("PBAX configuration...");
-    FAPI_INF("TODO: Getting PBAX configuration values via attribute settings.");
 
  return rc;
 };
@@ -818,17 +790,7 @@ pba_slave_setup_reset(const Target& i_target)
            FAPI_ERR("fapiPutScom( PBA_SLVCTL1_0x00064005 ) failed. With rc = 0x%x", (uint32_t)rc);
            break;
         }
-
-/*  Removed as this is done by p8_set_port_bar.C for the SLW used path
-    through the PBA
-
-        rc = fapiPutScom(i_target, PBA_SLVCTL2_0x00064006 , data);
-        if (rc)
-        {
-           FAPI_ERR("fapiPutScom( PBA_SLVCTL2_0x00064006 ) failed. With rc = 0x%x", (uint32_t)rc);
-           break;
-        }
-*/
+        
         rc = fapiPutScom(i_target, PBA_SLVCTL3_0x00064007 , data);
         if (rc)
         {
