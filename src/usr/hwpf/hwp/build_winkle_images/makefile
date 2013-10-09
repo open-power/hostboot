@@ -69,7 +69,7 @@ OBJS =  build_winkle_images.o   \
         p8_pfet_init.o          \
         p8_pfet_control.o       \
         p8_block_wakeup_intr.o \
-        proc_mailbox_utils.o
+        p8_mailbox_utils.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:

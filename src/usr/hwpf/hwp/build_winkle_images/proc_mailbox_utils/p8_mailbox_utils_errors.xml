@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils/proc_mailbox_utils_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils/p8_mailbox_utils_errors.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,23 +20,23 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_mailbox_utils_errors.xml,v 1.1 2013/08/12 22:04:34 jeshua Exp $ -->
+<!-- $Id: p8_mailbox_utils_errors.xml,v 1.1 2013/09/18 19:54:48 dcrowell Exp $ -->
 <!-- Error definitions for proc_mailbox_utils procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_MAILBOX_UTILS_PROC_REFCLK_ZERO_ERROR</rc>
+    <rc>RC_P8_MAILBOX_UTILS_PROC_REFCLK_ZERO_ERROR</rc>
     <description>
-      Procedure: proc_mailbox_utils (proc_mailbox_utils_get_mbox1)
+      Procedure: p8_mailbox_utils (p8_mailbox_utils_get_mbox1)
       The ATTR_FREQ_PROC_REFCLOCK specified a zero for proc refclk, which is invalid
     </description>
     <ffdc>REF_FREQ</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_MAILBOX_UTILS_FREQ_MULT_OOB_ERROR</rc>
+    <rc>RC_P8_MAILBOX_UTILS_FREQ_MULT_OOB_ERROR</rc>
     <description>
-      Procedure: proc_mailbox_utils (proc_mailbox_utils_get_mbox1)
+      Procedure: p8_mailbox_utils (p8_mailbox_utils_get_mbox1)
       The calculated DPLL frequency multiplier is too bit to fit in the bit field
     </description>
     <ffdc>BOOT_FREQ</ffdc>

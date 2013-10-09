@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 #include "proc_spless_sbe_startWA.H"
 #include "p8_scom_addresses.H"
-#include    "proc_mailbox_utils.H"
+#include "p8_mailbox_utils.H"
 
 
 //------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ fapi::ReturnCode proc_spless_sbe_startWA(const fapi::Target & i_target)
         // -----------------------------------------------------------
         //Need to set the I2C speed based in the mailbox reg
         //Since not all 1.x part have the correctly programmed OTPROM
-        rc = proc_mailbox_utils_get_mbox2( i_target, l_set_data );
+        rc = p8_mailbox_utils_get_mbox2( i_target, l_set_data );
         if (rc)
         {
             FAPI_ERR("ERROR: get_mbox2 = 0x%08x",

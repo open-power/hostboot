@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils/proc_mailbox_utils.C $ */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/proc_mailbox_utils/p8_mailbox_utils.C $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,8 +21,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_mailbox_utils.C,v 1.1 2013/08/12 22:03:50 jeshua Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mailbox_utils.C,v $
+// $Id: p8_mailbox_utils.C,v 1.1 2013/09/18 17:28:20 dcrowell Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_mailbox_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_mailbox_utils.H"
+#include "p8_mailbox_utils.H"
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -356,7 +356,7 @@ fapi::ReturnCode vid2mv(uint8_t i_vid_7_0, uint32_t &o_voltage)
 //             o_set_data         The 32-bit mailbox value
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_mailbox_utils_get_mbox1( const fapi::Target &i_target, uint32_t & o_set_data )
+fapi::ReturnCode p8_mailbox_utils_get_mbox1( const fapi::Target &i_target, uint32_t & o_set_data )
 {
     fapi::ReturnCode l_fapirc;
 
@@ -398,7 +398,7 @@ fapi::ReturnCode proc_mailbox_utils_get_mbox1( const fapi::Target &i_target, uin
         {
             FAPI_ERR("Attribute ATTR_FREQ_PROC_REFCLOCK failed must be non-zero");
             uint32_t & REF_FREQ = l_refclk_freq;
-            FAPI_SET_HWP_ERROR(l_fapirc, RC_PROC_MAILBOX_UTILS_PROC_REFCLK_ZERO_ERROR);
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_P8_MAILBOX_UTILS_PROC_REFCLK_ZERO_ERROR);
             break;
         }
 
@@ -448,7 +448,7 @@ fapi::ReturnCode proc_mailbox_utils_get_mbox1( const fapi::Target &i_target, uin
             uint32_t & DPLL_DIV  = l_dpll_divider;
             uint64_t & FREQ_MULT = l_result;
             const uint32_t & MAX_BITS  = BOOT_FREQ_BIT_LENGTH;
-            FAPI_SET_HWP_ERROR(l_fapirc, RC_PROC_MAILBOX_UTILS_FREQ_MULT_OOB_ERROR);
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_P8_MAILBOX_UTILS_FREQ_MULT_OOB_ERROR);
             break;
         }
         uint32_t l_freq_mult = (uint32_t)l_result;
@@ -538,7 +538,7 @@ fapi::ReturnCode proc_mailbox_utils_get_mbox1( const fapi::Target &i_target, uin
 //             o_set_data         The 32-bit mailbox value
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_mailbox_utils_get_mbox2( const fapi::Target &i_target, uint32_t & o_set_data )
+fapi::ReturnCode p8_mailbox_utils_get_mbox2( const fapi::Target &i_target, uint32_t & o_set_data )
 {
     fapi::ReturnCode l_fapirc;
 
@@ -645,7 +645,7 @@ fapi::ReturnCode proc_mailbox_utils_get_mbox2( const fapi::Target &i_target, uin
 //             o_set_data         The 32-bit mailbox value
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_mailbox_utils_get_mbox3( const fapi::Target &i_target, uint32_t & o_set_data )
+fapi::ReturnCode p8_mailbox_utils_get_mbox3( const fapi::Target &i_target, uint32_t & o_set_data )
 {
     fapi::ReturnCode l_fapirc;
 
@@ -710,7 +710,7 @@ fapi::ReturnCode proc_mailbox_utils_get_mbox3( const fapi::Target &i_target, uin
 //             i_includeNode      True if the value should include node information
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint32_t & o_set_data,
+fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint32_t & o_set_data,
                                                bool i_includeNode )
 {
     fapi::ReturnCode l_fapirc;

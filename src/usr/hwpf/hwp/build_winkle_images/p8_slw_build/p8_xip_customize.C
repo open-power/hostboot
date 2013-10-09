@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.55 2013/09/13 14:09:15 jeshua Exp $
+// $Id: p8_xip_customize.C,v 1.56 2013/09/18 17:28:34 dcrowell Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -52,7 +52,7 @@
 #include <p8_ring_identification.H>
 #include <p8_pore_table_gen_api.H>
 #include <p8_scom_addresses.H>
-#include <proc_mailbox_utils.H>
+#include <p8_mailbox_utils.H>
 
 #define min(a,b) ((a<b)?a:b)
 
@@ -740,7 +740,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     uint32_t mboxValue = 0;
 
     //MBOX 0 (Note: utils functions number them 1-4, not 0-3)
-    rc = proc_mailbox_utils_get_mbox1(i_target, mboxValue);
+    rc = p8_mailbox_utils_get_mbox1(i_target, mboxValue);
     if( rc ) {
       FAPI_ERR("Getting the MBOX 0 value failed, so returning the error");
       return rc;
@@ -753,7 +753,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     }
 
     //MBOX 1 (Note: utils functions number them 1-4, not 0-3)
-    rc = proc_mailbox_utils_get_mbox2(i_target, mboxValue);
+    rc = p8_mailbox_utils_get_mbox2(i_target, mboxValue);
     if( rc ) {
       FAPI_ERR("Getting the MBOX 1 value failed, so returning the error");
       return rc;
@@ -766,7 +766,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     }
 
     //MBOX 2 (Note: utils functions number them 1-4, not 0-3)
-    rc = proc_mailbox_utils_get_mbox3(i_target, mboxValue);
+    rc = p8_mailbox_utils_get_mbox3(i_target, mboxValue);
     if( rc ) {
       FAPI_ERR("Getting the MBOX 2 value failed, so returning the error");
       return rc;
@@ -780,7 +780,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
     //MBOX 3 (Note: utils functions number them 1-4, not 0-3)
     //Don't want to include the node info in the SBE image, because that would cause Stradale problems
-    rc = proc_mailbox_utils_get_mbox4(i_target, mboxValue, false);
+    rc = p8_mailbox_utils_get_mbox4(i_target, mboxValue, false);
     if( rc ) {
       FAPI_ERR("Getting the MBOX 3 value failed, so returning the error");
       return rc;
