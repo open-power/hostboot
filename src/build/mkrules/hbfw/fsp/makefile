@@ -41,6 +41,7 @@ RUNBVT_SUBDIRS   +=
 
 INCLUDES = hbdescriptor.H \
            hbterminatetypes.H \
+           hbotcompid.H
 
 .elseif(${CONTEXT} == "x86.nfp")
 
@@ -52,6 +53,9 @@ OBJECTS_SUBDIRS  += plugins
 EXPLIB_SUBDIRS   += plugins
 EXPSHLIB_SUBDIRS += plugins
 STANDARD_SUBDIRS += plugins
+
+INCLUDES = hbotcompid.H
+
 .endif
 
 .include <${RULES_MK}>
