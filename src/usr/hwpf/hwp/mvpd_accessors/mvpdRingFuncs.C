@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mvpdRingFuncs.C,v 1.6 2013/10/09 20:54:11 mjjones Exp $
+// $Id: mvpdRingFuncs.C,v 1.7 2013/10/10 19:40:07 maploetz Exp $
 /**
  *  @file mvpdRingFuncs.C
  *
@@ -444,7 +444,7 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
             // Set operation has been removed, if need to be implemented
             //copy over from mvpdRingFuncs
             FAPI_ERR("mbvpdRingFunc: Invalid parameter function");
-            assert(0);
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_RING_FUNC_INVALID_PARAMETER);
         }
 
     } while ( 0 );
