@@ -47,8 +47,20 @@ namespace HWAS
 using namespace HWAS::COMMON;
 using namespace TARGETING;
 
+const uint32_t EMPTY_GARD_RECORDID = 0xFFFFFFFF;
+
 void _flush(void *i_addr);
 errlHndl_t _GardRecordIdSetup(void *&io_platDeconfigGard);
+
+errlHndl_t DeconfigGard::platLogEvent(
+    const Target * const i_pTarget,
+    const GardEvent i_eventType)
+{
+    errlHndl_t l_pErr = NULL;
+    HWAS_DBG("LogEvent %d", i_eventType);
+
+    return l_pErr;
+}
 
 errlHndl_t DeconfigGard::platClearGardRecords(
     const Target * const i_pTarget)

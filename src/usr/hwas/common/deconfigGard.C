@@ -98,7 +98,7 @@ errlHndl_t collectGard(const PredicateBase *i_pPredicate)
 
     if (errl)
     {
-        HWAS_INF("collectGard failed (plid 0x%X)", errl->plid());
+        HWAS_ERR("collectGard failed (plid 0x%X)", errl->plid());
     }
     else
     {
@@ -144,11 +144,10 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
     do
     {
         GardRecords_t l_gardRecords;
-
         l_pErr = platGetGardRecords(NULL, l_gardRecords);
         if (l_pErr)
         {
-            HWAS_ERR("Error 0x%X from platGetGardRecords", l_pErr->plid());
+            HWAS_ERR("Error from platGetGardRecords");
             break;
         }
 
@@ -190,8 +189,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
             l_pErr = platClearGardRecords(l_pTarget);
             if (l_pErr)
             {
-                HWAS_ERR("Error 0x%X from platClearGardRecords",
-                        l_pErr->plid());
+                HWAS_ERR("Error from platClearGardRecords");
                 break;
             }
         } // for
@@ -212,7 +210,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
     while (0);
 
     return l_pErr;
-}
+} // clearGardRecordsForReplacedTargets
 
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
@@ -220,7 +218,6 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 {
     HWAS_INF("Deconfigure Targets from GARD Records for IPL");
     errlHndl_t l_pErr = NULL;
-    GardRecords_t l_gardRecords;
 
     do
     {
@@ -236,23 +233,24 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             // manufacturing records are disabled
             //  - don't process
             HWAS_INF("Manufacturing policy: disabled - skipping GARD Records");
+            l_pErr = platLogEvent(NULL, MFG);
+            if (l_pErr)
+            {
+                HWAS_ERR("platLogEvent returned an error");
+            }
             break;
         }
 
         // Get all GARD Records
+        GardRecords_t l_gardRecords;
         l_pErr = platGetGardRecords(NULL, l_gardRecords);
         if (l_pErr)
         {
-            HWAS_ERR("Error 0x%X from platGetGardRecords", l_pErr->plid());
+            HWAS_ERR("Error from platGetGardRecords");
             break;
         }
 
         HWAS_DBG("%d GARD Records found", l_gardRecords.size());
-
-        if (l_gardRecords.empty())
-        {
-            break;
-        }
 
         // For each GARD Record
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
@@ -260,15 +258,6 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
              ++l_itr)
         {
             GardRecord l_gardRecord = *l_itr;
-
-            if ((l_sys_policy & CDM_POLICIES_PREDICTIVE_DISABLED) &&
-                (l_gardRecord.iv_errorType == GARD_Predictive))
-            {
-                // predictive records are disabled AND gard record is predictive
-                //  - don't process
-                HWAS_INF("Predictive policy: disabled - skipping GARD Record");
-                continue;
-            }
 
             // Find the associated Target
             Target * l_pTarget =
@@ -288,6 +277,27 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             {
                 HWAS_INF("skipping %.8X - predicate didn't match",
                         get_huid(l_pTarget));
+                l_pErr = platLogEvent(l_pTarget, PREDICATE);
+                if (l_pErr)
+                {
+                    HWAS_ERR("platLogEvent returned an error");
+                    break;
+                }
+                continue;
+            }
+
+            if ((l_sys_policy & CDM_POLICIES_PREDICTIVE_DISABLED) &&
+                (l_gardRecord.iv_errorType == GARD_Predictive))
+            {
+                // predictive records are disabled AND gard record is predictive
+                //  - don't process
+                HWAS_INF("Predictive policy: disabled - skipping GARD Record");
+                l_pErr = platLogEvent(l_pTarget, PREDICTIVE);
+                if (l_pErr)
+                {
+                    HWAS_ERR("platLogEvent returned an error");
+                    break;
+                }
                 continue;
             }
 
@@ -296,6 +306,12 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             {
                 HWAS_INF("skipping %.8X - target not present",
                         get_huid(l_pTarget));
+                l_pErr = platLogEvent(l_pTarget, GARD_NOT_APPLIED);
+                if (l_pErr)
+                {
+                    HWAS_ERR("platLogEvent returned an error");
+                    break;
+                }
                 continue;
             }
 
@@ -316,14 +332,26 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             _deconfigureByAssoc(*l_pTarget, l_errlogEid);
 
             HWAS_MUTEX_UNLOCK(iv_mutex);
+
+            l_pErr = platLogEvent(l_pTarget, GARD_APPLIED);
+            if (l_pErr)
+            {
+                HWAS_ERR("platLogEvent returned an error");
+                break;
+            }
         } // for
+
+        if (l_pErr)
+        {
+            break;
+        }
 
         // Deconfigure procs based on fabric bus deconfigs and perform SMP
         // node balancing
         l_pErr = _invokeDeconfigureAssocProc();
-        if ( l_pErr )
+        if (l_pErr)
         {
-            HWAS_ERR("Error from _invokeDeconfigureAssocProc ");
+            HWAS_ERR("Error from _invokeDeconfigureAssocProc");
             break;
         }
     }
@@ -332,10 +360,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
     return l_pErr;
 } // deconfigureTargetsFromGardRecordsForIpl
 
+//******************************************************************************
 bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2)
 {
-    return (t1->getAttr<ATTR_HUID>() <
-                t2->getAttr<ATTR_HUID>());
+    return (t1->getAttr<ATTR_HUID>() < t2->getAttr<ATTR_HUID>());
 }
 
 //******************************************************************************

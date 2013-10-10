@@ -77,10 +77,15 @@ class DeconfigGard
 
 public:
 
-    enum
-    {
-        CLEAR_ALL_GARD_RECORDS = EMPTY_GARD_RECORDID,
-        GET_ALL_GARD_RECORDS = EMPTY_GARD_RECORDID,
+    // enums for events codes for Gard events
+    // used by platLogEvent() function
+    enum GardEvent
+    {                       // if GARD record:
+        GARD_APPLIED,       //  applied
+        MFG,                //  not applied due to MFG policy
+        PREDICTIVE,         //  not applied due to predictive policy
+        PREDICATE,          //  not applied due to predicate
+        GARD_NOT_APPLIED,   //  not applied for other reason
     };
 
     // enums to indicated non-error reason for a targets deconfiguration.
@@ -247,6 +252,18 @@ public:
      */
     void registerDeferredDeconfigure(const TARGETING::Target & i_target,
                                  const uint32_t i_errlEid);
+
+    /**
+     * @brief Platform specific function that
+     *          logs a special trace event
+     *
+     * @param[in] i_pTarget  Pointer to Target
+     * @param[in] i_eventType GardEvent enum
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t platLogEvent(const TARGETING::Target * const i_pTarget,
+                                const GardEvent i_eventType);
 
     /**
      * @brief Platform specific function that

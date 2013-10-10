@@ -197,23 +197,6 @@ errlHndl_t platGetFCO(
         const TARGETING::TargetHandle_t &i_node,
         uint32_t &o_fco);
 
-
-/**
- * @brief platform specific code to get the address in PNOR to read
- *  and write GARD data
- *
- * @param[out] o_addr       pointer to where GARD data is in PNOR
- * @param[out] o_size       size (in bytes) of GARD data section in PNOR
- *
- * @return errlHndl_t       valid errlHndl_t handle if there was an error
- *                          NULL if no errors;
- */
-errlHndl_t platGetGardPnorAddr(void *& o_addr,
-                               uint64_t &o_size);
-
-const uint32_t EMPTY_GARD_RECORDID=0xFFFFFFFF;
-const uint32_t EMPTY_GARD_VALUE=0xFF;
-
 /**
  * @brief wrapper function to create new errlog in platform-specific manner.
  *
