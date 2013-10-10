@@ -126,7 +126,8 @@ use Digest::MD5 qw(md5_hex);
 # use the intermediate representation containing the full host boot model.
 # Aborts application if file name not found.
 my $attributes = $xml->XMLin($cfgHbXmlFile,
-    forcearray => ['enumerationType','attribute','hwpfToHbAttrMap']);
+    forcearray => ['enumerationType','attribute','hwpfToHbAttrMap',
+                   'compileAttribute']);
 my $fapiAttributes = {};
 if ($cfgFapiAttributesXmlFile ne "")
 {
@@ -586,25 +587,19 @@ sub getPeerHuid
 {
     my($targetInstance) = @_;
 
-    my $peerHUID = INVALID_HUID;
-    if(exists $targetInstance->{compileAttribute}->{id})
+    my $peerHUID = PEER_HUID_NOT_PRESENT;
+    if(exists $targetInstance->{compileAttribute})
     {
-        if ($targetInstance->{compileAttribute}->{id} eq "PEER_HUID")
+        foreach my $compileAttribute (@{$targetInstance->{compileAttribute}})
         {
-            $peerHUID = $targetInstance->{compileAttribute}->{default};
-        }
-        else
-        {
-            fatal("We should have only PEER_HUID as compileAttribute. "
-                    . "Don't know how to handle this Attribute "
-                    . "$targetInstance->{compileAttribute}->{id}\n");
+            if($compileAttribute->{id} eq "PEER_HUID")
+            {
+                $peerHUID = $compileAttribute->{default};
+                last;
+            }
         }
     }
-    else
-    {
-        # PEER HUID doesn't exist, Return an pre-defined HUID which is invalid
-        $peerHUID = PEER_HUID_NOT_PRESENT;
-    }
+
     return $peerHUID;
 }
 
