@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: pib2cfam.C,v 1.15 2013/06/24 14:51:53 jeshua Exp $
+// $Id: pib2cfam.C,v 1.16 2013/08/29 14:54:56 jeshua Exp $
 
 /// \file pib2cfam.C
 /// \brief A simple PibSlave that maps a small range of PIB addresses to CFAM
@@ -79,8 +79,9 @@ Pib2Cfam::operation(Transaction& io_transaction)
     case ACCESS_MODE_READ:
 
         switch (io_transaction.iv_address) {
-        case 0x00050006:
-        case 0x00050007:
+	case 0x00050006:
+	case 0x00050007:
+	case 0x0005000A:
         case 0x00050012:
         case 0x00050013:
         case 0x00050014:
@@ -111,8 +112,8 @@ Pib2Cfam::operation(Transaction& io_transaction)
 
         switch (io_transaction.iv_address) {
 
-        case 0x00050006:
-        case 0x00050007:
+	case 0x00050006:
+	case 0x00050007:
         case 0x00050012:
         case 0x00050013:
         case 0x00050014:
