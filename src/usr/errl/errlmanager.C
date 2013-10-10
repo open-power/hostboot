@@ -310,10 +310,11 @@ void ErrlManager::errlogMsgHndlr ( void )
             case ERRLOG_SHUTDOWN:
                 TRACFCOMP( g_trac_errl, INFO_MRK "Shutdown event received" );
 
-                // respond before shutting down our queue etc..
-                msg_respond ( iv_msgQ, theMsg );
                 //Start shutdown process for error log
                 errlogShutdown();
+
+                // Respond that we are done shutting down.
+                msg_respond ( iv_msgQ, theMsg );
 
                 TRACFCOMP( g_trac_errl, INFO_MRK "Shutdown event processed" );
 
