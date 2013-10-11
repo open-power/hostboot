@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.7 2013/09/17 16:37:19 jimyac Exp $ -->
+<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.8 2013/10/04 18:40:10 jimyac Exp $ -->
 <!-- Error definitions for p8_build_pstate_datablock procedure -->
 <hwpErrors>
  <!-- *********************************************************************** -->
@@ -37,6 +37,11 @@
   <hwpError>
     <rc>RC_PROCPM_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL</rc>
     <description>MVPD Bucket Frequency was not equal per chiplet</description>
+  </hwpError>    
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_ATTR_DPLL_DIV_ERROR</rc>
+    <description> Attribute ATTR_PROC_DPLL_DIVIDER = 0</description>
   </hwpError>   
  <!-- *********************************************************************** -->
   <hwpError>
@@ -53,35 +58,99 @@
     <rc>RC_PROCPM_PSTATE_DATABLOCK_INT_VOLTAGE_BIAS_ERROR</rc>
     <description>Cannot have both up and down bias set</description>
   </hwpError>         
+  <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_OBJECT_ERROR</rc>
+    <description>chip_characterization_create was passed null pointer to characterization or characterization->parameters</description>
+    <ffdc>CHAR_RETURN_CODE</ffdc>    
+  </hwpError>  
+  <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc> RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_ARGUMENT_ERROR</rc>
+    <description>chip_characterization_create was passed null pointer to characterization->vpd or no points</description>
+    <ffdc>CHAR_RETURN_CODE</ffdc>    
+    <ffdc>POINTS</ffdc>    
+  </hwpError>    
+  <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc> RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_ERROR</rc>
+    <description>chip_characterization_create returned an error</description>
+    <ffdc>CHAR_RETURN_CODE</ffdc>    
+  </hwpError>      
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_PSTATE_DATABLOCK_CHIP_CHARACTERIZE_ERROR</rc>
-    <description>Procedure chip_characterization_create() returned an error</description>
-    <ffdc>RETURN_CODE</ffdc>    
-  </hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_OBJECT_ERROR</rc>
+    <description>gpst_create was passed null pointer to gpst, characterization, or characterization->ops or characterization->points = 0</description>
+    <ffdc>GPST_RETURN_CODE</ffdc>
+  </hwpError>     
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ARGUMENT_ERROR</rc>
+    <description>gpst_create was passed bad argument and resulted in PSTATE limits error or operating point odering error</description>
+    <ffdc>GPST_RETURN_CODE</ffdc>
+    <ffdc>OPS_PMIN</ffdc>
+    <ffdc>OPS_PMAX</ffdc>
+  </hwpError>     
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ENTRY_ERROR</rc>
+    <description>gpst_entry_create was passed a voltage that was out of limits of vrm11 vid code or ivid vide code</description>
+    <ffdc>GPST_RETURN_CODE</ffdc>
+  </hwpError>        
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ERROR</rc>
-    <description>Procedure gpst_create() returned an error</description>
-    <ffdc>RETURN_CODE</ffdc>
+    <description>gpst_create returned an error</description>
+    <ffdc>GPST_RETURN_CODE</ffdc>
   </hwpError>  
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_OBJECT_ERROR</rc>
+    <description>lpst_create was passed null pointer to gpst or lpsa</description>
+    <ffdc>LPST_RETURN_CODE</ffdc>
+  </hwpError>      
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_ERROR</rc>
-    <description>Procedure lpst_create() returned an error</description>
-    <ffdc>RETURN_CODE</ffdc>
+    <description>lpst_create returned an error</description>
+    <ffdc>LPST_RETURN_CODE</ffdc>
   </hwpError>    
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_RESCLK_BAND_ERROR</rc>
+    <description>Resonant clocking band attribute values are not in ascending order from low to high</description>
+  </hwpError>    
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PDV_ZERO_DATA_ERROR</rc>
+    <description>Zero valued data found in #V</description>
+    <ffdc>OP_POINT</ffdc>
+    <ffdc>CHIPLET_NUM</ffdc>
+    <ffdc>BUCKET_ID</ffdc>
+  </hwpError>    
+   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PDV_OPPOINT_ORDER_ERROR</rc>
+    <description>#V operating point relationship error (power save > nominal > turbo)</description>
+    <ffdc>OP_POINT</ffdc>
+    <ffdc>CHIPLET_NUM</ffdc>
+    <ffdc>BUCKET_ID</ffdc>
+  </hwpError>     
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_PSTATE_MINMAX_BOUNDS_ERROR</rc>
     <description>freq2pState returned error - computed pstate for freq is out of bounds of MAX/MIN possible</description>
     <ffdc>RETURN_CODE</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
   </hwpError>      
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_PSTATE_GT_GPSTPMAX_ERROR</rc>
     <description>pstate_minmax_chk returned error -  Computed pstate is greater than max pstate in gpst</description>
     <ffdc>RETURN_CODE</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <ffdc>FREQ_KHZ</ffdc>
   </hwpError>        
   <!-- *********************************************************************** -->
   <hwpError>

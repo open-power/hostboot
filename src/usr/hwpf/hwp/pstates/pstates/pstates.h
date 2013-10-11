@@ -23,7 +23,7 @@
 #ifndef __PSTATES_H__
 #define __PSTATES_H__
 
-// $Id: pstates.h,v 1.8 2013/09/17 16:36:40 jimyac Exp $
+// $Id: pstates.h,v 1.10 2013/10/04 18:38:18 jimyac Exp $
 
 /// \file pstates.h
 /// \brief Pstate structures and support routines for OCC product firmware
@@ -97,7 +97,7 @@
 /// kept up to date as changes are made to the layout or contents of the
 /// structure. 
 
-#define PSTATE_SUPERSTRUCTURE_MAGIC 0x5053544154453031ull /* PSTATE01 */
+#define PSTATE_SUPERSTRUCTURE_MAGIC 0x5053544154453032ull /* PSTATE02 */
 
 
 /// \defgroup pstate_options Pstate Options
@@ -531,13 +531,13 @@ typedef struct {
 
     /// Local Pstate Array
     LocalPstateArray lpsa;
-
+    
     /// Resonant Clocking Setup
     ResonantClockingSetup resclk;
     
     /// CPM Pstate ranges
     CpmPstateModeRanges cpmranges;
-    
+  
 } PstateSuperStructure;
 
 

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.10 2013/09/17 16:36:39 jimyac Exp $
+// $Id: pstate_tables.c,v 1.12 2013/10/10 20:37:55 jimyac Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -875,7 +875,7 @@ void
 build_vds_region_table( ivrm_parm_data_t*       i_ivrm_parms,
                         PstateSuperStructure*   pss)
 {   
-    int         i;
+    uint8_t     i;
     uint32_t    vds;
     uint64_t    beg_offset = 0;
     uint64_t    end_offset = 0;
@@ -911,8 +911,8 @@ void
 fill_vin_table( ivrm_parm_data_t*       i_ivrm_parms,
                 PstateSuperStructure*   pss)
 {  
-    int         s;
-    int         i;
+    uint8_t     s;
+    uint8_t     i;
     int         idx;
 //    uint8_t     pfetstr = 17;
     
@@ -1102,7 +1102,7 @@ void fit_file(int n, uint8_t version, double C[], ivrm_cal_data_t* cal_data)
 // jwy      Vg = (double)cal_data->point[k].gate_voltage/1000;         // uV
       y  = ((double)cal_data->point[k].drain_current)/1000;      // uA 
     } 
-    else if (version == 1 || version == 2){
+    else if (version == 1 || version == 2 || version == 3) {
       Vd = (double)cal_data->point[k].drain_voltage;             // mV
       Vs = (double)cal_data->point[k].source_voltage;            // mV
 // jwy      Vg = (double)cal_data->point[k].gate_voltage/1000;         // uV
