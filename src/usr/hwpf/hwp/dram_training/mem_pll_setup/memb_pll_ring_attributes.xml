@@ -22,6 +22,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
   <!-- ********************************************************************* -->
+  <!-- $Id: memb_pll_ring_attributes.xml,v 1.9 2013/05/21 18:50:54 bellows Exp $ -->
   <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_DATA</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
