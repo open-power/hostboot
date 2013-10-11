@@ -1007,7 +1007,7 @@ errlHndl_t hdatService::findSpira( void )
         //   is loaded at relative memory address 0x0
         hdatNaca_t* naca = reinterpret_cast<hdatNaca_t*>
           (HDAT_NACA_OFFSET + payload_base);
-        TRACFCOMP( g_trac_runtime, "NACA=%p", naca );
+        TRACFCOMP( g_trac_runtime, "NACA=%.X->%p", HDAT_NACA_OFFSET, naca );
 
         // Do some sanity checks on the NACA
         if( naca->nacaPhypPciaSupport != 1 )
@@ -1052,7 +1052,7 @@ errlHndl_t hdatService::findSpira( void )
             // pointer is also relative to PHYP's zero
             iv_spiraH = reinterpret_cast<hdatSpira_t*>
               (naca->spiraH + payload_base);
-            TRACFCOMP( g_trac_runtime, "SPIRA-H=%p", iv_spiraH );
+            TRACFCOMP( g_trac_runtime, "SPIRA-H=%X->%p", naca->spiraH, iv_spiraH );
 
             // Check the headers and version info
             errhdl = check_header( &(iv_spiraH->hdatHDIF),
@@ -1068,9 +1068,10 @@ errlHndl_t hdatService::findSpira( void )
               (&(iv_spiraH->hdatDataArea[SPIRAH_HOST_DATA_AREAS]));
             TRACUCOMP( g_trac_runtime, "SPIRA-S tuple offset=%.8X", tuple_addr );
             // need to offset from virtual zero
-            tuple_addr += payload_base;
+            //tuple_addr += payload_base;
             hdat5Tuple_t* tuple = reinterpret_cast<hdat5Tuple_t*>(tuple_addr);
             TRACUCOMP( g_trac_runtime, "SPIRA-S tuple=%p", tuple );
+
             errlHndl_t errhdl_s = check_tuple( SPIRA_S,
                                                tuple );
             if( errhdl_s )
@@ -1081,19 +1082,28 @@ errlHndl_t hdatService::findSpira( void )
             }
             else
             {
-                iv_spiraS = reinterpret_cast<hdatSpira_t*>
-                  (tuple->hdatAbsAddr + payload_base);
-                TRACFCOMP( g_trac_runtime, "SPIRA-S=%p", iv_spiraS );
-
-                // Check the headers and version info
-                errhdl_s = check_header( &(iv_spiraH->hdatHDIF),
-                                         SPIRAS_HEADER );
+                uint64_t tmp_addr = 0;
+                errhdl_s = getSpiraTupleVA( tuple, tmp_addr );
                 if( errhdl_s )
                 {
-                    TRACFCOMP( g_trac_runtime, "SPIRA-S is invalid, will try legacy SPIRA" );
-                    RUNTIME::UdNaca(naca).addToLog(errhdl_s);
-                    RUNTIME::UdSpira(iv_spiraS).addToLog(errhdl_s);
+                    TRACFCOMP( g_trac_runtime, "Couldn't map SPIRA-S, will try legacy SPIRA" );
                     iv_spiraS = NULL;
+                }
+                else
+                {
+                    iv_spiraS = reinterpret_cast<hdatSpira_t*>(tmp_addr);
+                    TRACFCOMP( g_trac_runtime, "SPIRA-S=%p", iv_spiraS );
+
+                    // Check the headers and version info
+                    errhdl_s = check_header( &(iv_spiraH->hdatHDIF),
+                                             SPIRAS_HEADER );
+                    if( errhdl_s )
+                    {
+                        TRACFCOMP( g_trac_runtime, "SPIRA-S is invalid, will try legacy SPIRA" );
+                        RUNTIME::UdNaca(naca).addToLog(errhdl_s);
+                        RUNTIME::UdSpira(iv_spiraS).addToLog(errhdl_s);
+                        iv_spiraS = NULL;
+                    }
                 }
             }
         }
@@ -1102,7 +1112,7 @@ errlHndl_t hdatService::findSpira( void )
         // pointer is also relative to PHYP's zero
         iv_spiraL = reinterpret_cast<hdatSpira_t*>
           (naca->spiraOld + payload_base);
-        TRACFCOMP( g_trac_runtime, "Legacy SPIRA=%p", iv_spiraL );
+        TRACFCOMP( g_trac_runtime, "Legacy SPIRA=%X->%p", naca->spiraOld, iv_spiraL );
 
         // Make sure the SPIRA is valid
         errhdl_l = verify_hdat_address( iv_spiraL,
@@ -1124,6 +1134,11 @@ errlHndl_t hdatService::findSpira( void )
             {
                 TRACFCOMP( g_trac_runtime, "Legacy SPIRA is not filled in, using SPIRA-H/S" );
                 iv_spiraL = NULL;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_runtime, "Legacy SPIRA is filled in so we'll use it" );
+                iv_spiraS = NULL;
             }
         }
 
