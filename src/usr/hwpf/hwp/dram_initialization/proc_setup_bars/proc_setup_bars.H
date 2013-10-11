@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.H,v 1.12 2013/08/28 22:00:54 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.13 2013/10/11 14:58:57 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1207,6 +1207,13 @@ const uint32_t PROC_SETUP_BARS_PCIE_BAR_EN_REGS[PROC_SETUP_BARS_PCIE_NUM_UNITS] 
     PCIE2_IO_BAR_EN_0x02012845
 };
 
+// ETU Reset register field/bit definitions
+const uint32_t PROC_SETUP_BARS_PCIE_ETU_RESET_REGS[PROC_SETUP_BARS_PCIE_NUM_UNITS] =
+{
+    PCIE0_ETU_RESET_0x0901200A,
+    PCIE1_ETU_RESET_0x0901240A,
+    PCIE2_ETU_RESET_0x0901280A
+};
 
 extern "C"
 {

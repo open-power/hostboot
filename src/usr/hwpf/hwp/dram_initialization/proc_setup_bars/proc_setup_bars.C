@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.18 2013/08/28 22:00:50 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.19 2013/10/11 14:58:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -2214,6 +2214,10 @@ fapi::ReturnCode proc_setup_bars_pcie_write_io_bar_regs(
                             break;
                         }
                     }
+                    if (!rc.ok())
+                    {
+                        break;
+                    }
                 }
                 // set enable bit data/mask
                 rc_ecmd |= enable_data.setBit(
@@ -2266,6 +2270,18 @@ fapi::ReturnCode proc_setup_bars_pcie_write_io_bar_regs(
             {
                 FAPI_ERR("proc_setup_bars_pcie_write_io_bar_regs: Error from proc_setup_bars_common_write_bar_reg");
                 break;
+            }
+
+            // if enabling BARs, pull ETU out of reset
+            ecmdDataBufferBase etu_reset(64);
+            rc = fapiPutScom(i_target,
+                             PROC_SETUP_BARS_PCIE_ETU_RESET_REGS[u],
+                             etu_reset);
+            if (!rc.ok())
+            {
+               FAPI_ERR("proc_setup_bars_pcie_write_io_bar_regs: Error from fapiPutScom (PCIE%d_ETU_RESET_0x%08X)",
+                        u, PROC_SETUP_BARS_PCIE_ETU_RESET_REGS[u]);
+               break;
             }
         }
     }

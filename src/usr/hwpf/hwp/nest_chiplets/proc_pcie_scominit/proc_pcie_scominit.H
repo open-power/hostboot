@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.H,v 1.4 2013/05/15 04:18:58 jmcgill Exp $
+// $Id: proc_pcie_scominit.H,v 1.5 2013/10/11 14:54:22 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,7 +39,6 @@
 // *!   Remove active IOPs from reset
 // *!   Perform IOP overrides/customization
 // *!   Mark IOP programming complete
-// *!   Remove ETU reset
 // *!
 //------------------------------------------------------------------------------
 
@@ -96,15 +95,6 @@ const uint32_t PCIE_GP4_IOP_SWAP_END_BIT[PROC_PCIE_SCOMINIT_NUM_IOP] =
     49,
     55
 };
-
-// ETU Reset register field/bit definitions
-const uint32_t PROC_PCIE_SCOMINIT_ETU_RESET[PROC_PCIE_SCOMINIT_NUM_PHB] =
-{
-    PCIE0_ETU_RESET_0x0901200A,
-    PCIE1_ETU_RESET_0x0901240A,
-    PCIE2_ETU_RESET_0x0901280A
-};
-const uint32_t ETU_RESET_GLOBAL_RESET_BIT = 0;
 
 // Murano/Venice support lane configurations bewtween 0x0 & 0xC,
 // swap values between 0x0 & 0x7

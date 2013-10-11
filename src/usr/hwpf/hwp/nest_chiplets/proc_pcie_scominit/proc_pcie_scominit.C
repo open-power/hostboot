@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.C,v 1.7 2013/05/15 04:18:56 jmcgill Exp $
+// $Id: proc_pcie_scominit.C,v 1.8 2013/10/11 14:54:22 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -353,34 +353,6 @@ fapi::ReturnCode proc_pcie_scominit_iop_complete(
             {
                 FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScomUnderMask (PCIE_IOP%d_PLL_GLOBAL_CONTROL2_0x%016llX)",
                          i, PROC_PCIE_SCOMINIT_PLL_GLOBAL_CONTROL2[i]);
-                break;
-            }
-        }
-        if (!rc.ok())
-        {
-            break;
-        }
-
-        // form ETU reset data buffer
-        rc_ecmd |= data.flushTo0();
-        if (rc_ecmd)
-        {
-            FAPI_ERR("proc_pcie_scominit_iop_complete: Error 0x%x setting up ETU reset register data buffer",
-                     rc_ecmd);
-            rc.setEcmdError(rc_ecmd);
-            break;
-        }
-
-        // clear ETU reset
-        for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_PHB); i++)
-        {
-            rc = fapiPutScom(i_target,
-                             PROC_PCIE_SCOMINIT_ETU_RESET[i],
-                             data);
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_pcie_scominit_iop_complete: Error from fapiPutScom (PCIE%d_ETU_RESET_0x%08X)",
-                          i, PROC_PCIE_SCOMINIT_ETU_RESET[i]);
                 break;
             }
         }
