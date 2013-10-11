@@ -109,6 +109,12 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libstart_payload.so),
         DEP_LIB(libruntime.so),
         DEP_LIB(libdevtree.so),
+/*
+ *      This library is loaded dynamically when needed in start_payload.
+ *      Adding statement here to make listdeps.pl happy.
+
+        DEP_LIB(libocc.so),
+*/
         { 0 },
     }
 };

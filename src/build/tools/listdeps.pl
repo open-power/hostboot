@@ -35,6 +35,8 @@ use File::Find ();
 use File::Path;
 use Cwd;
 
+use constant MAX_DEPENDENT_MODULES => 6;
+
 # validate the number of input args
 if( $#ARGV == -1 || $#ARGV > 4 )
 {
@@ -114,14 +116,15 @@ my $depends;
 my %FunctionMap;
 
 #slurp in all the modules names from the img directory
-my @module_names = < *.so >;
+my @module_names = < *[!_][!r][!t].so >;
+
+my $PREFIX = $ENV{'CROSS_PREFIX'};
 
 # for each module, grab the defined functions and create a hash
 # with the key being the function name and the value returned as the
 # shared library where it is defined.
 foreach $module_name  (@module_names )
 {
-    my $PREFIX = $ENV{'CROSS_PREFIX'};
     my @output = `${PREFIX}nm -AD  --defined-only $module_name`;
 
     chomp @output;
@@ -197,6 +200,7 @@ my %resident_modules = (
     "libmdia.so"           => '1',
     "libattn.so"           => '1',
     "libi2c.so"            => '1',
+    "libutil.so"           => '1',
 
 );
 
@@ -241,7 +245,7 @@ foreach my $module_name  (@istep_modules )
     push(@Dependencies, $module_name);
 
     # get an array with all the undefined functions from this module
-    my @output = `ppc64-mcp6-nm --undefined-only $module_name`;
+    my @output = `${PREFIX}nm --undefined-only $module_name`;
 
     chomp @output;
 
@@ -320,7 +324,7 @@ sub validate
         chomp($line);
         $line =~ s/^\s*(.*?)\s*$/$1/;
         $line =~s/DEP_LIB\(//;
-        $line =~s/\),//;
+        $line =~s/\),.*//;
         #print "$line\n";
         push( @list,$line);
         # we are at the start of the dependencies list
@@ -331,15 +335,19 @@ sub validate
              my $line = $_;
              chomp($line);
              last if( m/\}/ );
+
+             if (!($line =~ m/DEP_LIB/)) { next; }
+
              $line =~ s/^\s*(.*?)\s*$/$1/;
              $line =~s/DEP_LIB\(//;
              $line =~s/\),//;
              #     print "$line\n";
              push( @list, $line );
         }
-        if( @list > 4 )
+        if( @list >= MAX_DEPENDENT_MODULES )
         {
-            print "\n-- WARNING -- too many dependencies listed (MAX=4) in";
+            print "\n-- WARNING -- too many dependencies listed (MAX=".
+                  (MAX_DEPENDENT_MODULES-1).") in";
             print " src/include/usr/isteps/$istepFile\n\n";
         }
     }

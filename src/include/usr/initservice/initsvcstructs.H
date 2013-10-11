@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -37,7 +37,8 @@
 
 #include <initservice/initsvcreasoncodes.H>
 
-#define MAX_DEPENDENT_MODULES   5
+// This constant has a corresponding entry in src/build/tools/listdeps.pl.
+#define MAX_DEPENDENT_MODULES   6
 
 
 namespace   INITSERVICE
