@@ -631,6 +631,82 @@ PLUGIN_CALLOUT_PEER_BUS( psi,  TYPE_PSI,  0 )
 
 #undef PLUGIN_CALLOUT_PEER_BUS
 
+//------------------------------------------------------------------------------
+
+/**
+ * @brief Call to check for configured PHB (before capturing FFDC)
+ * @param  i_chip             P8 chip
+ * @param  i_phbPos           PHB position
+ * @param  o_isPhbConfigured  set to true if the PHB configured
+ * @returns Success
+ */
+int32_t phbConfigured(ExtensibleChip * i_chip,
+                      uint32_t i_phbPos,
+                      bool & o_isPhbConfigured)
+{
+    #define PRDF_FUNC "[Proc::phbConfigured] "
+
+    static const uint32_t MAX_PCI_NUM = 3;
+    static const char * pciEtuResetReg[MAX_PCI_NUM] =
+                                         { "PCI_ETU_RESET_0",
+                                           "PCI_ETU_RESET_1",
+                                           "PCI_ETU_RESET_2" };
+    int32_t o_rc = SUCCESS;
+    o_isPhbConfigured = false;
+
+    do
+    {
+        if( i_phbPos >= MAX_PCI_NUM )
+        {
+            PRDF_ERR( PRDF_FUNC"invalid PCI number: %d", i_phbPos );
+            break;
+        }
+
+        SCAN_COMM_REGISTER_CLASS * etuResetReg =
+            i_chip->getRegister( pciEtuResetReg[i_phbPos] );
+
+        if(NULL == etuResetReg)
+        {
+            PRDF_ERR( PRDF_FUNC"getRegister() Failed for register:%s",
+                         pciEtuResetReg[i_phbPos] );
+            break;
+        }
+
+        o_rc = etuResetReg->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"%s Read() failed. Target=0x%08x",
+                      pciEtuResetReg[i_phbPos], i_chip->GetId() );
+            break;
+        }
+
+        // If bit 0 is cleared then the PHB is configured
+        if ( ! etuResetReg->IsBitSet(0) )
+        {
+            o_isPhbConfigured = true;
+        }
+
+    } while(0);
+
+    return SUCCESS;
+
+}
+
+#define PLUGIN_PHB_CONFIGURED( POS ) \
+int32_t phbConfigured_##POS( ExtensibleChip * i_chip, \
+                             bool & o_isPhbConfigured ) \
+{ return phbConfigured( i_chip, POS, o_isPhbConfigured ); } \
+PRDF_PLUGIN_DEFINE( Proc, phbConfigured_##POS );
+
+PLUGIN_PHB_CONFIGURED( 0 )
+PLUGIN_PHB_CONFIGURED( 1 )
+PLUGIN_PHB_CONFIGURED( 2 )
+
+#undef PLUGIN_PHB_CONFIGURED
+
+//------------------------------------------------------------------------------
+
+
 } // end namespace Proc
 
 } // end namespace PRDF

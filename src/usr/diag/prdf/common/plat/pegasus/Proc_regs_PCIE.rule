@@ -108,6 +108,7 @@
         name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012000;
         capture     group default;
+        capture     req funccall("phbConfigured_0");
     };
 
     register PCICLOCKFIR_1
@@ -115,6 +116,7 @@
         name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012400;
         capture     group default;
+        capture     req funccall("phbConfigured_1");
     };
 
     register PCICLOCKFIR_2
@@ -122,7 +124,30 @@
         name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
         scomaddr    0x09012800;
         capture     group default;
+        capture     req funccall("phbConfigured_2");
     };
+
+    register PCI_ETU_RESET_0
+    {
+        name        "ES.PE_WRAP_TOP.PE0.PEPBCQ.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
+        scomaddr    0x0901200A;
+        capture     group never;
+    };
+
+    register PCI_ETU_RESET_1
+    {
+        name        "ES.PE_WRAP_TOP.PE1.PEPBCQ.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
+        scomaddr    0x0901240A;
+        capture     group never;
+    };
+
+    register PCI_ETU_RESET_2
+    {
+        name        "ES.PE_WRAP_TOP.PE2.PEPBCQ.PBAIB.PEAIBREGS.PE_ETU_RESET_REG";
+        scomaddr    0x0901280A;
+        capture     group never;
+    };
+
 
     ############################################################################
     # PCIE Chiplet PBFFIR
