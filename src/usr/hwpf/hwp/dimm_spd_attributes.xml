@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.23 2013/07/14 01:35:41 mjjones Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.28 2013/10/11 19:58:00 mjjones Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -1419,13 +1419,23 @@ file
     <id>ATTR_VPD_DRAM_2N_MODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
-        The 2N/2T characteristic of the DIMM from the MT keyword.  If the memory controller needs to run on 2N mode, the address is presented for two cycles.  By default, 2N should be set to INVALID until the platform initializes it..
+        The 2N/2T characteristic of the DIMM from the VPD MR keyword.  If the memory controller needs to run on 2N mode, the address is presented for two cycles.  By default, 2N should be set to INVALID until the platform initializes it.
     </description>
     <valueType>uint8</valueType>
     <enum>INVALID = 0x00, 1N = 0x01, 2N = 0x02</enum>
     <array>2</array>
     <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DIMM_SPARE_TEMP</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>Spare DRAM availability. temporary version, will be replaced by the VPD version</description>
+    <valueType>uint8</valueType>
+    <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
+    <odmVisable/>
     <writeable/>
+    <odmChangeable/>
 </attribute>
 -->
 
