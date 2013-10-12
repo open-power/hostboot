@@ -278,7 +278,7 @@ void ErrlManager::errlogMsgHndlr ( void )
                                    "Terminating error was commited"
                                    " errlmanager is reqesting a shutdown.");
 
-                        INITSERVICE::Shutdown(l_err->plid());
+                        INITSERVICE::doShutdown(l_err->plid(), true);
 
                         TRACDCOMP( g_trac_errl,
                                 INFO_MRK"shutdown in progress" );
@@ -585,8 +585,13 @@ void ErrlManager::errlogShutdown(void)
     // Un-register error log message queue from the mailbox service
     MBOX::msgq_unregister( MBOX::HB_ERROR_MSGQ );
 
-    // destroy the queue
-    msg_q_destroy(iv_msgQ);
+    // Do not destroy the queue... there are paths where the daemon thread
+    // still has references to the queue or the unregisterShutdownEvent did
+    // not take effect because we were already in the middle of a system
+    // shutdown.
+    // Leaving this message queue around really isn't a leak because we are
+    // shutting down.
+    // msg_q_destroy(iv_msgQ);
 
     return;
 }

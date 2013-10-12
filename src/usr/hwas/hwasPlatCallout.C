@@ -130,7 +130,7 @@ errlHndl_t platHandleHWCallout(
             {
                 HWAS_ERR("master proc deconfigured - Shutdown due to plid 0x%X",
                         io_errl->plid());
-                INITSERVICE::doShutdown(io_errl->plid());
+                INITSERVICE::doShutdown(io_errl->plid(), true);
             }
         }
     } // PLD

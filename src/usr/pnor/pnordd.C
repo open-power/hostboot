@@ -600,7 +600,7 @@ errlHndl_t PnorDD::writeRegSfc(SfcRange i_range,
                                uint32_t i_data)
 {
     errlHndl_t l_err = NULL;
-    uint32_t lpc_addr;
+    uint32_t lpc_addr = 0;
 
     switch(i_range)
     {
@@ -646,7 +646,7 @@ errlHndl_t PnorDD::readRegSfc(SfcRange i_range,
                               uint32_t& o_data)
 {
     errlHndl_t l_err = NULL;
-    uint32_t lpc_addr;
+    uint32_t lpc_addr = 0;
 
     switch(i_range)
     {

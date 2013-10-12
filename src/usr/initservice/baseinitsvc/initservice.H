@@ -191,7 +191,7 @@ public:
 
     /**
      * @brief Un register a service for a Shutdown event
-     * 
+     *
      * @param[in] i_msgQ, The message queue to be removed.
      *
      * @return true  - i_msgQ was removed from the event notification list. |
@@ -218,19 +218,6 @@ public:
                       uint64_t i_payload_base = 0,
                       uint64_t i_payload_entry = 0,
                       uint64_t i_payload_data = 0);
-
-    /**
-     * @brief Creates detatched thread and calls doShutdown
-     *
-     * @param[in] i_status - Shutdown status to be passed along on shutdown
-     *
-     * @return Nothing
-     * @note Added to enable errl manager to continue to run in termination
-     * path
-     */
-
-static void * Shutdown( void * io_args );
-
 
 protected:
 
@@ -308,6 +295,9 @@ private:
 
     // List of Services to notify on shutdown
     EventRegistry_t iv_regMsgQ;
+
+    mutex_t iv_registryMutex;
+    bool iv_shutdownInProgress;
 
 };  //  class InitService
 

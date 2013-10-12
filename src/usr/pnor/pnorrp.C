@@ -142,19 +142,6 @@ void* wait_for_message( void* unused )
     return NULL;
 }
 
-/**
- * @brief  Static function wrapper to call doShutdown
- *   to avoid deadlock in main task
- */
-void* pnor_shutdown( void* unused )
-{
-    TRACFCOMP(g_trac_pnor, "pnor_shutdown> " );
-    printk( "PNOR errors causing shutdown\n" );
-    INITSERVICE::doShutdown( PNOR::RC_ECC_UE );
-    return NULL;
-}
-
-
 /********************
  Private/Protected Methods
  ********************/
@@ -727,7 +714,7 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
                 //  that happen during shutdown.
                 iv_shutdownUE = true;
                 o_fatalError = true;
-                task_create( pnor_shutdown, NULL );
+                INITSERVICE::doShutdown( PNOR::RC_ECC_UE, true );
             }
             // found an error so we need to fix something
             else if( ecc_stat != PNOR::ECC::CLEAN )

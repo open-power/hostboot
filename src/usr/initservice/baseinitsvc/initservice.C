@@ -42,6 +42,7 @@
 #include    <sys/sync.h>
 #include    <sys/mm.h>
 #include    <vmmconst.h>
+#include    <sys/time.h>
 
 #include    <errl/errludstring.H>
 
@@ -567,7 +568,7 @@ void InitService::init( void *io_ptr )
             l_shutdownStatus );
 
     //  Tell kernel to perform shutdown sequence
-    InitService::getTheInstance().doShutdown( l_shutdownStatus );
+    INITSERVICE::doShutdown( l_shutdownStatus );
 
     printk( "InitService exit.\n" );
     // return to _start() to exit the task.
@@ -580,8 +581,11 @@ InitService& InitService::getTheInstance( )
 }
 
 
-InitService::InitService( )
-{ }
+InitService::InitService( ) :
+    iv_shutdownInProgress(false)
+{
+    mutex_init(&iv_registryMutex);
+}
 
 
 InitService::~InitService( )
@@ -595,86 +599,97 @@ void registerBlock(void* i_vaddr, uint64_t i_size, BlockPriority i_priority)
 void InitService::registerBlock(void* i_vaddr, uint64_t i_size,
                                 BlockPriority i_priority)
 {
-    //Order priority from largest to smallest upon inserting
-    std::vector<regBlock_t*>::iterator regBlock_iter = iv_regBlock.begin();
-    for (; regBlock_iter!=iv_regBlock.end(); ++regBlock_iter)
+    mutex_lock(&iv_registryMutex);
+
+    if (!iv_shutdownInProgress)
     {
-        if ((uint64_t)i_priority >= (*regBlock_iter)->priority)
+
+        //Order priority from largest to smallest upon inserting
+        std::vector<regBlock_t*>::iterator regBlock_iter = iv_regBlock.begin();
+        for (; regBlock_iter!=iv_regBlock.end(); ++regBlock_iter)
         {
-            iv_regBlock.insert(regBlock_iter,
-                               new regBlock_t(i_vaddr,i_size,
-                                              (uint64_t)i_priority));
-            regBlock_iter=iv_regBlock.begin();
-            break;
+            if ((uint64_t)i_priority >= (*regBlock_iter)->priority)
+            {
+                iv_regBlock.insert(regBlock_iter,
+                        new regBlock_t(i_vaddr,i_size,
+                            (uint64_t)i_priority));
+                regBlock_iter=iv_regBlock.begin();
+                break;
+            }
+        }
+        if (regBlock_iter == iv_regBlock.end())
+        {
+            iv_regBlock.push_back(new regBlock_t(i_vaddr,i_size,
+                        (uint64_t)i_priority));
         }
     }
-    if (regBlock_iter == iv_regBlock.end())
+
+    mutex_unlock(&iv_registryMutex);
+}
+
+
+void doShutdown(uint64_t i_status,
+                bool i_inBackground,
+                uint64_t i_payload_base,
+                uint64_t i_payload_entry,
+                uint64_t i_payload_data)
+{
+    class ShutdownExecute
     {
-        iv_regBlock.push_back(new regBlock_t(i_vaddr,i_size,
-                                             (uint64_t)i_priority));
-    }
-}
+        public:
+            ShutdownExecute(uint64_t i_status,
+                            uint64_t i_payload_base,
+                            uint64_t i_payload_entry,
+                            uint64_t i_payload_data)
+                : status(i_status),
+                  payload_base(i_payload_base),
+                  payload_entry(i_payload_entry),
+                  payload_data(i_payload_data)
+            { }
 
+            void execute()
+            {
+                Singleton<InitService>::instance().doShutdown(status,
+                                                              payload_base,
+                                                              payload_entry,
+                                                              payload_data);
+            }
+            void startThread()
+            {
+                task_create(ShutdownExecute::run, this);
+            }
 
-void Shutdown(uint64_t i_status )
-{
-    void * plid = new uint64_t;
+        private:
+            uint64_t status;
+            uint64_t payload_base;
+            uint64_t payload_entry;
+            uint64_t payload_data;
 
-    *((uint64_t *)plid) = i_status;
+            static void* run(void* _self)
+            {
+                task_detach();
 
-    // spawn a detached thread to handle the shutdown
-    // request - need to do this because the initservice
-    // is going to try and send a sync message to the errl
-    // manager to shutdown
-    tid_t l_tid = task_create(
-            &InitService::Shutdown, plid );
+                ShutdownExecute* self =
+                    reinterpret_cast<ShutdownExecute*>(_self);
 
-    TRACFCOMP( g_trac_initsvc,
-            INFO_MRK"shutdown tid=%d", l_tid );
+                self->execute();
 
-}
-
-void * InitService::Shutdown( void * i_args )
-{
-
-    TRACFCOMP( g_trac_initsvc, ENTER_MRK"Shutdown()" );
-
-    // detach the process from the calling process.
-    task_detach();
-
-    uint64_t plid = *(reinterpret_cast<uint64_t*>(i_args));
-
-    TRACDCOMP( g_trac_initsvc, "plid 0x%x", plid );
-    // request a shutdown, passing in the terminating
-    // error plid as the status.
-    INITSERVICE::doShutdown( plid );
-
-    // delete the storage for the plid;
-    delete ((uint64_t *)i_args);
-
-    i_args = NULL;
-
-    TRACFCOMP( g_trac_initsvc, EXIT_MRK"Shutdown()" );
-
-    return i_args;
-}
-
-
-
-void doShutdown ( uint64_t i_status,
-                  uint64_t i_payload_base,
-                  uint64_t i_payload_entry,
-                  uint64_t i_payload_data)
-{
-    Singleton<InitService>::instance().doShutdown( i_status,
-                                                   i_payload_base,
-                                                   i_payload_entry,
-                                                   i_payload_data);
-
-    while(1)
-    {
-        task_yield();
+                return NULL;
+            }
     };
+
+    ShutdownExecute* s = new ShutdownExecute(i_status, i_payload_base,
+                                             i_payload_entry, i_payload_data);
+
+    if (i_inBackground)
+    {
+        s->startThread();
+    }
+    else
+    {
+        s->execute();
+        while(1) nanosleep(1,0);
+    }
 }
 
 void InitService::doShutdown(uint64_t i_status,
@@ -684,6 +699,17 @@ void InitService::doShutdown(uint64_t i_status,
 {
     int l_rc = 0;
     errlHndl_t l_err = NULL;
+
+    // Ensure no one is manpulating the registry lists and that only one
+    // thread actually executes the shutdown path.
+    mutex_lock(&iv_registryMutex);
+    if (iv_shutdownInProgress)
+    {
+        mutex_unlock(&iv_registryMutex);
+        return;
+    }
+    iv_shutdownInProgress = true;
+    mutex_unlock(&iv_registryMutex);
 
     // Call registered services and notify of shutdown
     msg_t * l_msg = msg_allocate();
@@ -699,7 +725,7 @@ void InitService::doShutdown(uint64_t i_status,
         msg_sendrecv(i->msgQ,l_msg);
     }
 
-     msg_free(l_msg);
+    msg_free(l_msg);
 
     std::vector<regBlock_t*>::iterator l_rb_iter = iv_regBlock.begin();
     //FLUSH each registered block in order
@@ -739,29 +765,38 @@ bool InitService::registerShutdownEvent(msg_q_t i_msgQ,
                                         EventPriority_t i_priority)
 {
     bool result = true;
-    EventRegistry_t::iterator in_pos = iv_regMsgQ.end();
 
-    for(EventRegistry_t::iterator r = iv_regMsgQ.begin();
-        r != iv_regMsgQ.end();
-        ++r)
+    mutex_lock(&iv_registryMutex);
+
+    if (!iv_shutdownInProgress)
     {
-        if(r->msgQ == i_msgQ)
+
+        EventRegistry_t::iterator in_pos = iv_regMsgQ.end();
+
+        for(EventRegistry_t::iterator r = iv_regMsgQ.begin();
+                r != iv_regMsgQ.end();
+                ++r)
         {
-            result = false;
-            break;
+            if(r->msgQ == i_msgQ)
+            {
+                result = false;
+                break;
+            }
+
+            if(r->msgPriority <= (uint32_t)i_priority)
+            {
+                in_pos = r;
+            }
         }
 
-        if(r->msgPriority <= (uint32_t)i_priority)
+        if(result)
         {
-            in_pos = r;
+            in_pos = iv_regMsgQ.insert(in_pos,
+                            regMsgQ_t(i_msgQ, i_msgType, i_priority));
         }
     }
 
-    if(result)
-    {
-        in_pos = iv_regMsgQ.insert(in_pos,
-                                   regMsgQ_t(i_msgQ, i_msgType, i_priority));
-    }
+    mutex_unlock(&iv_registryMutex);
 
     return result;
 }
@@ -769,17 +804,27 @@ bool InitService::registerShutdownEvent(msg_q_t i_msgQ,
 bool InitService::unregisterShutdownEvent(msg_q_t i_msgQ)
 {
     bool result = false;
-    for(EventRegistry_t::iterator r = iv_regMsgQ.begin();
-        r != iv_regMsgQ.end();
-        ++r)
+
+    mutex_lock(&iv_registryMutex);
+
+    if (!iv_shutdownInProgress)
     {
-        if(r->msgQ == i_msgQ)
+
+        for(EventRegistry_t::iterator r = iv_regMsgQ.begin();
+                r != iv_regMsgQ.end();
+                ++r)
         {
-            result = true;
-            iv_regMsgQ.erase(r);
-            break;
+            if(r->msgQ == i_msgQ)
+            {
+                result = true;
+                iv_regMsgQ.erase(r);
+                break;
+            }
         }
     }
+
+    mutex_unlock(&iv_registryMutex);
+
     return result;
 }
 

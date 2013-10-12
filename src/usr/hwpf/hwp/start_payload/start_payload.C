@@ -551,6 +551,7 @@ errlHndl_t callShutdown ( void )
                    "callShutdown finished, shutdown = 0x%x.",
                    status );
         INITSERVICE::doShutdown( status,
+                                 false,
                                  payloadBase,
                                  payloadEntry,
                                  payloadData);

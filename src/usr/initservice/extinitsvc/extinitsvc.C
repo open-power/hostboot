@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -116,12 +116,11 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
 
         //  Tell the kernel to shut down.  This will not actually
         //  happen until the last thread has ended.
-        InitService::getTheInstance().doShutdown(
-                                      SHUTDOWN_STATUS_EXTINITSVC_FAILED);
+        INITSERVICE::doShutdown(SHUTDOWN_STATUS_EXTINITSVC_FAILED);
 
         //  end the task.
         io_rtaskRetErrl=NULL;
-        return; 
+        return;
 #endif
 
         //  end the task and pass the errorlog to initservice to be committed.
@@ -131,7 +130,7 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
                 l_errl );
 
         io_rtaskRetErrl=l_errl;
-        return; 
+        return;
     }
 
     //  finish things up, return to initservice with goodness.

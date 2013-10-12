@@ -84,6 +84,7 @@ bool unregisterShutdownEvent(msg_q_t i_msgQ);
  * @brief Perform necessary steps, such as FLUSHing, to registered blocks.
  *
  * @param[in] i_status - Shutdown status to be passed along on shutdown
+ * @param[in] i_inBackground - Shutdown should be handled by a background task.
  * @param[in] i_payload_base - The base address (target HRMOR) of the
  *                             payload.
  * @param[in] i_payload_entry - The offset from base address of the
@@ -92,26 +93,16 @@ bool unregisterShutdownEvent(msg_q_t i_msgQ);
  *
  * @return Nothing
  *
- * @note Never returns.
+ * @note If inBackground = true, the shutdown call will spawn a child task
+ *       which will do the shutdown processing.  If inBackground = false, the
+ *       shutdown processing will be handled in the context of the caller and
+ *       will never return.
  */
 void doShutdown ( uint64_t i_status,
+                  bool i_inBackground = false,
                   uint64_t i_payload_base = 0,
                   uint64_t i_payload_entry = 0,
-                  uint64_t i_payload_data = 0) NO_RETURN;
-
-
-/**
- * @brief Creates a separate thread and calls doShutdown
- *
- * @param[in] i_status - Shutdown status to be passed along on shutdown
- *
- * @return Nothing
- *
- * @Note: added for errlmanager to call so errlmanager continues
- * to run in case there are errors in the shutdown path
- *
- */
-void Shutdown( uint64_t i_status );
+                  uint64_t i_payload_data = 0);
 
 /**
  * @brief Returns if Service Processor Base Services are available
