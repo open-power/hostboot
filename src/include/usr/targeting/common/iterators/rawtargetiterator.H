@@ -87,7 +87,7 @@ class _TargetRawIterator : public _TargetIterator<T>
          */
         ALWAYS_INLINE
         _TargetRawIterator()
-            : iv_pCurrent(NULL)
+            : _TargetIterator<T>(NULL)
         {
         }
 
@@ -99,9 +99,28 @@ class _TargetRawIterator : public _TargetIterator<T>
          */
         ALWAYS_INLINE
         explicit _TargetRawIterator(T i_pTarget)
-            : iv_pCurrent(i_pTarget)
+            : _TargetIterator<T>(i_pTarget)
         {
         }
+
+        /**
+         *  @brief Pre-increment the iterator
+         *
+         *  @return The reference to the same iterator after advancing it
+         */
+        ALWAYS_INLINE
+        _TargetRawIterator& operator++();
+
+        /**
+         *  @brief Post-increment the iterator
+         *
+         *  @param[in] UNNAMED Dummy parameter used to distinguish
+         *      this interface from pre-increment
+         *
+         *  @return Copy of the original iterator before it advanced
+         */
+        ALWAYS_INLINE
+        _TargetRawIterator operator++(int);
 
         /**
          *  @brief Destroy an iterator to a (const/non-const) target handle
@@ -113,6 +132,17 @@ class _TargetRawIterator : public _TargetIterator<T>
         {
         }
 
+        /**
+         *  @brief Copy constructor; assign iterator to a new iterator (such
+         *      that they logically point to same entity)
+         *
+         *  @param[in] i_rhs The iterator to assign
+         */
+        ALWAYS_INLINE
+        _TargetRawIterator(const _TargetRawIterator& i_rhs)
+            : _TargetIterator<T>(i_rhs)
+        {
+        }
 
     private:
 
@@ -121,8 +151,6 @@ class _TargetRawIterator : public _TargetIterator<T>
          *      the target service (or end() if end of list)
          */
         void advance();
-
-        T iv_pCurrent; // Pointer to current target
 };
 
 /**
@@ -130,6 +158,29 @@ class _TargetRawIterator : public _TargetIterator<T>
  */
 typedef _TargetRawIterator<Target*> TargetRawIterator;
 typedef _TargetRawIterator<const Target*> ConstTargetRawIterator;
+
+//******************************************************************************
+// _TargetRawIterator::operator++ (postincrement)
+//******************************************************************************
+
+template<typename T>
+_TargetRawIterator<T> _TargetRawIterator<T>::operator++(int)
+{
+    _TargetRawIterator l_originalIterator(*this);
+    advance();
+    return l_originalIterator;
+}
+
+//******************************************************************************
+// _TargetRawIterator::operator++ (preincrement)
+//******************************************************************************
+
+template<typename T>
+_TargetRawIterator<T>& _TargetRawIterator<T>::operator++()
+{
+    advance();
+    return *this;
+}
 
 #undef TARG_CLASS
 #undef TARG_NAMESPACE

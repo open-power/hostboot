@@ -70,9 +70,10 @@ void _TargetRawIterator<T>::advance()
 
     // If cursor points to end()/NULL, do nothing.  Otherwise, check to see if
     // it should advance (possibly to NULL)
-    if(iv_pCurrent != NULL)
+    if(_TargetIterator<T>::iv_pCurrent != NULL)
     {
-        iv_pCurrent = l_targetService.getNextTarget(iv_pCurrent);
+        _TargetIterator<T>::iv_pCurrent =
+            l_targetService.getNextTarget(_TargetIterator<T>::iv_pCurrent);
     }
 }
 

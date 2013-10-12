@@ -241,6 +241,8 @@ class _TargetIterator
          */
         void advance();
 
+    protected:
+
         T iv_pCurrent; // Pointer to current target
 };
 

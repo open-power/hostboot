@@ -685,6 +685,8 @@ use constant BUS_POS_FIELD        => 6;
 use constant BUS_ORDINAL_FIELD    => 7;
 use constant DIMM_POS_FIELD       => 8;
 
+use constant CDIMM_RID_NODE_MULTIPLIER => 32;
+
 my @Membuses;
 foreach my $i (@{$memBus->{'memory-bus'}})
 {
@@ -1124,7 +1126,9 @@ for my $i ( 0 .. $#STargets )
         {
             die "ERROR. Can't locate Centaur from memory bus table\n";
         }
-        my $relativeCentaurRid = $STargets[$i][PLUG_POS];
+
+        my $relativeCentaurRid = $STargets[$i][PLUG_POS]
+            + (CDIMM_RID_NODE_MULTIPLIER * $STargets[$i][NODE_FIELD]);
 
         #should note that the $SortedVmem is sorted by node and position and
         #currently $STargets is also sorted by node and postion. If this ever
@@ -2704,7 +2708,9 @@ sub generate_dimm
     # Adjust offset basedon processor value
     $vpdRec = ($proc * 64) + $vpdRec;
 
-    my $dimmHex=sprintf("0xD0%02X",$relativePos);
+    my $dimmHex = sprintf("0xD0%02X",$relativePos
+        + (CDIMM_RID_NODE_MULTIPLIER * ${node}));
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
