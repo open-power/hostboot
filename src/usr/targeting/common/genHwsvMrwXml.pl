@@ -655,14 +655,16 @@ our $psiBus = XMLin("$mrwdir/${sysname}-psi-busses.xml",
                       forcearray=>['psi-bus']);
 
 # Capture all PSI connections into the @hbPSIs array
-use constant HB_PSI_MASTER_CHIP_UNIT_FIELD      => 0;
-use constant HB_PSI_PROC_NODE_FIELD             => 1;
-use constant HB_PSI_PROC_POS_FIELD              => 2;
+use constant HB_PSI_MASTER_CHIP_POSITION_FIELD  => 0;
+use constant HB_PSI_MASTER_CHIP_UNIT_FIELD      => 1;
+use constant HB_PSI_PROC_NODE_FIELD             => 2;
+use constant HB_PSI_PROC_POS_FIELD              => 3;
 
 my @hbPSIs;
 foreach my $i (@{$psiBus->{'psi-bus'}})
 {
     push @hbPSIs, [
+                  $i->{fsp}->{'psi-unit'}->{target}->{position},
                   $i->{fsp}->{'psi-unit'}->{target}->{chipUnit},
                   $i->{processor}->{target}->{node},
                   $i->{processor}->{target}->{position},
@@ -1835,12 +1837,14 @@ sub generate_proc
         $mboxsize = length($mboxpath) + 1;
     }
 
+    my $psichip = 0;
     my $psilink = 0;
     for my $psi ( 0 .. $#hbPSIs )
     {
         if(($node eq $hbPSIs[$psi][HB_PSI_PROC_NODE_FIELD]) &&
            ($proc eq $hbPSIs[$psi][HB_PSI_PROC_POS_FIELD] ))
         {
+            $psichip = $hbPSIs[$psi][HB_PSI_MASTER_CHIP_POSITION_FIELD];
             $psilink = $hbPSIs[$psi][HB_PSI_MASTER_CHIP_UNIT_FIELD];
             last;
         }
@@ -1974,7 +1978,7 @@ sub generate_proc
             ($i->{'processor'}->{target}->{node} eq $node ))
         {
             $fspBase = 0x0003FFE000000000 + 0x400000000*$lognode + 0x100000000*$logid;
-            $psiBase = 0x0003FFFE80000000 + 0x100000*$psilink;
+            $psiBase = 0x0003FFFE80000000 + 0x400000*$psichip + 0x100000*$psilink;
             last;
         }
     }
