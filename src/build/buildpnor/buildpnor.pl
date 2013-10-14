@@ -346,7 +346,7 @@ sub createPnorImage
             my $userflags0 = ($chip << 16)
               | ($compress << 8)
               | $ecc;
-            trace(0,"userflags0 = $userflags0");
+            trace(1,"userflags0 = $userflags0");
             if ($g_ffsCmd eq "") {
                 trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 0 --name $eyeCatch --value $userflags0");
                 my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 0 --name $eyeCatch --value $userflags0`;
