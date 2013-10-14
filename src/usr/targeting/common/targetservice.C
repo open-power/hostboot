@@ -65,6 +65,12 @@ namespace TARGETING
 // It is defined here to limit the scope
 #define MAX_NODE_ID  iv_nodeInfo.size()
 
+#ifdef MULTINODE_TARGETING
+#define MAX_ENABLED_NODE_ID iv_nodeInfo.size()
+#else
+#define MAX_ENABLED_NODE_ID 1
+#endif
+
 //******************************************************************************
 // targetService
 //******************************************************************************
@@ -381,7 +387,7 @@ uint8_t TargetService::getNextInitializedNode(const NODE_ID i_node) const
     uint8_t l_nodeCnt = 0;
     bool l_foundNode = false;
 
-    if(static_cast<uint32_t>(i_node + 1) < MAX_NODE_ID)
+    if(static_cast<uint32_t>(i_node + 1) < MAX_ENABLED_NODE_ID )
     {
         for(l_nodeCnt=(i_node +1); l_nodeCnt<MAX_NODE_ID; ++l_nodeCnt)
         {
