@@ -32,8 +32,8 @@
 #include <errl/errlmanager.H>
 #include <util/utillidmgr.H>
 #include <map>
-
 #include <runtime/interface.h>
+#include <vpd/vpd_if.H>
 
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
@@ -112,6 +112,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->scom_write = rt_scom_write;
                 intf->lid_load = rt_lid_load;
                 intf->lid_unload = rt_lid_unload;
+                intf->get_vpd_image_addr = rt_get_vpd;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -296,11 +297,52 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return 0;
         }
 
+
+        //--------------------------------------------------------------------
+        static uint64_t rt_get_vpd()
+        {
+            if(cv_vpd_addr != 0)
+            {
+                return cv_vpd_addr;
+            }
+
+            // runtime VPD area not setup yet.
+            // Need to map the area into virtual memory
+
+            uint64_t phys_addr = 0;
+            errlHndl_t err = VPD::vpd_load_rt_image(phys_addr);
+
+            if(!err)
+            {
+
+                uint8_t * vpd_ptr =
+                    reinterpret_cast<uint8_t *>(phys_addr);
+
+                void * vptr = mm_block_map(vpd_ptr, VMM_RT_VPD_SIZE);
+
+                assert(vptr != NULL,"rt_get_vpd. Could not map VPD memory");
+
+
+                // Store the address in a class variable so we only 
+                // need to load vpd once.
+                cv_vpd_addr = reinterpret_cast<uint64_t>(vptr);
+            }
+            else
+            {
+                errlCommit(err,CXXTEST_COMP_ID);
+            }
+
+            return cv_vpd_addr;
+
+        }
+
+        static uint64_t cv_vpd_addr;
 };
 
 
 RuntimeLoaderTest::SCOM_MAP RuntimeLoaderTest::cv_scomMap;
 std::map<void*, UtilLidMgr*> RuntimeLoaderTest::cv_loadedLids;
+uint64_t RuntimeLoaderTest::cv_vpd_addr = 0;
 
 
 #endif

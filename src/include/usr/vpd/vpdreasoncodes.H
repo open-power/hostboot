@@ -70,6 +70,12 @@ enum vpdModuleId
 
     // Centaur FRU VPD
 
+    // Runtime VPD
+    VPD_RT_GET_ADDR                         = 0x80,
+    VPD_RT_WRITE_PNOR                       = 0x81,
+    VPD_BLD_RT_IMAGE                        = 0x82,
+    VPD_SEND_MBOX_WRITE_MESSAGE             = 0x83,
+
 };
 
 /**
@@ -102,6 +108,13 @@ enum vpdReasonCode
     VPD_INVALID_WRITE_METHOD            = VPD_COMP_ID | 0x13,
     VPD_NULL_ENTRY                      = VPD_COMP_ID | 0x14,
     VPD_UNSUPPORTED_WRITE               = VPD_COMP_ID | 0x15,
+    VPD_RT_INVALID_TYPE                 = VPD_COMP_ID | 0x16,
+    VPD_RT_CALL_TO_HYPR_FAILED          = VPD_COMP_ID | 0x17,
+    VPD_RT_WRITE_NOT_SUPPORTED          = VPD_COMP_ID | 0x18,
+    VPD_RT_NOT_INITIALIZED              = VPD_COMP_ID | 0x19,
+    VPD_RT_NULL_VPD_PTR                 = VPD_COMP_ID | 0x1a,
+    VPD_INSUFFICIENT_SPACE_FOR_IMAGE    = VPD_COMP_ID | 0x1b,
+    VPD_MBOX_NOT_SUPPORTED_RT           = VPD_COMP_ID | 0x1c,
 };
 
 };  // end MVPD

@@ -460,6 +460,7 @@ class MVPDTest: public CxxTest::TestSuite
                                    testData,
                                    theSize,
                                    DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+#ifndef __HOSTBOOT_RUNTIME
                 if( err )
                 {
                     fails++;
@@ -521,6 +522,19 @@ class MVPDTest: public CxxTest::TestSuite
                                 VPD_COMP_ID );
                     continue;
                 }
+#else
+                if(!err)
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_vpd, ERR_MRK
+                               "testMvpdWrite() at runtime did not fail");
+                    TS_FAIL( "testMvpdWrite() - VPD write did not fail at runtime");
+                }
+                else
+                {
+                    delete err;
+                }
+#endif
                 
             } while( 0 );
 

@@ -255,6 +255,7 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdWriteDQ ( void )
         {
+#ifndef __HOSTBOOT_RUNTIME
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -445,6 +446,7 @@ class SPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_spd,
                        "testSpdWriteDQ - %d/%d fails",
                        fails, cmds );
+#endif
         }
 
         /**
@@ -456,6 +458,7 @@ class SPDTest: public CxxTest::TestSuite
          */
         void _testSpdWriteSmall ( void )
         {
+#ifndef __HOSTBOOT_RUNTIME
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -642,6 +645,7 @@ class SPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_spd,
                        "testSpdWriteSmall - %d/%d fails",
                        fails, cmds );
+#endif
         }
         /**
          * @brief Test an invalid Keyword to a DIMM target.
@@ -761,6 +765,7 @@ class SPDTest: public CxxTest::TestSuite
          */
         void testSpdInvalidWrite ( void )
         {
+#ifndef __HOSTBOOT_RUNTIME
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -819,8 +824,8 @@ class SPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_spd,
                        "testSpdInvalidWrite - %d/%d fails",
                        fails, cmds );
+#endif
         }
-
 
         /**
          * @brief This test will test reading the Module specific keywords.

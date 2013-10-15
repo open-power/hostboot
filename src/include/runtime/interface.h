@@ -103,6 +103,11 @@ typedef struct hostInterfaces
      */
     int (*lid_unload)(void*);
 
+    /** Get address of VPD image
+     * @return physical address of VPD image
+     */
+    uint64_t (*get_vpd_image_addr)();
+
 } hostInterfaces_t;
 
 typedef struct runtimeInterfaces

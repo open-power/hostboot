@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/devtree/devtree_reasoncodes.H $               */
+/* $Source: src/include/usr/vpd/vpd_if.H $                                */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,26 +20,16 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __DEVTREE_REASONCODES_H
-#define __DEVTREE_REASONCODES_H
+#if !defined(__VPD_IF_H)
+#define __VPD_IF_H
 
-#include <hbotcompid.H>
-
-namespace DEVTREE
+namespace VPD
 {
-    enum DevtreeModuleId
-    {
-        MOD_DEVTREE_INVALID           = 0x00, /**< Zero is invalid module id */
-        MOD_DEVTREE_BLD_MEM           = 0x01,
-        MOD_BLD_VPD_IMAGE             = 0x02,
-    };
-
-    enum DevtreeReasonCode
-    {
-        RC_ATTR_MEMSIZE_GET_FAIL            = DEVTREE_COMP_ID | 0x01,
-        RC_ATTR_MEMBASE_GET_FAIL            = DEVTREE_COMP_ID | 0x02,
-        RC_INSUFFICIENT_SPACE_FOR_RT_VPD    = DEVTREE_COMP_ID | 0x03,
-    };
+    /**
+     * Load the runtime VPD image into memory
+     * @param[out] The physical address of the VPD image
+     * @return error handle if there was an error
+     */
+    errlHndl_t vpd_load_rt_image(uint64_t & o_vpd_addr);
 };
-
 #endif

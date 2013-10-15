@@ -286,6 +286,9 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
             TRACFCOMP(g_trac_vpd, INFO_MRK "No SP Base Services, skipping VPD write");
             TRACFBIN( g_trac_vpd, "msg=", msg, sizeof(msg_t) );
             TRACFBIN( g_trac_vpd, "extra=", msg->extra_data, i_numBytes );
+            free (msg->extra_data);
+            msg_free( msg );
+
             break;
         }
 

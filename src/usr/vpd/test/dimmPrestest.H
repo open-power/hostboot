@@ -55,6 +55,7 @@ class DIMMPresTest: public CxxTest::TestSuite
          */
         void testDimmPres ( void )
         {
+#ifndef __HOSTBOOT_RUNTIME
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -115,6 +116,7 @@ class DIMMPresTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_spd,
                        "testDimmPres - %d/%d fails",
                        fails, cmds );
+#endif
         }
 
 
@@ -124,6 +126,7 @@ class DIMMPresTest: public CxxTest::TestSuite
          */
         void testDimmPresInvalidSize ( void )
         {
+#ifndef __HOSTBOOT_RUNTIME
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -180,9 +183,8 @@ class DIMMPresTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_spd,
                        "testDimmPresInvalidSize() - %d/%d fails",
                        fails, cmds );
+#endif
         }
 
-
 };
-
 #endif

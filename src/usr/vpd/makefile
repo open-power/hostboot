@@ -23,9 +23,13 @@
 ROOTPATH = ../../..
 MODULE = vpd
 
-OBJS = vpd.o spd.o ipvpd.o mvpd.o dimmPres.o cvpd.o
+#include common objects between hb and runtime
+include vpd.mk
 
-SUBDIRS = test.d
+#include unique objects
+OBJS += vpd.o dimmPres.o rtvpd_load.o
+
+SUBDIRS = test.d runtime.d
 
 BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:7dabbe4879dcdd19ed236573aa68e8671fa8c3c7

@@ -1068,6 +1068,7 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
                                void * o_data )
 {
     errlHndl_t err = NULL;
+#ifndef __HOSTBOOT_RUNTIME
     const char * fileName = "dimmspd.dat";
     const char * startAddr = NULL;
     size_t fileSize;
@@ -1164,7 +1165,7 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
 
     TRACSSCOMP( g_trac_spd,
                 EXIT_MRK"spdReadBinaryFile()" );
-
+#endif
     return err;
 }
 

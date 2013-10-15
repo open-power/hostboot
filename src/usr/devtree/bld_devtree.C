@@ -44,6 +44,7 @@ $ */
 #include "devtree.H"
 #include <sys/mmio.h> //THIRTYTWO_GB
 #include <intr/interrupt.H>
+#include <vpd/vpd_if.H>
 
 
 trace_desc_t *g_trac_devtree = NULL;
@@ -428,7 +429,11 @@ uint32_t bld_intr_node(devTree * i_dt, dtOffset_t & i_parentNode,
     return i_dt->getPhandle(intNode);
 }
 
-void add_reserved_mem(devTree * i_dt, uint64_t i_homerAddr[], size_t i_num)
+
+void add_reserved_mem(devTree * i_dt,
+                      uint64_t i_homerAddr[],
+                      size_t i_num,
+                      uint64_t i_vpd_addr)
 {
     /*
      * The reserved-names and reserve-names properties work hand in hand.
@@ -454,21 +459,48 @@ void add_reserved_mem(devTree * i_dt, uint64_t i_homerAddr[], size_t i_num)
     dtOffset_t rootNode = i_dt->findNode("/");
 
     const char* homerStr = "ibm,slw-occ-image";
-    const char* reserve_strs[i_num+1];
-    uint64_t homerRanges[i_num][2];
+    const char* vpdStr   = "ibm,hbrt-vpd-image";
+    const char* reserve_strs[i_num+2];
+    uint64_t ranges[i_num+1][2];
+    uint64_t cell_count = sizeof(ranges) / sizeof(uint64_t);
+    uint64_t res_mem_addrs[i_num+1];
+    uint64_t res_mem_sizes[i_num+1];
+
     for(size_t i = 0; i<i_num; i++)
     {
         reserve_strs[i] = homerStr;
-        homerRanges[i][0] = i_homerAddr[i];
-        homerRanges[i][1] = VMM_HOMER_INSTANCE_SIZE;
+        ranges[i][0] = i_homerAddr[i];
+        ranges[i][1] = VMM_HOMER_INSTANCE_SIZE;
+        res_mem_addrs[i] = i_homerAddr[i];
+        res_mem_sizes[i] = VMM_HOMER_INSTANCE_SIZE;
     }
 
-    reserve_strs[i_num] = NULL;
+    if(i_vpd_addr)
+    {
+        reserve_strs[i_num] = vpdStr;
+        ranges[i_num][0] = i_vpd_addr;
+        ranges[i_num][1] = VMM_RT_VPD_SIZE;
+
+        res_mem_addrs[i_num] = i_vpd_addr;
+        res_mem_sizes[i_num] = VMM_RT_VPD_SIZE;
+
+        reserve_strs[i_num+1] = NULL;
+    }
+    else
+    {
+        reserve_strs[i_num] = NULL;
+        cell_count -= sizeof(ranges[0]);
+    }
 
     i_dt->addPropertyStrings(rootNode, "reserved-names", reserve_strs);
     i_dt->addPropertyCells64(rootNode, "reserved-ranges",
-                             reinterpret_cast<uint64_t*>(homerRanges),
-                             sizeof(homerRanges) / sizeof(uint64_t));
+                             reinterpret_cast<uint64_t*>(ranges),
+                             cell_count);
+
+    // added per comment from Dean Sanner
+    // cell_count has limit of DT_MAX_MEM_RESERVE  = 16. Is this enough
+    // for all processors + 1 vpd area?
+    i_dt->populateReservedMem(res_mem_addrs, res_mem_sizes, cell_count);
 }
 
 
@@ -538,8 +570,17 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt)
         }
     }
 
-    //Add in reserved memory for HOMER images
-    add_reserved_mem(i_dt, l_homerAddr, l_cpuTargetList.size());
+    // VPD
+    uint64_t l_vpd_addr = 0;
+
+    errhdl = VPD::vpd_load_rt_image(l_vpd_addr);
+
+
+    //Add in reserved memory for HOMER images and VPD image
+    add_reserved_mem(i_dt,
+                     l_homerAddr,
+                     l_cpuTargetList.size(),
+                     l_vpd_addr);
 
     return errhdl;
 }

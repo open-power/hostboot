@@ -247,6 +247,7 @@ class CVPDTest: public CxxTest::TestSuite
          */
         void testCvpdWrite ( void )
         {
+#ifndef __HOSTBOOT_RUNTIME
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
@@ -409,6 +410,7 @@ class CVPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_vpd,
                        "testCvpdWrite - %d/%d fails",
                        fails, cmds );
+#endif
         }
 
         /**
