@@ -412,8 +412,10 @@ if { ![info exists output_dir] } {
     set output_dir "./"
 }
 
-# Make the output directory
-eval {exec} "mkdir -p $output_dir/pnor"
+if { ![info exists noretrieve] } {
+    # Make the output directory
+    eval {exec} "mkdir -p $output_dir/pnor"
+}
 
 lappend cmds ":INFO userid $userid version $version"
 

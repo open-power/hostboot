@@ -175,6 +175,14 @@ proc AquireData { sock } {
             } else {
               set filename $b
             }
+
+            if { ![file exists $src_path] } {
+                puts $sock "ERROR: sandbox directory not found"
+                puts $log "$sock: sandbox directory not found"
+                CloseOut $sock
+                return
+            }
+
             # we can't just find -name $filename because that won't find path/filename. -wholename does
             #  that, but we need the $filename to not have any ./ prefix if the user included that.
             # additionally, find usually outputs the file(s) separated by a newline. if there
@@ -652,7 +660,7 @@ proc SendSandboxNew { sock git_sh} {
 # client.  Note: Everything from stderr gets returned
 ##################################################################
 
-set explist [list  {^make.*Error.*} {ERROR:.*} {error:.*} {^IfScrub..E>.*} {^Parse Error.*} {^Error.*} {^exception caught.*} ]
+set explist [list  {^make.*Error.*} {.*NOT FOUND.*} {ERROR:.*} {error:.*} {^IfScrub..E>.*} {^Parse Error.*} {^Error.*} {^exception caught.*} ]
 
 ##################################################################
 ## This event catches the output of the sandbox when the pipe become readable
@@ -746,7 +754,7 @@ proc SendPnorFiles { sock obj_dir } {
     set pnor_files {}
 
     # Send the image files
-    if {[catch {set pnor_files [glob -dir $obj_dir hostboot.header.bin hostboot_extended.bin hostboot.stage.bin]} res]} {
+    if {[catch {set pnor_files [glob -dir $obj_dir hostboot.header.bin hostboot_extended.bin hostboot.bin hostboot.stage.bin]} res]} {
         puts $sock "ERROR: Needed image files not found in $obj_dir"
         puts $log "$sock: Needed image files not found in $obj_dir"
     } else {
