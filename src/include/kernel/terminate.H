@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,7 +40,7 @@ void terminateExecuteTI();
  *  @param[in] i_plid:    plid to be stored
  *  @param[out] NONE:
  */
-void termWritePlid(uint16_t i_source, uint64_t plid);
+void termWritePlid(uint16_t i_source, uint32_t plid);
 
 /** @fn termWriteSRC
  *  Create an SRC and Update the TI data area with the src created

@@ -53,7 +53,7 @@ void terminateExecuteTI()
     p8_force_attn();
 }
 
-void termWritePlid(uint16_t i_source, uint64_t plid)
+void termWritePlid(uint16_t i_source, uint32_t plid)
 {
     kernel_TIDataArea.type = TI_WITH_PLID;
     kernel_TIDataArea.source = i_source;

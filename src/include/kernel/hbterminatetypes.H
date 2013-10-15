@@ -85,8 +85,9 @@ struct HB_TI_DataArea
             uint64_t reserved3:16;  /**< Reserved space  */
         };
         uint64_t flag;              /**< Full word - flag */
-    }; 
-    uint64_t plid;                  /**< Plid  */
+    };
+    uint32_t reserved0;
+    uint32_t plid;                  /**< Plid  */
     HB_T_SRC_DataArea src;          /**< SRC  */
 };
 
@@ -97,7 +98,7 @@ enum hb_terminate_type
     TI_WITH_SRC =  0x0002,
 };
 
-// Enum used in the flag indicating who initiated the TI 
+// Enum used in the flag indicating who initiated the TI
 enum hb_terminate_source
 {
     TI_KERNEL_ASSERT = 0x0001,
