@@ -554,7 +554,7 @@ void PnorDD::sfcInit( )
                            cv_nor_chipid );
 
                 //Shutdown if we detect unsupported Hardware
-                INITSERVICE::doShutdown( PNOR::RC_UNSUPORTED_HARDWARE);
+                INITSERVICE::doShutdown( PNOR::RC_UNSUPPORTED_HARDWARE);
 
                 //Set chip ID back to zero to avoid later chip specific logic.
                 cv_nor_chipid = 0;

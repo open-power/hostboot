@@ -1899,7 +1899,7 @@ void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
     if(interrupt_found && (retryCount == 0))
     {
         // traces above should identify stuck interrupt
-        INITSERVICE::doShutdown(INTR::RC_PERSISTANT_INTERRUPTS);
+        INITSERVICE::doShutdown(INTR::RC_PERSISTENT_INTERRUPTS);
     }
 }
 

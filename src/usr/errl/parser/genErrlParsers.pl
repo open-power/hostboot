@@ -325,7 +325,8 @@ foreach my $file (@reasonCodeFiles)
                     # in reasoncode.H files
                     if($term_rc_tag)
                     {
-                        my $line = $1." = 0x".$rcToValueHash{$namespace}->{$1};
+                        my $line = $1." = 0x".
+                          $rcToValueHash{$namespace}->{$1}.",";
                         push @taggedLines, $line;
                         $printEnum = 1;
                         $term_rc_tag = 0;
@@ -350,7 +351,8 @@ foreach my $file (@reasonCodeFiles)
                     # in reasoncode.H files
                     if($term_rc_tag)
                     {
-                        my $line = $1." = 0x".$rcToValueHash{$namespace}->{$1};
+                        my $line = $1." = 0x".
+                          $rcToValueHash{$namespace}->{$1}.",";
                         push @taggedLines, $line;
                         $printEnum = 1;
                         $term_rc_tag = 0;

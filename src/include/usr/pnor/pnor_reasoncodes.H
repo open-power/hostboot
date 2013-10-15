@@ -64,20 +64,16 @@ namespace PNOR
         RC_UNSUPPORTED_OPERATION     = PNOR_COMP_ID | 0x07,
         RC_LPC_ERROR                 = PNOR_COMP_ID | 0x08,
         RC_BAD_STARTUP_RC            = PNOR_COMP_ID | 0x09,
-        //RC_UNSUPORTED_HARDWARE Must have one unique use
-        //   for Shutdown path  
-        RC_UNSUPORTED_HARDWARE       = PNOR_COMP_ID | 0x0A,
+        //termination_rc
+        RC_UNSUPPORTED_HARDWARE      = PNOR_COMP_ID | 0x0A,
         RC_MICRON_INCOMPLETE         = PNOR_COMP_ID | 0x0B,
-        //RC_PARTITION_TABLE_INVALID Must have one unique use
-        //   for Shutdown path  
+        //termination_rc
         RC_PARTITION_TABLE_INVALID   = PNOR_COMP_ID | 0x0C,
-        //RC_UNSUPPORTED_MODE can only be used in
-        //   shutdown calls.
+        //termination_rc
         RC_UNSUPPORTED_MODE          = PNOR_COMP_ID | 0x0D,
-        //RC_UNSUPPORTED_SFCRANGE can only be used in
-        //   shutdown calls.
+        //termination_rc
         RC_UNSUPPORTED_SFCRANGE      = PNOR_COMP_ID | 0x0E,
-        // Cannot change value of RC_ECC_UE, used by FSP
+        //termination_rc
         RC_ECC_UE                    = PNOR_COMP_ID | 0x0F,
     };
 };
