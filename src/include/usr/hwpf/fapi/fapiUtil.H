@@ -46,6 +46,7 @@
  *                          mjjones     08/13/2012  Add fapiSpecialWakeup
  *                          mjjones     09/24/2013  Update fapiLogError to
  *                                                  accept another parameter
+ *                          dcrowell    10/14/2013  Add explicit inline
  */
 
 #ifndef FAPIUTIL_H_
@@ -268,6 +269,7 @@ namespace fapi
  * This function can be called to check that a variable type is as expected
  */
 template<typename T>
+inline
 void fapiCheckType(const T &) {}
 
 }
