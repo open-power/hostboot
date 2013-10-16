@@ -30,7 +30,6 @@ PRDF_RULE_PLUGINS_PEGASUS = \
     prdfCenMba.o \
     prdfPlatCenMba.o \
     prdfCenMembuf.o \
-    prdfPlatCenMembuf.o \
     prdfP8TodPlugins.o \
     prdfCenPll.o
 

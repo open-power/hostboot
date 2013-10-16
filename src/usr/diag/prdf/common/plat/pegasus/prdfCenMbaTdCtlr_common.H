@@ -166,7 +166,6 @@ class CenMbaTdCtlrCommon
     virtual int32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
                                    const CenRank & i_rank,
                                    const TdType i_event ) = 0;
-
   protected: // functions
 
     /**

@@ -394,7 +394,7 @@ PRDF_PLUGIN_DEFINE( Membuf, checkSpareBit );
  * @return SUCCESS
  */
 int32_t AnalyzeMpe( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc,
-                    uint32_t i_mbaPos, uint8_t i_rank, bool isFetchError )
+                    uint32_t i_mbaPos, uint8_t i_rank )
 {
     #define PRDF_FUNC "[AnalyzeMpe] "
 
@@ -415,32 +415,26 @@ int32_t AnalyzeMpe( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc,
         CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
         TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
 
-        // Add address to UE table.
-        if ( isFetchError )
+        CenAddr addr;
+        l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_MPE_ADDR, addr );
+        if ( SUCCESS != l_rc )
         {
-            CenAddr addr;
-            l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_MPE_ADDR, addr );
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
-                break;
-            }
-            mbadb->iv_ueTable.addEntry( UE_TABLE::FETCH_MPE, addr );
-        }
-        else
-        {
-            CenAddr addr;
-            l_rc = getCenMaintStartAddr( mbaChip, addr );
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC"getCenMaintStartAddr() failed" );
-                break;
-            }
-            mbadb->iv_ueTable.addEntry( UE_TABLE::SCRUB_MPE, addr );
+           PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+           break;
         }
 
+        // If the address does not match the rank that reported the attention,
+        // there are multiple MPE attentions and the address was overwritten.
+        // In this case, add an invalid dummy address to the UE table.
+        if ( addr.getRank().getMaster() != i_rank )
+        {
+            addr = CenAddr( i_rank, 0, 0xffffffff, 0xffffffff, 0xffffffff );
+        }
+
+        mbadb->iv_ueTable.addEntry( UE_TABLE::FETCH_MPE, addr );
+
         // Get the current mark in hardware.
-        CenRank rank ( i_rank );
+        CenRank rank ( addr.getRank() );
         CenMark mark;
         l_rc = mssGetMarkStore( mbaTrgt, rank, mark );
         if ( SUCCESS != l_rc )
@@ -1070,16 +1064,9 @@ PLUGIN_FETCH_RCE_PREUE_ERROR( PreUe, 1, false )
 int32_t AnalyzeFetchMpe##MBA##_##RANK( ExtensibleChip * i_membChip, \
                                        STEP_CODE_DATA_STRUCT & i_sc ) \
 { \
-    return AnalyzeMpe( i_membChip, i_sc, MBA, RANK, true ); \
+    return AnalyzeMpe( i_membChip, i_sc, MBA, RANK ); \
 } \
-PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetchMpe##MBA##_##RANK ); \
-\
-int32_t AnalyzeMaintMpe##MBA##_##RANK( ExtensibleChip * i_membChip, \
-                                       STEP_CODE_DATA_STRUCT & i_sc ) \
-{ \
-    return AnalyzeMpe( i_membChip, i_sc, MBA, RANK, false ); \
-} \
-PRDF_PLUGIN_DEFINE( Membuf, AnalyzeMaintMpe##MBA##_##RANK );
+PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetchMpe##MBA##_##RANK );
 
 PLUGIN_MEMORY_MPE_ERROR( 0, 0 )
 PLUGIN_MEMORY_MPE_ERROR( 0, 1 )

@@ -116,8 +116,7 @@ int32_t CenMbaTdCtlrCommon::cleanupPrevCmd()
     firand->ClearBit(0); // Maintenance command complete
     firand->ClearBit(8); // Maintenance command complete (DD1.0 workaround)
 
-    int32_t l_rc = firand->Write();
-    if ( SUCCESS != l_rc )
+    if ( SUCCESS != firand->Write() )
     {
         PRDF_ERR( PRDF_FUNC"Write() failed on MBASPA_AND" );
         o_rc = FAIL;
@@ -693,6 +692,5 @@ void CenMbaTdCtlrCommon::setTdSignature( STEP_CODE_DATA_STRUCT & io_sc,
     io_sc.service_data->SetErrorSig( i_sig );
 
 }
-
 } // end namespace PRDF
 

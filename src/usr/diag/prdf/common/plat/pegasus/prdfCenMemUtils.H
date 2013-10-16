@@ -77,6 +77,7 @@ struct SymbolData
 };
 
 typedef std::vector<SymbolData> MaintSymbols;
+
 /**
  * @brief  Checks CE stats on a MBA.
  * @param  i_mbaChip   MBA chip.
@@ -84,16 +85,19 @@ typedef std::vector<SymbolData> MaintSymbols;
  * @param  i_rank Rank for which stat collection will be done.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t collectCeStats( ExtensibleChip *i_mbaChip, MaintSymbols &o_maintStats,
-                      const CenRank & i_rank );
+int32_t collectCeStats( ExtensibleChip * i_mbaChip, MaintSymbols & o_maintStats,
+                        const CenRank & i_rank );
+
 /**
  * @brief  Gets DRAM size for an MBA.
  * @param  i_mbaChip   MBA chip.
  * @param  o_size  size for a DRAM.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t getDramSize( ExtensibleChip *i_mbaChip, uint8_t & o_size );
+int32_t getDramSize( ExtensibleChip * i_mbaChip, uint8_t & o_size );
 
-} // namespace MemUtils
+} // end namespace MemUtils
+
 } // end namespace PRDF
+
 #endif

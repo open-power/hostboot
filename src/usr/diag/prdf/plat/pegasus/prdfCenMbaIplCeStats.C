@@ -131,11 +131,11 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
             HalfRankKey rankKey = { i_stopRank, portSlct };
             iv_rankMap[rankKey]++;
 
-             // In case of dimm Slct , rank select does not matter
-             CenRank dimmRank( dimmSlct << DIMM_SLCT_PER_MBA );
-             // Increment the soft CEs per half dimm select.
-             HalfRankKey dsKey = { dimmRank, portSlct };
-             iv_dsMap[dsKey]++;
+            // In case of dimm select, rank select does not matter
+            CenRank dimmRank( dimmSlct << DIMM_SLCT_PER_MBA );
+            // Increment the soft CEs per half dimm select.
+            HalfRankKey dsKey = { dimmRank, portSlct };
+            iv_dsMap[dsKey]++;
         }
 
     } while (0);
@@ -145,6 +145,7 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
     // We are doing cleanup in TdController code,
     // So not clearing up stats here.
     return o_rc;
+
     #undef PRDF_FUNC
 }
 

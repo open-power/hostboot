@@ -45,6 +45,8 @@ PRDR_ERROR_SIGNATURE(MaintHARD_CTE,   0xffff0012, "", "Maintenance HARD CTE");
 PRDR_ERROR_SIGNATURE(MaintSOFT_CTE,   0xffff0013, "", "Maintenance SOFT CTE");
 PRDR_ERROR_SIGNATURE(MaintINTER_CTE,  0xffff0014, "", "Maintenance INTER CTE");
 PRDR_ERROR_SIGNATURE(MaintRETRY_CTE,  0xffff0015, "", "Maintenance RETRY CTE");
+PRDR_ERROR_SIGNATURE(MaintNCE_CTE,  0xffff0016, "",
+                     "Maintenance SOFT/HARD/INTER CTE");
 
 PRDR_ERROR_SIGNATURE(VcmVerified,     0xffff0020, "", "VCM: verified");
 PRDR_ERROR_SIGNATURE(VcmFalseAlarm,   0xffff0021, "", "VCM: false alarm");
