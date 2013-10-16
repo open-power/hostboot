@@ -1321,14 +1321,16 @@ fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,
                 o_enable = l_buses.size() ? 1 : 0;
                 break;
             case fapi::ATTR_PROC_A_ENABLE:
-                // The enable flag is 1 if one of the abus target is functional
-                getChildChiplets( l_buses, l_pTarget, TARGETING::TYPE_ABUS );
-                o_enable = l_buses.size() ? 1 : 0;
+                // The enable flag reflects the state of the pervasive chiplet,
+                //  NOT the bus logic, so always return true since we don't
+                //  support partial good on the ABUS chiplet
+                o_enable = 1;
                 break;
             case fapi::ATTR_PROC_X_ENABLE:
-                // The enable flag is 1 if one of the xbus target is functioanl
-                getChildChiplets( l_buses, l_pTarget, TARGETING::TYPE_XBUS );
-                o_enable = l_buses.size() ? 1 : 0;
+                // The enable flag reflects the state of the pervasive chiplet,
+                //  NOT the bus logic, so always return true since we don't
+                //  support partial good on the XBUS chiplet
+                o_enable = 1;
                 break;
             default:
                 o_enable = 0;
