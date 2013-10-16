@@ -20,74 +20,28 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pm_prep_for_reset_errors.xml,v 1.4 2013/08/02 19:15:40 stillgs Exp $ -->
-<!-- Error definitions for proc_pcbs_init procedure -->
+<!-- $Id: p8_pm_prep_for_reset_errors.xml,v 1.6 2013-10-15 17:29:30 dcrowell Exp $ -->
+<!-- Error definitions for p8_pm_prep_for_reset procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PREP_UNSUPPORTED_MODE_ERR</rc>
     <description>Mode parameter value not supported</description>
     <ffdc>MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PREP_TARGET_ERR</rc>
-    <description>Errors in Targets passed -- PM_RESET-MODE</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_OCC</rc>
-    <description>Errors in proc_occ_control.C  -- PM_RESET-MODE</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_CPU</rc>
-    <description>Errors in proc_cpu_special_wakeup.C  -- PM_RESET-MODE</description>
-  </hwpError>
-    <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_PMC_FORCE</rc>
-    <description>Errors in proc_pmc_force_vsafe.C  -- PM_RESET-MODE</description>
-  </hwpError>
-    <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_PCBS</rc>
-    <description>Errors in proc__pcbs_init.C  -- PM_RESET-MODE</description>
-  </hwpError>
-    <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_PMC_INIT</rc>
-    <description>Errors in proc_pmc_init.C  -- PM_RESET-MODE</description>
-  </hwpError>
-    <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_PORESW</rc>
-    <description>Errors in proc_poresw_init.C  -- PM_RESET-MODE</description>
-  </hwpError>
-    <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_POREGPE</rc>
-    <description>Errors in proc_poregpe_init.C  -- PM_RESET-MODE</description>
-  </hwpError>
-    <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_OHA</rc>
-    <description>Errors in proc_oha_init.C  -- PM_RESET-MODE</description>
-  </hwpError>
-    <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_PBA</rc>
-    <description>Errors in proc_pba_init.C  -- PM_RESET-MODE</description>
-  </hwpError> 
-      <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_OCC_SRAM</rc>
-    <description>Errors in proc_occ_sram_init.C  -- PM_RESET-MODE</description>
-  </hwpError>
-      <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PREP_CODE_PROC_OCB</rc>
-    <description>Errors in proc_ocb_init.C  -- PM_RESET-MODE</description>
+    <description>Primary target must be set to a valid value in the SCM case.</description>
+    <ffdc>PRIMARY_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->  
 </hwpErrors>

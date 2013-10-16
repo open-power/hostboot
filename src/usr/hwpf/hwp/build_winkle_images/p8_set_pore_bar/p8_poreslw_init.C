@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poreslw_init.C,v 1.15 2013/08/02 19:09:56 stillgs Exp $
+// $Id: p8_poreslw_init.C,v 1.16 2013/09/25 22:36:39 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poreslw_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -141,6 +141,7 @@ p8_poreslw_init(const Target& i_target, uint32_t mode)
     else {
 
       FAPI_ERR("Unknown mode passed to p8_poreslw_init. Mode %x ....", mode);
+      uint32_t & IMODE = mode;
       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PORESLW_CODE_BAD_MODE);
 
     }
@@ -325,6 +326,9 @@ poreslw_reset(const Target& i_target)
         if(!wait_state_detected)
         {
           FAPI_ERR("PORE SLW reset failed ");
+          const fapi::Target & CHIP = i_target;
+          uint32_t           & POLLCOUNT = poll_count;
+          const uint32_t     & MAXPOLLS = max_polls;
           FAPI_SET_HWP_ERROR(rc, RC_PROCPM_SLW_RESET_TIMEOUT);
         }
 
@@ -461,16 +465,18 @@ poreslw_ex_setup(const Target& i_target)
                 pm_winkle_exit);
 
         */
+        
+        // 9/16/13: L3 High Availablity is not supported on P8 any longer.  Removing.
         // Due to L3 High Availability Write Pointers that must be
         // saved upon a Deep Winkle Entry, this transition must be
         // assisted.
-        // \todo  need Attribute for L3 HA enabled.  GA1 = NO
-        if (pm_winkle_entry != ASSISTED)
-        {
-            FAPI_INF("Winkle Entry is not configured in ASSISTED mode.  L3 High Availability functions"
-                        " are not supported");
-            FAPI_INF("Continuing anyway....");
-        }
+        // If ever supported, would need an Attribute for L3 HA enabled.  GA1 = NO
+        //if (pm_winkle_entry != ASSISTED)
+        //{
+        //    FAPI_INF("Winkle Entry is not configured in ASSISTED mode.  L3 High Availability functions"
+        //             " are not supported");
+        //    FAPI_INF("Continuing anyway....");
+        //}
 
         // --------------------------------------
         // Walk the configured chiplets
@@ -501,149 +507,196 @@ poreslw_ex_setup(const Target& i_target)
                 break;
             }
 
-            address = EX_GP3_0x100F0012 + (l_ex_number * 0x01000000);
-            rc=fapiGetScom(i_target, address, data);
-            if(rc)
+            FAPI_INF("\tSetting up Core %X ", l_ex_number);
+
+            //  ******************************************************************
+            //  Set PMGP1_REG
+            //  ******************************************************************
+
+            FAPI_DBG("\t-----------------------------------------------------");
+            FAPI_DBG("\tPMGP1_REG Configuration                  ");
+            FAPI_DBG("\t-----------------------------------------------------");
+            FAPI_DBG("\t  pm_sleep_entry          => %d ", pm_sleep_entry );
+            FAPI_DBG("\t  pm_sleep_exit           => %d ", pm_sleep_exit  );
+            FAPI_DBG("\t  pm_sleep_type           => %d ", pm_sleep_type  );
+            FAPI_DBG("\t  pm_winkle_entry         => %d ", pm_winkle_entry  );
+            FAPI_DBG("\t  pm_winkle_exit          => %d ", pm_winkle_exit  );
+            FAPI_DBG("\t  pm_winkle_type          => %d ", pm_winkle_type  );
+            FAPI_DBG("\t-----------------------------------------------------");
+
+
+            FAPI_DBG("\t*************************************");
+            FAPI_INF("\tSetup PMGP1_REG for EX %x", l_ex_number);
+            FAPI_DBG("\t*************************************");
+
+            // Initialize the set and clear vectors
+            e_rc |= clear_data.flushTo1();  // Set to 1s to be used for WAND
+            e_rc |= set_data.flushTo0();    // Set to 0s to be used for WOR
+
+            // If   sleep entry = 1 (hardware), sleep power down enable = 1
+            // else sleep entry = 0 (assisted), sleep power down enable = 0
+            if (pm_sleep_entry)
             {
-                FAPI_ERR("GetScom error");
+                e_rc |= set_data.setBit(PM_SLEEP_POWER_DOWN_EN_BIT);
+            }
+            else
+            {
+                e_rc |= clear_data.clearBit(PM_SLEEP_POWER_DOWN_EN_BIT);
+            }
+
+            // If   sleep exit  = 1 (hardware), sleep power up enable = 1
+            // else sleep exit  = 0 (assisted), sleep power up enable = 0
+            if (pm_sleep_exit)
+            {
+                e_rc |= set_data.setBit(PM_SLEEP_POWER_UP_EN_BIT);
+            }
+            else
+            {
+                e_rc |= clear_data.clearBit(PM_SLEEP_POWER_UP_EN_BIT);
+            }
+
+            // If   sleep type  = 1 (deep), sleep power up sel = 1
+            // else sleep type  = 0 (fast), sleep power up sel = 0
+            if (pm_sleep_type)
+            {
+                e_rc |= set_data.setBit(PM_SLEEP_POWER_OFF_SEL_BIT);
+
+            }
+            else
+            {
+                e_rc |= clear_data.clearBit(PM_SLEEP_POWER_OFF_SEL_BIT);
+            }
+
+            // If   winkle entry = 1 (hardware), winkle power down enable = 1
+            // else winkle entry = 0 (assisted), winkle power down enable = 0
+            if (pm_winkle_entry)
+            {
+                e_rc |= set_data.setBit(PM_WINKLE_POWER_DOWN_EN_BIT);
+            }
+            else
+            {
+                e_rc |= clear_data.clearBit(PM_WINKLE_POWER_DOWN_EN_BIT);
+            }
+
+            // If   winkle exit  = 1 (hardware), winkle power up enable = 1
+            // else winkle exit  = 0 (assisted), winkle power up enable = 0
+            if (pm_winkle_exit)
+            {
+                e_rc |= set_data.setBit(PM_WINKLE_POWER_UP_EN_BIT);
+            }
+            else
+            {
+                e_rc |= clear_data.clearBit(PM_WINKLE_POWER_UP_EN_BIT);
+            }
+
+            // If   winkle type  = 1 (deep), winkle power up sel = 1
+            // else winkle type  = 0 (fast), winkle power up sel = 0
+            if (pm_winkle_type)
+            {
+                e_rc |= set_data.setBit(PM_WINKLE_POWER_OFF_SEL_BIT);
+
+            }
+            else
+            {
+                e_rc |= clear_data.clearBit(PM_WINKLE_POWER_OFF_SEL_BIT);
+            }
+
+            // Check for any errors from set/clear ops into the buffers
+            if (e_rc)
+            {
+                FAPI_ERR("eCmdDataBuffer operation failed. rc = 0x%x", (uint32_t)e_rc);
+                rc.setEcmdError(e_rc);
                 break;
             }
 
-            // Check if chiplet enable bit is set (configured).  If so, process
-            if ( data.isBitSet(0) )
+            // The set and clear vectors are built.  Write them to
+            // the respective addresses.
+            FAPI_DBG("\tEX_PMGP1_WOR  0x%16llx" , set_data.getDoubleWord(0));
+            address = EX_PMGP1_REG_0_WORx100F0105 + (l_ex_number * 0x01000000);
+            rc=fapiPutScom(i_target, address, set_data);
+            if (rc)
             {
-                FAPI_INF("\tSetting up Core %X ", l_ex_number);
+                FAPI_ERR("fapiPutScom(EX_PMGP1_REG_0_WORx100F0105) failed. rc = 0x%x", (uint32_t)rc);
+                break;
+            }
 
-                //  ******************************************************************
-                //  Set PMGP1_REG
-                //  ******************************************************************
+            FAPI_DBG("\tEX_PMGP1_WAND 0x%16llx" , clear_data.getDoubleWord(0));
+            address = EX_PMGP1_REG_0_WANDx100F0104 + (l_ex_number * 0x01000000);
+            rc=fapiPutScom(i_target, address, clear_data);
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(EX_PMGP1_REG_0_WORx100F0105) failed. rc = 0x%x", (uint32_t)rc);
+                break;
+            }
 
-                FAPI_DBG("\t-----------------------------------------------------");
-                FAPI_DBG("\tPMGP1_REG Configuration                  ");
-                FAPI_DBG("\t-----------------------------------------------------");
-                FAPI_DBG("\t  pm_sleep_entry          => %d ", pm_sleep_entry );
-                FAPI_DBG("\t  pm_sleep_exit           => %d ", pm_sleep_exit  );
-                FAPI_DBG("\t  pm_sleep_type           => %d ", pm_sleep_type  );
-                FAPI_DBG("\t  pm_winkle_entry         => %d ", pm_winkle_entry  );
-                FAPI_DBG("\t  pm_winkle_exit          => %d ", pm_winkle_exit  );
-                FAPI_DBG("\t  pm_winkle_type          => %d ", pm_winkle_type  );
-                FAPI_DBG("\t-----------------------------------------------------");
+            FAPI_INF("\tDisable the PCBS Heartbeat EX %x", l_ex_number);
+            address = EX_SLAVE_CONFIG_0x100F001E + (l_ex_number * 0x01000000);
+            rc = fapiGetScom(i_target, address, data);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Scom error reading PCBS Slave Config");
+                break;
+            }
 
+            e_rc |= data.setBit(4);
+            if (e_rc)
+            {
+                FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
+                rc.setEcmdError(e_rc);
+                break;
+            }
 
-                FAPI_DBG("\t*************************************");
-                FAPI_INF("\tSetup PMGP1_REG for EX %x", l_ex_number);
-                FAPI_DBG("\t*************************************");
+            rc=fapiPutScom(i_target, address, data);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Scom error writing PCBS Slave Config");
+                break;
+            }
 
-                // Initialize the set and clear vectors
-                e_rc |= clear_data.flushTo1();  // Set to 1s to be used for WAND
-                e_rc |= set_data.flushTo0();    // Set to 0s to be used for WOR
+            // --------------------------------------
+            FAPI_INF("\tSet PMGP0(46) to deal with HW259509 - winkle Pstate stepping hang");
+            // This is a spare bit in Murano and Venice DD1s but
+            // is necessary to set in Murano and Venice DD2 to deal
+            // the hang condition that is fixed.  As bit 46 is spare
+            // in the previous levels, setting it on all levels is not
+            // harmful.
+            address = EX_PMGP0_OR_0x100F0102 + (l_ex_number * 0x01000000);
+            e_rc |= data.flushTo0();
+            e_rc |= data.setBit(46);
+            if (e_rc)
+            {
+                FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
+                rc.setEcmdError(e_rc);
+                break;
+            }
 
-                // If   sleep entry = 1 (hardware), sleep power down enable = 1
-                // else sleep entry = 0 (assisted), sleep power down enable = 0
-                if (pm_sleep_entry)
-                {
-                    e_rc |= set_data.setBit(PM_SLEEP_POWER_DOWN_EN_BIT);
-                }
-                else
-                {
-                    e_rc |= clear_data.clearBit(PM_SLEEP_POWER_DOWN_EN_BIT);
-                }
+            rc=fapiPutScom(i_target, address, data);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Scom error setting PMGP0");
+                break;
+            }
 
-                // If   sleep exit  = 1 (hardware), sleep power up enable = 1
-                // else sleep exit  = 0 (assisted), sleep power up enable = 0
-                if (pm_sleep_exit)
-                {
-                    e_rc |= set_data.setBit(PM_SLEEP_POWER_UP_EN_BIT);
-                }
-                else
-                {
-                    e_rc |= clear_data.clearBit(PM_SLEEP_POWER_UP_EN_BIT);
-                }
+            // --------------------------------------
+            // Check that PM function is enabled (eg not disabled).
+            // If not, remove the disable
 
-                // If   sleep type  = 1 (deep), sleep power up sel = 1
-                // else sleep type  = 0 (fast), sleep power up sel = 0
-                if (pm_sleep_type)
-                {
-                    e_rc |= set_data.setBit(PM_SLEEP_POWER_OFF_SEL_BIT);
+            address = EX_PMGP0_0x100F0100 + (l_ex_number * 0x01000000);
+            rc=fapiGetScom(i_target, address, data);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Scom error reading PMGP0");
+                break;
+            }
 
-                }
-                else
-                {
-                    e_rc |= clear_data.clearBit(PM_SLEEP_POWER_OFF_SEL_BIT);
-                }
+            if (data.isBitSet(PM_DISABLE))
+            {
 
-                // If   winkle entry = 1 (hardware), winkle power down enable = 1
-                // else winkle entry = 0 (assisted), winkle power down enable = 0
-                if (pm_winkle_entry)
-                {
-                    e_rc |= set_data.setBit(PM_WINKLE_POWER_DOWN_EN_BIT);
-                }
-                else
-                {
-                    e_rc |= clear_data.clearBit(PM_WINKLE_POWER_DOWN_EN_BIT);
-                }
+                // Activate the PCBS-PM macro by clearing the PM_DISABLE bit
+                FAPI_INF("\tActivate the PCBS-PM for EX %x", l_ex_number);
 
-                // If   winkle exit  = 1 (hardware), winkle power up enable = 1
-                // else winkle exit  = 0 (assisted), winkle power up enable = 0
-                if (pm_winkle_exit)
-                {
-                    e_rc |= set_data.setBit(PM_WINKLE_POWER_UP_EN_BIT);
-                }
-                else
-                {
-                    e_rc |= clear_data.clearBit(PM_WINKLE_POWER_UP_EN_BIT);
-                }
-
-                // If   winkle type  = 1 (deep), winkle power up sel = 1
-                // else winkle type  = 0 (fast), winkle power up sel = 0
-                if (pm_winkle_type)
-                {
-                    e_rc |= set_data.setBit(PM_WINKLE_POWER_OFF_SEL_BIT);
-
-                }
-                else
-                {
-                    e_rc |= clear_data.clearBit(PM_WINKLE_POWER_OFF_SEL_BIT);
-                }
-
-                // Check for any errors from set/clear ops into the buffers
-                if (e_rc)
-                {
-                    FAPI_ERR("eCmdDataBuffer operation failed. rc = 0x%x", (uint32_t)e_rc);
-                    rc.setEcmdError(e_rc);
-                    break;
-                }
-
-                // The set and clear vectors are built.  Write them to
-                // the respective addresses.
-                FAPI_DBG("\tEX_PMGP1_WOR  0x%16llx" , set_data.getDoubleWord(0));
-                address = EX_PMGP1_REG_0_WORx100F0105 + (l_ex_number * 0x01000000);
-                rc=fapiPutScom(i_target, address, set_data);
-                if (rc)
-                {
-                    FAPI_ERR("fapiPutScom(EX_PMGP1_REG_0_WORx100F0105) failed. rc = 0x%x", (uint32_t)rc);
-                    break;
-                }
-
-                FAPI_DBG("\tEX_PMGP1_WAND 0x%16llx" , clear_data.getDoubleWord(0));
-                address = EX_PMGP1_REG_0_WANDx100F0104 + (l_ex_number * 0x01000000);
-                rc=fapiPutScom(i_target, address, clear_data);
-                if (rc)
-                {
-                    FAPI_ERR("fapiPutScom(EX_PMGP1_REG_0_WORx100F0105) failed. rc = 0x%x", (uint32_t)rc);
-                    break;
-                }
-
-                FAPI_INF("\tDisable the PCBS Heartbeat EX %x", l_ex_number);
-                address = EX_SLAVE_CONFIG_0x100F001E + (l_ex_number * 0x01000000);
-                rc = fapiGetScom(i_target, address, data);
-                if(!rc.ok())
-                {
-                    FAPI_ERR("Scom error reading PCBS Slave Config");
-                    break;
-                }
-
-                e_rc |= data.setBit(4);
+                e_rc |= data.flushTo1();
+                e_rc |= data.clearBit(PM_DISABLE);
                 if (e_rc)
                 {
                     FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
@@ -651,23 +704,29 @@ poreslw_ex_setup(const Target& i_target)
                     break;
                 }
 
+                address = EX_PMGP0_AND_0x100F0101 + (l_ex_number * 0x01000000);
                 rc=fapiPutScom(i_target, address, data);
                 if(!rc.ok())
                 {
-                    FAPI_ERR("Scom error writing PCBS Slave Config");
+                    FAPI_ERR("Scom error writing EX_PMGP0_OR");
                     break;
                 }
+            }
 
-                // --------------------------------------
-                FAPI_INF("\tSet PMGP0(46) to deal with HW259509 - winkle Pstate stepping hang");
-                // This is a spare bit in Murano and Venice DD1s but
-                // is necessary to set in Murano and Venice DD2 to deal
-                // the hang condition that is fixed.  As bit 46 is spare
-                // in the previous levels, setting it on all levels is not
-                // harmful.
-                address = EX_PMGP0_OR_0x100F0102 + (l_ex_number * 0x01000000);
+            // --------------------------------------
+            // Clear OCC Special Wake-up bit - only 1 bit in the register
+            address = EX_PMSpcWkupOCC_REG_0x100F010C + (l_ex_number * 0x01000000);
+            rc=fapiGetScom(i_target, address, data);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Scom error clearing EX_OCC_SPWKUP");
+                break;
+            }
+
+            if (data.isBitSet(0))
+            {
+                FAPI_INF("\tClear OCC Special Wake-up for EX %x", l_ex_number);
                 e_rc |= data.flushTo0();
-                e_rc |= data.setBit(46);
                 if (e_rc)
                 {
                     FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
@@ -676,92 +735,27 @@ poreslw_ex_setup(const Target& i_target)
                 }
 
                 rc=fapiPutScom(i_target, address, data);
-                if(!rc.ok())
-                {
-                    FAPI_ERR("Scom error setting PMGP0");
-                    break;
-                }
-
-                // --------------------------------------
-                // Check that PM function is enabled (eg not disabled).
-                // If not, remove the disable
-
-                address = EX_PMGP0_0x100F0100 + (l_ex_number * 0x01000000);
-                rc=fapiGetScom(i_target, address, data);
-                if(!rc.ok())
-                {
-                    FAPI_ERR("Scom error reading PMGP0");
-                    break;
-                }
-
-                if (data.isBitSet(PM_DISABLE))
-                {
-
-                    // Activate the PCBS-PM macro by clearing the PM_DISABLE bit
-                    FAPI_INF("\tActivate the PCBS-PM for EX %x", l_ex_number);
-
-                    e_rc |= data.flushTo1();
-                    e_rc |= data.clearBit(PM_DISABLE);
-                    if (e_rc)
-                    {
-                        FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
-                        rc.setEcmdError(e_rc);
-                        break;
-                    }
-
-                    address = EX_PMGP0_AND_0x100F0101 + (l_ex_number * 0x01000000);
-                    rc=fapiPutScom(i_target, address, data);
-                    if(!rc.ok())
-                    {
-                        FAPI_ERR("Scom error writing EX_PMGP0_OR");
-                        break;
-                    }
-                }
-
-                // --------------------------------------
-                // Clear OCC Special Wake-up bit - only 1 bit in the register
-                address = EX_PMSpcWkupOCC_REG_0x100F010C + (l_ex_number * 0x01000000);
-                rc=fapiGetScom(i_target, address, data);
                 if(!rc.ok())
                 {
                     FAPI_ERR("Scom error clearing EX_OCC_SPWKUP");
                     break;
                 }
+            }
 
-                if (data.isBitSet(0))
-                {
-                    FAPI_INF("\tClear OCC Special Wake-up for EX %x", l_ex_number);
-                    e_rc |= data.flushTo0();
-                    if (e_rc)
-                    {
-                        FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
-                        rc.setEcmdError(e_rc);
-                        break;
-                    }
+            // --------------------------------------
+            // Initialize the special wake-up tracking attributes
+            FAPI_INF("\tInitialize the special wake-up tracking attributes");
 
-                    rc=fapiPutScom(i_target, address, data);
-                    if(!rc.ok())
-                    {
-                        FAPI_ERR("Scom error clearing EX_OCC_SPWKUP");
-                        break;
-                    }
-                }
+            FAPI_EXEC_HWP(rc,  p8_cpu_special_wakeup,
+                                l_exChiplets[j],
+                                SPCWKUP_INIT,
+                                SPW_ALL);
+            if(rc)
+            {
+                FAPI_ERR("Special wake-up initialization error");
+                break;
+            }
 
-                // --------------------------------------
-                // Initialize the special wake-up tracking attributes
-                FAPI_INF("\tInitialize the special wake-up tracking attributes");
-
-                FAPI_EXEC_HWP(rc,  p8_cpu_special_wakeup,
-                                    l_exChiplets[j],
-                                    SPCWKUP_INIT,
-                                    SPW_ALL);
-                if(rc)
-                {
-                    FAPI_ERR("Special wake-up initialization error");
-                    break;
-                }
-
-            }  // Chiplet Enabled
         }  // chiplet loop
     } while(0);
 

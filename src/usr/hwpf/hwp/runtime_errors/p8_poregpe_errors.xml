@@ -20,27 +20,45 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_poregpe_errors.xml,v 1.2 2013/05/23 18:44:30 stillgs Exp $ -->
+<!-- $Id: p8_poregpe_errors.xml,v 1.4 2013-10-15 17:36:07 dcrowell Exp $ -->
 <!-- Error definitions for proc_poregpe procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROCPM_GPE0_RESET_TIMEOUT</rc>
-    <description>GPE0 reset failed in proc_poregpe_init.</description>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_GPE1_RESET_TIMEOUT</rc>
-    <description>GPE1 reset failed in proc_poregpe_init.</description>
+    <rc>RC_PROCPM_GPE_RESET_TIMEOUT</rc>
+    <description>GPE reset failed in proc_poregpe_init.</description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>MAXPOLLS</ffdc>
+    <ffdc>IENGINE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_GPE_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>  
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_GPE_CODE_BAD_MODE</rc>
     <description>Unknown mode passed to proc_poregpe_init.</description>
+    <ffdc>IMODE</ffdc>
+    <ffdc>CHIP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>      
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_GPE_BAD_ENGINE</rc>
     <description>Unknown engine passed to proc_poregpe_init. </description>
+    <ffdc>IENGINE</ffdc>
+    <ffdc>CHIP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>      
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

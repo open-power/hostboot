@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: p8_poregpe_init.C,v 1.4 2013/08/02 19:09:35 stillgs Exp $
+// $Id: p8_poregpe_init.C,v 1.5 2013/09/25 22:36:40 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poregpe_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -108,10 +108,12 @@ p8_poregpe_init(const Target& i_target, uint32_t mode, uint32_t engine)
         if (!(engine == GPE0 || engine == GPE1 || engine == GPEALL) )
         {
 
-          FAPI_ERR("Unknown engine passed to p8_poregpe_init. Engine %x ....",
+            FAPI_ERR("Unknown engine passed to p8_poregpe_init. Engine %x ....",
                   engine);
-          FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_BAD_ENGINE);
-          break;
+            const fapi::Target & CHIP = i_target;
+            const uint32_t & IENGINE = engine;
+            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_BAD_ENGINE);
+            break;
         }
 
         /// -------------------------------
@@ -163,8 +165,10 @@ p8_poregpe_init(const Target& i_target, uint32_t mode, uint32_t engine)
 
         else
         {
-          FAPI_ERR("Unknown mode passed to p8_poregpe_init. Mode %x ....", mode);
-          FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_CODE_BAD_MODE);
+            FAPI_ERR("Unknown mode passed to p8_poregpe_init. Mode %x ....", mode);
+            const fapi::Target & CHIP = i_target;
+            uint32_t & IMODE = mode;
+            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_CODE_BAD_MODE);
         }
     } while(0);
 
@@ -212,6 +216,8 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
         else
         {
             FAPI_ERR("Invalid engine parm passed to poregpe_reset");
+            const fapi::Target & CHIP = i_target;
+            const uint32_t & IENGINE = engine;
             FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_BAD_ENGINE);
             break;
         }
@@ -295,7 +301,11 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
         if(!wait_state_detected)
         {
           FAPI_ERR("GPE%x reset failed ", engine);
-          FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE0_RESET_TIMEOUT);
+          const fapi::Target & CHIP = i_target;
+          uint32_t           & POLLCOUNT = poll_count;
+          const uint32_t     & MAXPOLLS = max_polls;
+          const uint32_t     & IENGINE = engine;
+          FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_RESET_TIMEOUT);
         }
 
     } while(0);

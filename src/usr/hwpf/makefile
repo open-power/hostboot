@@ -89,7 +89,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/pstates/pstates/p8_build_pstate_datablock_errors.xml \
     hwp/pstates/pstates/proc_get_voltage_errors.xml \
     hwp/proc_cfam_registers.xml \
-    hwp/proc_slw_registers.xml \
+    hwp/p8_slw_registers.xml \
     hwp/proc_sbe_select_ex_errors.xml \
     hwp/utility_procedures/memory_mss_maint_cmds.xml \
     hwp/mc_config/mss_volt/memory_mss_volt.xml \
@@ -121,7 +121,10 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/mc_config/mss_eff_config/memory_mss_eff_config_termination.xml \
     hwp/build_winkle_images/p8_block_wakeup_intr/p8_block_wakeup_intr_errors.xml \
     hwp/build_winkle_images/proc_mailbox_utils/p8_mailbox_utils_errors.xml \
-    hwp/proc_otprom_registers.xml
+    hwp/proc_otprom_registers.xml \
+    hwp/runtime_errors/p8_gpe_registers.xml \
+    hwp/runtime_errors/p8_pmc_deconfig_setup_errors.xml \
+    hwp/runtime_errors/p8_pss_registers.xml 
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \

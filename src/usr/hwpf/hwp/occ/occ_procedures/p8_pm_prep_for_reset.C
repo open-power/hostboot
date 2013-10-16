@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.C,v 1.21 2013/08/02 19:12:40 stillgs Exp $
+// $Id: p8_pm_prep_for_reset.C,v 1.22 2013/09/25 22:36:37 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -168,6 +168,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             if ( i_primary_chip_target.getType() == TARGET_TYPE_NONE )
             {
                 FAPI_ERR("Set primay target properly for SCM " );
+                const fapi::Target PRIMARY_TARGET = i_primary_chip_target;
                 FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PREP_TARGET_ERR); 
                 break;
             }

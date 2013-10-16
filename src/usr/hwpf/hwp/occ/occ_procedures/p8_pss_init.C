@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pss_init.C,v 1.6 2013/08/02 19:11:20 stillgs Exp $
+// $Id: p8_pss_init.C,v 1.7 2013/09/25 22:36:42 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pss_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -140,7 +140,8 @@ p8_pss_init(const Target &i_target, uint32_t mode)
     else
     {
         FAPI_ERR("Unknown mode passed to p8_pss_init. Mode %x ....", mode);
-        uint32_t & MODE = mode;
+        const fapi::Target & CHIP = i_target;
+        uint32_t & IMODE = mode;
         FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PSS_CODE_BAD_MODE);
     }
 
@@ -710,44 +711,27 @@ pss_init(const Target& i_target)
 fapi::ReturnCode
 pss_reset(const Target& i_target)
 {
-    fapi::ReturnCode rc;
+    fapi::ReturnCode    rc;
     uint32_t            e_rc = 0;
     ecmdDataBufferBase  data(64);
 
-    uint32_t            attr_proc_pss_init_nest_frequency;
-    float               pss_cycle_ns;
-    uint32_t            pollcount=0;
-    float               max_polls;
-    uint32_t            pss_timeout_us = 1000;
+    uint32_t            pollcount = 0;
+    uint32_t            max_polls;
+    const uint32_t      pss_timeout_us = 10000;  // 10 millisecond.  Far longer than needed
+    const uint32_t      pss_poll_interval_us = 10;
 
     FAPI_INF("PSS reset start...");
     do
     {
 
-        // Determine the PowerBus frequency to determine the clock speed
-        // of the PSS logic.  This determines the number of polls needed
-        // for a given timeout interval.
-        GETATTR(        rc,
-                        ATTR_FREQ_PB,
-                        "ATTR_FREQ_PB",
-                        NULL,
-                        attr_proc_pss_init_nest_frequency);
-
-        pss_cycle_ns = ((1/(float)attr_proc_pss_init_nest_frequency)*4);
-        FAPI_DBG("pss_cycle_ns = %f; pss_nest_freq = %d",
-                        pss_cycle_ns, attr_proc_pss_init_nest_frequency);
-        max_polls = (pss_timeout_us / (pss_cycle_ns / 1000));
-        FAPI_DBG("computed max polls = %f; pss_timeout_us = %d; pss_cycle_ns = %f",
-                        max_polls, pss_timeout_us, pss_cycle_ns);
-
         //  ******************************************************************
-        //     - Poll status register for ongoing or errors to give the
+        //     - Poll status register for ongoing or no errors to give the
         //       chance for on-going operations to complete
         //  ******************************************************************
 
         FAPI_DBG("Polling for ADC on-going to go low ... ");
-
-        do
+        max_polls = pss_timeout_us / pss_poll_interval_us;
+        for (pollcount = 0; pollcount < max_polls; pollcount++)
         {
             rc = fapiGetScom(i_target, SPIPSS_ADC_STATUS_REG_0x00070003, data );
             if (rc)
@@ -755,21 +739,39 @@ pss_reset(const Target& i_target)
                 FAPI_ERR("fapiGetScom(SPIPSS_ADC_STATUS_REG_0x00070003) failed.");
                 break;
             }
-            FAPI_INF(".");
-            pollcount++;
-        } while (data.isBitSet(0) && data.isBitClear(5) && pollcount < max_polls);
+            // Ongoing is not set OR an error
+            if (data.isBitClear(0) || data.isBitSet(7))
+            {
+                break;
+            }
+            FAPI_DBG("Delay before next poll");
+            e_rc = fapiDelay(pss_poll_interval_us*1000, 1000);  // ns, sim clocks
+            if (e_rc)
+            {
+                FAPI_ERR("fapiDelay error");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+        }
         if (!rc.ok())
         {
             break;
         }
+        if (data.isBitSet(7))
+        {
+            FAPI_ERR("SPIADC error bit asserted waiting for operation to complete.");
+            const fapi::Target & CHIP = i_target;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PSS_ADC_ERROR);
+            break;
+        }
         if (pollcount >= max_polls)
         {
-            FAPI_INF("WARNING: SPI ADC did not go to idle in %d us.  Reset of PSS macro is commencing anyway", pss_timeout_us);
+            FAPI_INF("WARNING: SPI ADC did not go to idle in at least %d us.  Reset of PSS macro is commencing anyway", pss_timeout_us);
             break;
         }
         else
         {
-            FAPI_INF("Send all the frames from ADC to the device.So now resetting it ");
+            FAPI_INF("All frames sent from ADC to the APSS device.");
         }
 
         //  ******************************************************************
@@ -778,8 +780,7 @@ pss_reset(const Target& i_target)
         //  ******************************************************************
 
         FAPI_INF("Polling for P2S on-going to go low ... ");
-        pollcount = 0;
-        do
+        for (pollcount = 0; pollcount < max_polls; pollcount++)
         {
             rc = fapiGetScom(i_target, SPIPSS_P2S_STATUS_REG_0x00070043, data );
             if (rc)
@@ -787,28 +788,49 @@ pss_reset(const Target& i_target)
                 FAPI_ERR("fapiGetScom(SPIPSS_P2S_STATUS_REG_0x00070043) failed.");
                 break;
             }
-            FAPI_INF(".");
-            pollcount++;
-        } while (data.isBitSet(0) && data.isBitClear(5) && pollcount < max_polls);
+           
+            // Ongoing is not set OR an error
+            if (data.isBitClear(0) || data.isBitSet(7))
+            {
+                break;
+            }
+            FAPI_DBG("Delay before next poll");
+            e_rc = fapiDelay(pss_poll_interval_us*1000, 1000);  // ns, sim clocks
+            if (e_rc)
+            {
+                rc.setEcmdError(e_rc);
+                break;
+            }            
+        }
         if (!rc.ok())
         {
             break;
         }
+        if (data.isBitSet(7))
+        {
+            FAPI_ERR("SPIP2S FSM error bit asserted waiting for operation to complete.");
+            const fapi::Target & CHIP = i_target;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PSS_P2S_ERROR);
+            break;
+        }
+        if (data.isBitSet(5))
+        {
+            FAPI_INF("SPIP2S Write While Bridge Busy bit asserted.  Will be cleared with coming reset");
+        }
         if (pollcount >= max_polls)
         {
-            FAPI_INF("WARNING: SPI P2S did not go to idle in %d us.  Reset of PSS macro is commencing anyway", pss_timeout_us);
-            break;
+            FAPI_INF("WARNING: SPI P2S did not go to idle in at least %d us.  Reset of PSS macro is commencing anyway", pss_timeout_us);
         }
         else
         {
-            FAPI_INF("Sent all the frames from P2S bridge to the device.");
+            FAPI_INF("SAll frames sent from P2S to the APSS device.");
         }
 
         //  ******************************************************************
         //     - Resetting both ADC and P2S bridge
         //  ******************************************************************
 
-        FAPI_INF("Resetting P2S and ADC bridge.");
+        FAPI_INF("Resetting P2S and ADC bridges.");
 
         e_rc=data.flushTo0();
         e_rc=data.setBit(1);

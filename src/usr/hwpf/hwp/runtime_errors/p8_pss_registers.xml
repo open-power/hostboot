@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/runtime_errors/p8_pss_errors.xml $           -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_errors/p8_pss_registers.xml $        -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,45 +20,30 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pss_errors.xml,v 1.5 2013-10-15 17:39:44 dcrowell Exp $ -->
-<!-- Error definitions for proc_pss_init procedure -->
+<!-- $Id: p8_pss_registers.xml,v 1.1 2013/10/08 15:45:12 stillgs Exp $ -->
+<!-- Definition of PSS registers to collect on some errors -->
 <hwpErrors>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PSS_CODE_BAD_MODE</rc>
-    <description>Unknown mode passed to proc_pss_init.</description>
-    <ffdc>IMODE</ffdc>
-    <ffdc>CHIP</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError> 
-   <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PSS_ADC_ERROR</rc>
-    <description>SPIADC error bit asserted waiting for operation to complete."</description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_PSS_REGISTERS</id>
-      <target>CHIP</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP</target>
-      <priority>HIGH</priority>
-    </callout>   
-  </hwpError> 
-   <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_PSS_P2S_ERROR</rc>
-    <description>SPIP2S error bit asserted waiting for operation to complete."</description>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_PSS_REGISTERS</id>
-      <target>CHIP</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>CHIP</target>
-      <priority>HIGH</priority>
-    </callout>   
-  </hwpError> 
-  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_PROC_PSS_REGISTERS</id>
+    <scomRegister>SPIPSS_ADC_CTRL_REG0_0x00070000</scomRegister>  
+    <scomRegister>SPIPSS_ADC_CTRL_REG1_0x00070001</scomRegister>  
+    <scomRegister>SPIPSS_ADC_CTRL_REG2_0x00070002</scomRegister>  
+    <scomRegister>SPIPSS_ADC_STATUS_REG_0x00070003</scomRegister>  
+    <scomRegister>SPIPSS_ADC_CMD_REG_0x00070004</scomRegister>  
+    <scomRegister>SPIPSS_ADC_WDATA_REG_0x00070010</scomRegister>  
+    <scomRegister>SPIPSS_ADC_RDATA_REG0_0x00070020</scomRegister>  
+    <scomRegister>SPIPSS_ADC_RDATA_REG1_0x00070021</scomRegister>  
+    <scomRegister>SPIPSS_ADC_RDATA_REG2_0x00070022</scomRegister>  
+    <scomRegister>SPIPSS_ADC_RDATA_REG3_0x00070023</scomRegister>  
+    <scomRegister>SPIPSS_100NS_REG_0x00070028</scomRegister>  
+    <scomRegister>SPIPSS_P2S_CTRL_REG0_0x00070040</scomRegister>  
+    <scomRegister>SPIPSS_P2S_CTRL_REG1_0x00070041</scomRegister>  
+    <scomRegister>SPIPSS_P2S_CTRL_REG2_0x00070042</scomRegister>  
+    <scomRegister>SPIPSS_P2S_STATUS_REG_0x00070043</scomRegister>  
+    <scomRegister>SPIPSS_P2S_COMMAND_REG_0x00070044</scomRegister>  
+    <scomRegister>SPIPSS_P2S_WDATA_REG_0x00070050</scomRegister>  
+    <scomRegister>SPIPSS_P2S_RDATA_REG_0x00070060</scomRegister>  
+    <scomRegister>SPIPSS_ADC_RESET_REGISTER_0x00070005</scomRegister>  
+    <scomRegister>SPIPSS_P2S_RESET_REGISTER_0x00070045</scomRegister>  
+  </registerFfdc>
 </hwpErrors>
