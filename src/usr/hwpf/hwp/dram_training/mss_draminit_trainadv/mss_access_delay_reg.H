@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//$Id: mss_access_delay_reg.H,v 1.9 2013/07/18 06:23:03 sauchadh Exp $
+//$Id: mss_access_delay_reg.H,v 1.10 2013/10/09 11:28:54 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -192,6 +192,8 @@ extern "C" {
 fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose, uint32_t &io_value_u32);
 
 fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t i_input_index,uint8_t i_verbose,scom_location& out);
+
+fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t &dq_lane,uint8_t i_verbose,uint8_t &phy_lane,uint8_t &phy_block,uint8_t flag);
 
 fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,ip_type_t i_input_type_e,uint8_t i_block,uint8_t i_lane,uint64_t &o_scom_address_64,uint8_t &o_start_bit,uint8_t &o_len);
 

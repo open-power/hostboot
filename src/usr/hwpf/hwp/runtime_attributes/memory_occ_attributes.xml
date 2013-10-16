@@ -1,0 +1,49 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_attributes/memory_occ_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<!-- $Id: memory_occ_attributes.xml,v 1.1 2013/10/08 08:23:08 bellows Exp $ -->
+<!-- *********************************************************************** -->
+
+<attribute>
+    <id>ATTR_MSS_DATABUS_UTIL_PER_MBA</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>MBA DRAM data bus utilization percent to use to determine cfg_nm_n_per_mba</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_UTIL_N_PER_MBA</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>cfg_nm_n_per_mba throttle N value that was calculated from MSS_DATABUS_UTIL_PER_MBA</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+</attributes>

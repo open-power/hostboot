@@ -1058,6 +1058,8 @@
     <attribute><id>MSS_THROTTLE_CONTROL_CAS_WEIGHT</id></attribute>
     <attribute><id>MCBIST_RANDOM_SEED_VALUE</id></attribute>
     <attribute><id>MCBIST_RANDOM_SEED_TYPE</id></attribute>
+    <attribute><id>MSS_DATABUS_UTIL_PER_MBA</id></attribute>
+    <attribute><id>MSS_UTIL_N_PER_MBA</id></attribute>
 </targetType>
 
 <targetType>

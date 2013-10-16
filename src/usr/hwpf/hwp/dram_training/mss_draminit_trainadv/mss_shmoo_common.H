@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_shmoo_common.H,v 1.16 2013/08/08 11:09:15 sasethur Exp $
+// $Id: mss_shmoo_common.H,v 1.17 2013/10/07 08:35:41 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM 
@@ -47,7 +47,7 @@
 #ifndef MSS_SHMOO_COMMON_H
 #define MSS_SHMOO_COMMON_H
 
-enum shmoo_type_t { TEST_NONE=0,MCBIST=1,WR_EYE=2, WRT_DQS=4,RD_EYE=8,RD_GATE=16 };
+enum shmoo_type_t { TEST_NONE=0,MCBIST=1,WR_EYE=2, WRT_DQS=8,RD_EYE=4,RD_GATE=16 };
 
 
 enum shmoo_algorithm_t { SEQ_LIN}; // Parallel bytes/ranks here .. no parallel targets in HB

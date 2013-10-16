@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.56 2013/09/16 13:56:28 bellows Exp $
+// $Id: mss_draminit.C,v 1.58 2013/10/15 14:16:33 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.58   | jdsloat  | 10/15/13| Added rc checks in ddr4 shadow regs check per review request
+//  1.57   | jdsloat  | 10/09/13| Added mrs_load_ddr4 with defines for ddr4 usage, added shadow regs, removed complicated flow
 //  1.56   | bellows  | 09/16/13| Hostboot compile fix
 //  1.55   | kcook    | 09/13/13| Updated define FAPI_LRDIMM token.
 //  1.54   | kcook    | 08/27/13| Removed LRDIMM support to mss_lrdimm_funcs.C. 
@@ -109,6 +111,7 @@
 #include "cen_scom_addresses.H"
 #include <mss_unmask_errors.H>
 #include <mss_lrdimm_funcs.H>
+#include <mss_ddr4_funcs.H>
 
 
 
@@ -134,6 +137,20 @@ ReturnCode mss_lrdimm_mrs_load(Target& i_target, uint32_t i_port_number, uint32_
 }
 #endif
 
+ #ifndef FAPI_DDR4
+using namespace fapi;
+fapi::ReturnCode mss_mrs_load_ddr4(Target& i_target, uint32_t port_number, uint32_t& ccs_inst_cnt)
+{
+   ReturnCode rc;
+
+   FAPI_ERR("Invalid exec of mrs_load_ddr4  %s!", i_target.toEcmdString());
+   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+   return rc;
+
+}
+
+#endif
+
 //----------------------------------------------------------------------
 //  Constants
 //----------------------------------------------------------------------
@@ -143,8 +160,11 @@ const uint8_t MAX_NUM_RANK_PAIR = 4;
 const uint8_t MAX_NUM_LR_RANKS = 8;
 const uint8_t MRS0_BA = 0;
 const uint8_t MRS1_BA = 1;
-const uint8_t MRS2_BA = 2;
+const uint8_t MRS2_BA = 2;  
 const uint8_t MRS3_BA = 3;
+const uint8_t MRS4_BA = 4;
+const uint8_t MRS5_BA = 5;
+const uint8_t MRS6_BA = 6;
 const uint8_t INVALID = 255;
 
 
@@ -198,14 +218,20 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     uint8_t rank_pair_group = 0;
     uint8_t bit_position = 0;
     ecmdDataBufferBase data_buffer_64(64);
-    ecmdDataBufferBase mrs0(16);
+    ecmdDataBufferBase mrs0(16); 
     ecmdDataBufferBase mrs1(16);
     ecmdDataBufferBase mrs2(16);
     ecmdDataBufferBase mrs3(16);
+    ecmdDataBufferBase mrs4(16);
+    ecmdDataBufferBase mrs5(16);
+    ecmdDataBufferBase mrs6(16);
     uint16_t MRS0 = 0;
     uint16_t MRS1 = 0;
     uint16_t MRS2 = 0;
     uint16_t MRS3 = 0;
+    uint16_t MRS4 = 0;
+    uint16_t MRS5 = 0;
+    uint16_t MRS6 = 0;
     uint8_t num_drops_per_port;
     uint8_t primary_ranks_array[4][2]; //primary_ranks_array[group][port]
     uint8_t secondary_ranks_array[4][2]; //secondary_ranks_array[group][port]
@@ -441,15 +467,12 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 	}
     }
 
-    //if ((!(dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
-    if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
-    {
         //Commented because Master Attention Reg Check not written yet.
         //Master Attntion Reg Check... Need to add appropriate call below.
         //MASTER_ATTENTION_REG_CHECK();
 
         // Step one: Deassert Force_mclk_low signal
-      // this action needs to be done in ddr_phy_reset so that the plls can actually lock
+        // this action needs to be done in ddr_phy_reset so that the plls can actually lock
 
         // Step two: Assert Resetn signal, Begin driving mem clks
         rc = mss_assert_resetn_drive_mem_clks(i_target);
@@ -505,13 +528,26 @@ ReturnCode mss_draminit_cloned(Target& i_target)
         // Ports 0-1
         for ( port_number = 0; port_number < MAX_NUM_PORTS; port_number++)
         {
+
             // Step four: Load MRS Setting
-            rc = mss_mrs_load(i_target, port_number, ccs_inst_cnt);
-            if(rc)
-            {
-                FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-                return rc;
-            }
+	    if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
+	    {
+		    rc = mss_mrs_load(i_target, port_number, ccs_inst_cnt);
+		    if(rc)
+		    {
+		        FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+		        return rc;
+		    }
+	    }
+	    else
+	    {
+		    rc = mss_mrs_load_ddr4(i_target, port_number, ccs_inst_cnt);
+		    if(rc)
+		    {
+		        FAPI_ERR(" mrs_load_ddr4 Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+		        return rc;
+		    }
+	    }
 
         }
 
@@ -551,7 +587,8 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 	    if((primary_ranks_array[rank_pair_group][0] != INVALID) || (primary_ranks_array[rank_pair_group][1] != INVALID))
 	    {
 
-		if (port_number == 0){
+		if (port_number == 0)
+		{
 	    		// Get contents of MRS Shadow Regs and Print it to output
 			if (rank_pair_group == 0)
 			{
@@ -582,6 +619,30 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
 		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+
+				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+				{
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP0_P0_0x8000C0200301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS4);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP0_P0_0x8000C0210301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS5);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP0_P0_0x8000C0220301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS6);
+				}
 
 			}
 			else if (rank_pair_group == 1)
@@ -614,6 +675,30 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
 		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
+				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+				{
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP1_P0_0x8000C1200301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP1_P0_0x8000C1210301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP1_P0_0x8000C1220301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+				}
+
 			}
 			else if (rank_pair_group == 2)
 			{
@@ -644,6 +729,31 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
 		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+
+				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+				{
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP2_P0_0x8000C2200301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP2_P0_0x8000C2210301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP2_P0_0x8000C2220301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+				}
+
 			}
 			else if (rank_pair_group == 3)
 			{
@@ -674,6 +784,31 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
 		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+
+				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+				{
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP3_P0_0x8000C3200301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP3_P0_0x8000C3210301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP3_P0_0x8000C3220301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+				}
+
 			}
 		}
 		else if (port_number == 1)
@@ -708,6 +843,30 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
 		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
+				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+				{
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP0_P1_0x8001C0200301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP0_P1_0x8001C0210301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP0_P1_0x8001C0220301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+				}
+
 			}
 			else if (rank_pair_group == 1)
 			{
@@ -739,6 +898,31 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
 		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
+				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+				{
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP1_P1_0x8001C1200301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP1_P1_0x8001C1210301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP1_P1_0x8001C1220301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+
+				}
+
 			}
 			else if (rank_pair_group == 2)
 		        {
@@ -769,6 +953,31 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
 		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+
+				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+				{
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP2_P1_0x8001C2200301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP2_P1_0x8001C2210301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP2_P1_0x8001C2220301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+				}
+
 			}
 			else if (rank_pair_group == 3)
 			{
@@ -799,6 +1008,31 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
 		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+
+				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+				{
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP3_P1_0x8001C3200301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP3_P1_0x8001C3210301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+
+			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP3_P1_0x8001C3220301143F, data_buffer_64);
+                                	if(rc) return rc;
+			    		rc_num = rc_num | data_buffer_64.reverse();
+			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+				}
+
 			}
 
 		}
@@ -826,14 +1060,6 @@ ReturnCode mss_draminit_cloned(Target& i_target)
         //Master Attntion Reg Check... Need to add appropriate call below.
         //MASTER_ATTENTION_REG_CHECK();
 
-    }
-    else
-    {
-        FAPI_INF( "++ COMPLICATED FLOW GOES HERE ++");
-        // TODO:
-        // This is Commented out because COMPLICATED_FLOW_CONTROL has not been written yet.
-        //COMPLICATED_FLOW_CONTROL(); //--- currently dummy function
-    }
     return rc;
 }
 

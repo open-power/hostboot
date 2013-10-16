@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.17 2013/07/18 06:22:49 sauchadh Exp $
+// $Id: mss_access_delay_reg.C,v 1.19 2013/10/09 11:28:41 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -53,6 +53,7 @@
 //   1.15  | sauchadh |20-may-13| Fixed swizzle issue in DQSCLK phase rotators
 //   1.16  | sauchadh |12-jun-13| ADDED	 CAC registers for read dqs
 //   1.17  | sauchadh |18-Jul-13| Added data bit disable registers
+//   1.19  | abhijsau |9-Oct-13 | Added mss_c4_phy() function 
 
 
 //----------------------------------------------------------------------
@@ -2685,7 +2686,503 @@ fapi::ReturnCode mss_getrankpair(const fapi::Target & i_target_mba,uint8_t i_por
 } //end of mss_getrankpair
     
 
-
+//******************************************************************************
+//Function name: mss_c4_phy()
+//Description:This function returns address,start bit and bit length for RD_DQ, WR_DQ, RD_DQS, WR_DQS
+//Input  : Target MBA=i_target_mba, i_port_u8=0 or 1, i_rank_pair=0 or 1 or 2 or 3, i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS,i_input_index_u8=0-79/0-71/0-8/0-19 , i_verbose-extra print statements  
+//Output : out (address,start bit and bit length)
+//******************************************************************************    
+        
+fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t &i_input_index,uint8_t i_verbose,uint8_t &phy_lane,uint8_t &phy_block,uint8_t flag)
+{    
+   fapi::ReturnCode rc; 
+   const uint8_t l_dqmax=80;
+   const uint8_t l_dqsmax=20;
+   //const uint8_t l_blkmax=5;
+   const uint8_t lane_dq_p0[l_dqmax]={4,6,5,7,2,1,3,0,13,15,12,14,8,9,11,10,13,15,12,14,9,8,11,10,13,15,12,14,11,9,10,8,11,8,9,10,12,13,14,15,7,6,5,4,1,3,2,0,5,6,4,7,3,1,2,0,7,4,5,6,2,0,3,1,3,0,1,2,6,5,4,7,11,8,9,10,15,13,12,14}; 
+   const uint8_t lane_dq_p1[l_dqmax]={9,11,8,10,13,14,15,12,10,8,11,9,12,13,14,15,1,0,2,3,4,5,6,7,9,11,10,8,15,12,13,14,5,7,6,4,1,0,2,3,0,2,1,3,5,4,6,7,0,2,3,1,4,5,6,7,12,15,13,14,11,8,10,9,5,7,4,6,3,2,0,1,14,12,15,13,9,8,11,10}; 
+   const uint8_t lane_dq_p2[l_dqmax]={13,15,12,14,11,9,10,8,13,12,14,15,10,9,11,8,5,6,7,4,2,3,0,1,10,9,8,11,13,12,15,14,15,12,13,14,11,10,9,8,7,6,4,5,1,0,3,2,0,2,1,3,5,6,4,7,5,7,6,4,1,0,2,3,1,2,3,0,7,6,5,4,9,10,8,11,12,15,14,13};
+   const uint8_t lane_dq_p3[l_dqmax]={4,5,6,7,0,1,3,2,12,13,15,14,8,9,10,11,10,8,11,9,12,13,15,14,3,0,1,2,4,6,7,5,9,10,11,8,14,13,15,12,7,5,6,4,3,1,2,0,5,6,7,4,1,2,3,0,14,12,15,13,8,10,9,11,0,3,2,1,6,5,7,4,10,11,9,8,12,13,15,14};
+   const uint8_t dqs_dq_lane_p0[l_dqsmax]={4,0,12,8,12,8,12,8,8,12,4,0,4,0,4,0,0,4,8,12};
+   const uint8_t dqs_dq_lane_p1[l_dqsmax]={8,12,8,12,0,4,8,12,4,0,0,4,0,4,12,8,4,0,12,8};
+   const uint8_t dqs_dq_lane_p2[l_dqsmax]={12,8,12,8,4,0,8,12,12,8,4,0,0,4,4,0,0,4,8,12};
+   const uint8_t dqs_dq_lane_p3[l_dqsmax]={4,0,12,8,8,12,0,4,8,12,4,0,4,0,12,8,0,4,8,12};
+   const uint8_t block_p1[l_dqmax]={0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2};
+   const uint8_t block_p0[l_dqmax]={2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1};
+   const uint8_t block_p2[l_dqmax]={1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4};
+   const uint8_t block_p3[l_dqmax]={2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+   const uint8_t block_dqs_p0[l_dqsmax]={2,2,2,2,0,0,3,3,4,4,3,3,4,4,1,1,0,0,1,1};
+   const uint8_t block_dqs_p1[l_dqsmax]={0,0,3,3,0,0,1,1,2,2,3,3,4,4,4,4,1,1,2,2};
+   const uint8_t block_dqs_p2[l_dqsmax]={1,1,3,3,0,0,0,0,2,2,2,2,3,3,4,4,1,1,4,4};
+   const uint8_t block_dqs_p3[l_dqsmax]={2,2,2,2,0,0,0,0,3,3,3,3,4,4,4,4,1,1,1,1};
+   uint8_t l_mbapos = 0;
+   uint8_t l_dram_width=0;
+   uint8_t l_lane=0;
+   uint8_t l_block=0;
+   uint8_t lane_dqs[4];
+   uint8_t l_index=0;
+   uint8_t l_dq=0;
+   uint8_t l_phy_dq=0;
+   //uint8_t l_phy_block=0;
+   uint64_t l_scom_address_64=0x0ull;
+   uint8_t l_start_bit=0;
+   uint8_t l_len=0;
+   ip_type_t l_input_type;
+   ecmdDataBufferBase data_buffer_64(64);
+   uint8_t l_dimmtype=0;
+   uint8_t l_swizzle=0;
+      
+   rc = FAPI_ATTR_GET(ATTR_MSS_DQS_SWIZZLE_TYPE, &i_target_mba, l_swizzle); if(rc) return rc;
+      
+   rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos); if(rc) return rc;
+   
+   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+         
+   rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
+   
+      
+   if(i_input_type_e==RD_DQ || i_input_type_e==WR_DQ)
+   {
+   
+      if(i_port==0 && l_mbapos==0)
+      {
+	  
+	  if(flag==1){
+		for(l_phy_dq=0;l_phy_dq<l_dqmax;l_phy_dq++){
+			if(phy_block==block_p0[l_phy_dq]){
+				if(phy_lane==lane_dq_p0[l_phy_dq]){
+				i_input_index=l_phy_dq;
+				}
+			}
+		}	
+	  }else{
+	  
+         l_lane=lane_dq_p0[i_input_index];
+		l_block=block_p0[i_input_index];	 
+		}
+      }
+      else if(i_port==1 && l_mbapos==0)
+      {
+	  
+	  if(flag==1){
+		for(l_phy_dq=0;l_phy_dq<l_dqmax;l_phy_dq++){
+			if(phy_block==block_p1[l_phy_dq]){
+				if(phy_lane==lane_dq_p1[l_phy_dq]){
+				i_input_index=l_phy_dq;
+				}
+			}
+		}
+	}else{
+         l_lane=lane_dq_p1[i_input_index];
+         l_block=block_p1[i_input_index];	    
+		}
+	} 
+    else if(i_port==0 && l_mbapos==1)
+      {
+	  if(flag==1){
+		for(l_phy_dq=0;l_phy_dq<l_dqmax;l_phy_dq++){
+			if(phy_block==block_p2[l_phy_dq]){
+				if(phy_lane==lane_dq_p2[l_phy_dq]){
+				i_input_index=l_phy_dq;
+				}
+			}
+		}
+	}else{
+	  
+         l_lane=lane_dq_p2[i_input_index];
+         l_block=block_p2[i_input_index];	
+		}
+    }
+    else
+      {
+	  if(flag==1){
+		for(l_phy_dq=0;l_phy_dq<l_dqmax;l_phy_dq++){
+			if(phy_block==block_p3[l_phy_dq]){
+				if(phy_lane==lane_dq_p3[l_phy_dq]){
+				i_input_index=l_phy_dq;
+				}
+			}
+		}
+	}else{
+		l_lane=lane_dq_p3[i_input_index];
+		l_block=block_p3[i_input_index];	
+	 }
+    }
+      
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      } 
+      // if(i_input_type_e==RD_DQ)
+      // {
+         // l_input_type=RD_DQ_t;
+      // }
+      // else 	
+      // {
+         // l_input_type=WR_DQ_t;    
+      // }
+      
+            
+      // rc=get_address(i_target_mba,i_port,i_rank_pair,l_input_type,l_block,l_lane,l_scom_address_64,l_start_bit,l_len); if(rc) return rc; 		 
+      if(flag==0){
+	  phy_lane=l_lane;
+	  phy_block=l_block;
+	  }
+	  // out.scom_addr=l_scom_address_64;
+      // out.start_bit=l_start_bit;
+      // out.bit_length=l_len; 
+   }
+   
+   else if (i_input_type_e==WR_DQS ||  i_input_type_e==DQS_ALIGN)	    
+   {
+      if(i_port==0 && l_mbapos==0)
+      {
+         l_dq=dqs_dq_lane_p0[i_input_index];
+         l_block=block_dqs_p0[i_input_index]; 
+      }
+             
+      else if(i_port==1 && l_mbapos==0)
+      {
+         l_dq=dqs_dq_lane_p1[i_input_index];   
+         l_block=block_dqs_p1[i_input_index]; 
+      }   
+      else if(i_port==0 && l_mbapos==1)
+      {
+         l_dq=dqs_dq_lane_p2[i_input_index];   
+         l_block=block_dqs_p2[i_input_index]; 
+      }
+      else 
+      {
+         l_dq=dqs_dq_lane_p3[i_input_index];   
+         l_block=block_dqs_p3[i_input_index]; 
+      }
+       
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("dqs_dq_lane=%d",l_dq);
+      }
+      l_input_type=RD_CLK_t; 
+      rc=get_address(i_target_mba,i_port,i_rank_pair, l_input_type,l_block,l_lane,l_scom_address_64,l_start_bit,l_len); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("read clock address=%llx",l_scom_address_64);
+      }
+      rc=fapiGetScom(i_target_mba,l_scom_address_64,data_buffer_64);if(rc) return rc; 
+            
+      if(l_dram_width==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4)
+      {
+         
+         if (data_buffer_64.isBitSet(48))
+         {
+            lane_dqs[l_index]=16;
+            l_index++;
+         }
+         else if(data_buffer_64.isBitSet(52))
+         { 
+            lane_dqs[l_index]=18;
+            l_index++;
+         }
+        
+         if (data_buffer_64.isBitSet(49))
+         {
+            lane_dqs[l_index]=16;
+            l_index++;
+         }
+     
+         else if (data_buffer_64.isBitSet(53))
+         {
+            lane_dqs[l_index]=18;
+            l_index++;
+         }
+         
+         if (data_buffer_64.isBitSet(54))
+         {
+            lane_dqs[l_index]=20;
+            l_index++;
+         }
+         else if (data_buffer_64.isBitSet(56))
+         {
+            lane_dqs[l_index]=22;
+            l_index++;
+         }
+      
+         if (data_buffer_64.isBitSet(55))
+         {
+            lane_dqs[l_index]=20;
+            l_index++;
+         }
+         else if (data_buffer_64.isBitSet(57))   // else is not possible as one of them will definitely get set
+         {
+            lane_dqs[l_index]=22;
+            l_index++;
+         }
+         if(i_verbose==1)
+         {
+            FAPI_INF("array is=%d and %d and %d and %d",lane_dqs[0],lane_dqs[1],lane_dqs[2],lane_dqs[3]);
+         }   
+         if(l_dq==0)
+         {
+            l_lane=lane_dqs[0];
+         }
+         else if(l_dq==4)
+         {
+            l_lane=lane_dqs[1];
+         }  
+         else if(l_dq==8)
+         {
+            l_lane=lane_dqs[2];
+         }
+         else 
+         {
+            l_lane=lane_dqs[3];
+         }
+         
+         if(i_verbose==1)
+         {
+            FAPI_INF("lane is=%d",l_lane); 
+         }
+      }			  
+   
+     
+      else
+      {   
+         if (data_buffer_64.isBitSet(48)&& data_buffer_64.isBitSet(49))
+         {		  
+            lane_dqs[l_index]=16;
+            l_index++; 		    
+         }
+         else if (data_buffer_64.isBitSet(52)&& data_buffer_64.isBitSet(53))
+         {		  
+            lane_dqs[l_index]=18;
+            l_index++; 		    
+         }
+         if (data_buffer_64.isBitSet(54)&& data_buffer_64.isBitSet(55))
+         {		  
+            lane_dqs[l_index]=20;
+            l_index++; 		    
+         }
+         else if (data_buffer_64.isBitSet(56)&& data_buffer_64.isBitSet(57))   // else is not possible as one of them will definitely get set
+         {		  
+            lane_dqs[l_index]=22;
+            l_index++; 		    
+         }
+         if(i_verbose==1)
+         {
+            FAPI_INF("array is=%d and %d",lane_dqs[0],lane_dqs[1]); 
+         } 
+         if((l_dq==0) || (l_dq==4))
+         {
+            l_lane=lane_dqs[0];
+         }
+         else 
+         {
+            l_lane=lane_dqs[1];
+         }
+         
+         if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+         {
+            if((i_input_index==1) || (i_input_index==3) || (i_input_index==5) || (i_input_index==7) || (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) || (i_input_index==17) || (i_input_index==19))
+            {
+               if(l_lane==16)
+               {
+                  l_lane=18;
+               }
+               else if(l_lane==18)
+               {
+                  l_lane=16;
+               }
+               
+               else if(l_lane==20)
+               {
+                  l_lane=22;
+               }
+               
+               else
+               {
+                  l_lane=20;
+               }
+               
+            }
+         }
+         
+         else
+         {
+            if((i_port==0) && (l_mbapos==0))
+            {
+               if(l_swizzle==1)
+               {
+                  if((i_input_index==3) || (i_input_index==1) || (i_input_index==4) || (i_input_index==17)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==6))
+                  {
+                     if(l_lane==16)
+                     {
+                        l_lane=18;
+                     }
+                     else if(l_lane==18)
+                     {
+                        l_lane=16;
+                     }
+                     
+                     else if(l_lane==20)
+                     {
+                        l_lane=22;
+                     }
+                     
+                     else
+                     {
+                        l_lane=20;
+                     }
+                  
+                  }   
+               }
+                           
+               else
+               {
+                  if((i_input_index==3) || (i_input_index==1) || (i_input_index==5) || (i_input_index==7)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==17))
+                  {
+                     if(l_lane==16)
+                     {
+                        l_lane=18;
+                     }
+                     else if(l_lane==18)
+                     {
+                        l_lane=16;
+                     }
+                       
+                     else if(l_lane==20)
+                     {
+                        l_lane=22;
+                     }
+                       
+                     else
+                     {
+                        l_lane=20;
+                     }
+                  }   
+                          
+               }
+            }   
+            
+            else if((i_port==1) && (l_mbapos==0))
+            {
+               if(l_swizzle==1)
+               {
+                  if((i_input_index==2) || (i_input_index==0) || (i_input_index==4) || (i_input_index==17)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==7))
+                  {
+                     if(l_lane==16)
+                     {
+                        l_lane=18;
+                     }
+                     else if(l_lane==18)
+                     {
+                        l_lane=16;
+                     }
+                     
+                     else if(l_lane==20)
+                     {
+                        l_lane=22;
+                     }
+                  
+                     else
+                     {
+                        l_lane=20;
+                     }
+                  }   
+               }
+               
+               else
+               {
+                  if((i_input_index==1) || (i_input_index==3) || (i_input_index==5) || (i_input_index==7)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==17))
+                  {
+                     if(l_lane==16)
+                     {
+                        l_lane=18;
+                     }
+                     else if(l_lane==18)
+                     {
+                        l_lane=16;
+                     }
+                     
+                     else if(l_lane==20)
+                     {
+                        l_lane=22;
+                     }
+                  
+                     else
+                     {
+                        l_lane=20;
+                     }
+                  }   
+               }
+            }
+                  
+                  
+            else
+            {
+               if((i_input_index==1) || (i_input_index==3) || (i_input_index==5) || (i_input_index==7)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==17))
+               {
+                  if(l_lane==16)
+                  {
+                     l_lane=18;
+                  }
+                  else if(l_lane==18)
+                  {
+                     l_lane=16;
+                  }
+                  
+                  else if(l_lane==20)
+                  {
+                     l_lane=22;
+                  }
+                  
+                  else
+                  {
+                     l_lane=20;
+                  }
+               
+               }   
+            }
+            
+            
+            
+         }
+         if(i_verbose==1)
+         {
+            FAPI_INF("lane is=%d",l_lane);
+         }   
+      }  
+      
+      // if(i_input_type_e==WR_DQS)	  		  
+      // {
+         // l_input_type=WR_DQS_t;  
+      // }
+      // else
+      // {
+         // l_input_type=DQS_ALIGN_t;
+      // }
+      
+      // rc=get_address(i_target_mba,i_port,i_rank_pair,l_input_type,l_block,l_lane,l_scom_address_64,l_start_bit,l_len); if(rc) return rc; 		 
+	 if(flag==0){
+	 phy_lane=l_lane;
+	  phy_block=l_block;
+	  }
+	  // out.scom_addr=l_scom_address_64;
+      // out.start_bit=l_start_bit;
+      // out.bit_length=l_len; 
+   }   
+      
+   else
+   {
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+      FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
+      return rc;      
+   }  
+      
+                
+   return rc; 
+}     
+ 
 
 
 

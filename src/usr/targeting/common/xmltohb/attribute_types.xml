@@ -12838,4 +12838,34 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <writeable/>
 </attribute>
 
+<attribute>
+  <id>MSS_DATABUS_UTIL_PER_MBA</id>
+  <description>MBA DRAM data bus utilization percent to use to determine cfg_nm_n_per_mba</description>
+  <simpleType>
+      <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_DATABUS_UTIL_PER_MBA</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_UTIL_N_PER_MBA</id>
+  <description>cfg_nm_n_per_mba throttle N value that was calculated from MSS_DATABUS_UTIL_PER_MBA</description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_UTIL_N_PER_MBA</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
