@@ -38,11 +38,15 @@
 #include <errl/errludbacktrace.H>
 #include <errl/errludcallout.H>
 #include <errl/errlreasoncodes.H>
+#include <errl/errludstring.H>
 #include <trace/interface.H>
 #include <arch/ppc.H>
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
 #include <targeting/common/targetservice.H>
+
+// Hostboot Image ID string
+extern char hbi_ImageId;
 
 using namespace ERRORLOG;
 using namespace HWAS;
@@ -441,6 +445,22 @@ void ErrlEntry::addProcedureCallout(const HWAS::epubProcedureID i_procedure,
 
 } // addProcedureCallout
 
+///////////////////////////////////////////////////////////////////////////////
+// Function to add a UD section containing the Hostboot Build ID to the
+// current error log being committed
+void ErrlEntry::addHbBuildId()
+{
+    // Title string
+    const char * const l_title = "Hostboot Build ID: ";
+    // Char[] based on title + Hostboot image ID
+    char l_pString[strlen(l_title) + strlen(&hbi_ImageId) + 1];
+    // Set beginning of string
+    strcpy(l_pString, l_title);
+    // Concatenate the Hostboot Image ID
+    strcat(l_pString, &hbi_ImageId);
+    // Create UD section and add string
+    ErrlUserDetailsString(l_pString).addToLog(this);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
@@ -462,6 +482,10 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         delete iv_pBackTrace;
         iv_pBackTrace = NULL;
     }
+
+    // Add the Hostboot Build ID to the error log
+    addHbBuildId();
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

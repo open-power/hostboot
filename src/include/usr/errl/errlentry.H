@@ -618,6 +618,15 @@ private:
 
 
     /**
+     * @brief Called by commit(), this fucntion creates a
+     * user details section which contains the Hostboot
+     * build ID and adds this to the current error log being
+     * processed.
+     */
+    void addHbBuildId();
+
+
+    /**
       * @brief   Disabled copy constructor and assignment operator
       */
     ErrlEntry(const ErrlEntry& i_right);
