@@ -367,6 +367,21 @@ chip Ex
         capture     type secondary;
         capture     group default;
     };
+
+    ############################################################################
+    # EX non-existent registers for capture
+    ############################################################################
+    register L2TRACE_ARRAY
+    {
+        name        "Capture Data for L2 Trace Array";
+        capture     group never;
+    };
+
+    register L3TRACE_ARRAY
+    {
+        name        "Capture Data for L3 Trace Array";
+        capture     group never;
+    };
 };
 
  ##############################################################################
