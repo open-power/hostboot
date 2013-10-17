@@ -158,7 +158,7 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         l_u32 = (iv_srcType<< 24)|(iv_ssid<<16)| iv_reasonCode;
 
         char l_tmpString[ 20 ];
-        uint64_t cb = sprintf( l_tmpString, "%X", l_u32 );
+        uint64_t cb = sprintf( l_tmpString, "%08X", l_u32 );
         memcpy( psrc->srcString, l_tmpString, cb );
 
         l_rc = flatSize();
@@ -184,14 +184,35 @@ uint64_t ErrlSrc::unflatten( const void * i_buf)
     iv_user1        = p->word6;
     iv_user2        = p->word8;
 
+    if(p->word5 & 0x02000000) // deconfigure - bit 6
+    {
+        iv_deconfig = true;
+    }
+    if(p->word5 & 0x01000000) // GARD - bit 7
+    {
+        iv_gard = true;
+    }
+
     return flatSize();
 }
 
+// Quick hexdigit to binary converter.
+// Hopefull someday to replaced by strtoul
 uint64_t ErrlSrc::aschex2bin(char c)
 {
-    if(c >= 'a') c = c + 10 - 'a';
-    else if (c >= 'A') c = c + 10 - 'A';
-    else c -= '0';
+    if(c >= 'a' && c <= 'f')
+    {
+        c = c + 10 - 'a';
+    }
+    else if (c >= 'A' && c <= 'F')
+    {
+        c = c + 10 - 'A';
+    }
+    else if (c >= '0' && c <= '9')
+    {
+       c -= '0';
+    }
+    // else it's not a hex digit, ignore
 
     return c;
 }
