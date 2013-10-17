@@ -123,7 +123,7 @@ errlHndl_t  loadPoreImage(  char                    *& o_rporeAddr,
         if((rc !=0) || (o_rporeSize == 0) || o_rporeSize > l_info.size)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR: invalid WINK image rc[%d] slwSize[%d] part size[%d]",
+                   "ERROR: invalid WINK image rc[%d] slwSize[%d] part size[%d]",
                        rc, o_rporeSize, l_info.size);
             /*@
              * @errortype
@@ -539,23 +539,10 @@ void*    call_host_build_winkle( void    *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_procChip).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_BUILD_WINKLE_IMAGES_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_HOST_BUILD_WINKLE
-                 * @userdata1       bytes 0-1: plid identifying first error
-                 *                  bytes 2-3: reason code of first error
-                 * @userdata2       bytes 0-1: total number of elogs included
-                 *                  bytes 2-3: N/A
-                 * @devdesc     Call to host_build_winkle has failed.
-                 *              See user data for failing processor information
-                 *
-                 */
-                l_StepError.addErrorDetails(
-                                        ISTEP::ISTEP_BUILD_WINKLE_IMAGES_FAILED,
-                                        ISTEP::ISTEP_HOST_BUILD_WINKLE,
-                                        l_errl );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
+
+                // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
 
@@ -592,23 +579,10 @@ void*    call_host_build_winkle( void    *io_pArgs )
                                       reinterpret_cast<uint64_t>
                                       (l_pVirtMemBase));
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_MM_UNMAP_ERR
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_HOST_BUILD_WINKLE
-             * @userdata1       bytes 0-1: plid identifying first error
-             *                  bytes 2-3: reason code of first error
-             * @userdata2       bytes 0-1: total number of elogs included
-             *                  bytes 2-3: N/A
-             * @devdesc     Call to host_build_winkle has failed due to
-             *              unmapping of memory.
-             *
-             */
-            l_StepError.addErrorDetails(
-                                        ISTEP::ISTEP_MM_UNMAP_ERR,
-                                        ISTEP::ISTEP_HOST_BUILD_WINKLE,
-                                        l_errl );
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit error
             errlCommit( l_errl, HWPF_COMP_ID );
         }
     }
@@ -738,23 +712,10 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_procChip).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode       ISTEP_BUILD_WINKLE_IMAGES_FAILED
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         ISTEP_PROC_SET_PORE_BAR
-             * @userdata1       bytes 0-1: plid identifying first error
-             *                  bytes 2-3: reason code of first error
-             * @userdata2       bytes 0-1: total number of elogs included
-             *                  bytes 2-3: N/A
-             * @devdesc          call to proc_set_porebar has failed, see
-             *                   error log identified by the plid in user
-             *                   data section.
-             */
-            l_stepError.addErrorDetails(ISTEP_BUILD_WINKLE_IMAGES_FAILED,
-                                        ISTEP_PROC_SET_PORE_BAR,
-                                        l_errl );
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails( l_errl );
 
+            // Commit error
             errlCommit( l_errl, HWPF_COMP_ID );
         }
         else
@@ -830,23 +791,10 @@ void*    call_p8_poreslw_init( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_procChip).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode       ISTEP_P8_PORESLW_INIT_FAILED
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         ISTEP_PROC_PORESLW_INIT
-             * @userdata1       bytes 0-1: plid identifying first error
-             *                  bytes 2-3: reason code of first error
-             * @userdata2       bytes 0-1: total number of elogs included
-             *                  bytes 2-3: N/A
-             * @devdesc          call to proc_set_porebar has failed, see
-             *                   error log identified by the plid in user
-             *                   data section.
-             */
-            l_stepError.addErrorDetails(ISTEP_P8_PORESLW_INIT_FAILED,
-                                        ISTEP_PROC_PORESLW_INIT,
-                                        l_errl );
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails( l_errl );
 
+            // Commit error
             errlCommit( l_errl, HWPF_COMP_ID );
         }
         else

@@ -27,6 +27,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 
 #   CompressedScanData struct needed for getRepairRings()
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include

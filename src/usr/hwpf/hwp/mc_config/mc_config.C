@@ -90,8 +90,10 @@ void*    call_host_collect_dimm_spd( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd entry" );
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_collect_dimm_spd entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_collect_dimm_spd exit" );
 
     return l_err;
 }
@@ -173,22 +175,10 @@ void*   call_mss_volt( void *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "ERROR 0x%.8X:  mss_volt HWP( ) ", l_err->reasonCode());
 
-            /*@
-            * @errortype
-            * @reasoncode       ISTEP_MC_CONFIG_FAILED
-            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid         ISTEP_MSS_VOLT
-            * @userdata1        bytes 0-1: plid identifying first error
-            *                   bytes 2-3: reason code of first error
-            * @userdata2        bytes 0-1: total number of elogs included
-            *                   bytes 2-3: N/A
-            * @devdesc          call to mss_volt has failed
-            *
-            */
-            l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
-                                    ISTEP_MSS_VOLT,
-                                    l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
             break;
 
@@ -249,22 +239,10 @@ void*    call_mss_freq( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_MC_CONFIG_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_FREQ
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_freq has failed
-             *
-             */
-            l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
-                                        ISTEP_MSS_FREQ,
-                                        l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break; // break out memBuf loop
@@ -485,22 +463,10 @@ void*    call_mss_eff_config( void *io_pArgs )
 
     if (l_err)
     {
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_MC_CONFIG_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_MSS_EFF_CONFIG
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     call to mss_eff_grouping has failed
-         *
-         */
-        l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
-                                    ISTEP_MSS_EFF_CONFIG,
-                                    l_err );
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
 
+        // Commit Error
         errlCommit( l_err, HWPF_COMP_ID );
     }
 
@@ -516,7 +482,7 @@ void*    call_mss_attr_update( void *io_pArgs )
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update entry");
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update exit" );
 
     return l_StepError.getErrorHandle();

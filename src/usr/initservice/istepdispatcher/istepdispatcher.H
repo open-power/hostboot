@@ -152,6 +152,17 @@ public:
      */
     void runProgressThread();
 
+    /**
+     * @brief This function will return the current istep and substep.
+     *
+     * @param[out] o_iStep - The current Istep value.
+     *
+     * @param[out] o_subStep - The current SubStep value.
+     *
+     */
+    void getIstepInfo ( uint8_t & o_iStep,
+                        uint8_t & o_subStep );
+
 protected:
 
     /**

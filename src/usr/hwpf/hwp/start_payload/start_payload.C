@@ -341,20 +341,10 @@ void*    call_host_runtime_setup( void    *io_pArgs )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "istep start_payload_failed see plid 0x%x", l_err->plid());
 
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_START_PAYLOAD_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_HOST_RUNTIME_SETUP
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     host_runtime_setup failed
-         */
-        l_StepError.addErrorDetails(ISTEP_START_PAYLOAD_FAILED,
-                ISTEP_HOST_RUNTIME_SETUP, l_err );
+        // Create IStep error log and cross reference error that occurred
+        l_StepError.addErrorDetails( l_err );
 
+        // Commit Error
         errlCommit(l_err, ISTEP_COMP_ID);
 
     }
@@ -419,20 +409,10 @@ void*    call_host_start_payload( void    *io_pArgs )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "istep start_payload_failed see plid 0x%x", l_errl->plid());
 
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_START_PAYLOAD_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_HOST_START_PAYLOAD
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     host_start_payload failed
-         */
-        l_StepError.addErrorDetails(ISTEP_START_PAYLOAD_FAILED,
-                                    ISTEP_HOST_START_PAYLOAD, l_errl );
+        // Create IStep error log and cross reference error that occurred
+        l_StepError.addErrorDetails( l_errl );
 
+        // Commit Error
         errlCommit(l_errl, ISTEP_COMP_ID);
 
     }

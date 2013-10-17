@@ -119,23 +119,10 @@ void*    call_fabric_erepair( void    *io_pArgs )
                                             l_PbusConnections, busSet[i] );
         if ( l_errl )
         {
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_GET_PBUS_CONNECTIONS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_FABRIC_IO_RESTORE_EREPAIR
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to fabric_io_run_training has failed
-             *              see error log in the user details seciton for
-             *              additional details.
-             */
-            l_StepError.addErrorDetails(ISTEP_GET_PBUS_CONNECTIONS_FAILED,
-                                        ISTEP_FABRIC_IO_RESTORE_EREPAIR,
-                                        l_errl );
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
 
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
         }
 
@@ -177,20 +164,10 @@ void*    call_fabric_erepair( void    *io_pArgs )
                 ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
                 ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_GET_RESTORE_LANES_FAILED
-                 * @severity    ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_IO_RESTORE_EREPAIR
-                 * @userdata1   None
-                 * @userdata2   None
-                 * @devdesc     call to io_restore_erepair has failed
-                 */
-                l_StepError.addErrorDetails(
-                                        ISTEP_FABRIC_GET_RESTORE_LANES_FAILED,
-                                        ISTEP_FABRIC_IO_RESTORE_EREPAIR,
-                                        l_errl);
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl);
 
+                // Commit Error
                 errlCommit(l_errl, HWPF_COMP_ID);
 
                 break;
@@ -223,19 +200,10 @@ void*    call_fabric_erepair( void    *io_pArgs )
                 ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
                 ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_DRIVE_RESTORE_FAILED
-                 * @severity    ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_IO_RESTORE_EREPAIR
-                 * @userdata1   None
-                 * @userdata2   None
-                 * @devdesc     call to io_restore_erepair has failed
-                 */
-                l_StepError.addErrorDetails(ISTEP_FABRIC_DRIVE_RESTORE_FAILED,
-                                           ISTEP_FABRIC_IO_RESTORE_EREPAIR,
-                                           l_errl);
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl);
 
+                // Commit Error
                 errlCommit(l_errl, HWPF_COMP_ID);
                 break;
             }
@@ -282,20 +250,10 @@ void*    call_fabric_erepair( void    *io_pArgs )
                 ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
                 ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_RECEIVE_RESTORE_FAILED
-                 * @severity    ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_IO_RESTORE_EREPAIR
-                 * @userdata1   None
-                 * @userdata2   None
-                 * @devdesc     call to io_restore_erepair has failed
-                 */
-                l_StepError.addErrorDetails(
-                                        ISTEP_FABRIC_RECEIVE_RESTORE_FAILED,
-                                        ISTEP_FABRIC_IO_RESTORE_EREPAIR,
-                                        l_errl);
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl);
 
+                // Commit Error
                 errlCommit(l_errl, HWPF_COMP_ID);
                 break;
             }
@@ -386,23 +344,10 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_IO_DCCAL_ENDPOINT1_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_IO_DCCAL
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_io_dccal has failed
-                 *              see error log in the user details section for
-                 *              additional details.
-                 */
-                l_StepError.addErrorDetails(ISTEP_FABRIC_IO_DCCAL_ENDPOINT1_FAILED,
-                                            ISTEP_FABRIC_IO_DCCAL,
-                                            l_errl );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
 
+                // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
                 // We want to continue the training despite the error, so
                 // no break
@@ -420,23 +365,10 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_IO_DCCAL_ENDPOINT2_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_IO_DCCAL
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_io_dccal has failed
-                 *              see error log in the user details section for
-                 *              additional details.
-                 */
-                l_StepError.addErrorDetails(ISTEP_FABRIC_IO_DCCAL_ENDPOINT2_FAILED,
-                                            ISTEP_FABRIC_IO_DCCAL,
-                                            l_errl );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
 
+                // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
                 // We want to continue the training despite the error, so
                 // no break
@@ -504,23 +436,10 @@ void*    call_fabric_pre_trainadv( void    *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_PRE_TRAINADV_ENDPOINT1_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_PRE_TRAINADV
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_pre_trainadv has failed
-                 *              see error log in the user details section for
-                 *              additional details.
-                 */
-                l_StepError.addErrorDetails(ISTEP_FABRIC_PRE_TRAINADV_ENDPOINT1_FAILED,
-                                            ISTEP_FABRIC_PRE_TRAINADV,
-                                            l_errl );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
 
+                // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
                 // We want to continue the training despite the error, so
                 // no break
@@ -530,7 +449,7 @@ void*    call_fabric_pre_trainadv( void    *io_pArgs )
             FAPI_INVOKE_HWP( l_errl, io_pre_trainadv, l_fapi_endp2_target );
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "%s : %cbus connection fabric_pre_trainadv. Target 0x%.8X",
+                   "%s : %cbus connection fabric_pre_trainadv. Target 0x%.8X",
                        (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'A'),
                         TARGETING::get_huid(l_itr->second) );
             if ( l_errl )
@@ -538,23 +457,10 @@ void*    call_fabric_pre_trainadv( void    *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_PRE_TRAINADV_ENDPOINT2_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_PRE_TRAINADV
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_pre_trainadv has failed
-                 *              see error log in the user details section for
-                 *              additional details.
-                 */
-                l_StepError.addErrorDetails(ISTEP_FABRIC_PRE_TRAINADV_ENDPOINT2_FAILED,
-                                            ISTEP_FABRIC_PRE_TRAINADV,
-                                            l_errl );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
 
+                // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
                 // We want to continue the training despite the error, so
                 // no break
@@ -596,23 +502,10 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
 
         if ( l_errl )
         {
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_GET_PBUS_CONNECTIONS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_FABRIC_IO_RUN_TRAINING
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to fabric_io_run_training has failed
-             *              see error log in the user details seciton for
-             *              additional details.
-             */
-            l_StepError.addErrorDetails(ISTEP_GET_PBUS_CONNECTIONS_FAILED,
-                                        ISTEP_FABRIC_IO_RUN_TRAINING,
-                                        l_errl );
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
 
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
         }
 
@@ -642,23 +535,10 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
                 ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
                 ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_EDI_EI_INITIALIZATION_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_IO_RUN_TRAINING
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_io_run_training has failed
-                 *              see error log in the user details seciton for
-                 *              additional details.
-                 */
-                l_StepError.addErrorDetails(ISTEP_EDI_EI_INITIALIZATION_FAILED,
-                                            ISTEP_FABRIC_IO_RUN_TRAINING,
-                                            l_errl );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
 
+                // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
         }
@@ -723,23 +603,10 @@ void*    call_fabric_post_trainadv( void    *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_POST_TRAINADV_ENDPOINT1_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_POST_TRAINADV
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_post_trainadv has failed
-                 *              see error log in the user details section for
-                 *              additional details.
-                 */
-                l_StepError.addErrorDetails(ISTEP_FABRIC_POST_TRAINADV_ENDPOINT1_FAILED,
-                                            ISTEP_FABRIC_POST_TRAINADV,
-                                            l_errl );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
 
+                // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
                 // We want to continue the training despite the error, so
                 // no break
@@ -749,7 +616,7 @@ void*    call_fabric_post_trainadv( void    *io_pArgs )
             FAPI_INVOKE_HWP( l_errl, io_post_trainadv, l_fapi_endp2_target );
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "%s : %cbus connection fabric_post_trainadv. Target 0x%.8X",
+                  "%s : %cbus connection fabric_post_trainadv. Target 0x%.8X",
                        (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'A'),
                         TARGETING::get_huid(l_itr->second) );
             if ( l_errl )
@@ -757,23 +624,10 @@ void*    call_fabric_post_trainadv( void    *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FABRIC_POST_TRAINADV_ENDPOINT2_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_FABRIC_POST_TRAINADV
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to fabric_post_trainadv has failed
-                 *              see error log in the user details section for
-                 *              additional details.
-                 */
-                l_StepError.addErrorDetails(ISTEP_FABRIC_POST_TRAINADV_ENDPOINT2_FAILED,
-                                            ISTEP_FABRIC_POST_TRAINADV,
-                                            l_errl );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
 
+                // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
                 // We want to continue the training despite the error, so
                 // no break
@@ -905,23 +759,10 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
 
     if ( l_errl )
     {
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_GET_PBUS_CONNECTIONS_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_PROC_FAB_IOVALID
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     call to fabric_io_run_training has failed
-         *              see error log in the user details seciton for
-         *              additional details.
-         */
-        l_StepError.addErrorDetails(ISTEP_GET_PBUS_CONNECTIONS_FAILED,
-                                    ISTEP_PROC_FAB_IOVALID,
-                                    l_errl );
+        // Create IStep error log and cross reference error that occurred
+        l_StepError.addErrorDetails( l_errl );
 
+        // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
@@ -1008,23 +849,12 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "ERROR : call_proc_fab_iovalid encountered an error");
-        /*@
-         * @errortype
-         * @reasoncode       ISTEP_EDI_EI_INITIALIZATION_FAILED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         ISTEP_PROC_FAB_IOVALID
-         * @userdata1        bytes 0-1: plid identifying first error
-         *                   bytes 2-3: reason code of first error
-         * @userdata2        bytes 0-1: total number of elogs included
-         *                   bytes 2-3: N/A
-         * @devdesc          call to proc_fab_iovalid has failed
-         */
-        l_StepError.addErrorDetails(ISTEP_EDI_EI_INITIALIZATION_FAILED,
-                                    ISTEP_PROC_FAB_IOVALID,
-                                    l_errl );
 
+        // Create IStep error log and cross reference error that occurred
+        l_StepError.addErrorDetails( l_errl );
+
+        // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
-
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

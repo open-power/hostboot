@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,50 +22,74 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <hwpisteperror.H>
 #include <hwpistepud.H>
+#include <istepdispatcher.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 
 // setup the internal elog pointer and capture error data for the first or
 // add error data to top level elog
-void IStepError::addErrorDetails(istepReasonCode reasoncode,
-                                  istepModuleId modid,
-                                  const errlHndl_t i_err )
+void IStepError::addErrorDetails( const errlHndl_t i_err )
 {
     mutex_lock( &iv_mutex );
 
-    // if internal elog is null, create a new one ad grab some data from the
+    iv_errorCount++;
+
+    // if internal elog is null, create a new one and grab some data from the
     // first error that is passed in.
     if( iv_eHandle == NULL )
     {
-        // add the PLID and reason code of the first error to user data word 0
-        uint64_t data0 = i_err->plid();
-        data0 <<= 32;
-        data0 |= i_err->reasonCode();
+        uint8_t l_iStep = 0;
+        uint8_t l_subStep = 0;
+
+        // Set the eid and reason code of the first error to user data word 1
+        uint64_t data1=TWO_UINT32_TO_UINT64(i_err->eid(),i_err->reasonCode());
+
+        // Set the error count and iStep/subStep to user data word 2
+        INITSERVICE::IStepDispatcher::
+                       getTheInstance().getIstepInfo(l_iStep,l_subStep);
+        uint64_t data2 = TWO_UINT32_TO_UINT64(iv_errorCount,  //first error
+                             TWO_UINT8_TO_UINT16(l_iStep,l_subStep));
+
+        /*@
+         * @errortype
+         * @reasoncode  ISTEP_FAILURE
+         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    ISTEP_REPORTING_ERROR
+         * @userdata1[0:31] eid of first error
+         * @userdata1[32:63] Reason code of first error
+         * @userdata2[0:31] Total number of elogs included
+         * @userdata2[32:64] iStep and SubStep that failed
+         * @devdesc     IStep failed, see other log(s) with the same PLID
+         *              for reason.
+         *
+         */
 
         iv_eHandle = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             modid, reasoncode, data0, 0);
+                                             ISTEP_REPORTING_ERROR,
+                                             ISTEP_FAILURE,
+                                             data1, data2);
+    }
+    else  // just increment error count
+    {
+        // retrieve iStep and subStep
+        uint32_t l_iStepSubStep = (iv_eHandle->getUserData2() & 0xFFFFFFFF);
+        // update the error count and keep iStep/subStep in user data word 1
+        uint64_t l_data2 = TWO_UINT32_TO_UINT64 (iv_errorCount,l_iStepSubStep);
+        iv_eHandle->addUserData2(l_data2);
     }
 
-    // set the plid of the inpout elog to match the summary elog
+    // set the plid of the input elog to match the istep elog
     i_err->plid( iv_eHandle->plid() );
 
-    // grab the isteps trace and add to the original elog
+    // grab the istep's trace and add to the input elog
     i_err->collectTrace("ISTEPS_TRACE", 1024);
 
-    // add some details from the elog to the IStep error object
+    // add some details from the input elog to the istep error object
     ISTEP_ERROR::HwpUserDetailsIstep errorDetails( i_err );
 
+    // cross reference input error log to istep error object
     errorDetails.addToLog( iv_eHandle );
-
-    iv_errorCount++;
-
-    // put iv_errorCount into bytes 0 and 1 of user data 2
-    uint64_t data = ((uint64_t)iv_errorCount << 32);
-
-    iv_eHandle->addUserData2(data);
 
     mutex_unlock( &iv_mutex );
 }
-
-

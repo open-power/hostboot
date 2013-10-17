@@ -146,23 +146,10 @@ void*    call_mss_getecid( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_GETECID
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_get_cen_ecid has failed
-             *              see error log in the user details section for
-             *              additional details.
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
-                                        ISTEP_MSS_GETECID,
-                                        l_err );
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
         }
         else
@@ -221,23 +208,10 @@ void*    call_mss_getecid( void *io_pArgs )
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                               "ERROR: error deconfiguring MBA or Centaur");
 
-                    /*@
-                     * @errortype
-                     * @reasoncode  ISTEP_DECONFIGURE_MBA_FAILED
-                     * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid    ISTEP_MSS_GETECID
-                     * @userdata1   bytes 0-1: plid identifying first error
-                     *              bytes 2-3: reason code of first error
-                     * @userdata2   bytes 0-1: total number of elogs included
-                     *              bytes 2-3: N/A
-                     * @devdesc     call to deconfigure MBA or Centaur failed
-                     *              see error log in the user details section for
-                     *              additional details.
-                     */
-                    l_StepError.addErrorDetails(ISTEP_DECONFIGURE_MBA_FAILED,
-                                                ISTEP_MSS_GETECID,
-                                                l_err );
+                    // Create IStep error log and cross ref error that occurred
+                    l_StepError.addErrorDetails( l_err );
 
+                    // Commit Error
                     errlCommit( l_err, HWPF_COMP_ID );
                 }
             }
@@ -321,22 +295,11 @@ void*    call_mss_getecid( void *io_pArgs )
                         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                                   "ERROR: error deconfiguring Centaur L4");
 
-                        /*@
-                         * @errortype
-                         * @reasoncode  ISTEP_DECONFIGURE_L4_FAILED
-                         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                         * @moduleid    ISTEP_MSS_GETECID
-                         * @userdata1   bytes 0-1: plid identifying first error
-                         *              bytes 2-3: reason code of first error
-                         * @userdata2   bytes 0-1: total number of elogs included
-                         *              bytes 2-3: N/A
-                         * @devdesc     call to deconfigure Centaur L4 failed
-                         *              see error log in the user details section for
-                         *              additional details.
-                         */
-                        l_StepError.addErrorDetails(ISTEP_DECONFIGURE_L4_FAILED,
-                                                    ISTEP_MSS_GETECID,
-                                                    l_err);
+                        // Create IStep error log
+                        //   and cross reference error that occurred
+                        l_StepError.addErrorDetails( l_err);
+
+                        // Commit Error
                         errlCommit(l_err, HWPF_COMP_ID);
                         break;
                     }
@@ -424,24 +387,11 @@ void*    call_proc_dmi_scominit( void *io_pArgs )
 
     if( l_errl )
     {
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_DMI_TRAINING_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_PROC_DMI_SCOMINIT
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     call to proc_dmi_scominit has failed, target data
-         *              is included in the error logs listed in the
-         *              user data section of this error log.
-         *
-         */
-        l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
-                                    ISTEP_PROC_DMI_SCOMINIT,
-                                    l_errl);
 
+        // Create IStep error log and cross reference error that occurred
+        l_StepError.addErrorDetails( l_errl);
+
+        // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
@@ -500,24 +450,10 @@ void*    call_dmi_scominit( void *io_pArgs )
 
     if( l_errl )
     {
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_DMI_TRAINING_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_DMI_SCOMINIT
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     call to cen_dmi_scominit has failed, target data
-         *              is included in the error logs listed in the
-         *              user data section of this error log.
-         *
-         */
-        l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
-                                    ISTEP_DMI_SCOMINIT,
-                                    l_errl);
+        // Create IStep error log and cross reference error that occurred
+        l_StepError.addErrorDetails( l_errl);
 
+        // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
@@ -610,21 +546,10 @@ void* call_dmi_erepair( void *io_pArgs )
             ErrlUserDetailsTarget(l_mcs_target).addToLog(l_errPtr);
             ErrlUserDetailsTarget(l_mem_target).addToLog(l_errPtr);
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_GET_RESTORE_LANES_FAILED
-             * @severity    ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to io_restore_erepair has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_GET_RESTORE_LANES_FAILED,
-                                        ISTEP_DMI_IO_RESTORE_EREPAIR,
-                                        l_errPtr);
+           // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errPtr);
 
+            // Commit Error
             errlCommit(l_errPtr, HWPF_COMP_ID);
 
             break;
@@ -659,21 +584,10 @@ void* call_dmi_erepair( void *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_mcs_target).addToLog(l_errPtr);
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_DMI_DRIVE_RESTORE_FAILED
-                 * @severity    ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to io_restore_erepair has failed
-                 */
-                l_StepError.addErrorDetails(ISTEP_DMI_DRIVE_RESTORE_FAILED,
-                                            ISTEP_DMI_IO_RESTORE_EREPAIR,
-                                            l_errPtr);
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errPtr);
 
+                // Commit Error
                 errlCommit(l_errPtr, HWPF_COMP_ID);
                 break;
             }
@@ -723,21 +637,10 @@ void* call_dmi_erepair( void *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_mem_target).addToLog(l_errPtr);
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_DMI_RECEIVE_RESTORE_FAILED
-                 * @severity    ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to io_restore_erepair has failed
-                 */
-                l_StepError.addErrorDetails(ISTEP_DMI_RECEIVE_RESTORE_FAILED,
-                                            ISTEP_DMI_IO_RESTORE_EREPAIR,
-                                            l_errPtr);
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errPtr);
 
+                // Commit Error
                 errlCommit(l_errPtr, HWPF_COMP_ID);
                 break;
             }
@@ -818,21 +721,11 @@ void*    call_dmi_io_dccal( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X :  dmi_io_dccal HWP Target MCS 0x%.8X",
                       l_errl->reasonCode(), TARGETING::get_huid(l_itr->first));
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_IO_DCCAL_MCS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_IO_DCCAL
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to dmi_io_dccal on MCS has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_IO_DCCAL_MCS_FAILED,
-                                        ISTEP_DMI_IO_DCCAL,
-                                        l_errl);
 
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
             // We want to continue the training despite the error, so
             // no break
@@ -862,21 +755,11 @@ void*    call_dmi_io_dccal( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X :  dmi_io_dccal HWP Target Membuf 0x%.8X",
                       l_errl->reasonCode(), TARGETING::get_huid(l_itr->second));
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_IO_DCCAL_MEMBUF_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_IO_DCCAL
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to dmi_io_dccal on MEMBUF has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_IO_DCCAL_MEMBUF_FAILED,
-                                        ISTEP_DMI_IO_DCCAL,
-                                        l_errl);
 
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
             // We want to continue the training despite the error, so
             // no break
@@ -945,21 +828,11 @@ void*    call_dmi_pre_trainadv( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X :  dmi_pre_trainadv HWP Target MCS 0x%.8X",
                       l_errl->reasonCode(), TARGETING::get_huid(l_itr->first));
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_PRE_TRAINADV_MCS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_PRE_TRAINADV
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to dmi_pre_trainadv on MCS has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_PRE_TRAINADV_MCS_FAILED,
-                                        ISTEP_DMI_PRE_TRAINADV,
-                                        l_errl);
 
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
             // We want to continue the training despite the error, so
             // no break
@@ -976,23 +849,13 @@ void*    call_dmi_pre_trainadv( void *io_pArgs )
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X :  dmi_pre_trainadv HWP Target Membuf 0x%.8X",
-                      l_errl->reasonCode(), TARGETING::get_huid(l_itr->second));
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_PRE_TRAINADV_MEMBUF_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_PRE_TRAINADV
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to dmi_pre_trainadv on MEMBUF has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_PRE_TRAINADV_MEMBUF_FAILED,
-                                        ISTEP_DMI_PRE_TRAINADV,
-                                        l_errl);
+                    "ERROR 0x%.8X :  dmi_pre_trainadv HWP Target Membuf 0x%.8X",
+                    l_errl->reasonCode(), TARGETING::get_huid(l_itr->second));
 
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
             // We want to continue the training despite the error, so
             // no break
@@ -1056,20 +919,11 @@ void*    call_dmi_io_run_training( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X :  dmi_io_run_training HWP",
                       l_err->reasonCode());
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_IO_RUN_TRAINING
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to dmi_io_run_training has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
-                                        ISTEP_DMI_IO_RUN_TRAINING,
-                                        l_err);
+
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_err);
+
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
             break; // Break out target list loop
         }
@@ -1134,21 +988,11 @@ void*    call_dmi_post_trainadv( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X :  dmi_post_trainadv HWP Target MCS 0x%.8X",
                       l_errl->reasonCode(), TARGETING::get_huid(l_itr->first));
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_POST_TRAINADV_MCS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_POST_TRAINADV
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to dmi_post_trainadv on MCS has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_POST_TRAINADV_MCS_FAILED,
-                                        ISTEP_DMI_POST_TRAINADV,
-                                        l_errl);
 
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
             // We want to continue the training despite the error, so
             // no break
@@ -1165,23 +1009,13 @@ void*    call_dmi_post_trainadv( void *io_pArgs )
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X :  dmi_post_trainadv HWP Target Membuf 0x%.8X",
-                      l_errl->reasonCode(), TARGETING::get_huid(l_itr->second));
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_POST_TRAINADV_MEMBUF_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_POST_TRAINADV
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to dmi_post_trainadv on MEMBUF has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_POST_TRAINADV_MEMBUF_FAILED,
-                                        ISTEP_DMI_POST_TRAINADV,
-                                        l_errl);
+                   "ERROR 0x%.8X :  dmi_post_trainadv HWP Target Membuf 0x%.8X",
+                   l_errl->reasonCode(), TARGETING::get_huid(l_itr->second));
 
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
             // We want to continue the training despite the error, so
             // no break
@@ -1270,22 +1104,10 @@ void*    call_proc_cen_framelock( void *io_pArgs )
                  "ERROR 0x%.8X : proc_cen_framelock HWP( mem %d )",
                 l_err->reasonCode(), l_memNum );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_DMI_TRAINING_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_PROC_CEN_FRAMELOCK
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to proc_cen_framelock has failed
-                 *
-                 */
-                l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
-                                            ISTEP_PROC_CEN_FRAMELOCK,
-                                            l_err);
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_err);
 
+                // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
 
                 break; // break out of mem num loop
@@ -1382,22 +1204,10 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_pTarget).addToLog( l_err );
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_DMI_TRAINING_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_PROC_CEN_SET_INBAND_ADDR
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to proc_cen_set_inband_addr has failed
-                 *
-                 */
-                l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
-                                            ISTEP_PROC_CEN_SET_INBAND_ADDR,
-                                            l_err);
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_err);
 
+                // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
 
                 break; // break out of mcs loop

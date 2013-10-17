@@ -396,7 +396,7 @@ void*    call_\@substepname( void    *io_pArgs )
                   \"ERROR : \@substepname, errorlog PLID=0x%x\",
                   lerrl->plid()  );
 
-        l_StepError.addErrorDetails( __REASON_CODE__, __MODULE_ID__, l_errl);
+        l_StepError.addErrorDetails( l_errl);
 
         errlCommit( l_errl, HWPF_COMP_ID );
     }

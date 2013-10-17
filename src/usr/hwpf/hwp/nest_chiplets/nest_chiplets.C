@@ -180,21 +180,10 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_A_X_PCI_DMI_PLL_INITF
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_a_x_pci_dmi_pll_initf has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
-                                        ISTEP_PROC_A_X_PCI_DMI_PLL_INITF,
-                                        l_err);
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
            break;
@@ -290,21 +279,10 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_A_X_PCI_DMI_PLL_SETUP
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_a_x_pci_dmi_pll_setup has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
-                                        ISTEP_PROC_A_X_PCI_DMI_PLL_SETUP,
-                                        l_err);
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break;
@@ -446,21 +424,10 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_CUSTOMIZE_CHIP_REGIONS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_STARTCLOCK_CHIPLETS
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to customizeChipRegions failed, check module VPD.
-             */
-            l_StepError.addErrorDetails(ISTEP_CUSTOMIZE_CHIP_REGIONS_FAILED,
-                                        ISTEP_PROC_STARTCLOCK_CHIPLETS,
-                                        l_err);
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break;
@@ -486,21 +453,10 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_STARTCLOCK_CHIPLETS
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_start_clocks_chiplets has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
-                                        ISTEP_PROC_STARTCLOCK_CHIPLETS,
-                                        l_err);
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break; // break out of cpuNum
@@ -527,7 +483,8 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
     errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                             "call_proc_chiplet_scominit entry" );
 
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -561,20 +518,8 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
 
                 ErrlUserDetailsTarget(l_cpu_target).addToLog( l_err );
 
-                /*@
-                 * @errortype
-                 * @reasoncode       ISTEP_PROC_CHIPLET_SCOMINIT_FAILED
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         ISTEP_PROC_CHIPLET_SCOMINIT
-                 * @userdata1        bytes 0-1: plid identifying first error
-                 *                   bytes 2-3: reason code of first error
-                 * @userdata2        bytes 0-1: total number of elogs included
-                 *                   bytes 2-3: N/A
-                 * @devdesc          call to proc_chiplet_scominit has failed
-                 */
-                l_StepError.addErrorDetails(ISTEP_PROC_CHIPLET_SCOMINIT_FAILED,
-                                            ISTEP_PROC_CHIPLET_SCOMINIT,
-                                            l_err );
+                // Create IStep error log and cross ref to error that occurred
+                l_StepError.addErrorDetails( l_err );
                 // We want to continue to the next target instead of exiting,
                 // Commit the error log and move on
                 // Note: Error log should already be deleted and set to NULL
@@ -617,16 +562,8 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
                     "ERROR 0x%.8X : getPbusConnections XBUS returns error",
                     l_err->reasonCode());
 
-            // TODO - RTC 57977
-            // Need to discuss with Jamie on how to handle this:
-            // - An istep may fail in multiple locations.  The failure
-            //   may not be always from invoking the HW procedures.
-            //   It may come from support functions in this case.
-            // - How do we set the error tags and use reason code for different
-            //   fail scenarios?
-            l_StepError.addErrorDetails(ISTEP_PROC_CHIPLET_SCOMINIT_FAILED,
-                                        ISTEP_PROC_CHIPLET_SCOMINIT,
-                                        l_err);
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
             // Commit the error log
             // Log should be deleted and set to NULL in errlCommit.
             errlCommit(l_err, HWPF_COMP_ID);
@@ -672,20 +609,8 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
                 ErrlUserDetailsTarget(l_thisXbusTarget).addToLog( l_err );
                 ErrlUserDetailsTarget(l_connectedXbusTarget).addToLog( l_err );
 
-                /*@
-                 * @errortype
-                 * @reasoncode       ISTEP_PROC_XBUS_SCOMINIT_FAILED
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         ISTEP_PROC_XBUS_SCOMINIT
-                 * @userdata1        bytes 0-1: plid identifying first error
-                 *                   bytes 2-3: reason code of first error
-                 * @userdata2        bytes 0-1: total number of elogs included
-                 *                   bytes 2-3: N/A
-                 * @devdesc          call to proc_xbus_scominit has failed
-                 */
-                l_StepError.addErrorDetails(ISTEP_PROC_XBUS_SCOMINIT_FAILED,
-                                            ISTEP_PROC_XBUS_SCOMINIT,
-                                            l_err );
+                // Create IStep error log and cross ref to error that occurred
+                l_StepError.addErrorDetails( l_err );
                 // We want to continue to the next target instead of exiting,
                 // Commit the error log and move on
                 // Note: Error log should already be deleted and set to NULL
@@ -734,16 +659,8 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                     "ERROR 0x%.8X : getPbusConnections ABUS returns error",
                     l_err->reasonCode());
 
-            // TODO - RTC 57977
-            // Need to discuss with Jamie on how to handle this:
-            // - An istep may fail in multiple locations.  The failure
-            //   may not be always from invoking the HW procedures.
-            //   It may come from support functions in this case.
-            // - How do we set the error tags and use reason code for different
-            //   fail scenarios?
-            l_StepError.addErrorDetails(ISTEP_PROC_CHIPLET_SCOMINIT_FAILED,
-                                        ISTEP_PROC_CHIPLET_SCOMINIT,
-                                        l_err);
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
             // Commit the error log
             // Log should be deleted and set to NULL in errlCommit.
@@ -798,20 +715,8 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                 ErrlUserDetailsTarget(l_thisAbusTarget).addToLog( l_err );
                 ErrlUserDetailsTarget(l_connectedAbusTarget).addToLog( l_err );
 
-                /*@
-                 * @errortype
-                 * @reasoncode       ISTEP_PROC_ABUS_SCOMINIT_FAILED
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         ISTEP_PROC_ABUS_SCOMINIT
-                 * @userdata1        bytes 0-1: plid identifying first error
-                 *                   bytes 2-3: reason code of first error
-                 * @userdata2        bytes 0-1: total number of elogs included
-                 *                   bytes 2-3: N/A
-                 * @devdesc          call to proc_abus_scominit has failed
-                 */
-                l_StepError.addErrorDetails(ISTEP_PROC_ABUS_SCOMINIT_FAILED,
-                                            ISTEP_PROC_ABUS_SCOMINIT,
-                                            l_err );
+                // Create IStep error log and cross ref to error that occurred
+                l_StepError.addErrorDetails( l_err );
                 // We want to continue to the next target instead of exiting,
                 // Commit the error log and move on
                 // Note: Error log should already be deleted and set to NULL
@@ -865,21 +770,10 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_PCIE_SCOMINIT
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_pcie_scominit has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
-                                        ISTEP_PROC_PCIE_SCOMINIT,
-                                        l_errl);
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_errl );
 
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
 
             break;
@@ -918,21 +812,11 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
                   "ERROR 0x%.8X : proc_scomoverride_chiplets "
                   "HWP returns error",
                   l_errl->reasonCode());
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_SCOMOVERRIDE_CHIPLETS
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_scomoverride_chiplets has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
-                                        ISTEP_PROC_SCOMOVERRIDE_CHIPLETS,
-                                        l_errl);
 
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_errl );
+
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
     }
     else

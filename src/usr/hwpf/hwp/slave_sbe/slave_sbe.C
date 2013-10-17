@@ -62,7 +62,6 @@
 #include "proc_spless_sbe_startWA.H"
 #include <sbe/sbeif.H>
 
-
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -104,21 +103,8 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
         // capture the target data in the elog
         ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
 
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_SLAVE_SBE_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_PROC_REVERT_SBE_MCS_SETUP
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     call to proc_revert_sbe_mcs_setup returned an error
-         *
-         */
-        l_stepError.addErrorDetails(ISTEP_SLAVE_SBE_FAILED,
-                                    ISTEP_PROC_REVERT_SBE_MCS_SETUP,
-                                    l_errl );
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_errl );
 
         errlCommit( l_errl, HWPF_COMP_ID );
     }
@@ -232,24 +218,10 @@ void* call_host_sbe_start( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_SLAVE_SBE_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_SBE_START
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to HWP to start SBE
-             *              returned an error
-             *
-             */
-            l_stepError.addErrorDetails(
-                            ISTEP_SLAVE_SBE_FAILED,
-                            ISTEP_PROC_SBE_START,
-                            l_errl );
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails( l_errl );
 
+            // Commit error log
             errlCommit( l_errl, HWPF_COMP_ID );
         }
         else
@@ -351,24 +323,10 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_SLAVE_SBE_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_check_slave_sbe_seeprom_complete
-             *              returned an error
-             *
-             */
-            l_stepError.addErrorDetails(
-                            ISTEP_SLAVE_SBE_FAILED,
-                            ISTEP_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE,
-                            l_errl );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_errl );
 
+            // Commit error log
             errlCommit( l_errl, HWPF_COMP_ID );
         }
         else
@@ -416,23 +374,11 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_PROC_GETECID_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_GETECID
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_get_ecid failed.
-             *
-             */
-             l_stepError.addErrorDetails( ISTEP_PROC_GETECID_FAILED,
-                                          ISTEP_PROC_GETECID,
-                                          l_errl );
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails( l_errl );
 
-             errlCommit( l_errl, HWPF_COMP_ID );
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
         }
         else
         {
@@ -525,22 +471,11 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
 
                 // capture the target data in the elog
                 ErrlUserDetailsTarget( *l_proc_iter ).addToLog( l_errl );
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_SLAVE_SBE_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_PROC_CEN_REF_CLK_ENABLE
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to proc_cen_ref_clk_enable returned an error
-                 *
-                 */
-                l_stepError.addErrorDetails( ISTEP_SLAVE_SBE_FAILED,
-                        ISTEP_PROC_CEN_REF_CLK_ENABLE,
-                        l_errl );
 
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit error log
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
             else

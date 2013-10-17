@@ -93,7 +93,7 @@ void*    call_host_disable_vddr( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr entry" );
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_disable_vddr entry");
 
     if(INITSERVICE::spBaseServicesEnabled())
     {
@@ -105,28 +105,14 @@ void*    call_host_disable_vddr( void *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: call_host_disable_vddr to sendMsg returns error",
+                "ERROR 0x%.8X: call_host_disable_vddr to sendMsg returns error",
                           l_err->reasonCode());
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_VDDR_DISABLE
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     Failed trying to send the VDD disable message
-             *              to the FSP.
-             *              See error log in the user details section for
-             *              additional information.
-             */
-            l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                                        ISTEP_VDDR_DISABLE,
-                                        l_err );
 
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
         }
         else
         {
@@ -207,21 +193,10 @@ void*    call_mem_pll_initf( void *io_pArgs )
 
     if( l_err )
     {
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_MEM_PLL_INITF
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     call to cen_mem_pll_initf has failed
-         */
-        l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                                    ISTEP_MEM_PLL_INITF,
-                                    l_err);
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
 
+        // Commit Error
         errlCommit( l_err, HWPF_COMP_ID );
     }
 
@@ -285,21 +260,10 @@ void*    call_mem_pll_setup( void *io_pArgs )
 
     if( l_err )
     {
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_MEM_PLL_SETUP
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     call to cen_mem_pll_setup has failed
-         */
-        l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                                    ISTEP_MEM_PLL_SETUP,
-                                    l_err);
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
 
+        // Commit Error
         errlCommit( l_err, HWPF_COMP_ID );
     }
 
@@ -317,7 +281,7 @@ void*    call_mem_startclocks( void *io_pArgs )
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_startclocks entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_mem_startclocks entry" );
 
     // Get all Centaur targets
     TARGETING::TargetHandleList l_membufTargetList;
@@ -352,21 +316,10 @@ void*    call_mem_startclocks( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MEM_STARTCLOCKS
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to cen_mem_startclocks has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                                        ISTEP_MEM_STARTCLOCKS,
-                                        l_err);
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break;
@@ -405,35 +358,22 @@ void*    call_host_enable_vddr( void *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X: call_host_enable_vddr to sendMsg returns error",
+                 "ERROR 0x%.8X: call_host_enable_vddr to sendMsg returns error",
                     l_err->reasonCode());
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_VDDR_ENABLE
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     Failed trying to send the VDD enable message
-             *              to the FSP.
-             *              See error log in the user details section for
-             *              additional information.
-             */
-            l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                                        ISTEP_VDDR_ENABLE,
-                                        l_err );
 
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "SUCCESS :  host_enable_vddr()" );
         }
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr exit" );
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                              "call_host_enable_vddr exit" );
 
         return l_StepError.getErrorHandle();
     }
@@ -498,23 +438,10 @@ void*    call_mss_scominit( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_SCOMINIT
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_scominit has failed
-             *              see error log in the user details section for
-             *              additional details.
-             */
-            l_stepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                                        ISTEP_MSS_SCOMINIT,
-                                        l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break;
@@ -540,7 +467,8 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
 
     IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_mss_ddr_phy_reset entry" );
 
     // Get all MBA targets
     TARGETING::TargetHandleList l_mbaTargetList;
@@ -579,21 +507,10 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_DDR_PHY_RESET
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_ddr_phy_reset has failed
-             */
-            l_stepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                             ISTEP_MSS_DDR_PHY_RESET,
-                             l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break; // break out of mba loop
@@ -660,22 +577,10 @@ void*    call_mss_draminit( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_mba_target).addToLog(l_err);
 
-            /*@
-             *
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_DRAMINIT
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_dram_init has failed
-             */
-            l_stepError.addErrorDetails( ISTEP_DRAM_TRAINING_FAILED,
-                              ISTEP_MSS_DRAMINIT,
-                              l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break; // Break out of mba loop
@@ -703,7 +608,8 @@ void*    call_mss_draminit_training( void *io_pArgs )
 
     IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_mss_draminit_training entry" );
 
     // Get all MBA targets
     TARGETING::TargetHandleList l_mbaTargetList;
@@ -743,22 +649,10 @@ void*    call_mss_draminit_training( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
 
-            /*@
-             *
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_DRAMINIT_TRAINING
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_dram_init_training has failed
-             */
-            l_stepError.addErrorDetails( ISTEP_DRAM_TRAINING_FAILED,
-                              ISTEP_MSS_DRAMINIT_TRAINING,
-                              l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break; // break out of mba loop
@@ -814,40 +708,31 @@ void*    call_mss_draminit_trainadv( void *io_pArgs )
                     (const_cast<TARGETING::Target*>(l_mba_target)) );
 
         //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP(l_err, mss_draminit_training_advanced, l_fapi_mba_target);
+        FAPI_INVOKE_HWP(l_err, mss_draminit_training_advanced,
+                        l_fapi_mba_target);
 
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X : mss_draminit_training_advanced HWP returns error",
+              "ERROR 0x%.8X : mss_draminit_training_advanced HWP returns error",
                 l_err->reasonCode());
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
 
-            /*@
-             *
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_DRAMINIT_TRAINADV
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_dram_init_training_advanced has failed
-             */
-            l_stepError.addErrorDetails( ISTEP_DRAM_TRAINING_FAILED,
-                                         ISTEP_MSS_DRAMINIT_TRAINADV,
-                                         l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
         }
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  mss_draminit_training_advanced HWP( )" );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "SUCCESS :  mss_draminit_training_advanced HWP( )" );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "call_mss_draminit_trainadv exit" );
 
     return l_stepError.getErrorHandle();
 }
@@ -861,7 +746,7 @@ void*    call_mss_draminit_mc( void *io_pArgs )
 
     IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_mss_draminit_mc entry" );
 
     // Get all centaur targets
     TARGETING::TargetHandleList l_mBufTargetList;
@@ -899,23 +784,10 @@ void*    call_mss_draminit_mc( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
 
-            /*@
-             *
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_DRAMINIT_MC
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_dram_init_mc has failed
-             *
-             */
-            l_stepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                                        ISTEP_MSS_DRAMINIT_MC,
-                                        l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
             break; // break out of memBuf loop
@@ -994,23 +866,11 @@ void*    call_mss_dimm_power_test( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_MSS_DIMM_POWER_TEST
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to mss_dimm_power_test has failed
-             */
-            l_stepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
-                             ISTEP_MSS_DIMM_POWER_TEST,
-                             l_err );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_err );
 
+            // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
         }
         else
         {

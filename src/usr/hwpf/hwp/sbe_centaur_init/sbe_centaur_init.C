@@ -110,7 +110,8 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         uint8_t cur_ec = (*l_membuf_iter)->getAttr<TARGETING::ATTR_EC>();
 
 
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"call_sbe_centaur_init() - Find SBE image in PNOR");
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK,
+                   "call_sbe_centaur_init() - Find SBE image in PNOR");
 
         l_errl = SBE::findSBEInPnor(l_membuf_target,
                                  l_sbePnorAddr,
@@ -118,7 +119,8 @@ void*    call_sbe_centaur_init( void *io_pArgs )
                                  NULL);
         if (l_errl)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"call_sbe_centaur_init() - Error getting image from PNOR. ec=0x%.2X",
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK,
+           "call_sbe_centaur_init() - Error getting image from PNOR. ec=0x%.2X",
                        cur_ec );
 
             TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -127,23 +129,10 @@ void*    call_sbe_centaur_init( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_membuf_target).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_SBE_PNOR_CENTAUR_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_SBE_CENTAUR_INIT
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to find the centaur sbe image in pnor
-             *              in the sbe_centaur_init function to initialize
-             *              the centuars has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_SBE_PNOR_CENTAUR_FAILED,
-                                        ISTEP_SBE_CENTAUR_INIT,
-                                        l_errl);
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
 
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
@@ -299,22 +288,10 @@ void*    call_sbe_centaur_init( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_membuf_target).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_SBE_CENTAUR_INIT_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_SBE_CENTAUR_INIT
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_swl_build to build the sleep
-             *              winkle image has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_SBE_CENTAUR_INIT_FAILED,
-                                        ISTEP_SBE_CENTAUR_INIT,
-                                        l_errl);
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
 
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
 
             break; // break out of memBuf loop
@@ -327,7 +304,6 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         }
 
     }   // end for
-
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_sbe_centaur_init exit" );

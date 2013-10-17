@@ -1273,4 +1273,16 @@ void iStepBreakPoint(uint32_t i_info)
     IStepDispatcher::getTheInstance().iStepBreakPoint( i_info );
 }
 
+// ----------------------------------------------------------------------------
+// IStepDispatcher::getIstepInfo()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::getIstepInfo ( uint8_t & o_iStep,
+                                     uint8_t & o_subStep )
+{
+    mutex_lock( &iv_mutex );
+    o_iStep = iv_curIStep;
+    o_subStep = iv_curSubStep;
+    mutex_unlock( &iv_mutex );
+}
+
 } // namespace

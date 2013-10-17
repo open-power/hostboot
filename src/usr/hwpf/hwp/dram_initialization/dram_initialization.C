@@ -155,24 +155,12 @@ void*    call_mss_extent_setup( void    *io_pArgs )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "ERROR : failed executing mss_extent_setup returning error" );
-        /*@
-         * @errortype
-         * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
-         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid        ISTEP_MSS_EXTENT_SETUP
-         * @userdata1       bytes 0-1: plid identifying first error
-         *                  bytes 2-3: reason code of first error
-         * @userdata2       bytes 0-1: total number of elogs included
-         *                  bytes 2-3: N/A
-         * @devdesc         call to mss_extent_setup has failed, see error log
-         *                  identified by the plid in user data
-         */
-        l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
-                                    ISTEP_MSS_EXTENT_SETUP,
-                                    l_errl );
 
+        // Create IStep error log and cross reference to error that occurred
+        l_stepError.addErrorDetails( l_errl );
+
+        // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
-
     }
     else
     {
@@ -218,7 +206,7 @@ void*   call_mss_memdiag( void    *io_pArgs )
         l_errl = runStep(l_mbaList);
         if(NULL != l_errl)
         {
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "MDIA subStep failed");
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"MDIA subStep failed");
             break;
         }
 
@@ -232,26 +220,14 @@ void*   call_mss_memdiag( void    *io_pArgs )
 
     } while (0);
 
-     if( l_errl )
-     {
-         /*@
-          * @errortype
-          * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
-          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-          * @moduleid         ISTEP_MSS_MEMDIAG
-          * @userdata1        bytes 0-1: plid identifying first error
-          *                   bytes 2-3: reason code of first error
-          * @userdata2        bytes 0-1: total number of elogs included
-          *                   bytes 2-3: N/A
-          * @devdesc          call to mss_memdiag has failed, see error log
-          *                   identified by the plid in user data
-          */
-         l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
-                                     ISTEP_MSS_MEMDIAG,
-                                     l_errl );
+    if( l_errl )
+    {
+        // Create IStep error log and cross reference to error that occurred
+        l_stepError.addErrorDetails( l_errl );
 
-         errlCommit( l_errl, HWPF_COMP_ID );
-     }
+        // Commit Error
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -358,23 +334,10 @@ void*    call_mss_thermal_init( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCentaur).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         ISTEP_MSS_THERMAL_INIT
-             * @userdata1        bytes 0-1: plid identifying first error
-             *                   bytes 2-3: reason code of first error
-             * @userdata2        bytes 0-1: total number of elogs included
-             *                   bytes 2-3: N/A
-             * @devdesc          call to mss_thermal_init has failed
-             *                   see error log in the user details section for
-             *                   additional details.
-             */
-            l_StepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
-                                        ISTEP_MSS_THERMAL_INIT,
-                                        l_errl );
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_errl );
 
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
 
             break;
@@ -446,22 +409,10 @@ void*    call_proc_setup_bars( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pCpuTarget).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
-             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid        ISTEP_MSS_SETUP_BARS
-             * @userdata1       bytes 0-1: plid identifying first error
-             *                  bytes 2-3: reason code of first error
-             * @userdata2       bytes 0-1: total number of elogs included
-             *                  bytes 2-3: N/A
-             * @devdesc         call to mss_setup_bars failed, see error log
-             *                  identified by the plid in user data 1.
-             */
-            l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
-                                        ISTEP_MSS_SETUP_BARS,
-                                        l_errl );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_errl );
 
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
 
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -565,25 +516,12 @@ void*    call_proc_setup_bars( void    *io_pArgs )
 
     if ( l_errl )
     {
-        /*@
-         * @errortype
-         * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         ISTEP_PROC_SETUP_BARS
-         * @userdata1        bytes 0-1: plid identifying first error
-         *                   bytes 2-3: reason code of first error
-         * @userdata2        bytes 0-1: total number of elogs included
-         *                   bytes 2-3: N/A
-         * @devdesc          call to proc_setup_bars has failed, see error log
-         *                   identified by the plid in user data section.
-         */
 
-        l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
-                                    ISTEP_PROC_SETUP_BARS,
-                                    l_errl);
+        // Create IStep error log and cross reference to error that occurred
+        l_stepError.addErrorDetails( l_errl);
 
+        // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
-
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -633,22 +571,10 @@ void*    call_proc_pcie_config( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
 
-            /*@
-             * @errortype
-             * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
-             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid        ISTEP_PROC_PCIE_CONFIG
-             * @userdata1       bytes 0-1: plid identifying first error
-             *                  bytes 2-3: reason code of first error
-             * @userdata2       bytes 0-1: total number of elogs included
-             *                  bytes 2-3: N/A
-             * @devdesc         call to proc_pcie_config failed, see error log
-             *                  identified by the plid in user data 1.
-             */
-            l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
-                                        ISTEP_PROC_PCIE_CONFIG,
-                                        l_errl );
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_errl );
 
+            // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
 
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -730,8 +656,8 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
                                              0);
 
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : call_proc_exit_cache_contained - extendVMM, rc=0x%x",
-                      rc );
+                  "ERROR : call_proc_exit_cache_contained - extendVMM, rc=0x%x",
+                  rc );
         }
         else
         {
@@ -742,25 +668,11 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
     }
     if ( l_errl )
     {
-        /*@
-         * @errortype
-         * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         ISTEP_PROC_EXIT_CACHE_CONTAINED
-         * @userdata1        bytes 0-1: plid identifying first error
-         *                   bytes 2-3: reason code of first error
-         * @userdata2        bytes 0-1: total number of elogs included
-         *                   bytes 2-3: N/A
-         * @devdesc          call to proc_exit_cache_contained has failed
-         *                   see error log in the user details section for
-         *                   additional details.
-         */
-        l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
-                                    ISTEP_PROC_EXIT_CACHE_CONTAINED,
-                                    l_errl);
+        // Create IStep error log and cross reference to error that occurred
+        l_stepError.addErrorDetails( l_errl );
 
+        // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
-
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -888,7 +800,7 @@ void*   call_host_mpipl_service( void *io_pArgs )
                 if (l_errMsg)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR : returned from DUMP::sendMboxMsg - dump start" );
+                       "ERROR : returned from DUMP::sendMboxMsg - dump start" );
 
                     errlCommit( l_errMsg, HWPF_COMP_ID );
 
@@ -907,7 +819,7 @@ void*   call_host_mpipl_service( void *io_pArgs )
                 if (l_err)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR : returned from DUMP::HbDumpCopySrcToDest" );
+                          "ERROR : returned from DUMP::HbDumpCopySrcToDest" );
 
                     break;
                 }
@@ -953,7 +865,7 @@ void*   call_host_mpipl_service( void *io_pArgs )
             if (l_errUnLoad)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : returned from VFS::module_unload (libdump.so)" );
+                     "ERROR : returned from VFS::module_unload (libdump.so)" );
 
                 errlCommit( l_errUnLoad, HWPF_COMP_ID );
             }
@@ -969,31 +881,12 @@ void*   call_host_mpipl_service( void *io_pArgs )
     // If got an error in the procedure or collection of the dump kill the istep
     if( l_err )
     {
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
 
-        /*@
-         * @errortype
-         * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
-         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid        ISTEP_HOST_MPIPL_SERVICE
-         * @userdata1       bytes 0-1: plid identifying first error
-         *                  bytes 2-3: reason code of first error
-         * @userdata2       bytes 0-1: total number of elogs
-         *                             included
-         *                  bytes 2-3: N/A
-         * @devdesc         call to proc_mpipl_ex_cleanup or
-         *                  proc_mpipl_chip_cleanup has failed
-         *                  see error log identified by the plid
-         *                  in user data 1
-         */
-        l_StepError.addErrorDetails(
-                                ISTEP_DRAM_INITIALIZATION_FAILED,
-                                ISTEP_HOST_MPIPL_SERVICE,
-                                l_err );
-
+        // Commit Error
         errlCommit( l_err, HWPF_COMP_ID );
     }
-
-
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_mpipl_service exit" );

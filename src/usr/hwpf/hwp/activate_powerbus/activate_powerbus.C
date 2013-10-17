@@ -93,9 +93,9 @@ void*    call_proc_build_smp( void    *io_pArgs )
                                      l_abusConnections, TYPE_ABUS, false );
         if (l_errl)
         {
-            l_StepError.addErrorDetails(ISTEP_ACTIVATE_POWER_BUS_FAILED,
-                                        ISTEP_PROC_BUILD_SMP,
-                                        l_errl);
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl);
+            // Commit error
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
@@ -106,9 +106,9 @@ void*    call_proc_build_smp( void    *io_pArgs )
 
         if (l_errl)
         {
-            l_StepError.addErrorDetails(ISTEP_ACTIVATE_POWER_BUS_FAILED,
-                                        ISTEP_PROC_BUILD_SMP,
-                                        l_errl);
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl);
+            // Commit error
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
@@ -227,20 +227,9 @@ void*    call_proc_build_smp( void    *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR : proc_build_smp" );
-            /*@
-             * @errortype
-             * @reasoncode       ISTEP_ACTIVATE_POWER_BUS_FAILED
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         ISTEP_PROC_BUILD_SMP
-             * @userdata1        bytes 0-1: plid identifying first error
-             *                   bytes 2-3: reason code of first error
-             * @userdata2        bytes 0-1: total number of elogs included
-             *                   bytes 2-3: N/A
-             * @devdesc          call to proc_build_smp has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_ACTIVATE_POWER_BUS_FAILED,
-                                        ISTEP_PROC_BUILD_SMP,
-                                        l_errl);
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails(l_errl);
+            // Commit error
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }

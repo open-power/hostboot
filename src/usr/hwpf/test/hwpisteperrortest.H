@@ -26,6 +26,7 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlentry.H>
 #include <hwpisteperror.H>
+#include <istepdispatcher.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -38,204 +39,248 @@ public:
      */
     void testIstepError1(void)
     {
+        uint8_t l_iStep = 0;
+        uint8_t l_subStep =0;
+        const uint16_t MY_REASON_CODE = 0xC0DE;
+        const uint8_t  MY_MODULE_ID = 0xBB;
 
-    const uint16_t MY_REASON_CODE = 0xC0DE;
-    const uint8_t  MY_MODULE_ID = 0xBB;
-            // Create an error log
-            errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    MY_MODULE_ID,
-                                    MY_REASON_CODE,
-                                    TWO_UINT32_TO_UINT64( 0xDE, 0xAD),
-                                    TO_UINT64(0xBEEF) );
-            do {
+        TS_TRACE("testIStepError1: entry");
 
-                IStepError l_stepError;
+        // Get the expected iStep and subStep. Likely the last valid values
+        // since the test case is running after the iSteps.
+        INITSERVICE::IStepDispatcher::
+                getTheInstance().getIstepInfo(l_iStep,l_subStep);
 
-                l_stepError.addErrorDetails( ISTEP_INVALID_REASONCODE,
-                                             ISTEP_INVALID_MODULE, l_errl );
+        // Create an error log
+        errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                MY_MODULE_ID,
+                                MY_REASON_CODE,
+                                TWO_UINT32_TO_UINT64( 0xDE, 0xAD),
+                                TO_UINT64(0xBEEF) );
+        do {
 
-                TS_TRACE("testIStepError1: original elog eid is %d",
+            IStepError l_stepError;
+
+            l_stepError.addErrorDetails( l_errl );
+
+            TS_TRACE("testIStepError1: original elog eid is %d",
                           l_errl->eid() );
 
-                TS_TRACE("testIStepError1: original elog reasoncode is %d",
+            TS_TRACE("testIStepError1: original elog reasoncode is %d",
                           l_errl->reasonCode() );
 
-                // grab the values from the original errorlog for use later
-                uint64_t test_data0 = l_errl->eid();
-                test_data0 <<= 32;
+            // grab the values from the original errorlog for use later
+            uint64_t test_data0 = l_errl->eid();
+            test_data0 <<= 32;
 
-                test_data0 |= l_errl->reasonCode();
+            test_data0 |= l_errl->reasonCode();
 
-                // this call to get resets the error handle
-                errlHndl_t new_errl = l_stepError.getErrorHandle();
+            // this call to get resets the error handle
+            errlHndl_t new_errl = l_stepError.getErrorHandle();
 
-                uint64_t l_data0 = new_errl->getUserData1();
+            uint64_t l_data0 = new_errl->getUserData1();
 
-                uint32_t eid = ( l_data0  & 0xFFFFFFFF00000000) >> 32;
-                uint32_t reason = (uint32_t)(l_data0 & 0x00000000FFFFFFFF);
+            uint32_t eid = ( l_data0  & 0xFFFFFFFF00000000) >> 32;
+            uint32_t reason = (uint32_t)(l_data0 & 0x00000000FFFFFFFF);
 
-                if( eid != l_errl->eid() )
-                {
-                    TS_FAIL("testIstepError1: expected"
+            // Verify the reference to the added error log.
+            // Added log id is in bytes 0-3 of userdata 1.
+            // Reason code is in bytes 4-6 of userdata 1.
+            if( eid != l_errl->eid() )
+            {
+                TS_FAIL("testIstepError1: expected"
                             "eid[0x%.8x] == l_errl->eid()[0x%.8x] "
                             "eid rebuilt from user data of "
                             "IStepError did not match original error eid",
                             eid, l_errl->eid());
-                }
-                else
-                {
-                    TS_TRACE("testIstepError1: passed: eid == l_errl->eid()");
-                }
+            }
+            else
+            {
+                TS_TRACE("testIstepError1: passed: eid == l_errl->eid()");
+            }
 
-                if( reason != l_errl->reasonCode() )
-                {
-                    TS_FAIL("testIstepError1: "
-                            "expected reasonCode == l_errl->reasonCode() \
-                              reasonCode rebuilt from user data of \
-                              IStepError did not match original reasoncode");
+            if( reason != l_errl->reasonCode() )
+            {
+                TS_FAIL("testIstepError1: "
+                        "expected reasonCode == l_errl->reasonCode() \
+                          reasonCode rebuilt from user data of \
+                          IStepError did not match original reasoncode");
 
-                }
-                else
-                {
-                    TS_TRACE("testIstepError1: passed: "
-                             "reason == l_errl->reasonCode()");
-                }
+            }
+            else
+            {
+                TS_TRACE("testIstepError1: passed: "
+                         "reason == l_errl->reasonCode()");
+            }
 
+            // Verify that we counted the error we added.
+            // Count is in bytes 0-3 of userdata 2.
+            // iStep and subStep in bytes 4-6 of userdata 2.
+            uint64_t l_data1 = new_errl->getUserData2();
 
-                // verify that we counted the error we added
-                // count is in bytes 0-3 of userdata 2
-                //
-                uint64_t l_data1 = new_errl->getUserData2();
+            uint32_t l_count  = ( l_data1&0xFFFFFFFF00000000 ) >> 32;
+            uint32_t l_errlStepSubStep =
+                            (uint32_t)(l_data1&0x00000000FFFFFFFF);
+            uint32_t l_expectedStepSubStep =
+                            (uint32_t)(l_subStep | (l_iStep<<8));
 
-                l_data1 >>= 32;
+            if( l_count != 1 )
+            {
+                TS_FAIL("error count in IStepError not correct,"
+                        " should be 1, is %d",l_count);
+            }
+            else
+            {
+                TS_TRACE("passed: error count = 1");
+            }
 
-                if( l_data1 != 1 )
-                {
-                    TS_FAIL("error count in IStepError not correct should be 1");
-                }
-                else
-                {
-                    TS_TRACE("passed: error count = 1");
-                }
+            if( l_errlStepSubStep != l_expectedStepSubStep )
+            {
+                TS_FAIL("Step/SubStep in IStepError not correct,"
+                        " should be 0x%08x, is 0x%08x ",
+                        l_expectedStepSubStep,
+                        l_errlStepSubStep);
+            }
+            else
+            {
+                TS_TRACE("passed: step/subStep correct");
+            }
 
+            errlCommit( l_errl, CXXTEST_COMP_ID );
+            errlCommit( new_errl, CXXTEST_COMP_ID );
 
-                errlCommit( l_errl, CXXTEST_COMP_ID );
-                errlCommit( new_errl, CXXTEST_COMP_ID );
-
-            }while(0);
+        }while(0);
     }
+
     void testIstepError2(void)
     {
+        uint8_t l_iStep = 0;
+        uint8_t l_subStep =0;
+        const uint16_t MY_REASON_CODE = 0xC0DE;
+        const uint8_t  MY_MODULE_ID = 0xBB;
 
-    const uint16_t MY_REASON_CODE = 0xC0DE;
-    const uint8_t  MY_MODULE_ID = 0xBB;
-            // Create an error log
-            errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    MY_MODULE_ID,
-                                    MY_REASON_CODE,
-                                    TWO_UINT32_TO_UINT64( 0xDE, 0xAD),
-                                    TO_UINT64(0xBEEF) );
-            do {
+        TS_TRACE("testIStepError2: entry");
 
-                IStepError l_stepError;
+        // Get the expected iStep and subStep. Likely the last valid values
+        // since the test case is running after the iSteps.
+        INITSERVICE::IStepDispatcher::
+                getTheInstance().getIstepInfo(l_iStep,l_subStep);
 
-                l_stepError.addErrorDetails( ISTEP_INVALID_REASONCODE,
-                                             ISTEP_INVALID_MODULE, l_errl );
+        // Create an error log
+        errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                MY_MODULE_ID,
+                                MY_REASON_CODE,
+                                TWO_UINT32_TO_UINT64( 0xDE, 0xAD),
+                                TO_UINT64(0xBEEF) );
+        do {
 
-                TS_TRACE("testIStepError2: original elog eid is %d",
-                          l_errl->eid() );
+            IStepError l_stepError;
 
-                TS_TRACE("testIStepError2: original elog reasoncode is %d",
-                          l_errl->reasonCode() );
+            l_stepError.addErrorDetails( l_errl );
 
-                // grab the values from the original errorlog for use later
-                uint64_t test_data0 = l_errl->eid();
-                test_data0 <<= 32;
+            TS_TRACE("testIStepError2: original elog eid is %d",
+                      l_errl->eid() );
 
-                test_data0 |= l_errl->reasonCode();
+            TS_TRACE("testIStepError2: original elog reasoncode is %d",
+                      l_errl->reasonCode() );
 
-                // add a new elog in three more times..
+            // grab the values from the original errorlog for use later
+            uint64_t test_data0 = l_errl->eid();
+            test_data0 <<= 32;
+
+            test_data0 |= l_errl->reasonCode();
+
+            // add a new elog in three more times..
             // Create an error log -- junk data
             errlHndl_t l_errl2 = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    0x05,
-                                    0xcafe,
-                                    TWO_UINT32_TO_UINT64( 0xDE, 0xAD),
-                                    TO_UINT64(0xBEEF) );
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                0x05,
+                                0xcafe,
+                                TWO_UINT32_TO_UINT64( 0xDE, 0xAD),
+                                TO_UINT64(0xBEEF) );
 
-                l_stepError.addErrorDetails( ISTEP_INVALID_REASONCODE,
-                                             ISTEP_INVALID_MODULE, l_errl2);
+            l_stepError.addErrorDetails( l_errl2 );
+            l_stepError.addErrorDetails( l_errl2 );
+            l_stepError.addErrorDetails( l_errl2 );
 
-                l_stepError.addErrorDetails( ISTEP_INVALID_REASONCODE,
-                                             ISTEP_INVALID_MODULE, l_errl2);
+            // count should be 4 and the data0 and data 1 values of the
+            // istep error should be the same as before
 
-                l_stepError.addErrorDetails( ISTEP_INVALID_REASONCODE,
-                                             ISTEP_INVALID_MODULE, l_errl2);
+            // this call to get resets the error handle
+            errlHndl_t new_errl = l_stepError.getErrorHandle();
 
-                // count should be 4 and the data0 and data 1 values of the
-                // istep error should be the same as before
+            uint64_t l_data0 = new_errl->getUserData1();
 
+            uint32_t eid = ( l_data0  & 0xFFFFFFFF00000000) >> 32;
+            uint32_t reason = (uint32_t)(l_data0 & 0x00000000FFFFFFFF);
 
-                // this call to get resets the error handle
-                errlHndl_t new_errl = l_stepError.getErrorHandle();
+            if( eid != l_errl->eid() )
+            {
+                TS_FAIL("testIStepError2: expected "
+                        "eid[0x%.8x] == l_errl->eid()[0x%.8x] "
+                        "eid rebuilt from user data of "
+                        "IStepError did not match original error eid",
+                        eid, l_errl->eid());
+            }
+            else
+            {
+                TS_TRACE("testIStepError2: passed: eid == l_errl->eid()");
+            }
 
-                uint64_t l_data0 = new_errl->getUserData1();
+            if( reason != l_errl->reasonCode() )
+            {
+                TS_FAIL("testIStepError2: "
+                        "expected reasonCode == l_errl->reasonCode()"
+                        "reasonCode rebuilt from user data of"
+                        "IStepError did not match original reasoncode");
 
-                uint32_t eid = ( l_data0  & 0xFFFFFFFF00000000) >> 32;
-                uint32_t reason = (uint32_t)(l_data0 & 0x00000000FFFFFFFF);
+            }
+            else
+            {
+                TS_TRACE("testIStepError2: passed: "
+                         "reason == l_errl->reasonCode()");
+            }
 
-                if( eid != l_errl->eid() )
-                {
-                    TS_FAIL("testIStepError2: expected "
-                            "eid[0x%.8x] == l_errl->eid()[0x%.8x] "
-                            "eid rebuilt from user data of "
-                            "IStepError did not match original error eid",
-                            eid, l_errl->eid());
-                }
-                else
-                {
-                    TS_TRACE("testIStepError2: passed: eid == l_errl->eid()");
-                }
+            // Verify that 4 logs have been added.
+            // Count is in bytes 0-3 of userdata 2.
+            // iStep and subStep in bytes 4-6 of userdata 2.
+            uint64_t l_data1 = new_errl->getUserData2();
 
-                if( reason != l_errl->reasonCode() )
-                {
-                    TS_FAIL("testIStepError2: "
-                            "expected reasonCode == l_errl->reasonCode()"
-                            "reasonCode rebuilt from user data of"
-                            "IStepError did not match original reasoncode");
+            uint32_t l_count  = ( l_data1&0xFFFFFFFF00000000 ) >> 32;
+            uint32_t l_errlStepSubStep =
+                            (uint32_t)(l_data1&0x00000000FFFFFFFF);
+            uint32_t l_expectedStepSubStep =
+                            (uint32_t)(l_subStep | (l_iStep<<8));
 
-                }
-                else
-                {
-                    TS_TRACE("testIStepError2: passed: "
-                             "reason == l_errl->reasonCode()");
-                }
+            if( l_count != 4 )
+            {
+                TS_FAIL("error count in IStepError not correct,"
+                        " should be 4, is %d",l_count);
+            }
+            else
+            {
+                TS_TRACE("passed: error count = 4");
+            }
 
-                // verify that we counted the error we added
-                // count is in bytes 0-3 of userdata 2
-                //
-                uint64_t l_data1 = new_errl->getUserData2();
+            if( l_errlStepSubStep != l_expectedStepSubStep )
+            {
+                TS_FAIL("Step/SubStep in IStepError not correct,"
+                        " should be 0x%08x, is 0x%08x ",
+                        l_expectedStepSubStep,
+                        l_errlStepSubStep);
+            }
+            else
+            {
+                TS_TRACE("passed: step/subStep correct");
+            }
 
-                l_data1 >>= 32;
+            errlCommit( l_errl, CXXTEST_COMP_ID );
+            errlCommit( new_errl, CXXTEST_COMP_ID );
+            errlCommit( l_errl2, CXXTEST_COMP_ID );
 
-                if( l_data1 != 4 )
-                {
-                    TS_FAIL("error count in IStepError not correct"
-                             "should be 4");
-                    TS_TRACE("error count is %d", l_data1 );
-                }
-                else
-                {
-                    TS_TRACE("passed: error count is correct [%d]", l_data1 );
-                }
-
-                errlCommit( l_errl, CXXTEST_COMP_ID );
-                errlCommit( new_errl, CXXTEST_COMP_ID );
-                errlCommit( l_errl2, CXXTEST_COMP_ID );
-
-            }while(0);
+        }while(0);
     }
 
 };

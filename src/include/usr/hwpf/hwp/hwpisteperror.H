@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -41,8 +41,8 @@ namespace ISTEP_ERROR
     /**
      * @class IStepError
      *
-     * Inteface to the a top level error log returned to the ISTEP dispatcher when
-     * an individual step fails due to an error in a hardware procedure.
+     * Inteface to the a top level error log returned to the ISTEP dispatcher
+     * when an individual step fails due to an error in a hardware procedure.
      *
      * The class may be used to aggregate the errors returned from procedures
      * which may have been run in parallel.  The top level error log will
@@ -93,6 +93,8 @@ namespace ISTEP_ERROR
              *
              *          The first call will initialize the internal object
              *          pointer allocating a new errl object as needed.
+             *          The iStep and subStep is retrieved from the
+             *          istepdispatcher and added to the log.
              *          Subsequent calls to this function will result in a new
              *          user data section being added to the top level error
              *          log with additional error data from the error handle
@@ -100,19 +102,11 @@ namespace ISTEP_ERROR
              *
              *          NOTE: This function is thread safe.
              *
-             * @param: reasoncode - reason code identifying which Istep has
-             *                      failed
-             * @param: modid      - module id identifying which module or
-             *                      procedure has caused the error to be
-             *                      created
-             *
              *  @param  i_err     - error handle passed in, the internal code
              *                      will parse specific details from the log
              *                      passed in to include in the top level elog.
              */
-            void addErrorDetails(ISTEP::istepReasonCode reasoncode,
-                                 ISTEP::istepModuleId modid,
-                                 errlHndl_t i_err );
+            void addErrorDetails( errlHndl_t i_err );
 
             /**
              *  @brief  Return an errlHndl_t which points to the internal error
@@ -128,8 +122,8 @@ namespace ISTEP_ERROR
             errlHndl_t getErrorHandle();
 
             /**
-             *  @brief  Utility function to determine if the internal error handle
-             *          is null.
+             *  @brief  Utility function to determine if the internal error
+             *          handle is null.
              *
              *  @return  boolean
              *                  true indicates errl handle is currently NULL;
@@ -139,7 +133,7 @@ namespace ISTEP_ERROR
              *  Note: This funciton is not thread safe
              *
              */
-            bool       isNull() const { return ((iv_eHandle == NULL ) ?  true : false); };
+            bool isNull() const { return ((iv_eHandle==NULL ) ? true : false);};
 
         private:
 

@@ -215,23 +215,10 @@ void*    call_host_activate_master( void    *io_pArgs )
     // @@@@@    END CUSTOM BLOCK:   @@@@@
     if( l_errl )
     {
-        /*@
-         * @errortype
-         * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
-         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid        ISTEP_HOST_ACTIVATE_MASTER
-         * @userdata1       bytes 0-1: plid identifying first error
-         *                  bytes 2-3: reason code of first error
-         * @userdata2       bytes 0-1: total number of elogs included
-         *                  bytes 2-3: N/A
-         * @devdesc         call to host_activate_master failed see
-         *                  error identified by the plid in user data
-         *                  field.
-         */
-        l_stepError.addErrorDetails(ISTEP_CORE_ACTIVATE_FAILED,
-                         ISTEP_HOST_ACTIVATE_MASTER,
-                         l_errl );
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_errl );
 
+        // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
@@ -336,9 +323,10 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 
     if (l_errl)
     {
-        l_stepError.addErrorDetails(ISTEP_BAD_RC,
-                                    ISTEP_HOST_ACTIVATE_SLAVE_CORES,
-                                    l_errl);
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_errl );
+
+        // Commit Error
         errlCommit(l_errl, HWPF_COMP_ID);
     }
     else
@@ -387,23 +375,13 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                 {
                     // capture the target data in the elog
                     ErrlUserDetailsTarget(l_pChipTarget).addToLog( l_errl );
-                    /*@
-                     * @errortype
-                     * @reasoncode      ISTEP_PROC_POST_WINKLE_FAILED
-                     * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid        ISTEP_HOST_ACTIVATE_SLAVE_CORES
-                     * @userdata1       bytes 0-1: plid identifying first error
-                     *                  bytes 2-3: reason code of first error
-                     * @userdata2       bytes 0-1: total number of elogs included
-                     *                  bytes 2-3: N/A
-                     * @devdesc         call to host_activate_master failed see
-                     *                  error identified by the plid in user data
-                     *                  field.
-                    */
-                    l_stepError.addErrorDetails(ISTEP_PROC_POST_WINKLE_FAILED,
-                                            ISTEP_HOST_ACTIVATE_SLAVE_CORES,
-                                            l_errl );
+
+                    // Create IStep error log and cross ref error that occurred
+                    l_stepError.addErrorDetails( l_errl );
+
+                    // Commit Error
                     errlCommit( l_errl, HWPF_COMP_ID );
+
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                              "ERROR : proc_post_winkle, PLID=0x%x",
                              l_errl->plid()  );
@@ -478,22 +456,9 @@ void*    call_host_ipl_complete( void    *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_masterProc).addToLog( l_err );
 
-            /*@
-             * @errortype
-             * @reasoncode      ISTEP_PROC_SWITCH_CFSIM_FAILED
-             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid        ISTEP_HOST_IPL_COMPLETE
-             * @userdata1       bytes 0-1: plid identifying first error
-             *                  bytes 2-3: reason code of first error
-             * @userdata2       bytes 0-1: total number of elogs included
-             *                  bytes 2-3: N/A
-             * @devdesc         call to proc_switch_cfsim failed.
-             *                  see error identified by the plid in user data
-             *                  field.
-             */
-            l_stepError.addErrorDetails( ISTEP_PROC_SWITCH_CFSIM_FAILED,
-                                         ISTEP_HOST_IPL_COMPLETE,
-                                         l_err );
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails( l_err );
+
             // commit errorlog
             errlCommit( l_err, HWPF_COMP_ID );
 
@@ -543,24 +508,10 @@ void*    call_host_ipl_complete( void    *io_pArgs )
                 // capture the target data in the elog
                 myDetails.addToLog(l_err);
 
-                /*@
-                 * @errortype
-                 * @reasoncode      ISTEP_CEN_REC_ATTN_FAILED
-                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid        ISTEP_HOST_IPL_COMPLETE
-                 * @userdata1       bytes 0-1: plid identifying first error
-                 *                  bytes 2-3: reason code of first error
-                 * @userdata2       bytes 0-1: total number of elogs included
-                 *                  bytes 2-3: N/A
-                 * @devdesc         call to cen_switch_attn failed.
-                 *                  see
-                 *                  error identified by the plid in user data
-                 *                  field.
-                 */
-                l_stepError.addErrorDetails( ISTEP_CEN_REC_ATTN_FAILED,
-                                             ISTEP_HOST_IPL_COMPLETE,
-                                             l_err );
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_err );
 
+                // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
             }
             else
@@ -613,24 +564,10 @@ void*    call_host_ipl_complete( void    *io_pArgs )
                 // capture the target data in the elog
                 myDetails.addToLog(l_err);
 
-                /*@
-                 * @errortype
-                 * @reasoncode      ISTEP_PROC_REC_ATTN_FAILED
-                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid        ISTEP_HOST_IPL_COMPLETE
-                 * @userdata1       bytes 0-1: plid identifying first error
-                 *                  bytes 2-3: reason code of first error
-                 * @userdata2       bytes 0-1: total number of elogs included
-                 *                  bytes 2-3: N/A
-                 * @devdesc         call to cen_switch_attn failed.
-                 *                  see
-                 *                  error identified by the plid in user data
-                 *                  field.
-                 */
-                l_stepError.addErrorDetails( ISTEP_PROC_REC_ATTN_FAILED,
-                                             ISTEP_HOST_IPL_COMPLETE,
-                                             l_err );
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_err );
 
+                // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
             }
             else
@@ -676,27 +613,12 @@ void*    call_host_ipl_complete( void    *io_pArgs )
     {
         // collect and log any remaining errors
 
-        /*@
-         * @errortype
-         * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
-         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid        ISTEP_HOST_IPL_COMPLETE
-         * @userdata1       bytes 0-1: plid identifying first error
-         *                  bytes 2-3: reason code of first error
-         * @userdata2       bytes 0-1: total number of elogs included
-         *                  bytes 2-3: N/A
-         * @devdesc         call to host_ipl_complete failed see
-         *                  error identified by the plid in user data
-         *                  field.
-         */
-        l_stepError.addErrorDetails(ISTEP_CORE_ACTIVATE_FAILED,
-                                    ISTEP_HOST_IPL_COMPLETE,
-                                    l_err );
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_err );
 
+        // Commit Error
         errlCommit( l_err, HWPF_COMP_ID );
     }
-
-
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_ipl_complete exit ");
