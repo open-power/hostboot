@@ -33,7 +33,7 @@ foreach $cc in (get-object-list p8_proc) {
     echo "-Trigger SBE"
     ($cc).proc_lbus_map.write 0x28E0 0x0000F3FF  #NonFunc EX (only 4,5 is good)
     ($cc).proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush) 
-    ($cc).proc_lbus_map.write 0x2870 0x10000000  #SBE Vital 0x281C (load) 
+    ($cc).proc_lbus_map.write 0x2870 0xB0000000  #SBE Vital 0x281C (load)
     ($cc).proc_lbus_map.write 0x2870 0x90000000  #SBE Vital 0x281C (start)
 }
 
