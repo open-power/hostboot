@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pss_errors.xml,v 1.5 2013-10-15 17:39:44 dcrowell Exp $ -->
+<!-- $Id: p8_pss_errors.xml,v 1.6 2013-10-17 19:22:08 dcrowell Exp $ -->
 <!-- Error definitions for proc_pss_init procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -37,7 +37,7 @@
    <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSS_ADC_ERROR</rc>
-    <description>SPIADC error bit asserted waiting for operation to complete."</description>
+    <description>SPIADC error bit asserted waiting for operation to complete.</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_PSS_REGISTERS</id>
       <target>CHIP</target>
@@ -50,7 +50,7 @@
    <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSS_P2S_ERROR</rc>
-    <description>SPIP2S error bit asserted waiting for operation to complete."</description>
+    <description>SPIP2S error bit asserted waiting for operation to complete.</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_PSS_REGISTERS</id>
       <target>CHIP</target>
