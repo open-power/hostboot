@@ -102,12 +102,10 @@ errlHndl_t getMbaWorkFlow(
 
     o_wf.push_back(RESTORE_DRAM_REPAIRS);
 
-    switch (i_mode) {
-
+    switch (i_mode)
+    {
         case NINE_PATTERNS:
 
-            o_wf.push_back(START_RANDOM_PATTERN);
-            o_wf.push_back(START_SCRUB);
             o_wf.push_back(START_PATTERN_7);
             o_wf.push_back(START_SCRUB);
             o_wf.push_back(START_PATTERN_6);
@@ -116,12 +114,14 @@ errlHndl_t getMbaWorkFlow(
             o_wf.push_back(START_SCRUB);
             o_wf.push_back(START_PATTERN_4);
             o_wf.push_back(START_SCRUB);
+            o_wf.push_back(START_PATTERN_3);
+            o_wf.push_back(START_SCRUB);
 
             // fall through
 
         case FOUR_PATTERNS:
 
-            o_wf.push_back(START_PATTERN_3);
+            o_wf.push_back(START_RANDOM_PATTERN);
             o_wf.push_back(START_SCRUB);
             o_wf.push_back(START_PATTERN_2);
             o_wf.push_back(START_SCRUB);
@@ -132,7 +132,7 @@ errlHndl_t getMbaWorkFlow(
 
         case ONE_PATTERN:
 
-            o_wf.push_back(START_PATTERN_0);
+            o_wf.push_back(START_PATTERN_0); // 0's pattern, must be last
 
             // fall through
 
