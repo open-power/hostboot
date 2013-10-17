@@ -199,12 +199,10 @@
                             i_deconfigState, i_gardState,             \
                             io_errl, i_writeVpd,                      \
                             i_gardErrType, i_severity, i_hcdb_update) \
-  HWAS::DeconfigEnum deconfigState =                                 \
-                        (i_deconfigState == HWAS::DECONFIG ?         \
-                        HWAS::DELAYED_DECONFIG : i_deconfigState);   \
   io_errl->addHwCallout(i_target,                                    \
                         (const HWAS::callOutPriority)i_priority,     \
-                        deconfigState,                               \
+                        (i_deconfigState == HWAS::DECONFIG ?         \
+                        HWAS::DELAYED_DECONFIG : i_deconfigState),   \
                         (const HWAS::GARD_ErrorType)i_gardErrType);  \
   (void)(i_hcdb_update)
 
