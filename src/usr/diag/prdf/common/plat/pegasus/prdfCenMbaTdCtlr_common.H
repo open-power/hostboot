@@ -127,7 +127,7 @@ class CenMbaTdCtlrCommon
      */
     explicit CenMbaTdCtlrCommon( ExtensibleChip * i_mbaChip ) :
         iv_mbaChip(i_mbaChip), iv_initialized(false), iv_tdState(NO_OP),
-        iv_rank(), iv_mark(), iv_mssCmd(NULL)
+        iv_rank(), iv_mark(), iv_mssCmd(NULL), iv_isEccSteer(false)
     {}
 
     /** @brief Destructor */
@@ -401,6 +401,9 @@ class CenMbaTdCtlrCommon
 
     /** Current maintenance command */
     PlatServices::mss_MaintCmdWrapper * iv_mssCmd;
+
+    /** Tells if in DSD procedure we should use eccSpare. */
+    bool iv_isEccSteer;
 
 }; // CenMbaTdCtlrCommon
 

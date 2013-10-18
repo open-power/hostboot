@@ -39,9 +39,6 @@
 #include <prdfCenMbaDataBundle.H>
 #include <prdfCenSymbol.H>
 
-// TODO: RTC 68096 Currently we are only supporting x8 DRAM. Once support for x4
-//       DRAM is available, it will have impact on DRAM spare.
-
 using namespace TARGETING;
 
 namespace PRDF
@@ -908,7 +905,8 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Set the steer mux
-        o_rc = mssSetSteerMux( iv_mbaTrgt, iv_rank, iv_mark.getCM(), false );
+        o_rc = mssSetSteerMux( iv_mbaTrgt, iv_rank, iv_mark.getCM(),
+                               iv_isEccSteer );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"mssSetSteerMux() failed" );

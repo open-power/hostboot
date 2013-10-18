@@ -356,8 +356,11 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlrCommon::handleMCE_VCM2] "
 
+    using namespace fapi; // For spare config macros.
+
     int32_t o_rc = SUCCESS;
 
+    iv_isEccSteer = false;
     do
     {
         if ( VCM_PHASE_2 != iv_tdState )
@@ -413,25 +416,25 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        // RAS callout policies can be determined by the DIMM type. We can
-        // assume IS DIMMs are on low end systems and Centaur DIMMs are on
-        // mid/high end systems.
-        bool isCenDimm = false;
-        o_rc = isMembufOnDimm( iv_mbaTrgt, isCenDimm );
+        uint8_t ps = iv_mark.getCM().getPortSlct();
+        uint8_t spareConfig = ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+        o_rc = getDimmSpareConfig( iv_mbaTrgt, iv_rank, ps,
+                                   spareConfig );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"isMembufOnDimm() failed" );
+            PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
             break;
         }
+        bool isX4Dimm = isDramWidthX4( iv_mbaTrgt );
 
-        if ( isCenDimm ) // Medium/high end systems
+        // Chaeck if DRAM spare is present.
+        // Also eccspare is available on all X4 DIMMS.
+        if ( ( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE != spareConfig ) || isX4Dimm )
         {
-            uint8_t ps = iv_mark.getCM().getPortSlct();
 
             // It is possible that a Centaur DIMM does not have spare DRAMs.
-            // Check the VPD for available spares. Note that a x4 DIMM may have
-            // one or two spare DRAMs so check for availability on both.
-            // TODO: RTC 68096 Add support for x4 DRAMs.
+            // Check the VPD for available spares. Note that a x4 DIMM have
+            // DRAM spare and eccspare, so check for availability on both.
             bool dramSparePossible = false;
             o_rc = bitmap.isDramSpareAvailable( ps, dramSparePossible );
             if ( SUCCESS != o_rc )
@@ -444,7 +447,6 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
             {
                 // Verify the spare is not already used.
                 CenSymbol sp0, sp1, ecc;
-                // TODO: RTC 68096 need to support ECC spare.
                 o_rc = mssGetSteerMux( iv_mbaTrgt, iv_rank, sp0, sp1, ecc );
                 if ( SUCCESS != o_rc )
                 {
@@ -452,15 +454,14 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                     break;
                 }
 
-                if ( ((0 == ps) && !sp0.isValid()) ||
-                     ((1 == ps) && !sp1.isValid()) )
-                {
-                    // A spare DRAM is available.
-                    startDsdProcedure = true;
-                }
-                else if ( iv_mark.getCM().getDram() ==
+               // If spare DRAM is bad, HW can not steer another DRAM even
+               // if it is available ( e.g. ecc Spare ). So if chip mark is on
+               // spare DRAM, update VPD and make predictive callout.
+                if ( ( iv_mark.getCM().getDram() ==
                           (0 == ps ? sp0.getDram() : sp1.getDram()) )
+                     || ( iv_mark.getCM().getDram() == ecc.getDram() ))
                 {
+
                     setTdSignature( io_sc, PRDFSIG_VcmBadSpare );
 
                     // The chip mark was on the spare DRAM and it is bad, so
@@ -469,19 +470,43 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                     MemoryMru memmru ( iv_mbaTrgt, iv_rank, iv_mark.getCM() );
                     memmru.setDramSpared();
                     io_sc.service_data->SetCallout( memmru );
+
                     io_sc.service_data->SetServiceCall();
 
-                    o_rc = bitmap.setDramSpare( ps );
-                    if ( SUCCESS != o_rc )
+                    if ( iv_mark.getCM().getDram() == ecc.getDram() )
                     {
-                        PRDF_ERR( PRDF_FUNC"setDramSpare() failed" );
-                        break;
+                        o_rc = bitmap.setEccSpare();
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC"setEccSpare() failed" );
+                            break;
+                        }
                     }
+                    else
+                    {
+                        o_rc = bitmap.setDramSpare( ps );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC"setDramSpare() failed" );
+                            break;
+                        }
+                    }
+                }
+                else if ( ((0 == ps) && !sp0.isValid()) ||
+                          ((1 == ps) && !sp1.isValid()) )
+                {
+                    // A spare DRAM is available.
+                    startDsdProcedure = true;
+                }
+                else if( isDramWidthX4 ( iv_mbaTrgt ) && !ecc.isValid() )
+                {
+                    startDsdProcedure = true;
+                    iv_isEccSteer = true;
                 }
                 else
                 {
                     // Chip mark and DRAM spare are both used.
-                    setTdSignature( io_sc, PRDFSIG_VcmMarksUnavail );
+                    io_sc.service_data->SetErrorSig( PRDFSIG_VcmMarksUnavail );
                     io_sc.service_data->SetServiceCall();
                 }
             }
@@ -492,7 +517,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                 io_sc.service_data->SetServiceCall();
             }
         }
-        else // Low end systems
+        else // DRAM spare not supported.
         {
             // Not able to do dram sparing. If there is a symbol mark, there are
             // no repairs available so call it out and set the error log to
@@ -569,12 +594,18 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
             break;
         }
-
-        o_rc = bitmap.setDramSpare( iv_mark.getCM().getPortSlct() );
-        if ( SUCCESS != o_rc )
+        if ( iv_isEccSteer )
         {
-            PRDF_ERR( PRDF_FUNC"setDramSpare() failed" );
-            break;
+            bitmap.setEccSpare();
+        }
+        else
+        {
+            o_rc = bitmap.setDramSpare( iv_mark.getCM().getPortSlct() );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"setDramSpare() failed" );
+                break;
+            }
         }
 
         o_rc = setBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );

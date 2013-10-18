@@ -49,10 +49,11 @@ namespace FSP
  */
 struct DramRepairDataHdr
 {
-    uint8_t rankCount  : 4; //Number of ranks with DRAM Repair data
-    uint8_t isX4Dram   : 1; //Is this mba connected in x4 mode
-    uint8_t isIsDimm   : 1; //Is this mba connected to Industry standadrd DIMM
-    uint8_t reserved   : 2; // Future use
+    uint8_t rankCount   : 4; // Number of ranks with DRAM Repair data
+    uint8_t isX4Dram    : 1; // Is this mba connected in x4 mode
+    uint8_t isSpareDram : 1; // Is spare DRAM supported on DIMMS attached
+                             // to this MBA.
+    uint8_t reserved    : 2; // Future use
     uint8_t wiringType;     // Future use. In case we need to display the DRAM
                             // site location instead symbols (TBD).
 
@@ -67,7 +68,7 @@ struct DramRepairDataHdr
     {
         i_left << ( uint8_t )(i_right.rankCount << 4
                    | i_right.isX4Dram << 3
-                   | i_right.isIsDimm << 2
+                   | i_right.isSpareDram << 2
                    | i_right.reserved )
                << i_right.wiringType;
         return i_left;
@@ -87,7 +88,7 @@ struct DramRepairDataHdr
 
         i_right.rankCount = temp >> 4;
         i_right.isX4Dram = temp >> 3;
-        i_right.isIsDimm = temp >> 2;
+        i_right.isSpareDram = temp >> 2;
         i_right.reserved = temp;
 
         return i_left;

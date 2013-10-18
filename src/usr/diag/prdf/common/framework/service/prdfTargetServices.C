@@ -1183,6 +1183,66 @@ bool isDramWidthX4( TargetHandle_t i_mba )
 
 //------------------------------------------------------------------------------
 
+int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
+                            uint8_t i_ps, uint8_t & o_spareConfig )
+{
+    #define PRDF_FUNC "[PlatServices::getDimmSpareConfig] "
+    int32_t o_rc = SUCCESS;
+
+    using namespace fapi;
+
+    ATTR_EFF_DIMM_SPARE_type attr;
+    o_spareConfig = ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+    do
+    {
+        if( TYPE_MBA != getTargetType( i_mba ) )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid Target:0x%08X", getHuid( i_mba ) );
+            o_rc = FAIL; break;
+        }
+
+        if ( MAX_PORT_PER_MBA <= i_ps )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid parameters i_ps:%u", i_ps );
+            o_rc = FAIL; break;
+        }
+
+        // Using namespace explicitly in ATTR_EFF_DIMM_SPARE as otherwise it
+        // has conflict with fapi namespace.
+        if ( SUCCESS != i_mba->tryGetAttr< TARGETING::ATTR_EFF_DIMM_SPARE>
+                                                                    ( attr ))
+        {
+            PRDF_ERR( PRDF_FUNC"Failed to get ATTR_EFF_DIMM_SPARE for Target:"
+                      "0x%08X", getHuid( i_mba ) );
+            o_rc = FAIL; break;
+        }
+        o_spareConfig = attr[i_ps][i_rank.getDimmSlct()][i_rank.getRankSlct()];
+
+        // Check for valid values
+        // For X4 DRAM, we can not have full byte as spare config. Also for X8
+        // DRAM we can not have nibble as spare.
+
+        if( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE == o_spareConfig) break;
+
+        bool isFullByte = ( ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE ==
+                                                            o_spareConfig );
+        bool isX4Dram = isDramWidthX4(i_mba);
+
+        if ( ( isX4Dram && isFullByte ) || ( !isX4Dram && !isFullByte ) )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid Configuration: o_spareConfig:%u",
+                      o_spareConfig );
+            o_rc = FAIL; break;
+        }
+
+    }while(0);
+
+    return o_rc;
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
 {
     #define PRDF_FUNC "[PlatServices::getRanksPerDimm] "

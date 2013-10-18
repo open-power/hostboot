@@ -365,6 +365,20 @@ bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget);
  */
 uint8_t getRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_ds );
 
+/**
+ * @brief   Get spare DRAM information on a DIMM.
+ * @param   i_mba MBA target.
+ * @param   i_rank Rank.
+ * @param   i_ps MBA port select.
+ * @param   o_spareConfig Spare DRAM config information.
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @note    On a DIMM its possible that spare is not present. Also on X4 DRAM
+ *          spare can be on High nibble or low nibble. This function will
+ *          populate spare config information in o_spareConfig.
+ */
+int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
+                            uint8_t i_ps, uint8_t & o_spareConfig );
+
 //##############################################################################
 //##
 //##                        Clock specific functions

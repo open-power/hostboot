@@ -32,6 +32,7 @@ namespace PRDF
 {
 
 using namespace PlatServices;
+using namespace fapi; // for spare dram config
 
 bool CenDqBitmap::badDqs() const
 {
@@ -251,11 +252,30 @@ int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
             o_rc = FAIL; break;
         }
 
+        uint8_t spareConfig = ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+        o_rc = getDimmSpareConfig( iv_mba , iv_rank, i_portSlct,
+                                   spareConfig );
+        if( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
+            o_rc = FAIL; break;
+        }
+
+        if ( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE == spareConfig )
+        {
+            PRDF_ERR( PRDF_FUNC" Spare is not avaiable" );
+            o_rc = FAIL; break;
+        }
+
         if ( isDramWidthX4(iv_mba) )
         {
             i_pins &= 0xf; // limit to 4 bits
-            // TODO: RTC 68096 Need to check if this is correct behavior.
-            iv_data[i_portSlct][DIMM_DQ_RANK_BITMAP_SIZE-1] |= i_pins << 4;
+
+            if( ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE  == spareConfig )
+            {
+                i_pins = i_pins << 4;
+            }
+            iv_data[i_portSlct][DIMM_DQ_RANK_BITMAP_SIZE-1] |= i_pins;
         }
         else
         {
@@ -274,18 +294,25 @@ int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
 
 int32_t CenDqBitmap::setEccSpare( uint8_t i_pins )
 {
+
     #define PRDF_FUNC "[CenDqBitmap::setEccSpare] "
 
     int32_t o_rc = SUCCESS;
 
     do
     {
-        // TODO: RTC 68096 Need to add x4 ECC support.
-
-    } while (0);
+        if ( ! isDramWidthX4(iv_mba) )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid Call. Function called for MBA having "
+                      "non X4 DRAM" );
+            o_rc = FAIL; break;
+        }
+        // ECC spare bits are stored in port1, dq bits 68-71
+        // Call setDram with symbol 0 to update the VPD for these bits.
+        setDram( 0, i_pins );
+    }while( 0 );
 
     return o_rc;
-
     #undef PRDF_FUNC
 }
 
@@ -308,14 +335,55 @@ int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
             o_rc = FAIL; break;
         }
 
+        uint8_t spareConfig = ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+        o_rc = getDimmSpareConfig( iv_mba , iv_rank, i_portSlct,
+                                   spareConfig );
+        if( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
+            break;
+        }
+
+        uint8_t spareDqBits = iv_data[i_portSlct][DIMM_DQ_RANK_BITMAP_SIZE-1];
+
         if ( isDramWidthX4(iv_mba) )
         {
-            // TODO: RTC 68096 Need to add x4 ECC support.
+            // Check for DRAM spare
+            if( ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE  == spareConfig )
+            {
+                o_available = ( 0 == ( spareDqBits & 0xf0 ) );
+            }
+            else if( ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE  == spareConfig )
+            {
+                o_available = ( 0 == ( spareDqBits & 0x0f ) );
+            }
+
+            if( false == o_available )
+            {
+                // check for ecc spare
+                // ECC spare bits are stored in port1, dq bits 68-71
+                // These bits map to symbol 0. Use isChipMark to check
+                // if these bits are all 1.
+                o_rc = isChipMark( 0, o_available );
+                if( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC"isChipMark() failed" );
+                    break;
+                }
+                // isChipMark return true if chip Mark is present.
+                // Invert its value to get the right result.
+                o_available = !(o_available);
+            }
         }
         else
         {
-            o_available =
-                      ( 0 == iv_data[i_portSlct][DIMM_DQ_RANK_BITMAP_SIZE-1] );
+            if ( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE == spareConfig )
+            {
+                // spare is not available.
+                o_available = false;
+            }
+            else
+                o_available = ( 0 == spareDqBits );
         }
 
     } while (0);

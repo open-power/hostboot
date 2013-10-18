@@ -426,8 +426,8 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
             snprintf(temp, 64, "%s SM: %s", data, symbolStr);
             snprintf(data, 64, temp);
 
-            // Display DRAM spare information for non-ISDIMMs
-            if ( !mbaData.header.isIsDimm )
+            // Display DRAM spare information if spare DRAM is supported.
+            if ( !mbaData.header.isSpareDram )
             {
                 getDramRepairSymbolStr(rankEntry.port0Spare, symbolStr, 10);
                 snprintf(temp, 64, "%s Sp0: %s", data, symbolStr);
@@ -436,14 +436,14 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
                 getDramRepairSymbolStr(rankEntry.port1Spare, symbolStr, 10);
                 snprintf(temp, 64, "%s Sp1: %s", data, symbolStr);
                 snprintf(data, 64, temp);
+            }
 
-                // Display ECC spare information for X4 DRAMs
-                if ( mbaData.header.isX4Dram )
-                {
-                    getDramRepairSymbolStr( rankEntry.eccSpare, symbolStr, 10 );
-                    snprintf(temp, 64, "%s EccSp: %s", data, symbolStr);
-                    snprintf(data, 64, temp);
-                }
+            // Display ECC spare information for X4 DRAMs
+            if ( mbaData.header.isX4Dram )
+            {
+                getDramRepairSymbolStr( rankEntry.eccSpare, symbolStr, 10 );
+                snprintf(temp, 64, "%s EccSp: %s", data, symbolStr);
+                snprintf(data, 64, temp);
             }
 
             i_parser.PrintString( "", data );

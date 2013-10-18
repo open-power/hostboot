@@ -120,12 +120,11 @@ class CenDqBitmap
 
     /**
      * @brief  Sets the ECC spare on the specified port (x4 mode only).
-     * @param  i_portSlct The target port.
-     * @param  i_pins     Optional 2-bit value of the symbol's pins. The default
-     *                    is to set both pins.
+     * @param  i_pins     Optional 4-bit value of the DRAM's pins.
+     *                    The default is to set all pins.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t setEccSpare( uint8_t i_pins );
+    int32_t setEccSpare( uint8_t i_pins = 0xf );
 
     /**
      * @brief  Queries for DRAM spare status.

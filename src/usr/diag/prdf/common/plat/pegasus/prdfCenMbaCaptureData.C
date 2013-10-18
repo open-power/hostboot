@@ -165,80 +165,114 @@ void addMemEccData( ExtensibleChip * i_mbaChip, STEP_CODE_DATA_STRUCT & io_sc )
 void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
                              CaptureData & io_cd )
 {
+    #define PRDF_FUNC "[CenMbaCaptureData::captureDramRepairsData] "
+    using namespace fapi; // for spare config
+
     int32_t rc = SUCCESS;
     DramRepairMbaData mbaData;
 
-    // Iterate all ranks to get DRAM repair data
-    for ( uint32_t r = 0; r < MASTER_RANKS_PER_MBA; r++ )
-    {
-        CenRank rank ( r );
+    mbaData.header.isSpareDram = false;
+    std::vector<CenRank> masterRanks;
 
-        // Get chip/symbol marks
-        CenMark mark;
-        rc = PlatServices::mssGetMarkStore( i_mbaTrgt, rank, mark );
+    do
+    {
+        rc = getMasterRanks( i_mbaTrgt, masterRanks );
         if ( SUCCESS != rc )
         {
-            PRDF_ERR("Failed to get markstore data");
-            continue;
+            PRDF_ERR( PRDF_FUNC"getMasterRanks() failed" );
+            break;
+        }
+        if( masterRanks.empty() )
+        {
+            PRDF_ERR( PRDF_FUNC"Master Rank list size is 0");
+            break;;
+        }
+        uint8_t spareConfig = ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+        // check for spare DRAM. Port does not matter.
+        // Also this configuration is same for all ranks on MBA.
+        rc = getDimmSpareConfig( i_mbaTrgt, masterRanks[0], 0, spareConfig );
+        if( SUCCESS != rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
+            break;
         }
 
-        // Get DRAM spares
-        CenSymbol sp0, sp1, ecc;
-        rc = PlatServices::mssGetSteerMux( i_mbaTrgt, rank, sp0, sp1, ecc );
-        if ( SUCCESS != rc )
-        {
-            PRDF_ERR("Failed to get DRAM steer data");
-            continue;
-        }
+        if( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE != spareConfig )
+            mbaData.header.isSpareDram = true;
 
-        // Add data
-        DramRepairRankData rankData = { rank.getMaster(),
-                                        mark.getCM().getSymbol(),
-                                        mark.getSM().getSymbol(),
-                                        sp0.getSymbol(),
-                                        sp1.getSymbol(),
-                                        ecc.getSymbol() };
-        if ( rankData.valid() )
+        // Iterate all ranks to get DRAM repair data
+        for ( std::vector<CenRank>::iterator it = masterRanks.begin();
+              it != masterRanks.end(); it++ )
         {
-            mbaData.rankDataList.push_back(rankData);
-        }
-    }
-    // If MBA had some DRAM repair data, add header information
-    if( mbaData.rankDataList.size() > 0 )
-    {
-        bool isCentaurDimm = true;
-        mbaData.header.rankCount = mbaData.rankDataList.size();
-        PlatServices::isMembufOnDimm( i_mbaTrgt, isCentaurDimm );
-        mbaData.header.isIsDimm = !isCentaurDimm;
-        mbaData.header.isX4Dram = PlatServices::isDramWidthX4( i_mbaTrgt );
-        UtilMem dramStream;
-        dramStream << mbaData;
+            // Get chip/symbol marks
+            CenMark mark;
+            rc = mssGetMarkStore( i_mbaTrgt, *it, mark );
+            if ( SUCCESS != rc )
+            {
+                PRDF_ERR( PRDF_FUNC"mssGetMarkStore() Failed");
+                continue;
+            }
 
-        #ifndef PPC
-        // Fix endianess issues with non PPC machines.
-        // This is a workaround. Though UtilMem takes care of endianess,
-        // It seems with capture data its not working
-        const size_t sz_word = sizeof(uint32_t);
+            // Get DRAM spares
+            CenSymbol sp0, sp1, ecc;
+            rc = mssGetSteerMux( i_mbaTrgt, *it, sp0, sp1, ecc );
+            if ( SUCCESS != rc )
+            {
+                PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed");
+                continue;
+            }
 
-        // Allign data with 32 bit boundary
-        for (uint32_t i = 0; i < ( dramStream.size()%sz_word ); i++)
-        {
-            uint8_t dummy = 0;
-            dramStream << dummy;
+            // Add data
+            DramRepairRankData rankData = { (*it).getMaster(),
+                                            mark.getCM().getSymbol(),
+                                            mark.getSM().getSymbol(),
+                                            sp0.getSymbol(),
+                                            sp1.getSymbol(),
+                                            ecc.getSymbol() };
+            if ( rankData.valid() )
+            {
+                mbaData.rankDataList.push_back(rankData);
+            }
         }
-        for ( uint32_t i = 0; i < ( dramStream.size()/sz_word); i++ )
+        // If MBA had some DRAM repair data, add header information
+        if( mbaData.rankDataList.size() > 0 )
         {
-            ((uint32_t*)dramStream.base())[i] =
+            mbaData.header.rankCount = mbaData.rankDataList.size();
+            mbaData.header.isX4Dram =  isDramWidthX4( i_mbaTrgt );
+            UtilMem dramStream;
+            dramStream << mbaData;
+
+            #ifndef PPC
+            // Fix endianess issues with non PPC machines.
+            // This is a workaround. Though UtilMem takes care of endianess,
+            // It seems with capture data its not working
+            const size_t sz_word = sizeof(uint32_t);
+
+            // Allign data with 32 bit boundary
+            for (uint32_t i = 0; i < ( dramStream.size()%sz_word ); i++)
+            {
+                uint8_t dummy = 0;
+                dramStream << dummy;
+            }
+            for ( uint32_t i = 0; i < ( dramStream.size()/sz_word); i++ )
+            {
+                ((uint32_t*)dramStream.base())[i] =
                             htonl(((uint32_t*)dramStream.base())[i]);
-        }
-        #endif
+            }
+            #endif
 
-        // Allocate space for the capture data.
-        BIT_STRING_ADDRESS_CLASS dramRepairData ( 0, ( dramStream.size() )*8,
+            // Allocate space for the capture data.
+            BIT_STRING_ADDRESS_CLASS dramRepairData ( 0,( dramStream.size() )*8,
                                                (CPU_WORD *) dramStream.base() );
-        io_cd.Add( i_mbaTrgt, Util::hashString("DRAM_REPAIRS_DATA"),
-                   dramRepairData );
-    }
+            io_cd.Add( i_mbaTrgt, Util::hashString("DRAM_REPAIRS_DATA"),
+                       dramRepairData );
+        }
+    }while(0);
+
+    if( FAIL == rc )
+        PRDF_ERR( PRDF_FUNC"Failed for MBA 0x%08X", getHuid( i_mbaTrgt ) );
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
