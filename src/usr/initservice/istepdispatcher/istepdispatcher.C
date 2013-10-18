@@ -277,40 +277,37 @@ errlHndl_t IStepDispatcher::executeAllISteps()
         {
             err = doIstep(istep, substep, l_deconfigs);
 
-            if (err)
+            if (l_deconfigs)
             {
-                // IStep error, check if a reconfig loop should be attempted
-                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: IStep Error on %d:%d",
+                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: Deconfigure(s) during IStep %d:%d",
                           istep, substep);
-
                 uint8_t newIstep = 0;
                 uint8_t newSubstep = 0;
 
-                // Check for reconfigure. If istep returns an error, and there
-                // was a deconfigure, and checkReconfig is true (meaning the
-                // error is within the loops) then reconfigure. Else, break out
-                // with istep error.
-                if ( l_deconfigs &&
-                    (checkReconfig(istep, substep, newIstep, newSubstep) ==
-                        true))
+                if ((checkReconfig(istep, substep, newIstep, newSubstep)) &&
+                    (numReconfigs < MAX_NUM_RECONFIG_ATTEMPTS))
                 {
-                    if (numReconfigs >= MAX_NUM_RECONFIG_ATTEMPTS)
+                    // Within the Reconfig Loop, loop back
+                    numReconfigs++;
+                    uint32_t l_plid = 0;
+
+                    if (err)
                     {
-                        // Reconfigure loop has already been attempted too
-                        // often, break out with the istep error
-                        TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: No Reconfig Loop, Max count exceeded");
-                        break;
+                        // The IStep returned an error, This is the generic
+                        // 'IStep failed' from the IStepError class, the real
+                        // errors detailing the failure have already been
+                        // committed. Record the PLID and delete it. This will
+                        // be replaced by the ReconfigLoop info error with the
+                        // same plid that matches the real errors
+                        l_plid = err->plid();
+                        delete err;
+                        err = NULL;
                     }
 
-                    // Delete the Istep error and create a new info error with
-                    // the same plid stating that a reconfig loop was performed
-                    uint32_t l_plid = err->plid();
-                    delete err;
-                    err = NULL;
-                    numReconfigs++;
-
+                    // Create a new info error stating that a reconfig loop is
+                    // about to be performed
                     uint64_t errWord = FOUR_UINT16_TO_UINT64(
-                                istep, substep, newIstep, newSubstep);
+                        istep, substep, newIstep, newSubstep);
                     /*@
                      * @errortype
                      * @reasoncode       ISTEP_RECONFIG_LOOP_ENTERED
@@ -331,25 +328,29 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         ISTEP_RECONFIG_LOOP_ENTERED,
                         errWord,
                         numReconfigs);
-                    err->plid(l_plid);
-                    errlCommit(err, INITSVC_COMP_ID);
+                    err->collectTrace("HWAS_I", 1024);
 
+                    if (l_plid != 0)
+                    {
+                        // Use the same plid as the IStep error
+                        err->plid(l_plid);
+                    }
+                    errlCommit(err, INITSVC_COMP_ID);
                     istep = newIstep;
                     substep = newSubstep;
                     TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: Reconfig Loop: Back to %d:%d",
                               istep, substep);
-                }
-                else
-                {
-                    // Break out with the istep error
-                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: No Reconfig Loop");
-                    break;
+                    continue;
                 }
             }
-            else
+
+            if (err)
             {
-                substep++;
+                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: IStep Error on %d:%d",
+                          istep, substep);
+                break;
             }
+            substep++;
         }
 
         if (err)
@@ -468,30 +469,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
         if (postDeconfigs != preDeconfigs)
         {
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Deconfigs happened, pre:%d, post:%d",
+                      preDeconfigs, postDeconfigs);
             o_deconfigs = true;
-
-            if (err == NULL)
-            {
-                // IStep returned success, but HW was deconfigured! IStep
-                // success is a contract that the IStep worked and the system
-                // config did not change. Therefore create an error.
-                TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Creating deconfig error");
-
-                /*@
-                 * @errortype
-                 * @reasoncode       ISTEP_FAILED_DUE_TO_DECONFIG
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         ISTEP_INITSVC_MOD_ID
-                 * @userdata1        Istep that failed
-                 * @userdata2        SubStep that failed
-                 * @devdesc          IStep reported success but HW deconfigured
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    ISTEP_INITSVC_MOD_ID,
-                    ISTEP_FAILED_DUE_TO_DECONFIG,
-                    i_istep, i_substep);
-            }
         }
 
         if(err)
@@ -977,8 +957,45 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 
     err = doIstep (istep, substep, l_deconfigs);
 
-    uint64_t status = 0;
+    if ((!err) && l_deconfigs)
+    {
+        // There was no IStep error, but there were deconfig(s)
+        uint8_t newIstep = 0;
+        uint8_t newSubstep = 0;
+        if (checkReconfig(istep, substep, newIstep, newSubstep))
+        {
+            // Within the Reconfig Loop. In non-istep-mode it would loop back
+            // to the start of the loop, this cannot be done here (this is
+            // istep-mode) so create an error.
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: IStep success and deconfigs, creating error");
 
+            /*@
+             * @errortype
+             * @reasoncode       ISTEP_FAILED_DUE_TO_DECONFIG
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         ISTEP_INITSVC_MOD_ID
+             * @userdata1        Istep that failed
+             * @userdata2        SubStep that failed
+             * @devdesc          IStep Mode. IStep reported success but HW
+             *                   deconfigured within Reconfig Loop.
+             */
+            err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                ISTEP_INITSVC_MOD_ID,
+                ISTEP_FAILED_DUE_TO_DECONFIG,
+                istep, substep);
+            err->collectTrace("HWAS_I", 1024);
+        }
+        else
+        {
+            // Not within the Reconfig Loop. In non-istep-mode it is considered
+            // a success so it is the same here
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: IStep success and deconfigs, returning success");
+        }
+        
+    }
+
+    uint64_t status = 0;
     if (err)
     {
         // Commit the error and record the plid as status in the top 32bits
