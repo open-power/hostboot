@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.8 2013/10/09 20:54:58 mjjones Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.9 2013/10/22 14:02:13 whs Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -122,5 +122,14 @@
     <description>
         An invalid parameter was passed to a mbvpd ring function.
     </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_TERM_DATA_UNSUPPORTED_VPD_ENCODE</rc>
+    <description>
+        The requested vpd value does not have a translation value.
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>VPD_VALUE</ffdc>
   </hwpError>
 </hwpErrors>

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdTermData.H,v 1.1 2013/05/28 11:17:29 whs Exp $
+// $Id: getMBvpdTermData.H,v 1.3 2013/10/21 18:54:14 whs Exp $
 
 /**
  *  @file getMBvpdTermData.H
@@ -64,16 +64,21 @@ const uint16_t TERM_DATA_SPECIAL_MASK = 0x0300;
 const uint8_t TERM_DATA_CHK60 = 0x40;  // check version for keyword to use
 
 // There are multiple types of output values. The type is shown in the comment.
+//
+// Some values are returned directly from the vpd and some vpd values
+// are translated before returning. Those translated are marked in the comment
+// section with <translated>
+//
 // The base offset value is incremented based on the vpd data type.
     enum MBvpdTermData
     {
-       TERM_DATA_DRAM_RON =                0x00,  //uint8_t [2][2]
-       TERM_DATA_DRAM_RTT_NOM =            0x02,  //uint8_t [2][2][4]
-       TERM_DATA_DRAM_RTT_WR =             0x0a,  //uint8_t [2][2][4]
+       TERM_DATA_DRAM_RON =             0x00,  //uint8_t [2][2] <translated>
+       TERM_DATA_DRAM_RTT_NOM =         0x02,  //uint8_t [2][2][4] <translated>
+       TERM_DATA_DRAM_RTT_WR =          0x0a,  //uint8_t [2][2][4] <translated>
        TERM_DATA_ODT_RD =                  0x12,  //uint8_t [2][2][4]
        TERM_DATA_ODT_WR =                  0x1a,  //uint8_t [2][2][4]
-       TERM_DATA_CEN_RD_VREF =             0x22,  //uint32_t [2]
-       TERM_DATA_DRAM_WR_VREF =            0x26,  //uint32_t [2]
+       TERM_DATA_CEN_RD_VREF =             0x22,  //uint32_t [2] <translated>
+       TERM_DATA_DRAM_WR_VREF =            0x26,  //uint32_t [2] <translated>
        TERM_DATA_DRAM_WRDDR4_VREF =        0x2a,  //uint8_t [2]
        TERM_DATA_CEN_RCV_IMP_DQ_DQS =      0x2b,  //uint8_t [2]
        TERM_DATA_CEN_DRV_IMP_DQ_DQS =      0x2c,  //uint8_t [2]
@@ -81,11 +86,11 @@ const uint8_t TERM_DATA_CHK60 = 0x40;  // check version for keyword to use
        TERM_DATA_CEN_DRV_IMP_ADDR =        0x2e,  //uint8_t [2]
        TERM_DATA_CEN_DRV_IMP_CLK =         0x2f,  //uint8_t [2]
        TERM_DATA_CEN_DRV_IMP_SPCKE =       0x30,  //uint8_t [2]
-       TERM_DATA_CEN_SLEW_RATE_DQ_DQS =    0x31,  //uint8_t [2]
-       TERM_DATA_CEN_SLEW_RATE_CNTL =      0x32,  //uint8_t [2]
-       TERM_DATA_CEN_SLEW_RATE_ADDR =      0x33,  //uint8_t [2]
-       TERM_DATA_CEN_SLEW_RATE_CLK =       0x34,  //uint8_t [2]
-       TERM_DATA_CEN_SLEW_RATE_SPCKE =     0x35,  //uint8_t [2]
+       TERM_DATA_CEN_SLEW_RATE_DQ_DQS =    0x31,  //uint8_t [2] <translated>
+       TERM_DATA_CEN_SLEW_RATE_CNTL =      0x32,  //uint8_t [2] <translated>
+       TERM_DATA_CEN_SLEW_RATE_ADDR =      0x33,  //uint8_t [2] <translated>
+       TERM_DATA_CEN_SLEW_RATE_CLK =       0x34,  //uint8_t [2] <translated>
+       TERM_DATA_CEN_SLEW_RATE_SPCKE =     0x35,  //uint8_t [2] <translated>
 // TERM_DATA_CKE_PRI_MAP is a uint16 in the vpd data. It is returned as
 // as a uint32. The offset is incremented by only 2 to get the next vpd value.
        TERM_DATA_CKE_PRI_MAP =             0x36,  //uint32_t [2]
@@ -159,7 +164,7 @@ template<const fapi::MBvpdTermData ATTR>
     inline void checkTermDataType
         (typename MBvpdTermDataSize<ATTR>::Type &) {}
 /* example
-#define ATTR_EFF_DRAM_RON_GETMACRO(ID, PTARGET, VAL)\
+#define ATTR_VPD_DRAM_RON_GETMACRO(ID, PTARGET, VAL)\
    (checkTermDataType<fapi::TERM_DATA_DRAM_RON>(VAL), \
    fapi::platAttrSvc::fapiPlatGetTermData\
       (PTARGET, fapi::TERM_DATA_DRAM_RON , VAL, sizeof(VAL)))

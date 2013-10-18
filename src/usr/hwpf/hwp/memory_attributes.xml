@@ -428,7 +428,8 @@ firmware notes: none</description>
     <description>Read ODT. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: VPD(MT),mss_eff_cnfg_termination
 consumer: various.C files and initfiles
-firmware notes: none</description>
+firmware notes: none
+OBSOLETE: will use VPD attribute</description>
     <valueType>uint8</valueType>
     <platInit/>
     <writeable/>
@@ -443,7 +444,8 @@ firmware notes: none</description>
     <description>Write ODT. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 Creator: VPD(MT)/ mss_eff_cnfg_termination
 consumer: various.C and initfile
-firmware notes: none</description>
+firmware notes: none
+Obsolete: will use VPD attribute</description>
     <valueType>uint8</valueType>
     <platInit/>
     <writeable/>
@@ -493,7 +495,8 @@ firmware notes: none</description>
 OHM48 is for DDR4.
 creator: VPD(MT)/mss_eff_cnfg_termination
 consumer: various.C files (no initfile)
-firmware notes: none</description>
+firmware notes: none
+OBSOLETE: Use VPD attribute</description>
     <valueType>uint8</valueType>
     <enum>OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
     <platInit/>
@@ -509,7 +512,8 @@ firmware notes: none</description>
     <description>DRAM Rtt_Nom. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: VPD(MT),mss_eff_cnfg_termination
 consumer: various.C files (no initfiles)
-firmware notes: none</description>
+firmware notes: none
+OBSOLETE: use VPD attribute</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, OHM20 = 20, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
     <platInit/>
@@ -525,7 +529,8 @@ firmware notes: none</description>
     <description>DRAM Rtt_WR. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 Creator: VPD(MT), mss_eff_cnfg_termination
 consumer: various.C files (no initfiles)
-firmware notes: none</description>
+firmware notes: none
+OBSOLETE: use VPD attribute</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120, OHM240 = 240, HIGHZ = 1</enum>
     <platInit/>
@@ -602,8 +607,8 @@ consumer: initfile,various.C files
 firmware notes: none
 This is the nominal value</description>
     <valueType>uint8</valueType>
-    <enum>OHM24_FFE0, OHM30_FFE0,
-OHM30_FFE480, OHM30_FFE240, OHM30_FFE160, OHM30_FFE120, OHM34_FFE0, OHM34_FFE480, OHM34_FFE240, OHM34_FFE160, OHM34_FFE120, OHM40_FFE0, OHM40_FFE480, OHM40_FFE240, OHM40_FFE160, OHM40_FFE120</enum>
+    <enum>OHM24_FFE0 = 0x0A, OHM30_FFE0 = 0x08,
+OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x18, OHM34_FFE0 = 0x07, OHM34_FFE480 = 0x47, OHM34_FFE240 = 0x37, OHM34_FFE160 = 0x27, OHM34_FFE120 = 0x17, OHM40_FFE0 = 0x06, OHM40_FFE480 = 0x46, OHM40_FFE240 = 0x36, OHM40_FFE160 = 0x26, OHM40_FFE120 = 0x16</enum>
     <platInit/>
     <writeable/>
     <odmVisable/>
