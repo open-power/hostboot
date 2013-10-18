@@ -196,23 +196,21 @@
  * @note  convert immediate deconfig to delayed deconfig in HB.
  */
 #define PRDF_HW_ADD_CALLOUT(i_target, i_priority,         \
-                            i_deconfigState, i_gardState,             \
-                            io_errl, i_writeVpd,                      \
-                            i_gardErrType, i_severity, i_hcdb_update) \
+                            i_deconfigState,              \
+                            io_errl, i_gardErrType,       \
+                            i_severity, i_diag_need)      \
   io_errl->addHwCallout(i_target,                                    \
                         (const HWAS::callOutPriority)i_priority,     \
                         (i_deconfigState == HWAS::DECONFIG ?         \
                         HWAS::DELAYED_DECONFIG : i_deconfigState),   \
                         (const HWAS::GARD_ErrorType)i_gardErrType);  \
-  (void)(i_hcdb_update)
+  (void)(i_diag_need)
 
 /**
  * @brief Process's pending deconfig and GARD service actions
  *        and thencommits and deletes the error log.
  */
-#define PRDF_HW_COMMIT_ERRL(io_sysTerm, io_errl, i_deferDeconfig, \
-                            i_action, i_continue)                 \
-  io_sysTerm = false;  \
+#define PRDF_HW_COMMIT_ERRL(io_errl, i_deferDeconfig, i_action) \
   PRDF_COMMIT_ERRL(io_errl, i_action);
 
 /**

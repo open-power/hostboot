@@ -196,7 +196,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     using namespace HWAS;
     errlSeverity_t severityParm = ERRL_SEV_RECOVERED;
 #else
-    bool writeVPD = false;    // Make the default to not Write VPD Capture data
     bool causeAttnPreviouslyReported = false;
     bool pldCheck = false;  // Default to not do the PLD check. Set it to true for  Machine Check
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
@@ -220,15 +219,14 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // take care of this. The Hidden and Informational cases will reassign the actionFlag.
     uint32_t actionFlag = (ERRL_ACTION_SA | ERRL_ACTION_REPORT | ERRL_ACTION_CALL_HOME);
 
-
-
-    HWSV::hwsvHCDBUpdate hcdbUpdate = HWSV::HWSV_HCDB_DO_UPDATE;
+    HWSV::hwsvDiagUpdate l_diagUpdate = HWSV::HWSV_DIAG_NEEDED;
 
     // Use this SDC unless determined in Check Stop processing to use a UE,
     // or SUE saved SDC
     sdc = i_sdc;
 
     GardAction::ErrorType prdGardErrType;
+    // TODO: RTC - 89322: Consolidate gardSate and prdGardErrType values.
     HWSV::hwsvGardEnum gardState;  // defined in src/hwsv/server/hwsvTypes.H
     HWAS::GARD_ErrorType gardErrType = HWAS::GARD_NULL;
     HWAS::DeconfigEnum deconfigState = HWAS::NO_DECONFIG;
@@ -241,7 +239,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ++iv_serviceActionCounter;
 
     uint16_t PRD_Reason_Code = 0;
-    uint32_t dumpPlid = 0;
 
     //**************************************************************
     // Initial set up by Attention Type
@@ -256,7 +253,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
         PRDF_ERR( PRDF_FUNC"Hostboot should NOT have any system checkstop!" );
 #else
-        writeVPD = true;              // Change the default so as to Write Capture Data
         pldCheck = true;              // Do the PLD check
 
         if (terminateOnCheckstop)
@@ -603,8 +599,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     o_errl->setSev(severityParm);
 
     if (ERRL_ACTION_HIDDEN == actionFlag)
-    {  //Change HCDB Update to not do the update for non-visible logs
-        hcdbUpdate = HWSV::HWSV_HCDB_OVERRIDE;
+    {  // Diagnostics is not needed in the next IPL cycle for non-visible logs
+        l_diagUpdate = HWSV::HWSV_DIAG_NOT_NEEDED;
     }
 
     //**************************************************************
@@ -631,12 +627,10 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
                                 thisDeconfigState,
-                                gardState,
                                 o_errl,
-                                writeVPD,
                                 gardErrType,
                                 severityParm,
-                                hcdbUpdate);
+                                l_diagUpdate);
 
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
@@ -650,12 +644,10 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 PRDF_HW_ADD_CALLOUT( *it,
                                      thispriority,
                                      deconfigState,
-                                     gardState,
                                      o_errl,
-                                     writeVPD,
                                      gardErrType,
                                      severityParm,
-                                     hcdbUpdate );
+                                     l_diagUpdate );
             }
         }
         else if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
@@ -965,35 +957,25 @@ will also be removed. Need to confirm if this code is required anymore.
         // for FSP specific SRC handling in the future
         MnfgTrace( esig, pfaData );
 
-        PRDF_GET_PLID(o_errl, dumpPlid);
-
-        bool l_sysTerm = false;
-        PRDF_HW_COMMIT_ERRL(l_sysTerm,
-                            o_errl,
-                            deconfigSched,
-                            actionFlag,
-                            HWSV::HWSV_CONTINUE);
-        if(true == l_sysTerm) // if sysTerm then we have to commit and delete the log
+        PRDF_HW_COMMIT_ERRL( o_errl, deconfigSched, actionFlag );
+        if ( NULL != o_errl )
         {
-            //Just commit the log
+            // Just commit the log.
+            uint32_t dumpPlid = 0;
+            PRDF_GET_PLID(o_errl, dumpPlid);
+
             uint32_t l_rc = 0;
             PRDF_GET_RC(o_errl, l_rc);
 
             uint16_t l_reasonCode = 0;
             PRDF_GET_REASONCODE(o_errl, l_reasonCode);
 
-            PRDF_INF( PRDF_FUNC"committing error log: PLID=%.8X, ReasonCode=%.8X, RC=%.8X, actions=%.4X",
-                      dumpPlid,
-                      l_reasonCode,
-                      l_rc, actionFlag );
+            PRDF_INF( PRDF_FUNC"Committing error log: PLID=%.8X, "
+                               "ReasonCode=%.8X, RC=%.8X, actions=%.4X",
+                               dumpPlid, l_reasonCode, l_rc, actionFlag );
+
             PRDF_COMMIT_ERRL(o_errl, actionFlag);
         }
-        else
-        {
-            // Error log has been committed, return NULL Error Log to PrdMain
-            o_errl = NULL;
-        }
-
     }
     // If the Error Log is not committed (as due to a Terminate condtion),
     // the Error Log will be returned to PRDMain

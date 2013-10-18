@@ -101,7 +101,7 @@ enum MFG_THRES_SYNC_MSG_TYPE
 
     namespace HWSV
     {
-        typedef uint32_t hwsvHCDBUpdate;
+        typedef uint32_t hwsvDiagUpdate;
         typedef uint32_t hwsvTermEnum;
         typedef uint32_t hwsvGardEnum;
         typedef uint32_t hwsvDeconfigSchedule;
@@ -111,9 +111,9 @@ enum MFG_THRES_SYNC_MSG_TYPE
             // hwsvTermEnum
             HWSV_SYS_NO_TERMINATE = 0,
 
-            // hwsvHCDBUpdate
-            HWSV_HCDB_DO_UPDATE = 0,
-            HWSV_HCDB_OVERRIDE,
+            // hwsvDiagUpdate
+            HWSV_DIAG_NOT_NEEDED = 0,
+            HWSV_DIAG_NEEDED,
 
             // hwsvGardEnum
             HWSV_NO_GARD = 0,
