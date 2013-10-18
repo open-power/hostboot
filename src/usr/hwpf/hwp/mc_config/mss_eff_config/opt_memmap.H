@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.H,v 1.7 2013/08/12 16:40:18 jmcgill Exp $
+// $Id: opt_memmap.H,v 1.8 2013/09/26 17:55:25 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/opt_memmap.H,v $      */
 
 
@@ -70,6 +70,7 @@
 
 // conversion factor definitions
 const uint64_t OPT_MEMMAP_GB = 0x0000000040000000ULL;
+const uint64_t OPT_MEMMAP_TB = 0x0000010000000000ULL;
 
 // default origin for non-mirrored/mirrored address regions
 const uint64_t OPT_MEMMAP_BASE_ORIGIN      = 0;                     // 0

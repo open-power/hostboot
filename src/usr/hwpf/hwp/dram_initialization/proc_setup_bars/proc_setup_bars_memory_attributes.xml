@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_setup_bars_memory_attributes.xml,v 1.9 2013/07/09 16:26:28 bellows Exp $ -->
+<!-- $Id: proc_setup_bars_memory_attributes.xml,v 1.10 2013/09/23 22:20:29 jmcgill Exp $ -->
 <!-- proc_setup_bars_memory_attributes.xml -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -35,12 +35,14 @@
         NORMAL  = non-mirrored start: 0, mirrored start: 512TB
         FLIPPED = mirrored start: 0, non-mirrored start: 512TB
         SELECTIVE = non-mirrored/mirrored start (interleaved): 0
+        DRAWER = non-mirrored start: 1TB*drawer, mirrored start: 512TB+(1TB*drawer/2)
     </description>
     <valueType>uint8</valueType>
     <enum>
       NORMAL    = 0x0,
       FLIPPED   = 0x1,
-      SELECTIVE = 0x2
+      SELECTIVE = 0x2,
+      DRAWER    = 0x3
     </enum>
     <platInit/>
     <persistRuntime/>

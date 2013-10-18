@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.C,v 1.14 2013/08/29 21:13:47 jmcgill Exp $
+// $Id: opt_memmap.C,v 1.15 2013/09/26 17:52:54 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/opt_memmap.C,v $
 
 
@@ -44,6 +44,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.15   | jmcgill  | 09/17/13| Add logic to offset memory map based on
+//         |          |         | drawer number (required for multi-drawer
+//         |          |         | Brazos)
 //  1.14   | thi      | 08/29/13| Init variable to avoid HB compiler error.
 //  1.13   | jmcgill  | 08/29/13| Remove use of reverse iter (HB doesn't support)
 //  1.12   | jmcgill  | 07/10/13| Update to match new attributes, selective
@@ -64,7 +67,7 @@
 // Design flow:
 //
 // opt_memmap() interacts with mss_eff_grouping() to define the assignment
-// of non-mirrored/mirrored real address space on each chip in the system
+// of non-mirrored/mirrored real address space on each chip in the drawer
 //
 // opt_memmap() will be called twice in the IPL flow, once before and once
 // after mss_eff_grouping()
@@ -96,6 +99,7 @@
 //         policy       sort criteria        origin         origin
 //        --------      -------------      ------------    --------
 //         NORMAL            nm                0TB           512TB
+//         DRAWER            nm             1TB*drawer     512TB+(1TB*drawer/2)
 //         FLIPPED           m                512TB           0TB
 //        SELECTIVE         nm+m               0TB            8TB
 //
@@ -229,6 +233,8 @@ public:
         // sort by non-mirrored size
         if (((iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL) &&
              (rhs.iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)) ||
+            ((iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER) &&
+             (rhs.iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER)) ||
             ((iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE) &&
              (rhs.iv_mirror_policy == ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)))
         {
@@ -470,7 +476,7 @@ public:
 ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
 {
     ReturnCode rc;
-    std::vector<ProcChipMemmap> l_system_memmap;
+    std::vector<ProcChipMemmap> l_drawer_memmap;
     uint8_t l_mirror_policy;
 
     do
@@ -491,33 +497,51 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
         // first pass of execution
         if (i_init)
         {
-            // loop across all chips in system, set common
+            uint64_t mem_base;
+            uint64_t mirror_base;
+
+            if (l_mirror_policy ==
+                ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
+            {
+                mem_base = OPT_MEMMAP_BASE_ORIGIN;
+                mirror_base = OPT_MEMMAP_OFFSET_ORIGIN;
+            }
+            else if (l_mirror_policy ==
+                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
+            {
+                mem_base = OPT_MEMMAP_OFFSET_ORIGIN;
+                mirror_base = OPT_MEMMAP_BASE_ORIGIN;
+            }
+            else if (l_mirror_policy ==
+                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
+            {
+                mem_base = OPT_MEMMAP_BASE_ORIGIN;
+                mirror_base = OPT_MEMMAP_SELECTIVE_ORIGIN;
+            }
+
+            // loop across all chips in drawer, set common
             // base for non-mirrored/mirrored memory on each chip in preparation
             // for mss_eff_grouping call
             for (std::vector<fapi::Target>::iterator l_iter = i_procs.begin();
                  l_iter != i_procs.end();
                  ++l_iter)
             {
-                uint64_t mem_base;
-                uint64_t mirror_base;
+                if ((l_mirror_policy ==
+                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER) &&
+                    (l_iter == i_procs.begin()))
+                {
+                    uint8_t drawer_id;
+                    rc = FAPI_ATTR_GET(ATTR_FABRIC_NODE_ID,
+                                       &(*l_iter),
+                                       drawer_id);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_FABRIC_NODE_ID)");
+                        break;
+                    }
 
-                if (l_mirror_policy ==
-                    ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
-                {
-                    mem_base = OPT_MEMMAP_BASE_ORIGIN;
-                    mirror_base = OPT_MEMMAP_OFFSET_ORIGIN;
-                }
-                else if (l_mirror_policy ==
-                         ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
-                {
-                    mem_base = OPT_MEMMAP_OFFSET_ORIGIN;
-                    mirror_base = OPT_MEMMAP_BASE_ORIGIN;
-                }
-                else if (l_mirror_policy ==
-                         ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
-                {
-                    mem_base = OPT_MEMMAP_BASE_ORIGIN;
-                    mirror_base = OPT_MEMMAP_SELECTIVE_ORIGIN;
+                    mem_base = drawer_id * OPT_MEMMAP_TB;
+                    mirror_base = OPT_MEMMAP_OFFSET_ORIGIN + (mem_base / 2);
                 }
 
                 rc = FAPI_ATTR_SET(ATTR_PROC_MEM_BASE,
@@ -547,32 +571,10 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
         // reorder chips based on their effective stackable size
         else
         {
-            // loop across all chips in system, consume results of
-            // mss_eff_grouping call
-            for (std::vector<fapi::Target>::iterator l_iter = i_procs.begin();
-                 l_iter != i_procs.end();
-                 ++l_iter)
-            {
-                ProcChipMemmap p(&(*l_iter), l_mirror_policy);
-                rc = p.processAttributes();
-                if (!rc.ok())
-                {
-                    FAPI_ERR("Error from processAttributes");
-                    break;
-                }
-                l_system_memmap.push_back(p);
-            }
-            if (!rc.ok())
-            {
-                break;
-            }
-
-            // sort chips based on their effective stackable size
-            std::sort(l_system_memmap.begin(), l_system_memmap.end());
-
-            // establish base for alignment of mirrored/non-mirrored regions
+            // base for alignment of mirrored/non-mirrored regions
             uint64_t l_m_base_curr = 0;
             uint64_t l_nm_base_curr = 0;
+
             if (l_mirror_policy ==
                 ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
             {
@@ -594,51 +596,94 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                 l_m_base_curr  = OPT_MEMMAP_SELECTIVE_ORIGIN;
             }
 
+            // loop across all chips in drawer, consume results of
+            // mss_eff_grouping call
+            for (std::vector<fapi::Target>::iterator l_iter = i_procs.begin();
+                 l_iter != i_procs.end();
+                 ++l_iter)
+            {
+                if ((l_mirror_policy ==
+                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER) &&
+                    (l_iter == i_procs.begin()))
+                {
+                    uint8_t drawer_id;
+                    rc = FAPI_ATTR_GET(ATTR_FABRIC_NODE_ID,
+                                       &(*l_iter),
+                                       drawer_id);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_FABRIC_NODE_ID)");
+                        break;
+                    }
+
+                    l_nm_base_curr = drawer_id * OPT_MEMMAP_TB;
+                    l_m_base_curr = OPT_MEMMAP_OFFSET_ORIGIN + (l_nm_base_curr / 2);
+                }
+
+                ProcChipMemmap p(&(*l_iter), l_mirror_policy);
+                rc = p.processAttributes();
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from processAttributes");
+                    break;
+                }
+                l_drawer_memmap.push_back(p);
+            }
+            if (!rc.ok())
+            {
+                break;
+            }
+
+            // sort chips based on their effective stackable size
+            std::sort(l_drawer_memmap.begin(), l_drawer_memmap.end());
+
             // walk through chips, from largest->smallest effective size &
             // assign base addresses for each group
-            for (uint8_t i = l_system_memmap.size();
+            for (uint8_t i = l_drawer_memmap.size();
                  i != 0;
                  --i)
             {
                 FAPI_DBG("Stacking chip n%d:p%d (eff nm size = %lld GB, eff m size = %lld GB)...",
-                         l_system_memmap[i-1].iv_node_id,
-                         l_system_memmap[i-1].iv_chip_id,
-                         l_system_memmap[i-1].iv_nm_eff_size / OPT_MEMMAP_GB,
-                         l_system_memmap[i-1].iv_m_eff_size / OPT_MEMMAP_GB);
+                         l_drawer_memmap[i-1].iv_node_id,
+                         l_drawer_memmap[i-1].iv_chip_id,
+                         l_drawer_memmap[i-1].iv_nm_eff_size / OPT_MEMMAP_GB,
+                         l_drawer_memmap[i-1].iv_m_eff_size / OPT_MEMMAP_GB);
 
                 if (l_mirror_policy ==
                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
                 {
-                    l_m_base_curr += l_system_memmap[i-1].iv_nm_eff_size;
+                    l_m_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size;
                 }
 
                 // establish base addresses for this chip & realign
                 // all groups on this chip to reflect this
-                l_system_memmap[i-1].setNMBase(l_nm_base_curr);
-                l_system_memmap[i-1].setMBase(l_m_base_curr);
+                l_drawer_memmap[i-1].setNMBase(l_nm_base_curr);
+                l_drawer_memmap[i-1].setMBase(l_m_base_curr);
                 FAPI_DBG("nm base: %016llX", l_nm_base_curr);
                 FAPI_DBG("m base: %016llX", l_m_base_curr);
-                if (l_mirror_policy ==
-                    ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
+                if ((l_mirror_policy ==
+                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL) ||
+                    (l_mirror_policy ==
+                     ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_DRAWER))
                 {
-                    l_nm_base_curr += l_system_memmap[i-1].iv_nm_eff_size;
-                    l_m_base_curr += l_system_memmap[i-1].iv_nm_eff_size / 2;
+                    l_nm_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size;
+                    l_m_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size / 2;
                 }
                 else if (l_mirror_policy ==
                          ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
                 {
-                    l_nm_base_curr += l_system_memmap[i-1].iv_nm_eff_size;
-                    l_m_base_curr += l_system_memmap[i-1].iv_m_eff_size;
+                    l_nm_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size;
+                    l_m_base_curr += l_drawer_memmap[i-1].iv_m_eff_size;
                 }
                 else if (l_mirror_policy ==
                          ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
                 {
-                    l_nm_base_curr += l_system_memmap[i-1].iv_nm_eff_size;
-                    l_m_base_curr += l_system_memmap[i-1].iv_nm_eff_size / 2;
+                    l_nm_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size;
+                    l_m_base_curr += l_drawer_memmap[i-1].iv_nm_eff_size / 2;
                 }
 
                 // flush attributes for this chip
-                rc = l_system_memmap[i-1].flushAttributes();
+                rc = l_drawer_memmap[i-1].flushAttributes();
                 if (!rc.ok())
                 {
                     FAPI_ERR("Error from flushAttributes");
