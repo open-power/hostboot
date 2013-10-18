@@ -3357,7 +3357,7 @@ TARGETING::MapSystemAttrSize& mapSystemAttrSize();
 /*
  * \@brief Typedef map <attr, attSize>
  */
-typedef map<ATTRIBUTE_ID, uint32_t> AttrSizeMapper;
+typedef std::map<ATTRIBUTE_ID, uint32_t> AttrSizeMapper;
 
 class MapSystemAttrSize
 {
