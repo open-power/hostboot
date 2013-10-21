@@ -218,6 +218,26 @@ private:
     void handleSyncPointReachedMsg(msg_t * & io_pMsg);
 
     /**
+     * @brief Handles a shutdown request message.
+     *
+     * Sets iv_shutdown and Signals any IStep thread
+     * waiting for a SyncPoint.
+     *
+     * @param[io] io_pMsg Reference to pointer to message (cleaned up)
+     */
+    void handleShutdownMsg(msg_t * & io_pMsg);
+
+    /**
+     * @brief Initiates the shutdown process based on an FSP request.
+     *
+     * Called by waitForSyncPoint or executeAllISteps if shutdown message
+     * has been received by the msgHndlr, this function creates and
+     * commits an error log indicating shutdown due to FSP request, and
+     * then initiates a TI.
+     */
+    void shutdownDuringIpl();
+
+    /**
      * @brief Handles a ProcFabIovalid message.
      *
      * Executes the processing required for the sys_proc_fab_iovalid istep
@@ -311,11 +331,10 @@ private:
     // Mutexes
     mutable mutex_t iv_bkPtMutex; // Used to throttle breakpoints
     mutable mutex_t iv_mutex;     //used to synchronize access to all instance
-                                  //variables except iv_syncPointReached
+                                  //variables
 
     // Used for waiting for and signalling Sync Points
-    mutable mutex_t iv_syncMutex;
-    mutable sync_cond_t iv_syncHit;
+    mutable sync_cond_t iv_cond;
     bool iv_syncPointReached;
 
     // Set once in the constructor, mutex protection not needed
@@ -333,6 +352,8 @@ private:
     uint8_t iv_curSubStep;             // Current SubStep
     msg_t* iv_pIstepMsg;               // External Istep request message
     timespec_t iv_lastProgressMsgTime; // Last time progress message sent
+    bool iv_shutdown;                  // Shutdown request has been received
+                                       // from the FSP
 
     // Message Queue for receiving message from SP or SPless user console
     msg_q_t iv_msgQ;

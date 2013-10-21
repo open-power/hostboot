@@ -57,6 +57,7 @@ enum
     HWSVR_SYNC_POINT            = 0x10,
     HWSVR_IPL_PROGRESS_CODE     = 0x11,
     HWSVR_DO_IOVALID_PROCESSING = 0xC1,
+    HWSVR_DO_SHUTDOWN           = 0x12
 };
 
 // ------------------------------------------------------------------
@@ -76,6 +77,8 @@ enum
                               HWSVR_DO_IOVALID_PROCESSING,
     IPL_PROGRESS_CODE       = MBOX::FIRST_UNSECURE_MSG |
                                 HWSVR_IPL_PROGRESS_CODE,
+    SHUTDOWN                = MBOX::FIRST_UNSECURE_MSG |
+                                HWSVR_DO_SHUTDOWN,
 
 };
 

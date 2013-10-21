@@ -96,12 +96,12 @@ IStepDispatcher::IStepDispatcher() :
     iv_progressThreadStarted(false),
     iv_curIStep(0),
     iv_curSubStep(0),
-    iv_pIstepMsg(NULL)
+    iv_pIstepMsg(NULL),
+    iv_shutdown(false)
 {
     mutex_init(&iv_bkPtMutex);
     mutex_init(&iv_mutex);
-    mutex_init(&iv_syncMutex);
-    sync_cond_init(&iv_syncHit);
+    sync_cond_init(&iv_cond);
 
     TARGETING::Target* l_pSys = NULL;
     TARGETING::targetService().getTopLevelTarget(l_pSys);
@@ -428,25 +428,36 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         if (!iv_istepMode)
         {
             mutex_lock(&iv_mutex);
+            // Record current IStep, SubStep
             iv_curIStep = i_istep;
             iv_curSubStep = i_substep;
 
-            // Send Progress Code
-            err = this->sendProgressCode(false);
-            mutex_unlock(&iv_mutex);
-
-            if(err)
+            // If a shutdown request has been received
+            if (iv_shutdown)
             {
-                // Commit the error and continue
-                errlCommit(err, INITSVC_COMP_ID);
+                mutex_unlock(&iv_mutex);
+                // Do not begin new IStep and shutdown
+                shutdownDuringIpl();
             }
-
-            // Start progress thread, if not yet started
-            if (!iv_progressThreadStarted)
+            else
             {
-                tid_t l_progTid = task_create(startProgressThread,this);
-                assert( l_progTid > 0 );
-                iv_progressThreadStarted = true;
+                // Send Progress Code
+                err = this->sendProgressCode(false);
+                mutex_unlock(&iv_mutex);
+
+                if(err)
+                {
+                    // Commit the error and continue
+                    errlCommit(err, INITSVC_COMP_ID);
+                }
+
+                // Start progress thread, if not yet started
+                if (!iv_progressThreadStarted)
+                {
+                    tid_t l_progTid = task_create(startProgressThread,this);
+                    assert( l_progTid > 0 );
+                    iv_progressThreadStarted = true;
+                }
             }
         }
 
@@ -769,6 +780,20 @@ void IStepDispatcher::msgHndlr()
                     TRACFCOMP(g_trac_initsvc, ERR_MRK"msgHndlr: Ignoring IStep msg in non-IStep mode!");
                 }
                 break;
+            case SHUTDOWN:
+                // Shutdown requested from Fsp
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"msgHndlr: SHUTDOWN");
+                // If not in IStep mode, further process the shutdown message
+                // otherwise, ignore it
+                if (!iv_istepMode)
+                {
+                    handleShutdownMsg(pMsg);
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_initsvc, ERR_MRK"msgHndlr: Ignoring shutdown msg in IStep mode!");
+                }
+                break;
             default:
                 TRACFCOMP(g_trac_initsvc, ERR_MRK"msgHndlr: Ignoring unknown message 0x%08x",
                           pMsg->type);
@@ -793,13 +818,22 @@ void IStepDispatcher::waitForSyncPoint()
     else
     {
         // Wait for the condition variable to be signalled
-        mutex_lock(&iv_syncMutex);
-        while(!iv_syncPointReached)
+        mutex_lock(&iv_mutex);
+        while((!iv_syncPointReached) && (!iv_shutdown))
         {
-            sync_cond_wait(&iv_syncHit, &iv_syncMutex);
+            sync_cond_wait(&iv_cond, &iv_mutex);
         }
-        iv_syncPointReached = false;
-        mutex_unlock(&iv_syncMutex);
+        // If shutdown request has been received from the FSP
+        if (iv_shutdown)
+        {
+            mutex_unlock(&iv_mutex);
+            shutdownDuringIpl();
+        }
+        else
+        {
+            iv_syncPointReached = false;
+            mutex_unlock(&iv_mutex);
+        }
     }
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::waitForSyncPoint");
@@ -908,10 +942,10 @@ void IStepDispatcher::handleSyncPointReachedMsg(msg_t * & io_pMsg)
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleSyncPointReachedMsg");
 
     // Signal any IStep waiting for a sync point
-    mutex_lock(&iv_syncMutex);
+    mutex_lock(&iv_mutex);
     iv_syncPointReached = true;
-    sync_cond_signal(&iv_syncHit);
-    mutex_unlock(&iv_syncMutex);
+    sync_cond_signal(&iv_cond);
+    mutex_unlock(&iv_mutex);
 
     if (msg_is_async(io_pMsg))
     {
@@ -927,6 +961,66 @@ void IStepDispatcher::handleSyncPointReachedMsg(msg_t * & io_pMsg)
     }
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleSyncPointReachedMsg");
+}
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::handleShutdownMsg()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
+{
+    TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleShutdownMsg");
+
+    // Set iv_shutdown and signal any IStep waiting for a sync point
+    mutex_lock(&iv_mutex);
+    iv_shutdown = true;
+    sync_cond_broadcast(&iv_cond);
+    mutex_unlock(&iv_mutex);
+
+    if (msg_is_async(io_pMsg))
+    {
+        // It is expected shutdown request messages are async
+        msg_free(io_pMsg);
+        io_pMsg = NULL;
+    }
+    else
+    {
+        // Send the message back as a response
+        msg_respond(iv_msgQ, io_pMsg);
+        io_pMsg = NULL;
+    }
+
+    TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleShutdownMsg");
+}
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::shutdownDuringIpl()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::shutdownDuringIpl()
+{
+    TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::shutdownDuringIpl");
+
+    // Create and commit error log for FFDC
+
+    /*@
+     * @errortype
+     * @reasoncode       SHUTDOWN_REQUESTED_BY_FSP
+     * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+     * @moduleid         ISTEP_INITSVC_MOD_ID
+     * @userdata1        Current IStep
+     * @userdata2        Current SubStep
+     * @devdesc          Received shutdown request from FSP
+     */
+    errlHndl_t err = new ERRORLOG::ErrlEntry(
+        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+        ISTEP_INITSVC_MOD_ID,
+        SHUTDOWN_REQUESTED_BY_FSP,
+        this->iv_curIStep, this->iv_curSubStep);
+
+    errlCommit(err, INITSVC_COMP_ID);
+
+    // Call doShutdown with the RC to initiate a TI
+    INITSERVICE::doShutdown(SHUTDOWN_REQUESTED_BY_FSP);
+
 }
 
 // ----------------------------------------------------------------------------
@@ -1169,15 +1263,19 @@ void IStepDispatcher::runProgressThread()
                        l_PrevTime.tv_sec), 0 );
             mutex_lock( &iv_mutex );
         }
-
+        // If shutdown has been requested by FSP, stop ProgressThread
+        if(iv_shutdown)
+        {
+            break;
+        }
         if( l_PrevTime.tv_sec == iv_lastProgressMsgTime.tv_sec &&
             l_PrevTime.tv_nsec == iv_lastProgressMsgTime.tv_nsec)
         {
 #if 0
-        /* 15 sec msg constraint not planned for GA1
-        err = this->sendProgressCode(false);
-        commit error in future
-        */
+            /* 15 sec msg constraint not planned for GA1
+            err = this->sendProgressCode(false);
+            commit error in future
+            */
 #else
         // Normally this would be done in sendProgressCode but do it here
         // to prevent thread from becoming a CPU hog.
