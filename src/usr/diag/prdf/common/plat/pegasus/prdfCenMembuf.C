@@ -642,16 +642,18 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
 //------------------------------------------------------------------------------
 
 /**
- * @brief  MBSECCFIR[17] - Fetch Retry CE (RCE).
+ * @brief  Fetch Retry CE / Prefetch UE Errors.
  * @param  i_membChip A Centaur chip.
  * @param  i_sc       The step code data struct.
  * @param  i_mbaPos   The MBA position.
+ * @param  isRceError True for RCE error false otherwise.
  * @return SUCCESS
  */
-int32_t AnalyzeFetchRce( ExtensibleChip * i_membChip,
-                         STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos )
+int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
+                            STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos,
+                            bool isRceError )
 {
-    #define PRDF_FUNC "[AnalyzeFetchRce] "
+    #define PRDF_FUNC "[AnalyzeFetchRcePue] "
 
     int32_t l_rc = SUCCESS;
 
@@ -667,19 +669,38 @@ int32_t AnalyzeFetchRce( ExtensibleChip * i_membChip,
             l_rc = FAIL; break;
         }
 
+        CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
+
         CenAddr addr;
-        l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_RCE_ADDR, addr );
+        if( isRceError )
+            l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_RCE_ADDR, addr );
+        else
+            l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_UE_ADDR, addr );
+
         if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
             break;
         }
 
+        CenRank rank = addr.getRank();
         // Callout the rank and the attached MBA.
-        MemoryMru memmru ( mbaChip->GetChipHandle(), addr.getRank(),
-                           MemoryMruData::CALLOUT_RANK_AND_MBA );
+        MemoryMru memmru ( mbaChip->GetChipHandle(), rank,
+                           MemoryMruData::CALLOUT_RANK );
         i_sc.service_data->SetCallout( memmru );
 
+        // Add the entry to rce table and take action as per rce table rules.
+        if ( mbadb->iv_rceTable.addEntry( rank , i_sc ))
+        {
+            // Tell TD controller to handle TPS event.
+            l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
+                                             CenMbaTdCtlrCommon::TPS_EVENT );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"handleTdEvent() failed." );
+                break;
+            }
+        }
     } while (0);
 
     // Add ECC capture data for FFDC.
@@ -1019,12 +1040,30 @@ PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetch##TYPE##MBA );
 
 PLUGIN_FETCH_ECC_ERROR( Nce, 0 )
 PLUGIN_FETCH_ECC_ERROR( Nce, 1 )
-PLUGIN_FETCH_ECC_ERROR( Rce, 0 )
-PLUGIN_FETCH_ECC_ERROR( Rce, 1 )
 PLUGIN_FETCH_ECC_ERROR( Ue,  0 )
 PLUGIN_FETCH_ECC_ERROR( Ue,  1 )
 
 #undef PLUGIN_FETCH_ECC_ERROR
+
+// Handling for RCE and prefetch UE is similar.
+// So use common macro and function ( AnalyzeFetchRcePue ).
+
+#define PLUGIN_FETCH_RCE_PREUE_ERROR( TYPE, MBA, IS_RCE ) \
+int32_t AnalyzeFetch##TYPE##MBA( ExtensibleChip * i_membChip, \
+                                 STEP_CODE_DATA_STRUCT & i_sc ) \
+{ \
+    return AnalyzeFetchRcePue( i_membChip, i_sc, MBA, IS_RCE ); \
+} \
+PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetch##TYPE##MBA );
+
+// This is bit inefficient. 1st and 3rd arguement have 1 to 1
+// mapping. But to keep macro expansion simple, using extra argument.
+PLUGIN_FETCH_RCE_PREUE_ERROR( Rce, 0, true )
+PLUGIN_FETCH_RCE_PREUE_ERROR( Rce, 1, true )
+PLUGIN_FETCH_RCE_PREUE_ERROR( PreUe, 0, false )
+PLUGIN_FETCH_RCE_PREUE_ERROR( PreUe, 1, false )
+
+#undef PLUGIN_FETCH_RCE_PREUE_ERROR
 
 // Define the plugins for memory MPE errors.
 #define PLUGIN_MEMORY_MPE_ERROR( MBA, RANK ) \

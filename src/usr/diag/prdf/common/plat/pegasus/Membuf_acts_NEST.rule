@@ -1034,14 +1034,12 @@ group gMbsEccFir filter priority(19,41) # UEs highest priority
     /** MBA0_MBSECCFIR[43]
      *  MBECCFIR_PREFETCH_MEMORY_UE
      */
-    #TODO via RTC 47289 ( CE/UE isolation )
-    (Mba0_MbsEccFir, bit(43)) ? TBDDefaultCallout;
+    (Mba0_MbsEccFir, bit(43)) ? analyzeFetchPreUe0;
 
     /** MBA1_MBSECCFIR[43]
      *  MBECCFIR_PREFETCH_MEMORY_UE
      */
-    #TODO via RTC 47289 ( CE/UE isolation )
-    (Mba1_MbsEccFir, bit(43)) ? TBDDefaultCallout;
+    (Mba1_MbsEccFir, bit(43)) ? analyzeFetchPreUe1;
 
     /** MBA0_MBSECCFIR[44]
      *  MBECCFIR_MEMORY_RCD_PARITY_ERROR
@@ -1367,14 +1365,17 @@ actionclass analyzeFetchNce0 { funccall("AnalyzeFetchNce0"); };
 /** Analyze a fetch NCE on MBA1 */
 actionclass analyzeFetchNce1 { funccall("AnalyzeFetchNce1"); };
 
-# TODO: RTC 23125 The RAS spreadsheet action is RCE is: "Threshold per rank 8/24
-#       make a callout of DIMM pair". Needs discussion.
-
 /** Analyze a fetch RCE on MBA0 */
-actionclass analyzeFetchRce0 { funccall("AnalyzeFetchRce0"); threshold32pday; };
+actionclass analyzeFetchRce0 { funccall("AnalyzeFetchRce0"); };
 
 /** Analyze a fetch RCE on MBA1 */
-actionclass analyzeFetchRce1 { funccall("AnalyzeFetchRce1"); threshold32pday; };
+actionclass analyzeFetchRce1 { funccall("AnalyzeFetchRce1"); };
+
+/** Analyze a PreFetch Ue on MBA0 */
+actionclass analyzeFetchPreUe0 { funccall("AnalyzeFetchPreUe0"); };
+
+/** Analyze a PreFetch Ue on MBA1 */
+actionclass analyzeFetchPreUe1 { funccall("AnalyzeFetchPreUe1"); };
 
 /** Analyze a fetch UE on MBA0 */
 actionclass analyzeFetchUe0 { funccall("AnalyzeFetchUe0"); threshold1; };
