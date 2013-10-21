@@ -167,12 +167,19 @@ errlHndl_t hdatService::check_header( hdatHDIF_t* i_header,
                                       sizeof(hdatHDIF_t) );
         if( errhdl ) { break; }
 
+        // Check version number but don't fail, this lets
+        //  us handle minor changes more smoothly.  A major
+        //  change should probably see a fail later on.
+        if( i_header->hdatVersion != i_exp.version )
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "RUNTIME::check_header> Version not as expected for %s, continuing anyway. Act=%.4X, Exp=%.4X", i_exp.name, i_header->hdatVersion, i_exp.version );
+        }
+
         // Check the ID, Version and Name
         if( (i_header->hdatStructId != i_exp.id)
-            && (i_header->hdatVersion != i_exp.version)
-            && !memcmp(i_header->hdatStructName,i_exp.name,6) )
+            || memcmp(i_header->hdatStructName,i_exp.name,6) )
         {
-            TRACFCOMP( g_trac_runtime, ERR_MRK "RUNTIME::check_header> HDAT Header data not as expected (id:version:name). Act=%.4X:%.4X:%s, Exp=%.4X:%.4X :%s", i_header->hdatStructId, i_header->hdatVersion, i_header->hdatStructName, i_exp.id, i_exp.version, i_exp.name );
+            TRACFCOMP( g_trac_runtime, ERR_MRK "RUNTIME::check_header> HDAT Header data not as expected (id:version:name). Act=%.4X:%.4X:%s, Exp=%.4X:%.4X:%s", i_header->hdatStructId, i_header->hdatVersion, i_header->hdatStructName, i_exp.id, i_exp.version, i_exp.name );
             hdatHeaderExp_t actual;
             actual.id = i_header->hdatStructId;
             actual.version = i_header->hdatVersion;
@@ -1095,7 +1102,7 @@ errlHndl_t hdatService::findSpira( void )
                     TRACFCOMP( g_trac_runtime, "SPIRA-S=%p", iv_spiraS );
 
                     // Check the headers and version info
-                    errhdl_s = check_header( &(iv_spiraH->hdatHDIF),
+                    errhdl_s = check_header( &(iv_spiraS->hdatHDIF),
                                              SPIRAS_HEADER );
                     if( errhdl_s )
                     {
