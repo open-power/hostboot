@@ -329,30 +329,34 @@ int32_t cleanupSecondaryFirBits( ExtensibleChip * i_chip,
 
     //In case of spare deployed attention for DMI bus, we need to clear
     // secondary MBIFIR[10] and MCIFIR[10] bits.
-    if ( i_busType == TYPE_MCS )
+    do
     {
-        mcsTgt = getConnectedChild( i_chip->GetChipHandle(),
-                                      TYPE_MCS,
-                                      i_busPos);
-        mcsChip = ( ExtensibleChip * )systemPtr->GetChip( mcsTgt );
-        mbChip =  getMcsDataBundle( mcsChip )->getMembChip();
-        if (mbChip)
+        if ( i_busType == TYPE_MCS )
+        {
+            mcsTgt = getConnectedChild( i_chip->GetChipHandle(),
+                                        TYPE_MCS,
+                                        i_busPos);
+            if (!mcsTgt) break;
+            mcsChip = ( ExtensibleChip * )systemPtr->GetChip( mcsTgt );
+            if (!mcsChip) break;
+            mbChip =  getMcsDataBundle( mcsChip )->getMembChip();
+            if (!mbChip) break;
             mbTgt =   mbChip->GetChipHandle();
-
-    }
-    else if ( i_busType == TYPE_MEMBUF )
-    {
-        mbTgt = i_chip->GetChipHandle();
-        mcsChip = getMembufDataBundle( i_chip )->getMcsChip();
-        if (mcsChip)
+            if (!mbTgt) break;
+        }
+        else if ( i_busType == TYPE_MEMBUF )
+        {
+            mbTgt = i_chip->GetChipHandle();
+            if (!mbTgt) break;
+            mcsChip = getMembufDataBundle( i_chip )->getMcsChip();
+            if (!mcsChip) break;
             mcsTgt  = mcsChip->GetChipHandle();
-        mbChip = i_chip;
-    }
+            if (!mcsTgt) break;
+            mbChip = i_chip;
+        }
 
-    if ( ( NULL != mcsChip ) && ( NULL != mbChip ))
-    {
         SCAN_COMM_REGISTER_CLASS * mciFir =
-                                    mcsChip->getRegister( "MCIFIR" );
+          mcsChip->getRegister( "MCIFIR" );
         int32_t rc = mciFir->Read();
         if ( SUCCESS != rc )
         {
@@ -367,7 +371,7 @@ int32_t cleanupSecondaryFirBits( ExtensibleChip * i_chip,
         }
 
         SCAN_COMM_REGISTER_CLASS * mbiFir =
-                                    mbChip->getRegister( "MBIFIR" );
+          mbChip->getRegister( "MBIFIR" );
         rc = mbiFir->Read();
         if ( SUCCESS != rc )
         {
@@ -380,7 +384,7 @@ int32_t cleanupSecondaryFirBits( ExtensibleChip * i_chip,
             mbiFir->ClearBit(10);
             l_rc |= mbiFir->Write();
         }
-    }
+    } while (0);
     return l_rc;
 }
 
