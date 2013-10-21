@@ -67,7 +67,16 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
-        i_parser.PrintString("String data", static_cast<char *>(i_pBuffer));
+        const char *outputString = static_cast<const char *>(i_pBuffer);
+        for (uint32_t i = 0; i < i_buflen;)
+        {
+            if (strlen(outputString)) // skip NULLs
+            {
+                i_parser.PrintString("String data", outputString);
+            }
+            i += strlen(outputString) + 1;
+            outputString += strlen(outputString) + 1;
+        }
     }
 
 private:
