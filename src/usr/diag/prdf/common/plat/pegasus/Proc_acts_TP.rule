@@ -403,42 +403,42 @@ group gOccFir filter singlebit
     /** OCCFIR[9]
      *  OCC_SCOM_OCCFIR_SRT_UE
      */
-    (OccFir, bit(9)) ? calloutConnectedOccThr1;
+    (OccFir, bit(9)) ? SelfMedThr1;
 
     /** OCCFIR[10]
      *  OCC_SCOM_OCCFIR_SRT_CE
      */
-    (OccFir, bit(10)) ? defaultMaskedError;
+    (OccFir, bit(10)) ? ThresholdNoCallout;
 
     /** OCCFIR[11]
      *  OCC_SCOM_OCCFIR_SRT_READ_ERROR
      */
-    (OccFir, bit(11)) ? calloutConnectedOccThr1;
+    (OccFir, bit(11)) ? SelfMedThr1;
 
     /** OCCFIR[12]
      *  OCC_SCOM_OCCFIR_SRT_WRITE_ERROR
      */
-    (OccFir, bit(12)) ? calloutConnectedOccThr1;
+    (OccFir, bit(12)) ? SelfMedThr1;
 
     /** OCCFIR[13]
      *  OCC_SCOM_OCCFIR_SRT_DATAOUT_PERR
      */
-    (OccFir, bit(13)) ? calloutConnectedOccThr1;
+    (OccFir, bit(13)) ? SelfMedThr1;
 
     /** OCCFIR[14]
      *  OCC_SCOM_OCCFIR_SRT_OCI_WRITE_DATA_PARITY
      */
-    (OccFir, bit(14)) ? calloutConnectedOccThr1;
+    (OccFir, bit(14)) ? SelfMedThr1;
 
     /** OCCFIR[15]
      *  OCC_SCOM_OCCFIR_SRT_OCI_BE_PARITY_ER
      */
-    (OccFir, bit(15)) ? calloutConnectedOccThr1;
+    (OccFir, bit(15)) ? SelfMedThr1;
 
     /** OCCFIR[16]
      *  OCC_SCOM_OCCFIR_SRT_OCI_ADDR_PARITY_ERR
      */
-    (OccFir, bit(16)) ? calloutConnectedOccThr1;
+    (OccFir, bit(16)) ? SelfMedThr1;
 
     /** OCCFIR[17]
      *  OCC_SCOM_OCCFIR_PORE_SW_ERROR_ERR
@@ -488,52 +488,52 @@ group gOccFir filter singlebit
     /** OCCFIR[26]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_TIMEOUT
      */
-    (OccFir, bit(26)) ? calloutConnectedOccThr1;
+    (OccFir, bit(26)) ? SelfMedThr1;
 
     /** OCCFIR[27]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_READ_DATA_PARITY
      */
-    (OccFir, bit(27)) ? calloutConnectedOccThr1;
+    (OccFir, bit(27)) ? SelfMedThr1;
 
     /** OCCFIR[28]
      *  OCC_SCOM_OCCFIR_OCB_DB_OCI_SLAVE_ERROR
      */
-    (OccFir, bit(28)) ? calloutConnectedOccThr1;
+    (OccFir, bit(28)) ? SelfMedThr1;
 
     /** OCCFIR[29]
      *  OCC_SCOM_OCCFIR_OCB_PIB_ADDR_PARITY_ERR
      */
-    (OccFir, bit(29)) ? calloutConnectedOccThr1;
+    (OccFir, bit(29)) ? SelfMedThr1;
 
     /** OCCFIR[30]
      *  OCC_SCOM_OCCFIR_OCB_DB_PIB_DATA_PARITY_ERR
      */
-    (OccFir, bit(30)) ? calloutConnectedOccThr1;
+    (OccFir, bit(30)) ? SelfMedThr1;
 
     /** OCCFIR[31]
      *  OCC_SCOM_OCCFIR_OCB_IDC0_ERROR
      */
-    (OccFir, bit(31)) ? calloutConnectedOccThr1;
+    (OccFir, bit(31)) ? SelfMedThr1;
 
     /** OCCFIR[32]
      *  OCC_SCOM_OCCFIR_OCB_IDC1_ERROR
      */
-    (OccFir, bit(32)) ? calloutConnectedOccThr1;
+    (OccFir, bit(32)) ? SelfMedThr1;
 
     /** OCCFIR[33]
      *  OCC_SCOM_OCCFIR_OCB_IDC2_ERROR
      */
-    (OccFir, bit(33)) ? calloutConnectedOccThr1;
+    (OccFir, bit(33)) ? SelfMedThr1;
 
     /** OCCFIR[34]
      *  OCC_SCOM_OCCFIR_OCB_IDC3_ERROR
      */
-    (OccFir, bit(34)) ? calloutConnectedOccThr1;
+    (OccFir, bit(34)) ? SelfMedThr1;
 
     /** OCCFIR[35]
      *  OCC_SCOM_OCCFIR_SRT_FSM_ERR
      */
-    (OccFir, bit(35)) ? calloutConnectedOccThr1;
+    (OccFir, bit(35)) ? SelfMedThr1;
 
     /** OCCFIR[36]
      *  OCC_SCOM_OCCFIR_JTAGACC_ERR
@@ -548,7 +548,7 @@ group gOccFir filter singlebit
     /** OCCFIR[38]
      *  OCC_SCOM_OCCFIR_C405_ECC_UE
      */
-    (OccFir, bit(38)) ? calloutConnectedOccThr1;
+    (OccFir, bit(38)) ? SelfMedThr1;
 
     /** OCCFIR[39]
      *  OCC_SCOM_OCCFIR_C405_ECC_CE
@@ -584,17 +584,17 @@ group gOccFir filter singlebit
     /** OCCFIR[45]
      *  OCC_SCOM_OCCFIR_SLW_OCISLV_ERR
      */
-    (OccFir, bit(45)) ? calloutConnectedOccThr1;
+    (OccFir, bit(45)) ? SelfMedThr1;
 
     /** OCCFIR[46]
      *  OCC_SCOM_OCCFIR_GPE_OCISLV_ERR
      */
-    (OccFir, bit(46)) ? calloutConnectedOccThr1;
+    (OccFir, bit(46)) ? SelfMedThr1;
 
     /** OCCFIR[47]
      *  OCC_SCOM_OCCFIR_OCB_OCISLV_ERR
      */
-    (OccFir, bit(47)) ? calloutConnectedOccThr1;
+    (OccFir, bit(47)) ? SelfMedThr1;
     #FIXME RTC23127 actions for bit 48,49 are undecided.
     /** OCCFIR[48]
      *  OCC_SCOM_OCCFIR_C405ICU_M_TIMEOUT
@@ -1151,11 +1151,13 @@ actionclass analyzeMcs31
     funccall("MaskMCS31IfCentaurCheckstop");
 };
 
-/** Callout the connected OCC */
-actionclass calloutConnectedOccThr1
+
+/** In the field, don't callout hw */
+actionclass ThresholdNoCallout
 {
-   threshold1;
-   callout ( connected(TYPE_OCC, 0), MRU_MED );
+    threshold( field(32 / day), mfg( 1 ) );
+    calloutSelfMed;
+    funccall("ClearServiceCallFlag");
 };
 
 # TOD Actions:
