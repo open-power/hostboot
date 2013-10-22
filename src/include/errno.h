@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,7 +33,8 @@
 #define EINVAL          22      // Invalid argument
 #define ENFILE          23      // Too many open files in system
 #define EDEADLK         35      // Operation would cause deadlock.
-#define EALREADY        114     // Operation already in progress 
+#define ETIME           62      // Time expired.
+#define EALREADY        114     // Operation already in progress
 
 #define EWOULDBLOCK     EAGAIN  // operation would block
 

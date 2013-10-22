@@ -137,7 +137,7 @@ class CpuManager
          *  @param[in] pir - PIR value of first thread in core.
          *  @param[in] i_threads - Bitstring of threads to enable (left-justified).
          */
-        static int startCore(uint64_t pir,uint64_t i_threads);
+        static void startCore(uint64_t pir,uint64_t i_threads);
 
 
         /** @fn forceMemoryPeriodic()

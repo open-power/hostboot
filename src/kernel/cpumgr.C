@@ -381,7 +381,7 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
 
 }
 
-int CpuManager::startCore(uint64_t pir,uint64_t i_threads)
+void CpuManager::startCore(uint64_t pir,uint64_t i_threads)
 {
     size_t threads = getThreadCount();
     pir = pir & ~(threads-1);
@@ -389,7 +389,8 @@ int CpuManager::startCore(uint64_t pir,uint64_t i_threads)
     if (pir >=
         (KERNEL_MAX_SUPPORTED_NODES * KERNEL_MAX_SUPPORTED_CPUS_PER_NODE))
     {
-        return -ENXIO;
+        TASK_SETRTN(TaskManager::getCurrentTask(), -ENXIO);
+        return;
     }
 
     for(size_t i = 0; i < threads; i++)
@@ -404,7 +405,7 @@ int CpuManager::startCore(uint64_t pir,uint64_t i_threads)
 
     InterruptMsgHdlr::addCpuCore(pir);
 
-    return 0;
+    return;
 };
 
 size_t CpuManager::getThreadCount()

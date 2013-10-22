@@ -30,6 +30,7 @@
 #include <kernel/intmsghandler.H>
 #include <sys/msg.h>
 #include <sys/misc.h>
+#include <sys/time.h>
 #include <intr/interrupt.H>
 #include <map>
 #include <algorithm>
@@ -293,6 +294,14 @@ namespace INTR
 
             };
 
+            enum
+            {
+                CPU_WAKEUP_SECONDS = 1,
+                CPU_WAKEUP_INTERVAL_COUNT = 10,
+                CPU_WAKEUP_INTERVAL_NS = (NS_PER_SEC * CPU_WAKEUP_SECONDS) /
+                                         CPU_WAKEUP_INTERVAL_COUNT,
+            };
+
             typedef std::map<ext_intr_t,intr_response_t> Registry_t;
             typedef std::vector<PIR_t> CpuList_t;
             typedef std::vector<TARGETING::Target *> ChipList_t;
@@ -544,6 +553,12 @@ namespace INTR
              * @return error log if not valid
              */
             static errlHndl_t checkAddress(uint64_t i_addr);
+
+            /**
+             * Background thread to handle if a core doesn't wake up.
+             * @param[in] _pir - The PIR value (as void*) to check for.
+             */
+            static void* handleCpuTimeout(void* _pir);
 
     };
 }; // INTR namespace

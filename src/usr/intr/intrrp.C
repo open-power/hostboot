@@ -204,7 +204,7 @@ errlHndl_t IntrRp::_init()
     assert(sys != NULL);
     uint64_t hrmor_base =
         sys->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
- 
+
     KernelIpc::ipc_data_area.pir = iv_masterCpu.word;
     KernelIpc::ipc_data_area.hrmor_base = hrmor_base;
     KernelIpc::ipc_data_area.msg_queue_id = 0;
@@ -242,7 +242,7 @@ errlHndl_t IntrRp::_init()
             // found.
             cleanCheck();
         }
-        
+
 
         // Set up the interrupt provider registers
         // NOTE: It's only possible to set up the master core at this point.
@@ -263,7 +263,7 @@ errlHndl_t IntrRp::_init()
                           "IntrRp::_init: Skipping thread %d : en_threads=%X",
                           thread,en_threads);
                 continue;
-            } 
+            }
             pir.threadId = thread;
             initInterruptPresenter(pir);
         }
@@ -544,11 +544,63 @@ void IntrRp::msgHandler()
                         {
                             TRACDCOMP(g_trac_intr,"MSG_INTR_ADD_CPU: Skipping thread %d",thread);
                             continue;
-                        } 
+                        }
                         pir.threadId = thread;
                         initInterruptPresenter(pir);
                         sendIPI(pir);
                     }
+
+                    pir.threadId = 0;
+                    task_create(handleCpuTimeout,
+                                reinterpret_cast<void*>(pir.word));
+                }
+                break;
+
+            case MSG_INTR_ADD_CPU_TIMEOUT:
+                {
+                    PIR_t pir = msg->data[0];
+                    size_t count = msg->data[1];
+
+                    if(iv_ipisPending.count(pir))
+                    {
+                        if (count < CPU_WAKEUP_INTERVAL_COUNT)
+                        {
+                            TRACDCOMP(g_trac_intr,
+                                      INFO_MRK "Cpu wakeup pending on %x",
+                                      pir.word);
+
+                            // Tell child thread to retry.
+                            msg->data[1] = EAGAIN;
+                        }
+                        else // Timed out.
+                        {
+                            TRACFCOMP(g_trac_intr,
+                                      ERR_MRK "Cpu wakeup timeout on %x",
+                                      pir.word);
+
+                            // Tell child thread to exit.
+                            msg->data[1] = 0;
+
+                            // Get saved thread info.
+                            IPI_Info_t& ipiInfo = iv_ipisPending[pir];
+                            msg_t* ipiMsg = ipiInfo.second;
+                            iv_ipisPending.erase(pir);
+
+                            // Respond to waiting thread with ETIME.
+                            ipiMsg->data[1] = -ETIME;
+                            msg_respond(iv_msgQ, ipiMsg);
+                        }
+                    }
+                    else // Ended successfully.
+                    {
+                        TRACDCOMP(g_trac_intr,
+                                  INFO_MRK "Cpu wakeup completed on %x",
+                                  pir.word);
+                        // Tell child thread to exit.
+                        msg->data[1] = 0;
+                    }
+
+                    msg_respond(iv_msgQ, msg);
                 }
                 break;
 
@@ -1298,7 +1350,7 @@ void IntrRp::shutDown()
             {
                 TRACDCOMP(g_trac_intr,"IntrRp::shutDown: Skipping thread %d",thread);
                 continue;
-            } 
+            }
             pir.threadId = thread;
             disableInterruptPresenter(pir);
         }
@@ -1966,7 +2018,7 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
 
         // Set interrupt presenter to allow all interrupts
         TRACFCOMP(g_trac_intr,"Allow interrupts");
-        for(TARGETING::TargetHandleList::iterator 
+        for(TARGETING::TargetHandleList::iterator
             core = procCores.begin();
             core != procCores.end();
             ++core)
@@ -2040,7 +2092,7 @@ void IntrRp::cleanCheck()
     TARGETING::TargetHandleList procCores;
     getAllChiplets(procCores, TYPE_CORE);
 
-    for(TARGETING::TargetHandleList::iterator 
+    for(TARGETING::TargetHandleList::iterator
         core = procCores.begin();
         core != procCores.end();
         ++core)
@@ -2049,7 +2101,7 @@ void IntrRp::cleanCheck()
 
         FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
         FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
-        CHIP_UNIT_ATTR coreId = 
+        CHIP_UNIT_ATTR coreId =
             (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
         PIR_t pir(0);
@@ -2308,4 +2360,38 @@ uint64_t INTR::getIntpAddr(const TARGETING::Target * i_ex, uint8_t i_thread)
     return (l_intB+ InterruptMsgHdlr::mmio_offset(
               pir.word & (InterruptMsgHdlr::P8_PIR_THREADID_MSK |
                           InterruptMsgHdlr::P8_PIR_COREID_MSK)));
+}
+
+void* INTR::IntrRp::handleCpuTimeout(void* _pir)
+{
+    uint64_t pir = reinterpret_cast<uint64_t>(_pir);
+    task_detach();
+
+    int count = 0;
+    int rc = 0;
+
+    // Allocate a message to send to the RP thread.
+    msg_t* msg = msg_allocate();
+    msg->type = MSG_INTR_ADD_CPU_TIMEOUT;
+    msg->data[0] = pir;
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
+
+    do
+    {
+        // Sleep for the right amount.
+        nanosleep(0, CPU_WAKEUP_INTERVAL_NS);
+
+        // Check the status with the RP thread.
+        msg->data[1] = count;
+        msg_sendrecv(intr_msgQ, msg);
+
+        // Get the status from the response message.
+        rc = msg->data[1];
+        count++;
+
+    } while(rc == EAGAIN);
+
+    msg_free(msg);
+
+    return NULL;
 }

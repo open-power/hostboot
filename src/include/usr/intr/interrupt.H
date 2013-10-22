@@ -53,6 +53,11 @@ namespace INTR
         };
         PIR_t(uint32_t i_word = 0) : word(i_word) {}
 
+        PIR_t(uint32_t i_nodeId, uint32_t i_chipId,
+              uint32_t i_coreId, uint32_t i_thread = 0) :
+            nodeId(i_nodeId), chipId(i_chipId),
+            coreId(i_coreId), threadId(i_thread) {}
+
         PIR_t operator= (uint32_t i_word)
         {
             word = i_word;
@@ -71,7 +76,7 @@ namespace INTR
      * @note The XISR is 24 bits:
      * XISR[ 0: 4] NOT DEFINED
      * XISR[ 5: 7] Node id
-     * XISR[ 8:10] chipId within Node 
+     * XISR[ 8:10] chipId within Node
      * XISR[11:12] Unit selection [GX='00', PHB0='01', PHB1='10', PHB2='11']
      * XISR[13:19] BUID
      * XISR[20:23] level
@@ -139,6 +144,7 @@ namespace INTR
         MSG_INTR_SHUTDOWN,          //!< Call to shutdown interrupt presenter
         MSG_INTR_ENABLE_PSI_INTR,   //!< Enable PSI interrupts
         MSG_INTR_MPIPL_CLEANUP,     //!< Clean up interrupts on MPIPL
+        MSG_INTR_ADD_CPU_TIMEOUT,   //!< Check for a timeout waiting for a core.
     };
 
     /**

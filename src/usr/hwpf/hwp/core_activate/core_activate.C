@@ -45,6 +45,8 @@
 #include    <hwpisteperror.H>
 #include    <errl/errludtarget.H>
 
+#include    <intr/interrupt.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -103,7 +105,7 @@ void*    call_host_activate_master( void    *io_pArgs )
 
         const TARGETING::Target*  l_masterCore  = getMasterCore( );
         assert( l_masterCore != NULL );
-        
+
         TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
                                           ( getParentChip( l_masterCore ) );
 
@@ -114,7 +116,7 @@ void*    call_host_activate_master( void    *io_pArgs )
         // Pass in Master EX target
         const TARGETING::Target* l_masterEx = getExChiplet(l_masterCore);
         assert(l_masterEx != NULL );
-        
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master: call proc_prep_master_winkle. "
                    "Target HUID %.8X",
@@ -280,9 +282,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
         assert( sys != NULL );
         uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
 
-        uint64_t pir = l_coreId << 3;
-        pir |= l_chipId << 7;
-        pir |= l_logicalNodeId << 10;
+        uint64_t pir = INTR::PIR_t(l_logicalNodeId, l_chipId, l_coreId).word;
 
         if (pir != l_masterCoreID)
         {
@@ -292,11 +292,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 
             int rc = cpu_start_core(pir,en_threads);
 
-            // We purposefully only create one error log here.  The only
-            // failure from the kernel is a bad PIR, which means we have
-            // a pervasive attribute problem of some sort.  Just log the
-            // first failing PIR.
-            if ((0 != rc) && (NULL == l_errl))
+            if (0 != rc)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "call_host_activate_slave_cores: "
@@ -313,12 +309,27 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                  *
                  * @devdesc Kernel returned error when trying to activate core.
                  */
-                l_errl =
+                errlHndl_t l_tmperrl =
                     new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             ISTEP_HOST_ACTIVATE_SLAVE_CORES,
                                             ISTEP_BAD_RC,
                                             pir,
                                             rc );
+
+                // Callout core that failed to wake up.
+                l_tmperrl->addHwCallout(*l_core,
+                                        HWAS::SRCI_PRIORITY_MED,
+                                        HWAS::DECONFIG,
+                                        HWAS::GARD_Predictive);
+
+                if (NULL == l_errl)
+                {
+                    l_errl = l_tmperrl;
+                }
+                else
+                {
+                    errlCommit( l_tmperrl, HWPF_COMP_ID );
+                }
             }
         }
     }

@@ -409,7 +409,7 @@ namespace Systemcalls
             mq->messages.insert(mp);
             if (!m->__reserved__pseudosync)
             {
-                // Choose next thread to execute, this one is delayed.
+                // Choose next task to execute, this one is delayed.
                 t->cpu->scheduler->setNextRunnable();
             } // For pseudo-sync, just keep running the current task.
         }
@@ -670,9 +670,10 @@ namespace Systemcalls
     /** Prep core for activation. */
     void CpuStartCore(task_t *t)
     {
-        TASK_SETRTN(t,
-            CpuManager::startCore(static_cast<uint64_t>(TASK_GETARG0(t)),
-                                  static_cast<uint64_t>(TASK_GETARG1(t))));
+        // This will cause another task to be scheduled in while the
+        // core is started.
+        CpuManager::startCore(static_cast<uint64_t>(TASK_GETARG0(t)),
+                              static_cast<uint64_t>(TASK_GETARG1(t)));
     };
 
     /** Read SPR values. */

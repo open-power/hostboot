@@ -117,7 +117,7 @@ void InterruptMsgHdlr::handleInterrupt()
         // from the ICP BAR SCOM register, however, since this value will
         // never change unless PHYP changes its memory map, it is deemed
         // sufficient to hard code the value.  If this is not an MPIPL then
-        // there is a serious problem elsewhere. 
+        // there is a serious problem elsewhere.
 
         cv_ipc_base_address = (uint64_t)(INTP_BAR_VALUE) << 32; // val in BAR
         cv_ipc_base_address >>= 14;                 // convert to base address
@@ -196,6 +196,11 @@ MessageHandler::HandleResult InterruptMsgHdlr::handleResponse
  int i_rc
  )
 {
+    if (MSG_INTR_ADD_CPU == i_type)
+    {
+        TASK_SETRTN(i_task, i_rc);
+        return SUCCESS;
+    }
     return UNHANDLED_RC;
 }
 
