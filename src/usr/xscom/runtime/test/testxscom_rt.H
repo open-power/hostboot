@@ -41,8 +41,8 @@ struct testXscomAddrData
 const testXscomAddrData g_xscomAddrTable[] =
 {
         // Write data to be ORed with read value
-        {0x15013288, 0x0000040000000000},
-        {0x15010002, 0xC000000000000000},
+        {0x0006000B, 0x0000040000000000}, // PORE_GPE0_SCRATCH1_0x0006000B
+        {0x0006000C, 0xC000000000000000}, // PORE_GPE0_SCRATCH2_0x0006000C
         {0x00040001, 0xE000000000000000}, //TP Chiplet
         // TODO - more tests
 };

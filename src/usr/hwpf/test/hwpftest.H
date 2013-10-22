@@ -273,43 +273,26 @@ public:
 
         //Note:  this data is based on the sample.initfile.
         //If the initfile changes, this data will also need to be changed.
-        //@TODO via RTC: 60769 -- base 15XXXXXX addr on master core
         ifScom_t l_ifScomData[] =
         {
-            {0x000000000006002b, 0, 0x0000000000000000 |
-                                    (0x00000000000000C4ll << (64 - (32 + 8)))},
-            {0x000000000006002c, 0, (0x0000000000000001ll << (64 - 8)) |
-                                    (0x0000000000000008ll << (64 - (24 + 8)))},
-            {0x000000000006800b, 0, 0},
-            {0x000000000006800c, 0, (0x8000000000000000 >> 0x17) |
-                                    (0x0000000000000060ll << (64 - (24 + 8))) |
-                                    0x0000000000003000},
-            {0x0000000015010002, 0, 0xAABBC00000000000},
-            {0x0000000015013283, 0, 0x3c90000000000000 |
-                                    (0x8000000000000000 >> 0x0c) |
-                                    (0x8000000000000000 >> 0x0d) |
-                                    (0x0306400412000000 >> 0x0e) |
-                                    0x000000000000000D},
-            {0x0000000015013284, 0, 0x3c90000000000000},
-            {0x0000000015013285, 0, (0x8000000000000000 >> 0x0f) |
-                                    (0x8000000000000000 >> 0x10) |
-                                    (0x8000000000000000 >> 0x13) |
-                                    (0x0306400412000000 >> 0x15) },
-            {0x0000000015013286, 0, 0x0000000000000192},
-            {0x0000000015013287, 0, 0x0000000000000182},
-            {0x0000000015013288, 0, 0x0000000000000192},
-            // TODO:  RTC:Issue 66579    Removed as this register is now being
-            // used by dump
-
-            /*{0x0000000015013289, 0, (0x8000000000000000 >> 0x17) |
-                                    (0x4000000000000000 >> 0x18)}*/
+            {/*PORE_GPE0_SCRATCH0_*/0x0006000A, 0, 0x0ABBC00000000000},
+            {/*PORE_GPE0_SCRATCH1_*/0x0006000B, 0, 0x00000000C4000000},
+            {/*PORE_GPE0_SCRATCH2_*/0x0006000C, 0, 0x0100000800000000},
+            {/*PORE_GPE1_SCRATCH0_*/0x0006002A, 0, 0x0000000000000000},
+            {/*PORE_GPE1_SCRATCH1_*/0x0006002B, 0, 0x0000016000003000},
+            {/*PORE_GPE1_SCRATCH2_*/0x0006002C, 0, 0x0c9c0c190010480d},
+            {/*PORE_SLW_SCRATCH0_*/0x0006800A,  0, 0x0c90000000000000},
+            {/*PORE_SLW_SCRATCH1_*/0x0006800B,  0, 0x0001901832002090},
+            {/*PORE_SLW_SCRATCH2_*/0x0006800C,  0, 0x0000000000000192},
+            {/*PORE_SBE_SCRATCH1_*/0x000E000B,  0, 0x0000000000000192},
+            {/*PORE_SBE_SCRATCH2_*/0x000E000C,  0, 0x0000014000000000}
         };
 
-        fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
+        fapi::ReturnCode l_rc;
         ecmdDataBufferBase l_ScomData(64);
 
         do {
-            // Set up some attributes for testing
+            // Set up some attributes used by sample.initfile
             uint8_t l_uint8 = 1;
             l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_uint8);
             if (l_rc != fapi::FAPI_RC_SUCCESS)
@@ -387,19 +370,6 @@ public:
                 break;
             }
 
-            // Test ATTR_IS_SIMULATION access through FAPI
-            uint8_t l_flag;
-            l_rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, l_flag);
-            if (l_rc != fapi::FAPI_RC_SUCCESS)
-            {
-                TS_FAIL("testHwpf5: ATTR_IS_SIMULATION. Error from GET");
-                break;
-            }
-            else
-            {
-                //printk("ATTR_IS_SIMULATION = %d\n", l_flag);
-            }
-
             //Set the targets
 
             std::vector<fapi::Target> l_target;
@@ -463,32 +433,6 @@ public:
                 break;
             }
 
-            // Test ATTR_EC attribute access through FAPI
-            uint8_t l_EC_R = 0xFF;
-
-            l_rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &l_fapiTarget, l_EC_R);
-            if (l_rc != fapi::FAPI_RC_SUCCESS)
-            {
-                TS_FAIL("testHwpf5: ATTR_EC. Error from GET");
-                break;
-            }
-
-            // Test ATTR_FUNCTIONAL attribute access through FAPI
-            uint8_t l_functional = 0xff;
-            l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_fapiTarget, l_functional);
-            if (l_rc != fapi::FAPI_RC_SUCCESS)
-            {
-                TS_FAIL("testHwpf5: ATTR_FUNCTIONAL. Error from GET");
-                break;
-            }
-            else
-            {
-                FAPI_INF("testHwpf5: Master chip ATTR_FUNCTIONAL: %d", l_functional);
-            }
-
-            //printk("EC = %d\n", l_EC_R);
-
-            /*
             // Save original scom data to restore at end of test
             for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
             {
@@ -507,7 +451,6 @@ public:
             {
                 break;
             }
-            */
 
             // Set scom data to 0 to start from known state for bit ops
             l_ScomData.setDoubleWord(0, 0ll);
@@ -563,9 +506,8 @@ public:
                 break;
             }
 
-            /*
             // Restore the original Scom data
-            //uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
+            uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
             for (uint32_t i = 0; i < sizeof(l_ifScomData)/sizeof(ifScom_t); i++)
             {
                 l_ecmdRc = l_ScomData.setDoubleWord(0,l_ifScomData[i].origData);
@@ -591,7 +533,6 @@ public:
             {
                 break;
             }
-            */
 
         } while (0);
 
@@ -625,15 +566,13 @@ public:
             l_pTarget->tryGetAttr<TARGETING::ATTR_IS_SIMULATION>(l_vpoMode) &&
             l_vpoMode == 0)
         {
-            static const uint32_t NUM_OF_SCOMREGS = 6;
+            static const uint32_t NUM_OF_SCOMREGS = 4;
             ifScom_t l_ifScom[NUM_OF_SCOMREGS] =
             {
                 {0x000000000006002b, 0x0000000000000183},
                 {0x000000000006002c, 0x0000000000000183},
                 {0x000000000006800b, 0},
                 {0x000000000006800c, 0x8000000000000000 >> 0x17},
-                {0x0000000015010002, 0xAABBC00000000000},
-                {0x0000000015013288, 0x00000CDE00000000},
             };
 
             // Get the master processor chip

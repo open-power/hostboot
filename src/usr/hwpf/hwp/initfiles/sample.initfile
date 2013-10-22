@@ -63,36 +63,32 @@ define def_not_equal_test =  (SYS.ATTR_SCRATCH_UINT64_1 != SYS.ATTR_SCRATCH_UINT
 define MBA0 = TGT1;
 define MBA1 = TGT2;
 
-
-#@TODO via RTC: 60769 -- base 15XXXXXX addr on master core
-
 #--******************************************************************************
-#-- Basic SCOM
+#-- Basic SCOM to PORE_GPE0_SCRATCH0_0x0006000A
 #--******************************************************************************
-scom 0x0000000015010002              {
+scom 0x000000000006000A              {
   scom_data                 ;
-  0xAABBC00000000000        ;
+  0x0ABBC00000000000        ;
 }
 
 #--******************************************************************************
-#-- SCOM with Address and Data of Array Type, Range of Index, Bit Support
+#-- SCOM with Address and Data of Array Type, Range of Index, Bit Support to
+#-- PORE_GPE0_SCRATCH1_0x0006000B and PORE_GPE0_SCRATCH2_0x0006000C
 #-- The following Scom is equivalent to:
-#scom 0x000000000006002B           {
+#scom 0x000000000006000B           {
 #  bits, scom_data             ,              expr;
 #  0:7,  SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2],   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] > SYS.ATTR_SCRATCH_UINT8_1;
 #  24:31, SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2],  SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_ARRAY_1[3];
 #  32:39, SYS.ATTR_SCRATCH_UINT8_ARRAY_2[0][1][2], SYS.ATTR_SCRATCH_UINT8_ARRAY_1[0] < SYS.ATTR_SCRATCH_UINT8_ARRAY_1[1];
 #}
 #
-#scom 0x000000000006002C           {
+#scom 0x000000000006000C           {
 #  bits, scom_data             ,              expr;
 #  0:7,  SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2],   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[31] > SYS.ATTR_SCRATCH_UINT8_1;
 #  24:31, SYS.ATTR_SCRATCH_UINT8_ARRAY_1[31], SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_ARRAY_1[7];
 #  32:39, SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3], SYS.ATTR_SCRATCH_UINT8_ARRAY_1[17] < SYS.ATTR_SCRATCH_UINT8_ARRAY_1[18];
 #}
-#--******************************************************************************
-
-scom 0x000000000006002(B,C)        {
+scom 0x000000000006000(B,C)        {
   bits, scom_data             ,              expr;
   0:7,  SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2],   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2,31] > SYS.ATTR_SCRATCH_UINT8_1;
   24:31, SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2,31], SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_ARRAY_1[3,7];
@@ -100,19 +96,17 @@ scom 0x000000000006002(B,C)        {
 }
 
 #--******************************************************************************
-#-- Basic SCOM with define used
+#-- Basic SCOM with define used to PORE_GPE1_SCRATCH0_0x0006002A
 #--******************************************************************************
-
-scom 0x000000000006800b              {
+scom 0x000000000006002A              {
   scom_data,            expr                 ;
   0x0000000000000184,   def_equal_test       ;
 }
 
 #--******************************************************************************
-#-- Basic SCOM with a single bit set
+#-- Basic SCOM with a single bit set to PORE_GPE1_SCRATCH1_0x0006002B
 #--******************************************************************************
-
-scom 0x000000000006800c              {
+scom 0x000000000006002B             {
     bits ,                    scom_data        ;
     23   ,                    0b1              ;
 }
@@ -121,8 +115,7 @@ scom 0x000000000006800c              {
 #-- Basic SCOM with same address but different bits set & Scom data of Attr type
 #-- Simple operations on Scom data
 #--******************************************************************************
-
-scom 0x000000000006800c              {
+scom 0x000000000006002B              {
     bits , scom_data                                                                  , expr       ;
     24:31, (MBA1.ATTR_CHIP_UNIT_POS + SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3])          , (SYS.ATTR_SCRATCH_UINT8_1 | 0b00000001) != 1;
     24:31, ((MBA1.ATTR_CHIP_UNIT_POS | SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3]) + 1) / 2, !(SYS.ATTR_SCRATCH_UINT8_1 == 3);
@@ -130,11 +123,11 @@ scom 0x000000000006800c              {
 }
 
 #--******************************************************************************
-#-- Basic SCOM with bits
+#-- Basic SCOM with bits to PORE_GPE1_SCRATCH2_0x0006002C
 #--******************************************************************************
-scom 0x0000000015013283              {
+scom 0x000000000006002C              {
     bits ,                    scom_data        ;
-    0:11 ,                    0b001111001001   ;
+    0:11 ,                    0b000011001001   ;
     12   ,                    0b1              ;
     13   ,                    0x1              ;
     14:59,                    0x00c190010480   ;
@@ -142,12 +135,12 @@ scom 0x0000000015013283              {
 }
 
 #--******************************************************************************
-#-- Complext SCOM with Bit Support, define, and attributes
+#-- Complex SCOM with Bit Support, define, and attributes to
+#-- PORE_SLW_SCRATCH0_0x0006800A
 #--******************************************************************************
-
-scom 0x0000000015013284              {
+scom 0x000000000006800A              {
     bits ,                    scom_data,        expr                                  ;
-    0:11 ,                    0b001111001001,   ANY                                   ;
+    0:11 ,                    0b000011001001,   ANY                                   ;
     12   ,                    0b1,              def_equal_test                        ;
     12   ,                    0b0,              def_not_equal_test                    ;
     13   ,                    0b1,              def_uint8_greater_test                ;
@@ -155,10 +148,10 @@ scom 0x0000000015013284              {
 }
 
 #--******************************************************************************
-#-- Complex SCOM with Bit Support, and logical operators
+#-- Complex SCOM with Bit Support, and logical operators to
+#-- PORE_SLW_SCRATCH1_0x0006800B
 #--******************************************************************************
-
-scom 0x0000000015013285              {
+scom 0x000000000006800B              {
     bits ,                    scom_data,        expr                                  ;
     12   ,                    0b1,              def_equal_test && def_not_equal_test  ;
     12   ,                    0b0,              def_equal_test || def_not_equal_test  ;
@@ -174,40 +167,42 @@ scom 0x0000000015013285              {
 
 #--******************************************************************************
 #-- SCOM with 'ec' column - Use scratch for now since all attributes work
+#-- To PORE_SLW_SCRATCH2_0x0006800C
 #--******************************************************************************
-
-scom 0x0000000015013286              {
+scom 0x000000000006800C              {
   scom_data,            SYS.ATTR_SCRATCH_UINT32_1,  SYS.ATTR_SCRATCH_UINT32_2        ;
   0x0000000000000192,   != 0,                       >= ENUM_ATTR_SCRATCH_UINT64_ARRAY_2_VAL_B       ;
 }
 
 #--******************************************************************************
-#-- Basic SCOM with an array
+#-- Basic SCOM with an array to PORE_SBE_SCRATCH0_0x000E000A
 #--******************************************************************************
-scom 0x0000000015013287              {
+scom 0x00000000000E000A              {
   scom_data,            expr                 ;
   0x0000000000000182,   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1    ;
 }
 
 #--******************************************************************************
 #-- SCOM with 'ec' & expr column - Use scratch for now since all attributes work
+#-- To PORE_SBE_SCRATCH1_0x000E000B
 #--******************************************************************************
-scom 0x0000000015013288              {
+scom 0x00000000000E000B              {
   scom_data,            SYS.ATTR_SCRATCH_UINT32_1,   expr;
   0x0000000000000192,   3,                           SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3] == 0x00000000000000BE;
 }
 
 #--******************************************************************************
 #-- Complex SCOM with Bit Support, associated attributes and logical operators
+#-- To PORE_SBE_SCRATCH2_0x000E000C
 #--******************************************************************************
 # TODO:  RTC:Issue 66579   remove this register as it is now being used by dump
-#scom 0x0000000015013289              {
-#  bits,  scom_data,               MBA1.ATTR_CHIP_UNIT_POS, expr;
-#  23,    0b0,                     1,                       MBA0.ATTR_CHIP_UNIT_POS == 1;
-#  23,    MBA1.ATTR_CHIP_UNIT_POS, 1,                       MBA0.ATTR_CHIP_UNIT_POS == 0;
-#  24:25, 0b10,                    0,                       any;
-#  24:25, 0b01,                    1,                       SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1;
-#}
+scom 0x00000000000E000C              {
+  bits,  scom_data,               MBA1.ATTR_CHIP_UNIT_POS, expr;
+  23,    0b0,                     1,                       MBA0.ATTR_CHIP_UNIT_POS == 1;
+  23,    MBA1.ATTR_CHIP_UNIT_POS, 1,                       MBA0.ATTR_CHIP_UNIT_POS == 0;
+  24:25, 0b10,                    0,                       any;
+  24:25, 0b01,                    1,                       SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1;
+}
 
 #--******************************************************************************
 #-- Basic SCOM with Multiple Arrays/Address Ranges

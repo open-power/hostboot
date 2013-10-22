@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -72,9 +72,8 @@ fapi::ReturnCode hwpInitialTest(const std::vector<fapi::Target> & i_target)
 
     do
     {
-        // Use this SCOM register for testing
-        //@TODO via RTC: 60769 -- base 15XXXXXX addr on master core
-        const uint64_t l_addr = 0x15010002;
+        // Use PORE_GPE0_SCRATCH2_0x0006000C Scom register for testing
+        const uint64_t l_addr = 0x0006000C;
         ecmdDataBufferBase l_ScomData(64);
         uint64_t l_originalScomData = 0;
 
