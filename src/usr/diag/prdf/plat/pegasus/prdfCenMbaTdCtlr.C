@@ -1684,9 +1684,9 @@ int32_t CenMbaTdCtlr::signalMdiaCmdComplete()
             break;
         }
 
-        // Get the address currently in the MBMEA.
-        CenAddr curEndAddr;
-        o_rc = getCenMaintEndAddr( iv_mbaChip, curEndAddr );
+        // Need to compare the address in which the command stopped.
+        CenAddr stoppedAddr;
+        o_rc = getCenMaintStartAddr( iv_mbaChip, stoppedAddr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"cenGetMaintAddr() failed" );
@@ -1698,8 +1698,8 @@ int32_t CenMbaTdCtlr::signalMdiaCmdComplete()
         CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
         mbadb->iv_sendCmdCompleteMsg = true;
         mbadb->iv_cmdCompleteMsgData =
-                        (allEndAddr == curEndAddr) ? MDIA::COMMAND_COMPLETE
-                                                   : MDIA::COMMAND_STOPPED;
+                        (allEndAddr == stoppedAddr) ? MDIA::COMMAND_COMPLETE
+                                                    : MDIA::COMMAND_STOPPED;
 
     } while(0);
 
