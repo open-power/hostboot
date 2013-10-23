@@ -34,8 +34,14 @@ namespace PRDF
 namespace TOD
 {
 
+//NOTE: Position at which strings representing names of TOD control registers
+//are placed in regStatList cannot be changed independently. Position of string
+//in the array must match value of corresponding enum member e.g. value
+//of MPCR is zero, therefore, TOD_MPCR can only be placed at regStatList[0]
+
 // following enum represents all the tod control and status registers which
 // need to be read and restored during data parity errors.
+
 enum Register
 {
     MPCR            = 0,
@@ -48,15 +54,6 @@ enum Register
     PSMSCR          = 7,
     LAST_TOD_REG    = 8,
 };
-
-//NOTE: Position at which strings representing names of TOD control registers
-//are placed in regStatList cannot be changed independently. Position of string
-//in the array must match value of corresponding enum member e.g. value
-//of MPCR is zero, therefore, TOD_MPCR can only be placed at regStatList[0]
-
-static const char *regStatList[] = { "TOD_MPCR","TOD_PCRP0", "TOD_PCRP1",
-                                     "TOD_SCRP0", "TOD_SCRP1","TOD_SPCR",
-                                     "TOD_IPCR", "TOD_PSMSCR" };
 
 }//end namespace TOD
 
