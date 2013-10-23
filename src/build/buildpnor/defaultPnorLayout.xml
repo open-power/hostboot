@@ -40,7 +40,7 @@ Layout Description
               added to the partition table at <sideAOffset>
               or <sideBOffset>
     <testonly/> Indicates partition is used for internal
-                testing only.  Partition should be skipped 
+                testing only.  Partition should be skipped
                  in production environments.
     <ecc/>  Indicates Partition should be ECC protected
     <sha512Version/> Indicates Partition uses SHA512 for
@@ -64,6 +64,7 @@ Layout Description
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x10000</physicalOffset>
         <physicalRegionSize>0x500000</physicalRegionSize>
+        <sha512Version/>
         <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>

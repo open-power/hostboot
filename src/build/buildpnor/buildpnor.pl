@@ -215,6 +215,7 @@ sub loadPnorLayout
         my $side = $sectionEl->{side}[0];
         my $testonly = $sectionEl->{testonly}[0];
         my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
+        my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
 
         if (($emitTestSections == 0) && ($sectionEl->{testonly}[0] eq "yes"))
         {
@@ -234,6 +235,7 @@ sub loadPnorLayout
         $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
 
     }
 
@@ -334,22 +336,38 @@ sub createPnorImage
                 last;
             }
 
-            #ECC flag
+            # User data Flags
             my $chip = 0;
             my $compress = 0;
             my $ecc = 0;
+            my $sha512Version = 0;
+
             if( ($sectionHash{$key}{ecc} eq "yes") )
             {
                 $ecc = 0x8000;
-            };
+            }
+            if( ($sectionHash{$key}{sha512Version} eq "yes") )
+            {
+                $sha512Version = 0x80;
+            }
+
+            #First User Data Word
             #[1:chip][1:compression][2:ecc]
-            my $userflags0 = ($chip << 16)
-              | ($compress << 8)
+            my $userflags0 = ($chip << 24)
+              | ($compress << 16)
               | $ecc;
+
+            #Second User Data Word
+            #[1:sha512Version]
+            my $userflags1 = ($sha512Version << 24);
+
             trace(1,"userflags0 = $userflags0");
+            trace(1,"userflags1 = $userflags1");
             if ($g_ffsCmd eq "") {
                 trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 0 --name $eyeCatch --value $userflags0");
                 my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 0 --name $eyeCatch --value $userflags0`;
+                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 1 --name $eyeCatch --value $userflags1");
+                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 1 --name $eyeCatch --value $userflags1`;
             }
             $rc = $?;
             if($rc)
@@ -357,7 +375,6 @@ sub createPnorImage
                 trace(0, "$this_func: Call to add userdata to $eyeCatch failed.  rc=$rc.  Aborting!");
                 last;
             }
-
 
             #Trunc Partition
             #f{fs,part} --target tuleta.pnor --partition-offset 0 --name HBI --trunc

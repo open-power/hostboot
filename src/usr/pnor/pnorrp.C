@@ -440,6 +440,7 @@ errlHndl_t PnorRP::readTOC()
 
         //Walk through all the entries in the table and parse the data.
         ffs_entry* cur_entry = (l_ffs_hdr->entries);
+
         for(uint32_t i=0; i<l_ffs_hdr->entry_count; i++)
         {
             TRACUCOMP(g_trac_pnor, "PnorRp::readTOC:  Entry %d, name=%s, pointer=0x%X", i, cur_entry->name, (uint64_t)cur_entry);
@@ -488,6 +489,22 @@ errlHndl_t PnorRP::readTOC()
             iv_TOC[cur_side][secId].integrity = ffsUserData->dataInteg;
             iv_TOC[cur_side][secId].version = ffsUserData->verCheck;
             iv_TOC[cur_side][secId].misc = ffsUserData->miscFlags;
+
+            TRACFCOMP(g_trac_pnor, "PnorRp::readTOC: User Data %s", cur_entry->name);
+            TRACFBIN(g_trac_pnor, "PnorRp::readTOC: Bin Dump",ffsUserData, sizeof(ffs_hb_user_t) );
+
+            if (iv_TOC[cur_side][secId].version == FFS_VERS_SHA512)
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRp::readTOC: Incrementing Flash Address for SHA Header");
+                if (iv_TOC[cur_side][secId].integrity == FFS_INTEG_ECC_PROTECT)
+                {
+                    iv_TOC[cur_side][secId].flashAddr += (PAGESIZE*9)/8;
+                }
+                else
+                {
+                    iv_TOC[cur_side][secId].flashAddr += PAGESIZE;
+                }
+            }
 
             if((iv_TOC[cur_side][secId].flashAddr + iv_TOC[cur_side][secId].size) > (l_ffs_hdr->block_count*PAGESIZE))
             {

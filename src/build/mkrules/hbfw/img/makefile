@@ -54,6 +54,9 @@ BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
 EXT_PAD_IMAGE = hostboot_extended.bin.pad
 EXT_ECC_IMAGE = hostboot_extended.bin.ecc
+EXT_ECC_HEADER_IMAGE = hostboot_extended.header.ecc.bin
+EXT_SHA_IMAGE = hostboot_extended.sha.bin
+EXT_HEADER_IMAGE = hostboot_extended.header.bin
 TESTDATA = hbtestdata.bin
 TESTDATA_ECC = hbtestdata.bin.ecc
 ALL_HB_IMAGES = ${BASE_IMAGES} \
@@ -61,6 +64,8 @@ ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${BASE_ECC_IMAGE} ${EXT_ECC_IMAGE} \
                 ${BASE_W_HEADER_ECC_IMAGE} \
                 ${EXT_PAD_IMAGE} \
+                ${EXT_SHA_IMAGE} ${EXT_HEADER_IMAGE} \
+                ${EXT_ECC_HEADER_IMAGE} \
                 ${TESTDATA} ${TESTDATA_ECC}
 
 cp_hbfiles: .SPECTARG
@@ -76,6 +81,13 @@ cp_hbfiles: .SPECTARG
 	# dd command will pad image up to the next 4K page
 	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
 	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
+	# add version header w/ sha hash
+	echo -en VERSION\\0 > ${EXT_SHA_IMAGE}
+	sha512sum ${EXT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${EXT_SHA_IMAGE}
+	dd if=${EXT_SHA_IMAGE} of=${EXT_HEADER_IMAGE} ibs=4k conv=sync
+	dd if=${EXT_SHA_IMAGE} of=${EXT_ECC_HEADER_IMAGE} ibs=4k conv=sync
+	cat ${EXT_IMAGE} >> ${EXT_HEADER_IMAGE}
+	cat ${EXT_ECC_IMAGE} >> ${EXT_ECC_HEADER_IMAGE}
 	# create data for a test partition in pnor
 	dd if=/dev/urandom of=${TESTDATA} bs=1 count=28K
 	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8
@@ -105,8 +117,8 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
 #uncomment the below line to enable ECC in the extended image
-#HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_IMAGE},HBRT=${HBRT_IMAGE},TEST=${TESTDATA_ECC}
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_IMAGE},TEST=${TESTDATA_ECC}
+#HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_IMAGE},HBRT=${HBRT_IMAGE},TEST=${TESTDATA_ECC}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_HEADER_IMAGE},HBRT=${HBRT_IMAGE},TEST=${TESTDATA_ECC}
 
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
