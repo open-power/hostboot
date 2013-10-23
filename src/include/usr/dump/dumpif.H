@@ -101,8 +101,9 @@ namespace DUMP
     struct dumpEntry
     {
         uint64_t dataAddr;
-        uint64_t dataSize;
-    };
+        uint32_t reserved;
+        uint32_t dataSize;
+    } PACKED;
 
     //The MDRT has this format.
     struct resultsEntry
@@ -111,7 +112,7 @@ namespace DUMP
         uint64_t destAddr;
         uint64_t dataSize;
         uint64_t reserved;
-    };
+    } PACKED;
 
 
     /**
