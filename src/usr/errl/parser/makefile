@@ -82,7 +82,9 @@ ${GENDIR}/comps.C: ${ROOTPATH}/src/include/usr/hbotcompid.H mkdirs
 	grep "const compId_t [A-Z0-9]*_COMP_ID" $< | \
 	grep -v MY_COMP_ID | \
 	sed 's/const compId_t \([A-Z0-9]*\)_COMP_ID[ =\t]*\(0[xX][0-9a-fA-F]*\).*/{ "\1", \2 },/' \
-	> $@
+	> $@.tmp
+	cmp -s $@.tmp $@ || mv $@.tmp $@
+	rm -f $@.tmp
 
 ${OBJDIR}/errlparser.o: errlparser.C ${ROOTPATH}/src/include/usr/errl/hberrltypes.H ${GENDIR}/comps.C
 	$(CC) -c  $(CFLAGS)  -o $@  $<
