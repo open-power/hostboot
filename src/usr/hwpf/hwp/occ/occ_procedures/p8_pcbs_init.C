@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pcbs_init.C,v 1.19 2013/08/02 19:03:12 stillgs Exp $
+// $Id: p8_pcbs_init.C,v 1.22 2013-10-24 14:28:07 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pcbs_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -48,7 +48,7 @@
 ///
 ///
 /// \version --------------------------------------------------------------------------
-/// \version 1.8  rmaier 12/07/12 Removed PFET delay value calculation from p8_pcbs_init_config since this is moved to p8_pfet_init.C
+/// \version 1.8  rmaier 12/07/12 Removed PFET delay value calculation from pcbs_config since this is moved to p8_pfet_init.C
 /// \version --------------------------------------------------------------------------
 /// \version 1.7  rmaier 10/25/12 Removed PMGP1_REG Idle-Configuration since this function moved to p8_poreslw_init.C
 /// \version --------------------------------------------------------------------------
@@ -346,13 +346,13 @@ using namespace fapi;
     if(e_rc)                                                                \
     {                                                                       \
         FAPI_ERR("Set DoubleWord failed. With rc = 0x%x", (uint32_t)e_rc);  \
-        rc.setEcmdError(e_rc);                                            \
+        rc.setEcmdError(e_rc);                                              \
         break;                                                              \
     }                                                                       \
     FAPI_DBG("Scan0 equivalent reset of 0x%08llx to 0x%16llX",              \
                  _mi_address, _mi_reset_value);                             \
-    rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);                \
-    if(!rc.ok())                                                          \
+    rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);                  \
+    if(!rc.ok())                                                            \
     {                                                                       \
         FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);         \
         break;                                                              \
@@ -365,13 +365,13 @@ using namespace fapi;
     if(e_rc)                                                                \
     {                                                                       \
         FAPI_ERR("Set Word failed. With rc = 0x%x", (uint32_t)e_rc);        \
-        rc.setEcmdError(e_rc);                                            \
+        rc.setEcmdError(e_rc);                                              \
         break;                                                              \
     }                                                                       \
     FAPI_DBG("Scan0 equivalent reset of 0x%08llx to 0x%08X",                \
                  _mi_address, _mi_reset_value);                             \
-    rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);                \
-    if(!rc.ok())                                                          \
+    rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);                  \
+    if(!rc.ok())                                                            \
     {                                                                       \
         FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);         \
         break;                                                              \
@@ -387,7 +387,6 @@ using namespace fapi;
 //------------------------------------------------------------------------------
 //Start scan zero value
 //------------------------------------------------------------------------------
-/// \todo   Review scan0 values
 
 CONST_UINT64_T( PMGP0_REG_0x100F0100_scan0                              ,  ULL(0x8030010C21000000) );
 CONST_UINT64_T( PMGP1_REG_0x100F0103_scan0                              ,  ULL(0x6C00000000000000) );
@@ -435,19 +434,19 @@ CONST_UINT64_T( EX_PCBS_Local_Pstate_Frequency_Target_Control_Register_0x100F016
 
 // Reset function
 fapi::ReturnCode
-p8_pcbs_init_reset  (  const fapi::Target& i_target,
-                       struct_pcbs_val_init_type& pcbs_val_init);
+pcbs_reset  (  const fapi::Target& i_target,
+               struct_pcbs_val_init_type& pcbs_val_init);
 // Config function
 fapi::ReturnCode
-p8_pcbs_init_config (  const fapi::Target&  i_target);
+pcbs_config (  const fapi::Target&  i_target);
 
 // Init function
 fapi::ReturnCode
-p8_pcbs_init_init  (  const fapi::Target& i_target);
+pcbs_init  (  const fapi::Target& i_target);
 
 // SCAN0 function
 fapi::ReturnCode
-p8_pcbs_init_scan0(const Target &i_target, uint8_t i_ex_number);
+pcbs_scan0(const Target &i_target, uint8_t i_ex_number);
 
 // ----------------------------------------------------------------------
 // Function definitions
@@ -479,10 +478,10 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
 
         if ( i_mode == PM_CONFIG )
         {
-            rc=p8_pcbs_init_config(i_target);
+            rc=pcbs_config(i_target);
             if (rc)
             {
-              FAPI_ERR("p8_pcbs_init_config failed. With rc = 0x%x", (uint32_t)rc);
+              FAPI_ERR("pcbs_config failed. With rc = 0x%x", (uint32_t)rc);
               break;
             }
 
@@ -490,10 +489,10 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
         else if ( i_mode == PM_INIT )
         {
 
-            rc=p8_pcbs_init_init(i_target);
+            rc=pcbs_init(i_target);
             if (rc)
             {
-              FAPI_ERR("p8_pcbs_init_init failed. With rc = 0x%x", (uint32_t)rc);
+              FAPI_ERR("pcbs_init failed. With rc = 0x%x", (uint32_t)rc);
               break;
             }
         }
@@ -518,43 +517,7 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
             pcbs_val_init.KUV = 0;                     // Default
             pcbs_val_init.ivrms_enabled = 1 ;
 
-       //            rc = FAPI_ATTR_GET(   ATTR_PM_IVRMS_ENABLED,
-       //                                    &i_target,
-       //                                    pcbs_val_init.ivrms_enabled);
-            if (rc)
-            {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_IVRMS_ENABLED with rc = 0x%x", (uint32_t)rc);
-                break;
-            }
-
-//             rc = FAPI_ATTR_GET(   ATTR_PM_SAFE_PSTATE,
-//                                     &i_target,
-//                                     pcbs_val_init.PSAFE);
-            if (rc)
-            {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_SAFE_PSTATE with rc = 0x%x", (uint32_t)rc);
-                break;
-            }
-
-//             rc = FAPI_ATTR_GET(   ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM,
-//                                     &i_target,
-//                                     pcbs_val_init.PUV_MIN);
-           if (rc)
-            {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM with rc = 0x%x", (uint32_t)rc);
-                break;
-            }
-
- //            rc = FAPI_ATTR_GET(   ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM,
-//                                     &i_target,
-//                                     pcbs_val_init.PUV_MAX);
-            if (rc)
-            {
-                FAPI_ERR("fapiGetAttribute of ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM with rc = 0x%x", (uint32_t)rc);
-                break;
-            }
-
-            rc = p8_pcbs_init_reset( i_target, pcbs_val_init);
+            rc = pcbs_reset( i_target, pcbs_val_init);
             if (rc)
             {
                 FAPI_ERR("p8_pcbs_init_reset failed. With rc = 0x%x", (uint32_t)rc);
@@ -585,13 +548,13 @@ p8_pcbs_init( const Target& i_target, uint32_t i_mode)
  * @retval ERROR defined in xml
  */
 fapi::ReturnCode
-p8_pcbs_init_config(const Target& i_target)
+pcbs_config(const Target& i_target)
 {
   fapi::ReturnCode rc;
 
   /// Function moved in p8_pfet_int.C
   /// FAPI_DBG("*************************************");
-  /// FAPI_INF("p8_pcbs_init_config beginning ...");
+  /// FAPI_INF("pcbs_config beginning ...");
   /// FAPI_DBG("*************************************");
   ///
 
@@ -609,7 +572,7 @@ p8_pcbs_init_config(const Target& i_target)
  * @retval ERROR defined in xml
  */
 fapi::ReturnCode
-p8_pcbs_init_init(const Target& i_target)
+pcbs_init(const Target& i_target)
 {
     fapi::ReturnCode                rc;
     uint32_t                        e_rc;              // eCmd returncode
@@ -620,9 +583,13 @@ p8_pcbs_init_init(const Target& i_target)
     std::vector<fapi::Target>       l_exChiplets;
     uint8_t                         l_ex_number = 0;
     uint64_t                        address;
-    uint64_t                    ex_offset;
+    uint64_t                        ex_offset;
+    
+    // detect PCBS Error Reset capaiblity
+    uint8_t                         chipHasPcbsErrReset = 0;
+    
 
-    FAPI_INF("p8_pcbs_init_init beginning for target %s ...", i_target.toEcmdString());
+    FAPI_INF("pcbs_init beginning for target %s ...", i_target.toEcmdString());
 
     do
     {
@@ -645,7 +612,7 @@ p8_pcbs_init_init(const Target& i_target)
             rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[c], l_ex_number);
             if (rc)
             {
-                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS with rc = 0x%x", (uint32_t)rc);
+                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS for list entry %d with rc = 0x%x", c, (uint32_t)rc);
                 break;
             }
 
@@ -694,6 +661,39 @@ p8_pcbs_init_init(const Target& i_target)
             PUTSCOM(rc, i_target, address, data );
 
             FAPI_INF("Forced OCC SPR Mode");
+            
+            //  ******************************************************************
+            //  - Resonant clocks
+            //  ******************************************************************
+            FAPI_INF("Disable Resonant Clocks and put Controller in Manual mode.  Enabled by OCC once loaded");
+
+            address = EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165 + ex_offset;
+            GETSCOM(rc, i_target, address, data);
+            
+            e_rc |= data.setBit(1);   // (1) control mode = Manual
+            E_RC_CHECK(e_rc, rc);
+          
+            PUTSCOM(rc, i_target, address, data);
+            
+            // Check if already disabled
+            address = EX_GP3_0x100F0012 + ex_offset;
+            GETSCOM(rc, i_target, address, data);
+
+            // if resonant clocks should have been disabled by either:
+            //    - Power on IPL or
+            //    - p8_pm_prep_for_reset
+            if (data.isBitClear(22))
+            {
+                
+                e_rc |= data.flushTo0();
+                e_rc |= data.setBit(22);   // Resonant clock disable
+                E_RC_CHECK(e_rc, rc);
+
+                address = EX_GP3_OR_0x100F0014 + ex_offset;
+                PUTSCOM(rc, i_target, address, data);    
+                FAPI_IMP("WARNING: resonant clocking was NOT properly disabled");            
+                FAPI_IMP("  Not currently failing until real resonant disable is available");            
+            }       
 
             //  ******************************************************************
             //  - Power Management Control Reg
@@ -720,6 +720,41 @@ p8_pcbs_init_init(const Target& i_target)
             PUTSCOM(rc, i_target, address, data);
 
             FAPI_INF ("PMCR default value adjustment (Hardware flush 0) of EX_PCBS_Power_Management_Idle_Control_Reg_0x1*0F0158 " );
+            
+        
+            //  ******************************************************************
+            //  - Power Management Error Reg
+            //  ******************************************************************
+            // clear the PCBS PM Error register for accummulated error during 
+            // initialization.
+            
+            // Read it first to have a log in the event of any debug
+            address = EX_PMErr_REG_0x100F0109 + ex_offset;
+            GETSCOM(rc, i_target, address, data);
+            
+            FAPI_INF("\tPM Error Register on EX %d prior to clearing: 0x%016llX", 
+                        l_ex_number,
+                        data.getDoubleWord(0));
+             
+            rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET,
+                               &i_target,
+                               chipHasPcbsErrReset);
+            if(rc)
+            {
+     		    FAPI_ERR("Error querying Chip EC feature: "
+                         "ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET");
+                break;
+            }
+
+            FAPI_INF("PCBS Error Reset is %s being performed",
+                     (chipHasPcbsErrReset ? "" : "NOT"));
+
+
+            if (chipHasPcbsErrReset)
+            {
+                // Write anything to the register to clear it.                
+                PUTSCOM(rc, i_target, address, data);            
+            }
 
         }  //END FOR
         if (!rc.ok() )
@@ -745,7 +780,7 @@ p8_pcbs_init_init(const Target& i_target)
  * @retval ERROR defined in xml
  */
 fapi::ReturnCode
-p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
+pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
 {
     fapi::ReturnCode            rc;
     uint32_t                    e_rc;           // ecmd returncode
@@ -1144,10 +1179,10 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
             //  Set other regs back to scan0 state
             //  ******************************************************************
 
-            rc = p8_pcbs_init_scan0(i_target, l_ex_number);
+            rc = pcbs_scan0(i_target, l_ex_number);
             if (rc)
             {
-                FAPI_ERR(" p8_pcbs_init_scan0 failed. With rc = 0x%x", (uint32_t)rc);
+                FAPI_ERR(" pcbs_scan0 failed. With rc = 0x%x", (uint32_t)rc);
                 break;
             }
 
@@ -1174,7 +1209,7 @@ p8_pcbs_init_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_i
  * @retval ERROR defined in xml
  */
 fapi::ReturnCode
-p8_pcbs_init_scan0(const Target &i_target, uint8_t i_ex_number)
+pcbs_scan0(const Target &i_target, uint8_t i_ex_number)
 {
     fapi::ReturnCode            rc;
     uint32_t                    e_rc;           // ecmd returncode
@@ -1284,6 +1319,21 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pcbs_init.C,v $
+Revision 1.22  2013-10-24 14:28:07  dcrowell
+Fix scan0 value to not write read-only bit
+
+Revision 1.21  2013-10-23 19:00:30  stillgs
+
+Additiona fix for SW230400 as SIMIC models do not all write access to bit 0 of 0x165
+to disable resonant clocking.  Changed to use GP3(26).  Note: it is noticed by
+inspection that the formal resonant clock disablement (from any state) is not yet
+implement.  This will be included in a subsequent update with unique CQ.
+
+Revision 1.20  2013/10/22 15:22:55  stillgs
+
+- Fix for SW230400:  added initialization of resonant clock control mode to "firmware" mode
+to ensure that OCC GPSM see the hardware in that assumptive state.
+
 Revision 1.19  2013/08/02 19:03:12  stillgs
 
 - Fix for SW209736 (OCC Reset Procedure incorrectly sets Freq to Turbo Value)
