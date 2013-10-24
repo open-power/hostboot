@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.38 2013/09/19 19:02:10 bellows Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.39 2013/10/17 12:59:04 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -78,7 +78,7 @@
 //  1.36   | sasethur |23-Aug-13| Ability to run MCBIST is enabled.
 //  1.37   | sasethur |04-Sep-13| Fixed fw review comment
 //  1.38   | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
-
+//  1.39   | abhijsau |17-OCT-13| fixed a logical bug 
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
@@ -325,7 +325,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     			    return rc;
     			}
     		    }
-    		    if (((l_shmoo_param_valid & DELAY_REG) != 0) || (l_shmoo_type_valid != TEST_NONE))
+    		    if (((l_shmoo_param_valid == PARAM_NONE)))
     		    {
     			rc = delay_shmoo(i_target_mba, l_port, l_shmoo_type_valid, &l_left_margin, &l_right_margin, l_shmoo_param); 
     			if (rc)

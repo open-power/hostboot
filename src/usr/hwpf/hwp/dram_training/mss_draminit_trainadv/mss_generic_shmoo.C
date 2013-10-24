@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: mss_generic_shmoo.C,v 1.74 2013/10/04 10:58:13 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.77 2013/10/21 06:05:32 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.77  |abhijit	|21-oct-13| fixed the printing for tdqss min and tdqss max  
+//   1.76  |abhijit	|17-oct-13| fixed the printing for dqs by 4  
 //   1.74  |abhijit	|4-oct-13 | fixed fw comments 
 //   1.73  |abhijit	|1-oct-13 | fixed write dqs by 8 for isdimm 
 //   1.72  |abhijit	|20-sep-13| fixed printing of rd eye report as -1 for not finding left bound 
@@ -368,7 +370,7 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     FAPI_ERR("generic_shmoo::run MSS Generic Shmoo failed initial Sanity Check. Memory not in an all pass Condition");
     return rc; 
     }
-	}else if(l_attr_schmoo_test_type_u8 == 4){
+	}else if(l_attr_schmoo_test_type_u8 == 8){
 	 if(l_rankpgrp0[0] !=255)
     {
     l_totrg_0++;
@@ -528,7 +530,7 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     // It is used to print the schmoo report
     rc=print_report(i_target);if(rc) return rc;
 	
-	if(l_attr_schmoo_test_type_u8==4){
+	if(l_attr_schmoo_test_type_u8==8){
 	  FAPI_INF(" Least tDQSSmin(ps)=%d ps and Least tDQSSmax=%d ps", *o_left_min_margin,*o_right_min_margin);
 	  }else if(l_attr_schmoo_test_type_u8==16){
 	  
@@ -2927,24 +2929,24 @@ fapi::ReturnCode generic_shmoo::knob_update_dqs_by4_isdimm(const fapi::Target & 
 	 l_dq=4*l_n;
 	 l_my_dqs=l_dqs_arr[l_n];
 	 if(schmoo_error_map[l_p][rank][l_n]==0){
-	 FAPI_INF("\n value of nominal delay scenario=%d rank=%d for port=%d dqs=%d is %d ",l_dqs,rank,l_p,l_my_dqs,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_my_dqs][l_rp]);
+	// FAPI_INF("\n value of nominal delay scenario=%d rank=%d for port=%d dqs=%d is %d ",l_dqs,rank,l_p,l_my_dqs,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_my_dqs][l_rp]);
 	 SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_my_dqs][l_rp]=SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_my_dqs][l_rp]+l_delay;
-	 FAPI_INF("\n value of delay scenario=%d rank=%d for port=%d dqs=%d is %d ",l_dqs,rank,l_p,l_my_dqs,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_my_dqs][l_rp]);
+	// FAPI_INF("\n value of delay scenario=%d rank=%d for port=%d dqs=%d is %d ",l_dqs,rank,l_p,l_my_dqs,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_my_dqs][l_rp]);
 	 rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e_dqs,l_my_dqs,0,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_my_dqs][l_rp]);if(rc) return rc;
 	 SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]=SHMOO[scenario].MBA.P[l_p].S[rank].K.nom_val[l_dq][l_rp]+l_delay;
-	 FAPI_INF("\n value of delay scenario=%d rank=%d for port=%d bit=%d is %d ",scenario,rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);
+	 //FAPI_INF("\n value of delay scenario=%d rank=%d for port=%d bit=%d is %d ",scenario,rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);
 	 rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);if(rc) return rc;
 	  l_dq=l_dq+1;
 	  SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]=SHMOO[scenario].MBA.P[l_p].S[rank].K.nom_val[l_dq][l_rp]+l_delay;
-	 FAPI_INF("\n value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);
+	 //FAPI_INF("\n value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);
 	  rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);if(rc) return rc;
 	  l_dq=l_dq+1;
 	  SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]=SHMOO[scenario].MBA.P[l_p].S[rank].K.nom_val[l_dq][l_rp]+l_delay;
-	 FAPI_INF("\n value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);
+	 //FAPI_INF("\n value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);
 	  rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);if(rc) return rc;
 	  l_dq=l_dq+1;
 	  SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]=SHMOO[scenario].MBA.P[l_p].S[rank].K.nom_val[l_dq][l_rp]+l_delay;
-	 FAPI_INF("\n value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);
+	 //FAPI_INF("\n value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);
 	  rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[scenario].MBA.P[l_p].S[rank].K.rb_regval[l_dq][l_rp]);if(rc) return rc;
 	 }
 	 //FAPI_INF("\n abhijit here before \n");
@@ -2983,7 +2985,7 @@ fapi::ReturnCode generic_shmoo::knob_update_dqs_by4_isdimm(const fapi::Target & 
 		rank=valid_rank[l_rank];
 		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
 	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
-	 FAPI_INF("\n restoring nominal values for dqs=%d port=%d rank=%d is %d \n",l_n,l_p,rank,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n][l_rp]);
+	 //FAPI_INF("\n restoring nominal values for dqs=%d port=%d rank=%d is %d \n",l_n,l_p,rank,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n][l_rp]);
 	 rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e_dqs,l_n,0,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n][l_rp]);if(rc) return rc;
 	 
 			} 
@@ -3051,19 +3053,19 @@ fapi::ReturnCode generic_shmoo::knob_update_dqs_by4_isdimm(const fapi::Target & 
 	  SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_my_dqs][l_rp]=SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_my_dqs][l_rp]-l_delay;
 	 rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e_dqs,l_my_dqs,0,SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_my_dqs][l_rp]);if(rc) return rc;
 	 SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]=SHMOO[scenario].MBA.P[l_p].S[rank].K.nom_val[l_dq][l_rp]-l_delay;
-	 FAPI_INF("\n left value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);
+	 //FAPI_INF("\n left value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);
 	 rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);if(rc) return rc;
 	  l_dq=l_dq+1;
 	  SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]=SHMOO[scenario].MBA.P[l_p].S[rank].K.nom_val[l_dq][l_rp]-l_delay;
-	 FAPI_INF("\n left value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);
+	 //FAPI_INF("\n left value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);
 	  rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);if(rc) return rc;
 	  l_dq=l_dq+1;
 	  SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]=SHMOO[scenario].MBA.P[l_p].S[rank].K.nom_val[l_dq][l_rp]-l_delay;
-	 FAPI_INF("\n left value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);
+	 //FAPI_INF("\n left value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);
 	  rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);if(rc) return rc;
 	  l_dq=l_dq+1;
 	  SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]=SHMOO[scenario].MBA.P[l_p].S[rank].K.nom_val[l_dq][l_rp]-l_delay;
-	 FAPI_INF("\n left value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);
+	 //FAPI_INF("\n left value of delay rank=%d for port=%d bit=%d is %d ",rank,l_p,l_dq,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);
 	  rc=mss_access_delay_reg(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp]);if(rc) return rc;
 	 }
 	 if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp] == 0){
