@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.H,v 1.1 2013/04/17 22:36:34 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.H,v 1.2 2013/09/30 16:09:57 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -46,11 +46,54 @@
 
 
 //------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+const uint32_t TP_BNDY_PLL_RING_ADDR    = 0x00030088;
+const uint32_t PB_BNDY_DMIPLL_RING_ADDR = 0x02030088;
+const uint32_t AB_BNDY_PLL_RING_ADDR    = 0x08030088;
+const uint32_t PCI_BNDY_PLL_RING_ADDR   = 0x09030088;
+
+const uint32_t DMI_PLL_VCO_WORKAROUND_THRESHOLD_FREQ = 4800;
+
+const uint32_t PB_BNDY_DMIPLL_RING_CCALLOAD_OFFSET = 580;
+const uint32_t PB_BNDY_DMIPLL_RING_CCALFMIN_OFFSET = 581;
+
+const uint32_t AB_BNDY_PLL_RING_CCALLOAD_OFFSET = 278;
+const uint32_t AB_BNDY_PLL_RING_CCALFMIN_OFFSET = 279;
+
+const uint32_t PCI_BNDY_PLL_RING_CCALLOAD_OFFSET = 0x0;
+const uint32_t PCI_BNDY_PLL_RING_CCALFMIN_OFFSET = 0x0;
+
+
+//------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 
 extern "C"
 {
+
+
+//------------------------------------------------------------------------------
+// function:
+//      Scan PLL boundary ring with setpulse
+//
+// parameters: i_target                 => chip target
+//             i_chiplet_base_scom_addr => aligned base address of chiplet SCOM
+//                                         address space
+//             i_pll_ring_addr          => PLL ring address
+//             i_pll_ring_data          => data buffer containing full PLL ring
+//                                         content
+//             i_mask_scan_collision    => mask scan collision bit in chiplet
+//                                         pervasive LFIR
+// returns: FAPI_RC_SUCCESS if operation was successful, else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_bndy(
+    const fapi::Target& i_target,
+    const uint32_t i_chiplet_base_scom_addr,
+    const uint32_t i_pll_ring_addr,
+    ecmdDataBufferBase& i_pll_ring_data,
+    const bool i_mask_scan_collision);
 
 
 //------------------------------------------------------------------------------
@@ -71,6 +114,8 @@ extern "C"
 //             i_ccalfmin_ring_offset      => ring offset for ccalfmin PLL control
 //                                            bit (used only if workaround
 //                                            is true)
+//             i_mask_scan_collision       => mask scan collision bit in chiplet
+//                                            pervasive LFIR
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_pll(
@@ -80,7 +125,8 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_pll(
     ecmdDataBufferBase& i_pll_ring_data,
     const bool i_lctank_pll_vco_workaround,
     const uint32_t i_ccalload_ring_offset,
-    const uint32_t i_ccalfmin_ring_offset);
+    const uint32_t i_ccalfmin_ring_offset,
+    const bool i_mask_scan_collision);
 
 
 //------------------------------------------------------------------------------

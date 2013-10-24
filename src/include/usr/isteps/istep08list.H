@@ -180,6 +180,7 @@ const DepModInfo  g_istep08Dependancies = {
     {
         DEP_LIB(libedi_ei_initialization.so),
         DEP_LIB(libdmi_training.so),
+        DEP_LIB(libnest_chiplets.so),
         { 0 },
     }
 };

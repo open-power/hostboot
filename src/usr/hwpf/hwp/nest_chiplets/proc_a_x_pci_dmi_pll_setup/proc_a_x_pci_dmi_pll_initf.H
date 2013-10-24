@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_initf.H,v 1.3 2013/04/17 22:38:40 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.H,v 1.4 2013/09/30 16:09:57 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -44,9 +44,6 @@
 
 #include <fapi.H>
 
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Structure definitions

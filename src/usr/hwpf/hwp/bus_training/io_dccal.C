@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.19 2013/04/12 20:39:08 thomsen Exp $
+// $Id: io_dccal.C,v 1.26 2013/10/16 01:40:02 jmcgill Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,15 +39,23 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.19  |thomsen |04/12/11| Added delay after starting zcal and offset cancellation to work around a GCR parity error bug (HW242564)
-//   1.18  |jaswamin|01/26/11| Commented out offset cal for X and A bus
+//   1.22  |jaswamin|09/19/13| Removed unused variables 
+//   1.19  |thomsen |04/12/12| Added delay after starting zcal and offset cancellation to work around a GCR parity error bug (HW242564)
+//   1.18  |jaswamin|01/26/12| Commented out offset cal for X and A bus
 //   1.0   |varkeykv|09/27/11|Initial check in . Have to modify targets once bus target is defined and available.Not tested in any way other than in unit SIM IOTK
 //   1.1   |varkeykv |17/11/11|Code cleanup . Fixed header files. Changed fAPI API
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
+#include "proc_a_x_pci_dmi_pll_utils.H"
 #include "io_dccal.H"
 #include "gcr_funcs.H"
+#include <p8_scom_addresses.H>
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
 
 extern "C" {
 
@@ -103,51 +111,90 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
     uint32_t rc_ecmd=0;
     uint16_t bits = 0;
     ecmdDataBufferBase data_buffer;
- 
+	ecmdDataBufferBase rx_wt_timeout_sel_buf(16),rx_pdwn_lite_value_buf(16),rx_eo_latch_offset_done_buf(16),rx_wt_cu_pll_pgooddly_buf(16);
     ecmdDataBufferBase set_bits(16);
     ecmdDataBufferBase clear_bits(16);
-    
+    //char printStr[200];
     FAPI_DBG("In the Dccal procedure");
     io_interface_t chip_interface=master_interface;//first we run on master chip
     uint32_t group=master_group;
     const Target *target_ptr=&target; // Assuming I am allowed to do this . 
-
+		rc=GCR_read(*target_ptr,master_interface,rx_training_status_pg ,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
         FAPI_DBG("IO_DCCAL : Starting Offset Calibration on interface %d group %d",chip_interface,group);
         // read and save rx_pdwn_lite_disable
-        int read_bit=rx_pdwn_lite_disable;
-        rc= GCR_read(*target_ptr,master_interface,rx_mode_pg ,group,0,data_buffer);if (rc) {return(rc);}
-        int rx_pdwn_lite_value=data_buffer.getHalfWord(0) & read_bit;
+        //int read_bit=rx_pdwn_lite_disable;
+        rc= GCR_read(*target_ptr,master_interface,rx_mode_pg ,group,0,rx_pdwn_lite_value_buf);if (rc) {return(rc);}
+        //int rx_pdwn_lite_value=rx_wt_timeout_sel_buf.getHalfWord(0) & read_bit;
         
         // read and save rx_wt_timeout_sel
-        read_bit=rx_wt_timeout_sel_tap7; //find the 3 bit value of the field. need it to be all 1's to do an &
-        rc= GCR_read(*target_ptr,master_interface,rx_timeout_sel_pg ,group,0,data_buffer);if (rc) {return(rc);}
-        int rx_wt_timeout_value=data_buffer.getHalfWord(0) & read_bit;
+        //read_bit=rx_wt_timeout_sel_tap7; //find the 3 bit value of the field. need it to be all 1's to do an &
+        rc= GCR_read(*target_ptr,master_interface,rx_timeout_sel_pg ,group,0,rx_wt_timeout_sel_buf);if (rc) {return(rc);}
+        //int rx_wt_timeout_value=rx_wt_timeout_sel_buf.getHalfWord(0) & read_bit;
         
+		//read and save rx_wt_cu_pll_pgooddly
+		//read_bit=rx_wt_cu_pll_pgooddly_disable; // selects 111 for the 3 bit field.need it to be all 1's to do an &
+		rc= GCR_read(*target_ptr,master_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf);if (rc) {return(rc);}
+		//int rx_wt_cu_pll_pgooddly_value=rx_wt_cu_pll_pgooddly_buf.getHalfWord(0) & read_bit;
+		
+		//read and save rx_wt_cu_pll_reset
+		//read_bit=rx_wt_cu_pll_reset;
+		//int rx_wt_cu_pll_reset_value=rx_wt_cu_pll_pgooddly_buf.getHalfWord(0) & read_bit;
+		
+		//read and save rx_wt_cu_pll_pgood
+		//read_bit=rx_wt_cu_pll_pgood;
+		//int rx_wt_cu_pll_pgood_value=rx_wt_cu_pll_pgooddly_buf.getHalfWord(0) & read_bit;
+		
         // set power down lite disable, rx_pdwn_lite_disable
         bits=rx_pdwn_lite_disable;
-        rc_ecmd|=set_bits.insert(bits,0,16);
+		//bits=1;
+		set_bits.insert(rx_pdwn_lite_value_buf,0,16);
+		//rc_ecmd|=set_bits.insert(bits,0,16);
+        //rc_ecmd|=set_bits.insert(bits,2,1);
+		//rc_ecmd|=set_bits.setOr(bits,0,16);
+		set_bits.setBit(2);
         bits=rx_pdwn_lite_disable_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
+        //rc_ecmd|=clear_bits.insert(bits,0,16);
+		rc_ecmd|=clear_bits.flushTo0();
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
         rc=GCR_write(*target_ptr,chip_interface,rx_mode_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+		
+		//write rx_wt_cu_pll_pgooddly to  '111'
+		rc_ecmd|=set_bits.insert(rx_wt_cu_pll_pgooddly_buf,0,16);
+		set_bits.setBit(2);
+		set_bits.setBit(3);
+		set_bits.setBit(4);
+		bits=rx_wt_cu_pll_pgooddly_clear;
+		rc_ecmd|=clear_bits.flushTo0();
+		if(rc_ecmd)
+		{
+			rc.setEcmdError(rc_ecmd);
+            return(rc);
+		}
+		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
         
-        // write rx_wt_timeout_sel to '111'
-        bits=rx_wt_timeout_sel_tap7;
-        rc_ecmd|=set_bits.insert(bits,0,16);
+		// write rx_wt_timeout_sel to '111'
+		bits=rx_wt_timeout_sel_tap7;
+		set_bits.insert(rx_wt_timeout_sel_buf,0,16);
+		set_bits.setBit(9);
+		set_bits.setBit(10);
+		set_bits.setBit(11);
         bits=rx_wt_timeout_sel_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
+        //rc_ecmd|=clear_bits.insert(bits,0,16);
+		rc_ecmd|=clear_bits.flushTo0();
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
         rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
-        
-        bits=rx_start_offset_cal;
+		
+       
+		//writw rx_start_offset_cal to '1'
+    	bits=rx_start_offset_cal;
         rc_ecmd|=set_bits.insert(bits,0,16);
         bits=rx_start_offset_cal_clear;
         rc_ecmd|=clear_bits.insert(bits,0,16); 
@@ -157,8 +204,39 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
             return(rc);
         }
         rc=GCR_write(*target_ptr,chip_interface,rx_training_start_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+		
+		//write rx_wt_cu_pll_reset to '1'
+		//write rx_wt_cu_pll_pgood to '1'
+		rc_ecmd|=set_bits.insert(rx_wt_cu_pll_pgooddly_buf,0,16);
+		set_bits.setBit(0);
+		set_bits.setBit(1);
+		set_bits.setBit(2);
+		set_bits.setBit(3);
+		set_bits.setBit(4);
+		bits=rx_wt_cu_pll_pgooddly_clear;
+		rc_ecmd|=clear_bits.flushTo0();
+		if(rc_ecmd)
+		{
+			rc.setEcmdError(rc_ecmd);
+            return(rc);
+		}
+		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
 	    fapiDelay(100000000,10000000); //Wait 100ms for zcal to complete before polling the status register
       
+	    //write rx_wt_timeout_sel to '000'
+        set_bits.insert(rx_wt_timeout_sel_buf,0,16);
+		set_bits.clearBit(9);
+		set_bits.clearBit(10);
+		set_bits.clearBit(11);
+        bits=rx_wt_timeout_sel_clear;
+        //rc_ecmd|=clear_bits.insert(bits,0,16);
+		rc_ecmd|=clear_bits.flushTo0();
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
         // Poll for the done bit
         rc=GCR_read(*target_ptr,master_interface,rx_training_status_pg ,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
         
@@ -167,7 +245,7 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         bool fail= data_buffer.getHalfWord(0) & fail_bit;
         bool done = data_buffer.getHalfWord(0)& done_bit;
         int timeoutCnt = 0;
-        while ( ( !done ) && ( timeoutCnt < 1000 ) && !fail )
+        while ( ( !done ) && ( timeoutCnt < 5000 ) && !fail )
         {
                 // wait for 80000 time units
                 // Time units may be something for simulation, and something else (or nothing) for hardware
@@ -175,7 +253,7 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
                 rc=GCR_read(*target_ptr,chip_interface,rx_training_status_pg,group,0,data_buffer); if (rc) {return(rc);}// have to add support for field parsing
                 fail= data_buffer.getHalfWord(0) & fail_bit;
                 done = data_buffer.getHalfWord(0)& done_bit;
-                fapiDelay(1000000,1000000);
+                fapiDelay(10000000,10000000);
                 timeoutCnt++;
         }
         
@@ -187,12 +265,12 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
                 return rc;
         }
         // Check for errors
-        else if ( timeoutCnt >= 1000 && !done && !fail )
+        else if ( timeoutCnt >= 5000 && !done && !fail )
         {
                 FAPI_ERR("Timed out waiting for Done bit to be set");
                 //Set HWP error
                 FAPI_SET_HWP_ERROR(rc,IO_DCCAL_OFFCAL_TIMEOUT_RC);
-                return rc;
+                //return rc;
         }
         else
         {
@@ -200,8 +278,8 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         }
         
         // clear eye opt offset cal done bit, rx_eo_latch_offset_done
-        bits=0x0000;
-        rc_ecmd|=set_bits.insert(bits,0,16);
+		rc=GCR_read(*target_ptr,chip_interface,rx_eo_step_stat_pg,group,0,set_bits); if (rc) {return(rc);}// have to add support for field parsing
+        rc_ecmd|=set_bits.clearBit(0);
         bits=rx_eo_latch_offset_done_clear;
         rc_ecmd|=clear_bits.insert(bits,0,16);
         if(rc_ecmd)
@@ -210,24 +288,34 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
             return(rc);
         }
         rc=GCR_write(*target_ptr,chip_interface,rx_eo_step_stat_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+        FAPI_DBG("Reading back 4.\n");
+		rc= GCR_read(*target_ptr,master_interface,rx_eo_step_stat_pg ,group,0,data_buffer);if (rc) {return(rc);}
+        // //restore rx_pdwn_lite_disable to saved value
         
-        //restore rx_pdwn_lite_disable to saved value
-        
-        bits=rx_pdwn_lite_value;
-        rc_ecmd|=set_bits.insert(bits,0,16);
+        // bits=rx_pdwn_lite_value;
+        // rc_ecmd|=set_bits.insert(bits,0,16);
         bits=rx_pdwn_lite_disable_clear;
         rc_ecmd|=clear_bits.insert(bits,0,16);
-        if(rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-        rc=GCR_write(*target_ptr,chip_interface,rx_mode_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+        // if(rc_ecmd)
+        // {
+            // rc.setEcmdError(rc_ecmd);
+            // return(rc);
+        // }
+        rc=GCR_write(*target_ptr,chip_interface,rx_mode_pg,group,0,rx_pdwn_lite_value_buf ,clear_bits);if (rc) {return(rc);}
         
+		
+		
         // restore rx_wt_timeout_sel to saved value
         
-        bits=rx_wt_timeout_value;
-        rc_ecmd|=set_bits.insert(bits,0,16);
+        //bits=rx_wt_timeout_value;
+		bits=rx_wt_timeout_sel_tap3;
+        set_bits.insert(rx_wt_timeout_sel_buf,0,16);
+		//rc_ecmd |= set_bits.setAnd(bits,9,3);
+		// if(target.getType() !=  fapi::TARGET_TYPE_MEMBUF_CHIP){
+			// rc_ecmd|=set_bits.insert(bits,9,3);
+		// }
+		// else
+		rc_ecmd |= set_bits.clearBit(9);
         bits=rx_wt_timeout_sel_clear;
         rc_ecmd|=clear_bits.insert(bits,0,16);
         if(rc_ecmd)
@@ -237,8 +325,21 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         }
         rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
         
-    
-    
+		FAPI_DBG("Reading back 5.\n");
+		rc= GCR_read(*target_ptr,master_interface,rx_timeout_sel_pg ,group,0,data_buffer);if (rc) {return(rc);}
+		
+        
+		//restore rx_wt_cu_pll_pgooddly
+		//restore rx_wt_cu_pll_reset
+		//restore rx_wt_cu_pll_pgood. Since they all belong to the same register field.
+		bits=rx_wt_cu_pll_pgooddly_clear;
+		rc_ecmd|=clear_bits.flushTo0();
+		if(rc_ecmd)
+		{
+			rc.setEcmdError(rc_ecmd);
+            return(rc);
+		}
+		rc=GCR_write(*target_ptr,chip_interface,rx_wiretest_pll_cntl_pg,group,0,rx_wt_cu_pll_pgooddly_buf ,clear_bits);if (rc) {return(rc);}
     
     
     return(rc);
@@ -518,53 +619,272 @@ ReturnCode io_dccal(const Target& target){
     ReturnCode rc;
     io_interface_t master_interface=CP_IOMC0_P0;
     uint32_t master_group=0;
+	uint8_t pb_bndy_dmipll_data[231]={0},ab_bndy_pll_data[80]={0},tp_bndy_pll_data[80]={0};
+    ecmdDataBufferBase ring_data;
+    fapi::Target parent_target;
+	uint32_t ring_length=0;
+	uint32_t rc_ecmd=0;
+
     FAPI_DBG("Running IO DCCAL PROCEDURE");
-    // This is a DMI/MC bus 
-    if( (target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET )){
-      FAPI_DBG("This is a Processor DMI bus using base DMI scom address");
-      master_interface=CP_IOMC0_P0; // base scom for MC bus
-      master_group=3; // Design requires us to do this as per scom map and layout
-      // EDI/DMI needs both impedance cal and offset cal
-      // Z cal doesnt require group since its a per bus feature , but to satisfy PLAT swapped translation requirements we pass group=3 on master
-      rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
-      // Offset cal requires group address
-     // rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
+
+    // This is a DMI/MC bus
+    if (target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET)
+    {
+        FAPI_DBG("This is a Processor DMI bus using base DMI scom address");
+        master_interface=CP_IOMC0_P0; // base scom for MC bus
+        master_group=3; // Design requires us to do this as per scom map and layout
+
+        // obtain parent chip target needed for ring manipulation
+	    rc = fapiGetParentChip(target, parent_target);
+        if (rc)
+        {
+            FAPI_ERR("Error from fapiGetParentChip");
+            return(rc);
+        }
+
+        // install PLL config for dccal operation
+	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_LENGTH)");
+            return(rc);
+        }
+	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA)");
+            return(rc);
+        }
+	    rc_ecmd |= ring_data.setBitLength(ring_length);
+	    rc_ecmd |= ring_data.insert(pb_bndy_dmipll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
+                                            NEST_CHIPLET_0x02000000,
+                                            PB_BNDY_DMIPLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
+
+        // EDI/DMI needs both impedance cal and offset cal
+        // Z cal doesnt require group since its a per bus feature , but to satisfy PLAT swapped translation requirements we pass group=3 on master
+        rc = run_zcal(target,master_interface,master_group);
+        if (rc)
+        {
+            FAPI_ERR("Error from run_zcal");
+            return(rc);
+        }
+        // Offset cal requires group address
+        rc = run_offset_cal(target,master_interface,master_group);
+        if (rc)
+        {
+            FAPI_ERR("Error from run_offset_cal");
+            return(rc);
+        }
+
+        // restore PLL config for functional operation
+	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_DATA)");
+            return(rc);
+        }
+	    rc_ecmd |= ring_data.insert(pb_bndy_dmipll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
+                                            NEST_CHIPLET_0x02000000,
+                                            PB_BNDY_DMIPLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
     }
-    else if( (target.getType() ==  fapi::TARGET_TYPE_MEMBUF_CHIP)){
-      FAPI_DBG("This is a Centaur DMI bus using base DMI scom address");
-      master_interface=CEN_DMI; // base scom for CEN
-      master_group=0;
-      // EDI/DMI needs both impedance cal and offset cal
-      // Z cal doesnt require group since its a per bus feature , but to satisfy PLAT swapped translation requirements we pass group=3 on master
-      rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
-      // Offset cal requires group address
-      //rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
-    }
+    else if (target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)
+    {
+        FAPI_DBG("This is a Centaur DMI bus using base DMI scom address");
+        master_interface=CEN_DMI; // base scom for CEN
+        master_group=0;
+
+        // install PLL config for dccal operation
+	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_LENGTH, &target, ring_length);	// -- get length of scan ring
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_LENGTH)");
+            return(rc);
+        }
+  	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA)");
+            return(rc);
+        }
+	    rc_ecmd |= ring_data.setBitLength(ring_length);
+	    rc_ecmd |= ring_data.insert(tp_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
+                                            TP_CHIPLET_0x01000000,
+                                            TP_BNDY_PLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
+
+        // EDI/DMI needs both impedance cal and offset cal
+        // Z cal doesnt require group since its a per bus feature , but to satisfy PLAT swapped translation requirements we pass group=3 on master
+        // Offset cal requires group address
+        rc = run_zcal(target,master_interface,master_group);
+        if (rc)
+        {
+            FAPI_ERR("Error from run_zcal");
+            return(rc);
+        }
+        rc = run_offset_cal(target,master_interface,master_group);
+        if (rc)
+        {
+            FAPI_ERR("Error from run_offset_cal");
+            return(rc);
+        }
+
+        // restore PLL config for functional operation
+        rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_DATA)");
+            return(rc);
+        }
+  	    rc_ecmd |= ring_data.insert(tp_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
+                                            TP_CHIPLET_0x01000000,
+                                            TP_BNDY_PLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
+	}
     //This is an X Bus
-    else if( (target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT  )){
-      FAPI_DBG("This is a X Bus training invocation");
-      master_interface=CP_FABRIC_X0; // base scom for X bus
-      master_group=0; // Design requires us to do this as per scom map and layout
-      if(rc.ok()){
-          // No Z cal in EI4/X bus design
-          for(int i=0;i<5;++i){
-             master_group=i;
-              //rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};            
-          }
-      }
+    else if (target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT)
+    {
+        FAPI_DBG("This is a X Bus training invocation");
     }
     //This is an A Bus
-    else if( (target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT )){
-      FAPI_DBG("This is an A Bus training invocation");
-      master_interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT 
-      master_group=0; // Design requires us to do this as per scom map and layout
-                // EDI-A bus needs both impedance cal and offset cal 
-      rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
-       //rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
+    else if (target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT)
+    {
+        FAPI_DBG("This is an A Bus training invocation");
+        master_interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT
+        master_group=0; // Design requires us to do this as per scom map and layout
+
+        // obtain parent chip target needed for ring manipulation
+	    rc = fapiGetParentChip(target, parent_target);
+        if (rc)
+        {
+            FAPI_ERR("Error from fapiGetParentChip");
+            return(rc);
+        }
+
+        // install PLL config for dccal operation
+  	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_LENGTH)");
+            return(rc);
+        }
+	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA)");
+            return(rc);
+        }
+	    rc_ecmd |= ring_data.setBitLength(ring_length);
+	    rc_ecmd |= ring_data.insert(ab_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
+                                            A_BUS_CHIPLET_0x08000000,
+                                            AB_BNDY_PLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
+
+        // EDI-A bus needs both impedance cal and offset cal
+	    rc = run_zcal(target,master_interface,master_group);
+        if (rc)
+        {
+            FAPI_ERR("Error from run_zcal");
+            return(rc);
+        }
+	    rc = run_offset_cal(target,master_interface,master_group);
+        if (rc)
+        {
+            FAPI_ERR("Error from run_offset_cal");
+            return(rc);
+        }
+
+        // restore PLL config for functional operation
+	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_DATA)");
+            return(rc);
+        }
+	    rc_ecmd |= ring_data.setBitLength(ring_length);
+	    rc_ecmd |= ring_data.insert(ab_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
+                                            A_BUS_CHIPLET_0x08000000,
+                                            AB_BNDY_PLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
     }
-    else{
-      FAPI_ERR("Invalid io_dccal HWP invocation . Target doesnt belong to DMI/X/A instances");
-      FAPI_SET_HWP_ERROR(rc, IO_DCCAL_INVALID_INVOCATION_RC);
+    else
+    {
+        FAPI_ERR("Invalid io_dccal HWP invocation . Target doesnt belong to DMI/X/A instances");
+        FAPI_SET_HWP_ERROR(rc, IO_DCCAL_INVALID_INVOCATION_RC);
     }
     return rc;
 }

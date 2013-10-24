@@ -844,8 +844,19 @@ void*    call_dmi_io_dccal( void *io_pArgs )
                     TARGETING::get_huid(l_itr->first));
         }
 
+        // io_dccal.C is going to look for a PLL ring with a "stub"
+        // mem freq -- so set to a default, then clear it (so as not
+        // to mess up MSS HWP later
+        TARGETING::Target* l_membuf_target =
+            (const_cast<TARGETING::Target*>(l_itr->second));
+        l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(1600);
+
         // Call on the MEMBUF
         FAPI_INVOKE_HWP(l_errl, dmi_io_dccal, l_fapi_membuf_target);
+
+        // Clear MSS_FREQ.  This attribute will be set in istep 12 (mss_freq) for good
+        l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(0);
+
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

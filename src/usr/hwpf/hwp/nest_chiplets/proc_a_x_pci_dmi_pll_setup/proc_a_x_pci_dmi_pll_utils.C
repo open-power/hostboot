@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.3 2013/08/20 02:05:06 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.4 2013/09/30 16:09:57 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -54,6 +54,9 @@ using namespace fapi;
 const uint32_t PROC_A_X_PCI_DMI_PLL_UTILS_MAX_LOCK_POLLS = 50;
 const uint32_t PROC_A_X_PCI_DMI_PLL_UTILS_POLL_DELAY_HW = 2000000;
 const uint32_t PROC_A_X_PCI_DMI_PLL_UTILS_POLL_DELAY_SIM = 1;
+
+// Pervasive LFIR Register field/bit definitions
+const uint8_t PERV_LFIR_SCAN_COLLISION_BIT = 3;
 
 // OPCG/Clock Region Register values
 const uint64_t OPCG_REG0_FOR_SETPULSE  = 0x818C000000000000ull;
@@ -89,6 +92,8 @@ extern "C"
 //             i_pll_ring_addr          => PLL ring address
 //             i_pll_ring_data          => data buffer containing full PLL ring
 //                                         content
+//             i_mask_scan_collision    => mask scan collision bit in chiplet
+//                                         pervasive LFIR
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
 
@@ -96,7 +101,8 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_bndy(
     const fapi::Target& i_target,
     const uint32_t i_chiplet_base_scom_addr,
     const uint32_t i_pll_ring_addr,
-    ecmdDataBufferBase& i_pll_ring_data)
+    ecmdDataBufferBase& i_pll_ring_data,
+    const bool i_mask_scan_collision)
 {
     // data buffer to hold SCOM data
     ecmdDataBufferBase data(64);
@@ -110,6 +116,28 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_bndy(
 
     do
     {
+        //-------------------------------------------
+        //  Mask Pervasive LFIR
+        //------------------------------------------
+
+        if (i_mask_scan_collision)
+        {
+            FAPI_DBG("Masking Pervasive LFIR scan collision bit ...");
+            rc_ecmd |= data.setBit(PERV_LFIR_SCAN_COLLISION_BIT);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("Error 0x%x setting up ecmd data buffer to set Pervasive LFIR Mask Register.", rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            rc = fapiPutScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_MASK_OR_0x0004000F, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error writing Pervasive LFIR Mask OR Register.");
+                break;
+            }
+        }
+
         //-------------------------------------------
         //  Set the OPCG to generate the setpulse
         //------------------------------------------
@@ -220,6 +248,37 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_bndy(
             break;
         }
 
+
+        //-------------------------------------------
+        //  Clear & Unmask Pervasive LFIR
+        //------------------------------------------
+
+        if (i_mask_scan_collision)
+        {
+            FAPI_DBG("Clearing Pervasive LFIR scan collision bit ...");
+            rc_ecmd |= data.flushTo1();
+            rc_ecmd |= data.clearBit(PERV_LFIR_SCAN_COLLISION_BIT);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("Error 0x%x setting up ecmd data buffer to clear Pervasive LFIR Register.", rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            rc = fapiPutScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_AND_0x0004000B, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error writing Pervasive LFIR AND Register.");
+                break;
+            }
+
+            FAPI_DBG("Unmasking Pervasive LFIR scan collision bit ...");
+            rc = fapiPutScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_MASK_AND_0x0004000E, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error writing Pervasive LFIR Mask And Register.");
+                break;
+            }
+        }
     } while(0);
 
 
@@ -257,7 +316,8 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_pll(
     ecmdDataBufferBase& i_pll_ring_data,
     const bool i_lctank_pll_vco_workaround,
     const uint32_t i_ccalload_ring_offset,
-    const uint32_t i_ccalfmin_ring_offset)
+    const uint32_t i_ccalfmin_ring_offset,
+    const bool i_mask_scan_collision)
 {
     // return codes
     uint32_t rc_ecmd = 0;
@@ -287,7 +347,8 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_pll(
                 i_target,
                 i_chiplet_base_scom_addr,
                 i_pll_ring_addr,
-                i_pll_ring_data);
+                i_pll_ring_data,
+                i_mask_scan_collision);
         if (!rc.ok())
         {
             FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy (scan = %d)", scan_count);
@@ -322,7 +383,8 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_pll(
                     i_target,
                     i_chiplet_base_scom_addr,
                     i_pll_ring_addr,
-                    i_pll_ring_data);
+                    i_pll_ring_data,
+                    i_mask_scan_collision);
             if (!rc.ok())
             {
                 FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy (scan = %d)", scan_count);

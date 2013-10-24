@@ -134,8 +134,8 @@ extern "C"
             case fapi::ATTR_PROC_AB_BNDY_PLL_FLUSH:
             case fapi::ATTR_PROC_AB_BNDY_PLL_LENGTH:
             case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA:
-//          case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_FLUSH:
-//          case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH:
+//            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_FLUSH:
+            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH:
                 // Set entry size
                 l_numKeys = 1;
                 l_arrayEntryLength = sizeof(PLL_RING_ATTR_WITH_1_KEYS);
@@ -156,8 +156,8 @@ extern "C"
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FLUSH:
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_LENGTH:
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA:
-//          case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
-//          case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
+//            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
+            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
                 // Set entry size
                 l_numKeys = 1;
                 l_arrayEntryLength = sizeof(PLL_RING_ATTR_WITH_1_KEYS);
@@ -386,8 +386,8 @@ extern "C"
                 }
                 break;
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA:
-//          case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
-//          case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
+//            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
+            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
                 // Is chip type Murano or Venice
                 if (l_chipType == ENUM_ATTR_NAME_MURANO) {
                     // Establish default array to S1 EC 10 array
@@ -688,9 +688,9 @@ extern "C"
                     }
                     break;
                 case fapi::ATTR_PROC_AB_BNDY_PLL_LENGTH:
-//            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH:
+                case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH:
                 case fapi::ATTR_PROC_PB_BNDY_DMIPLL_LENGTH:
-//            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
+                case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH:
                 case fapi::ATTR_PROC_PCI_BNDY_PLL_LENGTH:
                     // Set length
                     o_ringBitLength = l_1KeyPllArrayPtr -> l_ATTR_PLL_RING_BIT_LENGTH;

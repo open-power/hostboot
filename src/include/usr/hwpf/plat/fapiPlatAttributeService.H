@@ -1523,6 +1523,16 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
         fapi::FAPI_RC_SUCCESS :\
         ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
           ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA, PTARGET, VAL ))
+#define ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
+          ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH, PTARGET, VAL ))
+#define ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
+          ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH, PTARGET, VAL ))
 
 // FLUSH accesses
 #define ATTR_PROC_AB_BNDY_PLL_FLUSH_GETMACRO(ID, PTARGET, VAL) \

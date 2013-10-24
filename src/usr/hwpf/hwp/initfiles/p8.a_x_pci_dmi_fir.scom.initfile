@@ -1,4 +1,4 @@
-#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.1 2013/05/15 04:27:09 jmcgill Exp $
+#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.4 2013/09/30 16:54:36 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -24,7 +24,7 @@ define mcr_enabled =  ((ATTR_CHIP_REGIONS_TO_ENABLE[2] & 0x0040000000000000) != 
 define xbus_enabled = (ATTR_PROC_X_ENABLE == ENUM_ATTR_PROC_X_ENABLE_ENABLE);
 define abus_enabled = (ATTR_PROC_A_ENABLE == ENUM_ATTR_PROC_A_ENABLE_ENABLE);
 define pcie_enabled = (ATTR_PROC_PCIE_ENABLE == ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
-
+define trace_on_scom = (ATTR_CHIP_EC_FEATURE_TRACE_CONTROL_ON_SCOM != 0);
 
 #--------------------------------------------------------------------------------
 #-- SCOM initializations
@@ -140,6 +140,16 @@ scom 0x04040002 {
     0:63, 0x203FFFE000000000, (xbus_enabled);
 }
 
+#-- configure chiplet trace arrays to stop on checkstop
+scom 0x040107C0 {
+    bits, scom_data,          expr;
+    7,    0b1,                (xbus_enabled && trace_on_scom);
+}
+
+scom 0x040107CB {
+    bits, scom_data,          expr;
+    17,    0b1,               (xbus_enabled && trace_on_scom);
+}
 
 
 #-- ABUS IO (EDI)
@@ -210,9 +220,16 @@ scom 0x08040002 {
     0:63, 0x23FFFFE000000000, (abus_enabled);
 }
 
+#-- configure chiplet trace arrays to stop on checkstop
+scom 0x080107C0 {
+    bits, scom_data,          expr;
+    7,    0b1,                (abus_enabled && trace_on_scom);
+}
 
-#-- PCI IOP FIR
-#-- set base configuration for 
+scom 0x080107CB {
+    bits, scom_data,          expr;
+    17,    0b1,               (abus_enabled && trace_on_scom);
+}
 
 
 #-- FBUS PB
@@ -259,4 +276,15 @@ scom 0x0904000D {
 scom 0x09040002 {
     bits, scom_data,          expr;
     0:63, 0x211FFFE000000000, (pcie_enabled);
+}
+
+#-- configure chiplet trace arrays to stop on checkstop
+scom 0x090107C0 {
+    bits, scom_data,          expr;
+    7,    0b1,                (pcie_enabled && trace_on_scom);
+}
+
+scom 0x090107CB {
+    bits, scom_data,          expr;
+    17,    0b1,               (pcie_enabled && trace_on_scom);
 }
