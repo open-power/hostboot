@@ -92,51 +92,11 @@ void*    call_sbe_centaur_init( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    bool l_unloadSbePnorImg = false;
     size_t l_sbePnorSize = 0;
-    const char * l_sbePnorAddr = NULL;
+    void* l_sbePnorAddr = NULL;
     errlHndl_t  l_errl = NULL;
 
     IStepError  l_StepError;
-
-    // ----------------------- Setup sbe_pnor stuff --------------------
-
-    if (l_membufTargetList.size())
-    {
-        // Loading image
-        l_errl = VFS::module_load("centaur.sbe_pnor.bin");
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                 "ERROR 0x%.8X call_sbe_centaur_init - "
-                 "VFS::module_load(centaur.sbe_pnor.bin) returns error",
-                 l_errl->reasonCode());
-        }
-        else
-        {
-            // Set flag to unload
-            l_unloadSbePnorImg = true;
-            l_errl = VFS::module_address("centaur.sbe_pnor.bin",
-                                         l_sbePnorAddr, l_sbePnorSize);
-            if(l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                 "ERROR 0x%.8X call_sbe_centaur_init - "
-                 "VFS::module_address(centaur.sbe_pnor.bin) return error",
-                 l_errl->reasonCode());
-            }
-            else
-            {
-                char l_header[10];
-                memcpy (l_header, l_sbePnorAddr, 9);
-                l_header[9] = '\0';
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "call_sbe_centaur_init - Loading "
-                     "centaur.sbe_pnor.bin, Addr 0x%llX, Size %d, Header %s",
-                     l_sbePnorAddr, l_sbePnorSize, l_header);
-            }
-        }
-    }
 
     // Loop thru all Centaurs in list
     for (TargetHandleList::const_iterator
@@ -144,28 +104,62 @@ void*    call_sbe_centaur_init( void *io_pArgs )
          l_membuf_iter != l_membufTargetList.end();
          ++l_membuf_iter)
     {
-/*
         //find SBE image in PNOR
-        // @todo RTC 77647
-        // Will use SBE::findSBEInPnor() function rather than
-        // VFS::module_load/address() function calls above
+        TARGETING::Target* l_membuf_target = *l_membuf_iter;
 
-*/
+        uint8_t cur_ec = (*l_membuf_iter)->getAttr<TARGETING::ATTR_EC>();
 
-        // Make sure we have successfully retrieved the reference image
+
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"call_sbe_centaur_init() - Find SBE image in PNOR");
+
+        l_errl = SBE::findSBEInPnor(l_membuf_target,
+                                 l_sbePnorAddr,
+                                 l_sbePnorSize,
+                                 NULL);
         if (l_errl)
         {
-            l_StepError.addErrorDetails(ISTEP_SBE_CENTAUR_INIT_FAILED,
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"call_sbe_centaur_init() - Error getting image from PNOR. ec=0x%.2X",
+                       cur_ec );
+
+            TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "call_sbe_centaur_init - l_sbePnorAddr",l_sbePnorAddr,400);
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_membuf_target).addToLog( l_errl );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_SBE_PNOR_CENTAUR_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_SBE_CENTAUR_INIT
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to find the centaur sbe image in pnor
+             *              in the sbe_centaur_init function to initialize
+             *              the centuars has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_SBE_PNOR_CENTAUR_FAILED,
                                         ISTEP_SBE_CENTAUR_INIT,
                                         l_errl);
+
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
-     
+
+        char l_header[10];
+        memcpy (l_header, l_sbePnorAddr, 9);
+        l_header[9] = '\0';
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "call_sbe_centaur_init - Loading "
+                     "centaur sbe from pnor, Addr 0x%llX, Size %d, Header %s",
+                     l_sbePnorAddr, l_sbePnorSize, l_header);
+
         // Create a FAPI Target
-        TARGETING::Target* l_membuf_target = *l_membuf_iter;
         const fapi::Target l_fapiTarget( fapi::TARGET_TYPE_MEMBUF_CHIP,
-                                         l_membuf_target);
+                     (const_cast<TARGETING::Target*>(l_membuf_target)));
 
         // Expand buffer for new image size
         const uint32_t l_customizedMaxSize = MAX_SBE_IMG_SIZE;
@@ -214,7 +208,7 @@ void*    call_sbe_centaur_init( void *io_pArgs )
 
 
         FAPI_INVOKE_HWP( l_errl, cen_xip_customize,
-                         l_fapiTarget, (void *)l_sbePnorAddr,
+                         l_fapiTarget, l_sbePnorAddr,
                          l_pCustomizedImage, l_customizedSize,
                          l_pBuf1, l_buf1Size,
                          l_pBuf2, l_buf2Size );
@@ -334,24 +328,6 @@ void*    call_sbe_centaur_init( void *io_pArgs )
 
     }   // end for
 
-    // Unload image
-    if (l_unloadSbePnorImg == true)
-    {
-        l_errl = VFS::module_unload("centaur.sbe_pnor.bin");
-
-        if (l_errl)
-        {
-             FAPI_ERR("ERROR 0x%.8X call_sbe_centaur_init - "
-                      "Error unloading centaur.sbe_pnor.bin",
-                      l_errl->reasonCode());
-
-            l_StepError.addErrorDetails(ISTEP_SBE_CENTAUR_INIT_FAILED,
-                                        ISTEP_SBE_CENTAUR_INIT,
-                                        l_errl);
-
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
-    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_sbe_centaur_init exit" );
