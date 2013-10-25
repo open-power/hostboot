@@ -57,15 +57,21 @@ RUNBVT_SUBDIRS   +=
 
 TARFILES = fsp.tar simics.tar
 
+VPATH += fsp/hwas/common:
+
 _SUBDIR/BUILD/EXPINC/fsp: expand_tars_fsp.tar
 _SUBDIR/BUILD/EXPINC/simics: expand_tars_simics.tar
 
-EXPINC_TARGETS += expand_tars
+EXPINC_TARGETS += expand_tars epub_check
 
 expand_tars: ${TARFILES:S/^/expand_tars_/g}
 expand_tars_%: $${@:S/expand_tars_//}
 	@echo Extracting $> to ${*:S/expand_tars_//}
 	mkdir -p ${*:S/expand_tars_//}
 	${TAR} -x --file $> -C ${*:S/expand_tars_//}
+epub_check: expand_tars epubProcedureID_check.pl epub_service_codes.H hwasCallout.H
+	@echo "===== Checking epubProcedureID's Start:" `date`
+	${epubProcedureID_check.pl:P} ${epub_service_codes.H:P} ${hwasCallout.H:P}
+	@echo "===== Checking epubProcedureID's End:" `date`
 
 .include <${RULES_MK}>
