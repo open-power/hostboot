@@ -604,18 +604,32 @@ private:
 
 
     /**
+     * @brief sort compare function, to be used when flattening an
+     * error log
+     *
+     * @param[in]      i_ud1 - first user-defined section to compare
+     * @param[in]      i_ud2 - second user-defined section to compare
+     *
+     * @return  true if i_ud1 should be first, false otherwise
+     */
+    static bool udSort(ErrlUD *i_ud1, ErrlUD *i_ud2);
+
+    /**
      * @brief Flatten the data to caller's buffer. The resulting flat
      * data will be in PEL (platform event log) format.
      * The ErrlManager is the primary user of this call.
      *
      * @param[in,out]  o_buffer   Points to data block to be filled
-     * @param[in]      i_cbBuffer  Count of bytes in buffer supplied
+     * @param[in]      i_cbBuffer Count of bytes in buffer supplied
+     * @param[in]      i_truncate true: truncate the data
+     *                              false: error if buffer too small
+     *                  NOTE: PH, UH and PS MUST fit
      *
      * @return  Count of bytes copied to caller's
-     *          buffer or else zero if it does not fit.
+     *          buffer or else zero if it does not fit and i_truncate==false.
      */
-    uint64_t flatten( void * o_buffer, const uint64_t i_cbBuffer );
-
+    uint64_t flatten( void * o_buffer, const uint64_t i_cbBuffer,
+            const bool i_truncate = false);
 
     /**
      * @brief Called by commit(), this fucntion creates a

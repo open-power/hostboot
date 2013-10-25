@@ -246,6 +246,9 @@ void PnorRP::initDaemon()
         iv_startupRC = l_errhdl->reasonCode();
     }
 
+    // call ErrlManager function - tell him that PNOR is ready!
+    ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::PNOR);
+
     TRACUCOMP(g_trac_pnor, "< PnorRP::initDaemon" );
 }
 

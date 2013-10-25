@@ -142,12 +142,15 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         // set deconfigure and/or gard bits
         if (iv_deconfig)
         {
-            psrc->word5 |= 0x02000000; // deconfigure - bit 6
+            psrc->word5 |= ErrlSrc::DECONFIG_BIT; // deconfigure
         }
         if (iv_gard)
         {
-            psrc->word5 |= 0x01000000; // GARD - bit 7
+            psrc->word5 |= ErrlSrc::GARD_BIT; // GARD
         }
+
+        // set ACK bit - means unacknowledged
+        psrc->word5 |= ErrlSrc::ACK_BIT; // ACK
 
         // Stash the Hostboot long long words into the hexwords of the SRC.
         psrc->word6       = iv_user1;    // spans 6-7
@@ -184,11 +187,11 @@ uint64_t ErrlSrc::unflatten( const void * i_buf)
     iv_user1        = p->word6;
     iv_user2        = p->word8;
 
-    if(p->word5 & 0x02000000) // deconfigure - bit 6
+    if(p->word5 & ErrlSrc::DECONFIG_BIT) // deconfigure
     {
         iv_deconfig = true;
     }
-    if(p->word5 & 0x01000000) // GARD - bit 7
+    if(p->word5 & ErrlSrc::GARD_BIT) // GARD
     {
         iv_gard = true;
     }
@@ -198,7 +201,7 @@ uint64_t ErrlSrc::unflatten( const void * i_buf)
 
 // Quick hexdigit to binary converter.
 // Hopefull someday to replaced by strtoul
-uint64_t ErrlSrc::aschex2bin(char c)
+uint64_t ErrlSrc::aschex2bin(char c) const
 {
     if(c >= 'a' && c <= 'f')
     {

@@ -46,6 +46,7 @@ class ErrlSrc : public ErrlSctn
     // you would expect to be part of ErrlEntry are actually instance data
     // in this class.
     friend class ErrlEntry;
+    friend class ErrlManager;
 
 
 private:
@@ -57,8 +58,10 @@ private:
         SST             = 1,   // section type
         VER             = 1,   // section version
         SRCVER          = 2,   // SRC version (not section version)
-        WORDCOUNT       = 9    // SRC word count
-        // CSS_VER      = 8    // TODO unused, relates to iv_cssver[]
+        WORDCOUNT       = 9,   // SRC word count
+        DECONFIG_BIT    = 0x02000000, // deconfig bit (6) in word 5
+        GARD_BIT        = 0x01000000, // gard bit (7) in word 5
+        ACK_BIT         = 0x00200000, // ack bit (10) in word 5
     };
 
 
@@ -145,7 +148,7 @@ private:
      * @note return value is only valid if input is valid hex digit
      * '0'-'9', 'A'-'F', 'a'='f'
      */
-    uint64_t aschex2bin(char c);
+    uint64_t aschex2bin(char c) const;
 
     // Instance data
     srcType_t       iv_srcType : 8; // SRC type, the ?? in SRC ??xxxxxx
@@ -156,8 +159,6 @@ private:
     uint64_t        iv_user2;       // user data 2
     bool            iv_deconfig;    // true if there is a deconfigure callout
     bool            iv_gard;        // true if there is a gard callout
-
-
 };
 
 

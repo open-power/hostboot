@@ -90,6 +90,19 @@ public:
         ErrlUserDetailsString stringUD("String test - string 3");
         stringUD.addToLog(errl);
 
+        // shove a lot of traces here, so that we test the truncate in the
+        // write to PNOR
+        errl->collectTrace("TARG", 1024);
+        errl->collectTrace("TARG", 48);
+        errl->collectTrace("TARG", 1024);
+        errl->collectTrace("TARG", 48);
+        errl->collectTrace("TARG", 1024);
+        errl->collectTrace("TARG", 48);
+        errl->collectTrace("TARG", 1024);
+        errl->collectTrace("TARG", 48);
+        errl->collectTrace("TARG", 1024);
+        errl->collectTrace("TARG", 48);
+
         // commit the errorlog
         errlCommit(errl, CXXTEST_COMP_ID);
     }

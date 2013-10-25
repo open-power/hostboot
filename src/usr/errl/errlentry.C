@@ -132,7 +132,7 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
 ErrlEntry::~ErrlEntry()
 {
     // Free memory of all sections
-    for (std::vector<ErrlUD*>::iterator l_itr = iv_SectionVector.begin();
+    for (std::vector<ErrlUD*>::const_iterator l_itr = iv_SectionVector.begin();
          l_itr != iv_SectionVector.end(); ++l_itr)
     {
         delete (*l_itr);
@@ -500,7 +500,7 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
     HWAS::callout_ud_t *  highestPriorityCallout = NULL;
 
     // look thru the errlog for any Callout UserDetail sections
-    for( std::vector<ErrlUD*>::iterator it = iv_SectionVector.begin();
+    for( std::vector<ErrlUD*>::const_iterator it = iv_SectionVector.begin();
             it != iv_SectionVector.end();
             it++ )
     {
@@ -530,7 +530,7 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
     {
         // no callouts in log, add default callout for hb code and
         // add trace
-        TRACFCOMP(g_trac_errl, "WRN>> No callouts in elog 0x%.8X", eid());
+        TRACFCOMP(g_trac_errl, "WRN>> No callouts in elog %.8X", eid());
         TRACFCOMP(g_trac_errl, "Adding default callout EPUB_PRC_HB_CODE ");
         addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                              HWAS::SRCI_PRIORITY_LOW);
@@ -734,7 +734,7 @@ void ErrlEntry::processCallout()
     if (pFn != NULL)
     {
         // look thru the errlog for any Callout UserDetail sections
-        for(std::vector<ErrlUD*>::iterator it = iv_SectionVector.begin();
+        for(std::vector<ErrlUD*>::const_iterator it = iv_SectionVector.begin();
                 it != iv_SectionVector.end();
                 it++ )
         {
@@ -772,7 +772,7 @@ void ErrlEntry::deferredDeconfigure()
     {
         //check for defered deconfigure callouts
         // look thru the errlog for any Callout UserDetail sections
-        for(std::vector<ErrlUD*>::iterator it = iv_SectionVector.begin();
+        for(std::vector<ErrlUD*>::const_iterator it = iv_SectionVector.begin();
                 it != iv_SectionVector.end();
                 it++ )
         {
@@ -810,7 +810,7 @@ uint64_t ErrlEntry::flattenedSize()
 
     // plus the sizes of the other optional sections
 
-    std::vector<ErrlUD*>::iterator it;
+    std::vector<ErrlUD*>::const_iterator it;
     for( it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++ )
     {
         l_bytecount += (*it)->flatSize();
@@ -824,29 +824,35 @@ uint64_t ErrlEntry::flattenedSize()
 // for use by ErrlManager. Return how many bytes flattened to the output
 // buffer, or else zero on error.
 
-uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
+uint64_t ErrlEntry::flatten( void * o_pBuffer,
+            const uint64_t i_bufsize,
+            const bool i_truncate)
 {
-    uint64_t  l_flatCount = 0;
-    uint64_t  l_cb = 0;
+    uint64_t l_flatSize = 0;
+    uint64_t l_cb = 0;
+    uint64_t l_sizeRemaining = i_bufsize;
+
+    // The CPPASSERT() macro will cause the compile to abend
+    // when the expression given evaluates to false.  If ever
+    // these cause the compile to fail, then perhaps the size
+    // of enum'ed types has grown unexpectedly.
+    CPPASSERT( 2 == sizeof(iv_Src.iv_reasonCode));
+    CPPASSERT( 2 == sizeof(compId_t));
+    CPPASSERT( 1 == sizeof(iv_Src.iv_modId));
 
     do
     {
-        l_flatCount = flattenedSize();
-        if ( i_bufsize < l_flatCount )
+        // check if the input buffer needs to be and is big enough
+        l_flatSize = flattenedSize();
+        if (( l_sizeRemaining < l_flatSize ) && (!i_truncate))
         {
-            // buffer is not big enough; return zero
-            TRACFCOMP( g_trac_errl, ERR_MRK"Invalid buffer size");
-            l_flatCount = 0;
+            TRACFCOMP( g_trac_errl,
+                    ERR_MRK"Buffer (%d) < flatSize (%d), aborting flatten",
+                    l_sizeRemaining, l_flatSize);
+            l_flatSize = 0; // return zero
             break;
         }
 
-        // The CPPASSERT() macro will cause the compile to abend
-        // when the expression given evaluates to false.  If ever
-        // these cause the compile to fail, then perhaps the size
-        // of enum'ed types has grown unexpectedly.
-        CPPASSERT( 2 == sizeof(iv_Src.iv_reasonCode));
-        CPPASSERT( 2 == sizeof(compId_t));
-        CPPASSERT( 1 == sizeof(iv_Src.iv_modId));
 
         // Inform the private header how many sections there are,
         // counting the PH, UH, PS, and the optionals.
@@ -854,41 +860,45 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
 
         // Flatten the PH private header section
         char * pBuffer = static_cast<char *>(o_pBuffer);
-        l_cb = iv_Private.flatten( pBuffer, i_bufsize );
+        l_cb = iv_Private.flatten( pBuffer, l_sizeRemaining );
         if( 0 == l_cb )
         {
-            // Rare.
             TRACFCOMP( g_trac_errl, ERR_MRK"ph.flatten error");
-            l_flatCount = 0;
+            l_flatSize = 0;
+            // don't check i_truncate - this section MUST fit.
             break;
         }
 
+        // save this location - if the number of sections that we flatten is
+        // reduced, we need to update this PH section.
+        char *pPHBuffer = pBuffer;
+
         pBuffer += l_cb;
-        i_bufsize -= l_cb;
+        l_sizeRemaining -= l_cb;
 
         // flatten the UH user header section
-        l_cb = iv_User.flatten( pBuffer,  i_bufsize );
+        l_cb = iv_User.flatten( pBuffer,  l_sizeRemaining );
         if( 0 == l_cb )
         {
-            // Rare.
             TRACFCOMP( g_trac_errl, ERR_MRK"uh.flatten error");
-            l_flatCount = 0;
+            l_flatSize = 0;
+            // don't check i_truncate - this section MUST fit.
             break;
         }
         pBuffer += l_cb;
-        i_bufsize -= l_cb;
+        l_sizeRemaining -= l_cb;
 
         // flatten the PS primary SRC section
-        l_cb = iv_Src.flatten( pBuffer, i_bufsize );
+        l_cb = iv_Src.flatten( pBuffer, l_sizeRemaining );
         if( 0 == l_cb )
         {
-            // Rare.
             TRACFCOMP( g_trac_errl, ERR_MRK"ps.flatten error");
-            l_flatCount = 0;
+            l_flatSize = 0;
+            // don't check i_truncate - this section MUST fit.
             break;
         }
         pBuffer += l_cb;
-        i_bufsize -= l_cb;
+        l_sizeRemaining -= l_cb;
 
 
         // flatten the optional user-defined sections
@@ -899,32 +909,48 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
         // any remaining user-defined sections.  Therefore this order
         // preserves the callouts, and then gives priority to other
         // non-trace sections.
-        std::vector<ErrlUD*>::iterator it;
-        for(it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++)
+        //
+        // for saving errorlogs into PNOR, i_truncate will be set to true
+        // and sections which don't fit are not saved.
+        uint32_t l_sectionCount = iv_SectionVector.size();
+
+        std::vector<ErrlUD*>::const_iterator it;
+        for(it = iv_SectionVector.begin();
+            (it != iv_SectionVector.end()) && (l_flatSize != 0);
+            it++)
         {
             // If UD section is a hardware callout.
             if( (ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
                 (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst) )
             {
-                l_cb = (*it)->flatten( pBuffer, i_bufsize );
+                l_cb = (*it)->flatten( pBuffer, l_sizeRemaining );
                 if( 0 == l_cb )
                 {
-                    // Rare.
-                    TRACFCOMP( g_trac_errl, ERR_MRK"ud.flatten error");
-                    l_flatCount = 0;
-                    break;
+                    if (i_truncate)
+                    {
+                        // TODO: RTC 77560 - error if this happens during test
+                        TRACFCOMP( g_trac_errl,
+                                INFO_MRK"ud.flatten error, skipping");
+                        // won't fit - don't count it.
+                        l_sectionCount--;
+                        continue;
+                    }
+                    else
+                    {
+                        TRACFCOMP( g_trac_errl,
+                                ERR_MRK"ud.flatten error, aborting");
+                        l_flatSize = 0; // return zero
+                        break;
+                    }
                 }
                 pBuffer += l_cb;
-                i_bufsize -= l_cb;
+                l_sizeRemaining -= l_cb;
             }
-        }
+        } // for
 
-        if( 0 == l_flatCount )
-        {
-          break;
-        }
-
-        for(it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++)
+        for(it = iv_SectionVector.begin();
+            (it != iv_SectionVector.end()) && (l_flatSize != 0);
+            it++)
         {
             // If UD section is not a hardware callout and not a trace.
             if( !(((ERRL_COMP_ID        == (*it)->iv_header.iv_compId) &&
@@ -932,53 +958,90 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,  uint64_t i_bufsize )
                   ((FIPS_ERRL_COMP_ID   == (*it)->iv_header.iv_compId) &&
                    (FIPS_ERRL_UDT_TRACE == (*it)->iv_header.iv_sst))) )
             {
-                l_cb = (*it)->flatten( pBuffer, i_bufsize );
+                l_cb = (*it)->flatten( pBuffer, l_sizeRemaining );
                 if( 0 == l_cb )
                 {
-                    // Rare.
-                    TRACFCOMP( g_trac_errl, ERR_MRK"ud.flatten error");
-                    l_flatCount = 0;
-                    break;
+                    if (i_truncate)
+                    {
+                        // TODO: RTC 77560 - error if this happens during test
+                        TRACFCOMP( g_trac_errl,
+                                INFO_MRK"ud.flatten error, skipping");
+                        // won't fit - don't count it.
+                        l_sectionCount--;
+                        continue;
+                    }
+                    else
+                    {
+                        TRACFCOMP( g_trac_errl,
+                                ERR_MRK"ud.flatten error, aborting");
+                        l_flatSize = 0; // return zero
+                        break;
+                    }
                 }
                 pBuffer += l_cb;
-                i_bufsize -= l_cb;
+                l_sizeRemaining -= l_cb;
             }
-        }
+        } // for
 
-        if( 0 == l_flatCount )
-        {
-          break;
-        }
-
-        for(it = iv_SectionVector.begin(); it != iv_SectionVector.end(); it++)
+        for(it = iv_SectionVector.begin();
+            (it != iv_SectionVector.end()) && (l_flatSize != 0);
+            it++)
         {
             // If UD section is a trace.
             if( (FIPS_ERRL_COMP_ID   == (*it)->iv_header.iv_compId) &&
                 (FIPS_ERRL_UDT_TRACE == (*it)->iv_header.iv_sst) )
             {
-                l_cb = (*it)->flatten( pBuffer, i_bufsize );
+                l_cb = (*it)->flatten( pBuffer, l_sizeRemaining );
                 if( 0 == l_cb )
                 {
-                    // Rare.
-                    TRACFCOMP( g_trac_errl, ERR_MRK"ud.flatten error");
-                    l_flatCount = 0;
-                    break;
+                    if (i_truncate)
+                    {
+                        // TODO: RTC 77560 - error if this happens during test
+                        TRACFCOMP( g_trac_errl,
+                                INFO_MRK"ud.flatten error, skipping");
+                        // won't fit - don't count it.
+                        l_sectionCount--;
+                        continue;
+                    }
+                    else
+                    {
+                        TRACFCOMP( g_trac_errl,
+                                ERR_MRK"ud.flatten error, aborting");
+                        l_flatSize = 0; // return zero
+                        break;
+                    }
                 }
                 pBuffer += l_cb;
-                i_bufsize -= l_cb;
+                l_sizeRemaining -= l_cb;
             }
-        }
+        } // for
 
-        if( 0 == l_flatCount )
+        if( 0 == l_flatSize )
         {
           break;
         }
 
+        if (l_sectionCount != iv_SectionVector.size())
+        {
+            // some section was too big and didn't get flatten - update the
+            // section count in the PH section and re-flatten it.
+            iv_Private.iv_sctns = 3 + l_sectionCount;
+            l_cb = iv_Private.flatten( pPHBuffer, l_sizeRemaining );
+            if( 0 == l_cb )
+            {
+                TRACFCOMP( g_trac_errl, ERR_MRK"ph.flatten error");
+                l_flatSize = 0;
+                // don't check i_truncate - this section MUST fit.
+                break;
+            }
+        }
     }
     while( 0 );
 
-    return l_flatCount;
-}
+    // if l_flatSize == 0, there was an error, return 0.
+    //  else return actual size that we flattened into the buffer.
+    return (l_flatSize == 0) ? 0 : (i_bufsize - l_sizeRemaining);
+} // flatten
 
 
 uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )

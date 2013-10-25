@@ -47,6 +47,7 @@
 
 // Others
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 #include <devicefw/userif.H>
 
 //******************************************************************************
@@ -95,6 +96,9 @@ static void initTargeting(errlHndl_t& io_pError)
         (void)l_targetService.init();
 
         initializeAttributes(l_targetService);
+
+        // call ErrlManager function - tell him that TARG is ready!
+        ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::TARG);
     }
 
     TARG_EXIT();

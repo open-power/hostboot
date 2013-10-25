@@ -53,7 +53,6 @@ private:
         SLEN            = 40,  // section length w/o sizeof(ErrlSctnHdr)
         SST             = 0,   // section type
         VER             = 1    // section version
-        // CSS_VER      = 8    // TODO unused, relates to iv_cssver[]
     };
 
     /**
@@ -119,10 +118,6 @@ private:
     uint8_t     iv_sctns;     // count of sections
     uint32_t    iv_plid;      // platform log id
     uint32_t    iv_eid;       // Error Log ID
-
-    // uint8_t  iv_cssver[CSS_VER];  // TODO unused now, do we need this?
-
-
 };
 
 

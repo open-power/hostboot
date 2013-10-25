@@ -38,6 +38,7 @@
 #include <targeting/common/commontargeting.H>
 #include <kernel/ipc.H>
 #include <arch/ppc.H>
+#include <errl/errlmanager.H>
 
 #define MBOX_TRACE_NAME MBOX_COMP_NAME
 
@@ -189,6 +190,9 @@ errlHndl_t MailboxSp::_init()
 
     // Start the the interprocessor communications message handler
     IPC::IpcSp::init(err);
+
+    // call ErrlManager function - tell him that MBOX is ready!
+    ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::MBOX);
 
     return err;
 }
