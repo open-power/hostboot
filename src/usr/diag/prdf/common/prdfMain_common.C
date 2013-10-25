@@ -88,6 +88,11 @@ errlHndl_t initialize()
 {
     PRDF_ENTER( "PRDF::initialize()" );
 
+    // will unlock when going out of scope
+    // this lock is recursive so it's ok to lock again
+    // as long as calling from the same thread
+    PRDF_SYSTEM_SCOPELOCK;
+
     g_prd_errlHndl = NULL; // This forces any previous errls to be committed
 
     // Synchronize SCOM access to hardware
@@ -150,6 +155,9 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
                  const AttnList & i_attnList )
 {
     PRDF_ENTER( "PRDF::main() Global attnType=%04X", i_attentionType );
+
+    // will unlock when going out of scope
+    PRDF_SYSTEM_SCOPELOCK;
 
     g_prd_errlHndl = NULL;
 
@@ -275,6 +283,9 @@ errlHndl_t refresh()
     PRDF_ENTER("PRDF::refresh()");
 
     errlHndl_t l_errl = NULL;
+
+    // will unlock when going out of scope
+    PRDF_SYSTEM_SCOPELOCK;
 
     if((false == g_initialized) || (NULL == systemPtr))
     {

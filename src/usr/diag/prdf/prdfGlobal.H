@@ -77,4 +77,10 @@
 #define PRDF_RUNTIME_DECONFIG( i_pTarget ) \
   SUCCESS
 
+/**
+ * @brief macro to acquire scope lock on system target
+ *        This macro is currently not used in hostboot.
+ */
+#define PRDF_SYSTEM_SCOPELOCK
+
 #endif // PRDF_GLOBAL_HB_H
