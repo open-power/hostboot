@@ -295,7 +295,8 @@ void CpuManager::activateCPU(cpu_t * i_cpu)
 
     // Verify / set SPRs.
     uint64_t msr = getMSR();
-    msr |= 0x1000; // TODO: RTC: 51148 - Simics workaround for SW170137.
+    msr |= 0x1000; // MSR[ME] is not saved on initial wakeup, but we set on
+                   // entering userspace, so ignore this bit in assert.
     kassert(WAKEUP_MSR_VALUE == msr);
     setLPCR(WAKEUP_LPCR_VALUE);
     setRPR(WAKEUP_RPR_VALUE);
