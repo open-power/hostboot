@@ -393,8 +393,8 @@ sub getPhysicalAddr
 
     if (not defined @segment_manager_addr)
     {
-        ::userDisplay "   VirtualToPhy: Cannot find Device Segment symbol.\n";
-        die;
+        ::userDisplay "   VirtualToPhy: Cannot find SegmentManager symbol.\n";
+        return NotFound;
     }
 
 
@@ -439,11 +439,7 @@ sub getPhysicalAddr
             {
                 ::userDisplay (sprintf
                                "   VirtualToPhy: Did not find a block for v addr:   %X\n" , $vaddr);
-
-                ##  Don't die here, return NotPresent.
-                ##  @TODO   Issue RTC 63901 will review this and provide a
-                ##  a permanent fix.
-                return NotPresent;
+                return NotFound;
 
             }
 
@@ -460,7 +456,7 @@ sub getPhysicalAddr
         {
             ::userDisplay
               "   VirtualToPhy:  BaseSegment - no valid pointer... Have you run yet?\n\n";
-            die;
+            return NotFound;
         }
     }
     elsif ($segmentIndex == 1)
@@ -483,7 +479,8 @@ sub getPhysicalAddr
         if ($firststackptr == 0)
         {
             ::userDisplay
-              "   VirtualToPhy:  No Stack Pointer. Have you run yet?\n"; die;
+              "   VirtualToPhy:  No Stack Pointer. Have you run yet?\n";
+            return NotFound;
 
         }
 
@@ -507,14 +504,15 @@ sub getPhysicalAddr
             ::userDisplay (sprintf
                            "   VirtualToPhy:Did not find a stack for v addr:   %X\n" , $vaddr);
 
-            die;
+            return NotFound;
         }
 
         my $firstblockptr = ::read64 ($stackptr + STACK_BLOCKPTR_OFFSET, 8);
 
         if ($firstblockptr == 0)
         {
-            ::userDisplay "   No BlockPtr found.\n"; die;
+            ::userDisplay "   No BlockPtr found.\n";
+            return NotFound;
         }
 
         #Call function to get the correct block for the VA
@@ -532,7 +530,7 @@ sub getPhysicalAddr
             ::userDisplay (sprintf
                            "   VirtualToPhy: Did not find a block for v addr:   %X\n" , $vaddr);
 
-            die;
+            return NotFound;
         }
 
         # get the physical address from SPTE entry in this block
@@ -614,7 +612,8 @@ sub getPhysicalAddr
             }
             else
             {
-                ::userDisplay "  Bad index.. address is not right.\n"; die;
+                ::userDisplay "  Bad index.. address is not right.\n";
+                return NotFound;
             }
         }
         else
