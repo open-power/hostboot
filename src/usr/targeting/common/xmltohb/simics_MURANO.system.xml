@@ -35,9 +35,6 @@
        * each Centaur membuf chip has 2 MBA chiplets
         * each MBA chiplet has 2 ports
          * each MBA port connects to 2 logical dimms
-
-     Values for pm_attributes_all_plat.xml attributes was provided by
-         Greg Still on 10/17/1012.
      ================================================================= -->
 
 <!-- System -->
@@ -46,16 +43,73 @@
     <id>sys0</id>
     <type>sys-sys-power8</type>
     <attribute>
-        <id>EXECUTION_PLATFORM</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0</default>
+    </attribute>
+    <attribute>
+        <id>EXECUTION_PLATFORM</id>
+        <default>1</default>
+    </attribute>
+    <!-- System Attributes from MRW -->
+    <attribute>
+        <id>FREQ_PROC_REFCLOCK</id>
+        <default>133</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PROC_REFCLOCK_KHZ</id>
+        <default>133333</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_MEM_REFCLOCK</id>
+        <default>266</default>
+    </attribute>
+    <attribute>
+        <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_A</id>
+        <default>0x1900</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_CORE_FLOOR</id>
+        <default>0x2580</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PB</id>
+        <default>0x7D0</default>
+    </attribute>
+    <attribute>
+        <id>NEST_FREQ_MHZ</id>
+        <default>0x960</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PCIE</id>
+        <default>0x3E8</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_X</id>
+        <default>0xFA0</default>
+    </attribute>
+    <attribute>
+        <id>MSS_CLEANER_ENABLE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MSS_PREFETCH_ENABLE</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>PROC_EPS_TABLE_TYPE</id>
@@ -70,49 +124,110 @@
         <default>2</default>
     </attribute>
     <attribute>
-        <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
+        <id>X_EREPAIR_THRESHOLD_FIELD</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>A_EREPAIR_THRESHOLD_FIELD</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>DMI_EREPAIR_THRESHOLD_FIELD</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>X_EREPAIR_THRESHOLD_MNFG</id>
         <default>0</default>
     </attribute>
     <attribute>
-        <id>FREQ_PROC_REFCLOCK</id>
-        <default>133</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_MEM_REFCLOCK</id>
-        <default>266</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_CORE_FLOOR</id>
-        <default>0x2580</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_PB</id>
-        <default>0x7D0</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_X</id>
-        <default>0xFA0</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_A</id>
-        <default>0x1900</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_PCIE</id>
-        <default>0x3E8</default>
-    </attribute>
-    <attribute>
-        <id>PROC_EPS_GB_DIRECTION</id>
+        <id>A_EREPAIR_THRESHOLD_MNFG</id>
         <default>0</default>
     </attribute>
     <attribute>
-        <id>PROC_EPS_GB_PERCENTAGE</id>
-        <default>0x14</default>
-    </attribute>
-    <attribute>
-        <id>PROC_FABRIC_ASYNC_SAFE_MODE</id>
+        <id>DMI_EREPAIR_THRESHOLD_MNFG</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <default>96</default>
+    </attribute>
+    <attribute>
+        <id>MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
+        <default>512</default>
+    </attribute>
+    <attribute>
+        <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+        <default>5000</default>
+    </attribute>
+    <attribute>
+        <id>PM_EXTERNAL_VRM_STEPSIZE</id>
+        <default>0xc4</default>
+    </attribute>
+    <attribute>
+        <id>PM_EXTERNAL_VRM_STEPDELAY</id>
+        <default>0xa</default>
+    </attribute>
+    <attribute>
+        <id>PM_SPIVID_FREQUENCY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SAFE_FREQUENCY</id>
+        <default>0x7ec</default>
+    </attribute>
+    <attribute>
+        <id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
+        <default>0x7d0</default>
+    </attribute>
+    <attribute>
+        <id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
+        <default>0x8fc</default>
+    </attribute>
+    <attribute>
+        <id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
+        <default>0xbb8</default>
+    </attribute>
+    <attribute>
+        <id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
+        <default>0xbea</default>
+    </attribute>
+    <attribute>
+        <id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
+        <default>0x12c0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SPIPSS_FREQUENCY</id>
+        <default>0xa</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD</id>
+        <default>0x140</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS</id>
+        <default>0x23a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS</id>
+        <default>0xdac</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS</id>
+        <default>0</default>
+    </attribute>
+    <!-- End System Attributes from MRW -->
     <attribute>
         <id>ISTEP_MODE</id>
         <default>0x0</default>
@@ -152,95 +267,17 @@
         <default>NONE</default>
     </attribute>
     <attribute>
-        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
-        <default>24</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MSS_PREFETCH_ENABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MSS_CLEANER_ENABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>MAX_PROC_CHIPS_PER_NODE</id>
         <default>4</default>
     </attribute>
-    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>FREQ_CORE_MAX</id>
         <default>4000</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>0x3</default>
-    </attribute>
-    <!-- End pm_plat_attributes.xml -->
     <attribute><id>MAX_EXS_PER_PROC_CHIP</id>
         <default>6</default>
     </attribute>
     <attribute><id>MAX_MCS_PER_SYSTEM</id>
         <default>16</default>
-    </attribute>
-    <attribute><id>X_EREPAIR_THRESHOLD_FIELD</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>A_EREPAIR_THRESHOLD_FIELD</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>DMI_EREPAIR_THRESHOLD_FIELD</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>A_EREPAIR_THRESHOLD_MNFG</id>
-        <default>0</default>
-    </attribute>
-    <attribute> <id>DMI_EREPAIR_THRESHOLD_MNFG</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>X_EREPAIR_THRESHOLD_MNFG</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
-        <default>96</default>
-    </attribute>
-    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
-        <default>512</default>
-    </attribute>
-    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
-        <default>32</default>
-    </attribute>
-    <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id>
-        <default>5000</default>
     </attribute>
 </targetInstance>
 
@@ -331,24 +368,6 @@
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>1</default>
     </attribute>
-    <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0x4</default><!-- PORT0NONRED -->
-    </attribute>
-    <attribute><id>PM_SLEEP_TYPE</id></attribute>
-    <attribute><id>PM_APSS_CHIP_SELECT</id>
-        <default>0x00</default><!-- CS0 -->
-    </attribute>
-    <attribute><id>PM_PBAX_NODEID</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>PM_PBAX_CHIPID</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
-        <default>0</default>
-    </attribute>
-    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -445,6 +464,60 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
+    <!-- PM_ attributes -->
+    <attribute>
+        <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SPIVID_PORT_ENABLE</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PM_APSS_CHIP_SELECT</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_NODEID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_CHIPID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_BRDCST_ID_VECTOR</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_ENTRY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_EXIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_TYPE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_ENTRY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_EXIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_TYPE</id>
+        <default>0</default>
+    </attribute>
+    <!-- End PM_ attributes -->
     <attribute>
          <id>EEPROM_VPD_PRIMARY_INFO</id>
          <default>
@@ -1090,26 +1163,6 @@
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>1</default>
     </attribute>
-    <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0x0</default><!-- NONE -->
-    </attribute>
-    <attribute><id>PM_SLEEP_ENTRY</id></attribute>
-    <attribute><id>PM_SLEEP_EXIT</id></attribute>
-    <attribute><id>PM_SLEEP_TYPE</id></attribute>
-    <attribute><id>PM_APSS_CHIP_SELECT</id>
-        <default>0xFF</default><!-- NONE -->
-    </attribute>
-    <attribute><id>PM_PBAX_NODEID</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>PM_PBAX_CHIPID</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
-        <default>0</default>
-    </attribute>
-    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -1206,7 +1259,60 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
-
+    <!-- PM_ attributes -->
+    <attribute>
+        <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SPIVID_PORT_ENABLE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_APSS_CHIP_SELECT</id>
+        <default>0xff</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_NODEID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_CHIPID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_BRDCST_ID_VECTOR</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_ENTRY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_EXIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_TYPE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_ENTRY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_EXIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_TYPE</id>
+        <default>0</default>
+    </attribute>
+    <!-- End PM_ attributes -->
     <attribute>
          <id>EEPROM_VPD_PRIMARY_INFO</id>
          <default>
@@ -1854,23 +1960,6 @@
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>1</default>
     </attribute>
-    <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_SLEEP_ENTRY</id></attribute>
-    <attribute><id>PM_SLEEP_EXIT</id></attribute>
-    <attribute><id>PM_SLEEP_TYPE</id></attribute>
-    <attribute><id>PM_APSS_CHIP_SELECT</id>
-        <default>0xFF</default><!-- NONE -->
-    </attribute>
-    <attribute><id>PM_PBAX_NODEID</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>PM_PBAX_CHIPID</id>
-        <default>2</default>
-    </attribute>
-    <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
-        <default>0</default>
-    </attribute>
-    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -1967,7 +2056,60 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
-
+    <!-- PM_ attributes -->
+    <attribute>
+        <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SPIVID_PORT_ENABLE</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PM_APSS_CHIP_SELECT</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_NODEID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_CHIPID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_BRDCST_ID_VECTOR</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_ENTRY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_EXIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_TYPE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_ENTRY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_EXIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_TYPE</id>
+        <default>0</default>
+    </attribute>
+    <!-- End PM_ attributes -->
     <attribute>
          <id>EEPROM_VPD_PRIMARY_INFO</id>
          <default>
@@ -2615,26 +2757,6 @@
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>1</default>
     </attribute>
-    <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0x0</default><!-- NONE -->
-    </attribute>
-    <attribute><id>PM_SLEEP_ENTRY</id></attribute>
-    <attribute><id>PM_SLEEP_EXIT</id></attribute>
-    <attribute><id>PM_SLEEP_TYPE</id></attribute>
-    <attribute><id>PM_APSS_CHIP_SELECT</id>
-        <default>0xFF</default><!-- NONE -->
-    </attribute>
-    <attribute><id>PM_PBAX_NODEID</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>PM_PBAX_CHIPID</id>
-        <default>3</default>
-    </attribute>
-    <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
-        <default>0</default>
-    </attribute>
-    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -2731,6 +2853,60 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
+    <!-- PM_ attributes -->
+    <attribute>
+        <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SPIVID_PORT_ENABLE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_APSS_CHIP_SELECT</id>
+        <default>0xff</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_NODEID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_CHIPID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PM_PBAX_BRDCST_ID_VECTOR</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_ENTRY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_EXIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_SLEEP_TYPE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_ENTRY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_EXIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PM_WINKLE_TYPE</id>
+        <default>0</default>
+    </attribute>
+    <!-- End PM_ attributes -->
     <attribute>
          <id>EEPROM_VPD_PRIMARY_INFO</id>
          <default>

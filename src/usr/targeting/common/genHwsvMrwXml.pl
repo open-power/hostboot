@@ -53,6 +53,13 @@ use Data::Dumper;
 ################################################################################
 $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 
+#------------------------------------------------------------------------------
+# Constants
+#------------------------------------------------------------------------------
+use constant CHIP_NODE_INDEX => 0; # Position in array of chip's node
+use constant CHIP_POS_INDEX => 1; # Position in array of chip's position
+use constant CHIP_ATTR_START_INDEX => 2; # Position in array of start of attrs
+
 our $mrwdir = "";
 my $sysname = "";
 my $usage = 0;
@@ -96,103 +103,135 @@ if ($sysname eq "brazos")
     $MAXNODE = 4;
 }
 
+#------------------------------------------------------------------------------
+# Process the system-policy MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-system-policy.xml\n";
 close (FH);
-my $policy = XMLin("$mrwdir/${sysname}-system-policy.xml");
+my $sysPolicy = XMLin("$mrwdir/${sysname}-system-policy.xml");
+my $reqPol = $sysPolicy->{"required-policy-settings"};
 
-my $SystemAttrs = XMLin("$mrwdir/${sysname}-system-policy.xml",
-                      forcearray=>['required-policy-settings']);
-my @systemAttr;
+my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
 
-use constant SYS_ATTR_START_INDEX=>0;
-
-foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
-{
-    my $freqA = sprintf("0x%04X",$i->{'proc_a_frequency'}->{content});
-    my $freqPB = sprintf("0x%04X",$i->{'proc_pb_frequency'}->{content});
-    my $freqPCIE = sprintf("0x%04X",$i->{'proc_pcie_frequency'}->{content});
-    my $freqX = sprintf("0x%04X",$i->{'proc_x_frequency'}->{content});
-    my $freqBoot = sprintf("0x%04X",$i->{'boot-frequency'}->{content});
-
-    #TODO: SW187611 remove the hard core value for FREQ_CORE_FLOOR
-
-    push @systemAttr, ["ALL_MCS_IN_INTERLEAVING_GROUP",
+#TODO: SW187611 remove the hard core value for FREQ_CORE_FLOOR
 #@TODO RTC: 66365
-# As a temporary workaround, ignoring value of ALL_MCS_IN_INTERLEAVING_GROUP
-# and overwriting MRW supplied value with "0".  Replace "0" with following
-# line when it's time to remove the workaround
-# $i->{all_mcs_in_interleaving_group},
-                       "0",
-                       "BOOT_FREQ_MHZ",
-                       $freqBoot,
-                       "FREQ_A",
-                       $freqA,
-                       "FREQ_CORE_FLOOR",
-                       "0x2580",
-                       "FREQ_PB",
-                       $freqPB,
-                       "NEST_FREQ_MHZ",
-                       $freqPB,
-                       "FREQ_PCIE",
-                       $freqPCIE,
-                       "FREQ_X",
-                       $freqX,
-                       "MSS_CLEANER_ENABLE",
-                       $i->{mss_cleaner_enable},
-                       "MSS_MBA_ADDR_INTERLEAVE_BIT",
-                       $i->{mss_mba_addr_interleave_bit},
-                       "MSS_MBA_CACHELINE_INTERLEAVE_MODE",
-                       $i->{mss_mba_cacheline_interleave_mode},
-                       "MSS_PREFETCH_ENABLE",
-                       $i->{mss_prefetch_enable},
-                       "PROC_EPS_TABLE_TYPE",
-                       $i->{proc_eps_table_type},
-                       "PROC_FABRIC_PUMP_MODE",
-                       $i->{proc_fabric_pump_mode},
-                       "PROC_X_BUS_WIDTH",
-                       $i->{proc_x_bus_width},
-                       "X_EREPAIR_THRESHOLD_FIELD",
-                       $i->{"x-erepair-threshold-field"},
-                       "A_EREPAIR_THRESHOLD_FIELD",
-                       $i->{"a-erepair-threshold-field"},
-                       "DMI_EREPAIR_THRESHOLD_FIELD",
-                       $i->{"dmi-erepair-threshold-field"},
-                       "X_EREPAIR_THRESHOLD_MNFG",
-                       $i->{"x-erepair-threshold-mnfg"},
-                       "A_EREPAIR_THRESHOLD_MNFG",
-                       $i->{"a-erepair-threshold-mnfg"},
-                       "DMI_EREPAIR_THRESHOLD_MNFG",
-                       $i->{"dmi-erepair-threshold-mnfg"},
-                       "MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA",
-                       $i->{"safemode_mem_throttle_numerator_per_mba"},
-                       "MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR",
-                       $i->{"safemode_mem_throttle_denominator"},
-                       "MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP",
-                       $i->{"safemode_mem_throttle_numerator_per_chip"},
-                       "MRW_THERMAL_MEMORY_POWER_LIMIT",
-                       $i->{"thermal_memory_power_limit"},
-                       ];
+# Setting ALL_MCS_IN_INTERLEAVING_GROUP to zero. Need to replace with:
+# $reqPol->{'all_mcs_in_interleaving_group"}
+
+push @systemAttr,
+[
+    "FREQ_PROC_REFCLOCK", $reqPol->{'processor-refclock-frequency'}->{content},
+    "FREQ_PROC_REFCLOCK_KHZ",
+        $reqPol->{'processor-refclock-frequency-khz'}->{content},
+    "FREQ_MEM_REFCLOCK", $reqPol->{'memory-refclock-frequency'}->{content},
+    "ALL_MCS_IN_INTERLEAVING_GROUP", "0",
+    "BOOT_FREQ_MHZ", $reqPol->{'boot-frequency'}->{content},
+    "FREQ_A", $reqPol->{'proc_a_frequency'}->{content},
+    "FREQ_CORE_FLOOR", "0x2580",
+    "FREQ_PB", $reqPol->{'proc_pb_frequency'}->{content},
+    "NEST_FREQ_MHZ", $reqPol->{'proc_pb_frequency'}->{content},
+    "FREQ_PCIE", $reqPol->{'proc_pcie_frequency'}->{content},
+    "FREQ_X", $reqPol->{'proc_x_frequency'}->{content},
+    "MSS_CLEANER_ENABLE", $reqPol->{'mss_cleaner_enable'},
+    "MSS_MBA_ADDR_INTERLEAVE_BIT", $reqPol->{'mss_mba_addr_interleave_bit'},
+    "MSS_MBA_CACHELINE_INTERLEAVE_MODE",
+        $reqPol->{'mss_mba_cacheline_interleave_mode'},
+    "MSS_PREFETCH_ENABLE", $reqPol->{'mss_prefetch_enable'},
+    "PROC_EPS_TABLE_TYPE", $reqPol->{'proc_eps_table_type'},
+    "PROC_FABRIC_PUMP_MODE", $reqPol->{'proc_fabric_pump_mode'},
+    "PROC_X_BUS_WIDTH", $reqPol->{'proc_x_bus_width'},
+    "X_EREPAIR_THRESHOLD_FIELD", $reqPol->{'x-erepair-threshold-field'},
+    "A_EREPAIR_THRESHOLD_FIELD", $reqPol->{'a-erepair-threshold-field'},
+    "DMI_EREPAIR_THRESHOLD_FIELD", $reqPol->{'dmi-erepair-threshold-field'},
+    "X_EREPAIR_THRESHOLD_MNFG", $reqPol->{'x-erepair-threshold-mnfg'},
+    "A_EREPAIR_THRESHOLD_MNFG", $reqPol->{'a-erepair-threshold-mnfg'},
+    "DMI_EREPAIR_THRESHOLD_MNFG", $reqPol->{'dmi-erepair-threshold-mnfg'},
+    "MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA",
+        $reqPol->{'safemode_mem_throttle_numerator_per_mba'},
+    "MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR",
+        $reqPol->{'safemode_mem_throttle_denominator'},
+    "MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP",
+        $reqPol->{'safemode_mem_throttle_numerator_per_chip'},
+    "MRW_THERMAL_MEMORY_POWER_LIMIT", $reqPol->{'thermal_memory_power_limit'},
+    "PM_EXTERNAL_VRM_STEPSIZE", $reqPol->{'pm_external_vrm_stepsize'},
+    "PM_EXTERNAL_VRM_STEPDELAY", $reqPol->{'pm_external_vrm_stepdelay'},
+    "PM_SPIVID_FREQUENCY", $reqPol->{'pm_spivid_frequency'}->{content},
+    "PM_SAFE_FREQUENCY", $reqPol->{'pm_safe_frequency'}->{content},
+    "PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY",
+        $reqPol->{'pm_resonant_clock_full_clock_sector_buffer_frequency'}->
+            {content},
+    "PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY",
+        $reqPol->{'pm_resonant_clock_low_band_lower_frequency'}->{content},
+    "PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY",
+        $reqPol->{'pm_resonant_clock_low_band_upper_frequency'}->{content},
+    "PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY",
+        $reqPol->{'pm_resonant_clock_high_band_lower_frequency'}->{content},
+    "PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY",
+        $reqPol->{'pm_resonant_clock_high_band_upper_frequency'}->{content},
+    "PM_SPIPSS_FREQUENCY", $reqPol->{'pm_spipss_frequency'}->{content},
+    "PROC_R_LOADLINE_VDD", $reqPol->{'proc_r_loadline_vdd'},
+    "PROC_R_DISTLOSS_VDD", $reqPol->{'proc_r_distloss_vdd'},
+    "PROC_VRM_VOFFSET_VDD", $reqPol->{'proc_vrm_voffset_vdd'},
+    "PROC_R_LOADLINE_VCS", $reqPol->{'proc_r_loadline_vcs'},
+    "PROC_R_DISTLOSS_VCS", $reqPol->{'proc_r_distloss_vcs'},
+    "PROC_VRM_VOFFSET_VCS", $reqPol->{'proc_vrm_voffset_vcs'},
+];
+
+#------------------------------------------------------------------------------
+# Process the pm-settings MRW file
+#------------------------------------------------------------------------------
+open (FH, "<$mrwdir/${sysname}-pm-settings.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-pm-settings.xml\n";
+close (FH);
+my $pmSettings = XMLin("$mrwdir/${sysname}-pm-settings.xml");
+
+my @pmChipAttr; # Repeated [NODE, POS, ATTR, VAL, ATTR, VAL, ATTR, VAL...]
+
+foreach my $i (@{$pmSettings->{'processor-settings'}})
+{
+    push @pmChipAttr,
+    [
+        $i->{target}->{node}, $i->{target}->{position},
+        "PM_UNDERVOLTING_FRQ_MINIMUM",
+            $i->{pm_undervolting_frq_minimum}->{content},
+        "PM_UNDERVOLTING_FREQ_MAXIMUM",
+            $i->{pm_undervolting_frq_maximum}->{content},
+        "PM_SPIVID_PORT_ENABLE", $i->{pm_spivid_port_enable},
+        "PM_APSS_CHIP_SELECT", $i->{pm_apss_chip_select},
+        "PM_PBAX_NODEID", $i->{pm_pbax_nodeid},
+        "PM_PBAX_CHIPID", $i->{pm_pbax_chipid},
+        "PM_PBAX_BRDCST_ID_VECTOR", $i->{pm_pbax_brdcst_id_vector},
+        "PM_SLEEP_ENTRY", $i->{pm_sleep_entry},
+        "PM_SLEEP_EXIT", $i->{pm_sleep_exit},
+        "PM_SLEEP_TYPE", $i->{pm_sleep_type},
+        "PM_WINKLE_ENTRY", $i->{pm_winkle_entry},
+        "PM_WINKLE_EXIT", $i->{pm_winkle_exit},
+        "PM_WINKLE_TYPE", $i->{pm_winkle_type},
+    ]
 }
 
-my $ProcPcie;
+my @SortedPmChipAttr = sort byNodePos @pmChipAttr;
 
+if ((scalar @SortedPmChipAttr) == 0)
+{
+    # For all systems without a populated <sys>-pm-settings file, this script
+    # defaults the values.
+    # Orlena: Platform dropped so there will never be a populated
+    #         orlena-pm-settings file
+    # Brazos: SW231069 raised to get brazos-pm-settings populated
+    print STDOUT "WARNING: No data in $mrwdir/${sysname}-pm-settings.xml. Defaulting values\n";
+}
+
+#------------------------------------------------------------------------------
+# Process the proc-pcie-settings MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-proc-pcie-settings.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-proc-pcie-settings.xml\n";
-
-$ProcPcie = XMLin("$mrwdir/${sysname}-proc-pcie-settings.xml");
-
 close (FH);
+my $ProcPcie = XMLin("$mrwdir/${sysname}-proc-pcie-settings.xml");
 
-
-use constant PCIE_NODE_INDEX => 0;
-use constant PCIE_POS_INDEX  => 1;
-#the constant below is used in the addProcPcieAttrs() function. Reason to start
-#at 2 is because the first two entries are not part of the loop to print out
-#the pcie data
-
-use constant PCIE_START_INDEX =>2;
-
+# Repeated [NODE, POS, ATTR, IOP0-VAL, IOP1-VAL, ATTR, IOP0-VAL, IOP1-VAL]
 my @procPcie;
 foreach my $i (@{$ProcPcie->{'processor-settings'}})
 {
@@ -239,8 +278,11 @@ foreach my $i (@{$ProcPcie->{'processor-settings'}})
                      $i->{proc_pcie_iop_zcal_control_iop1}];
 }
 
-my @SortedPcie = sort byPcieNodePos @procPcie;
+my @SortedPcie = sort byNodePos @procPcie;
 
+#------------------------------------------------------------------------------
+# Process the chip-ids MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-chip-ids.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-chip-ids.xml\n";
 close (FH);
@@ -258,6 +300,9 @@ foreach my $i (@{$chipIds->{'chip-id'}})
                      "n$i->{target}->{node}:p$i->{target}->{position}" ];
 }
 
+#------------------------------------------------------------------------------
+# Process the power-busses MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-power-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-power-busses.xml\n";
 close (FH);
@@ -324,6 +369,9 @@ foreach my $i (@{$powerbus->{'power-bus'}})
                   $upstrm_swap, $tx_swap, $rx_swap, $endpoint2_ipath ];
 }
 
+#------------------------------------------------------------------------------
+# Process the dmi-busses MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-dmi-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-dmi-busses.xml\n";
 close (FH);
@@ -373,6 +421,9 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
     push @dbus_centaur, [ $node, $membuf, $swap, $tx_swap, $rx_swap ];
 }
 
+#------------------------------------------------------------------------------
+# Process the cent-vrds MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-cent-vrds.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-cent-vrds.xml\n";
 close (FH);
@@ -431,6 +482,9 @@ foreach my $i (@{$vmemCentaur->{'centaur-vrd-connection'}})
 
 my @SortedVmem = sort byVmemNodePos @unsortedVmem;
 
+#------------------------------------------------------------------------------
+# Process the cec-chips and pcie-busses MRW files
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-cec-chips.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-cec-chips.xml\n";
 close (FH);
@@ -562,6 +616,9 @@ foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
     }
 }
 
+#------------------------------------------------------------------------------
+# Process the targets MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-targets.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-targets.xml\n";
 close (FH);
@@ -601,6 +658,9 @@ foreach my $i (@{$eTargets->{target}})
     }
 }
 
+#------------------------------------------------------------------------------
+# Process the fsi-busses MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-fsi-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-fsi-busses.xml\n";
 close (FH);
@@ -648,6 +708,9 @@ foreach my $fsiBus (@{$fsiBus->{'fsi-bus'}})
         $fsiBus->{slave}->{target}->{name} ];
 }
 
+#------------------------------------------------------------------------------
+# Process the psi-busses MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-psi-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-psi-busses.xml\n";
 close (FH);
@@ -671,6 +734,9 @@ foreach my $i (@{$psiBus->{'psi-bus'}})
                 ];
 }
 
+#------------------------------------------------------------------------------
+# Process the memory-busses MRW file
+#------------------------------------------------------------------------------
 open (FH, "<$mrwdir/${sysname}-memory-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-memory-busses.xml\n";
 close (FH);
@@ -1432,21 +1498,21 @@ sub byDimmInstancePath ($$)
 }
 
 ################################################################################
-# Compares two proc pcie instances based on the node and position #
+# Compares two arrays based on chip node and position
 ################################################################################
-sub byPcieNodePos($$)
+sub byNodePos($$)
 {
     my $retVal = -1;
 
-    my $lhsInstance_node = $_[0][PCIE_NODE_INDEX];
-    my $rhsInstance_node = $_[1][PCIE_NODE_INDEX];
+    my $lhsInstance_node = $_[0][CHIP_NODE_INDEX];
+    my $rhsInstance_node = $_[1][CHIP_NODE_INDEX];
     if(int($lhsInstance_node) eq int($rhsInstance_node))
     {
-         my $lhsInstance_pos = $_[0][PCIE_POS_INDEX];
-         my $rhsInstance_pos = $_[1][PCIE_POS_INDEX];
+         my $lhsInstance_pos = $_[0][CHIP_POS_INDEX];
+         my $rhsInstance_pos = $_[1][CHIP_POS_INDEX];
          if(int($lhsInstance_pos) eq int($rhsInstance_pos))
          {
-                die "ERROR: Duplicate pcie positions: 2 pcie with same
+                die "ERROR: Duplicate chip positions: 2 chip with same
                     node and position, \
                     NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
          }
@@ -1505,13 +1571,6 @@ sub generate_sys
         $plat = 1;
     }
 
-    my $proc_refclk = $policy->{'required-policy-settings'}->
-                               {'processor-refclock-frequency'}->{content};
-    my $proc_refclk_khz = $policy->{'required-policy-settings'}->
-                               {'processor-refclock-frequency-khz'}->{content};
-    my $mem_refclk = $policy->{'required-policy-settings'}->
-                              {'memory-refclock-frequency'}->{content};
-
     print "
 <!-- $SYSNAME System with new values-->
 
@@ -1531,20 +1590,8 @@ sub generate_sys
         <default>instance:system:TO_BE_ADDED</default>
     </compileAttribute>
     <attribute>
-        <id>FREQ_PROC_REFCLOCK</id>
-        <default>$proc_refclk</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_PROC_REFCLOCK_KHZ</id>
-        <default>$proc_refclk_khz</default>
-    </attribute>
-    <attribute>
         <id>EXECUTION_PLATFORM</id>
         <default>$plat</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_MEM_REFCLOCK</id>
-        <default>$mem_refclk</default>
     </attribute>\n";
 
     print "    <!-- System Attributes from MRW -->\n";
@@ -1552,21 +1599,6 @@ sub generate_sys
     print "    <!-- End System Attributes from MRW -->\n";
 
     print "
-    <!-- The default value of the following three attributes are written  -->
-    <!-- by the HWP using them. The default values are not from MRW. They -->
-    <!-- are included here FYI.                                           -->
-    <attribute>
-        <id>PROC_EPS_GB_DIRECTION</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PROC_EPS_GB_PERCENTAGE</id>
-        <default>0x14</default>
-    </attribute>
-    <attribute>
-        <id>PROC_FABRIC_ASYNC_SAFE_MODE</id>
-        <default>0</default>
-    </attribute>
     <attribute>
         <id>SP_FUNCTIONS</id>
         <default>
@@ -1615,46 +1647,13 @@ sub generate_sys
     <attribute>
         <id>MSS_CLEANER_ENABLE</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_CORE_MAX</id>
+        <default>4000</default>
     </attribute>";
     generate_max_config();
 
-    #todo-RTC:52835
-    print "
-    <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>FREQ_CORE_MAX</id>
-        <default>4000</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>0x1</default>
-    </attribute>
-";
     # HDAT drawer number (physical node) to
     # HostBoot Instance number (logical node) map
     # Index is the hdat drawer number, value is the HB instance number
@@ -2060,45 +2059,84 @@ sub generate_proc
         <default>0</default>
     </attribute>\n";
 
-    #@todo-RTC:52835
-    print "
-    <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>PM_SLEEP_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_PBAX_NODEID</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>PM_PBAX_CHIPID</id>
-        <default>$logid</default>
-    </attribute>
-    <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
-        <default>$lognode</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_PORT_ENABLE</id>\n";
-    if( $proc % 2 == 0 ) # proc0 of DCM
+    if ((scalar @SortedPmChipAttr) == 0)
     {
-        print "        <default>0x4</default><!-- PORT0NONRED -->";
+        # Default the values.
+        print "    <!-- PM_ attributes (default values) -->\n";
+        print "    <attribute>\n";
+        print "        <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>\n";
+        print "        <default>0</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>\n";
+        print "        <default>0</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_SPIVID_PORT_ENABLE</id>\n";
+        if( $proc % 2 == 0 ) # proc0 of DCM
+        {
+            print "        <default>0x4</default><!-- PORT0NONRED -->\n";
+        }
+        else # proc1 of DCM
+        {
+            print "        <default>0x0</default><!-- NONE -->\n";
+        }
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_APSS_CHIP_SELECT</id>\n";
+        if( $proc % 2 == 0 ) # proc0 of DCM
+        {
+            print "        <default>0x00</default><!-- CS0 -->\n";
+        }
+        else # proc1 of DCM
+        {
+            print "        <default>0xFF</default><!-- NONE -->\n";
+        }
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_PBAX_NODEID</id>\n";
+        print "        <default>0</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_PBAX_CHIPID</id>\n";
+        print "        <default>$logid</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_PBAX_BRDCST_ID_VECTOR</id>\n";
+        print "        <default>$lognode</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_SLEEP_ENTRY</id>\n";
+        print "        <default>0x0</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_SLEEP_EXIT</id>\n";
+        print "        <default>0x0</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_SLEEP_TYPE</id>\n";
+        print "        <default>0x0</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_WINKLE_ENTRY</id>\n";
+        print "        <default>0x0</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_WINKLE_EXIT</id>\n";
+        print "        <default>0x0</default>\n";
+        print "    </attribute>\n";
+        print "    <attribute>\n";
+        print "        <id>PM_WINKLE_TYPE</id>\n";
+        print "        <default>0x0</default>\n";
+        print "    </attribute>\n";
+        print "    <!-- End PM_ attributes (default values) -->\n";
     }
-    else # proc1 of DCM
+    else
     {
-        print "        <default>0x0</default><!-- NONE -->";
+        print "    <!-- PM_ attributes -->\n";
+        addProcPmAttrs( $proc, $node );
+        print "    <!-- End PM_ attributes -->\n";
     }
-    print "
-    </attribute>
-    <attribute><id>PM_APSS_CHIP_SELECT</id>\n";
-    if( $proc % 2 == 0 ) # proc0 of DCM
-    {
-        print "        <default>0x00</default><!-- CS0 -->";
-    }
-    else # proc1 of DCM
-    {
-        print "        <default>0xFF</default><!-- NONE -->";
-    }
-    print "       
-    </attribute>
-    <!-- End pm_plat_attributes.xml -->\n";
-
 
     print "    </targetInstance>\n";
 
@@ -2759,13 +2797,36 @@ sub addSysAttrs
         while ($j<$sysAttrArraySize)
         {
             print "    <attribute>\n";
-            print "        <id>$systemAttr[$i][SYS_ATTR_START_INDEX+$j]</id>\n";
+            print "        <id>$systemAttr[$i][$j]</id>\n";
             $j++;
-            print "        <default>\n";
-            print "            $systemAttr[$i][SYS_ATTR_START_INDEX+$j]\n";
-            print "        </default>\n";
+            print "        <default>$systemAttr[$i][$j]</default>\n";
             print "    </attribute>\n";
             $j++;
+        }
+    }
+}
+
+sub addProcPmAttrs
+{
+    my ($position,$nodeId) = @_;
+
+    for my $i (0 .. $#SortedPmChipAttr)
+    {
+        if (($SortedPmChipAttr[$i][CHIP_POS_INDEX] == $position) &&
+            ($SortedPmChipAttr[$i][CHIP_NODE_INDEX] == $node) )
+        {
+            #found the corresponding proc and node
+            my $j =0;
+            my $arraySize=$#{$SortedPmChipAttr[$i]} - CHIP_ATTR_START_INDEX;
+            while ($j<$arraySize)
+            {
+                print "    <attribute>\n";
+                print "        <id>$SortedPmChipAttr[$i][CHIP_ATTR_START_INDEX+$j]</id>\n";
+                $j++;
+                print "        <default>$SortedPmChipAttr[$i][CHIP_ATTR_START_INDEX+$j]</default>\n";
+                print "    </attribute>\n";
+                $j++;
+            }
         }
     }
 }
@@ -2776,23 +2837,22 @@ sub addProcPcieAttrs
 
     for my $i (0 .. $#SortedPcie)
     {
-        if (($SortedPcie[$i][PCIE_POS_INDEX] == $position) &&
-            ($SortedPcie[$i][PCIE_NODE_INDEX] == $node) )
+        if (($SortedPcie[$i][CHIP_POS_INDEX] == $position) &&
+            ($SortedPcie[$i][CHIP_NODE_INDEX] == $node) )
         {
             #found the corresponding proc and node
             my $j =0;
-            #subtract to from the size because the start position is 2 over
-            my $pcieArraySize=$#{$SortedPcie[$i]} - PCIE_START_INDEX;
-            while ($j<$pcieArraySize)
+            my $arraySize=$#{$SortedPcie[$i]} - CHIP_ATTR_START_INDEX;
+            while ($j<$arraySize)
             {
                 print "    <attribute>\n";
-                print "        <id>$SortedPcie[$i][PCIE_START_INDEX+$j]</id>\n";
+                print "        <id>$SortedPcie[$i][CHIP_ATTR_START_INDEX+$j]</id>\n";
                 $j++;
                 print "        <default>\n";
-                print "            $SortedPcie[$i][PCIE_START_INDEX+$j]";
+                print "            $SortedPcie[$i][CHIP_ATTR_START_INDEX+$j]";
                 print ",";
                 $j++;
-                print "$SortedPcie[$i][PCIE_START_INDEX+$j]\n";
+                print "$SortedPcie[$i][CHIP_ATTR_START_INDEX+$j]\n";
                 print "        </default>\n";
                 print "    </attribute>\n";
                 $j++;

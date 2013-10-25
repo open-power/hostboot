@@ -3465,9 +3465,8 @@ Consumer:  proc_pm_init and proc_pcbs_init
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_SLEEP_ENTRY</id>
         <macro>DIRECT</macro>
@@ -3491,9 +3490,8 @@ Consumer:  proc_pm_init and proc_pcbs_init.
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_SLEEP_EXIT</id>
         <macro>DIRECT</macro>
@@ -3513,9 +3511,8 @@ Consumer:  proc_pm_init and proc_pcbs_init
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_SLEEP_TYPE</id>
         <macro>DIRECT</macro>
@@ -3531,16 +3528,14 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_WINKLE_TYPE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERUP_CORE_DELAY0</id>
     <description>
@@ -3559,7 +3554,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERUP_CORE_DELAY1</id>
     <description>
@@ -3633,7 +3627,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERDOWN_CORE_DELAY0</id>
     <description>
@@ -3652,7 +3645,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERDOWN_CORE_DELAY1</id>
     <description>
@@ -3726,7 +3718,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERUP_ECO_DELAY0</id>
     <description>
@@ -3745,7 +3736,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERUP_ECO_DELAY1</id>
     <description>
@@ -3819,7 +3809,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERDOWN_ECO_DELAY0</id>
     <description>
@@ -3838,7 +3827,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_PFET_POWERDOWN_ECO_DELAY1</id>
     <description>
@@ -4479,7 +4467,6 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC:52835 add default 0 -->
 <attribute>
     <id>PM_SPIVID_PORT_ENABLE</id>
     <description>
@@ -12468,258 +12455,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>FREQ_EXT_BIAS_UP</id>
-    <description>
-     Frequency Bias - % of bias upward (binary in 0.5 percent steps) in generating
-     Pstate tables.  Either this or FREQ_EXT_BIAS_DOWN can have non-zero value
-     concurrently due to the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_FREQ_EXT_BIAS_UP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>FREQ_EXT_BIAS_DOWN</id>
-    <description>
-     Frequency Bias - % of bias downward (binary in 0.5 percent steps) in generating
-     Pstate tables.  Either this or FREQ_EXT_BIAS_UP can have non-zero value
-     concurrently due to the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_FREQ_EXT_BIAS_DOWN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VOLTAGE_EXT_VDD_BIAS_UP</id>
-    <description>
-     External VDD Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
-     is applied to each VPD point in generating the Global Pstate tables. Either
-     this or ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN can have non-zero value concurrently due to
-     the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_UP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VOLTAGE_EXT_VDD_BIAS_DOWN</id>
-    <description>
-     External VDD Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
-     is applied to each VPD point in generating the Global Pstate tables. Either
-     this or ATTR_VOLTAGE_EXT_VDD_BIAS_UP can have non-zero value concurrently due to
-     the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VOLTAGE_EXT_VCS_BIAS_UP</id>
-    <description>
-     External VCS Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
-     is applied to each VPD point in generating the Global Pstate tables. Either
-     this or ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN can have non-zero value concurrently due to
-     the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VOLTAGE_EXT_VCS_BIAS_UP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VOLTAGE_EXT_VCS_BIAS_DOWN</id>
-    <description>
-     External VCS Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
-     is applied to each VPD point in generating the Global Pstate tables. Either
-     this or ATTR_VOLTAGE_EXT_VCS_BIAS_UP can have non-zero value concurrently due to
-     the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VOLTAGE_INT_VDD_BIAS_UP</id>
-    <description>
-     Internal VDD Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
-     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table
-     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias
-     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_DOWN can have non-zero value
-     concurrently due to the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VOLTAGE_INT_VDD_BIAS_UP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VOLTAGE_INT_VDD_BIAS_DOWN</id>
-    <description>
-     Internal VDD Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
-     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table
-     built *after* the ATTR_VOLTAGE_EXT_VDD_BIAS_UP/ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN bias
-     have been applied. Either this or ATTR_VOLTAGE_INT_VDD_BIAS_UP can have non-zero value
-     concurrently due to the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VOLTAGE_INT_VDD_BIAS_DOWN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VOLTAGE_INT_VCS_BIAS_UP</id>
-    <description>
-     Internal VCS Voltage Bias - % of bias upward (binary in 0.5 percent steps) that
-     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table
-     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias
-     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_DOWN can have non-zero value
-     concurrently due to the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VOLTAGE_INT_VCS_BIAS_UP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VOLTAGE_INT_VCS_BIAS_DOWN</id>
-    <description>
-     Internal VCS Voltage Bias - % of bias downward (binary in 0.5 percent steps) that
-     is applied to the Local Pstate Table voltage entries based on the Global Pstate Table
-     built *after* the ATTR_VOLTAGE_EXT_VCS_BIAS_UP/ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN bias
-     have been applied. Either this or ATTR_VOLTAGE_INT_VCS_BIAS_UP can have non-zero value
-     concurrently due to the unsigned definition of attributes.
-
-     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
-
-     Consumers: p8_build_gpstate_table.C
-
-     Platform default:  0
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VOLTAGE_INT_VCS_BIAS_DOWN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
     <description>
       Override for Minimum frequency for which undervolting is allowed.
@@ -12790,7 +12525,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_WINKLE_ENTRY</id>
@@ -12815,7 +12550,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_WINKLE_EXIT</id>

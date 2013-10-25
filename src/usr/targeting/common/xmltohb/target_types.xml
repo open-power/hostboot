@@ -119,26 +119,24 @@
     <attribute><id>MNFG_FLAGS</id></attribute>
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
     <!-- Start pm_plat_attributes.xml -->
-    <attribute><id>FREQ_CORE_MAX</id></attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
+    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
+    <attribute><id>PM_SPIVID_FREQUENCY</id></attribute>
+    <attribute><id>PM_SAFE_FREQUENCY</id></attribute>
     <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id></attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id></attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id></attribute>
     <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id></attribute>
     <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id></attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id></attribute>
     <attribute><id>PM_SPIPSS_FREQUENCY</id></attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id></attribute>
-
-    <attribute><id>CPM_TURBO_BOOST_PERCENT</id></attribute>
     <attribute><id>PROC_R_LOADLINE_VDD</id></attribute>
-    <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
     <attribute><id>PROC_R_DISTLOSS_VDD</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VDD</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
-
+    <attribute><id>FREQ_CORE_MAX</id></attribute>
+    <attribute><id>CPM_TURBO_BOOST_PERCENT</id></attribute>
     <!-- End pm_plat_attributes.xml -->
     <!--    sbe_config_update attributes    -->
     <attribute><id>NEST_FREQ_MHZ</id></attribute>
@@ -306,19 +304,27 @@
     <attribute><id>PROC_L3_BAR1_REG</id></attribute>
     <attribute><id>PROC_L3_BAR2_REG</id></attribute>
     <attribute><id>PROC_L3_BAR_GROUP_MASK_REG</id></attribute>
-     <!--   proc_fab_smp_fabric_attributes.xml  -->
-     <attribute><id>PROC_PCIE_NOT_F_LINK</id></attribute>
-     <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
-     <attribute><id>MSS_MCS_GROUP_32</id></attribute>
-     <attribute><id>MSS_MEM_IPL_COMPLETE</id></attribute>
-     <!-- Start pm_plat_attributes.xml -->
-     <attribute><id>PM_APSS_CHIP_SELECT</id></attribute>
-     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id></attribute>
-     <attribute><id>PM_PBAX_CHIPID</id></attribute>
-     <attribute><id>PM_PBAX_NODEID</id></attribute>
-     <attribute><id>PM_SPIVID_PORT_ENABLE</id></attribute>
-     <!-- End pm_plat_attributes.xml -->
-     <!-- Start pm_hwp_attributes.xml -->
+    <!--   proc_fab_smp_fabric_attributes.xml  -->
+    <attribute><id>PROC_PCIE_NOT_F_LINK</id></attribute>
+    <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
+    <attribute><id>MSS_MCS_GROUP_32</id></attribute>
+    <attribute><id>MSS_MEM_IPL_COMPLETE</id></attribute>
+    <!-- Start pm_plat_attributes.xml -->
+    <attribute><id>PM_UNDERVOLTING_FRQ_MINIMUM</id></attribute>
+    <attribute><id>PM_UNDERVOLTING_FREQ_MAXIMUM</id></attribute>
+    <attribute><id>PM_SPIVID_PORT_ENABLE</id></attribute>
+    <attribute><id>PM_APSS_CHIP_SELECT</id></attribute>
+    <attribute><id>PM_PBAX_NODEID</id></attribute>
+    <attribute><id>PM_PBAX_CHIPID</id></attribute>
+    <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id></attribute>
+    <attribute><id>PM_SLEEP_ENTRY</id></attribute>
+    <attribute><id>PM_SLEEP_EXIT</id></attribute>
+    <attribute><id>PM_SLEEP_TYPE</id></attribute>
+    <attribute><id>PM_WINKLE_ENTRY</id></attribute>
+    <attribute><id>PM_WINKLE_EXIT</id></attribute>
+    <attribute><id>PM_WINKLE_TYPE</id></attribute>
+    <!-- End pm_plat_attributes.xml -->
+    <!-- Start pm_hwp_attributes.xml -->
     <attribute><id>PM_AISS_TIMEOUT</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY_RANGE</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY_VALUE</id></attribute>
@@ -362,9 +368,6 @@
     <attribute><id>PM_RESONANT_CLOCK_LFRLOW_PSTATE</id></attribute>
     <attribute><id>PM_RESONANT_CLOCK_LFRUPPER_PSTATE</id></attribute>
     <attribute><id>PM_SAFE_PSTATE</id></attribute>
-    <attribute><id>PM_SLEEP_ENTRY</id></attribute>
-    <attribute><id>PM_SLEEP_EXIT</id></attribute>
-    <attribute><id>PM_SLEEP_TYPE</id></attribute>
     <attribute><id>PM_SLEEP_WINKLE_REQUEST_TIMEOUT</id></attribute>
     <attribute><id>PM_SPIPSS_CLOCK_DIVIDER</id></attribute>
     <attribute><id>PM_SPIPSS_CLOCK_PHASE</id></attribute>
@@ -390,7 +393,6 @@
     <attribute><id>PM_SPIVID_IN_DELAY_FRAME2</id></attribute>
     <attribute><id>PM_SPIVID_MAJORITY_VOTE_ENABLE</id></attribute>
     <attribute><id>PM_SPIVID_MAX_RETRIES</id></attribute>
-    <attribute><id>PM_WINKLE_TYPE</id></attribute>
     <attribute><id>PROC_DPLL_DIVIDER</id></attribute>
      <!-- End pm_hwp_attributes.xml -->
      <!-- Begin poreve_memory_attributes.xml -->
@@ -407,23 +409,7 @@
     <attribute><id>PROC_MIRROR_SIZES_ACK</id></attribute>
     <attribute><id>PROC_MEM_BASES_ACK</id></attribute>
     <attribute><id>PROC_MEM_SIZES_ACK</id></attribute>
-
-    <attribute><id>FREQ_EXT_BIAS_UP</id></attribute>
-    <attribute><id>FREQ_EXT_BIAS_DOWN</id></attribute>
-    <attribute><id>VOLTAGE_EXT_VDD_BIAS_UP</id></attribute>
-    <attribute><id>VOLTAGE_EXT_VDD_BIAS_DOWN</id></attribute>
-    <attribute><id>VOLTAGE_EXT_VCS_BIAS_UP</id></attribute>
-    <attribute><id>VOLTAGE_EXT_VCS_BIAS_DOWN</id></attribute>
-    <attribute><id>VOLTAGE_INT_VDD_BIAS_UP</id></attribute>
-    <attribute><id>VOLTAGE_INT_VDD_BIAS_DOWN</id></attribute>
-    <attribute><id>VOLTAGE_INT_VCS_BIAS_UP</id></attribute>
-    <attribute><id>VOLTAGE_INT_VCS_BIAS_DOWN</id></attribute>
-    <attribute><id>PM_UNDERVOLTING_FRQ_MINIMUM</id></attribute>
-    <attribute><id>PM_UNDERVOLTING_FREQ_MAXIMUM</id></attribute>
     <attribute><id>CPM_INFLECTION_POINTS</id></attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id></attribute>
-    <attribute><id>PM_WINKLE_EXIT</id></attribute>
-
 </targetType>
 
 <targetType>

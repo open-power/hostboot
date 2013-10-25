@@ -115,6 +115,22 @@ fapi::ReturnCode setTargetingAttr(const fapi::Target * i_pFapiTarget,
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when accessing
+ * an attribute where zero needs to be returned. The use-case is for attributes
+ * that exist solely for overriding
+ *
+ * @param[out] o_data Pointer to user's attribute variable
+ * @param[in]  i_len  Size of o_data
+ * @return ReturnCode.  Zero on success, else platform specified error
+ */
+inline fapi::ReturnCode fapiPlatGetZeroAttrData(void * o_data,
+                                                size_t i_len)
+{
+    memset(o_data, 0, i_len);
+    return fapi::FAPI_RC_SUCCESS;
+}
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when accessing
  * SPD ATTR. It should not be called directly
  *
  * @param[in]  i_pFapiTarget Target pointer to operate on
@@ -1649,4 +1665,39 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
 #define ATTR_SPD_MODULE_REVISION_CODE_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttrAccessor(PTARGET, fapi::getSpdAttr::SPD_MODULE_REVISION_CODE, &VAL, sizeof(VAL))
+
+//------------------------------------------------------------------------------
+//  MACROs to support PM Attributes that always get 0 (sole purpose is override)
+//------------------------------------------------------------------------------
+#define ATTR_FREQ_EXT_BIAS_UP_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_FREQ_EXT_BIAS_DOWN_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_VOLTAGE_EXT_VDD_BIAS_UP_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_VOLTAGE_EXT_VCS_BIAS_UP_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_VOLTAGE_INT_VDD_BIAS_UP_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_VOLTAGE_INT_VDD_BIAS_DOWN_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_VOLTAGE_INT_VCS_BIAS_UP_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+#define ATTR_VOLTAGE_INT_VCS_BIAS_DOWN_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+
 #endif // FAPIPLATATTRIBUTESERVICE_H_
