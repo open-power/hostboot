@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.H,v 1.9 2013/07/29 20:15:05 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.H,v 1.10 2013/08/29 20:41:09 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -335,7 +335,7 @@ const uint8_t  PB_SCONFIG_WE0_FP_I2C_HSHAKE = false;                   // off
 const bool     PB_SCONFIG_WE0_FP_I2C_SPARE_MODE = false;               // spare
 const uint8_t  PB_SCONFIG_WE0_FP_C2I_DONE_LAUNCH = 0x0;                // rc_p1
 const bool     PB_SCONFIG_WE0_FP_C2I_SPARE_MODE = false;               // spare
-const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_FULL = 0x0D;             // 13
+const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_FULL = 0x0E;             // 14
 const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_NOM = 0x12;              // 18
 
 

@@ -20,8 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-// $Id: p8_set_pore_bar.C,v 1.5 2013/08/02 19:34:02 stillgs Exp $
+// $Id: p8_set_pore_bar.C,v 1.6 2013/09/04 14:53:16 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.C,v $
 //-------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -117,8 +116,8 @@ const uint32_t  SLW_PBA_SLAVE = 2;
 // Function prototypes
 // ------------------------------------------------------------------------------
 
-fapi::ReturnCode pba_slave_reset(   const fapi::Target& i_target,
-                                    uint32_t id);
+fapi::ReturnCode bar_pba_slave_reset( const fapi::Target& i_target,
+                                      uint32_t id );
 
 // ------------------------------------------------------------------------------
 // Function definitions
@@ -490,7 +489,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
             // reprogram this slave for IMA writes using special code sequences that
             // restore normal DMA writes after each IMA sequence.
 
-            rc = pba_slave_reset(i_target, SLW_PBA_SLAVE);
+            rc = bar_pba_slave_reset(i_target, SLW_PBA_SLAVE);
             if (rc)
             {
                 FAPI_ERR("PBA Slave Reset failed");
@@ -539,7 +538,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
 /// \param timeout A value of SsxInterval type.  The special value
 /// SSX_WAIT_FOREVER indicates no timeout.
 ///
-/// This form of pba_slave_reset() gives the caller control over timeouts and
+/// This form of bar_pba_slave_reset() gives the caller control over timeouts and
 /// error handling.
 ///
 /// \retval 0 Succes
@@ -548,7 +547,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
 /// to reset the slave.
 
 fapi::ReturnCode
-pba_slave_reset(const fapi::Target& i_target, uint32_t id)
+bar_pba_slave_reset(const fapi::Target& i_target, uint32_t id)
 {
 
     uint32_t            poll_count = 0;

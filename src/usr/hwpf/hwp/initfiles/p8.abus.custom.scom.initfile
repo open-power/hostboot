@@ -1,8 +1,9 @@
-#-- $Id: p8.abus.custom.scom.initfile,v 1.7 2013/09/17 22:28:51 jgrell Exp $
+#-- $Id: p8.abus.custom.scom.initfile,v 1.8 2013/09/24 20:20:19 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.8 |jgrell  |09/24/13|Changed "1" expression to "any"
 #--     1.6 |jgrell  |09/17/13|Added DD2 specific inits
 #--     1.4 |jgrell  |06/18/13|Added Venice specific PRBS tap IDs due to common initfile
 #--     1.3 |thomsen |04/30/13|Added TGT1. to ATTR_CHIP_EC* attribute instances to reference a chip target rather than a chiplet target
@@ -301,7 +302,6 @@ scom 0x800.0b(tx_mode_pg)(tx_grp0)(lane_na).0x(abus_gcr_addr) {
 
 scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0)(lane_na).0x(abus_gcr_addr) {
 bits,                         	scom_data, 	expr;
-#@thi - fix compiler error
 rx_rc_enable_dfe_h1_cal,      	0b0,       	any; #temp for DD2 testing. Previously --> TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0;
 rx_rc_enable_ddc,		0b0,		any; #temp for DD2 testing. Previously --> TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
 rx_rc_enable_ctle_cal,		0b0,		any; #temp for DD2 testing. Previously --> TGT1.ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
