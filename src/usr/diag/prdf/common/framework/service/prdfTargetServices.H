@@ -281,6 +281,14 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target );
  */
 uint32_t getNodePosition( TARGETING::TargetHandle_t i_target );
 
+/**
+ * @brief   Returns Model associated with Proc.
+ *          Model expected is either MURANO or VENICE.
+ * @param   i_proc a proc target
+ * @return  proc model if target is valid else MODEL_NA
+ */
+TARGETING::MODEL getProcModel( TARGETING::TargetHandle_t i_proc );
+
 //##############################################################################
 //##
 //##                        Memory specific functions

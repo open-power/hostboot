@@ -337,22 +337,22 @@ group gIoxFir_0 filter singlebit
     /** IOXFIR_0[9]
      *  Spare Deployed
      */
-    (IoxFir_0, bit(9)) ? defaultMaskedError;
+    (IoxFir_0, bit(9)) ? spareDeployed_xbus0;
 
     /** IOXFIR_0[10]
      *  Max Spares Exceeded
      */
-    (IoxFir_0, bit(10)) ? defaultMaskedError;
+    (IoxFir_0, bit(10)) ? maxSparesExceeded_xbus0;
 
     /** IOXFIR_0[11]
      *  Recalibration or Dynamic Repair Error
      */
-    (IoxFir_0, bit(11)) ? defaultMaskedError;
+    (IoxFir_0, bit(11)) ? calloutXbus0InterfaceTh1;
 
     /** IOXFIR_0[12]
      *  Too Many Bus Errors
      */
-    (IoxFir_0, bit(12)) ? defaultMaskedError;
+    (IoxFir_0, bit(12)) ? tooManyBusErrors_xbus0;
 
     /** IOXFIR_0[13:15]
      *  Reserved
@@ -523,22 +523,22 @@ group gIoxFir_2 filter singlebit
     /** IOXFIR_2[9]
      *  Spare Deployed
      */
-    (IoxFir_2, bit(9)) ? defaultMaskedError;
+    (IoxFir_2, bit(9)) ? spareDeployed_xbus2;
 
     /** IOXFIR_2[10]
      *  Max Spares Exceeded
      */
-    (IoxFir_2, bit(10)) ? defaultMaskedError;
+    (IoxFir_2, bit(10)) ? maxSparesExceeded_xbus2;
 
     /** IOXFIR_2[11]
      *  Recalibration or Dynamic Repair Error
      */
-    (IoxFir_2, bit(11)) ? defaultMaskedError;
+    (IoxFir_2, bit(11)) ? calloutXbus2InterfaceTh1;
 
     /** IOXFIR_2[12]
      *  Too Many Bus Errors
      */
-    (IoxFir_2, bit(12)) ? defaultMaskedError;
+    (IoxFir_2, bit(12)) ? tooManyBusErrors_xbus2;
 
     /** IOXFIR_2[13:15]
      *  Reserved
@@ -616,22 +616,22 @@ group gIoxFir_3 filter singlebit
     /** IOXFIR_3[9]
      *  Spare Deployed
      */
-    (IoxFir_3, bit(9)) ? defaultMaskedError;
+    (IoxFir_3, bit(9)) ? spareDeployed_xbus3;
 
     /** IOXFIR_3[10]
      *  Max Spares Exceeded
      */
-    (IoxFir_3, bit(10)) ? defaultMaskedError;
+    (IoxFir_3, bit(10)) ? maxSparesExceeded_xbus3;
 
     /** IOXFIR_3[11]
      *  Recalibration or Dynamic Repair Error
      */
-    (IoxFir_3, bit(11)) ? defaultMaskedError;
+    (IoxFir_3, bit(11)) ? calloutXbus3InterfaceTh1;
 
     /** IOXFIR_3[12]
      *  Too Many Bus Errors
      */
-    (IoxFir_3, bit(12)) ? defaultMaskedError;
+    (IoxFir_3, bit(12)) ? tooManyBusErrors_xbus3;
 
     /** IOXFIR_3[13:15]
      *  Reserved
@@ -717,6 +717,18 @@ actionclass calloutXbus2InterfaceTh1 { calloutXbus2Interface; threshold1; };
 /** Callout the XBUS 3 interface, threshold 1 */
 actionclass calloutXbus3InterfaceTh1 { calloutXbus3Interface; threshold1; };
 
+/** Lane Repair: spare deployed - XBUS 0 */
+actionclass spareDeployed_xbus0
+{ calloutXbus1Interface; funccall("spareDeployed_xbus0"); };
+
+/** Lane Repair: max spares exceeded - XBUS 0 */
+actionclass maxSparesExceeded_xbus0
+{ calloutXbus1InterfaceTh1; funccall("maxSparesExceeded_xbus0"); };
+
+/** Lane Repair: too many bus errors - XBUS 0 */
+actionclass tooManyBusErrors_xbus0
+{ calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus0"); };
+
 /** Lane Repair: spare deployed - XBUS 1 */
 actionclass spareDeployed_xbus1
 { calloutXbus1Interface; funccall("spareDeployed_xbus1"); };
@@ -728,6 +740,30 @@ actionclass maxSparesExceeded_xbus1
 /** Lane Repair: too many bus errors - XBUS 1 */
 actionclass tooManyBusErrors_xbus1
 { calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus1"); };
+
+/** Lane Repair: spare deployed - XBUS 2 */
+actionclass spareDeployed_xbus2
+{ calloutXbus1Interface; funccall("spareDeployed_xbus2"); };
+
+/** Lane Repair: max spares exceeded - XBUS 2 */
+actionclass maxSparesExceeded_xbus2
+{ calloutXbus1InterfaceTh1; funccall("maxSparesExceeded_xbus2"); };
+
+/** Lane Repair: too many bus errors - XBUS 2 */
+actionclass tooManyBusErrors_xbus2
+{ calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus2"); };
+
+/** Lane Repair: spare deployed - XBUS 3 */
+actionclass spareDeployed_xbus3
+{ calloutXbus1Interface; funccall("spareDeployed_xbus3"); };
+
+/** Lane Repair: max spares exceeded - XBUS 3 */
+actionclass maxSparesExceeded_xbus3
+{ calloutXbus1InterfaceTh1; funccall("maxSparesExceeded_xbus3"); };
+
+/** Lane Repair: too many bus errors - XBUS 3 */
+actionclass tooManyBusErrors_xbus3
+{ calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus3"); };
 
 /** Threshold 5 per day, mask but do not predictively callout XBUS 0 */
 actionclass calloutXbus0InterfaceTh5pDay

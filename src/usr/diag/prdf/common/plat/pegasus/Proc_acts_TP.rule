@@ -88,7 +88,7 @@ group gTpChipletFir filter singlebit
     /** TP_CHIPLET_FIR[13]
      *  Attention from IOMCFIR_0 (Venice only)
      */
-    (TpChipletFir, bit(13)) ? defaultMaskedError;
+    (TpChipletFir, bit(13)) ? analyze(gIomcFir_0);
 
     /** TP_CHIPLET_FIR[14]
      *  Attention from IOMCFIR_1

@@ -973,6 +973,27 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target )
     return o_pos;
 }
 
+//------------------------------------------------------------------------------
+
+TARGETING::MODEL getProcModel( TARGETING::TargetHandle_t i_proc )
+{
+    #define PRDF_FUNC "[PlatServices::getProcModel] "
+
+    MODEL l_model = MODEL_NA;
+    if( TYPE_PROC == getTargetType( i_proc ) )
+    {
+        l_model = i_proc->getAttr<ATTR_MODEL>();
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC"Invalid Target Huid = 0x%08x", getHuid( i_proc ) );
+    }
+
+    return l_model;
+
+    #undef PRDF_FUNC
+}
+
 //##############################################################################
 //##
 //##                        Memory specific functions

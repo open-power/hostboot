@@ -423,12 +423,19 @@ int32_t maxSparesExceeded_##BUS##POS( ExtensibleChip * i_chip, \
 { return LaneRepair::handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
 PRDF_PLUGIN_DEFINE( Proc, maxSparesExceeded_##BUS##POS );
 
+PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 0 )
 PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 1 )
+PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 2 )
+PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 3 )
 
 PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 0 )
 PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 1 )
 PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 2 )
 
+PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 0 )
+PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 1 )
+PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 2 )
+PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 3 )
 PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 4 )
 PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 5 )
 PLUGIN_LANE_REPAIR( dmiBus, TYPE_MCS, 6 )
@@ -442,7 +449,10 @@ int32_t tooManyBusErrors_##BUS##POS( ExtensibleChip * i_chip, \
 { return LaneRepair::handleLaneRepairEvent(i_chip, TYPE, POS, i_sc, false); } \
 PRDF_PLUGIN_DEFINE( Proc, tooManyBusErrors_##BUS##POS );
 
+PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 0 )
 PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 1 )
+PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 2 )
+PLUGIN_LANE_REPAIR( xbus, TYPE_XBUS, 3 )
 
 PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 0 )
 PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 1 )
@@ -565,6 +575,22 @@ int32_t MaskMCS31IfCentaurCheckstop( ExtensibleChip * i_chip,
     return l_rc;
 }
 PRDF_PLUGIN_DEFINE( Proc, MaskMCS31IfCentaurCheckstop );
+
+/**
+ * @brief  checks if proc is Venice chip.
+ * @param  i_chip P8 chip.
+ * @param  isVenice TRUE if chip is venice false otherwise.
+ * @return SUCCESS
+ */
+int32_t isVeniceProc( ExtensibleChip * i_chip, bool & o_isVenice )
+{
+    o_isVenice = false;
+    if( MODEL_VENICE == getProcModel( i_chip->GetChipHandle() ) )
+        o_isVenice = true;
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Proc, isVeniceProc );
 
 //------------------------------------------------------------------------------
 // Callout plugins
@@ -689,6 +715,7 @@ int32_t phbConfigured(ExtensibleChip * i_chip,
 
     return SUCCESS;
 
+    #undef PRDF_FUNC
 }
 
 #define PLUGIN_PHB_CONFIGURED( POS ) \

@@ -132,14 +132,16 @@
         scomaddr    0x04011000;
         reset       (&, 0x04011001);
         mask        (|, 0x04011005);
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     group default;
     };
 
     register IOXFIR_0_MASK
     {
         name        "XBUS01.X0.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011003;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     group default;
     };
 
     register IOXFIR_0_ACT0
@@ -147,7 +149,9 @@
         name        "XBUS01.X0.BUSCTL.SCOM.FIR_ACTION0_REG";
         scomaddr    0x04011006;
         capture     type secondary;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     req nonzero("IOXFIR_0");
+        capture     group default;
     };
 
     register IOXFIR_0_ACT1
@@ -155,7 +159,9 @@
         name        "XBUS01.X0.BUSCTL.SCOM.FIR_ACTION1_REG";
         scomaddr    0x04011007;
         capture     type secondary;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     req nonzero("IOXFIR_0");
+        capture     group default;
     };
 
     ############################################################################
@@ -206,14 +212,16 @@
         scomaddr    0x04011800;
         reset       (&, 0x04011801);
         mask        (|, 0x04011805);
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     group default;
     };
 
     register IOXFIR_2_MASK
     {
         name        "XBUS23.X0.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011803;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     group default;
     };
 
     register IOXFIR_2_ACT0
@@ -221,7 +229,9 @@
         name        "XBUS23.X0.BUSCTL.SCOM.FIR_ACTION0_REG";
         scomaddr    0x04011806;
         capture     type secondary;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     req nonzero("IOXFIR_2");
+        capture     group default;
     };
 
     register IOXFIR_2_ACT1
@@ -229,7 +239,9 @@
         name        "XBUS23.X0.BUSCTL.SCOM.FIR_ACTION1_REG";
         scomaddr    0x04011807;
         capture     type secondary;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     req nonzero("IOXFIR_2");
+        capture     group default;
     };
 
     ############################################################################
@@ -242,14 +254,16 @@
         scomaddr    0x04011c00;
         reset       (&, 0x04011c01);
         mask        (|, 0x04011c05);
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     group default;
     };
 
     register IOXFIR_3_MASK
     {
         name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011c03;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     group default;
     };
 
     register IOXFIR_3_ACT0
@@ -257,7 +271,9 @@
         name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG";
         scomaddr    0x04011c06;
         capture     type secondary;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     req nonzero("IOXFIR_3");
+        capture     group default;
     };
 
     register IOXFIR_3_ACT1
@@ -265,7 +281,9 @@
         name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_ACTION1_REG";
         scomaddr    0x04011c07;
         capture     type secondary;
-        capture     group never; #FIXME: RTC 49971
+        capture     req funccall("isVeniceProc");
+        capture     req nonzero("IOXFIR_3");
+        capture     group default;
     };
 
     ############################################################################

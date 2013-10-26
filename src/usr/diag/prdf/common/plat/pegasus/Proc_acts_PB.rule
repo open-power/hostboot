@@ -2780,8 +2780,171 @@ group gPciNestFir filter singlebit
 ################################################################################
 # PB Chiplet IOMCFIR_0
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
-# Venice only
+rule IomcFir_0
+{
+  CHECK_STOP:  IOMCFIR_0 & ~IOMCFIR_0_MASK & ~IOMCFIR_0_ACT0 & ~IOMCFIR_0_ACT1;
+  RECOVERABLE: IOMCFIR_0 & ~IOMCFIR_0_MASK & ~IOMCFIR_0_ACT0 &  IOMCFIR_0_ACT1;
+};
+
+group gIomcFir_0 filter singlebit
+{
+    /** IOMCFIR_0[0]
+     *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IomcFir_0, bit(0)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[1]
+     *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IomcFir_0, bit(1)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IomcFir_0, bit(2)) ? SelfHighThr1;
+
+    /** IOMCFIR_0[3:7]
+     *  Reserved
+     */
+    (IomcFir_0, bit(3|4|5|6|7)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[8]
+     *  MCS0 Training Error
+     */
+    (IomcFir_0, bit(8)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[9]
+     *  MCS0 Spare Deployed
+     */
+    (IomcFir_0, bit(9)) ? spareDeployed_dmiBus0;
+
+    /** IOMCFIR_0[10]
+     *  MCS0 Max Spares Exceeded
+     */
+    (IomcFir_0, bit(10)) ? maxSparesExceeded_dmiBus0;
+
+    /** IOMCFIR_0[11]
+     *  MCS0 Recalibration or Dynamic Repair Error
+     */
+    (IomcFir_0, bit(11)) ? calloutDmiBus0Th1;
+
+    /** IOMCFIR_0[12]
+     *  MCS0 Too Many Bus Errors
+     */
+    (IomcFir_0, bit(12)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[13:15]
+     *  Reserved
+     */
+    (IomcFir_0, bit(13|14|15)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[16]
+     *  MCS1 Training Error
+     */
+    (IomcFir_0, bit(16)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[17]
+     *  MCS1 Spare Deployed
+     */
+    (IomcFir_0, bit(17)) ? spareDeployed_dmiBus1;
+
+    /** IOMCFIR_0[18]
+     *  MCS1 Max Spares Exceeded
+     */
+    (IomcFir_0, bit(18)) ? maxSparesExceeded_dmiBus1;
+
+    /** IOMCFIR_0[19]
+     *  MCS1 Recalibration or Dynamic Repair Error
+     */
+    (IomcFir_0, bit(19)) ? calloutDmiBus1Th1;
+
+    /** IOMCFIR_0[20]
+     *  MCS1 Too Many Bus Errors
+     */
+    (IomcFir_0, bit(20)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[21:23]
+     *  Reserved
+     */
+    (IomcFir_0, bit(21|22|23)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[24]
+     *  MCS2 Training Error
+     */
+    (IomcFir_0, bit(24)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[25]
+     *  MCS2 Spare Deployed
+     */
+    (IomcFir_0, bit(25)) ? spareDeployed_dmiBus2;
+
+    /** IOMCFIR_0[26]
+     *  MCS2 Max Spares Exceeded
+     */
+    (IomcFir_0, bit(26)) ? maxSparesExceeded_dmiBus2;
+
+    /** IOMCFIR_0[27]
+     *  MCS2 Recalibration or Dynamic Repair Error
+     */
+    (IomcFir_0, bit(27)) ? calloutDmiBus2Th1;
+
+    /** IOMCFIR_0[28]
+     *  MCS2 Too Many Bus Errors
+     */
+    (IomcFir_0, bit(28)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[29:31]
+     *  Reserved
+     */
+    (IomcFir_0, bit(29|30|31)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[32]
+     *  MCS3 Training Error
+     */
+    (IomcFir_0, bit(32)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[33]
+     *  MCS3 Spare Deployed
+     */
+    (IomcFir_0, bit(33)) ? spareDeployed_dmiBus3;
+
+    /** IOMCFIR_0[34]
+     *  MCS3 Max Spares Exceeded
+     */
+    (IomcFir_0, bit(34)) ? maxSparesExceeded_dmiBus3;
+
+    /** IOMCFIR_0[35]
+     *  MCS3 Recalibration or Dynamic Repair Error
+     */
+    (IomcFir_0, bit(35)) ? calloutDmiBus3Th1;
+
+    /** IOMCFIR_0[36]
+     *  MCS3 Too Many Bus Errors
+     */
+    (IomcFir_0, bit(36)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[37:39]
+     *  Reserved
+     */
+    (IomcFir_0, bit(37|38|39)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[40:47]
+     *  FIR_RX_BUS4 unused
+     */
+    (IomcFir_0, bit(40|41|42|43|44|45|46|47)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IomcFir_0, bit(48)) ? defaultMaskedError;
+
+    /** IOMCFIR_0[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IomcFir_0, bit(49)) ? defaultMaskedError;
+};
 
 ################################################################################
 # PB Chiplet IOMCFIR_1
@@ -3014,6 +3177,38 @@ actionclass calloutConnPci2AndIsolatePathTh1
     calloutConnPci2Th1;
 };
 
+/** Callout the DMI bus 0 */
+actionclass calloutDmiBus0
+{
+    callout(connected(TYPE_MCS,    0), MRU_MEDA);
+    callout(connected(TYPE_MEMBUF, 0), MRU_MEDA);
+    calloutDmiBusSymFru;
+};
+
+/** Callout the DMI bus 1 */
+actionclass calloutDmiBus1
+{
+    callout(connected(TYPE_MCS,    1), MRU_MEDA);
+    callout(connected(TYPE_MEMBUF, 1), MRU_MEDA);
+    calloutDmiBusSymFru;
+};
+
+/** Callout the DMI bus 2 */
+actionclass calloutDmiBus2
+{
+    callout(connected(TYPE_MCS,    2), MRU_MEDA);
+    callout(connected(TYPE_MEMBUF, 2), MRU_MEDA);
+    calloutDmiBusSymFru;
+};
+
+/** Callout the DMI bus 3 */
+actionclass calloutDmiBus3
+{
+    callout(connected(TYPE_MCS,    3), MRU_MEDA);
+    callout(connected(TYPE_MEMBUF, 3), MRU_MEDA);
+    calloutDmiBusSymFru;
+};
+
 /** Callout the DMI bus 4 */
 actionclass calloutDmiBus4
 {
@@ -3046,6 +3241,18 @@ actionclass calloutDmiBus7
     calloutDmiBusSymFru;
 };
 
+/** Callout the DMI bus 0, threshold 1 */
+actionclass calloutDmiBus0Th1 { calloutDmiBus0; threshold1; };
+
+/** Callout the DMI bus 1, threshold 1 */
+actionclass calloutDmiBus1Th1 { calloutDmiBus1; threshold1; };
+
+/** Callout the DMI bus 2, threshold 1 */
+actionclass calloutDmiBus2Th1 { calloutDmiBus2; threshold1; };
+
+/** Callout the DMI bus 3, threshold 1 */
+actionclass calloutDmiBus3Th1 { calloutDmiBus3; threshold1; };
+
 /** Callout the DMI bus 4, threshold 1 */
 actionclass calloutDmiBus4Th1 { calloutDmiBus4; threshold1; };
 
@@ -3057,6 +3264,22 @@ actionclass calloutDmiBus6Th1 { calloutDmiBus6; threshold1; };
 
 /** Callout the DMI bus 7, threshold 1 */
 actionclass calloutDmiBus7Th1 { calloutDmiBus7; threshold1; };
+
+/** Lane Repair: spare deployed - DMI bus 0 */
+actionclass spareDeployed_dmiBus0
+{ calloutDmiBus0; funccall("spareDeployed_dmiBus0"); };
+
+/** Lane Repair: spare deployed - DMI bus 1 */
+actionclass spareDeployed_dmiBus1
+{ calloutDmiBus1; funccall("spareDeployed_dmiBus1"); };
+
+/** Lane Repair: spare deployed - DMI bus 2 */
+actionclass spareDeployed_dmiBus2
+{ calloutDmiBus2; funccall("spareDeployed_dmiBus2"); };
+
+/** Lane Repair: spare deployed - DMI bus 3 */
+actionclass spareDeployed_dmiBus3
+{ calloutDmiBus3; funccall("spareDeployed_dmiBus3"); };
 
 /** Lane Repair: spare deployed - DMI bus 4 */
 actionclass spareDeployed_dmiBus4
@@ -3073,6 +3296,22 @@ actionclass spareDeployed_dmiBus6
 /** Lane Repair: spare deployed - DMI bus 7 */
 actionclass spareDeployed_dmiBus7
 { calloutDmiBus7; funccall("spareDeployed_dmiBus7"); };
+
+/** Lane Repair: max spares exceeded - DMI bus 0 */
+actionclass maxSparesExceeded_dmiBus0
+{ calloutDmiBus0Th1; funccall("maxSparesExceeded_dmiBus0"); };
+
+/** Lane Repair: max spares exceeded - DMI bus 1 */
+actionclass maxSparesExceeded_dmiBus1
+{ calloutDmiBus1Th1; funccall("maxSparesExceeded_dmiBus1"); };
+
+/** Lane Repair: max spares exceeded - DMI bus 2 */
+actionclass maxSparesExceeded_dmiBus2
+{ calloutDmiBus2Th1; funccall("maxSparesExceeded_dmiBus2"); };
+
+/** Lane Repair: max spares exceeded - DMI bus 3 */
+actionclass maxSparesExceeded_dmiBus3
+{ calloutDmiBus3Th1; funccall("maxSparesExceeded_dmiBus3"); };
 
 /** Lane Repair: max spares exceeded - DMI bus 4 */
 actionclass maxSparesExceeded_dmiBus4

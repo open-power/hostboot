@@ -728,7 +728,43 @@
     # PB Chiplet IOMCFIR_0
     ############################################################################
 
-    # Venice only scomaddr = 0x02011A00
+    register IOMCFIR_0
+    {
+        name        "IOMC0.BUSCTL.SCOM.FIR_REG";
+        scomaddr    0x02011A00;
+        reset       (&, 0x02011A01);
+        mask        (|, 0x02011A05);
+        capture     req funccall("isVeniceProc");
+        capture     group default;
+    };
+
+    register IOMCFIR_0_MASK
+    {
+        name        "IOMC0.BUSCTL.SCOM.FIR_MASK_REG";
+        scomaddr    0x02011A03;
+        capture     req funccall("isVeniceProc");
+        capture     group default;
+    };
+
+    register IOMCFIR_0_ACT0
+    {
+        name        "IOMC0.BUSCTL.SCOM.FIR_ACTION0_REG";
+        scomaddr    0x02011A06;
+        capture     type secondary;
+        capture     group default;
+        capture     req funccall("isVeniceProc");
+        capture     req nonzero("IOMCFIR_0");
+    };
+
+    register IOMCFIR_0_ACT1
+    {
+        name        "IOMC0.BUSCTL.SCOM.FIR_ACTION1_REG";
+        scomaddr    0x02011A07;
+        capture     type secondary;
+        capture     group default;
+        capture     req funccall("isVeniceProc");
+        capture     req nonzero("IOMCFIR_0");
+    };
 
     ############################################################################
     # PB Chiplet IOMCFIR_1
