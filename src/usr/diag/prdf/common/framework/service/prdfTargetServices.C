@@ -1039,7 +1039,7 @@ int32_t getMasterRanks( TargetHandle_t i_memTrgt,
 
             for ( uint32_t rs = 0; rs < 4; rs++ )
             {
-                if ( 0 != (rankMask & (0x08 >> rs)) )
+                if ( 0 != (rankMask & (0x80 >> rs)) )
                 {
                     o_ranks.push_back( CenRank((ds << 2) | rs) );
                 }

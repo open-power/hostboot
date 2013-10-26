@@ -164,11 +164,15 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
         // There may have been a code bug, callout 2nd level support.
         io_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_HIGH );
 
-        // Callout the mark. If nothing was added to the callout list (no valid
-        // marks), callout the MBA.
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+        // Callout the rank if no other callouts have been made (besides 2nd
+        // Level Support). Note that iv_mark is not always guaranteed to be
+        // valid for every error scenario. For simplicity, callout the rank that
+        // was targeted with low priority.
         if ( 1 == io_sc.service_data->GetMruList().size() )
-            io_sc.service_data->SetCallout( mba );
+        {
+            MemoryMru memmru ( mba, iv_rank, MemoryMruData::CALLOUT_RANK );
+            io_sc.service_data->SetCallout( memmru, MRU_LOW );
+        }
 
         // Just in case it was a legitimate maintenance command complete (error
         // log not committed) but something else failed.
@@ -1551,7 +1555,7 @@ int32_t CenMbaTdCtlr::exitTdSequence()
         }
 
         // Clear out the mark, just in case. This is so we don't accidentally
-        // callout this mark on another rank in an error patch scenario.
+        // callout this mark on another rank in an error path scenario.
         iv_mark = CenMark();
 
     } while (0);
