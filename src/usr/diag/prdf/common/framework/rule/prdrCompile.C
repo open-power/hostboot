@@ -445,6 +445,7 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
 
         // Initialize target types.
         g_ActionArgMap["TYPE_PROC"]     = TARGETING::TYPE_PROC;
+        g_ActionArgMap["TYPE_NX"]       = TARGETING::TYPE_NX;
         g_ActionArgMap["TYPE_EX"]       = TARGETING::TYPE_EX;
         g_ActionArgMap["TYPE_XBUS"]     = TARGETING::TYPE_XBUS;
         g_ActionArgMap["TYPE_ABUS"]     = TARGETING::TYPE_ABUS;

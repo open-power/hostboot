@@ -222,6 +222,7 @@ group gPbLFir filter singlebit
 # PB Chiplet NXDMAENGFIR
 ################################################################################
 
+# updated actions for all NX related FIR based on p8dd1_mss_FFDC_63.xls
 rule NxDmaEngFir
 {
     CHECK_STOP:
@@ -230,11 +231,8 @@ rule NxDmaEngFir
         NXDMAENGFIR & ~NXDMAENGFIR_MASK & ~NXDMAENGFIR_ACT0 &  NXDMAENGFIR_ACT1;
 };
 
-#FIXME RTC 23127 Due to various pending queries action for many bits not defined
-#yet
 group gNxDmaEngFir filter singlebit
 {
-# FIXME - Get confirmation from HW team to see how this FIR is wired.
     /** NXDMAENGFIR[0]
      *  Reserved
      */
@@ -243,7 +241,7 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[1]
      *  ICS invalid state error FIR bit
      */
-    (NxDmaEngFir, bit(1)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(1)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[2|3]
      *  Reserved
@@ -253,22 +251,22 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[4]
      *  Channel 0 842 array corrected ECC error
      */
-    (NxDmaEngFir, bit(4)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(4)) ? calloutNxThr32;
 
     /** NXDMAENGFIR[5]
      *  Channel 0 842 array uncorrectable ECC error
      */
-    (NxDmaEngFir, bit(5)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(5)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[6]
      *  Channel 1 842 array corrected ECC error
      */
-    (NxDmaEngFir, bit(6)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(6)) ? calloutNxThr32;
 
     /** NXDMAENGFIR[7]
      *  Channel 1 842 array uncorrectable ECC error
      */
-    (NxDmaEngFir, bit(7)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(7)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[8]
      *  DMA non-zero CSB CC detected
@@ -278,27 +276,27 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[9]
      *  DMA array correctable ECC error
      */
-    (NxDmaEngFir, bit(9)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(9)) ? calloutNxThr32;
 
     /** NXDMAENGFIR[10]
      *  DMA outbound write/inbound read correctable ECC error
      */
-    (NxDmaEngFir, bit(10)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(10)) ? calloutNxThr32;
 
     /** NXDMAENGFIR[11]
      *  Channel 5 AMF array corrected ECC error
      */
-    (NxDmaEngFir, bit(11)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(11)) ? calloutNxThr32;
 
     /** NXDMAENGFIR[12]
      *  Channel 6 AMF array corrected ECC error
      */
-    (NxDmaEngFir, bit(12)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(12)) ? calloutNxThr32;
 
     /** NXDMAENGFIR[13]
      *  Channel 7 AMF array corrected ECC error
      */
-    (NxDmaEngFir, bit(13)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(13)) ? calloutNxThr32;
 
     /** NXDMAENGFIR[14]
      *  Error from other SCOM satellites
@@ -308,87 +306,87 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[15]
      *  DMA invalid state error
      */
-    (NxDmaEngFir, bit(15)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(15)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[16]
      *  DMA invalid state error
      */
-    (NxDmaEngFir, bit(16)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(16)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[17]
      *  DMA array uncorrectable ECC error
      */
-    (NxDmaEngFir, bit(17)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(17)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[18]
      *  DMA outbound write/inbound read uncorrectable ECC error
      */
-    (NxDmaEngFir, bit(18)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(18)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[19]
      *  DMA inbound read error
      */
-    (NxDmaEngFir, bit(19)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(19)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[20]
      *  Channel 0 invalid state error
      */
-    (NxDmaEngFir, bit(20)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(20)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[21]
      *  Channel 1 invalid state error
      */
-    (NxDmaEngFir, bit(21)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(21)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[22]
      *  Channel 2 invalid state error
      */
-    (NxDmaEngFir, bit(22)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(22)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[23]
      *  Channel 3 invalid state error
      */
-    (NxDmaEngFir, bit(23)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(23)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[24]
      *  Channel 4 invalid state error
      */
-    (NxDmaEngFir, bit(24)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(24)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[25]
      *  Channel 5 invalid state error
      */
-    (NxDmaEngFir, bit(25)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(25)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[26]
      *  Channel 6 invalid state error
      */
-    (NxDmaEngFir, bit(26)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(26)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[27]
      *  Channel 7 invalid state error
      */
-    (NxDmaEngFir, bit(27)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(27)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[28]
      *  Channel 5 AMF array uncorrectable ECC error
      */
-    (NxDmaEngFir, bit(28)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(28)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[29]
      *  Channel 6 AMF array uncorrectable ECC error
      */
-    (NxDmaEngFir, bit(29)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(29)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[30]
      *  Channel 7 AMF array uncorrectable ECC error
      */
-    (NxDmaEngFir, bit(30)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(30)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[31]
      *  UE error on CRB(CSB address, CCB)
      */
-    (NxDmaEngFir, bit(31)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(31)) ? calloutNxOnPhypIntp;
 
     /** NXDMAENGFIR[32]
      *  SUE error on CRB(CSB address, CCB)
@@ -408,12 +406,12 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[36]
      *  Channel 4 AMF array corrected ECC error
      */
-    (NxDmaEngFir, bit(36)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(36)) ? calloutNxThr32;
 
     /** NXDMAENGFIR[37]
      *  Channel 4 AMF array uncorrectable ECC error
      */
-    (NxDmaEngFir, bit(37)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(37)) ? calloutNxThr1;
 
     /** NXDMAENGFIR[38|39|40|41|42|43|44|45|46|47]
      *  Reserved
@@ -443,106 +441,101 @@ rule NxCqFir
 
 group gNxCqFir filter singlebit
 {
-# FIXME - Get confirmation from HW team to see how this FIR is wired.
     /** NXCQFIR[0]
      *  PBI internal parity error
      */
-    (NxCqFir, bit(0)) ? TBDDefaultCallout;
+    (NxCqFir, bit(0)) ? calloutNxThr1;
 
     /** NXCQFIR[1]
      *  PowerBus CE error
      */
-    (NxCqFir, bit(1)) ? TBDDefaultCallout;
+    (NxCqFir, bit(1)) ? calloutNxThr5pHr;
 
     /** NXCQFIR[2]
      *  PowerBus UE error
      */
-    (NxCqFir, bit(2)) ? TBDDefaultCallout;
+    (NxCqFir, bit(2)) ? calloutNxThr1;
 
     /** NXCQFIR[3]
      *  PowerBus SUE error
      */
-    (NxCqFir, bit(3)) ? TBDDefaultCallout;
+    (NxCqFir, bit(3)) ? defaultMaskedError;
 
     /** NXCQFIR[4]
      *  Inbound array CE error
      */
-    (NxCqFir, bit(4)) ? TBDDefaultCallout;
+    (NxCqFir, bit(4)) ? calloutNxThr5pHr;
 
     /** NXCQFIR[5]
      *  Inbound array UE error
      */
-    (NxCqFir, bit(5)) ? TBDDefaultCallout;
+    (NxCqFir, bit(5)) ? calloutNxThr1;
 
     /** NXCQFIR[6]
      *  PowerBus data hang error
      */
-    (NxCqFir, bit(6)) ? TBDDefaultCallout;
+    (NxCqFir, bit(6)) ? callout2ndLvlMedThr1;
 
     /** NXCQFIR[7]
      *  PowerBus command hang error
      */
-    (NxCqFir, bit(7)) ? TBDDefaultCallout;
+    (NxCqFir, bit(7)) ? defaultMaskedError;
 
     /** NXCQFIR[8]
      *  PowerBus read address error
      */
-    (NxCqFir, bit(8)) ? TBDDefaultCallout;
+    (NxCqFir, bit(8)) ? calloutNxThr1;
 
     /** NXCQFIR[9]
      *  PowerBus write address error
      */
-    (NxCqFir, bit(9)) ? TBDDefaultCallout;
+    (NxCqFir, bit(9)) ? calloutNxThr1;
 
     /** NXCQFIR[10]
      *  PowerBus miscellaneous error
      */
-    (NxCqFir, bit(10)) ? TBDDefaultCallout;
+    (NxCqFir, bit(10)) ? callout2ndLvlMedThr1;
 
     /** NXCQFIR[11]
      *  MMIO BAR parity error
      */
-    (NxCqFir, bit(11)) ? TBDDefaultCallout;
+    (NxCqFir, bit(11)) ? calloutNxThr1;
 
     /** NXCQFIR[12]
      *  CRB kill ISN received while holding ISN with UE error
      */
-    (NxCqFir, bit(12)) ? TBDDefaultCallout;
+    (NxCqFir, bit(12)) ? calloutNxOnPhypIntp;
 
     /** NXCQFIR[13]
      *  ACK_DEAD cresp received by read command
      */
-    (NxCqFir, bit(13)) ? TBDDefaultCallout;
+    (NxCqFir, bit(13)) ? calloutNxThr1;
 
     /** NXCQFIR[14]
      *  ACK_DEAD cresp received by write command
      */
-    (NxCqFir, bit(14)) ? TBDDefaultCallout;
+    (NxCqFir, bit(14)) ? calloutNxThr1;
 
     /** NXCQFIR[15]
      *  Link check aborted while waiting on data
      */
-    (NxCqFir, bit(15)) ? TBDDefaultCallout;
+    (NxCqFir, bit(15)) ? calloutNxThr1;
 
     /** NXCQFIR[16]
      *  Hang poll time expired on internal transfer
      */
-    (NxCqFir, bit(16)) ? TBDDefaultCallout;
+    (NxCqFir, bit(16)) ? calloutNxThr1;
 
     /** NXCQFIR[17]
      *  A write occurred to a secure register when it wasn't enabled
      */
-    (NxCqFir, bit(17)) ? TBDDefaultCallout;
+    (NxCqFir, bit(17)) ? defaultMaskedError;
 
     /** NXCQFIR[18]
      *  FIR/SCOM satellite parity error
      */
-    (NxCqFir, bit(18)) ? TBDDefaultCallout;
+    (NxCqFir, bit(18)) ? defaultMaskedError;
 
-    /** NXCQFIR[19]
-     *  FIR/SCOM satellite parity error duplicate
-     */
-    (NxCqFir, bit(19)) ? TBDDefaultCallout;
 };
 
 ################################################################################
@@ -562,217 +555,217 @@ group gNxAsFir filter singlebit
     /** NXASFIR[0]
      *  SND_ARY_UE
      */
-    (NxAsFir, bit(0)) ? TBDDefaultCallout;
+    (NxAsFir, bit(0)) ? calloutNxASThr1;
 
     /** NXASFIR[1]
      *  MMIO_DAT_UE
      */
-    (NxAsFir, bit(1)) ? TBDDefaultCallout;
+    (NxAsFir, bit(1)) ? calloutNxOnPhypIntp;
 
     /** NXASFIR[2]
      *  COPREQ_DAT_UE
      */
-    (NxAsFir, bit(2)) ? TBDDefaultCallout;
+    (NxAsFir, bit(2)) ? defaultMaskedError;
 
     /** NXASFIR[3]
      *  PBCQ_Q_INFO_PE
      */
-    (NxAsFir, bit(3)) ? TBDDefaultCallout;
+    (NxAsFir, bit(3)) ? calloutNxOnPhypIntp;
 
     /** NXASFIR[4]
      *  RCMD0_ADDR_PE
      */
-    (NxAsFir, bit(4)) ? TBDDefaultCallout;
+    (NxAsFir, bit(4)) ? calloutNxASThr1;
 
     /** NXASFIR[5]
      *  RCMD0_TTAG_PE
      */
-    (NxAsFir, bit(5)) ? TBDDefaultCallout;
+    (NxAsFir, bit(5)) ? calloutNxASThr1;
 
     /** NXASFIR[6]
      *  RCMD1_ADDR_PE
      */
-    (NxAsFir, bit(6)) ? TBDDefaultCallout;
+    (NxAsFir, bit(6)) ? calloutNxASThr1;
 
     /** NXASFIR[7]
      *  RCMD1_TTAG_PE
      */
-    (NxAsFir, bit(7)) ? TBDDefaultCallout;
+    (NxAsFir, bit(7)) ? calloutNxASThr1;
 
     /** NXASFIR[8]
      *  MAL_FMD_MMIO_ST
      */
-    (NxAsFir, bit(8)) ? TBDDefaultCallout;
+    (NxAsFir, bit(8)) ? calloutNxOnPhypIntp;
 
     /** NXASFIR[9]
      *  DATA_HANG
      */
-    (NxAsFir, bit(9)) ? TBDDefaultCallout;
+    (NxAsFir, bit(9)) ? calloutNxASThr1;
 
     /** NXASFIR[10]
      *  CANNOT_RTY_ERR
      */
-    (NxAsFir, bit(10)) ? TBDDefaultCallout;
+    (NxAsFir, bit(10)) ? defaultMaskedError;
 
     /** NXASFIR[11]
      *  CMPL_CNT_ERR
      */
-    (NxAsFir, bit(11)) ? TBDDefaultCallout;
+    (NxAsFir, bit(11)) ? defaultMaskedError;
 
     /** NXASFIR[12]
      *  MULT_CAM_HIT_ERR
      */
-    (NxAsFir, bit(12)) ? TBDDefaultCallout;
+    (NxAsFir, bit(12)) ? defaultMaskedError;
 
     /** NXASFIR[13]
      *  FUTURE_ERR_1
      */
-    (NxAsFir, bit(13)) ? TBDDefaultCallout;
+    (NxAsFir, bit(13)) ? defaultMaskedError;
 
     /** NXASFIR[14]
      *  FL_FIFO_OVFLW
      */
-    (NxAsFir, bit(14)) ? TBDDefaultCallout;
+    (NxAsFir, bit(14)) ? calloutNxASThr1;
 
     /** NXASFIR[15]
      *  CMD_TO_INVALID_RW
      */
-    (NxAsFir, bit(15)) ? TBDDefaultCallout;
+    (NxAsFir, bit(15)) ? defaultMaskedError;
 
     /** NXASFIR[16]
      *  DMA_WL_UE
      */
-    (NxAsFir, bit(16)) ? TBDDefaultCallout;
+    (NxAsFir, bit(16)) ? calloutNxASThr1;
 
     /** NXASFIR[17]
      *  CREDWT_RTY_ERR
      */
-    (NxAsFir, bit(17)) ? TBDDefaultCallout;
+    (NxAsFir, bit(17)) ? defaultMaskedError;
 
     /** NXASFIR[18]
      *  NOTIFY_RTY_ERR
      */
-    (NxAsFir, bit(18)) ? TBDDefaultCallout;
+    (NxAsFir, bit(18)) ? defaultMaskedError;
 
     /** NXASFIR[19]
      *  RCV_TAB_UE
      */
-    (NxAsFir, bit(19)) ? TBDDefaultCallout;
+    (NxAsFir, bit(19)) ? calloutNxASThr1;
 
     /** NXASFIR[20]
      *  FIFO_ADR_TAB_UE
      */
-    (NxAsFir, bit(20)) ? TBDDefaultCallout;
+    (NxAsFir, bit(20)) ? calloutNxASThr1;
 
     /** NXASFIR[21]
      *  MMIO_CR_DARY_UE
      */
-    (NxAsFir, bit(21)) ? TBDDefaultCallout;
+    (NxAsFir, bit(21)) ? calloutNxASThr1;
 
     /** NXASFIR[22]
      *  NOTIF_ARY_UE
      */
-    (NxAsFir, bit(22)) ? TBDDefaultCallout;
+    (NxAsFir, bit(22)) ? calloutNxASThr1;
 
     /** NXASFIR[23]
      *  INTR_ARY_UE
      */
-    (NxAsFir, bit(23)) ? TBDDefaultCallout;
+    (NxAsFir, bit(23)) ? calloutNxASThr1;
 
     /** NXASFIR[24]
      *  CR0_ATAG_PE
      */
-    (NxAsFir, bit(24)) ? TBDDefaultCallout;
+    (NxAsFir, bit(24)) ? calloutNxASThr1;
 
     /** NXASFIR[25]
      *  CR0_TTAG_PE
      */
-    (NxAsFir, bit(25)) ? TBDDefaultCallout;
+    (NxAsFir, bit(25)) ? calloutNxASThr1;
 
     /** NXASFIR[26]
      *  CR1_ATAG_PE
      */
-    (NxAsFir, bit(26)) ? TBDDefaultCallout;
+    (NxAsFir, bit(26)) ? calloutNxASThr1;
 
     /** NXASFIR[27]
      *  CR1_TTAG_PE
      */
-    (NxAsFir, bit(27)) ? TBDDefaultCallout;
+    (NxAsFir, bit(27)) ? calloutNxASThr1;
 
     /** NXASFIR[28]
      *  CW_ADR_ERR
      */
-    (NxAsFir, bit(28)) ? TBDDefaultCallout;
+    (NxAsFir, bit(28)) ? defaultMaskedError;
 
     /** NXASFIR[29]
      *  INTR_RTY_CNT_EXP
      */
-    (NxAsFir, bit(29)) ? callout2ndLvlMedThr1;
+    (NxAsFir, bit(29)) ? defaultMaskedError;
 
     /** NXASFIR[30]
      *  EG_OVFLW
      */
-    (NxAsFir, bit(30)) ? callout2ndLvlMedThr1;
+    (NxAsFir, bit(30)) ? calloutNxASThr1;
 
     /** NXASFIR[31]
      *  MULT_PM_HIT
      */
-    (NxAsFir, bit(31)) ? TBDDefaultCallout;
+    (NxAsFir, bit(31)) ? defaultMaskedError;
 
     /** NXASFIR[32]
      *  EG_SCOM_ERR
      */
-    (NxAsFir, bit(32)) ? TBDDefaultCallout;
+    (NxAsFir, bit(32)) ? defaultMaskedError;
 
     /** NXASFIR[33]
      *  UNUSUAL_EG_SCENARIO
      */
-    (NxAsFir, bit(33)) ? TBDDefaultCallout;
+    (NxAsFir, bit(33)) ? defaultMaskedError;
 
     /** NXASFIR[34]
      *  DSLC_INTF_PE
      */
-    (NxAsFir, bit(34)) ? TBDDefaultCallout;
+    (NxAsFir, bit(34)) ? calloutNxOnPhypIntp;
 
     /** NXASFIR[35]
      *  AS_IN_CE
      */
-    (NxAsFir, bit(35)) ? TBDDefaultCallout;
+    (NxAsFir, bit(35)) ? calloutNxASThr32;
 
     /** NXASFIR[36]
      *  AS_IN_UNSUP_CFG
      */
-    (NxAsFir, bit(36)) ? TBDDefaultCallout;
+    (NxAsFir, bit(36)) ? defaultMaskedError;
 
     /** NXASFIR[37]
      * COPREQ_CRESP_ERR
      */
-    (NxAsFir, bit(37)) ? TBDDefaultCallout;
+    (NxAsFir, bit(37)) ? defaultMaskedError;
 
     /** NXASFIR[38]
      *  CREDWT_CRESP_ERR
      */
-    (NxAsFir, bit(38)) ? TBDDefaultCallout;
+    (NxAsFir, bit(38)) ? defaultMaskedError;
 
     /** NXASFIR[39]
      *  AS_IN_SP_FIR
      */
-    (NxAsFir, bit(39)) ? TBDDefaultCallout;
+    (NxAsFir, bit(39)) ? defaultMaskedError;
 
     /** NXASFIR[40]
      *  AS_EG_CE
      */
-    (NxAsFir, bit(40)) ? TBDDefaultCallout;
+    (NxAsFir, bit(40)) ? calloutNxASThr32;
 
     /** NXASFIR[41]
      *  SCOM_ERR
      */
-    (NxAsFir, bit(41)) ? TBDDefaultCallout;
+    (NxAsFir, bit(41)) ? defaultMaskedError;
 
     /** NXASFIR[42]
      *  SCOM_ERR_DUP
      */
-    (NxAsFir, bit(42)) ? TBDDefaultCallout;
+    (NxAsFir, bit(42)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -790,137 +783,147 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[0]
      *  BAR_PE
      */
-    (NxCxaFir, bit(0)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(0)) ? defaultMaskedError;
 
     /** NXCXAFIR[1]
      *  REGISTER_PE
      */
-    (NxCxaFir, bit(1)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(1)) ? SelfMedThr1;
 
     /** NXCXAFIR[2]
      *  MASTER_ARRAY_CE
      */
-    (NxCxaFir, bit(2)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(2)) ? SelfMedThr32PerDay;
 
     /** NXCXAFIR[3]
      *  MASTER_ARRAY_UE
      */
-    (NxCxaFir, bit(3)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(3)) ? SelfMedThr1;
 
     /** NXCXAFIR[4]
      *  TIMER_EXPIRED_RECOV_ERROR
      */
-    (NxCxaFir, bit(4)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(4)) ? defaultMaskedError;
 
     /** NXCXAFIR[5]
      *  TIMER_EXPIRED_XSTOP_ERROR
      */
-    (NxCxaFir, bit(5)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(5)) ? SelfMedThr1;
 
     /** NXCXAFIR[6]
      *  PSL_CMD_UE
      */
-    (NxCxaFir, bit(6)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(6)) ? defaultMaskedError;
 
     /** NXCXAFIR[7]
      *  PSL_CMD_SUE
      */
-    (NxCxaFir, bit(7)) ? callout2ndLvlMedThr1;
+    (NxCxaFir, bit(7)) ? defaultMaskedError;
 
     /** NXCXAFIR[8]
      *  SNOOP_ARRAY_CE
      */
-    (NxCxaFir, bit(8)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(8)) ? callout2ndLvlMedThr32perDay;
 
     /** NXCXAFIR[9]
      *  SNOOP_ARRAY_UE
      */
-    (NxCxaFir, bit(9)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(9)) ? SelfMedThr1;
 
     /** NXCXAFIR[10]
      *  RECOVERY_FAILED
      */
-    (NxCxaFir, bit(10)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(10)) ? SelfMedThr1;
+
+    /** NXCXAFIR[11]
+     *  ILLEGAL_LPC_BAR_ACCESS
+     */
+    (NxCxaFir, bit(11)) ? defaultMaskedError;
+
+    /** NXCXAFIR[12]
+     *  XPT_RECOVERABLE_ERROR_MASK
+     */
+    (NxCxaFir, bit(12)) ? defaultMaskedError;
 
     /** NXCXAFIR[13]
      *  MASTER_RECOVERABLE_ERROR
      */
-    (NxCxaFir, bit(13)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(13)) ? defaultMaskedError;
 
     /** NXCXAFIR[14]
      *  SNOOPER_RECOVERABLE_ERROR
      */
-    (NxCxaFir, bit(14)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(14)) ? defaultMaskedError;
 
     /** NXCXAFIR[15]
      *  XPT_RECOVERABLE_ERROR
      */
-    (NxCxaFir, bit(15)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(15)) ? defaultMaskedError;
 
     /** NXCXAFIR[16]
      *  MASTER_SYS_XSTOP_ERROR
      */
-    (NxCxaFir, bit(16)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(16)) ? SelfMedThr1;
 
     /** NXCXAFIR[17]
      *  SNOOPER_SYS_XSTOP_ERROR
      */
-    (NxCxaFir, bit(17)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(17)) ? SelfMedThr1;
 
     /** NXCXAFIR[18]
      *  XPT_SYS_XSTOP_ERROR
      */
-    (NxCxaFir, bit(18)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(18)) ? SelfMedThr1;
 
     /** NXCXAFIR[19]
      *  MUOP_ERROR_1
      */
-    (NxCxaFir, bit(19)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(19)) ? defaultMaskedError;
 
     /** NXCXAFIR[20]
      *  MUOP_ERROR_2
      */
-    (NxCxaFir, bit(20)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(20)) ? defaultMaskedError;
 
     /** NXCXAFIR[21]
      *  MUOP_ERROR_3
      */
-    (NxCxaFir, bit(21)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(21)) ? defaultMaskedError;
 
     /** NXCXAFIR[22]
      *  SUOP_ERROR_1
      */
-    (NxCxaFir, bit(22)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(22)) ? defaultMaskedError;
 
     /** NXCXAFIR[23]
      *  SUOP_ERROR_2
      */
-    (NxCxaFir, bit(23)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(23)) ? defaultMaskedError;
 
     /** NXCXAFIR[24]
      *  SUOP_ERROR_3
      */
-    (NxCxaFir, bit(24)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(24)) ? defaultMaskedError;
 
     /** NXCXAFIR[25]
      *  POWERBUS_MISC_ERROR
      */
-    (NxCxaFir, bit(25)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(25)) ? SelfMedThr1;
 
     /** NXCXAFIR[26]
      *  POWERBUS_INTERFACE_PE
      */
-    (NxCxaFir, bit(26)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(26)) ? SelfMedThr1;
 
     /** NXCXAFIR[27]
      *POWERBUS_DATA_HANG_ERROR
      */
-    (NxCxaFir, bit(27)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(27)) ? defaultMaskedError;
 
     /** NXCXAFIR[28]
      *  POWERBUS_HANG_ERROR
      */
-    (NxCxaFir, bit(28)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(28)) ? defaultMaskedError;
 
     /** NXCXAFIR[29]
      *  LD_CLASS_CMD_ADDR_ERR
@@ -935,67 +938,77 @@ group gNxCxaFir filter singlebit
     /** NXCXAFIR[31]
      *  PHB_LINK_DOWN
      */
-    (NxCxaFir, bit(31)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(31)) ? defaultMaskedError;
 
     /** NXCXAFIR[32]
      *  LD_CLASS_CMD_FOREIGN_LINK_FAIL
      */
-    (NxCxaFir, bit(32)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(32)) ? defaultMaskedError;
 
     /** NXCXAFIR[33]
      *  FOREIGN_LINK_HANG_ERROR
      */
-    (NxCxaFir, bit(33)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(33)) ? defaultMaskedError;
 
     /** NXCXAFIR[34]
      *  XPT_POWERBUS_CE
      */
-    (NxCxaFir, bit(34)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(34)) ? callout2ndLvlMedThr32perDay;
 
     /** NXCXAFIR[35]
      *  XPT_POWERBUS_UE
      */
-    (NxCxaFir, bit(35)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(35)) ? defaultMaskedError;
 
     /** NXCXAFIR[36]
      *  XPT_POWERBUS_SUE
      */
-    (NxCxaFir, bit(36)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(36)) ? defaultMaskedError;
 
     /** NXCXAFIR[37]
      *  TLBI_TIMEOUT
      */
-    (NxCxaFir, bit(37)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(37)) ? defaultMaskedError;
 
     /** NXCXAFIR[38]
      *  TLBI_SEQ_ERR
      */
-    (NxCxaFir, bit(38)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(38)) ? SelfMedThr1;
 
     /** NXCXAFIR[39]
      *  TLBI_BAD_OP_ERR
      */
-    (NxCxaFir, bit(39)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(39)) ? SelfMedThr1;
 
     /** NXCXAFIR[40]
      *  TLBI_SEQ_NUM_PARITY_ERR
      */
-    (NxCxaFir, bit(40)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(40)) ? SelfMedThr1;
 
     /** NXCXAFIR[41]
      *  ST_CLASS_CMD_FOREIGN_LINK_FAIL
      */
-    (NxCxaFir, bit(41)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(41)) ? defaultMaskedError;
 
-    /** NXCXAFIR[47]
-     *  SCOM_ERR2
+    /** NXCXAFIR[42]
+     *  TIMEBASE_ERR
      */
-    (NxCxaFir, bit(47)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(42)) ? defaultMaskedError;
 
-    /** NXCXAFIR[48]
+    /** NXCXAFIR[43]
+     *  XPT_INFORMATIONAL_ERR
+     */
+    (NxCxaFir, bit(43)) ? defaultMaskedError;
+
+    /** NXCXAFIR[44|45|46]
+     *  SPARE_BIT
+     */
+    (NxCxaFir, bit(44|45|46)) ? defaultMaskedError;
+
+    /** NXCXAFIR[47|48]
      *  SCOM_ERR
      */
-    (NxCxaFir, bit(48)) ? TBDDefaultCallout;
+    (NxCxaFir, bit(47|48)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -3335,3 +3348,50 @@ actionclass callout2ndLvlMedThr1
     callout2ndLvlMed;
     threshold1;
 };
+
+/** callout NX associated with Proc with a threshold of 32 per day*/
+actionclass calloutNxThr32
+{
+    calloutNx;
+    threshold32pday;
+};
+
+/** callout NX associated with Proc with a threshold of 1 per day*/
+actionclass calloutNxThr1
+{
+    calloutNx;
+    threshold1;
+};
+
+/**callout Nx connected to Proc */
+actionclass calloutNx
+{
+    callout(connected(TYPE_NX, 0), MRU_MED);
+};
+
+#RTC 86494 This action is under discussion.
+/** callout Nx through Phyp */
+actionclass calloutNxOnPhypIntp
+{
+    TBDDefaultCallout;
+};
+
+/** callout Nx-AS connected to Proc*/
+#RTC 86494 we may not support NX-AS. In that case we may endup masking
+#the relevant bits.
+actionclass calloutNxASThr1
+{
+    TBDDefaultCallout;
+};
+
+actionclass calloutNxASThr32
+{
+    TBDDefaultCallout;
+};
+
+actionclass calloutNxThr5pHr
+{
+    TBDDefaultCallout;
+    threshold5phour;
+};
+

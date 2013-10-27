@@ -380,16 +380,17 @@ struct conn_t
             case TYPE_NODE:   order =  1; break;
             case TYPE_OSC:    order =  2; break;
             case TYPE_PROC:   order =  3; break;
-            case TYPE_OCC:    order =  4; break;
-            case TYPE_EX:     order =  5; break;
-            case TYPE_XBUS:   order =  6; break;
-            case TYPE_ABUS:   order =  7; break;
-            case TYPE_PCI:    order =  8; break;
-            case TYPE_MCS:    order =  9; break;
-            case TYPE_MEMBUF: order = 10; break;
-            case TYPE_L4:     order = 11; break;
-            case TYPE_MBA:    order = 12; break;
-            case TYPE_DIMM:   order = 13; break;
+            case TYPE_NX:     order =  4; break;
+            case TYPE_OCC:    order =  5; break;
+            case TYPE_EX:     order =  6; break;
+            case TYPE_XBUS:   order =  7; break;
+            case TYPE_ABUS:   order =  8; break;
+            case TYPE_PCI:    order =  9; break;
+            case TYPE_MCS:    order = 10; break;
+            case TYPE_MEMBUF: order = 11; break;
+            case TYPE_L4:     order = 12; break;
+            case TYPE_MBA:    order = 13; break;
+            case TYPE_DIMM:   order = 14; break;
             default: ;
         }
 
@@ -438,6 +439,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_OSC,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
 
         { TYPE_PROC,   TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_PROC,   TYPE_NX,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_OCC,    TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_EX,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_XBUS,   TargetService::CHILD_BY_AFFINITY  },
@@ -449,8 +451,10 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_PROC,   TYPE_MBA,    TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_OCC,    TYPE_NODE,    TargetService::PARENT_BY_AFFINITY  },
-        { TYPE_OCC,    TYPE_PROC,    TargetService::PARENT_BY_AFFINITY  },
+        { TYPE_NX,     TYPE_PROC,   TargetService::PARENT_BY_AFFINITY  },
+
+        { TYPE_OCC,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY  },
+        { TYPE_OCC,    TYPE_PROC,   TargetService::PARENT_BY_AFFINITY  },
 
         { TYPE_EX,     TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
         { TYPE_EX,     TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
