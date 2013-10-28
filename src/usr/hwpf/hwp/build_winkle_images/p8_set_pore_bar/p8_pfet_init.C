@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_init.C,v 1.9 2013/08/02 19:05:49 stillgs Exp $
+// $Id: p8_pfet_init.C,v 1.10 2013/10/11 23:01:57 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -237,13 +237,12 @@ pfet_init(const Target& i_target, uint32_t i_mode)
 
         FAPI_INF("Executing pfet_config...");
 
-        // Harcoded defaults that don't come via attribute
-        // Vret (not supported) = "off" (stage 0 = 0xB) for bits 0:3
-        // Voff                 = "off" (stage 01 = 0xB) for bits 4:7
-        // \todo  The scan0 values are zeros which indicate that the
-        // power won't go off.  Double check the setting below!!!
-        core_vret_voff_value = 0xBB;
-        eco_vret_voff_value = 0xBB;
+        // VRET settings need to be "ON" as PFET VRET is not supported
+        // The iVRM hardware will tell the PFET controller to go 'OFF"
+        // in its support of Vret.  These values do not pertain in that
+        // case.
+        core_vret_voff_value = 0x00;
+        eco_vret_voff_value = 0x00;
 
         //  ******************************************************************
         //  Get Attributes for pFET Delay

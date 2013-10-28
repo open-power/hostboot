@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: pm_hwp_attributes.xml,v 1.8 2013/07/18 22:03:52 stillgs Exp $ -->
+<!-- $Id: pm_hwp_attributes.xml,v 1.9 2013/09/13 21:07:46 stillgs Exp $ -->
 <!--
     XML file specifying Power Management HWPF attributes.
     These attributes are initialized to zero by the platform and set to a
@@ -782,6 +782,17 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     
     <valueType>uint32</valueType>
     <array>16</array>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SLW_CONTROL_VECTOR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Stores the offset in SLW image of this control vector for later use by scripts to control error injection.
+    This value is added to the contents of PBABAR2 for given chip to calculated the memory address for this vector per chip.
+    </description>
+    <valueType>uint32</valueType>
     <writeable/>
 </attribute>
 

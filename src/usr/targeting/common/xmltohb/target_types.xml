@@ -138,6 +138,11 @@
     <attribute><id>FREQ_CORE_MAX</id></attribute>
     <attribute><id>CPM_TURBO_BOOST_PERCENT</id></attribute>
     <!-- End pm_plat_attributes.xml -->
+
+    <!-- Start pm_hwp_attributes.xml -->
+    <attribute><id>PM_SLW_CONTROL_VECTOR_OFFSET</id></attribute>
+    <!-- End pm_hwp_attributes.xml -->
+
     <!--    sbe_config_update attributes    -->
     <attribute><id>NEST_FREQ_MHZ</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>

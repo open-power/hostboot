@@ -230,31 +230,31 @@ extern "C"
             case fapi::ATTR_MEMB_TP_BNDY_PLL_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH:
                 // Set entry size
                 l_numKeys = 2;
@@ -328,6 +328,7 @@ extern "C"
                 }
                 break;
             case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA:
+            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH:
                 // Is chip type Murano or Venice
                 if (l_chipType == ENUM_ATTR_NAME_MURANO) {
                     // Establish default array to S1 EC 10 array
@@ -490,7 +491,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array);
@@ -503,7 +504,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA_array);
@@ -516,7 +517,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA_array);
@@ -529,7 +530,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA_array);
@@ -542,7 +543,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA_array);
@@ -555,7 +556,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA_array);
@@ -568,7 +569,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA_array);
@@ -581,7 +582,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA_array);
@@ -596,7 +597,7 @@ extern "C"
 		}
                 break;
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA:
-//          case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
+//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH:
                 // Establish default array to Centaur EC 10 array
                 l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_array);
@@ -675,9 +676,9 @@ extern "C"
                     }
                     break;
                 case fapi::ATTR_PROC_AB_BNDY_PLL_FLUSH:
-//            case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_FLUSH:
+//                case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_FLUSH:
                 case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FLUSH:
-//            case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
+//                case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_FLUSH:
                 case fapi::ATTR_PROC_PCI_BNDY_PLL_FLUSH:
                     // Copy flush data
                     for (uint16_t i = 0;
@@ -736,15 +737,15 @@ extern "C"
                     }
                     break;
                 case fapi::ATTR_MEMB_TP_BNDY_PLL_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
-//            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
+//                case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
                     // Copy flush data
                     for (uint16_t i = 0;
                          i < (l_2KeyPllArrayPtr->l_ATTR_PLL_RING_BYTE_LENGTH);

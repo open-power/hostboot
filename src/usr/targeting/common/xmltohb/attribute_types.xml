@@ -4394,10 +4394,28 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>PM_SLW_CONTROL_VECTOR_OFFSET</id>
+    <description>
+    Stores the offset in SLW image of this control vector for later use by scripts to control error injection.
+    This value is added to the contents of PBABAR2 for given chip to calculated the memory address for this vector per chip.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SLW_CONTROL_VECTOR_OFFSET</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <!-- End pm_hwp_attributes.xml -->
 
 
-<!-- Support for pm_hwp_attributes.xml -->
+<!-- Support for pm_plat_attributes.xml -->
 
 <attribute>
     <id>PM_EXTERNAL_VRM_STEPSIZE</id>

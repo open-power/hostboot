@@ -1458,197 +1458,94 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
 // MACROs to route ATTR PLL Ring accesses to the correct HWSV function
 //------------------------------------------------------------------------------
 // DATA accesses
-#define ATTR_PROC_AB_BNDY_PLL_DATA_GETMACRO(ID, PTARGET, VAL) \
+#define PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
         fapi::FAPI_RC_SUCCESS :\
         ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_AB_BNDY_PLL_DATA, PTARGET, VAL ))
-#define ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-    ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA, PTARGET, VAL ))
-#define ATTR_PROC_PB_BNDY_DMIPLL_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL)  ?\
-       fapi::FAPI_RC_SUCCESS :\
-       ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PB_BNDY_DMIPLL_DATA, PTARGET, VAL ))
-#define ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA, PTARGET, VAL ))
-#define ATTR_PROC_PCI_BNDY_PLL_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PCI_BNDY_PLL_DATA, PTARGET, VAL ))
-#define ATTR_PROC_PERV_BNDY_PLL_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PERV_BNDY_PLL_DATA, PTARGET, VAL ))
-#define ATTR_MEMB_TP_BNDY_PLL_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_DATA, PTARGET, VAL ))
+          fapi::ID, PTARGET, VAL ))
 
+#define ATTR_PROC_AB_BNDY_PLL_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_PB_BNDY_DMIPLL_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_PCI_BNDY_PLL_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_PERV_BNDY_PLL_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_MEMB_TP_BNDY_PLL_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 
 // FLUSH accesses
 #define ATTR_PROC_AB_BNDY_PLL_FLUSH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_AB_BNDY_PLL_FLUSH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PB_BNDY_DMIPLL_FLUSH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PB_BNDY_DMIPLL_FLUSH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PCI_BNDY_PLL_FLUSH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PCI_BNDY_PLL_FLUSH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PERV_BNDY_PLL_FLUSH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PERV_BNDY_PLL_FLUSH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_FLUSH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_FLUSH, PTARGET, VAL))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 
 // LENGTH accesses
 #define ATTR_PROC_AB_BNDY_PLL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_AB_BNDY_PLL_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PB_BNDY_DMIPLL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PCI_BNDY_PLL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PCI_BNDY_PLL_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PERV_BNDY_PLL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_PROC_PERV_BNDY_PLL_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_LENGTH, PTARGET, VAL ))
-
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
-        fapi::FAPI_RC_SUCCESS :\
-        ( fapi::platAttrSvc::fapiPlatGetPllAttr( \
-          ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH, PTARGET, VAL ))
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 
 //------------------------------------------------------------------------------
 //  MACROs to support DIMM SPD Attributes that are handled by an Accessor HWP

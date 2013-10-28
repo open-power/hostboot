@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_oha_firinit.C,v 1.12 2013/05/24 13:07:01 pchatnah Exp $
+// $Id: p8_pm_oha_firinit.C,v 1.13 2013/09/25 22:35:00 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_oha_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -105,16 +105,7 @@ p8_pm_oha_firinit(const fapi::Target &i_target , uint32_t mode )
     std::vector<Target>::iterator   itr;    
 
 
-    enum OHA_FIRS 
-    {    
-        OHA21_PPT_TIMEOUT_ERR       =0            ,
-        NOT_CPM_BIT_SYNCED          =1            ,
-        AISS_HANG_CONDITION         =2            ,
-        TC_TC_THERM_TRIP0           =3            ,
-        TC_TC_THERM_TRIP1           =4            ,
-        PCB_ERR_TO_FIR              =5            
     
-    };
 
     FAPI_INF("Executing proc_pm_oha_firinit  ...");
     

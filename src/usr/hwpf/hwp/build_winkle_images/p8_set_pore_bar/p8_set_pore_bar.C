@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_set_pore_bar.C,v 1.6 2013/09/04 14:53:16 dcrowell Exp $
+// $Id: p8_set_pore_bar.C,v 1.7 2013/10/04 19:30:36 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.C,v $
 //-------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -171,6 +171,9 @@ p8_set_pore_bar(      const fapi::Target& i_target,
     const uint32_t      pba_slave = PBA_SLAVE2;
 
     const uint64_t      slw_pba_cmd_scope = 0x2;   // Set to system
+    
+    SbeXipItem          slw_control_vector_info;
+    uint32_t            slw_control_vector_offset;
 
 
     // -----------------------------------------------------------------
@@ -186,6 +189,10 @@ p8_set_pore_bar(      const fapi::Target& i_target,
             if(i_mem_bar != 0)
             {
                 FAPI_ERR("SLW Size is 0 but BAR is non-zero:  0x%16llx", i_mem_bar );
+                const fapi::Target & CHIP = i_target;
+                const uint64_t     & IMAGEADDR = (uint64_t)i_image;
+                const uint32_t     & MEMSIZE = i_mem_size;
+                const uint64_t     & MEMBAR = i_mem_bar;
                 FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_SIZE0_ERROR);
                 break;
             }
@@ -217,10 +224,39 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         if (l_ecmdRc)
         {
             FAPI_ERR("Get XIP of slw_branch_table failed. rc = %x\n", l_ecmdRc);
+            const fapi::Target & CHIP = i_target;
+            const uint64_t     & IMAGEADDR = (uint64_t)i_image;
+            const uint32_t     & XIPRC = l_ecmdRc;
+            const uint64_t     & BRANCHTABLEADDRESS = slw_branch_table_address;
             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_IMAGE_BRANCH_VALUE_ERROR);
             break;
         }
         FAPI_DBG("slw_branch_table_address:   %16llX", slw_branch_table_address);
+
+        // Get the SLW Control Vector offset from the image
+        l_ecmdRc = sbe_xip_find((void*)   i_image,
+                                          "slw_control_vector",
+                                          &slw_control_vector_info);
+        if (l_ecmdRc)
+        {
+            FAPI_ERR("XIP Find of slw_control_vector failed. rc = %x\n", l_ecmdRc);
+            const fapi::Target & CHIP = i_target;
+            const uint64_t     & IMAGEADDR = (uint64_t)i_image;
+            const uint32_t     & XIPRC = l_ecmdRc;
+            const uint64_t     & SLWCONTROLVECTOR = (uint64_t)slw_control_vector_info.iv_address;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_IMAGE_SLW_CONTROL_VECTOR_ERROR);
+            break;
+        }
+        
+        slw_control_vector_offset = slw_control_vector_info.iv_address;
+        FAPI_DBG("slw_control_vector offset:   %16llX", (uint64_t)slw_control_vector_info.iv_address);
+       
+       
+        SETATTR(rc,
+                ATTR_PM_SLW_CONTROL_VECTOR_OFFSET,
+                "ATTR_PM_SLW_CONTROL_VECTOR_OFFSET",
+                NULL,
+                slw_control_vector_offset);
 
         // Initialize the ecmdDataBuffer
         l_ecmdRc |= data.clear();
@@ -231,7 +267,6 @@ p8_set_pore_bar(      const fapi::Target& i_target,
             rc.setEcmdError(l_ecmdRc);
             break;
         }
-
 
         // Setup the the table base address register
         //
@@ -362,6 +397,9 @@ p8_set_pore_bar(      const fapi::Target& i_target,
             if (region_masked_address != 0 )
             {
                 FAPI_ERR("SLW BAR address is not 1MB aligned:  0x%16llx", i_mem_bar );
+                const fapi::Target & CHIP = i_target;
+                const uint64_t     & MEMBAR = i_mem_bar;
+                const uint64_t     & REGIONMASKEDADDR = region_masked_address;
                 FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_PBABAR_ERROR);
                 break;
             }
@@ -416,7 +454,11 @@ p8_set_pore_bar(      const fapi::Target& i_target,
             if (l_ecmdRc)
             {
                 FAPI_ERR("Get of XIP Image size failed");
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_IMAGE_SIZE_ERROR);
+                const fapi::Target & CHIP = i_target;
+                const uint64_t     & IMAGEADDR = (uint64_t)i_image;
+                const uint32_t     & XIPRC = l_ecmdRc;
+                const uint64_t     & IMAGESIZE = image_size;
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_XIP_IMAGE_SIZE_ERROR);
                 break;
             }
 
@@ -434,6 +476,8 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         else
         {
             FAPI_ERR("Invalid image location passed %x ", i_mem_type);
+            const fapi::Target & CHIP = i_target;
+            const uint64_t     & MEMLOC = i_mem_type;
             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_LOC_ERROR);
             break;
         }
@@ -600,6 +644,11 @@ bar_pba_slave_reset(const fapi::Target& i_target, uint32_t id)
             poll_count++;
 	        if (poll_count == PBA_SLAVE_RESET_TIMEOUT)
             {
+                const fapi::Target & CHIP = i_target;
+                const uint32_t     & POLLCOUNT = poll_count;
+                const uint32_t     & TIMEOUTVALUE = PBA_SLAVE_RESET_TIMEOUT;
+                const uint64_t     & PSR = psr.value;
+                const uint32_t     & SLVID = id;
 	            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PBA_SLVRST_TIMED_OUT);
                 break;
 	        }
