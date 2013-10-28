@@ -23,7 +23,7 @@
 #ifndef __P8_ISTEP_NUM_H
 #define __P8_ISTEP_NUM_H
 
-// $Id: p8_istep_num.H,v 1.25 2013/05/06 21:46:09 jeshua Exp $
+// $Id: p8_istep_num.H,v 1.26 2013/10/03 20:52:47 jeshua Exp $
 
 /// Istep number encoding for all SEEPROM and PNOR procedures.  Used to update
 /// the SBEVITAL register to record procedure progress and to create unique
@@ -41,17 +41,18 @@ CONST_UINT64_T(proc_sbe_npll_setup_istep_num,               ULL(0x0207));
 CONST_UINT64_T(proc_sbe_tp_switch_gears_istep_num,          ULL(0x0208));
 CONST_UINT64_T(proc_sbe_tp_chiplet_init2_istep_num,         ULL(0x0209));
 CONST_UINT64_T(proc_sbe_tp_arrayinit_istep_num,             ULL(0x020A));
-CONST_UINT64_T(proc_sbe_tp_chiplet_init3_istep_num,         ULL(0x020B));
-CONST_UINT64_T(proc_sbe_chiplet_init_istep_num,             ULL(0x020C));
-CONST_UINT64_T(proc_sbe_arrayinit_istep_num,                ULL(0x020D));
-CONST_UINT64_T(proc_sbe_setup_evid_istep_num,               ULL(0x020E));
-CONST_UINT64_T(proc_sbe_initf_istep_num,                    ULL(0x020F));
-CONST_UINT64_T(proc_sbe_pb_startclocks_istep_num,           ULL(0x0210));
-CONST_UINT64_T(proc_sbe_scominit_istep_num,                 ULL(0x0211));
-CONST_UINT64_T(proc_sbe_fabricinit_istep_num,               ULL(0x0212));
-CONST_UINT64_T(proc_sbe_check_master_istep_num,             ULL(0x0213));
-CONST_UINT64_T(proc_sbe_select_ex_istep_num,                ULL(0x0214));
-CONST_UINT64_T(proc_sbe_run_exinit_istep_num,               ULL(0x0215));
+CONST_UINT64_T(proc_sbe_tp_initf_istep_num,                 ULL(0x020B));
+CONST_UINT64_T(proc_sbe_tp_chiplet_init3_istep_num,         ULL(0x020C));
+CONST_UINT64_T(proc_sbe_chiplet_init_istep_num,             ULL(0x020D));
+CONST_UINT64_T(proc_sbe_arrayinit_istep_num,                ULL(0x020E));
+CONST_UINT64_T(proc_sbe_setup_evid_istep_num,               ULL(0x020F));
+CONST_UINT64_T(proc_sbe_initf_istep_num,                    ULL(0x0210));
+CONST_UINT64_T(proc_sbe_pb_startclocks_istep_num,           ULL(0x0211));
+CONST_UINT64_T(proc_sbe_scominit_istep_num,                 ULL(0x0212));
+CONST_UINT64_T(proc_sbe_fabricinit_istep_num,               ULL(0x0213));
+CONST_UINT64_T(proc_sbe_check_master_istep_num,             ULL(0x0214));
+CONST_UINT64_T(proc_sbe_select_ex_istep_num,                ULL(0x0215));
+CONST_UINT64_T(proc_sbe_run_exinit_istep_num,               ULL(0x0216));
 
 CONST_UINT64_T(proc_sbe_pnor_setup_istep_num,               ULL(0x0301));
 
@@ -79,7 +80,11 @@ CONST_UINT64_T(proc_sbe_enable_pnor_istep_num,              ULL(0x0500));
 CONST_UINT64_T(proc_sbe_lco_loader_istep_num,               ULL(0x0501));
 CONST_UINT64_T(proc_sbe_instruct_start_istep_num,           ULL(0x0502));
 
-CONST_UINT64_T(proc_sbe_trigger_winkle_istep_num,           ULL(0x0F01));
+//NOTE: The following values must stay constant as HB looks for them
+CONST_UINT64_T(proc_sbe_trigger_winkle_istep_num,            ULL(0x0F01));
+CONST_UINT64_T(proc_sbe_check_master_magic_istep_num,        ULL(0x02FF));
+CONST_UINT64_T(proc_sbe_ex_host_runtime_scom_magic_istep_num,ULL(0x04FF));
+CONST_UINT64_T(proc_sbe_enable_pnor_magic_istep_num,         ULL(0x05FF));
 
 // The following record progress through the SLW process and only are 
 // logged in the virtual SBEVITAL in the OCC SRAM;  these are not recorded
@@ -93,10 +98,15 @@ CONST_UINT64_T(slw_deep_sleep_exit_istep_num,               ULL(0x0F85));
 CONST_UINT64_T(slw_deep_winkle_enter_istep_num,             ULL(0x0F86));
 CONST_UINT64_T(slw_deep_winkle_exit_istep_num,              ULL(0x0F87));
 
+
 #define PROC_SBE_TRIGGER_WINKLE_ISTEP_NUM proc_sbe_trigger_winkle_istep_num
 #define PROC_SBE_CHECK_MASTER_ISTEP_NUM proc_sbe_check_master_istep_num
+#define PROC_SBE_CHECK_MASTER_MAGIC_ISTEP_NUM proc_sbe_check_master_magic_istep_num
 #define PROC_SBE_ENABLE_PNOR_ISTEP_NUM proc_sbe_enable_pnor_istep_num
+#define PROC_SBE_ENABLE_PNOR_MAGIC_ISTEP_NUM proc_sbe_enable_pnor_magic_istep_num
 #define PROC_SBE_EX_HOST_RUNTIME_SCOM_ISTEP_NUM proc_sbe_ex_host_runtime_scom_istep_num
+#define PROC_SBE_EX_HOST_RUNTIME_SCOM_MAGIC_ISTEP_NUM proc_sbe_ex_host_runtime_scom_magic_istep_num
 #define PROC_SBE_TP_LD_IMAGE_ISTEP_NUM proc_sbe_tp_ld_image_istep_num
+
 
 #endif  // __P8_ISTEP_NUM_H

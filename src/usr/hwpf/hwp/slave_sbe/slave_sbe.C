@@ -60,6 +60,7 @@
 #include "proc_check_slave_sbe_seeprom_complete.H"
 #include "proc_getecid.H"
 #include "proc_spless_sbe_startWA.H"
+#include <sbe/sbeif.H>
 
 
 using namespace ISTEP;
@@ -283,6 +284,8 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 {
     errlHndl_t  l_errl = NULL;
     IStepError  l_stepError;
+    void* sbeImgPtr = NULL;
+    size_t sbeImgSize = 0;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_check_slave_sbe_seeprom_complete entry" );
@@ -322,13 +325,22 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             continue;
         }
 
+        l_errl = SBE::findSBEInPnor(l_pProcTarget,sbeImgPtr,sbeImgSize);
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR : proc_check_slave_sbe_seeprom_complete "
+                  "Can't find SBE image in pnor");
+        }
+
         fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
                                        l_pProcTarget    );
 
         // Invoke the HWP
         FAPI_INVOKE_HWP(l_errl,
                         proc_check_slave_sbe_seeprom_complete,
-                        l_fapiProcTarget);
+                        l_fapiProcTarget, sbeImgPtr);
 
         if (l_errl)
         {

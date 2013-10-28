@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_check_slave_sbe_seeprom_complete.H,v 1.2 2012/10/16 03:25:34 jmcgill Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.H,v 1.3 2013/09/20 15:25:12 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -49,7 +49,8 @@
 //------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*proc_check_slave_sbe_seeprom_complete_FP_t)(const fapi::Target &);
+typedef fapi::ReturnCode (*proc_check_slave_sbe_seeprom_complete_FP_t)(const fapi::Target &,
+                                                                       const void *);
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -68,12 +69,14 @@ extern "C"
  *        proc_sbe_check_master / proc_sbe_enable_pnor
  *
  * @param[in] i_target           Reference to processor slave chip target
+ * @param[in] i_pSEEPROM         Pointer to the seeprom image (for errors)
  *
  * @return ReturnCode            Success if slave chip stopped at correct place,
  *                               else error
  */
   fapi::ReturnCode proc_check_slave_sbe_seeprom_complete(
-                                               const fapi::Target & i_target);
+                                               const fapi::Target & i_target,
+                                               const void         * i_pSEEPROM);
 
 } // extern "C"
 

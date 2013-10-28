@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.7 2013/06/21 14:24:28 jeshua Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.10 2013/10/28 16:46:40 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -211,17 +211,20 @@ extern "C"
 //      When stopped, check if the SBE halt code, istep, and substep are correct
 //
 // parameters: i_target           => slave chip target
+//             i_pSEEPROM         => pointer to the seeprom image (for errors)
 //
 // returns: FAPI_RC_SUCCESS if the slave SBE stopped with success at the correct
 //          location, else error
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_check_slave_sbe_seeprom_complete(
-        const fapi::Target & i_target)
+        const fapi::Target & i_target,
+        const void         * i_pSEEPROM)
     {
         // data buffer to hold register values
         ecmdDataBufferBase data(64);
 
         // return codes
+        uint32_t rc_ecmd = 0;
         fapi::ReturnCode rc;
 
         // mark function entry
@@ -302,16 +305,15 @@ extern "C"
                     istep_num,
                     substep_num);
                 //Get the error code from the SBE code
-                //JDS TODO - how do I get the pointer to the SEEPROM?
-                FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target, NULL, SBE);
+                FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target, i_pSEEPROM, SBE);
                 break;
             }
             //Halt code was success
 
             //Did it stop in the correct istep?
-            if(( istep_num != PROC_SBE_CHECK_MASTER_ISTEP_NUM ) &&
-               ( istep_num != PROC_SBE_ENABLE_PNOR_ISTEP_NUM ) &&
-               ( istep_num != PROC_SBE_EX_HOST_RUNTIME_SCOM_ISTEP_NUM ))
+            if(( istep_num != PROC_SBE_CHECK_MASTER_MAGIC_ISTEP_NUM ) &&
+               ( istep_num != PROC_SBE_ENABLE_PNOR_MAGIC_ISTEP_NUM ) &&
+               ( istep_num != PROC_SBE_EX_HOST_RUNTIME_SCOM_MAGIC_ISTEP_NUM ))
             {
                 FAPI_ERR(
                     "SBE halted in wrong istep (istep 0x%X, substep %i)", 
@@ -327,9 +329,9 @@ extern "C"
             //Istep is correct
 
             //Did it stop in the correct substep?
-            if( (( istep_num == PROC_SBE_CHECK_MASTER_ISTEP_NUM ) &&
+            if( (( istep_num == PROC_SBE_CHECK_MASTER_MAGIC_ISTEP_NUM ) &&
                  ( substep_num != SUBSTEP_CHECK_MASTER_SLAVE_CHIP )) ||
-                (( istep_num == PROC_SBE_ENABLE_PNOR_ISTEP_NUM ) &&
+                (( istep_num == PROC_SBE_ENABLE_PNOR_MAGIC_ISTEP_NUM ) &&
                  ( substep_num != SUBSTEP_ENABLE_PNOR_SLAVE_CHIP )))
             {
                 FAPI_ERR(
@@ -346,6 +348,23 @@ extern "C"
             //Substep is correct
 
             //Looks good!
+
+            // Reset the SBE so it can be used for MPIPL if needed
+            rc_ecmd |= data.flushTo0();
+            rc_ecmd |= data.setBit(0);
+
+            if(rc_ecmd)
+            {
+                FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+            rc = fapiPutScom(i_target, PORE_SBE_RESET_0x000E0002, data);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Scom error resetting SBE\n");
+                break;
+            }
         } while (0);
 
         // mark function exit
