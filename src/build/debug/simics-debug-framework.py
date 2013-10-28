@@ -498,6 +498,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7009:   # MAGIC_MEMORYLEAK_FUNCTION
         magic_memoryleak_function(cpu)
 
+    if arg == 7011: #MAGIC_SIMICS_CHECK
+        cpu.r3 = 1
+        print "TimeManager::cv_isSimicsRunning = true"
+
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5

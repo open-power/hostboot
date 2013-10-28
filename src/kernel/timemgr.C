@@ -28,6 +28,17 @@
 
 uint64_t TimeManager::iv_timebaseFreq = 0xFFFFFFFF;
 
+bool isSimicsRunning() __attribute__((alias("__isSimicsRunning")));
+extern "C" void __isSimicsRunning() NEVER_INLINE;
+
+void __isSimicsRunning()
+{
+    asm volatile("li 3, 0");
+    MAGIC_INSTRUCTION(MAGIC_SIMICS_CHECK);
+}
+
+bool TimeManager::cv_isSimicsRunning = isSimicsRunning();
+
 void TimeManager::init()
 {
     Singleton<TimeManager>::instance()._init();
@@ -114,6 +125,13 @@ uint64_t TimeManager::getIdleTimeSliceCount()
 {
     uint64_t sliceCount = getTimeSliceCount();
 
+    // In Simics we want to idle longer to improve overall performance.  Set
+    // the idle baseline at 10x normal idle frequency.
+    if (cv_isSimicsRunning)
+    {
+        sliceCount *= 10;
+    }
+
     // Get a delayed task, if there is one
     _TimeManager_Delay_t* node = _get_delaylist()->front();
 
@@ -133,6 +151,7 @@ uint64_t TimeManager::getIdleTimeSliceCount()
             sliceCount = 1;
         }
     }
+
     return sliceCount;
 }
 

@@ -395,6 +395,7 @@ enum
     MAGIC_RANDOM              =  7008, // generate random number
     MAGIC_MEMORYLEAK_FUNCTION =  7009, // A memory was function called.
     MAGIC_FAKEPAYLOAD_ENTER   =  7010, // Entered the fake payload.
+    MAGIC_SIMICS_CHECK        =  7011, // Check if system is running on simics
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
 };
 
