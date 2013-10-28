@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_deconfig_setup.C,v 1.9 2013/03/08 19:52:47 stillgs Exp $
+// $Id: p8_pmc_deconfig_setup.C,v 1.10 2013/10/22 03:21:48 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_deconfig_setup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -64,148 +64,120 @@ extern "C" {
 
 using namespace fapi;
 
-// ----------------------------------------------------------------------
-// Constant definitions
-// ----------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------
-// Global variables
-// ----------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------
-// Function prototypes
-// ----------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------
-// Function definitions
-// ----------------------------------------------------------------------
-
-
-/// \param[in] i_target Chip target
-
-/// \retval RC_PROCPM_PMC_DECONFIG_NO_CORESPM_PORE if no functional cores
-///         are found
+//------------------------------------------------------------------------------
+/**
+ * p8_pmc_deconfig_setup -  Set PMC Deconfig register based on chiplet GP3(0)
+ *
+ * @param[in] i_target Chip target
+ *
+ *
+ * @retval FAPI_RC_SUCCESS
+ * @retval ERROR defined in xml
+ */
 ReturnCode
 p8_pmc_deconfig_setup(const Target& i_target)
 {
 
-    fapi::ReturnCode                l_rc;
+    fapi::ReturnCode                rc;
     uint32_t                        e_rc = 0;
+    uint64_t                        address = 0;
     ecmdDataBufferBase              data(64);
     ecmdDataBufferBase              config_data(64);
     std::vector<fapi::Target>       l_exChiplets;
-    uint8_t                         l_functional = 0;
     uint8_t                         l_ex_number = 0;
-    bool                            core_flag = false;
 
-
-    FAPI_INF("Executing p8_pmc_deconfig_setup...");
-
-    l_rc = fapiGetChildChiplets (i_target, TARGET_TYPE_EX_CHIPLET, l_exChiplets, TARGET_STATE_PRESENT);
-    if (l_rc)
+    
+    do
     {
-        FAPI_ERR("Error from fapiGetChildChiplets!");
-        return l_rc;
-    }
+        FAPI_INF("Executing p8_pmc_deconfig_setup on target %s...", i_target.toEcmdString());
 
-    FAPI_DBG("\tChiplet vector size  => %u ", l_exChiplets.size());
-
-    // Set the buffer to assume that all chiplets are deconfigured.  Validly configured
-    // chiplets will then turn off this deconfiguration.
-    FAPI_INF("\tAssuming all cores are non-functional");
-    e_rc |= config_data.flushTo0();
-    e_rc |= config_data.setBit(0, 16);
-    if (e_rc)
-    {
-        FAPI_ERR("Error (0x%x) flushing ecmdDataBufferBase", e_rc);
-        l_rc.setEcmdError(e_rc);
-        return l_rc;
-    }
-
-    // Iterate through the returned chiplets
-    for (uint8_t j=0; j < l_exChiplets.size(); j++)
-    {
-
-        // Determine if it's functional
-        l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[j], l_functional);
-        if (l_rc)
-        {
-            FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
+        rc = fapiGetChildChiplets ( i_target, 
+                                    TARGET_TYPE_EX_CHIPLET, 
+                                    l_exChiplets, 
+                                    TARGET_STATE_FUNCTIONAL);
+        if (rc)
+        {   
+            FAPI_ERR("Error from fapiGetChildChiplets!");
             break;
         }
-        else
+
+        FAPI_DBG("\tChiplet vector size  => %u ", l_exChiplets.size());
+
+        // Set the buffer to assume that all chiplets are deconfigured.  Validly configured
+        // chiplets will then turn off this deconfiguration.
+        FAPI_INF("\tAssuming all cores are non-functional");
+        e_rc |= config_data.flushTo0();
+        e_rc |= config_data.setBit(0, 16);
+        if (e_rc)
         {
-            if ( l_functional )
+            FAPI_ERR("Error (0x%x) flushing ecmdDataBufferBase", e_rc);
+            rc.setEcmdError(e_rc);
+            return rc;
+        }
+
+        // Iterate through the returned chiplets
+        for (uint8_t j=0; j < l_exChiplets.size(); j++)
+        {
+                 
+            // Get the core number
+            rc = FAPI_ATTR_GET( ATTR_CHIP_UNIT_POS, 
+                                &l_exChiplets[j], 
+                                l_ex_number);
+            if (rc)
             {
-                // Get the core number
-                l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
-                if (l_rc)
+                FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
+                break;
+            }
+
+            FAPI_INF(" Working on ex chiplet number %d", l_ex_number);
+            
+            address = EX_GP3_0x100F0012 + (l_ex_number * 0x01000000);
+            rc=fapiGetScom(i_target, address, data);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom address 0x%08llX failed. rc = 0x%x", 
+                            address,
+                            (uint32_t)rc);
+                break;
+            }
+
+            FAPI_DBG("\tGP0(0) from core %x (@ %08llx) => 0x%16llx",
+                            l_ex_number,
+                            address,
+                            data.getDoubleWord(0));
+
+            // Check if chiplet enable bit is set (configured);  If so,
+            // clear the chiplet bit in PMC Core Deconfig Register (0:15)
+            // indexed by ex number
+            if ( data.isBitSet(0) )
+            {
+                FAPI_INF("\tSetting Core %X as functional", l_ex_number);
+                e_rc |= config_data.clearBit(l_ex_number);
+                if (e_rc)
                 {
-                    FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
+                    FAPI_ERR("Error (0x%x) setting bit in ecmdDataBufferBase", e_rc);
+                    rc.setEcmdError(e_rc);
                     break;
                 }
-
-                FAPI_INF(" Working on ex chiplet number %d", l_ex_number);
-
-                l_rc=fapiGetScom(i_target, (EX_GP3_0x100F0012+(l_ex_number*0x01000000)), data);
-                if(l_rc)
-                {
-                    FAPI_ERR("GetScom error ");
-                    break;
-                }
-
-                FAPI_DBG("\tGP0(0) from core %x (@ %08llx) => 0x%16llx",
-                                l_ex_number,
-                                (EX_GP3_0x100F0012+(l_ex_number*0x01000000)),
-                                data.getDoubleWord(0));
-
-                // Check if chiplet enable bit is set (configured);  If so,
-                // clear the chiplet bit in PMC Core Deconfig Register (0:15)
-                // indexed by ex number
-                if ( data.isBitSet(0) )
-                {
-                    FAPI_INF("\tSetting Core %X as functional", l_ex_number);
-                    e_rc |= config_data.clearBit(l_ex_number);
-                    if (e_rc)
-                    {
-                        FAPI_ERR("Error (0x%x) setting bit in ecmdDataBufferBase", e_rc);
-                        l_rc.setEcmdError(e_rc);
-                        break;
-                    }
-                    core_flag =  true;
-                }
-            }
-            else  // Not Functional so skip it
-            {
-                // Do nothing
-            }
+            }                            
         }
-    }
-
-    // If no errors, write the deconfig register
-    if (!l_rc)
-    {
-        if ( core_flag )
+        
+        address = PMC_CORE_DECONFIG_REG_0x0006200D;
+        rc = fapiPutScom(i_target, address , config_data);
+        if(rc)
         {
-            l_rc=fapiPutScom(i_target, PMC_CORE_DECONFIG_REG_0x0006200D , config_data);
-            if(l_rc)
-            {
-                FAPI_ERR("PutScom error");
-            }
-            else
-            {
-                FAPI_INF("\tWriting PMC Core Deconfig Register with 0x%16llx", config_data.getDoubleWord(0));
-            }
+            FAPI_ERR("fapiPutScom address 0x%08llX failed. rc = 0x%x", 
+                        address, 
+                        (uint32_t)rc);
+            break;
         }
-        else
-        {
-            FAPI_INF("No configured cores were detected!");
-        }
-    }
-    return l_rc;
+        
+        FAPI_INF("\tWriting PMC Core Deconfig Register with 0x%16llx", 
+                        config_data.getDoubleWord(0));      
+           
+    } while (0);
+    
+    return rc;
 }
 
 
