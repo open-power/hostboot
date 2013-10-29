@@ -57,6 +57,7 @@
 #endif
 
 #include <prdfCenLogParse.H>
+#include <prdfGardType.H>
 
 //------------------------------------------------------------------------------
 // Data structures
@@ -74,7 +75,6 @@ namespace FSP
 
 #define PRDF_COMPRESSBUFFER_UNCOMPRESS_FUNCTIONS
 #include <prdfCompressBuffer.H>
-#include <prdfGardType.H>
 
 // Default tables for undefined Chips
 ErrorCodeDescription g_defaultErrorCodes[] =
@@ -454,9 +454,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintString( "ERRL Severity", tmp );
 
         // GARD info
-        // Need to use PRDF namespace as we have included prdfGardType.H
-        // in nested PRDF namespace
-        tmpStr = PRDF::GardAction::ToString( pfa.prdGardErrType );
+        tmpStr = GardAction::ToString( pfa.prdGardErrType );
         snprintf( tmp, 50, "%s (0x%X) ", tmpStr, pfa.prdGardErrType );
         i_parser.PrintString( "PRD GARD Error Type", tmp );
         i_parser.PrintNumber( "HWAS GARD State", "0x%02X", pfa.hwasGardState );

@@ -32,6 +32,15 @@
 
 namespace PRDF
 {
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+namespace HOSTBOOT
+{
+#endif
+
+#ifdef PRDF_FSP_ERRL_PLUGIN
+namespace FSP
+{
+#endif
 
 namespace PARSER
 {
@@ -100,6 +109,13 @@ namespace DQ_BITMAP
     };
 
 } // namespace DQ_BITMAP
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+} // end namespace HOSTBOOT
+#endif
+
+#ifdef PRDF_FSP_ERRL_PLUGIN
+} // end namespace FSP
+#endif
 
 } // end namespace PRDF
 

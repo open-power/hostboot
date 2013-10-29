@@ -38,14 +38,14 @@
 namespace PRDF
 {
 
-using namespace PARSER;
-
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 namespace HOSTBOOT
 #else
 namespace FSP
 #endif
 {
+
+using namespace PARSER;
 
 //------------------------------------------------------------------------------
 // Helper functions

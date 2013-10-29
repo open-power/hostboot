@@ -26,6 +26,16 @@
 
 namespace PRDF
 {
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+namespace HOSTBOOT
+{
+#endif
+
+#ifdef PRDF_FSP_ERRL_PLUGIN
+namespace FSP
+{
+#endif
+
 namespace GardAction
 {
   enum ErrorType
@@ -57,6 +67,13 @@ namespace GardAction
 
 } // end namespace GardAction
 
+#ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
+} // end namespace HOSTBOOT
+#endif
+
+#ifdef PRDF_FSP_ERRL_PLUGIN
+} // end namespace FSP
+#endif
 } // end namespace PRDF
 
 #endif /* prdfGardType_H */
