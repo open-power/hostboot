@@ -26,6 +26,6 @@ MODULE = util
 OBJS = threadpool.o utilbase.o utilstream.o utilmem.o utilfile.o \
        utillidmgr.o
 
-SUBDIRS = test.d
+SUBDIRS = test.d runtime.d
 
 include ${ROOTPATH}/config.mk

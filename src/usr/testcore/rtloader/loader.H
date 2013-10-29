@@ -30,6 +30,7 @@
 #include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
+#include <util/utillidmgr.H>
 #include <map>
 
 #include <runtime/interface.h>
@@ -105,6 +106,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->sendErrorLog = rt_logErr;
                 intf->scom_read = rt_scom_read;
                 intf->scom_write = rt_scom_write;
+                intf->lid_load = rt_lid_load;
+                intf->lid_unload = rt_lid_unload;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -168,9 +171,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             assert(false);
         }
 
-
-
-
         static int rt_scom_read(uint32_t chipid,
                                  uint32_t addr,
                                  void* data)
@@ -199,15 +199,12 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return rc;
         }
 
-
-
-
         static int rt_scom_write(uint32_t chipid,
                                   uint32_t addr,
                                   void* data)
         {
             int rc = 0;
- 
+
             TRACFCOMP(g_trac_test,
                       "RUNTIME MSG: Scom write chipid: 0x%08x Address: 0x%08x",
                       chipid,
@@ -221,8 +218,9 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return rc;
         }
 
-
-
+        typedef std::pair<uint32_t,uint32_t> SCOM_KEY;
+        typedef std::map<SCOM_KEY,uint64_t> SCOM_MAP;
+        static SCOM_MAP cv_scomMap;
 
         static int rt_logErr(uint32_t plid,
                              uint32_t data_len,
@@ -236,7 +234,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             TRACDBIN(g_trac_test, "RUNTIME ERROR LOG:",data,data_len);
 
-            
+
             errlHndl_t err =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                         0,0);
@@ -247,13 +245,58 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return rc;
         }
 
+        static std::map<void*, UtilLidMgr*> cv_loadedLids;
 
-        typedef std::pair<uint32_t,uint32_t> SCOM_KEY;
-        typedef std::map<SCOM_KEY,uint64_t> SCOM_MAP;
-        static SCOM_MAP cv_scomMap;
+        static int rt_lid_load(uint32_t lid, void** buffer, size_t* size)
+        {
+            errlHndl_t l_errl = NULL;
+            UtilLidMgr* lidmgr = new UtilLidMgr(lid);
+
+            do
+            {
+                l_errl = lidmgr->getLidSize(*size);
+                if (l_errl) break;
+
+                *buffer = malloc(*size);
+                l_errl = lidmgr->getLid(*buffer, *size);
+                if (l_errl) break;
+
+            } while(0);
+
+            if (l_errl)
+            {
+                free(*buffer);
+                *buffer = NULL;
+                *size = 0;
+
+                delete l_errl;
+                delete lidmgr;
+                return -1;
+            }
+            else
+            {
+                cv_loadedLids[*buffer] = lidmgr;
+                return 0;
+            }
+
+        }
+
+        static int rt_lid_unload(void* buffer)
+        {
+            UtilLidMgr* lidmgr = cv_loadedLids[buffer];
+            if (NULL == lidmgr) return -1;
+
+            cv_loadedLids.erase(buffer);
+            free(buffer);
+            delete lidmgr;
+            return 0;
+        }
+
 };
 
 
 RuntimeLoaderTest::SCOM_MAP RuntimeLoaderTest::cv_scomMap;
+std::map<void*, UtilLidMgr*> RuntimeLoaderTest::cv_loadedLids;
+
 
 #endif

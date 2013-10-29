@@ -34,7 +34,8 @@ namespace Util
         UTIL_MOD_MEM_WRITE      = 0x02,       // UtilMem::Write
         UTIL_LIDMGR_GETLID      = 0x03,       // UtilLidMgr::getLid
         UTIL_LIDMGR_GETLIDSIZE  = 0x04,       // UtilLidMgr::getLidSize
-        UTIL_LIDMGR_GETLIDPNOR  = 0x06,       // UtilLidMgr::getLidPnor
+        UTIL_LIDMGR_GETLIDPNOR  = 0x05,       // UtilLidMgr::getLidPnor
+        UTIL_LIDMGR_RT          = 0x06,
     };
 
     enum ReasonCode

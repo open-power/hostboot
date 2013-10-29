@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/vfs/vfs_reasoncodes.H $                       */
+/* $Source: src/usr/util/runtime/test/testlidmgr.H $                      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,29 +20,25 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef VFS_REASONCODES_H
-#define VFS_REASONCODES_H
+#include <util/utillidmgr.H>
 
-#include <hbotcompid.H>
-
-namespace VFS
+class LidMgrTest : public CxxTest::TestSuite
 {
-    enum VfsModuleID
-    {
-        UNDEFINED_MODULE_ERRL_ID    = 0x00,
-        VFS_MODULE_ID               = 0x01,
-        VFS_RT_MODULE_ID            = 0x02,
-    };
+    public:
+        void testMissingLid()
+        {
+            UtilLidMgr lidmgr(-1);
 
-    enum VfsReasonCode
-    {
-        VFS_LOAD_FAILED     =       VFS_COMP_ID | 0x01,
-        VFS_UNLOAD_FAILED   =       VFS_COMP_ID | 0x02,
-        VFS_ALLOC_VMEM_FAILED =     VFS_COMP_ID | 0x03,
-        VFS_PERMS_VMEM_FAILED =     VFS_COMP_ID | 0x04,
-        VFS_MODULE_DOES_NOT_EXIST = VFS_COMP_ID | 0x05,
-        VFS_INVALID_DATA_MODULE   = VFS_COMP_ID | 0x06,
-    };
+            size_t l_size = 0;
+            errlHndl_t l_errl = lidmgr.getLidSize(l_size);
+
+            if (NULL == l_errl)
+            {
+                TS_FAIL("Found missing lid -1.");
+            }
+            else
+            {
+                delete l_errl;
+            }
+        }
 };
-
-#endif

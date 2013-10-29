@@ -59,13 +59,13 @@ typedef struct hostInterfaces
     /** realloc */
     void* (*realloc)(void*, size_t);
 
-    /** sendErrorLog 
+    /** sendErrorLog
      * @param[in] plid Platform Log identifier
      * @param[in] data size in bytes
      * @param[in] pointer to data
      * @return 0 on success else error code
      */
-    int (*sendErrorLog)(uint32_t,uint32_t,void *); 
+    int (*sendErrorLog)(uint32_t,uint32_t,void *);
 
     /** Scan communication read
      * @param[in] chip_id (based on devtree defn)
@@ -82,6 +82,26 @@ typedef struct hostInterfaces
      * @return 0 on success else return code
      */
     int (*scom_write)(uint32_t, uint32_t, void* );
+
+    /** lid_load
+     *  Load a LID from PNOR, FSP, etc.
+     *
+     *  @param[in] LID number.
+     *  @param[out] Allocated buffer for LID.
+     *  @param[out] Size of LID (in bytes).
+     *
+     *  @return 0 on success, else RC.
+     */
+    int (*lid_load)(uint32_t, void**, size_t*);
+
+    /** lid_unload
+     *  Release memory from previously loaded LID.
+     *
+     *  @param[in] Allocated buffer for LID to release.
+     *
+     *  @return 0 on success, else RC.
+     */
+    int (*lid_unload)(void*);
 
 } hostInterfaces_t;
 

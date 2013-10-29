@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/runtime/rt_vfs.C $                                        */
+/* $Source: src/usr/errl/runtime/rt_vfs.C $                               */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,84 +20,65 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <runtime/interface.h>
-#include <kernel/console.H>
-#include <util/align.H>
+#include <string.h>
 #include <sys/vfs.h>
-#include <vector>
-#include <errno.h>
+#include <vfs/vfs_reasoncodes.H>
+#include <errl/errlentry.H>
+#include <errl/errludstring.H>
 
-VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
+using namespace ERRORLOG;
 
-void vfs_module_init()
+namespace VFS
 {
-    printk("Initializing modules.\n");
-
-    VfsSystemModule* module = &VFS_MODULES[0];
-    while ('\0' != module->module[0])
+    void find_test_modules(std::vector<const char*> & o_list)
     {
-        uint64_t textsize = (uint64_t)module->data - (uint64_t)module->text;
-        if (textsize != 0)
+        o_list.clear();
+
+        for(VfsSystemModule* vfsItr = &VFS_MODULES[0];
+            '\0' != vfsItr->module[0];
+            vfsItr++)
         {
-            for (uint64_t i = (uint64_t)module->text;
-                 i < (uint64_t)module->data;
-                 i += PAGESIZE)
+            if (0 == memcmp(vfsItr->module, "libtest", 7))
             {
-                g_hostInterfaces->set_page_execute(reinterpret_cast<void*>(i));
+                if (NULL != vfsItr->start)
+                {
+                    o_list.push_back(vfsItr->module);
+                }
             }
         }
-
-        ++module;
     }
 
-    module = &VFS_MODULES[0];
-    while ('\0' != module->module[0])
+    errlHndl_t module_address(const char * i_name,
+                              const char *& o_address, size_t & o_size)
     {
-        printk("\tIniting module %s...", module->module);
-        if (NULL != module->init)
+        errlHndl_t l_errl = NULL;
+        VfsSystemModule* entry = vfs_find_module(&VFS_MODULES[0], i_name);
+
+        if ((NULL == entry) || (entry->text != entry->data))
         {
-            (module->init)(NULL);
-        }
-        printk("done.\n");
-
-        ++module;
-    }
-
-    printk("Modules initialized.\n");
-
-}
-
-VfsSystemModule * vfs_find_module(VfsSystemModule * i_table,
-                                  const char * i_name)
-{
-    VfsSystemModule* module = i_table;
-    VfsSystemModule* ret = NULL;
-    while ('\0' != module->module[0])
-    {
-        if (0 == strcmp(i_name,module->module))
-        {
-            ret = module;
-            break;
-        }
-        module++;
-    }
-    return ret;
-}
-
-void* vfs_start_entrypoint(VfsSystemModule * i_module)
-{
-    void* ptr = reinterpret_cast<void*>(-ENOENT);
-    if(i_module != NULL)
-    {
-        if (i_module->start == NULL)
-        {
-            // module has no start() routine
-            ptr = reinterpret_cast<void*>(-ENOEXEC);
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @moduleid        VFS_RT_MODULE_ID
+             * @reasoncode      VFS_INVALID_DATA_MODULE
+             * @userdata1       0
+             * @userdata2       0
+             *
+             * @devdesc         Module is not a data module
+             *
+             */
+            l_errl = new ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,       //  severity
+                VFS::VFS_RT_MODULE_ID,                  //  moduleid
+                VFS::VFS_INVALID_DATA_MODULE,           //  reason Code
+                0, 0);
+            ErrlUserDetailsString(i_name).addToLog(l_errl);
         }
         else
         {
-            ptr = reinterpret_cast<void*>(i_module->start);
+            o_address = (const char *)entry->data;
+            o_size = entry->byte_count;
         }
+
+        return l_errl;
     }
-    return ptr;
 }

@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/trace/runtime/makefile $
+# $Source: src/usr/util/runtime/test/makefile $
 #
 # IBM CONFIDENTIAL
 #
@@ -21,19 +21,10 @@
 #
 # IBM_PROLOG_END_TAG
 HOSTBOOT_RUNTIME = 1
-ROOTPATH = ../../../..
-MODULE = errl_rt
+ROOTPATH = ../../../../..
 
-OBJS = errlentry.o rt_errlmanager.o errlsctn.o errlsctnhdr.o errlprvt.o errluh.o \
-       errlud.o errlsrc.o errluserdetails.o backtrace.o errludtarget.o \
-       errludstring.o errludbacktrace.o errludattribute.o \
-       errludcallout.o rt_vfs.o
+MODULE = testutil_rt
 
-SUBDIRS = test.d
+TESTS = *.H
 
-VPATH += ..
 include $(ROOTPATH)/config.mk
-
-# to find errludattribute.[CH] and errludtarget.[CH] - they are generated
-#  by src/usr/targeting/common/xmltohb/xmltohb.pl
-vpath %.C ${GENDIR}

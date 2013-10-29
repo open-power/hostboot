@@ -58,7 +58,7 @@ class UtilLidMgr
      *      Ensures member variables are initialized to sane values.
      *      Sets the initial LID ID.
      *
-     *  @param[in] i_lidId 
+     *  @param[in] i_lidId
      *                LID ID.
      *
      */
@@ -81,7 +81,7 @@ class UtilLidMgr
      *          to work with.  It can also be used to reset the
      *          object to a different LID Id..
      *
-     *  @param[in] i_lidId 
+     *  @param[in] i_lidId
      *                   LID ID.
      *
      *  @return     errlHndl_t
@@ -97,7 +97,7 @@ class UtilLidMgr
      *          Returns useful LID metrics to the user.  Currently
      *          this is only the size of the LID in bytes.
      *
-     *  @param[out] o_lidSize 
+     *  @param[out] o_lidSize
      *                   Size of the LID in bytes.
      *
      *  @return     errlHndl_t
@@ -115,11 +115,11 @@ class UtilLidMgr
      *          allocate the indicated memory space before
      *          calling this function.
      *
-     *  @param[in] i_dest 
+     *  @param[in] i_dest
      *          Pointer to where LID should be stored in
      *          hostboot memory
      *
-     *  @param[in] i_destSeze 
+     *  @param[in] i_destSeze
      *          Reserved space in bytes at destintion address
      *          for LID.
      *
@@ -132,6 +132,29 @@ class UtilLidMgr
   protected:
 
     /**
+     *  @brief  Updates the lidId in the object
+     *
+     *  @par Detailed Description:
+     *          Updates the lidId in the object
+     *          Also composes the LID filename
+     *          This function assumes the lid name is of the format
+     *          <uppercase hex>.lidbin
+     *          The file is not technically a lid, thus the slightly
+     *          different name
+     *
+     *  @param[in] i_lidId
+     *                   LID ID.
+     */
+    void updateLid(uint32_t i_lidId);
+
+   /**
+    *  @brief performs object cleanup when a new lidId is set
+    *         Function is also called by the destructor.
+    */
+   errlHndl_t cleanup();
+
+#ifndef __HOSTBOOT_RUNTIME
+    /**
      *  @brief Get LID Size PNOR
      *
      *  @par Detailed Description:
@@ -142,10 +165,10 @@ class UtilLidMgr
      *          The file is not technically a lid, thus the slightly
      *          different name
      *
-     *  @param[out] o_lidSize 
+     *  @param[out] o_lidSize
      *                   Size of the LID in bytes.
      *
-     *  @param[out] o_imgInPnor 
+     *  @param[out] o_imgInPnor
      *                   Indicates image was found in PNOR
      *
      *  @return     errlHndl_t
@@ -167,15 +190,15 @@ class UtilLidMgr
      *          The file is not technically a lid, thus the slightly
      *          different name
      *
-     *  @param[in] i_dest 
+     *  @param[in] i_dest
      *          pointer where LID should be stored in
      *          hostboot memory
      *
-     *  @param[in] i_destSeze 
+     *  @param[in] i_destSeze
      *          Reserved space in bytes at destintion address
      *          for LID.
      *
-     *  @param[out] o_imgInPnor 
+     *  @param[out] o_imgInPnor
      *                   Indicates image was found in PNOR
      *
      *  @return     errlHndl_t
@@ -185,30 +208,6 @@ class UtilLidMgr
     errlHndl_t getLidPnor(void* i_dest,
                           size_t i_destSize,
                           bool& o_imgInPnor);
-
-    /**
-     *  @brief performs object cleanup when a new lidId is set
-     *         Function is also called by the destructor.
-     */
-    errlHndl_t cleanup();
-
-    
-    /**
-     *  @brief  Updates the lidId in the object
-     *
-     *  @par Detailed Description:
-     *          Updates the lidId in the object
-     *          Also composes the LID filename
-     *          This function assumes the lid name is of the format
-     *          <uppercase hex>.lidbin
-     *          The file is not technically a lid, thus the slightly
-     *          different name
-     *
-     *  @param[in] i_lidId 
-     *                   LID ID.
-     */
-   void updateLid(uint32_t i_lidId);
-
 
     /**
      * @enum UtilLidMgr::MBOX_MSG_TYPE
@@ -261,7 +260,7 @@ class UtilLidMgr
      *           ::MBOX_MSG_TYPE passed in to define the
      *           message sending policy.
      *
-     *  @param[in/out] i_msg 
+     *  @param[in/out] i_msg
      *                    This parameter is used as both input and an
      *                    output parameter. If the message is sent
      *                    synchronusly the response will be populated
@@ -296,6 +295,24 @@ class UtilLidMgr
      * @brief Pointer to message queue
      */
     msg_q_t iv_HbMsgQ;
+#else // __HOSTBOOT_RUNTIME
+
+    /**
+     * @brief Loads the LID using the Host interfaces.
+     */
+    errlHndl_t loadLid();
+
+    /**
+     * @brief Cached value of the LID location.  (Host vs PNOR)
+     */
+    bool iv_isPnor;
+
+    /**
+     * @brief Pointer to the buffer containing the LID.
+     */
+    void* iv_lidBuffer;
+
+#endif // __HOSTBOOT_RUNTIME
 
     /**
      * @brief LID fileName

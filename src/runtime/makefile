@@ -24,6 +24,6 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../..
 
 OBJS = rt_start.o rt_main.o rt_console.o rt_stdlib.o rt_sync.o rt_assert.o \
-       rt_vfs.o
+       rt_vfs.o rt_task.o
 
 include ${ROOTPATH}/config.mk
