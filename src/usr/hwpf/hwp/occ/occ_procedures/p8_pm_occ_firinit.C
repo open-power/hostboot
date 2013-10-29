@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_occ_firinit.C,v 1.14 2013/09/20 19:04:51 jimyac Exp $
+// $Id: p8_pm_occ_firinit.C,v 1.15 2013-10-28 13:35:49 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_occ_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -77,12 +77,13 @@ using namespace fapi;
 fapi::ReturnCode
 p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
 {
-    fapi::ReturnCode     rc;
-    ecmdDataBufferBase   fir(64);
-    ecmdDataBufferBase   action_0(64);
-    ecmdDataBufferBase   action_1(64);
-    ecmdDataBufferBase   mask(64);
-    uint32_t             e_rc = 0;
+    fapi::ReturnCode    rc;
+    ecmdDataBufferBase  fir(64);
+    ecmdDataBufferBase  action_0(64);
+    ecmdDataBufferBase  action_1(64);
+    ecmdDataBufferBase  mask(64);
+    uint32_t            e_rc = 0;
+    uint8_t             ce_fir_disable = 0;;
 
     FAPI_DBG("Executing p8_pm_occ_firinit  ....");
     
@@ -111,7 +112,21 @@ p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
         }
         else
         {
-            
+
+            // Read attributes to determine mask modifications        
+            rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_OCC_CE_FIR_DISABLE,
+               &i_target,
+               ce_fir_disable);
+            if(rc)
+            {
+     		    FAPI_ERR("Error querying Chip EC feature: "
+                         "ATTR_CHIP_EC_FEATURE_OCC_CE_FIR_DISABLE");
+                break;
+            }
+           
+            FAPI_INF("OCC Correctable error FIRs are %s",
+                     (ce_fir_disable ? "MASKED" : "ENABLED"));
+                          
             // Clear the FIR
             e_rc |= fir.flushTo0();
             
@@ -152,6 +167,10 @@ p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
             SET_RECOV_ATTN(8);  SET_FIR_MASKED(8);        //  8 = ocb_error
             SET_RECOV_ATTN(9);                            //  9 = srt_ue
             SET_RECOV_ATTN(10);                           //  10 = srt_ce
+            if (ce_fir_disable)
+            {
+                SET_FIR_MASKED(10);
+            }
             SET_RECOV_ATTN(11);                           //  11 = srt_read_error
             SET_RECOV_ATTN(12);                           //  12 = srt_write_error
             SET_RECOV_ATTN(13);                           //  13 = srt_dataout_perr
@@ -181,6 +200,10 @@ p8_pm_occ_firinit(const fapi::Target& i_target , uint32_t mode)
             SET_RECOV_ATTN(37); SET_FIR_MASKED(37);       //  37 = spare_err_37
             SET_RECOV_ATTN(38);                           //  38 = c405_ecc_ue
             SET_RECOV_ATTN(39);                           //  39 = c405_ecc_ce
+            if (ce_fir_disable)
+            {
+                SET_FIR_MASKED(39);
+            }
             SET_RECOV_ATTN(40); SET_FIR_MASKED(40);       //  40 = c405_oci_machinecheck
             SET_RECOV_ATTN(41);                           //  41 = sram_spare_direct_error0
             SET_RECOV_ATTN(42);                           //  42 = sram_spare_direct_error1
