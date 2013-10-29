@@ -372,43 +372,6 @@ int32_t CoreConfiguredAndNotHostboot(ExtensibleChip * i_chip,
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(Proc, CoreConfiguredAndNotHostboot);
 
-/**
-  * @brief Call  HWP and set the right dump type
-  * @param  i_chip P8 chip
-  * @param  i_sc   The step code data struct
-  * @returns Failure or Success
-  * @note
-  */
-int32_t analyzeMpIPL( ExtensibleChip * i_chip,
-                      STEP_CODE_DATA_STRUCT & i_sc )
-{
-    int32_t l_rc = SUCCESS;
-
-#ifndef __HOSTBOOT_MODULE
-
-    if (CHECK_STOP == i_sc.service_data->GetAttentionType())
-    {
-        TargetHandle_t l_procTarget = i_chip->GetChipHandle();
-        bool l_mpiplMode = false;
-        l_rc = PlatServices::checkMpiplEligibility(l_procTarget,
-                                                   l_mpiplMode);
-
-        PRDF_TRAC("[analyzeMpIPL] Proc: 0x%08x, l_mpiplMode: %d, "
-                  "l_rc: %d", i_chip->GetId(), l_mpiplMode, l_rc);
-
-        if((SUCCESS == l_rc) && (true == l_mpiplMode))
-        {
-            i_sc.service_data->SetDump(CONTENT_SW,
-                                       l_procTarget);
-        }
-    }
-
-#endif
-
-    return l_rc;
-}
-PRDF_PLUGIN_DEFINE( Proc, analyzeMpIPL );
-
 //------------------------------------------------------------------------------
 // Lane Repair plugins
 //------------------------------------------------------------------------------

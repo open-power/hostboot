@@ -563,23 +563,22 @@ group gOccFir filter singlebit
     /** OCCFIR[41]
      *  OCC_SCOM_OCCFIR_SRAM_SPARE_DIRECT_ERROR0
      */
-    #FIXME RTC 23127 action for bit 41,42,43,44 are undecided.
-    (OccFir, bit(41)) ? TBDDefaultCallout;
+    (OccFir, bit(41)) ? defaultMaskedError;
 
     /** OCCFIR[42]
      *  OCC_SCOM_OCCFIR_SRAM_SPARE_DIRECT_ERROR1
      */
-    (OccFir, bit(42)) ? TBDDefaultCallout;
+    (OccFir, bit(42)) ? defaultMaskedError;
 
     /** OCCFIR[43]
      *  OCC_SCOM_OCCFIR_SRAM_SPARE_DIRECT_ERROR2
      */
-    (OccFir, bit(43)) ? TBDDefaultCallout;
+    (OccFir, bit(43)) ? defaultMaskedError;
 
     /** OCCFIR[44]
      *  OCC_SCOM_OCCFIR_SRAM_SPARE_DIRECT_ERROR3
      */
-    (OccFir, bit(44)) ? TBDDefaultCallout;
+    (OccFir, bit(44)) ? defaultMaskedError;
 
     /** OCCFIR[45]
      *  OCC_SCOM_OCCFIR_SLW_OCISLV_ERR
@@ -595,16 +594,16 @@ group gOccFir filter singlebit
      *  OCC_SCOM_OCCFIR_OCB_OCISLV_ERR
      */
     (OccFir, bit(47)) ? SelfMedThr1;
-    #FIXME RTC23127 actions for bit 48,49 are undecided.
+
     /** OCCFIR[48]
      *  OCC_SCOM_OCCFIR_C405ICU_M_TIMEOUT
      */
-    (OccFir, bit(48)) ? TBDDefaultCallout;
+    (OccFir, bit(48)) ? callout2ndLvlMedThr1;
 
     /** OCCFIR[49]
      *  OCC_SCOM_OCCFIR_C405DCU_M_TIMEOUT
      */
-    (OccFir, bit(49)) ? TBDDefaultCallout;
+    (OccFir, bit(49)) ? callout2ndLvlMedThr1;
 
     /** OCCFIR[50|51|52|53|54|55|56|57|58|59|60|61]
      *  OCC_SCOM_OCCLFIR_SPARE_FIR

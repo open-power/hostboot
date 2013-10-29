@@ -1466,7 +1466,7 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[5]
      *  PB_CENT_CRESP_ADDR_ERROR
      */
-    (PbCentFir, bit(5)) ? analyzeMpIPL;
+    (PbCentFir, bit(5)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[6]
      *  PB_CENT_CRESP_ERROR
@@ -1491,7 +1491,7 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[10]
      *  PB_CENT_FORCE_MP_IPL
      */
-    (PbCentFir, bit(10)) ? analyzeMpIPL;
+    (PbCentFir, bit(10)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[11]
      *  PB_CENT_FIR_SPARE_0
@@ -1651,8 +1651,8 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[21]
      *  TCBR_TP_PSI_GLB_ERR_0
      */
-    #FIXME RTC 23127 Action not clear from spread sheet
-    (PsiHbFir, bit(21)) ? TBDDefaultCallout;
+    #FIXME RTC 23127 Need to get validation from Rolf Fitz
+    (PsiHbFir, bit(21)) ? defaultMaskedError;
 
     /** PSIHBFIR[22]
      *  TCBR_TP_PSI_GLB_ERR_1
@@ -3131,16 +3131,6 @@ group gIomcFir_1 filter singlebit
 ################################################################################
 # Actions specific to PB chiplet
 ################################################################################
-
-/**
- * Check for Memory Preserving IPL Eligibility
- * and force a SW_DUMP content for checkstop
- */
-actionclass analyzeMpIPL
-{
-    TBDDefaultCallout;
-    funccall("analyzeMpIPL");
-};
 
 /** Callout the connected PCI 0 controller. */
 actionclass calloutConnPci0 { callout(connected(TYPE_PCI,0), MRU_MED); };
