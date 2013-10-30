@@ -48,6 +48,8 @@
 #include    <mvpd_accessors/getMBvpdAddrMirrorData.H>
 #include    <mvpd_accessors/getMBvpdTermData.H>
 #include    <mvpd_accessors/getMBvpdSlopeInterceptData.H>
+#include    <mvpd_accessors/getMBvpdVersion.H>
+#include    <mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
@@ -407,6 +409,197 @@ public:
     }
 
     /**
+     * @brief call getMBvpdVersion to fetch vpd version
+     *
+     */
+    void    testGetVersion()
+    {
+        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        getMBvpdVersion_FP_t (l_getMBvpdVersion)
+                              = &getMBvpdVersion;
+
+        TS_TRACE( "testGetVersion entry" );
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        TS_TRACE( "testGetVersion l_memBufList.size()=%d",
+                                      l_memBufList.size() );
+        // loop thru memory buffers
+#if UNITTESTfwt
+        uint8_t l_mbNum = 0;    // check them all in unit test
+#else
+        uint8_t l_mbNum = (l_memBufList.size() > 0) ? l_memBufList.size()-1 : 0;
+#endif
+        for (; l_mbNum < l_memBufList.size(); l_mbNum++ )
+        {
+            TARGETING::TargetHandleList l_mbaList;
+            getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
+                            CLASS_UNIT,TYPE_MBA,false);
+
+            TS_TRACE( "testGetVersion l_mbaBufList.size()=%d",
+                    l_mbaList.size());
+
+            // loop thru all the mbas (should be 2)
+#if UNITTESTfwt
+            uint8_t l_mbaNum = 0;  // check them all in unit test
+#else
+            uint8_t l_mbaNum = (l_mbaList.size() > 0) ? l_mbaList.size()-1:0 ;
+#endif
+            for (; l_mbaNum < l_mbaList.size(); l_mbaNum++ )
+            {
+                TARGETING::TargetHandleList l_dimmList;
+
+                getChildAffinityTargets(l_dimmList,l_mbaList[l_mbaNum],
+                            CLASS_LOGICAL_CARD,TYPE_DIMM,false);
+                TS_TRACE( "testGetVersion l_dimmList.size()=%d",
+                    l_dimmList.size());
+
+                // cast OUR type of target to a FAPI type of target.
+                fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
+                      (const_cast<TARGETING::Target*>(l_mbaList[l_mbaNum])));
+
+                // verify HWP accessor
+                uint32_t l_val = 0xffffffff;
+
+                l_fapirc = (*l_getMBvpdVersion)(l_fapi_mba_target,l_val);
+                if (l_fapirc)
+                {
+                   TS_FAIL( "fapiGetVersion: HWP accessor fail rc=0x%x",
+                         static_cast<uint32_t>(l_fapirc) );
+                   fapiLogError(l_fapirc);
+                }
+                else
+                {
+                    TS_TRACE( "testGetVersion accessor 0x%08x",l_val);
+                }
+
+                // loop thru all the DIMMs (should be 4)
+#if UNITTESTfwt
+                uint8_t l_dimmNum = 0;  // check them all in unit test
+#else
+                uint8_t l_dimmNum =
+                             (l_dimmList.size() > 0) ? l_dimmList.size()-1:0 ;
+#endif
+                for (; l_dimmNum < l_dimmList.size(); l_dimmNum++ )
+                {
+//                    uint32_t l_val = 0xFFFFFFFF;
+
+                    //  dump physical path to target
+                    EntityPath l_path;
+                    l_path = l_dimmList[l_dimmNum]->getAttr<ATTR_PHYS_PATH>();
+                    l_path.dump();
+
+                    // cast OUR type of target to a FAPI type of target.
+                    fapi::Target l_fapi_dimm_target(
+                                          TARGET_TYPE_DIMM,
+                      (const_cast<TARGETING::Target*>(l_dimmList[l_dimmNum])));
+
+                    // verify getting all attributes
+                    l_fapirc = FAPI_ATTR_GET(ATTR_VPD_VERSION,
+                           &l_fapi_dimm_target,
+                           l_val);
+                    TS_TRACE( "testGetVersion attribute %d 0x%08x",
+                                   l_dimmNum,l_val);
+                }
+                if (l_fapirc)
+                {
+                   TS_FAIL( "fapiGetVersion: FAPI_ATTR_GET fail rc=0x%x",
+                         static_cast<uint32_t>(l_fapirc) );
+                   fapiLogError(l_fapirc);
+                }
+            }
+        }
+
+        TS_TRACE( "testGetVersion exit" );
+
+    }
+
+    /**
+     * @brief call getMBvpdDram2NModeEnabled to retrieve 2N mode
+     *
+     */
+    void    testGetDram2NModeEnabled()
+    {
+        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        getMBvpdDram2NModeEnabled_FP_t (l_getMBvpdDram2NModeEnabled)
+                              = &getMBvpdDram2NModeEnabled;
+
+        TS_TRACE( "testGetDram2NModeEnabled entry" );
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        TS_TRACE( "testGetDram2NModeEnabled l_memBufList.size()=%d",
+                                      l_memBufList.size() );
+        // loop thru memory buffers
+#if UNITTESTfwt
+        uint8_t l_mbNum = 0;    // check them all in unit test
+#else
+        uint8_t l_mbNum = (l_memBufList.size() > 0) ? l_memBufList.size()-1 : 0;
+#endif
+        for (; l_mbNum < l_memBufList.size(); l_mbNum++ )
+        {
+            TARGETING::TargetHandleList l_mbaList;
+            getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
+                            CLASS_UNIT,TYPE_MBA,false);
+
+            TS_TRACE( "testGetDram2NModeEnabled l_mbaBufList.size()=%d",
+                    l_mbaList.size());
+
+            // loop thru all the mbas (should be 2)
+#if UNITTESTfwt
+            uint8_t l_mbaNum = 0;  // check them all in unit test
+#else
+            uint8_t l_mbaNum = (l_mbaList.size() > 0) ? l_mbaList.size()-1:0 ;
+#endif
+            for (; l_mbaNum < l_mbaList.size(); l_mbaNum++ )
+            {
+                // cast OUR type of target to a FAPI type of target.
+                fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
+                      (const_cast<TARGETING::Target*>(l_mbaList[l_mbaNum])));
+
+                // verify HWP accessor
+                uint8_t l_val = 0xFF;
+
+                l_fapirc = (*l_getMBvpdDram2NModeEnabled)
+                                     (l_fapi_mba_target,l_val);
+                if (l_fapirc)
+                {
+                   TS_FAIL("fapiGetDram2NModeEnabled:HWP accessor fail rc=0x%x",
+                         static_cast<uint32_t>(l_fapirc) );
+                   fapiLogError(l_fapirc);
+                }
+                else
+                {
+                    TS_TRACE("testGetDram2NModeEnabled accessor 0x%02x",
+                           l_val);
+                }
+                // verify attribute
+                l_fapirc = FAPI_ATTR_GET(ATTR_VPD_DRAM_2N_MODE_ENABLED,
+                           &l_fapi_mba_target,
+                           l_val);
+                if (l_fapirc)
+                {
+                   TS_FAIL("fapiGetDram2NModeEnabled:"
+                         " FAPI_ATTR_GET fail rc=0x%x",
+                         static_cast<uint32_t>(l_fapirc) );
+                   fapiLogError(l_fapirc);
+                }
+                else
+                {
+                    TS_TRACE( "testGetDram2NModeEnabled attribute 0x%02x",
+                           l_val);
+                }
+            }
+        }
+
+        TS_TRACE( "testGetDram2NModeEnabled exit" );
+
+    }
+
+
+    /**
      * @brief call getMBvpdAddrMirrorData to fetch memory buffer AM attributes
      *
      */
@@ -446,13 +639,6 @@ public:
 #endif
             for (; l_mbaNum < l_mbaList.size(); l_mbaNum++ )
             {
-                TARGETING::TargetHandleList l_dimmList;
-
-                getChildAffinityTargets(l_dimmList,l_mbaList[l_mbaNum],
-                            CLASS_LOGICAL_CARD,TYPE_DIMM,false);
-                TS_TRACE( "testGetAddrMirrorData l_dimmList.size()=%d",
-                    l_dimmList.size());
-
                 // cast OUR type of target to a FAPI type of target.
                 fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
                       (const_cast<TARGETING::Target*>(l_mbaList[l_mbaNum])));
@@ -474,39 +660,21 @@ public:
                            l_val[0][0], l_val[0][1], l_val[1][0], l_val[1][1]);
                 }
 
-                // loop thru all the DIMMs (should be 4)
-#if UNITTESTfwt
-                uint8_t l_dimmNum = 0;  // check them all in unit test
-#else
-                uint8_t l_dimmNum =
-                             (l_dimmList.size() > 0) ? l_dimmList.size()-1:0 ;
-#endif
-                for (; l_dimmNum < l_dimmList.size(); l_dimmNum++ )
-                {
-                    uint8_t l_val = 0xFF;
-
-                    //  dump physical path to target
-                    EntityPath l_path;
-                    l_path = l_dimmList[l_dimmNum]->getAttr<ATTR_PHYS_PATH>();
-                    l_path.dump();
-
-                    // cast OUR type of target to a FAPI type of target.
-                    fapi::Target l_fapi_dimm_target(
-                                          TARGET_TYPE_DIMM,
-                      (const_cast<TARGETING::Target*>(l_dimmList[l_dimmNum])));
-
-                    // verify getting all attributes
-                    l_fapirc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING,
-                           &l_fapi_dimm_target,
+                // verify attribute
+                l_fapirc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING,
+                           &l_fapi_mba_target,
                            l_val);
-                    TS_TRACE( "testGetAddrMirrorData attribute %d 0x%02x",
-                                   l_dimmNum,l_val);
-                }
                 if (l_fapirc)
                 {
                    TS_FAIL( "fapiGetAddrMirrorData: FAPI_ATTR_GET fail rc=0x%x",
                          static_cast<uint32_t>(l_fapirc) );
                    fapiLogError(l_fapirc);
+                }
+                else
+                {
+                    TS_TRACE( "testGetAddrMirrorData attribute "
+                           "(0x%02x,0x%02x),(0x%02x,0x%02x)",
+                           l_val[0][0], l_val[0][1], l_val[1][0], l_val[1][1]);
                 }
             }
         }

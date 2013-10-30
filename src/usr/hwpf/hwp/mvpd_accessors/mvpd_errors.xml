@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.9 2013/10/22 14:02:13 whs Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.11 2013/10/30 21:14:03 whs Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -131,5 +131,14 @@
     </description>
     <ffdc>ATTR_ID</ffdc>
     <ffdc>VPD_VALUE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_DRAM_2N_MODE_NOT_EQUAL</rc>
+    <description>
+        The 2 ports of DRAM 2N MODE should be equal.
+    </description>
+    <ffdc>PORT0</ffdc>
+    <ffdc>PORT1</ffdc>
   </hwpError>
 </hwpErrors>

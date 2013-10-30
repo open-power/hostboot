@@ -47,6 +47,8 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <fapiPllRingAttr.H>
 #include <getPllRingAttr.H>
 
@@ -1193,74 +1195,12 @@ fapi::ReturnCode fapiPlatGetPhaseRotatorData (
 }
 
 fapi::ReturnCode fapiPlatGetAddrMirrorData (
-             const fapi::Target * i_pFapiTarget,
-             uint8_t    &o_val )
+             const fapi::Target * i_pTarget,
+             uint8_t   (& o_val) [2][2] )
 {
+    // Get the data using the HWP accessor
     fapi::ReturnCode l_rc;
-    TARGETING::Target * l_pTarget = NULL;
-    TARGETING::TargetHandleList l_mbaList;
-    uint8_t l_val[2][2] = {{0xFF,0xFF},{0xFF,0xFF}};
-
-    do {
-        // Get the Targeting Target
-        l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget);
-        if (l_rc)
-        {
-            FAPI_ERR("fapiPlatGetAddrMirrorData:Error from getTargetingTarget");
-            break;
-        }
-
-        // Find the port and DIMM position
-        TARGETING::ATTR_MBA_PORT_type l_portPos =
-                          l_pTarget->getAttr<TARGETING::ATTR_MBA_PORT>();
-        TARGETING::ATTR_MBA_DIMM_type l_dimmPos =
-                          l_pTarget->getAttr<TARGETING::ATTR_MBA_DIMM>();
-
-        // Find MBA target from DIMM target
-        getParentAffinityTargets (l_mbaList, l_pTarget, TARGETING::CLASS_UNIT,
-                                  TARGETING::TYPE_MBA, false);
-
-        if (l_mbaList.size () != 1 )
-        {
-            FAPI_ERR("fapiPlatGetAddrMirrorData: expect 1 mba %d ",
-               l_mbaList.size());
-
-            /*@
-             * @errortype
-             * @moduleid     fapi::MOD_PLAT_ATTR_SVC_GET_MIRR_DATA
-             * @reasoncode   fapi::RC_NO_SINGLE_MBA
-             * @userdata1    Number of MBAs
-             * @devdesc      fapiPlatGetAddrMirrorData could not find the
-             *               expected 1 mba from the passed dimm target
-             */
-            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                fapi::MOD_PLAT_ATTR_SVC_GET_MIRR_DATA,
-                fapi::RC_NO_SINGLE_MBA,
-                l_mbaList.size());
-
-            // Attach the error log to the fapi::ReturnCode
-            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
-            break;
-        }
-
-        // Get the Fapi Target
-        fapi::Target l_fapiTarget(TARGET_TYPE_MBA_CHIPLET,
-                    static_cast<void *>(l_mbaList[0]));
-
-        // Get the data using the HWP accessor
-        FAPI_EXEC_HWP(l_rc, getMBvpdAddrMirrorData, l_fapiTarget, l_val);
-        if (l_rc)
-        {
-            FAPI_ERR("fapiPlatGetAddrMirrorData:"
-                     " Error from getMBvpdAddrMirrorData");
-            break;
-        }
-
-        // return the address mirroring data for the passed DIMM
-        o_val = l_val[l_portPos][l_dimmPos];
-
-    } while (0);
+    FAPI_EXEC_HWP(l_rc, getMBvpdAddrMirrorData, *i_pTarget, o_val);
     return l_rc;
 }
 
@@ -1289,6 +1229,77 @@ fapi::ReturnCode fapiPlatGetSlopeInterceptData (
     return l_rc;
 }
 
+fapi::ReturnCode fapiPlatGetVpdVersion (
+             const fapi::Target * i_pFapiTarget,
+             uint32_t    &o_val )
+{
+    fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pTarget = NULL;
+    TARGETING::TargetHandleList l_mbaList;
+
+    do {
+        // Get the Targeting Target
+        l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget);
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatGetVpdVersion: Error from getTargetingTarget");
+            break;
+        }
+
+        // Find MBA target from DIMM target
+        getParentAffinityTargets (l_mbaList, l_pTarget, TARGETING::CLASS_UNIT,
+                                  TARGETING::TYPE_MBA, false);
+
+        if (l_mbaList.size () != 1 )
+        {
+            FAPI_ERR("fapiPlatGetVpdVersion: expect 1 mba %d ",
+               l_mbaList.size());
+
+            /*@
+             * @errortype
+             * @moduleid     fapi::MOD_PLAT_ATTR_SVC_GET_VPD_VERSION
+             * @reasoncode   fapi::RC_NO_SINGLE_MBA
+             * @userdata1    Number of MBAs
+             * @devdesc      fapiPlatGetVpdVersion could not find the
+             *               expected 1 mba from the passed dimm target
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_PLAT_ATTR_SVC_GET_VPD_VERSION,
+                fapi::RC_NO_SINGLE_MBA,
+                l_mbaList.size());
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+            break;
+        }
+
+        // Get the Fapi Target
+        fapi::Target l_fapiTarget(TARGET_TYPE_MBA_CHIPLET,
+                    static_cast<void *>(l_mbaList[0]));
+
+        // Get the data using the HWP accessor
+        FAPI_EXEC_HWP(l_rc, getMBvpdVersion, l_fapiTarget, o_val);
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatGetVpdVersion:"
+                     " Error from getMBvpdVersion");
+            break;
+        }
+
+    } while (0);
+    return l_rc;
+}
+
+fapi::ReturnCode fapiPlatGetDram2NModeEnabled (
+             const fapi::Target * i_pFapiTarget,
+             uint8_t    &o_val )
+{
+    // Get the data using the HWP accessor
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getMBvpdDram2NModeEnabled, * i_pFapiTarget, o_val);
+    return l_rc;
+}
 
 fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,
      const fapi::Target * i_pFapiTarget, uint8_t & o_enable )

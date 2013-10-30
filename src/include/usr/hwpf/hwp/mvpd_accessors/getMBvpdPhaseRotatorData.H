@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdPhaseRotatorData.H,v 1.2 2013/04/29 16:48:15 whs Exp
+// $Id: getMBvpdPhaseRotatorData.H,v 1.8 2013/11/08 18:13:43 whs Exp $
 
 /**
  *  @file getMBvpdPhaseRotatorData.H
@@ -49,8 +49,9 @@ namespace fapi
 // special processing flags to be added on to the MBvpdPhaseRotatorData value
     enum MBvpdPhaseRotatorSpecial
     {
-        PHASE_ROT_HIGH_NIBBLE = 0x0100,     //bits 4:7 shifted right 4
-        PHASE_ROT_LOW_NIBBLE  = 0x0200,     //bits 0:3
+        PHASE_ROT_HIGH_NIBBLE = 0x0100, //bits 0:3 of MSB 0 to LSB 7
+                                        //  shifted right 4
+        PHASE_ROT_LOW_NIBBLE  = 0x0200, //bits 4:7 of MSB 0 to LSB 7
         PHASE_ROT_PORT00=0x0300, // return vpd port 0 value for 0 and 1
         PHASE_ROT_PORT11=0x0400, // return vpd port 1 value for 0 and 1
     };
@@ -115,12 +116,12 @@ const uint8_t  PHASE_ROT_CHK60 = 0x40;  // check version for offset to use
         PHASE_ROT_M1_CNTL_CSN3 = 0x2d,
         PHASE_ROT_M1_CNTL_ODT0 = 0x2e,
         PHASE_ROT_M1_CNTL_ODT1 = 0x2f,
-        // DRAM_2N_MODE reserved = 0x30,
+        PHASE_ROT_DRAM_2N_MODE = 0x30,
         PHASE_ROT_TSYS_ADR  = 0x31 | PHASE_ROT_CHK60 | PHASE_ROT_PORT00,
         PHASE_ROT_TSYS_DP18 = 0x31 | PHASE_ROT_CHK60 | PHASE_ROT_PORT11,
 // Use these offsets for vpd less than version 6.0
-        PHASE_ROT_RLO_V53 = 0x31 | PHASE_ROT_HIGH_NIBBLE,
-        PHASE_ROT_WLO_V53 = 0x31 | PHASE_ROT_LOW_NIBBLE,
+        PHASE_ROT_RLO_V53 = 0x31 | PHASE_ROT_LOW_NIBBLE,
+        PHASE_ROT_WLO_V53 = 0x31 | PHASE_ROT_HIGH_NIBBLE,
         PHASE_ROT_GPO_V53= 0x32,
         PHASE_ROT_TSYS_ADR_V53  = 0x33 | PHASE_ROT_PORT00,
         PHASE_ROT_TSYS_DP18_V53 = 0x33 | PHASE_ROT_PORT11,

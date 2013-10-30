@@ -49,6 +49,8 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
 #include <vpd/spdenums.H>
 #include <dimmConsts.H>
@@ -470,13 +472,13 @@ fapi::ReturnCode fapiPlatGetPhaseRotatorData (
  * the Address Mirroring Data attributes
  * It should not be called directly.
  *
- *  @param[in]  i_pTarget   Target DIMM pointer
- *  @param[out] o_val       Address Mirroring Data for DIMM
+ *  @param[in]  i_pTarget   Target mba pointer
+ *  @param[out] o_val       Address Mirroring Data for mba
  *  @return     ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiPlatGetAddrMirrorData (
                                     const fapi::Target * i_pTarget,
-                                    uint8_t    &o_val);
+                                    uint8_t (&o_val) [2][2] );
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
@@ -527,6 +529,31 @@ fapi::ReturnCode fapiPlatDimmGetBadDqBitmap (
                                    const fapi::Target * i_pTarget,
                                    uint8_t (&o_data)[DIMM_DQ_MAX_DIMM_RANKS]
                                                     [DIMM_DQ_RANK_BITMAP_SIZE]);
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the vpd version
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target DIMM pointer
+ *  @param[out] o_val       vpd version
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetVpdVersion (
+                                    const fapi::Target * i_pTarget,
+                                    uint32_t & o_val );
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the Dram 2N Mode Enabled attribute
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target mba pointer
+ *  @param[out] o_val       Dram 2N Mode Enabled attr enumeration value
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetDram2NModeEnabled (
+                                    const fapi::Target * i_pTarget,
+                                    uint8_t & o_val );
 
 /**
  * @brief This function is called by the FAPI_ATTR_SET macro when setting
@@ -1596,5 +1623,21 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
 #define ATTR_VOLTAGE_INT_VCS_BIAS_DOWN_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetZeroAttrData(&VAL, sizeof(VAL))
+
+//------------------------------------------------------------------------------
+//  MACROS to support MBVPD Get vpd version attribute
+//------------------------------------------------------------------------------
+#define ATTR_VPD_VERSION_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetVpdVersion\
+        (PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACROS to support MBVPD Get Dram 2N Mode Enabled
+//------------------------------------------------------------------------------
+#define ATTR_VPD_DRAM_2N_MODE_ENABLED_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetDram2NModeEnabled\
+        (PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

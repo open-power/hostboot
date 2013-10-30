@@ -50,8 +50,7 @@ fapi::ReturnCode getMBvpdAddrMirrorData(
     const uint8_t NUM_PORTS = 2;   //Each MBA has 2 ports
     struct port_attributes
     {
-       uint8_t dimm0 : 4 ;
-       uint8_t dimm1 : 4 ;
+       uint8_t iv_dimm ; // bits 0:3 DIMM 0 bits 4:7 DIMM 1
     };
     struct mba_attributes
     {
@@ -125,10 +124,10 @@ fapi::ReturnCode getMBvpdAddrMirrorData(
         // of the 4 DIMMs for the requested mba from the AM keyword buffer
         for (uint8_t l_port=0; l_port<NUM_PORTS; l_port++)
         {
-            o_val[l_port][0]= l_pMaBuffer->
-                       mb_mba[l_mbaPos].mba_port[l_port].dimm0;
-            o_val[l_port][1]= l_pMaBuffer->
-                       mb_mba[l_mbaPos].mba_port[l_port].dimm1;
+            uint8_t l_dimm = l_pMaBuffer->
+                                mb_mba[l_mbaPos].mba_port[l_port].iv_dimm;
+            o_val[l_port][0]= ((l_dimm & 0xF0)>>4);
+            o_val[l_port][1]= l_dimm & 0x0F;
         }
 
     } while (0);

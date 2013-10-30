@@ -34,5 +34,7 @@ OBJS += getMvpdRing.o \
         getMBvpdAddrMirrorData.o \
         getMBvpdTermData.o \
         getMBvpdSlopeInterceptData.o \
-        getMBvpdSpareDramData.o
+        getMBvpdSpareDramData.o \
+        getMBvpdVersion.o \
+        getMBvpdDram2NModeEnabled.o
 

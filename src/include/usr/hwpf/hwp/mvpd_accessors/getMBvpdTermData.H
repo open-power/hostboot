@@ -50,8 +50,9 @@ namespace fapi
 // special processing flags to be added on to the MBvpdTermData value
     enum MBvpdTermDataSpecial
     {
-        TERM_DATA_HIGH_NIBBLE = 0x0100,     //bits 4:7 shifted right 4
-        TERM_DATA_LOW_NIBBLE  = 0x0200,     //bits 0:3
+        TERM_DATA_HIGH_NIBBLE = 0x0100,  //bits 0:3 of MSB 0 to LSB 7
+                                         //  shifted right 4
+        TERM_DATA_LOW_NIBBLE  = 0x0200,  //bits 4:7 of MSB 0 to LSB 7
     };
 // mask to isolate special processing flags
 const uint16_t TERM_DATA_SPECIAL_MASK = 0x0300;
@@ -95,8 +96,8 @@ const uint8_t TERM_DATA_CHK60 = 0x40;  // check version for keyword to use
 // as a uint32. The offset is incremented by only 2 to get the next vpd value.
        TERM_DATA_CKE_PRI_MAP =             0x36,  //uint32_t [2]
        TERM_DATA_CKE_PWR_MAP =             0x38,  //uint32_t [2]
-       TERM_DATA_RLO = 0x3c|TERM_DATA_CHK60|TERM_DATA_HIGH_NIBBLE, //uint8_t[2]
-       TERM_DATA_WLO = 0x3c|TERM_DATA_CHK60|TERM_DATA_LOW_NIBBLE,  //uint8_t[2]
+       TERM_DATA_RLO = 0x3c|TERM_DATA_CHK60|TERM_DATA_LOW_NIBBLE,   //uint8_t[2]
+       TERM_DATA_WLO = 0x3c|TERM_DATA_CHK60|TERM_DATA_HIGH_NIBBLE,  //uint8_t[2]
        TERM_DATA_GPO = 0x3d|TERM_DATA_CHK60,    //uint8_t[2]
     };
 }
