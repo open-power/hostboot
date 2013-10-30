@@ -1,9 +1,10 @@
 
-#-- $Id: mba_def.initfile,v 1.48 2013/09/30 21:29:38 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.49 2013/10/24 18:49:51 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.49|tschang |10/24/13|added ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT, ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT to throttle settings
 #--     1.48|tschang | 9/30/13|add 10% margin to refresh check interval calculations
 #--     1.47|tschang | 8/15/13| HW259719 - dd2 only fix - ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL to turn on clock gates
 #--     1.46|tschang | 7/17/13|updated refresh interval and refresh check interval calculations
@@ -1687,6 +1688,9 @@ define  def_mcb_addr_total22_max25  = (((ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] - ATT
 #		31:44	cfg_nm_m	MSS_MEM_THROTTLE_DENOMINATOR
 #		51	cfg_nm_per_slot_enabled	1
 #		52	cfg_nm_count_other_mba_dis	Set to 0 for CDIMM, Set to 1 for everything else
+#cfg_nm_ras_weight, bits 45:47 = ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT
+#cfg_nm_cas_weight, bits 48:50 = ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT
+
 
 
 scom 0x03010416     {
@@ -1694,6 +1698,8 @@ scom 0x03010416     {
     0:14    ,   ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA   ,            1            ,     any;          # cfg_nm_n_per_mba	MSS_MEM_THROTTLE_NUMERATOR_PER_MBA
     15:30   ,   ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP  ,            1            ,     any;          # cfg_nm_n_per_chip	MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP
     31:44   ,   ATTR_MSS_MEM_THROTTLE_DENOMINATOR         ,            1            ,     any;          # cfg_nm_m	MSS_MEM_THROTTLE_DENOMINATOR
+    45:47   ,   ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT      ,            1            ,     any;          # cfg_nm_ras_weight
+    48:50   ,   ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT      ,            1            ,     any;          # cfg_nm_cas_weight
 #    51      ,   0b1                                       ,            1            ,     any;          # cfg_nm_per_slot_enabled	1
     51      ,   0b0                                       ,            1            ,     (ATTR_EFF_DIMM_TYPE == 0);          # cfg_nm_per_slot_enabled	Set to 0 for CDIMM, Set to 1 for everything else
     51      ,   0b1                                       ,            1            ,     ((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 2) || (ATTR_EFF_DIMM_TYPE == 3));          # cfg_nm_per_slot_enabled	Set to 0 for CDIMM, Set to 1 for everything else

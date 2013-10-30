@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.53 2013/10/04 06:32:33 sasethur Exp $
+// $Id: mss_mcbist_common.C,v 1.55 2013/10/24 15:04:44 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.55  |aditya  |10/24/13|Removed DD2.0 attribute check  for  ECC setup 
+//   1.54  |aditya  |10/17/13|Minor fix in byte mask function
 //   1.53  |aditya  |10/05/13|Updated fw comments
 //   1.52  |aditya  |09/27/13|Updated for Host Boot Compile
 //   1.51  |aditya  |09/18/13|Updated parameters for random seed attribute and Error map masking
@@ -183,12 +185,12 @@ fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,mcbist_byte_mask
 	
 	
 	Target i_target_centaur;
-	uint8_t l_attr_centaur_ec_mcbist_random_data_gen = 0;
+	//uint8_t l_attr_centaur_ec_mcbist_random_data_gen = 0;
 		rc = fapiGetParentChip(i_target_mba, i_target_centaur); if(rc) return rc;
 	
 	rc = FAPI_ATTR_GET(ATTR_MCBIST_PATTERN, &i_target_mba,i_mcbpatt); if(rc) return rc;//-----------i_mcbpatt------->run
 	rc = FAPI_ATTR_GET(ATTR_MCBIST_TEST_TYPE, &i_target_mba, i_mcbtest); if(rc) return rc;//---------i_mcbtest------->run
-	rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_MCBIST_RANDOM_DATA_GEN, &i_target_centaur, l_attr_centaur_ec_mcbist_random_data_gen); if(rc) return rc;//---------i_mcbtest------->run
+	//rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_MCBIST_RANDOM_DATA_GEN, &i_target_centaur, l_attr_centaur_ec_mcbist_random_data_gen); if(rc) return rc;//---------i_mcbtest------->run
 
 	rc = mss_conversion_testtype(i_target_mba,i_mcbtest, i_mcbtest1);if(rc) return rc;
     rc = mss_conversion_data(i_target_mba,i_mcbpatt,i_mcbpatt1);if(rc) return rc;
@@ -212,8 +214,8 @@ rc = FAPI_ATTR_GET(ATTR_MCBIST_ERROR_CAPTURE, &i_target_mba,l_bit32); if(rc) ret
 	
 	}
 
-   if(l_attr_centaur_ec_mcbist_random_data_gen == 0)
-   {    
+  // if(l_attr_centaur_ec_mcbist_random_data_gen == 0)
+   //{    
 		//FIFO work around for random data	
 		//###################################
 		//# WRQ and RRQ set to FIFO mode OFF
@@ -241,7 +243,7 @@ rc = FAPI_ATTR_GET(ATTR_MCBIST_ERROR_CAPTURE, &i_target_mba,l_bit32); if(rc) ret
 //End	
 //power bus ECC setting for random data
 
-//# MBA01_MBA_WRD_MODE - dsibale powerbus ECC checking and correction
+//# MBA01_MBA_WRD_MODE - disbale powerbus ECC checking and correction
 		rc = fapiGetScom(i_target_mba,0x03010449,l_data_buffer_64); if(rc) return rc; 
 		rc_num =  l_data_buffer_64.setBit(0);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
 		rc_num =  l_data_buffer_64.setBit(1);if (rc_num){FAPI_ERR( "Error in function  start_mcb:");rc.setEcmdError(rc_num);return rc;}
@@ -259,7 +261,7 @@ rc = FAPI_ATTR_GET(ATTR_MCBIST_ERROR_CAPTURE, &i_target_mba,l_bit32); if(rc) ret
 		rc = fapiPutScom(i_target_mba,0x0201148a,l_data_buffer_64); if(rc) return rc;
 
 		//end of power bus ECC setting for random data
-	}
+	//}
    
     rc = fapiGetScom(i_target_mba,MBA01_CCS_MODEQ_0x030106a7, l_data_buffer_64);  if(rc) return rc;   
     rc_num =  l_data_buffer_64.clearBit(29); if (rc_num){FAPI_ERR( "Error in function setup_mcb:");rc.setEcmdError(rc_num);return rc;}
@@ -2135,7 +2137,7 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba)
 
     uint8_t l_dqBitmap[DIMM_DQ_RANK_BITMAP_SIZE];
     uint8_t l_dq[8]={0};
-    uint16_t l_sp[2]={0};
+    uint8_t l_sp[2]={0};
     uint16_t l_index0=0;
     uint8_t l_index_sp=0;
     //uint16_t l_sp_mask=0x0000;

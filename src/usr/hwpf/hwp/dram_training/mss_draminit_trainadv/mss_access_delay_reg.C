@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.19 2013/10/09 11:28:41 sasethur Exp $
+// $Id: mss_access_delay_reg.C,v 1.20 2013/10/22 06:17:40 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -3168,6 +3168,92 @@ fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, ui
 	  phy_block=l_block;
 	  }
 	  // out.scom_addr=l_scom_address_64;
+      // out.start_bit=l_start_bit;
+      // out.bit_length=l_len; 
+   } else if (i_input_type_e==RD_DQS || i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
+   {
+      
+      
+      if(i_port==0 && l_mbapos==0)
+      {
+         l_dq=dqs_dq_lane_p0[i_input_index];
+         l_block=block_dqs_p0[i_input_index]; 
+      }
+             
+      else if(i_port==1 && l_mbapos==0)
+      {
+         l_dq=dqs_dq_lane_p1[i_input_index];   
+         l_block=block_dqs_p1[i_input_index]; 
+      }   
+      else if(i_port==0 && l_mbapos==1)
+      {
+         l_dq=dqs_dq_lane_p2[i_input_index];   
+         l_block=block_dqs_p2[i_input_index]; 
+      }
+      else
+      {
+         l_dq=dqs_dq_lane_p3[i_input_index];   
+         l_block=block_dqs_p3[i_input_index]; 
+      }
+      
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("dqs_dq_lane=%d",l_dq);
+      }   
+      if(l_dq==0)
+      {
+         l_lane=16;
+      }
+         
+      else if(l_dq==4)
+      {
+         l_lane=18;
+      }
+         
+      else if (l_dq==8)
+      {
+         l_lane=20;
+      }
+         
+      else
+      {
+         l_lane=22;
+      }
+      //FAPI_INF("here");
+      
+      if (i_input_type_e==DQS_GATE)
+      {
+         l_input_type=DQS_GATE_t;
+      }
+      
+      else if(i_input_type_e==RDCLK)
+      {
+         l_input_type=RDCLK_t;
+      }
+      
+      else if(i_input_type_e==RD_DQS)
+      {
+         l_input_type=RD_DQS_t;
+      }
+      
+      else
+      {
+         l_input_type=DQSCLK_t;
+      }
+      
+      if(i_verbose==1)
+      {
+         FAPI_INF("lane is=%d",l_lane);
+      }
+	  
+	  if(flag==0){
+	 phy_lane=l_lane;
+	  phy_block=l_block;
+	  }
+      
+      // rc=get_address(i_target_mba,i_port,i_rank_pair,l_input_type,l_block,l_lane,l_scom_address_64,l_start_bit,l_len); if(rc) return rc; 		 
+      // out.scom_addr=l_scom_address_64;
       // out.start_bit=l_start_bit;
       // out.bit_length=l_len; 
    }   

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_unmask_errors.C,v 1.3 2013/03/08 22:03:00 gollub Exp $
+// $Id: mss_unmask_errors.C,v 1.4 2013/10/22 18:55:06 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -34,6 +34,8 @@
 //         |          |         | so they will be masked during memdiags, and
 //         |          |         | unmasked before scrub is started.
 //   1.3   | 03/08/13 | gollub  | Masking MBSPA[0] for DD1, and using MBSPA[8] instead.
+//   1.4   | 10/22/13 | gollub  | Keep maint ECC errors masked, since PRD intends
+//         |          |         | to use cmd complete attention instead.
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -1707,28 +1709,32 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         // on when cmd stops on error, but can't be set to do both. 
         l_ecmd_rc |= l_mbaspa_mask.setBit(0);            
 
-        // 1	Hard_CE_ETE_Attn                             mask (until after memdiags)
-        // NOTE: FW memdiags needs this masked because they want to wait till
-        // cmd gets to end of rank before getting any attention.
+        // 1	Hard_CE_ETE_Attn                             mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the 
+        // cmd complete attention, then checking these manually to see if 
+        // they cause the cmd to stop
         // NOTE: Hards counted during super fast read, but can't be called 
         // true hard CEs since super fast read doesn't write back and read again.
         l_ecmd_rc |= l_mbaspa_mask.setBit(1);            
 
-        // 2	Soft_CE_ETE_Attn                             mask (until after memdiags)
-        // NOTE: FW memdiags needs this masked because they want to wait till
-        // cmd gets to end of rank before getting any attention.
+        // 2	Soft_CE_ETE_Attn                             mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the 
+        // cmd complete attention, then checking these manually to see if 
+        // they cause the cmd to stop
         // NOTE: Softs not counted during super fast read.
         l_ecmd_rc |= l_mbaspa_mask.setBit(2);            
 
-        // 3	Intermittent_ETE_Attn                        mask (until after memdiags)
-        // NOTE: FW memdiags needs this masked because they want to wait till
-        // cmd gets to end of rank before getting any attention.
+        // 3	Intermittent_ETE_Attn                        mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the 
+        // cmd complete attention, then checking these manually to see if 
+        // they cause the cmd to stop
         // NOTE: Intermittents not counted during super fast read.
         l_ecmd_rc |= l_mbaspa_mask.setBit(3);            
 
-        // 4	RCE_ETE_Attn                                 mask (until after memdiags)
-        // NOTE: FW memdiags needs this masked because they want to wait till
-        // cmd gets to end of rank before getting any attention.
+        // 4	RCE_ETE_Attn                                 mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the 
+        // cmd complete attention, then checking these manually to see if 
+        // they cause the cmd to stop
         // NOTE: RCEs not counted during super fast read.
         l_ecmd_rc |= l_mbaspa_mask.setBit(4);            
 
@@ -1865,9 +1871,10 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         l_ecmd_rc |= l_mbeccfir_action1.setBit(19);
         l_ecmd_rc |= l_mbeccfir_mask_or.setBit(19);
 
-        // 20:27	Maint MPE Rank 0:7      recoverable         mask (until after memdiags)
-        // NOTE: FW memdiags needs this masked because they want to wait till
-        // cmd gets to end of rank before getting any attention.
+        // 20:27	Maint MPE Rank 0:7      recoverable         mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the 
+        // cmd complete attention, then checking these manually to see if 
+        // they cause the cmd to stop
         l_ecmd_rc |= l_mbeccfir_action0.clearBit(20,8);            
         l_ecmd_rc |= l_mbeccfir_action1.setBit(20,8);
         l_ecmd_rc |= l_mbeccfir_mask_or.setBit(20,8);
@@ -1906,9 +1913,10 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         l_ecmd_rc |= l_mbeccfir_action1.setBit(40);
         l_ecmd_rc |= l_mbeccfir_mask_or.setBit(40);
 
-        // 41	Maintenance UE              recoverable         mask (until after memdiags)
-        // NOTE: FW memdiags needs this masked because they want to wait till
-        // cmd gets to end of rank before getting any attention.
+        // 41	Maintenance UE              recoverable         mask (forever)
+        // NOTE: FW wants to mask these and rely instead on detecting the 
+        // cmd complete attention, then checking these manually to see if 
+        // they cause the cmd to stop
         l_ecmd_rc |= l_mbeccfir_action0.clearBit(41);            
         l_ecmd_rc |= l_mbeccfir_action1.setBit(41);
         l_ecmd_rc |= l_mbeccfir_mask_or.setBit(41);
@@ -1954,12 +1962,12 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         l_ecmd_rc |= l_mbeccfir_action1.clearBit(49);
         l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(49);
 
-        // 50	internal scom error         recovereble         mask (tbd)
+        // 50	internal scom error         recovereble         mask
         l_ecmd_rc |= l_mbeccfir_action0.clearBit(50);            
         l_ecmd_rc |= l_mbeccfir_action1.setBit(50);
         l_ecmd_rc |= l_mbeccfir_mask_or.setBit(50);
 
-        // 51	internal scom error clone   recovereble         mask (tbd)
+        // 51	internal scom error clone   recovereble         mask
         l_ecmd_rc |= l_mbeccfir_action0.clearBit(51);            
         l_ecmd_rc |= l_mbeccfir_action1.setBit(51);
         l_ecmd_rc |= l_mbeccfir_mask_or.setBit(51);
@@ -2479,7 +2487,7 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
     ecmdDataBufferBase l_mbeccfir_mask(64);
     ecmdDataBufferBase l_mbeccfir_mask_and(64);
 
-    ecmdDataBufferBase l_mbaspa_mask(64);
+    //ecmdDataBufferBase l_mbaspa_mask(64);
 
     // Get associated functional MBAs on this centaur
     l_rc = fapiGetChildChiplets(i_target,
@@ -2508,12 +2516,16 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
         }    
     
 
+        // NOTE: FW wants to mask these and rely instead on detecting the 
+        // cmd complete attention, then checking these manually to see if 
+        // they cause the cmd to stop
+        
         //*************************
         //*************************
         // MBASPA
         //*************************
         //*************************        
-                
+        /*        
         // Read mask
         l_rc = fapiGetScom_w_retry(l_mbaChiplets[i],
                                    MBA01_MBSPAMSKQ_0x03010614,
@@ -2529,8 +2541,8 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
         //       them. But typically we are expecting the bit set at this point
         //       to be valid errors for PRD to log.
 
-
-        // 1	Hard_CE_ETE_Attn                             unmask
+        
+        // 1	Hard_CE_ETE_Attn                             unmask       
         // NOTE: Unmasking, but PRD responsible for setting and enabling the threshold.
         l_ecmd_rc |= l_mbaspa_mask.clearBit(1);            
 
@@ -2545,7 +2557,6 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
         // 4	RCE_ETE_Attn                                 unmask
         // NOTE: Unmasking, but PRD responsible for setting and enabling the threshold.
         l_ecmd_rc |= l_mbaspa_mask.clearBit(4);            
-                    
 
         if(l_ecmd_rc)
         {
@@ -2566,9 +2577,10 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
             if (i_bad_rc) fapiLogError(i_bad_rc);        
             return l_rc;
         }
-
+        */
         //************************************************    
         // DEBUG: read them all back to verify
+        /*
         l_rc = fapiGetScom_w_retry(l_mbaChiplets[i],
                                    MBA01_MBSPAMSKQ_0x03010614,
                                    l_mbaspa_mask);
@@ -2578,8 +2590,9 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
             if (i_bad_rc) fapiLogError(i_bad_rc);        
             return l_rc;
         }
+        */
         //************************************************    
-
+        
 
 
         //*************************
@@ -2627,11 +2640,16 @@ fapi::ReturnCode mss_unmask_fetch_errors(const fapi::Target & i_target,
         // 19	Memory UE                   recoverable         unmask
         l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(19);
         
+        // NOTE: FW wants to mask these and rely instead on detecting the 
+        // cmd complete attention, then checking these manually to see if 
+        // they cause the cmd to stop
+        /*
         // 20:27	Maint MPE Rank 0:7      recoverable         unmask
         l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(20,8);
         
         // 41	Maintenance UE              recoverable         unmask
         l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(41);
+        */
         
         // 43	Prefetch Memory UE          recoverable         unmask
         l_ecmd_rc |= l_mbeccfir_mask_and.clearBit(43);
