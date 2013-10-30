@@ -312,7 +312,7 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
             reinterpret_cast<TARGETING::Target*>((*l_itr)->iv_target1.get());
 
         TARGETING::Target * l_pTarget2 =
-            reinterpret_cast<TARGETING::Target*>((*l_itr)->iv_target1.get());
+            reinterpret_cast<TARGETING::Target*>((*l_itr)->iv_target2.get());
 
         HWAS::callOutPriority l_priority =
             xlateCalloutPriority((*l_itr)->iv_calloutPriority);
