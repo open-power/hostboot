@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/targeting/common/pointer.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/targeting/common/pointer.H $                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TARGETING_COMMON_POINTER_H
 #define __TARGETING_COMMON_POINTER_H
 
@@ -41,9 +40,23 @@ namespace TARGETING
  *      and FSP
  */
 template<typename T>
-union AbstractPointer 
+union AbstractPointer
 {
     uint64_t raw; ///< Raw value of the container
+
+    /**
+     *  @brief Specialized address format to support encoding address of
+     *      a target/etc. outside a given node.  This is used by platforms with
+     *      address translation to traverse associations, and presumes that
+     *      byte 0 of any virtual address is never set.
+     */
+    struct {
+        uint64_t nodeId : 8; ///< Node ID indexed to 1.  Value of 0
+                             ///< indicates node ID should not be used
+                             ///< for address translation
+        uint64_t ptr : 56;   ///< Address to translate
+
+    } TranslationEncoded;
 
     /**
      *  @brief Returns the AbstractPointer as a platform specific pointer

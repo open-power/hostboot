@@ -842,9 +842,20 @@ void TargetService::_getAssociationsViaDfs(
 
         if(TARG_ADDR_TRANSLATION_REQUIRED)
         {
-            pDestinationTarget = static_cast<Target*>(
-                TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
-                    pDestinationTarget, i_pSourceTarget));
+            NODE_ID node = (*pDestinationTargetItr).TranslationEncoded.nodeId;
+            if(!node)
+            {
+                pDestinationTarget = static_cast<Target*>(
+                    TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
+                        pDestinationTarget, i_pSourceTarget));
+            }
+            else
+            {
+                // Node IDs indexed from 1, so decrement to compensate
+                pDestinationTarget = static_cast<Target*>(
+                    TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
+                        pDestinationTarget, --node));
+            }
         }
 
         if(   (!i_pPredicate)
