@@ -152,7 +152,6 @@ void* wait_for_message( void* unused )
 PnorRP::PnorRP()
 : iv_msgQ(NULL)
 ,iv_startupRC(0)
-,iv_shutdownUE(false)
 {
     TRACFCOMP(g_trac_pnor, "PnorRP::PnorRP> " );
 
@@ -580,12 +579,6 @@ void PnorRP::waitForMessage()
                 switch(message->type)
                 {
                     case( MSG_MM_RP_READ ):
-                        // do not allow reads in the shutdown path, only writes
-                        if( iv_shutdownUE )
-                        {
-                            status_rc = -EIO;
-                            break;
-                        }
                         l_errhdl = readFromDevice( dev_offset,
                                                    chip_select,
                                                    needs_ecc,
@@ -729,7 +722,6 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
                 // Also need to spawn a separate task to do the shutdown
                 //  so that the regular PNOR task can service the writes
                 //  that happen during shutdown.
-                iv_shutdownUE = true;
                 o_fatalError = true;
                 INITSERVICE::doShutdown( PNOR::RC_ECC_UE, true );
             }

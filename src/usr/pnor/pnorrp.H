@@ -149,12 +149,6 @@ class PnorRP
     std::map<uint64_t,FlashStats_t> iv_stats;
 
     /**
-     * Remember that we got a UE and we are shutting down
-     */
-    bool iv_shutdownUE;
-
-
-    /**
      * @brief Initialize the daemon, called by constructor
      */
     void initDaemon();

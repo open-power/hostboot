@@ -248,6 +248,49 @@ class PnorRpTest : public CxxTest::TestSuite
             }
         }
 
+        //Enable this to test the UE handling, not turning on by default
+        // because it causes a shutdown
+#if 0 
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC: Attempting UE" );
+        // flush the page to make sure it gets out to the device
+        totals++;
+        rc = mm_remove_pages( RELEASE, dataptr, PAGESIZE );
+        if( rc )
+        {
+            TRACFCOMP( g_trac_pnor, "PnorRpTest::test_ECC> ERROR : error on RELEASE 2: rc=%X", rc );
+            TS_FAIL( "PnorRpTest::test_ECC> ERROR : error on RELEASE 2" );
+            fails++;
+        }
+        // generate data with CEs
+        chip_data_ptr = chip_data;
+        for (int i = 0; i < 9; i++)
+        {
+            memcpy( &data_ecc, chip_data_ptr, sizeof(uint64_t) );
+            uint64_t bad_data = data_ecc ^ (1ul << i) ^ (1ul << 9);
+            memcpy( chip_data_ptr, &bad_data, sizeof(uint64_t) );
+            chip_data_ptr += 9;
+        }
+        // write the bad data to the chip directly
+        totals++;
+        errhdl = deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                             chip_data,
+                             l_size,
+                             DEVICE_PNOR_ADDRESS(0, TEST_PHYS_OFFSET));
+        if( errhdl )
+        {
+            TS_FAIL("PnorRpTest::test_ECC: PNORDD deviceWrite() 2 failed! Error committed.");
+            ERRORLOG::errlCommit(errhdl,PNOR_COMP_ID);
+            fails++;
+        }
+        uint32_t tmp2 = 0;
+        totals++;
+        memcpy( &tmp2, dataptr, sizeof(uint32_t) );
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC: UE all done - should never see this!!" );
+        fails++;
+        TS_FAIL("PnorRpTest::test_ECC: UE did not kill the task!.");
+#endif
+
+
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC> %d/%d fails", fails, total );
     };
 
