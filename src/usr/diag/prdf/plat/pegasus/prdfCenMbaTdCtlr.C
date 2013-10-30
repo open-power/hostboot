@@ -29,7 +29,6 @@
 #include <prdfExtensibleChip.H>
 #include <prdfGlobal.H>
 #include <prdfPlatServices.H>
-#include <prdfRegisterCache.H>
 #include <prdfTrace.H>
 
 // Pegasus includes
@@ -49,18 +48,6 @@ namespace PRDF
 {
 
 using namespace PlatServices;
-
-enum EccErrorMask
-{
-    NO_ERROR  = 0,        ///< No ECC errors found
-    UE        = 0x01,     ///< UE
-    MPE       = 0x02,     ///< Chip mark placed
-    MCE       = 0x04,     ///< CE on chip mark
-    HARD_CTE  = 0x08,     ///< Hard CE threshold exceeed
-    SOFT_CTE  = 0x10,     ///< Soft CE threshold exceeed
-    INTER_CTE = 0x20,     ///< Intermittent CE threshold exceeed
-    RETRY_CTE = 0x40,     ///< Retry CE threshold exceeed
-};
 
 //------------------------------------------------------------------------------
 //                            Class Variables
@@ -144,39 +131,13 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"iv_mbaChip:0x%08x iv_initialized:%c iv_tdState:%d "
-                  "iv_rank:M%dS%d iv_mark:%2d %2d", getHuid(mba),
-                  iv_initialized ? 'T' : 'F', iv_tdState, iv_rank.getMaster(),
-                  iv_rank.getSlave(), iv_mark.getCM().getSymbol(),
-                  iv_mark.getSM().getSymbol() );
+        PRDF_ERR( PRDF_FUNC"Failed." );
+        badPathErrorHandling( io_sc );
 
-        int32_t l_rc = cleanupPrevCmd(); // Just in case.
-        if ( SUCCESS != l_rc )
-            PRDF_ERR( PRDF_FUNC"cleanupPrevCmd() failed" );
-
-        l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );
+        // Tell MDIA to skip further analysis on this MBA.
+        int32_t l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );
         if ( SUCCESS != l_rc )
             PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(SKIP_MBA) failed" );
-
-        io_sc.service_data->SetErrorSig( PRDFSIG_MaintCmdComplete_ERROR );
-        io_sc.service_data->SetServiceCall();
-
-        // There may have been a code bug, callout 2nd level support.
-        io_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_HIGH );
-
-        // Callout the rank if no other callouts have been made (besides 2nd
-        // Level Support). Note that iv_mark is not always guaranteed to be
-        // valid for every error scenario. For simplicity, callout the rank that
-        // was targeted with low priority.
-        if ( 1 == io_sc.service_data->GetMruList().size() )
-        {
-            MemoryMru memmru ( mba, iv_rank, MemoryMruData::CALLOUT_RANK );
-            io_sc.service_data->SetCallout( memmru, MRU_LOW );
-        }
-
-        // Just in case it was a legitimate maintenance command complete (error
-        // log not committed) but something else failed.
-        io_sc.service_data->ClearFlag(ServiceDataCollector::DONT_COMMIT_ERRL);
     }
 
     return o_rc;
@@ -192,35 +153,15 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::handleTdEvent] "
 
-    int32_t o_rc = SUCCESS;
+    // This is a no-op in Hostboot because we can't support Targeted Diagnostics
+    // at this time. Instead, print a trace statement indicating the intended
+    // request. Note that any VCM request will eventually be found during the
+    // initialization of the runtime TD controller.
+    PRDF_INF( PRDF_FUNC"TD request found during Hostboot: iv_mbaChip=0x%08x "
+              "i_rank=M%dS%d i_event=%d", iv_mbaChip->GetId(),
+              i_rank.getMaster(), i_rank.getSlave(), i_event );
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
-    do
-    {
-        o_rc = initialize();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"initialize() failed" );
-            break;
-        }
-
-        // This is a no-op in Hostboot. Instead, print a trace statement
-        // indicating the intended request.
-        PRDF_INF( PRDF_FUNC"TD request found during Hostboot: "
-                  "iv_mbaChip=0x%08x i_rank=M%dS%d i_event=%d",
-                  getHuid(mba), i_rank.getMaster(), i_rank.getSlave(),
-                  i_event );
-
-    } while(0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC"iv_mbaChip:0x%08x iv_initialized:%c iv_tdState:%d",
-                  getHuid(mba), iv_initialized ? 'T' : 'F', iv_tdState );
-    }
-
-    return o_rc;
+    return SUCCESS;
 
     #undef PRDF_FUNC
 }
@@ -356,6 +297,9 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
+        // Add the mark to the callout list.
+        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
         o_rc = checkEccErrors( eccErrorMask );
@@ -377,8 +321,6 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else
         {
-            CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
-
             // Start VCM Phase 2
             o_rc = startVcmPhase2( io_sc );
             if ( SUCCESS != o_rc )
@@ -412,6 +354,9 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
+
+        // Add the mark to the callout list.
+        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
@@ -451,8 +396,6 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
             iv_tdState = NO_OP; // Abort the TD procedure.
 
             io_sc.service_data->SetErrorSig( PRDFSIG_VcmFalseAlarm );
-
-            CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
             // In the field, this error log will be recoverable for now, but we
             // may have to add thresholding later if they become a problem. In
@@ -497,6 +440,9 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
+        // Add the mark to the callout list.
+        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
         o_rc = checkEccErrors( eccErrorMask );
@@ -518,8 +464,6 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else
         {
-            CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
-
             // Start DSD Phase 2
             o_rc = startDsdPhase2( io_sc );
             if ( SUCCESS != o_rc )
@@ -553,6 +497,9 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
+
+        // Add the mark to the callout list.
+        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
         // Get error condition which caused command to stop
         uint16_t eccErrorMask = NO_ERROR;
@@ -590,8 +537,6 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
             // The chip mark has successfully been steered to the spare.
 
             io_sc.service_data->SetErrorSig( PRDFSIG_DsdDramSpared );
-
-            CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
             // Remove chip mark from hardware.
             iv_mark.clearCM();
@@ -1066,77 +1011,6 @@ int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::checkEccErrors( uint16_t & o_eccErrorMask )
-{
-    #define PRDF_FUNC "[CenMbaTdCtlr::checkEccErrors] "
-
-    int32_t o_rc = SUCCESS;
-
-    o_eccErrorMask = NO_ERROR;
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
-    do
-    {
-        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-        ExtensibleChip * membChip = mbadb->getMembChip();
-        if ( NULL == membChip )
-        {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed: MBA=0x%08x",
-                      getHuid(mba) );
-            o_rc = FAIL; break;
-        }
-
-        const char * reg_str = ( 0 == getTargetPosition(mba) )
-                                    ? "MBA0_MBSECCFIR" : "MBA1_MBSECCFIR";
-        SCAN_COMM_REGISTER_CLASS * mbsEccFir = membChip->getRegister( reg_str );
-
-        o_rc = mbsEccFir->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
-            break;
-        }
-
-        if ( mbsEccFir->IsBitSet(20 + iv_rank.getMaster()) )
-        {
-            o_eccErrorMask |= MPE;
-
-            // Clean up side-effect FIRs that may be set due to the chip mark.
-            o_rc = chipMarkCleanup();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC"chipMarkCleanup() failed" );
-                break;
-            }
-        }
-
-        if ( mbsEccFir->IsBitSet(38) ) o_eccErrorMask |= MCE;
-        if ( mbsEccFir->IsBitSet(41) ) o_eccErrorMask |= UE;
-
-        SCAN_COMM_REGISTER_CLASS * mbaSpaFir =
-                            iv_mbaChip->getRegister("MBASPA");
-        o_rc = mbaSpaFir->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"Failed to read MBASPA Regsiter");
-            break;
-        }
-
-        if ( mbaSpaFir->IsBitSet(1) ) o_eccErrorMask |= HARD_CTE;
-        if ( mbaSpaFir->IsBitSet(2) ) o_eccErrorMask |= SOFT_CTE;
-        if ( mbaSpaFir->IsBitSet(3) ) o_eccErrorMask |= INTER_CTE;
-        if ( mbaSpaFir->IsBitSet(4) ) o_eccErrorMask |= RETRY_CTE;
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::handleUE] "
@@ -1289,241 +1163,6 @@ int32_t CenMbaTdCtlr::handleMPE( STEP_CODE_DATA_STRUCT & io_sc )
 }
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[CenMbaTdCtlr::handleMCE_VCM2] "
-
-    int32_t o_rc = SUCCESS;
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
-    do
-    {
-        if ( VCM_PHASE_2 != iv_tdState )
-        {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
-            o_rc = FAIL; break;
-        }
-
-        io_sc.service_data->SetErrorSig( PRDFSIG_VcmVerified );
-
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
-
-        if ( areDramRepairsDisabled() )
-        {
-            iv_tdState = NO_OP; // The TD procedure is complete.
-
-            io_sc.service_data->SetServiceCall();
-
-            break; // nothing else to do.
-        }
-
-        bool startDsdProcedure = false;
-
-        // Read VPD.
-        CenDqBitmap bitmap;
-        o_rc = getBadDqBitmap( mba, iv_rank, bitmap );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
-            break;
-        }
-
-        // The chip mark is considered verified, so set it in VPD.
-        // NOTE: If this chip mark was placed on the spare, the original failing
-        //       DRAM will have already been set in VPD so this will be
-        //       redundant but it simplifies the rest of the logic below.
-        o_rc = bitmap.setDram( iv_mark.getCM().getSymbol() );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"setDram() failed" );
-            break;
-        }
-
-        // RAS callout policies can be determined by the DIMM type. We can
-        // assume IS DIMMs are on low end systems and Centaur DIMMs are on
-        // mid/high end systems.
-        bool isCenDimm = false;
-        o_rc = isMembufOnDimm( mba, isCenDimm );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"isMembufOnDimm() failed" );
-            break;
-        }
-
-        if ( isCenDimm ) // Medium/high end systems
-        {
-            uint8_t ps = iv_mark.getCM().getPortSlct();
-
-            // It is possible that a Centaur DIMM does not have spare DRAMs.
-            // Check the VPD for available spares. Note that a x4 DIMM may have
-            // one or two spare DRAMs so check for availability on both.
-            // TODO: RTC 68096 Add support for x4 DRAMs.
-            bool dramSparePossible = false;
-            o_rc = bitmap.isDramSpareAvailable( ps, dramSparePossible );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC"isDramSpareAvailable() failed" );
-                break;
-            }
-
-            if ( dramSparePossible )
-            {
-                // Verify the spare is not already used.
-                CenSymbol sp0, sp1, ecc;
-                // TODO: RTC 68096 need to support ECC spare.
-                o_rc = mssGetSteerMux( mba, iv_rank, sp0, sp1, ecc );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed" );
-                    break;
-                }
-
-                if ( ((0 == ps) && !sp0.isValid()) ||
-                     ((1 == ps) && !sp1.isValid()) )
-                {
-                    // A spare DRAM is available.
-                    startDsdProcedure = true;
-                }
-                else if ( iv_mark.getCM().getDram() ==
-                          (0 == ps ? sp0.getDram() : sp1.getDram()) )
-                {
-                    io_sc.service_data->SetErrorSig( PRDFSIG_VcmBadSpare );
-
-                    // The chip mark was on the spare DRAM and it is bad, so
-                    // call it out and set it in VPD.
-
-                    MemoryMru memmru ( mba, iv_rank, iv_mark.getCM() );
-                    memmru.setDramSpared();
-                    io_sc.service_data->SetCallout( memmru );
-                    io_sc.service_data->SetServiceCall();
-
-                    o_rc = bitmap.setDramSpare( ps );
-                    if ( SUCCESS != o_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC"setDramSpare() failed" );
-                        break;
-                    }
-                }
-                else
-                {
-                    // Chip mark and DRAM spare are both used.
-                    io_sc.service_data->SetErrorSig( PRDFSIG_VcmMarksUnavail );
-                    io_sc.service_data->SetServiceCall();
-                }
-            }
-            else
-            {
-                // Chip mark is in place and sparing is not possible.
-                io_sc.service_data->SetErrorSig( PRDFSIG_VcmMarksUnavail );
-                io_sc.service_data->SetServiceCall();
-            }
-        }
-        else // Low end systems
-        {
-            // Not able to do dram sparing. If there is a symbol mark, there are
-            // no repairs available so call it out and set the error log to
-            // predictive.
-            if ( iv_mark.getSM().isValid() )
-            {
-                io_sc.service_data->SetErrorSig( PRDFSIG_VcmMarksUnavail );
-                io_sc.service_data->SetServiceCall();
-            }
-        }
-
-        // Write VPD.
-        o_rc = setBadDqBitmap( mba, iv_rank, bitmap );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"setBadDqBitmap() failed" );
-            break;
-        }
-
-        // Start DSD Phase 1, if possible.
-        if ( startDsdProcedure )
-        {
-            o_rc = startDsdPhase1( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC"startDsdPhase1() failed" );
-                break;
-            }
-        }
-        else
-        {
-            iv_tdState = NO_OP; // The TD procedure is complete.
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-int32_t CenMbaTdCtlr::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[CenMbaTdCtlr::handleMCE_DSD2] "
-
-    int32_t o_rc = SUCCESS;
-
-    io_sc.service_data->SetErrorSig( PRDFSIG_DsdBadSpare );
-    io_sc.service_data->SetServiceCall();
-
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
-    do
-    {
-        if ( DSD_PHASE_2 != iv_tdState )
-        {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
-            o_rc = FAIL; break;
-        }
-
-        // Callout mark and spare DRAM.
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
-
-        MemoryMru memmru ( mba, iv_rank, iv_mark.getCM() );
-        memmru.setDramSpared();
-        io_sc.service_data->SetCallout( memmru );
-
-        // The spare DRAM is bad, so set it in VPD. At this point, the chip mark
-        // should have already been set in the VPD because it was recently
-        // verified.
-
-        CenDqBitmap bitmap;
-        o_rc = getBadDqBitmap( mba, iv_rank, bitmap );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
-            break;
-        }
-
-        o_rc = bitmap.setDramSpare( iv_mark.getCM().getPortSlct() );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"setDramSpare() failed" );
-            break;
-        }
-
-        o_rc = setBadDqBitmap( mba, iv_rank, bitmap );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"setBadDqBitmap() failed" );
-            break;
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 int32_t CenMbaTdCtlr::exitTdSequence()
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::exitTdSequence] "
@@ -1557,107 +1196,6 @@ int32_t CenMbaTdCtlr::exitTdSequence()
         // Clear out the mark, just in case. This is so we don't accidentally
         // callout this mark on another rank in an error path scenario.
         iv_mark = CenMark();
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-int32_t CenMbaTdCtlr::prepareNextCmd()
-{
-    #define PRDF_FUNC "[CenMbaTdCtlr::prepareNextCmd] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-        ExtensibleChip * membChip = mbadb->getMembChip();
-        if ( NULL == membChip )
-        {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
-            o_rc = FAIL; break;
-        }
-
-        uint32_t mbaPos = getTargetPosition( iv_mbaChip->GetChipHandle() );
-
-        //----------------------------------------------------------------------
-        // Clean up previous command
-        //----------------------------------------------------------------------
-
-        o_rc = cleanupPrevCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"cleanupPrevCmd() failed" );
-            break;
-        }
-
-        //----------------------------------------------------------------------
-        // Clear ECC counters
-        //----------------------------------------------------------------------
-
-        const char * reg_str = ( 0 == mbaPos ) ? "MBA0_MBSTR" : "MBA1_MBSTR";
-        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
-        o_rc = mbstr->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
-            break;
-        }
-
-        mbstr->SetBit(53); // Setting this bit clears all counters.
-
-        o_rc = mbstr->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
-            break;
-        }
-
-        // Hardware automatically clears bit 53, so flush this register out of
-        // the register cache to avoid clearing the counters again with a write
-        // from the out-of-date cached copy.
-        RegDataCache & cache = RegDataCache::getCachedRegisters();
-        cache.flush( membChip, mbstr );
-
-        //----------------------------------------------------------------------
-        // Clear ECC FIRs
-        //----------------------------------------------------------------------
-
-        reg_str = ( 0 == mbaPos ) ? "MBA0_MBSECCFIR_AND" : "MBA1_MBSECCFIR_AND";
-        SCAN_COMM_REGISTER_CLASS * firand = membChip->getRegister( reg_str );
-        firand->setAllBits();
-
-        // Clear MPE bit for this rank.
-        firand->ClearBit( 20 + iv_rank.getMaster() );
-
-        // Clear NCE, SCE, MCE, RCE, SUE, UE bits (36-41)
-        firand->SetBitFieldJustified( 36, 6, 0 );
-
-        o_rc = firand->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
-            break;
-        }
-
-        SCAN_COMM_REGISTER_CLASS * spaAnd =
-                                iv_mbaChip->getRegister("MBASPA_AND");
-        spaAnd->setAllBits();
-
-        // clear threshold exceeded attentions
-        spaAnd->SetBitFieldJustified( 1, 4, 0 );
-
-        o_rc = spaAnd->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"Write() failed on MBASPA_AND" );
-            o_rc = FAIL; break;
-        }
 
     } while (0);
 

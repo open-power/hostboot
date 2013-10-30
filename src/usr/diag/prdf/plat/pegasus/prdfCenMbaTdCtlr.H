@@ -87,14 +87,6 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
   private: // functions
 
     /**
-     * @brief  Checks if ECC errors have occurred during a maintenance command.
-     * @param  o_eccErrorMask Bitwise mask indicating which ECC errors have
-     *         occurred.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t checkEccErrors( uint16_t & o_eccErrorMask );
-
-    /**
      * @brief  Handle UEs during TD analysis.
      * @param  io_sc Service data collector.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -110,35 +102,11 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     int32_t handleMPE( STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
-     * @brief  Handle MCE event during VCM Phase 2
-     * @param  io_sc Service data collector.
-     * @note   This will update bad bits information in VPD, set callouts, and
-     *         start the DRAM sparing procedure, if possible.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc );
-
-    /**
-     * @brief  Handle MCE event during DSD Phase 2
-     * @param  io_sc Service data collector.
-     * @note   This will update bad bits information in VPD and set callouts.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc );
-
-    /**
      * @brief  Handle cleanup when TD sequence is complete and TD state machine
      *         will reset.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     int32_t exitTdSequence();
-
-    /**
-     * @brief  Preforms cleanup tasks that need to be done before starting the
-     *         next maintenance command (i.e. clear scrub counter).
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t prepareNextCmd();
 
     /**
      * @brief  Sends a message to MDIA that a maintenance command has completed.

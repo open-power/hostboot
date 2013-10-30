@@ -83,6 +83,18 @@ class CenMbaTdCtlrCommon
         MAX_TD_STATE     ///< The maximum number of TD states.
     };
 
+    enum EccErrorMask
+    {
+        NO_ERROR  = 0,        ///< No ECC errors found
+        UE        = 0x01,     ///< UE
+        MPE       = 0x02,     ///< Chip mark placed
+        MCE       = 0x04,     ///< CE on chip mark
+        HARD_CTE  = 0x08,     ///< Hard CE threshold exceeed
+        SOFT_CTE  = 0x10,     ///< Soft CE threshold exceeed
+        INTER_CTE = 0x20,     ///< Intermittent CE threshold exceeed
+        RETRY_CTE = 0x40,     ///< Retry CE threshold exceeed
+    };
+
   public: // functions
 
     /**
@@ -269,11 +281,53 @@ class CenMbaTdCtlrCommon
     virtual int32_t cleanupPrevCmd();
 
     /**
+     * @brief  Preforms cleanup tasks that need to be done before starting the
+     *         next maintenance command (i.e. clear scrub counter).
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t prepareNextCmd();
+
+    /**
      * @brief  Clears FIR bits that may have been a side-effect of a chip mark
      *         placed by hardware.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     virtual int32_t chipMarkCleanup();
+
+    /**
+     * @brief  Checks if ECC errors have occurred during a maintenance command.
+     * @param  o_eccErrorMask Bitwise mask indicating which ECC errors have
+     *         occurred.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t checkEccErrors( uint16_t & o_eccErrorMask );
+
+    /**
+     * @brief  Handle MCE event during VCM Phase 2
+     * @param  io_sc Service data collector.
+     * @note   This will update bad bits information in VPD, set callouts, and
+     *         start the DRAM sparing procedure, if possible.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
+     * @brief  Handle MCE event during DSD Phase 2
+     * @param  io_sc Service data collector.
+     * @note   This will update bad bits information in VPD and set callouts.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
+     * @brief This class is designed such that all functions will eventually
+     *        return any bad error code to the top level public functions such
+     *        as handleCmdCompleteEvent() and handleTdEvent(). This is a common
+     *        function to handle everything needed to that the TD controller
+     *        can hopefully fail gracefully.
+     * @param io_sc The step code data struct.
+     */
+    virtual void badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc );
 
   protected: // instance variables
 
