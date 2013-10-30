@@ -786,6 +786,7 @@ bool InitService::registerShutdownEvent(msg_q_t i_msgQ,
             if(r->msgPriority <= (uint32_t)i_priority)
             {
                 in_pos = r;
+                break;
             }
         }
 
