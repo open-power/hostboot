@@ -177,10 +177,7 @@ class TargetService
                                 ///< Hardware affinity.  For example the child
                                 ///< of a memory controller channel target might
                                 ///< be a DIMM target
-            VOLTAGE_SUPPLIER,   ///< The result target(s) should be the voltage
-                                ///< supplier
-            VOLTAGE_CONSUMER,   ///< The result target(s) should be the voltage
-                                ///< consumer
+            MAX_ASSOCIATION_TYPES, ///< Number of types, must always be last
         };
 
     public:
@@ -488,10 +485,10 @@ class TargetService
                   EntityPath&  o_entityPath) const;
 
         /**
-         *  @brief Returns entity paths of targets associated to the specified
-         *      target in a specific way
+         *  @brief Returns handles to targets associated to the specified
+         *      target in a specific way, in depth first order
          *
-         *  Returns entity paths of targets associated to the specified target,
+         *  Returns handles to targets associated to the specified target,
          *  as indicated by an association type.  Based on the specified
          *  recursion level, the routine will determine the immediate
          *  associations, or all possible associations.  For example, if caller
@@ -499,11 +496,13 @@ class TargetService
          *  the routine will return the next set of targets in the physical
          *  hierarchy.  Conversely if the caller asks for ALL children targets
          *  for said source target, the routine will return all targets
-         *  contained within the processor chip.
+         *  contained within the processor chip.  All targets will be returned
+         *  in depth first order.
          *
          *  @param[out] o_list List of target handles that match the specified
-         *      criteria
-         *  @param[in] i_pTarget Target from which to search for other targets
+         *      criteria.  Caller's list will be cleared initially.
+         *  @param[in] i_pTarget Target from which to search for other targets.
+         *      Must not be NULL.
          *  @param[in] i_type Type of association linking the specified target
          *      to candidate result targets
          *  @param[in] i_recursionLevel Whether to return candidate targets
@@ -741,46 +740,6 @@ class TargetService
         typedef std::vector< NodeSpecificInfo > NodeInfo_t;
 
         /**
-         *  @brief Enum specifying which direction to traverse associations
-         *      between targets
-         *
-         *  Given a general class of association between targets, this enum
-         *  tells the target service which direction to search along an entity
-         *  path for the result targets
-         */
-        enum ASSOCIATION_DIRECTION
-        {
-            INWARDS,  ///< Search for associated targets of the specified target
-                      ///< that happen to be closer to the top level target
-            OUTWARDS, ///< Search for associated targets of the specified target
-                      ///< that happen to be farther from the top level target
-        };
-
-        /**
-         *  @brief Structure mapping an association type to an entity path
-         *      attribute and entity path search direction
-         *
-         *  This map allows the target service to accept an association type
-         *  from a caller and determine the appropriate entity path to search
-         *  along for the result target, and in which direction along the path
-         */
-        struct AssociationAttrMap
-        {
-            ASSOCIATION_TYPE      associationType; ///< Specifies the type of
-                                                   ///< association to traverse
-            ASSOCIATION_DIRECTION associationDir;  ///< Specifies which
-                                                   ///< direction along an
-                                                   ///< entity path to search
-            ATTRIBUTE_ID          attr;            ///< Specifies which entity
-                                                   ///< path to search along
-        };
-
-        /**
-         *  @brief Aliases a vector of association mappings
-         */
-        typedef std::vector< AssociationAttrMap > AssociationMappings_t;
-
-        /**
          *  @brief Returns the first Target from the first initialized node
          *  from the pool of targets.
          *
@@ -831,82 +790,55 @@ class TargetService
          */
         void _maxTargets(NodeSpecificInfo & io_nodeInfoContainer);
 
-        /**
-         *  @brief Returns handles to the targets associated to the
-         *      target represented by the specified entity path such that the
-         *      results are closer to the top level target than the source
-         *
-         *  Returns handles to the targets associated to the target represented
-         *  by the specified entity path such that the results are closer to the
-         *  top level target than the source.  An IMMEDIATE recursion level
-         *  returns handles to targets that are one association away from the
-         *  target referenced by the supplied entity path.  A recursion level of
-         *  ALL recursively returns results.
-         *
-         *  @param[in] i_attr Entity path attribute that is used as the basis
-         *      for lookups on candidate targets
-         *  @param[in] i_recursionLevel Whether to provide immediate or
-         *      recursive results
-         *  @param[in] i_entityPath Entity path to start search from
-         *  @param[in] i_pPredicate Pointer to a predicate to be evaluated 
-         *      against each candidate target.  If the predicate returns true, 
-         *      the target will be added to the result list.  A value of NULL 
-         *      acts as a predicate that always returns true.
-         *  @param[out] o_list List of returned target handles
-         *
-         *  @pre Target service must be initialized
-         *
-         *  @post List of target handles corresponding to targets closer to the
-         *      top level target than the one referenced by the specified entity
-         *      path returned
-         */
-        void _getInwards(
-                  ATTRIBUTE_ID      i_attr,
-                  RECURSION_LEVEL   i_recursionLevel,
-                  EntityPath        i_entityPath,
-            const PredicateBase*    i_pPredicate,
-                  TargetHandleList& o_list) const;
 
+        //@NEBA
         /**
-         *  @brief Returns handles to the targets associated to the
-         *      target represented by the specified entity path such that the
-         *      results are farther from the top level target than the source
+         *  @brief Returns handles targets associated to the specified target in
+         *      a specific way as indicated by the input parameters.  Returns
+         *      results in depth first order.
          *
-         *  Returns handles to the targets associated to the target represented
-         *  by the specified entity path such that the results are farther from
-         *  the top level target than the source.  An IMMEDIATE recursion level
-         *  returns handles to targets that are one association away from the
-         *  target referenced by the supplied entity path.  A recursion level of
-         *  ALL recursively returns results.
+         *  Returns handles to targets associated to the specified target,
+         *  as indicated by an association type.  Based on the specified
+         *  recursion level, the routine will determine the immediate
+         *  associations, or all possible associations.  For example, if caller
+         *  supplies a processor chip target and asks for its children targets,
+         *  the routine will return the next set of targets in the physical
+         *  hierarchy.  Conversely if the caller asks for ALL children targets
+         *  for said source target, the routine will return all targets
+         *  contained within the processor chip.  All searching is peformed as a
+         *  depth first search.  This routine will not clear the caller's input
+         *  list when returning results.
          *
-         *  @param[in] i_attr Entity path attribute that is used as the basis
-         *      for lookups on candidate targets
-         *  @param[in] i_recursionLevel Whether to provide immediate or
-         *      recursive results
-         *  @param[in] i_entityPath Entity path to look from
-         *  @param[in] i_pPredicate Pointer to a predicate to be evaluated 
-         *      against each candidate target.  If the predicate returns true, 
-         *      the target will be added to the result list.  A value of NULL 
-         *      acts as a predicate that always returns true.
-         *  @param[out] o_list List of returned target handles
+         *  @param[out] o_list List of target handles that match the specified
+         *      criteria, not cleared by this function.
+         *  @param[in] i_pSourceTarget Target from which to search for other
+         *      targets.  Must not be NULL.  Function presumes caller has
+         *      already screened out NULL targets.
+         *  @param[in] i_type Type of association linking the specified target
+         *      to candidate result targets
+         *  @param[in] i_recursionLevel Whether to return candidate targets
+         *      immediately associated to the specified target or recursively
+         *      associated to it.
+         *  @param[in] i_pPredicate Pointer to a predicate to be evaluated
+         *      against each candidate target (as determined by the source
+         *      target, type, and recursion level parameters).  If the predicate
+         *      returns true, the target will be added to the result list.  A
+         *      value of NULL acts as a predicate that always returns true.
          *
-         *  @pre Target service must be initialized
+         *  @pre Input target must not be NULL
          *
-         *  @post List of target handles corresponding to targets farther from
-         *      the top level target than the one referenced by the specified
-         *      entity path returned.
+         *  @post List of target handles matching the specified criteria
+         *      added to end of caller's list
          */
-        void _getOutwards(
-                  ATTRIBUTE_ID      i_attr,
-                  RECURSION_LEVEL   i_recursionLevel,
-                  EntityPath        i_entityPath,
-            const PredicateBase*    i_pPredicate,
-                  TargetHandleList& o_list ) const;
+        void _getAssociationsViaDfs(
+                  TargetHandleList&    o_list,
+            const Target* const        i_pSourceTarget,
+            const ASSOCIATION_TYPE     i_type,
+            const RECURSION_LEVEL      i_recursionLevel,
+            const PredicateBase* const i_pPredicate) const;
 
         // Instance variables
         bool        iv_initialized; ///< Is service initialized or not
-
-        AssociationMappings_t iv_associationMappings; ///< Association map
 
         NodeInfo_t iv_nodeInfo;
 

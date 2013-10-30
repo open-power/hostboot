@@ -107,6 +107,19 @@ TargetService::TargetService() :
 {
     #define TARG_FN "TargetService()"
 
+    // Target class in targeting/common/target.H has an array of pointers to
+    // target handles.  Currently there is one pointer for each supported
+    // association type.  The currently supported association types are PARENT,
+    // CHILD. PARENT_BY_AFFINITY, and CHILD_BY_AFFINTY.  The number of pointers
+    // should exactly equal value of TargetService::MAX_ASSOCIATION_TYPES
+    // defined in targeting/common/targetservice.H.  Due to the huge code
+    // changes necessary to directly use that enum value, this compile time
+    // assert enforces that restriction.
+    CPPASSERT(
+     (   (  sizeof( reinterpret_cast<Target*>(0)->iv_ppAssociations)
+          / sizeof( reinterpret_cast<Target*>(0)->iv_ppAssociations[0]) )
+      == (TargetService::MAX_ASSOCIATION_TYPES) ));
+
     #undef TARG_FN
 }
 
@@ -136,22 +149,6 @@ void TargetService::init(const size_t i_maxNodes)
     if(!iv_initialized)
     {
         TARG_INF("Max Nodes to initialize is [%d]", i_maxNodes);
-
-        // Build the association mappings
-        AssociationAttrMap a1 = {PARENT, INWARDS, ATTR_PHYS_PATH};
-        AssociationAttrMap a2 = {CHILD, OUTWARDS, ATTR_PHYS_PATH};
-        AssociationAttrMap a3 = {PARENT_BY_AFFINITY,
-            INWARDS,ATTR_AFFINITY_PATH};
-        AssociationAttrMap a4 = {CHILD_BY_AFFINITY,
-            OUTWARDS,ATTR_AFFINITY_PATH};
-        AssociationAttrMap a5 = {VOLTAGE_SUPPLIER, INWARDS, ATTR_POWER_PATH};
-        AssociationAttrMap a6 = {VOLTAGE_CONSUMER, OUTWARDS, ATTR_POWER_PATH};
-        iv_associationMappings.push_back(a1);
-        iv_associationMappings.push_back(a2);
-        iv_associationMappings.push_back(a3);
-        iv_associationMappings.push_back(a4);
-        iv_associationMappings.push_back(a5);
-        iv_associationMappings.push_back(a6);
 
         for(uint8_t l_nodeCnt=0; l_nodeCnt<i_maxNodes; l_nodeCnt++)
         {
@@ -818,6 +815,59 @@ bool TargetService::tryGetPath(
 }
 
 //******************************************************************************
+// TargetService::_getAssociationsViaDfs
+//******************************************************************************
+
+void TargetService::_getAssociationsViaDfs(
+          TargetHandleList&    o_list,
+    const Target* const        i_pSourceTarget,
+    const ASSOCIATION_TYPE     i_type,
+    const RECURSION_LEVEL      i_recursionLevel,
+    const PredicateBase* const i_pPredicate) const
+{
+    AbstractPointer<Target>* pDestinationTargetItr =
+        TARG_TO_PLAT_PTR(i_pSourceTarget->iv_ppAssociations[i_type]);
+
+    if(TARG_ADDR_TRANSLATION_REQUIRED)
+    {
+        pDestinationTargetItr = static_cast< AbstractPointer<Target>* >(
+            TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
+                pDestinationTargetItr, i_pSourceTarget));
+    }
+
+    while( static_cast<uint64_t>(*pDestinationTargetItr) )
+    {
+        Target* pDestinationTarget = TARG_TO_PLAT_PTR(
+            *pDestinationTargetItr);
+
+        if(TARG_ADDR_TRANSLATION_REQUIRED)
+        {
+            pDestinationTarget = static_cast<Target*>(
+                TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
+                    pDestinationTarget, i_pSourceTarget));
+        }
+
+        if(   (!i_pPredicate)
+           || ((*i_pPredicate)(pDestinationTarget)))
+        {
+            o_list.push_back(pDestinationTarget);
+        }
+
+        if(i_recursionLevel == ALL)
+        {
+            (void)_getAssociationsViaDfs(
+                o_list,
+                pDestinationTarget,
+                i_type,
+                i_recursionLevel,
+                i_pPredicate);
+        }
+
+        ++pDestinationTargetItr;
+    }
+}
+
+//******************************************************************************
 // TargetService::getAssociated
 //******************************************************************************
 
@@ -844,43 +894,8 @@ void TargetService::getAssociated(
     // Start with no elements
     o_list.clear();
 
-    // Figure out which attribute to look up
-    for (AssociationMappings_t::const_iterator
-            assocIter = iv_associationMappings.begin();
-            assocIter != iv_associationMappings.end();
-            ++assocIter)
-    {
-        if (i_type == (*assocIter).associationType)
-        {
-            EntityPath l_entityPath;
-
-            bool l_exist = tryGetPath((*assocIter).attr,
-                i_pTarget, l_entityPath);
-
-            if (l_exist)
-            {
-                if ((*assocIter).associationDir == INWARDS)
-                {
-                    (void) _getInwards((*assocIter).attr,
-                        i_recursionLevel, l_entityPath, i_pPredicate, o_list);
-                }
-                else if ((*assocIter).associationDir == OUTWARDS)
-                {
-                    (void) _getOutwards((*assocIter).attr,
-                        i_recursionLevel, l_entityPath, i_pPredicate, o_list);
-                }
-                else
-                {
-                    TARG_ASSERT(0, TARG_LOC
-                           "(*assocIter).associationDir "
-                           "= 0x%X not supported",
-                           (*assocIter).associationDir);
-                }
-            }
-            break;
-        }
-    }
-
+    (void)_getAssociationsViaDfs(
+        o_list,i_pTarget,i_type,i_recursionLevel,i_pPredicate);
     } while (0);
 
     #undef TARG_FN
@@ -1108,107 +1123,6 @@ void TargetService::_maxTargets(NodeSpecificInfo& io_nodeInfoContainer)
     io_nodeInfoContainer.maxTargets = *pNumTargets;
 
     TARG_INF("Max targets = %d", io_nodeInfoContainer.maxTargets);
-
-    #undef TARG_FN
-}
-
-//******************************************************************************
-// TargetService::_getInwards
-//******************************************************************************
-
-void TargetService::_getInwards(
-    const ATTRIBUTE_ID         i_attr,
-    const RECURSION_LEVEL      i_recursionLevel,
-          EntityPath           i_entityPath,
-    const PredicateBase* const i_pPredicate,
-          TargetHandleList&    o_list) const
-{
-    #define TARG_FN "_getInwards(...)"
-
-    while (i_entityPath.size() > 1)
-    {
-        i_entityPath.removeLast();
-
-        TargetIterator l_allTargets;
-
-        for(l_allTargets = targetService().begin();
-            l_allTargets != targetService().end();
-            ++l_allTargets)
-        {
-            EntityPath l_candidatePath;
-            bool l_candidateFound = false;
-
-            l_candidateFound = tryGetPath(i_attr,
-                                   (*l_allTargets),
-                                   l_candidatePath);
-
-            if ( (l_candidateFound)
-                    && (l_candidatePath == i_entityPath)
-                    && (   (i_pPredicate == NULL)
-                        || (*i_pPredicate)(*l_allTargets) ) )
-            {
-                o_list.push_back(*l_allTargets);
-                break;
-            }
-        }
-
-        if (i_recursionLevel == IMMEDIATE)
-        {
-            break;
-        }
-    }
-
-    #undef TARG_FN
-}
-
-//******************************************************************************
-// TargetService::_getOutwards
-//******************************************************************************
-
-void TargetService::_getOutwards(
-    const ATTRIBUTE_ID         i_attr,
-    const RECURSION_LEVEL      i_recursionLevel,
-          EntityPath           i_entityPath,
-    const PredicateBase* const i_pPredicate,
-          TargetHandleList&    o_list) const
-{
-    #define TARG_FN "_getOutwards(...)"
-    do
-    {
-        // If at max depth (a leaf path element), no children possible
-        if (i_entityPath.size() >= EntityPath::MAX_PATH_ELEMENTS)
-        {
-            break;
-        }
-
-        // Find the children (immediate, or all), depending on recursion level
-        TargetIterator l_allTargets;
-
-        for(l_allTargets = targetService().begin();
-            l_allTargets != targetService().end();
-            ++l_allTargets)
-        {
-            EntityPath l_candidatePath;
-            bool l_candidateFound = tryGetPath(i_attr, *l_allTargets,
-                                        l_candidatePath);
-            if (l_candidateFound)
-            {
-                if ( ( (i_recursionLevel == IMMEDIATE)
-                          && (l_candidatePath.size() == i_entityPath.size() +1))
-                        || (   (i_recursionLevel == ALL)
-                            && (l_candidatePath.size() > i_entityPath.size())))
-                {
-                    if (i_entityPath.equals(l_candidatePath,i_entityPath.size())
-                           && (  (i_pPredicate == NULL)
-                                || (*i_pPredicate)(*l_allTargets) ) )
-                    {
-                        o_list.push_back(*l_allTargets);
-                    }
-                }
-            }
-        }
-
-    } while (0);
 
     #undef TARG_FN
 }

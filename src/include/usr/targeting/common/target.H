@@ -533,6 +533,17 @@ class Target
         // Pointer to array of void* (which point to attributes)
         TARGETING::AbstractPointer< AbstractPointer<void> > iv_pAttrValues;
 
+        // Array of pointers to target handles.  Currently there is one pointer
+        // for each supported association type.  The currently supported
+        // association types are PARENT, CHILD, PARENT_BY_AFFINITY, and
+        // CHILD_BY_AFFINTY.  The number of pointers should exactly equal value
+        // of TargetService::MAX_ASSOCIATION_TYPES defined in
+        // targeting/common/targetservice.H.  Due to the huge code changes
+        // necessary to directly use that enum value, a compile time assert in
+        // targeting/common/targetservice.C enforces that restriction.
+        TARGETING::AbstractPointer< AbstractPointer<Target> >
+            iv_ppAssociations[4];
+
     private: // Private CTORs/DTORs/Operators
 
         /**
@@ -559,6 +570,8 @@ class Target
 
         friend class PnorBuilderService;
         friend class TargetCloner;
+        friend class TargetService;
+        friend class AssociationManager;
 
         // Friend functions to allow FAPI Attribute code to directly call
         // _tryGetAttr and _trySetAttr for code size optimization

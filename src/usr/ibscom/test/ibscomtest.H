@@ -66,9 +66,11 @@ class IBscomTest: public CxxTest::TestSuite
         TARGETING::PredicateCTM l_cent(TARGETING::CLASS_CHIP,
                                        TARGETING::TYPE_MEMBUF,
                                        TARGETING::MODEL_NA);
-        TARGETING::PredicatePostfixExpr cent_query;
-        cent_query.push(&l_cent);
+        TARGETING::PredicateHwas functionalPredicate;
+        functionalPredicate.functional(true);
 
+        TARGETING::PredicatePostfixExpr cent_query;
+        cent_query.push(&l_cent).push(&functionalPredicate).And();
 
         TARGETING::TargetHandleList centaur_list;
         TARGETING::targetService().

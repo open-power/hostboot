@@ -45,6 +45,7 @@ use XML::Simple;
 use Text::Wrap;
 use Data::Dumper;
 use POSIX;
+use Env;
 
 ################################################################################
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
@@ -118,6 +119,34 @@ if($cfgVerbose)
 
 use constant INVALID_HUID=>0xffffffff;
 use constant PEER_HUID_NOT_PRESENT=>0xfffffffe;
+
+# When computing associations between targets, always store the association list
+# pointers in this exact order within each target object.  It also must be the
+# case that the ASSOCIATION_TYPE enum in the target service header must declare
+# the corresponding enum values in this order as well
+use constant PARENT_BY_CONTAINMENT => "ParentByContainment";
+use constant CHILD_BY_CONTAINMENT => "ChildByContainment";
+use constant PARENT_BY_AFFINITY => "ParentByAffinity";
+use constant CHILD_BY_AFFINITY => "ChildByAffinity";
+my @associationTypes = ( PARENT_BY_CONTAINMENT,
+    CHILD_BY_CONTAINMENT, PARENT_BY_AFFINITY, CHILD_BY_AFFINITY );
+
+# Constants for attribute names (minus ATTR_ prefix)
+use constant ATTR_PHYS_PATH => "PHYS_PATH";
+use constant ATTR_AFFINITY_PATH => "AFFINITY_PATH";
+use constant ATTR_UNKNOWN => "UnknownAttributeName";
+
+# Data manipulation constants
+use constant BITS_PER_BYTE => 8;
+use constant LOW_BYTE_MASK => 0xFF;
+use constant BYTE_RIGHT_BIT_INDEX => BITS_PER_BYTE - 1;
+use constant BYTES_PER_ABSTRACT_POINTER => 8;
+
+# This is the maximum total sum of (compute nodes + control nodes) possible for
+# any known system using this attribute compiler.  It is used to reserve
+# space in each system target's CHILD + CHILD_BY_AFFINITY association lists
+# so that FSP can link a system target to multiple nodes
+use constant MAX_COMPUTE_AND_CONTROL_NODE_SUM => 5;
 
 my $xml = new XML::Simple (KeyAttr=>[]);
 use Digest::MD5 qw(md5_hex);
@@ -4646,6 +4675,308 @@ sub getPnorBaseAddress {
 }
 
 ################################################################################
+# Given a number, return a decimal/hexidecimal pair (for debug)
+################################################################################
+
+sub toDecAndHex
+{
+    my ($val) = @_;
+    return "$val/" .  sprintf("0x%016X",$val);
+}
+
+################################################################################
+# Trace association code entry (for debug)
+################################################################################
+
+sub ASSOC_ENTER
+{
+    if($ENV{"ASSOC_FUNC"} eq "1")
+    {
+        my ($trace) = @_;
+        my ($package, $filename, $line, $undef, $hasargs, $wantarray, $evaltext,
+            $is_require, $hints, $bitmask, $hinthash) = caller (0);
+        my (undef,undef,undef,$subroutine) = caller (1);
+        print STDERR "ENTER>> Function $subroutine, Line: $line\n";
+        print STDERR "    " . $trace . "\n";
+    }
+}
+
+################################################################################
+# Trace association code exit (for debug)
+################################################################################
+
+sub ASSOC_EXIT
+{
+    if($ENV{"ASSOC_FUNC"} eq "1")
+    {
+        my ($trace) = @_;
+        my ($package, $filename, $line, $undef, $hasargs, $wantarray, $evaltext,
+            $is_require, $hints, $bitmask, $hinthash) = caller (0);
+        my (undef,undef,undef,$subroutine) = caller (1);
+        print STDERR "EXIT>> Function $subroutine, Line: $line\n";
+        print STDERR "    " . $trace . "\n";
+    }
+}
+
+################################################################################
+# Trace association code debug statements
+################################################################################
+
+sub ASSOC_DBG
+{
+    if($ENV{"ASSOC_DBG"} eq "1")
+    {
+        my ($trace) = @_;
+        my ($package, $filename, $line, $subroutine, $hasargs, $wantarray,
+            $evaltext, $is_require, $hints, $bitmask, $hinthash) = caller (0);
+        print STDERR "DEBUG($line): " . $trace . "\n";
+    }
+}
+
+################################################################################
+# Trace association code important statements
+################################################################################
+
+sub ASSOC_IMP
+{
+    if($ENV{"ASSOC_IMP"} eq "1")
+    {
+        my ($trace) = @_;
+        my ($package, $filename, $line, $subroutine, $hasargs, $wantarray,
+            $evaltext, $is_require, $hints, $bitmask, $hinthash) = caller (0);
+        print STDERR "IMP($line): " . $trace . "\n";
+    }
+}
+
+################################################################################
+# Given an association type, return name of corresponding attribute
+################################################################################
+
+sub getAttributeNameForAssociationTypeOf
+{
+    my ($associationType) = @_;
+
+    my $attributeName = ATTR_UNKNOWN;
+    if(   ($associationType eq PARENT_BY_CONTAINMENT)
+       || ($associationType eq CHILD_BY_CONTAINMENT))
+    {
+        $attributeName = ATTR_PHYS_PATH;
+    }
+    elsif (   ($associationType eq PARENT_BY_AFFINITY)
+           || ($associationType eq CHILD_BY_AFFINITY))
+    {
+        $attributeName = ATTR_AFFINITY_PATH;
+    }
+    else
+    {
+        fatal (  "FATAL ERROR! Couldn't determine attribute name for "
+               . "$associationType associationType");
+    }
+    return $attributeName;
+}
+
+################################################################################
+# For a given target, compute parent/children of given type
+################################################################################
+
+sub buildAssociations
+{
+    my ($targetAddrHashRef, $targetId,
+        $associationType, $offsetToTargetsInBinary) = @_;
+
+    ASSOC_ENTER("targetId = $targetId, associationType = $associationType, " .
+        "offsetToTargetsInBinary = " . toDecAndHex($offsetToTargetsInBinary) );
+
+    my $attributeName = getAttributeNameForAssociationTypeOf($associationType);
+
+    # Look at all targets except the one given as input, and see if any
+    # of them have entity paths which are immediate children or parents
+    # of this target
+    foreach my $id (keys %$targetAddrHashRef)
+    {
+        # Skip input target
+        if($id eq $targetId)
+        {
+            next;
+        }
+
+        if($attributeName eq ATTR_PHYS_PATH)
+        {
+            my $destPath = $targetAddrHashRef->{$id}{$attributeName};
+            my $targetPath = $targetAddrHashRef->{$targetId}{$attributeName};
+            if($associationType eq PARENT_BY_CONTAINMENT)
+            {
+                # Parent path matches current target's entity path except
+                # missing last path component
+                my $index = rindex $targetPath, "/";
+                my $parentPath = substr $targetPath , 0, $index;
+                ASSOC_DBG("GIVEN: Current physical path = $targetPath");
+                ASSOC_DBG("CHECKING: Candidate parent physical path "
+                          . "= $destPath");
+                ASSOC_DBG("CHECKING: Parent of current physical path "
+                          . "= $parentPath");
+                if($parentPath eq $destPath)
+                {
+                    ASSOC_IMP("FOUND: parent physical path "
+                              . "= $destPath ($targetPath)");
+                    unshift
+                         @ { $targetAddrHashRef->{$targetId}
+                                 {ParentByContainmentAssociations} },
+                         $offsetToTargetsInBinary + $targetAddrHashRef->{$id}
+                            {OffsetToTargetWithinTargetList};
+                    last;
+                }
+            }
+            elsif($associationType eq CHILD_BY_CONTAINMENT)
+            {
+                # Child path matches current target's entity path except there
+                # is one extraneous path component at end
+                my $index = rindex $destPath , "/";
+                my $parentOfDestPath = substr $destPath , 0, $index;
+                ASSOC_DBG("GIVEN: Current physical path = $targetPath");
+                ASSOC_DBG("CHECKING: Candidate child physical path "
+                          . "= $destPath");
+                ASSOC_DBG("CHECKING: Parent of child physical path "
+                          . "= $parentOfDestPath");
+                if($parentOfDestPath eq $targetPath )
+                {
+                    ASSOC_IMP("FOUND: Child physical path "
+                              . "= $destPath ($targetPath)");
+                    unshift
+                         @ { $targetAddrHashRef->{$targetId}
+                                 {ChildByContainmentAssociations} },
+                        $offsetToTargetsInBinary + $targetAddrHashRef->{$id}
+                            {OffsetToTargetWithinTargetList};
+                }
+            }
+        }
+        elsif($attributeName eq ATTR_AFFINITY_PATH)
+        {
+            my $destPath = $targetAddrHashRef->{$id}{$attributeName};
+            my $targetPath = $targetAddrHashRef->{$targetId}{$attributeName};
+            if($associationType eq PARENT_BY_AFFINITY)
+            {
+                # Parent path matches current target's entity path except
+                # missing last path component
+                my $index = rindex $targetPath, "/";
+                my $parentPath = substr $targetPath , 0, $index;
+                ASSOC_DBG("GIVEN: Current affinty path = $targetPath");
+                ASSOC_DBG("CHECKING: Candidate parent affinity path "
+                          . "= $destPath");
+                ASSOC_DBG("CHECKING: Parent of current affinity path "
+                          . "= $parentPath");
+                if($parentPath eq $destPath)
+                {
+                    ASSOC_IMP("FOUND: parent affinty path "
+                              . "= $destPath ($targetPath)");
+                    unshift
+                         @ { $targetAddrHashRef->{$targetId}
+                                 {ParentByAffinityAssociations} },
+                         $offsetToTargetsInBinary + $targetAddrHashRef->{$id}
+                             {OffsetToTargetWithinTargetList};
+                    last;
+                }
+            }
+            elsif($associationType eq CHILD_BY_AFFINITY)
+            {
+                # Child path matches current target's entity path except there
+                # is one extraneous path component at end
+                my $index = rindex $destPath , "/";
+                my $parentOfDestPath = substr $destPath , 0, $index;
+                ASSOC_DBG("GIVEN: Current affinty path = $targetPath");
+                ASSOC_DBG("CHECKING: Candidate child affinity path "
+                          . "= $destPath");
+                ASSOC_DBG("CHECKING: Parent of child affinty path "
+                          . "= $parentOfDestPath");
+                if($parentOfDestPath eq $targetPath )
+                {
+                    ASSOC_IMP("FOUND: Child affinity path "
+                              . "= $destPath ($targetPath)");
+                    unshift
+                         @ { $targetAddrHashRef->{$targetId}
+                                 {ChildByAffinityAssociations} },
+                        $offsetToTargetsInBinary + $targetAddrHashRef->{$id}
+                            {OffsetToTargetWithinTargetList};
+                }
+            }
+        }
+    }
+    ASSOC_EXIT();
+}
+
+################################################################################
+# Update dummy pointers with real pointers in binary blob of target structs
+################################################################################
+
+sub updateTargetAssociationPointers
+{
+    my ( $targetAddrHashRef, $targetsBinDataRef ) = @_;
+
+    ASSOC_ENTER();
+
+    foreach my $id ( keys %$targetAddrHashRef )
+    {
+        ASSOC_DBG("Fixing up target with ID = $id");
+        foreach my $associationType (@associationTypes)
+        {
+            # Seek to pointer location within target object and replace the
+            # dummy value with the real value
+            my $seek = $targetAddrHashRef->{$id}{
+                "offsetToPtrTo" . $associationType . "Associations"};
+            my $pointer = $targetAddrHashRef->{$id}{ $associationType . "Ptr" };
+            ASSOC_DBG("Seeking to offset: $seek");
+            ASSOC_DBG("Writing pointer value of: " . toDecAndHex($pointer) );
+            for(my $pointerByte=0; $pointerByte<8; ++$pointerByte)
+            {
+                vec($$targetsBinDataRef, $seek+$pointerByte,BITS_PER_BYTE) =
+                    (($pointer >> ((BYTE_RIGHT_BIT_INDEX-$pointerByte)
+                        *BITS_PER_BYTE)) & LOW_BYTE_MASK);
+            }
+        }
+    }
+
+    ASSOC_EXIT();
+}
+
+################################################################################
+# Serialize association data into a binary blob
+################################################################################
+
+sub serializeAssociations
+{
+    my ($offsetWithinBinary, $targetsAoHRef, $targetAddrHashRef,
+        $associationsBinDataRef ) = @_;
+    ASSOC_ENTER();
+
+    foreach my $targetInstance (@$targetsAoHRef)
+    {
+        my $id = $targetInstance->{id};
+        ASSOC_DBG("Serializing target = $id");
+        foreach my $associationType (@associationTypes)
+        {
+            $targetAddrHashRef->{$id}{ $associationType . "Ptr" }
+                = $offsetWithinBinary;
+            ASSOC_DBG("Offset within binary = $offsetWithinBinary");
+            my $pointers = "Association = $associationType, pointers = ";
+            foreach my $pointer ( @ { $targetAddrHashRef->{$id}
+                                          { $associationType . "Associations"}})
+            {
+                $$associationsBinDataRef .= pack8byte($pointer);
+                $offsetWithinBinary += BYTES_PER_ABSTRACT_POINTER;
+                $pointers .= toDecAndHex($pointer);
+                $pointers .= ", ";
+            }
+            chomp($pointers);
+            chomp($pointers);
+            ASSOC_DBG($pointers);
+        }
+    }
+    my $associationsBinDataSize = length $$associationsBinDataRef;
+    ASSOC_IMP("Size of association section = $associationsBinDataSize");
+    ASSOC_EXIT();
+}
+
+################################################################################
 # Write the PNOR targeting image
 ################################################################################
 
@@ -4819,6 +5150,11 @@ sub generateTargetingImage {
     # Ensure consistent ordering of target instances
     my $attrAddr = $pnorRoBaseAddress + $startOfAttributePointers;
 
+    # Configure globals for computing associations
+    my %targetAddrHash = ();
+    my $offsetWithinTargets = 0;
+    my @NullPtrArray = ( 0 ) ;
+
     foreach my $targetInstance (@targetsAoH)
     {
         my $data;
@@ -4829,6 +5165,10 @@ sub generateTargetingImage {
          # print "        offset:  ",
          # $attributeListTypeHoH{$targetInstance->{type}}{offset}, "\n" ;
 
+        # Keep track of where this target is from start of targets
+        $targetAddrHash{$targetInstance->{id}}{OffsetToTargetWithinTargetList}
+            = $offsetWithinTargets;
+
         # Create target record
         $data .= pack4byte(
             $attributeListTypeHoH{$targetInstance->{type}}{elements});
@@ -4836,11 +5176,69 @@ sub generateTargetingImage {
               $attributeListTypeHoH{$targetInstance->{type}}{offset}
             + $pnorRoBaseAddress);
         $data .= pack8byte($attrAddr);
+
+        # Make note of the offsets within the blob of targets where each pointer
+        # for each association list is.  Also reserve each pointer with an
+        # invalid value for now.
+        use constant INVALID_POINTER => 0;
+        my $ptrToParentByContainmentAssociations = INVALID_POINTER;
+        my $ptrToChildByContainmentAssociations = INVALID_POINTER;
+        my $ptrToParentByAffinityAssociations = INVALID_POINTER;
+        my $ptrToChildByAffinityAssociations = INVALID_POINTER;
+
+        my $id = $targetInstance->{id};
+        $targetAddrHash{$id}{offsetToPtrToParentByContainmentAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToParentByContainmentAssociations);
+
+        $targetAddrHash{$id}{offsetToPtrToChildByContainmentAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToChildByContainmentAssociations);
+
+        $targetAddrHash{$id}{offsetToPtrToParentByAffinityAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToParentByAffinityAssociations);
+
+        $targetAddrHash{$id}{offsetToPtrToChildByAffinityAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToChildByAffinityAssociations);
+
+        $targetAddrHash{$id}{ParentByContainmentAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{ChildByContainmentAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{ParentByAffinityAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{ChildByAffinityAssociations} = [@NullPtrArray];
+
+        if($id =~/^sys\d+$/)
+        {
+            ASSOC_DBG("Found system target of $id, reserving space");
+            for(my $reserved = 0;
+                $reserved < MAX_COMPUTE_AND_CONTROL_NODE_SUM - 1; ++$reserved)
+            {
+                unshift
+                    @ { $targetAddrHash{$id}{ChildByContainmentAssociations} },
+                    0;
+                unshift
+                    @ { $targetAddrHash{$id}{ChildByAffinityAssociations} },
+                    0;
+            }
+        }
+
+        ASSOC_DBG("Target ID = $id");
+        ASSOC_DBG("Offset within targets to ptr to parent containment list = "
+        . "$targetAddrHash{$id}{offsetToPtrToParentByContainmentAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to child containment list = "
+        . "$targetAddrHash{$id}{offsetToPtrToChildByContainmentAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to parent affinit list = "
+        . "$targetAddrHash{$id}{offsetToPtrToParentByAffinityAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to child affinity list = "
+        . "$targetAddrHash{$id}{offsetToPtrToChildByAffinityAssociations}");
+
         $attrAddr += $attributeListTypeHoH{$targetInstance->{type}}{elements}
             * (length pack8byte(0));
 
         # Increment the offset
         $offset += (length $data);
+        $offsetWithinTargets += (length $data);
 
         # Add it to the target sub-section
         $targetsBinData .= $data;
@@ -4894,6 +5292,15 @@ sub generateTargetingImage {
                 (keys %attrhash)
             )
         {
+            # Save each target's physical + affinity path for association
+            # processing later on
+            if(   ($attributeId eq ATTR_PHYS_PATH)
+               || ($attributeId eq ATTR_AFFINITY_PATH) )
+            {
+                $targetAddrHash{$targetInstance->{id}}{$attributeId} =
+                    $attrhash{$attributeId}->{default};
+            }
+
             my $attrValue =
             enumNameToValue($attributeIdEnumeration,$attributeId);
             $attrValue = sprintf ("%0x", $attrValue);
@@ -4982,7 +5389,12 @@ sub generateTargetingImage {
                     ($attrhash{$attributeId}->{default} != 0))
                 {
                     my $index = $attrhash{$attributeId}->{default} - 1;
-                    $index *= 20; # length(N + quad + quad)
+
+                    # Each target is 4 bytes # attributes, 8 bytes pointer
+                    # to attribute list, 8 bytes pointer to attribute pointer
+                    # list, 4 x 8 byte pointers to association lists, for total
+                    # of 20 + 32 = 52 bytes per target
+                    $index *= (20 + 32); # length(N + quad + quad + 4x quad)
                     $attrhash{$attributeId}->{default} = $index + $firstTgtPtr;
                 }
 
@@ -5233,6 +5645,35 @@ sub generateTargetingImage {
               . "what was written to PNOR, $attributesWritten.");
     }
 
+    # Build the parent/child relationships for all targets
+    foreach my $targetInstance (@targetsAoH)
+    {
+        foreach my $associationType (@associationTypes)
+        {
+            buildAssociations(
+                \%targetAddrHash,
+                $targetInstance->{id},
+                $associationType,
+                $firstTgtPtr)
+        }
+    }
+
+    # Serialize the association lists into a blob
+    my $associationsBinData;
+    my $offsetToAssociationsFromTargets =
+        (length $targetsBinData) + (length $roAttrBinData);
+    serializeAssociations( $firstTgtPtr + $offsetToAssociationsFromTargets,
+        \@targetsAoH, \%targetAddrHash, \$associationsBinData);
+    my $associationsBinDataSize = length $associationsBinData;
+    ASSOC_IMP("Size of association section, redundant calculation "
+              . "= $associationsBinDataSize");
+
+    # Fix up the target bin blob to point to the right association lists
+    updateTargetAssociationPointers(\%targetAddrHash, \$targetsBinData);
+
+    # Size of PNOR RO increases by size of associations
+    $offset += $associationsBinDataSize;
+
     # Build header data
 
     my $headerBinData;
@@ -5369,8 +5810,21 @@ sub generateTargetingImage {
     $outFile .= $attributeListBinData;
     $outFile .= $attributePointerBinData;
     $outFile .= $numTargetsBinData;
+
+    my $offsetOfTargets = length $outFile;
+    my $sizeOfTargets = length $targetsBinData;
+    my $offsetToAssociationsFromTargets =
+        (length $targetsBinData) + (length $roAttrBinData);
+    ASSOC_DBG("Offset of targets within targeting binary = $offsetOfTargets");
+    ASSOC_DBG("Size of targets within targeting binary = $sizeOfTargets");
+    ASSOC_DBG("Offset to associations from start of targets "
+              . "= $offsetToAssociationsFromTargets");
+
     $outFile .= $targetsBinData;
     $outFile .= $roAttrBinData;
+
+    $outFile .= $associationsBinData;
+
     $outFile .= pack ("@".($sectionHoH{pnorRo}{size} - $offset));
 
     # Serialize PNOR RW section to multiple of 4k page size (pad if necessary)
