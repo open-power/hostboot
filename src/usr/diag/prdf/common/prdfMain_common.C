@@ -269,6 +269,13 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
             // starting the second pass
             PRDF_INF( "PRDF::main() No bits found set in first pass,"
                       " starting second pass" );
+            sysdebug.initAttnPendingtatus( ); //for the second  pass
+
+            if( l_tempSdc.isSecondaryErrFound() )
+            {
+                sdc.service_data->setSecondaryErrFlag();
+            }
+
             analyzeRc = systemPtr->Analyze( sdc, i_attentionType );
 
             // merging capture data of primary pass with capture data of

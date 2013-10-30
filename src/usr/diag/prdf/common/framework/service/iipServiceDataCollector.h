@@ -134,6 +134,7 @@ public:
     PRDF_SDC_FLAG(TRACKIT,                 0x00010)
     PRDF_SDC_FLAG(TERMINATE,               0x00008)
     PRDF_SDC_FLAG(LOGIT,                   0x00004)
+    PRDF_SDC_FLAG(SECONDARY_ERRORS_FOUND,  0x00002)
   PRDF_SDC_FLAGS_MAP_END
 
    /** Defines Analysis pass related properties.
@@ -716,7 +717,21 @@ public:
   /** Is a Using Saved SDC on? */
   bool IsUsingSavedSdc (void) const { return (flags & USING_SAVED_SDC) != 0 ? true:false; }
 
-  /** Is a Force Lantent Check Stop flag on? */
+  /**
+   * @brief     sets flag indicating only secondary error  bit is set in FIR
+   */
+   void setSecondaryErrFlag( ) { flags |= SECONDARY_ERRORS_FOUND; }
+
+  /**
+   * @brief     clears flag indicating only secondary error  bit is set in FIR
+   */
+   void clearSecondaryErrFlag() { ( flags &= ~SECONDARY_ERRORS_FOUND ); }
+   /**
+    * @brief    returns true if there is only secondary error.
+    * @return   true if secondary is found false otherwise.
+    */
+   bool isSecondaryErrFound() const
+   { return ( ( flags & SECONDARY_ERRORS_FOUND ) != 0 ); }
 
 #ifndef __HOSTBOOT_MODULE
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -166,15 +168,21 @@ class AttnListTest : public CxxTest::TestSuite
         {
             static AttentionOps * nullOps = 0;
             static const TargetHandle_t nullTarget = 0;
+            static const AttnData attn0( nullTarget, CHECK_STOP);
+            static const AttnData attn1( nullTarget + 1, CHECK_STOP);
+            static const AttnData attn2( nullTarget + 2, CHECK_STOP);
+            static const AttnData attn3( nullTarget + 3, CHECK_STOP);
+            static const AttnData attn4( nullTarget + 4, CHECK_STOP);
+            static const AttnData attn5( nullTarget + 5, CHECK_STOP);
 
             static const AttnData tests[] =
             {
-                {nullTarget, CHECK_STOP},
-                {nullTarget +1, CHECK_STOP},
-                {nullTarget +2, CHECK_STOP},
-                {nullTarget, RECOVERABLE},
-                {nullTarget +1, RECOVERABLE},
-                {nullTarget +2, RECOVERABLE},
+                attn0,
+                attn1,
+                attn2,
+                attn3,
+                attn4,
+                attn5,
             };
             static const AttnData * testsEnd = tests
                 + sizeof(tests)/sizeof(*tests);

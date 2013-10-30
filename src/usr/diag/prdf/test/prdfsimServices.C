@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -26,6 +28,7 @@
 #include <prdfMain.H>
 #include <prdfTrace.H>
 #include <prdfGlobal.H>
+#include <algorithm>
 
 #include "prdfsimUtil.H"
 #include "prdsimSignatureParser.H"
@@ -149,10 +152,10 @@ namespace PRDF
     void SimServices::addAttnEntry(const char * i_epath,
                                        ATTENTION_VALUE_TYPE i_attnType)
     {
-        AttnData l_attnEntry;
-        l_attnEntry.targetHndl = string2Target(i_epath);
-        l_attnEntry.attnType = i_attnType;
-        iv_attnList.push_back(l_attnEntry);
+        AttnData l_attnEntry( string2Target(i_epath), i_attnType );
+        iv_attnList.insert( std::lower_bound( iv_attnList.begin(),
+                                              iv_attnList.end(), l_attnEntry ),
+                                              l_attnEntry );
 
         // If the target in sim is not functional,
         // set to functional and destroy the PRD config

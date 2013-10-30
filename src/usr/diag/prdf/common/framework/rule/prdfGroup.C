@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -73,7 +75,14 @@ int32_t Group::Analyze(STEP_CODE_DATA_STRUCT & i_step)
          (i != l_errRegsEnd) && (l_rc != SUCCESS);
          ++i)
     {
+        bool l_secErr = i_step.service_data->isSecondaryErrFound();
         (*i_step.service_data) = l_backupStep;
+
+        if( l_secErr )
+        {
+           i_step.service_data->setSecondaryErrFlag();
+        }
+
         l_tmpRC = (*i)->Analyze(i_step);
 
         if (PRD_SCAN_COMM_REGISTER_ZERO != l_tmpRC)
@@ -81,7 +90,7 @@ int32_t Group::Analyze(STEP_CODE_DATA_STRUCT & i_step)
             l_rc = l_tmpRC;
         }
     }
-    if (PRD_SCAN_COMM_REGISTER_ZERO == l_tmpRC)
+    if ( PRD_SCAN_COMM_REGISTER_ZERO == l_tmpRC )
     {
         l_rc = l_tmpRC;
     }

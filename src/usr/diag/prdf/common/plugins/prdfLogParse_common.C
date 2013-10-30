@@ -481,6 +481,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintBool("  Using Sync'd Saved Sdc", pfa.USING_SAVED_SDC    );
         i_parser.PrintBool("  Last Core Termination",  pfa.LAST_CORE_TERMINATE);
         i_parser.PrintBool("  Deferred Deconfig",      pfa.DEFER_DECONFIG     );
+        i_parser.PrintBool("  Secondary Error",        pfa.SECONDARY_ERROR    );
 
         // Attention types
         i_parser.PrintNumber("Primary ATTN type",   "0x%02X", pfa.priAttnType);

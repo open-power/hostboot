@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -140,28 +142,28 @@ public:
   uint32_t Reinitialize(const AttnList & i_attnList);
 
   /**
-   Indicates if an attention is active for a particular chip
-   <ul>
-   <br><b>Parameters:  </b> i_pTargetHandle
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
+   * @brief      Indicates if an attention is active and still not analyzed
+   * @param      i_chipTrgt  chip under investigation for pending active attn.
+   * @param      i_attn      Attn for which analysis status is to be determined.
+   * @return     [true | false]
    */
-  bool IsAttentionActive(TARGETING::TargetHandle_t i_ptargetHandle ) const;
+  bool isActiveAttentionPending(
+                        TARGETING::TargetHandle_t i_chipTrgt,
+                        ATTENTION_TYPE i_attn = INVALID_ATTENTION_TYPE ) const;
 
   /**
-   Indicates if an attention is active for a particular chip
-   <ul>
-   <br><b>Parameters:  </b> ChipClass
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
+   * @brief     clears the active attention pending status
+   * @param     i_chipTrgt  chip for which pending status is set to false.
+   * @param     i_attn      Attn for which analysis status is to be determined.
    */
-//  bool IsAttentionActive(const CHIP_CLASS & chip) const;
+  void clearAttnPendingStatus( TARGETING::TargetHandle_t i_chipTgt,
+                               ATTENTION_TYPE i_attn );
+
+  /**
+   * @brief     sets attention analysis pending status to true for all chips in
+   *            the attention list for each type of attention.
+   */
+  void initAttnPendingtatus( );
 
   /**
    Get the attention type for the attention that is active on this chip
@@ -293,7 +295,13 @@ public:
   void SetAttentionType( TARGETING::TargetHandle_t i_pTargetHandle,
                          ATTENTION_VALUE_TYPE i_eAttentionType );
 
-  // SetGlobalAttentionType(uint8_t ga); // FIXME : remove this function when merge, no longer used
+  /**
+   * @brief   Adds a chip to the list of chips reporting attention.
+   * @param   i_chipTgt  chip to be added to the list.
+   * @param   i_attnType attn associated with the chip
+  */
+  void addChipToAttnList( TARGETING::TargetHandle_t i_chipTgt,
+                          ATTENTION_VALUE_TYPE i_attnType );
 
 private:
 

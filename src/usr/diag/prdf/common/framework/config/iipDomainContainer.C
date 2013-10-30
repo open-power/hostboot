@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -111,22 +113,21 @@ chips()  // dg04 - remove size from arg list
 
 template<class T>
 inline
-bool DomainContainer<T>::Query(ATTENTION_TYPE attentionType)     // DG03
+bool DomainContainer<T>::Query( ATTENTION_TYPE attentionType )
 {
-  bool rc = false;
+    bool o_rc = false;
+    SYSTEM_DEBUG_CLASS sysdebug;
+    unsigned int size = GetSize();
 
-  SYSTEM_DEBUG_CLASS sysdebug;
-  unsigned int size = GetSize();
-  for(unsigned int i = 0;(i < size) && (rc == false);i++)
-  {
-    TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
-    if(sysdebug.IsAttentionActive(l_pchipHandle) == true)
+    for( unsigned int i = 0; i < size; i++ )
     {
-      if(sysdebug.GetAttentionType(l_pchipHandle) == attentionType) rc = true;
+        TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
+        o_rc =
+            sysdebug.isActiveAttentionPending( l_pchipHandle, attentionType );
+        if( true == o_rc ) break;
     }
-  }
 
-  return(rc);
+    return(o_rc);
 }
 
 template<class T>
@@ -134,9 +135,14 @@ inline
 int32_t DomainContainer<T>::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                                     ATTENTION_TYPE attentionType)
 {
-  serviceData.service_data->GetErrorSignature()->clear();
-  Order(attentionType);                    // DG01 DG02
-  return(LookUp(0)->Analyze(serviceData, attentionType));
+    SYSTEM_DEBUG_CLASS sysdebug;
+    serviceData.service_data->GetErrorSignature()->clear();
+    Order(attentionType);
+    ExtensibleChip * l_chip = LookUp(0);
+    int32_t o_rc = ( l_chip->Analyze( serviceData, attentionType ) );
+    sysdebug.clearAttnPendingStatus( l_chip->GetChipHandle(), attentionType );
+
+    return o_rc;
 }
 
 template<class T>

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2008,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,65 +48,44 @@ bool RuleChipDomain::Query( ATTENTION_TYPE i_attnType )
         RuleChip * chip = LookUp(i);
         TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
 
-        if ( sysdbug.IsAttentionActive(l_pchipHandle) )
+        if ( sysdbug.isActiveAttentionPending( l_pchipHandle, i_attnType ) )
         {
-            // First check if this chip is reporting the correct attention type.
-            if ( sysdbug.GetAttentionType(l_pchipHandle) == i_attnType )
+            // If the attention type is a checkstop, check if the chip is
+            // reporting based on an externally signaled error condition. If
+            // so, ignore this chip (the chip reporting the checkstop will
+            // be found later).
+
+            const char * funcName;
+
+            switch(i_attnType)
             {
-                    // If the attention type is a checkstop, check if the chip is
-                // reporting based on an externally signaled error condition. If
-                // so, ignore this chip (the chip reporting the checkstop will
-                // be found later).
-
-                // If the attention type is RECOVERABLE and if the SN chip has an
-                // attached MC with a checkstop, ignore this Rec attn.
-                //mp01 c Start
-                const char * funcName;
-
-                switch(i_attnType)
-                {
-                    case CHECK_STOP:
-                    case UNIT_CS:
-                        funcName = "IgnoreCheckstopAttn";
-                        break;
-                    case RECOVERABLE:
-                        funcName = "IgnoreRecoveredAttn";
-                        break;
-                    case SPECIAL:
-                        funcName = "IgnoreSpecialAttn";
-                        break;
-                    default:
-                        continue;
-                }
-
-                ExtensibleChipFunction * ef
-                  = chip->getExtensibleFunction( funcName, true );
-
-                bool ignore = false;
-                (*ef)( chip, bindParm<bool &, const ATTENTION_TYPE>
-                       (ignore, i_attnType) );
-
-                if ( ignore )
+                case CHECK_STOP:
+                case UNIT_CS:
+                    funcName = "IgnoreCheckstopAttn";
+                    break;
+                case RECOVERABLE:
+                    funcName = "IgnoreRecoveredAttn";
+                    break;
+                case SPECIAL:
+                    funcName = "IgnoreSpecialAttn";
+                    break;
+                default:
                     continue;
-
-                o_rc = true;
-                break;
-                //mp01 c Stop
-
             }
 
-            // If the attention type is recoverable and this chip is reporting a
-            // checkstop, check for recovereable errors on this chip.
-            if ( (i_attnType == RECOVERABLE) &&
-                 ( (sysdbug.GetAttentionType(l_pchipHandle) == CHECK_STOP) ||
-                   (sysdbug.GetAttentionType(l_pchipHandle) == UNIT_CS) ) )
-            {
-                ExtensibleChipFunction * ef
-                           = chip->getExtensibleFunction("CheckForRecovered");
-                (*ef)(chip, bindParm<bool &>(o_rc));
+            ExtensibleChipFunction * ef
+              = chip->getExtensibleFunction( funcName, true );
 
-                if ( o_rc ) break;
-            }
+            bool ignore = false;
+            (*ef)( chip, bindParm<bool &, const ATTENTION_TYPE>
+                   (ignore, i_attnType) );
+
+            if ( ignore )
+                continue;
+
+            o_rc = true;
+
+            break;
         }
     }
 
@@ -125,68 +106,36 @@ void RuleChipDomain::Order( ATTENTION_TYPE i_attnType )
         RuleChip * chip = LookUp(i);
         TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
 
-        if ( sysdbug.IsAttentionActive(l_pchipHandle) )
+        if ( sysdbug.isActiveAttentionPending( l_pchipHandle, i_attnType ) )
         {
-            // Move the first chip with this attention type to the front of the
-            // list.
-            if ( sysdbug.GetAttentionType(l_pchipHandle) == i_attnType )
+            switch(i_attnType)
             {
-                   // If the attention type is a checkstop, check if the chip is
-                // reporting based on an externally signaled error condition. If
-                // so, ignore this chip (the chip reporting the checkstop will
-                // be found later).
-
-                // If the attention type is RECOVERABLE and if the SN chip has an
-                // attached MC with a checkstop, ignore this Rec attn.
-                //mp01 c Start
-                switch(i_attnType)
-                {
-                    case CHECK_STOP:
-                    case UNIT_CS:
-                        funcName = "IgnoreCheckstopAttn";
-                        break;
-                    case RECOVERABLE:
-                        funcName = "IgnoreRecoveredAttn";
-                        break;
-                    case SPECIAL:
-                        funcName = "IgnoreSpecialAttn";
-                        break;
-                    default:
-                        continue;
-                }
-
-                ExtensibleChipFunction * ef
-                  = chip->getExtensibleFunction( funcName, true );
-
-                bool ignore = false;
-                (*ef)( chip, bindParm<bool &, const ATTENTION_TYPE>
-                       (ignore, i_attnType) );
-
-                if ( ignore )
-                    continue;
-
-                MoveToFront(i);
-                break;
-                //mp01 c Stop
-            }
-
-            // If the attention type is recoverable and this chip is reporting a
-            // checkstop, check for recovereable errors on this chip.
-            if ( (i_attnType == RECOVERABLE) &&
-                 ( (sysdbug.GetAttentionType(l_pchipHandle) == CHECK_STOP) ||
-                   (sysdbug.GetAttentionType(l_pchipHandle) == UNIT_CS) ) )
-            {
-                ExtensibleChipFunction * ef
-                           = chip->getExtensibleFunction("CheckForRecovered");
-                bool hasRer = false;
-                (*ef)(chip, bindParm<bool &>(hasRer));
-
-                if ( hasRer )
-                {
-                    MoveToFront(i);
+                case CHECK_STOP:
+                case UNIT_CS:
+                    funcName = "IgnoreCheckstopAttn";
                     break;
-                }
+                case RECOVERABLE:
+                    funcName = "IgnoreRecoveredAttn";
+                    break;
+                case SPECIAL:
+                    funcName = "IgnoreSpecialAttn";
+                    break;
+                default:
+                    continue;
             }
+
+            ExtensibleChipFunction * ef
+              = chip->getExtensibleFunction( funcName, true );
+
+            bool ignore = false;
+            (*ef)( chip, bindParm<bool &, const ATTENTION_TYPE>
+                   (ignore, i_attnType) );
+
+            if ( ignore )
+                continue;
+
+            MoveToFront(i);
+            break;
         }
     }
 }

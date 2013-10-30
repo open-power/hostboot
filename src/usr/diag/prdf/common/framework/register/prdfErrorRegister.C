@@ -88,8 +88,7 @@ int32_t ErrorRegister::SetErrorSignature( STEP_CODE_DATA_STRUCT & error,
     switch( blen )
     {
         case 0:
-            (error.service_data->GetErrorSignature())->setErrCode(
-                                                PRD_SCAN_COMM_REGISTER_ZERO );
+            esig->setErrCode( PRD_SCAN_COMM_REGISTER_ZERO );
             if( error.service_data->isPrimaryPass() )
             {
                 rc = PRD_SCAN_COMM_REGISTER_ZERO;
@@ -130,16 +129,17 @@ ErrorRegister::ErrorRegister( SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm,
 int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
 {
     int32_t rc = SUCCESS;
-
     uint32_t l_savedErrSig = 0;
+
+    ErrorSignature * esig = error.service_data->GetErrorSignature();
 
     if(xScrId == 0x0fff)
     {
-        ( error.service_data->GetErrorSignature() )->setRegId(scr.GetAddress());
+        esig->setRegId(scr.GetAddress());
     }
     else
     {
-        ( error.service_data->GetErrorSignature() )->setRegId( xScrId );
+        esig->setRegId( xScrId );
     }
 
     // Get Data from hardware
@@ -154,7 +154,7 @@ int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
 
         // Save signature to determine if it changes during resolution
         // execution.
-        l_savedErrSig = (error.service_data->GetErrorSignature())->getSigId();
+        l_savedErrSig = esig->getSigId();
     }
 
     uint32_t res_rc = Lookup(error, bl); // lookup and execute the resolutions
@@ -163,8 +163,7 @@ int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
     // If we had a DD02 and the signature changes, ignore DD02.
     if ( rc == PRD_SCAN_COMM_REGISTER_ZERO )
     {
-        uint32_t l_currentSig =
-                    error.service_data->GetErrorSignature()->getSigId();
+        uint32_t l_currentSig = esig->getSigId();
         if( l_currentSig != l_savedErrSig )
         {
             // Found a better answer during the DD02 analysis.
@@ -192,10 +191,10 @@ int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
     }
     else // scr read failed
     {
-        ( error.service_data->GetErrorSignature() )->setErrCode(
-                                                        PRD_SCANCOM_FAILURE );
+        esig->setErrCode( PRD_SCANCOM_FAILURE );
         rc = scr_rc;
     }
+
     return(rc);
 }
 

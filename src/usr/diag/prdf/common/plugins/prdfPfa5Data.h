@@ -162,7 +162,8 @@ struct PfaData
              USING_SAVED_SDC      :1,
              LAST_CORE_TERMINATE  :1,
              DEFER_DECONFIG       :1,
-             Reserved             :19;
+             SECONDARY_ERROR      :1,
+             Reserved             :18;
 
     // Thresholding
     uint32_t errorCount :16, // Number of occurrences of this attention
@@ -216,6 +217,7 @@ struct PfaData
                     (i_right.USING_SAVED_SDC      << 19) |
                     (i_right.LAST_CORE_TERMINATE  << 18) |
                     (i_right.DEFER_DECONFIG       << 17) |
+                    (i_right.SECONDARY_ERROR      << 16) |
                     (i_right.Reserved                  ) );
 
         i_left << ( (i_right.errorCount << 16) |
@@ -268,6 +270,7 @@ struct PfaData
         i_right.USING_SAVED_SDC     = (l_tmp[2] >> 19) & 0x01;
         i_right.LAST_CORE_TERMINATE = (l_tmp[2] >> 18) & 0x01;
         i_right.DEFER_DECONFIG      = (l_tmp[2] >> 17) & 0x01;
+        i_right.SECONDARY_ERROR     = (l_tmp[2] >> 16) & 0x01;
 
         i_right.errorCount = (l_tmp[3] >> 16) & 0xFFFF;
         i_right.threshold  = (l_tmp[3]      ) & 0xFFFF;

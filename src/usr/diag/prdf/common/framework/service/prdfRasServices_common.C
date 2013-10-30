@@ -835,6 +835,7 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
     o_pfa.LAST_CORE_TERMINATE = 0; // Will be set later, if needed.
     o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc() ? 1 : 0;
     o_pfa.DEFER_DECONFIG      = i_deferDeconfig         ? 1 : 0;
+    o_pfa.SECONDARY_ERROR     = i_sdc.isSecondaryErrFound() ? 1 : 0;
 
     // Thresholding
     o_pfa.errorCount = i_sdc.GetHits();

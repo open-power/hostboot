@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2000,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,6 +56,10 @@
 #include <prdfBitString.H>
 #include <prdfPlatServices.H>
 #include <prdfErrlUtil.H>
+#include <prdfRuleChip.H>
+#include <iipSystem.h>
+#include <prdfPluginDef.H>
+#include <algorithm>
 
 #undef xspprdsdbug_C
 
@@ -88,6 +94,44 @@ bool g_init_done = false;
 uint32_t * g_src = NULL;
 
 //---------------------------------------------------------------------
+
+bool findAttention( TARGETING::TargetHandle_t i_chipTgt,
+                    ATTENTION_VALUE_TYPE i_eAttnType,
+                    AttnList::iterator & it )
+{
+    bool matchFound = false;
+
+    AttnData l_attnData( i_chipTgt, i_eAttnType );
+    it = std::lower_bound( g_AttnDataList.begin(),
+                           g_AttnDataList.end(),
+                           l_attnData );
+
+    if( it != g_AttnDataList.end() && *it == l_attnData )
+    {
+        matchFound = true;
+    }
+
+    return matchFound;
+}
+
+//---------------------------------------------------------------------
+
+bool findTarget( TARGETING::TargetHandle_t i_chipTgt,
+                 AttnList::iterator & it )
+{
+    bool matchFound = false;
+    it = std::lower_bound(  g_AttnDataList.begin(), g_AttnDataList.end(),
+                            i_chipTgt );
+
+    if( it != g_AttnDataList.end() && i_chipTgt == (*it).targetHndl )
+    {
+        matchFound = true;
+    }
+
+    return matchFound;
+}
+
+//---------------------------------------------------------------------
 // Member Function Specifications
 //---------------------------------------------------------------------
 
@@ -97,6 +141,7 @@ SYSTEM_DEBUG_CLASS::SYSTEM_DEBUG_CLASS(void)
 
 uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
 {
+    using PluginDef::bindParm;
     uint32_t l_rc = 0;
 
     do
@@ -139,7 +184,34 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
             break;
         }
 
-        g_AttnDataList = i_attnList;
+        Clear();
+        for( AttnList::const_iterator i = i_attnList.begin();
+             i != i_attnList.end(); ++i )
+        {
+            addChipToAttnList( (*i).targetHndl,(*i).attnType );
+
+            // There can be a case where chip has both recoverable and Check
+            // Stop. In that case chip shall report only Check Stop. In such a
+            // case, we analyse the recoverable first and see if we can blame
+            // check stop on recoverable. To ease its handling, let us add a
+            // chip reporting recoverable attention to attention list.
+
+            if( ((*i).attnType == CHECK_STOP ) || ((*i).attnType == UNIT_CS ) )
+            {
+                bool l_recovFound = false;
+                ExtensibleChip * l_chip =
+                    ( ExtensibleChip *) systemPtr->GetChip( (*i).targetHndl );
+                ExtensibleChipFunction * ef
+                           = l_chip->getExtensibleFunction("CheckForRecovered");
+
+                (*ef)( l_chip, bindParm<bool &>( l_recovFound ) );
+
+                if ( l_recovFound )
+                {
+                    addChipToAttnList( (*i).targetHndl,RECOVERABLE );
+                }
+            }
+        }
 
         g_init_done = true;
 
@@ -150,19 +222,24 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
 
 // --------------------------------------------------------------------
 
-bool SYSTEM_DEBUG_CLASS::IsAttentionActive( TARGETING::TargetHandle_t i_pChipHandle ) const
+bool SYSTEM_DEBUG_CLASS::isActiveAttentionPending(
+                                    TARGETING::TargetHandle_t i_chipTrgt,
+                                    ATTENTION_TYPE i_attn ) const
 {
-    bool rc = false;
+    bool o_rc = false;
+    ATTENTION_VALUE_TYPE attn ;
+    //FIXME RTC 118194 shall investigate need for ATTENTION_VALUE_TYPE and
+    //ATTENTION_TYPE. If possible one will be removed.
+    attn = ( ATTENTION_VALUE_TYPE )i_attn;
+    AttnData l_attnData( i_chipTrgt, attn );
+    AttnList::iterator it;
 
-    for(AttnList::const_iterator i = g_AttnDataList.begin(); i != g_AttnDataList.end(); ++i)
+    if( findAttention( i_chipTrgt, attn, it ) )
     {
-        if((*i).targetHndl == i_pChipHandle)
-        {
-            rc = true;
-            break;
-        }
+        o_rc = (*it).isAnalysisNotDone;
     }
-    return rc;
+
+    return o_rc;
 }
 
 // --------------------------------------------------------------------
@@ -194,22 +271,30 @@ TargetHandle_t SYSTEM_DEBUG_CLASS::getTargetWithAttn
 
 // -------------------------------------------------------------------
 
-uint8_t SYSTEM_DEBUG_CLASS::GetAttentionType(TARGETING::TargetHandle_t i_pChipHandle) const
+uint8_t SYSTEM_DEBUG_CLASS::GetAttentionType( TargetHandle_t i_chipTgt ) const
 {
     uint8_t type = INVALID_ATTENTION_TYPE;
+    AttnList::iterator it;
 
-    for(AttnList::const_iterator i = g_AttnDataList.begin(); i != g_AttnDataList.end(); ++i)
+    // Attention list is sorted. If a given target say X reports
+    // both recoverable and platform check stop, we shall have two entries for
+    // X in attention list. Also, following will be the order
+    // 1. Entry with Platform CS
+    // 2. Entry with Recoverable
+    // It's because platform checktop attention has an enum value lower than
+    // recoverable attention. When findTarget shall look for target X and an
+    // attention type in the attention list, it shall see platform checkstop
+    // entry before recoverable one. It's because entry with Platform CS will
+    // occupy lower position in the list compared to  entry with Recoverable
+    // attention.
+
+    if( findTarget( i_chipTgt, it ) )
     {
-        if((*i).targetHndl == i_pChipHandle)
-        {
-            type = (uint8_t) (*i).attnType;
-            break;
-        }
+        type = (*it).attnType;
     }
 
     return (uint8_t) type;
 }
-
 
 // -------------------------------------------------------------------
 
@@ -225,13 +310,15 @@ void SYSTEM_DEBUG_CLASS::SetPrdSrcPointer(uint32_t* src_ptr)
 
 // -------------------------------------------------------------------
 
-void SYSTEM_DEBUG_CLASS::CalloutThoseAtAttention(STEP_CODE_DATA_STRUCT & serviceData) const
+void SYSTEM_DEBUG_CLASS::CalloutThoseAtAttention(
+                                    STEP_CODE_DATA_STRUCT & serviceData) const
 {
     ServiceDataCollector * sdc = serviceData.service_data;
 
     CaptureData & capture = sdc->GetCaptureData();
 
-    for(AttnList::const_iterator i = g_AttnDataList.begin(); i != g_AttnDataList.end(); ++i)
+    for( AttnList::const_iterator i = g_AttnDataList.begin();
+         i != g_AttnDataList.end(); ++i )
     {
         sdc->SetCallout((*i).targetHndl);
         AttnData ad(*i);
@@ -243,6 +330,46 @@ void SYSTEM_DEBUG_CLASS::CalloutThoseAtAttention(STEP_CODE_DATA_STRUCT & service
     sdc->SetCallout(NextLevelSupport_ENUM);
 
 }
+
+// -------------------------------------------------------------------
+
+void SYSTEM_DEBUG_CLASS::clearAttnPendingStatus(
+                                    TARGETING::TargetHandle_t i_chipTgt,
+                                    ATTENTION_TYPE i_attnType )
+{
+    ATTENTION_VALUE_TYPE attn ;
+    attn = ( ATTENTION_VALUE_TYPE )i_attnType;
+    AttnData l_attn( i_chipTgt, attn );
+    AttnList::iterator it;
+
+    if( findAttention( i_chipTgt, attn, it ) )
+    {
+        (*it).isAnalysisNotDone = false;
+    }
+}
+
+// -------------------------------------------------------------------
+
+void SYSTEM_DEBUG_CLASS::initAttnPendingtatus( )
+{
+    for( AttnList::iterator i = g_AttnDataList.begin();
+         i != g_AttnDataList.end(); ++i )
+    {
+        (*i).isAnalysisNotDone  = true;
+    }
+}
+
+// -------------------------------------------------------------------
+
+void SYSTEM_DEBUG_CLASS::addChipToAttnList(
+                            TARGETING::TargetHandle_t i_chipTgt,
+                            ATTENTION_VALUE_TYPE i_attnType )
+{
+    AttnData l_attnData( i_chipTgt, i_attnType );
+    g_AttnDataList.insert( std::lower_bound( g_AttnDataList.begin(),
+                           g_AttnDataList.end(), l_attnData ), l_attnData );
+}
+
 
 // --------------------------------------------------------------------
 // SIMULATION SUPPORT for setting up sysdbug
@@ -257,12 +384,12 @@ void SYSTEM_DEBUG_CLASS::SetAttentionType(TARGETING::TargetHandle_t i_pTargetHan
 {
     if(i_eAttnType  > INVALID_ATTENTION_TYPE)
     {
-        if(!IsAttentionActive(i_pTargetHandle))
+        if( !isActiveAttentionPending( i_pTargetHandle, i_eAttnType ) )
         {
-            AttnData attnData;
-            attnData.targetHndl = i_pTargetHandle;
-            attnData.attnType = i_eAttnType;
-            g_AttnDataList.push_back(attnData);
+            AttnData attnData( i_pTargetHandle, i_eAttnType );
+            g_AttnDataList.insert( std::lower_bound( g_AttnDataList.begin(),
+                                                     g_AttnDataList.end(),
+                                                     attnData ), attnData );
         }
     }
 }

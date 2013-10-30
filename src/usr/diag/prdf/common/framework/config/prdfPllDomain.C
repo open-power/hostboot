@@ -97,9 +97,13 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
         for(unsigned int index = 0; (index < GetSize()) && (atAttn == false);
             ++index)
         {
-            if(sysdbug.IsAttentionActive(LookUp(index)->GetChipHandle()))
+            ExtensibleChip * l_chip = LookUp( index );
+            TARGETING::TargetHandle_t l_chipTgt = l_chip->GetChipHandle();
+            bool l_analysisPending =
+                  sysdbug.isActiveAttentionPending( l_chipTgt, RECOVERABLE );
+
+            if( l_analysisPending )
             {
-                ExtensibleChip * l_chip = LookUp(index);
                 ExtensibleChipFunction * l_query =
                                     l_chip->getExtensibleFunction(QueryPllFunc);
                 int32_t rc = (*l_query)(l_chip,PluginDef::bindParm<bool &>(atAttn));

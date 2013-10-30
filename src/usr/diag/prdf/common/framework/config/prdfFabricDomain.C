@@ -116,7 +116,6 @@ int32_t FabricDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
 void FabricDomain::Order(ATTENTION_TYPE attentionType)
 {
-    using PluginDef::bindParm;
 
     if (attentionType == MACHINE_CHECK)
     {
@@ -130,14 +129,16 @@ void FabricDomain::Order(ATTENTION_TYPE attentionType)
     else // Recovered or Special
     {
         SYSTEM_DEBUG_CLASS sysdbug;
-        for (int32_t i = (GetSize() - 1); i >= 0; --i) //pw03
+        for (int32_t i = (GetSize() - 1); i >= 0; --i)
         {
             RuleChip * l_fabChip = LookUp(i);
-            TARGETING::TargetHandle_t l_pchipHandle = l_fabChip->GetChipHandle();
-            if ((sysdbug.IsAttentionActive(l_pchipHandle)) &&
-                    (sysdbug.GetAttentionType(l_pchipHandle ) == attentionType))
+            TARGETING::TargetHandle_t l_pchipHandle =
+                                                l_fabChip->GetChipHandle();
+            bool l_analysisPending =
+                sysdbug.isActiveAttentionPending(l_pchipHandle, attentionType );
+            if ( l_analysisPending )
             {
-                MoveToFront(i);  //pw03
+                MoveToFront(i);
                 break;
             }
         }
@@ -327,48 +328,22 @@ void FabricDomain::SortForRecov()
     std::fill(&l_sev[0], &l_sev[GetSize()], 0);
 
     // Loop through all chips.
-    for (uint32_t i = 0; i < GetSize(); ++i)
+    for ( uint32_t i = 0; i < GetSize(); ++i )
     {
         RuleChip * l_fabChip = LookUp(i);
         TARGETING::TargetHandle_t l_pchipHandle = l_fabChip->GetChipHandle();
-        if (sysdbug.IsAttentionActive(l_pchipHandle))  // If at attention, check.
+
+        //check if chip has an attention which has not been analyzed as yet
+        if( sysdbug.isActiveAttentionPending( l_pchipHandle, RECOVERABLE ) )
         {
+            // Find severity level.
+            ExtensibleChipFunction * l_extFunc
+                    = l_fabChip->getExtensibleFunction(
+                                                "CheckForRecoveredSev");
 
-            if (RECOVERABLE == sysdbug.GetAttentionType( l_pchipHandle))
-            {
-                // Recovered, set sev 1.
-                l_sev[i] = 1;
-            }
-            else if (CHECK_STOP == sysdbug.GetAttentionType(l_pchipHandle))
-            {
-                // Check for recovered error at checkstop.
-                ExtensibleChipFunction * l_extFunc
-                    = l_fabChip->getExtensibleFunction("CheckForRecovered");
-
-                bool l_hasRer = false;
-
-                (*l_extFunc)(l_fabChip, bindParm<bool &>(l_hasRer));
-
-                if (l_hasRer)
-                {
-                    // Has a recovered error, sev 1.
-                    l_sev[i] = 1;
-                }
-            }
-
-            // Find real severity level.
-            if (0 != l_sev[i])
-            {
-                ExtensibleChipFunction * l_extFunc
-                        = l_fabChip->getExtensibleFunction(
-                                                    "CheckForRecoveredSev");
-
-                uint32_t l_cSev = 1;
-                (*l_extFunc)(l_fabChip, bindParm<uint32_t &>(l_cSev));
-
-                l_sev[i] = l_cSev;
-            }
+            (*l_extFunc)(l_fabChip, bindParm<uint32_t &>( l_sev[i] ));
         }
+
     }
 
     // Find item with highest severity.
@@ -376,7 +351,7 @@ void FabricDomain::SortForRecov()
                        std::max_element(&l_sev[0],
                                         &l_sev[GetSize()],
                                         __prdfFabricDomain::lessThanOperator))
-               ); //pw03
+               );
 }
 
 

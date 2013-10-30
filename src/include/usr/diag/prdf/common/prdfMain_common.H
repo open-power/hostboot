@@ -64,8 +64,71 @@ enum ATTENTION_VALUE_TYPE
  */
 struct AttnData
 {
-    TARGETING::TargetHandle_t targetHndl;
-    ATTENTION_VALUE_TYPE attnType;
+    TARGETING::TargetHandle_t targetHndl;   // tgt for chips at attention
+    ATTENTION_VALUE_TYPE attnType;          // attention reported by chip
+    bool isAnalysisNotDone;                 // analysis status for a given attn
+
+    /**
+     * @brief overloads operator <
+     */
+    bool operator < ( const  AttnData & i_attnData )
+    {
+        bool isLess = false ;
+        if( this->targetHndl == i_attnData.targetHndl )
+        {
+            isLess = ( this->attnType < i_attnData.attnType );
+        }
+        else
+        {
+            isLess = ( this->targetHndl < i_attnData.targetHndl );
+        }
+
+        return isLess;
+    }
+
+    /**
+     * @brief overloads operator ==
+     */
+    bool operator == ( const  AttnData & i_attnData )
+    {
+        bool isequal = false ;
+        if( this->targetHndl == i_attnData.targetHndl )
+        {
+            isequal = ( this->attnType == i_attnData.attnType );
+        }
+
+        return isequal;
+    }
+
+    /**
+     * @brief overloads operator <
+     */
+    bool operator < ( const  TARGETING::TargetHandle_t i_trgt )
+    {
+        return ( this->targetHndl < i_trgt );
+    }
+
+    /**
+     * @brief   constructor.
+     * @param   i_tgt       target of chip reporting attention.
+     * @param   i_attnType  attention type reported by chip.
+     */
+    AttnData( TARGETING::TargetHandle_t i_tgt,
+              ATTENTION_VALUE_TYPE i_attnType ):
+      targetHndl( i_tgt ),
+      attnType( i_attnType ),
+      isAnalysisNotDone( true )
+    {}
+
+    /**
+     * @brief   default constructor
+     */
+    AttnData() :
+      targetHndl( NULL ),
+      attnType( INVALID_ATTENTION_TYPE ),
+      isAnalysisNotDone( false )
+    {}
+
 };
 
 typedef std::vector<AttnData> AttnList;

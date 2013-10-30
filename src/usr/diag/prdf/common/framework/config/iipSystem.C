@@ -279,21 +279,25 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             startAttention = RECOVERABLE;
 
         ATTENTION_TYPE atnType = startAttention;
-        for(atnType = startAttention;
-            domainAtAttentionPtr == NULL && atnType >= attentionType ;
-            --atnType)
+
+        for( atnType = startAttention;
+             domainAtAttentionPtr == NULL && atnType >= attentionType ;
+             --atnType)
         {
-            for(DomainContainerType::iterator domainIterator = prioritizedDomains.begin();
-                domainIterator != prioritizedDomains.end() && domainAtAttentionPtr == NULL;
-                domainIterator++)
+            DomainContainerType::iterator domainIterator;
+
+            for( domainIterator = prioritizedDomains.begin();
+                 domainIterator != prioritizedDomains.end() &&
+                 domainAtAttentionPtr == NULL; )
             {
+                bool l_continueInDomain = false;
                 domainAtAttentionPtr = ((*domainIterator)->Query(atnType)) ? (*domainIterator) : NULL;
                 if(domainAtAttentionPtr != NULL)
                 {
                     serviceData.service_data->SetCauseAttentionType(atnType);
                     rc = domainAtAttentionPtr->Analyze(serviceData, atnType);
                     if((rc == PRD_SCAN_COMM_REGISTER_ZERO) ||
-                        (rc == PRD_POWER_FAULT))
+                        (rc == PRD_POWER_FAULT) )
                     {
                         // save sdc, and continue
                         if(l_saved_sdc == NULL)
@@ -302,7 +306,20 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                                                 *serviceData.service_data);
                             l_saved_rc = rc;
                         }
-                        // TODO clear serviceData ?
+
+                        if( ( PRD_SCAN_COMM_REGISTER_ZERO == rc ) &&
+                            ( serviceData.service_data->isPrimaryPass() ) &&
+                             serviceData.service_data->isSecondaryErrFound() )
+                        {
+                            //So, the chip was reporting attention but none of
+                            //the FIR read had any Primary bit set. But some
+                            //secondary bits are on though. So, we would like
+                            //to investigate if there are other chips in
+                            //the domain which are reporting primary attention.
+                            l_continueInDomain = true;
+                            serviceData.service_data->clearSecondaryErrFlag();
+                        }
+
                         domainAtAttentionPtr = NULL;
 
                         if(rc == PRD_POWER_FAULT)
@@ -311,6 +328,7 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                             break;
                         }
                     }
+
                     else if ( ( attentionType == MACHINE_CHECK )
                              && ( atnType != MACHINE_CHECK ) )
                     {
@@ -344,6 +362,16 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                     }
 
                 } // end domainAtAttentionPtr != NULL
+
+                //so if a chip of a domain is at attention and gave us dd02, we
+                //would like to see other chips of the domain before moving on
+                //to next domain.
+
+                if( !l_continueInDomain )
+                {
+                    domainIterator++;
+                }
+
             } // end inner for loop
         } // end outer for loop
 
