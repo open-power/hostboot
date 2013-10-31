@@ -215,6 +215,7 @@
     <attribute><id>PROC_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>PCI_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>MEM_FILTER_PLL_SOURCE</id></attribute>
+    <attribute><id>EFFECTIVE_EC</id></attribute>
 </targetType>
 
 <targetType>

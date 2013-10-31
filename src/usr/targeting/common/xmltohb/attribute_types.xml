@@ -12641,4 +12641,23 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>EFFECTIVE_EC</id>
+    <description>
+        Holds the effective EC of the system.  Effective EC is the lowest EC
+        among all the functional procs in the system.  Some cards may "downbin"
+        the effective ECs of their contained processors, which could lower the
+        effective EC of the system beyond what would occur when considering
+        processor ECs alone
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0x00</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>
