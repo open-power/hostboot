@@ -1559,37 +1559,6 @@ public:
                 break;
             }
 
-            // set Functional policy to disabled
-            //  test that gard record isn't created
-            l_policies = CDM_POLICIES_FUNCTIONAL_DISABLED;
-            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
-
-            // (try to) Create a GARD Record for the target.
-            l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x12, GARD_Func);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard9: Error from createGardRecord");
-                break;
-            }
-
-            // Get the GARD Records for the target - shouldn't be any
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard9: Error from getGardRecords (2)");
-                break;
-            }
-
-            if (l_records.size() != 0)
-            {
-                TS_FAIL("testGard9: %d records for target, expected 0",
-                        l_records.size());
-                break;
-            }
-
             // restore
             l_policies = 0;
             pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
@@ -1731,7 +1700,7 @@ public:
             l_pErr = theDeconfigGard().clearGardRecords(NULL);
             if (l_pErr)
             {
-                TS_FAIL("testGard7: Error from clearGardRecords(NULL)");
+                TS_FAIL("testGard10: Error from clearGardRecords(NULL)");
                 break;
             }
 
@@ -1752,7 +1721,7 @@ public:
             // create GARD record, set Policy, call 'doGard' step and confirm
             //  target is NOT deconfigured
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_target, 0x12, GARD_Func);
+                    createGardRecord(l_target, 0x12, GARD_Predictive);
             if (l_pErr)
             {
                 TS_FAIL("testGard10: Error from createGardRecord");
@@ -1773,30 +1742,11 @@ public:
                 break;
             }
 
-            // set Functional policy to disabled,
-            //  test that gard record is not created
-            l_policies = CDM_POLICIES_FUNCTIONAL_DISABLED;
-            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
-
-            l_pErr = collectGard();
-            if (l_pErr)
-            {
-                TS_FAIL("testGard10: Error from collectGard");
-                break;
-            }
-
-            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
-            if (!l_state.functional)
-            {
-                TS_FAIL("testGard10: target NOT functional");
-                break;
-            }
-
             // Clear all GARD Records
             l_pErr = theDeconfigGard().clearGardRecords(NULL);
             if (l_pErr)
             {
-                TS_FAIL("testGard7: Error from clearGardRecords(NULL)");
+                TS_FAIL("testGard10: Error from clearGardRecords(NULL)");
                 break;
             }
 

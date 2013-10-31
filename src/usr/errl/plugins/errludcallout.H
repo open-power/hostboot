@@ -153,7 +153,6 @@ case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                     case_GARD_ERROR_TYPE(GARD_Unrecoverable)
                     case_GARD_ERROR_TYPE(GARD_Fatal)
                     case_GARD_ERROR_TYPE(GARD_Predictive)
-                    case_GARD_ERROR_TYPE(GARD_Func)
                     case_GARD_ERROR_TYPE(GARD_Power)
                     case_GARD_ERROR_TYPE(GARD_PHYP)
                     case_GARD_ERROR_TYPE(GARD_Void)

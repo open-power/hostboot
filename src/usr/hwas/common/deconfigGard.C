@@ -270,15 +270,6 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
-            if ((l_sys_policy & CDM_POLICIES_FUNCTIONAL_DISABLED) &&
-                (l_gardRecord.iv_errorType == GARD_Func))
-            {
-                // functional records are disabled AND gard record is Functional
-                //  - don't process
-                HWAS_INF("Functional policy: disabled - skipping GARD Record");
-                continue;
-            }
-
             // Find the associated Target
             Target * l_pTarget =
                 targetService().toTarget(l_gardRecord.iv_targetId);
@@ -516,15 +507,6 @@ errlHndl_t DeconfigGard::createGardRecord(const Target * const i_pTarget,
             // predictive records are disabled AND gard record is predictive
             //  - don't process
             HWAS_INF("Predictive policy: disabled - skipping GARD Record create");
-            break;
-        }
-
-        if ((l_sys_policy & CDM_POLICIES_FUNCTIONAL_DISABLED) &&
-            (i_errorType == GARD_Func))
-        {
-            // functional records are disabled AND gard record is Functional
-            //  - don't process
-            HWAS_INF("Functional policy: disabled - skipping GARD Record create");
             break;
         }
 

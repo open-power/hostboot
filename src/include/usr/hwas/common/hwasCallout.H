@@ -53,7 +53,6 @@ typedef enum {
     GARD_Unrecoverable          = 0xE2, //TODO:RTC-76814
     GARD_Fatal                  = 0xE3, //IPL Failures, and others.
     GARD_Predictive             = 0xE6, //Policy flag to disable.
-    GARD_Func                   = 0xE7, //Policy flag to disable.
     GARD_Power                  = 0xE9, //Needed since EID is NOT passed in.
     GARD_PHYP                   = 0xEA, //Needed since EID is NOT passed in.
     GARD_Void                   = 0xFF

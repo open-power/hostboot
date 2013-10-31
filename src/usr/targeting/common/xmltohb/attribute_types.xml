@@ -11565,18 +11565,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <description>Enumeration of CDM_POLICIES flags</description>
     <enumerator>
         <description>
-        Functional_Guard policy:
-        Used in Field or development to prevent and disable the following:
-        . Storing or creation of new Guard records from diagnostics or other
-            faults through error logs with the error_type of Functional.
-        . Using an already stored System Guard record with error_type of
-            Functional from deconfiguring resources.
-        </description>
-        <name>FUNCTIONAL_DISABLED</name>
-        <value>0x01</value>
-    </enumerator>
-    <enumerator>
-        <description>
         MFG_Guard policy:
         Used in MFG only to prevent and disable the following:
         . Storing or creation of new Guard records from Diagnostic or other
@@ -11589,7 +11577,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
             processor/memory, VPD, FSP, etc.
         </description>
         <name>MANUFACTURING_DISABLED</name>
-        <value>0x02</value>
+        <value>0x01</value>
     </enumerator>
     <enumerator>
         <description>
@@ -11601,7 +11589,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
             Predictive from deconfiguring resources.
         </description>
         <name>PREDICTIVE_DISABLED</name>
-        <value>0x04</value>
+        <value>0x02</value>
     </enumerator>
 </enumerationType>
 

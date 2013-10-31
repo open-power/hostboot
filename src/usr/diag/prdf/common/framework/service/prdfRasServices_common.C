@@ -295,7 +295,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     sdc = sdcBuffer;
                     // Add secondary signature
                     sdc.AddSignatureList( secSig );
-                    gardErrType = HWAS::GARD_Func;
+                    gardErrType = HWAS::GARD_Fatal;
                     causeAttnPreviouslyReported = true;
                 }
             }
@@ -313,7 +313,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     sdc = sdcBuffer;
                     // Add secondary signature
                     sdc.AddSignatureList( secSig );
-                    gardErrType = HWAS::GARD_Func;
+                    gardErrType = HWAS::GARD_Fatal;
                     causeAttnPreviouslyReported = true;
                 }
             }
@@ -406,7 +406,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     // If gardErrType was determined during UE/SUE processing for Check Stop,
     // use that and not determine gardErrType from the sdc values.
-    if (gardErrType != HWAS::GARD_Func)
+    if (gardErrType != HWAS::GARD_Fatal)
     {
         prdGardErrType = sdc.QueryGard();
         switch (prdGardErrType)
@@ -419,12 +419,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 gardErrType = HWAS::GARD_Predictive;
                 break;
             case GardAction::Fatal:
-                gardErrType = HWAS::GARD_Func;
+                gardErrType = HWAS::GARD_Fatal;
                 break;
             case GardAction::CheckStopOnlyGard:
                 if  (MACHINE_CHECK == i_attnType)
                 {
-                    gardErrType = HWAS::GARD_Func;
+                    gardErrType = HWAS::GARD_Fatal;
                 }
                 else
                 {
@@ -445,7 +445,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     }
     else
     {
-        // gardErrType is GARD_Func, set in UE/SUE processing for Check Stop.
+        // gardErrType is GARD_Fatal, set in UE/SUE processing for Check Stop.
         // If NoGard was specified in this switched sdc, then keep the NoGard
         if ( sdc.QueryGard() == GardAction::NoGard )
         {
