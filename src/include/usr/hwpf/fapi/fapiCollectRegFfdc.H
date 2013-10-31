@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: fapiCollectRegFfdc.H,v 1.4 2013/10/31 19:48:22 dedahle Exp $
 /**
  *  @file fapiCollectRegFfdc.H
  *

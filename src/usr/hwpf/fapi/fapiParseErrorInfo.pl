@@ -21,7 +21,7 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-#
+# $Id: fapiParseErrorInfo.pl,v 1.25 2013/10/31 21:34:01 dedahle Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -286,7 +286,9 @@ print CRFILE "#include <fapiReturnCode.H>\n";
 print CRFILE "#include <fapiHwAccess.H>\n";
 print CRFILE "#include <fapiPlatTrace.H>\n";
 print CRFILE "#include <fapiPlatRegAddresses.H>\n\n";
-print CRFILE "#include <fapiPlatAttributeService.H>\n\n";
+print CRFILE "#include <fapiAttributeService.H>\n";
+print CRFILE "#include <fapiSystemConfig.H>\n\n";
+
 print CRFILE "namespace fapi\n";
 print CRFILE "{\n";
 print CRFILE "void fapiCollectRegFfdc(const fapi::Target & i_target,\n";

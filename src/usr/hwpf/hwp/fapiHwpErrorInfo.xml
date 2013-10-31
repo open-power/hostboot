@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: fapiHwpErrorInfo.xml,v 1.14 2013/10/31 19:49:04 dedahle Exp $ -->
 <!-- XML file specifying Test HW Procedure generated errors. -->
 
 <hwpErrors>
