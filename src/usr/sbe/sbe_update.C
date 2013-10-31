@@ -29,6 +29,7 @@
 #include <errl/errludtarget.H>
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/targetservice.H>
 #include <util/align.H>
 #include <util/crc32.H>
 #include <errno.h>
@@ -37,7 +38,9 @@
 #include <devicefw/driverif.H>
 #include <sys/mm.h>
 #include <sys/misc.h>
+#include <sys/msg.h>
 #include <hwas/common/deconfigGard.H>
+#include <initservice/initserviceif.H>
 #include <sbe/sbeif.H>
 #include <sbe/sbereasoncodes.H>
 #include "sbe_update.H"
@@ -139,6 +142,22 @@ namespace SBE
             }
 
 
+            // Get the Master Proc Chip Target for comparisons later
+            TARGETING::Target* masterProcChipTargetHandle = NULL;
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            err = tS.queryMasterProcChipTargetHandle(
+                                                masterProcChipTargetHandle);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - "
+                           "queryMasterProcChipTargetHandle returned error. "
+                           "Commit here and continue.  Check below against "
+                           "masterProcChipTargetHandle=NULL is ok");
+                 errlCommit( err, SBE_COMP_ID );
+                 err = NULL;
+            }
+
+
             for(uint32_t i=0; i<procList.size(); i++)
             {
 
@@ -148,8 +167,22 @@ namespace SBE
                 memset(&sbeState, 0, sizeof(sbeState));
                 sbeState.target = procList[i];
 
-                // @todo RTC 47033 check attribute on target to see if it's
-                // the master processor and set sbeState.target_is_master
+                TRACUCOMP( g_trac_sbe, "updateProcessorSbeSeeproms(): "
+                           "Main Loop: tgt=0x%X, i=%d",
+                           TARGETING::get_huid(sbeState.target), i)
+
+                // Check to see if current target is master processor
+                if ( sbeState.target == masterProcChipTargetHandle)
+                {
+                    TRACUCOMP(g_trac_sbe,"sbeState.target=0x%X is MASTER. "
+                              " (i=%d)",
+                              TARGETING::get_huid(sbeState.target), i);
+                    sbeState.target_is_master = true;
+                }
+                else
+                {
+                    sbeState.target_is_master = false;
+                }
 
                 err = getSbeInfoState(sbeState);
 
@@ -203,7 +236,7 @@ namespace SBE
                                    err->reasonCode(),
                                    TARGETING::get_huid(sbeState.target));
 
-                        break;
+                        // Don't break - handle error at the end of the loop,
                     }
                     else
                     {
@@ -243,20 +276,19 @@ namespace SBE
             /**************************************************************/
             /*  Perform System Operation                                  */
             /**************************************************************/
-            //TODO RTC: 47033 - Restart IPL if SBE Update requires it
-            // For Now just trace that a restart is needed
-            if (l_restartNeeded == true)
+            // Restart IPL if SBE Update requires it
+            if ( l_restartNeeded == true )
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Restart "
-                           "Needed, but not currently supported (%d). "
-                           "Continuing IPL",
-                           l_restartNeeded );
+                           "Needed (%d), Calling INITSERVICE::doShutdown()"
+                           " with SBE_UPDATE_REQUEST_REIPL = 0x%X",
+                           l_restartNeeded, SBE_UPDATE_REQUEST_REIPL );
+                INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
             }
 
 
         }while(0);
-
 
 
         // Cleanup VMM Workspace
@@ -383,6 +415,8 @@ namespace SBE
                            "should be: 0x%X",
                            sbeToc->eyeCatch, SBETOC_EYECATCH );
 
+                TRACFBIN( g_trac_sbe, "sbeToc", &sbeToc, sizeof(sbeToc_t));
+
                 /*@
                  * @errortype
                  * @moduleid     SBE_FIND_IN_PNOR
@@ -409,6 +443,9 @@ namespace SBE
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Unsupported "
                                "SBE TOC Version in SBE Partition" );
+
+                    TRACFBIN( g_trac_sbe, "sbeToc", &sbeToc, sizeof(sbeToc_t));
+
                     /*@
                      * @errortype
                      * @moduleid          SBE_FIND_IN_PNOR
@@ -430,8 +467,6 @@ namespace SBE
                     err->collectTrace(SBE_COMP_NAME);
                     err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
                                               HWAS::SRCI_PRIORITY_HIGH );
-
-                    // @todo RTC 47033 capture SBE TOC for analysis
 
                     break;
                 }
@@ -465,6 +500,8 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe,ERR_MRK"findSBEInPnor:SBE Image not "
                            "located, ec=0x%.2X",ec );
 
+                TRACFBIN( g_trac_sbe, "sbeToc", &sbeToc, sizeof(sbeToc_t));
+
                 /*@
                  * @errortype
                  * @moduleid     SBE_FIND_IN_PNOR
@@ -486,8 +523,6 @@ namespace SBE
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH );
-                // @todo RTC 47033 capture SBE TOC for analysis
-
                 break;
             }
 
@@ -607,7 +642,7 @@ namespace SBE
                                                     "Proc Target")
                                                    .addToLog(err);
 
-                    // @todo RTC 47033 look for specific return code for
+                    // @todo RTC 89503 look for specific return code for
                     // the case where he couldn't fix the cores we asked for
                     // but could possibly fit a lesser amount
 
@@ -955,7 +990,7 @@ namespace SBE
     errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState)
     {
 
-        TRACDCOMP( g_trac_sbe,
+        TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"getSbeInfoState(): HUID=0x%.8X",
                    TARGETING::get_huid(io_sbeState.target));
 
@@ -1228,7 +1263,9 @@ namespace SBE
 
             // Handle Uncorrectable ECC - no error log:
             // clear data and set o_seeprom_ver_ECC_fail=true
-            if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
+            // -- unless SIM version found:  than just ignore
+            if ( (eccStatus == PNOR::ECC::UNCORRECTABLE) &&
+                 (o_info.struct_version != SBE_SEEPROM_STRUCT_SIMICS_VERSION) )
             {
 
                 TRACFCOMP( g_trac_sbe,ERR_MRK"getSeepromSideVersion() - ECC "
@@ -1546,8 +1583,10 @@ namespace SBE
 /////////////////////////////////////////////////////////////////////
     errlHndl_t getTargetUpdateActions(sbeTargetState_t& io_sbeState)
     {
-        TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"getTargetUpdateActions()");
+        TRACUCOMP( g_trac_sbe,
+                   ENTER_MRK"getTargetUpdateActions(): HUID=0x%.8X",
+                   TARGETING::get_huid(io_sbeState.target));
+
         errlHndl_t err = NULL;
 
         bool seeprom_0_isDirty =    false;
@@ -1565,15 +1604,24 @@ namespace SBE
             /*  -- dirty or clean?                                        */
             /**************************************************************/
             if (
-                // Check PNOR and SEEPROM 0 Version
-                (0 != memcmp(&(io_sbeState.pnorVersion),
+                 ( // Standard Checks:
+
+                   // Check PNOR and SEEPROM 0 Version
+                   (0 != memcmp(&(io_sbeState.pnorVersion),
                              &(io_sbeState.seeprom_0_ver.image_version),
                              SBE_IMAGE_VERSION_SIZE))
-                ||
-                // Check CRC and SEEPROM 0 CRC
-                (0 != memcmp(&(io_sbeState.customizedImage_crc),
-                             &(io_sbeState.seeprom_0_ver.data_crc),
-                             SBE_DATA_CRC_SIZE))
+                   ||
+                   // Check CRC and SEEPROM 0 CRC
+                   (0 != memcmp(&(io_sbeState.customizedImage_crc),
+                                &(io_sbeState.seeprom_0_ver.data_crc),
+                                SBE_DATA_CRC_SIZE))
+                 )
+                 &&
+                 ( // Simics Check:
+                   // Look for simics specific version - consider clean if found
+                   ( io_sbeState.seeprom_0_ver.struct_version !=
+                                         SBE_SEEPROM_STRUCT_SIMICS_VERSION)
+                 )
                )
             {
                 seeprom_0_isDirty = true;
@@ -1586,34 +1634,35 @@ namespace SBE
             /*  -- dirty or clean?                                        */
             /**************************************************************/
             if (
-                // Check PNOR and SEEPROM 1 Version
-                (0 != memcmp(&(io_sbeState.pnorVersion),
-                             &(io_sbeState.seeprom_1_ver.image_version),
-                             SBE_IMAGE_VERSION_SIZE))
-                ||
-                // Check CRC and SEEPROM 1 CRC
-                (0 != memcmp(&(io_sbeState.customizedImage_crc),
-                             &(io_sbeState.seeprom_1_ver.data_crc),
-                             SBE_DATA_CRC_SIZE))
+                 ( // Standard Checks:
+
+                   // Check PNOR and SEEPROM 1 Version
+                   (0 != memcmp(&(io_sbeState.pnorVersion),
+                                &(io_sbeState.seeprom_1_ver.image_version),
+                                SBE_IMAGE_VERSION_SIZE))
+                   ||
+                   // Check CRC and SEEPROM 1 CRC
+                   (0 != memcmp(&(io_sbeState.customizedImage_crc),
+                                &(io_sbeState.seeprom_1_ver.data_crc),
+                                SBE_DATA_CRC_SIZE))
+                 )
+                 &&
+                 ( // Simics Check:
+                   // Look for simics specific version - consider clean if found
+                   ( io_sbeState.seeprom_1_ver.struct_version !=
+                                         SBE_SEEPROM_STRUCT_SIMICS_VERSION)
+                 )
                )
             {
                 seeprom_1_isDirty = true;
             }
 
 
-
             /**************************************************************/
             /*  Determine what side to update                             */
             /**************************************************************/
 
-            //If all clean, we are done:
-            if((!seeprom_0_isDirty) &&
-               (!seeprom_1_isDirty))
-            {
-                break;
-            }
-
-            //Need to update something
+            // Set cur and alt isDirty values
             if( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 )
             {
                 current_side_isDirty = seeprom_0_isDirty;
@@ -1624,7 +1673,6 @@ namespace SBE
                 current_side_isDirty = seeprom_1_isDirty;
                 alt_side_isDirty     = seeprom_0_isDirty;
             }
-
 
             // Set system_situation - bits defined in sbe_update.H
             uint8_t system_situation = 0x00;
@@ -1751,12 +1799,11 @@ namespace SBE
             // To be safe, we're only look at the bits defined in sbe_update.H
             i_system_situation &= SITUATION_ALL_BITS_MASK;
 
-            // @todo RTC 47033 set bit 1 in MVPD SB flag byte to
-            // represent the which SEEPROM the FSP should reboot from
-
 
             switch ( i_system_situation )
             {
+
+            ///////////////////////////////////////////////////////////////////
                 case ( SITUATION_CUR_IS_TEMP  |
                        SITUATION_CUR_IS_DIRTY |
                        SITUATION_ALT_IS_DIRTY  ) :
@@ -1765,6 +1812,7 @@ namespace SBE
                     // Treat like 0xC0
                     // not sure why we booted off of temp
 
+            ///////////////////////////////////////////////////////////////////
                 case ( SITUATION_CUR_IS_TEMP  |
                        SITUATION_CUR_IS_DIRTY |
                        SITUATION_ALT_IS_CLEAN  ) :
@@ -1784,23 +1832,32 @@ namespace SBE
                                 ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
-                    // Update MVPD flag make cur=perm
+                    // Update MVPD PERMANENT flag: make cur=perm
                     ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
                          // clear bit 0
                          io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
                          : //set bit 0
                          io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
 
+                    // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
+                    ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                         // clear bit 1
+                         io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
+                         : //set bit 1
+                         io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"decisionTreeForUpdates() - "
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "cur=temp/dirty. Update alt. Re-IPL. "
                                "Update MVPD flag. "
-                               "(d_t=0x%.2X, act=0x%.8X)",
+                               "(sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
 
                     break;
 
+            ///////////////////////////////////////////////////////////////////
                 case ( SITUATION_CUR_IS_TEMP  |
                        SITUATION_CUR_IS_CLEAN |
                        SITUATION_ALT_IS_DIRTY  ) :
@@ -1819,23 +1876,24 @@ namespace SBE
 
 
                     // MVPD flag Update
-                   // Update MVPD flag make cur=perm
+                    // Update MVPD flag make cur=perm
                     ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
                          // clear bit 0
                          io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
-                         : //set bit 0
+                         : // set bit 0
                          io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
 
-
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"decisionTreeForUpdates() - "
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "cur=temp/clean, alt=dirty. "
                                "Update alt. Continue IPL. Update MVPD flag."
-                               "(d_t=0x%.2X, act=0x%.8X)",
+                               "(sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
                     break;
 
 
+            ///////////////////////////////////////////////////////////////////
                 case ( SITUATION_CUR_IS_TEMP  |
                        SITUATION_CUR_IS_CLEAN |
                        SITUATION_ALT_IS_CLEAN  ) :
@@ -1847,14 +1905,16 @@ namespace SBE
 
                     l_actions = CLEAR_ACTIONS;
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"decisionTreeForUpdates() - "
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "Both sides clean-no updates. cur was temp. "
-                               "Continue IPL. (d_t=0x%.2X, act=0x%.8X)",
+                               "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
                     break;
 
 
+            ///////////////////////////////////////////////////////////////////
                 case ( SITUATION_CUR_IS_PERM  |
                        SITUATION_CUR_IS_DIRTY |
                        SITUATION_ALT_IS_DIRTY  ) :
@@ -1870,28 +1930,96 @@ namespace SBE
                                 ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"decisionTreeForUpdates() - "
+                    // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
+                    ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                         // clear bit 1
+                         io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
+                         : // set bit 1
+                         io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "cur=perm/dirty, alt=dirty. Update alt. re-IPL. "
-                               "(d_t=0x%.2X, act=0x%.8X)",
+                               "(sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
                     break;
 
 
+            ///////////////////////////////////////////////////////////////////
                 case ( SITUATION_CUR_IS_PERM  |
                        SITUATION_CUR_IS_DIRTY |
                        SITUATION_ALT_IS_CLEAN  ) :
 
                     // 0x40: cur=perm, cur=dirty, alt=clean
-                    // @todo RTC 40733 - Ask FSP if we just asked for re-IPL
-                    // for now just continue IPL
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"decisionTreeForUpdates() - "
-                               "cur=perm/dirty, alt=clean. Continue IPL. "
-                               "(d_t=0x%.2X, act=0x%.8X)",
-                               i_system_situation, l_actions);
-                    break;
+                    // Ask FSP if we just re-IPLed due to our request.
+                    // If Yes: Working PERM side is out-of-sync, so callout
+                    //         SBE code, but continue IPL on dirty image
+                    // If Not: Update alt and re-IPL
 
+                    if ( isIplFromReIplRequest() )
+                    {
+                        l_actions = CLEAR_ACTIONS;
+                        TRACFCOMP(g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                  "cur=perm/dirty, alt=clean. On our Re-IPL. "
+                                  "Call-out SBE code but Continue IPL. "
+                                  "(sit=0x%.2X, act=0x%.8X)",
+                                  TARGETING::get_huid(io_sbeState.target),
+                                  i_system_situation, l_actions);
 
+                        /*@
+                         * @errortype
+                         * @moduleid     SBE_DECISION_TREE
+                         * @reasoncode   SBE_PERM_SIDE_DIRTY_BAD_PATH
+                         * @userdata1    System Situation
+                         * @userdata2    Update Actions
+                         * @devdesc      Bad Path in decisionUpdateTree:
+                         *               cur=PERM/DIRTY
+                         */
+                        errlHndl_t err = new ErrlEntry(
+                                             ERRL_SEV_RECOVERED,
+                                             SBE_DECISION_TREE,
+                                             SBE_PERM_SIDE_DIRTY_BAD_PATH,
+                                             TO_UINT64(i_system_situation),
+                                             TO_UINT64(l_actions));
+                        // Target isn't directly related to fail, but could be
+                        // useful to see how far we got before failing.
+                        ErrlUserDetailsTarget(io_sbeState.target
+                                              ).addToLog(err);
+                        err->collectTrace(SBE_COMP_NAME);
+                        err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                                  HWAS::SRCI_PRIORITY_HIGH );
+                        break;
+
+                    }
+                    else
+                    {
+                        // Update alt and re-ipl
+                        l_actions |= IPL_RESTART;
+                        l_actions |= DO_UPDATE;
+
+                        // Set Update side to alt
+                        io_sbeState.seeprom_side_to_update =
+                                ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
+                                  ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+
+                        // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
+                        ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                          // clear bit 1
+                          io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
+                          : // set bit 1
+                          io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
+
+                        TRACFCOMP(g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                  "cur=perm/dirty, alt=dirty. Not our Re-IPL. "
+                                  "Update alt. re-IPL.(sit=0x%.2X, act=0x%.8X)",
+                                  TARGETING::get_huid(io_sbeState.target),
+                                  i_system_situation, l_actions);
+
+                        break;
+                    }
+
+            ///////////////////////////////////////////////////////////////////
                 case ( SITUATION_CUR_IS_PERM  |
                        SITUATION_CUR_IS_CLEAN |
                        SITUATION_ALT_IS_DIRTY  ) :
@@ -1907,15 +2035,17 @@ namespace SBE
                                 ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 )
                                   ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"decisionTreeForUpdates() - "
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "cur=perm/clean, alt=dirty. "
                                "Update alt. Continue IPL. "
-                               "(d_t=0x%.2X, act=0x%.8X)",
+                               "(sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
                     break;
 
 
+            ///////////////////////////////////////////////////////////////////
                 case ( SITUATION_CUR_IS_PERM  |
                        SITUATION_CUR_IS_CLEAN |
                        SITUATION_ALT_IS_CLEAN  ) :
@@ -1925,36 +2055,45 @@ namespace SBE
                     // but handle just in case
                     l_actions = CLEAR_ACTIONS;
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"decisionTreeForUpdates() - "
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "Both sides clean-no updates. cur was temp. "
-                               "Continue IPL. (d_t=0x%.2X, act=0x%.8X)",
+                               "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
                     break;
 
+            ///////////////////////////////////////////////////////////////////
                 default:
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"decisionTreeForUpdates() - "
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "Unsupported Scenario.  Just Continue IPL. "
-                               "(d_t=0x%.2X, act=0x%.8X)",
+                               "(sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
                     break;
             }
+            ///////////////////////////////////////////////////////////////////
+            //  End of i_system_situation switch statement
+            ///////////////////////////////////////////////////////////////////
 
 
             // Set actions
             io_sbeState.update_actions = static_cast<sbeUpdateActions_t>
                                                     (l_actions);
 
-            TRACUCOMP( g_trac_sbe, "decisionTreeForUpdates() - i_system_situation= "
-                       "0x%.2X, actions=0x%.8X, Update EEPROM=0x%X, doU=%d, "
-                       "reIpl=%d",
+            TRACUCOMP( g_trac_sbe, "decisionTreeForUpdates() Tgt=0x%X: "
+                       "i_system_situation=0x%.2X, actions=0x%.8X, "
+                       "Update EEPROM=0x%X, doU=%d, reIpl=%d, "
+                       "mvpd_byte0_flags=0x%X",
+                       TARGETING::get_huid(io_sbeState.target),
                        i_system_situation,
                        io_sbeState.update_actions,
                        io_sbeState.seeprom_side_to_update,
                        io_sbeState.update_actions && DO_UPDATE,
-                       io_sbeState.update_actions && IPL_RESTART);
+                       io_sbeState.update_actions && IPL_RESTART,
+                       io_sbeState.mvpdSbKeyword.flags);
 
         }while(0);
 
@@ -1967,33 +2106,23 @@ namespace SBE
 /////////////////////////////////////////////////////////////////////
     errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState)
     {
-        TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"performUpdateActions()");
+        TRACUCOMP( g_trac_sbe,
+                   ENTER_MRK"performUpdateActions(): HUID=0x%.8X",
+                   TARGETING::get_huid(io_sbeState.target));
+
         errlHndl_t err = NULL;
 
         do{
 
-
             /**************************************************************/
             /*  Update Actions:                                           */
-            /*  1) Update SEEPROM                                         */
-            /*  2) Update MVPD                                            */
+            /*  1) Update MVPD                                            */
+            /*  2) Update SEEPROM                                         */
             /**************************************************************/
 
-            /**************************************************************/
-            /*  1) Update SEEPROM                                         */
-            /**************************************************************/
-            err = updateSeepromSide(io_sbeState);
-            if(err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"performUpdateActions() - "
-                           "updateProcessorSbeSeeproms() failed.  HUID=0x%.8X.",
-                           TARGETING::get_huid(io_sbeState.target));
-                continue;
-            }
 
             /**************************************************************/
-            /*  2) Update MVPD                                            */
+            /*  1) Update MVPD                                            */
             /**************************************************************/
             //Update MVPD anytime we do any sort of SBE Update.
             err =  getSetMVPDVersion(io_sbeState.target,
@@ -2009,135 +2138,24 @@ namespace SBE
                 break;
             }
 
+            /**************************************************************/
+            /*  2) Update SEEPROM                                         */
+            /**************************************************************/
+            err = updateSeepromSide(io_sbeState);
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"performUpdateActions() - "
+                           "updateProcessorSbeSeeproms() failed.  HUID=0x%.8X.",
+                           TARGETING::get_huid(io_sbeState.target));
+                continue;
+            }
+
 
 
         }while(0);
 
         return err;
 
-
-    }
-
-/////////////////////////////////////////////////////////////////////
-    // @todo RTC 47033 - Likely to remove this function because creating a
-    // CRC from the customized image seems more efficient.
-    errlHndl_t getDataCrc(TARGETING::Target* i_target,
-                                uint32_t& o_data_crc)
-    {
-        TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"getDataCrc");
-
-        errlHndl_t err = NULL;
-        size_t   data_size = 0;
-        uint8_t* data_ptr  = NULL;
-        uint8_t  index     = 0;
-
-        size_t    mvpd_pdG_size     = 0;
-        uint8_t*  mvpd_pdG_data_ptr = NULL;
-        size_t    mvpd_pdR_size     = 0;
-        uint8_t*  mvpd_pdR_data_ptr = NULL;
-
-        o_data_crc = 0x0;
-
-        do{
-
-
-            /*******************************************/
-            /*  Get #G Ring Data from MVPD             */
-            /*******************************************/
-            // Note: First read with NULL for o_buffer sets vpdSize to the
-            // correct length
-            err = deviceRead( i_target,
-                              NULL,
-                              mvpd_pdG_size,
-                              DEVICE_MVPD_ADDRESS( MVPD::CP00,
-                                                   MVPD::pdG ) );
-
-            if(err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getDataCrc() - MVPD failure getting pdG keyword size HUID=0x%.8X",
-                           TARGETING::get_huid(i_target));
-                break;
-            }
-
-            // Create buffer to capture the data
-            mvpd_pdG_data_ptr = static_cast<uint8_t*>(malloc(mvpd_pdG_size));
-
-            err = deviceRead( i_target,
-                              mvpd_pdG_data_ptr,
-                              mvpd_pdG_size,
-                              DEVICE_MVPD_ADDRESS( MVPD::CP00,
-                                                   MVPD::pdG ) );
-            if(err)
-            {
-                 TRACFCOMP( g_trac_sbe, ERR_MRK"getDataCrc() - MVPD failure read pdG data HUID=0x%.8X",
-                            TARGETING::get_huid(i_target));
-                 break;
-            }
-
-
-            /*******************************************/
-            /*  Get #R Ring Data from MVPD             */
-            /*******************************************/
-            // Note: First read with NULL for o_buffer sets vpdSize to the
-            // correct length
-            err = deviceRead( i_target,
-                              NULL,
-                              mvpd_pdR_size,
-                              DEVICE_MVPD_ADDRESS( MVPD::CP00,
-                                                   MVPD::pdR ) );
-
-            if(err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getDataCrc() - MVPD failure getting pdR keyword size HUID=0x%.8X",
-                           TARGETING::get_huid(i_target));
-                break;
-            }
-
-            // Create buffer to capture the data
-            mvpd_pdR_data_ptr = static_cast<uint8_t*>(malloc(mvpd_pdR_size));
-
-            err = deviceRead( i_target,
-                              mvpd_pdR_data_ptr,
-                              mvpd_pdR_size,
-                              DEVICE_MVPD_ADDRESS( MVPD::CP00,
-                                                   MVPD::pdR ) );
-            if(err)
-            {
-                 TRACFCOMP( g_trac_sbe, ERR_MRK"getDataCrc() - MVPD failure read pdG data HUID=0x%.8X",
-                            TARGETING::get_huid(i_target));
-                 break;
-            }
-
-
-            /**********************************************/
-            /*  Concatenate the Data and compute the CRC  */
-            /**********************************************/
-            // Add up all the sizes and create a buffer
-            data_size = mvpd_pdG_size + mvpd_pdR_size;
-            data_ptr  = static_cast<uint8_t*>(malloc(data_size));
-
-
-            memcpy( data_ptr, mvpd_pdG_data_ptr, mvpd_pdG_size);
-            index = mvpd_pdG_size;
-
-            memcpy( &(data_ptr[index]), mvpd_pdR_data_ptr, mvpd_pdR_size);
-
-            o_data_crc = Util::crc32_calc(data_ptr, data_size);
-
-
-        }while(0);
-
-        // Free allocated memory
-        free(mvpd_pdG_data_ptr);
-        free(mvpd_pdR_data_ptr);
-
-
-        TRACUCOMP( g_trac_sbe, EXIT_MRK"getDataCrc: o_data_crc= 0x%.4x, "
-                   "pdG_size=%d, pdR_size=%d",
-                   o_data_crc, mvpd_pdG_size, mvpd_pdR_size);
-
-        return err;
 
     }
 
@@ -2152,10 +2170,10 @@ namespace SBE
                    i_mask, i_maxBits);
         uint32_t retMask = i_mask;
 
-
         while(__builtin_popcount(retMask) >  static_cast<int32_t>(i_maxBits))
         {
-            retMask ^= 0x1 << static_cast<uint32_t>(__builtin_ctz(retMask));
+            retMask ^= (0x80000000 >>
+                        static_cast<uint32_t>(__builtin_clz(retMask)));
         }
 
         TRACDCOMP( g_trac_sbe,
@@ -2193,6 +2211,13 @@ namespace SBE
                                  reinterpret_cast<void*>
                                  (VMM_VADDR_SBE_UPDATE),
                                  VMM_SBE_UPDATE_SIZE);
+
+            if(rc == -EALREADY)
+            {
+                //-EALREADY inidciates the block is already mapped
+                // so just ignore
+                rc = 0;
+            }
 
             if( rc )
             {
@@ -2234,7 +2259,7 @@ namespace SBE
                  * @userdata1    Requested Address
                  * @userdata2    rc from mm_set_permission
                  * @devdesc      updateProcessorSbeSeeproms> Error from
-                 *               mm_set_permission
+                 *               mm_set_permission on creation
                  */
                 err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                     SBE_CREATE_TEST_SPACE,
@@ -2267,6 +2292,35 @@ namespace SBE
         int64_t rc = 0;
 
         do{
+
+            // Set permissions back to "no_access" before returning
+            rc = mm_set_permission(reinterpret_cast<void*>
+                                   (VMM_VADDR_SBE_UPDATE),
+                                   VMM_SBE_UPDATE_SIZE,
+                                   NO_ACCESS | ALLOCATE_FROM_ZERO );
+            if( rc )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace() - "
+                           "Error from mm_set_permission : rc=%d", rc );
+                /*@
+                 * @errortype
+                 * @moduleid     SBE_CLEANUP_TEST_SPACE
+                 * @reasoncode   SBE_SET_PERMISSION_FAIL
+                 * @userdata1    Requested Address
+                 * @userdata2    rc from mm_set_permission
+                 * @devdesc      updateProcessorSbeSeeproms> Error from
+                 *               mm_set_permission on cleanup
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_CLEANUP_TEST_SPACE,
+                                    SBE_SET_PERMISSION_FAIL,
+                                    TO_UINT64(VMM_VADDR_SBE_UPDATE),
+                                    TO_UINT64(rc));
+                err->collectTrace(SBE_COMP_NAME);
+                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH );
+                break;
+            }
 
             //release all pages in page block to ensure we
             //start with clean state
@@ -2306,6 +2360,123 @@ namespace SBE
         return err;
 
     }
+
+
+/////////////////////////////////////////////////////////////////////
+    bool isIplFromReIplRequest(void)
+    {
+        TRACDCOMP( g_trac_sbe,
+                   ENTER_MRK"isIplFromReIplRequest");
+
+        bool o_reIplRequest = false;
+        errlHndl_t err = NULL;
+        msg_t * msg = msg_allocate();
+
+        do{
+
+
+            /*********************************************/
+            /*  Check if MBOX is enabled                 */
+            /*********************************************/
+            bool mbox_enabled = false;
+
+            TARGETING::Target * sys = NULL;
+            TARGETING::targetService().getTopLevelTarget( sys );
+            TARGETING::SpFunctions spfuncs;
+            if( sys &&
+                sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
+                spfuncs.mailboxEnabled)
+            {
+                mbox_enabled = true;
+            }
+
+            /****************************************************/
+            /*  MBOX IS NOT enabled: assume IPL not our request */
+            /****************************************************/
+            if ( mbox_enabled == false )
+            {
+                o_reIplRequest = false;
+                TRACFCOMP(g_trac_sbe, INFO_MRK"isIplFromReIplRequest(): "
+                          "MBOX not enabled, so assume not our IPL request. "
+                          "o_reIplRequest=%d", o_reIplRequest);
+                break;
+            }
+
+
+            /*********************************************/
+            /*  MBOX enabled, send message               */
+            /*********************************************/
+            msg->type = MSG_IPL_DUE_TO_SBE_UPDATE;
+            msg->data[0] = 0x0;
+            msg->data[1] = 0x0;
+            msg->extra_data = NULL;
+
+            err = MBOX::sendrecv(MBOX::IPL_SERVICE_QUEUE, msg);
+
+            if(err)
+            {
+                o_reIplRequest = false;
+                TRACFCOMP(g_trac_sbe, ERR_MRK"isIplFromReIplRequest(): "
+                          "Error sending MBOX msg. Commit error, and assume "
+                          "IPL wasn't requested from us: o_reIplRequest=%d",
+                          o_reIplRequest);
+
+                errlCommit(err, SBE_COMP_ID);
+                break;
+            }
+
+            // data word 0: if non-zero:  IPL is due to SBE Update Request
+            // data word 1: if non-zero:  IPL is due to an error found by the
+            //                            FSP
+            TRACFCOMP(g_trac_sbe, INFO_MRK"isIplFromReIplRequest(): "
+                      "MBOX msg returned: data_words 0=0x%X, 1=0x%X",
+                      msg->data[0], msg->data[1]);
+
+            if ( msg->data[1] == 0 ) // No error from FSP side
+            {
+                if( msg->data[0] != 0 )
+                {
+                    // IPL is due to SBE Update Request
+                    o_reIplRequest = true;
+                    TRACFCOMP(g_trac_sbe, INFO_MRK"isIplFromReIplRequest(): "
+                              "MBOX retuned that it was our IPL request: "
+                              "o_reIplRequest=%d", o_reIplRequest);
+                }
+                else
+                {
+                    // normal IPL
+                    o_reIplRequest = false;
+                    TRACFCOMP(g_trac_sbe, INFO_MRK"isIplFromReIplRequest(): "
+                             "MBOX returned that it was a normal IPL: "
+                             "o_reIplRequest=%d", o_reIplRequest);
+                }
+            }
+            else  /*  Non-Zero: error from FSP side. */
+            {
+                // handle error reported by FSP
+                o_reIplRequest = false;
+                TRACFCOMP(g_trac_sbe, INFO_MRK"isIplFromReIplRequest(): "
+                          "MBOX returned error from FSP-side, so assume not "
+                          "our IPL request: o_reIplRequest=%d", o_reIplRequest);
+            }
+
+
+        }while(0);
+
+        // msg cleanup
+        msg_free(msg);
+        msg = NULL;
+
+        TRACDCOMP( g_trac_sbe,
+                   EXIT_MRK"isIplFromReIplRequest(): o_reIplRequest=%d",
+                   o_reIplRequest);
+
+        return o_reIplRequest;
+
+    }
+
+
+
 
 
 } //end SBE Namespace

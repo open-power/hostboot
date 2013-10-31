@@ -33,6 +33,13 @@ echo "Master PNOR is: "+$hb_pnor
 $hb_cpu = "system_cmp0.cpu0_0_04_0"
 echo "Defaulting to CPU "+$hb_cpu+" for Hostboot tools"
 
+# Prevent SBE Updates from happening on an IPL
+echo "Altering SBE SEEPROM Versions to disable Update in IPL"
+foreach $cc in (get-object-list p8_proc) {
+    ($cc).procSBEPrimary_eeprom_image.set 0x300 0x5A5A5A5A 8 -l
+    ($cc).procSBEBackup_eeprom_image.set  0x300 0x5A5A5A5A 8 -l
+}
+
 # Load HB debug tools.
 try {
     run-python-file (lookup-file hbfw/simics-debug-framework.py)

@@ -199,13 +199,17 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 uint32_t outMask;
             } testData[] =
             {
-                {0xFFFFFFFF, 10, 0xFFC00000},
+                {0xFFFFFFFF, 10, 0x000003FF},
                 {0xFFFFFFFF, 32, 0xFFFFFFFF},
-                {0x0000FF00, 4,  0x0000F000},
+                {0x0000FF00, 4,  0x00000F00},
+                {0x0000FA30, 3,  0x00000230},
                 {0x0000FF00, 8,  0x0000FF00},
                 {0x0000FF50, 16, 0x0000FF50},
-                {0x000000FF, 5,  0x000000F8},
+                {0x0000EC50, 4,  0x00000C50},
+                {0x000000FF, 5,  0x0000001F},
                 {0x000000FF, 8,  0x000000FF},
+                {0x11111111, 5,  0x00011111},
+                {0x55555555, 11, 0x00155555},
             };
             const uint32_t NUM_TESTS = sizeof(testData)/sizeof(testData[0]);
 
@@ -415,7 +419,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             uint8_t local_ec = theTarget->getAttr<TARGETING::ATTR_EC>();
 
             err = createSbeImageVmmSpace();
-            if(theTarget == NULL)
+            if(err)
             {
                 total++;
                 fails++;
@@ -484,22 +488,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
                       sizeof(sbeSeepromVersionInfo_t));
 
 
-            /****************************************************/
-            /* CRC Calculation                                  */
-            /****************************************************/
-            uint32_t new_data_crc = 0;
-            total++;
-
-            err = getDataCrc(theTarget, new_data_crc);
-            if(err)
-            {
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - getDataCrc() failed");
-                break;
-            }
-
-            TRACUCOMP( g_trac_sbe, "testSbeUpdateTarget(): getDataCrc(): data_crc=0x%.4x",
-                       new_data_crc);
 
             /****************************************************/
             /* Get Target Update Actions                        */
@@ -588,7 +576,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - re-IPL
             { 0xE0, SBE_SEEPROM0, 0x80,
               static_cast<sbeUpdateActions_t>(DO_UPDATE|IPL_RESTART),
-              EEPROM::SBE_BACKUP, 0x00 },
+              EEPROM::SBE_BACKUP, 0x40 },
 
 
             // case 0xC0: cur=temp, cur=dirty, alt=dirty
@@ -623,17 +611,17 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - re-IPL
             { 0x60, SBE_SEEPROM0, 0x00,
               static_cast<sbeUpdateActions_t>(DO_UPDATE|IPL_RESTART),
-              EEPROM::SBE_BACKUP, 0x00 },
+              EEPROM::SBE_BACKUP, 0x40 },
 
-            // case 0x40: cur=temp, cur=dirty, alt=clean
-            // @todo RTC 47033 - Ask FSP if we just re-IPLed, but just
-            //                   continue IPL now
+            // case 0x40: cur=perm, cur=dirty, alt=clean
+            // This case asks FSP if we just re-IPLed, but assume we don't
+            // get mbox msg back in sim so update and re-IPL on alt
             // Arbitrarily set cur side to 1 (therefore perm set to 1)
-            // No Updates
-            // Continue IPL
+            // - update alt=0
+            // - re-IPL
             { 0x40, SBE_SEEPROM1, 0x80,
-              static_cast<sbeUpdateActions_t>(CLEAR_ACTIONS),
-              EEPROM::LAST_CHIP_TYPE, 0x80 },
+              static_cast<sbeUpdateActions_t>(DO_UPDATE|IPL_RESTART),
+              EEPROM::SBE_PRIMARY, 0x80 },
 
             // case 0x20: cur=perm, cur=clean, alt=dirty
             // Arbitrarily set cur side to 0 (therefore perm set to 0)
@@ -663,6 +651,17 @@ class SBEUpdateTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_sbe,
                        ENTER_MRK"testSbeDecisionTree()" );
 
+            // Get and Set a target for sbeState
+            TARGETING::Target * theTarget =
+                                getFunctionalTarget(TARGETING::TYPE_PROC);
+            if(theTarget == NULL)
+            {
+                total++;
+                fails++;
+                TS_FAIL("testSbeUpdateTarget() - No Functional Targets found!");
+                break;
+            }
+            sbeState.target = theTarget;
 
             // Loop through each situation
             for( uint32_t i = 0; i < NUM_CMDS; i++ )
@@ -685,6 +684,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 /****************************************************/
                 /* Get Target Update Actions                        */
                 /****************************************************/
+
                 total++;
                 SBE::decisionTreeForUpdates(sbeState,
                                             testData[i].i_situation);

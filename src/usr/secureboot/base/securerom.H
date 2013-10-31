@@ -95,7 +95,6 @@ extern "C"
 // Interfaces for Assembly Functions to call into Secure ROM
 // - 1st parameter is address of function offset into Secure ROM,
 //   followed by additional parameters as necssary
-// MAB: void* call_rom_entry(void*, void*, void*, void*);
 
 ROM_response call_rom_verify(void*, ROM_container_raw*, ROM_hw_params*);
 void         call_rom_SHA512(void*, const sha2_byte *, size_t, sha2_hash_t*);

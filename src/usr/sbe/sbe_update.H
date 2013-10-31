@@ -44,7 +44,8 @@ namespace SBE
     const size_t   SBE_MVPD_SHORT_IMAGE_VERSION_SIZE = 20;
 
     // Version of Struct stored in SEEPROM
-    const uint32_t SBE_SEEPROM_STRUCT_VERSION = 0x00000001;
+    const uint32_t SBE_SEEPROM_STRUCT_VERSION        = 0x00000001;
+    const uint32_t SBE_SEEPROM_STRUCT_SIMICS_VERSION = 0x5A5A5A5A;
 
     // Used for locations of SBE_Version and SBE Image on a SEEPROM
     const uint64_t SBE_IMAGE_SEEPROM_ADDRESS    = 0x400; // 1KB
@@ -62,12 +63,17 @@ namespace SBE
 
     // MVPD SB Keyword contants
     const size_t  MVPD_SB_RECORD_SIZE = 49;
-    const uint8_t PERMANENT_FLAG_MASK          = 0x80;
-    // PERMANENT FLAG = 0 -> indicates 0 is permanent.
+
+    // PERMANENT FLAG - bit 0: 0x0 -> indicates 0 is permanent.
+    const uint8_t PERMANENT_FLAG_MASK             = 0x80;
     const uint8_t SEEPROM_0_PERMANENT_VALUE       = 0x00;
     const uint8_t SEEPROM_1_PERMANENT_VALUE       = 0x80;
-    // @todo RTC 47033 -  add support for bit 1 (0x40): temp boot side
 
+    // RE-IPL SEEPROM DESIGNATION - bit 1: 0x0 -> indicates boot from SEEPROM 0
+    // NOTE: Used *ONLY* for re-IPL Requests
+    const uint8_t REIPL_SEEPROM_MASK              = 0x40;
+    const uint8_t REIPL_SEEPROM_0_VALUE           = 0x00;
+    const uint8_t REIPL_SEEPROM_1_VALUE           = 0x40;
 
     // Situation constants -- bits numbered from left to right
     const uint8_t SITUATION_ALL_BITS_MASK = 0xE0;
@@ -82,6 +88,9 @@ namespace SBE
     // Bit 2:  alt side clean (=0) or dirty (=1)
     const uint8_t SITUATION_ALT_IS_CLEAN  = 0x00;
     const uint8_t SITUATION_ALT_IS_DIRTY  = 0x20;
+
+    // For mbox messages to FSP
+    const uint32_t MSG_IPL_DUE_TO_SBE_UPDATE = 0x40000012;
 
 
     /******************************************/
@@ -301,18 +310,6 @@ namespace SBE
                                    void* io_imgPtr,
                                    size_t& o_actImgSize);
 
-    /**
-     @brief Collect data for CRC, Concatenate the data, then compute the CRC
-     *
-     * @param[in] i_target      Target processor
-     *
-     * @param[out] o_data_crc   CRC computed from concatenated collected data
-     *
-     * @return errlHndl_t    Error log handle on failure.
-     */
-    errlHndl_t getDataCrc(TARGETING::Target* i_target,
-                          uint32_t& o_data_crc);
-
 
     /**
      * @brief Determines which Seeprom was used to boot the SBE
@@ -354,6 +351,7 @@ namespace SBE
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
      *                              and the information to be used for updating
      *                              the SBE State of the target
+     * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t updateSeepromSide(sbeTargetState_t i_sbeState);
 
@@ -362,6 +360,14 @@ namespace SBE
     /******************************************/
     /*  Functions -- Helper Functions         */
     /******************************************/
+
+    /**
+     * @brief Send Mailbox msg to FSP to query if this IPL came from
+     *        SBE Update Re-Ipl Request
+     *
+     * @return  bool    If true, this IPL was from a Hostboot re-IPL request
+     */
+    bool isIplFromReIplRequest(void);
 
     /**
      * @brief Determines the Update Actions for a specific target situation
@@ -422,7 +428,8 @@ namespace SBE
 
     /**
      * @brief Reduces bits set in a bit mask until there is a
-     *        a maximum number of bits set
+     *        a maximum number of bits set.
+     *        NOTE: bits removed left-to-right
      *
      * @param[in] i_mask      Starting mask to be reduced
      *

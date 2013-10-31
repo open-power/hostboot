@@ -41,6 +41,7 @@
 #include <errl/errludtarget.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
+#include <sys/time.h>
 #include <i2c/eepromddreasoncodes.H>
 #include <i2c/eepromif.H>
 #include "eepromdd.H"
@@ -466,6 +467,10 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                 break;
             }
 
+            // Wait 5ms for EEPROM o write data to its internal memory
+            nanosleep(0,5 * NS_PER_MSEC);   // 5 msec
+
+
             // Update how much data was written
             total_bytes_written += loop_data_length;
 
@@ -483,7 +488,6 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
             // Leave do-while loop
             break;
         }
-
 
         TRACSCOMP( g_trac_eepromr,
                    "EEPROM WRITE END   : Chip: %02d : Offset %.2X : Len %d",

@@ -44,6 +44,8 @@
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
 
+#include    <sbe/sbeif.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -304,7 +306,8 @@ void * call_host_slave_sbe_update( void * io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update entry" );
 
-    // call p8_customize_image.C
+    // @todo RTC 89503 - enable this call
+    // l_errl = SBE::updateProcessorSbeSeeproms();
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update exit" );

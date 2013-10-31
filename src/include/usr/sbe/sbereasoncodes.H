@@ -50,6 +50,7 @@ enum sbeModuleId
     SBE_CLEANUP_TEST_SPACE              = 0x07,
     SBE_GET_TARGET_INFO_STATE           = 0x08,
     SBE_GET_SEEPROM_INFO                = 0x09,
+    SBE_DECISION_TREE                   = 0x0A,
 };
 
 /**
@@ -81,6 +82,7 @@ enum sbeReasonCode
     SBE_INVALID_INPUT                   = SBE_COMP_ID | 0x0D,
     SBE_INVALID_SEEPROM_SIDE            = SBE_COMP_ID | 0x0E,
     SBE_ECC_FAIL                        = SBE_COMP_ID | 0x0F,
+    SBE_PERM_SIDE_DIRTY_BAD_PATH        = SBE_COMP_ID | 0x10,
 };
 
 };  // end SBE
