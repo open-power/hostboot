@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,6 +38,8 @@
 #include <util/align.H>
 #include <kernel/basesegment.H>
 #include <arch/ppc.H>
+
+#include <usr/vmmconst.h>
 
 #include <new>
 
@@ -378,9 +380,8 @@ void Block::castOutPages(uint64_t i_type)
         iv_nextBlock->castOutPages(i_type);
     }
 
-    // TODO We will eventually need to skip other blocks as well, such as
-    // when the memory space grows.
-    if(iv_baseAddr != 0) // Skip base area
+    if((iv_baseAddr != VMM_ADDR_BASE_BLOCK) || // Skip base area
+       (iv_baseAddr != VMM_ADDR_EXTEND_BLOCK)) // Skip extended memory.
     {
         size_t rw_constraint = 5;
         size_t ro_constraint = 3;
@@ -532,15 +533,17 @@ int Block::setPermSPTE( ShadowPTE* i_spte, uint64_t i_access_type)
     // if write_tracked
     if ( i_access_type & WRITE_TRACKED)
     {
-        // TODO.. fail if no message handler when trying to
-        //    set a page to write tracked.
-
         // If the page is already READ_ONLY
         // you cannot set to WRITE_TRACKED
         if (getPermission(i_spte) == READ_ONLY)
         {
             return -EINVAL;
         }
+        else if (NULL == iv_writeMsgHdlr)
+        {
+            return -EINVAL;
+        }
+
         i_spte->setWriteTracked(true);
     }
     else

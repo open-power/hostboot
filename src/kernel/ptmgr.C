@@ -313,8 +313,6 @@ void PageTableManager::flush( void )
 /********************
  Private/Protected Methods
  ********************/
-#include <sys/mm.h> //@TODO: Remove with 43401
-#include <usr/vmmconst.h> //@TODO: Remove with 43401.
 /**
  * @brief  Constructor
  */

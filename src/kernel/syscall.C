@@ -155,9 +155,8 @@ void kernel_execute_system_call()
     uint64_t syscall = t->context.gprs[3];
     if (syscall >= SYSCALL_MAX)
     {
-        // TODO : kill task.
         printk("Invalid syscall : %ld\n", syscall);
-        while(1);
+        TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
     else
     {
