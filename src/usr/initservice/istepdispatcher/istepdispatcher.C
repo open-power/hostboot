@@ -486,6 +486,27 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             }
         }
 
+        if(err)
+        {
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Istep failed, plid 0x%x",
+                      err->plid());
+        }
+        // Check for any attentions and invoke PRD for analysis
+        else if (true == theStep->taskflags.check_attn)
+        {
+            TRACDCOMP(g_trac_initsvc,
+                      INFO_MRK"Check for attentions and invoke PRD" );
+
+            err = ATTN::checkForIplAttentions();
+
+            if ( err )
+            {
+                TRACFCOMP( g_trac_initsvc, ERR_MRK"doIstep: error from checkForIplAttentions");
+            }
+        }
+
+        // now that HWP and PRD have run, check for deferred deconfig work.
+
         // Check for Power Line Disturbance (PLD)
         if (HWAS::hwasPLDDetection())
         {
@@ -507,25 +528,6 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Deconfigs happened, pre:%d, post:%d",
                       preDeconfigs, postDeconfigs);
             o_deconfigs = true;
-        }
-
-        if(err)
-        {
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Istep failed, plid 0x%x",
-                      err->plid());
-        }
-        // Check for any attentions and invoke PRD for analysis
-        else if (true == theStep->taskflags.check_attn)
-        {
-            TRACDCOMP(g_trac_initsvc,
-                      INFO_MRK"Check for attentions and invoke PRD" );
-
-            err = ATTN::checkForIplAttentions();
-
-            if ( err )
-            {
-                TRACFCOMP( g_trac_initsvc, ERR_MRK"doIstep: error from checkForIplAttentions");
-            }
         }
 
         TRACFCOMP(g_trac_initsvc, EXIT_MRK"doIstep: step %d, substep %d",
