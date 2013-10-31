@@ -82,11 +82,14 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
             break;
         }
 
-        // Get the first DIMM's port and dimm number
+        // Use the last DIMM
+        fapi::Target & l_dimmTarg = l_dimms.back();
+
+        // Get the DIMM's port and dimm number
         uint8_t l_port = 0;
         uint8_t l_dimm = 0;
 
-        l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &(l_dimms[0]), l_port);
+        l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &l_dimmTarg, l_port);
 
         if (l_rc)
         {
@@ -94,7 +97,7 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
             break;
         }
 
-        l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &(l_dimms[0]), l_dimm);
+        l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &l_dimmTarg, l_dimm);
 
         if (l_rc)
         {
@@ -102,9 +105,13 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
             break;
         }
 
+        FAPI_INF("fapiTestHwpDq: Using dimm with MBA port:%d, dimm:%d",
+                 l_port, l_dimm);
+
         // Get the bad DQ Bitmap for all ranks and print any non-zero data
+        const uint8_t NUM_RANKS = 4;
         uint8_t l_rank = 0;
-        for (l_rank = 0; l_rank < 3; l_rank++)
+        for (l_rank = 0; l_rank < NUM_RANKS; l_rank++)
         {
             // Get the bad DQ Bitmap for the rank
             l_rc = dimmGetBadDqBitmap(i_mba, l_port, l_dimm, l_rank,
@@ -121,7 +128,7 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
             {
                 if (l_dqBitmap[i] != 0)
                 {
-                    FAPI_INF("fapiTestHwpDq: Non-zero DQ data. Rank:%d, Byte:%d, Val:0x02%x",
+                    FAPI_INF("fapiTestHwpDq: Non-zero DQ data. Rank:%d, Byte:%d, Val:0x%02x",
                              l_rank, i, l_dqBitmap[i]);
                 }
             }
@@ -142,7 +149,7 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
         l_dqBitmap[6] = 0x20;
 
         // Set the bad DQ Bitmap for the last rank
-        l_rc = dimmSetBadDqBitmap(i_mba, l_port, l_dimm, l_rank, l_dqBitmap);
+        l_rc = dimmSetBadDqBitmap(i_mba, l_port, l_dimm, l_rank - 1, l_dqBitmap);
 
         if (l_rc)
         {
@@ -154,7 +161,7 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
         l_dqBitmap[2] = 0;
         l_dqBitmap[6] = 0;
 
-        l_rc = dimmGetBadDqBitmap(i_mba, l_port, l_dimm, l_rank, l_dqBitmap);
+        l_rc = dimmGetBadDqBitmap(i_mba, l_port, l_dimm, l_rank - 1, l_dqBitmap);
 
         if (l_rc)
         {
@@ -176,7 +183,7 @@ fapi::ReturnCode fapiTestHwpDq(const fapi::Target & i_mba)
         l_dqBitmap[2] = l_origDq2;
         l_dqBitmap[6] = l_origDq6;
 
-        l_rc = dimmSetBadDqBitmap(i_mba, l_port, l_dimm, l_rank, l_dqBitmap);
+        l_rc = dimmSetBadDqBitmap(i_mba, l_port, l_dimm, l_rank - 1, l_dqBitmap);
 
         if (l_rc)
         {
