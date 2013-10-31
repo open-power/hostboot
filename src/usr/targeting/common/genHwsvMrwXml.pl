@@ -1587,7 +1587,7 @@ sub generate_sys
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:system:TO_BE_ADDED</default>
+        <default>instance:sys-$sys</default>
     </compileAttribute>
     <attribute>
         <id>EXECUTION_PLATFORM</id>
@@ -2306,10 +2306,49 @@ sub generate_pcies
     }
 }
 
+my $phbInit = 0;
+my %phbList = ();
+sub generate_phb
+{
+    open (FH, "<$::mrwdir/${sysname}-targets.xml") ||
+        die "ERROR: unable to open $::mrwdir/${sysname}-targets.xml\n";
+    close (FH);
+
+    my $phbTargets = XMLin("$::mrwdir/${sysname}-targets.xml");
+
+    #get the PHB details
+    foreach my $Target (@{$phbTargets->{target}})
+    {
+        if($Target->{'ecmd-common-name'} eq "phb")
+        {
+            my $node     = $Target->{'node'};
+            my $proc     = $Target->{'position'};
+            my $chipUnit = $Target->{'chip-unit'};
+            my $ipath    = $Target->{'instance-path'};
+
+
+            $phbList{$node}{$proc}{$chipUnit} = {
+                'node'        => $node,
+                'proc'        => $proc,
+                'phbChipUnit' => $chipUnit,
+                'phbIpath'    => $ipath,
+            }
+        }
+    }
+}
+
 sub generate_a_pcie
 {
     my ($proc, $phb, $ordinalId) = @_;
     my $uidstr = sprintf("0x%02X10%04X",${node},$phb+$proc*3+${node}*8*3);
+
+    # Get the PHB info
+    if ($phbInit == 0)
+    {
+        generate_phb;
+        $phbInit = 1;
+    }
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pci${phb}</id>
@@ -2325,7 +2364,7 @@ sub generate_a_pcie
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:pci:TO_BE_ADDED</default>
+        <default>instance:$phbList{$node}{$proc}{$phb}->{'phbIpath'}</default>
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2517,7 +2556,7 @@ sub generate_nx
         <id>INSTANCE_PATH</id>";
         # TODO RTC: 87142
         print "
-        <default>instance:TO_BE_ADDED</default>
+        <default>instance:nx:TO_BE_ADDED</default>
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2530,6 +2569,40 @@ sub generate_nx
     print "
 </targetInstance>
 ";
+}
+
+my $logicalDimmInit = 0;
+my %logicalDimmList = ();
+sub generate_logicalDimms
+{
+    open (FH, "<$::mrwdir/${sysname}-memory-busses.xml") ||
+        die "ERROR: unable to open $::mrwdir/${sysname}-memory-busses.xml\n";
+    close (FH);
+
+    my $dramTargets = XMLin("$::mrwdir/${sysname}-memory-busses.xml");
+
+    #get the DRAM details
+    foreach my $Target (@{$dramTargets->{drams}->{dram}})
+    {
+        my $ipath = $Target->{'dram-instance-path'};
+        my $dimmIpath = $Target->{'dimm-instance-path'};
+        my $mbaIpath = $Target->{'mba-instance-path'};
+        my $mbaPort = $Target->{'mba-port'};
+        my $mbaSlot = $Target->{'mba-slot'};
+
+        my $dimm = substr($dimmIpath, index($dimmIpath, 'dimm-')+5);
+        my $mba = substr($mbaIpath, index($mbaIpath, 'mba')+3);
+
+        $logicalDimmList{$dimm}{$mba}{$mbaPort}{$mbaSlot} = {
+                'dimmIpath'        => $dimmIpath,
+                'mbaIpath'         => $mbaIpath,
+                'dimm'             => $dimm,
+                'mba'              => $mba,
+                'mbaPort'          => $mbaPort,
+                'mbaSlot'          => $mbaSlot,
+                'logicalDimmIpath' => $ipath,
+        }
+    }
 }
 
 sub generate_centaur
@@ -2557,6 +2630,13 @@ sub generate_centaur
             $msb_swap = $dmi->[DBUS_CENTAUR_RX_SWAP_INDEX];
             last;
         }
+    }
+
+    # Get the logical DIMM info
+    if ($logicalDimmInit == 0)
+    {
+        generate_logicalDimms;
+        $logicalDimmInit = 1;
     }
 
     print "
@@ -2753,6 +2833,20 @@ sub generate_dimm
     my $dimmHex = sprintf("0xD0%02X",$relativePos
         + (CDIMM_RID_NODE_MULTIPLIER * ${node}));
 
+    #MBA numbers should be 01 and 23
+    my $mbanum=0;
+    if (1 ==$x )
+    {
+        $mbanum = '23';
+    }
+    else
+    {
+        $mbanum = '01';
+    }
+
+    my $logicalDimmInstancePath = "instance:"
+        . $logicalDimmList{$relativePos}{$mbanum}{$y}{$z}->{'logicalDimmIpath'};
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
@@ -2770,7 +2864,7 @@ sub generate_dimm
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:logical dimms:TO_BE_ADDED</default>
+        <default>$logicalDimmInstancePath</default>
     </compileAttribute>
     <attribute>
         <id>MBA_DIMM</id>
