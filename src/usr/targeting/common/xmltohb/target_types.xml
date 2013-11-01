@@ -95,6 +95,7 @@
     <attribute><id>FREQ_X</id></attribute>
     <attribute><id>SP_FUNCTIONS</id></attribute>
     <attribute><id>HB_SETTINGS</id></attribute>
+    <attribute><id>CEC_IPL_TYPE</id></attribute>
     <attribute><id>PAYLOAD_KIND</id></attribute>
     <attribute><id>PAYLOAD_BASE</id></attribute>
     <attribute><id>PAYLOAD_ENTRY</id></attribute>

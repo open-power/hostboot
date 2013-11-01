@@ -1998,6 +1998,39 @@
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>CEC_IPL_TYPE</id>
+    <description>
+      Attribute which describes optional IPL flavors
+    </description>
+    <complexType>
+        <description>Structure which defines a they IPL types
+         Applicable for System target only.
+        </description>
+        <field>
+            <name>PostDump</name>
+            <description>
+            Perform mainstore dump collection. Only valid for MPIPL
+                0b0: Do not collect mainstore dump
+                0b1: Perform mainstore dump collection
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>reserved</name>
+            <description>Reserved for future use</description>
+            <type>uint8_t</type>
+            <bits>7</bits>
+            <default>0</default>
+        </field>
+        </complexType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 
 <!-- Begin attributes (4) to test string support -->
 
