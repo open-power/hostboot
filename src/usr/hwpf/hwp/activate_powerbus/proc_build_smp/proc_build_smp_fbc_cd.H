@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.H,v 1.10 2013/08/29 20:41:09 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.H,v 1.11 2013/09/26 18:01:39 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -496,7 +496,6 @@ extern "C"
 //------------------------------------------------------------------------------
 // function: program fabric configuration register (hotplug, C/D set)
 // parameters: i_smp => structure encapsulating SMP topology
-//             i_op  => enumerated type representing SMP build phase
 // returns: FAPI_RC_SUCCESS if register reads are successful and all shadow
 //               registers are equivalent,
 //          RC_PROC_BUILD_SMP_CORE_FLOOR_RATIO_ERR if cache/nest frequency

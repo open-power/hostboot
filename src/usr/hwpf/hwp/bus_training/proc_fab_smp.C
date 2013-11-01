@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fab_smp.C,v 1.7 2012/09/24 05:00:12 jmcgill Exp $
+// $Id: proc_fab_smp.C,v 1.8 2013/09/23 22:01:31 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -51,7 +51,7 @@ extern "C" {
 
 //------------------------------------------------------------------------------
 // function: utility function to read & return fabric node ID attribute
-// parameters: i_target  => pointer to chip target
+// parameters: i_target  => pointer to chip/chiplet target
 //             o_node_id => structure encapsulating node ID value
 // returns: FAPI_RC_SUCCESS if attribute read is successful & value is valid,
 //          RC_PROC_FAB_SMP_FABRIC_NODE_ID_ATTR_ERR if attribute value is
@@ -64,6 +64,9 @@ fapi::ReturnCode proc_fab_smp_get_node_id_attr(
 {
     // return code
     fapi::ReturnCode rc;
+    // chiplet->chip target conversion
+    bool use_parent = false;
+    fapi::Target parent_target;
     // temporary attribute storage used to build procedure data structures
     uint8_t node_id_attr;
 
@@ -72,9 +75,24 @@ fapi::ReturnCode proc_fab_smp_get_node_id_attr(
 
     do
     {
+        if (i_target->getType() != fapi::TARGET_TYPE_PROC_CHIP)
+        {
+            use_parent = true;
+            // retrieve parent target if input target is a chiplet
+            rc = fapiGetParentChip(*i_target,
+                                   parent_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_fab_smp_get_node_id_attr: Error from fapiGetParentChip");
+                break;
+            }
+        }
+
         // retrieve node ID attribute
         rc = FAPI_ATTR_GET(ATTR_FABRIC_NODE_ID,
-                           i_target,
+                           ((use_parent)?
+                            (&parent_target):
+                            (i_target)),
                            node_id_attr);
         if (!rc.ok())
         {
@@ -131,7 +149,7 @@ fapi::ReturnCode proc_fab_smp_get_node_id_attr(
 
 //------------------------------------------------------------------------------
 // function: utility function to read & return fabric chip ID attribute
-// parameters: i_target  => pointer to chip target
+// parameters: i_target  => pointer to chip/chiplet target
 //             o_chip_id => structure encapsulating chip ID value
 // returns: FAPI_RC_SUCCESS if attribute read is successful & value is valid,
 //          RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR if attribute value is
@@ -144,6 +162,9 @@ fapi::ReturnCode proc_fab_smp_get_chip_id_attr(
 {
     // return code
     fapi::ReturnCode rc;
+    // chiplet->chip target conversion
+    bool use_parent = false;
+    fapi::Target parent_target;
     // temporary attribute storage used to build procedure data structures
     uint8_t chip_id_attr;
 
@@ -152,9 +173,24 @@ fapi::ReturnCode proc_fab_smp_get_chip_id_attr(
 
     do
     {
+        if (i_target->getType() != fapi::TARGET_TYPE_PROC_CHIP)
+        {
+            use_parent = true;
+            // retrieve parent target if input target is a chiplet
+            rc = fapiGetParentChip(*i_target,
+                                   parent_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_fab_smp_get_chip_id_attr: Error from fapiGetParentChip");
+                break;
+            }
+        }
+
         // retrieve chip ID attribute
         rc = FAPI_ATTR_GET(ATTR_FABRIC_CHIP_ID,
-                           i_target,
+                           ((use_parent)?
+                            (&parent_target):
+                            (i_target)),
                            chip_id_attr);
         if (!rc.ok())
         {

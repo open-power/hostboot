@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.C,v 1.7 2013/05/09 03:52:14 jmcgill Exp $
+// $Id: proc_build_smp_adu.C,v 1.8 2013/09/26 18:00:08 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -49,6 +49,65 @@ extern "C"
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// function: set action which will occur on fabric pmisc switch command
+// parameters: i_target    => P8 chip target
+//             i_switch_ab => perform switch AB operation?
+//             i_switch_cd => perform switch CD operation?
+// returns: FAPI_RC_SUCCESS if action is configured successfully,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_adu_set_switch_action(
+    const fapi::Target& i_target,
+    const bool i_switch_ab,
+    const bool i_switch_cd)
+{
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
+    ecmdDataBufferBase pmisc_data(64), pmisc_mask(64);
+
+    FAPI_DBG("proc_build_smp_adu_set_switch_action: Start");
+    do
+    {
+        // build ADU pMisc Mode register content
+        FAPI_DBG("proc_build_smp_adu_set_switch_action: Writing ADU pMisc Mode register");
+        // switch AB bit
+        rc_ecmd |= pmisc_data.writeBit(
+            ADU_PMISC_MODE_ENABLE_PB_SWITCH_AB_BIT,
+            i_switch_ab);
+        rc_ecmd |= pmisc_mask.setBit(
+            ADU_PMISC_MODE_ENABLE_PB_SWITCH_AB_BIT);
+        // switch CD bit
+        rc_ecmd |= pmisc_data.writeBit(
+            ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT,
+            i_switch_cd);
+        rc_ecmd |= pmisc_mask.setBit(
+            ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT);
+        rc.setEcmdError(rc_ecmd);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_adu_set_switch_action: Error 0x%x setting up ADU pMisc Mode register data buffer",
+                     rc_ecmd);
+            break;
+        }
+        // write ADU pMisc Mode register content
+        rc = fapiPutScomUnderMask(i_target,
+                                  ADU_PMISC_MODE_0x0202000B,
+                                  pmisc_data,
+                                  pmisc_mask);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_adu_set_switch_action: fapiPutUnderMask error (ADU_PMISC_MODE_0x0202000B)");
+            break;
+        }
+    } while(0);
+
+    FAPI_DBG("proc_build_smp_adu_set_switch_action: End");
+    return rc;
+}
 
 
 //------------------------------------------------------------------------------
@@ -340,102 +399,6 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
 
 
 // NOTE: see comments above function prototype in header
-fapi::ReturnCode proc_build_smp_quiesce_pb(
-    proc_build_smp_chip& i_smp_chip)
-{
-    fapi::ReturnCode rc;
-    // ADU status/control information
-    proc_adu_utils_fbc_op adu_ctl;
-    proc_adu_utils_fbc_op_hp_ctl adu_hp_ctl_unused;
-    bool adu_is_dirty = false;
-
-    // mark function entry
-    FAPI_DBG("proc_build_smp_quiesce_pb: Start");
-
-    do
-    {
-        // build ADU control structure
-        adu_ctl.ttype = ADU_FBC_OP_TTYPE_PBOP;
-        adu_ctl.tsize = ADU_FBC_OP_TSIZE_PBOP_DIS_ALL_FP_EN;
-        adu_ctl.address = 0x0ULL;
-        adu_ctl.scope = ADU_FBC_OP_SCOPE_SYSTEM;
-        adu_ctl.drop_priority = ADU_FBC_OP_DROP_PRIORITY_HIGH;
-        adu_ctl.cmd_type = ADU_FBC_OP_CMD_ADDR_ONLY;
-        adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_OVERRIDE;
-        adu_ctl.use_autoinc = false;
-
-        // acquire ADU lock
-        // only required to obtain lock for this chip, as this function will
-        // only be executed when fabric is configured as single chip island
-        rc = proc_build_smp_adu_acquire_lock(
-            i_smp_chip.chip->this_chip,
-            PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS,
-            PROC_BUILD_SMP_PHASE1_ADU_PICK_LOCK);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_acquire_lock");
-            break;
-        }
-        // NOTE: lock is now held, if an operation fails from this point
-        //       to the end of the procedure:
-        //       o attempt to cleanup/release lock (so that procedure does not
-        //         leave the ADU in a locked state)
-        //       o return rc of original fail
-        adu_is_dirty = true;
-
-        // reset ADU
-        rc = proc_build_smp_adu_reset(i_smp_chip.chip->this_chip);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_reset");
-            break;
-        }
-
-        // launch command
-        rc = proc_adu_utils_send_fbc_op(i_smp_chip.chip->this_chip,
-                                        adu_ctl,
-                                        false,
-                                        adu_hp_ctl_unused);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_adu_utils_send_fbc_op");
-            break;
-        }
-
-        // check status
-        rc = proc_build_smp_adu_check_status(i_smp_chip.chip->this_chip);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_check_status");
-            break;
-        }
-
-        // release ADU lock
-        rc = proc_build_smp_adu_release_lock(
-            i_smp_chip.chip->this_chip,
-            PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_release_lock");
-            break;
-        }
-    } while(0);
-
-    // if error has occurred and ADU is dirty,
-    // attempt to reset ADU and free lock (propogate rc of original fail)
-    if (!rc.ok() && adu_is_dirty)
-    {
-        (void) proc_build_smp_adu_reset(i_smp_chip.chip->this_chip);
-        (void) proc_build_smp_adu_release_lock(i_smp_chip.chip->this_chip, 1);
-    }
-
-    // mark function exit
-    FAPI_DBG("proc_build_smp_quiesce_pb: End");
-    return rc;
-}
-
-
-// NOTE: see comments above function prototype in header
 fapi::ReturnCode proc_build_smp_switch_cd(
     proc_build_smp_chip& i_smp_chip)
 {
@@ -450,6 +413,7 @@ fapi::ReturnCode proc_build_smp_switch_cd(
 
     do
     {
+        FAPI_DBG("proc_build_smp_switch_cd: Acquiring lock for ADU");
         // acquire ADU lock
         // only required to obtain lock for this chip, as this function will
         // only be executed when fabric is configured as single chip island
@@ -476,6 +440,18 @@ fapi::ReturnCode proc_build_smp_switch_cd(
             FAPI_ERR("proc_build_smp_switch_cd: Error from proc_build_smp_adu_reset");
             break;
         }
+        FAPI_DBG("proc_build_smp_switch_cd: ADU lock held");
+
+        // condition for switch CD operation
+        rc = proc_build_smp_adu_set_switch_action(
+            i_smp_chip.chip->this_chip,
+            false,
+            true);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_switch_cd: Error from proc_build_smp_adu_set_switch_action (set)");
+            break;
+        }
 
         // build ADU control structure
         adu_ctl.ttype = ADU_FBC_OP_TTYPE_PMISC;
@@ -487,15 +463,15 @@ fapi::ReturnCode proc_build_smp_switch_cd(
         adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_OVERRIDE;
         adu_ctl.use_autoinc = false;
 
-        adu_hp_ctl.do_tm_quiesce = false;
+        adu_hp_ctl.do_tm_quiesce = true;
         adu_hp_ctl.do_pre_quiesce = true;
         adu_hp_ctl.do_post_init = true;
         adu_hp_ctl.post_quiesce_delay = PROC_BUILD_SMP_PHASE1_POST_QUIESCE_DELAY;
         adu_hp_ctl.pre_init_delay = PROC_BUILD_SMP_PHASE1_PRE_INIT_DELAY;
-        adu_hp_ctl.do_switch_ab = false;
-        adu_hp_ctl.do_switch_cd = true;
 
         // launch command
+        FAPI_DBG("proc_build_smp_switch_cd: Issuing switch CD from %s",
+                 i_smp_chip.chip->this_chip.toEcmdString());
         rc = proc_adu_utils_send_fbc_op(i_smp_chip.chip->this_chip,
                                         adu_ctl,
                                         true,
@@ -514,7 +490,19 @@ fapi::ReturnCode proc_build_smp_switch_cd(
             break;
         }
 
+        // reset switch controls
+        rc = proc_build_smp_adu_set_switch_action(
+            i_smp_chip.chip->this_chip,
+            false,
+            false);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_switch_cd: Error from proc_build_smp_adu_set_switch_action (reset)");
+            break;
+        }
+
         // release ADU lock
+        FAPI_DBG("proc_build_smp_switch_cd: Releasing lock for ADU");
         rc = proc_build_smp_adu_release_lock(
             i_smp_chip.chip->this_chip,
             PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS);
@@ -523,12 +511,15 @@ fapi::ReturnCode proc_build_smp_switch_cd(
             FAPI_ERR("proc_build_smp_switch_cd: Error from proc_build_smp_adu_release_lock");
             break;
         }
+        FAPI_DBG("proc_build_smp_switch_cd: ADU lock released");
     } while(0);
 
     // if error has occurred and ADU is dirty,
     // attempt to reset ADU and free lock (propogate rc of original fail)
     if (!rc.ok() && adu_is_dirty)
     {
+        FAPI_INF("proc_build_smp_switch_cd: Attempting to reset/free lock on ADU");
+        (void) proc_build_smp_adu_set_switch_action(i_smp_chip.chip->this_chip, false, false);
         (void) proc_build_smp_adu_reset(i_smp_chip.chip->this_chip);
         (void) proc_build_smp_adu_release_lock(i_smp_chip.chip->this_chip, 1);
     }
@@ -540,9 +531,188 @@ fapi::ReturnCode proc_build_smp_switch_cd(
 
 
 // NOTE: see comments above function prototype in header
+fapi::ReturnCode proc_build_smp_quiesce_pb(
+    proc_build_smp_system& i_smp,
+    const proc_build_smp_operation i_op)
+{
+    fapi::ReturnCode rc;
+    std::map<proc_fab_smp_node_id, proc_build_smp_node>::iterator n_iter;
+    std::map<proc_fab_smp_chip_id, proc_build_smp_chip>::iterator p_iter;
+    std::vector<proc_build_smp_chip*>::iterator quiesce_iter;
+    // ADU status/control information
+    proc_adu_utils_fbc_op adu_ctl;
+    proc_adu_utils_fbc_op_hp_ctl adu_hp_ctl;
+    bool adu_is_dirty = false;
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_quiesce_pb: Start");
+
+    do
+    {
+        FAPI_DBG("proc_build_smp_quiesce_pb: Acquiring lock for all ADU units in fabric");
+        // loop through all chips, lock & reset ADU
+        for (n_iter = i_smp.nodes.begin();
+             (n_iter != i_smp.nodes.end()) && (rc.ok());
+             n_iter++)
+        {
+            for (p_iter = n_iter->second.chips.begin();
+                 (p_iter != n_iter->second.chips.end()) && (rc.ok());
+                 p_iter++)
+            {
+                // acquire ADU lock
+                rc = proc_build_smp_adu_acquire_lock(
+                    p_iter->second.chip->this_chip,
+                    ((i_op == SMP_ACTIVATE_PHASE1)?
+                     (PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS):
+                     (PROC_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS)),
+                    ((i_op == SMP_ACTIVATE_PHASE1)?
+                     (PROC_BUILD_SMP_PHASE1_ADU_PICK_LOCK):
+                     (PROC_BUILD_SMP_PHASE2_ADU_PICK_LOCK)));
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_acquire_lock");
+                    break;
+                }
+                // NOTE: lock is now held, if an operation fails from this point
+                //       to the end of the procedure:
+                //       o attempt to cleanup/release lock (so that procedure does not
+                //         leave the ADU in a locked state)
+                //       o return rc of original fail
+                adu_is_dirty = true;
+
+                // reset ADU
+                rc = proc_build_smp_adu_reset(p_iter->second.chip->this_chip);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_reset");
+                    break;
+                }
+            }
+        }
+        if (!rc.ok())
+        {
+            break;
+        }
+        FAPI_DBG("proc_build_smp_quiesce_pb: All ADU locks held");
+
+        // build ADU control structure
+        adu_ctl.ttype = ADU_FBC_OP_TTYPE_PBOP;
+        adu_ctl.tsize = ADU_FBC_OP_TSIZE_PBOP_DIS_ALL_FP_EN;
+        adu_ctl.address = 0x0ULL;
+        adu_ctl.scope = ADU_FBC_OP_SCOPE_SYSTEM;
+        adu_ctl.drop_priority = ADU_FBC_OP_DROP_PRIORITY_HIGH;
+        adu_ctl.cmd_type = ADU_FBC_OP_CMD_ADDR_ONLY;
+        adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_OVERRIDE;
+        adu_ctl.use_autoinc = false;
+
+        adu_hp_ctl.do_tm_quiesce = true;
+        adu_hp_ctl.do_pre_quiesce = false;
+        adu_hp_ctl.do_post_init = false;
+        adu_hp_ctl.post_quiesce_delay = 0x0;
+        adu_hp_ctl.pre_init_delay = 0x0;
+
+        // issue quiesce on all specified chips
+        for (n_iter = i_smp.nodes.begin();
+             (n_iter != i_smp.nodes.end()) && (rc.ok());
+             n_iter++)
+        {
+            for (p_iter = n_iter->second.chips.begin();
+                 (p_iter != n_iter->second.chips.end()) && (rc.ok());
+                 p_iter++)
+            {
+                if (p_iter->second.issue_quiesce_next)
+                {
+                    FAPI_DBG("proc_build_smp_quiesce_pb: Issuing quiesce from %s",
+                             p_iter->second.chip->this_chip.toEcmdString());
+                    // launch command
+                    rc = proc_adu_utils_send_fbc_op(p_iter->second.chip->this_chip,
+                                                    adu_ctl,
+                                                    true,
+                                                    adu_hp_ctl);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_adu_utils_send_fbc_op");
+                        break;
+                    }
+
+                    // check status
+                    rc = proc_build_smp_adu_check_status(p_iter->second.chip->this_chip);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_check_status");
+                        break;
+                    }
+                }
+            }
+        }
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        FAPI_DBG("proc_build_smp_quiesce_pb: Releasing lock for all ADU units in drawer");
+        // loop through all chips, unlock ADUs
+        for (n_iter = i_smp.nodes.begin();
+             (n_iter != i_smp.nodes.end()) && (rc.ok());
+             n_iter++)
+        {
+            for (p_iter = n_iter->second.chips.begin();
+                 (p_iter != n_iter->second.chips.end()) && (rc.ok());
+                 p_iter++)
+            {
+                // release ADU lock
+                rc = proc_build_smp_adu_release_lock(
+                    p_iter->second.chip->this_chip,
+                    ((i_op == SMP_ACTIVATE_PHASE1)?
+                     (PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS):
+                     (PROC_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS)));
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_quiesce_pb: Error from proc_build_smp_adu_release_lock");
+                    break;
+                }
+            }
+        }
+        if (!rc.ok())
+        {
+            break;
+        }
+        FAPI_DBG("proc_build_smp_quiesce_pb: All ADU locks released");
+    } while(0);
+
+
+    // if error has occurred and any ADU is dirty,
+    // attempt to reset all ADUs and free locks (propogate rc of original fail)
+    if (!rc.ok() && adu_is_dirty)
+    {
+        FAPI_INF("proc_build_smp_quiesce_pb: Attempting to reset/free lock on all ADUs");
+        // loop through all chips, unlock ADUs
+        for (n_iter = i_smp.nodes.begin();
+             n_iter != i_smp.nodes.end();
+             n_iter++)
+        {
+            for (p_iter = n_iter->second.chips.begin();
+                 p_iter != n_iter->second.chips.end();
+                 p_iter++)
+            {
+                (void) proc_build_smp_adu_reset(p_iter->second.chip->this_chip);
+                (void) proc_build_smp_adu_release_lock(
+                    p_iter->second.chip->this_chip,
+                    1);
+            }
+        }
+    }
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_quiesce_pb: End");
+    return rc;
+}
+
+
+// NOTE: see comments above function prototype in header
 fapi::ReturnCode proc_build_smp_switch_ab(
-    proc_build_smp_chip& i_master_smp_chip,
-    proc_build_smp_system& i_smp)
+    proc_build_smp_system& i_smp,
+    const proc_build_smp_operation i_op)
 {
     fapi::ReturnCode rc;
     std::map<proc_fab_smp_node_id, proc_build_smp_node>::iterator n_iter;
@@ -557,6 +727,7 @@ fapi::ReturnCode proc_build_smp_switch_ab(
 
     do
     {
+        FAPI_DBG("proc_build_smp_switch_ab: Acquiring lock for all ADU units in fabric");
         // loop through all chips, lock & reset ADU
         for (n_iter = i_smp.nodes.begin();
              (n_iter != i_smp.nodes.end()) && (rc.ok());
@@ -569,8 +740,12 @@ fapi::ReturnCode proc_build_smp_switch_ab(
                 // acquire ADU lock
                 rc = proc_build_smp_adu_acquire_lock(
                     p_iter->second.chip->this_chip,
-                    PROC_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS,
-                    PROC_BUILD_SMP_PHASE2_ADU_PICK_LOCK);
+                    ((i_op == SMP_ACTIVATE_PHASE1)?
+                     (PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS):
+                     (PROC_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS)),
+                    ((i_op == SMP_ACTIVATE_PHASE1)?
+                     (PROC_BUILD_SMP_PHASE1_ADU_PICK_LOCK):
+                     (PROC_BUILD_SMP_PHASE2_ADU_PICK_LOCK)));
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_build_smp_switch_ab: Error from proc_build_smp_adu_acquire_lock");
@@ -590,12 +765,26 @@ fapi::ReturnCode proc_build_smp_switch_ab(
                     FAPI_ERR("proc_build_smp_switch_ab: Error from proc_build_smp_adu_reset");
                     break;
                 }
+
+                // condition for switch AB operation
+                // all chips which were not quiesced prior to switch AB will
+                // need to observe the switch
+                rc = proc_build_smp_adu_set_switch_action(
+                    p_iter->second.chip->this_chip,
+                    !p_iter->second.quiesced_next,
+                    false);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_switch_ab: Error from proc_build_smp_adu_set_switch_action (set)");
+                    break;
+                }
             }
         }
         if (!rc.ok())
         {
             break;
         }
+        FAPI_DBG("proc_build_smp_switch_ab: All ADU locks held");
 
         // build ADU control structure
         adu_ctl.ttype = ADU_FBC_OP_TTYPE_PMISC;
@@ -607,16 +796,20 @@ fapi::ReturnCode proc_build_smp_switch_ab(
         adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_OVERRIDE;
         adu_ctl.use_autoinc = false;
 
-        adu_hp_ctl.do_tm_quiesce = false;
+        adu_hp_ctl.do_tm_quiesce = true;
         adu_hp_ctl.do_pre_quiesce = true;
         adu_hp_ctl.do_post_init = true;
-        adu_hp_ctl.post_quiesce_delay = PROC_BUILD_SMP_PHASE2_POST_QUIESCE_DELAY;
-        adu_hp_ctl.pre_init_delay = PROC_BUILD_SMP_PHASE2_PRE_INIT_DELAY;
-        adu_hp_ctl.do_switch_ab = true;
-        adu_hp_ctl.do_switch_cd = false;
+        adu_hp_ctl.post_quiesce_delay = ((i_op == SMP_ACTIVATE_PHASE1)?
+                                         (PROC_BUILD_SMP_PHASE1_POST_QUIESCE_DELAY):
+                                         (PROC_BUILD_SMP_PHASE2_POST_QUIESCE_DELAY));
+        adu_hp_ctl.pre_init_delay = ((i_op == SMP_ACTIVATE_PHASE1)?
+                                     (PROC_BUILD_SMP_PHASE1_PRE_INIT_DELAY):
+                                     (PROC_BUILD_SMP_PHASE2_PRE_INIT_DELAY));
 
         // launch command
-        rc = proc_adu_utils_send_fbc_op(i_master_smp_chip.chip->this_chip,
+        FAPI_DBG("proc_build_smp_switch_ab: Issuing switch AB from %s",
+                 i_smp.nodes[i_smp.master_chip_curr_node_id].chips[i_smp.master_chip_curr_chip_id].chip->this_chip.toEcmdString());
+        rc = proc_adu_utils_send_fbc_op(i_smp.nodes[i_smp.master_chip_curr_node_id].chips[i_smp.master_chip_curr_chip_id].chip->this_chip,
                                         adu_ctl,
                                         true,
                                         adu_hp_ctl);
@@ -627,7 +820,7 @@ fapi::ReturnCode proc_build_smp_switch_ab(
         }
 
         // check status
-        rc = proc_build_smp_adu_check_status(i_master_smp_chip.chip->this_chip);
+        rc = proc_build_smp_adu_check_status(i_smp.nodes[i_smp.master_chip_curr_node_id].chips[i_smp.master_chip_curr_chip_id].chip->this_chip);
         if (!rc.ok())
         {
             FAPI_ERR("proc_build_smp_switch_ab: Error from proc_build_smp_adu_check_status");
@@ -635,6 +828,7 @@ fapi::ReturnCode proc_build_smp_switch_ab(
         }
 
         // loop through all chips, unlock ADUs
+        FAPI_DBG("proc_build_smp_switch_ab: Releasing lock for all ADU units in drawer");
         for (n_iter = i_smp.nodes.begin();
              (n_iter != i_smp.nodes.end()) && (rc.ok());
              n_iter++)
@@ -643,10 +837,23 @@ fapi::ReturnCode proc_build_smp_switch_ab(
                  (p_iter != n_iter->second.chips.end()) && (rc.ok());
                  p_iter++)
             {
+                // reset switch action
+                rc = proc_build_smp_adu_set_switch_action(
+                    p_iter->second.chip->this_chip,
+                    false,
+                    false);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_switch_ab: Error from proc_build_smp_adu_set_switch_action (clear)");
+                    break;
+                }
+
                 // release ADU lock
                 rc = proc_build_smp_adu_release_lock(
                     p_iter->second.chip->this_chip,
-                    PROC_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS);
+                    ((i_op == SMP_ACTIVATE_PHASE1)?
+                     (PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS):
+                     (PROC_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS)));
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_build_smp_switch_ab: Error from proc_build_smp_adu_release_lock");
@@ -654,13 +861,18 @@ fapi::ReturnCode proc_build_smp_switch_ab(
                 }
             }
         }
+        if (!rc.ok())
+        {
+            break;
+        }
+        FAPI_DBG("proc_build_smp_switch_ab: All ADU locks released");
     } while(0);
-
 
     // if error has occurred and any ADU is dirty,
     // attempt to reset all ADUs and free locks (propogate rc of original fail)
     if (!rc.ok() && adu_is_dirty)
     {
+        FAPI_INF("proc_build_smp_switch_ab: Attempting to reset/free lock on all ADUs");
         // loop through all chips, unlock ADUs
         for (n_iter = i_smp.nodes.begin();
              n_iter != i_smp.nodes.end();
@@ -670,6 +882,7 @@ fapi::ReturnCode proc_build_smp_switch_ab(
                  p_iter != n_iter->second.chips.end();
                  p_iter++)
             {
+                (void) proc_build_smp_adu_set_switch_action(p_iter->second.chip->this_chip, false, false);
                 (void) proc_build_smp_adu_reset(p_iter->second.chip->this_chip);
                 (void) proc_build_smp_adu_release_lock(
                     p_iter->second.chip->this_chip,

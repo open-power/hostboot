@@ -44,8 +44,6 @@
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
 
-#include    <sbe/sbeif.H>
-
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -122,6 +120,11 @@ void*    call_proc_build_smp( void    *io_pArgs )
         //   chip object of this A/X-bus endpoint for the procEntry
         std::vector<proc_build_smp_proc_chip> l_procChips;
 
+        // Get the master proc
+        TARGETING::Target * l_masterProc =   NULL;
+        (void)TARGETING::targetService().
+                   masterProcChipTargetHandle( l_masterProc );
+
         for (TARGETING::TargetHandleList::const_iterator
              l_cpuIter = l_cpuTargetList.begin();
              l_cpuIter != l_cpuTargetList.end();
@@ -136,6 +139,16 @@ void*    call_proc_build_smp( void    *io_pArgs )
             l_procEntry.enable_f0  = false;
             l_procEntry.enable_f1  = false;
 
+            if (l_pTarget == l_masterProc)
+            {
+                l_procEntry.master_chip_sys_next = true;
+            }
+            else
+            {
+                l_procEntry.master_chip_sys_next = false;
+            }
+
+            // Get A-BUS
             TARGETING::TargetHandleList l_abuses;
             getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
 
@@ -152,19 +165,20 @@ void*    call_proc_build_smp( void    *io_pArgs )
                     continue;
                 }
 
-                const TARGETING::Target *l_pParent = NULL;
-                l_pParent = getParentChip(
-                        (const_cast<TARGETING::Target*>(l_itr->second)));
-                fapi::Target l_fapiproc_parent( TARGET_TYPE_PROC_CHIP,
-                                             (void *)l_pParent );
+                fapi::Target l_fapiEndpointTarget(TARGET_TYPE_ABUS_ENDPOINT,
+                          (const_cast<TARGETING::Target*>(l_itr->second)) );
 
                 switch (l_srcID)
                 {
-                    case 0: l_procEntry.a0_chip = l_fapiproc_parent; break;
-                    case 1: l_procEntry.a1_chip = l_fapiproc_parent; break;
-                    case 2: l_procEntry.a2_chip = l_fapiproc_parent; break;
+                    case 0: l_procEntry.a0_chip = l_fapiEndpointTarget; break;
+                    case 1: l_procEntry.a1_chip = l_fapiEndpointTarget; break;
+                    case 2: l_procEntry.a2_chip = l_fapiEndpointTarget; break;
                    default: break;
                 }
+
+                const TARGETING::Target *l_pParent =
+                       getParentChip(
+                             (const_cast<TARGETING::Target*>(l_itr->second)));
 
                 l_procEntry.f0_node_id = static_cast<proc_fab_smp_node_id>(
                         l_pTarget->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>());
@@ -172,6 +186,7 @@ void*    call_proc_build_smp( void    *io_pArgs )
                         l_pParent->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>());
             }
 
+            // Get X-BUS
             TARGETING::TargetHandleList l_xbuses;
             getChildChiplets( l_xbuses, l_pTarget, TYPE_XBUS );
 
@@ -188,18 +203,15 @@ void*    call_proc_build_smp( void    *io_pArgs )
                     continue;
                 }
 
-                const TARGETING::Target *l_pParent = NULL;
-                l_pParent = getParentChip(
-                            (const_cast<TARGETING::Target*>(l_itr->second)));
-                fapi::Target l_fapiproc_parent( TARGET_TYPE_PROC_CHIP,
-                                             (void *)l_pParent );
+                fapi::Target l_fapiEndpointTarget( TARGET_TYPE_XBUS_ENDPOINT,
+                            (const_cast<TARGETING::Target*>(l_itr->second)) );
 
                 switch (l_srcID)
                 {
-                    case 0: l_procEntry.x0_chip = l_fapiproc_parent; break;
-                    case 1: l_procEntry.x1_chip = l_fapiproc_parent; break;
-                    case 2: l_procEntry.x2_chip = l_fapiproc_parent; break;
-                    case 3: l_procEntry.x3_chip = l_fapiproc_parent; break;
+                    case 0: l_procEntry.x0_chip = l_fapiEndpointTarget; break;
+                    case 1: l_procEntry.x1_chip = l_fapiEndpointTarget; break;
+                    case 2: l_procEntry.x2_chip = l_fapiEndpointTarget; break;
+                    case 3: l_procEntry.x3_chip = l_fapiEndpointTarget; break;
                    default: break;
                 }
             }
@@ -303,8 +315,7 @@ void * call_host_slave_sbe_update( void * io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update entry" );
 
-    // @todo RTC 47033 - enable this call
-    // l_errl = SBE::updateProcessorSbeSeeproms();
+    // call p8_customize_image.C
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update exit" );

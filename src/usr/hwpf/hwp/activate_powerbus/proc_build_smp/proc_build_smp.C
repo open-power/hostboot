@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.9 2013/07/30 20:51:09 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.10 2013/09/26 18:14:05 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -589,18 +589,15 @@ fapi::ReturnCode proc_build_smp_process_chip(
 
 //------------------------------------------------------------------------------
 // function: set chip master status (node/system) for PB operations
-// parameters: i_first_chip_in_sys  => first chip processed in system?
-//             i_first_chip_in_node => first chip processed in node?
-//             i_op                 => procedure operation phase/mode
-//             io_smp_chip          => structure encapsulating single chip in
-//                                     SMP topology
-//             io_smp               => structure encapsulating SMP
-//             o_master_chip_sys    => indication that this chip is current
-//                                     system master
+// parameters: i_first_chip_in_node   => first chip processed in node?
+//             i_op                   => procedure operation phase/mode
+//             io_smp_chip            => structure encapsulating single chip in
+//                                       SMP topology
+//             io_smp                 => structure encapsulating SMP
 // returns: FAPI_RC_SUCCESS if insertion is successful and merged node ranges
 //              are valid,
 //          RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR if node/system master
-//              is detected based on chip state and input paramters,
+//              error is detected based on chip state and input paramters,
 //          RC_PROC_BUILD_SMP_INVALID_OPERATION if an unsupported operation
 //              is specified
 //          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if shadow registers are not
@@ -608,17 +605,14 @@ fapi::ReturnCode proc_build_smp_process_chip(
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_set_master_config(
-    const bool i_first_chip_in_sys,
     const bool i_first_chip_in_node,
     const proc_build_smp_operation i_op,
     proc_build_smp_chip& io_smp_chip,
-    proc_build_smp_system& io_smp,
-    bool & o_master_chip_sys)
+    proc_build_smp_system& io_smp)
 {
     fapi::ReturnCode rc;
     ecmdDataBufferBase data(64);
     bool error = false;
-    o_master_chip_sys = false;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_set_master_config: Start");
@@ -641,48 +635,27 @@ fapi::ReturnCode proc_build_smp_set_master_config(
         io_smp_chip.master_chip_node_curr =
             (data.isBitSet(PB_HP_MODE_CHG_RATE_GP_MASTER_BIT));
 
-        // check/set expectation for NEXT state based on current HW programming
+         // check/set expectation for CURR/NEXT states based on HW state
         // as well as input parameters
         // HBI
         if (i_op == SMP_ACTIVATE_PHASE1)
         {
-            // check input state
+            // each chip should match the flush state of the fabric logic
             if (!io_smp_chip.master_chip_sys_curr ||
                 io_smp_chip.master_chip_node_curr)
             {
                 error = true;
+                break;
             }
-            // set next state based on input parameters
-            io_smp_chip.master_chip_sys_next = i_first_chip_in_sys;
-            io_smp_chip.master_chip_node_next = i_first_chip_in_node;
 
-            // set current system master pointer
-            if (!io_smp.master_chip_curr_set &&
-                io_smp_chip.master_chip_sys_curr)
-            {
-                o_master_chip_sys = true;
-            }
+            // set next state
+            io_smp_chip.master_chip_node_next = i_first_chip_in_node;
         }
         // FSP
         else if (i_op == SMP_ACTIVATE_PHASE2)
         {
-            // if designated as new master, should already be one
-            if (!io_smp_chip.master_chip_sys_curr &&
-                i_first_chip_in_sys)
-            {
-                error = true;
-            }
-
-            // set next state based on input parameters
-            io_smp_chip.master_chip_sys_next = i_first_chip_in_sys;
+            // set next state
             io_smp_chip.master_chip_node_next = io_smp_chip.master_chip_node_curr;
-
-            // set current system master pointer
-            if (!io_smp.master_chip_curr_set &&
-                io_smp_chip.master_chip_sys_curr)
-            {
-                o_master_chip_sys = true;
-            }
         }
         // unsupported operation
         else
@@ -695,21 +668,60 @@ fapi::ReturnCode proc_build_smp_set_master_config(
             break;
         }
 
-        // error for supported operation
-        if (error)
+        // mark system master for launching fabric reconfiguration operations
+        // also track which slave fabrics will be quiesced
+        if (io_smp_chip.chip->master_chip_sys_next)
         {
-           FAPI_ERR("proc_build_smp_set_master_config: Node/system master designation error");
-           const uint8_t& OP = i_op;
-           const bool& MASTER_CHIP_SYS_CURR = io_smp_chip.master_chip_sys_curr;
-           const bool& MASTER_CHIP_NODE_CURR = io_smp_chip.master_chip_node_curr;
-           const bool& FIRST_CHIP_IN_SYS = i_first_chip_in_sys;
-           const bool& FIRST_CHIP_IN_NODE = i_first_chip_in_node;
-           FAPI_SET_HWP_ERROR(
-               rc,
-               RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR);
-           break;
+            // this chip will not be quiesced, to enable switch AB
+            io_smp_chip.issue_quiesce_next = false;
+
+            // in both activation scenarios, we expect that:
+            //   - only a single chip is designated to be the new master
+            //   - the newly designated master is currently configured
+            //     as a master within the scope of its current enclosing fabric
+            if (!io_smp.master_chip_curr_set &&
+                io_smp_chip.master_chip_sys_curr)
+            {
+                io_smp.master_chip_curr_set = true;
+                io_smp.master_chip_curr_node_id = io_smp_chip.node_id;
+                io_smp.master_chip_curr_chip_id = io_smp_chip.chip_id;
+            }
+            else
+            {
+                error = true;
+                break;
+            }
         }
+        else
+        {
+            // this chip will not be the new master, but is one now
+            // use it to quisece all chips in its fabric
+            if (io_smp_chip.master_chip_sys_curr)
+            {
+                io_smp_chip.issue_quiesce_next = true;
+            }
+            else
+            {
+                io_smp_chip.issue_quiesce_next = false;
+            }
+        }
+
     } while(0);
+
+    // error for supported operation
+    if (rc.ok() && error)
+    {
+       FAPI_ERR("proc_build_smp_set_master_config: Node/system master designation error");
+       const uint8_t& OP = i_op;
+       const bool& MASTER_CHIP_SYS_CURR = io_smp_chip.master_chip_sys_curr;
+       const bool& MASTER_CHIP_NODE_CURR = io_smp_chip.master_chip_node_curr;
+       const bool& MASTER_CHIP_SYS_NEXT = io_smp_chip.chip->master_chip_sys_next;
+       const bool& MASTER_CHIP_NODE_NEXT = io_smp_chip.master_chip_node_next;
+       const bool& SYS_RECONFIG_MASTER_SET = io_smp.master_chip_curr_set;
+       FAPI_SET_HWP_ERROR(
+           rc,
+           RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR);
+    }
 
     // mark function exit
     FAPI_DBG("proc_build_smp_set_master_config: End");
@@ -722,7 +734,6 @@ fapi::ReturnCode proc_build_smp_set_master_config(
 //           on its fabric node/chip ID
 // parameters: io_smp_chip          => structure encapsulating single chip in
 //                                     SMP topology
-//             i_first_chip_in_sys  => first chip processed in system?
 //             i_op                 => procedure operation phase/mode
 //             io_smp               => structure encapsulating full SMP
 // returns: FAPI_RC_SUCCESS if insertion is successful and merged node ranges
@@ -740,7 +751,6 @@ fapi::ReturnCode proc_build_smp_set_master_config(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_insert_chip(
     proc_build_smp_chip& io_smp_chip,
-    const bool i_first_chip_in_sys,
     const proc_build_smp_operation i_op,
     proc_build_smp_system& io_smp)
 {
@@ -751,8 +761,6 @@ fapi::ReturnCode proc_build_smp_insert_chip(
     proc_fab_smp_chip_id chip_id = io_smp_chip.chip_id;
     // first chip found in node?
     bool first_chip_in_node  = false;
-    // chip is current SMP master?
-    bool master_chip_sys_curr;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_insert_chip: Start");
@@ -809,12 +817,10 @@ fapi::ReturnCode proc_build_smp_insert_chip(
 
         // determine node/system master status
         FAPI_DBG("proc_build_smp_insert_chip: Determining node/system master status");
-        rc = proc_build_smp_set_master_config(i_first_chip_in_sys,
-                                              first_chip_in_node,
+        rc = proc_build_smp_set_master_config(first_chip_in_node,
                                               i_op,
                                               io_smp_chip,
-                                              io_smp,
-                                              master_chip_sys_curr);
+                                              io_smp);
         if (!rc.ok())
         {
             FAPI_ERR("proc_build_smp_insert_chip: Error from proc_fab_smp_set_master_config");
@@ -823,13 +829,6 @@ fapi::ReturnCode proc_build_smp_insert_chip(
 
         // insert chip into SMP
         io_smp.nodes[node_id].chips[chip_id] = io_smp_chip;
-        // save pointer to current system master chip?
-        if (master_chip_sys_curr)
-        {
-            io_smp.master_chip_curr_set = true;
-            io_smp.master_chip_curr_node_id = node_id;
-            io_smp.master_chip_curr_chip_id = chip_id;
-        }
 
     } while(0);
 
@@ -856,8 +855,10 @@ fapi::ReturnCode proc_build_smp_insert_chip(
 //          RC_PROC_BUILD_SMP_NODE_ADD_INTERNAL_ERR if node map insert fails,
 //          RC_PROC_BUILD_SMP_DUPLICATE_FABRIC_ID_ERR if chips with duplicate
 //              fabric node/chip IDs are detected,
+//          RC_PROC_BUILD_SMP_NO_MASTER_SPECIFIED_ERR if input parameters
+//              do not specify a new fabric system master,
 //          RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR if node/system master
-//              is detected based on chip state and input paramters,
+//              error is detected based on chip state and input paramters,
 //          RC_PROC_BUILD_SMP_INVALID_OPERATION if an unsupported operation
 //              is specified
 //          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if shadow registers are not
@@ -877,30 +878,77 @@ fapi::ReturnCode proc_build_smp_process_chips(
 
     // loop over all chips passed from platform to HWP
     std::vector<proc_build_smp_proc_chip>::iterator i;
-    for (i = i_proc_chips.begin(); i != i_proc_chips.end(); i++)
+    std::map<proc_fab_smp_node_id, proc_build_smp_node>::iterator n_iter;
+    std::map<proc_fab_smp_chip_id, proc_build_smp_chip>::iterator p_iter;
+    io_smp.master_chip_curr_set = false;
+
+    do
     {
-        // process platform provided data in chip argument,
-        // query chip specific attributes
-        proc_build_smp_chip smp_chip;
-        rc = proc_build_smp_process_chip(&(*i),
-                                         smp_chip);
+
+        for (i = i_proc_chips.begin(); i != i_proc_chips.end(); i++)
+        {
+            // process platform provided data in chip argument,
+            // query chip specific attributes
+            proc_build_smp_chip smp_chip;
+            rc = proc_build_smp_process_chip(&(*i),
+                                             smp_chip);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_process_chips: Error from proc_build_smp_process_chip");
+                break;
+            }
+
+            // insert chip into SMP data structure given node & chip ID
+            rc = proc_build_smp_insert_chip(smp_chip,
+                                            i_op,
+                                            io_smp);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_process_chips: Error from proc_build_smp_insert_chip");
+                break;
+            }
+        }
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_chips: Error from proc_build_smp_process_chip");
             break;
         }
 
-        // insert chip into SMP data structure given node & chip ID
-        rc = proc_build_smp_insert_chip(smp_chip,
-                                        (i == i_proc_chips.begin()),
-                                        i_op,
-                                        io_smp);
-        if (!rc.ok())
+        if (!io_smp.master_chip_curr_set)
         {
-            FAPI_ERR("proc_build_smp_process_chips: Error from proc_build_smp_insert_chip");
+            FAPI_ERR("proc_build_smp_process_chips: No system master specified!");
+            const uint8_t& OP = i_op;
+            FAPI_SET_HWP_ERROR(
+                rc,
+                RC_PROC_BUILD_SMP_NO_MASTER_SPECIFIED_ERR);
             break;
         }
-    }
+
+        for (n_iter = io_smp.nodes.begin();
+             (n_iter != io_smp.nodes.end()) && (rc.ok());
+             n_iter++)
+        {
+            for (p_iter = n_iter->second.chips.begin();
+                 (p_iter != n_iter->second.chips.end()) && (rc.ok());
+                 p_iter++)
+            {
+                if (((i_op == SMP_ACTIVATE_PHASE1) &&
+                     (p_iter->second.issue_quiesce_next)) ||
+                     ((i_op == SMP_ACTIVATE_PHASE2) &&
+                      (n_iter->first != io_smp.master_chip_curr_node_id)))
+                {
+                    p_iter->second.quiesced_next = true;
+                }
+                else
+                {
+                    p_iter->second.quiesced_next = false;
+                }
+            }
+        }
+        if (!rc.ok())
+        {
+            break;
+        }
+    } while(0);
 
     // mark function exit
     FAPI_DBG("proc_build_smp_process_chips: End");
@@ -918,7 +966,6 @@ fapi::ReturnCode proc_build_smp(
 {
     fapi::ReturnCode rc;
     proc_build_smp_system smp;
-    smp.master_chip_curr_set = false;
 
     // mark function entry
     FAPI_DBG("proc_build_smp: Start");

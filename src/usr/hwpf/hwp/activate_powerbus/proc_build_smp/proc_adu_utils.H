@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.H,v 1.5 2013/04/15 18:31:39 jmcgill Exp $
+// $Id: proc_adu_utils.H,v 1.6 2013/09/26 17:57:02 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -281,8 +281,6 @@ struct proc_adu_utils_fbc_op_hp_ctl {
     uint32_t pre_init_delay;     // cycle delay to pause after programmed
                                  // command (clean cresp) before issuing
                                  // post-init command
-    bool do_switch_ab;           // enable AB switch?
-    bool do_switch_cd;           // enable CD switch?
 };
 
 // ADU status structure
@@ -376,10 +374,6 @@ const uint32_t ADU_FORCE_ECC_DATA_TX_ECC_HI_END_BIT = 8;
 const uint32_t ADU_FORCE_ECC_DATA_TX_ECC_LO_START_BIT = 9;
 const uint32_t ADU_FORCE_ECC_DATA_TX_ECC_LO_END_BIT = 16;
 const uint32_t ADU_FORCE_ECC_DATA_TX_ECC_OVERWRITE_BIT = 17;
-
-// ADU pMISC Mode register field/bit definitions
-const uint32_t ADU_PMISC_MODE_ENABLE_PB_SWITCH_AB_BIT = 30;
-const uint32_t ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT = 31;
 
 // ADU Data register field/bit definitions
 const uint32_t ADU_DATA_START_BIT = 0;

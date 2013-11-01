@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.H,v 1.3 2013/02/25 14:50:53 jmcgill Exp $
+// $Id: proc_build_smp_adu.H,v 1.4 2013/09/26 18:00:09 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -61,30 +61,15 @@ const bool PROC_BUILD_SMP_PHASE2_ADU_PICK_LOCK = true;
 const uint32_t PROC_BUILD_SMP_PHASE2_POST_QUIESCE_DELAY = 4096;
 const uint32_t PROC_BUILD_SMP_PHASE2_PRE_INIT_DELAY = 512;
 
+// ADU pMISC Mode register field/bit definitions
+const uint32_t ADU_PMISC_MODE_ENABLE_PB_SWITCH_AB_BIT = 30;
+const uint32_t ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT = 31;
 
 extern "C" {
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-// function: perform fabric quiesce on a single chip
-// parameters: i_smp_chip => structure encapsulating chip
-// returns: FAPI_RC_SUCCESS if fabric reconfiguration is successful,
-//          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
-//              ADU atomic lock,
-//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid parameters are detected
-//              by ADU library code,
-//          RC_PROC_ADU_UTILS_INTERNAL_ERR if an unexpected internal
-//              logic error occurs in ADU library code,
-//          RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH if ADU status mismatches
-//              for switch operation,
-//          else error
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_build_smp_quiesce_pb(
-    proc_build_smp_chip& i_smp_chip);
 
 //------------------------------------------------------------------------------
 // function: perform fabric C/D configuration switch on a single chip
@@ -105,14 +90,39 @@ fapi::ReturnCode proc_build_smp_switch_cd(
 
 
 //------------------------------------------------------------------------------
-// function: perform fabric A/B configuration switch on all chips present in
-//           SMP (defined by i_smp)
+// function: quiesce slave fabrics by issuing fabric quiesce operation on
+//           specified chips
+//           NOTE: ADU atomic lock will be obtained for all chips prior
+//                 to issuing quiesce operation on specified chips
+// parameters: i_smp => structure encapsulating SMP
+//             i_op  => enumerated type representing SMP build phase
+//                      (SMP_ACTIVATE_PHASE1 = HBI,
+//                       SMP_ACTIVATE_PHASE2 = FSP)
+// returns: FAPI_RC_SUCCESS if fabric reconfiguration is successful,
+//          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
+//              ADU atomic lock,
+//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid parameters are detected
+//              by ADU library code,
+//          RC_PROC_ADU_UTILS_INTERNAL_ERR if an unexpected internal
+//              logic error occurs in ADU library code,
+//          RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH if ADU status mismatches
+//              for switch operation,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_quiesce_pb(
+    proc_build_smp_system& i_smp,
+    const proc_build_smp_operation i_op);
+
+
+//------------------------------------------------------------------------------
+// function: perform fabric A/B configuration switch on all chips present in SMP
 //           NOTE: ADU atomic lock will be obtained for all chips prior to
 //                 issuing switch from master chip (defined by
 //                 i_master_smp_chip)
-// parameters: i_master_smp_chip => structure encapsulating current SMP master
-//                                  chip
-//             i_smp             => structure encapsulating SMP
+// parameters: i_smp => structure encapsulating SMP
+//             i_op  => enumerated type representing SMP build phase
+//                      (SMP_ACTIVATE_PHASE1 = HBI,
+//                       SMP_ACTIVATE_PHASE2 = FSP)
 // returns: FAPI_RC_SUCCESS if fabric reconfiguration is successful,
 //          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
 //              ADU atomic lock,
@@ -125,8 +135,9 @@ fapi::ReturnCode proc_build_smp_switch_cd(
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_switch_ab(
-    proc_build_smp_chip& i_master_smp_chip,
-    proc_build_smp_system& i_smp);
+    proc_build_smp_system& i_smp,
+    const proc_build_smp_operation i_op);
+
 
 } // extern "C"
 

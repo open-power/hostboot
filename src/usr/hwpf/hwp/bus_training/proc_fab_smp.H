@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fab_smp.H,v 1.7 2013/07/30 20:51:28 jmcgill Exp $
+// $Id: proc_fab_smp.H,v 1.8 2013/09/23 22:01:31 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -115,7 +115,7 @@ extern "C"
 
 //------------------------------------------------------------------------------
 // function: utility function to read & return fabric node ID attribute
-// parameters: i_target  => pointer to P8 chip target
+// parameters: i_target  => pointer to chip/chiplet target
 //             o_node_id => structure encapsulating node ID value
 // returns: FAPI_RC_SUCCESS if attribute read is successful & value is valid,
 //          RC_PROC_FAB_SMP_FABRIC_NODE_ID_ATTR_ERR if attribute value is
@@ -128,7 +128,7 @@ fapi::ReturnCode proc_fab_smp_get_node_id_attr(
 
 //------------------------------------------------------------------------------
 // function: utility function to read & return fabric chip ID attribute
-// parameters: i_target  => pointer to P8 chip target
+// parameters: i_target  => pointer to chip/chiplet target
 //             o_chip_id => structure encapsulating chip ID value
 // returns: FAPI_RC_SUCCESS if attribute read is successful & value is valid,
 //          RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR if attribute value is
@@ -141,7 +141,7 @@ fapi::ReturnCode proc_fab_smp_get_chip_id_attr(
 
 //------------------------------------------------------------------------------
 // function: utility function to read & return PCIe/DSMP mux attribute values
-// parameters: i_target          => pointer to P8 chip target
+// parameters: i_target          => pointer to chip target
 //             o_pcie_not_f_link => vector of boolean values representing state
 //                                  of PCIe/DSMP mux settings (one value per
 //                                  foreign link, true=PCIe function, false=

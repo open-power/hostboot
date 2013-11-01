@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.C,v 1.6 2012/08/21 05:16:27 jmcgill Exp $
+// $Id: proc_adu_utils.C,v 1.7 2013/09/26 17:56:54 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -300,7 +300,6 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
-    ecmdDataBufferBase pmisc_data(64), pmisc_mask(64);
     ecmdDataBufferBase ctl_data(64);
     ecmdDataBufferBase cmd_data(64);
     uint8_t struct_data_to_insert;
@@ -337,43 +336,6 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
             const uint64_t & ARGS = i_adu_hp_ctl.pre_init_delay;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_ARGS);
             break;
-        }
-
-
-        // build ADU pMisc Mode register content
-        if (i_use_hp)
-        {
-            FAPI_DBG("proc_adu_utils_send_fbc_op: Writing ADU pMisc Mode register");
-            // switch AB bit
-            rc_ecmd |= pmisc_data.writeBit(
-                ADU_PMISC_MODE_ENABLE_PB_SWITCH_AB_BIT,
-                i_adu_hp_ctl.do_switch_ab);
-            rc_ecmd |= pmisc_mask.setBit(
-                ADU_PMISC_MODE_ENABLE_PB_SWITCH_AB_BIT);
-            // switch CD bit
-            rc_ecmd |= pmisc_data.writeBit(
-                ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT,
-                i_adu_hp_ctl.do_switch_cd);
-            rc_ecmd |= pmisc_mask.setBit(
-                ADU_PMISC_MODE_ENABLE_PB_SWITCH_CD_BIT);
-            rc.setEcmdError(rc_ecmd);
-
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_adu_utils_send_fbc_op: Error 0x%x setting up ADU pMisc Mode register data buffer",
-                         rc_ecmd);
-                break;
-            }
-            // write ADU pMisc Mode register content
-            rc = fapiPutScomUnderMask(i_target,
-                                      ADU_PMISC_MODE_0x0202000B,
-                                      pmisc_data,
-                                      pmisc_mask);
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_adu_utils_send_fbc_op: fapiPutUnderMask error (ADU_PMISC_MODE_0x0202000B)");
-                break;
-            }
         }
 
         // build ADU Control register content

@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_build_smp_errors.xml,v 1.4 2013/05/22 15:46:58 mjjones Exp $ -->
+<!-- $Id: proc_build_smp_errors.xml,v 1.5 2013/09/26 18:16:09 jmcgill Exp $ -->
 <!-- Error definitions for proc_build_smp -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -45,8 +45,14 @@
     <ffdc>OP</ffdc>
     <ffdc>MASTER_CHIP_SYS_CURR</ffdc>
     <ffdc>MASTER_CHIP_NODE_CURR</ffdc>
-    <ffdc>FIRST_CHIP_IN_SYS</ffdc>
-    <ffdc>FIRST_CHIP_IN_NODE</ffdc>
+    <ffdc>MASTER_CHIP_SYS_NEXT</ffdc>
+    <ffdc>MASTER_CHIP_NODE_NEXT</ffdc>
+    <ffdc>SYS_RECONFIG_MASTER_SET</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_NO_MASTER_SPECIFIED_ERR</rc>
+    <description>Input parameters do not specify a new fabric system master.</description>
+    <ffdc>OP</ffdc>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_BUILD_SMP_EPSILON_RANGE_ERR</rc>

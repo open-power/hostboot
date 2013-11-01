@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.H,v 1.10 2013/07/30 20:51:20 jmcgill Exp $
+// $Id: proc_build_smp.H,v 1.11 2013/09/26 18:14:06 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -57,10 +57,6 @@
 // *!               (switch A/B)
 // *!
 //------------------------------------------------------------------------------
-// *! TODO:: epsilon: need updated pre-epsilon values (current: P7 values)
-// *! TODO:: switch CD: hang rate for foreign links & other lab tuned settings
-// *!        (current: placeholder settings from Murano sim)
-// *! TODO:: phase 2 execution for Venice (FSP drawer integration)
 // *! TODO:: support for manufacturing AVP mode configurations
 //------------------------------------------------------------------------------
 
@@ -93,18 +89,25 @@ enum proc_build_smp_operation
 };
 
 // HWP argument structure defining properties of this chip
-// and links which should be considered in this invocation (X/A/F)
+// and links which should be considered
 struct proc_build_smp_proc_chip
 {
     // target for this chip
     fapi::Target this_chip;
+    // set if this chip should be designated fabric
+    // master post-reconfiguration
+    // NOTE: this chip must currently be designated a
+    //       master in its enclosing fabric
+    //       PHASE1/HBI: any chip
+    //       PHASE2/FSP: any current drawer master
+    bool master_chip_sys_next;
 
-    // targets defining A link connected chips
+    // chiplet targets connected to A links
     fapi::Target a0_chip;
     fapi::Target a1_chip;
     fapi::Target a2_chip;
 
-    // targets defining X link connected chips
+    // chiplet targets connected to X links
     fapi::Target x0_chip;
     fapi::Target x1_chip;
     fapi::Target x2_chip;
@@ -138,7 +141,8 @@ struct proc_build_smp_chip
     bool master_chip_sys_curr;
     // node/system master designation (next)
     bool master_chip_node_next;
-    bool master_chip_sys_next;
+    bool issue_quiesce_next;
+    bool quiesced_next;
     // select for PCIe/DSMP mux (one per link)
     bool pcie_not_f_link[PROC_FAB_SMP_NUM_F_LINKS];
 };
@@ -187,7 +191,8 @@ struct proc_build_smp_system
 {
     // nodes which reside in this SMP
     std::map<proc_fab_smp_node_id, proc_build_smp_node> nodes;
-    // system master chip (curr)
+    // current system master for the purpose of launching
+    // fabric reconfiguration operations
     bool master_chip_curr_set;
     proc_fab_smp_node_id master_chip_curr_node_id;
     proc_fab_smp_chip_id master_chip_curr_chip_id;
@@ -240,10 +245,7 @@ extern "C"
 //------------------------------------------------------------------------------
 // function: perform fabric SMP reconfiguration operations
 // parameters: i_proc_chips => vector of structures defining properties of each
-//                             chip and links which should be considered in
-//                             this invocation (A/X/F)
-//                             NOTE: first chip in vector will become the
-//                                   fabric master after the reconfiguration
+//                             chip and its connected links
 //             i_op  => enumerated type representing SMP build phase
 //                      (SMP_ACTIVATE_PHASE1 = HBI,
 //                       SMP_ACTIVATE_PHASE2 = FSP)
@@ -271,8 +273,10 @@ extern "C"
 //          RC_PROC_BUILD_SMP_NODE_ADD_INTERNAL_ERR if node map insert fails,
 //          RC_PROC_BUILD_SMP_DUPLICATE_FABRIC_ID_ERR if chips with duplicate
 //              fabric node/chip IDs are detected,
+//          RC_PROC_BUILD_SMP_NO_MASTER_SPECIFIED_ERR if input parameters
+//              do not specify a new fabric system master,
 //          RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR if node/system master
-//              is detected based on chip state and input paramters,
+//              error is detected based on chip state and input paramters,
 //          RC_PROC_BUILD_SMP_INVALID_OPERATION if an unsupported operation
 //              is specified
 //          RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR if HP shadow registers are not

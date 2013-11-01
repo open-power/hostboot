@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_ab.C,v 1.5 2013/01/21 03:11:32 jmcgill Exp $
+// $Id: proc_build_smp_fbc_ab.C,v 1.9 2013/10/24 19:59:08 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_ab.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -143,13 +143,19 @@ fapi::ReturnCode proc_build_smp_get_f_owpack_config(
 
 //------------------------------------------------------------------------------
 // function: read PB Link Mode register and extract per-link training delays
-// parameters: i_smp_chip         => structure encapsulating SMP chip
-//             i_num_links        => number of links to process
-//             i_scom_addr        => address for SCOM register containing link
-//                                   delay values
-//             i_link_delay_start => per-link delay field start bit offsets
-//             i_link_delay_end   => per-link delay field end bit offsets
-//             o_link_delays      => array of link round trip delay values
+// parameters: i_smp_chip            => structure encapsulating SMP chip
+//             i_num_links           => number of links to process
+//             i_scom_addr           => address for SCOM register containing link
+//                                      delay values
+//             i_link_delay_start    => per-link delay field start bit offsets
+//             i_link_delay_end      => per-link delay field end bit offsets
+//             i_link_en             => per-link enable values
+//             i_link_target         => link endpoint targets
+//             o_link_delay_local    => array of link round trip delay values
+//                                       (measured by local chip)
+//             o_link_delay_remote   => array of link round trip delay values
+//                                      (measured by remote chips)
+//             o_link_number_remote  => array of link numbers
 // returns: FAPI_RC_SUCCESS if SCOM is successful & output link delays are
 //              valid,
 //          else error
@@ -160,7 +166,11 @@ fapi::ReturnCode proc_build_smp_get_link_delays(
     const uint32_t i_scom_addr,
     const uint32_t i_link_delay_start[],
     const uint32_t i_link_delay_end[],
-    uint16_t o_link_delays[])
+    const bool i_link_en[],
+    fapi::Target* i_link_target[],
+    uint16_t o_link_delay_local[],
+    uint16_t o_link_delay_remote[],
+    uint8_t o_link_number_remote[])
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0x0;
@@ -171,7 +181,7 @@ fapi::ReturnCode proc_build_smp_get_link_delays(
 
     do
     {
-        // read PB Link Mode register
+        // read PB Link Mode register on local chip
         rc = fapiGetScom(i_smp_chip.chip->this_chip,
                          i_scom_addr,
                          data);
@@ -185,20 +195,97 @@ fapi::ReturnCode proc_build_smp_get_link_delays(
         // extract & return link training delays
         for (uint8_t l = 0; l < i_num_links; l++)
         {
-            rc_ecmd |= data.extractToRight(
-                &(o_link_delays[l]),
-                i_link_delay_start[l],
-                (i_link_delay_end[l]-
-                 i_link_delay_start[l]+1));
-
-            if (rc_ecmd)
+            if (!i_link_en[l])
             {
-                FAPI_ERR("proc_build_smp_get_link_delays: Error 0x%x accessing data buffer",
-                         rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
+                o_link_delay_local[l] = 0xFF;
+            }
+            else
+            {
+               rc_ecmd |= data.extractToRight(
+                   &(o_link_delay_local[l]),
+                   i_link_delay_start[l],
+                   (i_link_delay_end[l]-
+                    i_link_delay_start[l]+1));
+               
+               if (rc_ecmd)
+               {
+                   FAPI_ERR("proc_build_smp_get_link_delays: Error 0x%x accessing data buffer",
+                            rc_ecmd);
+                   rc.setEcmdError(rc_ecmd);
+                   break;
+               }
             }
         }
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // process remote links
+        for (uint8_t l = 0; l < i_num_links; l++)
+        {
+            if (!i_link_en[l])
+            {
+                o_link_delay_remote[l] = 0xFF;
+            }
+            else
+            {
+                fapi::Target parent_target;
+                uint8_t remote_link_number = 0x0;
+                
+                // determine link number on remote end (equivalent to chiplet #)
+                rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
+                                   i_link_target[l],
+                                   remote_link_number);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_get_link_delays: Error querying ATTR_CHIP_UNIT_POS");
+                    break;
+                }
+                o_link_number_remote[l] = remote_link_number;
+                
+                // obtain parent chip target
+                rc = fapiGetParentChip(*(i_link_target[l]),
+                                       parent_target);
+                
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_get_link_delays: Error from fapiGetParentChip");
+                    break;
+                }
+                
+                // read PB link Mode Register using parent target
+                rc = fapiGetScom(parent_target,
+                                 i_scom_addr,
+                                 data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_get_link_delays: fapiGetScom error (%08X)",
+                             i_scom_addr);
+                    break;
+                }
+                
+                // extract proper data
+                rc_ecmd |= data.extractToRight(
+                    &(o_link_delay_remote[l]),
+                    i_link_delay_start[remote_link_number],
+                    (i_link_delay_end[remote_link_number]-
+                     i_link_delay_start[remote_link_number]+1));
+                
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("proc_build_smp_get_link_delays: Error 0x%x accessing data buffer",
+                             rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+            }
+        }
+        if (!rc.ok())
+        {
+            break;
+        }
+
     } while(0);
 
     // mark function exit
@@ -217,7 +304,10 @@ fapi::ReturnCode proc_build_smp_get_link_delays(
 //             i_link_delay_start => per-link delay field start bit offsets
 //             i_link_delay_end   => per-link delay field end bit offsets
 //             i_link_en          => per-link enable values
-//             i_link_id          => per-link ID values
+//             i_link_id          => per-link destination chip/node ID values
+//             i_link_target      => per-link destination targets
+//             i_allow_aggregate  => permit aggregate configuration?
+//             i_x_not_a          => link type (true=X, false=A)
 //             o_link_addr_dis    => per-link address disable values
 //                                   (true=address only, false=address/data)
 //             o_link_aggregate   => enable aggregate link mode?
@@ -235,16 +325,19 @@ fapi::ReturnCode proc_build_smp_calc_link_setup(
     const uint32_t i_link_delay_end[],
     const bool i_link_en[],
     const uint8_t i_link_id[],
+    fapi::Target * i_link_target[],
+    const bool i_allow_aggregate,
+    const bool i_x_not_a,
     bool o_link_addr_dis[],
     bool &o_link_aggregate)
 {
     fapi::ReturnCode rc;
-    // mark precisely which links target each ID
-    bool id_active[i_num_ids][i_num_links];
     // mark number of links targeting each ID
     uint8_t id_active_count[i_num_ids];
     // link round trip delay values
-    uint16_t link_delays[i_num_links];
+    uint16_t link_delay_local[i_num_links];
+    uint16_t link_delay_remote[i_num_links];
+    uint8_t link_number_remote[i_num_links];
 
     // mark function entry
     FAPI_DBG("proc_build_smp_calc_link_setup: Start");
@@ -255,10 +348,6 @@ fapi::ReturnCode proc_build_smp_calc_link_setup(
         for (uint8_t id = 0; id < i_num_ids; id++)
         {
             id_active_count[id] = 0;
-            for (uint8_t l = 0; l < i_num_links; l++)
-            {
-                id_active[id][l] = false;
-            }
         }
 
         // process all links
@@ -268,7 +357,6 @@ fapi::ReturnCode proc_build_smp_calc_link_setup(
             if (i_link_en[l])
             {
                 id_active_count[i_link_id[l]]++;
-                id_active[i_link_id[l]][l] = true;
             }
             // set default value for link address disable (enable coherency)
             o_link_addr_dis[l] = false;
@@ -282,7 +370,8 @@ fapi::ReturnCode proc_build_smp_calc_link_setup(
             if (id_active_count[id] > 1)
             {
                 // design only supports one set of aggregate links per chip
-                if (o_link_aggregate)
+                // currently procedure does not support aggregate F links
+                if (!i_allow_aggregate || o_link_aggregate)
                 {
                     FAPI_ERR("proc_build_smp_calc_link_setup: Invalid aggregate link configuration");
                     FAPI_SET_HWP_ERROR(
@@ -296,7 +385,7 @@ fapi::ReturnCode proc_build_smp_calc_link_setup(
                 // (disable coherency)
                 for (uint8_t l = 0; l < i_num_links; l++)
                 {
-                    if (id_active[id][l])
+                    if (i_link_en[l])
                     {
                         o_link_addr_dis[l] = true;
                     }
@@ -309,28 +398,102 @@ fapi::ReturnCode proc_build_smp_calc_link_setup(
                                                     i_scom_addr,
                                                     i_link_delay_start,
                                                     i_link_delay_end,
-                                                    link_delays);
+                                                    i_link_en,
+                                                    i_link_target,
+                                                    link_delay_local,
+                                                    link_delay_remote,
+                                                    link_number_remote);
                 if (rc)
                 {
                     FAPI_ERR("proc_build_smp_calc_link_setup: Error from proc_build_smp_get_link_delays");
                     break;
                 }
 
-                // search link delays to find smallest value
-                uint8_t coherent_link_id = 0;
-                uint16_t min_delay = 0xFFFF;
                 for (uint8_t l = 0; l < i_num_links; l++)
                 {
-                    if (i_link_en[l] && (link_delays[l] <= min_delay))
+                    FAPI_DBG("proc_build_smp_calc_link_setup: link_delay_local[%d]: %d", l, link_delay_local[l]);
+                }
+                for (uint8_t l = 0; l < i_num_links; l++)
+                {
+                    FAPI_DBG("proc_build_smp_calc_link_setup: link_delay_remote[%d]: %d", l, link_delay_remote[l]);
+                }
+                for (uint8_t l = 0; l < i_num_links; l++)
+                {
+                    FAPI_DBG("proc_build_smp_calc_link_setup: link_number_remote[%d]: %d", l, link_number_remote[l]);
+                }
+
+                // sum local/remote delay factors & scan for smallest value
+                uint32_t link_delay_total[i_num_links];
+                uint8_t coherent_link_index = 0xFF;
+                uint32_t coherent_link_delay = 0xFFFFFFFF;
+                for (uint8_t l = 0; l < i_num_links; l++)
+                {
+                    link_delay_total[l] = link_delay_local[l] + link_delay_remote[l];
+                    if (i_link_en[l] &&
+                        (link_delay_total[l] < coherent_link_delay))
                     {
-                        coherent_link_id = l;
-                        min_delay = link_delays[l];
+                        coherent_link_delay = link_delay_total[l];
+                        FAPI_DBG("proc_build_smp_calc_link_setup: Setting coherent_link_delay = %d", coherent_link_delay);
                     }
                 }
 
-                // assign this link to carry coherency
-                o_link_addr_dis[coherent_link_id] = false;
+                // ties must be broken consistently on both connected chips
+                // search if a tie has occurred
+                uint8_t matches = 0;
+                for (uint8_t l = 0; l < i_num_links; l++)
+                {
+                    if (i_link_en[l] &&
+                        (link_delay_total[l] == coherent_link_delay))
+                    {
+                        matches++;
+                        coherent_link_index = l;
+                    }
+                }
+
+                // if no ties, we're done
+                // mark lowest aggregate latency link as coherent link
+                // else, break tie
+                // select link with lowest link number on chip with smaller ID
+                // (chip ID if X links, node ID if A links)
+                uint8_t id_local = ((i_x_not_a)?((uint8_t) i_smp_chip.chip_id):((uint8_t) i_smp_chip.node_id));
+                if (matches != 1)
+                {
+                    FAPI_DBG("proc_build_smp_calc_link_setup: Breaking tie");
+                    if (id_local < id)
+                    {
+                        for (uint8_t l = 0; l < i_num_links; l++)
+                        {
+                            if (i_link_en[l] &&
+                                (link_delay_total[l] == coherent_link_delay))
+                            {
+                                coherent_link_index = l;
+                                break;
+                            }
+                        }
+                        FAPI_DBG("proc_build_smp_calc_link_setup: Selecting coherent link = link %d baaed on this chip (%d)", coherent_link_index, id_local);
+                    }
+                    else
+                    {
+                        uint8_t lowest_remote_link_number = 0xFF;
+                        for (uint8_t l = 0; l < i_num_links; l++)
+                        {
+                            if ((i_link_en[l]) &&
+                                (link_delay_total[l] == coherent_link_delay) &&
+                                (link_number_remote[l] < lowest_remote_link_number))
+                            {
+                                lowest_remote_link_number= link_number_remote[l];
+                                coherent_link_index = l;
+                            }
+                        }
+                        FAPI_DBG("proc_build_smp_calc_link_setup: Selecting coherent link = linkd %d based on remote chip ID (%d)", coherent_link_index, id);
+                    }
+                }
+                o_link_addr_dis[coherent_link_index] = false;
             }
+        }
+        if (!rc.ok())
+        {
+            break;
         }
     } while(0);
 
@@ -739,6 +902,7 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
     ecmdDataBufferBase data(64);
     // set of per-link destination chip targets
     fapi::Target * a_target[PROC_FAB_SMP_NUM_A_LINKS];
+    fapi::Target * f_target[PROC_FAB_SMP_NUM_F_LINKS];
     // per-link enables
     bool a_en[PROC_FAB_SMP_NUM_A_LINKS];
     bool f_en[PROC_FAB_SMP_NUM_F_LINKS];
@@ -804,6 +968,8 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
         f_id[0] = i_smp_chip.chip->f0_node_id;
         f_en[1] = i_smp_chip.chip->enable_f1;
         f_id[1] = i_smp_chip.chip->f1_node_id;
+        f_target[0] = NULL;
+        f_target[1] = NULL;
 
         for (uint8_t l = 0; l < PROC_FAB_SMP_NUM_F_LINKS; l++)
         {
@@ -831,6 +997,9 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
                                                 PB_A_MODE_LINK_DELAY_END_BIT,
                                                 a_en,
                                                 a_id,
+                                                a_target,
+                                                true,
+                                                false,
                                                 a_addr_dis,
                                                 a_link_aggregate);
             if (rc)
@@ -873,6 +1042,9 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
                                                 PB_IOF_MODE_LINK_DELAY_END_BIT,
                                                 f_en,
                                                 f_id,
+                                                f_target,
+                                                false,
+                                                false,
                                                 f_addr_dis,
                                                 f_link_aggregate);
             if (rc)
@@ -950,7 +1122,7 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
 
         // pb_cfg_master_chip
         rc_ecmd |= data.writeBit(PB_HP_MODE_MASTER_CHIP_BIT,
-                                 i_smp_chip.master_chip_sys_next?1:0);
+                                 i_smp_chip.chip->master_chip_sys_next?1:0);
 
         // pb_cfg_a_aggregate
         rc_ecmd |= data.writeBit(PB_HP_MODE_A_AGGREGATE_BIT,
@@ -958,7 +1130,7 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
 
         // pb_cfg_tm_master
         rc_ecmd |= data.writeBit(PB_HP_MODE_TM_MASTER_BIT,
-                                 i_smp_chip.master_chip_sys_next?1:0);
+                                 i_smp_chip.chip->master_chip_sys_next?1:0);
 
         // pb_cfg_chg_rate_gp_master
         rc_ecmd |= data.writeBit(PB_HP_MODE_CHG_RATE_GP_MASTER_BIT,
@@ -966,7 +1138,7 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
 
         // pb_cfg_chg_rate_sp_master
         rc_ecmd |= data.writeBit(PB_HP_MODE_CHG_RATE_SP_MASTER_BIT,
-                                 i_smp_chip.master_chip_sys_next?1:0);
+                                 i_smp_chip.chip->master_chip_sys_next?1:0);
 
         // pb_cfg_pump_mode
         rc_ecmd |= data.writeBit(PB_HP_MODE_PUMP_MODE_BIT,
@@ -1190,6 +1362,9 @@ fapi::ReturnCode proc_build_smp_set_pb_hpx_mode(
                                                 PB_X_MODE_LINK_DELAY_END_BIT,
                                                 x_en,
                                                 x_id,
+                                                x_target,
+                                                true,
+                                                true,
                                                 x_addr_dis,
                                                 x_link_aggregate);
             if (rc)
@@ -1317,7 +1492,18 @@ fapi::ReturnCode proc_build_smp_set_fbc_ab(
 
     do
     {
-        // loop through all chips
+        // quiesce 'slave' fabrics in preparation for joining
+        //   PHASE1 -> quiesce all chips except the chip which is the new fabric master
+        //   PHASE2 -> quiesce all drawers except the drawer containing the new fabric master
+        rc = proc_build_smp_quiesce_pb(i_smp, i_op);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_fbc_ab: Error from proc_build_smp_quiesce_pb");
+            break;
+        }
+
+        // program CURR register set only for chips which were just quiesced
+        // program NEXT register set for all chips
         for (n_iter = i_smp.nodes.begin();
              (n_iter != i_smp.nodes.end()) && (rc.ok());
              n_iter++)
@@ -1326,26 +1512,10 @@ fapi::ReturnCode proc_build_smp_set_fbc_ab(
                  (p_iter != n_iter->second.chips.end()) && (rc.ok());
                  p_iter++)
             {
-                // in SMP activate phase1, quisece hostboot slave chips
-                if ((i_op == SMP_ACTIVATE_PHASE1) &&
-                    (!p_iter->second.master_chip_sys_next))
-                {
-                    rc = proc_build_smp_quiesce_pb(p_iter->second);
-                    if (!rc.ok())
-                    {
-                        FAPI_ERR("proc_build_smp_set_fbc_ab: Error from proc_build_smp_quiesce_pb");
-                        break;
-                    }
-                }
-
-                // always program NEXT register set
-                // only program CURR register set for hostboot slave chips in
-                // SMP activate phase 1
                 rc = proc_build_smp_set_pb_hp_mode(
                     p_iter->second,
                     i_smp,
-                    ((i_op == SMP_ACTIVATE_PHASE1) &&
-                     (!p_iter->second.master_chip_sys_next)),
+                    p_iter->second.quiesced_next,
                     true);
                 if (!rc.ok())
                 {
@@ -1356,8 +1526,7 @@ fapi::ReturnCode proc_build_smp_set_fbc_ab(
                 rc = proc_build_smp_set_pb_hpx_mode(
                     p_iter->second,
                     i_smp,
-                    ((i_op == SMP_ACTIVATE_PHASE1) &&
-                     (!p_iter->second.master_chip_sys_next)),
+                    p_iter->second.quiesced_next,
                     true);
                 if (!rc.ok())
                 {
@@ -1371,19 +1540,16 @@ fapi::ReturnCode proc_build_smp_set_fbc_ab(
             break;
         }
 
-        // issue switch AB from current SMP master chip
-        proc_fab_smp_node_id node_id = i_smp.master_chip_curr_node_id;
-        proc_fab_smp_chip_id chip_id = i_smp.master_chip_curr_chip_id;
-        rc = proc_build_smp_switch_ab(
-            i_smp.nodes[node_id].chips[chip_id],
-            i_smp);
+        // issue switch AB reconfiguration from chip designated as new master
+        // (which is guaranteed to be a master now)
+        rc = proc_build_smp_switch_ab(i_smp, i_op);
         if (!rc.ok())
         {
             FAPI_ERR("proc_build_smp_set_fbc_ab: Error from proc_build_smp_switch_ab");
             break;
         }
 
-        // reset NEXT register set (copy CURR->NEXT)
+        // reset NEXT register set (copy CURR->NEXT) for all chips
         for (n_iter = i_smp.nodes.begin();
              (n_iter != i_smp.nodes.end()) && (rc.ok());
              n_iter++)
@@ -1407,6 +1573,11 @@ fapi::ReturnCode proc_build_smp_set_fbc_ab(
                 }
             }
         }
+        if (!rc.ok())
+        {
+            break;
+        }
+
     } while(0);
 
     // mark function exit
