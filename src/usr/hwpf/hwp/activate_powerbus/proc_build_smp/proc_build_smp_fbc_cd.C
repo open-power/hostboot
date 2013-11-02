@@ -1273,7 +1273,8 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we5(
 
     do
     {
-        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_CENT5_VER2,
+//@thi - Patch this per Joe's suggestion
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_WE5_VER2,
                            &(i_smp_chip.chip->this_chip),
                            ver2);
         if (!rc.ok())

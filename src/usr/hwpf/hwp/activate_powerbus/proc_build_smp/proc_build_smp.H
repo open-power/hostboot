@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.H,v 1.11 2013/09/26 18:14:06 jmcgill Exp $
+// $Id: proc_build_smp.H,v 1.12 2013/10/18 21:36:02 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -158,7 +158,7 @@ struct proc_build_smp_node
     proc_fab_smp_node_id node_id;
 };
 
-// core floor/nest frequency ratio cutpoints
+// core floor/nest frequency ratio cutpoints (epsilon)
 enum proc_build_smp_core_floor_ratio
 {
     PROC_BUILD_SMP_CORE_FLOOR_RATIO_8_8 = 0,
@@ -167,6 +167,26 @@ enum proc_build_smp_core_floor_ratio
     PROC_BUILD_SMP_CORE_FLOOR_RATIO_5_8 = 3,
     PROC_BUILD_SMP_CORE_FLOOR_RATIO_4_8 = 4,
     PROC_BUILD_SMP_CORE_FLOOR_RATIO_2_8 = 5
+};
+
+// core floor/nest frequency ratio cutpoints (CPU delay)
+const uint8_t PROC_BUILD_SMP_CPU_DELAY_NUM_SETPOINTS = 13;
+
+enum proc_build_smp_cpu_delay
+{
+    PROC_BUILD_SMP_CPU_DELAY_4800_2400 = 0,
+    PROC_BUILD_SMP_CPU_DELAY_4431_2400 = 1,
+    PROC_BUILD_SMP_CPU_DELAY_4114_2400 = 2,
+    PROC_BUILD_SMP_CPU_DELAY_3840_2400 = 3,
+    PROC_BUILD_SMP_CPU_DELAY_3600_2400 = 4,
+    PROC_BUILD_SMP_CPU_DELAY_3338_2400 = 5,
+    PROC_BUILD_SMP_CPU_DELAY_3200_2400 = 6,
+    PROC_BUILD_SMP_CPU_DELAY_3032_2400 = 7,
+    PROC_BUILD_SMP_CPU_DELAY_2880_2400 = 8,
+    PROC_BUILD_SMP_CPU_DELAY_2743_2400 = 9,
+    PROC_BUILD_SMP_CPU_DELAY_2618_2400 = 10,
+    PROC_BUILD_SMP_CPU_DELAY_2504_2400 = 11,
+    PROC_BUILD_SMP_CPU_DELAY_2400_2400 = 12
 };
 
 // structure to encapsulate system epsilon configuration
@@ -203,9 +223,14 @@ struct proc_build_smp_system
     uint32_t freq_a;
     uint32_t freq_x;
     uint32_t freq_core_floor;
+    uint32_t freq_core_nom;
+    uint32_t freq_core_ceiling;
     uint32_t freq_pcie;
     // core floor/pb frequency ratio
     proc_build_smp_core_floor_ratio core_floor_ratio;
+    // CPU ratios
+    proc_build_smp_cpu_delay nom_cpu_delay;
+    proc_build_smp_cpu_delay full_cpu_delay;
 
     // program async boundary crossings to safe mode
     bool async_safe_mode;

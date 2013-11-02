@@ -1,4 +1,4 @@
-#-- $Id: p8.pe.phase2.scom.initfile,v 1.3 2013/04/19 14:30:07 jmcgill Exp $
+#-- $Id: p8.pe.phase2.scom.initfile,v 1.4 2013/11/01 00:37:33 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -27,14 +27,19 @@ define def_nest_freq_r0 = (SYS.ATTR_FREQ_PB >= 2200);
 define def_nest_freq_r1 = ((SYS.ATTR_FREQ_PB <= 1700) && (SYS.ATTR_FREQ_PB < 2200));
 define def_nest_freq_r2 = (SYS.ATTR_FREQ_PB < 1700);
 
+define enable_enh_ive_ordering = (ATTR_CHIP_EC_FEATURE_ENABLE_IVE_PERFORMANCE_ORDERING != 0);
+define enable_dmar_ooo         = (ATTR_CHIP_EC_FEATURE_ENABLE_PCI_DMAR_OOO != 0);
+
 #--------------------------------------------------------------------------------
 #-- SCOM initializations
 #--------------------------------------------------------------------------------
 
 #-- PBCQ Mode Control Register
 scom 0x02012(0,4,8)0B {
-    bits,    scom_data;
-    26,      0b1;                                                   #-- enable enhanced IVE performance ordering
+    bits,    scom_data,    expr;
+    12,      0b1,          any;                                     #-- disable group scope on TCE read requests
+    26,      0b1,          (enable_enh_ive_ordering);               #-- enable enhanced IVE performance ordering only where supported (HW226407)
+    27,      0b1,          any;                                     #-- force IVE write operations to system scope
 }
 
 #-- PCI Hardware Configuration 0 Register
@@ -44,6 +49,12 @@ scom 0x02012(0,4,8)18 {
     4:7,     0b0010;                                                #-- data poll scale (reg=2, scale of 3)
     8:11,    0b0000;                                                #-- data poll scale (PE) (reg=0, scale of 1)
     17,      0b1;                                                   #-- disable out-of-order store behavior
+}
+
+#-- PCI Hardware Configuration 1 Register
+scom 0x02012(0,4,8)19 {
+    bits,    scom_data,    expr;
+    22,      0b1,          (enable_dmar_ooo);                       #-- enable OOO DMA read only where supported (HW223650)
 }
 
 #-- PCI Nest Clock Trace Control Register
@@ -62,7 +73,6 @@ scom 0x09012(0,4,8)0F {
     6:8,     0b011,        (def_nest_freq_r0);                      #-- Maximum Ch2 command credit given to ETU
     6:8,     0b010,        (def_nest_freq_r1 || def_nest_freq_r2);
     9:11,    0b000,        any;                                     #-- Maximum Ch3 command credit given to ETU
-    12:13,   0b10,         (def_nest_freq_r0 || def_nest_freq_r1);  #-- Overcommit of inbound speed matching buffer
-    12:13,   0b11,         (def_nest_freq_r2);
+    12:13,   0b11,         any;                                     #-- Overcommit of inbound speed matching buffer (HW245629)
     30:31,   0b11,         any;                                     #-- enable PCI clock tracing w/ ETU as default
 }

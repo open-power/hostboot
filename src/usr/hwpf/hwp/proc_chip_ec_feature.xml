@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.29 2013/10/11 14:34:44 thi Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.37 2013/10/31 16:02:44 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
@@ -169,9 +169,34 @@
     <id>ATTR_CHIP_EC_FEATURE_CAPP_HANG_CONTROL_ON_SCOM</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Returns if a chip contains SCOM configuration for CAPP unit PB hang recovrery controls.  True if:
+      Returns if a chip contains SCOM configuration for CAPP unit PB hang recovery controls.  True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CAPP_PROD</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns if a chip contains production CAPP logic function
+        Murano EC 0x20 or greater
+        Venice EC 0x20 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -194,7 +219,7 @@
     <id>ATTR_CHIP_EC_FEATURE_NX_HANG_CONTROL_ON_SCOM</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Returns if a chip contains SCOM configuration for NX unit PB hang recovrery controls.  True if:
+      Returns if a chip contains SCOM configuration for NX unit PB hang recovery controls.  True if:
         Murano EC 0x20 or greater
         Venice EC 0x20 or greater
     </description>
@@ -377,7 +402,7 @@
     <id>ATTR_CHIP_EC_FEATURE_ADU_PBINIT_LAUNCH_BUG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      True if: 
+      True if:
         Murano EC less than 0x20
         Venice EC less than 0x20
     </description>
@@ -474,12 +499,81 @@
     </chipEcFeature>
   </attribute>
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_CENT5_VER2</id>
+    <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_WE5_VER2</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
+      Specifies layout of WE5 serial chain
       True if:
         Murano EC greater than or equal to 0x20
         Venice EC greater than or equal to 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C8_VER3</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Specifies layout of C8 serial chain
+      True if:
+        Murano/Venice EC greater than or equal to 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C8_VER2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Specifies layout of C8 serial chain
+      True if:
+        Venice EC equal to 0x10
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C10_VER2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Specifies layout of C10 serial chain
+      True if:
+        Murano/Venice EC greater than or equal to 0x20
     </description>
     <chipEcFeature>
       <chip>
@@ -670,6 +764,73 @@
           <test>LESS_THAN</test>
         </ec>
       </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_OCC_CE_FIR_DISABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC less than 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>      
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_ENABLE_IVE_PERFORMANCE_ORDERING</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC greater than or equal to 0x20
+        Venice
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>      
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>      
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_ENABLE_PCI_DMAR_OOO</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC greater than or equal to 0x20
+        Venice
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>      
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>      
     </chipEcFeature>
   </attribute>
 </attributes>
