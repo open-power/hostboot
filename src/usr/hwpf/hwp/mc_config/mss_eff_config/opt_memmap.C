@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.C,v 1.15 2013/09/26 17:52:54 jmcgill Exp $
+// $Id: opt_memmap.C,v 1.16 2013/10/28 21:17:47 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/opt_memmap.C,v $
 
 
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.16   | jmcgill  | 10/28/13| Offset drawers by 32TB rather than 1TB
 //  1.15   | jmcgill  | 09/17/13| Add logic to offset memory map based on
 //         |          |         | drawer number (required for multi-drawer
 //         |          |         | Brazos)
@@ -540,7 +541,7 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                         break;
                     }
 
-                    mem_base = drawer_id * OPT_MEMMAP_TB;
+                    mem_base = drawer_id * 32 * OPT_MEMMAP_TB;
                     mirror_base = OPT_MEMMAP_OFFSET_ORIGIN + (mem_base / 2);
                 }
 
@@ -616,7 +617,7 @@ ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
                         break;
                     }
 
-                    l_nm_base_curr = drawer_id * OPT_MEMMAP_TB;
+                    l_nm_base_curr = drawer_id * 32 * OPT_MEMMAP_TB;
                     l_m_base_curr = OPT_MEMMAP_OFFSET_ORIGIN + (l_nm_base_curr / 2);
                 }
 
