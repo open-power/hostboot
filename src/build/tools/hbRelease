@@ -28,6 +28,8 @@ use Getopt::Long qw(:config pass_through);
 use POSIX;
 use Text::Wrap;
 use List::Util 'max';
+use Term::ReadKey;
+use File::Temp qw/tempfile/;
 
 my $debug = 0;
 my $help = 0;
@@ -46,6 +48,7 @@ my %commands = ( "define" => \&execute_define,
                  "add-forcedep" => \&execute_add_forcedep,
                  "verify-patches" => \&execute_verify_patches,
                  "release" => \&execute_release,
+                 "publish-cq" => \&execute_publish_cq,
                  "build-name" => \&execute_build_name,
                  "help" => \&execute_help,
                );
@@ -327,6 +330,40 @@ sub execute_release
 
 }
 
+sub execute_publish_cq
+{
+    my $level = "";
+    my $track = "";
+    my $released = "";
+
+    GetOptions("name:s" => \$level,
+               "level:s" => \$level,
+               "track:s" => \$track,
+               "released:s" => \$released);
+
+    die "Missing level name" if ($level eq "");
+    die "Missing track" if ($track eq "");
+
+    my $level_info = config_get_level($level);
+
+    $released = $level_info->{released} if ($released eq "");
+
+    my $commits = git_commit_history($level, $released);
+
+    foreach my $commit (@{$commits})
+    {
+        my $changeid = gerrit_changeid_num($commit);
+        my $cq = cq_workitem_num($commit);
+        if ($cq ne "")
+        {
+            print "Change-Id: $changeid\n" if ($debug);
+            print "CQ: $cq\n" if ($debug);
+
+            bq_add_releasenote($cq, $changeid, $level, $track);
+        }
+    }
+}
+
 sub execute_build_name
 {
     my $release = "810";
@@ -446,6 +483,17 @@ q(
 
     Options:
         --level=<name>          The level to release [required].
+),
+            "publish-cq" =>
+q(
+        Update CQ tracks for any released commits to indicate which Hostboot
+        build the commit was added to and which CQ track was used to add the
+        HB release to CMVC.
+
+    Options:
+        --level=<name>          The level to publish [required].
+        --track=<name>          The CQ number used release [required].
+        --released=<commit>     Alternate starting point for publish [optional].
 ),
             "build-name" =>
 q(
@@ -1401,6 +1449,29 @@ sub cq_workitem_num
     }
 }
 
+# sub gerrit_changeid_num
+#
+# Determine the Gerrit Change-Id associated with a git commit.
+#
+# @param[in] commit - The git commit.
+#
+# @return string - Gerrit Change-Id number (or "").
+#
+sub gerrit_changeid_num
+{
+    my $commit = shift;
+    my $message = git_commit_msg($commit);
+
+    if ($message =~ m/Change-Id:\s*(I[0-9a-z]+)/)
+    {
+        return $1;
+    }
+    else
+    {
+        return "";
+    }
+}
+
 
 # sub rtc_hyperlink
 #
@@ -1682,4 +1753,92 @@ sub array_intersect
     my @result = map { ($set{$_} > 1) ? $_ : () } (keys %set);
 
     return \@result;
+}
+
+    # globals used to store the cookie file name for logging into BQ.
+my $cookie_fh = "";
+my $cookie_name = "";
+
+use constant BQ_SERVER => "http://w3.rchland.ibm.com/projects/bestquest/";
+
+# sub bq_login
+#
+# Login to the BestQuest website.
+#
+sub bq_login
+{
+    return if ($cookie_name ne "");
+
+    my %bq_login_params = ( user => "UNKNOWN",
+                     passwd => "UNKNOWN",
+                     database => "AIXOS",
+                     schema => "STGC_AIX",
+                     cqserver => "auscqweb.austin.ibm.com",
+                     cqport => "6600" );
+
+    # Read username / password.
+    print "BestQuest username: ";
+    chomp($bq_login_params{user} = ReadLine 0);
+    print "BestQuest password: ";
+    ReadMode 'noecho';
+    chomp($bq_login_params{passwd} = ReadLine 0);
+    ReadMode 'normal';
+    print "\n";
+
+    # Create parameters.
+    my $login_post = "verb=login_form_response";
+    foreach my $key (keys %bq_login_params)
+    {
+        $login_post = $login_post."&login_".$key."=".$bq_login_params{$key};
+    }
+
+    # Create a tempfile to hold the cookies.
+    ($cookie_fh, $cookie_name) = tempfile(UNLINK => 1);
+
+    # Do login.
+    system "wget -q -O - --save-cookies $cookie_name ".
+           "--post-data '$login_post' ".BQ_SERVER." > /dev/null";
+}
+
+# sub bq_add_releasenote
+#
+# Adds a string "Change X added to Hostboot level Y and released under Z." to
+# a CQ defect / feature.
+#
+# @param[in] - CQ defect / feature.
+# @param[in] - Corresponding Gerrit Change-Id.
+# @param[in] - Hostboot release level.
+# @param[in] - Hostboot release track.
+#
+sub bq_add_releasenote
+{
+    my $cq = shift;
+    my $change_id = shift;
+    my $level = shift;
+    my $release = shift;
+
+    my $note = "Change%20$change_id%20added%20to%20Hostboot%20level%20".
+               "$level%20and%20released%20under%20$release";
+
+    # Login to BQ.
+    bq_login();
+
+    print "Updating release note for $cq.\n";
+
+    # Find CQ ID for defect/feature.
+    my $cqid_cmd = "wget -q -O - --load-cookies $cookie_name ".
+                   BQ_SERVER."?defect=$cq | grep 'CQ ID:' -A1 | tail -n1 | ".
+                   "sed 's/<\\/a.*//' | sed 's/.*recordType=//' | ".
+                   "sed 's/\">/ /'";
+
+    my $cqid_result = `$cqid_cmd`;
+    chomp $cqid_result;
+
+    my ($cqtype,$cqid) = split / /, $cqid_result;
+
+    # Add release comment.
+    system "wget -q -O - --load-cookies $cookie_name '".BQ_SERVER.
+           "?verb=editnote_form_response&table=$cqtype&id=$cqid&uid=$cq&".
+           "note_string=$note' > /dev/null";
+
 }
