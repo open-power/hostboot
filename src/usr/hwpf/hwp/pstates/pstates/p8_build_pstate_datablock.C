@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.23 2013/10/04 18:38:12 jimyac Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.24 2013/10/30 17:35:53 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -60,7 +60,7 @@ using namespace fapi;
 // ----------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------
-ReturnCode proc_get_mvpd_data    (const Target& i_target, uint32_t attr_mvpd_data[PV_D][PV_W], ivrm_mvpd_t *ivrm_mvpd, uint8_t *valid_chiplets);
+ReturnCode proc_get_mvpd_data    (const Target& i_target, uint32_t attr_mvpd_data[PV_D][PV_W], ivrm_mvpd_t *ivrm_mvpd, uint8_t *present_chiplets, uint8_t *functional_chiplets);
 ReturnCode proc_get_attributes   (const Target& i_target, AttributeList *attr_list);
 ReturnCode proc_get_extint_bias  (uint32_t attr_mvpd_data[PV_D][PV_W], const AttributeList *attr, double *volt_int_vdd_bias, double *volt_int_vcs_bias);
 ReturnCode proc_boost_gpst       (PstateSuperStructure *pss, uint32_t attr_boost_percent);
@@ -85,8 +85,9 @@ p8_build_pstate_datablock(const Target& i_target,
 
   AttributeList attr;
   ChipCharacterization* characterization;
-  uint8_t i                 = 0;
-  uint8_t valid_chiplets    = 0;
+  uint8_t i                   = 0;
+  uint8_t present_chiplets    = 0;
+  uint8_t functional_chiplets = 0;
 
   const uint8_t pv_op_order[S132A_POINTS] = PV_OP_ORDER;
 
@@ -123,25 +124,26 @@ p8_build_pstate_datablock(const Target& i_target,
     // ----------------
     // get #V & #M data
     // ----------------
-    FAPI_IMP("Getting #V & #M Data");  
+    FAPI_IMP("Getting #V & #M Data");
 
     // clear array
     memset(attr_mvpd_voltage_control, 0, sizeof(attr_mvpd_voltage_control));
     memset(&ivrm_mvpd,                0, sizeof(ivrm_mvpd));
 
-    l_rc = proc_get_mvpd_data(i_target, attr_mvpd_voltage_control, &ivrm_mvpd, &valid_chiplets);
+    l_rc = proc_get_mvpd_data(i_target, attr_mvpd_voltage_control, &ivrm_mvpd, &present_chiplets, &functional_chiplets);
     if (l_rc) {
       break;
     }
-    else if (valid_chiplets == 0) {
-      FAPI_INF("No Valid Chiplet found - exit wihout error and with empty pstate table");
-      (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
-                                                            PSTATE_NO_COPY_GPST      |
-                                                            PSTATE_NO_INSTALL_GPST   |
-                                                            PSTATE_NO_INSTALL_LPSA   |
-                                                            PSTATE_NO_INSTALL_RESCLK |
-                                                            PSTATE_FORCE_INITIAL_PMIN);
+    else if (present_chiplets == 0) {
+      FAPI_ERR("**** ERROR : There are no cores present");
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_NO_CORES_PRESENT_ERROR);
       break;
+    }
+    else if (functional_chiplets == 0) {
+      FAPI_IMP("No FUNCTIONAL chiplets found - local pstate data is not valid");
+      // indicate not LPST installed in PSS
+      (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
+                                       PSTATE_NO_INSTALL_LPSA);
     }
 
     // ---------------------------------------------
@@ -207,23 +209,23 @@ p8_build_pstate_datablock(const Target& i_target,
                                       characterization->ops,
                                       characterization->parameters,
                                       characterization->points);
-  
+
     // check for error
-    int & CHAR_RETURN_CODE = rc;  
+    int & CHAR_RETURN_CODE = rc;
     if (rc == -GPST_INVALID_OBJECT) {
       FAPI_ERR("**** ERROR : chip_characterization_create was passed null pointer to characterization or characterization->parameters");
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_OBJECT_ERROR);
-      break;  
+      break;
     }
     else if (rc == -GPST_INVALID_ARGUMENT) {
       int & POINTS  = characterization->points;
       FAPI_ERR("**** ERROR : chip_characterization_create was passed null pointer to characterization->vpd or no points");
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_ARGUMENT_ERROR);  
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_ARGUMENT_ERROR);
       break;
     }
     else if (rc) {
       FAPI_ERR("**** ERROR : chip_characterization_create returned error rc = %d", rc );
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_ERROR);  
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_CHARACTERIZATION_ERROR);
       break;
     }
 
@@ -231,7 +233,7 @@ p8_build_pstate_datablock(const Target& i_target,
     // Create the Global Pstate table
     // ------------------------------
     FAPI_IMP("Creating Global Pstate Table");
-  
+
     rc = gpst_create(&((*io_pss).gpst),
                      characterization,
                      PSTATE_STEPSIZE,
@@ -242,27 +244,27 @@ p8_build_pstate_datablock(const Target& i_target,
     FAPI_INF("GPST refclock(Mhz) = %d  pstate0_freq(Khz) = %d  frequency_step(Khz) = %d", attr.attr_freq_proc_refclock, s132a_parms.pstate0_frequency_khz, s132a_parms.frequency_step_khz);
 
     // check for error
-    int & GPST_RETURN_CODE = rc;  
+    int & GPST_RETURN_CODE = rc;
     if (rc == -GPST_INVALID_OBJECT) {
       FAPI_ERR("**** ERROR : gpst_create was passed null pointer to gpst, characterization, or characterization->ops or characterization->points = 0");
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_OBJECT_ERROR);    
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_OBJECT_ERROR);
       break;
     }
     else if (rc == -GPST_INVALID_ARGUMENT) {
       int32_t & OPS_PMIN           = s132a_characterization.ops[0].pstate;
       int32_t & OPS_PMAX           = s132a_characterization.ops[s132a_characterization.points - 1].pstate;
       FAPI_ERR("**** ERROR : gpst_create was passed bad argument and resulted in PSTATE limits error or operating point ordering error");
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ARGUMENT_ERROR);  
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ARGUMENT_ERROR);
       break;
     }
     else if (rc == -GPST_INVALID_ENTRY) {
       FAPI_ERR("**** ERROR : gpst_entry_create was passed a voltage that was out of limits of vrm11 vid code or ivid vide code");
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ENTRY_ERROR);  
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ENTRY_ERROR);
       break;
     }
     else if (rc) {
       FAPI_ERR("**** ERROR : gpst_create returned error rc = %d", rc );
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ERROR);  
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_GPST_CREATE_ERROR);
       break;
     }
 
@@ -270,7 +272,7 @@ p8_build_pstate_datablock(const Target& i_target,
     // Boost the Global Pstate table
     // -----------------------------
     FAPI_IMP("Boost Global Pstate Table per CPM Boost Attribute");
-  
+
     l_rc = proc_boost_gpst (io_pss, attr.attr_cpm_turbo_boost_percent);
     if (l_rc) break;
 
@@ -294,33 +296,38 @@ p8_build_pstate_datablock(const Target& i_target,
     // Create the Local Pstate table
     // -----------------------------
     FAPI_IMP("Creating Local Pstate Table");
-  
+
     rc = lpst_create( &((*io_pss).gpst), &((*io_pss).lpsa), DEAD_ZONE_5MV, volt_int_vdd_bias, volt_int_vcs_bias);
- 
+
     int & LPST_RETURN_CODE = rc;
     if (rc == -LPST_INVALID_OBJECT) {
       FAPI_ERR("**** ERROR : lpst_create was passed null pointer to gpst or lpsa");
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_OBJECT_ERROR);
       break;
     }
+    else if (rc == -IVID_INVALID_VOLTAGE) {
+      FAPI_ERR("**** ERROR : lpst_create attempted to convert an invalid voltage value to ivid format (GT 1.39375V or LT 0.6V");
+      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_IVID_ERROR);
+      break;
+    }
     else if (rc == -LPST_GPST_WARNING) {
-      FAPI_INF("No Local Pstate Generated  - Global Pstate Table is completely within Deadzone" );
-      
+      FAPI_IMP("No Local Pstate Generated  - Global Pstate Table is completely within Deadzone" );
+
       // indicate not LPST installed in PSS
       (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
-                                       PSTATE_NO_INSTALL_LPSA);          
+                                       PSTATE_NO_INSTALL_LPSA);
     }
     else if (rc) {
       FAPI_ERR("**** ERROR : lpst_create returned error rc = %d", rc );
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_ERROR);
-      break;    
+      break;
     }
 
     // -----------------------
     // Create VDS & VIN tables
     // -----------------------
     FAPI_IMP("Create VDS & VIN Tables");
-  
+
     ivrm_parm_data_t        ivrm_parms;
 
     // Set defaults
@@ -354,11 +361,11 @@ p8_build_pstate_datablock(const Target& i_target,
         // perform least squares fit to get coefficients & then fill in VIN table
         fit_file(ivrm_parms.number_of_coefficients,
                  ivrm_mvpd.header.version,
-                 ivrm_mvpd.data.ex[3].Coef,
-                 &(ivrm_mvpd.data.ex[3]) );
+                 ivrm_mvpd.data.ex[i].Coef,
+                 &(ivrm_mvpd.data.ex[i]) );
 
         write_HWtab_bin(&ivrm_parms,
-                        ivrm_mvpd.data.ex[3].Coef,
+                        ivrm_mvpd.data.ex[i].Coef,
                         io_pss);
         break;
       }
@@ -368,25 +375,25 @@ p8_build_pstate_datablock(const Target& i_target,
     // Update CPM Range info in Superstructure
     // ---------------------------------------
     FAPI_IMP("Creating CPM Range Table");
-  
+
     l_rc = proc_upd_cpmrange (io_pss, &attr);
     if (l_rc) break;
 
     // -----------------------------------------------
     // Update Resonant Clocking info in Superstructure
-    // -----------------------------------------------    
+    // -----------------------------------------------
     if (attr.attr_chip_ec_feature_resonant_clk_valid) {
-      FAPI_IMP("Creating Resonant Clocking Band Table");  
-  
-      l_rc = proc_res_clock (io_pss, &attr); 
+      FAPI_IMP("Creating Resonant Clocking Band Table");
+
+      l_rc = proc_res_clock (io_pss, &attr);
       if (l_rc) break;
     }
     else {
     (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
-                                                           PSTATE_NO_INSTALL_RESCLK );    
-    
+                                                           PSTATE_NO_INSTALL_RESCLK );
+
     }
-    
+
     // ------------------------
     // Force optional overrides
     // ------------------------
@@ -397,7 +404,7 @@ p8_build_pstate_datablock(const Target& i_target,
     //  -------------------
     //  uint32_t ATTR_PM_PSTATE0_FREQUENCY // Binary in Khz
   } while(0);
-  
+
   return l_rc;
 } // end p8_build_pstate_datablock
 
@@ -412,9 +419,8 @@ ReturnCode proc_get_attributes(const Target& i_target,
                                AttributeList *attr)
 {
   ReturnCode l_rc;
-  int        i      = 0; 
-  char       str[1024];
-  
+  int        i      = 0;
+
   do
   {
     // --------------------------
@@ -425,9 +431,15 @@ ReturnCode proc_get_attributes(const Target& i_target,
 
     // ---------------------------------------------------------------
     // set ATTR_PROC_DPLL_DIVIDER to 4 and do not read attribute value
-    // ---------------------------------------------------------------   
+    // ---------------------------------------------------------------
     attr->attr_proc_dpll_divider = 4;
     FAPI_INF("ATTR_PROC_DPLL_DIVIDER - set to 4");
+
+    l_rc = FAPI_ATTR_SET(ATTR_PROC_DPLL_DIVIDER, &i_target, attr->attr_proc_dpll_divider );
+    if  (l_rc ) {
+      FAPI_ERR("fapiSetAttribute of ATTR_PROC_DPLL_DIVIDER failed");
+      break;
+    }
 
     // ----------------------------
     // attributes currently defined
@@ -435,48 +447,46 @@ ReturnCode proc_get_attributes(const Target& i_target,
     #define DATABLOCK_GET_ATTR(attr_name, target, attr_assign) \
             l_rc = FAPI_ATTR_GET(attr_name, target, attr->attr_assign); \
             if (l_rc) break; \
-            FAPI_INF("%-60s = 0x%08x %u", #attr_name, attr->attr_assign, attr->attr_assign); 
+            FAPI_INF("%-60s = 0x%08x %u", #attr_name, attr->attr_assign, attr->attr_assign);
 
-    DATABLOCK_GET_ATTR(ATTR_FREQ_EXT_BIAS_UP,                                &i_target, attr_freq_ext_bias_up);     
-    DATABLOCK_GET_ATTR(ATTR_FREQ_EXT_BIAS_DOWN,                              &i_target, attr_freq_ext_bias_down);     
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDD_BIAS_UP,                         &i_target, attr_voltage_ext_vdd_bias_up); 
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VCS_BIAS_UP,                         &i_target, attr_voltage_ext_vcs_bias_up); 
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN,                       &i_target, attr_voltage_ext_vdd_bias_down); 
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN,                       &i_target, attr_voltage_ext_vcs_bias_down); 
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_UP,                         &i_target, attr_voltage_int_vdd_bias_up); 
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VCS_BIAS_UP,                         &i_target, attr_voltage_int_vcs_bias_up); 
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_DOWN,                       &i_target, attr_voltage_int_vdd_bias_down); 
-    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VCS_BIAS_DOWN,                       &i_target, attr_voltage_int_vcs_bias_down); 
-    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK,                                   NULL, attr_freq_proc_refclock);        
-    //jwy DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,                               &i_target, attr_proc_dpll_divider);         // set to 4 above - is this temporary?
-    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_MAX,                                        NULL, attr_freq_core_max);             
-    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_FREQUENCY,                                    NULL, attr_pm_safe_frequency);         
-    DATABLOCK_GET_ATTR(ATTR_BOOT_FREQ_MHZ,                                        NULL, attr_boot_freq_mhz);             
-    DATABLOCK_GET_ATTR(ATTR_CPM_TURBO_BOOST_PERCENT,                              NULL, attr_cpm_turbo_boost_percent);   
-    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VDD,                                  NULL, attr_proc_r_loadline_vdd);       
-    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VCS,                                  NULL, attr_proc_r_loadline_vcs);       
-    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VDD,                                  NULL, attr_proc_r_distloss_vdd);       
-    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VCS,                                  NULL, attr_proc_r_distloss_vcs);       
-    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VDD,                                 NULL, attr_proc_vrm_voffset_vdd);      
-    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VCS,                                 NULL, attr_proc_vrm_voffset_vcs);      
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY, NULL, attr_pm_resonant_clock_full_clock_sector_buffer_frequency); 
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY,           NULL, attr_pm_resonant_clock_low_band_lower_frequency);           
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY,           NULL, attr_pm_resonant_clock_low_band_upper_frequency);           
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY,          NULL, attr_pm_resonant_clock_high_band_lower_frequency);          
-    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY,          NULL, attr_pm_resonant_clock_high_band_upper_frequency);          
+    DATABLOCK_GET_ATTR(ATTR_FREQ_EXT_BIAS_UP,                                &i_target, attr_freq_ext_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_EXT_BIAS_DOWN,                              &i_target, attr_freq_ext_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDD_BIAS_UP,                         &i_target, attr_voltage_ext_vdd_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VCS_BIAS_UP,                         &i_target, attr_voltage_ext_vcs_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VDD_BIAS_DOWN,                       &i_target, attr_voltage_ext_vdd_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_EXT_VCS_BIAS_DOWN,                       &i_target, attr_voltage_ext_vcs_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_UP,                         &i_target, attr_voltage_int_vdd_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VCS_BIAS_UP,                         &i_target, attr_voltage_int_vcs_bias_up);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_DOWN,                       &i_target, attr_voltage_int_vdd_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VCS_BIAS_DOWN,                       &i_target, attr_voltage_int_vcs_bias_down);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK,                                   NULL, attr_freq_proc_refclock);
+    //jwy DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,                               &i_target, attr_proc_dpll_divider);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_MAX,                                        NULL, attr_freq_core_max);
+    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_FREQUENCY,                                    NULL, attr_pm_safe_frequency);
+    DATABLOCK_GET_ATTR(ATTR_BOOT_FREQ_MHZ,                                        NULL, attr_boot_freq_mhz);
+    DATABLOCK_GET_ATTR(ATTR_CPM_TURBO_BOOST_PERCENT,                              NULL, attr_cpm_turbo_boost_percent);
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VDD,                                  NULL, attr_proc_r_loadline_vdd);
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VCS,                                  NULL, attr_proc_r_loadline_vcs);
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VDD,                                  NULL, attr_proc_r_distloss_vdd);
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VCS,                                  NULL, attr_proc_r_distloss_vcs);
+    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VDD,                                 NULL, attr_proc_vrm_voffset_vdd);
+    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VCS,                                 NULL, attr_proc_vrm_voffset_vcs);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY, NULL, attr_pm_resonant_clock_full_clock_sector_buffer_frequency);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY,           NULL, attr_pm_resonant_clock_low_band_lower_frequency);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY,           NULL, attr_pm_resonant_clock_low_band_upper_frequency);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY,          NULL, attr_pm_resonant_clock_high_band_lower_frequency);
+    DATABLOCK_GET_ATTR(ATTR_PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY,          NULL, attr_pm_resonant_clock_high_band_upper_frequency);
 
     // Read array attribute
     l_rc = FAPI_ATTR_GET(ATTR_CPM_INFLECTION_POINTS, &i_target, attr->attr_cpm_inflection_points); if (l_rc) break;
-    
+
     for (i = 0; i < 16; i++) {
-      sprintf (str, "%s(%d)","ATTR_CPM_INFLECTION_POINTS", i);
-      FAPI_INF("%-60s = 0x%08x %u",str, attr->attr_cpm_inflection_points[i], attr->attr_cpm_inflection_points[i]);
-//      FAPI_INF("ATTR_CPM_INFLECTION_POINTS(%d) = 0x%08x %u",i, attr->attr_cpm_inflection_points[i], attr->attr_cpm_inflection_points[i]);
+      FAPI_INF("ATTR_CPM_INFLECTION_POINTS(%d) = 0x%08x %u",i, attr->attr_cpm_inflection_points[i], attr->attr_cpm_inflection_points[i]);
     }
 
-    // Read chip ec feature 
-    DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID, &i_target, attr_chip_ec_feature_resonant_clk_valid);      
-    
+    // Read chip ec feature
+    DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID, &i_target, attr_chip_ec_feature_resonant_clk_valid);
+
     // --------------------------------------------------------------
     // do basic attribute value checking and generate error if needed
     // --------------------------------------------------------------
@@ -492,9 +502,9 @@ ReturnCode proc_get_attributes(const Target& i_target,
     if (attr->attr_proc_dpll_divider == 0) {
       FAPI_ERR("**** ERROR : Attribute ATTR_PROC_DPLL_DIVIDER = 0");
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_ATTR_DPLL_DIV_ERROR);
-      break;       
+      break;
     }
-     
+
     // ----------------------------------------------------
     // Check Valid Frequency and Voltage Biasing Attributes
     //  - cannot have both up and down bias set
@@ -542,19 +552,19 @@ ReturnCode proc_get_attributes(const Target& i_target,
       FAPI_INF("Double Biasing enabled on external and internal VCS");
     }
 
-    // check resonant clocking attribute values relative to each other    
+    // check resonant clocking attribute values relative to each other
     if (attr->attr_chip_ec_feature_resonant_clk_valid) {
-    
+
       if ( (attr->attr_pm_resonant_clock_low_band_lower_frequency  > attr->attr_pm_resonant_clock_low_band_upper_frequency) ||
            (attr->attr_pm_resonant_clock_low_band_upper_frequency  > attr->attr_pm_resonant_clock_high_band_lower_frequency) ||
            (attr->attr_pm_resonant_clock_high_band_lower_frequency > attr->attr_pm_resonant_clock_high_band_upper_frequency) ) {
-           
+
         FAPI_ERR("**** ERROR : Resonant clocking band attribute values are not in ascending order from low to high");
         FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_RESCLK_BAND_ERROR);
-        break;     
-      }     
+        break;
+      }
     }
-    
+
     // ------------------------------------------------------
     // do attribute default value setting if the are set to 0
     // ------------------------------------------------------
@@ -584,17 +594,17 @@ ReturnCode proc_get_attributes(const Target& i_target,
     }
 
     if (attr->attr_proc_r_distloss_vdd == 0) {
-      attr->attr_proc_r_distloss_vdd = 500;
-      FAPI_INF("Attribute value was 0 - setting to default value ATTR_PROC_R_DISTLOSS_VDD = 500");
+      attr->attr_proc_r_distloss_vdd = 390;
+      FAPI_INF("Attribute value was 0 - setting to default value ATTR_PROC_R_DISTLOSS_VDD = 390");
     }
 
     if (attr->attr_proc_r_distloss_vcs == 0) {
-      attr->attr_proc_r_distloss_vcs = 800;
-      FAPI_INF("Attribute value was 0 - setting to default value ATTR_PROC_R_DISTLOSS_VCS = 800");
+      attr->attr_proc_r_distloss_vcs = 3500;
+      FAPI_INF("Attribute value was 0 - setting to default value ATTR_PROC_R_DISTLOSS_VCS = 3500");
     }
 
   } while(0);
-  
+
   return l_rc;
 }
 
@@ -607,7 +617,8 @@ ReturnCode proc_get_attributes(const Target& i_target,
 ReturnCode proc_get_mvpd_data(const Target&     i_target,
                                      uint32_t    attr_mvpd_data[PV_D][PV_W],
                                      ivrm_mvpd_t *ivrm_mvpd,
-                                     uint8_t     *valid_chiplets)
+                                     uint8_t     *present_chiplets,
+                                     uint8_t     *functional_chiplets)
 {
   ReturnCode l_rc;
   std::vector<fapi::Target>       l_exChiplets;
@@ -628,8 +639,12 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
   uint8_t    bucket_id        = 0;
   uint16_t   cal_data[4];
 
-  do 
+  do
   {
+    // initialize
+    *present_chiplets    = 0;
+    *functional_chiplets = 0;
+
     // -----------------------------------------------------------------
     // get list of chiplets and loop over each and get #V data from each
     // -----------------------------------------------------------------
@@ -642,178 +657,177 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
       break;
     }
 
-    for (j=0; j < l_exChiplets.size(); j++) {
+    FAPI_INF("Number of EX chiplets present => %u", l_exChiplets.size());
 
-      // Determine if it's functional
+    for (j=0; j < l_exChiplets.size(); j++) {
+      *present_chiplets = 1;
+      l_bufferSize      = 512;
+      l_bufferSize_pdm  = 512;
+      uint8_t l_chipNum = 0xFF;
+
+      l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_chipNum);
+      if (l_rc) {
+        FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
+        break;
+      }
+
+      // set l_record to appropriate lprx record (add core number to lrp0)
+      l_record = (uint32_t)fapi::MVPD_RECORD_LRP0 + l_chipNum;
+
+      // Get Chiplet MVPD data and put in chiplet_mvpd_data using accessor function
+      l_rc = fapiGetMvpdField((fapi::MvpdRecord)l_record,
+                              fapi::MVPD_KEYWORD_PDV,
+                              i_target,
+                              l_buffer,
+                              l_bufferSize);
+      if (!l_rc.ok()) {
+        FAPI_ERR("**** ERROR : Unexpected error encountered in fapiGetMvpdField");
+        break;
+      }
+
+      // check buffer size
+      if (l_bufferSize < PDV_BUFFER_SIZE) {
+        FAPI_ERR("**** ERROR : Wrong size buffer returned from fapiGetMvpdField for #V => %d", l_bufferSize );
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_BUFFER_SIZE_ERROR);
+        break;
+      }
+
+      // clear array
+      memset(chiplet_mvpd_data, 0, sizeof(chiplet_mvpd_data));
+
+      // fill chiplet_mvpd_data 2d array with data iN buffer (skip first byte - bucket id)
+      #define UINT16_GET(__uint8_ptr)   ((uint16_t)( ( (*((const uint8_t *)(__uint8_ptr)) << 8) | *((const uint8_t *)(__uint8_ptr) + 1) ) ))
+
+      // use copy of allocated buffer pointer to increment through buffer
+      l_buffer_inc = l_buffer;
+
+      bucket_id = *l_buffer_inc;
+      l_buffer_inc++;
+
+      FAPI_INF("#V chiplet = %u bucket id = %u", l_chipNum, bucket_id);
+
+      for (i=0; i<=4; i++) {
+
+        for (ii=0; ii<=4; ii++) {
+          chiplet_mvpd_data[i][ii] = (uint32_t) UINT16_GET(l_buffer_inc);
+          FAPI_INF("#V data = 0x%04X  %-6d", chiplet_mvpd_data[i][ii], chiplet_mvpd_data[i][ii]);
+          // increment to next MVPD value in buffer
+          l_buffer_inc+= 2;
+        }
+      }
+
+      // perform data validity checks on this #V data before proceeding to use it
+      l_rc = proc_chk_valid_poundv(chiplet_mvpd_data, l_chipNum, bucket_id);
+      if (l_rc) break;
+
+      // on first chiplet put each bucket's data into attr_mvpd_voltage_control
+      if (first_chplt) {
+
+        for (i=0; i<=4; i++) {
+
+          for (ii=0; ii<=4; ii++) {
+            attr_mvpd_data[i][ii] = chiplet_mvpd_data[i][ii];
+          }
+        }
+        first_chplt = 0;
+      }
+      else {
+        // on subsequent chiplets, check that frequencies are same for each operating point for each chiplet
+        if ( (attr_mvpd_data[0][0] != chiplet_mvpd_data[0][0]) ||
+             (attr_mvpd_data[1][0] != chiplet_mvpd_data[1][0]) ||
+             (attr_mvpd_data[2][0] != chiplet_mvpd_data[2][0]) ||
+             (attr_mvpd_data[3][0] != chiplet_mvpd_data[3][0]) ||
+             (attr_mvpd_data[4][0] != chiplet_mvpd_data[4][0]) ) {
+
+          FAPI_ERR("**** ERROR : frequencies are not the same for each operating point for each chiplet");
+          FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL);
+          break;
+        }
+      }
+
+      // check each bucket for max voltage and if max, put bucket's data into attr_mvpd_voltage_control
+      for (i=0; i <= 4; i++) {
+
+        if (attr_mvpd_data[i][1] < chiplet_mvpd_data[i][1]) {
+          attr_mvpd_data[i][0] = chiplet_mvpd_data[i][0];
+          attr_mvpd_data[i][1] = chiplet_mvpd_data[i][1];
+          attr_mvpd_data[i][2] = chiplet_mvpd_data[i][2];
+          attr_mvpd_data[i][3] = chiplet_mvpd_data[i][3];
+          attr_mvpd_data[i][4] = chiplet_mvpd_data[i][4];
+        }
+      }
+
+      // --------------------------------------------
+      // Process #M Data
+      // --------------------------------------------
+
+      // Determine if present chiplet is functional
       l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[j], l_functional);
       if (l_rc) {
         FAPI_ERR("fapiGetAttribute of ATTR_FUNCTIONAL error");
         break;
       }
-      else {
 
-        if ( l_functional ) {
-          *valid_chiplets   = 1;
-          l_bufferSize      = 512;
-          l_bufferSize_pdm  = 512;
-          uint8_t l_chipNum = 0xFF;
+      if ( l_functional ) {
+        *functional_chiplets = 1;
 
-          l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_chipNum);
-          if (l_rc) {
-            FAPI_ERR("fapiGetAttribute of ATTR_CHIP_UNIT_POS error");
-            break;
+        // Get Chiplet #M MVPD data
+        l_rc = fapiGetMvpdField((fapi::MvpdRecord)l_record,
+                               fapi::MVPD_KEYWORD_PDM,
+                               i_target,
+                               l_buffer_pdm,
+                               l_bufferSize_pdm);
+        if (!l_rc.ok()) {
+          FAPI_ERR("**** ERROR : Unexpected error encountered in fapiGetMvpdField");
+          break;
+        }
+
+        // check buffer size
+        if (l_bufferSize_pdm < PDM_BUFFER_SIZE) {
+          FAPI_ERR("**** ERROR : Wrong size buffer returned from fapiGetMvpdField for #M => %d", l_bufferSize_pdm );
+          FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDM_BUFFER_SIZE_ERROR);
+          break;
+        }
+
+        // use copy of allocated buffer pointer to increment through buffer
+        l_buffer_pdm_inc = l_buffer_pdm;
+
+        // get #M version and advance pointer 1-byte to beginning of #M data
+        version_pdm = *l_buffer_pdm_inc;
+        ivrm_mvpd->header.version = version_pdm ;
+        l_buffer_pdm_inc++;
+
+        // loop over 13 entries of #M data with 4 measurements per entry
+        FAPI_INF("#M chiplet = %u  version = %u", l_chipNum, version_pdm);
+
+        for (i=0; i < POUNDM_POINTS; i++) {
+
+          for (ii=0; ii<4; ii++) {
+            cal_data[ii] = UINT16_GET(l_buffer_pdm_inc);
+
+            if (version_pdm == 2)
+              l_buffer_pdm_inc+= 4;
+            else
+              l_buffer_pdm_inc+= 2;
+
           }
 
-          // set l_record to appropriate lprx record (add core number to lrp0)
-          l_record = (uint32_t)fapi::MVPD_RECORD_LRP0 + l_chipNum;
+          ivrm_mvpd->data.ex[j].point[i].gate_voltage   = cal_data[0];
+          ivrm_mvpd->data.ex[j].point[i].drain_voltage  = cal_data[1];
+          ivrm_mvpd->data.ex[j].point[i].source_voltage = cal_data[2];
+          ivrm_mvpd->data.ex[j].point[i].drain_current  = cal_data[3];
 
-          // Get Chiplet MVPD data and put in chiplet_mvpd_data using accessor function
-          l_rc = fapiGetMvpdField((fapi::MvpdRecord)l_record,
-                                  fapi::MVPD_KEYWORD_PDV,
-                                  i_target,
-                                  l_buffer,
-                                  l_bufferSize);
-          if (!l_rc.ok()) {
-            FAPI_ERR("**** ERROR : Unexpected error encountered in fapiGetMvpdField");
-            break;
-          }
+          FAPI_INF("#M data (hex & dec) = 0x%04x 0x%04x 0x%04x 0x%04x    %5u %5u %5u %5u", cal_data[0], cal_data[1], cal_data[2], cal_data[3], cal_data[0], cal_data[1], cal_data[2], cal_data[3]);
+        }
 
-          // check buffer size
-          if (l_bufferSize < PDV_BUFFER_SIZE) {
-            FAPI_ERR("**** ERROR : Wrong size buffer returned from fapiGetMvpdField for #V => %d", l_bufferSize );
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_BUFFER_SIZE_ERROR);
-            break;
-          }
+        // set number of samples to 13
+        ivrm_mvpd->data.ex[j].point_valid = POUNDM_POINTS;
+      } // end functional
 
-          // clear array
-          memset(chiplet_mvpd_data, 0, sizeof(chiplet_mvpd_data));
+    } // end for loop
 
-          // fill chiplet_mvpd_data 2d array with data iN buffer (skip first byte - bucket id)
-          #define UINT16_GET(__uint8_ptr)   ((uint16_t)( ( (*((const uint8_t *)(__uint8_ptr)) << 8) | *((const uint8_t *)(__uint8_ptr) + 1) ) ))
-
-          // use copy of allocated buffer pointer to increment through buffer
-          l_buffer_inc = l_buffer;
-
-          bucket_id = *l_buffer_inc;
-          l_buffer_inc++;
-
-          FAPI_INF("#V chiplet = %u bucket id = %u", l_chipNum, bucket_id);
-
-          for (i=0; i<=4; i++) {
-
-            for (ii=0; ii<=4; ii++) {
-              chiplet_mvpd_data[i][ii] = (uint32_t) UINT16_GET(l_buffer_inc);
-              FAPI_INF("#V data = 0x%04X  %-6d", chiplet_mvpd_data[i][ii], chiplet_mvpd_data[i][ii]);
-              // increment to next MVPD value in buffer
-              l_buffer_inc+= 2;
-            }
-          }
-
-          // perform data validity checks on this #V data before proceeding to use it
-          l_rc = proc_chk_valid_poundv(chiplet_mvpd_data, l_chipNum, bucket_id);
-          if (l_rc) break;
-
-          // on first chiplet put each bucket's data into attr_mvpd_voltage_control
-          if (first_chplt) {
-
-            for (i=0; i<=4; i++) {
-
-              for (ii=0; ii<=4; ii++) {
-                attr_mvpd_data[i][ii] = chiplet_mvpd_data[i][ii];
-              }
-            }
-            first_chplt = 0;
-          }
-          else {
-            // on subsequent chiplets, check that frequencies are same for each operating point for each chiplet
-            if ( (attr_mvpd_data[0][0] != chiplet_mvpd_data[0][0]) ||
-                 (attr_mvpd_data[1][0] != chiplet_mvpd_data[1][0]) ||
-                 (attr_mvpd_data[2][0] != chiplet_mvpd_data[2][0]) ||
-                 (attr_mvpd_data[3][0] != chiplet_mvpd_data[3][0]) ||
-                 (attr_mvpd_data[4][0] != chiplet_mvpd_data[4][0]) ) {
-
-              FAPI_ERR("**** ERROR : frequencies are not the same for each operating point for each chiplet");
-              FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL);
-              break;
-            }
-          }
-
-          // check each bucket for max voltage and if max, put bucket's data into attr_mvpd_voltage_control
-          for (i=0; i <= 4; i++) {
-
-            if (attr_mvpd_data[i][1] < chiplet_mvpd_data[i][1]) {
-              attr_mvpd_data[i][0] = chiplet_mvpd_data[i][0];
-              attr_mvpd_data[i][1] = chiplet_mvpd_data[i][1];
-              attr_mvpd_data[i][2] = chiplet_mvpd_data[i][2];
-              attr_mvpd_data[i][3] = chiplet_mvpd_data[i][3];
-              attr_mvpd_data[i][4] = chiplet_mvpd_data[i][4];
-            }
-          }
-
-          // --------------------------------------------
-          // Process #M Data
-          // --------------------------------------------
-
-          // Get Chiplet #M MVPD data
-          l_rc = fapiGetMvpdField((fapi::MvpdRecord)l_record,
-                                 fapi::MVPD_KEYWORD_PDM,
-                                 i_target,
-                                 l_buffer_pdm,
-                                 l_bufferSize_pdm);
-          if (!l_rc.ok()) {
-            FAPI_ERR("**** ERROR : Unexpected error encountered in fapiGetMvpdField");
-            break;
-          }
-
-          // check buffer size
-          if (l_bufferSize_pdm < PDM_BUFFER_SIZE) {
-            FAPI_ERR("**** ERROR : Wrong size buffer returned from fapiGetMvpdField for #M => %d", l_bufferSize_pdm );
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDM_BUFFER_SIZE_ERROR);
-            break;
-          }
-
-          // use copy of allocated buffer pointer to increment through buffer
-          l_buffer_pdm_inc = l_buffer_pdm;
-
-          // get #M version and advance pointer 1-byte to beginning of #M data
-          version_pdm = *l_buffer_pdm_inc;
-          ivrm_mvpd->header.version = version_pdm ;
-          l_buffer_pdm_inc++;
-
-          // loop over 13 entries of #M data with 4 measurements per entry
-          FAPI_INF("#M chiplet = %u  version = %u", l_chipNum, version_pdm);
-
-          for (i=0; i<13; i++) {
-
-            for (ii=0; ii<4; ii++) {
-              cal_data[ii] = UINT16_GET(l_buffer_pdm_inc);
-              
-              if (version_pdm == 2)
-                l_buffer_pdm_inc+= 4;
-              else
-                l_buffer_pdm_inc+= 2;
-                
-            }
-
-            ivrm_mvpd->data.ex[j].point[i].gate_voltage   = cal_data[0];
-            ivrm_mvpd->data.ex[j].point[i].drain_voltage  = cal_data[1];
-            ivrm_mvpd->data.ex[j].point[i].source_voltage = cal_data[2];
-            ivrm_mvpd->data.ex[j].point[i].drain_current  = cal_data[3];
-
-            FAPI_INF("#M data (hex & dec) = 0x%04x 0x%04x 0x%04x 0x%04x    %5u %5u %5u %5u", cal_data[0], cal_data[1], cal_data[2], cal_data[3], cal_data[0], cal_data[1], cal_data[2], cal_data[3]);
-          }
-
-          // set number of samples to 13
-          ivrm_mvpd->data.ex[j].point_valid = 13;
-
-        } // end if l_functional
-        else {            // Not Functional so skip it
-        }        
-      }      
-    } // end for loop    
-  
   } while(0);
-  
+
   free (l_buffer);
   free (l_buffer_pdm);
 
@@ -896,7 +910,7 @@ ReturnCode proc_upd_cpmrange (PstateSuperStructure *pss,
     // loop over valid points in attribute and convert to Khz and then convert to pstate value
     for (i = 0; i < valid_points; i++) {
       freq_khz = attr->attr_cpm_inflection_points[i] * revle32(pss->gpst.frequency_step_khz);
-      FAPI_INF("Converting CPM inflection point %u (%u khz) to Pstate", i, freq_khz); 
+      FAPI_INF("Converting CPM inflection point %u (%u khz) to Pstate", i, freq_khz);
       rc = freq2pState(&(pss->gpst), freq_khz, &pstate);  if (rc) break;
       rc = pstate_minmax_chk(&(pss->gpst), &pstate);      if (rc) break;
       pss->cpmranges.inflectionPoint[i] = pstate;
@@ -907,20 +921,20 @@ ReturnCode proc_upd_cpmrange (PstateSuperStructure *pss,
     if (rc) break;
 
     // convert pMax attribute to Khz and then convert to pstate value
-    
+
     if (attr->attr_cpm_inflection_points[9] == 0) {
       FAPI_INF(" CPM pMax  = 0. Skipping conversion to pstate");
     }
     else {
-      freq_khz = attr->attr_cpm_inflection_points[9] * revle32(pss->gpst.frequency_step_khz);  
-      FAPI_INF("Converting CPM pMax (%u khz) to Pstate", freq_khz); 
+      freq_khz = attr->attr_cpm_inflection_points[9] * revle32(pss->gpst.frequency_step_khz);
+      FAPI_INF("Converting CPM pMax (%u khz) to Pstate", freq_khz);
       rc = freq2pState(&(pss->gpst), freq_khz, &pstate);   if (rc) break;
       rc = pstate_minmax_chk(&(pss->gpst), &pstate);       if (rc) break;
       pss->cpmranges.pMax = pstate;
 
       FAPI_INF("CPM pMax   freq_khz = %u  pstate = %d",freq_khz, pstate);
     }
-    
+
   } while (0);
 
   // ------------------------------------------------------
@@ -930,7 +944,7 @@ ReturnCode proc_upd_cpmrange (PstateSuperStructure *pss,
     int      & RETURN_CODE = rc;
     int8_t   & PSTATE      = pstate;
     uint32_t & FREQ_KHZ    = freq_khz;
-    
+
     if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_LT_PSTATE_MIN) {
       FAPI_ERR("**** ERROR : Computed pstate for freq (%d khz) out of bounds of MAX/MIN possible rc = %d", freq_khz, rc);
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PSTATE_MINMAX_BOUNDS_ERROR);
@@ -969,9 +983,9 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
   gpst_entry_t entry;
   uint8_t    gpsi_max;
 
-  do 
+  do
   {
-  
+
     if (attr_boost_percent == 0) {
       FAPI_INF("CPM Turbo Boost Attribute = 0 -- no boosting will be done");
       break;
@@ -990,8 +1004,8 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
 
     // if boosted frequency is <= turbo frequency, then no boost is to be done
     if (boosted_freq_khz <= pstate0_frequency_khz) {
-      FAPI_INF("CPM Turbo Boost Attribute resulted in no increase in pstates - boost_pct = %f turbo_freq_khz = %u boosted_freq_khz = %u", 
-               boosted_pct,  pstate0_frequency_khz, boosted_freq_khz);   
+      FAPI_INF("CPM Turbo Boost Attribute resulted in no increase in pstates - boost_pct = %f turbo_freq_khz = %u boosted_freq_khz = %u",
+               boosted_pct,  pstate0_frequency_khz, boosted_freq_khz);
       break;
     }
     // calculate # pstates that boosted frequency is above turbo
@@ -1000,7 +1014,7 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
     // pstate difference is 0 then no boost is to be done, else update global pstate table
     if (pstate_diff == 0) {
       FAPI_INF("CPM Turbo Boost Attribute resulted in no increase in pstates - boost_pct = %f turbo_freq_khz = %u boosted_freq_khz = %u",
-               boosted_pct,  pstate0_frequency_khz, boosted_freq_khz);    
+               boosted_pct,  pstate0_frequency_khz, boosted_freq_khz);
       break;
     }
     else {
@@ -1017,7 +1031,7 @@ ReturnCode proc_boost_gpst (PstateSuperStructure *pss,
       pss->gpst.entries += pstate_diff;
 
     }
-    
+
   } while(0);
   return l_rc;
 } // end proc_boost_gpst
@@ -1035,42 +1049,42 @@ ReturnCode proc_chk_valid_poundv(const uint32_t poundv_data[PV_D][PV_W],
   ReturnCode    l_rc;
   const uint8_t pv_op_order[S132A_POINTS] = PV_OP_ORDER;
   const char    *pv_op_str[S132A_POINTS] = PV_OP_ORDER_STR;
-  uint8_t       i = 0; 
-  
+  uint8_t       i = 0;
+
   do
   {
-    // check for non-zero freq, voltage, or current in valid operating points                             
-    for (i = 0; i <= S132A_POINTS-1; i++) {                                                                 
+    // check for non-zero freq, voltage, or current in valid operating points
+    for (i = 0; i <= S132A_POINTS-1; i++) {
 
-      FAPI_INF("Checking for Zero valued data in each #V operating point (%s) f=%u v=%u i=%u v=%u i=%u", 
+      FAPI_INF("Checking for Zero valued data in each #V operating point (%s) f=%u v=%u i=%u v=%u i=%u",
                pv_op_str[pv_op_order[i]],
                poundv_data[pv_op_order[i]][0],
                poundv_data[pv_op_order[i]][1],
                poundv_data[pv_op_order[i]][2],
                poundv_data[pv_op_order[i]][3],
                poundv_data[pv_op_order[i]][4]);
-      
-      if (poundv_data[pv_op_order[i]][0] == 0 ||                                                          
-          poundv_data[pv_op_order[i]][1] == 0 ||                                                          
-          poundv_data[pv_op_order[i]][2] == 0 ||                                                          
-          poundv_data[pv_op_order[i]][3] == 0 ||                                                          
-          poundv_data[pv_op_order[i]][4] == 0   ) {                                                       
 
-        FAPI_ERR("**** ERROR : Zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)", chiplet_num, bucket_id, pv_op_str[pv_op_order[i]]);                                            
-        const uint8_t& OP_POINT    = pv_op_order[i];                                                                   
-        const uint8_t& CHIPLET_NUM = chiplet_num;                                                         
-        const uint8_t& BUCKET_ID   = bucket_id;                                                         
-        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_ZERO_DATA_ERROR);                         
-        break;                                                                                            
-      }                                                                                                   
-    }                                                                                                     
-    
+      if (poundv_data[pv_op_order[i]][0] == 0 ||
+          poundv_data[pv_op_order[i]][1] == 0 ||
+          poundv_data[pv_op_order[i]][2] == 0 ||
+          poundv_data[pv_op_order[i]][3] == 0 ||
+          poundv_data[pv_op_order[i]][4] == 0   ) {
+
+        FAPI_ERR("**** ERROR : Zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)", chiplet_num, bucket_id, pv_op_str[pv_op_order[i]]);
+        const uint8_t& OP_POINT    = pv_op_order[i];
+        const uint8_t& CHIPLET_NUM = chiplet_num;
+        const uint8_t& BUCKET_ID   = bucket_id;
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_ZERO_DATA_ERROR);
+        break;
+      }
+    }
+
     if (l_rc) break;
-                                                                                                          
-    // check valid operating points' values have this relationship (power save <= nominal <= turbo)       
-    for (i = 1; i <= S132A_POINTS-1; i++) {                                                                 
 
-    FAPI_INF("Checking for relationship between #V operating point(%s <= %s) f=%u <= f=%u  v=%u <= v=%u  i=%u <= i=%u  v=%u <= v=%u  i=%u <= i=%u", 
+    // check valid operating points' values have this relationship (power save <= nominal <= turbo)
+    for (i = 1; i <= S132A_POINTS-1; i++) {
+
+    FAPI_INF("Checking for relationship between #V operating point(%s <= %s) f=%u <= f=%u  v=%u <= v=%u  i=%u <= i=%u  v=%u <= v=%u  i=%u <= i=%u",
                pv_op_str[pv_op_order[i-1]], pv_op_str[pv_op_order[i]],
                poundv_data[pv_op_order[i-1]][0], poundv_data[pv_op_order[i]][0],
                poundv_data[pv_op_order[i-1]][1], poundv_data[pv_op_order[i]][1],
@@ -1078,24 +1092,24 @@ ReturnCode proc_chk_valid_poundv(const uint32_t poundv_data[PV_D][PV_W],
                poundv_data[pv_op_order[i-1]][3], poundv_data[pv_op_order[i]][3],
                poundv_data[pv_op_order[i-1]][4], poundv_data[pv_op_order[i]][4]);
 
-      if (poundv_data[pv_op_order[i-1]][0] > poundv_data[pv_op_order[i]][0]  ||                           
-          poundv_data[pv_op_order[i-1]][1] > poundv_data[pv_op_order[i]][1]  ||                           
-          poundv_data[pv_op_order[i-1]][2] > poundv_data[pv_op_order[i]][2]  ||                           
-          poundv_data[pv_op_order[i-1]][3] > poundv_data[pv_op_order[i]][3]  ||                           
-          poundv_data[pv_op_order[i-1]][4] > poundv_data[pv_op_order[i]][4]    ) {                        
+      if (poundv_data[pv_op_order[i-1]][0] > poundv_data[pv_op_order[i]][0]  ||
+          poundv_data[pv_op_order[i-1]][1] > poundv_data[pv_op_order[i]][1]  ||
+          poundv_data[pv_op_order[i-1]][2] > poundv_data[pv_op_order[i]][2]  ||
+          poundv_data[pv_op_order[i-1]][3] > poundv_data[pv_op_order[i]][3]  ||
+          poundv_data[pv_op_order[i-1]][4] > poundv_data[pv_op_order[i]][4]    ) {
 
-        FAPI_ERR("**** ERROR : Relationship error between #V operating point (%s <= %s)(power save <= nominal <= turbo) (chiplet = %u  bucket id = %u  op point = %u)", 
-                 pv_op_str[pv_op_order[i-1]], pv_op_str[pv_op_order[i]], chiplet_num, bucket_id, pv_op_order[i]);  
-        const uint8_t& OP_POINT    = pv_op_order[i];                                                                   
+        FAPI_ERR("**** ERROR : Relationship error between #V operating point (%s <= %s)(power save <= nominal <= turbo) (chiplet = %u  bucket id = %u  op point = %u)",
+                 pv_op_str[pv_op_order[i-1]], pv_op_str[pv_op_order[i]], chiplet_num, bucket_id, pv_op_order[i]);
+        const uint8_t& OP_POINT    = pv_op_order[i];
         const uint8_t& CHIPLET_NUM = chiplet_num;
-        const uint8_t& BUCKET_ID   = bucket_id;                                                            
-        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_OPPOINT_ORDER_ERROR);                     
-        break;                                                                                            
-      }                                                                                                   
+        const uint8_t& BUCKET_ID   = bucket_id;
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_OPPOINT_ORDER_ERROR);
+        break;
+      }
     }
-                                                                                                         
+
   } while(0);
-  
+
   return l_rc;
 }
 
@@ -1105,15 +1119,15 @@ ReturnCode proc_chk_valid_poundv(const uint32_t poundv_data[PV_D][PV_W],
 /// \param[inout] *pss   => pointer to pstate superstructure
 /// \param[in]    *attr  => pointer to attribute list structure
 /// -------------------------------------------------------------------
-ReturnCode proc_res_clock (PstateSuperStructure *pss, 
+ReturnCode proc_res_clock (PstateSuperStructure *pss,
                            AttributeList *attr_list)
 {
-  ReturnCode l_rc; 
-  int        rc       = 0;  
+  ReturnCode l_rc;
+  int        rc       = 0;
   uint32_t   freq_khz = 0;
   Pstate     pstate   = 0;
-  
-  do 
+
+  do
   {
     // ----------------------------------------------------------------------------
     // convert resonant clock frequencies to pstate value and set in superstructure
@@ -1128,25 +1142,25 @@ ReturnCode proc_res_clock (PstateSuperStructure *pss,
           pstate = gpst_pmax(&(pss->gpst)); \
           FAPI_INF("%s pstate is greater than gpst_max(%d) - clipping to gpst_max", #attr_name, pstate); \
         } \
-        pss->resclk.ps_name = pstate;                                                 
+        pss->resclk.ps_name = pstate;
 
     DATABLOCK_RESCLK(attr_pm_resonant_clock_full_clock_sector_buffer_frequency, full_csb_ps);
     DATABLOCK_RESCLK(attr_pm_resonant_clock_low_band_lower_frequency,           res_low_lower_ps);
     DATABLOCK_RESCLK(attr_pm_resonant_clock_low_band_upper_frequency,           res_low_upper_ps);
     DATABLOCK_RESCLK(attr_pm_resonant_clock_high_band_lower_frequency,          res_high_lower_ps);
     DATABLOCK_RESCLK(attr_pm_resonant_clock_high_band_upper_frequency,          res_high_upper_ps);
-                  
+
   } while(0);
 
   // ---------------------------------
-  // check error code from freq2pState 
+  // check error code from freq2pState
   // ---------------------------------
   if (rc && rc != -GPST_PSTATE_GT_GPST_PMAX) {
     int &      RETURN_CODE = rc;
     int8_t &   PSTATE      = pstate;
     uint32_t & FREQ_KHZ    = freq_khz;
-    
-    if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_LT_PSTATE_MIN) {   
+
+    if (rc == -PSTATE_LT_PSTATE_MIN || rc == -PSTATE_LT_PSTATE_MIN) {
       FAPI_ERR("**** ERROR : Computed pstate for freq (%d khz) out of bounds of MAX/MIN possible rc = %d", freq_khz, rc);
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PSTATE_MINMAX_BOUNDS_ERROR);
     }
@@ -1155,7 +1169,7 @@ ReturnCode proc_res_clock (PstateSuperStructure *pss,
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_ERROR);
     }
   }
-       
+
   return l_rc;
 }
 

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.12 2013/10/10 20:37:55 jimyac Exp $
+// $Id: pstate_tables.c,v 1.13 2013/10/30 17:35:57 jimyac Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -648,14 +648,14 @@ lpst_create(const GlobalPstateTable *gpst,
     //  - lpst_max is gpst entry that is equal to (turbo_vdd - deadzone)
     // ------------------------------------------------------------------
     entry.value = revle64(gpst->pstate[(gpst->entries)-1].value); 
-    rc          = vrm112vuv(entry.fields.evid_vdd, &turbo_uv);  if (rc) break;  
+    rc          = ivid2vuv(entry.fields.evid_vdd_eff, &turbo_uv);  if (rc) break;  
       
     turbo_uv    = (uint32_t) (turbo_uv * volt_int_vdd_bias);
     lpst_max_uv = turbo_uv - (dead_zone_5mv * 5000);     
           
     for (i = gpst->entries - 1 ; i >= 0; i--) {
       entry.value = revle64(gpst->pstate[i].value);   
-      rc         = vrm112vuv(entry.fields.evid_vdd, &v_uv);  if (rc) break;
+      rc         = ivid2vuv(entry.fields.evid_vdd_eff, &v_uv);  if (rc) break;
       v_uv        = (uint32_t) (v_uv * volt_int_vdd_bias); 
        
       if (lpst_max_uv >= v_uv) {
@@ -696,13 +696,13 @@ lpst_create(const GlobalPstateTable *gpst,
       entry.value = revle64(gpst->pstate[gpst_index].value);
          
       // compute ivid_vdd
-      rc = vrm112vuv(entry.fields.evid_vdd, &vdd_uv);      if (rc) break;
+      rc = ivid2vuv(entry.fields.evid_vdd_eff, &vdd_uv);   if (rc) break;
       vdd_uv    = (uint32_t) (vdd_uv * volt_int_vdd_bias);
       rc = vuv2ivid(vdd_uv, ROUND_VOLTAGE_DOWN, &v_ivid);  if (rc) break;
       lpsa->pstate[i].fields.ivid_vdd = v_ivid;
       
       // compute ivid_vcs
-      rc = vrm112vuv(entry.fields.evid_vcs, &v_uv);     if (rc) break;
+      rc = ivid2vuv(entry.fields.evid_vcs_eff, &v_uv);  if (rc) break;
       v_uv    = (uint32_t) (v_uv * volt_int_vcs_bias); 
       rc = vuv2ivid(v_uv, ROUND_VOLTAGE_DOWN, &v_ivid); if (rc) break;
       lpsa->pstate[i].fields.ivid_vcs = v_ivid;       
@@ -720,7 +720,7 @@ lpst_create(const GlobalPstateTable *gpst,
           break;                        
         
         entry.value = revle64(gpst->pstate[gpst_index].value);
-        rc          = vrm112vuv(entry.fields.evid_vdd, &vdd_uv);      if (rc) break;
+        rc          = ivid2vuv(entry.fields.evid_vdd_eff, &vdd_uv);   if (rc) break;
         vdd_uv    = (uint32_t) (vdd_uv * volt_int_vdd_bias);        
         rc          = vuv2ivid(vdd_uv, ROUND_VOLTAGE_DOWN, &v_ivid);  if (rc) break;
         vid_incr[j] = v_ivid - lpsa->pstate[i].fields.ivid_vdd;
@@ -798,7 +798,7 @@ lpst_create(const GlobalPstateTable *gpst,
         inc_step = j - 1;
 // jwy        printf("%d %d %d\n", lpst_pstate,j, steps_above_curr);
         entry.value = revle64(gpst->pstate[lpst_pstate - gpst_pmin(gpst) + j].value);       
-        rc         = vrm112vuv(entry.fields.evid_vdd, &gpst_uv);         if (rc) break;
+        rc         = ivid2vuv(entry.fields.evid_vdd_eff, &gpst_uv);      if (rc) break;
         gpst_uv     = (uint32_t) (gpst_uv * volt_int_vdd_bias);
         rc         = vuv2ivid(gpst_uv, ROUND_VOLTAGE_DOWN, &gpst_ivid);  if (rc) break;
         
@@ -823,7 +823,7 @@ lpst_create(const GlobalPstateTable *gpst,
         dec_step = j - 1;
 // jwy        printf("%d %d %d\n", lpst_pstate,j, steps_below_curr);
         entry.value = revle64(gpst->pstate[lpst_pstate - gpst_pmin(gpst) - j].value);       
-        rc         = vrm112vuv(entry.fields.evid_vdd, &gpst_uv);         if (rc) break;
+        rc         = ivid2vuv(entry.fields.evid_vdd_eff, &gpst_uv);         if (rc) break;
         gpst_uv     = (uint32_t) (gpst_uv * volt_int_vdd_bias);
         rc         = vuv2ivid(gpst_uv, ROUND_VOLTAGE_DOWN, &gpst_ivid);  if (rc) break;
         

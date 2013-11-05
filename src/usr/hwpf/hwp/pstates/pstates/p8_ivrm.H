@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_ivrm.H,v 1.1 2013/08/13 17:13:00 jimyac Exp $
+// $Id: p8_ivrm.H,v 1.2 2013/10/23 12:55:19 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_ivrm.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -35,6 +35,9 @@
 //  
 // 
 // 
+
+#define CHIPLETS 12
+
 // 4 x 2B = 8B per measurement 
 typedef struct IVRM_MEASUREMENT {
     uint16_t            gate_voltage;       // V1: mV, V2: uV
@@ -50,14 +53,6 @@ typedef struct IVRM_CAL_DATA {
     double             Coef[4];                      
     ivrm_measurement_t  point[IVRM_CAL_POINTS];
 } ivrm_cal_data_t;
-
-#define MURANO 1
-
-#ifdef  MURANO
-#define CHIPLETS 6
-#elif   VENICE
-#define CHIPLETS 12
-#endif
 
 // Murano:  256B x 6  = 1036B + 2 (temp) = 1038B
 // Venice:  256B x 12 = 2072B + 2 (temp) = 2074B

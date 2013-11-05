@@ -20,9 +20,14 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.8 2013/10/04 18:40:10 jimyac Exp $ -->
+<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.9 2013/10/30 17:28:36 jimyac Exp $ -->
 <!-- Error definitions for p8_build_pstate_datablock procedure -->
 <hwpErrors>
+ <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_NO_CORES_PRESENT_ERROR</rc>
+    <description>There are no cores present</description>
+  </hwpError> 
  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_PDV_BUFFER_SIZE_ERROR</rc>
@@ -110,6 +115,12 @@
     <ffdc>LPST_RETURN_CODE</ffdc>
   </hwpError>      
   <!-- *********************************************************************** -->
+   <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_IVID_ERROR</rc>
+    <description>lpst_create attempted to convert an invalid voltage value to ivid format (GT 1.39375V or LT 0.6V)</description>
+    <ffdc>LPST_RETURN_CODE</ffdc>
+  </hwpError>      
+  <!-- *********************************************************************** -->  
   <hwpError>
     <rc>RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_ERROR</rc>
     <description>lpst_create returned an error</description>

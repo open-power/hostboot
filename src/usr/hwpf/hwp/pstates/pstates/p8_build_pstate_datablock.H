@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.H,v 1.10 2013/10/04 18:38:15 jimyac Exp $
+// $Id: p8_build_pstate_datablock.H,v 1.11 2013/10/30 17:35:55 jimyac Exp $
 #ifndef _P8_BUILD_PSTATE_DATABLOCK_H_
 #define _P8_BUILD_PSTATE_DATABLOCK_H_
 
@@ -50,6 +50,7 @@ fapi::ReturnCode p8_build_pstate_datablock(const fapi::Target& i_target, PstateS
 #define PDM_BUFFER_SIZE    105
 #define BIAS_PCT_UNIT      0.005
 #define BOOST_PCT_UNIT     0.001
+#define POUNDM_POINTS      13
 
 // #V 2 dimensional array values (5x5) - 5 operating point and 5 values per operating point
 #define PV_D 5
