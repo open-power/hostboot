@@ -67,7 +67,7 @@ using namespace TARGETING;
 //******************************************************************************
 errlHndl_t collectGard(const PredicateBase *i_pPredicate)
 {
-    HWAS_INF("collectGard entry" );
+    HWAS_DBG("collectGard entry" );
     errlHndl_t errl = NULL;
 
     do
@@ -119,14 +119,14 @@ DeconfigGard::DeconfigGard()
   iv_XABusEndpointDeconfigured(false),
   iv_deconfigCount(0)
 {
-    HWAS_INF("DeconfigGard Constructor");
+    HWAS_DBG("DeconfigGard Constructor");
     HWAS_MUTEX_INIT(iv_mutex);
 }
 
 //******************************************************************************
 DeconfigGard::~DeconfigGard()
 {
-    HWAS_INF("DeconfigGard Destructor");
+    HWAS_DBG("DeconfigGard Destructor");
     HWAS_MUTEX_DESTROY(iv_mutex);
     free(iv_platDeconfigGard);
 }
@@ -247,7 +247,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             break;
         }
 
-        HWAS_INF("%d GARD Records found", l_gardRecords.size());
+        HWAS_DBG("%d GARD Records found", l_gardRecords.size());
 
         if (l_gardRecords.empty())
         {
@@ -341,7 +341,7 @@ bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2)
 //******************************************************************************
 errlHndl_t DeconfigGard::processFieldCoreOverride()
 {
-    HWAS_INF("Process Field Core Override FCO");
+    HWAS_DBG("Process Field Core Override FCO");
     errlHndl_t l_pErr = NULL;
 
     do
@@ -446,78 +446,6 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
 }
 
 //******************************************************************************
-errlHndl_t DeconfigGard::createGardRecord(const Target * const i_pTarget,
-                                          const uint32_t i_errlEid,
-                                          const GARD_ErrorType i_errorType)
-{
-    errlHndl_t l_pErr = NULL;
-
-    do
-    {
-        const uint8_t lDeconfigGardable =
-                i_pTarget->getAttr<ATTR_DECONFIG_GARDABLE>();
-        const uint8_t lPresent =
-                i_pTarget->getAttr<ATTR_HWAS_STATE>().present;
-        if (!lDeconfigGardable || !lPresent)
-        {
-            // Target is not GARDable. Commit an error
-            HWAS_ERR("Target not GARDable");
-
-            /*@
-             * @errortype
-             * @moduleid     HWAS::MOD_DECONFIG_GARD
-             * @reasoncode   HWAS::RC_TARGET_NOT_GARDABLE
-             * @devdesc      Attempt to create a GARD Record for a target that
-             *               is not GARDable
-             *               (not DECONFIG_GARDABLE or not present)
-             * @userdata1    HUID of input target // GARD errlog EID
-             * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
-             */
-            const uint64_t userdata1 =
-                (static_cast<uint64_t>(get_huid(i_pTarget)) << 32) | i_errlEid;
-            const uint64_t userdata2 =
-                (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
-            l_pErr = hwasError(
-                ERRL_SEV_UNRECOVERABLE,
-                HWAS::MOD_DECONFIG_GARD,
-                HWAS::RC_TARGET_NOT_GARDABLE,
-                userdata1,
-                userdata2);
-            break;
-        }
-
-        Target* pSys;
-        targetService().getTopLevelTarget(pSys);
-        HWAS_ASSERT(pSys, "HWAS createGardRecord: no TopLevelTarget");
-
-        // check for system CDM Policy
-        const ATTR_CDM_POLICIES_type l_sys_policy =
-                pSys->getAttr<ATTR_CDM_POLICIES>();
-        if (l_sys_policy & CDM_POLICIES_MANUFACTURING_DISABLED)
-        {
-            // manufacturing records are disabled
-            //  - don't process
-            HWAS_INF("Manufacturing policy: disabled - skipping GARD Record create");
-            break;
-        }
-
-        if ((l_sys_policy & CDM_POLICIES_PREDICTIVE_DISABLED) &&
-            (i_errorType == GARD_Predictive))
-        {
-            // predictive records are disabled AND gard record is predictive
-            //  - don't process
-            HWAS_INF("Predictive policy: disabled - skipping GARD Record create");
-            break;
-        }
-
-        l_pErr = platCreateGardRecord(i_pTarget, i_errlEid, i_errorType);
-    }
-    while (0);
-
-    return l_pErr;
-}
-
-//******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecords(
     const Target * const i_pTarget)
 {
@@ -539,7 +467,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(Target & i_target,
                                            const uint32_t i_errlEid,
                                            bool i_evenAtRunTime)
 {
-    HWAS_INF("Deconfigure Target");
+    HWAS_DBG("Deconfigure Target");
     errlHndl_t l_pErr = NULL;
 
     do
@@ -640,7 +568,7 @@ errlHndl_t DeconfigGard::_getDeconfigureRecords(
     const Target * const i_pTarget,
     DeconfigureRecords_t & o_records)
 {
-    HWAS_INF("Get Deconfigure Record(s)");
+    HWAS_DBG("Get Deconfigure Record(s)");
     o_records.clear();
 
     HWAS_MUTEX_LOCK(iv_mutex);
@@ -1312,7 +1240,7 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
         } // switch
     } // !i_atRunTime
 
-    //HWAS_INF("deconfigByAssoc exiting: %.8X", get_huid(&i_target));
+    HWAS_DBG("deconfigByAssoc exiting: %.8X", get_huid(&i_target));
 } // _deconfigByAssoc
 
 //******************************************************************************
@@ -1320,7 +1248,7 @@ uint32_t DeconfigGard::getDeconfigureStatus() const
 {
     // no lock needed - just return the value.
     uint32_t l_deconfigCount = iv_deconfigCount;
-    HWAS_INF("getDeconfigureStatus returning %u", l_deconfigCount);
+    HWAS_DBG("getDeconfigureStatus returning %u", l_deconfigCount);
     return l_deconfigCount;
 }
 

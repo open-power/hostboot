@@ -249,26 +249,6 @@ public:
                                  const uint32_t i_errlEid);
 
     /**
-     * @brief Creates a GARD Record for a Target.
-     *
-     * Called by ErrlManager when committing an error log containing a
-     * GARD Record request.
-     *
-     * Called by an administrator to manually create a GARD Record.
-     *
-     * Any error creating the GARD Record will be returned to the user.
-     *
-     * @param[in] i_pTarget   Pointer to Target to create GARD Record for.
-     * @param[in] i_errlEid Error log EID to store in GARD Record.
-     * @param[in] i_errorType error type of the GARD Record.
-     *
-     * @return errlHndl_t. Error log handle.
-     */
-    errlHndl_t createGardRecord(const TARGETING::Target * const i_pTarget,
-                                const uint32_t i_errlEid,
-                                const GARD_ErrorType i_errorType);
-
-    /**
      * @brief Platform specific function that
      *          Creates a GARD Record for a Target.
      *

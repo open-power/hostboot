@@ -56,12 +56,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
     errlHndl_t l_pErr = NULL;
 
     EntityPath l_targetId;
-    if (i_pTarget)
-    {
-        HWAS_INF("Clear GARD Records for %.8X", get_huid(i_pTarget));
-        l_targetId = i_pTarget->getAttr<ATTR_PHYS_PATH>();
-    }
-    else
+    if (!i_pTarget)
     {
         HWAS_INF("Clear all GARD Records");
     }
@@ -103,7 +98,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
             }
         } // for
 
-        HWAS_INF("GARD Records to Cleared: %d", l_gardRecordsCleared);
+        HWAS_INF("GARD Records Cleared: %d", l_gardRecordsCleared);
     }
     else
     {
@@ -122,12 +117,7 @@ errlHndl_t DeconfigGard::platGetGardRecords(
     o_records.clear();
 
     EntityPath l_targetId;
-    if (i_pTarget)
-    {
-        HWAS_INF("Get GARD Record for %.8X", get_huid(i_pTarget));
-        l_targetId = i_pTarget->getAttr<ATTR_PHYS_PATH>();
-    }
-    else
+    if (!i_pTarget)
     {
         HWAS_INF("Get all GARD Records");
     }
@@ -188,6 +178,62 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
 
     do
     {
+        const uint8_t lDeconfigGardable =
+                i_pTarget->getAttr<ATTR_DECONFIG_GARDABLE>();
+        const uint8_t lPresent =
+                i_pTarget->getAttr<ATTR_HWAS_STATE>().present;
+        if (!lDeconfigGardable || !lPresent)
+        {
+            // Target is not GARDable. Commit an error
+            HWAS_ERR("Target not GARDable");
+
+            /*@
+             * @errortype
+             * @moduleid     HWAS::MOD_DECONFIG_GARD
+             * @reasoncode   HWAS::RC_TARGET_NOT_GARDABLE
+             * @devdesc      Attempt to create a GARD Record for a target that
+             *               is not GARDable
+             *               (not DECONFIG_GARDABLE or not present)
+             * @userdata1    HUID of input target // GARD errlog EID
+             * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
+             */
+            const uint64_t userdata1 =
+                (static_cast<uint64_t>(get_huid(i_pTarget)) << 32) | i_errlEid;
+            const uint64_t userdata2 =
+                (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
+            l_pErr = hwasError(
+                ERRL_SEV_UNRECOVERABLE,
+                HWAS::MOD_DECONFIG_GARD,
+                HWAS::RC_TARGET_NOT_GARDABLE,
+                userdata1,
+                userdata2);
+            break;
+        }
+
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        HWAS_ASSERT(pSys, "HWAS platCreateGardRecord: no TopLevelTarget");
+
+        // check for system CDM Policy
+        const ATTR_CDM_POLICIES_type l_sys_policy =
+                pSys->getAttr<ATTR_CDM_POLICIES>();
+        if (l_sys_policy & CDM_POLICIES_MANUFACTURING_DISABLED)
+        {
+            // manufacturing records are disabled
+            //  - don't process
+            HWAS_INF("Manufacturing policy: disabled - skipping GARD Record create");
+            break;
+        }
+
+        if ((l_sys_policy & CDM_POLICIES_PREDICTIVE_DISABLED) &&
+            (i_errorType == GARD_Predictive))
+        {
+            // predictive records are disabled AND gard record is predictive
+            //  - don't process
+            HWAS_INF("Predictive policy: disabled - skipping GARD Record create");
+            break;
+        }
+
         l_pErr = _GardRecordIdSetup(iv_platDeconfigGard);
         if (l_pErr)
         {

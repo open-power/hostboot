@@ -841,11 +841,11 @@ public:
 
             // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x12, GARD_Predictive);
+                    platCreateGardRecord(l_pTarget, 0x12, GARD_Predictive);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard4: Error from createGardRecord");
+                TS_FAIL("testGard4: Error from platCreateGardRecord");
                 break;
             }
 
@@ -971,21 +971,21 @@ public:
 
             // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x23, GARD_Predictive);
+                    platCreateGardRecord(l_pTarget, 0x23, GARD_Predictive);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard5: Error from createGardRecord");
+                TS_FAIL("testGard5: Error from platCreateGardRecord");
                 break;
             }
 
             // Create another GARD Record for the target
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x45, GARD_Fatal);
+                    platCreateGardRecord(l_pTarget, 0x45, GARD_Fatal);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard5: Error from createGardRecord (2)");
+                TS_FAIL("testGard5: Error from platCreateGardRecord (2)");
                 break;
             }
 
@@ -1104,21 +1104,21 @@ public:
 
             // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x23, GARD_User_Manual);
+                    platCreateGardRecord(l_pTarget, 0x23, GARD_User_Manual);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard6: Error from createGardRecord");
+                TS_FAIL("testGard6: Error from platCreateGardRecord");
                 break;
             }
 
             // Create another GARD Record for the target - should overwrite
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x46, GARD_Fatal);
+                    platCreateGardRecord(l_pTarget, 0x46, GARD_Fatal);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard6: Error from createGardRecord (2)");
+                TS_FAIL("testGard6: Error from platCreateGardRecord (2)");
                 break;
             }
 
@@ -1245,11 +1245,11 @@ public:
 
             // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x71, GARD_Predictive);
+                    platCreateGardRecord(l_pTarget, 0x71, GARD_Predictive);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard7: Error from createGardRecord");
+                TS_FAIL("testGard7: Error from platCreateGardRecord");
                 break;
             }
 
@@ -1355,10 +1355,10 @@ public:
             // create GARD record, call 'doGard' step and confirm target is
             //  deconfigured
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_target, 0x12, GARD_User_Manual);
+                    platCreateGardRecord(l_target, 0x12, GARD_User_Manual);
             if (l_pErr)
             {
-                TS_FAIL("testGard8: Error from createGardRecord");
+                TS_FAIL("testGard8: Error from platCreateGardRecord");
                 break;
             }
 
@@ -1504,11 +1504,11 @@ public:
 
             // (try to) Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x12, GARD_Fatal);
+                    platCreateGardRecord(l_pTarget, 0x12, GARD_Fatal);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard9: Error from createGardRecord");
+                TS_FAIL("testGard9: Error from platCreateGardRecord");
                 break;
             }
 
@@ -1535,11 +1535,11 @@ public:
 
             // (try to) Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_pTarget, 0x12, GARD_Predictive);
+                    platCreateGardRecord(l_pTarget, 0x12, GARD_Predictive);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard9: Error from createGardRecord");
+                TS_FAIL("testGard9: Error from platCreateGardRecord");
                 break;
             }
 
@@ -1635,10 +1635,10 @@ public:
             // create GARD record, set Policy, call 'doGard' step and confirm
             //  target is NOT deconfigured
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_target, 0x12, GARD_Predictive);
+                    platCreateGardRecord(l_target, 0x12, GARD_Predictive);
             if (l_pErr)
             {
-                TS_FAIL("testGard10: Error from createGardRecord");
+                TS_FAIL("testGard10: Error from platCreateGardRecord");
                 break;
             }
 
@@ -1721,10 +1721,10 @@ public:
             // create GARD record, set Policy, call 'doGard' step and confirm
             //  target is NOT deconfigured
             l_pErr = theDeconfigGard().
-                    createGardRecord(l_target, 0x12, GARD_Predictive);
+                    platCreateGardRecord(l_target, 0x12, GARD_Predictive);
             if (l_pErr)
             {
-                TS_FAIL("testGard10: Error from createGardRecord");
+                TS_FAIL("testGard10: Error from platCreateGardRecord");
                 break;
             }
 

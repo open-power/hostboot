@@ -89,7 +89,7 @@ errlHndl_t platHandleHWCallout(
             }
             default:
             {
-                errl = HWAS::theDeconfigGard().createGardRecord(i_pTarget,
+                errl = HWAS::theDeconfigGard().platCreateGardRecord(i_pTarget,
                         io_errl->eid(),
                         i_gardErrorType);
                 break;
