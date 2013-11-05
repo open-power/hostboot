@@ -942,7 +942,7 @@ will also be removed. Need to confirm if this code is required anymore.
                 if ( SUCCESS == l_rc )
                 {
                     // Call Dump for Proc Core CS
-                    if ( TYPE_CORE == dumpTrgtType )
+                    if ( TYPE_EX == dumpTrgtType )
                     {
                         l_rc = PRDF_HWUDUMP( o_errl,
                                              CONTENT_SINGLE_CORE_CHECKSTOP,
