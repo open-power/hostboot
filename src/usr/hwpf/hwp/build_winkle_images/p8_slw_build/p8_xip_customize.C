@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.56 2013/09/18 17:28:34 dcrowell Exp $
+// $Id: p8_xip_customize.C,v 1.58 2013/10/29 16:51:57 jeshua Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -546,6 +546,9 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_ERR("FAPI_ATTR_GET(ATTR_CHIP_REGIONS_TO_ENABLE) returned error.\n");
     return rc;
   }
+  //Make sure we always enable the pervasive chiplet
+  attrCombGoodVec[0] = 0x0f18000000000000ull;
+  attrCombGoodVec[1] = 0x0f18000000000000ull;
   rcLoc = sbe_xip_find( o_imageOut, COMBINED_GOOD_VECTORS_TOC_NAME, &xipTocItem);
   if (rcLoc)  {
     FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
@@ -625,6 +628,95 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	  FAPI_DBG(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
 	  *(uint64_t*)hostSecuritySetupVec = myRev64(attrSecuritySetupVec);
 	  FAPI_DBG(" After =0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
+	}
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Untrusted bar settings
+  // Retrieval method:  Attribute.
+  // System phase:      IPL sysPhase.
+  // Note: TBD
+  // ==========================================================================
+
+	if (i_sysPhase==0)  {
+	  uint64_t   attrAduUntrustedBarBase;
+    uint64_t   attrAduUntrustedBarSize;
+
+	  uint64_t   attrPsiUntrustedBar0Base;
+    uint64_t   attrPsiUntrustedBar0Size;
+
+	  uint64_t   attrPsiUntrustedBar1Base;
+    uint64_t   attrPsiUntrustedBar1Size;
+    
+		void       *hostAduUntrustedBar;
+    uint64_t   *untrustbar_field;
+
+    //-------------------------------------------------------------------------------------------
+    // ADU BAR
+	  rc = FAPI_ATTR_GET(ATTR_PROC_ADU_UNTRUSTED_BAR_BASE_ADDR, &i_target, attrAduUntrustedBarBase);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_ADU_UNTRUSTED_BAR_BASE_ADDR) returned error.\n");
+	    return rc;
+	  }
+
+	  rc = FAPI_ATTR_GET(ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE, &i_target, attrAduUntrustedBarSize);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE) returned error.\n");
+	    return rc;
+	  }
+
+    //-------------------------------------------------------------------------------------------
+    // PSI BAR0
+	  rc = FAPI_ATTR_GET(ATTR_PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR, &i_target, attrPsiUntrustedBar0Base);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR) returned error.\n");
+	    return rc;
+	  }
+
+	  rc = FAPI_ATTR_GET(ATTR_PROC_PSI_UNTRUSTED_BAR0_SIZE, &i_target, attrPsiUntrustedBar0Size);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PSI_UNTRUSTED_BAR0_SIZE) returned error.\n");
+	    return rc;
+	  }
+
+    //-------------------------------------------------------------------------------------------
+    // PSI BAR1
+	  rc = FAPI_ATTR_GET(ATTR_PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR, &i_target, attrPsiUntrustedBar1Base);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR) returned error.\n");
+	    return rc;
+	  }
+
+	  rc = FAPI_ATTR_GET(ATTR_PROC_PSI_UNTRUSTED_BAR1_SIZE, &i_target, attrPsiUntrustedBar1Size);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PSI_UNTRUSTED_BAR1_SIZE) returned error.\n");
+	    return rc;
+	  }
+
+    //------------------------------------------------------------------------------------------
+    //Look up fabric_config location
+	  rcLoc = sbe_xip_find( o_imageOut, UNTRUSTED_BAR_TOC_NAME, &xipTocItem);
+	  if (rcLoc)  {
+	    FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+	    FAPI_ERR("Probable cause:");
+	    FAPI_ERR("\tThe keyword (=%s) was not found.",UNTRUSTED_BAR_TOC_NAME);
+	    uint32_t & RC_LOCAL = rcLoc;
+	    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+	    return rc;
+	  }
+	  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostAduUntrustedBar);
+    untrustbar_field = (uint64_t*)hostAduUntrustedBar;
+	  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
+							UNTRUSTED_BAR_TOC_NAME);
+
+	  *(untrustbar_field + 0) = myRev64(attrAduUntrustedBarBase);
+	  *(untrustbar_field + 1) = myRev64(attrAduUntrustedBarSize);
+
+ 	  *(untrustbar_field + 2) = myRev64(attrPsiUntrustedBar0Base);
+	  *(untrustbar_field + 3) = myRev64(attrPsiUntrustedBar0Size);
+
+ 	  *(untrustbar_field + 4) = myRev64(attrPsiUntrustedBar1Base);
+	  *(untrustbar_field + 5) = myRev64(attrPsiUntrustedBar1Size);
+
 	}
 
 
@@ -1096,6 +1188,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                                               i_buf2,
                                               i_sizeBuf2,
                                               attrDdLevel,
+
                                               sizeImageMax,
                                               0xFF,
                                               xipSectionDcrings
