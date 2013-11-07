@@ -212,15 +212,15 @@ sub main
         # Skip comment lines
         if (!($line =~ /^#/))
         {
-            if ($line =~ /(\S+),(ATTR_\S+),(\S+),(\S+)/)
+            if ($line =~ /(\S+),(ATTR_\S+),0x(\S+),(\S+)/)
             {
                 if ($1 ne "NO-FAPI-ID")
                 {
-                    $targAttrInfo{$1}->{idVal} = $3;
+                    $targAttrInfo{$1}->{idVal} = hex $3;
                     $targAttrInfo{$1}->{typeStr} = $4;
                 }
 
-                $targAttrInfo{$2}->{idVal} = $3;
+                $targAttrInfo{$2}->{idVal} = hex $3;
                 $targAttrInfo{$2}->{typeStr} = $4;
             }
         }
