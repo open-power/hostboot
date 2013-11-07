@@ -92,6 +92,12 @@ void MfgThresholdMgr::reset()
     }
 }
 
+MfgThresholdFile * MfgThresholdMgr::getMfgThresholdFile()
+{
+    setupFile();
+    return iv_file;
+}
+
 uint8_t MfgThresholdMgr::getThresholdDefault(uint32_t i_thrName)
 {
     uint8_t l_value = 0;

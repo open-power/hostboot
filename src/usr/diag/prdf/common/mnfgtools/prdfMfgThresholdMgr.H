@@ -79,7 +79,7 @@ class MfgThresholdMgr
          *
          * @return MfgThresholdFile pointer
          */
-        inline MfgThresholdFile * getMfgThresholdFile() { return iv_file; };
+        MfgThresholdFile * getMfgThresholdFile();
 
     private:
 
