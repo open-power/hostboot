@@ -21,7 +21,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-
 #include <prdfMfgThresholdFile.H>
 #include <prdfGlobal.H>
 #include <prdfAssert.h>
