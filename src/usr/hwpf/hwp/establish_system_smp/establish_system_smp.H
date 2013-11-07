@@ -46,6 +46,12 @@
  *  @istepdesc      Establish System SMP
  *
  *  @{
+ *      @substepnum     9
+ *      @substepname    host_sys_fab_iovalid_processing
+ *      @substepdesc    : Lower functional fences on sys SMP
+ *          @target_sched   serial
+ *  @}
+ *  @{
  *      @substepnum     12
  *      @substepname    host_coalesce_host
  *      @substepdesc    : Create single host image
@@ -69,7 +75,7 @@ namespace   ESTABLISH_SYSTEM_SMP
     struct iovalid_msg {
         uint32_t               size;       //!Data length in bytes
         uint16_t               type;       //! IPL/CCM type message
-        uint16_t               count;      //! Number of drawer HUIDs in data
+        uint16_t               count;      //! Number of drawers in data
         TARGETING::EntityPath drawers[0];  //! Place holder for data
     };
 
@@ -102,9 +108,9 @@ errlHndl_t call_host_coalesce_host( );
  *
  *  param[in,out] io_pMsg - input message buffer with drawer info,
  *                          also used for response message to FSP
- *
+ *  return NULL
  */
-void host_sys_fab_iovalid_processing( msg_t* io_pMsg );
+void* host_sys_fab_iovalid_processing( void* io_pMsg );
 
 };   // end namespace
 

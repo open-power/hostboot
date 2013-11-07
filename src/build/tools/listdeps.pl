@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -171,7 +171,7 @@ else
         "libdmi_training.so" ,
         "libbuild_winkle_images.so" ,
         "libcore_activate.so" ,
-        "libestablish_system_smp.so" ,
+        "libtod_init.so" ,
         "libstart_payload.so" ,
         "libocc.so" ,
     );
@@ -219,7 +219,7 @@ my %istepFiles = (
     "libocc.so"                     => "istep15list.H" ,
     "libbuild_winkle_images.so"     => "istep15list.H" ,
     "libcore_activate.so"           => "istep16list.H" ,
-    "libestablish_system_smp.so"    => "istep18list.H" ,
+    "libtod_init.so"                => "istep18list.H" ,
     "libstart_payload.so"           => "istep21list.H" ,
 );
 

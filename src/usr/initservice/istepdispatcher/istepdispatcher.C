@@ -38,6 +38,7 @@
 #include <kernel/console.H>              // printk status
 #include <vfs/vfs.H>                     // for VFS::module_load
 #include <sys/task.h>                    //  tid_t, task_create, etc
+#include <sys/misc.h>                    //  cpu_all_winkle
 #include <errl/errlentry.H>              //  errlHndl_t
 #include <initservice/isteps_trace.H>    //  ISTEPS_TRACE buffer
 #include <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
@@ -1188,30 +1189,99 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
 {
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleProcFabIovalidMsg");
 
-    // Ensure the library is loaded
-    errlHndl_t err = VFS::module_load("libestablish_system_smp.so");
-
-    if (err)
+    errlHndl_t err = NULL;
+    do
     {
-        TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading module, PLID = 0x%x",
-                  err->plid());
-        errlCommit(err, INITSVC_COMP_ID);
-        msg_free(io_pMsg);
-        io_pMsg = NULL;
-    }
-    else
-    {
-        // $TODO RTC:88284 - Create Child Thread
-        ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing(io_pMsg);
-
-        // if there was an error don't winkle ?
-        if(io_pMsg->data[0] == HWSVR_MSG_SUCCESS)
+        // Ensure the libraries needed are loaded
+        err = VFS::module_load("libestablish_system_smp.so");
+        if (err)
         {
-            TRACFCOMP( g_trac_initsvc,
-                       "$TODO RTC:71447 - winkle all cores");
+            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading libestablish_system_smp, PLID = 0x%x",
+                      err->plid());
+
+            io_pMsg->data[0] = err->plid();
+            errlCommit(err, INITSVC_COMP_ID);
+            break;
+        }
+        err = VFS::module_load("libedi_ei_initialization.so");
+        if (err)
+        {
+            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading libedi_ei_initialization, PLID = 0x%x",
+                      err->plid());
+
+            io_pMsg->data[0] = err->plid();
+            errlCommit(err, INITSVC_COMP_ID);
+            break;
         }
 
+        // Create child thread so that if there are problems, the istep
+        //  dispatcher code continues
+        tid_t l_progTid = task_create(
+                ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing,io_pMsg);
+        assert( l_progTid > 0 );
+        //  wait here for the task to end.
+        //  status of the task ( OK or Crashed ) is returned in l_childsts
+        int l_childsts    = 0;
+        void *l_childrc = NULL;
+        tid_t l_tidretrc  = task_wait_tid( l_progTid,
+                                &l_childsts, &l_childrc );
+        if ((static_cast<int16_t>(l_tidretrc) < 0 ) ||
+            (l_childsts != TASK_STATUS_EXITED_CLEAN )
+           )
+        {
+            TRACFCOMP(g_trac_initsvc, "task_wait_tid failed; l_tidretrc=0x%x, l_childsts=0x%x",
+                      l_tidretrc, l_childsts);
+            // the launched task failed or crashed,
+        } // endif tidretrc
+
+        // if there wasn't an error, winkle
+        if(io_pMsg->data[0] == HWSVR_MSG_SUCCESS)
+        {
+            // Send the message back as a response
+            free(io_pMsg->extra_data);
+            io_pMsg->extra_data = NULL;
+            msg_respond(iv_msgQ, io_pMsg);
+            io_pMsg = NULL;
+
+            // call to suspend the MBOX so that all messages are flushed
+            err = MBOX::suspend();
+            if (err)
+            {
+                TRACFCOMP( g_trac_initsvc, "ERROR : MBOX::suspend");
+                errlCommit(err, INITSVC_COMP_ID);
+                // keep going, since we already responded back to the FSP
+            }
+
+            TRACFCOMP( g_trac_initsvc, "winkle all cores");
+            uint32_t l_rc = cpu_all_winkle();
+            if ( l_rc )
+            {
+                // failed to winkle
+                TRACFCOMP( g_trac_initsvc,
+                      "ERROR : failed cpu_all_winkle, rc=0x%x", l_rc  );
+            }
+            else
+            {
+                // something woke us up, we'll return and see what msg is there
+                TRACFCOMP( g_trac_initsvc,
+                   "Returned from cpu_all_winkle." );
+            }
+
+            err = MBOX::resume();
+            if (err)
+            {
+                TRACFCOMP( g_trac_initsvc, "ERROR : MBOX::resume");
+                errlCommit(err, INITSVC_COMP_ID);
+            }
+        }
+    } while (0);
+
+    // if there was an error send back that msg
+    if(io_pMsg && (io_pMsg->data[0] != HWSVR_MSG_SUCCESS))
+    {
         // Send the message back as a response
+        free(io_pMsg->extra_data);
+        io_pMsg->extra_data = NULL;
         msg_respond(iv_msgQ, io_pMsg);
         io_pMsg = NULL;
     }
@@ -1220,7 +1290,7 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
 }
 
 // ----------------------------------------------------------------------------
-// IStepDispatcher::handleProcFabIovalidMsg()
+// IStepDispatcher::sendProgressCode()
 // This method has a default of true for i_needsLock
 // ----------------------------------------------------------------------------
 errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)

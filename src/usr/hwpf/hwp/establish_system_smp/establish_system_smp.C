@@ -47,6 +47,7 @@
 #include    <initservice/isteps_trace.H>
 
 #include    <hwpisteperror.H>
+#include    <errl/errludtarget.H>
 
 #include    <istep_mbox_msgs.H>
 #include    <vfs/vfs.H>
@@ -54,6 +55,7 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <smp_unfencing_inter_enclosure_abus_links.H>
+#include    <targeting/common/utilFilter.H>
 #include    <targeting/common/attributes.H>
 
 //  fapi support
@@ -65,11 +67,16 @@
 #include    <mbox/ipc_msg_types.H>
 #include    <intr/interrupt.H>
 
+//  Uncomment these files as they become available:
+// #include    "host_coalesce_host/host_coalesce_host.H"
+#include    "p8_block_wakeup_intr/p8_block_wakeup_intr.H"
+
 namespace   ESTABLISH_SYSTEM_SMP
 {
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   EDI_EI_INITIALIZATION;
@@ -385,41 +392,36 @@ errlHndl_t call_host_coalesce_host( )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_coalesce_host exit" );
 
+    // end task, returning any errorlogs to IStepDisp
     return l_errl;
 }
 
 //******************************************************************************
 // host_sys_fab_iovalid_processing function
 //******************************************************************************
-void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
+void *host_sys_fab_iovalid_processing(void* io_ptr )
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "host_sys_fab_iovalid_processing entry" );
-
-    iovalid_msg * drawerData = NULL;
-
-    uint16_t count = 0;
-
-    std::vector<TARGETING::EntityPath> present_drawers;
+    // input parameter is actually a msg_t pointer
+    msg_t* io_pMsg = static_cast<msg_t *>(io_ptr);
+    // assume success, unless we hit an error later.
+    io_pMsg->data[0] = INITSERVICE::HWSVR_MSG_SUCCESS;
 
     errlHndl_t l_errl = NULL;
 
     // if there is extra data, start processing it
-    // else send back a msg to indicate invalid msg
     if(io_pMsg->extra_data)
     {
-        drawerData = (iovalid_msg *)io_pMsg->extra_data;
+        iovalid_msg * drawerData = (iovalid_msg *)io_pMsg->extra_data;
 
         // setup a pointer to the first drawer entry in our data
         TARGETING::EntityPath * ptr = drawerData->drawers;
 
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"Master node %s "
-                                                      "List size = %d bytes "
-                                                      "Drawer count = %d",
-                ptr->toString(), drawerData->size, drawerData->count);
-
-        count = drawerData->count;
+        const uint16_t count = drawerData->count;
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Master node %s List size = %d bytes Drawer count = %d",
+                ptr->toString(), drawerData->size, count);
 
         // get FABRIC_TO_PHYSICAL_NODE_MAP
         TARGETING::Target * sys = NULL;
@@ -427,14 +429,15 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
         assert(sys != NULL);
 
         uint8_t node_map[8];
-
-        bool rc =
-        sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>(node_map);
+        bool rc = sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>
+                    (node_map);
         assert(rc == true);
 
         TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
 
         // create a vector with the present drawers
+        std::vector<TARGETING::EntityPath> present_drawers;
+
         for(uint8_t i = 0; i < count; i++)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -442,7 +445,7 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
 
             present_drawers.push_back(*ptr);
 
-            TARGETING::EntityPath::PathElement pe = 
+            TARGETING::EntityPath::PathElement pe =
                 ptr->pathElementOfType(TARGETING::TYPE_NODE);
 
             // pe.instance is the drawer number - convert to logical node
@@ -465,42 +468,13 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "$TODO RTC:63128 - hb instances exchange and agree on cfg");
 
-        bool l_libloaded = false;
-        if ( !VFS::module_is_loaded( "libedi_ei_initialization.so" ) )
+        // after agreement, open abuses as required
+        l_errl = smp_unfencing_inter_enclosure_abus_links();
+        if (l_errl)
         {
-            l_errl = VFS::module_load( "libedi_ei_initialization.so" );
-            if ( l_errl )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                          "Could not load libedi_ei_initialization.so");
-            }
-            else
-            {
-                l_libloaded = true;
-            }
+            io_pMsg->data[0] = l_errl->plid();
+            errlCommit(l_errl, HWPF_COMP_ID);
         }
-
-        if(!l_errl)
-        {
-            // after agreement, open abuses as required
-            l_errl = smp_unfencing_inter_enclosure_abus_links();
-        }
-
-        if(l_libloaded) // loaded locally
-        {
-            l_errl = VFS::module_unload( "libedi_ei_initialization.so" );
-            if(l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                          "Could not un-load libedi_ei_initialization.so");
-            }
-        }
-
-        // release the storage from the message
-        free(io_pMsg->extra_data);
-        io_pMsg->extra_data = NULL;
-
-        io_pMsg->data[0] = INITSERVICE::HWSVR_MSG_SUCCESS;
     }
     else
     {
@@ -511,20 +485,79 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
 
     io_pMsg->data[1] = 0;
 
-    // if there is an error log add the ID to
-    // data 0
-    if(l_errl)
+    // if there wasn't an error
+    if (io_pMsg->data[0] == INITSERVICE::HWSVR_MSG_SUCCESS)
     {
-        io_pMsg->data[0] = l_errl->eid();
-        errlCommit(l_errl, HWPF_COMP_ID);
+        uint32_t l_plid = 0;
+
+        // loop thru all proc and find all functional ex units
+        // Get all functional proc chip targets
+        TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
+        for (TargetHandleList::const_iterator l_procIter =
+             l_procTargetList.begin();
+             l_procIter != l_procTargetList.end();
+             ++l_procIter)
+        {
+            const TARGETING::Target* l_pChipTarget = *l_procIter;
+
+            // Get EX list under this proc
+            TARGETING::TargetHandleList l_exList;
+            getChildChiplets( l_exList, l_pChipTarget, TYPE_EX );
+
+            for (TargetHandleList::const_iterator
+                l_exIter = l_exList.begin();
+                l_exIter != l_exList.end();
+                ++l_exIter)
+            {
+                const TARGETING::Target * l_exTarget = *l_exIter;
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running p8_block_wakeup_intr(SET) on EX target HUID %.8X",
+                    TARGETING::get_huid(l_exTarget));
+
+                fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
+                         (const_cast<TARGETING::Target*>(l_exTarget)) );
+
+                FAPI_INVOKE_HWP(l_errl,
+                                p8_block_wakeup_intr,
+                                l_fapi_ex_target,
+                                BLKWKUP_SET);
+                if ( l_errl )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR : p8_block_wakeup_intr(SET)" );
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_exTarget).addToLog( l_errl );
+                    if (l_plid != 0)
+                    {
+                        // use the same plid as the previous
+                        l_errl->plid(l_plid);
+                    }
+                    else
+                    {
+                        // set this plid for the caller to see
+                        l_plid = l_errl->plid();
+                        io_pMsg->data[0] = l_errl->plid();
+                    }
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "SUCCESS : p8_block_wakeup_intr(SET)" );
+                }
+            } // for ex
+        } // for proc
     }
 
     // response will be sent by calling routine
-    // IStepDispatcher::handleMoreWorkNeededMsg()
+    // IStepDispatcher::handleProcFabIovalidMsg()
     // which will also execute the procedure to winkle all cores
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "host_sys_fab_iovalid_processing exit" );
+            "host_sys_fab_iovalid_processing exit data[0]=0x%X",
+            io_pMsg->data[0]);
+    return NULL;
 }
 
 };   // end namespace

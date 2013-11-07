@@ -47,7 +47,6 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/establish_system_smp/establish_system_smp.H"
 #include    "../../../usr/hwpf/hwp/tod_init/tod_init.H"
 
 namespace   INITSERVICE
@@ -154,7 +153,7 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(18,09,""),
+                ISTEPNAME(18,09,"sys_proc_fab_iovalid"),
                 NULL,
                 {
                         NONE,
@@ -220,9 +219,7 @@ namespace   INITSERVICE
 
 const DepModInfo  g_istep18Dependancies = {
     {
-        DEP_LIB(libestablish_system_smp.so),
         DEP_LIB(libtod_init.so),
-        DEP_LIB(libedi_ei_initialization.so),
         { 0 },
     }
 };
