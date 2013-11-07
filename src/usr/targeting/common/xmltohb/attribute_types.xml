@@ -12622,14 +12622,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <description>Type of Master, ACTING_MASTER or MASTER_CANDIDATE or
       NOT_MASTER</description>
     <simpleType>
-        <enumeration>
-            <id>PROC_MASTER_TYPE</id>
-        </enumeration>
+        <uint8_t>
+            <default>NOT_MASTER</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <hasStringConversion/>
     <readable/>
     <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_MASTER_TYPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>

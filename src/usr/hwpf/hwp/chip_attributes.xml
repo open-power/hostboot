@@ -177,4 +177,21 @@
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_MASTER_TYPE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Returns a value indicating the master type of this chip:
+        master, alt-master, or not master.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        ACTING_MASTER = 0x00,
+        MASTER_CANDIDATE = 0x01,
+        NOT_MASTER = 0x02
+    </enum>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
