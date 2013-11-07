@@ -35,6 +35,10 @@
 
 #include <runtime/interface.h>
 
+trace_desc_t* g_trac_hbrt = NULL;
+TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
+
+
 class RuntimeLoaderTest : public CxxTest::TestSuite
 {
     public:
@@ -92,7 +96,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             mm_set_permission(imageArea, HEADER_OFFSET, EXECUTABLE);
 
-            TRACFCOMP(g_trac_test, "Runtime image loaded @ %x", imageArea);
+            TRACFCOMP(g_trac_hbrt, "Runtime image loaded @ %x", imageArea);
 
             do
             {
@@ -158,7 +162,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
         static void rt_puts(const char* str)
         {
-            TRACFCOMP(g_trac_test, "RUNTIME MSG: %s", str);
+            TRACFCOMP(g_trac_hbrt, "HBRT TRACE: %s", str);
         }
 
         static int rt_setPageExecute(void* addr)
@@ -177,8 +181,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         {
             int rc = 0;
 
-            TRACFCOMP(g_trac_test,
-                      "RUNTIME MSG: Scom read chipid: 0x%08x Address: 0x%08x",
+            TRACFCOMP(g_trac_hbrt,
+                      "Scom read chipid: 0x%08x Address: 0x%08x",
                       chipid,
                       addr);
 
@@ -205,8 +209,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         {
             int rc = 0;
 
-            TRACFCOMP(g_trac_test,
-                      "RUNTIME MSG: Scom write chipid: 0x%08x Address: 0x%08x",
+            TRACFCOMP(g_trac_hbrt,
+                      "Scom write chipid: 0x%08x Address: 0x%08x",
                       chipid,
                       addr);
 
@@ -227,12 +231,12 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                              void * data)
         {
             uint64_t rc = 0;
-            TRACFCOMP(g_trac_test,
-                      "RUNTIME MSG: Log error. Plid: %d  len: %d",
+            TRACFCOMP(g_trac_hbrt,
+                      "Log error. Plid: %d  len: %d",
                       plid,
                       data_len);
 
-            TRACDBIN(g_trac_test, "RUNTIME ERROR LOG:",data,data_len);
+            TRACDBIN(g_trac_hbrt, "RUNTIME ERROR LOG:",data,data_len);
 
 
             errlHndl_t err =
