@@ -52,6 +52,7 @@
  *                          mjjones     08/26/2013  Support Hw Callout
  *                          rjknight    09/10/2013  Support DIMM callout from
  *                                                  MBA port and dimm number
+ *                          mjjones     11/08/2013  Do not define struct in union
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -298,58 +299,65 @@ public:
      * An array of these is passed to the addErrorInfo function when a HWP
      * generates an error by calling the FAPI_SET_HWP_ERROR macro
      */
+    struct ErrorInfoEntryFfdc
+    {
+        uint8_t  iv_ffdcObjIndex;
+        uint16_t iv_ffdcSize;
+        uint32_t iv_ffdcId;
+    };
+
+    struct ErrorInfoEntryHwCallout
+    {
+        uint8_t iv_hw;
+        uint8_t iv_calloutPriority;
+        uint8_t iv_refObjIndex;
+    };
+
+    struct ErrorInfoEntryProcCallout
+    {
+        uint8_t iv_procedure;
+        uint8_t iv_calloutPriority;
+    };
+
+    struct ErrorInfoEntryBusCallout
+    {
+        uint8_t iv_endpoint1ObjIndex;
+        uint8_t iv_endpoint2ObjIndex;
+        uint8_t iv_calloutPriority;
+    };
+
+    struct ErrorInfoEntryTargetCDG
+    {
+        uint8_t iv_targetObjIndex;
+        uint8_t iv_callout;
+        uint8_t iv_deconfigure;
+        uint8_t iv_gard;
+        uint8_t iv_calloutPriority;
+    };
+
+    struct ErrorInfoEntryChildrenCDG
+    {
+        uint8_t  iv_parentObjIndex;
+        uint8_t  iv_callout;
+        uint8_t  iv_deconfigure;
+        uint32_t iv_childType;
+        uint8_t  iv_childPort;
+        uint8_t  iv_childNumber;
+        uint8_t  iv_gard;
+        uint8_t  iv_calloutPriority;
+    };
+
     struct ErrorInfoEntry
     {
         uint8_t iv_type; // Value from ErrorInfoType
         union
         {
-            struct
-            {
-                uint8_t  iv_ffdcObjIndex;
-                uint16_t iv_ffdcSize;
-                uint32_t iv_ffdcId;
-            } ffdc;
-
-            struct
-            {
-                uint8_t iv_hw;
-                uint8_t iv_calloutPriority;
-                uint8_t iv_refObjIndex;
-            } hw_callout;
-
-            struct
-            {
-                uint8_t iv_procedure;
-                uint8_t iv_calloutPriority;
-            } proc_callout;
-
-            struct
-            {
-                uint8_t iv_endpoint1ObjIndex;
-                uint8_t iv_endpoint2ObjIndex;
-                uint8_t iv_calloutPriority;
-            } bus_callout;
-
-            struct
-            {
-                uint8_t iv_targetObjIndex;
-                uint8_t iv_callout;
-                uint8_t iv_deconfigure;
-                uint8_t iv_gard;
-                uint8_t iv_calloutPriority;
-            } target_cdg;
-
-            struct
-            {
-                uint8_t  iv_parentObjIndex;
-                uint8_t  iv_callout;
-                uint8_t  iv_deconfigure;
-                uint32_t iv_childType;
-                uint8_t  iv_childPort;
-                uint8_t  iv_childNumber;
-                uint8_t  iv_gard;
-                uint8_t  iv_calloutPriority;
-            } children_cdg;
+            ErrorInfoEntryFfdc ffdc;
+            ErrorInfoEntryHwCallout hw_callout;
+            ErrorInfoEntryProcCallout proc_callout;
+            ErrorInfoEntryBusCallout bus_callout;
+            ErrorInfoEntryTargetCDG target_cdg;
+            ErrorInfoEntryChildrenCDG children_cdg;
         };
     };
 
