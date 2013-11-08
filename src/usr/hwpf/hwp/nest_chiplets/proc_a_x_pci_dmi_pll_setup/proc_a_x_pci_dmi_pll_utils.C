@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.4 2013/09/30 16:09:57 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.5 2013/10/28 06:45:46 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -110,6 +110,7 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_bndy(
     // return codes
     uint32_t rc_ecmd = 0;
     fapi::ReturnCode rc;
+    bool unmask_scan_collision = false;
 
     // mark function entry
     FAPI_DBG("Start");
@@ -122,7 +123,17 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_bndy(
 
         if (i_mask_scan_collision)
         {
+            FAPI_DBG("Reading value of Pervasive LFIR scan collision mask bit ...");
+            rc = fapiGetScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_MASK_0x0004000D, data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error reading Pervasive LFIR Mask OR Register.");
+                break;
+            }
+            unmask_scan_collision = data.isBitClear(PERV_LFIR_SCAN_COLLISION_BIT);            
+
             FAPI_DBG("Masking Pervasive LFIR scan collision bit ...");
+            rc_ecmd |= data.flushTo0();
             rc_ecmd |= data.setBit(PERV_LFIR_SCAN_COLLISION_BIT);
             if (rc_ecmd)
             {
@@ -271,12 +282,15 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_scan_bndy(
                 break;
             }
 
-            FAPI_DBG("Unmasking Pervasive LFIR scan collision bit ...");
-            rc = fapiPutScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_MASK_AND_0x0004000E, data);
-            if (!rc.ok())
+            if (unmask_scan_collision)
             {
-                FAPI_ERR("Error writing Pervasive LFIR Mask And Register.");
-                break;
+                FAPI_DBG("Unmasking Pervasive LFIR scan collision bit ...");
+                rc = fapiPutScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_MASK_AND_0x0004000E, data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error writing Pervasive LFIR Mask And Register.");
+                    break;
+                }
             }
         }
     } while(0);

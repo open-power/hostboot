@@ -1,4 +1,4 @@
-#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.4 2013/09/30 16:54:36 jmcgill Exp $
+#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.5 2013/10/28 06:56:28 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -21,10 +21,13 @@ SyntaxVersion = 1
 
 define mcl_enabled =  ((ATTR_CHIP_REGIONS_TO_ENABLE[2] & 0x0080000000000000) != 0);
 define mcr_enabled =  ((ATTR_CHIP_REGIONS_TO_ENABLE[2] & 0x0040000000000000) != 0);
+
 define xbus_enabled = (ATTR_PROC_X_ENABLE == ENUM_ATTR_PROC_X_ENABLE_ENABLE);
 define abus_enabled = (ATTR_PROC_A_ENABLE == ENUM_ATTR_PROC_A_ENABLE_ENABLE);
 define pcie_enabled = (ATTR_PROC_PCIE_ENABLE == ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
+
 define trace_on_scom = (ATTR_CHIP_EC_FEATURE_TRACE_CONTROL_ON_SCOM != 0);
+define is_venice     = (ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC != 0);
 
 #--------------------------------------------------------------------------------
 #-- SCOM initializations
@@ -43,13 +46,13 @@ scom 0x02011A06 {
 #-- IOMC0.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x02011A07 {
     bits, scom_data,          expr;
-    0:63, 0xE07070707000C000, (mcl_enabled);
+    0:63, 0x207878787800C000, (mcl_enabled);
 }
 
 #-- IOMC0.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x02011A03 {
     bits, scom_data,          expr;
-    0:63, 0x1FFFFFFFFFFF0000, (mcl_enabled);
+    0:63, 0xDFFFFFFFFFFF0000, (mcl_enabled);
 }
 
 #-- IOMC1.BUSCTL.SCOM.FIR_ACTION0_REG
@@ -61,13 +64,13 @@ scom 0x02011E06 {
 #-- IOMC1.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x02011E07 {
     bits, scom_data,          expr;
-    0:63, 0xE07070707000C000, (mcr_enabled);
+    0:63, 0x207878787800C000, (mcr_enabled);
 }
 
 #-- IOMC1.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x02011E03 {
     bits, scom_data,          expr;
-    0:63, 0x1FFFFFFFFFFF0000, (mcr_enabled);
+    0:63, 0xDFFFFFFFFFFF0000, (mcr_enabled);
 }
 
 
@@ -75,23 +78,86 @@ scom 0x02011E03 {
 #-- XBUS IO (EI4)
 #-- set base configuration for FIR, leaving link specific FIR bits *masked*
 #-- (will be unmasked by IO training procedure)
+
+#-- X0
+#-- XBUS01.X0.BUSCTL.SCOM.FIR_ACTION0_REG
+scom 0x04011006 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, ((xbus_enabled) && (is_venice));
+}
+
+#-- XBUS01.X0.BUSCTL.SCOM.FIR_ACTION1_REG
+scom 0x04011007 {
+    bits, scom_data,          expr;
+    0:63, 0x207800000000C000, ((xbus_enabled) && (is_venice));
+}
+
+#-- XBUS01.X0.BUSCTL.SCOM.FIR_MASK_REG
+scom 0x04011003 {
+    bits, scom_data,          expr;
+    0:63, 0xDFFFFFFFFFFF0000, ((xbus_enabled) && (is_venice));
+}
+
+#-- X1
 #-- XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG
+#-- XBUS01.X1.BUSCTL.SCOM.FIR_ACTION0_REG
 scom 0x04011406 {
     bits, scom_data,          expr;
     0:63, 0x0000000000000000, (xbus_enabled);
 }
 
 #-- XBUS1.BUSCTL.SCOM.FIR_ACTION1_REG
+#-- XBUS01.X1.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x04011407 {
     bits, scom_data,          expr;
-    0:63, 0xE07070707070C000, (xbus_enabled);
+    0:63, 0x207800000000C000, (xbus_enabled);
 }
 
 #-- XBUS1.BUSCTL.SCOM.FIR_MASK_REG
+#-- XBUS01.X1.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x04011403 {
     bits, scom_data,          expr;
-    0:63, 0x1FFFFFFFFFFF0000, (xbus_enabled);
+    0:63, 0xDFFFFFFFFFFF0000, (xbus_enabled);
 }
+
+#-- X3
+#-- XBUS23.X0.BUSCTL.SCOM.FIR_ACTION0_REG
+scom 0x04011806 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, ((xbus_enabled) && (is_venice));
+}
+
+#-- XBUS23.X0.BUSCTL.SCOM.FIR_ACTION1_REG
+scom 0x04011807 {
+    bits, scom_data,          expr;
+    0:63, 0x207800000000C000, ((xbus_enabled) && (is_venice));
+}
+
+#-- XBUS23.X0.BUSCTL.SCOM.FIR_MASK_REG
+scom 0x04011803 {
+    bits, scom_data,          expr;
+    0:63, 0xDFFFFFFFFFFF0000, ((xbus_enabled) && (is_venice));
+}
+
+#-- X2
+#-- XBUS23.X1.BUSCTL.SCOM.FIR_ACTION0_REG
+scom 0x04011C06 {
+    bits, scom_data,          expr;
+    0:63, 0x0000000000000000, ((xbus_enabled) && (is_venice));
+}
+
+#-- XBUS23.X1.BUSCTL.SCOM.FIR_ACTION1_REG
+scom 0x04011C07 {
+    bits, scom_data,          expr;
+    0:63, 0x207800000000C000, ((xbus_enabled) && (is_venice));
+}
+
+#-- XBUS23.X1.BUSCTL.SCOM.FIR_MASK_REG
+scom 0x04011C03 {
+    bits, scom_data,          expr;
+    0:63, 0xDFFFFFFFFFFF0000, ((xbus_enabled) && (is_venice));
+}
+
 
 #-- XBUS PB (PBEN)
 #-- set base configuration for FIR, leaving link specific FIR bits *masked*
@@ -124,13 +190,13 @@ scom 0x04040010 {
 #-- EN.PB.TPC.EPS.FIR.LOCAL_FIR_ACTION1
 scom 0x04040011 {
     bits, scom_data,          expr;
-    0:63, 0xFFFE000000000000, (xbus_enabled);
+    0:63, 0x8002000000000000, (xbus_enabled);
 }
 
 #-- EN.PB.TPC.EPS.FIR.LOCAL_FIR_MASK
 scom 0x0404000D {
     bits, scom_data,          expr;
-    0:63, 0x0001FFFFFF800000, (xbus_enabled);
+    0:63, 0x7FFDFFFFFF800000, (xbus_enabled);
 }
 
 #-- XBUS chiplet XFIR
@@ -164,13 +230,13 @@ scom 0x08010C06 {
 #-- ABUS.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x08010C07 {
     bits, scom_data,          expr;
-    0:63, 0xE07070707070C000, (abus_enabled);
+    0:63, 0x207878787878C000, (abus_enabled);
 }
 
 #-- ABUS.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x08010C03 {
     bits, scom_data,          expr;
-    0:63, 0x1FFFFFFFFFFF0000, (abus_enabled);
+    0:63, 0xDFFFFFFFFFFF0000, (abus_enabled);
 }
 
 #-- ABUS PB (PBES)
@@ -204,13 +270,13 @@ scom 0x08040010 {
 #-- ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION1
 scom 0x08040011 {
     bits, scom_data,          expr;
-    0:63, 0xFFF0000000000000, (abus_enabled);
+    0:63, 0x8000000000000000, (abus_enabled);
 }
 
 #-- ES.PBES_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_MASK
 scom 0x0804000D {
     bits, scom_data,          expr;
-    0:63, 0x000FFFFFFF800000, (abus_enabled);
+    0:63, 0x7FFFFFFFFF800000, (abus_enabled);
 }
 
 #-- ABUS chiplet XFIR
@@ -262,13 +328,13 @@ scom 0x09040010 {
 #-- ES.PE_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION1
 scom 0x09040011 {
     bits, scom_data,          expr;
-    0:63, 0xFFF0000000000000, (pcie_enabled);
+    0:63, 0x8000000000000000, (pcie_enabled);
 }
 
 #-- ES.PE_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_MASK
 scom 0x0904000D {
     bits, scom_data,          expr;
-    0:63, 0x000FFFFFFF800000, (pcie_enabled);
+    0:63, 0x7FFFFFFFFF800000, (pcie_enabled);
 }
 
 #-- PCIE chiplet XFIR
