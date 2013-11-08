@@ -681,7 +681,7 @@ class TargetService
          *
          *  @pre targetservice().init() should have been called before this.
          *
-         *  @post Target servicei is fully initialized along with a default
+         *  @post Target service is fully initialized along with a default
          *  master node.
          */
 
@@ -837,8 +837,25 @@ class TargetService
             const RECURSION_LEVEL      i_recursionLevel,
             const PredicateBase* const i_pPredicate) const;
 
+        /**
+         *  @brief Computes and stores the Top Level Target into iv_pSys
+         *
+         *  this should only be called to the exclusion of threads that might
+         *   try to read or write iv_pSys.
+         *
+         *  @param NONE
+         *
+         *  @pre Target service must already be 'initialized'
+         *
+         *  @post Target service iv_pSys initialized with top TYPE_SYS
+         *  target.
+         *
+         */
+        void _setTopLevelTarget();
+
         // Instance variables
         bool        iv_initialized; ///< Is service initialized or not
+        Target      * iv_pSys;      // Top Level Target
 
         NodeInfo_t iv_nodeInfo;
 

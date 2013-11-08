@@ -103,7 +103,8 @@ TRAC_INIT(&g_trac_targeting, "TARG", 4096);
 //******************************************************************************
 
 TargetService::TargetService() :
-    iv_initialized(false)
+    iv_initialized(false),
+    iv_pSys(NULL)
 {
     #define TARG_FN "TargetService()"
 
@@ -193,7 +194,29 @@ void TargetService::init(const size_t i_maxNodes)
         }
 
         iv_initialized = true;
+
+        // call to set the top TYPE_SYS target
+        _setTopLevelTarget();
     }
+
+    TARG_EXIT();
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// TargetService:: _setTopLevelTarget
+//******************************************************************************
+
+void TargetService::_setTopLevelTarget()
+{
+    #define TARG_FN "_setTopLevelTarget()"
+    TARG_ENTER();
+
+    // compute TopLevelTarget
+    EntityPath l_topLevelPhysicalPath(EntityPath::PATH_PHYSICAL);
+    l_topLevelPhysicalPath.addLast(TYPE_SYS, 0);
+    iv_pSys = toTarget(l_topLevelPhysicalPath);
 
     TARG_EXIT();
 
@@ -472,9 +495,7 @@ void TargetService::getTopLevelTarget(
     TARG_ASSERT(iv_initialized, TARG_ERR_LOC
                "USAGE: TargetService not initialized");
 
-    EntityPath l_topLevelPhysicalPath(EntityPath::PATH_PHYSICAL);
-    l_topLevelPhysicalPath.addLast(TYPE_SYS, 0);
-    o_targetHandle = toTarget(l_topLevelPhysicalPath);
+    o_targetHandle = iv_pSys;
 
     #undef TARG_FN
 }
@@ -1316,11 +1337,10 @@ void TargetService::initDefaultMasterNode()
                         // node, since targeting is not initalized yet, cannot
                         // use the basic features of predicates, rangefilter
                         // and all.
-                        Target* l_pSysTarget = NULL;
-                        getTopLevelTarget(l_pSysTarget);
-                        TARG_ASSERT(l_pSysTarget != NULL, TARG_ERR_LOC
+                        _setTopLevelTarget();
+                        TARG_ASSERT(iv_pSys != NULL, TARG_ERR_LOC
                             "Top Level Target cannot be NULL");
-                        pError = UTIL::SyncMasterSystemTarget(l_pSysTarget);
+                        pError = UTIL::SyncMasterSystemTarget(iv_pSys);
                         if(pError)
                         {
                             TARG_ASSERT(0, TARG_ERR_LOC
