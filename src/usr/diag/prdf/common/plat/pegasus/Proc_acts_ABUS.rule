@@ -135,11 +135,6 @@ group gAbusLFir filter singlebit
 # based on p8dd1_mss_FFDC_37_ reviewd.xls
 ################################################################################
 
-#FIXME RTC 23127 We need to revisit the Firmware action
-#FabricBus_CE_With_Repair. Description is same as P7 but
-#it appears it may need change.This appilies to PBES FIR.
-#calloutAbus0InterfaceTh5 may need modification.
-
 rule PbesFir
 {
     CHECK_STOP:
@@ -522,14 +517,29 @@ actionclass calloutAbus1InterfaceTh1 { calloutAbus1Interface; threshold1; };
 /** Callout the ABUS 2 interface, threshold 1 */
 actionclass calloutAbus2InterfaceTh1 { calloutAbus2Interface; threshold1; };
 
-/** Callout the ABUS 0 interface, threshold 5 per day */
-actionclass calloutAbus0InterfaceTh5 { calloutAbus0Interface; threshold5pday; };
+/** Threshold 5 per day, mask but do not predictively callout ABUS 0 */
+actionclass calloutAbus0InterfaceTh5
+{
+    calloutAbus0Interface;
+    threshold5pday;
+    funccall("ClearServiceCallFlag");
+};
 
-/** Callout the ABUS 1 interface, threshold 5 per day */
-actionclass calloutAbus1InterfaceTh5 { calloutAbus1Interface; threshold5pday; };
+/** Threshold 5 per day, mask but do not predictively callout ABUS 1 */
+actionclass calloutAbus1InterfaceTh5
+{
+    calloutAbus1Interface;
+    threshold5pday;
+    funccall("ClearServiceCallFlag");
+};
 
-/** Callout the ABUS 2 interface, threshold 5 per day */
-actionclass calloutAbus2InterfaceTh5 { calloutAbus2Interface; threshold5pday; };
+/** Threshold 5 per day, mask but do not predictively callout ABUS 2 */
+actionclass calloutAbus2InterfaceTh5
+{
+    calloutAbus2Interface;
+    threshold5pday;
+    funccall("ClearServiceCallFlag");
+};
 
 /** Lane Repair: spare deployed - ABUS 0 */
 actionclass spareDeployed_abus0

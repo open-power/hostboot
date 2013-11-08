@@ -729,29 +729,33 @@ actionclass maxSparesExceeded_xbus1
 actionclass tooManyBusErrors_xbus1
 { calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus1"); };
 
-/** Callout the XBUS 0 interface, threshold 5 per day */
+/** Threshold 5 per day, mask but do not predictively callout XBUS 0 */
 actionclass calloutXbus0InterfaceTh5pDay
 {
     calloutXbus0Interface;
     threshold5pday;
+    funccall("ClearServiceCallFlag");
 };
 
-/** Callout the XBUS 1 interface, threshold 5 per day */
+/** Threshold 5 per day, mask but do not predictively callout XBUS 1 */
 actionclass calloutXbus1InterfaceTh5pDay
 {
     calloutXbus1Interface;
     threshold5pday;
+    funccall("ClearServiceCallFlag");
 };
 
-/** Callout the XBUS 2 interface, threshold 5 per day */
+/** Threshold 5 per day, mask but do not predictively callout XBUS 2 */
 actionclass calloutXbus2InterfaceTh5pDay
 {   calloutXbus2Interface;
     threshold5pday;
+    funccall("ClearServiceCallFlag");
 };
 
-/** Callout the XBUS 3 interface, threshold 5 per day */
+/** Threshold 5 per day, mask but do not predictively callout XBUS 3 */
 actionclass calloutXbus3InterfaceTh5pDay
 {
     calloutXbus3Interface;
     threshold5pday;
+    funccall("ClearServiceCallFlag");
 };
