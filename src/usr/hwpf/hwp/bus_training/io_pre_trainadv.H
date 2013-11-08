@@ -20,35 +20,30 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_pre_trainadv.H,v 1.1 2013/05/10 20:05:59 thomsen Exp $
+// $Id: io_pre_trainadv.H,v 1.2 2013/11/08 14:22:11 mjjones Exp $
 #ifndef IO_PRE_TRAINADV_H_
 #define IO_PRE_TRAINADV_H_
 
 #include <fapi.H>
 
-using namespace fapi;
-
 /**
  * io_pre_trainadv HWP func pointer typedef
- *
  */
-typedef fapi::ReturnCode (*io_pre_trainadv_FP_t)(const fapi::Target &target);
+typedef fapi::ReturnCode (*io_pre_trainadv_FP_t)(const fapi::Target &);
 
 extern "C"
 {
 
 /**
- * io_pre_trainadv HWP
- *
- * master_target is any IO target P8 MCS,XBUS,Abus or centaur
- *
- *
- *
- *
+ * @brief Debug routine for IO Characterization
+ * 
+ * @param[in]  i_target  Reference to bus endpoint target. Type is one of:
+ *                       XBUS_ENDPOINT, ABUS_ENDPOINT,
+ *                       MCS_CHIPLET, MEMBUF_CHIP
+ * @return ReturnCode
  */
-
-fapi::ReturnCode io_pre_trainadv(const fapi::Target &target);
+fapi::ReturnCode io_pre_trainadv(const fapi::Target & i_target);
 
 } // extern "C"
-#endif // io_pre_trainadv_H_
 
+#endif
