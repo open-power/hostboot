@@ -1489,14 +1489,26 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(
             {
                 if ((*l_procInfoIter)->iv_ADeconfigured[i])
                 {
-                    deconfigBusCounter++;
+                    // Only increment deconfigBusCounter if peer proc exists
+                    //  and is functional
+                    if((*l_procInfoIter)->iv_pAProcs[i] &&
+                      (!(*l_procInfoIter)->iv_pAProcs[i]->iv_deconfigured))
+                    {
+                        deconfigBusCounter++;
+                    }
                 }
             }
             for (uint8_t i = 0; i < NUM_X_BUSES; i++)
             {
                 if ((*l_procInfoIter)->iv_XDeconfigured[i])
                 {
-                    deconfigBusCounter++;
+                    // Only increment deconfigBusCounter if peer proc exists
+                    // and is functional
+                    if((*l_procInfoIter)->iv_pXProcs[i] &&
+                      (!(*l_procInfoIter)->iv_pXProcs[i]->iv_deconfigured))
+                    {
+                        deconfigBusCounter++;
+                    }
                 }
             }
             // If number of endpoints deconfigured is > 1
