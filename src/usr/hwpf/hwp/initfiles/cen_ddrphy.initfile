@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.26 2013/07/17 15:45:02 mwuu Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.27 2013/11/01 19:40:50 mwuu Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,11 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#		1.28|mwuu    |11/01/13|Had a typo for ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8,
+#		                      |port A was getting the value of A9 phase rotator.
+#		                      |Using attribute settings for GPO,RLO,WLO for LRDIMM
+#		1.27|mwuu    |08/22/13|Changed RLO/GPO settings for LRDIMM to be picked up
+#		                      |by mss_eff_config_termination.
 #--     1.26|mwuu    |07/17/13|Changed FAST_SIM_PC to use SIM attribute, changed
 #           |        |        |type1 define to use CUSTOM attribute as well.
 #           |        |        |Changed READ_CLOCK section to enable clocks for x4.
@@ -430,7 +435,7 @@ scom 0x8000C00D0301143F {
 # 	# 9.4.12.2	RLO = READ_LATENCY_OFFSET (2's complement -8 to 7) {0=CDIMM, 1=RDIMM, 2=LRDIMM}
 # 	52:55	,	0x1			,	(def_is_rdimm)						;	# RDIMM
 # 	52:55	,	0x0			,	any									;	# CDIMM/UDIMM
- 	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM
+# 	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM	# !! need to review LR settings !!
  	52:55	,	(ATTR_EFF_RLO[0]),	any								;	# based on attribute now..
  	56		,	0b0			,	any									;	# MEMCTL_CIC_FAST
  	57		,	0b0			,	any									;	# MEMCTL_CTRN_IGNORE
@@ -855,8 +860,8 @@ scom 0x80013C7A0301143f {				# NFET_TERM_P1_[0:4]	broadcast
 	48:59	,	0x000	,	any											;	# 240/0, 480/0
 #	60:63	,	0b0000	,	any											;	# reserved
 }
-# DPHY01_DDRPHY_DP18_IO_TX_PFET_TERM_P1_0	0x07B	0x8000007B0301143f
-#scom 0x8000(00,04,08,0C,10)7B0301143f {	# PFET_TERM_P1_[0:4]
+# DPHY01_DDRPHY_DP18_IO_TX_PFET_TERM_P1_0	0x07B	0x8001007B0301143f
+#scom 0x8001(00,04,08,0C,10)7B0301143f {	# PFET_TERM_P1_[0:4]
 scom 0x80013C7B0301143f {				# PFET_TERM_P1_[0:4]	broadcast
 	bits	,	scom_data,	expr									;
 #	0:47	,	0x000000000000,	any									;	# reserved
@@ -3757,7 +3762,7 @@ scom 0x8000C8000301143F {	# _P0
 	#
 	# min GPO = 5 + max(rndUp(System_delay)) - RLO + ADVANCE_RD_VALID + SPAM_EN
 	# max GPO = 11 if in 2:1, 13 if in 4:1
-	48:51	,	0b0111		,	(def_is_lrdimm)	;	# GLOBAL_PHY_OFFSET LRDIMM set to 7
+#	48:51	,	0b0111		,	(def_is_lrdimm)	;	# GLOBAL_PHY_OFFSET LRDIMM set to 7		# need to review LR settings
 	48:51	,	(ATTR_EFF_GPO[0]),	any			;	# GLOBAL_PHY_OFFSET (GPO), based on attribute now
 #	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), ideally 2:1 max=11, 4:1 max=13
 	52		,	0b0			,	any				;	# ADVANCE_RD_VALID	ask Yuen
@@ -4555,10 +4560,10 @@ scom 0x800048080301143F {	# DPHY01_DDRPHY_ADR_DELAY4_P0_ADR2
 scom 0x800048090301143F {	# DPHY01_DDRPHY_ADR_DELAY5_P0_ADR2
 	bits	,	scom_data			,	expr									;
 #	0:47	,	0x000000000000		,	any										;	# reserved
-	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1[0])		,	(def_is_mba01)	;	# P0 L12, A0_CLK1_n
-	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1[0])		,	(def_is_mba01)	;	# P0 L13, A0_CLK1_p
-	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0[0])		,	(def_is_mba23)	;	# P2 L12, C0_CLK0_n
-	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0[0])		,	(def_is_mba23)	;	# P2 L13, C0_CLK0_p
+	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1[0])		,	(def_is_mba01)	;	# P0 L10, A0_CLK1_n
+	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1[0])		,	(def_is_mba01)	;	# P0 L11, A0_CLK1_p
+	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0[0])		,	(def_is_mba23)	;	# P2 L10, C0_CLK0_n
+	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0[0])		,	(def_is_mba23)	;	# P2 L11, C0_CLK0_p
 }
 scom 0x8000480A0301143F {	# DPHY01.DDRPHY_ADR_DELAY6_P0_ADR2
 	bits	,	scom_data			,	expr									;
@@ -4612,16 +4617,16 @@ scom 0x80004C080301143F {	# DPHY01_DDRPHY_ADR_DELAY4_P0_ADR3
 scom 0x80004C090301143F {	# DPHY01_DDRPHY_ADR_DELAY5_P0_ADR3
 	bits	,	scom_data			,	expr									;
 #	0:47	,	0x000000000000		,	any										;	# reserved
-	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7[0])		,	(def_is_mba01)	;	# P0 L12, A_A7
-	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_ACTN[0])			,	(def_is_mba01)	;	# P0 L13, A_ACTn
-	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0[0])		,	(def_is_mba23)	;	# P2 L12, C_BA0
-	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN[0])		,	(def_is_mba23)	;	# P2 L13, C_CASn
+	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7[0])		,	(def_is_mba01)	;	# P0 L10, A_A7
+	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_ACTN[0])			,	(def_is_mba01)	;	# P0 L11, A_ACTn
+	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0[0])		,	(def_is_mba23)	;	# P2 L10, C_BA0
+	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN[0])		,	(def_is_mba23)	;	# P2 L11, C_CASn
 }
 scom 0x80004C0A0301143F {	# DPHY01.DDRPHY_ADR_DELAY6_P0_ADR3
 	bits	,	scom_data			,	expr									;
 #	0:47	,	0x000000000000		,	any										;	# reserved
 	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9[0])		,	(def_is_mba01)	;	# P0 L12, A_A9
-	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9[0])		,	(def_is_mba01)	;	# P0 L13, A_A8
+	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8[0])		,	(def_is_mba01)	;	# P0 L13, A_A8	# fixed typo
 	48:55	,	(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4[0])		,	(def_is_mba23)	;	# P2 L12, C_A4
 	56:63	,	(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3[0])	,	(def_is_mba23)	;	# P2 L13, C0_CS3n
 }

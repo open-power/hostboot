@@ -22,12 +22,47 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-  <!-- $Id: centaur_ec_attributes.xml,v 1.10 2013/09/11 12:29:40 bwieman Exp $ -->
+  <!-- $Id: centaur_ec_attributes.xml,v 1.14 2013/10/31 13:17:30 bwieman Exp $ -->
   <attribute>
     <id>ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
         Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.  For HW259719. If true, Trace LCL_CLK_GATE_CTRL will be enabled.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CENTAUR_EC_ENABLE_NM_CHANGE_AFTER_SYNC</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.  IF TRUE, ENABLE NM change after sync.
+        This fix that is going into DD2 (to use values in N/M shadow registers when a sync command is seen), we should be able to change M to a different value if we wanted to without any issues.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.  IF TRUE, Enable ROW HAMMER ENHANCEMENT FOR DD2.
     </description>
     <chipEcFeature>
       <chip>
@@ -132,7 +167,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
     <id>ATTR_CENTAUR_EC_ECID_CONTAINS_PORT_LOGIC_BAD_INDICATION</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
-      If true then mss_get_cen_ecid reads the ECID bits to determine if 
+      If true then mss_get_cen_ecid reads the ECID bits to determine if
       logic on either of the ports are good.  For DD2, these bits are not
       used for this purpose and so the check is not made.
       This is true for Centaur 1.*
@@ -147,7 +182,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
- 
+
   <attribute>
     <id>ATTR_CENTAUR_EC_MCBIST_RANDOM_DATA_GEN</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -164,7 +199,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
-  
+
   <attribute>
     <id>ATTR_CENTAUR_EC_MCBIST_TRAP_RESET</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -181,12 +216,46 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
-  
+
   <attribute>
     <id>ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
         Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.   If false, this will enable workaround for start and end counters for Random Addressing.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+    <attribute>
+    <id>ATTR_CENTAUR_EC_SCOM_PARITY_ERROR_HW244827_FIXED</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.  If false, draminit_mc will execute a putscom to clear the scom parity error fir for all densities on DD1.X parts.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+    <attribute>
+    <id>ATTR_CENTAUR_EC_HW217608_MBSPA_0_CMD_COMPLETE_ATTN_FIXED</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.  If true, MBSPA bit 8 is masked, and MBSPA bit 0 is unmasked and configured to report when maint cmd either stops clean or stops on error. Otherwise, MBSPA bit 0 is masked, and MBSPA bit 8 is unmasked. NOTE: For DD1 when using MBSPA bit 8, a scan init is needed to enable the WAT workaround allows bit 8 to report when maint cmd either stops clean or stops on error. The scan init is enabled for DD1 and disabled for DD2, but does not use this same attribute.
     </description>
     <chipEcFeature>
       <chip>

@@ -1,8 +1,9 @@
-#-- $Id: mbs_def.initfile,v 1.37 2013/08/15 19:20:26 yctschan Exp $
+#-- $Id: mbs_def.initfile,v 1.38 2013/10/30 23:51:42 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--   1.38  |tschang |10/30/13| hash mode update for other IBM types
 #--   1.37  |tschang |08/15/13| HW259719 - dd2 only fix - ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL to turn on clock gates
 #--   1.36  |tschang |07/03/13| L4.ATTR_FUNCTIONAL for cache enable for some bits I missed
 #--   1.35  |tschang |07/02/13| L4.ATTR_FUNCTIONAL for cache enable
@@ -399,13 +400,6 @@ define def_mba23_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated = (def_mb
 define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mba23_1a_2socket      ||def_mba23_1b_2socket      ||def_mba23_1c_2socket      ||def_mba23_2a_2socket      ||def_mba23_2a_2socket_ddr4 ||def_mba23_2b_2socket      ||def_mba23_2b_2socket_ddr4 ||def_mba23_2c_2socket      ||def_mba23_2c_2socket_ddr4 ||def_mba23_3a_2socket      ||def_mba23_3a_2socket_ddr4 ||def_mba23_3b_2socket      ||def_mba23_3c_2socket_ddr4 ||def_mba23_5b_2socket      ||def_mba23_5c_2socket      ||def_mba23_5d_2socket      ||def_mba23_7a_2socket      ||def_mba23_7b_2socket      ||def_mba23_7c_2socket      ||def_mba23_7a_2socket_ddr4 ||def_mba23_7b_2socket_ddr4 ||def_mba23_7c_2socket_ddr4 ||def_mba23_1c_cdimm        ||def_mba23_3a_cdimm        ||def_mba23_3b_cdimm        ||def_mba23_3c_cdimm        ||def_mba23_3a_ddr4_cdimm   ||def_mba23_3b_ddr4_cdimm   ||def_mba23_3c_ddr4_cdimm   ||def_mba23_4a_cdimm        ||def_mba23_4a_ddr4_cdimm   ||def_mba23_4b_ddr4_cdimm   ||def_mba23_4c_ddr4_cdimm);
 
 ## Temp defines until the code adds these attributes
-#define  def_ATTR_MSS_CACHE_ENABLE = 0;                                   # cache disable
-#define  def_ATTR_MSS_PREFETCH_ENABLE = 0;                                # prefetch disable
-#define  def_ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT = 0;                        # no MBA interleave
-#define  def_01ATTR_MSS_MBA_INTERLEAVE_MODE = 0;
-#define  def_23ATTR_MSS_MBA_INTERLEAVE_MODE = 0;
-#define  def_01ATTR_EFF_MBA_POS = 0;	# -MW not needed?
-#define  def_23ATTR_EFF_MBA_POS = 1;	# -MW not needed?
 
 #--******************************************************************************
 #-- MBS FIR MASK Register
@@ -418,7 +412,7 @@ define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mb
 
 
 #--******************************************************************************
-# TRACE_TRCTRL_CONFIG MBA01 Trace Control Configuration Register
+# TRACE_TRCTRL_CONFIG Trace Control Configuration Register
 #
 # HW259719 - lcl_clk_gate_ctrl needs to be turned on and left on
 # DD2 fixed ONLY
@@ -601,6 +595,22 @@ define def_mba01_hash0_type1a = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 1) || (MBA0.AT
 # Type 1B/5B - simplied table to hash mode 2 when both dimm configured  and hash mode 1 when 1 dimm is configured
 define def_mba01_hash2_type1b_5b = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 15)) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] != 0) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] != 0);
 define def_mba01_hash1_type1b_5b = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 15)) && ((MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] == 0) || (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] == 0));
+# Type 1D/5C - simplied table to hash mode 2 for all cfgs
+define def_mba01_hash2_type1d_5c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 4) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 16));
+# Type 2A - simplied table to hash mode 1 when both dimm configured  and hash mode 0 when 1 dimm is configured
+define def_mba01_hash1_type2a = (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] != 0) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] != 0);
+define def_mba01_hash0_type2a = (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5) && ((MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] == 0) || (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] == 0));
+# Type 2B - simplied table to hash mode 0 for all cfgs
+define def_mba01_hash0_type2b = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6));
+# Type 3A/7A - simplied table to hash mode 1 for all cfgs
+define def_mba01_hash1_type3a_7a = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 21));
+# Type 3B/7B - simplied table to hash mode 0 for all cfgs
+define def_mba01_hash0_type3b_7b = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 22));
+# Type 2C - simplied table to hash mode 0 for all cfgs
+define def_mba01_hash0_type2c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7));
+# Type 3C/7C - simplied table to hash mode 0 for all cfgs
+define def_mba01_hash0_type3c_7c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 23));
+
 
 # MBA23 Type 1A - simplied table to hash mode 1 when both dimm configured
 define def_mba23_hash1_type1a = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1) || (MBA1.ATTR_EFF_IBM_TYPE[1][1] == 1)) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] != 0) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][1] != 0);
@@ -608,14 +618,30 @@ define def_mba23_hash0_type1a = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1) || (MBA1.AT
 # Type 1B/5B - simplied table to hash mode 2 when both dimm configured  and hash mode 1 when 1 dimm is configured
 define def_mba23_hash2_type1b_5b = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2) || (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 15)) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] != 0) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][1] != 0);
 define def_mba23_hash1_type1b_5b = ((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2) || (MBA1.ATTR_EFF_IBM_TYPE[1][0] == 15)) && ((MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] == 0) || (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][1] == 0));
+# Type 1D/5C - simplied table to hash mode 2 for all cfgs
+define def_mba23_hash2_type1d_5c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 4) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 16));
+# Type 2A - simplied table to hash mode 1 when both dimm configured  and hash mode 0 when 1 dimm is configured
+define def_mba23_hash1_type2a = (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] != 0) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] != 0);
+define def_mba23_hash0_type2a = (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 5) && ((MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] == 0) || (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] == 0));
+# Type 2B - simplied table to hash mode 0 for all cfgs
+define def_mba23_hash0_type2b = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 6));
+# Type 3A/7A - simplied table to hash mode 1 for all cfgs
+define def_mba23_hash1_type3a_7a = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 8) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 21));
+# Type 3B/7B - simplied table to hash mode 0 for all cfgs
+define def_mba23_hash0_type3b_7b = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 9) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 22));
+# Type 2C - simplied table to hash mode 0 for all cfgs
+define def_mba23_hash0_type2c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 7));
+# Type 3C/7C - simplied table to hash mode 0 for all cfgs
+define def_mba23_hash0_type3c_7c = ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 10) || (MBA0.ATTR_EFF_IBM_TYPE[0][0] == 23));
 
-define def_mba01_hash0_sel = (def_mba01_hash0_type1a);
-define def_mba01_hash1_sel = (def_mba01_hash1_type1a) || (def_mba01_hash1_type1b_5b);
-define def_mba01_hash2_sel = (def_mba01_hash1_type1b_5b);
+define def_mba01_hash0_sel = (def_mba01_hash0_type1a)    ||(def_mba01_hash0_type2a)    ||(def_mba01_hash0_type2b)    ||(def_mba01_hash0_type2c)    ||(def_mba01_hash0_type3b_7b) ||(def_mba01_hash0_type3c_7c) ;
+define def_mba01_hash1_sel = (def_mba01_hash1_type1a)    ||(def_mba01_hash1_type1b_5b) ||(def_mba01_hash1_type2a)    ||(def_mba01_hash1_type3a_7a) ;
+define def_mba01_hash2_sel = (def_mba01_hash2_type1b_5b) ||(def_mba01_hash2_type1d_5c) ;
 
-define def_mba23_hash0_sel = (def_mba23_hash0_type1a);
-define def_mba23_hash1_sel = (def_mba23_hash1_type1a) || (def_mba23_hash1_type1b_5b);
-define def_mba23_hash2_sel = (def_mba23_hash1_type1b_5b);
+define def_mba23_hash0_sel = (def_mba23_hash0_type1a)    ||(def_mba23_hash0_type2a)    ||(def_mba23_hash0_type2b)    ||(def_mba23_hash0_type2c)    ||(def_mba23_hash0_type3b_7b) ||(def_mba23_hash0_type3c_7c) ;
+define def_mba23_hash1_sel = (def_mba23_hash1_type1a)    ||(def_mba23_hash1_type1b_5b) ||(def_mba23_hash1_type2a)    ||(def_mba23_hash1_type3a_7a) ;
+define def_mba23_hash2_sel = (def_mba23_hash2_type1b_5b) ||(def_mba23_hash2_type1d_5c) ;
+
 ####################################
 # MBA01 address translation config #
 ####################################
