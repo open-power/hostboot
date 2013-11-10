@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_cen_framelock.H,v 1.7 2012/10/12 03:35:07 baysah Exp $
+// $Id: proc_cen_framelock.H,v 1.8 2013/10/30 03:48:12 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -176,30 +176,7 @@ extern "C"
 //             i_mem_target => Centaur chip target
 //             i_args       => proc_cen_framelock HWP argumemt structure
 // returns: FAPI_RC_SUCCESS if framelock/FRTL sequence completes successfully,
-//          RC_PROC_CEN_FRAMELOCK_INVALID_ARGS
-//              if invalid/out of range arguments are presented in i_args,
-//          RC_PROC_CEN_FRAMELOCK_FL_CEN_FIR_ERR
-//              if Centaur MBI FIR is set during framelock operation,
-//          RC_PROC_CEN_FRAMELOCK_FL_P8_FIR_ERR
-//              if P8 MCI FIR is set during framelock operation,
-//          RC_PROC_CEN_FRAMELOCK_FL_CEN_FAIL_ERR
-//              if Centaur MBI indicates framelock operation failure,
-//          RC_PROC_CEN_FRAMELOCK_FL_P8_FAIL_ERR
-//              if P8 MCI indicates framelock operation failure,
-//          RC_PROC_CEN_FRAMELOCK_FL_TIMEOUT_ERR
-//              if MCI/MBI does not post pass/fail indication after framelock
-//              operation is started,
-//          RC_PROC_CEN_FRAMELOCK_FRTL_CEN_FIR_ERR
-//              if Centaur MBI FIR is set during FRTL operation,
-//          RC_PROC_CEN_FRAMELOCK_FRTL_P8_FIR_ERR
-//              if P8 MCI FIR is set during FRTL operation,
-//          RC_PROC_CEN_FRAMELOCK_FRTL_CEN_FAIL_ERR
-//              if Centaur MBI indicates FRTL operation failure,
-//          RC_PROC_CEN_FRAMELOCK_FRTL_P8_FAIL_ERR
-//              if P8 MCI indicates FRTL operation failure,
-//          RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR
-//              if MCI/MBI does not post pass/fail indication after FRTL
-//              operation is started,
+//          or error from proc_cen_framelock_errors.xml
 //          else FAPI getscom/putscom return code for failing operation
 fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                                     const fapi::Target& i_mem_target,

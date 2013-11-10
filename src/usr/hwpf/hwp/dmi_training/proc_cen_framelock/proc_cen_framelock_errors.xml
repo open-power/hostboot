@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_cen_framelock_errors.xml,v 1.4 2013/06/25 15:38:24 cswenson Exp $ -->
+<!-- $Id: proc_cen_framelock_errors.xml,v 1.6 2013/11/08 17:54:43 baysah Exp $ -->
 <!-- Error definitions for proc_cen_framelock procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -28,59 +28,725 @@
     <rc>RC_PROC_CEN_FRAMELOCK_INVALID_ARGS</rc>
     <description>Invalid or out-of-range argument value(s) presented to proc_cen_framelock HWP.</description>
     <ffdc>ARGS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_CEN_FRAMELOCK_FL_CEN_FIR_ERR</rc>
-    <description>Framelock sequence set FIR bit in Centaur MBI FIR Register.</description>
-    <ffdc>FIR_REG</ffdc>
+    <rc>RC_PROC_CEN_FRAMELOCK_FL_P8_FIR_ERR_MCS</rc>
+    <description>
+        Framelock sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MCS issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MCS_CHIPLET</target>
+    </deconfigure>
+    <gard>
+      <target>MCS_CHIPLET</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_CEN_FRAMELOCK_FL_P8_FIR_ERR</rc>
-    <description>Framelock sequence set FIR bit in P8 MCI FIR Register.</description>
-    <ffdc>FIR_REG</ffdc>
+    <rc>RC_PROC_CEN_FRAMELOCK_FL_P8_FIR_ERR_MEMBUF</rc>
+    <description>
+        Framelock sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MEMBUF issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_CEN_FRAMELOCK_FL_CEN_FAIL_ERR</rc>
-    <description>Framelock sequence fail reported in Centaur MBI Status Register.</description>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FL_P8_FIR_ERR_MCS</rc>
+    <description>
+        Framelock errstate sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MCS issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MCS_CHIPLET</target>
+    </deconfigure>
+    <gard>
+      <target>MCS_CHIPLET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FL_P8_FIR_ERR_MEMBUF</rc>
+    <description>
+        Framelock errstate sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MEMBUF issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FL_CEN_FIR_ERR</rc>
+    <description>Framelock errstate sequence set FIR bit in Centaur MBI FIR Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CEN_FRAMELOCK_FL_P8_FAIL_ERR</rc>
     <description>Framelock sequence fail reported in P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FL_P8_FAIL_ERR</rc>
+    <description>Framelock errstate sequence fail reported in P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FL_CEN_FAIL_ERR</rc>
+    <description>Framelock errstate sequence fail reported in Centaur MBI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CEN_FRAMELOCK_FL_TIMEOUT_ERR</rc>
-    <description>Framelock sequence timed out waiting for pass/fail indication in Centaur MBI Status Register or P8 MCI Status Register.</description>
+    <description>Framelock sequence timed out waiting for pass/fail indication in P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_CEN_FIR_ERR</rc>
-    <description>FRTL sequence set FIR bit in Centaur MBI FIR Register.</description>
-    <ffdc>FIR_REG</ffdc>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FL_TIMEOUT_ERR</rc>
+    <description>Framelock errstate sequence timed out waiting for pass/fail indication in P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_P8_FIR_ERR</rc>
-    <description>FRTL sequence set FIR bit in P8 MCI FIR Register.</description>
-    <ffdc>FIR_REG</ffdc>
+    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_P8_FIR_ERR_MCS</rc>
+    <description>
+        FRTL sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MCS issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MCS_CHIPLET</target>
+    </deconfigure>
+    <gard>
+      <target>MCS_CHIPLET</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_CEN_FAIL_ERR</rc>
-    <description>FRTL sequence fail reported in Centaur MBI Status Register.</description>
+    <rc>RC_PROC_CEN_FRAMELOCK_FRTL_P8_FIR_ERR_MEMBUF</rc>
+    <description>
+        FRTL sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MEMBUF issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_MANUAL_FRTL_P8_FIR_ERR_MCS</rc>
+    <description>
+        FRTL manual sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MCS issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MCS_CHIPLET</target>
+    </deconfigure>
+    <gard>
+      <target>MCS_CHIPLET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_MANUAL_FRTL_P8_FIR_ERR_MEMBUF</rc>
+    <description>
+        FRTL manual sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MEMBUF issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P8_FIR_ERR_MCS</rc>
+    <description>
+        FRTL errstate sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MCS issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MCS_CHIPLET</target>
+    </deconfigure>
+    <gard>
+      <target>MCS_CHIPLET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P8_FIR_ERR_MEMBUF</rc>
+    <description>
+        FRTL errstate sequence set FIR bit in P8 MCI FIR Register.
+        FIR bit indicates MEMBUF issue.
+    </description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_MANUAL_FRTL_CEN_FIR_ERR</rc>
+    <description>FRTL mannual sequence set FIR bit in Centaur MBI FIR Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_CEN_FIR_ERR</rc>
+    <description>FRTL errstate sequence set FIR bit in Centaur MBI FIR Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CEN_FRAMELOCK_FRTL_P8_FAIL_ERR</rc>
     <description>FRTL sequence fail reported in P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_MANUAL_FRTL_P8_FAIL_ERR</rc>
+    <description>FRTL manual sequence fail reported in P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P8_FAIL_ERR</rc>
+    <description>FRTL errstate sequence fail reported in P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_MANUAL_FRTL_CEN_FAIL_ERR</rc>
+    <description>FRTL manual sequence fail reported in Centaur MBI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_CEN_FAIL_ERR</rc>
+    <description>FRTL errstate sequence fail reported in Centaur MBI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR</rc>
-    <description>FRTL sequence timed out waiting for pass/fail indication in Centaur MBI Status Register or P8 MCI Status Register.</description>
+    <description>FRTL sequence timed out waiting for pass/fail indication in P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_MANUAL_FRTL_TIMEOUT_ERR</rc>
+    <description>FRTL manual sequence timed out waiting for pass/fail indication in Centaur MBI Status Register or P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_TIMEOUT_ERR</rc>
+    <description>FRTL errstate sequence timed out waiting for pass/fail indication in Centaur MBI Status Register or P8 MCI Status Register.</description>
+    <ffdc>MCI_STAT</ffdc>
+    <ffdc>MCI_FIR</ffdc>
+    <ffdc>MBI_STAT</ffdc>
+    <ffdc>MBI_FIR</ffdc>
+    <callout>
+      <target>MEMBUF_CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MCS_CHIPLET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>MCS_CHIPLET, MEMBUF_CHIP</bus>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP</target>
+    </gard>
   </hwpError>
 </hwpErrors>
