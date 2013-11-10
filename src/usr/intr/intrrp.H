@@ -124,12 +124,11 @@ namespace INTR
                 // Used to enable/disable and control interrupt routing
                 NX_BUID_SCOM_ADDR       = 0x0201308E, //INTR CTRL for NX
                 NX_BUID_ENABLE          = 0,          //INTR Enable bit for NX
-                NX_IRSN_COMP_MASK       = 0x7FFFF,
+                IRSN_COMP_MASK          = 0x7FFFF,
                 NX_IRSN_MASK_MASK       = 0x1FFF,
                 NX_IRSN_UPPER_MASK      = 0x7E000,
                 NX_IRSN_COMP_SHIFT      = 44,
                 NX_IRSN_MASK_SHIFT      = 31,
-                MAX_NX_IRSN_SN          = 32,
 
 
 
@@ -482,30 +481,35 @@ namespace INTR
              *
              * @param i_target  Processor target to read value from
              * @param o_irsn    IRSN of the PSI unit for the processor
+             * @param o_num     Number of interrupts behind IRSN
              * @return an error handle on error
              */
             errlHndl_t getPsiIRSN(TARGETING::Target * i_target,
-                                  uint32_t& o_irsn);
+                                  uint32_t& o_irsn, uint32_t& o_num);
 
             /**
              * Read the PCIE interrupt source numbers out of the HW
              *
              * @param i_target  Processor target to read value from
              * @param o_irsn    List of IRSN for the PCIE units
+             * @param o_num     Number of interrupts behind IRSN
              * @return an error handle on error
              */
             errlHndl_t getPcieIRSNs(TARGETING::Target * i_target,
-                                    std::vector<uint32_t> &o_irsn);
+                                    std::vector<uint32_t> &o_irsn,
+                                    std::vector<uint32_t> &o_num);
 
             /**
              * Read the NX interrupt source number out of the HW
              *
              * @param i_target  Processor target to read value from
              * @param o_irsn    IRSN of the NX unit for the processor
+             * @param o_num     Number of interrupts behind IRSN
              * @return an error handle on error
              */
             errlHndl_t getNxIRSN(TARGETING::Target * i_target,
-                                 uint32_t& o_irsn);
+                                 uint32_t& o_irsn,
+                                 uint32_t& o_num);
 
 
             /**

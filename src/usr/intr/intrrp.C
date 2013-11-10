@@ -662,7 +662,8 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
     return err;
 }
 
-errlHndl_t IntrRp::getPsiIRSN(TARGETING::Target * i_target, uint32_t& o_irsn)
+errlHndl_t IntrRp::getPsiIRSN(TARGETING::Target * i_target,
+                              uint32_t& o_irsn, uint32_t& o_num)
 {
     errlHndl_t err = NULL;
 
@@ -670,6 +671,7 @@ errlHndl_t IntrRp::getPsiIRSN(TARGETING::Target * i_target, uint32_t& o_irsn)
     // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
     PSIHB_ISRN_REG_t reg;
     size_t scom_len = sizeof(uint64_t);
+    o_num = ISN_HOST; //Hardcoded based on HB knowledge of HW
 
     do{
         err = deviceRead
@@ -692,7 +694,8 @@ errlHndl_t IntrRp::getPsiIRSN(TARGETING::Target * i_target, uint32_t& o_irsn)
     return err;
 }
 
-errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target, uint32_t& o_irsn)
+errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target,
+                             uint32_t& o_irsn, uint32_t& o_num)
 {
     errlHndl_t err = NULL;
 
@@ -711,21 +714,28 @@ errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target, uint32_t& o_irsn)
             break;
         }
 
+        uint32_t l_mask = ((static_cast<uint32_t>(reg >> NX_IRSN_MASK_SHIFT)
+                    & NX_IRSN_MASK_MASK) | NX_IRSN_UPPER_MASK);
+
         o_irsn = ((static_cast<uint32_t>(reg >> NX_IRSN_COMP_SHIFT)
-                   & NX_IRSN_COMP_MASK) &
-                  ((static_cast<uint32_t>(reg >> NX_IRSN_MASK_SHIFT)
-                    & NX_IRSN_MASK_MASK) | NX_IRSN_UPPER_MASK));
+                   & IRSN_COMP_MASK) & l_mask);
+
+        //To get the number of interrupts, we need to "count" the 0 bits
+        //cheat by extending mask to FFF8 + mask, then invert and add 1
+        o_num = (~((~IRSN_COMP_MASK) | l_mask)) +1;
+
     }while(0);
 
 
-    TRACFCOMP(g_trac_intr,"NX_ISRN: 0x%x",o_irsn);
+    TRACFCOMP(g_trac_intr,"NX_ISRN: 0x%x, num: 0x%x",o_irsn, o_num);
 
     return err;
 }
 
 
 errlHndl_t IntrRp::getPcieIRSNs(TARGETING::Target * i_target,
-                                std::vector<uint32_t> &o_irsn)
+                                std::vector<uint32_t> &o_irsn,
+                                std::vector<uint32_t> &o_num)
 {
     errlHndl_t err = NULL;
     o_irsn.clear();
@@ -770,14 +780,21 @@ errlHndl_t IntrRp::getPcieIRSNs(TARGETING::Target * i_target,
             }
 
             uint64_t l_irsn64 = reg & mask;
-            reg >>= PE_IRSN_SHIFT;
-            mask >>=PE_IRSN_SHIFT;
             l_irsn64 >>=PE_IRSN_SHIFT;
             uint32_t l_irsn =  l_irsn64;
-            TRACFCOMP(g_trac_intr,"PE_ISRN[0x%08x] PE%d ", l_irsn, i);
+
+            //To get the number of interrupts, we need to "count" the 0 bits
+            //cheat by extending mask to FFF8 + mask, then invert and add 1
+            mask >>=PE_IRSN_SHIFT;
+            uint32_t l_intNum = mask;
+            l_intNum = (~((~IRSN_COMP_MASK) | l_intNum)) +1;
+
+            TRACFCOMP(g_trac_intr,"PE_ISRN[0x%08x] PE%d intNum: 0x%x  ",
+                      l_irsn, i, l_intNum);
             if(l_irsn != 0x0)
             {
                 o_irsn.push_back(l_irsn);
+                o_num.push_back(l_intNum);
             }
         }
         if(err)
@@ -1462,8 +1479,10 @@ errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
 
         //NX has no up/down stream enable bit - just one enable bit.
         //The NX should be cleared as part of an MPIPL so no
-        //interrupts should be pending from this unit.
-        if(i_rx_tx == INTR_UPSTREAM)
+        //interrupts should be pending from this unit, however
+        //we must allow EOIs to flow, so only disable when
+        //downstream is requested
+        if(i_rx_tx == INTR_DOWNSTREAM)
         {
             uint64_t reg = 0;
             scom_len = sizeof(uint64_t);
@@ -1638,7 +1657,8 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
 
         //Issue eio to PSI logic
         uint32_t l_psiBaseIsn;
-        err = getPsiIRSN(i_proc, l_psiBaseIsn);
+        uint32_t l_maxInt = 0;
+        err = getPsiIRSN(i_proc, l_psiBaseIsn, l_maxInt);
         if(err)
         {
             break;
@@ -1648,7 +1668,7 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
         if(l_psiBaseIsn)
         {
             l_psiBaseIsn |= 0xFF000000;
-            uint32_t l_psiMaxIsn = l_psiBaseIsn + ISN_HOST;
+            uint32_t l_psiMaxIsn = l_psiBaseIsn + l_maxInt;
 
             TRACFCOMP(g_trac_intr,"Issuing EOI to PSIHB range %x - %x",
                       l_psiBaseIsn, l_psiMaxIsn);
@@ -1663,19 +1683,18 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
 
         //Issue EIOs to PE (PCIE) ISN
         std::vector<uint32_t> l_peIsn;
-        err = getPcieIRSNs(i_proc, l_peIsn);
+        std::vector<uint32_t> l_peIntNum;
+        err = getPcieIRSNs(i_proc, l_peIsn, l_peIntNum);
         if(err)
         {
             break;
         }
 
-        for(std::vector<uint32_t>::iterator peIsn = l_peIsn.begin();
-            peIsn != l_peIsn.end();
-            ++peIsn)
+        for(uint32_t i = 0; i < l_peIsn.size(); i++)
         {
             //now need to issue on all SN up to 2048
-            uint32_t l_peBaseIsn = (*peIsn) | 0xFF000000;
-            uint32_t l_peMaxIsn = l_peBaseIsn + MAX_PE_IRSN_SN;
+            uint32_t l_peBaseIsn = l_peIsn[i] | 0xFF000000;
+            uint32_t l_peMaxIsn = l_peBaseIsn + l_peIntNum[i];
             TRACFCOMP(g_trac_intr,"Issuing EOI to PCIE range %x - %x",
                       l_peBaseIsn, l_peMaxIsn);
 
@@ -1687,7 +1706,7 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
 
         //Issue eio to NX logic
         uint32_t l_nxBaseIsn;
-        err = getNxIRSN(i_proc, l_nxBaseIsn);
+        err = getNxIRSN(i_proc, l_nxBaseIsn, l_maxInt);
         if(err)
         {
             break;
@@ -1697,8 +1716,8 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
         if(l_nxBaseIsn)
         {
             l_nxBaseIsn |= 0xFF000000;
-            uint32_t l_nxMaxIsn = l_nxBaseIsn + MAX_NX_IRSN_SN;
-            TRACFCOMP(g_trac_intr,"Issuing EOI to NX range % - %x",
+            uint32_t l_nxMaxIsn = l_nxBaseIsn + l_maxInt;
+            TRACFCOMP(g_trac_intr,"Issuing EOI to NX range %x - %x",
                       l_nxBaseIsn, l_nxMaxIsn);
 
             for(uint32_t l_isn = l_nxBaseIsn; l_isn < l_nxMaxIsn; ++l_isn)
