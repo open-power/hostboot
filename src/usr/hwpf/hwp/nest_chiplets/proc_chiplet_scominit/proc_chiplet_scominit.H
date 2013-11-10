@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.H,v 1.13 2013/05/30 13:13:07 jmcgill Exp $
+// $Id: proc_chiplet_scominit.H,v 1.14 2013/10/28 02:09:55 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -58,6 +58,12 @@ const char * const PROC_CHIPLET_SCOMINIT_CXA_IF         = "p8.cxa.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_A_X_PCI_DMI_IF = "p8.a_x_pci_dmi_fir.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_MCS_IF         = "p8.mcs.scom.if";
 
+
+// FSI GP6 Register field/bit definitions
+const uint16_t XBUS_RESONANT_CLOCK_CONFIG = 0xF180;
+
+const uint32_t MBOX_FSIGP6_XBUS_RESONANT_CLOCK_CONFIG_START_BIT = 0;
+const uint32_t MBOX_FSIGP6_XBUS_RESONANT_CLOCK_CONFIG_END_BIT   = 15;
 
 // MCS Mode0 Register field/bit definitions
 const uint32_t MCSMODE0_EN_CENTAUR_SYNC_BIT = 61;

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.H,v 1.5 2013/10/11 14:54:22 jmcgill Exp $
+// $Id: proc_pcie_scominit.H,v 1.6 2013/10/28 03:57:13 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -49,7 +49,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi.H>
-#include "p8_scom_addresses.H"
+#include <p8_scom_addresses.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions

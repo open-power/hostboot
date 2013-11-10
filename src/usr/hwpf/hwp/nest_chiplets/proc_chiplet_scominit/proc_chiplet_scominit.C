@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.16 2013/07/31 21:10:31 jmcgill Exp $
+// $Id: proc_chiplet_scominit.C,v 1.18 2013/10/28 19:10:50 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -42,7 +42,7 @@
 //------------------------------------------------------------------------------
 #include <fapiHwpExecInitFile.H>
 #include <proc_chiplet_scominit.H>
-#include "p8_scom_addresses.H"
+#include <p8_scom_addresses.H>
 
 extern "C" {
 
@@ -62,6 +62,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
     uint8_t mcs_pos;
     uint8_t master_mcs_pos = 0xFF;
     fapi::Target master_mcs;
+    uint8_t enable_xbus_resonant_clocking = 0x0;
 
     ecmdDataBufferBase data(64);
     ecmdDataBufferBase mask(64);
@@ -189,8 +190,54 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
             }
             else
             {
-                FAPI_DBG("proc_chiplet_scominit: Skipping execution of %s/%s (partial good)",
-                         PROC_CHIPLET_SCOMINIT_NX_IF, PROC_CHIPLET_SCOMINIT_AS_IF);
+                FAPI_DBG("proc_chiplet_scominit: Skipping execution of %s/%s/%s (partial good)",
+                         PROC_CHIPLET_SCOMINIT_NX_IF, PROC_CHIPLET_SCOMINIT_CXA_IF, PROC_CHIPLET_SCOMINIT_AS_IF);
+            }
+
+            // conditionally enable resonant clocking for XBUS
+            rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC,
+                               &i_target,
+                               enable_xbus_resonant_clocking);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_chiplet_scominit: Error querying ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC");
+                break;
+            }
+
+            if (enable_xbus_resonant_clocking)
+            {
+                FAPI_DBG("proc_chiplet_scominit: Enabling XBUS resonant clocking");
+                rc = fapiGetScom(i_target,
+                                 MBOX_FSIGP6_0x00050015,
+                                 data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: fapiGetScom error (MBOX_FSIGP6_0x00050015)");
+                    break;
+                }
+
+                rc_ecmd |= data.insertFromRight(
+                    XBUS_RESONANT_CLOCK_CONFIG,
+                    MBOX_FSIGP6_XBUS_RESONANT_CLOCK_CONFIG_START_BIT,
+                    (MBOX_FSIGP6_XBUS_RESONANT_CLOCK_CONFIG_END_BIT-
+                     MBOX_FSIGP6_XBUS_RESONANT_CLOCK_CONFIG_START_BIT+1));
+
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error 0x%x setting FSI GP6 register data buffer",
+                             rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+
+                rc = fapiPutScom(i_target,
+                                 MBOX_FSIGP6_0x00050015,
+                                 data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (MBOX_FSIGP6_0x00050015)");
+                    break;
+                }
             }
 
             // execute A/X/PCI/DMI FIR init SCOM initfile
@@ -250,7 +297,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
 
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_chiplet_scominit: Error from FAPI_ATTR_GET (ATTR_POS)");
+                    FAPI_ERR("proc_chiplet_scominit: Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
                     break;
                 }
 
@@ -309,15 +356,12 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                 }
 
             }
-            if (!rc.ok())
-            {
-                break;
-            }
         }
         // unsupported target type
         else
         {
             FAPI_ERR("proc_chiplet_scominit: Unsupported target type");
+            const fapi::Target & TARGET = i_target;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_CHIPLET_SCOMINIT_INVALID_TARGET);
             break;
         }

@@ -20,16 +20,26 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_fab_iovalid_errors.xml,v 1.6 2013/05/22 15:51:27 mjjones Exp $ -->
+<!-- $Id: proc_fab_iovalid_errors.xml,v 1.7 2013/10/28 03:58:28 jmcgill Exp $ -->
 <!-- Error definitions for proc_fab_iovalid procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_IOVALID_X_PARTIAL_GOOD_ERR</rc>
+    <ffdc>TARGET</ffdc>
     <description>X bus partial good attribute state does not allow for action on target.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_FAB_IOVALID_A_PARTIAL_GOOD_ERR</rc>
+    <ffdc>TARGET</ffdc>
     <description>A bus partial good attribute state does not allow for action on target.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

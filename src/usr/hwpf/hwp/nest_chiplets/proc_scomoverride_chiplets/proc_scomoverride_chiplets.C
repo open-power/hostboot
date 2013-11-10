@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_scomoverride_chiplets.C,v 1.2 2012/10/07 18:25:47 jmcgill Exp $
+// $Id: proc_scomoverride_chiplets.C,v 1.3 2013/10/28 03:57:15 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_scomoverride_chiplets.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -29,7 +29,7 @@
 // *! *** IBM Confidential ***
 // *|
 // *! TITLE       : proc_scomoverride_chiplets.C
-// *! DESCRIPTION :
+// *! DESCRIPTION : Placeholder for chiplet SCOM overrides
 // *!
 // *! OWNER NAME  : Joe McGill              Email: jmcgill@us.ibm.com
 // *! OWNER NAME  : Jeshua Smith            Email: jeshua@us.ibm.com
@@ -40,7 +40,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_scomoverride_chiplets.H"
+#include <proc_scomoverride_chiplets.H>
 
 extern "C"
 {

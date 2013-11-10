@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.C,v 1.8 2013/10/11 14:54:22 jmcgill Exp $
+// $Id: proc_pcie_scominit.C,v 1.9 2013/10/28 03:57:12 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,7 +39,7 @@
 //  Includes
 //------------------------------------------------------------------------------
 #include <fapiHwpExecInitFile.H>
-#include "proc_pcie_scominit.H"
+#include <proc_pcie_scominit.H>
 
 extern "C" {
 
@@ -100,6 +100,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
         {
             FAPI_ERR("proc_pcie_scominit_iop_init: Invalid IOP lane configuration attribute value 0x%02X",
                      iop_config);
+            const fapi::Target & TARGET = i_target;
             const uint8_t& ATTR_DATA = iop_config;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_PCIE_SCOMINIT_IOP_CONFIG_ATTR_ERR);
             break;
@@ -123,6 +124,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
             {
                 FAPI_ERR("proc_pcie_scominit_iop_init: Invalid IOP%d swap attribute value 0x%02X",
                          i, iop_swap[i]);
+                const fapi::Target & TARGET = i_target;
                 const uint8_t& IOP_DATA = i;
                 const uint8_t ATTR_DATA = iop_swap[i];
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_PCIE_SCOMINIT_IOP_SWAP_ATTR_ERR);
@@ -444,6 +446,7 @@ fapi::ReturnCode proc_pcie_scominit(
         if (i_target.getType() != fapi::TARGET_TYPE_PROC_CHIP)
         {
             FAPI_ERR("proc_pcie_scominit: Unsupported target type");
+            const fapi::Target & TARGET = i_target;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_PCIE_SCOMINIT_INVALID_TARGET);
             break;
         }
