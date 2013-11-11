@@ -36,36 +36,32 @@
 namespace PRDF
 {
 
+/**
+ *  @brief Singleton to access the SimFspSyncSvc
+ */
+class SimFspSyncSvc;
+PRDF_DECLARE_SINGLETON(SimFspSyncSvc, theSyncSvc);
+
+/**
+ *  @brief Returns a reference to the SimFspSyncSvc singleton
+ *
+ *  @return Reference to the SyncSvc
+ */
+SimFspSyncSvc& getSyncSvc();
+
 class SimFspSyncSvc
 {
     public:
 
-        /*
-         * @brief Returns a pointer to the only instance of this
-         *        singleton object, constructing it if neeeded.
-         *
-         * @return pointer to the instance of this object
+        /**
+         * @brief Constructor
          */
-        inline static SimFspSyncSvc* getSyncSvc();
-
-        /*
-         * @brief Returns true if SyncSvc is already running
-         *
-         * @return true if already running
-         */
-        inline bool static isSyncSvcRunning();
-
-        /*
-         * @brief Returns true if hb sync was already done
-         *
-         * @return true if already sync with hostboot
-         */
-        inline bool isHbSynced();
+        SimFspSyncSvc() {};
 
         /**
          * @brief Destructor
          */
-        virtual ~SimFspSyncSvc();
+        virtual ~SimFspSyncSvc() {};
 
         /**
          * @brief used to process hostboot msg
@@ -77,21 +73,6 @@ class SimFspSyncSvc
 
 
     private:
-
-        /**
-         * @brief Constructor
-         */
-        SimFspSyncSvc() {};
-
-        /**
-         * @brief Sync Service Singleton
-         */
-        static SimFspSyncSvc* cvInstance;
-
-        /**
-         * @brief Flag to indicate hostboot sync already occurred
-         */
-        bool iv_hbSynced;
 
         /*
          * @brief - send back the response to HB with MFG thresholds
@@ -111,32 +92,6 @@ class SimFspSyncSvc
 
 
 };
-
-inline SimFspSyncSvc* SimFspSyncSvc::getSyncSvc()
-{
-    if( NULL == cvInstance )
-    {
-         cvInstance = new SimFspSyncSvc();
-    }
-
-    return cvInstance;
-}
-
-
-/**
- *  @brief check if SyncSvc is running
- *
- *  @return true if SyncSvc is already running
- */
-inline bool SimFspSyncSvc::isSyncSvcRunning()
-{
-    return ( NULL == cvInstance ) ? false : true;
-}
-
-inline bool SimFspSyncSvc::isHbSynced()
-{
-    return iv_hbSynced;
-}
 
 } // end namespace PRDF
 

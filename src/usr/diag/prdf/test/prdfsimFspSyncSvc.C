@@ -35,12 +35,9 @@ namespace PRDF
 // SimFspSyncSvc begin
 /****************************/
 
-SimFspSyncSvc* SimFspSyncSvc::cvInstance = NULL;
-
-
-SimFspSyncSvc::~SimFspSyncSvc()
+SimFspSyncSvc& getSyncSvc()
 {
-    cvInstance = NULL;
+    return PRDF_GET_SINGLETON(theSyncSvc);
 }
 
 void SimFspSyncSvc::processRequestMsg(msg_t * i_msg)
@@ -49,9 +46,6 @@ void SimFspSyncSvc::processRequestMsg(msg_t * i_msg)
     PRDF_ENTER(FUNC);
 
     PRDF_ASSERT(NULL != i_msg);
-
-    // set this so we know the hb sync has begun
-    iv_hbSynced = true;
 
     errlHndl_t pError = NULL;
 

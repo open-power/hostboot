@@ -87,7 +87,7 @@ errlHndl_t SimMfgThresholdSync::sendMboxMsg( msg_t * i_msg )
     PRDF_TRAC( "extra_data: %p", i_msg->extra_data );
 
     // call sim SyncService to handle the request
-    SimFspSyncSvc::getSyncSvc()->processRequestMsg(i_msg);
+    getSyncSvc().processRequestMsg(i_msg);
 
     PRDF_EXIT( FUNC );
 
