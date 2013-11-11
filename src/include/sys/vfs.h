@@ -30,8 +30,13 @@
 #include <sys/task.h>
 #endif
 
-// make TODO VFS_MODULE_MAX equal to the actual number of modules in the base image (+ 2?)
+#ifndef __HOSTBOOT_RUNTIME
+// make VFS_MODULE_MAX equal to the actual number of modules in the base image (+ 2?)
 #define VFS_MODULE_MAX 16
+#else
+#define VFS_MODULE_MAX 32
+#endif
+
 // Extended use 4 4k pages
 //  Extended Module Virtual address at 1GB
 #define VFS_EXTENDED_MODULE_VADDR (1 * 1024 * 1024 * 1024)

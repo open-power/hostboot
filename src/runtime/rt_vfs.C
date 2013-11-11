@@ -27,7 +27,8 @@
 #include <vector>
 #include <errno.h>
 
-VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
+VfsSystemModule VFS_MODULES[VFS_MODULE_MAX] =
+{{{VFS_MODULE_MAX,0},NULL,NULL,NULL,NULL,NULL,0}};
 
 void vfs_module_init()
 {

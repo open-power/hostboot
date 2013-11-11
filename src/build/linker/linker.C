@@ -981,7 +981,10 @@ void ModuleTable::write_table(vector<Object> & i_objects)
             i->offset + i->data.vma_offset;
 
         cout << "Updating base module table..." << endl;
-        max_modules = VFS_MODULE_MAX;
+        fseek(iv_output, module_table_offset, SEEK_SET);
+        char mx_mod_ch = 0;
+        fread(&mx_mod_ch,sizeof(char),1,iv_output);
+        max_modules = (uint64_t)mx_mod_ch; // VFS_MODULE_MAX;
         ++i;
     }
     else
