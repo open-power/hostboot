@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.39 2013/06/21 21:51:58 lapietra Exp $
+// $Id: mss_draminit_mc.C,v 1.43 2013/10/28 15:10:24 dcadiga Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.43   | dcadiga  |28-OCT-13| Fixed code review comments for parent chip and typos
+//  1.42   | dcadiga  |16-OCT-13| Fixed Code Review Comments, added DD2.X EC check for parity on 32GB
+//  1.41   | dcadiga  |16-OCT-13| repeating Brent's test
+//  1.40   | bwieman  |21-JUN-13| just testing a commit
 //  1.39   | dcadiga  |21-JUN-13| Fixed Code Review Comments
 //  1.38   | dcadiga  |10-JUN-13| Removed Local Edit Info, added version comment
 //  1.37   | dcadiga  |10-JUN-13| Added Periodic Cal for 1.1
@@ -84,14 +88,6 @@
 //  1.3    | D Cadigan| 09302011| Moved to FAPI VBU directory
 //  1.2    | D Cadigan| 09282011| Converted to fapi, enhanced procedures to take in some variables.  Still need to debug those functions
 //  1.1    | D Cadigan| 04072011| Initial Copy
-
-
-//------------------------------------------------------------------------------
-// To-Do's
-//------------------------------------------------------------------------------
-// 1) Move addresses to cen_scom_addresses.H
-// 2) Add in attributes after they are added to the XML
-//------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------
 //  FAPI Includes
@@ -159,7 +155,9 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     ReturnCode rc;
     std::vector<fapi::Target> l_mbaChiplets;
     uint32_t rc_num  = 0;
-
+    uint8_t scom_parity_fixed_dd2 = 0;
+    rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_SCOM_PARITY_ERROR_HW244827_FIXED, &i_target, scom_parity_fixed_dd2);
+    if (rc) return rc;
     // Get associated MBA's on this centaur
     rc=fapiGetChildChiplets(i_target, fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
     if (rc) return rc;
@@ -190,24 +188,27 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
        FAPI_ERR("---Error During IML Complete Enable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
        return rc;
     }
-    //Temp Fix For Scom Parity
-    ecmdDataBufferBase parity_tmp_data_buffer_64(64);
-    rc = fapiGetScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
-    if(rc) return rc;
-    rc_num = rc_num | parity_tmp_data_buffer_64.clearBit(8);
-    if(rc_num)
+    //DD1.X Scom Parity Fix HW244827
+    if(!scom_parity_fixed_dd2)
     {
-        rc.setEcmdError(rc_num);
-        return rc;
-    }
-    rc = fapiPutScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
-    if(rc)
-    {
-       FAPI_ERR("---Error During Clear Parity Bit rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
-       return rc;
-    }
+       FAPI_INF("+++DD1.X Centaur, clearing MBS Parity FIR +++");
+       ecmdDataBufferBase parity_tmp_data_buffer_64(64);
+       rc = fapiGetScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
+       if(rc) return rc;
+       rc_num = rc_num | parity_tmp_data_buffer_64.clearBit(8);
+       if(rc_num)
+       {
+           rc.setEcmdError(rc_num);
+           return rc;
+       }
+       rc = fapiPutScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
+       if(rc)
+       {
+          FAPI_ERR("---Error During Clear Parity Bit rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+          return rc;
+       }
 
-
+    }
     // Loop through the 2 MBA's
     for (uint32_t i=0; i < l_mbaChiplets.size(); i++)
     {
@@ -240,12 +241,6 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
            FAPI_ERR("---Error During Refresh Enable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
            return rc;
         }
-	if (rc_num)
-	{
-	    FAPI_ERR( "Refresh Enable: Error setting up buffers");
-	    rc.setEcmdError(rc_num);
-	    return rc;
-	}
 
         // Step Four: Setup Periodic Cals
         FAPI_INF( "+++ Setting Up Periodic Cals +++");
@@ -286,7 +281,6 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     //Procedure to setup and enable periodic cals
     //Variables
     ReturnCode rc;
-    ReturnCode rc_buff;
     uint32_t rc_num  = 0;
     uint8_t bluewaterfall_broken = 0;
     uint8_t nwell_misplacement = 0;
@@ -298,8 +292,6 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
 
 
  
-    ecmdDataBufferBase mba01_data_buffer_64_p0(64);
-    ecmdDataBufferBase mba01_data_buffer_64_p1(64);
 
     ecmdDataBufferBase data_buffer_64(64);
 
@@ -326,12 +318,7 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     rc = FAPI_ATTR_GET(ATTR_EFF_ZQCAL_INTERVAL, &i_target, zq_cal_iterval);
     if(rc) return rc;
 
-    rc_num = rc_num | data_buffer_64.flushTo0();
-    if(rc_num)
-    {
-        rc.setEcmdError(rc_num);
-        return rc;
-    }
+    
     rc = fapiGetScom(i_target, MBA01_MBA_CAL0Q_0x0301040F, data_buffer_64);
     if(rc) return rc;
 
@@ -434,14 +421,6 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     }
     rc = fapiPutScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
     if(rc) return rc;
-
-    if (rc_num)
-    {
-        FAPI_ERR( "mss_enable_periodic_cal: Error setting up buffers");
-        rc_buff.setEcmdError(rc_num);
-        return rc_buff;
-    }
-
     return rc;
 
 }
@@ -453,7 +432,6 @@ ReturnCode mss_set_iml_complete (Target& i_target)
     //Set IML Complete
     //Variables
     ReturnCode rc;
-    ReturnCode rc_buff;
     uint32_t rc_num  = 0; 
     ecmdDataBufferBase data_buffer_64(64);
 
@@ -464,8 +442,8 @@ ReturnCode mss_set_iml_complete (Target& i_target)
     if (rc_num)
     {
         FAPI_ERR( "mss_set_iml_complete: Error setting up buffers");
-        rc_buff.setEcmdError(rc_num);
-        return rc_buff;
+        rc.setEcmdError(rc_num);
+        return rc;
     }
 
     rc = fapiPutScom(i_target, MBSSQ_0x02011417, data_buffer_64);
@@ -482,7 +460,6 @@ ReturnCode mss_enable_control_bit_ecc (Target& i_target)
     //Enable Control Bit ECC
     //Variables
     ReturnCode rc;
-    ReturnCode rc_buff;
     uint32_t rc_num  = 0;
     ecmdDataBufferBase ecc0_data_buffer_64(64);
     ecmdDataBufferBase ecc1_data_buffer_64(64);
@@ -510,8 +487,8 @@ ReturnCode mss_enable_control_bit_ecc (Target& i_target)
     if (rc_num)
     {
         FAPI_ERR( "mss_enable_control_bit_ecc: Error setting up buffers");
-        rc_buff.setEcmdError(rc_num);
-        return rc_buff;
+        rc.setEcmdError(rc_num);
+        return rc;
     }
 
     rc = fapiPutScom(i_target, MBS_ECC0_MBSECCQ_0x0201144A, ecc0_data_buffer_64);
@@ -530,7 +507,6 @@ ReturnCode mss_enable_power_management (Target& i_target)
     //Enable Power Management
     //Variables
     ReturnCode rc;
-    ReturnCode rc_buff;
     uint32_t rc_num  = 0;
     ecmdDataBufferBase pm_data_buffer_64(64);
 
@@ -545,15 +521,15 @@ ReturnCode mss_enable_power_management (Target& i_target)
     
     if (rc_num)
     {
-        FAPI_ERR( "mss_enable_control_bit_ecc: Error setting up buffers");
-        rc_buff.setEcmdError(rc_num);
-        return rc_buff;
+        FAPI_ERR( "mss_enable_power_management: Error setting up buffers");
+        rc.setEcmdError(rc_num);
+        return rc;
     }
 
     rc = fapiPutScom(i_target, MBA01_PM0Q_0x03010434, pm_data_buffer_64);
     if(rc) return rc;
 
-    FAPI_INF("+++ mss_enable_control_bit_ecc complete +++");
+    FAPI_INF("+++ mss_enable_power_management complete +++");
     return rc;
 }
 
@@ -564,7 +540,6 @@ ReturnCode mss_ccs_mode_reset (Target& i_target)
     //Selects address data from the mainline
     //Variables
     ReturnCode rc;
-    ReturnCode rc_buff;
     uint32_t rc_num  = 0;
     ecmdDataBufferBase ccs_mode_data_buffer_64(64);
 
@@ -575,9 +550,9 @@ ReturnCode mss_ccs_mode_reset (Target& i_target)
 
     if (rc_num)
     {
-        FAPI_ERR( "mss_enable_control_bit_ecc: Error setting up buffers");
-        rc_buff.setEcmdError(rc_num);
-        return rc_buff;
+        FAPI_ERR( "mss_ccs_mode_reset: Error setting up buffers");
+        rc.setEcmdError(rc_num);
+        return rc;
     }
 
     rc = fapiPutScom(i_target, CCS_MODEQ_AB_REG_0x030106A7, ccs_mode_data_buffer_64);
@@ -611,7 +586,7 @@ ReturnCode mss_spare_cke_disable (Target& i_target)
     if(rc) return rc;
 
 
-    FAPI_INF("+++ disable_spare_cke complete +++");
+    FAPI_INF("+++ mss_spare_cke_disable complete +++");
     return rc;
 }
 

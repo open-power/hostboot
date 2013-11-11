@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_thermal_init.C,v 1.7 2013/09/12 15:23:21 joabhend Exp $
+// $Id: mss_thermal_init.C,v 1.9 2013/10/11 15:51:56 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_thermal_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -45,6 +45,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.9   | pardeik  |11-OCT-13| gerrit review updates to remove uneeded items
+//   1.8   | pardeik  |04-OCT-13| changes done from gerrit review
 //   1.7   | pardeik  |01-AUG-13| Functional corrections to procedure
 //                              | Updates for defect HW257484
 //                              | Use custom DIMM instead of dimm type attribute
@@ -72,7 +74,6 @@ extern "C" {
 
 
    // Procedures in this file
-   fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target);
    fapi::ReturnCode mss_thermal_init_cloned(const fapi::Target & i_target);
    
    
@@ -116,22 +117,21 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       const uint8_t l_NUM_PORTS = 2;					// Number of ports per MBA
       const uint8_t l_NUM_DIMMS = 2;					// Number of dimms per MBA port
 
-      const uint64_t HANG_PULSE_0_REG = 0x020f0020;
-      const uint64_t THERM_MODE_REG = 0x0205000f;
-      const uint64_t CONTROL_REG = 0x02050012;
+      const uint64_t HANG_PULSE_0_REG = 0x00000000020f0020ULL;
+      const uint64_t THERM_MODE_REG = 0x000000000205000fULL;
+      const uint64_t CONTROL_REG = 0x0000000002050012ULL;
 
-      const uint64_t SCAC_FIRMASK = 0x020115c3;
-      const uint64_t SCAC_ACTMASK = 0x020115d3;
-      const uint64_t SCAC_ADDRMAP = 0x020115cd;
-      const uint64_t SCAC_CONFIG = 0x020115ce;
-      const uint64_t SCAC_ENABLE = 0x020115cc;
-      const uint64_t SCAC_I2CMCTRL = 0x020115d1;
-      //const uint64_t SCAC_LFIR = 0x020115c0;
-      const uint64_t SCAC_PIBTARGET = 0x020115d2;
-      const uint64_t I2CM_RESET = 0x000A0001;
+      const uint64_t SCAC_FIRMASK = 0x00000000020115c3ULL;
+      const uint64_t SCAC_ACTMASK = 0x00000000020115d3ULL;
+      const uint64_t SCAC_ADDRMAP = 0x00000000020115cdULL;
+      const uint64_t SCAC_CONFIG = 0x00000000020115ceULL;
+      const uint64_t SCAC_ENABLE = 0x00000000020115ccULL;
+      const uint64_t SCAC_I2CMCTRL = 0x00000000020115d1ULL;
+      const uint64_t SCAC_PIBTARGET = 0x00000000020115d2ULL;
+      const uint64_t I2CM_RESET = 0x00000000000A0001ULL;
 
-      const uint64_t MBS_EMER_THROT = 0x0201142d;
-      const uint64_t MBS_FIR_REG = 0x02011400;
+      const uint64_t MBS_EMER_THROT = 0x000000000201142dULL;
+      const uint64_t MBS_FIR_REG = 0x0000000002011400ULL;
 
       const uint32_t PRIMARY_I2C_BASE_ADDR = 0x000A0000;
       const uint32_t SPARE_I2C_BASE_ADDR = 0x000A0000;
@@ -139,6 +139,8 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       const uint32_t I2C_SETUP_LOWER_HALF = 0x05000000;
       const uint32_t ACT_MASK_UPPER_HALF = 0x00018000;
       const uint32_t ACT_MASK_LOWER_HALF = 0x00000000;
+      const uint32_t SENSOR_ADDR_MAP_ISDIMM = 0x012389ab;
+      const uint32_t SENSOR_ADDR_MAP_CDIMM = 0x01234567;
 // OCC polls cacheline every 2 ms.
 // For I2C bus at 50kHz (9.6 ms max to read 8 sensors), use interval of 5 to prevent stall error
       const uint32_t CONFIG_INTERVAL_TIMER = 5;
@@ -166,6 +168,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       if (l_rc) return l_rc;
 // setup DTS enables
       l_rc = fapiGetScom(i_target, THERM_MODE_REG, l_data);
+      if (l_rc) return l_rc;
       l_ecmd_rc |= l_data.setBit(20);
       l_ecmd_rc |= l_data.setBit(21);
       if(l_ecmd_rc) {
@@ -176,6 +179,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       if (l_rc) return l_rc;
 // setup pulse count and enable DTS sampling
       l_rc = fapiGetScom(i_target, THERM_MODE_REG, l_data);
+      if (l_rc) return l_rc;
       l_ecmd_rc |= l_data.setBit(5);
       l_ecmd_rc |= l_data.setBit(6);
       l_ecmd_rc |= l_data.setBit(7);
@@ -219,7 +223,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 
 	 l_rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &l_target_mba_array[mba_index], l_custom_dimm[l_mba_pos]);
 	 if (l_rc) return l_rc;
-	 FAPI_INF("ATTR_EFF_DIMM_TYPE: %d", l_custom_dimm[l_mba_pos]);
+	 FAPI_INF("ATTR_EFF_CUSTOM_DIMM: %d", l_custom_dimm[l_mba_pos]);
       }
 
       // Configure Centaur Thermal Cache
@@ -266,17 +270,14 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       l_rc = fapiGetScom(i_target, SCAC_ADDRMAP, l_data);
       if (l_rc) return l_rc;
 
-      if (l_custom_dimm[0] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES && l_custom_dimm[1] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES){
-	 l_addr_map_data_int = 0x012389ab;
+      if ((l_custom_dimm[0] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (l_custom_dimm[1] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)){
+	 l_addr_map_data_int = SENSOR_ADDR_MAP_ISDIMM;
       }
       else{
-	 l_addr_map_data_int = 0x01234567;
+	 l_addr_map_data_int = SENSOR_ADDR_MAP_CDIMM;
       }
 
-      ecmdDataBufferBase l_addr_map_data(32);
-      l_ecmd_rc |= l_addr_map_data.flushTo0();
-      l_ecmd_rc |= l_addr_map_data.insert(l_addr_map_data_int, 0, 32, 0);
-      l_ecmd_rc |= l_data.insert(l_addr_map_data, 0, 32, 0);
+      l_ecmd_rc |= l_data.insert(l_addr_map_data_int, 0, 32, 0);
       if(l_ecmd_rc) {
          l_rc.setEcmdError(l_ecmd_rc);
 	 return l_rc;
@@ -291,17 +292,8 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       l_rc = fapiGetScom(i_target, SCAC_PIBTARGET, l_data);
       if (l_rc) return l_rc;
 
-      ecmdDataBufferBase l_primary_i2cm_addr(32);
-      ecmdDataBufferBase l_spare_i2cm_addr(32);
-
-      l_ecmd_rc |= l_primary_i2cm_addr.flushTo0();
-      l_ecmd_rc |= l_primary_i2cm_addr.insert(PRIMARY_I2C_BASE_ADDR, 0, 32, 0);
-
-      l_ecmd_rc |= l_spare_i2cm_addr.flushTo0();
-      l_ecmd_rc |= l_spare_i2cm_addr.insert(SPARE_I2C_BASE_ADDR, 0, 32, 0);
-
-      l_ecmd_rc |= l_data.insert(l_primary_i2cm_addr, 0, 32, 0);
-      l_ecmd_rc |= l_data.insert(l_spare_i2cm_addr, 32, 32, 0);
+      l_ecmd_rc |= l_data.insert(PRIMARY_I2C_BASE_ADDR, 0, 32, 0);
+      l_ecmd_rc |= l_data.insert(SPARE_I2C_BASE_ADDR, 32, 32, 0);
       if(l_ecmd_rc) {
          l_rc.setEcmdError(l_ecmd_rc);
 	 return l_rc;
@@ -317,17 +309,8 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       l_rc = fapiGetScom(i_target, SCAC_I2CMCTRL, l_data);
       if (l_rc) return l_rc;
 
-      ecmdDataBufferBase l_i2c_ctrl_upper_half(32);
-      ecmdDataBufferBase l_i2c_ctrl_lower_half(32);
-
-      l_ecmd_rc |= l_i2c_ctrl_upper_half.flushTo0();
-      l_ecmd_rc |= l_i2c_ctrl_upper_half.insert(I2C_SETUP_UPPER_HALF, 0, 32, 0);
-
-      l_ecmd_rc |= l_i2c_ctrl_lower_half.flushTo0();
-      l_ecmd_rc |= l_i2c_ctrl_lower_half.insert(I2C_SETUP_LOWER_HALF, 0, 32, 0);
-
-      l_ecmd_rc |= l_data.insert(l_i2c_ctrl_upper_half, 0, 32, 0);
-      l_ecmd_rc |= l_data.insert(l_i2c_ctrl_lower_half, 32, 32, 0);
+      l_ecmd_rc |= l_data.insert(I2C_SETUP_UPPER_HALF, 0, 32, 0);
+      l_ecmd_rc |= l_data.insert(I2C_SETUP_LOWER_HALF, 32, 32, 0);
       if(l_ecmd_rc) {
          l_rc.setEcmdError(l_ecmd_rc);
 	 return l_rc;
@@ -343,17 +326,8 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       l_rc = fapiGetScom(i_target, SCAC_ACTMASK, l_data);
       if (l_rc) return l_rc;
 
-      ecmdDataBufferBase l_act_mask_upper_half(32);
-      ecmdDataBufferBase l_act_mask_lower_half(32);
-
-      l_ecmd_rc |= l_act_mask_upper_half.flushTo0();
-      l_ecmd_rc |= l_act_mask_upper_half.insert(ACT_MASK_UPPER_HALF, 0, 32, 0);
-
-      l_ecmd_rc |= l_act_mask_lower_half.flushTo0();
-      l_ecmd_rc |= l_act_mask_lower_half.insert(ACT_MASK_LOWER_HALF, 0, 32, 0);
-
-      l_ecmd_rc |= l_data.insert(l_act_mask_upper_half, 0, 32, 0);
-      l_ecmd_rc |= l_data.insert(l_act_mask_lower_half, 32, 32, 0);
+      l_ecmd_rc |= l_data.insert(ACT_MASK_UPPER_HALF, 0, 32, 0);
+      l_ecmd_rc |= l_data.insert(ACT_MASK_LOWER_HALF, 32, 32, 0);
       if(l_ecmd_rc) {
          l_rc.setEcmdError(l_ecmd_rc);
          return l_rc;
@@ -369,18 +343,9 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       l_rc = fapiGetScom(i_target, SCAC_CONFIG, l_data);
       if (l_rc) return l_rc;
 
-      ecmdDataBufferBase l_interval_timer(32);
-      ecmdDataBufferBase l_stall_timer(32);
-
-      l_ecmd_rc |= l_interval_timer.flushTo0();
-      l_ecmd_rc |= l_interval_timer.insert(CONFIG_INTERVAL_TIMER, 0, 32, 0);
-
-      l_ecmd_rc |= l_stall_timer.flushTo0();
-      l_ecmd_rc |= l_stall_timer.insert(CONFIG_STALL_TIMER, 0, 32, 0);
-
       l_ecmd_rc |= l_data.setBit(1);   //Sync to OCC_Read signal
-      l_ecmd_rc |= l_data.insert(l_interval_timer, 11, 5, 32-5);
-      l_ecmd_rc |= l_data.insert(l_stall_timer, 16, 8, 32-8);
+      l_ecmd_rc |= l_data.insert(CONFIG_INTERVAL_TIMER, 11, 5, 32-5);
+      l_ecmd_rc |= l_data.insert(CONFIG_STALL_TIMER, 16, 8, 32-8);
       if(l_ecmd_rc) {
          l_rc.setEcmdError(l_ecmd_rc);
 	 return l_rc;
@@ -395,7 +360,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       l_rc = fapiGetScom(i_target, SCAC_ENABLE, l_data);
       if (l_rc) return l_rc;
 
-      if (l_custom_dimm[0] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES && l_custom_dimm[1] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES){
+      if ((l_custom_dimm[0] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (l_custom_dimm[1] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)){
 
 	  
          l_ecmd_rc |= l_data.setBit(0);
@@ -438,7 +403,6 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       //---------------------------------
 
       ecmdDataBufferBase l_reset(64);
-      l_ecmd_rc |= l_reset.flushTo0();
       l_ecmd_rc |= l_reset.setBit(0);
       if(l_ecmd_rc) {
          l_rc.setEcmdError(l_ecmd_rc);
@@ -507,7 +471,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 
 
 // Write the IPL Safe Mode Throttles
-// TODO:  Enable once OCC writes the runtime memory throttles
+// TODO:  Enable once OCC writes the runtime memory throttles (SW227937)
 /*
       uint32_t l_safemode_throttle_n_per_mba;
       uint32_t l_safemode_throttle_n_per_chip;
@@ -536,7 +500,7 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 */
 
 // Update the runtime throttle attributes if needed for non custom DIMMs since those run power tests
-// TODO:  Enable once dimm_power_test is running and updating attributes
+// TODO:  Enable once dimm_power_test is running and updating attributes (SW227941)
 /*
       uint32_t l_runtime_throttle_n_per_mba;
       uint32_t l_runtime_throttle_n_per_chip;
