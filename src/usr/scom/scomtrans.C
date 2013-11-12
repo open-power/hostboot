@@ -414,6 +414,9 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
            // SCOM_TRANS_MBA_MASK =     0xFFFFFFFF7FFFFC00,
            // SCOM_TRANS_MBA_BASEADDR = 0x0000000003010400,
            //
+           // SCOM_TRANS_TCM_MBA_MASK =     0xFFFFFFFFFFFFFC00
+           // SCOM_TRANS_TCM_MBA_BASEADDR = 0x0000000003010800
+           //
            //     In the XML.. the
            //    <default>physical:sys-0/node-0/membuf-10/mbs-0/mba-1</default>
            //
@@ -422,8 +425,10 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
            //
            // 0x00000000_03010400   MBA 0   # MBA01
            // 0x00000000_03010C00   MBA 1   # MBA23
-           //
-           // 
+
+           // 0x00000000_03010880   MBA 0    # Trace for MBA01
+           // 0x00000000_030110C0   MBA 1    # Trace for MBA23 
+
            // 0x00000000_03011400   MBA 0   # DPHY01 (indirect addressing)
            // 0x00000000_03011800   MBA 1   # DPHY23 (indirect addressing)
 
@@ -433,13 +438,13 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
            // 0x80000000_0701143f   MBA 0   # DPHY01 (indirect addressing) 
            // 0x80000000_0701183f   MBA 1   # DPHY23 (indirect addressing)
            //
+
            // SCOM_TRANS_IND_MBA_MASK =      0x80000000FFFFFFFF,
            // SCOM_TRANS_IND_MBA_BASEADDR =  0x800000000301143f,
 
-
-            // check to see that the Address is in the correct direct
-            // scom MBA address range.
-            if ((i_addr & SCOM_TRANS_MBA_MASK) == SCOM_TRANS_MBA_BASEADDR)
+           // check to see that the Address is in the correct direct
+           // scom MBA address range.
+            if ( (i_addr & SCOM_TRANS_MBA_MASK) == SCOM_TRANS_MBA_BASEADDR )
             {
 
                 l_err = scomPerformTranslate(epath,
@@ -450,6 +455,19 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                                              i_target,
                                              i_addr );
             }
+
+            // New TCM MBA registers for DD2.0
+            else if ( (i_addr & SCOM_TRANS_TCM_MBA_MASK) ==
+                                SCOM_TRANS_TCM_MBA_BASEADDR )
+            {
+                l_instance = epath.pathElementOfType(TARGETING::TYPE_MBA).instance;
+                i_addr = i_addr + (l_instance * SCOM_TRANS_TCM_MBA_OFFSET);
+                // Call to set the target to the parent target type
+                l_err = scomfindParentTarget(epath,
+                                             TARGETING::TYPE_MEMBUF,
+                                             i_target);
+            }
+            
             // check to see if valid MBA 0 indirect address range
             else if ((i_addr & SCOM_TRANS_IND_MBA_MASK) ==
                      SCOM_TRANS_IND_MBA_BASEADDR)

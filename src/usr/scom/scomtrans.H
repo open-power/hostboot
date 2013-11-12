@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,11 +38,12 @@ namespace SCOM
         SCOM_TRANS_EX_MASK =          0xFFFFFFFF7F000000,
         SCOM_TRANS_MCS_MASK =         0xFFFFFFFF7FFFFF80,
         SCOM_TRANS_MBA_MASK =         0xFFFFFFFF7FFFFC00,
+        SCOM_TRANS_TCM_MBA_MASK =     0xFFFFFFFFFFFFFC00,
         SCOM_TRANS_XBUS_MASK =        0x00000000FFFFFC00,
         SCOM_TRANS_IND_MCS_DMI_MASK = 0x80000060FFFFFFFF,
         SCOM_TRANS_IND_MBA_MASK =     0x80000000FFFFFFFF,
         SCOM_TRANS_ABUS_MASK =        0x00000060FFFFFC00,
-        SCOM_TRANS_INDIRECT_MASK =    0x8000000000000000,     
+        SCOM_TRANS_INDIRECT_MASK =    0x8000000000000000,
     };
 
     enum ScomTransBaseAddr
@@ -52,6 +53,7 @@ namespace SCOM
         SCOM_TRANS_MCS_DMI_BASEADDR =     0x0000000002011A00,
         SCOM_TRANS_IND_MCS_BASEADDR =     0x8000006002011A00,
         SCOM_TRANS_MBA_BASEADDR =         0x0000000003010400,
+        SCOM_TRANS_TCM_MBA_BASEADDR =     0x0000000003010800,
         SCOM_TRANS_XBUS_BASEADDR =        0x0000000004011000,
         SCOM_TRANS_ABUS_BASEADDR =        0x0000000008010C00,
         SCOM_TRANS_IND_MBA_BASEADDR =     0x800000000301143f,
@@ -59,6 +61,10 @@ namespace SCOM
         SCOM_TRANS_INDIRECT_ADDRESS =     0x8000000000000000,
     };
 
+    enum ScomTransOffset
+    {
+        SCOM_TRANS_TCM_MBA_OFFSET      =  0x840,
+    };
 
 
 /**

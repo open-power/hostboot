@@ -1238,7 +1238,7 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
             //   (Chip is >=DD20 OR IBSCOM Override is set)
             if ((membufChips[i]->getAttr<ATTR_PRIMARY_CAPABILITIES>()
                 .supportsInbandScom) &&
-                ((membufChips[i]->getAttr<TARGETING::ATTR_EC>() >= 0x20) ||
+                (// TODO: RTC 68984: Disable IBSCOM for now (membufChips[i]->getAttr<TARGETING::ATTR_EC>() >= 0x20) ||
                  (sys->getAttr<TARGETING::ATTR_IBSCOM_ENABLE_OVERRIDE>() != 0))
                 )
             {

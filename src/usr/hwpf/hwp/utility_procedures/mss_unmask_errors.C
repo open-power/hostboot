@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_unmask_errors.C,v 1.4 2013/10/22 18:55:06 gollub Exp $
+// $Id: mss_unmask_errors.C,v 1.5 2013/10/31 20:41:25 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -36,6 +36,7 @@
 //   1.3   | 03/08/13 | gollub  | Masking MBSPA[0] for DD1, and using MBSPA[8] instead.
 //   1.4   | 10/22/13 | gollub  | Keep maint ECC errors masked, since PRD intends
 //         |          |         | to use cmd complete attention instead.
+//   1.5   | 10/31/13 | gollub  | For DD1 use MBSPA[8], for DD2 using MBSPA[0].
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -1472,7 +1473,17 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
     ecmdDataBufferBase l_mbeccfir_action0(64);
     ecmdDataBufferBase l_mbeccfir_action1(64);
 
+    uint8_t l_mbspa_0_fixed_for_dd2 = 0;
 
+    // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2    
+    l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_HW217608_MBSPA_0_CMD_COMPLETE_ATTN_FIXED, &i_target, l_mbspa_0_fixed_for_dd2);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CENTAUR_EC_HW217608_MBSPA_0_CMD_COMPLETE_ATTN_FIXED");
+        // Log passed in error before returning with new error
+        if (i_bad_rc) fapiLogError(i_bad_rc);                
+        return l_rc;
+    }    
 
     // Get associated functional MBAs on this centaur
     l_rc = fapiGetChildChiplets(i_target,
@@ -1682,7 +1693,7 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
 
         //*************************
         //*************************
-        // MBASPA
+        // MBSPA
         //*************************
         //*************************
         
@@ -1703,11 +1714,15 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         //       to be valid errors for PRD to log.
 
 
-        // 0	Command_Complete                             mask (broken on DD1)
-        // NOTE: This bit broken in DD1.
-        // It can be made to come on when cmd completes clean, or make to come
-        // on when cmd stops on error, but can't be set to do both. 
-        l_ecmd_rc |= l_mbaspa_mask.setBit(0);            
+        // 0	Command_Complete                             
+        if (l_mbspa_0_fixed_for_dd2)         
+        {
+            l_ecmd_rc |= l_mbaspa_mask.clearBit(0);         // DD2: unmask (fixed)
+        }
+        else 
+        {
+            l_ecmd_rc |= l_mbaspa_mask.setBit(0);           // DD1: masked (broken)
+        }
 
         // 1	Hard_CE_ETE_Attn                             mask (forever)
         // NOTE: FW wants to mask these and rely instead on detecting the 
@@ -1747,10 +1762,15 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         // 7	Firmware_Attn1                               masked (forever)
         l_ecmd_rc |= l_mbaspa_mask.setBit(7);            
 
-        // 8	wat_debug_attn                               unmasked
-        // NOTE: DD1 workaround for broken bit 0. This bit will come on whenever 
-        // cmd stops, either stop clean or stop on error.
-        l_ecmd_rc |= l_mbaspa_mask.clearBit(8);            
+        // 8	wat_debug_attn                     
+        if (l_mbspa_0_fixed_for_dd2)         
+        {
+            l_ecmd_rc |= l_mbaspa_mask.setBit(8);           // DD2: masked (workaround for mbspa 0 not needed)
+        }
+        else 
+        {
+            l_ecmd_rc |= l_mbaspa_mask.clearBit(8);         // DD1: unmasked (workaround for mbspa 0 needed)
+        }  
 
         // 9	Spare_Attn1                                  masked (forever)
         l_ecmd_rc |= l_mbaspa_mask.setBit(9);            

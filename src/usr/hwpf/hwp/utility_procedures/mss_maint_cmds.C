@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.27 2013/09/03 19:57:39 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.28 2013/10/31 20:42:54 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -78,6 +78,11 @@
 //         |          |         | Updated random data seed
 //         |          |         | Ordered display output by beat 0-7
 //   1.27  | 09/03/13 | gollub  | Removed unused variables
+//   1.28  | 10/31/13 | gollub  | Removed support for stop condition enum
+//         |          |         | ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR
+//         |          |         |     DD2: enable (fixed)
+//         |          |         |     DD1: disable (broken)
+
 
 //------------------------------------------------------------------------------
 //    Includes
@@ -1156,8 +1161,17 @@ fapi::ReturnCode mss_MaintCmd::loadStopCondMask()
     fapi::ReturnCode l_rc;
     uint32_t l_ecmd_rc = 0;
     ecmdDataBufferBase l_mbasctlq(64);
+    uint8_t l_mbspa_0_fixed_for_dd2 = 0;
 
     FAPI_INF("ENTER mss_MaintCmd::loadStopCondMask()");
+    
+    // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2    
+    l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_HW217608_MBSPA_0_CMD_COMPLETE_ATTN_FIXED, &iv_targetCentaur, l_mbspa_0_fixed_for_dd2);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting ATTR_CENTAUR_EC_HW217608_MBSPA_0_CMD_COMPLETE_ATTN_FIXED");
+        return l_rc;
+    }    
 
     // Get stop conditions from MBASCTLQ
     l_rc = fapiGetScom(iv_target, MBA01_MBASCTLQ_0x0301060F, l_mbasctlq);
@@ -1219,9 +1233,13 @@ fapi::ReturnCode mss_MaintCmd::loadStopCondMask()
     if ( 0 != (iv_stopCondition & STOP_ON_SUE) ) 
         l_ecmd_rc |= l_mbasctlq.setBit(12);
     
-    // Enable command complete attention on clean and error
-    if ( 0 != (iv_stopCondition & ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR) )
-        l_ecmd_rc |= l_mbasctlq.setBit(16);
+    // Command complete attention on clean and error
+    // DD2: enable (fixed)
+    // DD1: disable (broken)
+    if (l_mbspa_0_fixed_for_dd2)         
+    {
+        l_ecmd_rc |= l_mbasctlq.setBit(16);             
+    }
 
     if(l_ecmd_rc)
     {

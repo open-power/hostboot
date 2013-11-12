@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.H,v 1.17 2013/08/23 19:44:02 gollub Exp $
+// $Id: mss_maint_cmds.H,v 1.18 2013/10/31 20:42:15 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -54,6 +54,10 @@
 //         |          |         | Added mss_stopCmd
 //         |          |         | Changed setupAndExecuteCmd to pure virtual
 //   1.17  | 08/23/13 | gollub  | Added x4 ECC mode support: mss_x4_chip_mark_to_centaurDQ
+//   1.18  | 10/31/13 | gollub  | Removed support for stop condition enum
+//         |          |         | ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR
+
+
 
 #ifndef _MSS_MAINT_CMDS_H
 #define _MSS_MAINT_CMDS_H
@@ -270,10 +274,6 @@ class mss_MaintCmd
         // Enable command complete attention
         ENABLE_CMD_COMPLETE_ATTENTION =      0x0008,        
         
-        // Enable command complete attention for both stop clean, and stop
-        // due to error
-        ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR = 0x0004,        
-
     };
 
     /**
