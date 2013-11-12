@@ -68,7 +68,7 @@ namespace TARGETING
 #ifdef MULTINODE_TARGETING
 #define MAX_ENABLED_NODE_ID iv_nodeInfo.size()
 #else
-#define MAX_ENABLED_NODE_ID 1
+#define MAX_ENABLED_NODE_ID 2
 #endif
 
 //******************************************************************************

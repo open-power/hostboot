@@ -2555,15 +2555,7 @@ sub writeAttrMetadataMapCFile{
             my $keySize = "ATTR_"."$key"."_type";
             if(exists $finalAttrhash{$key}->{simpleType})
             {
-                if(exists $finalAttrhash{$key}->{simpleType}->{string})
-                {
-                    if(exists $finalAttrhash{$key}->{simpleType}->{string}->
-                        {sizeInclNull})
-                    {
-                        $keySize = "$keySize"."[". $finalAttrhash{$key}->
-                            {simpleType}->{string}->{sizeInclNull} . "]";
-                    }
-                }
+                # Nothing to do
             }
             elsif(!(exists $finalAttrhash{$key}->{complexType}) &&
                   !(exists $finalAttrhash{$key}->{nativeType}))
@@ -3262,34 +3254,9 @@ sub writeAttrSizeMapCFile{
                         {
                             # we have the attr here.. calculate the size
                             my $keyVal = "ATTR_"."$key"."_type";
-                            if(exists $attr->{simpleType})
-                            {
-                                if(exists $attr->{simpleType}->{array})
-                                {
-                                    my @splitArrSize = split(',',
-                                            $attr->{simpleType}->{array});
-                                    foreach my $num (@splitArrSize)
-                                    {
-                                        $keyVal = "$keyVal"."[$num]";
-                                    }
-                                }
-                                elsif(exists $attr->{simpleType}->{string})
-                                {
-                                    if(exists $attr->{simpleType}->{string}->
-                                        {sizeInclNull})
-                                    {
-                                        $keyVal = "$keyVal" . "[" .
-                                            $attr->{simpleType}->{string}->
-                                            {sizeInclNull} . "]";
-                                    }
-                                }
-                                $finalAttrhash{$key} = $keyVal;
-                            }
-                            elsif(exists $attr->{complexType})
-                            {
-                                $finalAttrhash{$key} = $keyVal;
-                            }
-                            elsif(exists $attr->{nativeType})
+                            if( (exists $attr->{simpleType}) ||
+                                (exists $attr->{complexType}) ||
+                                (exists $attr->{nativeType}) )
                             {
                                 $finalAttrhash{$key} = $keyVal;
                             }
