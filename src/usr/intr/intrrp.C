@@ -429,7 +429,8 @@ void IntrRp::msgHandler()
 
                             IPI_Info_t& ipiInfo = iv_ipisPending[core_pir];
 
-                            ipiInfo.first &= ~(1 << pir.threadId);
+                            ipiInfo.first &=
+                                ~(0x8000000000000000 >> pir.threadId);
 
                             if (0 == ipiInfo.first)
                             {
@@ -535,7 +536,7 @@ void IntrRp::msgHandler()
                     size_t threads = cpu_thread_count();
                     uint64_t en_threads = get_enabled_threads();
 
-                    iv_ipisPending[pir] = IPI_Info_t((1 << threads)-1, msg);
+                    iv_ipisPending[pir] = IPI_Info_t(en_threads, msg);
 
                     for(size_t thread = 0; thread < threads; ++thread)
                     {

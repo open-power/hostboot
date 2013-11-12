@@ -314,7 +314,7 @@ namespace INTR
             ChipList_t  iv_chipList;    //!< Proc chips with PSI intr enabled
             ISNList_t   iv_isnList;     //!< List of ISN's to clear on shutdown
 
-            typedef std::pair<uint8_t, msg_t*> IPI_Info_t;
+            typedef std::pair<uint64_t, msg_t*> IPI_Info_t;
             typedef std::map<PIR_t, IPI_Info_t> IPI_Pending_t;
             IPI_Pending_t iv_ipisPending;  //!< Pending IPIs.
 
