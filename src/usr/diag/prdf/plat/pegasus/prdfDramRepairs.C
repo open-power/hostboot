@@ -120,7 +120,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
 
     for ( uint8_t r = 0; r < MASTER_RANKS_PER_MBA; ++r )
     {
-        if ( 0 == (i_repairedRankMask & (1 << r)) )
+        if ( 0 == (i_repairedRankMask & (0x80 >> r)) )
         {
             continue; // this rank didn't have any repairs
         }
