@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pss_init.C,v 1.7 2013/09/25 22:36:42 stillgs Exp $
+// $Id: p8_pss_init.C,v 1.8 2013/11/08 22:36:48 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pss_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -143,7 +143,7 @@ p8_pss_init(const Target &i_target, uint32_t mode)
         const fapi::Target & CHIP = i_target;
         uint32_t & IMODE = mode;
         FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PSS_CODE_BAD_MODE);
-    }
+    } 
 
     return rc;
 
@@ -457,8 +457,6 @@ pss_init(const Target& i_target)
 
         FAPI_INF("    SPIPSS ADC CTRL_REG_2 Configuration                  ");
         FAPI_INF("      hwctrl_inter_frm_delay     => %d ", hwctrl_inter_frame_delay );
-        FAPI_INF("                                       "                     );
-        FAPI_INF("                                       "                     );
 
         rc = fapiPutScom(i_target, SPIPSS_ADC_CTRL_REG2_0x00070002, data );
         if (rc)
@@ -853,7 +851,28 @@ pss_reset(const Target& i_target)
             FAPI_ERR("fapiPutScom(SPIPSS_P2S_RESET_REGISTER_0x00070045) failed.");
             break;
         }
+        
+        // Clearing reset for cleanliness (SW229669)
+        e_rc=data.flushTo0();
+        if (e_rc)
+        {
+            rc.setEcmdError(e_rc);
+            break;
+        }
+               
+        rc = fapiPutScom(i_target,  SPIPSS_ADC_RESET_REGISTER_0x00070005 , data);
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(SPIPSS_ADC_RESET_REGISTER_0x00070005) failed.");
+            break;
+        }
 
+        rc = fapiPutScom(i_target,  SPIPSS_P2S_RESET_REGISTER_0x00070045 , data);
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(SPIPSS_P2S_RESET_REGISTER_0x00070045) failed.");
+            break;
+        }
     } while (0);
 
     FAPI_INF("PSS reset end...\n");
