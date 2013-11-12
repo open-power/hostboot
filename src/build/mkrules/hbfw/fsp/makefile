@@ -41,7 +41,8 @@ RUNBVT_SUBDIRS   +=
 
 INCLUDES = hbdescriptor.H \
            hbterminatetypes.H \
-           hbotcompid.H
+           hbotcompid.H \
+           hbfw_term_rc.H
 
 .elseif(${CONTEXT} == "x86.nfp")
 
