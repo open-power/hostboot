@@ -5,9 +5,3 @@ Brief description of the problem or reason for patch
 -Files: list of files
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
 
-Update action file for dmi_io_run_training to work with io_dccal.C v1.26
--RTC: Task 89387 used to remove this patch
--CMVC: Feature SW231052/903906 will be used to check the change into fips810
--Files: p8.act, s1.act
--Coreq: workarounds.postsimsetup
-
