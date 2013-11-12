@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.C,v 1.22 2013/09/25 22:36:37 stillgs Exp $
+// $Id: p8_pm_prep_for_reset.C,v 1.25 2013/10/30 17:13:09 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -36,22 +36,6 @@
 // *!   o System clocks are running
 // *!
 //------------------------------------------------------------------------------
-///
-/// \version --------------------------------------------------------------------------
-/// \version 1.5  rmaier 09/19/12 Added review feedback
-/// \version --------------------------------------------------------------------------
-/// \version 1.4  rmaier 09/17/12 Fixed error when calling p8_ocb_init.C.
-/// \version --------------------------------------------------------------------------
-/// \version 1.1  rmaier 08/23/12 Renaming proc_ to p8_
-/// \version --------------------------------------------------------------------------
-/// \version 1.3 rmaier 2012/07/17 Added review feedback
-/// \version --------------------------------------------------------------------------
-/// \version 1.2 rmaier 2012/03/13 Added return code handling
-/// \version --------------------------------------------------------------------------
-/// \version 1.1 rmaier 2012/02/28 Added calls to subroutines
-/// \version --------------------------------------------------------------------------
-/// \version 1.0 rmaier 2012/02/01 Initial Version
-/// \version ---------------------------------------------------------------------------
 ///
 /// High-level procedure flow:
 ///
@@ -71,16 +55,17 @@
 ///     - call p8_pmc_init.C *chiptarget, ENUM:PMC_RESET
 ///             - Issue reset to the PMC
 ///
-///     - call p8_poreslw_init.C *chiptarget, ENUM:PORESLW_RESET
-///
 ///     - call p8_poregpe_init.C *chiptarget, ENUM:POREGPE_RESET
-///
 ///
 ///     - call p8_pba_init.C *chiptarget, ENUM:PBA_RESET
 ///
 ///     - call p8_occ_sram_init.C *chiptarget, ENUM:OCC_SRAM_RESET
 ///
 ///     - call p8_ocb_init .C *chiptarget, ENUM:OCC_OCB_RESET
+///
+///     SLW engine reset is not done here as this will blow away all setup
+///     in istep 15.  Thus, ALL manipulation of this is done there or by
+///     p8_poreslw_recovery.
 ///
 ///  \endverbatim
 ///
@@ -108,9 +93,13 @@ using namespace fapi;
 // Function prototypes
 // ----------------------------------------------------------------------
 
+fapi::ReturnCode
+special_wakeup_all (const fapi::Target &i_target, bool i_action);
+
 // ----------------------------------------------------------------------
 // Function definitions
 // ----------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 /**
@@ -134,19 +123,20 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
 {
 
     fapi::ReturnCode                rc;
-    uint8_t                         l_ex_number = 0;
 
     std::vector<fapi::Target>       l_exChiplets;
     ecmdDataBufferBase              data(64);
     ecmdDataBufferBase              mask(64);
 
+    const char *        PM_MODE_NAME_VAR; // Defines storage for PM_MODE_NAME
+
     fapi::Target dummy;
 
     do
     {
-    
+
         FAPI_INF("p8_pm_prep_for_reset start  ....");
-        
+
         if (i_mode == PM_RESET)
         {
             FAPI_INF("Hard reset detected");
@@ -159,17 +149,17 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         {
             FAPI_ERR("Mode parameter value not supported: %u", i_mode);
             uint32_t & MODE = i_mode;
-            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PREP_UNSUPPORTED_MODE_ERR);             
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PREP_UNSUPPORTED_MODE_ERR);
             break;
         }
-                      
+
         if ( i_secondary_chip_target.getType() == TARGET_TYPE_NONE )
         {
             if ( i_primary_chip_target.getType() == TARGET_TYPE_NONE )
             {
                 FAPI_ERR("Set primay target properly for SCM " );
                 const fapi::Target PRIMARY_TARGET = i_primary_chip_target;
-                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PREP_TARGET_ERR); 
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PREP_TARGET_ERR);
                 break;
             }
             FAPI_DBG("Running on SCM");
@@ -178,7 +168,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         {
             FAPI_DBG("Running on DCM");
         }
-        
+
         //  ******************************************************************
         //  Put OCC PPC405 into reset
         //  ******************************************************************
@@ -210,81 +200,25 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         //  ******************************************************************
         //  Put all EX chiplet special wakeup
         //  *****************************************************************
-        //     - call proc_cpu_special_wakeup.C  *chiptarget, ENUM:OCC_SPECIAL_WAKEUP
-        //             - For each chiplet,  put into Special Wake-up via the OCC special wake-up bit
-        
-        //////////////////////// PRIMARY TARGET ////////////////////////////////
-        rc = fapiGetChildChiplets (  i_primary_chip_target,
-                                     TARGET_TYPE_EX_CHIPLET,
-                                     l_exChiplets,
-                                     TARGET_STATE_FUNCTIONAL);
+                
+        // Primary
+        rc = special_wakeup_all (i_primary_chip_target, true);
         if (rc)
         {
-            FAPI_ERR("Error from fapiGetChildChiplets!");
+            FAPI_ERR("special_wakeup_all - Enable: Failed for Target %s", 
+                        i_primary_chip_target.toEcmdString());
             break;
         }
+                
 
-        FAPI_DBG("Number of EX chiplet on primary  => %u ", l_exChiplets.size());
-
-	    // Iterate through the returned chiplets
-        for (uint8_t j=0; j < l_exChiplets.size(); j++)
-	    {
-	  
-            // Build the SCOM address
-            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
-            FAPI_DBG("Running special wakeup on ex chiplet %d ", l_ex_number);
-
-            // Set special wakeup for EX
-            rc = fapiSpecialWakeup(l_exChiplets[j], true);
-            if (rc) 
-            { 
-                FAPI_ERR("fapiSpecialWakeup: Failed to put CORE %d into special wakeup. With rc = 0x%x",  l_ex_number, (uint32_t)rc);  
-                break;    
-            }
-
-        }  // chiplet loop
-        
-        // Exit if error
-        if  (!rc.ok())
-        {
-            break;
-        }
-
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
+        // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
-            rc = fapiGetChildChiplets ( i_secondary_chip_target,
-                                        TARGET_TYPE_EX_CHIPLET,
-                                        l_exChiplets,
-                                        TARGET_STATE_FUNCTIONAL);
+            rc = special_wakeup_all (i_secondary_chip_target, true);
             if (rc)
             {
-              FAPI_ERR("Error from fapiGetChildChiplets!");
-              break;
-            }
-
-            FAPI_DBG("Number of EX chiplet on secondary  => %u ", l_exChiplets.size());
-
-            // Iterate through the returned chiplets
-            for (uint8_t j=0; j < l_exChiplets.size(); j++)
-            {
-
-	            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
-                FAPI_DBG("Running special wakeup on EX chiplet %d ", l_ex_number);
-
-                // Set special wakeup for EX
-                rc = fapiSpecialWakeup(l_exChiplets[j], true);
-                if (rc) 
-                { 
-                    FAPI_ERR("fapiSpecialWakeup: Failed to put CORE %d into special wakeup. With rc = 0x%x",  l_ex_number, (uint32_t)rc);  
-                    break;    
-                }
-                
-            }  // chiplet loop
-            
-            // Exit if error
-            if  (!rc.ok())
-            {
+                FAPI_ERR("special_wakeup_all - Enable: Failed for Target %s", 
+                            i_secondary_chip_target.toEcmdString());
                 break;
             }
 
@@ -324,23 +258,23 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         FAPI_INF("Force Vsafe value into voltage controller");
         FAPI_DBG("Executing: p8_pmc_force_vsafe.C");
 
-        //////////////////////// PRIMARY TARGET ////////////////////////////////
+        // Primary
 
         FAPI_EXEC_HWP(rc, p8_pmc_force_vsafe, i_primary_chip_target);
         if (rc)
         {
             FAPI_ERR("Failed to force Vsafe value into voltage controller. With rc = 0x%x", (uint32_t)rc);
-            FAPI_ERR("Continiing with reset of Power Management functions");
+            break;
         }
 
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
+        // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
             FAPI_EXEC_HWP(rc, p8_pmc_force_vsafe, i_secondary_chip_target);
             if (rc)
             {
               FAPI_ERR("Failed to force Vsafe value into voltage controller. With rc = 0x%x", (uint32_t)rc);
-              FAPI_ERR("Contining with reset of Power Management functions");
+              break;
             }
         }
 
@@ -354,15 +288,15 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         FAPI_INF("Prepare PCBSLV_PM for RESET");
         FAPI_DBG("Executing: p8_pcbs_init.C");
 
-        //////////////////////// PRIMARY TARGET ////////////////////////////////
+        // Primary
         FAPI_EXEC_HWP(rc, p8_pcbs_init, i_primary_chip_target, PM_RESET);
         if (rc)
         {
             FAPI_ERR("p8_pcbs_init: Failed to prepare PCBSLV_PM for RESET. With rc = 0x%x", (uint32_t)rc);
             break;
         }
-        
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
+
+        // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
 
@@ -381,13 +315,46 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         //
 
         FAPI_INF("Issue reset to PMC");
-        FAPI_DBG("Executing: p8_pmc_init.C");
+        FAPI_DBG("Executing: p8_pmc_init");
 
         FAPI_EXEC_HWP(rc, p8_pmc_init, i_primary_chip_target, i_secondary_chip_target, i_mode);
         if (rc)
         {
             FAPI_ERR("p8_pmc_init: Failed to issue PMC reset. With rc = 0x%x", (uint32_t)rc);
             break;
+        }
+        
+        //  ******************************************************************
+        //  As the PMC reset kills ALL of the configuration, the idle portion
+        //  must be reestablished to allow that portion to operate.  This is 
+        //  what p8_poreslw_init -init does. Additionally, this lets us drop 
+        //  special wake-up  before exiting.
+        //  ******************************************************************
+        //     - call p8_poreslw_init.C *chiptarget, ENUM:PM_INIT
+        //
+
+        FAPI_INF("Re-establish PMC Idle configuration");
+        FAPI_DBG("Executing: p8_poreslw_init in mode %s", PM_MODE_NAME(PM_INIT_PMC));
+        
+        // Primary
+        FAPI_EXEC_HWP(rc, p8_poreslw_init, i_primary_chip_target, PM_INIT_PMC);
+        if (rc)
+        {
+            FAPI_ERR("p8_poreslw_init: Failed to to reinialize the idle portion of the PMC. With rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+
+        // Secondary
+        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
+        {
+
+            FAPI_EXEC_HWP(rc, p8_poreslw_init, i_secondary_chip_target, PM_INIT_PMC);
+            if (rc)
+            {
+                FAPI_ERR("p8_poreslw_init: Failed to to reinialize the idle portion of the PMC. With rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+
         }
 
         //  ******************************************************************
@@ -399,7 +366,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         FAPI_INF("Issue reset to PSS macro");
         FAPI_DBG("Executing: p8_pss_init.C");
 
-        //////////////////////// PRIMARY TARGET ////////////////////////////////
+        // Primary
         FAPI_EXEC_HWP(rc, p8_pss_init, i_primary_chip_target, PM_RESET);
         if (rc)
         {
@@ -407,7 +374,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             break;
         }
 
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
+        // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
 
@@ -420,38 +387,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 break;
             }
         }
-
-        if (i_mode == PM_RESET) 
-        {
-            FAPI_INF("Hard reset detected...");
-            //  ******************************************************************
-            //  Issue reset to PORE Sleep/Winkle engine
-            //  ******************************************************************
-            //     - call p8_poreslw_init.C *chiptarget, ENUM:PORESLW_RESET
-
-            FAPI_INF("Issue reset to PORE Sleep/Winkle engine.");
-            FAPI_DBG("Executing: p8_poreslw_init.C");
-
-            //////////////////////// PRIMARY TARGET ////////////////////////////////
-            FAPI_EXEC_HWP(rc, p8_poreslw_init, i_primary_chip_target, PM_RESET);
-            if (rc)
-            {
-                FAPI_ERR("p8_poreslw_init: Failed to issue reset to PORE Sleep/Winkle engine. With rc = 0x%x", (uint32_t)rc);
-                break;
-            }
-        }
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
-
-        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {
-            FAPI_EXEC_HWP(rc, p8_poreslw_init, i_secondary_chip_target, PM_RESET);
-            if (rc)
-            {
-                FAPI_ERR("p8_poreslw_init: Failed to issue reset to PORE Sleep/Winkle engine. With rc = 0x%x", (uint32_t)rc);
-                break;
-            }
-        }
-
+               
         //  ******************************************************************
         //  Issue reset to PORE General Purpose Engine
         //  ******************************************************************
@@ -460,7 +396,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         FAPI_INF("Issue reset to PORE General Purpose Engine");
         FAPI_DBG("Executing: p8_poregpe_init.C");
 
-        //////////////////////// PRIMARY TARGET ////////////////////////////////
+        // Primary
         FAPI_EXEC_HWP(rc, p8_poregpe_init, i_primary_chip_target, PM_RESET, GPEALL );
         if (rc)
         {
@@ -468,7 +404,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             break;
         }
 
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
+        // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
             FAPI_EXEC_HWP(rc, p8_poregpe_init, i_secondary_chip_target, PM_RESET, GPEALL );
@@ -488,7 +424,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         FAPI_INF("Issue reset to PBA");
         FAPI_DBG("Executing: p8_pba_init.C");
 
-        //////////////////////// PRIMARY TARGET ////////////////////////////////
+        // Primary
         FAPI_EXEC_HWP(rc, p8_pba_init, i_primary_chip_target, PM_RESET );
         if (rc)
         {
@@ -496,7 +432,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             break;
         }
 
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
+        // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
             FAPI_EXEC_HWP(rc, p8_pba_init, i_secondary_chip_target, PM_RESET );
@@ -516,7 +452,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         FAPI_INF("Issue reset to OCC-SRAM");
         FAPI_DBG("Executing: p8_occ_sram_init.C");
 
-        //////////////////////// PRIMARY TARGET ////////////////////////////////
+        // Primary
         FAPI_EXEC_HWP(rc, p8_occ_sram_init, i_primary_chip_target, PM_RESET );
         if (rc)
         {
@@ -524,7 +460,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             break;
         }
 
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
+        // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
             FAPI_EXEC_HWP(rc, p8_occ_sram_init, i_secondary_chip_target, PM_RESET );
@@ -543,7 +479,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         FAPI_INF("Issue reset to OCB");
         FAPI_DBG("Executing: p8_ocb_init.C");
 
-        //////////////////////// PRIMARY TARGET ////////////////////////////////
+        // Primary
         FAPI_EXEC_HWP(rc, p8_ocb_init, i_primary_chip_target, PM_RESET,0 , 0, 0, 0, 0, 0 );
         if (rc)
         {
@@ -551,7 +487,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             break;
         }
 
-        //////////////////////// SECONDARY TARGET ////////////////////////////////
+        // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
             FAPI_EXEC_HWP(rc, p8_ocb_init, i_secondary_chip_target, PM_RESET,0 , 0, 0, 0, 0, 0 );
@@ -561,13 +497,107 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 break;
             }
         }
+        
+        //  ******************************************************************
+        //  Remove the EX chiplet special wakeups
+        //  *****************************************************************
+                
+        // Primary
+        rc = special_wakeup_all (i_primary_chip_target, false);
+        if (rc)
+        {
+            FAPI_ERR("special_wakeup_all - Enable: Failed for Target %s", 
+                        i_primary_chip_target.toEcmdString());
+            break;
+        }
+                
+
+        // Secondary
+        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
+        {
+            rc = special_wakeup_all (i_secondary_chip_target, false);
+            if (rc)
+            {
+                FAPI_ERR("special_wakeup_all - Enable: Failed for Target %s", 
+                            i_secondary_chip_target.toEcmdString());
+                break;
+            }
+
+        }
+
 
     } while(0);
 
     FAPI_INF("p8_pm_prep_for_reset start  ....");
-        
+
     return rc;
 } // Procedure
+
+
+
+/**
+ * special_wakeup_all - Sets or clears special wake-up on all configured EX on a 
+ *                     target
+ *
+ * @param[in] i_target   Chip target w
+ * @param[in] i_action   true - ENABLE; false - DISABLE
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode
+special_wakeup_all (const fapi::Target &i_target, bool i_action)
+{
+    fapi::ReturnCode                rc;    
+    std::vector<fapi::Target>       l_exChiplets;
+    uint8_t                         l_ex_number = 0;    
+    
+    do
+    {   
+             
+        rc = fapiGetChildChiplets (  i_target,
+                                     TARGET_TYPE_EX_CHIPLET,
+                                     l_exChiplets,
+                                     TARGET_STATE_FUNCTIONAL);
+        if (rc)
+        {
+            FAPI_ERR("Error from fapiGetChildChiplets!");
+            break;
+        }
+        
+	    // Iterate through the returned chiplets
+        for (uint8_t j=0; j < l_exChiplets.size(); j++)
+	    {
+            
+            FAPI_INF("\t%s special wake-up on %s",  
+                    i_action ? "Setting" : "Clearing", 
+                    l_exChiplets[j].toEcmdString());
+            
+            // Build the SCOM address
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
+            FAPI_DBG("Running special wakeup on ex chiplet %d ", l_ex_number);
+
+            // Set special wakeup for EX
+            rc = fapiSpecialWakeup(l_exChiplets[j], i_action);
+            if (rc)
+            {
+                FAPI_ERR("fapiSpecialWakeup: Failed to put CORE %d into special wakeup. With rc = 0x%x",  
+                            l_ex_number, (uint32_t)rc);
+                break;
+            }
+
+        }  // chiplet loop
+
+        // Exit if error
+        if  (!rc.ok())
+        {
+            break;
+        }
+        
+    } while(0);
+    return rc;
+}
+
 
 
 } //end extern C

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poreslw_init.C,v 1.16 2013/09/25 22:36:39 stillgs Exp $
+// $Id: p8_poreslw_init.C,v 1.18 2013/10/30 17:13:11 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poreslw_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -85,7 +85,7 @@ using namespace fapi;
 // Function prototypes
 // ----------------------------------------------------------------------
 
-fapi::ReturnCode poreslw_init(const Target& i_target);
+fapi::ReturnCode poreslw_init(const Target& i_target, uint32_t i_mode);
 fapi::ReturnCode poreslw_reset(const Target& i_target);
 fapi::ReturnCode poreslw_ex_setup(const Target& i_target);
 
@@ -108,8 +108,9 @@ fapi::ReturnCode
 p8_poreslw_init(const Target& i_target, uint32_t mode)
 {
     fapi::ReturnCode      rc;
+    const char *        PM_MODE_NAME_VAR; // Defines storage for PM_MODE_NAME
 
-    FAPI_INF("Executing p8_poreslw_init in mode %x ....", mode);
+    FAPI_INF("Executing p8_poreslw_init in mode %s", PM_MODE_NAME(mode));
 
     /// -------------------------------
     /// Configuration:  perform translation of any Platform Attributes
@@ -123,9 +124,9 @@ p8_poreslw_init(const Target& i_target, uint32_t mode)
     /// -------------------------------
     /// Initialization:  perform order or dynamic operations to initialize
     /// the SLW using necessary Platform or Feature attributes.
-    else if (mode == PM_INIT)
+    else if (mode == PM_INIT || mode == PM_INIT_PMC )
     {
-      rc = poreslw_init(i_target);
+      rc = poreslw_init(i_target, mode);
     }
 
     /// -------------------------------
@@ -161,7 +162,7 @@ p8_poreslw_init(const Target& i_target, uint32_t mode)
  * @retval ERROR defined in xml
  */
 fapi::ReturnCode
-poreslw_init(const Target& i_target)
+poreslw_init(const Target& i_target, uint32_t i_mode)
 {
     fapi::ReturnCode      rc;
     uint32_t              e_rc = 0;
@@ -207,12 +208,15 @@ poreslw_init(const Target& i_target)
 
         FAPI_DBG("Activate the PMC Idle seequencer by making sure the Halt bit is clear");
 
-        // Setup up each of the EX chiplets
-        rc = poreslw_ex_setup(i_target);
-        if(!rc.ok())
+        if (i_mode == PM_INIT)
         {
-            FAPI_ERR("Error from poreslw_ex_setup n");
-            break;
+            // Setup up each of the EX chiplets
+            rc = poreslw_ex_setup(i_target);
+            if(!rc.ok())
+            {
+                FAPI_ERR("Error from poreslw_ex_setup n");
+                break;
+            }
         }
 
     } while(0);

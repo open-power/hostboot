@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_firinit.C,v 1.12 2013-09-25 21:26:09 dcrowell Exp $
+// $Id: p8_pm_firinit.C,v 1.14 2013/10/30 17:13:05 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -109,11 +109,12 @@ using namespace fapi;
 fapi::ReturnCode
 p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
 {
-    fapi::ReturnCode rc;
-    ecmdDataBufferBase data(64);
-    uint64_t any_error = 0;
+    fapi::ReturnCode    rc;
+    ecmdDataBufferBase  data(64);
+    uint64_t            any_error = 0;
+    const char *        PM_MODE_NAME_VAR; // Defines storage for PM_MODE_NAME
 
-    FAPI_INF("p8_pm_firinit start for mode %x", i_mode);
+    FAPI_INF("p8_pm_firinit start for mode %s", PM_MODE_NAME(i_mode));
 
     do
     {
@@ -205,15 +206,15 @@ p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
         }
 
         //  ******************************************************************
-        //  OHA
+        //  OHA - Removed as the values are part of the winkle image
         //  ******************************************************************
 
-        FAPI_EXEC_HWP(rc, p8_pm_oha_firinit , i_target , i_mode );
-        if (rc)
-        {
-            FAPI_ERR("ERROR: p8_pm_oha_firinit detected failed result");
-            break;
-        }
+        //  FAPI_EXEC_HWP(rc, p8_pm_oha_firinit , i_target , i_mode );
+        //  if (rc)
+        //  {
+        //      FAPI_ERR("ERROR: p8_pm_oha_firinit detected failed result");
+        //      break;
+        //  }
 
         //  ******************************************************************
         //  PCBS
@@ -239,7 +240,7 @@ p8_pm_firinit(const fapi::Target &i_target , uint32_t i_mode)
 
     } while(0);
 
-    FAPI_INF("p8_pm_firinit end for mode %x", i_mode);
+    FAPI_INF("p8_pm_firinit end for mode %s", PM_MODE_NAME(i_mode));
     
     return rc;
 

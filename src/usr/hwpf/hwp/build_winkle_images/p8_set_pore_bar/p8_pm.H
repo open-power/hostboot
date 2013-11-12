@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm.H,v 1.7 2013/08/02 19:02:43 stillgs Exp $
+// $Id: p8_pm.H,v 1.9 2013/10/30 17:13:12 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -57,18 +57,49 @@ extern "C" {
 
 #ifndef _P8_PM_FLOW_MODE
 #define _P8_PM_FLOW_MODE
-enum p8_PM_FLOW_MODE {
-        PM_CONFIG       = 0x1,
-        PM_RESET        = 0x2,
-        PM_INIT         = 0x3,
-        PM_SETUP        = 0x4,
-        PM_SETUP_PIB    = 0x5,
-        PM_SETUP_ALL    = 0x6,
-        PM_RESET_SOFT   = 0x7,
-        PM_CONFIG_SOFT  = PM_CONFIG,
-        PM_INIT_SOFT    = 0x8,
-        PM_INIT_SPECIAL = 0x9
-        };
+enum p8_PM_FLOW_MODE 
+{
+    PM_CONFIG       = 0x1,
+    PM_RESET        = 0x2,
+    PM_INIT         = 0x3,
+    PM_SETUP        = 0x4,
+    PM_SETUP_PIB    = 0x5,
+    PM_SETUP_ALL    = 0x6,
+    PM_RESET_SOFT   = 0x7,
+    PM_CONFIG_SOFT  = PM_CONFIG,
+    PM_INIT_SOFT    = 0x8,
+    PM_INIT_SPECIAL = 0x9,
+    PM_INIT_PMC     = 0xA
+};
+        
+// This storage is contained in p8_pm_utils.C which must be included
+// in the compilation of all procs that use the PM_MODE_NAME macro     
+extern const char * p8_PM_FLOW_MODE_NAME[]; 
+
+#define PM_FLOW_MODE_NAME   \
+{                           \
+    "PM_CONFIG",            \
+    "PM_RESET",             \
+    "PM_INIT",              \
+    "PM_SETUP",             \
+    "PM_SETUP_PIB",         \
+    "PM_SETUP_ALL",         \
+    "PM_RESET_SOFT",        \
+    "PM_INIT_SOFT",         \
+    "PM_INIT_SPECIAL",      \
+    "PM_INIT_PMC",          \
+    "PM_CONFIG_SOFT"        \
+}
+
+// Necessary definition to allocated enum string array storage.
+// Typical declaration:  
+// const char *        PM_MODE_NAME_VAR; // Defines storage for PM_MODE_NAME
+#define PM_MODE_NAME_VAR p8_PM_FLOW_MODE_NAME[] = PM_FLOW_MODE_NAME
+
+#define PM_MODE_NAME(_mi_mode)(         \
+    p8_PM_FLOW_MODE_NAME[_mi_mode-1]    \
+)
+       
 #endif  // _P8_PM_FLOW_MODE
 
 

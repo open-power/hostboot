@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_control.C,v 1.10 2013/08/02 19:05:03 stillgs Exp $
+// $Id: p8_pfet_control.C,v 1.11 2013/10/29 21:53:32 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_control.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -802,6 +802,9 @@ p8_pfet_off( const fapi::Target& i_target,
     uint64_t                    address;
     bool                        b_core = false;
     bool                        b_eco = false;
+    
+    uint8_t                     core_vret_voff_value;
+    uint8_t                     eco_vret_voff_value;
 
     do
     {
@@ -863,12 +866,53 @@ p8_pfet_off( const fapi::Target& i_target,
                                 address,
                                 data.getDoubleWord(0));
 
+
+        // As we need to turn the PFETs off, ensure the stage pointers to the 
+        // OFF value are in place (and not assumed).
+        core_vret_voff_value = 0xBB;
+        eco_vret_voff_value = 0xBB;
+        
+        // -------------------------------------------------------------
+        FAPI_DBG("\tSetting Core Voff Settings");
+        e_rc |= data.insertFromRight(core_vret_voff_value, 0, 8);
+        if (e_rc)
+        {
+            FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+            l_rc.setEcmdError(e_rc);
+            break;
+        }
+
+        address = EX_CorePFVRET_REG_0x100F0130 + (0x01000000 * i_ex_number);
+        l_rc=fapiPutScom(i_target, address, data );
+        if (l_rc)
+        {
+            FAPI_ERR("PutScom error 0x%08llu", address);
+            break;
+        }
+
+        // -------------------------------------------------------------
+        FAPI_DBG("\tSetting ECO Voff Settings");
+        e_rc |= data.insertFromRight(eco_vret_voff_value, 0, 8);
+        if (e_rc)
+        {
+            FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+            l_rc.setEcmdError(e_rc);
+            break;
+        }
+
+        address = EX_ECOPFVRET_REG_0x100F0150 + (0x01000000 * i_ex_number);
+        l_rc=fapiPutScom(i_target, address, data );
+        if (l_rc)
+        {
+            FAPI_ERR("PutScom error 0x%08llu", address);
+            break;
+        }
+
+
         // VDD ---------------------
 
         FAPI_INF("Turning off VDD");
-
-
-
+        
         address = EX_PFET_CTL_REG_0x100F0106 + (0x01000000 * i_ex_number);
         l_rc=fapiGetScom( i_target, address, data );
         if(!l_rc.ok())
@@ -880,8 +924,6 @@ p8_pfet_off( const fapi::Target& i_target,
         FAPI_DBG("\tEX_PFET_CTL_REG_0x%08llX before 0x%16llX",
                                 address,
                                 data.getDoubleWord(0));
-
-
 
         if (b_core)
         {
@@ -1029,7 +1071,6 @@ p8_pfet_off( const fapi::Target& i_target,
             FAPI_ERR("PutScom error 0x%08llX", address);
             break;
         }
-
 
         // Read to allow for Cronus 5.1 or 5.6 to look at the resultant setting
         l_rc=fapiGetScom( i_target, address, data );
