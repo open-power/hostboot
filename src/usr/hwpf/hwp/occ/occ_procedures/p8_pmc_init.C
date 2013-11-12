@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_init.C,v 1.36 2013/08/02 19:09:07 stillgs Exp $
+// $Id: p8_pmc_init.C,v 1.37 2013/11/07 14:00:09 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -85,10 +85,10 @@ pmc_config_spivid_settings(const Target& l_pTarget)
     // SPIVID Defaults
 
     const uint32_t  default_spivid_frequency = 1;  // MHz
-    // Units: nanoseconds;  Value 10 microseconds
-    const uint32_t  default_spivid_interframe_delay_write_status = 10000;
-    // Units: nanoseconds;  Value 1 microsecond
-    const uint32_t  default_spivid_inter_retry_delay = 1000;
+    // Units: nanoseconds;  Value 15 microseconds
+    const uint32_t  default_spivid_interframe_delay_write_status = 15000;
+    // Units: nanoseconds;  Value 40 microsecond
+    const uint32_t  default_spivid_inter_retry_delay = 40000;
 
 
     uint32_t attr_pm_spivid_frequency = 1;
@@ -2508,6 +2508,14 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pmc_init.C,v $
+Revision 1.37  2013/11/07 14:00:09  stillgs
+
+Per SW232699, updated SPIVID parameters
+/!/ Units: nanoseconds;  Value 15 microseconds
+const uint32_t  default_spivid_interframe_delay_write_status = 15000;
+/!/ Units: nanoseconds;  Value 40 microseconds
+ const uint32_t  default_spivid_inter_retry_delay = 40000;
+
 Revision 1.36  2013/08/02 19:09:07  stillgs
 
 - Support for p8_pm.H.
