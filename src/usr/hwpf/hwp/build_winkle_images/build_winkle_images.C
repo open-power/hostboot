@@ -112,7 +112,7 @@ errlHndl_t  loadPoreImage(  char                    *& o_rporeAddr,
     do
     {
         // Get WINK PNOR section info from PNOR RP
-        l_errl = PNOR::getSectionInfo( PNOR::WINK,PNOR::CURRENT_SIDE, l_info );
+        l_errl = PNOR::getSectionInfo( PNOR::WINK, l_info );
         if( l_errl )
         {
             break;
@@ -488,7 +488,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
                 //  call the HWP with each fapi::Target
                 FAPI_INVOKE_HWP( l_errl,
-                                 p8_slw_build_fixed, 
+                                 p8_slw_build_fixed,
                                  l_fapi_cpu_target, //Proc chip target.
                                  reinterpret_cast<void*>(l_pPoreImage),
                                  l_pImageOut,

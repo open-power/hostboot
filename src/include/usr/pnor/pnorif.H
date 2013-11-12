@@ -91,13 +91,11 @@ struct SectionInfo_t
  * @brief  Return the size and address of a given section of PNOR data
  *
  * @param[in] i_section  PNOR section
- * @param[in] i_side  Side select
  * @param[out] o_info  Location and size information
  *
  * @return errlHndl_t  Error log if request was invalid
  */
 errlHndl_t getSectionInfo( SectionId i_section,
-                           SideSelect i_side,
                            SectionInfo_t& o_info );
 
 /**

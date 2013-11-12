@@ -41,21 +41,33 @@ class PnorRP
      * @brief Static Initializer
      * @param[in]  ref to errlHndl_t
      */
-    static void init( errlHndl_t    &io_rtaskRetErrl );
+    static void init( errlHndl_t &io_rtaskRetErrl );
 
     /**
      * @brief  Return the size and address of a given section of PNOR data
      *    Called by external PNOR::getSectionInfo()
      *
      * @param[in] i_section  PNOR section
-     * @param[in] i_side  Side select
      * @param[out] o_info  Location and size information
      *
      * @return errlHndl_t  Error log if request was invalid
      */
     errlHndl_t getSectionInfo( PNOR::SectionId i_section,
-                               PNOR::SideSelect i_side,
                                PNOR::SectionInfo_t& o_info );
+
+    /**
+      * @brief Creates a 4-byte Cyclic Redundancy Check (CRC) on the data
+      *        provided. The last iteration of the for-loop includes the ffs
+      *        checksum itself. Therefore if the 4-byte CRC created matches
+      *        the ffs checksum, the resulting CRC will be 0
+      *
+      * @param[in] ptr          Pointer to the data
+      *
+      * @param[in] size         Size of the data
+      *
+      * @return uint32_t        return 4-byte CRC, 0 if checksums match
+      */
+    uint32_t pnor_ffs_checksum(void* data, size_t size);
 
   protected:
     /**
@@ -70,24 +82,18 @@ class PnorRP
 
 
   private:
-
     /**
      * PNOR Constants
      */
+    static const uint32_t NUM_TOCS = 2;
+    static const uint64_t TOC_0_OFFSET = 0;
+    static const uint64_t TOC_1_OFFSET = 0x8000;
+
     enum
     {
         BASE_VADDR = VMM_VADDR_PNOR_RP, /**< 2GB = 0x80000000*/
+        TOTAL_SIZE = 64*MEGABYTE, /**< Allocate 64 MB (0x4000000)*/
 
-        NUM_SIDES = 2,  /**< A, B */
-
-        SIDE_SIZE = 32*MEGABYTE, /**< Allocate 32 MB (0x2000000) of VA per side */
-
-        NUM_VADDR_BLOCKS = NUM_SIDES+1, /**< Number of VADDR blocks. */
-        SIDEA_VADDR = BASE_VADDR,  /**< Base address of Side A */
-        SIDEB_VADDR = SIDEA_VADDR + SIDE_SIZE,  /**< Base address of Side B */
-        SIDELESS_VADDR = SIDEB_VADDR + SIDE_SIZE,  /**< Sideless data Base Addr */
-
-        TOTAL_SIZE = SIDE_SIZE*NUM_VADDR_BLOCKS,  /**< Size of PNOR VA region */
         LAST_VADDR = BASE_VADDR + TOTAL_SIZE,  /**< End of our VA range */
 
         /** Real number of bytes required to read 1 logical page */
@@ -98,11 +104,15 @@ class PnorRP
     };
 
     /**
+     * Which TOC (0 or 1) is used after verifying both.
+     */
+    uint32_t iv_TOC_used;
+
+    /**
      * Internal information to deal with the sections of PNOR
      */
     struct SectionData_t {
         PNOR::SectionId id;  /**< Identifier for this section */
-        PNOR::SideSelect side;  /** Side Select */
         uint64_t virtAddr;  /**< Virtual address for the start of the section */
         uint32_t flashAddr;  /**< Address in flash */
         uint32_t size;  /**< Actual size of content in bytes (not including ECC) */
@@ -123,12 +133,7 @@ class PnorRP
     /**
      * Cached copy of section data
      */
-    SectionData_t iv_TOC[NUM_SIDES][PNOR::NUM_SECTIONS+1];
-
-    /**
-     * Currently selected PNOR Side
-     */
-    PNOR::SideSelect iv_curSide;
+    SectionData_t iv_TOC[PNOR::NUM_SECTIONS+1];
 
     /**
      * Pointer to the message queue where we receive messages
@@ -154,7 +159,8 @@ class PnorRP
     void initDaemon();
 
     /**
-     * @brief Read the TOC and store section information
+     * @brief Verify both TOC's and store section information from one of the
+     *        verified TOC's
      *
      * @return Error from device
      */
@@ -217,13 +223,11 @@ class PnorRP
      * @brief  Figure out which section a VA belongs to
      *
      * @param[in] i_vaddr  Virtual address of page
-     * @param[out] o_side  Which side of the flash
      * @param[out] o_id  Which section of PNOR
      *
      * @return Error if VA is bad
      */
     errlHndl_t computeSection( uint64_t i_vaddr,
-                               PNOR::SideSelect& o_side,
                                PNOR::SectionId& o_id );
 
     /**
@@ -254,6 +258,7 @@ class PnorRP
      * @brief Static instance function for testcase only
      */
     static PnorRP& getInstance();
+
 };
 
 

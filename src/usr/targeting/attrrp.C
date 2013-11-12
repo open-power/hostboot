@@ -266,7 +266,6 @@ namespace TARGETING
             // Locate attribute section in PNOR.
             PNOR::SectionInfo_t l_pnorSectionInfo;
             l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
-                                          PNOR::CURRENT_SIDE,
                                           l_pnorSectionInfo);
             if (l_errl) break;
 

@@ -57,6 +57,7 @@ BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
 BASE_W_HEADER_IMAGE = hostboot.header.bin
 BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
+BASE_SHA_IMAGE = hostboot.sha.bin
 EXT_PAD_IMAGE = hostboot_extended.bin.pad
 EXT_ECC_IMAGE = hostboot_extended.bin.ecc
 EXT_ECC_HEADER_IMAGE = hostboot_extended.header.ecc.bin
@@ -67,7 +68,7 @@ TESTDATA_ECC = hbtestdata.bin.ecc
 ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${BASE_W_HEADER_IMAGE} \
                 ${BASE_ECC_IMAGE} ${EXT_ECC_IMAGE} \
-                ${BASE_W_HEADER_ECC_IMAGE} \
+                ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE}\
                 ${EXT_PAD_IMAGE} \
                 ${EXT_SHA_IMAGE} ${EXT_HEADER_IMAGE} \
                 ${EXT_ECC_HEADER_IMAGE} \
@@ -76,7 +77,10 @@ ALL_HB_IMAGES = ${BASE_IMAGES} \
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f -u ${SRCPATH:F${image}} ${image};@}
 	echo "00000000001800000000000008000000000000000007EF80" | xxd -r -ps - sbe.header
-	dd if=/dev/zero of=secureboot.header bs=1 count=4K
+	# add version header w/ sha hash
+	echo -en VERSION\\0 > ${BASE_SHA_IMAGE}
+	sha512sum ${BASE_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${BASE_SHA_IMAGE}
+	dd if=${BASE_SHA_IMAGE} of=secureboot.header ibs=4k conv=sync
 	dd if=/dev/zero of=hbb.footer bs=1 count=128K
 	cat sbe.header secureboot.header ${BASE_IMAGE} hbb.footer > hostboot.stage.bin
 	head -c 524288  hostboot.stage.bin > ${BASE_W_HEADER_IMAGE}
@@ -156,7 +160,7 @@ clobber_build_sbe_partitions:
 #################################################
 ###  SAMPLE for building a PNOR image
 #################################################
-#MURANO_TARGETING = simics_MURANO_targeting.bin 
+#MURANO_TARGETING = simics_MURANO_targeting.bin
 #MURANO_LAYOUT = defaultPnorLayout.xml
 #murano.pnor: ${MURANO_TARGETING} ${MURANO_LAYOUT} hostboot_extended.bin hostboot.bin
 #	${buildpnor.pl:P} --pnorLayout ${.PATH:F${MURANO_LAYOUT}} \

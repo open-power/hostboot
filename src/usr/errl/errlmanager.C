@@ -838,9 +838,7 @@ void ErrlManager::setupPnorInfo()
     {
         // Get SPD PNOR section info from PNOR RP
         PNOR::SectionInfo_t info;
-        errlHndl_t err = PNOR::getSectionInfo( PNOR::HB_ERRLOGS,
-                                                PNOR::CURRENT_SIDE,
-                                                info );
+        errlHndl_t err = PNOR::getSectionInfo( PNOR::HB_ERRLOGS, info );
 
         if (err)
         {

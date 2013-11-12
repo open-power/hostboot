@@ -37,11 +37,10 @@ struct pnorInformation
     uint64_t segmentSize;
     uint64_t maxSegments;
     PNOR::SectionId pnorSection;
-    PNOR::SideSelect pnorSide;
 };
 
 /**
- * @brief VPD Message Types 
+ * @brief VPD Message Types
  */
 enum VPD_MSG_TYPE
 {
@@ -53,13 +52,13 @@ enum VPD_MSG_TYPE
 /**
  * @brief Message definition for VPD Write Request
  *
- * - data0 : 
+ * - data0 :
  *   - [16] VPD Record Number
  *   - [32] 4-byte ASCII String for record name
  *          'XXXX'=Entire VPD section from PNOR
  *   - [16] 2-byte ASCII String for keyword or offset into SPD
  *          'XX'=Entire VPD record
- * - data1 : 
+ * - data1 :
  *   - [64] Size of binary data in bytes
  * - extra data : Binary VPD Data
  */
@@ -114,8 +113,8 @@ errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
  *
  * @param[in] i_target - The chip target to access the data for.
  *
- * @param[in] i_pnorInfo - Information about the PNOR section and side that we
- *      need to know to make the request.
+ * @param[in] i_pnorInfo - Information about the PNOR section that we need to
+ *      know to make the request.
  *
  * @param[in/out] io_cachedAddr - The address offset to the data chunk in
  *      PNOR.
@@ -147,8 +146,8 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
  *
  * @param[in] i_target - The chip target to access the data for.
  *
- * @param[in] i_pnorInfo - Information about the PNOR section and side that we
- *      need to know to make the request.
+ * @param[in] i_pnorInfo - Information about the PNOR section that we need to
+ *      know to make the request.
  *
  * @param[in/out] io_cachedAddr - The address offset to the data chunk in
  *      PNOR.

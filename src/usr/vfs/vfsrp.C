@@ -117,8 +117,7 @@ errlHndl_t VfsRp::_init()
     // Discover PNOR virtual address of extended image
     PNOR::SectionInfo_t l_pnor_info;
 
-    // Always use CURRENT_SIDE.  PNOR RP will know if that is A or B.
-    err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE, PNOR::CURRENT_SIDE, l_pnor_info);
+    err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE, l_pnor_info);
     if(!err)
     {
         iv_pnor_vaddr = l_pnor_info.vaddr;

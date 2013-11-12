@@ -49,8 +49,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             PNOR::SectionInfo_t runtimeSection;
 
             errlHndl_t l_errl =
-                PNOR::getSectionInfo(PNOR::HB_RUNTIME, PNOR::CURRENT_SIDE,
-                                     runtimeSection);
+                PNOR::getSectionInfo(PNOR::HB_RUNTIME, runtimeSection);
 
             if (l_errl)
             {

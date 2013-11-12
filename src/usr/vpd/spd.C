@@ -116,7 +116,7 @@ errlHndl_t getMemType ( uint8_t & o_memType,
  * @param[out] o_modType - The module type value to return.
  *
  * @param[in] i_target - The target to read data from.
- * 
+ *
  * @param[in] i_memType - The memory type
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer
@@ -270,7 +270,7 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
             break;
         }
 
-        // Check the Basic Memory Type 
+        // Check the Basic Memory Type
         if(( SPD_DDR3 == memType ) || ( SPD_DDR4 == memType ))
         {
             err = spdWriteValue( keyword,
@@ -338,7 +338,6 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
             info.maxSegments = DIMM_SPD_MAX_SECTIONS;
             info.pnorSection = PNOR::DIMM_JEDEC_VPD;
-            info.pnorSide = PNOR::CURRENT_SIDE;
             err = VPD::readPNOR( i_byteAddr,
                                  i_numBytes,
                                  o_data,
@@ -394,7 +393,6 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
             info.maxSegments = DIMM_SPD_MAX_SECTIONS;
             info.pnorSection = PNOR::DIMM_JEDEC_VPD;
-            info.pnorSide = PNOR::CURRENT_SIDE;
             err = VPD::writePNOR( i_offset,
                                   i_numBytes,
                                   i_data,
@@ -660,7 +658,7 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
             break;
         }
 
-        // We are not handling writes that are not on a byte 
+        // We are not handling writes that are not on a byte
         //   boundary until we absolutely need to.  There are
         //   no writable keywords that are not on byte boundaries
         if( entry->bitMask )
@@ -708,7 +706,7 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
         VPD::VpdWriteMsg_t msgdata;
         msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
         //XXXX=offset relative to whole section
-        memcpy( msgdata.record, "XXXX", sizeof(msgdata.record) ); 
+        memcpy( msgdata.record, "XXXX", sizeof(msgdata.record) );
         msgdata.offset = entry->offset;
         err = VPD::sendMboxWriteMsg( io_buflen,
                                      io_buffer,
@@ -821,7 +819,7 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
                                            0x0 );
             break;
     };
-    
+
     TRACSSCOMP( g_trac_spd, EXIT_MRK"ddr3SpecialCases()" );
     return err;
 }
@@ -904,7 +902,7 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
         // ==================================================
         // 4 byte - LSB first, no mask
         case CAS_LATENCIES_SUPPORTED_DDR4:
-            // Get 4th byte 
+            // Get 4th byte
             err = spdFetchData( i_kwdData.offset,
                                 1, /* Read 1 byte at a time */
                                 &tmpBuffer[0],
@@ -1367,7 +1365,7 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                 i_kwdData.modSpec ) );
             break;
         }
-        
+
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,

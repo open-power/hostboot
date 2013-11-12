@@ -368,8 +368,7 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
 
         // get the PNOR address.
         PNOR::SectionInfo_t l_section;
-        l_pErr = PNOR::getSectionInfo(PNOR::GUARD_DATA, PNOR::CURRENT_SIDE,
-                        l_section);
+        l_pErr = PNOR::getSectionInfo(PNOR::GUARD_DATA, l_section);
         if (l_pErr)
         {
             HWAS_ERR("PNOR::getSectionInfo failed!!!");

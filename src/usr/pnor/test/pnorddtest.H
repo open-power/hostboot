@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -67,7 +67,6 @@ class PnorDdTest : public CxxTest::TestSuite
 
             // Get SPD PNOR section info from PNOR RP
             l_err = PNOR::getSectionInfo( PNOR::TEST,
-                                          PNOR::CURRENT_SIDE,
                                           info );
             if(l_err)
             {
@@ -111,7 +110,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         TARGETING::Target* l_testTarget =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -146,7 +145,7 @@ class PnorDdTest : public CxxTest::TestSuite
             total++;
             if(l_size != sizeof(uint64_t))
             {
-                TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 1: Write length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address, 
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 1: Write length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address,
                         sizeof(uint64_t), l_size);
                 fails++;
             }
@@ -169,7 +168,7 @@ class PnorDdTest : public CxxTest::TestSuite
             total++;
             if(l_size != sizeof(uint64_t))
             {
-                TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 2: Write length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address, 
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD write 2: Write length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address,
                         sizeof(uint64_t), l_size);
                 fails++;
             }
@@ -199,7 +198,7 @@ class PnorDdTest : public CxxTest::TestSuite
             total++;
             if(l_size != sizeof(uint64_t))
             {
-                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 1: Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address, 
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 1: Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address,
                         sizeof(uint64_t), l_size);
                 fails++;
             }
@@ -228,7 +227,7 @@ class PnorDdTest : public CxxTest::TestSuite
             total++;
             if(l_size != sizeof(uint64_t))
             {
-                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 2: Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address, 
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 2: Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d", l_address,
                         sizeof(uint64_t), l_size);
                 fails++;
             }
@@ -247,7 +246,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         TARGETING::Target* l_testTarget =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -382,7 +381,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         TARGETING::Target* l_testTarget =
           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -398,7 +397,7 @@ class PnorDdTest : public CxxTest::TestSuite
                 break;
             }
 
-            // Find the nearest erase-block (4K) boundary 
+            // Find the nearest erase-block (4K) boundary
             uint64_t l_boundary = (base_address+4096)
                                    - (base_address%4096);
             uint64_t l_address = 0;
@@ -454,7 +453,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         PnorDD* pnordd = NULL;
         uint8_t* fake_space = NULL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -481,7 +480,7 @@ class PnorDdTest : public CxxTest::TestSuite
                  = supported_modes.begin();
                  m != supported_modes.end();
                  ++m )
-            { 
+            {
                 if( pnordd )
                 {
                     delete pnordd;
@@ -500,7 +499,7 @@ class PnorDdTest : public CxxTest::TestSuite
                     pnordd = new PnorDD(*m,
                                         reinterpret_cast<uint64_t>(fake_space),
                                         (4 * KILOBYTE));
-                    //Adjusting the address by an arbitrary multiplier to keep 
+                    //Adjusting the address by an arbitrary multiplier to keep
                     //successive tests from always using the same memory space.
                     scratch_space = (*m)*0x20;
                 }
@@ -515,7 +514,7 @@ class PnorDdTest : public CxxTest::TestSuite
                                   "PnorDdTest::test_readwrite_modes> Skipped due to not finding test section in PNOR" );
                         continue;
                     }
-                    //Adjusting the address by an arbitrary multiplier to keep 
+                    //Adjusting the address by an arbitrary multiplier to keep
                     //successive tests from always using the same memory space.
                     scratch_space += (*m)*0x20;
                 }
@@ -650,7 +649,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         PnorDD* pnordd = NULL;
         uint8_t* fake_space = NULL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -696,8 +695,8 @@ class PnorDdTest : public CxxTest::TestSuite
                     pnordd = new PnorDD(*m,
                                         reinterpret_cast<uint64_t>(fake_space),
                                         (4 * KILOBYTE));
-                    
-                    //Adjusting the address by an arbitrary multiplier to keep 
+
+                    //Adjusting the address by an arbitrary multiplier to keep
                     //successive tests from always using the same memory space.
                     scratch_space = (*m)*0x30;
 
@@ -713,7 +712,7 @@ class PnorDdTest : public CxxTest::TestSuite
                                   "PnorDdTest::test_readwrite_modes> Skipped due to not finding test section in PNOR" );
                         continue;
                     }
-                    //Adjusting the address by an arbitrary multiplier to keep 
+                    //Adjusting the address by an arbitrary multiplier to keep
                     //successive tests from always using the same memory space.
                     scratch_space += (*m)*0x30;
                 }
@@ -841,7 +840,7 @@ class PnorDdTest : public CxxTest::TestSuite
     {
         PnorDD* pnordd = NULL;
         uint8_t* fake_space = NULL;
-        size_t l_size = sizeof(uint64_t); 
+        size_t l_size = sizeof(uint64_t);
         errlHndl_t l_err = NULL;
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -904,7 +903,7 @@ class PnorDdTest : public CxxTest::TestSuite
                     }
                 }
 
-                // Find the nearest erase-block (4K) boundary 
+                // Find the nearest erase-block (4K) boundary
                 uint64_t l_boundary = (scratch_space+4096)
                   - (scratch_space%4096);
                 uint64_t l_address = 0;
@@ -981,7 +980,7 @@ Leaving it commented out because the test-case will not dynamically find the ext
     {
 
       TARGETING::Target* l_testTarget = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-      size_t l_size = sizeof(uint64_t); 
+      size_t l_size = sizeof(uint64_t);
       errlHndl_t l_err = NULL;
 
       do{

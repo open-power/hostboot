@@ -84,7 +84,6 @@ errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
     {
         // Get SPD PNOR section info from PNOR RP
         err = PNOR::getSectionInfo( i_pnorInfo.pnorSection,
-                                    i_pnorInfo.pnorSide,
                                     info );
 
         if( err )
@@ -306,7 +305,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                 l_err->collectTrace("SPD",1024);
             }
 
-            // just commit the log and move on, nothing else to do           
+            // just commit the log and move on, nothing else to do
             errlCommit( l_err, VPD_COMP_ID );
             l_err = NULL;
 

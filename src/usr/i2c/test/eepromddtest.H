@@ -270,7 +270,6 @@ class EEPROMTest: public CxxTest::TestSuite
                 PNOR::SectionInfo_t pnorSectionInfo;
 
                 err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE,
-                                           PNOR::CURRENT_SIDE,
                                            pnorSectionInfo);
 
                 if ( err ||

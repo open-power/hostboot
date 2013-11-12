@@ -40,6 +40,7 @@
 #include <devicefw/userif.H>
 #include <pnor/ecc.H>
 #include "../pnorrp.H"
+#include "../ffs.h"
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -75,7 +76,7 @@ class PnorRpTest : public CxxTest::TestSuite
         for( uint64_t idx = 0; idx < numSections; idx++)
         {
             total++;
-            errhdl = PNOR::getSectionInfo( testSections[idx], PNOR::CURRENT_SIDE, info );
+            errhdl = PNOR::getSectionInfo( testSections[idx], info );
             if( errhdl )
             {
                 TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> ERROR : getSectionInfo returned error for %d : RC=%X",
@@ -131,7 +132,7 @@ class PnorRpTest : public CxxTest::TestSuite
 
         // use the TEST partition as scratch space
         PNOR::SectionInfo_t info;
-        errhdl = PNOR::getSectionInfo( PNOR::TEST, PNOR::SIDE_A, info );
+        errhdl = PNOR::getSectionInfo( PNOR::TEST, info );
         if( errhdl )
         {
             TRACFCOMP( g_trac_pnor, "PnorRpTest::test_ECC> ERROR : getSectionInfo returned error for PNOR::TEST : RC=%X", errhdl->reasonCode() );
@@ -247,10 +248,9 @@ class PnorRpTest : public CxxTest::TestSuite
                 fails++;
             }
         }
-
         //Enable this to test the UE handling, not turning on by default
         // because it causes a shutdown
-#if 0 
+#if 0
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC: Attempting UE" );
         // flush the page to make sure it gets out to the device
         totals++;
@@ -290,7 +290,6 @@ class PnorRpTest : public CxxTest::TestSuite
         TS_FAIL("PnorRpTest::test_ECC: UE did not kill the task!.");
 #endif
 
-
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ECC> %d/%d fails", fails, total );
     };
 
@@ -316,7 +315,7 @@ class PnorRpTest : public CxxTest::TestSuite
 
         // use the TEST partition as scratch space
         PNOR::SectionInfo_t info;
-        PNOR::getSectionInfo( PNOR::TEST, PNOR::SIDE_A, info );
+        PNOR::getSectionInfo( PNOR::TEST, info );
 
         msg_t* msg = msg_allocate();
 
@@ -496,8 +495,99 @@ class PnorRpTest : public CxxTest::TestSuite
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_AddrReadWrite> %d/%d fails", fails, total );
     };
 
-    //@todo - import config data from build and compare to section info
+    /**
+     * @brief PNOR RP test - TOC
+     *        Verify TOC checksum errors for both TOC's fail silently and
+     *        pick up data from the other TOC. Test corrupts both header and
+     *        first entry because they are checked separately in pnorrp.C
+     *
+     */
+    void test_TOC(void)
+    {
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC Start" );
 
+        bool fatal_error = false;
+        uint64_t offset = 0;
+        uint8_t* tocHeader = new uint8_t[PAGESIZE];
+        uint8_t* tocEntry = new uint8_t[PAGESIZE];
+        uint8_t* corruptBuffer = new uint8_t[PAGESIZE];
+
+        // Corrupt both ffs header and first entry for each TOC
+        for (uint32_t cur_TOC = 0; cur_TOC < PnorRP::NUM_TOCS; ++cur_TOC)
+        {
+            uint32_t TOC_used = cur_TOC;
+
+            if (cur_TOC == 0)
+            {
+              offset =  PnorRP::TOC_0_OFFSET;
+            }
+            else
+            {
+              offset =  PnorRP::TOC_1_OFFSET;
+            }
+
+            // Read cur_TOC header data
+            PnorRP::getInstance().readFromDevice( offset, 0, false, tocHeader,
+                                                  fatal_error );
+
+            // Corrupt cur_TOC header data
+            memcpy(corruptBuffer, tocHeader, PAGESIZE);
+            corruptBuffer[0] = 0xFF;
+            corruptBuffer[1] = 0xFF;
+            PnorRP::getInstance().writeToDevice( offset, 0, false,
+                                                 corruptBuffer );
+
+            // Check if cur_TOC failed that other TOC is used
+            PnorRP::getInstance().readTOC();
+            TOC_used = PnorRP::getInstance().iv_TOC_used;
+            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC : TOC %d Corrupt Header Toc_used = %d", cur_TOC, TOC_used);
+
+            if (TOC_used == cur_TOC)
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : TOC %d is corrupted, did not use other TOC", cur_TOC);
+                TS_FAIL("PnorRpTest::test_TOC> ERROR : TOC %d is corrupted, did not use other TOC");
+            }
+
+            // Fix cur_TOC header
+            PnorRP::getInstance().writeToDevice( offset, 0, false, tocHeader );
+
+            // Read cur_TOC first entry data
+            PnorRP::getInstance().readFromDevice( offset + FFS_HDR_SIZE, 0,
+                                                  false, tocEntry,
+                                                  fatal_error );
+
+            // Corrupt cur_TOC header data
+            memcpy(corruptBuffer, tocEntry, PAGESIZE);
+            corruptBuffer[0] = 0xFF;
+            corruptBuffer[1] = 0xFF;
+            PnorRP::getInstance().writeToDevice( offset + FFS_HDR_SIZE, 0,
+                                                 false, corruptBuffer );
+
+            // Check if cur_TOC failed that other TOC is used
+            TOC_used = cur_TOC;
+            PnorRP::getInstance().readTOC();
+            TOC_used = PnorRP::getInstance().iv_TOC_used;
+            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC : TOC %d Corrupt Entry Toc_used = %d", cur_TOC, TOC_used);
+
+            if (TOC_used == cur_TOC)
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : TOC %d is corrupted, did not use other TOC ENTRY", cur_TOC);
+                TS_FAIL("PnorRpTest::test_TOC> ERROR : TOC %d is corrupted, did not use other TOC", cur_TOC);
+            }
+
+            // Fix cur_TOC first entry
+            PnorRP::getInstance().writeToDevice( offset + FFS_HDR_SIZE, 0,
+                                                 false, tocEntry );
+        }
+
+        delete tocHeader;
+        delete tocEntry;
+        delete corruptBuffer;
+
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC End");
+    }
+
+    //@todo - import config data from build and compare to section info
 
 };
 

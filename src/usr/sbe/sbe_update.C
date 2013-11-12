@@ -389,7 +389,6 @@ namespace SBE
 
             // Get SBE PNOR section info from PNOR RP
             err = PNOR::getSectionInfo( pnorSectionId,
-                                        PNOR::CURRENT_SIDE,
                                         pnorInfo );
             if(err)
             {

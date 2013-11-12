@@ -50,7 +50,6 @@ errlHndl_t bld_vpd_image(PNOR::SectionId vpd_type,
     errlHndl_t err = NULL;
     PNOR::SectionInfo_t info;
     err = PNOR::getSectionInfo( vpd_type,
-                                PNOR::CURRENT_SIDE,
                                 info );
 
     if(!err)

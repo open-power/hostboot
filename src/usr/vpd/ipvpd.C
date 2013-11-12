@@ -533,12 +533,11 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
 
     do
     {
-        // Call a function in the common VPD code 
+        // Call a function in the common VPD code
         VPD::pnorInformation info;
         info.segmentSize = iv_vpdSectionSize;
         info.maxSegments = iv_vpdMaxSections;
         info.pnorSection = iv_pnorSection;
-        info.pnorSide = PNOR::CURRENT_SIDE;
         err = VPD::readPNOR( i_byteAddr,
                              i_numBytes,
                              o_data,
@@ -816,7 +815,6 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
         info.segmentSize = iv_vpdSectionSize;
         info.maxSegments = iv_vpdMaxSections;
         info.pnorSection = iv_pnorSection;
-        info.pnorSide = PNOR::CURRENT_SIDE;
         err = VPD::writePNOR( i_offset+byteAddr,
                               keywordSize,
                               i_buffer,
@@ -839,8 +837,8 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 
         // Finally, send it down to the FSP
         msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-        memcpy( msgdata.record, i_recordName, RECORD_BYTE_SIZE ); 
-        memcpy( msgdata.keyword, i_keywordName, KEYWORD_BYTE_SIZE ); 
+        memcpy( msgdata.record, i_recordName, RECORD_BYTE_SIZE );
+        memcpy( msgdata.keyword, i_keywordName, KEYWORD_BYTE_SIZE );
         err = VPD::sendMboxWriteMsg( keywordSize,
                                      i_buffer,
                                      i_target,

@@ -150,17 +150,28 @@ if($rc != 0)
 }
 
 #create the PNOR image
-$rc = createPnorImage($tocVersion, $pnorBinName, \%pnorLayout);
+#two copies of TOC created at different offsets
+my $sideAOffset =  $pnorLayout{metadata}{sideAOffset};
+my $sideBOffset =  $pnorLayout{metadata}{sideBOffset};
+
+$rc = createPnorImage($tocVersion, $pnorBinName, \%pnorLayout, $sideAOffset);
 if($rc != 0)
 {
-    trace(0, "Error detected from call to createPnorImage().  Exiting");
+    trace(0, "Error detected from call to createPnorImage() sideAOffset. Exiting");
     exit 1;
 }
 
-$rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles);
+$rc = createPnorImage($tocVersion, $pnorBinName, \%pnorLayout, $sideBOffset);
 if($rc != 0)
 {
-    trace(0, "Error detected from call to fillPnorImage().  Exiting");
+    trace(0, "Error detected from call to createPnorImage() sideBOffset. Exiting");
+    exit 1;
+}
+
+$rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideAOffset);
+if($rc != 0)
+{
+    trace(0, "Error detected from call to fillPnorImage() sideAOffset. Exiting");
     exit 1;
 }
 
@@ -192,16 +203,19 @@ sub loadPnorLayout
         my $imageSize = $metadataEl->{imageSize}[0];
         my $blockSize = $metadataEl->{blockSize}[0];
         my $sideAOffset = $metadataEl->{sideAOffset}[0];
+        my $sideBOffset = $metadataEl->{sideBOffset}[0];
 
-        trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, sideAOffset=$sideAOffset");
+        trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, sideAOffset=$sideAOffset, sideBOffset=$sideBOffset");
 
         $imageSize = getNumber($imageSize);
         $blockSize = getNumber($blockSize);
         $sideAOffset = getNumber($sideAOffset);
+        $sideBOffset = getNumber($sideBOffset);
 
         $$i_pnorLayoutRef{metadata}{imageSize} = $imageSize;
         $$i_pnorLayoutRef{metadata}{blockSize} = $blockSize;
         $$i_pnorLayoutRef{metadata}{sideAOffset} = $sideAOffset;
+        $$i_pnorLayoutRef{metadata}{sideBOffset} = $sideBOffset;
     }
 
     #Iterate over the <section> elements.
@@ -247,11 +261,13 @@ sub loadPnorLayout
 ################################################################################
 sub createPnorImage
 {
-    my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef) = @_;
+    my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $offset) = @_;
     my $this_func = (caller(0))[3];
     my $rc = 0;
     my $key;
     trace(4, "$this_func: >>Enter");
+
+    trace(1, "createPnorImage:: $offset");
 
     #get Block size
     my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
@@ -266,14 +282,11 @@ sub createPnorImage
         return $rc;
     }
 
-    #Offset of Partition Table A in PNOR
-    my $sideAOffset =  $$i_pnorLayoutRef{metadata}{sideAOffset};
-
     #f{fs,part} --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
     if ($g_ffsCmd eq "") {
-        my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --create --size $imageSize --block $blockSize --force`;
+        my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --create --size $imageSize --block $blockSize --force`;
     } else {
-        my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --create --size $imageSize --block $blockSize --force`;
+        my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --create --size $imageSize --block $blockSize --force`;
     }
     $rc = $?;
     if($rc)
@@ -324,10 +337,10 @@ sub createPnorImage
             #Add Partition
             #f{fs,part} --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
             if ($g_ffsCmd eq "") {
-                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
-                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
+                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
+                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
             } else {
-                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
+                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
             }
             $rc = $?;
             if($rc)
@@ -364,10 +377,10 @@ sub createPnorImage
             trace(1,"userflags0 = $userflags0");
             trace(1,"userflags1 = $userflags1");
             if ($g_ffsCmd eq "") {
-                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 0 --name $eyeCatch --value $userflags0");
-                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 0 --name $eyeCatch --value $userflags0`;
-                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 1 --name $eyeCatch --value $userflags1");
-                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --user 1 --name $eyeCatch --value $userflags1`;
+                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --user 0 --name $eyeCatch --value $userflags0");
+                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --user 0 --name $eyeCatch --value $userflags0`;
+                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --user 1 --name $eyeCatch --value $userflags1");
+                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --user 1 --name $eyeCatch --value $userflags1`;
             }
             $rc = $?;
             if($rc)
@@ -379,9 +392,9 @@ sub createPnorImage
             #Trunc Partition
             #f{fs,part} --target tuleta.pnor --partition-offset 0 --name HBI --trunc
             if ($g_ffsCmd eq "") {
-                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset --trunc --name $eyeCatch`;
+                my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --trunc --name $eyeCatch`;
             } else {
-                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --trunc --name $eyeCatch`;
+                my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --trunc --name $eyeCatch`;
             }
             $rc = $?;
             if($rc)
@@ -394,7 +407,7 @@ sub createPnorImage
         #Disable usewords for now.  Will get re-enabled and fixed up as
         #we add support for underlying functions
 
-#        my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $sideAOffset
+#        my $Out = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset
 #        		--user 0 --name $eyeCatch --value $actualRegionSize`;
 #        $rc = $?;
 #        if($rc)
@@ -523,12 +536,12 @@ sub checkSpaceConstraints
 ################################################################################
 sub fillPnorImage
 {
-    my ($i_pnorBinName, $i_pnorLayoutRef, $i_binFiles) = @_;
+    my ($i_pnorBinName, $i_pnorLayoutRef, $i_binFiles, $offset) = @_;
     my $this_func = (caller(0))[3];
     my $rc = 0;
     my $key;
 
-    my $sideAOffset =  $$i_pnorLayoutRef{metadata}{sideAOffset};
+    trace(1, "fillPnorImage:: $offset");
 
     #key is the physical offset into the file, however don't need to sort
     #since FFS allows populating partitions in any order
@@ -554,9 +567,9 @@ sub fillPnorImage
 
         #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
         if ($g_ffsCmd eq "") {
-            my $Out = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $sideAOffset --write`;
+            my $Out = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write`;
         } else {
-            my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --write $inputFile`;
+            my $Out = `$g_ffsCmd --target $i_pnorBinName --partition-offset $offset --name $eyeCatch  --write $inputFile`;
         }
         $rc = $?;
         if($rc)
