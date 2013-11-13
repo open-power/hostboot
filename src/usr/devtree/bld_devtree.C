@@ -45,6 +45,7 @@ $ */
 #include <sys/mmio.h> //THIRTYTWO_GB
 #include <intr/interrupt.H>
 #include <vpd/vpd_if.H>
+#include <stdio.h>
 
 
 trace_desc_t *g_trac_devtree = NULL;
@@ -80,6 +81,8 @@ enum BuildConstants
      * L3.5 :  (0x35 << 24) | PIR */
     L2_HDR              = (0x20 << 24),
     L3_HDR              = (0x30 << 24),
+    CEN_ID_SHIFT        = 4,
+    CEN_ID_TAG          = 0x80000000,
 };
 
 
@@ -314,14 +317,22 @@ uint32_t bld_cpu_node(devTree * i_dt, dtOffset_t & i_parentNode,
     i_dt->addPropertyCell32(cpuNode, "ibm,pir", i_pir.word);
     i_dt->addPropertyCell32(cpuNode, "ibm,chip-id", i_chipId);
 
+    uint32_t numThreads = 0;
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+
     uint32_t interruptServerNum[THREADPERCORE];
     for(size_t i = 0; i < THREADPERCORE ; i++)
     {
-        i_pir.threadId = i;
-        interruptServerNum[i] = i_pir.word;
+        if (en_threads & (0x8000000000000000 >> i))
+        {
+            i_pir.threadId = i;
+            interruptServerNum[numThreads++] = i_pir.word;
+        }
     }
     i_dt->addPropertyCells32(cpuNode, "ibm,ppc-interrupt-server#s",
-                             interruptServerNum, THREADPERCORE);
+                             interruptServerNum, numThreads);
 
     /* This is the "architected processor version" as defined in PAPR. Just
      * stick to 0x0f000004 for P8 and things will be fine */
@@ -347,8 +358,6 @@ uint32_t bld_cpu_node(devTree * i_dt, dtOffset_t & i_parentNode,
     i_dt->addPropertyCell32(cpuNode, "ibm,spurr", 1);
 
     //TODO RTC88002 -- move this to nominal once HB has nominal freq
-    TARGETING::Target* sys = NULL;
-    TARGETING::targetService().getTopLevelTarget(sys);
     uint64_t freq = sys->getAttr<TARGETING::ATTR_BOOT_FREQ_MHZ>();
     freq *= MHZ;
 
@@ -412,19 +421,28 @@ uint32_t bld_intr_node(devTree * i_dt, dtOffset_t & i_parentNode,
     i_dt->addPropertyString(intNode, "device_type",
                             "PowerPC-External-Interrupt-Presentation");
 
-    uint32_t int_serv[2] = { i_pir.word, THREADPERCORE};
-    i_dt->addPropertyCells32(intNode, "ibm,interrupt-server-ranges",
-                             int_serv, 2);
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+    uint32_t numThreads = 0;
 
     uint64_t intr_prop[THREADPERCORE][2];
     for(size_t i=0; i < THREADPERCORE; i++)
     {
-        intr_prop[i][0] = INTR::getIntpAddr(i_ex, i);
-        intr_prop[i][1] = 0x1000;
+        if (en_threads & (0x8000000000000000 >> i))
+        {
+            intr_prop[numThreads][0] = INTR::getIntpAddr(i_ex, i);
+            intr_prop[numThreads][1] = 0x1000;
+            numThreads++;
+        }
     }
     i_dt->addPropertyCells64(intNode, "reg",
                              reinterpret_cast<uint64_t*>(intr_prop),
-                             sizeof(intr_prop) / sizeof(uint64_t));
+                             numThreads * 2);
+
+    uint32_t int_serv[2] = { i_pir.word, numThreads};
+    i_dt->addPropertyCells32(intNode, "ibm,interrupt-server-ranges",
+                             int_serv, 2);
 
     return i_dt->getPhandle(intNode);
 }
@@ -681,6 +699,82 @@ errlHndl_t bld_fdt_mem(devTree * i_dt)
                 }
             }
         }
+
+        /***************************************************************/
+        /* Now loop on all the centaurs in the system and add their    */
+        /* inband scom address                                         */
+        /***************************************************************/
+        rootNode = i_dt->findNode("/");
+
+        // Get all functional memb chip targets
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        for ( size_t memb = 0;
+              (!errhdl) && (memb < l_memBufList.size()); memb++ )
+        {
+            const TARGETING::Target * l_pMemB = l_memBufList[memb];
+
+            //Get MMIO Offset from parent MCS attribute.
+            PredicateCTM l_mcs(CLASS_UNIT,TYPE_MCS, MODEL_NA);
+
+            TargetHandleList mcs_list;
+            targetService().getAssociated(mcs_list,
+                            l_pMemB,
+                            TargetService::PARENT_BY_AFFINITY,
+                            TargetService::ALL,
+                            &l_mcs);
+
+            if( mcs_list.size() != 1 )
+            {
+                //This error should have already been caught in
+                //the inband Scom DD.... going to skip creating node
+                //if true
+                TRACFCOMP(g_trac_devtree,ERR_MRK" MCS for 0x%x not found",
+                          TARGETING::get_huid(l_pMemB));
+                continue;
+            }
+            Target* parentMCS = *(mcs_list.begin());
+            uint64_t l_ibscomBase =
+              parentMCS->getAttr<ATTR_IBSCOM_MCS_BASE_ADDR>();
+
+
+            dtOffset_t membNode = i_dt->addNode(rootNode, "memory-buffer",
+                                               l_ibscomBase);
+            uint64_t propertyCells[2] = {l_ibscomBase,THIRTYTWO_GB};
+            i_dt->addPropertyCells64(membNode, "reg", propertyCells, 2);
+
+            uint32_t l_ec = l_pMemB->getAttr<ATTR_EC>();
+            char cenVerStr[32];
+            snprintf(cenVerStr, 32, "ibm,centaur-v%.2x", l_ec);
+            const char* intr_compatStrs[] = {"ibm,centaur", cenVerStr,NULL};
+            i_dt->addPropertyStrings(membNode, "compatible", intr_compatStrs);
+
+
+            if(l_pMemB->
+               getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useInbandScom == 0x0)
+            {
+                i_dt->addProperty(membNode,"use-fsi");
+            }
+
+            //Add the attached proc chip for affinity
+            uint32_t l_procId = getProcChipId(getParentChip(parentMCS));
+            i_dt->addPropertyCell32(membNode, "ibm,fsi-master-chip-id",
+                                    l_procId);
+
+            uint32_t l_cenId = CEN_ID_TAG | (l_procId << CEN_ID_SHIFT);
+            l_cenId |= parentMCS->getAttr<ATTR_CHIP_UNIT>();
+            i_dt->addPropertyCell32(membNode, "ibm,chip-id",l_cenId);
+
+            //Add the CMFSI (which CMFSI 0 or 1) and port
+            //TODO RTC93298 make which CMFSI correct
+            uint32_t cmfsiCells[2] =
+                           {0,l_pMemB->getAttr<ATTR_FSI_MASTER_PORT>()};
+            i_dt->addPropertyCells32(membNode, "ibm,fsi-master-port",
+                                     cmfsiCells, 2);
+        }
+
+
     }while(0);
     return errhdl;
 }
