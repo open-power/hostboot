@@ -70,6 +70,7 @@
 #include    "proc_setup_bars/proc_setup_bars.H"
 #include    "proc_pcie_config/proc_pcie_config.H"
 #include    "proc_exit_cache_contained/proc_exit_cache_contained.H"
+#include    "mss_power_cleanup/mss_power_cleanup.H"
 //remove these once memory setup workaround is removed
 #include <devicefw/driverif.H>
 #include <vpd/spdenums.H>
@@ -237,56 +238,6 @@ void*   call_mss_memdiag( void    *io_pArgs )
     return l_stepError.getErrorHandle();
 }
 
-
-//
-//  Wrapper function to call mss_scrub
-//
-void*    call_mss_scrub( void    *io_pArgs )
-{
-    errlHndl_t  l_errl  =   NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_mss_scrub entry" );
-
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-
-    //  write HUID of target
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l));
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, mss_scrub, _args_...);
-    if ( l_errl )
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_mss_scrub exit" );
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_errl;
-}
-
-
-
 //
 //  Wrapper function to call mss_thermal_init
 //
@@ -359,6 +310,169 @@ void*    call_mss_thermal_init( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+
+//
+//  Wrapper function to call proc_pcie_config
+//
+void*    call_proc_pcie_config( void    *io_pArgs )
+{
+    errlHndl_t  l_errl  =   NULL;
+
+    IStepError  l_stepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_pcie_config entry" );
+
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC );
+
+    for ( TargetHandleList::const_iterator
+          l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end();
+          ++l_iter )
+    {
+        const TARGETING::Target* l_pTarget = *l_iter;
+
+        //  write HUID of target
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
+
+        // build a FAPI type of target.
+        const fapi::Target l_fapi_pTarget( TARGET_TYPE_PROC_CHIP,
+                          (const_cast<TARGETING::Target*>(l_pTarget)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl, proc_pcie_config, l_fapi_pTarget );
+
+        if ( l_errl )
+        {
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_errl );
+
+            // Commit Error
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : proc_pcie_config" );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : proc_pcie_config" );
+        }
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_pcie_config exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
+}
+
+
+//
+//  Wrapper function to call mss_power_cleanup
+//
+void*    call_mss_power_cleanup( void    *io_pArgs )
+{
+    errlHndl_t  l_err  =   NULL;
+    IStepError  l_stepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_mss_power_cleanup entry" );
+
+    // Get a list of all present Centaurs
+    TargetHandleList l_presCentaurs;
+    getChipResources(l_presCentaurs, TYPE_MEMBUF, UTIL_FILTER_PRESENT);
+    // Associated MBA targets
+    TARGETING::TargetHandleList l_mbaList;
+
+    // Define predicate for associated MBAs
+    PredicateCTM predMba(CLASS_UNIT, TYPE_MBA);
+    PredicatePostfixExpr presMba;
+    PredicateHwas predPres;
+    predPres.present(true);
+    presMba.push(&predMba).push(&predPres).And();
+
+    for (TargetHandleList::const_iterator
+            l_cenIter = l_presCentaurs.begin();
+            l_cenIter != l_presCentaurs.end();
+            ++l_cenIter)
+    {
+        // Make a local copy of the target for ease of use
+        TARGETING::Target * l_pCentaur = *l_cenIter;
+        // Retrieve HUID of current Centaur
+        TARGETING::ATTR_HUID_type l_currCentaurHuid =
+            TARGETING::get_huid(l_pCentaur);
+
+        // Dump current run on target
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_power_cleanup HWP on "
+                "target HUID %.8X", l_currCentaurHuid);
+
+        // find all present MBAs associated with this Centaur
+        TARGETING::TargetHandleList l_presMbas;
+        targetService().getAssociated(l_presMbas,
+                                      l_pCentaur,
+                                      TargetService::CHILD,
+                                      TargetService::IMMEDIATE,
+                                      &presMba);
+
+        // If not at least two MBAs found
+        if (l_presMbas.size() < 2)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "Not enough MBAs found for Centaur target HUID %.8X, "
+              "skipping this Centaur.",
+               l_currCentaurHuid);
+            continue;
+        }
+
+        // Create FAPI Targets.
+        const fapi::Target l_fapiCentaurTarget(TARGET_TYPE_MEMBUF_CHIP,
+                (const_cast<TARGETING::Target*>(l_pCentaur)));
+        const fapi::Target l_fapiMba0Target(TARGET_TYPE_MBA_CHIPLET,
+                (const_cast<TARGETING::Target*>(l_presMbas[0])));
+        const fapi::Target l_fapiMba1Target(TARGET_TYPE_MBA_CHIPLET,
+                (const_cast<TARGETING::Target*>(l_presMbas[1])));
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP(l_err, mss_power_cleanup, l_fapiCentaurTarget,
+                        l_fapiMba0Target, l_fapiMba1Target);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: mss_power_cleanup HWP returns error",
+                      l_err->reasonCode());
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails(l_err);
+            // Commit Error
+            errlCommit(l_err, HWPF_COMP_ID);
+        }
+        else
+        {
+            // Success
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Successfully ran mss_power_cleanup HWP on "
+                    "CENTAUR target HUID %.8X "
+                    "and associated MBAs",
+                    l_currCentaurHuid);
+        }
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_mss_power_cleanup exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
+}
 
 
 //
@@ -530,72 +644,6 @@ void*    call_proc_setup_bars( void    *io_pArgs )
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }
-
-
-
-//
-//  Wrapper function to call proc_pcie_config
-//
-void*    call_proc_pcie_config( void    *io_pArgs )
-{
-    errlHndl_t  l_errl  =   NULL;
-
-    IStepError  l_stepError;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_pcie_config entry" );
-
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC );
-
-    for ( TargetHandleList::const_iterator
-          l_iter = l_procTargetList.begin();
-          l_iter != l_procTargetList.end();
-          ++l_iter )
-    {
-        const TARGETING::Target* l_pTarget = *l_iter;
-
-        //  write HUID of target
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
-
-        // build a FAPI type of target.
-        const fapi::Target l_fapi_pTarget( TARGET_TYPE_PROC_CHIP,
-                          (const_cast<TARGETING::Target*>(l_pTarget)) );
-
-        //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP( l_errl, proc_pcie_config, l_fapi_pTarget );
-
-        if ( l_errl )
-        {
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
-
-            // Create IStep error log and cross reference to error that occurred
-            l_stepError.addErrorDetails( l_errl );
-
-            // Commit Error
-            errlCommit( l_errl, HWPF_COMP_ID );
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : proc_pcie_config" );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : proc_pcie_config" );
-        }
-    }
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_pcie_config exit" );
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_stepError.getErrorHandle();
-}
-
 
 
 //

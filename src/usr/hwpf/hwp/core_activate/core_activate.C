@@ -409,6 +409,31 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 
 
 //
+//  Wrapper function to call mss_scrub
+//
+void*    call_mss_scrub( void    *io_pArgs )
+{
+    errlHndl_t  l_errl  =   NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_mss_scrub entry" );
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "Note: call_mss_scrub is not directly executed by Hostboot "
+               "but is instead triggered by PRD. "
+               "Cronus executes this HWP directly" );
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_mss_scrub exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_errl;
+}
+
+
+
+
+//
 //  Wrapper function to call host_ipl_complete
 //
 void*    call_host_ipl_complete( void    *io_pArgs )

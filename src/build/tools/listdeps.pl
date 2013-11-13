@@ -35,7 +35,7 @@ use File::Find ();
 use File::Path;
 use Cwd;
 
-use constant MAX_DEPENDENT_MODULES => 6;
+use constant MAX_DEPENDENT_MODULES => 7;
 
 # validate the number of input args
 if( $#ARGV == -1 || $#ARGV > 4 )

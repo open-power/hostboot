@@ -31,6 +31,7 @@
 #include <targeting/common/predicates/predicateisfunctional.H>
 #include <targeting/common/predicates/predicatepostfixexpr.H>
 #include <targeting/common/predicates/predicateattrval.H>
+#include <targeting/common/utilFilter.H>
 
 /**
  * Miscellaneous Filter Utility Functions
@@ -43,78 +44,176 @@ namespace TARGETING
 
 #define TARG_CLASS ""
 
+
 /**
  * @brief Populate the o_vector with target object pointers based on the
  *        requested class, type, and functional state.
  *
  * @parm[out] o_vector, reference of vector of target pointers.
- * @parm[in]  i_class, the class of the targets to be obtained
- * @parm[in]  i_type, the type of the targets to be obtained
- * @parm[in]  i_functional, set to true to return only functional targets
+ * @parm[in]  i_class,  the class of the targets to be obtained
+ * @parm[in]  i_type,   the type of the targets to be obtained
+ * @parm[in]  i_state,  Selection filter based on ResourceState enum,
+ *                      designates all, present, or functional
  *
  * @return N/A
  */
-void _getAllChipsOrChiplets( TARGETING::TargetHandleList & o_vector,
-                     CLASS i_class, TYPE  i_type, bool i_functional = true )
+void _getChipOrChipletResources( TARGETING::TargetHandleList & o_vector,
+                     CLASS i_class, TYPE  i_type, ResourceState i_state )
 {
-    // Get all chip/chiplet targets
-    //  Use PredicateIsFunctional to filter only functional chips/chiplets
-    TARGETING::PredicateIsFunctional l_isFunctional;
-    //  filter for functional Chips/Chiplets
-    TARGETING::PredicateCTM l_Filter(i_class, i_type);
-    // declare a postfix expression widget
-    TARGETING::PredicatePostfixExpr l_goodFilter;
-    //  is-a--chip  is-functional   AND
-    l_goodFilter.push(&l_Filter).push(&l_isFunctional).And();
-    // apply the filter through all targets.
-    TARGETING::TargetRangeFilter l_filter( TARGETING::targetService().begin(),
-                            TARGETING::targetService().end(), &l_goodFilter );
-    if (!i_functional)
+    #define TARG_FN "_getChipOrChipletResources(...)"
+    TARG_ENTER();
+    switch(i_state)
     {
-        l_filter.setPredicate(&l_Filter);
+        case UTIL_FILTER_ALL:
+        {
+            // Type predicate
+            TARGETING::PredicateCTM l_CtmFilter(i_class, i_type);
+            // Apply the filter through all targets
+            TARGETING::TargetRangeFilter l_targetList(
+                                    TARGETING::targetService().begin(),
+                                    TARGETING::targetService().end(),
+                                    &l_CtmFilter);
+            o_vector.clear();
+            for ( ; l_targetList; ++l_targetList)
+            {
+                o_vector.push_back(*l_targetList);
+            }
+            break;
+        }
+        case UTIL_FILTER_PRESENT:
+        {
+            // Get all present chips or chiplets
+            // Present predicate
+            PredicateHwas l_predPres;
+            l_predPres.present(true);
+            // Type predicate
+            TARGETING::PredicateCTM l_CtmFilter(i_class, i_type);
+            // Set up compound predicate
+            TARGETING::PredicatePostfixExpr l_present;
+            l_present.push(&l_CtmFilter).push(&l_predPres).And();
+            // Apply the filter through all targets
+            TARGETING::TargetRangeFilter l_presTargetList(
+                                    TARGETING::targetService().begin(),
+                                    TARGETING::targetService().end(),
+                                    &l_present);
+            o_vector.clear();
+            for ( ; l_presTargetList; ++l_presTargetList)
+            {
+                o_vector.push_back(*l_presTargetList);
+            }
+            break;
+        }
+        case UTIL_FILTER_FUNCTIONAL:
+        {
+            // Get all functional chips or chiplets
+            // Functional predicate
+            TARGETING::PredicateIsFunctional l_isFunctional;
+            // Type predicate
+            TARGETING::PredicateCTM l_CtmFilter(i_class, i_type);
+            // Set up compound predicate
+            TARGETING::PredicatePostfixExpr l_functional;
+            l_functional.push(&l_CtmFilter).push(&l_isFunctional).And();
+            // Apply the filter through all targets
+            TARGETING::TargetRangeFilter l_funcTargetList(
+                                    TARGETING::targetService().begin(),
+                                    TARGETING::targetService().end(),
+                                    &l_functional);
+            o_vector.clear();
+            for ( ; l_funcTargetList; ++l_funcTargetList)
+            {
+                o_vector.push_back(*l_funcTargetList);
+            }
+            break;
+        }
+        default:
+            TARG_ASSERT(0, TARG_LOC "Invalid functional state used");
+            break;
     }
-
-    o_vector.clear();
-    for ( ; l_filter; ++l_filter)
-    {
-        o_vector.push_back( *l_filter );
-    }
+    TARG_EXIT();
+    #undef TARG_FN
 }
 
 
-void getAllChips( TARGETING::TargetHandleList & o_vector,
-                  TYPE i_chipType, bool i_functional = true )
+void getChipResources( TARGETING::TargetHandleList & o_vector,
+                  TYPE i_chipType, ResourceState i_state )
 {
-    _getAllChipsOrChiplets(o_vector, CLASS_CHIP, i_chipType, i_functional);
+    _getChipOrChipletResources(o_vector, CLASS_CHIP, i_chipType, i_state);
+}
+
+void getChipletResources( TARGETING::TargetHandleList & o_vector,
+                     TYPE i_chipletType, ResourceState i_state )
+{
+    _getChipOrChipletResources(o_vector, CLASS_UNIT, i_chipletType, i_state);
+}
+
+// Retrofit functions to getChipOrChipletResources
+void getAllChips( TARGETING::TargetHandleList & o_vector,
+                  TYPE i_chipType, bool i_functional )
+{
+    if (i_functional)
+    {
+        _getChipOrChipletResources(o_vector, CLASS_CHIP, i_chipType, UTIL_FILTER_FUNCTIONAL);
+    }
+    else
+    {
+        _getChipOrChipletResources(o_vector, CLASS_CHIP, i_chipType, UTIL_FILTER_ALL);
+    }
 }
 
 
 void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
                          TYPE i_cardType,
-                         bool i_functional = true )
+                         bool i_functional )
 {
-    _getAllChipsOrChiplets( o_vector,
-                            CLASS_LOGICAL_CARD,
-                            i_cardType,
-                            i_functional );
+    if (i_functional)
+    {
+        _getChipOrChipletResources( o_vector,
+                                CLASS_LOGICAL_CARD,
+                                i_cardType,
+                                UTIL_FILTER_FUNCTIONAL );
+    }
+    else
+    {
+        _getChipOrChipletResources( o_vector,
+                                CLASS_LOGICAL_CARD,
+                                i_cardType,
+                                UTIL_FILTER_ALL );
+    }
 }
 
 
 void getAllCards( TARGETING::TargetHandleList & o_vector,
                   TYPE i_cardType,
-                  bool i_functional = true )
+                  bool i_functional )
 {
-    _getAllChipsOrChiplets( o_vector,
-                            CLASS_CARD,
-                            i_cardType,
-                            i_functional );
+    if (i_functional)
+    {
+        _getChipOrChipletResources( o_vector,
+                                CLASS_CARD,
+                                i_cardType,
+                                UTIL_FILTER_FUNCTIONAL );
+    }
+    else
+    {
+        _getChipOrChipletResources( o_vector,
+                                CLASS_CARD,
+                                i_cardType,
+                                UTIL_FILTER_ALL );
+    }
 }
 
 
 void getAllChiplets( TARGETING::TargetHandleList & o_vector,
-                     TYPE i_chipletType, bool i_functional = true )
+                     TYPE i_chipletType, bool i_functional )
 {
-    _getAllChipsOrChiplets(o_vector, CLASS_UNIT, i_chipletType, i_functional);
+    if (i_functional)
+    {
+        _getChipOrChipletResources(o_vector, CLASS_UNIT, i_chipletType, UTIL_FILTER_FUNCTIONAL);
+    }
+    else
+    {
+        _getChipOrChipletResources(o_vector, CLASS_UNIT, i_chipletType, UTIL_FILTER_ALL);
+    }
 }
 
 
@@ -384,6 +483,7 @@ void getPeerTargets(
     TARG_EXIT();
     #undef TARG_FN
 }
+
 
 #undef TARG_CLASS
 

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_scom_addresses.H,v 1.64 2013/08/22 19:46:32 mjjones Exp $
+// $Id: cen_scom_addresses.H,v 1.65 2013/11/05 20:33:31 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -236,6 +236,7 @@ CONST_UINT64_T( MBI_FIRACT0_0x02010806                 , ULL(0x02010806) );
 CONST_UINT64_T( MBI_FIRACT1_0x02010807                 , ULL(0x02010807) );
 CONST_UINT64_T( MBI_CFG_0x0201080A                     , ULL(0x0201080A) );
 CONST_UINT64_T( MBI_STAT_0x0201080B                    , ULL(0x0201080B) );
+CONST_UINT64_T( MBI_CRCSYN_0x0201080C                  , ULL(0x0201080C) );
 
 CONST_UINT64_T( NEST_TRACE_DATA_HI_MBI_0x02010C40      , ULL(0x02010C40) );
 CONST_UINT64_T( NEST_TRACE_DATA_LO_MBI_0x02010C41	   , ULL(0x02010C41) );
@@ -1756,6 +1757,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.65  2013/11/05 20:33:31  bellows
+Added MBI_CRCSYN
+
 Revision 1.64  2013/08/22 19:46:32  mjjones
 Added DMI-FIR and WOF registers
 

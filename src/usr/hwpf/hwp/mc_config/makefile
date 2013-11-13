@@ -41,6 +41,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_volt
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_freq
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mss_lrdimm_funcs
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_pre_config
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_attr_cleanup
 
 OBJS =  mc_config.o                \
         mss_volt.o                 \
@@ -56,7 +57,8 @@ OBJS =  mc_config.o                \
         mss_throttle_to_power.o      \
         mss_eff_config_shmoo.o       \
         mss_error_support.o          \
-        mss_eff_pre_config.o
+        mss_eff_pre_config.o         \
+        mss_attr_cleanup.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
@@ -64,5 +66,6 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_volt
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_freq
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_pre_config
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_attr_cleanup
 
 include ${ROOTPATH}/config.mk

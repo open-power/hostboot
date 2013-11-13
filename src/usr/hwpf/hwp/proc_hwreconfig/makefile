@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/hwpf/hwp/bus_training/makefile $
+# $Source: src/usr/hwpf/hwp/edi_ei_initialization/makefile $
 #
 # IBM CONFIDENTIAL
 #
@@ -23,35 +23,34 @@
 
 ROOTPATH = ../../../../..
 
-MODULE = bus_training
+MODULE = proc_hwreconfig
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
-OBJS =  gcr_funcs.o io_funcs.o io_run_training.o pbusLinkSvc.o proc_fab_smp.o \
-        io_dccal.o \
-        io_power_down_lanes.o   \
-        io_read_erepair.o   \
-        io_clear_firs.o \
-        io_fir_isolation.o \
-        io_restore_erepair.o \
-        erepairAccessorHwpFuncs.o \
-        erepairGetFailedLanesHwp.o \
-        erepairSetFailedLanesHwp.o \
-        io_post_trainadv.o \
-        io_pre_trainadv.o \
-        io_cleanup.o
+##  NOTE: add the base istep dir here. 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/proc_hwreconfig
 
+##  Include sub dirs
+##  NOTE: add a new EXTRAINCDIR when you add a new HWP
+##  EXAMPLE:
+##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/proc_hwreconfig/proc_enable_reconfig
+
+##  NOTE: add new object files when you add a new HWP
+OBJS =  proc_enable_reconfig.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-## vpath   %.C proc_cen_framelock:io_run_training
-## vpath   %.H proc_cen_framelock:io_run_training
+##  EXAMPLE:
+#   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/proc_hwreconfig/proc_enable_reconfig
 
 include ${ROOTPATH}/config.mk
+

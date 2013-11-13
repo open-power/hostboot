@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_initialization/dram_initialization.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_initialization/dram_initialization.H $  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef  __DRAM_INITIALIZATION_DRAM_INITIALIZATION_H
 #define  __DRAM_INITIALIZATION_DRAM_INITIALIZATION_H
 
@@ -68,26 +67,26 @@
  *  @}
  *  @{
  *      @substepnum     4
- *      @substepname    mss_scrub
- *      @substepdesc    : Start background scrub
- *          @target_sched   serial
- *  @}
- *  @{
- *      @substepnum     5
  *      @substepname    mss_thermal_init
  *      @substepdesc    : Initialize the thermal sensor
  *          @target_sched   serial
  *  @}
  *  @{
+ *      @substepnum     5
+ *      @substepname    proc_pcie_config
+ *      @substepdesc    : Configure the PHBs
+ *          @target_sched   serial
+ *  @}
+ *  @{
  *      @substepnum     6
- *      @substepname    proc_setup_bars
- *      @substepdesc    : Setup Memory BARs
+ *      @substepname    mss_power_cleanup
+ *      @substepdesc    : Clean up any MCS/Centuars
  *          @target_sched   serial
  *  @}
  *  @{
  *      @substepnum     7
- *      @substepname    proc_pcie_config
- *      @substepdesc    : Configure the PHBs
+ *      @substepname    proc_setup_bars
+ *      @substepdesc    : Setup Memory BARs
  *          @target_sched   serial
  *  @}
  *  @{
@@ -146,19 +145,6 @@ void*    call_mss_extent_setup( void    *io_pArgs );
  */
 void*   call_mss_memdiag( void    *io_pArgs );
 
-/**
- *  @brief   mss_scrub
- *
- *           Start background scrub
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  pointer to any errlogs
- *
- */
-void*    call_mss_scrub( void    *io_pArgs );
-
-
 
 /**
  *  @brief   mss_thermal_init
@@ -172,6 +158,29 @@ void*    call_mss_scrub( void    *io_pArgs );
  */
 void*    call_mss_thermal_init( void    *io_pArgs );
 
+/**
+ *  @brief   proc_pcie_config
+ *
+ *           Configure the PHBs
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  pointer to any errlogs
+ *
+ */
+void*    call_proc_pcie_config( void    *io_pArgs );
+
+/**
+ *  @brief   mss_power_cleanup
+ *
+ *           Clean up any MCS/Centaurs
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  pointer to any errlogs
+ *
+ */
+void*    call_mss_power_cleanup( void    *io_pArgs );
 
 
 /**
@@ -185,21 +194,6 @@ void*    call_mss_thermal_init( void    *io_pArgs );
  *
  */
 void*    call_proc_setup_bars( void    *io_pArgs );
-
-
-
-/**
- *  @brief   proc_pcie_config
- *
- *           Configure the PHBs
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  pointer to any errlogs
- *
- */
-void*    call_proc_pcie_config( void    *io_pArgs );
-
 
 
 /**

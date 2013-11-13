@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/core_activate/core_activate.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/core_activate/core_activate.H $              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef  __CORE_ACTIVATE_CORE_ACTIVATE_H
 #define  __CORE_ACTIVATE_CORE_ACTIVATE_H
 
@@ -60,6 +59,12 @@
  *  @}
  *  @{
  *      @substepnum     3
+ *      @substepname    mss_scrub
+ *      @substepdesc    : Start background scrub
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     4
  *      @substepname    host_ipl_complete
  *      @substepdesc    : Notify FSP drawer ipl complete
  *       *          @target_sched   serial
@@ -103,6 +108,18 @@ void*    call_host_activate_master( void    *io_pArgs );
  */
 void*    call_host_activate_slave_cores( void    *io_pArgs );
 
+
+/**
+ *  @brief   mss_scrub
+ *
+ *           Start background scrub
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  pointer to any errlogs
+ *
+ */
+void*    call_mss_scrub( void    *io_pArgs );
 
 
 /**

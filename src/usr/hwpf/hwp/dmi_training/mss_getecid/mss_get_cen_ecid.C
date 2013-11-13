@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.C,v 1.28 2013/10/03 08:07:44 bellows Exp $
+// $Id: mss_get_cen_ecid.C,v 1.30 2013/11/14 16:55:39 bellows Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,7 +39,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.28   | bellows  |02-OCT-13| Minor Review Comments addressed
+//   1.30  | bellows  |11-NOV-13| Gerrit review updates
+//   1.29  | bellows  |08-NOV-13| Added ATTR_MSS_INIT_STATE to track IPL states
+//   1.28  | bellows  |02-OCT-13| Minor Review Comments addressed
 //   1.27  | bellows  |26-SEP-13| Fixed Minor firware comment
 //   1.26  | bellows  |19-SEP-13| Fixed the bug in 1.24
 //   1.25  | bellows  |18-SEP-13| Back to 1.23 because of some issue
@@ -73,6 +75,7 @@
 
 extern "C" {
 
+using namespace fapi;
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -106,6 +109,14 @@ extern "C" {
                           ecid_struct.o_psro,
                           ecid_struct.o_bluewaterfall_broken,
                           ecid_struct.o_nwell_misplacement );
+      if(rc) return rc;
+
+      // set the init state attribute to CLOCKS_ON
+      uint8_t l_attr_mss_init_state;
+      l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_CLOCKS_ON;
+      rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_target, l_attr_mss_init_state);
+      if(rc) return rc;
+
       return rc;
     }
 

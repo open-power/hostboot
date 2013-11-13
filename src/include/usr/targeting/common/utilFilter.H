@@ -38,6 +38,44 @@
 namespace TARGETING
 {
 
+    /**
+     * Enum of functional states for use with calls to getChip/ChipletResources
+     */
+    enum ResourceState
+    {
+        UTIL_FILTER_ALL,        // All targets
+        UTIL_FILTER_PRESENT,    // Present at minimum
+        UTIL_FILTER_FUNCTIONAL  // Functional targets only
+    };
+
+
+/**
+ * @brief Populate the o_vector with target chip pointers based on the
+ *        requested type, and functional state.
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ * @parm[in]  i_type, the type of the chip targets to be obtained
+ * @parm[in]  i_state, Selection filter based on ResourceState enum
+ *
+ * @return N/A
+ */
+void getChipResources(TARGETING::TargetHandleList & o_vector,
+                      TYPE i_type, ResourceState i_state );
+
+/**
+ * @brief Populate the o_vector with target chiplet pointers based on the
+ *        requested type, and functional state.
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ * @parm[in]  i_type, the type of the chiplet targets to be obtained
+ * @parm[in]  i_state, Selection filter based on ResourceState enum
+ *
+ * @return N/A
+ */
+void getChipletResources(TARGETING::TargetHandleList & o_vector,
+                      TYPE i_type, ResourceState i_state );
+
+
 /**
  * @brief Populate the o_vector with target chip pointers based on the
  *        requested type, and functional state.

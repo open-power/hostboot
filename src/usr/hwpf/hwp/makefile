@@ -49,7 +49,7 @@ SUBDIRS	=   dmi_training.d  sbe_centaur_init.d mc_config.d \
             core_activate.d dram_initialization.d edi_ei_initialization.d \
             establish_system_smp.d bus_training.d occ.d tod_init.d \
             nest_chiplets.d start_payload.d thread_activate.d slave_sbe.d \
-            pstates.d
+            pstates.d proc_hwreconfig.d
 
 include mvpd_accessors/mvpd.mk
 include spd_accessors/spd.mk

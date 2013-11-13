@@ -239,6 +239,7 @@ const DepModInfo  g_istep10Dependancies = {
         DEP_LIB(libporeve.so),
         DEP_LIB(libbuild_winkle_images.so),
         DEP_LIB(libsbe.so),
+        DEP_LIB(libproc_hwreconfig.so),
         { 0 },
     }
 };

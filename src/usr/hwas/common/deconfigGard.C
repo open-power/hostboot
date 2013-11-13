@@ -1307,8 +1307,12 @@ void DeconfigGard::_deconfigureTarget(Target & i_target,
         l_state.deconfiguredByEid = i_errlEid;
         i_target.setAttr<ATTR_HWAS_STATE>(l_state);
 
-        // increment the counter
-        iv_deconfigCount++;
+        // if this is a real error, deconfigure
+        if (i_errlEid & DECONFIGURED_BY_PLID_MASK)
+        {
+            // increment the counter
+            iv_deconfigCount++;
+        }
 
         // Do any necessary Deconfigure Actions
         _doDeconfigureActions(i_target);

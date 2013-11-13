@@ -28,13 +28,15 @@
  * @file    istep16list.H
  *
  *  IStep 16    Core Activate
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v1.41 (11/08/13)
  *
  *    16.1    host_activate_master
  *          : Activate master core
  *    16.2    host_activate_slave_cores
  *          : Activate slave cores
- *    16.3    host_ipl_complete
+ *    16.3    mss_scrub
+ *          : Start background scrub
+ *    16.4    host_ipl_complete
  *          : Notify FSP drawer ipl complete
  *
  *  *****************************************************************
@@ -93,7 +95,19 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(16,03,"host_ipl_complete"),
+                ISTEPNAME(16,03,"mss_scrub"),
+                CORE_ACTIVATE::call_mss_scrub,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                        false,
+                }
+        },
+
+
+        {
+                ISTEPNAME(16,04,"host_ipl_complete"),
                 CORE_ACTIVATE::call_host_ipl_complete,
                 {
                         START_FN,

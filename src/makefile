@@ -59,7 +59,7 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    establish_system_smp occ\
                    nest_chiplets start_payload thread_activate slave_sbe \
                    attn runtime ibscom dump tod_init secureboot_ext \
-                   devtree sbe
+                   devtree sbe proc_hwreconfig
 
 TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \

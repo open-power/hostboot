@@ -76,10 +76,10 @@ const uint8_t INNER_START_STEP = 12;
 const uint8_t INNER_START_SUBSTEP = 1;
 const uint8_t INNER_STOP_STEP = 12;
 const uint8_t INNER_STOP_SUBSTEP = 5;
-const uint8_t OUTER_START_STEP = 13;
+const uint8_t OUTER_START_STEP = 10;
 const uint8_t OUTER_START_SUBSTEP = 1;
 const uint8_t OUTER_STOP_STEP = 14;
-const uint8_t OUTER_STOP_SUBSTEP = 7;
+const uint8_t OUTER_STOP_SUBSTEP = 5;
 const uint8_t HB_START_ISTEP = 6;
 
 /**
@@ -1329,15 +1329,20 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
     const uint16_t OUTER_START = (OUTER_START_STEP << 8) | OUTER_START_SUBSTEP;
     const uint16_t OUTER_STOP = (OUTER_STOP_STEP << 8) | OUTER_STOP_SUBSTEP;
 
+    // If current step is within major step 12
     if ((current >= INNER_START) && (current <= INNER_STOP))
     {
         doReconfigure = true;
+        // Loop back to 12.1
         o_newIstep = INNER_START_STEP;
         o_newSubstep = INNER_START_SUBSTEP;
     }
+    // Else if current step is outside of 12 but in step 10, 11, 13 or
+    // 14 (up to 14.5)
     else if ((current >= OUTER_START) && (current <= OUTER_STOP))
     {
         doReconfigure = true;
+        // Loop back to 10.1
         o_newIstep = OUTER_START_STEP;
         o_newSubstep = OUTER_START_SUBSTEP;
     }

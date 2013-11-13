@@ -126,6 +126,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/runtime_errors/p8_gpe_registers.xml \
     hwp/runtime_errors/p8_pmc_deconfig_setup_errors.xml \
     hwp/runtime_errors/p8_pss_registers.xml \
+    hwp/proc_hwreconfig/proc_enable_reconfig/proc_enable_reconfig_errors.xml \
     hwp/dram_training/mem_startclocks/cen_mem_startclocks_errors.xml \
     hwp/dram_training/mem_pll_setup/cen_mem_pll_initf_errors.xml \
     hwp/dram_training/mem_pll_setup/cen_mem_pll_setup_errors.xml

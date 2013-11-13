@@ -37,14 +37,32 @@
 #include <fsi/fsiif.H>
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
+#include <hwpisteperror.H>
 
 #include <targeting/attrsync.H>
 #include <diag/prdf/prdfMain.H>
 #include <intr/interrupt.H>
 #include <ibscom/ibscomif.H>
 
+//  fapi support
+#include  <fapi.H>
+#include  <fapiPlatHwpInvoker.H>
+
+//  targeting support.
+#include  <targeting/common/utilFilter.H>
+#include  <targeting/common/commontargeting.H>
+
+#include  <errl/errludtarget.H>
+
+#include <proc_enable_reconfig.H>
+
 namespace HWAS
 {
+
+using namespace TARGETING;
+using namespace fapi;
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
 
 // functions called from the istep dispatcher -- hostboot only
 
@@ -88,8 +106,7 @@ void* host_discover_targets( void *io_pArgs )
     errlHndl_t errl = NULL;
 
     // Check whether we're in MPIPL mode
-    using namespace TARGETING;
-    Target* l_pTopLevel = NULL;
+    TARGETING::Target* l_pTopLevel = NULL;
     targetService().getTopLevelTarget( l_pTopLevel );
 
     if( l_pTopLevel == NULL )
@@ -154,8 +171,7 @@ void* host_gard( void *io_pArgs )
     errlHndl_t errl;
 
     // Check whether we're in MPIPL mode
-    using namespace TARGETING;
-    Target* l_pTopLevel = NULL;
+    TARGETING::Target* l_pTopLevel = NULL;
     targetService().getTopLevelTarget( l_pTopLevel );
 
     if( l_pTopLevel == NULL )
@@ -231,24 +247,115 @@ void* host_prd_hwreconfig( void *io_pArgs )
                 "host_prd_hwreconfig entry" );
 
     errlHndl_t errl = NULL;
-
-    // Flip the scom path back to FSI in case we enabled IBSCOM previously
-    IBSCOM::enableInbandScoms(IBSCOM_DISABLE);
-
-    // Call PRDF to remove non-function chips from its system model
-    errl = PRDF::refresh();
-
-    if (errl)
+    IStepError l_stepError;
+    do
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "host_prd_hwreconfig ERROR 0x%.8X returned from"
-                  "  call to PRDF::refresh", errl->reasonCode());
-    }  
+        // Flip the scom path back to FSI in case we enabled IBSCOM previously
+        IBSCOM::enableInbandScoms(IBSCOM_DISABLE);
 
+        // Call PRDF to remove non-function chips from its system model
+        errl = PRDF::refresh();
+
+        if (errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "host_prd_hwreconfig ERROR 0x%.8X returned from"
+                      "  call to PRDF::refresh", errl->reasonCode());
+
+            // Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails(errl);
+
+            // Commit Error
+            errlCommit(errl, HWPF_COMP_ID);
+
+            break;
+        }
+
+        // Lists for functional MCS/Centaurs
+        TARGETING::TargetHandleList l_fncMcsList;
+        TARGETING::TargetHandleList l_fncCentaurList;
+
+        // find all functional MCS chiplets of all procs
+        getChipletResources(l_fncMcsList, TYPE_MCS, UTIL_FILTER_FUNCTIONAL);
+
+        for (TargetHandleList::const_iterator
+             l_mcs_iter = l_fncMcsList.begin();
+             l_mcs_iter != l_fncMcsList.end();
+             ++l_mcs_iter)
+        {
+            // make a local copy of the MCS target
+            const TARGETING::Target * l_pMcs = *l_mcs_iter;
+            // Retrieve HUID of current MCS
+            TARGETING::ATTR_HUID_type l_currMcsHuid =
+                TARGETING::get_huid(l_pMcs);
+
+            // Find all the functional Centaurs that are associated with this MCS
+            getChildAffinityTargets(l_fncCentaurList, l_pMcs,
+                           CLASS_CHIP, TYPE_MEMBUF);
+
+            // There will always be 1 Centaur associated with a MCS.
+            if(1 != l_fncCentaurList.size())
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "No functional Centaurs found for "
+                        "MCS target HUID %.8X , skipping this MCS",
+                        l_currMcsHuid);
+                continue;
+            }
+
+            // Make a local copy
+            const TARGETING::Target * l_pCentaur = l_fncCentaurList[0];
+            // Retrieve HUID of current Centaur
+            TARGETING::ATTR_HUID_type l_currCentaurHuid =
+                TARGETING::get_huid(l_pCentaur);
+
+            // Dump current run on target
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running proc_enable_reconfig HWP on "
+                    "MCS target HUID %.8X CENTAUR target HUID %.8X",
+                    l_currMcsHuid, l_currCentaurHuid);
+
+            // Create FAPI Targets.
+            fapi::Target l_fapiMcsTarget(TARGET_TYPE_MCS_CHIPLET,
+                    (const_cast<TARGETING::Target*>(l_pMcs)));
+            fapi::Target l_fapiCentaurTarget(TARGET_TYPE_MEMBUF_CHIP,
+                    (const_cast<TARGETING::Target*>(l_pCentaur)));
+
+            // Call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP(errl, proc_enable_reconfig,
+                            l_fapiMcsTarget, l_fapiCentaurTarget);
+
+            if (errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: proc_enable_reconfig HWP returns error",
+                          errl->reasonCode());
+
+                // Capture the target data in the elog
+                ERRORLOG::ErrlUserDetailsTarget(l_pMcs).addToLog( errl );
+
+                // Create IStep error log and cross reference error that occurred
+                l_stepError.addErrorDetails(errl);
+
+                // Commit Error
+                errlCommit(errl, HWPF_COMP_ID);
+            }
+            else
+            {
+                // Success
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Successfully ran proc_enable_reconfig HWP on "
+                        "MCS target HUID %.8X CENTAUR target HUID %.8X",
+                        l_currMcsHuid,
+                        l_currCentaurHuid);
+            }
+        }
+    }
+    while(0);
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_prd_hwreconfig exit" );
-
-    return errl;
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
 }
 
 //******************************************************************************

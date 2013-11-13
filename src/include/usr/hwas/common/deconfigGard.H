@@ -118,6 +118,9 @@ public:
 
         // set for SPCN initiated deconfigure
         DECONFIGURED_BY_SPCN,                   // BASE | 0x08
+
+        // mask - these bits mean it's a PLID and not an enum
+        DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
     };
 
     /**
