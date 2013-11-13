@@ -29,7 +29,6 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <arch/ppc.H>
-#include <kernel/console.H>
 
 #include <cxxtest/TestSuite.H>
 
@@ -135,8 +134,6 @@ void reportTotalTests(  const char *suitename,
     TRACDCOMP( g_trac_test,
             "Suite %s Completed ",
             suitename  );
-    // printk( "%s completed %ld tests\n", suitename, numtests);
-
     return;
 }
 

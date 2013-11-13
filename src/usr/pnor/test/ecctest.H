@@ -23,6 +23,7 @@
 #include <cxxtest/TestSuite.H>
 #include <pnor/ecc.H>
 #include <stdlib.h>
+#include <string.h>
 
 // Forward declarations, see ecc.C
 namespace PNOR

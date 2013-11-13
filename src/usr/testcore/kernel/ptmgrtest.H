@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <arch/ppc.H>
 #include <sys/time.h>
 #include <kernel/ptmgr.H>
+#include <kernel/console.H>
 
 //#define PASS_TRACE(args...) TS_TRACE(args)
 #define PASS_TRACE(args...)

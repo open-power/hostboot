@@ -636,7 +636,7 @@ sub writeHostBootPreamble() {
 
   ##    print the standard includes for Hostboot
   print "\n";
-  print "#include <kernel/console.H>\n";
+  print "#include <kernel/console.H>\n" if ($debug);
   print "#include <sys/sync.h>\n";
   print "#include <sys/vfs.h>\n";
   print "#include <sys/task.h>\n";
@@ -694,7 +694,11 @@ sub writeHostBootSuites() {
     ##  run each of the tests in the list
     foreach (@{suiteTests()}) {
         $test = $_;
-        print   "\tprintkd(\"CxxTest: Executing ", suiteName(), " ", testName(), ".\\n\");\n";
+        if ( $debug )
+        {
+            print   "\tprintkd(\"CxxTest: Executing ", suiteName(), " ",
+                    testName(), ".\\n\");\n";
+        }
         printf "\t$suitevar->%s();\n\n", testName();
         $testcount++;
     }
