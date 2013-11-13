@@ -58,6 +58,8 @@ typedef struct hostInterfaces
     void (*free)(void*);
     /** realloc */
     void* (*realloc)(void*, size_t);
+    /** sleep */
+    void (*sleep)(uint64_t sec, uint64_t nsec);
 
     /** sendErrorLog
      * @param[in] plid Platform Log identifier

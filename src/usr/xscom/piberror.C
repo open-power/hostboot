@@ -53,6 +53,15 @@ void addFruCallouts(TARGETING::Target* i_target,
    switch (i_pibErrStatus)
    {
      case  PIB::PIB_CHIPLET_OFFLINE:
+       //Offline should just be a code bug, but it seems that there are
+       //  cases where bad hardware can also cause this problem
+       io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                    HWAS::SRCI_PRIORITY_HIGH);
+       io_errl->addHwCallout( i_target,
+                              HWAS::SRCI_PRIORITY_LOW,
+                              HWAS::NO_DECONFIG,
+                              HWAS::GARD_NULL );
+       break;
      case  PIB::PIB_PARTIAL_GOOD:
      case  PIB::PIB_INVALID_ADDRESS:
        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,

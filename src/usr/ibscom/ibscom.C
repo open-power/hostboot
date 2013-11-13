@@ -41,6 +41,9 @@
 #include <limits.h>
 #include <errl/errludtarget.H>
 #include <xscom/piberror.H>
+#include <diag/attn/attn.H>
+#include <ibscom/ibscomif.H>
+#include    <targeting/common/utilFilter.H>
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -48,13 +51,16 @@
 
 // Trace definition
 trace_desc_t* g_trac_ibscom = NULL;
-TRAC_INIT(&g_trac_ibscom, "IBSCOM", KILOBYTE);
+TRAC_INIT(&g_trac_ibscom, IBSCOM_COMP_NAME, KILOBYTE);
 
 using namespace ERRORLOG;
 using namespace TARGETING;
 
 namespace IBSCOM
 {
+// SCOM Register addresses
+const uint32_t MBS_FIR = 0x02011400;
+const uint32_t MBSIBERR0 = 0x0201141B;
 
 // Register XSCcom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
@@ -296,6 +302,109 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
     return l_err;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+void err_cleanup(Target* i_target,
+                 uint64_t i_addr)
+{
+    //Going to commit at most 1 informational error here
+    errlHndl_t l_err = NULL;
+    errlHndl_t tmp_err = NULL;
+    ERRORLOG::ErrlUserDetailsLogRegister l_logReg(i_target);
+
+    uint64_t zeroData = 0x0;
+    size_t op_size = sizeof(uint64_t);
+
+    // Clear our the status reg
+    op_size = sizeof(uint64_t);
+    tmp_err = deviceOp( DeviceFW::WRITE,
+                      i_target,
+                      &zeroData,
+                      op_size,
+                      DEVICE_FSISCOM_ADDRESS(MBSIBERR0) );
+    if(tmp_err)
+    {
+        if( l_err )
+        {
+            delete tmp_err;
+        }
+        else
+        {
+            l_err = tmp_err;
+        }
+
+        //Really just want to save the address, so stick in some
+        //obvious dummy data
+        uint64_t dummyData = 0x00000000DEADBEEF;
+        l_logReg.addDataBuffer(&dummyData, sizeof(dummyData),
+                               DEVICE_IBSCOM_ADDRESS(MBSIBERR0));
+    }
+
+    // Clear out the FIR bits we might trigger
+    uint64_t mbs_fir = 0;
+    op_size = sizeof(uint64_t);
+    tmp_err = deviceOp( DeviceFW::READ,
+                      i_target,
+                      &mbs_fir,
+                      op_size,
+                      DEVICE_FSISCOM_ADDRESS(MBS_FIR) );
+    if(tmp_err)
+    {
+        if( l_err )
+        {
+            delete tmp_err;
+        }
+        else
+        {
+            l_err = tmp_err;
+        }
+
+        //Really just want to save the address, so stick in some
+        //obvious dummy data
+        uint64_t dummyData = 0x10000000DEADBEEF;
+        l_logReg.addDataBuffer(&dummyData, sizeof(dummyData),
+                               DEVICE_IBSCOM_ADDRESS(MBS_FIR));
+    }
+
+    //22=MBS_FIR_MASK_REG_HOST_INBAND_READ_ERROR
+    //23=MBS_FIR_MASK_REG_HOST_INBAND_WRITE_ERROR
+    mbs_fir &= 0xFFFFFCFFFFFFFFFF;
+    op_size = sizeof(uint64_t);
+    l_err = deviceOp( DeviceFW::WRITE,
+                      i_target,
+                      &mbs_fir,
+                      op_size,
+                      DEVICE_FSISCOM_ADDRESS(MBS_FIR) );
+    if(tmp_err)
+    {
+        if( l_err )
+        {
+            delete tmp_err;
+        }
+        else
+        {
+            l_err = tmp_err;
+        }
+
+        //Really just want to save the address, so stick in some
+        //obvious dummy data
+        uint64_t dummyData = 0x20000000DEADBEEF;
+        l_logReg.addDataBuffer(&dummyData, sizeof(dummyData),
+                               DEVICE_IBSCOM_ADDRESS(MBS_FIR));
+    }
+
+    if( l_err )
+    {
+        l_logReg.addToLog(l_err);
+
+        //force to informational so we don't log extra errors
+        //inside of possible error collection paths
+        l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        errlCommit(l_err,IBSCOM_COMP_ID);
+        l_err = NULL;
+    }    
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -351,6 +460,35 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
             l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_IBSCOM_MUTEX>();
             mutex_lock(l_mutex);
             need_unlock = true;
+
+            //Need to check if ibscom is still enabled before moving on in
+            //case we flipped the switch due to an error
+            ScomSwitches l_switches = i_target->getAttr<ATTR_SCOM_SWITCHES>();
+            if( !l_switches.useInbandScom )
+            {
+                TRACFCOMP(g_trac_ibscom, ERR_MRK"doIBScom> IBSCOM longer enabled on %.8X, error must have occurred", get_huid(i_target));
+                /*@
+                 * @errortype
+                 * @moduleid     IBSCOM_DO_IBSCOM
+                 * @reasoncode   IBSCOM_RETRY_DUE_TO_ERROR
+                 * @userdata1[0:31]   HUID of Centaur Target
+                 * @userdata1[32:64]  SCOM Address
+                 * @userdata2    Not Used
+                 * @devdesc      Previous error disabled ibscom, so forcing
+                 *               a retry via FSI
+                 */
+                l_err =
+                  new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                IBSCOM_DO_IBSCOM,
+                                IBSCOM_RETRY_DUE_TO_ERROR,
+                                get_huid(i_target),
+                                i_addr);
+                //This error should NEVER get returned to caller, so it's a
+                //FW bug if it actually gets comitted.
+                l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                           HWAS::SRCI_PRIORITY_HIGH);
+                break;
+            }
         }
 
         if (i_opType == DeviceFW::READ)
@@ -391,6 +529,8 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                     //FW bug if it actually gets comitted.
                     l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                                HWAS::SRCI_PRIORITY_HIGH);
+                    ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target")
+                      .addToLog(l_err);
                     break;
                 }
                 else
@@ -416,20 +556,19 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
             l_virtAddr[i_addr] = l_data;
             eieio();
 
+            //Workaround for HW264203
+            //A read of MBSIBWRSTAT will not trigger a SUE so we need to
+            //read the MBS_FIR instead.
             TRACDCOMP(g_trac_ibscom,
-                      "doIBScom: Read MBSIBWRSTAT to check for error");
-            //Read MBSIBWRSTAT to check for errors
-            //If an error occured on last write, reading MBSIBWRSTAT will
-            //trigger a SUE.
-            const uint32_t MBSIBWRSTAT = 0x201141D;
-            uint64_t statData = 0;
+                      "doIBScom: Read MBS_FIR to check for error");
+            uint64_t fir_data = 0;
             size_t readSize = sizeof(uint64_t);
             l_err = doIBScom(DeviceFW::READ,
-                                  i_target,
-                                  &statData,
-                                  readSize,
-                                  MBSIBWRSTAT,
-                                  true);
+                             i_target,
+                             &fir_data,
+                             readSize,
+                             MBS_FIR,
+                             true);
             if(l_err != NULL)
             {
                 if( IBSCOM_SUE_IN_ERR_PATH == l_err->reasonCode() )
@@ -446,103 +585,122 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                     break;
                 }
             }
+            else
+            {
+                TRACUCOMP(g_trac_ibscom, "doIBScom: MBS_FIR=%.16X",fir_data);
 
+                //check the FIR bits specifically
+                //23 = MBS_FIR_MASK_REG_HOST_INBAND_WRITE_ERROR: A PIB error
+                //     or inband buffer error was detected on a host inband
+                //     write operation.
+                if( fir_data & 0x0000010000000000 )
+                {
+                    TRACFCOMP(g_trac_ibscom, ERR_MRK" doIBScom: MBS_FIR[23] detected after write : %.16X", fir_data);
+                    rw_error = true;
+                }
+            }
         }
 
+        // Common error checking for both read and write
         if(rw_error)
         {
             bool busDown = false;
             TRACUCOMP(g_trac_ibscom,
                       "doIBScom: Get Error data, read MBSIBERR0");
-            const uint32_t MBSIBERR0 = 0x201141B;
-            const uint64_t HOST_ERROR_VALID = 0x0000000080000000;
-            const uint64_t PIB_ERROR_STATUS_MASK = 0x0000000070000000;
-            const uint64_t PIB_ERROR_SHIFT = 28;
-            size_t readSize = sizeof(uint64_t);
-            uint64_t mbsiberr0_data = 0;
+            size_t op_size = sizeof(uint64_t);
 
-            //Use FSISCOM as workaround for DD1.x centaur chips (HW246298)
-            if(i_target->getAttr<TARGETING::ATTR_EC>() < 0x20)
+            // Note: Using FSISCOM path to read the errors even though
+            // we could use IBSCOM in DD2 because it makes code simpler
+
+            MBSIBERRO_Reg_t mbsiberr0;
+            op_size = sizeof(uint64_t);
+            l_err = deviceOp( DeviceFW::READ,
+                              i_target,
+                              &(mbsiberr0.data),
+                              op_size,
+                              DEVICE_FSISCOM_ADDRESS(MBSIBERR0) );
+            if(l_err)
             {
-                //Need to explicitly use FSI SCOM in DD1X chips
-                l_err = deviceOp( DeviceFW::READ,
-                                     i_target,
-                                     &mbsiberr0_data,
-                                     readSize,
-                                     DEVICE_FSISCOM_ADDRESS(MBSIBERR0) );
-                if(l_err)
-                {
-                    TRACFCOMP(g_trac_ibscom, ERR_MRK
-                              "doIBScom: Error reading MBSIBERR0 over FSI");
-                    //Save away the IBSCOM address
-                    ERRORLOG::ErrlUserDetailsLogRegister
-                      l_logReg(i_target);
-                    //Really just want to save the addres, so stick in some
-                    //obvious dummy data
-                    uint64_t dummyData = 0x00000000DEADBEEF;
-                    l_logReg.addDataBuffer(&dummyData, sizeof(dummyData),
-                                           DEVICE_IBSCOM_ADDRESS(i_addr));
-                    l_logReg.addToLog(l_err);
-                    break;
-                }
-                TRACUCOMP(g_trac_ibscom,
-                          "doIBScom: MBSIBERR0(0x%.16x) = 0x%.16X",
-                          MBSIBERR0, mbsiberr0_data);
+                TRACFCOMP(g_trac_ibscom, ERR_MRK
+                          "doIBScom: Error reading MBSIBERR0 over FSI");
+                //Save away the IBSCOM address
+                ERRORLOG::ErrlUserDetailsLogRegister l_logReg(i_target);
+                //Really just want to save the address, so stick in some
+                //obvious dummy data
+                uint64_t dummyData = 0x30000000DEADBEEF;
+                l_logReg.addDataBuffer(&dummyData, sizeof(dummyData),
+                                       DEVICE_IBSCOM_ADDRESS(i_addr));
+                l_logReg.addToLog(l_err);
+
+                //force to informational so we don't log extra errors
+                //inside of possible error collection paths
+                l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_err,IBSCOM_COMP_ID);
+                l_err = NULL;
+
+                //fabricate some error data
+                mbsiberr0.addr = i_addr;
+                mbsiberr0.errvalid = 1;
+                mbsiberr0.piberr = 0;
+                mbsiberr0.iswrite = (i_opType == DeviceFW::READ) ? 0 : 1;
+                mbsiberr0.reserved = 0xBADBAD;
+            }
+
+            TRACUCOMP(g_trac_ibscom,
+                      "doIBScom: MBSIBERR0(0x%.16x) = 0x%.16X",
+                      MBSIBERR0, mbsiberr0.data);
+
+            //if the MBSIBERR0Q_IB_HOST_ERROR_VALID bit is not set
+            //  then we have a bus failure
+            if( !(mbsiberr0.errvalid) )
+            {
+                //Bus is down
+                busDown = true;
+            }
+            //confirm that we are looking at error data for the scom we did
+            //0:31 = MBSIBERR0Q_IB_HOST_ADDRESS: This is the 32 bit scom
+            //  address that was being accessed when the error was detected.
+            else if( mbsiberr0.addr != i_addr )
+            {
+                TRACFCOMP( g_trac_ibscom, "doIBScom> The address in MBSIBERR0 (0x%.8X) doesn't match what we were scomming (0x%.8X)", mbsiberr0.addr, i_addr );
+                /*@
+                 * @errortype
+                 * @moduleid     IBSCOM_DO_IBSCOM
+                 * @reasoncode   IBSCOM_WRONG_ERROR
+                 * @userdata1[0:31]   HUID of Centaur Target
+                 * @userdata1[32:64]  SCOM Address
+                 * @userdata2    Contents of MBSIBERR0 register
+                 * @devdesc      Detected error doesn't match the address
+                 *               we failed on
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      IBSCOM_DO_IBSCOM,
+                                      IBSCOM_WRONG_ERROR,
+                                      TWO_UINT32_TO_UINT64(
+                                                     get_huid(i_target),
+                                                     i_addr),
+                                      mbsiberr0.data);
+                // this would be a code bug because we got out of sync somehow
+                l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH );
+                ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target")
+                  .addToLog(l_err);
+                ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_target);
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBS_FIR));
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBSIBERR0));
+                ffdc.addToLog(l_err);
+                l_err->collectTrace(IBSCOM_COMP_NAME);
 
                 //attempt to clear the error register so future accesses
                 //will work
-                uint64_t zeroData = 0x0;
-                readSize = sizeof(uint64_t);
-                l_err = deviceOp( DeviceFW::WRITE,
-                                     i_target,
-                                     &zeroData,
-                                     readSize,
-                                     DEVICE_FSISCOM_ADDRESS(MBSIBERR0) );
-                if(l_err )
-                {
-                    errlCommit(l_err,IBSCOM_COMP_ID);
-                    l_err = NULL;
-                }
+                err_cleanup(i_target,i_addr);
 
-                //if the MBSIBERR0Q_IB_HOST_ERROR_VALID bit is not set
-                //  then we have a bus failure
-                if( !(mbsiberr0_data & HOST_ERROR_VALID) )
-                {
-                    //Bus is down
-                    busDown = true;
-                }
+                break;
             }
-            else  // >= DD20
-            {
-                //TODO RTC: 68984: Validate error path on DD2.0 Centaurs
-                l_err = doIBScom(DeviceFW::READ,
-                                 i_target,
-                                 &mbsiberr0_data,
-                                 readSize,
-                                 MBSIBERR0,
-                                 true);
-                if(l_err != NULL)
-                {
-                    if( IBSCOM_SUE_IN_ERR_PATH == l_err->reasonCode() )
-                    {
-                        TRACFCOMP(g_trac_ibscom, ERR_MRK
-                                  "doIBScom: SUE on write detected");
-                        delete l_err;
-                        l_err = NULL;
-                        busDown = true;
-                    }
-                    else
-                    {
-                        TRACFCOMP(g_trac_ibscom, ERR_MRK"doIBScom: Unexpected error when checking for SUE");
-                        break;
-                    }
-                }
-            } // >= DD20
+
 
             if(busDown)
             {
-                //TODO RTC: 69115 - call PRD to do FIR analysis, return PRD
-                //error instead.
                 /*@
                  * @errortype
                  * @moduleid     IBSCOM_DO_IBSCOM
@@ -553,19 +711,25 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                  * @devdesc      Bus failure when attempting to perform
                  *               IBSCOM operation.  IBSCOM disabled.
                  */
-                l_err =
+                errlHndl_t ib_err =
                   new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                 IBSCOM_DO_IBSCOM,
                                 IBSCOM_BUS_FAILURE,
                                 TWO_UINT32_TO_UINT64(
                                                      get_huid(i_target),
                                                      i_addr),
-                                mbsiberr0_data);
+                                mbsiberr0.data);
 
-                l_err->addHwCallout(i_target,
-                                    HWAS::SRCI_PRIORITY_HIGH,
-                                    HWAS::NO_DECONFIG,
-                                    HWAS::GARD_NULL);
+                ib_err->addHwCallout(i_target,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::NO_DECONFIG,
+                                     HWAS::GARD_NULL);
+
+                //grab some HW regs via FSISCOM
+                ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_target);
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBS_FIR));
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBSIBERR0));
+                ffdc.addToLog(l_err);
 
                 //disable IBSCOM
                 ScomSwitches l_switches =
@@ -581,6 +745,33 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                     // Turn off IBSCOM and turn on FSI SCOM.
                     i_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
                 }
+
+                //@todo: RTC:92971
+                //There is a potential deadlock if we call PRD here
+                //Look for a better PRD error
+                //errlHndl_t prd_err = ATTN::checkForIplAttentions();
+                errlHndl_t prd_err = NULL;
+                if( prd_err )
+                {
+                    TRACFCOMP( g_trac_ibscom, ERR_MRK"Error from checkForIplAttentions : PLID=%X", prd_err->plid() );
+                    //connect up the plids
+                    ib_err->plid(prd_err->plid());
+                    //commit my log as info because PRD's log is better
+                    ib_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    errlCommit(ib_err,IBSCOM_COMP_ID);
+                    l_err = prd_err;
+                }
+                else
+                {
+                    //my log is the only one
+                    l_err = ib_err;
+                }
+
+                l_err->collectTrace(IBSCOM_COMP_NAME);
+
+                //Note-not cleaning up the error status here since
+                // we will not be using IBSCOM again
+
                 break;
             }
             else // bus isn't down, some other kind of error
@@ -597,22 +788,32 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                  */
                 l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                       IBSCOM_DO_IBSCOM,
-                                      IBSCOM_BUS_FAILURE,
+                                      IBSCOM_PIB_FAILURE,
                                       TWO_UINT32_TO_UINT64(
                                           get_huid(i_target),
                                           i_addr),
-                                      mbsiberr0_data);
+                                      mbsiberr0.data);
 
                 //Add this target to the FFDC
-                ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_err);
-
-                uint64_t pib_code =
-                  (mbsiberr0_data & PIB_ERROR_STATUS_MASK) >> PIB_ERROR_SHIFT;
+                ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target")
+                  .addToLog(l_err);
 
                 //add callouts based on the PIB error
                 PIB::addFruCallouts( i_target,
-                                     pib_code,
+                                     mbsiberr0.piberr,
                                      l_err );
+
+                //grab some HW regs via FSISCOM
+                ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_target);
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBS_FIR));
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBSIBERR0));
+                ffdc.addToLog(l_err);
+
+                l_err->collectTrace(IBSCOM_COMP_NAME);
+
+                //attempt to clear the error register so future accesses
+                //will work
+                err_cleanup(i_target,i_addr);
 
                 break;
             }
@@ -658,5 +859,71 @@ errlHndl_t ibscomPerformOp(DeviceFW::OperationType i_opType,
                      false);
     return l_err;
 }
+
+
+/**
+ * @brief Enable or disable Inband SCOMs on all capable chips
+ */
+void enableInbandScoms( bool i_disable )
+{
+    TARGETING::TargetHandleList membufChips;
+    TARGETING::getAllChips(membufChips, TYPE_MEMBUF, true);
+
+    mutex_t* l_mutex = NULL;
+
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+
+    uint8_t l_override =
+      sys->getAttr<TARGETING::ATTR_IBSCOM_ENABLE_OVERRIDE>();
+    TRACFCOMP(g_trac_ibscom,"IBSCOM_ENABLE_OVERRIDE=%d",l_override);
+
+    for(uint32_t i=0; i<membufChips.size(); i++)
+    {
+        TARGETING::Target* mb = membufChips[i];
+
+        // If the membuf chip supports IBSCOM AND..
+        //   (Chip is >=DD20 OR IBSCOM Override is set)
+        if( (mb->getAttr<ATTR_PRIMARY_CAPABILITIES>().supportsInbandScom)
+            &&
+            ( (mb->getAttr<TARGETING::ATTR_EC>() >= 0x20) ||
+              (l_override != 0) )
+            )
+        {
+            //don't mess with attributes without the mutex (just to be safe)
+            l_mutex = mb->getHbMutexAttr<TARGETING::ATTR_IBSCOM_MUTEX>();
+            mutex_lock(l_mutex);
+
+            ScomSwitches l_switches = mb->getAttr<ATTR_SCOM_SWITCHES>();
+
+            uint8_t ib_new = 1;
+            uint8_t fsi_new = 0;
+            if( i_disable == IBSCOM_DISABLE )
+            {
+                ib_new = 0;
+                fsi_new = 1;
+            }
+
+            // If Inband Scom enablement changed
+            if ((l_switches.useInbandScom != ib_new) ||
+                (l_switches.useFsiScom != fsi_new))
+            {
+                l_switches.useFsiScom = fsi_new;
+                l_switches.useInbandScom = ib_new;
+
+                // Modify attribute
+                membufChips[i]->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+
+                TRACFCOMP(g_trac_ibscom,
+                          "IBSCOM=%d on target HUID %.8X",
+                          ib_new,
+                          TARGETING::get_huid(mb));
+            }
+
+            mutex_unlock(l_mutex);
+        }
+    }  
+}
+
 
 } // end namespace

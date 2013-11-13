@@ -32,6 +32,7 @@
 #include <errl/errlmanager.H>
 #include <util/utillidmgr.H>
 #include <map>
+#include <sys/time.h>
 #include <runtime/interface.h>
 #include <vpd/vpd_if.H>
 
@@ -105,6 +106,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->malloc = malloc;
                 intf->free = free;
                 intf->realloc = realloc;
+                intf->sleep = nanosleep;
                 intf->assert = rt_assert;
                 intf->sendErrorLog = rt_logErr;
                 intf->scom_read = rt_scom_read;

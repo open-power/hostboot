@@ -75,6 +75,7 @@
 #include <erepairAccessorHwpFuncs.H>
 #include    "dmi_io_dccal/dmi_io_dccal.H"
 #include    <pbusLinkSvc.H>
+#include    <ibscom/ibscomif.H>
 
 namespace   DMI_TRAINING
 {
@@ -1244,49 +1245,7 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
         }
 
         //Now enable Inband SCOM for all membuf chips.
-        TARGETING::TargetHandleList membufChips;
-        getAllChips(membufChips, TYPE_MEMBUF, true);
-
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(sys);
-
-        for(uint32_t i=0; i<membufChips.size(); i++)
-        {
-            // If the membuf chip supports IBSCOM AND..
-            //   (Chip is >=DD20 OR IBSCOM Override is set)
-            if ((membufChips[i]->getAttr<ATTR_PRIMARY_CAPABILITIES>()
-                .supportsInbandScom) &&
-                (// TODO: RTC 68984: Disable IBSCOM for now (membufChips[i]->getAttr<TARGETING::ATTR_EC>() >= 0x20) ||
-                 (sys->getAttr<TARGETING::ATTR_IBSCOM_ENABLE_OVERRIDE>() != 0))
-                )
-            {
-                ScomSwitches l_switches =
-                  membufChips[i]->getAttr<ATTR_SCOM_SWITCHES>();
-
-                // If Inband Scom is not already enabled.
-                if ((l_switches.useInbandScom != 1) ||
-                    (l_switches.useFsiScom != 0))
-                {
-                    l_switches.useFsiScom = 0;
-                    l_switches.useInbandScom = 1;
-
-                    // Turn off FSI scom and turn on Inband Scom.
-                    membufChips[i]->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
-
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Enable IBSCOM on target HUID %.8X",
-                              TARGETING::get_huid(membufChips[i]));
-                }
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "IBSCOM NOT enabled on target HUID %.8X",
-                          TARGETING::get_huid(membufChips[i]));
-
-            }
-        }
-
+        IBSCOM::enableInbandScoms();
     }while(0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

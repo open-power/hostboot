@@ -1383,6 +1383,7 @@ errlHndl_t i2cSetupMasters ( void )
 
                 mode.bit_rate_div = io_args.bit_rate_divisor;
 
+                size = sizeof(uint64_t);
                 err = deviceWrite( centList[centaur],
                                    &mode.value,
                                    size,
@@ -1490,6 +1491,7 @@ errlHndl_t i2cSetupMasters ( void )
 
                 mode.bit_rate_div = io_args.bit_rate_divisor;
 
+                size = sizeof(uint64_t);
                 err = deviceWrite( procList[proc],
                                    &mode.value,
                                    size,

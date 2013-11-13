@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,12 +36,13 @@
 #include <errl/errlmanager.H>
 #include "scom.H"
 #include <scom/scomreasoncodes.H>
+#include <ibscom/ibscomreasoncodes.H>
 #include <sys/time.h>
 
 
 // Trace definition
 trace_desc_t* g_trac_scom = NULL;
-TRAC_INIT(&g_trac_scom, "SCOM", KILOBYTE, TRACE::BUFFER_SLOW); //1K
+TRAC_INIT(&g_trac_scom, SCOM_COMP_NAME, KILOBYTE, TRACE::BUFFER_SLOW); //1K
 
 
 namespace SCOM
@@ -102,7 +103,6 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
     bool l_indScomError = false;
     uint64_t temp_io_buffer = 0;
 
-    //@todo - determine hwhat an appropriate timeout value
     enum { MAX_INDSCOM_TIMEOUT_NS = 100000 }; //=.1ms
 
     // If the indirect scom bit is 0, then doing a regular scom
@@ -213,8 +213,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                     break;
                 }
 
-                //TODO tmp remove for VPO, need better polling strategy -- RTC43738
-                //nanosleep( 0, 10000 ); //sleep for 10,000 ns
+                nanosleep( 0, 10000 ); //sleep for 10,000 ns
                 elapsed_indScom_time_ns += 10000;
 
             }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
@@ -336,8 +335,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
                 }
 
-                //TODO tmp remove for VPO, need better polling strategy -- RTC43738
-                //nanosleep( 0, 10000 ); //sleep for 10,000 ns
+                nanosleep( 0, 10000 ); //sleep for 10,000 ns
                 elapsed_indScom_time_ns += 10000;
 
             }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
@@ -463,6 +461,19 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
         }
 
     }while(0);
+
+    //Look for special retry codes
+    if( l_err
+        && (0xFFFFFFFF != i_accessType)
+        && (l_err->reasonCode() == IBSCOM::IBSCOM_RETRY_DUE_TO_ERROR) )
+    {
+        delete l_err;
+        TRACFCOMP(g_trac_scom, "Forcing retry of Scom to %.16X on %.8X", i_addr, TARGETING::get_huid(i_target));
+        // use the unused i_accessType parameter to avoid an infinite recursion
+        int64_t accessType_flag = 0xFFFFFFFF;
+        l_err = doScomOp( i_opType, i_target, io_buffer,
+                          io_buflen, accessType_flag, i_addr );
+    }
 
     return l_err;
 }

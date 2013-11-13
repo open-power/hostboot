@@ -41,6 +41,7 @@
 #include <targeting/attrsync.H>
 #include <diag/prdf/prdfMain.H>
 #include <intr/interrupt.H>
+#include <ibscom/ibscomif.H>
 
 namespace HWAS
 {
@@ -231,6 +232,9 @@ void* host_prd_hwreconfig( void *io_pArgs )
 
     errlHndl_t errl = NULL;
 
+    // Flip the scom path back to FSI in case we enabled IBSCOM previously
+    IBSCOM::enableInbandScoms(IBSCOM_DISABLE);
+
     // Call PRDF to remove non-function chips from its system model
     errl = PRDF::refresh();
 
@@ -239,7 +243,7 @@ void* host_prd_hwreconfig( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "host_prd_hwreconfig ERROR 0x%.8X returned from"
                   "  call to PRDF::refresh", errl->reasonCode());
-    }
+    }  
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_prd_hwreconfig exit" );

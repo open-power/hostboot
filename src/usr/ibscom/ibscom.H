@@ -67,6 +67,24 @@ errlHndl_t ibscomPerformOp(DeviceFW::OperationType i_opType,
                           int64_t i_accessType,
                           va_list i_args);
 
+/**
+ * Bit definition for MBSIBERR0
+ */
+struct MBSIBERRO_Reg_t
+{
+    union
+    {
+        uint64_t data;
+        struct
+        {
+            uint64_t addr:32;    //MBSIBERR0Q_IB_HOST_ADDRESS
+            uint64_t errvalid:1; //MBSIBERR0Q_IB_HOST_ERROR_VALID
+            uint64_t piberr:3;   //MBSIBERR0Q_IB_HOST_ERROR_STATUS
+            uint64_t iswrite:1;  //MBSIBERR0Q_IB_HOST_WRITE_NOT_READ
+            uint64_t reserved:27;
+        };
+    };
+};
 
 
 };

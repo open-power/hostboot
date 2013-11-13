@@ -33,14 +33,14 @@ namespace PIB
      */
     enum
     {
-        PIB_NO_ERROR          = 0,//0x00000000,
-        PIB_RESOURCE_OCCUPIED = 1,//0x00000001,
-        PIB_CHIPLET_OFFLINE   = 2,//0x00000010,
-        PIB_PARTIAL_GOOD      = 3,//0x00000011,
-        PIB_INVALID_ADDRESS   = 4,//0x00000100,
-        PIB_CLOCK_ERROR       = 5,//0x00000101,
-        PIB_PARITY_ERROR      = 6,//0x00000110,
-        PIB_TIMEOUT           = 7,//0x00000111,
+        PIB_NO_ERROR          = 0,//0b000,
+        PIB_RESOURCE_OCCUPIED = 1,//0b001,
+        PIB_CHIPLET_OFFLINE   = 2,//0b010,
+        PIB_PARTIAL_GOOD      = 3,//0b011,
+        PIB_INVALID_ADDRESS   = 4,//0b100,
+        PIB_CLOCK_ERROR       = 5,//0b101,
+        PIB_PARITY_ERROR      = 6,//0b110,
+        PIB_TIMEOUT           = 7,//0b111,
     };
 
 
