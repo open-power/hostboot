@@ -2874,7 +2874,6 @@ public:
 
         // Call _deconfigureAssocProc to determine which procs
         // should be deconfigured based on state of system passed in
-        printk("hwasGardTest: Calling _deconfigureAssocProc\n");
         l_pErr = DeconfigGard::_deconfigureAssocProc(l_tuletaProcs);
         if (l_pErr)
         {
