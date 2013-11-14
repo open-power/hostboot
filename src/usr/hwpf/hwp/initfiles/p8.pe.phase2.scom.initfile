@@ -1,4 +1,4 @@
-#-- $Id: p8.pe.phase2.scom.initfile,v 1.4 2013/11/01 00:37:33 jmcgill Exp $
+#-- $Id: p8.pe.phase2.scom.initfile,v 1.5 2013/11/13 17:20:20 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -53,8 +53,8 @@ scom 0x02012(0,4,8)18 {
 
 #-- PCI Hardware Configuration 1 Register
 scom 0x02012(0,4,8)19 {
-    bits,    scom_data,    expr;
-    22,      0b1,          (enable_dmar_ooo);                       #-- enable OOO DMA read only where supported (HW223650)
+    bits,    scom_data;
+    22,      0b0;                                                   #-- diable OOO DMA read
 }
 
 #-- PCI Nest Clock Trace Control Register
