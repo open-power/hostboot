@@ -1438,6 +1438,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p0 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc0pore0</id>
+    <type>unit-pore-venice</type>
+    <attribute><id>HUID</id><default>0x001F0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p1 processor chip -->
 
 <targetInstance>
@@ -2595,6 +2615,25 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p1 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc1pore0</id>
+    <type>unit-pore-venice</type>
+    <attribute><id>HUID</id><default>0x001F0001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
 
 <!-- Venice n0p2 processor chip -->
 
@@ -3747,6 +3786,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-2/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p2 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc2pore0</id>
+    <type>unit-pore-venice</type>
+    <attribute><id>HUID</id><default>0x001F0002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/pore-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -4912,6 +4971,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p3 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc3pore0</id>
+    <type>unit-pore-venice</type>
+    <attribute><id>HUID</id><default>0x001F0003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p4 processor chip -->
 
 <targetInstance>
@@ -6031,6 +6110,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-4/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p4 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc4pore0</id>
+    <type>unit-pore-venice</type>
+    <attribute><id>HUID</id><default>0x001F0004</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/pore-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -7162,6 +7261,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p5 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc5pore0</id>
+    <type>unit-pore-venice</type>
+    <attribute><id>HUID</id><default>0x001F0005</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p6 processor chip -->
 
 <targetInstance>
@@ -8286,6 +8405,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p6 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc6pore0</id>
+    <type>unit-pore-venice</type>
+    <attribute><id>HUID</id><default>0x001F0006</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p7 processor chip -->
 
 <targetInstance>
@@ -9402,6 +9541,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-7/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p7 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc7pore0</id>
+    <type>unit-pore-venice</type>
+    <attribute><id>HUID</id><default>0x001F0007</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/pore-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>

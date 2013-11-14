@@ -532,14 +532,14 @@ foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
         if((exists($pcie_bus->{source}->{'dsmp-capable'}))&&
           ($pcie_bus->{source}->{'dsmp-capable'} eq 'Yes'))
         {
-    
+
             $dsmp_capable = 1;
         }
-    
+
         if((exists($pcie_bus->{endpoint}->{'is-slot'}))&&
           ($pcie_bus->{endpoint}->{'is-slot'} eq 'Yes'))
         {
-    
+
             $is_slot = 1;
         }
         my $lane_set = 0;
@@ -554,19 +554,19 @@ foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
             {
                 $lane_set = 1;
             }
-    
+
         }
         $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
-            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-mask'} 
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-mask'}
                 = $pcie_bus->{source}->{'lane-mask'};
         $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
-            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'dsmp-capable'} 
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'dsmp-capable'}
                 = $dsmp_capable;
         $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
-            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-swap'} 
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-swap'}
                 = oct($pcie_bus->{source}->{'lane-swap-bits'});
         $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
-            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-reversal'} 
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-reversal'}
                 = oct($pcie_bus->{source}->{'lane-reversal-bits'});
         $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
             {$pcie_bus->{source}->{iop}}->{$lane_set}->{'is-slot'} = $is_slot;
@@ -1152,6 +1152,10 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             # instance path to be added
             $ipath = "";
             generate_nx($proc,$proc_ordinal_id,$ipath);
+            # TODO RTC: 87142
+            # instance path to be added
+            $ipath = "";
+            generate_pore($proc,$proc_ordinal_id,$ipath);
         }
     }
 }
@@ -1218,7 +1222,7 @@ for my $i ( 0 .. $#STargets )
             print "\n";
         }
         my $mba = $STargets[$i][UNIT_FIELD];
-        generate_mba( $memb, $membMcs, $mba, 
+        generate_mba( $memb, $membMcs, $mba,
             $STargets[$i][ORDINAL_FIELD], $ipath);
         $mba_count += 1;
         if ($mba_count == 2)
@@ -2564,6 +2568,43 @@ sub generate_nx
 
     # call to do any fsp per-nx attributes
     do_plugin('fsp_nx', $proc, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_pore
+{
+    my ($proc, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X1F%04X",${node},$proc);
+    print "\n<!-- $SYSNAME n${node}p$proc PORE units -->\n";
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}pore0</id>
+    <type>unit-pore-$CHIPNAME</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/pore-0</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>";
+        # TODO RTC: 87142
+        print "
+        <default>instance:pore:TO_BE_ADDED</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>";
+
+    # call to do any fsp per-pore attributes
+    do_plugin('fsp_pore', $proc, $ordinalId );
 
     print "
 </targetInstance>

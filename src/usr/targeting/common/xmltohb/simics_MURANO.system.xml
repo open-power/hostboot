@@ -1075,6 +1075,26 @@
     </attribute>
 </targetInstance>
 
+<!-- murano n0p0 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc0pore0</id>
+    <type>unit-pore-murano</type>
+    <attribute><id>HUID</id><default>0x001F0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Murano n0p1 processor chip -->
 
 <targetInstance>
@@ -1864,6 +1884,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-1/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- murano n0p1 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc1pore0</id>
+    <type>unit-pore-murano</type>
+    <attribute><id>HUID</id><default>0x001F0001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/pore-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2669,6 +2709,26 @@
     </attribute>
 </targetInstance>
 
+<!-- murano n0p2 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc2pore0</id>
+    <type>unit-pore-murano</type>
+    <attribute><id>HUID</id><default>0x001F0002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Murano n0p3 processor chip -->
 
 <targetInstance>
@@ -3458,6 +3518,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-3/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- murano n0p3 PORE unit -->
+
+<targetInstance>
+    <id>sys0node0proc3pore0</id>
+    <type>unit-pore-murano</type>
+    <attribute><id>HUID</id><default>0x001F0003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/pore-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>

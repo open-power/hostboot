@@ -352,6 +352,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "Control Node";
         case TYPE_NX:
             return "NX";
+        case TYPE_PORE:
+            return "PORE";
         case TYPE_OSCREFCLK:
             return "OSCREFClock";
         case TYPE_OSCPCICLK:
