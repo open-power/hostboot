@@ -33,6 +33,6 @@ SUBDIRS = test.d runtime.d
 
 BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:7dabbe4879dcdd19ed236573aa68e8671fa8c3c7
-BINARY_FILES += $(IMGDIR)/cvpd.dat:1d43fa2a410a81b39b51b57248a3259cd3bf6352
+BINARY_FILES += $(IMGDIR)/cvpd.dat:0400a31bf0c8ecfefb3a21af50cf557c5def0352
 
 include ${ROOTPATH}/config.mk

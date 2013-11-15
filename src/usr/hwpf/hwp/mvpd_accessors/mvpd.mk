@@ -37,5 +37,6 @@ OBJS += getMvpdRing.o \
         getMBvpdSpareDramData.o \
         getMBvpdVersion.o \
         getMBvpdDram2NModeEnabled.o \
-        getMBvpdSensorMap.o
+        getMBvpdSensorMap.o \
+        accessMBvpdL4BankDelete.o
 

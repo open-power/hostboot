@@ -52,6 +52,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
+#include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
 #include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
 #include <vpd/spdenums.H>
@@ -572,6 +573,21 @@ fapi::ReturnCode fapiPlatGetDram2NModeEnabled (
                                     const fapi::Target * i_pTarget,
                                     uint8_t & o_val );
 
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro and
+ * FAPI_ATTR_SET macro when getting or setting the L4 Bank Delete
+ * record VSPD keyword MX vpd value
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target MB pointer
+ *  @param[in,out] io_val   Retrieved or value to set
+ *  @param[in] i_mode       Get or Set mode
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatL4BankDelete (
+                                    const fapi::Target * i_pTarget,
+                                    uint32_t & io_val,
+                                    const fapi::MBvpdL4BankDeleteMode i_mode );
 /**
  * @brief This function is called by the FAPI_ATTR_SET macro when setting
  * the Bad DQ Bitmap attribute
@@ -1715,5 +1731,19 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetSensorMap\
         (PTARGET, fapi::SENSOR_MAP_SECONDARY, VAL)
+
+//------------------------------------------------------------------------------
+//  MACROS to support MBVPD Get and Set L4 Bank Delete VPD
+//------------------------------------------------------------------------------
+#define ATTR_L4_BANK_DELETE_VPD_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatL4BankDelete\
+        (PTARGET, VAL, fapi::GET_L4_BANK_DELETE_MODE)
+
+#define ATTR_L4_BANK_DELETE_VPD_SETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::setAttrActionsFunc(fapi::ID, PTARGET,\
+                                               sizeof(VAL), &VAL),\
+    fapi::platAttrSvc::fapiPlatL4BankDelete\
+        (PTARGET, VAL, fapi::SET_L4_BANK_DELETE_MODE)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

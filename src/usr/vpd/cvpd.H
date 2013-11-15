@@ -96,6 +96,7 @@ namespace CVPD
         { AM,  "AM" },
         { VZ,  "VZ" },
         { pdD, "#D" },
+        { MX,  "MX" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_KEYWORD, "XX" },

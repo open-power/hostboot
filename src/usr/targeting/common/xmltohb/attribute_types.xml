@@ -12248,25 +12248,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>L4_BANK_DELETE_VPD</id>
-    <description>L4 Bank Delete settings in VPD.
-        Denotes what banks have been deleted from the L4.
-        Data will be pulled from CDIMM VPD if CDIMM present.
-        Data will be pulled from backplane VPD if IS DIMMs present.
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_L4_BANK_DELETE_VPD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>PROC_BOOT_VOLTAGE_VID</id>
     <description>
         Proc Boot Voltage

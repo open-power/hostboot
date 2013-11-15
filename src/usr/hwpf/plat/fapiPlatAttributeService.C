@@ -50,6 +50,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
+#include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
 #include <fapiPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
@@ -1311,6 +1312,18 @@ fapi::ReturnCode fapiPlatGetSensorMap (
     // Get the data using the HWP accessor
     fapi::ReturnCode l_rc;
     FAPI_EXEC_HWP(l_rc, getMBvpdSensorMap, * i_pFapiTarget, i_attr, o_val);
+    return l_rc;
+}
+
+fapi::ReturnCode fapiPlatL4BankDelete (
+             const fapi::Target * i_pTarget,
+             uint32_t  & io_val,
+             const fapi::MBvpdL4BankDeleteMode i_mode)
+{
+    // Call a VPD Accessor HWP to get or set the data
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, accessMBvpdL4BankDelete,
+                        *i_pTarget, io_val, i_mode);
     return l_rc;
 }
 

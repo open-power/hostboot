@@ -143,6 +143,14 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_MBVPD_INVALID_MODE_PARAMETER</rc>
+    <description>
+        Mode must be Get or Set.
+    </description>
+    <ffdc>MODE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_MBVPD_UNEXPECTED_MEM_TYPE</rc>
     <description>
         Memory type in VSPD keyword #I not DDR3 or DDR4

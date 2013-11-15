@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/vpd/cvpdenums.H $                             */
+/* $Source: src/include/usr/hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,57 +20,52 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __CVPDENUMS_H
-#define __CVPDENUMS_H
+// $Id: accessMBvpdL4BankDelete.H,v 1.2 2013/11/21 17:17:30 whs Exp $
+/**
+ *  @file accessMBvpdL4BankDelete.H
+ *
+ *  @brief MBvpd accessor for the ATTR_L4_BANK_DELETE_VPD attribute
+ */
 
-namespace CVPD
+#ifndef _HWP_ACCESSMBVPDL4BANKDELETE_
+#define _HWP_ACCESSMBVPDL4BANKDELETE_
+
+#include <fapi.H>
+
+namespace fapi
 {
 
-    /**
-     * @brief Enumeration for the CVPD Records that contain
-     *       the keyword enumerations below.
-     */
-    enum cvpdRecord
+// mode
+    enum MBvpdL4BankDeleteMode
     {
-        CVPD_FIRST_RECORD   = 0x00,
-        VEIR        = CVPD_FIRST_RECORD,
-        VER0        = 0x01,
-        MER0        = 0x02,
-        VSPD        = 0x03,
-        VINI        = 0x04,
-        // Last Record
-        CVPD_LAST_RECORD,
-        CVPD_TEST_RECORD,   // Test purposes ONLY!
-        CVPD_INVALID_RECORD = 0xFFFF,
+        GET_L4_BANK_DELETE_MODE = 0,      // retrieve value from vpd
+        SET_L4_BANK_DELETE_MODE = 1,      // update value in vpd
     };
+}
 
-    /**
-     * @brief Enumerations for CVPD keywords that can be
-     *       accessed in the CVPD.
-     */
-    enum cvpdKeyword
-    {
-        CVPD_FIRST_KEYWORD      = 0x00,
-        pdI          = CVPD_FIRST_KEYWORD,
-        PF           = 0x01,
-        MT           = 0x02,
-        MR           = 0x03,
-        pdA          = 0x04,
-        EL           = 0x05,
-        LM           = 0x06,
-        MW           = 0x07,
-        MV           = 0x08,
-        AM           = 0x09,
-        VZ           = 0x0a,
-        pdD          = 0x0b,
-        MX           = 0x0c,
+// function pointer typedef definition for HWP call support
+typedef fapi::ReturnCode (*accessMBvpdL4BankDelete_FP_t)
+    (const fapi::Target &,
+     uint32_t &,
+     const fapi::MBvpdL4BankDeleteMode);
 
-        // Last Keyword
-        CVPD_LAST_KEYWORD,
-        CVPD_TEST_KEYWORD,  // Test purposes ONLY!
-        CVPD_INVALID_KEYWORD    = 0xFFFF,
-    };
-
-};  // end CVPD
+extern "C"
+{
+/**
+ * @brief MBvpd accessor for the ATTR_L4_BANK_DELETE_VPD attribute
+ *
+ * Access L4 Bank Delete value in MBvpd record VSPD keyword MX.
+ *
+ * @param[in] i_mbTarget  - Reference to mb Target
+ * @param[in,out] io_val  - retrived MX value or value to use to update MX vpd
+ * @param[in] i_mode      - set or get mode
+ *
+ * @return fapi::ReturnCode FAPI_RC_SUCCESS if success, else error code
+ */
+fapi::ReturnCode accessMBvpdL4BankDelete(
+    const fapi::Target & i_mbTarget,
+    uint32_t & io_val,
+    const fapi::MBvpdL4BankDeleteMode i_mode );
+}
 
 #endif

@@ -1187,7 +1187,6 @@
     <attribute><id>CDIMM_SENSOR_MAP_PRIMARY</id></attribute>
     <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
-    <attribute><id>L4_BANK_DELETE_VPD</id></attribute>
     <attribute><id>DMI_DFE_OVERRIDE</id></attribute>
 </targetType>
 
