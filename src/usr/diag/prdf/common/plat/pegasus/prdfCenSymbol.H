@@ -166,6 +166,14 @@ class CenSymbol
     /** @return The DRAM index for this symbol. */
     uint8_t getDram() const { return symbol2Dram( iv_symbol, iv_x4Dram ); }
 
+    /**
+     * @return The first symbol of the DRAM associated with this symbol.
+     * @note   Needed for input into mss_put_mark_store and mss_put_steer_mux
+     *         hardware procedures.
+     */
+    uint8_t getDramSymbol() const
+    { return dram2Symbol( symbol2Dram(iv_symbol, iv_x4Dram), iv_x4Dram); }
+
     /** @return The bad pins associated with this symbol in relation to the DRAM
      *          (x4 mode is 4-bits, x8 mode is 8-bits,). */
     uint8_t getDramPins() const;
@@ -193,7 +201,10 @@ class CenSymbol
     static uint8_t symbol2PortSlct( uint8_t i_symbol );
 
     /** @return The DRAM index for the given symbol. */
-    static uint8_t symbol2Dram( uint8_t i_symbol, bool isX4Dram );
+    static uint8_t symbol2Dram( uint8_t i_symbol, bool i_isX4Dram );
+
+    /** @return The first symbol of the given DRAM index. */
+    static uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram );
 
     /**
      * @brief   Overrides the '<' operator.

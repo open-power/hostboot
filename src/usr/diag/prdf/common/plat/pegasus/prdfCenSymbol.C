@@ -261,16 +261,30 @@ uint8_t CenSymbol::symbol2PortSlct( uint8_t i_symbol )
 
 //------------------------------------------------------------------------------
 
-uint8_t CenSymbol::symbol2Dram( uint8_t i_symbol, bool isX4Dram )
+uint8_t CenSymbol::symbol2Dram( uint8_t i_symbol, bool i_isX4Dram )
 {
-    uint8_t dram = isX4Dram ? X4DRAMS_PER_RANK : X8DRAMS_PER_RANK;
+    const uint8_t dramsPerRank   = i_isX4Dram ? X4DRAMS_PER_RANK
+                                              : X8DRAMS_PER_RANK;
 
-    if ( SYMBOLS_PER_RANK > i_symbol )
-    {
-        dram = i_symbol / (isX4Dram ? SYMBOLS_PER_X4DRAM : SYMBOLS_PER_X8DRAM);
-    }
+    const uint8_t symbolsPerDram = i_isX4Dram ? SYMBOLS_PER_X4DRAM
+                                              : SYMBOLS_PER_X8DRAM;
 
-    return dram;
+    return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / symbolsPerDram)
+                                         : dramsPerRank;
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t CenSymbol::dram2Symbol( uint8_t i_dram, bool i_isX4Dram )
+{
+    const uint8_t dramsPerRank   = i_isX4Dram ? X4DRAMS_PER_RANK
+                                              : X8DRAMS_PER_RANK;
+
+    const uint8_t symbolsPerDram = i_isX4Dram ? SYMBOLS_PER_X4DRAM
+                                              : SYMBOLS_PER_X8DRAM;
+
+    return (dramsPerRank > i_dram) ? (i_dram * symbolsPerDram)
+                                   : SYMBOLS_PER_RANK;
 }
 
 //------------------------------------------------------------------------------

@@ -450,8 +450,8 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 
     uint8_t symbolMark = i_mark.getSM().isValid() ? i_mark.getSM().getSymbol()
                                                   : MSS_INVALID_SYMBOL;
-    uint8_t chipMark   = i_mark.getCM().isValid() ? i_mark.getCM().getSymbol()
-                                                  : MSS_INVALID_SYMBOL;
+    uint8_t chipMark = i_mark.getCM().isValid() ? i_mark.getCM().getDramSymbol()
+                                                : MSS_INVALID_SYMBOL;
 
     fapi::ReturnCode l_rc = mss_put_mark_store( getFapiTarget(i_mba),
                                                 i_rank.getMaster(), symbolMark,
@@ -522,7 +522,8 @@ int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
     errlHndl_t errl = NULL;
 
     PRD_FAPI_TO_ERRL( errl, mss_do_steering, getFapiTarget(i_mba),
-                      i_rank.getMaster(), i_symbol.getSymbol(), i_x4EccSpare );
+                      i_rank.getMaster(), i_symbol.getDramSymbol(),
+                      i_x4EccSpare );
 
     if ( NULL != errl )
     {
