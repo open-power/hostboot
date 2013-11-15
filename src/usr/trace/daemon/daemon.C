@@ -35,6 +35,7 @@
 #include <initservice/initserviceif.H>
 
 #include <sys/msg.h>
+#include <sys/task.h>
 #include <kernel/console.H>
 #include <util/align.H>
 
@@ -76,6 +77,9 @@ namespace TRACEDAEMON
 
     void Daemon::execute()
     {
+        // Mark as an independent daemon so if it crashes we terminate.
+        task_detach();
+
         // Mark the daemon as started in the interface.
         iv_service = Service::getGlobalInstance();
         iv_service->iv_daemon->start();

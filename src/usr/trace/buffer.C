@@ -254,28 +254,6 @@ namespace TRACE
             BufferPage* newPage = BufferPage::allocate();
             newPage->prev = first;
 
-            // If there is a page already, update its next pointer to point
-            // back at this new page.
-            if (first)
-            {
-                if (!__sync_bool_compare_and_swap(&first->next,
-                                                  NULL,
-                                                  newPage))
-                {
-                    // Someone beat us to allocating the page, release it.
-                    BufferPage::deallocate(newPage);
-                    do
-                    {
-                        pagesAllocated = iv_pagesAlloc;
-                        newPagesAllocated = pagesAllocated - 1;
-                    }
-                    while (!__sync_bool_compare_and_swap(&iv_pagesAlloc,
-                                                         pagesAllocated,
-                                                         newPagesAllocated));
-                    continue;
-                }
-            }
-
             // Now we have a page allocated, claim our entry first and then
             // hook it up to master list.
             l_entry = newPage->claimEntry(i_size);
@@ -300,6 +278,21 @@ namespace TRACE
                 // valid since we've freed it.
                 l_entry = NULL;
                 continue;
+            }
+
+            // If there was a page already, update its next pointer to point
+            // back at this new page.
+            if (first)
+            {
+                if (!__sync_bool_compare_and_swap(&first->next,
+                                                  NULL,
+                                                  newPage))
+                {
+                    // We were the first one to update iv_firstPage, so
+                    // first->next should have been NULL and nobody was
+                    // suppose to touch it.
+                    assert(false);
+                }
             }
 
             // Since we allocated a page, signal any other tasks that might be

@@ -669,8 +669,6 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                     this->iv_writeMsgHdlr->incMsgCount(i_task);
                 }
 
-// TODO.. Need to map the physical page here before sending the message because
-// the RP uses the physical page off the message queue.. (comment from patrick)
                 this->iv_writeMsgHdlr->addVirtAddr(
                         reinterpret_cast<void*>(l_vaddr),pageAddr);
                 this->iv_writeMsgHdlr->sendMessage(MSG_MM_RP_WRITE,
