@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -47,6 +47,8 @@ namespace KernelMisc
     extern uint64_t g_payload_entry;
     /** @brief Address from base of payload data pointer. */
     extern uint64_t g_payload_data;
+    /** @brief master host boot instance number (node) */
+    extern uint64_t g_masterHBInstance;
 
     /** @fn in_kernel_mode
      *  @brief Determine if the code is currently in kernel mode or not.

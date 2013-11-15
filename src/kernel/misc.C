@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,12 +36,15 @@
 #include <kernel/memstate.H>
 #include <kernel/intmsghandler.H>
 #include <kernel/hbdescriptor.H>
+#include <kernel/ipc.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t,
-                         uint64_t) NO_RETURN;
+                         uint64_t, uint64_t) NO_RETURN;
 
 extern HB_Descriptor kernel_hbDescriptor;
+
+KernelIpc::start_payload_data_area_t KernelIpc::start_payload_data_area;
 
 namespace KernelMisc
 {
@@ -49,6 +52,7 @@ namespace KernelMisc
     uint64_t g_payload_base = 0;
     uint64_t g_payload_entry = 0;
     uint64_t g_payload_data = 0;
+    uint64_t g_masterHBInstance = 0xfffffffffffffffful;
 
     void shutdown()
     {
@@ -109,7 +113,7 @@ namespace KernelMisc
             else
             {
                 static Barrier* l_barrier = new Barrier(CpuManager::getCpuCount());
-                static uint64_t l_lowestPIR = 0xffffffffffffffffull;
+                static uint64_t l_lowestPIR = 0xfffffffffffffffful;
 
                 if (c->master)
                 {
@@ -138,20 +142,70 @@ namespace KernelMisc
 
                 l_barrier->wait();
 
+                // only set this to valid PIR if local master
+                // otherwise leave as default;
+                uint64_t local_master_pir = 0xfffffffffffffffful;
+
+                // Find the start_payload_data_area on the master node
+                uint64_t hrmor_base = KernelIpc::ipc_data_area.hrmor_base;
+                uint64_t this_node =
+                    getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+
+                uint64_t hrmor_offset = getHRMOR() - (this_node * hrmor_base);
+
+                uint64_t dest_hrmor =
+                    (g_masterHBInstance * hrmor_base) + hrmor_offset;
+
+                uint64_t start_payload_data_area_address =
+                    reinterpret_cast<uint64_t>
+                    (&KernelIpc::start_payload_data_area);
+
+                start_payload_data_area_address += dest_hrmor;
+                start_payload_data_area_address |= 0x8000000000000000ul;
+
+                KernelIpc::start_payload_data_area_t * p_spda =
+                    reinterpret_cast<KernelIpc::start_payload_data_area_t*>
+                    (start_payload_data_area_address);
+
                 if (c->master)
                 {
+                    local_master_pir = getPIR();
                     // Reset the memory state register so that the dump tools
                     // don't attempt to dump all of memory once payload runs.
                     KernelMemState::setMemScratchReg(
                             KernelMemState::MEM_CONTAINED_NR,
                             KernelMemState::NO_MEM);
+
+
+                    // add this nodes cpu_count to the system cpu_count
+                    __sync_add_and_fetch(&(p_spda->cpu_count),
+                                         CpuManager::getCpuCount());
+
+                    // set lowest system PIR based on local lowest PIR
+                    do
+                    {
+                        uint64_t currentPIR = p_spda->lowest_PIR;
+                        if (l_lowestPIR > currentPIR)
+                        {
+                            break;
+                        }
+
+                        if (__sync_bool_compare_and_swap(&p_spda->lowest_PIR,
+                                                         currentPIR, l_lowestPIR))
+                        {
+                            break;
+                        }
+
+                    } while(1);
+
                 }
 
-                kernel_shutdown(CpuManager::getCpuCount(),
+                kernel_shutdown(p_spda->node_count,
                                 g_payload_base,
                                 g_payload_entry,
                                 g_payload_data,
-                                l_lowestPIR);
+                                local_master_pir,  //master PIR if local master
+                                start_payload_data_area_address);
             }
         }
         else

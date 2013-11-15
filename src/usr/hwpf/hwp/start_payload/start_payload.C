@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -69,6 +69,10 @@
 #include    "start_payload.H"
 #include    <runtime/runtime.H>
 #include    <devtree/devtreeif.H>
+#include    <sys/task.h>
+#include    <kernel/cpu.H> // for KERNEL_MAX_SUPPORTED_CPUS_PER_NODE
+#include    <kernel/ipc.H> // for internode data areas
+#include    <mbox/ipc_msg_types.H>
 
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
@@ -81,15 +85,27 @@ using   namespace   fapi;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 
+
 /**
  * @brief This function will call the Initservice interface to shutdown
  *      Hostboot.  This function will call shutdown, passing in system
  *      attribute variables for the Payload base and Payload offset.
  *
+ * @param[in] Host boot master instance number (logical node number)
+ * @param[in] Is this the master HB instance [true|false]
+ *
  * @return errlHndl_t - NULL if succesful, otherwise a pointer to the error
  *      log.
  */
-errlHndl_t callShutdown ( void );
+errlHndl_t callShutdown ( uint64_t i_hbInstance, bool i_masterIntance );
+
+/**
+ * @brief This function will send an IPC message to all other HB instances
+ *        to perfrom the shutdown sequence.
+ * @param[in] Hostboot master instance number (logical node number)
+ * @Return errlHndlt_t - Null if succesful, otherwise an error Handle
+ */
+errlHndl_t broadcastShutdown ( uint64_t i_hbInstance );
 
 /**
  * @brief This function will check the Istep mode and send the appropriate
@@ -389,9 +405,17 @@ void*    call_host_start_payload( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_host_start_payload entry" );
 
+    uint64_t this_node =
+        task_getcpuid()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
 
-    //  - Run CXX testcases
-    l_errl = INITSERVICE::executeUnitTests();
+    // broadcast shutdown to other HB instances.
+    l_errl = broadcastShutdown(this_node);
+
+    if( l_errl == NULL)
+    {
+        //  - Run CXX testcases
+        l_errl = INITSERVICE::executeUnitTests();
+    }
 
     if( l_errl == NULL )
     {
@@ -400,7 +424,7 @@ void*    call_host_start_payload( void    *io_pArgs )
         //      - base/entry will be from system attributes
         //      - this will start the payload (Phyp)
         // NOTE: this call will not return if successful.
-        l_errl = callShutdown();
+        l_errl = callShutdown(this_node, true);
 
     };
 
@@ -428,7 +452,8 @@ void*    call_host_start_payload( void    *io_pArgs )
 //
 // Call shutdown
 //
-errlHndl_t callShutdown ( void )
+errlHndl_t callShutdown ( uint64_t i_masterInstance,
+                          bool i_isMaster)
 {
     errlHndl_t err = NULL;
     uint64_t payloadBase = 0x0;
@@ -511,19 +536,23 @@ errlHndl_t callShutdown ( void )
         TARGETING::SpFunctions spFuncs =
                 sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
 
-        // Notify Fsp with appropriate mailbox message.
-        err = notifyFsp( istepModeFlag,
-                         spFuncs );
-
-        if( err )
+        if(i_isMaster)
         {
-            break;
-        }
+            // Notify Fsp with appropriate mailbox message.
+            err = notifyFsp( istepModeFlag,
+                             spFuncs );
 
-        // Load payload data in Sapphire mode when SP Base Services not enabled
-        if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
-        {
-            payloadData = DEVTREE::get_flatdevtree_phys_addr();
+            if( err )
+            {
+                break;
+            }
+
+            // Load payload data in Sapphire mode when 
+            // SP Base Services not enabled
+            if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()))
+            {
+                payloadData = DEVTREE::get_flatdevtree_phys_addr();
+            }
         }
 
         // do the shutdown.
@@ -534,7 +563,8 @@ errlHndl_t callShutdown ( void )
                                  false,
                                  payloadBase,
                                  payloadEntry,
-                                 payloadData);
+                                 payloadData,
+                                 i_masterInstance);
 
     } while( 0 );
 
@@ -587,6 +617,106 @@ errlHndl_t notifyFsp ( bool i_istepModeFlag,
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                EXIT_MRK"notifyFsp()" );
+
+    return err;
+}
+
+
+
+
+errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
+{
+    errlHndl_t err = NULL;
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+
+    TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
+        sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+    do
+    {
+        // Set up the start_payload_data_area before
+        // broadcasting the shutdown to the slave HB instances
+        memset(&KernelIpc::start_payload_data_area,
+               '\0',
+               sizeof(KernelIpc::start_payload_data_area));
+
+        KernelIpc::start_payload_data_area.node_count = 0;
+        KernelIpc::start_payload_data_area.lowest_PIR = 0xfffffffffffffffful;
+
+        // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
+        // Currently set up in host_sys_fab_iovalid_processing() which only
+        // gets called if there are multiple physical nodes.
+        if(hb_images == 0)
+        {
+            // Single node system
+            break;
+        }
+
+        // continue - multi-node
+
+        uint8_t node_map
+            [sizeof(TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP_type)];
+
+        sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>(node_map);
+
+        uint64_t node_count = 0;
+
+        // Count the number of hb instances before sending
+        // any start_payload messages
+        for(uint64_t drawer = 0; drawer < sizeof(node_map); ++drawer)
+        {
+            uint64_t node = node_map[drawer];
+
+            if(node < (sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8))
+            {
+
+                // set mask to msb
+                TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+                    ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+
+                if( 0 != ((mask >> node) & hb_images ) )
+                {
+                    ++node_count;
+                }
+            } 
+        }
+
+        KernelIpc::start_payload_data_area.node_count = node_count;
+
+        // send message to all other existing hb instances except this one.
+        for(uint64_t drawer = 0; drawer < sizeof(node_map); ++drawer)
+        {
+            uint64_t node = node_map[drawer];
+
+            if(node < (sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) &&
+               node != i_hbInstance)
+            {
+
+                // set mask to msb
+                TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+                    ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+
+                if( 0 != ((mask >> node) & hb_images ) )
+                {
+                    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "start_payload-sending msg for drawer %d",
+                               drawer );
+                    msg_t * msg = msg_allocate();
+                    msg->type = IPC::IPC_START_PAYLOAD;
+                    msg->data[0] = i_hbInstance;
+                    err = MBOX::send(MBOX::HB_IPC_MSGQ, msg, node);
+                    if (err)
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "MBOX::send failed");
+                        break;
+                    }
+                }
+            } 
+        }
+
+    } while(0);
 
     return err;
 }

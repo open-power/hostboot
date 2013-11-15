@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -31,6 +31,7 @@
         bne- 1b; \
         isync; \
         /*     Wait for count to reach CPU count. */ \
+    2: \
     1: \
         or 1,1,1;    /* Drop thread priority */ \
         ld temp, 0(addr); \
@@ -51,21 +52,24 @@
     ;// Steps:
     ;//     All threads enter "EA[0]=1" mode.
     ;//     <sync barrier 1>
-    ;//     Thread0 on each core updates HRMOR.
+    ;//     All nodes have reported cpu_count
     ;//     <sync barrier 2>
-    ;//     All threads execute - isync ; slbia ; isync
+    ;//     Thread0 on each core updates HRMOR.
     ;//     <sync barrier 3>
+    ;//     All threads execute - isync ; slbia ; isync
+    ;//     <sync barrier 4>
     ;//     All threads except "last thread" enters payload.
     ;//         * last thread waits for all other threads to leave.
     ;//
     ;// The design of the barrier stages comes from the BookIV chapter
     ;// titled "HRMOR Update Sequence".
     ;//
-    ;// @param[in] r3 - CPU count - Number of active CPUs.
+    ;// @param[in] r3 - Number of Host boot instances (nodes) on the system
     ;// @param[in] r4 - Payload Base
     ;// @param[in] r5 - Payload Entry
     ;// @param[in] r6 - Payload Data
-    ;// @param[in] r7 - Last thread to enter payload.
+    ;// @param[in] r7 - PIR of local master cpu - only set by local master
+    ;// @param[in] r8 - System address of start_payload_data_area
     ;//
 .global kernel_shutdown
 kernel_shutdown:
@@ -74,11 +78,6 @@ kernel_shutdown:
     rotldi r10, r10, 63
         ;// Retrieve existing HRMOR.
     mfspr r0, HRMOR
-        ;// Determine physical address of shutdown_barrier.
-    lis r8, kernel_shutdown_barriers@h
-    ori r8, r8, kernel_shutdown_barriers@l
-    or r8, r8, r0       ;// Apply HRMOR.
-    or r8, r8, r10      ;// Apply EA[0] = 1.
         ;// Determine physical address of EA[0]=1 mode instruction.
     lis r9, kernel_shutdown_ea0_1_mode@h
     ori r9, r9, kernel_shutdown_ea0_1_mode@l
@@ -88,7 +87,24 @@ kernel_shutdown:
     mtlr r9
     blr
 kernel_shutdown_ea0_1_mode:
+
+        ;// Only master cpu on the node should increment barrier for node count
+        ;// as it was the one that updated the cpu_count & lowest_pir
+        ;// barrier - 1 wait for all nodes to report
+    mfspr  r10, PIR
+    cmp    cr0, r10, r7
+    bne+ 2f       ;// inside KERNEL_BARRIER below
+
         ;// Perform barrier - 1
+    KERNEL_BARRIER(r8, r3, r11)
+
+    ;// safe now to access system cpu_count and  lowest_PIR
+    ld  r3, 48(r8)   ;// cpu_count for whole system
+    ld  r7, 40(r8)   ;// lowest PIR for whole system
+
+    addi  r8, r8, 8  ;// next barrier
+
+        ;// Perform barrier - 2
     KERNEL_BARRIER(r8, r3, r11)
 
         ;// Update HRMOR on master.
@@ -97,7 +113,7 @@ kernel_shutdown_ea0_1_mode:
     bne+ 1f
     mtspr HRMOR, r4
 1:
-        ;// Perform barrier - 2
+        ;// Perform barrier - 3
     addi r8, r8, 8
     KERNEL_BARRIER(r8, r3, r11)
 
@@ -106,11 +122,11 @@ kernel_shutdown_ea0_1_mode:
     slbia
     isync
 
-        ;// Perform barrier - 3
+        ;// Perform barrier - 4
     addi r8, r8, 8
     KERNEL_BARRIER(r8, r3, r11)
 
-        ;// "Barrier" 4:
+        ;// "Barrier" 5:
         ;//     Increment counter as leaving, except PIR == r7 waits.
     addi r8, r8, 8
             ;// Check for PIR == r7.
@@ -125,6 +141,12 @@ kernel_shutdown_ea0_1_mode:
     bne- 1b
     isync
 2:
+    ;// Clear "Hostboot active" scratch register.
+    li r3, (0x40 + 0x38) ;// See sys/mmio.h
+    mtspr SPRC, r3
+    li r3, 0x0
+    mtspr SPRD, r3
+
     ;// Enter Payload.
         ;// Set HSRR0 to entry point.
     mtspr HSRR0, r5
@@ -156,14 +178,5 @@ kernel_shutdown_ea0_1_mode:
     isync
         ;// Raise thread priority and leave ourselves.
     or 2,2,2
-        ;// Clear "Hostboot active" scratch register.
-    li r3, (0x40 + 0x38) ;// See sys/mmio.h
-    mtspr SPRC, r3
-    li r3, 0x0
-    mtspr SPRD, r3
     b 2b
-
-.section .data
-kernel_shutdown_barriers:
-    .space 8*4 ;//
 

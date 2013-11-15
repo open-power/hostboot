@@ -34,6 +34,7 @@ namespace IPC
     {
         IPC_POPULATE_ATTRIBUTES = MBOX::FIRST_SECURE_MSG + 1,
         IPC_TEST_CONNECTION = MBOX::FIRST_SECURE_MSG + 2,
+        IPC_START_PAYLOAD,
     };
 
 }; // namespace IPC

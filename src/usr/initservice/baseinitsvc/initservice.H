@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -209,6 +209,9 @@ public:
      *                              payload entry-point.
      * @param[in] i_payload_entry - HRMOR adjusted address of any payload data
      *                              placed in r3
+     * @param[in] i_masterHBInstance - master hostboot instance number (node)
+     *                                 Needed when starting payload on a
+     *                                 multi-node system.
      *
      * @return Nothing
      * @note This calls registered services to notify them of shutdown and it
@@ -217,7 +220,8 @@ public:
     void doShutdown ( uint64_t i_status,
                       uint64_t i_payload_base = 0,
                       uint64_t i_payload_entry = 0,
-                      uint64_t i_payload_data = 0);
+                      uint64_t i_payload_data = 0,
+                      uint64_t i_masterHBInstance = 0xffffffffffffffffull);
 
 protected:
 

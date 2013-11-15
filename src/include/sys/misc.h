@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -97,11 +97,13 @@ extern "C"
  *                              entry-point.
  *  @param[in] i_payload_data   Data pointer fo the payload.  For standalone
  *                              Saphire this is the devtree
+ *  @param[in[ i_masterHBInstance  Hostboot instance number. for multinode
  */
 extern "C" void shutdown(uint64_t i_status,
                          uint64_t i_payload_base,
                          uint64_t i_payload_entry,
-                         uint64_t i_payload_data);
+                         uint64_t i_payload_data,
+                         uint64_t i_masterHBInstance);
 #endif
 
 /** @enum ProcessorCoreType

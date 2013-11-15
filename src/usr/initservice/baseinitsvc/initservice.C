@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -632,7 +632,8 @@ void doShutdown(uint64_t i_status,
                 bool i_inBackground,
                 uint64_t i_payload_base,
                 uint64_t i_payload_entry,
-                uint64_t i_payload_data)
+                uint64_t i_payload_data,
+                uint64_t i_masterHBInstance)
 {
     class ShutdownExecute
     {
@@ -640,11 +641,13 @@ void doShutdown(uint64_t i_status,
             ShutdownExecute(uint64_t i_status,
                             uint64_t i_payload_base,
                             uint64_t i_payload_entry,
-                            uint64_t i_payload_data)
+                            uint64_t i_payload_data,
+                            uint64_t i_masterHBInstance)
                 : status(i_status),
                   payload_base(i_payload_base),
                   payload_entry(i_payload_entry),
-                  payload_data(i_payload_data)
+                  payload_data(i_payload_data),
+                  masterHBInstance(i_masterHBInstance)
             { }
 
             void execute()
@@ -652,7 +655,8 @@ void doShutdown(uint64_t i_status,
                 Singleton<InitService>::instance().doShutdown(status,
                                                               payload_base,
                                                               payload_entry,
-                                                              payload_data);
+                                                              payload_data,
+                                                              masterHBInstance);
             }
             void startThread()
             {
@@ -664,6 +668,7 @@ void doShutdown(uint64_t i_status,
             uint64_t payload_base;
             uint64_t payload_entry;
             uint64_t payload_data;
+            uint64_t masterHBInstance;
 
             static void* run(void* _self)
             {
@@ -679,7 +684,8 @@ void doShutdown(uint64_t i_status,
     };
 
     ShutdownExecute* s = new ShutdownExecute(i_status, i_payload_base,
-                                             i_payload_entry, i_payload_data);
+                                             i_payload_entry, i_payload_data,
+                                             i_masterHBInstance);
 
     if (i_inBackground)
     {
@@ -695,7 +701,8 @@ void doShutdown(uint64_t i_status,
 void InitService::doShutdown(uint64_t i_status,
                              uint64_t i_payload_base,
                              uint64_t i_payload_entry,
-                             uint64_t i_payload_data)
+                             uint64_t i_payload_data,
+                             uint64_t i_masterHBInstance)
 {
     int l_rc = 0;
     errlHndl_t l_err = NULL;
@@ -757,7 +764,11 @@ void InitService::doShutdown(uint64_t i_status,
         l_rb_iter++;
     }
 
-    shutdown(i_status, i_payload_base, i_payload_entry, i_payload_data);
+    shutdown(i_status,
+             i_payload_base,
+             i_payload_entry,
+             i_payload_data,
+             i_masterHBInstance);
 }
 
 bool InitService::registerShutdownEvent(msg_q_t i_msgQ,

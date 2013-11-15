@@ -29,6 +29,12 @@
 #include <errl/errlmanager.H>
 #include <mbox/mbox_reasoncodes.H>
 
+namespace START_PAYLOAD
+{
+    extern errlHndl_t callShutdown ( uint64_t i_hbInstance,
+                                     bool i_masterInstance );
+};
+
 trace_desc_t* g_trac_ipc = NULL;
 TRAC_INIT(&g_trac_ipc, IPC_TRACE_NAME, KILOBYTE);
 
@@ -118,6 +124,7 @@ void IpcSp::msgHandler()
                     {
                         errlCommit(err, IPC_COMP_ID);
                     }
+                    mod_loaded = false;
                 }
 
                 // Respond
@@ -143,6 +150,51 @@ void IpcSp::msgHandler()
                     errlCommit(err,IPC_COMP_ID);
                 }
                 break;
+
+            case IPC_START_PAYLOAD:
+
+                if ( !VFS::module_is_loaded( "libstart_payload.so" ) )
+                {
+                    err = VFS::module_load( "libstart_payload.so" );
+
+                    if ( err )
+                    {
+                        TRACFCOMP( g_trac_ipc,
+                                   "Could not load runtime module" );
+                    }
+                    else
+                    {
+                        mod_loaded = true;
+                    }
+                }
+
+                if(!err)
+                {
+                    //  Function will not return unless error
+                    err = START_PAYLOAD::callShutdown(msg->data[0],false);
+                }
+
+                if(err)
+                {
+                    errlCommit(err, IPC_COMP_ID);
+                }
+
+                if(mod_loaded)
+                {
+                    err = VFS::module_unload( "libstart_payload.so" );
+
+                    if (err)
+                    {
+                        errlCommit(err, IPC_COMP_ID);
+                    }
+                    mod_loaded = false;
+                }
+
+                msg_free(msg);
+
+                break;
+
+
             default:
 
                 TRACFCOMP( g_trac_ipc,
@@ -180,6 +232,8 @@ void IpcSp::msgHandler()
                 err->collectTrace(IPC_TRACE_NAME);
 
                 errlCommit(err, IPC_COMP_ID);
+
+                msg_free(msg);
 
                 break;
         }

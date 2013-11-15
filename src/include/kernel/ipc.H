@@ -39,7 +39,31 @@ struct ipc_data_area_t
     uint32_t pir;
 };
 
+/**
+ * This stucture maps an IPC data area needed by start_payload that is common
+ * to all HB instances.
+ * @note  Don't change the order or size of this stucture
+ * w/o also changing src/kernel/shutdown.S
+ */
+struct start_payload_data_area_t
+{
+    /** barriers needed in shutdown.S - see src/kernel/shutdown.S
+     *  barrier[0] blocks until all nodes have reported cpu/node_count
+     *  barrier[1] blocks until safe to update HRMOR on master
+     *  barrier[2] blocks until HRMORs updated
+     *  barrier[3] blocks until SLBs, ERATs etc. cleared
+     *  barrier[4] blocks until all CPUs have jumpted to payload except the
+     *             one with the lowest PIR
+     */
+    uint64_t barrier[5];
+    uint64_t lowest_PIR;    //!< Lowest cpu PIR in entire system (all nodes)
+    uint64_t cpu_count;     //!< Total number of cpu threads in entire system
+    uint64_t node_count;    //!< Total number of nodes in entire system
+};
+
+
 extern ipc_data_area_t ipc_data_area;
+extern start_payload_data_area_t start_payload_data_area;
 };
 
 #endif

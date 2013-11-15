@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -106,8 +106,6 @@ void*    call_host_verify_hdat( void    *io_pArgs );
  *
  */
 void*    call_host_start_payload( void    *io_pArgs );
-
-
 
 };   // end namespace
 

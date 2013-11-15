@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -29,6 +29,8 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/namedtarget.H>
 #include    <targeting/attrsync.H>
+
+#define THIS_NODE_NO_PAYLOAD 0xffffffffffffffffull
 
 namespace INITSERVICE
 {
@@ -91,6 +93,10 @@ bool unregisterShutdownEvent(msg_q_t i_msgQ);
  *                              payload entry-point.
  * @param[in] i_payload_data - Pointer to payload data (if needed)
  *
+ * @param[in] i_masterHBinstance - master Host boot instance number (node)
+ *                                 Needed when starting payload
+ *                                 on multi-node system.
+ *
  * @return Nothing
  *
  * @note If inBackground = true, the shutdown call will spawn a child task
@@ -102,7 +108,8 @@ void doShutdown ( uint64_t i_status,
                   bool i_inBackground = false,
                   uint64_t i_payload_base = 0,
                   uint64_t i_payload_entry = 0,
-                  uint64_t i_payload_data = 0);
+                  uint64_t i_payload_data = 0,
+                  uint64_t i_masterHBInstance = THIS_NODE_NO_PAYLOAD);
 
 /**
  * @brief Returns if Service Processor Base Services are available

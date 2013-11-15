@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -31,13 +31,15 @@ using namespace Systemcalls;
 void shutdown(uint64_t i_status,
               uint64_t i_payload_base,
               uint64_t i_payload_entry,
-              uint64_t i_payload_data)
+              uint64_t i_payload_data,
+              uint64_t i_masterHBInstance)
 {
-    _syscall4(MISC_SHUTDOWN,
+    _syscall5(MISC_SHUTDOWN,
                 reinterpret_cast<void*>(i_status),
                 reinterpret_cast<void*>(i_payload_base),
                 reinterpret_cast<void*>(i_payload_entry),
-                reinterpret_cast<void*>(i_payload_data));
+                reinterpret_cast<void*>(i_payload_data),
+                reinterpret_cast<void*>(i_masterHBInstance));
 }
 
 ProcessorCoreType cpu_core_type()
