@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.H,v 1.11 2013/10/30 17:35:55 jimyac Exp $
+// $Id: p8_build_pstate_datablock.H,v 1.12 2013/11/14 20:45:59 jimyac Exp $
 #ifndef _P8_BUILD_PSTATE_DATABLOCK_H_
 #define _P8_BUILD_PSTATE_DATABLOCK_H_
 
@@ -101,6 +101,7 @@ typedef struct {
   uint32_t attr_pm_resonant_clock_high_band_upper_frequency;
 
   uint8_t  attr_chip_ec_feature_resonant_clk_valid;
+  uint8_t  attr_proc_ec_core_hang_pulse_bug;
 
 } AttributeList;
 

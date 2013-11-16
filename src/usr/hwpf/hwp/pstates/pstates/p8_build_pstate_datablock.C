@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.24 2013/10/30 17:35:53 jimyac Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.27 2013/11/14 20:45:55 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -50,7 +50,7 @@
 #include "pstate_tables.h"
 #include "lab_pstates.h"
 #include "pstates.h"
-
+#include "p8_pm.H"
 #include "p8_build_pstate_datablock.H"
 
 extern "C" {
@@ -60,7 +60,7 @@ using namespace fapi;
 // ----------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------
-ReturnCode proc_get_mvpd_data    (const Target& i_target, uint32_t attr_mvpd_data[PV_D][PV_W], ivrm_mvpd_t *ivrm_mvpd, uint8_t *present_chiplets, uint8_t *functional_chiplets);
+ReturnCode proc_get_mvpd_data    (const Target& i_target, uint32_t attr_mvpd_data[PV_D][PV_W], ivrm_mvpd_t *ivrm_mvpd, uint8_t *present_chiplets, uint8_t *functional_chiplets, uint8_t *poundm_valid);
 ReturnCode proc_get_attributes   (const Target& i_target, AttributeList *attr_list);
 ReturnCode proc_get_extint_bias  (uint32_t attr_mvpd_data[PV_D][PV_W], const AttributeList *attr, double *volt_int_vdd_bias, double *volt_int_vcs_bias);
 ReturnCode proc_boost_gpst       (PstateSuperStructure *pss, uint32_t attr_boost_percent);
@@ -85,9 +85,12 @@ p8_build_pstate_datablock(const Target& i_target,
 
   AttributeList attr;
   ChipCharacterization* characterization;
-  uint8_t i                   = 0;
-  uint8_t present_chiplets    = 0;
-  uint8_t functional_chiplets = 0;
+  uint8_t i                     = 0;
+  uint8_t present_chiplets      = 0;
+  uint8_t functional_chiplets   = 0;
+  uint8_t poundm_valid          = 1;  // assume valid until code determines invalid
+  uint8_t lpst_valid            = 1;  // assume valid until code determines invalid
+  uint8_t attr_pm_ivrms_enabled = 0;
 
   const uint8_t pv_op_order[S132A_POINTS] = PV_OP_ORDER;
 
@@ -100,10 +103,9 @@ p8_build_pstate_datablock(const Target& i_target,
   ivrm_mvpd_t ivrm_mvpd;
 
   FAPI_INF("Executing p8_build_pstate_datablock ....");
-
+  
   do
   {
-
     // -----------------------------------------------------------
     // Clear the PstateSuperStructure and install the magic number
     // -----------------------------------------------------------
@@ -121,6 +123,23 @@ p8_build_pstate_datablock(const Target& i_target,
     // calculate pstate frequency step in Khz
     frequency_step_khz = (attr.attr_freq_proc_refclock * 1000)/attr.attr_proc_dpll_divider;
 
+    // --------------------------------
+    // check chip ec feature attributes
+    // --------------------------------    
+    if (attr.attr_proc_ec_core_hang_pulse_bug) {
+      FAPI_INF("ATTR_PROC_EC_CORE_HANG_PULSE_BUG is set so disable iVRMs - setting PSTATE_NO_INSTALL_LPSA");
+      (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
+                                       PSTATE_NO_INSTALL_LPSA);
+      poundm_valid = 0;
+      lpst_valid   = 0;                                                                                      
+    }
+    
+    if (! attr.attr_chip_ec_feature_resonant_clk_valid) {
+      FAPI_INF("ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID is not set so disable resonant clocking - setting PSTATE_NO_INSTALL_RESCLK");  
+      (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
+                                       PSTATE_NO_INSTALL_RESCLK );
+    }
+    
     // ----------------
     // get #V & #M data
     // ----------------
@@ -130,18 +149,28 @@ p8_build_pstate_datablock(const Target& i_target,
     memset(attr_mvpd_voltage_control, 0, sizeof(attr_mvpd_voltage_control));
     memset(&ivrm_mvpd,                0, sizeof(ivrm_mvpd));
 
-    l_rc = proc_get_mvpd_data(i_target, attr_mvpd_voltage_control, &ivrm_mvpd, &present_chiplets, &functional_chiplets);
+    l_rc = proc_get_mvpd_data(i_target, attr_mvpd_voltage_control, &ivrm_mvpd, &present_chiplets, &functional_chiplets, &poundm_valid);
     if (l_rc) {
       break;
     }
-    else if (present_chiplets == 0) {
+    else if (!present_chiplets) {
       FAPI_ERR("**** ERROR : There are no cores present");
       FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_NO_CORES_PRESENT_ERROR);
       break;
     }
-    else if (functional_chiplets == 0) {
-      FAPI_IMP("No FUNCTIONAL chiplets found - local pstate data is not valid");
-      // indicate not LPST installed in PSS
+        
+    if (!functional_chiplets || !poundm_valid) {
+      
+      if (!functional_chiplets)
+      {
+        FAPI_IMP("No FUNCTIONAL chiplets found - set PSTATE_NO_INSTALL_LPSA");
+      }
+      else
+      {
+        FAPI_IMP("Invalid #M found - set PSTATE_NO_INSTALL_LPSA");
+      }
+      
+      // indicate no LPST installed in PSS
       (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
                                        PSTATE_NO_INSTALL_LPSA);
     }
@@ -295,34 +324,38 @@ p8_build_pstate_datablock(const Target& i_target,
     // -----------------------------
     // Create the Local Pstate table
     // -----------------------------
-    FAPI_IMP("Creating Local Pstate Table");
+    
+    if (! attr.attr_proc_ec_core_hang_pulse_bug) {
+      FAPI_IMP("Creating Local Pstate Table");
+    
+      rc = lpst_create( &((*io_pss).gpst), &((*io_pss).lpsa), DEAD_ZONE_5MV, volt_int_vdd_bias, volt_int_vcs_bias);
 
-    rc = lpst_create( &((*io_pss).gpst), &((*io_pss).lpsa), DEAD_ZONE_5MV, volt_int_vdd_bias, volt_int_vcs_bias);
+      int & LPST_RETURN_CODE = rc;
+      if (rc == -LPST_INVALID_OBJECT) {
+        FAPI_ERR("**** ERROR : lpst_create was passed null pointer to gpst or lpsa");
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_OBJECT_ERROR);
+        break;
+      }
+      else if (rc == -IVID_INVALID_VOLTAGE) {
+        FAPI_ERR("**** ERROR : lpst_create attempted to convert an invalid voltage value to ivid format (GT 1.39375V or LT 0.6V");
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_IVID_ERROR);
+        break;
+      }
+      else if (rc == -LPST_GPST_WARNING) {
+        FAPI_IMP("No Local Pstate Generated  - Global Pstate Table is completely within Deadzone" );
 
-    int & LPST_RETURN_CODE = rc;
-    if (rc == -LPST_INVALID_OBJECT) {
-      FAPI_ERR("**** ERROR : lpst_create was passed null pointer to gpst or lpsa");
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_OBJECT_ERROR);
-      break;
+        // indicate no LPST installed in PSS
+        (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
+                                         PSTATE_NO_INSTALL_LPSA);
+        lpst_valid = 0; 
+      }
+      else if (rc) {
+        FAPI_ERR("**** ERROR : lpst_create returned error rc = %d", rc );
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_ERROR);
+        break;
+      }
     }
-    else if (rc == -IVID_INVALID_VOLTAGE) {
-      FAPI_ERR("**** ERROR : lpst_create attempted to convert an invalid voltage value to ivid format (GT 1.39375V or LT 0.6V");
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_IVID_ERROR);
-      break;
-    }
-    else if (rc == -LPST_GPST_WARNING) {
-      FAPI_IMP("No Local Pstate Generated  - Global Pstate Table is completely within Deadzone" );
-
-      // indicate not LPST installed in PSS
-      (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
-                                       PSTATE_NO_INSTALL_LPSA);
-    }
-    else if (rc) {
-      FAPI_ERR("**** ERROR : lpst_create returned error rc = %d", rc );
-      FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_LPST_CREATE_ERROR);
-      break;
-    }
-
+    
     // -----------------------
     // Create VDS & VIN tables
     // -----------------------
@@ -388,21 +421,43 @@ p8_build_pstate_datablock(const Target& i_target,
       l_rc = proc_res_clock (io_pss, &attr);
       if (l_rc) break;
     }
-    else {
-    (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
-                                                           PSTATE_NO_INSTALL_RESCLK );
-
-    }
 
     // ------------------------
     // Force optional overrides
     // ------------------------
     (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
                                                             PSTATE_FORCE_INITIAL_PMIN);
-
+    
+    //  -------------------
     //  Attributes to write
     //  -------------------
     //  uint32_t ATTR_PM_PSTATE0_FREQUENCY // Binary in Khz
+    FAPI_IMP("Writing Attribute Values");
+    
+    // check to see if IVRMs should be enabled based on VPD findings
+    if (poundm_valid && lpst_valid) 
+      attr_pm_ivrms_enabled = 1;
+    else 
+      attr_pm_ivrms_enabled = 0;
+    
+    SETATTR(l_rc, ATTR_PM_IVRMS_ENABLED, "ATTR_PM_IVRMS_ENABLED", &i_target, attr_pm_ivrms_enabled);   
+
+    // Read back attribute to see if overridden 
+    GETATTR (l_rc, ATTR_PM_IVRMS_ENABLED, "ATTR_PM_IVRMS_ENABLED", &i_target, attr_pm_ivrms_enabled);
+
+    if (attr_pm_ivrms_enabled && (!poundm_valid || !lpst_valid)) {
+      FAPI_INF("WARNING : Attribute ATTR_PM_IVRMS_ENABLED was overridden to 1, but #V or #M data is not valid for IVRMs");
+      // indicate no LPST installed in PSS
+      (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
+                                       PSTATE_NO_INSTALL_LPSA);    
+    }
+    else if (!attr_pm_ivrms_enabled && poundm_valid && lpst_valid) {
+      FAPI_INF("WARNING : ATTR_PM_IVRMS_ENABLED was overriden to 0, but #V or #M data are valid - set PSTATE_NO_INSTALL_LPSA");
+      // indicate no LPST installed in PSS
+      (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
+                                       PSTATE_NO_INSTALL_LPSA);    
+    }
+    
   } while(0);
 
   return l_rc;
@@ -486,6 +541,7 @@ ReturnCode proc_get_attributes(const Target& i_target,
 
     // Read chip ec feature
     DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID, &i_target, attr_chip_ec_feature_resonant_clk_valid);
+    DATABLOCK_GET_ATTR(ATTR_PROC_EC_CORE_HANG_PULSE_BUG       , &i_target, attr_proc_ec_core_hang_pulse_bug);
 
     // --------------------------------------------------------------
     // do basic attribute value checking and generate error if needed
@@ -618,7 +674,8 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
                                      uint32_t    attr_mvpd_data[PV_D][PV_W],
                                      ivrm_mvpd_t *ivrm_mvpd,
                                      uint8_t     *present_chiplets,
-                                     uint8_t     *functional_chiplets)
+                                     uint8_t     *functional_chiplets,
+                                     uint8_t     *poundm_valid)
 {
   ReturnCode l_rc;
   std::vector<fapi::Target>       l_exChiplets;
@@ -673,7 +730,10 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
 
       // set l_record to appropriate lprx record (add core number to lrp0)
       l_record = (uint32_t)fapi::MVPD_RECORD_LRP0 + l_chipNum;
-
+      
+      // clear out buffer to known value before calling fapiGetMvpdField
+      memset(l_buffer, 0, 512);
+      
       // Get Chiplet MVPD data and put in chiplet_mvpd_data using accessor function
       l_rc = fapiGetMvpdField((fapi::MvpdRecord)l_record,
                               fapi::MVPD_KEYWORD_PDV,
@@ -771,6 +831,9 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
       if ( l_functional ) {
         *functional_chiplets = 1;
 
+        // clear out buffer to known value before calling fapiGetMvpdField
+        memset(l_buffer_pdm, 0, 512);
+
         // Get Chiplet #M MVPD data
         l_rc = fapiGetMvpdField((fapi::MvpdRecord)l_record,
                                fapi::MVPD_KEYWORD_PDM,
@@ -778,8 +841,8 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
                                l_buffer_pdm,
                                l_bufferSize_pdm);
         if (!l_rc.ok()) {
-          FAPI_ERR("**** ERROR : Unexpected error encountered in fapiGetMvpdField");
-          break;
+          FAPI_INF("**** Warning : Unexpected error encountered in fapiGetMvpdField - IVRMs will not be enabled");
+          *poundm_valid = 0;
         }
 
         // check buffer size
@@ -818,6 +881,15 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
           ivrm_mvpd->data.ex[j].point[i].drain_current  = cal_data[3];
 
           FAPI_INF("#M data (hex & dec) = 0x%04x 0x%04x 0x%04x 0x%04x    %5u %5u %5u %5u", cal_data[0], cal_data[1], cal_data[2], cal_data[3], cal_data[0], cal_data[1], cal_data[2], cal_data[3]);
+          
+          // #M validity check - not valid if any measurements are 0
+          if (cal_data[0] == 0 || cal_data[1] == 0 ||
+              cal_data[2] == 0 || cal_data[3] == 0 )
+          {          
+            FAPI_INF("**** Warning : #M has zero valued measurements - IVRMs will not be enabled");
+            *poundm_valid = 0;         
+          }    
+                    
         }
 
         // set number of samples to 13
@@ -1084,13 +1156,10 @@ ReturnCode proc_chk_valid_poundv(const uint32_t poundv_data[PV_D][PV_W],
     // check valid operating points' values have this relationship (power save <= nominal <= turbo)
     for (i = 1; i <= S132A_POINTS-1; i++) {
 
-    FAPI_INF("Checking for relationship between #V operating point(%s <= %s) f=%u <= f=%u  v=%u <= v=%u  i=%u <= i=%u  v=%u <= v=%u  i=%u <= i=%u",
-               pv_op_str[pv_op_order[i-1]], pv_op_str[pv_op_order[i]],
-               poundv_data[pv_op_order[i-1]][0], poundv_data[pv_op_order[i]][0],
-               poundv_data[pv_op_order[i-1]][1], poundv_data[pv_op_order[i]][1],
-               poundv_data[pv_op_order[i-1]][2], poundv_data[pv_op_order[i]][2],
-               poundv_data[pv_op_order[i-1]][3], poundv_data[pv_op_order[i]][3],
-               poundv_data[pv_op_order[i-1]][4], poundv_data[pv_op_order[i]][4]);
+    FAPI_INF("Checking for relationship between #V operating point (%s <= %s)", pv_op_str[pv_op_order[i-1]], pv_op_str[pv_op_order[i]]);
+    FAPI_INF("   f=%u <= f=%u",               poundv_data[pv_op_order[i-1]][0], poundv_data[pv_op_order[i]][0]);
+    FAPI_INF("   v=%u <= v=%u  i=%u <= i=%u", poundv_data[pv_op_order[i-1]][1], poundv_data[pv_op_order[i]][1], poundv_data[pv_op_order[i-1]][2], poundv_data[pv_op_order[i]][2]);
+    FAPI_INF("   v=%u <= v=%u  i=%u <= i=%u", poundv_data[pv_op_order[i-1]][3], poundv_data[pv_op_order[i]][3], poundv_data[pv_op_order[i-1]][4], poundv_data[pv_op_order[i]][4]);              
 
       if (poundv_data[pv_op_order[i-1]][0] > poundv_data[pv_op_order[i]][0]  ||
           poundv_data[pv_op_order[i-1]][1] > poundv_data[pv_op_order[i]][1]  ||

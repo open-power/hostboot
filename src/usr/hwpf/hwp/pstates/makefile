@@ -41,6 +41,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 ##@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/???
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/
+
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  gpstCheckByte.o  \
