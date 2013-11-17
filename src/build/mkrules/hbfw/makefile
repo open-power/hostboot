@@ -62,7 +62,8 @@ VPATH += fsp/hwas/common:
 _SUBDIR/BUILD/EXPINC/fsp: expand_tars_fsp.tar
 _SUBDIR/BUILD/EXPINC/simics: expand_tars_simics.tar
 
-EXPINC_TARGETS += expand_tars epub_check
+# TODO RTC 91690 - Re-enable epub_check
+EXPINC_TARGETS += expand_tars
 
 expand_tars: ${TARFILES:S/^/expand_tars_/g}
 expand_tars_%: $${@:S/expand_tars_//}
