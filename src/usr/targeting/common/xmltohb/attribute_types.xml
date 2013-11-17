@@ -12617,13 +12617,14 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <default>NOT_MASTER</default>
 </enumerationType>
 
+<!-- TODO RTC 91689 Support enum in default -->
 <attribute>
     <id>PROC_MASTER_TYPE</id>
     <description>Type of Master, ACTING_MASTER or MASTER_CANDIDATE or
       NOT_MASTER</description>
     <simpleType>
         <uint8_t>
-            <default>NOT_MASTER</default>
+            <default>2</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
