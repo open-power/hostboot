@@ -267,7 +267,6 @@
     </attribute>
     <attribute>
         <id>PROC_MASTER_TYPE</id>
-        <default>NOT_MASTER</default>
     </attribute>
     <attribute>
         <id>PRIMARY_CAPABILITIES</id>
