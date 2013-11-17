@@ -69,7 +69,7 @@ expand_tars_%: $${@:S/expand_tars_//}
 	@echo Extracting $> to ${*:S/expand_tars_//}
 	mkdir -p ${*:S/expand_tars_//}
 	${TAR} -x --file $> -C ${*:S/expand_tars_//}
-epub_check: expand_tars epubProcedureID_check.pl epub_service_codes.H hwasCallout.H
+epub_check: expand_tars epubProcedureID_check.pl epub_service_codes.H
 	@echo "===== Checking epubProcedureID's Start:" `date`
 	${epubProcedureID_check.pl:P} ${epub_service_codes.H:P} ${hwasCallout.H:P}
 	@echo "===== Checking epubProcedureID's End:" `date`
