@@ -38,6 +38,7 @@
 #include <prdfCenMembufDataBundle.H>
 #include <prdfLaneRepair.H>
 #include <prdfP8McsDataBundle.H>
+#include <prdfCenMemUtils.H>
 
 //##############################################################################
 //
@@ -152,6 +153,7 @@ PRDF_PLUGIN_DEFINE( Mcs, PreAnalysis );
 int32_t PostAnalysis( ExtensibleChip * i_mcsChip,
                       STEP_CODE_DATA_STRUCT & i_sc )
 {
+    #define PRDF_FUNC "[Mcs::PostAnalysis] "
     int32_t l_rc = SUCCESS;
 
     if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) &&
@@ -161,25 +163,17 @@ int32_t PostAnalysis( ExtensibleChip * i_mcsChip,
         ExtensibleChip * membChip = mcsdb->getMembChip();
         if ( NULL != membChip )
         {
-            // Mask attentions from the Centaur
-            SCAN_COMM_REGISTER_CLASS * l_tpfirmask   = NULL;
-            SCAN_COMM_REGISTER_CLASS * l_nestfirmask = NULL;
-            SCAN_COMM_REGISTER_CLASS * l_memfirmask  = NULL;
-            SCAN_COMM_REGISTER_CLASS * l_memspamask  = NULL;
-
-            l_tpfirmask   = membChip->getRegister("TP_CHIPLET_FIR_MASK");
-            l_nestfirmask = membChip->getRegister("NEST_CHIPLET_FIR_MASK");
-            l_memfirmask  = membChip->getRegister("MEM_CHIPLET_FIR_MASK");
-            l_memspamask  = membChip->getRegister("MEM_CHIPLET_SPA_MASK");
-
-            l_tpfirmask->setAllBits();   l_rc |= l_tpfirmask->Write();
-            l_nestfirmask->setAllBits(); l_rc |= l_nestfirmask->Write();
-            l_memfirmask->setAllBits();  l_rc |= l_memfirmask->Write();
-            l_memspamask->setAllBits();  l_rc |= l_memspamask->Write();
+            l_rc = MemUtils::chnlCsCleanup( membChip, i_sc );
+            if( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"ChnlCsCleanup() failed for Membuf:0x%08X",
+                          membChip->GetId() );
+            }
         }
     }
 
     return SUCCESS;
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Mcs, PostAnalysis );
 

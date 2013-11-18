@@ -1098,56 +1098,48 @@ group gTodErrors filter singlebit
 actionclass analyzeMcs00
 {
     analyze(connected(TYPE_MCS, 0));
-    funccall("MaskMCS00IfCentaurCheckstop");
 };
 
 /** Analyze connected MCS 01 */
 actionclass analyzeMcs01
 {
     analyze(connected(TYPE_MCS, 1));
-    funccall("MaskMCS01IfCentaurCheckstop");
 };
 
 /** Analyze connected MCS 10 */
 actionclass analyzeMcs10
 {
     analyze(connected(TYPE_MCS, 2));
-    funccall("MaskMCS10IfCentaurCheckstop");
 };
 
 /** Analyze connected MCS 11 */
 actionclass analyzeMcs11
 {
     analyze(connected(TYPE_MCS, 3));
-    funccall("MaskMCS11IfCentaurCheckstop");
 };
 
 /** Analyze connected MCS 20 */
 actionclass analyzeMcs20
 {
     analyze(connected(TYPE_MCS, 4));
-    funccall("MaskMCS20IfCentaurCheckstop");
 };
 
 /** Analyze connected MCS 21 */
 actionclass analyzeMcs21
 {
     analyze(connected(TYPE_MCS, 5));
-    funccall("MaskMCS21IfCentaurCheckstop");
 };
 
 /** Analyze connected MCS 30 */
 actionclass analyzeMcs30
 {
     analyze(connected(TYPE_MCS, 6));
-    funccall("MaskMCS30IfCentaurCheckstop");
 };
 
 /** Analyze connected MCS 31 */
 actionclass analyzeMcs31
 {
     analyze(connected(TYPE_MCS, 7));
-    funccall("MaskMCS31IfCentaurCheckstop");
 };
 
 

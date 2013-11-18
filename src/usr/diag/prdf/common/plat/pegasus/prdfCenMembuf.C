@@ -45,6 +45,7 @@
 #include <prdfCenMembufDataBundle.H>
 #include <prdfCenMembufExtraSig.H>
 #include <prdfLaneRepair.H>
+#include <prdfCenMemUtils.H>
 
 using namespace TARGETING;
 
@@ -279,6 +280,7 @@ PRDF_PLUGIN_DEFINE( Membuf, PreAnalysis );
 int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
 {
     #define PRDF_FUNC "[Membuf::PostAnalysis] "
+    int32_t l_rc;
 
     #ifdef __HOSTBOOT_MODULE
 
@@ -305,7 +307,7 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
         firand->ClearBit(16); // SPA
         firand->ClearBit(17); // maintenance command complete
 
-        int32_t l_rc = firand->Write();
+        l_rc = firand->Write();
         if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"MCIFIR_AND write failed" );
@@ -315,6 +317,12 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
     } while (0);
 
     #endif // __HOSTBOOT_MODULE
+
+    l_rc = MemUtils::chnlCsCleanup( i_mbChip, i_sc );
+    if( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"ChnlCsCleanup() failed");
+    }
 
     return SUCCESS;
 

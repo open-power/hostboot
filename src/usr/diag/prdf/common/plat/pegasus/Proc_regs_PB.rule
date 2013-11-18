@@ -746,6 +746,13 @@
         capture     group default;
     };
 
+    register IOMCFIR_0_MASK_OR
+    {
+        name        "IOMC0.BUSCTL.SCOM.FIR_MASK_REG OR";
+        scomaddr    0x02011A05;
+        capture     group never;
+    };
+
     register IOMCFIR_0_ACT0
     {
         name        "IOMC0.BUSCTL.SCOM.FIR_ACTION0_REG";
@@ -784,6 +791,13 @@
         name        "IOMC1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x02011E03;
         capture     group default;
+    };
+
+    register IOMCFIR_1_MASK_OR
+    {
+        name        "IOMC1.BUSCTL.SCOM.FIR_MASK_REG OR";
+        scomaddr    0x02011E05;
+        capture     group never;
     };
 
     register IOMCFIR_1_ACT0

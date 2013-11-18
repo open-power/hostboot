@@ -35,12 +35,11 @@
 #include <vector>
 #include <prdfCenSymbol.H>
 
-
-
 namespace PRDF
 {
 
 class ExtensibleChip;
+struct STEP_CODE_DATA_STRUCT;
 
 namespace MemUtils
 {
@@ -95,6 +94,15 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, MaintSymbols & o_maintStats,
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 int32_t getDramSize( ExtensibleChip * i_mbaChip, uint8_t & o_size );
+
+/**
+ * @brief  Cleanup for channel CS on Centaur.
+ * @param  i_mbChip   Membuf chip.
+ * @param  i_sc  Service Data Collector.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
+                       STEP_CODE_DATA_STRUCT & i_sc );
 
 } // end namespace MemUtils
 

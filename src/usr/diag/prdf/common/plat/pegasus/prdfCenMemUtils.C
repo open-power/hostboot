@@ -29,6 +29,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
+#include <prdfCenMembufDataBundle.H>
 
 using namespace TARGETING;
 
@@ -159,6 +160,126 @@ int32_t getDramSize( ExtensibleChip *i_mbaChip, uint8_t & o_size )
 
     return o_rc;
 
+    #undef PRDF_FUNC
+}
+
+int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
+                       STEP_CODE_DATA_STRUCT & i_sc )
+{
+    #define PRDF_FUNC "[MemUtils::chnlCsCleanup] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if( (  NULL == i_mbChip ) ||
+            ( TYPE_MEMBUF != getTargetType( i_mbChip->GetChipHandle() )))
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid parameters" );
+            o_rc = FAIL; break;
+        }
+
+        if (( ! i_sc.service_data->IsUnitCS() ) ||
+              (CHECK_STOP == i_sc.service_data->GetAttentionType()) )
+            break;
+
+        CenMembufDataBundle * mbdb = getMembufDataBundle(i_mbChip);
+        ExtensibleChip * mcsChip = mbdb->getMcsChip();
+        if ( NULL == mcsChip )
+        {
+            PRDF_ERR( PRDF_FUNC"MCS chip is NULL for Membuf:0x%08X",
+                      i_mbChip->GetId() );
+            o_rc = FAIL; break;
+        }
+
+        TargetHandle_t mcs = mcsChip->GetChipHandle();
+        ExtensibleChip * procChip = NULL;
+        uint8_t pos = getTargetPosition( mcs );
+        TargetHandle_t proc = getParentChip ( mcs );
+
+        if ( NULL == proc )
+        {
+            PRDF_ERR( PRDF_FUNC"Proc is NULL for Mcs:0x%08X", getHuid( mcs ) );
+            o_rc = FAIL; break;
+        }
+
+        procChip = (ExtensibleChip *)systemPtr->GetChip( proc );
+
+        if( NULL == procChip )
+        {
+            PRDF_ERR( PRDF_FUNC"Can not find Proc chip for HUID:0x%08X",
+                      getHuid( proc) );
+            o_rc = FAIL; break;
+        }
+
+        // This is a cleanup function. If we get any error from scom
+        // operations, we will still continue with cleanup.
+        SCAN_COMM_REGISTER_CLASS * l_tpMask =
+              procChip->getRegister("TP_CHIPLET_FIR_MASK");
+        o_rc |= l_tpMask->Read();
+        if ( SUCCESS == o_rc )
+        {
+            // Bits 5-12 maps to attentions from MCS0-MCS7.
+            l_tpMask->SetBit( 5 + pos );
+            o_rc |= l_tpMask->Write();
+        }
+
+        // Mask attentions from the Centaur
+        const char *iomcFirMask = ( pos < 4 )?
+                                  "IOMCFIR_0_MASK_OR":"IOMCFIR_1_MASK_OR";
+
+        SCAN_COMM_REGISTER_CLASS * iomcMask =
+                                 procChip->getRegister( iomcFirMask);
+        if ( pos >=4 ) pos -= 4;
+
+        // 8 bits are reserved for each Centaur in IOMCFIR.
+        // There are total 4 ( for P system ) centaur supported
+        // in MCS. Bits for first centaur starts from bit 8.
+
+        iomcMask->SetBitFieldJustified( 8+ ( pos*8 ), 8, 0xff);
+
+        o_rc |= iomcMask->Write();
+
+        SCAN_COMM_REGISTER_CLASS * l_tpfirmask   = NULL;
+        SCAN_COMM_REGISTER_CLASS * l_nestfirmask = NULL;
+        SCAN_COMM_REGISTER_CLASS * l_memfirmask  = NULL;
+        SCAN_COMM_REGISTER_CLASS * l_memspamask  = NULL;
+
+        l_tpfirmask   = i_mbChip->getRegister("TP_CHIPLET_FIR_MASK");
+        l_nestfirmask = i_mbChip->getRegister("NEST_CHIPLET_FIR_MASK");
+        l_memfirmask  = i_mbChip->getRegister("MEM_CHIPLET_FIR_MASK");
+        l_memspamask  = i_mbChip->getRegister("MEM_CHIPLET_SPA_MASK");
+
+        l_tpfirmask->setAllBits();   o_rc |= l_tpfirmask->Write();
+        l_nestfirmask->setAllBits(); o_rc |= l_nestfirmask->Write();
+        l_memfirmask->setAllBits();  o_rc |= l_memfirmask->Write();
+        l_memspamask->setAllBits();  o_rc |= l_memspamask->Write();
+
+
+        for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
+        {
+            ExtensibleChip * mbaChip = mbdb->getMbaChip( i );
+            if( NULL != mbaChip )
+            {
+                TargetHandle_t mba = mbaChip->GetChipHandle();
+                if ( NULL != mba )
+                {
+                    #ifdef __HOSTBOOT_MODULE
+                    // This is very small platform specific code. So not
+                    // creating a separate file for this.
+                    int32_t l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );
+                    if ( SUCCESS != l_rc )
+                    {
+                        PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(0x%08x, SKIP_MBA) "
+                                  "failed", getHuid( mba ) );
+                        o_rc |= l_rc;
+                    }
+                    #endif // __HOSTBOOT_MODULE
+                }
+            }
+        }
+    }while(0);
+    return o_rc;
     #undef PRDF_FUNC
 }
 
