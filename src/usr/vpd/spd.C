@@ -903,7 +903,7 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
 
         // ==================================================
         // 4 byte - LSB first, no mask
-        case CAS_LATENCIES_SUPPORTED:
+        case CAS_LATENCIES_SUPPORTED_DDR4:
             // Get 4th byte 
             err = spdFetchData( i_kwdData.offset,
                                 1, /* Read 1 byte at a time */
