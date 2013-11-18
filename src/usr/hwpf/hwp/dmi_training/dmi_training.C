@@ -740,6 +740,9 @@ void*    call_dmi_io_dccal( void *io_pArgs )
         // io_dccal.C is going to look for a PLL ring with a "stub"
         // mem freq -- so set to a default, then clear it (so as not
         // to mess up MSS HWP later
+        // Note: io_dccal actually scans the ring in, is it really OK to use the
+        // ring corresponding to a default memory frequency of 1600MHz?
+        // RTC issue 92232 will resolve this
         TARGETING::Target* l_membuf_target =
             (const_cast<TARGETING::Target*>(l_itr->second));
         l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(1600);
@@ -911,8 +914,23 @@ void*    call_dmi_io_run_training( void *io_pArgs )
                TARGETING::get_huid(l_itr->first),
                TARGETING::get_huid(l_itr->second));
 
+        // dmi_io_run_training reads ATTR_MEMB_TP_BNDY_PLL_LENGTH, the Attribute
+        // Accessor (getPllRingAttr) needs to read ATTR_MSS_FREQ to find the
+        // ring data to get its length, but ATTR_MSS_FREQ is not yet setup, this
+        // is done by mss_freq. However, the ring length is the same for a
+        // particular EC level, the frequency only selects the data. Ideally the
+        // Accessor would be able to return the ring length without a frequency,
+        // a workaround is to set ATTR_MSS_FREQ to a default value here
+        // RTC issue 92232 will resolve this workaround.
+        TARGETING::Target* l_membuf_target =
+            (const_cast<TARGETING::Target*>(l_itr->second));
+        l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(1600);
+
         FAPI_INVOKE_HWP(l_err, dmi_io_run_training,
                         l_fapi_master_target, l_fapi_slave_target);
+
+        // Clear ATTR_MSS_FREQ. RTC issue 92232
+        l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(0);
 
         if (l_err)
         {

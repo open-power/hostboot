@@ -22,7 +22,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
   <!-- ********************************************************************* -->
-  <!-- $Id: memb_pll_ring_attributes.xml,v 1.9 2013/05/21 18:50:54 bellows Exp $ -->
+  <!-- $Id: memb_pll_ring_attributes.xml,v 1.11 2013/10/24 19:29:14 mfred Exp $ -->
   <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_DATA</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -298,5 +298,53 @@
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_RUNTIME_DATA</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Ring image for Centaur tp_bndy_pll ring for run time and pll cleanup
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_RUNTIME_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Scan chain position of CU PLL PDF360 bit in tp_pll_bndy chain (Offset from beginning of chain)
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Scan chain position of CU PLL REFCLKSEL bit in tp_pll_bndy chain (Offset from beginning of chain)
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
-

@@ -52,6 +52,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
+#include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
 #include <vpd/spdenums.H>
 #include <dimmConsts.H>
 #include <util/singleton.H>
@@ -612,6 +613,21 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
 fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_attrId,
                                     const fapi::Target * const i_pChipTarget,
                                     uint32_t (&o_pllRingLength));
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * PLL ring info attributes. It should not be called directly.
+ *
+ * @param[in]  i_pProcChip Pointer to Processor Chip fapi target
+ * @param[in]  i_attr      The Attribute to get
+ * @param[out] o_pVal      Pointer to data buffer filled in with attribute data
+ * @param[in]  i_len       Size of o_pVal
+ */
+fapi::ReturnCode fapiPlatGetPllInfoAttr(
+    const fapi::Target * i_pProcChip,
+    const fapi::getPllRingInfo::Attr i_attr,
+    void * o_pVal,
+    const size_t i_len);
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
@@ -1523,9 +1539,15 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_GETMACRO(ID, PTARGET, VAL) \
     PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_MEMB_TP_BNDY_PLL_FOR_RUNTIME_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
     PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_PB_BNDY_DMIPLL_FOR_RUNTIME_DATA_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_AB_BNDY_PLL_FOR_RUNTIME_DATA_GETMACRO(ID, PTARGET, VAL) \
     PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 
 // FLUSH accesses
@@ -1569,10 +1591,36 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH_GETMACRO(ID, PTARGET, VAL) \
     PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_MEMB_TP_BNDY_PLL_FOR_RUNTIME_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
     PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
 #define ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH_GETMACRO(ID, PTARGET, VAL) \
     PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_PB_BNDY_DMIPLL_FOR_RUNTIME_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+#define ATTR_PROC_AB_BNDY_PLL_FOR_RUNTIME_LENGTH_GETMACRO(ID, PTARGET, VAL) \
+    PLL_ATTR_GENERIC_GETMACRO(ID,PTARGET,VAL)
+
+// INFO accesses
+#define ATTR_PROC_DMI_CUPLL_PFD360_OFFSET_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPllInfoAttr(PTARGET, fapi::getPllRingInfo::PROC_DMI_CUPLL_PFD360_OFFSET, &VAL, sizeof(VAL))
+#define ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPllInfoAttr(PTARGET, fapi::getPllRingInfo::PROC_DMI_CUPLL_REFCLKSEL_OFFSET, &VAL, sizeof(VAL))
+#define ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPllInfoAttr(PTARGET, fapi::getPllRingInfo::PROC_ABUS_CUPLL_PFD360_OFFSET, &VAL, sizeof(VAL))
+#define ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPllInfoAttr(PTARGET, fapi::getPllRingInfo::PROC_ABUS_CUPLL_REFCLKSEL_OFFSET, &VAL, sizeof(VAL))
+#define ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPllInfoAttr(PTARGET, fapi::getPllRingInfo::MEMB_DMI_CUPLL_PFD360_OFFSET, &VAL, sizeof(VAL))
+#define ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPllInfoAttr(PTARGET, fapi::getPllRingInfo::MEMB_DMI_CUPLL_REFCLKSEL_OFFSET, &VAL, sizeof(VAL))
 
 //------------------------------------------------------------------------------
 //  MACROs to support DIMM SPD Attributes that are handled by an Accessor HWP

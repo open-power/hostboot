@@ -1,0 +1,146 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/spd_accessors/getDimmSpdDataErrors.xml $     -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PLL_RING_INFO_ATTR_INVALID_ATTRIBUTE_ID</rc>
+    <description>
+      Request to get PLL ring Info with invalid attribute ID. Code bug
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PLL_RING_INFO_ATTR_INVALID_OUTPUT_SIZE</rc>
+    <description>
+      Request to get PLL ring Info with invalid output buffer size. Code bug
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>EXPECTED_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PROC_DMI_CUPLL_PFD360_OFFSET_BAD_CHIP_NAME_EC</rc>
+    <description>
+      Request to get ATTR_PROC_DMI_CUPLL_PFD360_OFFSET with an unsupported
+      Processor Chip Name and EC level. The getPllRingInfoAttr Attribute
+      Accessor needs updating to support this chip.
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PROC_DMI_CUPLL_REFCLKSEL_OFFSET_BAD_CHIP_NAME_EC</rc>
+    <description>
+      Request to get ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET with an unsupported
+      Processor Chip Name and EC level. The getPllRingInfoAttr Attribute
+      Accessor needs updating to support this chip.
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PROC_ABUS_CUPLL_PFD360_OFFSET_BAD_CHIP_NAME_EC</rc>
+    <description>
+      Request to get ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET with an unsupported
+      Processor Chip Name and EC level. The getPllRingInfoAttr Attribute
+      Accessor needs updating to support this chip.
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET_BAD_CHIP_NAME_EC</rc>
+    <description>
+      Request to get ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET with an unsupported
+      Processor Chip Name and EC level. The getPllRingInfoAttr Attribute
+      Accessor needs updating to support this chip.
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEMB_DMI_CUPLL_PFD360_OFFSET_BAD_CHIP_NAME_EC</rc>
+    <description>
+      Request to get ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET with an unsupported
+      Processor Chip Name and EC level. The getPllRingInfoAttr Attribute
+      Accessor needs updating to support this chip.
+    </description>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET_BAD_CHIP_NAME_EC</rc>
+    <description>
+      Request to get ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET with an unsupported
+      Processor Chip Name and EC level. The getPllRingInfoAttr Attribute
+      Accessor needs updating to support this chip.
+    </description>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+</hwpErrors>

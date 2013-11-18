@@ -50,7 +50,8 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <fapiPllRingAttr.H>
-#include <getPllRingAttr.H>
+#include <hwpf/hwp/pll_accessors/getPllRingAttr.H>
+#include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -1572,6 +1573,18 @@ fapi::ReturnCode fapiPlatGetPllAttr(const fapi::AttributeId i_targAttrId,
     uint8_t l_data[MAX_PLL_RING_SIZE_BYTES] = {};
     FAPI_EXEC_HWP(l_rc, getPllRingAttr, i_targAttrId, *i_pChipTarget,
                   o_pllRingLength, l_data);
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetPllInfoAttr(
+    const fapi::Target * i_pProcChip,
+    const fapi::getPllRingInfo::Attr i_attr,
+    void * o_pVal,
+    const size_t i_len)
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getPllRingInfoAttr, *i_pProcChip, i_attr, o_pVal, i_len);
     return l_rc;
 }
 
