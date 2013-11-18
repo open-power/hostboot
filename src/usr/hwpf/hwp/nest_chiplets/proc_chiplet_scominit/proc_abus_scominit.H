@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_abus_scominit.H,v 1.3 2013/04/18 22:36:20 jgrell Exp $
+// $Id: proc_abus_scominit.H,v 1.4 2013/11/09 18:37:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_abus_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -71,14 +71,11 @@ extern "C" {
  *
  * Should be called for all valid/connected ABUS endpoints
  *
- * @param[in] i_abus_target     Reference to ABUS target
- *            i_this_pu_target  Reference to enclosing chip target
- *            i_other_pu_target Reference to connected chip target
- *                              If i_abus_target is TARGET_TYPE_ABUS_ENDPOINT,
- *                                 i_this_pu_target is TARGET_TYPE_PROC_CHIP,
- *                                 i_other_pu_target is TARGET_TYPE_PROC_CHIP,
- *                              calls:
- *                              - p8.abus.scom.initfile
+ * @param[in] i_abus_target           Reference to ABUS chiplet target
+ *            i_connected_abus_target Reference to connected ABUS chiplet target
+ *                                    If TARGET_TYPE_ABUS_ENDPOINT, calls:
+ *                                    - p8.abus.scom.initfile
+ *                                    - p8.abus.custom.scom.initfile
  *
  * @return ReturnCode
  */

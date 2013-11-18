@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_xbus_scominit.H,v 1.2 2013/02/04 23:08:13 thomsen Exp $
+// $Id: proc_xbus_scominit.H,v 1.3 2013/11/09 18:37:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_xbus_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -35,15 +35,6 @@
 // *!
 // *! ADDITIONAL COMMENTS :
 // *!
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//  Version		Date		Owner		Description
-//------------------------------------------------------------------------------
-//    1.2	   	02/04/13	thomsen		Added separate calls to base & customized scominit files. Removed separate calls to SIM vs. HW scominit files
-//           	01/09/13	thomsen		Added SIM and HW scominit filename strings
-//										Added *_OVERRIDE_IF to allow DMI initfile overrides for specific bus instances
-//                                      Changed passed targets in order to match scominit file updates.
-//    1.1       8/11/12     jmcgill		Initial release
 //------------------------------------------------------------------------------
 
 #ifndef PROC_XBUS_SCOMINIT_H_
@@ -80,12 +71,11 @@ extern "C" {
  *
  * Should be called for all valid/connected XBUS endpoints
  *
- * @param[in] i_xbus_target            Reference to XBUS target
- *            i_connected_abus_target  Reference to connected ABUS target
- *                              If i_xbus_target is TARGET_TYPE_XBUS_ENDPOINT,
- *                                 i_connected_abus_target is TARGET_TYPE_ABUS_ENDPOINT,
- *                              calls:
- *                              - p8.xbus.scom.initfile
+ * @param[in] i_xbus_target           Reference to XBUS chiplet target
+ *            i_connected_xbus_target Reference to connected XBUS chiplet target
+ *                                    If TARGET_TYPE_XBUS_ENDPOINT, calls:
+ *                                    - p8.xbus.scom.initfile
+ *                                    - p8.xbus.custom.scom.initfile
  *
  * @return ReturnCode
  */

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_abus_scominit.C,v 1.4 2013/04/18 22:35:35 jgrell Exp $
+// $Id: proc_abus_scominit.C,v 1.5 2013/11/09 18:37:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_abus_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -37,12 +37,18 @@
 // *!
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-//  Version		Date		Owner		Description
+//  Version     Date        Owner       Description
 //------------------------------------------------------------------------------
-//    1.4	   	02/18/13	thomsen		Changed targeting to use Abus_chiplet, chip, connected_Abus_chiplet & connected_chip to match Xbus and DMI target list so they are common
-//    1.3	   	02/10/13	jmcgill     Leverage chiplet level targeting, invoke custom initfile
-//    1.2	   	01/20/13	jmcgill		Add consistency check for A chiplet partial good support
-//    1.1       8/11/12     jmcgill		Initial release
+//    1.5       11/08/13    jmcgill     Updates for RAS review
+//    1.4       02/18/13    thomsen     Changed targeting to use Abus_chiplet,
+//                                      chip, connected_Abus_chiplet &
+//                                      connected_chip to match Xbus and DMI
+//                                      target list so they are common
+//    1.3       02/10/13    jmcgill     Leverage chiplet level targeting, invoke
+//                                      custom initfile
+//    1.2       01/20/13    jmcgill     Add consistency check for A chiplet
+//                                      partial good support
+//    1.1       8/11/12     jmcgill     Initial release
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -58,13 +64,13 @@ extern "C" {
 //------------------------------------------------------------------------------
 
 // HWP entry point, comments in header
-fapi::ReturnCode proc_abus_scominit( const fapi::Target & i_abus_target,
-                                     const fapi::Target & i_connected_abus_target)
+fapi::ReturnCode proc_abus_scominit(const fapi::Target & i_abus_target,
+                                    const fapi::Target & i_connected_abus_target)
 {
     fapi::ReturnCode rc;
     std::vector<fapi::Target> targets;
-    fapi::Target i_this_pu_target;
-    fapi::Target i_connected_pu_target;
+    fapi::Target this_pu_target;
+    fapi::Target connected_pu_target;
     uint8_t abus_enable_attr;
 
     // mark HWP entry
@@ -72,71 +78,89 @@ fapi::ReturnCode proc_abus_scominit( const fapi::Target & i_abus_target,
 
     do
     {
-
-	    // Get parent chip targets
-        rc = fapiGetParentChip(i_abus_target, i_this_pu_target); if(rc) return rc;
-        rc = fapiGetParentChip(i_connected_abus_target, i_connected_pu_target); if(rc) return rc;
-
-		// populate targets vector
-        targets.push_back(i_abus_target);               // Chiplet target
-        targets.push_back(i_this_pu_target);            // Proc target
-        targets.push_back(i_connected_abus_target);     // Connected Chiplet target
-        targets.push_back(i_connected_pu_target);       // Connected Proc target
-
-        // query ABUS partial good attribute
-        rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
-                           &i_this_pu_target,
-                           abus_enable_attr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_abus_scominit: Error querying ATTR_PROC_A_ENABLE");
-            break;
-        }
-
-        if (abus_enable_attr != fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE)
-        {
-            FAPI_ERR("proc_abus_scominit: Partial good attribute error");
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_ABUS_SCOMINIT_PARTIAL_GOOD_ERR);
-            break;
-        }
-
-        // processor target, processor MCS chiplet target
-        // test target types to confirm correct before calling initfile(s) to execute
-        if ((i_this_pu_target.getType()        == fapi::TARGET_TYPE_PROC_CHIP)     &&
-            (i_abus_target.getType()           == fapi::TARGET_TYPE_ABUS_ENDPOINT) &&
-            (i_connected_pu_target.getType()   == fapi::TARGET_TYPE_PROC_CHIP)     &&
+        // test target types to confirm correctness before calling initfile(s)
+        // to execute
+        if ((i_abus_target.getType()           == fapi::TARGET_TYPE_ABUS_ENDPOINT) &&
             (i_connected_abus_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT))
         {
-		    // Call BASE DMI SCOMINIT
+            // get parent chip targets
+            rc = fapiGetParentChip(i_abus_target, this_pu_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_abus_scominit: Error from fapiGetParentChip (this target, %s)",
+                         i_abus_target.toEcmdString());
+                break;
+            }
+
+            rc = fapiGetParentChip(i_connected_abus_target, connected_pu_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_abus_scominit: Error from fapiGetParentChip (connected target, %s)",
+                         i_connected_abus_target.toEcmdString());
+                break;
+            }
+
+            // populate targets vector
+            targets.push_back(i_abus_target);           // chiplet target
+            targets.push_back(this_pu_target);          // chip target
+            targets.push_back(i_connected_abus_target); // connected chiplet target
+            targets.push_back(connected_pu_target);     // connected chip target
+
+            // query ABUS partial good attribute
+            rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
+                               &this_pu_target,
+                               abus_enable_attr);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_abus_scominit: Error querying ATTR_PROC_A_ENABLE (%s)",
+                         this_pu_target.toEcmdString());
+                break;
+            }
+
+            if (abus_enable_attr != fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE)
+            {
+                FAPI_ERR("proc_abus_scominit: Partial good attribute error");
+                const fapi::Target & TARGET = this_pu_target;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_ABUS_SCOMINIT_PARTIAL_GOOD_ERR);
+                break;
+            }
+
+            // Call BASE ABUS SCOMINIT
             FAPI_INF("proc_abus_scominit: fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
-                     ABUS_BASE_IF, i_this_pu_target.toEcmdString(), i_abus_target.toEcmdString(),
-			    	                 i_connected_pu_target.toEcmdString(), i_connected_abus_target.toEcmdString());
+                ABUS_BASE_IF,
+                i_abus_target.toEcmdString(), this_pu_target.toEcmdString(),
+                i_connected_abus_target.toEcmdString(), connected_pu_target.toEcmdString());
             FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, ABUS_BASE_IF);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_abus_scominit: Error from fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
-                     ABUS_BASE_IF, i_this_pu_target.toEcmdString(), i_abus_target.toEcmdString(),
-			   	                 i_connected_pu_target.toEcmdString(), i_connected_abus_target.toEcmdString());
+                    ABUS_BASE_IF,
+                    i_abus_target.toEcmdString(), this_pu_target.toEcmdString(),
+                    i_connected_abus_target.toEcmdString(), connected_pu_target.toEcmdString());
                 break;
             }
 
-		    // Call CUSTOMIZED DMI SCOMINIT (system specific)
+            // Call CUSTOMIZED ABUS SCOMINIT
             FAPI_INF("proc_abus_scominit: fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
-                     ABUS_CUSTOM_IF, i_this_pu_target.toEcmdString(), i_abus_target.toEcmdString(),
-			    	                 i_connected_pu_target.toEcmdString(), i_connected_abus_target.toEcmdString());
+                ABUS_CUSTOM_IF,
+                i_abus_target.toEcmdString(), this_pu_target.toEcmdString(),
+                i_connected_abus_target.toEcmdString(), connected_pu_target.toEcmdString());
             FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, ABUS_CUSTOM_IF);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_abus_scominit: Error from fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
-                         ABUS_CUSTOM_IF, i_abus_target.toEcmdString(), i_abus_target.toEcmdString(),
-			   	                 i_connected_pu_target.toEcmdString(), i_connected_abus_target.toEcmdString());
+                    ABUS_BASE_IF,
+                    i_abus_target.toEcmdString(), this_pu_target.toEcmdString(),
+                    i_connected_abus_target.toEcmdString(), connected_pu_target.toEcmdString());
                 break;
             }
-		}
+        }
         // unsupported target type
         else
         {
             FAPI_ERR("proc_abus_scominit: Unsupported target type(s)");
+            const fapi::Target & THIS_ABUS_TARGET = i_abus_target;
+            const fapi::Target & CONNECTED_ABUS_TARGET = i_connected_abus_target;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_ABUS_SCOMINIT_INVALID_TARGET);
             break;
         }
@@ -144,7 +168,7 @@ fapi::ReturnCode proc_abus_scominit( const fapi::Target & i_abus_target,
 
     // mark HWP exit
     FAPI_INF("proc_abus_scominit: End");
-	return rc;
+    return rc;
 }
 
 

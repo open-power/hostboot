@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_getecid.C,v 1.8 2013/03/28 17:21:06 jmcgill Exp $
+// $Id: proc_getecid.C,v 1.9 2013/11/09 18:39:29 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_getecid.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -39,7 +39,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_getecid.H"
+#include <proc_getecid.H>
 
 extern "C" {
 
@@ -59,7 +59,7 @@ fapi::ReturnCode proc_getecid(
     uint64_t attr_data[2];
 
     // mark HWP entry
-    FAPI_IMP("Entering ...");
+    FAPI_DBG("proc_getecid: Start");
 
     io_fuseString.setBitLength(112); // sets size and zeros out buffer
     ecmdDataBufferBase otprom_mode_data(64);
@@ -75,14 +75,15 @@ fapi::ReturnCode proc_getecid(
       rc = fapiGetScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
       if (!rc.ok())
       {
-          FAPI_ERR("fapiGetScom error (OTPC_M_MODE_REGISTER_0x00010008)");
+          FAPI_ERR("proc_getecid: fapiGetScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
+                   i_target.toEcmdString());
           break;
       }
 
       rc_ecmd |= otprom_mode_data.clearBit(OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT);
       if (rc_ecmd)
       {
-          FAPI_ERR("Error 0x%X setting up OTPROM Mode register data buffer",
+          FAPI_ERR("proc_getecid: Error 0x%X setting up OTPROM Mode register data buffer",
                    rc_ecmd);
           rc.setEcmdError(rc_ecmd);
           break;
@@ -91,7 +92,8 @@ fapi::ReturnCode proc_getecid(
       rc = fapiPutScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
       if (!rc.ok())
       {
-          FAPI_ERR("fapiPutScom error (OTPC_M_MODE_REGISTER_0x00010008)");
+          FAPI_ERR("proc_getecid: fapiPutScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
+                   i_target.toEcmdString());
           break;
       }
 
@@ -103,7 +105,8 @@ fapi::ReturnCode proc_getecid(
       rc = fapiGetScom(i_target, ECID_PART_0_0x00018000, ecid_data);
       if (!rc.ok())
       {
-          FAPI_ERR("fapiGetScom error (ECID_PART_0_0x00018000)");
+          FAPI_ERR("proc_getecid: fapiGetScom error (ECID_PART_0_0x00018000) for %s",
+                   i_target.toEcmdString());
           break;
       }
 
@@ -115,7 +118,7 @@ fapi::ReturnCode proc_getecid(
 
       if (rc_ecmd)
       {
-          FAPI_ERR("Error 0x%X processing ECID (part 0) data buffer",
+          FAPI_ERR("proc_getecid: Error 0x%X processing ECID (part 0) data buffer",
                    rc_ecmd);
           rc.setEcmdError(rc_ecmd);
           break;
@@ -124,7 +127,8 @@ fapi::ReturnCode proc_getecid(
       rc = fapiGetScom(i_target, ECID_PART_1_0x00018001, ecid_data);
       if (!rc.ok())
       {
-          FAPI_ERR("fapiGetScom error (ECID_PART_1_0x00018001)");
+          FAPI_ERR("proc_getecid: fapiGetScom error (ECID_PART_1_0x00018001) for %s",
+                   i_target.toEcmdString());
           break;
       }
 
@@ -137,7 +141,7 @@ fapi::ReturnCode proc_getecid(
 
       if (rc_ecmd)
       {
-          FAPI_ERR("Error 0x%X processing ECID (part 1) data buffer",
+          FAPI_ERR("proc_getecid: Error 0x%X processing ECID (part 1) data buffer",
                    rc_ecmd);
           rc.setEcmdError(rc_ecmd);
           break;
@@ -149,7 +153,8 @@ fapi::ReturnCode proc_getecid(
                          attr_data);
       if (!rc.ok())
       {
-          FAPI_ERR("Error from FAPI_ATTR_SET (ATTR_ECID)");
+          FAPI_ERR("proc_getecid: Error from FAPI_ATTR_SET (ATTR_ECID) for %s (attr_data[0] = %016llX, attr_data[1] = %016llX",
+                   i_target.toEcmdString(), attr_data[0], attr_data[1]);
           break;
       }
 
@@ -160,7 +165,7 @@ fapi::ReturnCode proc_getecid(
       rc_ecmd |= otprom_mode_data.setBit(OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT);
       if (rc_ecmd)
       {
-          FAPI_ERR("Error 0x%X setting up OTPROM Mode register data buffer",
+          FAPI_ERR("proc_getecid: Error 0x%X setting up OTPROM Mode register data buffer",
                    rc_ecmd);
           rc.setEcmdError(rc_ecmd);
           break;
@@ -169,14 +174,15 @@ fapi::ReturnCode proc_getecid(
       rc = fapiPutScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
       if (!rc.ok())
       {
-          FAPI_ERR("fapiPutScom error (OTPC_M_MODE_REGISTER_0x00010008)");
+          FAPI_ERR("proc_getecid: fapiPutScom error (OTPC_M_MODE_REGISTER_0x00010008) for %s",
+                   i_target.toEcmdString());
           break;
       }
 
     } while(0);
 
     // mark HWP exit
-    FAPI_IMP("proc_getecid: Exiting ...");
+    FAPI_DBG("proc_getecid: End");
     return rc;
 }
 

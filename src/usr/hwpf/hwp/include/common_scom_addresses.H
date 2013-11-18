@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: common_scom_addresses.H,v 1.47 2013/07/10 15:30:36 jmcgill Exp $
+// $Id: common_scom_addresses.H,v 1.48 2013/11/04 14:31:08 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -36,7 +36,7 @@
 // The purpose of this header is to define scom addresses for use by procedures.
 // This will help catch address typos at compile time, and will make it easy
 // to track down which procedures use each address
-
+//
 
 #ifndef COMMON_SCOM_ADDRESSES
 #define COMMON_SCOM_ADDRESSES
@@ -297,11 +297,16 @@ CONST_UINT64_T( I2CMS_MEMS0_STATUS_0x000A000B         , ULL(0x000A000B) );
 //      PCB MASTER
 //------------------------------------------------------------------------------
 CONST_UINT64_T( PCBMS_0x000F0000                      , ULL(0x000F0000) );
+CONST_UINT64_T( PCBMS_REC_ACK_REG_0x000F0010          , ULL(0x000F0010) );
+CONST_UINT64_T( PCBMS_REC_ERR_REG0_0x000F0011         , ULL(0x000F0011) );
+CONST_UINT64_T( PCBMS_REC_ERR_REG1_0x000F0012         , ULL(0x000F0012) );
 CONST_UINT64_T( PCBMS_DEVICE_ID_0x000F000F            , ULL(0x000F000F) );
 CONST_UINT64_T( PCB_TIMEOUT_0x000F0019                , ULL(0x000F0019) );
 CONST_UINT64_T( MASTER_PCB_INT_0x000F001A             , ULL(0x000F001A) );
 CONST_UINT64_T( PRV_PIB_PCBMS_RESET_REG_0x000F001D    , ULL(0x000F001D) );
+CONST_UINT64_T( PCBMS_FIRST_ERR_REG_0x000F001E        , ULL(0x000F001E) );
 CONST_UINT64_T( MASTER_PCB_ERR_0x000F001F             , ULL(0x000F001F) );
+CONST_UINT64_T( PCBSL_ERROR_REG_ALL_0x400F001F        , ULL(0x400F001F) );
 
 //------------------------------------------------------------------------------
 //      TP GPIO
@@ -633,6 +638,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.48  2013/11/04 14:31:08  kahnevan
+Added missing addresses used by proc_perv_registers.xml
+
 Revision 1.47  2013/07/10 15:30:36  jmcgill
 add entries for SCOM debug resources
 

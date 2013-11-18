@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_dmi_scominit.C,v 1.7 2013/05/14 15:45:32 jmcgill Exp $
+// $Id: proc_dmi_scominit.C,v 1.8 2013/11/09 18:37:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_dmi_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -37,18 +37,30 @@
 // *!
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-//  Version		Date		Owner		Description
+//  Version     Date        Owner       Description
 //------------------------------------------------------------------------------
+//    1.8       10/08/13    jmcgill     Updates for RAS review
 //    1.7       05/14/13    jmcgill     Address review comments
-//    1.6	   	05/01/13	jgrell		Added proc chip target
-//    1.5	   	02/06/13	jmcgill		Change passed targets in order to match scominit file updates.
-//    1.4	   	02/04/13	thomsen		Fixed informational print to not say Error
-//    1.3	   	01/23/13	thomsen		Added separate calls to base & customized scominit files. Removed separate calls to SIM vs. HW scominit files
-//    1.2	   	01/10/13	thomsen		Added separate calls to SIM vs. HW scominit files
-//   									Added commented-out call to OVERRIDE initfile for system/bus/lane specific inits
-//                                      Changed passed targets in order to match scominit file updates.
-//                                      CO-REQs required: p8.dmi.vbu.scom.initfile v1.1 and p8.dmi.hw.scom.initfile v1.1
-//    1.1       8/11/12     jmcgill		Initial release
+//    1.6       05/01/13    jgrell      Added proc chip target
+//    1.5       02/06/13    jmcgill     Change passed targets in order to match
+//                                      scominit file updates.
+//    1.4       02/04/13    thomsen     Fixed informational print to not say
+//                                      Error
+//    1.3       01/23/13    thomsen     Added separate calls to base &
+//                                      customized scominit files. Removed
+//                                      separate calls to SIM vs. HW scominit
+//                                      files
+//    1.2       01/10/13    thomsen     Added separate calls to SIM vs. HW
+//                                      scominit files
+//                                      Added commented-out call to OVERRIDE
+//                                      initfile for system/bus/lane specific
+//                                      inits
+//                                      Changed passed targets in order to match
+//                                      scominit file updates.
+//                                      CO-REQs required:
+//                                        p8.dmi.vbu.scom.initfile v1.1 and
+//                                        p8.dmi.hw.scom.initfile v1.1
+//    1.1       8/11/12     jmcgill     Initial release
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -68,7 +80,7 @@ fapi::ReturnCode proc_dmi_scominit(const fapi::Target & i_target)
 {
 
     fapi::ReturnCode rc;
-    fapi::Target i_this_pu_target;
+    fapi::Target this_pu_target;
     std::vector<fapi::Target> targets;
 
     // mark HWP entry
@@ -76,40 +88,50 @@ fapi::ReturnCode proc_dmi_scominit(const fapi::Target & i_target)
 
     do
     {
-        // Get parent chip target
-        rc = fapiGetParentChip(i_target, i_this_pu_target);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_dmi_scominit: Error from fapiGetParentChip");
-            break;
-        }
-
-        // populate targets vector (i_target=chiplet target)
-        targets.push_back(i_target);
-        targets.push_back(i_this_pu_target);
-
-        // processor MCS chiplet target
-        // test target type to confirm correct before calling initfile(s) to execute
+        // test target type to confirm correct before calling initfile(s)
+        // to execute
         if (i_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET)
         {
+            // get parent chip target
+            rc = fapiGetParentChip(i_target, this_pu_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_dmi_scominit: Error from fapiGetParentChip (%s)",
+                         i_target.toEcmdString());
+                break;
+            }
+
+            // populate targets vector
+            targets.push_back(i_target);       // chiplet target
+            targets.push_back(this_pu_target); // chip target
+
             // Call BASE DMI SCOMINIT
-            FAPI_INF("proc_dmi_scominit: fapiHwpExecInitfile executing %s on %s",
-                     MCS_DMI_BASE_IF, i_target.toEcmdString());
+            FAPI_INF("proc_dmi_scominit: fapiHwpExecInitfile executing %s on %s, %s",
+                     MCS_DMI_BASE_IF,
+                     i_target.toEcmdString(),
+                     this_pu_target.toEcmdString());
             FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, MCS_DMI_BASE_IF);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_dmi_scominit: Error from fapiHwpExecInitfile executing %s on %s",
-                         MCS_DMI_BASE_IF, i_target.toEcmdString());
+                FAPI_ERR("proc_dmi_scominit: Error from fapiHwpExecInitfile executing %s on %s, %s",
+                         MCS_DMI_BASE_IF,
+                         i_target.toEcmdString(),
+                         this_pu_target.toEcmdString());
                 break;
             }
-            // Call CUSTOMIZED DMI SCOMINIT (system specific)
-            FAPI_INF("proc_dmi_scominit: fapiHwpExecInitfile executing %s on %s",
-                     MCS_DMI_CUSTOM_IF, i_target.toEcmdString());
+
+            // Call CUSTOMIZED DMI SCOMINIT
+            FAPI_INF("proc_dmi_scominit: fapiHwpExecInitfile executing %s on %s, %s",
+                     MCS_DMI_CUSTOM_IF,
+                     i_target.toEcmdString(),
+                     this_pu_target.toEcmdString());
             FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, MCS_DMI_CUSTOM_IF);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_dmi_scominit: Error from fapiHwpExecInitfile executing %s on %s",
-                         MCS_DMI_CUSTOM_IF, i_target.toEcmdString());
+                FAPI_ERR("proc_dmi_scominit: Error from fapiHwpExecInitfile executing %s on %s, %s",
+                         MCS_DMI_CUSTOM_IF,
+                         i_target.toEcmdString(),
+                         this_pu_target.toEcmdString());
                 break;
             }
         }
@@ -117,6 +139,7 @@ fapi::ReturnCode proc_dmi_scominit(const fapi::Target & i_target)
         else
         {
             FAPI_ERR("proc_dmi_scominit: Unsupported target type");
+            const fapi::Target & MCS_TARGET = i_target;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_DMI_SCOMINIT_INVALID_TARGET);
             break;
         }

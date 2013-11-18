@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_dmi_scominit.H,v 1.3 2013/01/24 20:20:34 thomsen Exp $
+// $Id: proc_dmi_scominit.H,v 1.4 2013/11/09 18:37:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_dmi_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -35,15 +35,6 @@
 // *!
 // *! ADDITIONAL COMMENTS :
 // *!
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//  Version		Date		Owner		Description
-//------------------------------------------------------------------------------
-//    1.3	   	01/23/13	thomsen		Added separate calls to base & customized scominit files. Removed separate calls to SIM vs. HW scominit files
-//    1.2	   	01/10/13	thomsen		Added SIM and HW scominit filename strings
-//										Added *_OVERRIDE_IF to allow initfile overrides for specific bus instances
-//                                      CO-REQs required: p8.dmi.vbu.scom.initfile v1.1 and p8.dmi.hw.scom.initfile v1.1
-//    1.1       8/11/12     jmcgill		Initial release
 //------------------------------------------------------------------------------
 
 #ifndef PROC_DMI_SCOMINIT_H_
@@ -79,9 +70,10 @@ extern "C" {
  *
  * Should be called with all functional MCS chiplets
  *
- * @param[in] i_target Reference to target
+ * @param[in] i_target Reference to MCS chiplet target
  *                     If TARGET_TYPE_MCS_CHIPLET, calls:
  *                     - p8.dmi.scom.initfile
+ *                     - p8.dmi.custom.scom.initfile
  *
  * @return ReturnCode
  */

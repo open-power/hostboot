@@ -20,16 +20,27 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_xbus_scominit_errors.xml,v 1.3 2013/06/25 15:38:34 cswenson Exp $ -->
+<!-- $Id: proc_xbus_scominit_errors.xml,v 1.4 2013/11/09 18:38:44 jmcgill Exp $ -->
 <!-- Error definitions for proc_xbus_scominit procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_XBUS_SCOMINIT_INVALID_TARGET</rc>
+    <ffdc>THIS_XBUS_TARGET</ffdc>
+    <ffdc>CONNECTED_XBUS_TARGET</ffdc>
     <description>Invalid target type presented to proc_xbus_scominit HWP (expects TARGET_TYPE_XBUS_ENDPOINT).</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_XBUS_SCOMINIT_PARTIAL_GOOD_ERR</rc>
+    <ffdc>TARGET</ffdc>
     <description>Partial good attribute state does not allow for action on chiplet target.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>
