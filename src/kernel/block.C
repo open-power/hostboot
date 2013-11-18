@@ -380,7 +380,7 @@ void Block::castOutPages(uint64_t i_type)
         iv_nextBlock->castOutPages(i_type);
     }
 
-    if((iv_baseAddr != VMM_ADDR_BASE_BLOCK) || // Skip base area
+    if((iv_baseAddr != VMM_ADDR_BASE_BLOCK) && // Skip base area
        (iv_baseAddr != VMM_ADDR_EXTEND_BLOCK)) // Skip extended memory.
     {
         size_t rw_constraint = 5;
