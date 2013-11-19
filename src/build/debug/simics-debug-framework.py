@@ -505,21 +505,57 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
+        hb_hrmor = cpu.hrmor
+        node_num = (hb_hrmor - 0x8000000)/0x200000000000
+
         # Figure out if we are running out of the cache or mainstore
-        runStr = "(system_cmp0.phys_mem)->map[0][1]"
+        runStr = "(system_cmp0.phys_mem)->map[%d][1]" % (2*node_num)
         ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
         # Add the HRMOR if we're running from memory
         if 'cache' not in result:
-            hb_tracBinaryBuffer = hb_tracBinaryBuffer + getHRMOR()
+            hb_tracBinaryBuffer = hb_tracBinaryBuffer + hb_hrmor
+
+        tracbin = ["hbTracBINARY","hbTracBINARY1","hbTracBINARY2","hbTracBINARY3"]
+        tracmerg = ["hbTracMERG","hbTracMERG1","hbTracMERG2","hbTracMERG3"]
+
         # Save the tracBinary buffer to a file named tracBINARY in current dir
         # and run fsp-trace on tracBINARY file (implied), append output to
         # tracMERG.  Once we extract the trace buffer, we need to reset
         # mailbox scratch 1 (to 0) so that the trace daemon knows it can
         # continue.
-        saveCommand = "(system_cmp0.phys_mem)->map[0][1]->image.save tracBINARY 0x%x %d ; (shell \"(fsp-trace ./ -s %s/hbotStringFile >> tracMERG 2>/dev/null) || true\"); ($hb_masterproc).proc_fsi2host_mbox->regs[95][1] = 0"%(hb_tracBinaryBuffer,hb_tracBinaryBufferSz,os.environ['HB_TOOLPATH'])
+        cmd1 = "(system_cmp0.phys_mem)->map[%d][1]->image.save %s 0x%x %d"\
+                %(2*node_num,\
+                tracbin[node_num],\
+                hb_tracBinaryBuffer,\
+                hb_tracBinaryBufferSz)
+
+        cmd2 = "(shell \"(fsp-trace ./%s -s %s/hbotStringFile >> %s 2>/dev/null) || true\")"\
+                %(tracbin[node_num],\
+                os.environ['HB_TOOLPATH'],\
+                tracmerg[node_num])
+
+        cmd3 = "(get-master-proc %d).proc_fsi2host_mbox->regs[95][1] = 0"%(node_num)
+
+        saveCommand = "%s; %s; %s"%(cmd1,cmd2,cmd3)
+
         SIM_run_alone(run_command, saveCommand )
 
+        #file = open("hb_trace_debug.dat", "a")
+        #file.write("%s\n" % (saveCommand))
+        #file.close()
+
+
 # Continuous trace: Clear these files.
+rc = os.system( "rm -f hbTracMERG" )
+rc = os.system( "rm -f hbTracMERG1" )
+rc = os.system( "rm -f hbTracMERG2" )
+rc = os.system( "rm -f hbTracMERG3" )
+rc = os.system( "rm -f hbTracBINARY" )
+rc = os.system( "rm -f hbTracBINARY1" )
+rc = os.system( "rm -f hbTracBINARY2" )
+rc = os.system( "rm -f hbTracBINARY3" )
+
+# remove legacy files so as not to confuse
 rc = os.system( "rm -f tracMERG" )
 rc = os.system( "rm -f tracBINARY" )
 
