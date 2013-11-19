@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.18 2013/10/28 19:10:50 jmcgill Exp $
+// $Id: proc_chiplet_scominit.C,v 1.22 2013/11/18 14:43:14 thi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -58,8 +58,12 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
 
     fapi::TargetType target_type;
     std::vector<fapi::Target> initfile_targets;
+    std::vector<fapi::Target> ex_targets;
+    std::vector<fapi::Target> mcs_targets;
     uint8_t nx_enabled;
     uint8_t mcs_pos;
+    uint8_t ex_pos;
+    uint8_t num_ex_targets;
     uint8_t master_mcs_pos = 0xFF;
     fapi::Target master_mcs;
     uint8_t enable_xbus_resonant_clocking = 0x0;
@@ -172,6 +176,65 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                     break;
                 }
 
+                // configure CXA APC master LCO settings
+                rc = fapiGetChildChiplets(i_target,
+                                          fapi::TARGET_TYPE_EX_CHIPLET,
+                                          ex_targets,
+                                          fapi::TARGET_STATE_FUNCTIONAL);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error from fapiGetChildChiplets (EX) on %s",
+                             i_target.toEcmdString());
+                    break;
+                }
+
+                // form valid LCO target list
+                for (std::vector<fapi::Target>::iterator i = ex_targets.begin();
+                     i != ex_targets.end();
+                     i++)
+                {
+                    // determine EX chiplet number
+                    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*i), ex_pos);
+
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_chiplet_scominit: Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS) on %s",
+                                 i->toEcmdString());
+                        break;
+                    }
+
+                    rc_ecmd |= data.setBit(ex_pos-((ex_pos < 8)?(1):(3)));
+                }
+                if (!rc.ok())
+                {
+                    break;
+                }
+
+                num_ex_targets = ex_targets.size();
+                rc_ecmd |= data.insertFromRight(
+                    num_ex_targets,
+                    CAPP_APC_MASTER_LCO_TARGET_MIN_START_BIT,
+                    (CAPP_APC_MASTER_LCO_TARGET_MIN_END_BIT-
+                     CAPP_APC_MASTER_LCO_TARGET_MIN_START_BIT+1));
+
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error 0x%x setting APC Master LCO Target register data buffer",
+                             rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+
+                rc = fapiPutScom(i_target,
+                                 CAPP_APC_MASTER_LCO_TARGET_0x02013021,
+                                 data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (CAPP_APC_MASTER_LCO_TARGET_0x02013021) on %s",
+                             i_target.toEcmdString());
+                    break;
+                }
+
                 // execute AS SCOM initfile
                 FAPI_INF("proc_chiplet_scominit: Executing %s on %s",
                          PROC_CHIPLET_SCOMINIT_AS_IF, i_target.toEcmdString());
@@ -200,7 +263,8 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                                enable_xbus_resonant_clocking);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_chiplet_scominit: Error querying ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC");
+                FAPI_ERR("proc_chiplet_scominit: Error querying ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC on %s",
+                         i_target.toEcmdString());
                 break;
             }
 
@@ -212,7 +276,8 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                                  data);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_chiplet_scominit: fapiGetScom error (MBOX_FSIGP6_0x00050015)");
+                    FAPI_ERR("proc_chiplet_scominit: fapiGetScom error (MBOX_FSIGP6_0x00050015) on %s",
+                             i_target.toEcmdString());
                     break;
                 }
 
@@ -235,7 +300,8 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                                  data);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (MBOX_FSIGP6_0x00050015)");
+                    FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (MBOX_FSIGP6_0x00050015) on %s",
+                             i_target.toEcmdString());
                     break;
                 }
             }
@@ -257,14 +323,14 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
             }
 
             // determine set of functional MCS chiplets
-            std::vector<fapi::Target> mcs_targets;
             rc = fapiGetChildChiplets(i_target,
                                       fapi::TARGET_TYPE_MCS_CHIPLET,
                                       mcs_targets,
                                       fapi::TARGET_STATE_FUNCTIONAL);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_chiplet_scominit: Error from fapiGetChildChiplets");
+                FAPI_ERR("proc_chiplet_scominit: Error from fapiGetChildChiplets (MCS) on %s",
+                         i_target.toEcmdString());
                 break;
             }
 
@@ -297,7 +363,8 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
 
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_chiplet_scominit: Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+                    FAPI_ERR("proc_chiplet_scominit: Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS) on %s",
+                             i->toEcmdString());
                     break;
                 }
 
@@ -332,6 +399,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
             {
                 // set MCMODE0Q_ENABLE_CENTAUR_SYNC on first target only
                 // (this bit is required to be set on at most one MCS/chip)
+                rc_ecmd |= data.flushTo0();
                 rc_ecmd |= data.setBit(MCSMODE0_EN_CENTAUR_SYNC_BIT);
                 rc_ecmd |= mask.setBit(MCSMODE0_EN_CENTAUR_SYNC_BIT);
 
@@ -351,7 +419,8 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                                           mask);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_chiplet_scominit: fapiPutScomUnderMask error (MCS_MCSMODE0_0x02011807)");
+                    FAPI_ERR("proc_chiplet_scominit: fapiPutScomUnderMask error (MCS_MCSMODE0_0x02011807) on %s",
+                             master_mcs.toEcmdString());
                     break;
                 }
 

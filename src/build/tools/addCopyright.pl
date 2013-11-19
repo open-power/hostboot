@@ -261,7 +261,7 @@ foreach ( @Files )
 
     ##
     ##  text files are valid, but should generate a warning.
-    if  ("txt" eq $filetype)
+    if  (("txt" eq $filetype) || "Initfile" eq $filetype)
     {
         print STDOUT    "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
         print STDOUT     "WARNING:: File $_ :  Filetype: $filetype\n";
@@ -432,6 +432,10 @@ sub filetype
     if ( $filename =~ m/\.txt$/i )
     {
         return "txt"
+    }
+    if ( $filename =~ m/\.initfile$/i )
+    {
+        return "Initfile"
     }
     if ( ( $filename =~ m/\.[cht]$/i )
        ||( $filename =~ m/\.[cht]\+\+$/i )

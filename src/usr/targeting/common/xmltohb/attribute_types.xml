@@ -12766,5 +12766,4 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </hwpfToHbAttrMap>
 </attribute>
 
-
 </attributes>

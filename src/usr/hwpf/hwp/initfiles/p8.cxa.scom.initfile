@@ -1,4 +1,4 @@
-#-- $Id: p8.cxa.scom.initfile,v 1.2 2013/04/08 13:50:19 jmcgill Exp $
+#-- $Id: p8.cxa.scom.initfile,v 1.3 2013/11/09 21:10:48 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -21,6 +21,8 @@ SyntaxVersion = 1
 #--------------------------------------------------------------------------------
 #-- Defines
 #--------------------------------------------------------------------------------
+define capp_hang_control_on_scom = (ATTR_CHIP_EC_FEATURE_CAPP_HANG_CONTROL_ON_SCOM != 0);
+define capp_prod = (ATTR_CHIP_EC_FEATURE_CAPP_PROD != 0);
 
 #--------------------------------------------------------------------------------
 #-- SCOM initializations
@@ -29,18 +31,189 @@ SyntaxVersion = 1
 
 #-- APC Master Config Register
 scom 0x02013019 {
-    bits  , scom_data,      expr;
-    4:7   , 0b0000,         (ATTR_CHIP_EC_FEATURE_CAPP_HANG_CONTROL_ON_SCOM != 0);   #-- HANG_POLL_SCALE
+    bits  , scom_data,     expr;
+    4:7   , 0b0000,        (capp_hang_control_on_scom);   #-- HANG_POLL_SCALE
 }
 
 #-- CAPP Snoop Control Register
 scom 0x0201301B {
     bits  ,  scom_data,    expr;
-    48:51 ,  0b0010,       (ATTR_CHIP_EC_FEATURE_CAPP_HANG_CONTROL_ON_SCOM != 0);    #-- CXA_SNP_DATA_HANG_POLL_SCALE
+    45:47 ,  0b111,        (capp_prod);                   #-- CXA_SNP_MASTER_ADDRESS_PIPELINE_WAIT_COUNT
+    48:51 ,  0b0010,       (capp_hang_control_on_scom);   #-- CXA_SNP_DATA_HANG_POLL_SCALE
 }
 
 #-- CAPP Transport Control Register
 scom 0x0201301C {
     bits  ,  scom_data;
-    15:18 ,  0b1000;   #-- TLBI_DATA_POLL_PULSE_DIV
+    15:18 ,  0b1000;                                      #-- TLBI_DATA_POLL_PULSE_DIV
+}
+
+#-- CXA FIR Action0/1 Registers
+#--   action0,1 = 00 : checkstop
+#--               01 : recovered attention
+#--               10 : recoverable interrupt
+#--               11 : local checkstop = CAPP Machine Check
+scom 0x02013006 {
+    bits  ,  scom_data;                                   #--Action
+     0    ,  0b0;                                         #-- 0b00 masked                BAR PE
+     1    ,  0b0;                                         #-- 0b00 xstop                 Register PE
+     2    ,  0b0;                                         #-- 0b01 recovered attn        Master Array CE
+     3    ,  0b0;                                         #-- 0b00 xstop                 Master Array UE
+     4    ,  0b1;                                         #-- 0b11 capp mach check       Timer Expired Recoverable Epoch
+     5    ,  0b0;                                         #-- 0b00 xstop                 Timer Expired Xstop  RCS sequencer hang
+     6    ,  0b1;                                         #-- 0b11 capp mach check       PSL Cmd UE
+     7    ,  0b1;                                         #-- 0b11 capp mach check       PSL Cmd SUE
+     8    ,  0b0;                                         #-- 0b01 recovered attn        Snoop Array CE
+     9    ,  0b0;                                         #-- 0b00 xstop                 Snoop Array UE
+    10    ,  0b0;                                         #-- 0b00 xstop                 Recovery Failed
+    11    ,  0b1;                                         #-- 0b11 capp mach check       Illegal LPC Bar Access   DD2 only
+    12    ,  0b1;                                         #-- 0b11 capp mach check       XPT Recoverable err      DD2 only
+    13    ,  0b1;                                         #-- 0b11 capp mach check       Master Recoverable Err
+    14    ,  0b0;                                         #-- 0b00 masked                Spare
+    15    ,  0b0;                                         #-- 0b00 masked                Scom satellite parity Err
+    16    ,  0b0;                                         #-- 0b00 xstop                 Master Sys Xstop Err
+    17    ,  0b0;                                         #-- 0b00 xstop                 Snooper Sys Xstop Err
+    18    ,  0b0;                                         #-- 0b00 xstop                 XPT Sys Xstop Err
+    19    ,  0b0;                                         #-- 0b00 masked                Master Uop Err1   For Lab Use only
+    20    ,  0b0;                                         #-- 0b00 masked                Master Uop Err2   For Lab Use only
+    21    ,  0b0;                                         #-- 0b00 masked                Master Uop Err3   For Lab Use only
+    22    ,  0b0;                                         #-- 0b00 masked                Snooper Uop Err1  For Lab Use only
+    23    ,  0b0;                                         #-- 0b00 masked                Snooper Uop Err2  For Lab Use only
+    24    ,  0b0;                                         #-- 0b00 masked                Snooper Uop Err3  For Lab Use only
+    25    ,  0b0;                                         #-- 0b00 xstop                 Unsolicited PowerBus Data or Cresp
+    26    ,  0b0;                                         #-- 0b00 xstop                 PowerBus parity Err
+    27    ,  0b0;                                         #-- 0b00 masked                PowerBus Data Hang Err
+    28    ,  0b0;                                         #-- 0b00 masked                PowerBus Hang Err
+    29    ,  0b0;                                         #-- 0b00 xstop                 PowerBus Address Err on LD class APC op
+    30    ,  0b0;                                         #-- 0b00 xstop                 PowerBus Address Err on ST class APC op
+    31    ,  0b1;                                         #-- 0b11 capp mach check       PHB Link Down
+    32    ,  0b0;                                         #-- 0b00 masked                LD class Foreign Link err
+    33    ,  0b0;                                         #-- 0b00 masked                Foreign Link Hang err
+    34    ,  0b0;                                         #-- 0b01 recovered attn        XPT PowerBus CE
+    35    ,  0b0;                                         #-- 0b00 masked                XPT PowerBus UE
+    36    ,  0b0;                                         #-- 0b00 masked                XPT PowerBus SUE
+    37    ,  0b1;                                         #-- 0b11 capp mach check       TLBI Timeout Err
+    38    ,  0b0;                                         #-- 0b00 xstop                 TLBI Seq Err
+    39    ,  0b0;                                         #-- 0b00 xstop                 TLBI Bad Op Err
+    40    ,  0b0;                                         #-- 0b00 xstop                 TLBI Seq Num Parity Err
+    41    ,  0b0;                                         #-- 0b00 masked                ST class Foreign Link Fail
+    42    ,  0b0;                                         #-- 0b00 masked                TimeBase Err     DD2 only
+    43    ,  0b0;                                         #-- 0b00 masked                XPT Informational  DD2 only
+    44    ,  0b0;                                         #-- 0b00 masked                Spare
+    45    ,  0b0;                                         #-- 0b00 masked                Spare
+    46    ,  0b0;                                         #-- 0b00 masked                Spare
+    47    ,  0b0;                                         #-- 0b00 masked                Scom satellite parity error Copy 1
+    48    ,  0b0;                                         #-- 0b00 masked                Scom satellite parity error Copy 2
+}
+scom 0x02013007 {
+    bits  ,  scom_data;                                   #--Action
+     0    ,  0b0;                                         #-- 0b00 masked                BAR PE
+     1    ,  0b0;                                         #-- 0b00 xstop                 Register PE
+     2    ,  0b1;                                         #-- 0b01 recovered attn        Master Array CE
+     3    ,  0b0;                                         #-- 0b10 xstop                 Master Array UE
+     4    ,  0b1;                                         #-- 0b11 capp mach check       Timer Expired Recoverable Epoch
+     5    ,  0b0;                                         #-- 0b00 xstop                 Timer Expired Xstop  RCS sequencer hang
+     6    ,  0b1;                                         #-- 0b11 capp mach check       PSL Cmd UE
+     7    ,  0b1;                                         #-- 0b11 capp mach check       PSL Cmd SUE
+     8    ,  0b1;                                         #-- 0b01 recovered attn        Snoop Array CE
+     9    ,  0b0;                                         #-- 0b00 xstop                 Snoop Array UE
+    10    ,  0b0;                                         #-- 0b00 xstop                 Recovery Failed
+    11    ,  0b1;                                         #-- 0b11 capp mach check       Illegal LPC Bar Access   DD2 only
+    12    ,  0b1;                                         #-- 0b11 capp mach check       XPT Recoverable err      DD2 only
+    13    ,  0b1;                                         #-- 0b11 capp mach check       Master Recoverable Err
+    14    ,  0b0;                                         #-- 0b00 masked                Spare
+    15    ,  0b0;                                         #-- 0b00 masked                Scom satellite parity Err
+    16    ,  0b0;                                         #-- 0b00 xstop                 Master Sys Xstop Err
+    17    ,  0b0;                                         #-- 0b00 xstop                 Snooper Sys Xstop Err
+    18    ,  0b0;                                         #-- 0b00 xstop                 XPT Sys Xstop Err
+    19    ,  0b0;                                         #-- 0b00 masked                Master Uop Err1   For Lab Use only
+    20    ,  0b0;                                         #-- 0b00 masked                Master Uop Err2   For Lab Use only
+    21    ,  0b0;                                         #-- 0b00 masked                Master Uop Err3   For Lab Use only
+    22    ,  0b0;                                         #-- 0b00 masked                Snooper Uop Err1  For Lab Use only
+    23    ,  0b0;                                         #-- 0b00 masked                Snooper Uop Err2  For Lab Use only
+    24    ,  0b0;                                         #-- 0b00 masked                Snooper Uop Err3  For Lab Use only
+    25    ,  0b0;                                         #-- 0b00 xstop                 Unsolicited PowerBus Data or Cresp
+    26    ,  0b0;                                         #-- 0b00 xstop                 PowerBus parity Err
+    27    ,  0b0;                                         #-- 0b00 masked                PowerBus Data Hang Err
+    28    ,  0b0;                                         #-- 0b00 masked                PowerBus Hang Err
+    29    ,  0b0;                                         #-- 0b00 xstop                 PowerBus Address Err on LD class APC op
+    30    ,  0b0;                                         #-- 0b00 xstop                 PowerBus Address Err on ST class APC op
+    31    ,  0b1;                                         #-- 0b11 capp mach check       PHB Link Down
+    32    ,  0b0;                                         #-- 0b00 masked                LD class Foreign Link err
+    33    ,  0b0;                                         #-- 0b00 masked                Foreign Link Hang err
+    34    ,  0b1;                                         #-- 0b01 recovered attn        XPT PowerBus CE
+    35    ,  0b0;                                         #-- 0b00 masked                XPT PowerBus UE
+    36    ,  0b0;                                         #-- 0b00 masked                XPT PowerBus SUE
+    37    ,  0b1;                                         #-- 0b11 capp mach check       TLBI Timeout Err
+    38    ,  0b0;                                         #-- 0b00 xstop                 TLBI Seq Err
+    39    ,  0b0;                                         #-- 0b00 xstop                 TLBI Bad Op Err
+    40    ,  0b0;                                         #-- 0b00 xstop                 TLBI Seq Num Parity Err
+    41    ,  0b0;                                         #-- 0b00 masked                ST class Foreign Link Fail
+    42    ,  0b0;                                         #-- 0b00 masked                TimeBase Err         DD2 only
+    43    ,  0b0;                                         #-- 0b00 masked                XPT Informational    DD2 only
+    44    ,  0b0;                                         #-- 0b00 masked                Spare
+    45    ,  0b0;                                         #-- 0b00 masked                Spare
+    46    ,  0b0;                                         #-- 0b00 masked                Spare
+    47    ,  0b0;                                         #-- 0b00 masked                Scom satellite parity error Copy 1
+    48    ,  0b0;                                         #-- 0b00 masked                Scom satellite parity error Copy 2
+}
+
+
+#-- CXA CAPP FIR Mask Register
+scom 0x02013003 {
+    bits  ,  scom_data,    expr;
+     0    ,  0b1,          any;                           #--                            BAR PE
+     1    ,  0b1,          (!capp_prod);                  #-- mask for DD1               Register PE
+     1    ,  0b0,          (capp_prod);                   #--                            Register PE
+     2    ,  0b0,          any;                           #--                            Master Array CE
+     3    ,  0b0,          any;                           #--                            Master Array UE
+     4    ,  0b0,          any;                           #--                            Timer Expired Recoverable Epoch
+     5    ,  0b0,          any;                           #--                            Timer Expired Xstop  RCS sequencer hang
+     6    ,  0b0,          any;                           #--                            PSL Cmd UE
+     7    ,  0b0,          any;                           #--                            PSL Cmd SUE
+     8    ,  0b0,          any;                           #--                            Snoop Array CE
+     9    ,  0b0,          any;                           #--                            Snoop Array UE
+    10    ,  0b0,          any;                           #--                            Recovery Failed
+    11    ,  0b1,          (!capp_prod);                  #-- mask for DD1               Illegal LPC Bar Access   DD2 only
+    11    ,  0b0,          (capp_prod);                   #--                            Illegal LPC Bar Access   DD2 only
+    12    ,  0b1,          (!capp_prod);                  #-- mask for DD1               XPT Recoverable err      DD2 only
+    12    ,  0b0,          (capp_prod);                   #--                            XPT Recoverable err      DD2 only
+    13    ,  0b0,          any;                           #--                            Master Recoverable Err
+    14    ,  0b1,          any;                           #--                            Spare
+    15    ,  0b1,          any;                           #--                            Scom satellite parity Err
+    16    ,  0b0,          any;                           #--                            Master Sys Xstop Err
+    17    ,  0b0,          any;                           #--                            Snooper Sys Xstop Err
+    18    ,  0b1,          (!capp_prod);                  #-- mask for DD1               XPT Sys Xstop Err
+    18    ,  0b0,          (capp_prod);                   #--                            XPT Sys Xstop Err
+    19    ,  0b1,          any;                           #--                            Master Uop Err1   For Lab Use only
+    20    ,  0b1,          any;                           #--                            Master Uop Err2   For Lab Use only
+    21    ,  0b1,          any;                           #--                            Master Uop Err3   For Lab Use only
+    22    ,  0b1,          any;                           #--                            Snooper Uop Err1  ³or Lab Use only
+    23    ,  0b1,          any;                           #--                            Snooper Uop Err2  ³or Lab Use only
+    24    ,  0b1,          any;                           #--                            Snooper Uop Err3  ³or Lab Use only
+    25    ,  0b0,          any;                           #--                            Unsolicited PowerBus Data or Cresp
+    26    ,  0b1,          (!capp_prod);                  #-- mask for DD1               PowerBus Parity Err
+    26    ,  0b0,          (capp_prod);                   #--                            PowerBus Parity Err
+    27    ,  0b1,          any;                           #--                            PowerBus Data Hang Err
+    28    ,  0b1,          any;                           #--                            PowerBus Hang Err
+    29    ,  0b0,          any;                           #--                            PowerBus Address Err on LD class APC op
+    30    ,  0b0,          any;                           #--                            PowerBus Address Err on ST class APC op
+    31    ,  0b0,          any;                           #--                            PHB Link Down
+    32    ,  0b1,          any;                           #--                            LD class Foreign Link err
+    33    ,  0b1,          any;                           #--                            Foreign Link Hang err
+    34    ,  0b0,          any;                           #--                            XPT PowerBus CE
+    35    ,  0b1,          any;                           #--                            XPT PowerBus UE
+    36    ,  0b1,          any;                           #--                            XPT PowerBus SUE
+    37    ,  0b0,          any;                           #--                            TLBI Timeout Err
+    38    ,  0b0,          any;                           #--                            TLBI Seq Err
+    39    ,  0b0,          any;                           #--                            TLBI Bad Op Err
+    40    ,  0b0,          any;                           #--                            TLBI Seq Num Parity Err
+    41    ,  0b1,          any;                           #--                            ST class Foreign Link Fail
+    42    ,  0b1,          any;                           #--                            TimeBase Err     DD2 only
+    43    ,  0b1,          any;                           #--                            XPT Informational  DD2 only
+    44    ,  0b1,          any;                           #--                            Spare
+    45    ,  0b1,          any;                           #--                            Spare
+    46    ,  0b1,          any;                           #--                            Spare
+    47    ,  0b1,          any;                           #--                            Scom satellite parity error Copy 1
+    48    ,  0b1,          any;                           #--                            Scom satellite parity error Copy 2
 }
