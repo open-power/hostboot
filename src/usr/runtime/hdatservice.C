@@ -315,8 +315,13 @@ hdatService::hdatService(void)
 :iv_spiraL(NULL)
 ,iv_spiraH(NULL)
 ,iv_spiraS(NULL)
-,iv_mdrtCnt(0)
 {
+    for( RUNTIME::SectionId id = RUNTIME::FIRST_SECTION;
+         id <= RUNTIME::LAST_SECTION;
+         id = (RUNTIME::SectionId)(id+1) )
+    {
+        iv_actuals[id] = ACTUAL_NOT_SET;
+    }
 }
 
 hdatService::~hdatService(void)
@@ -562,6 +567,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         {
             break;
         }
+
+        //Store record size for later
+        size_t record_size = 0;
 
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
@@ -895,6 +903,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
 
             //Note - there is no header for the MDST
             o_dataSize = tuple->hdatActualCnt * tuple->hdatActualSize;
+            record_size = tuple->hdatActualSize;
             errhdl = getSpiraTupleVA(tuple, o_dataAddr);
             if( errhdl ) { break; }
        }
@@ -922,6 +931,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
 
             //Note - there is no header for the MDDT
             o_dataSize = tuple->hdatActualCnt * tuple->hdatActualSize;
+            record_size = tuple->hdatActualSize;
             errhdl = getSpiraTupleVA(tuple, o_dataAddr);
             if( errhdl ) { break; }
         }
@@ -950,6 +960,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             //Note - there is no header for the MDRT
             //return the total allocated size since it is empty at first
             o_dataSize = tuple->hdatAllocSize * tuple->hdatAllocCnt;
+            record_size = tuple->hdatAllocSize;
             errhdl = getSpiraTupleVA(tuple, o_dataAddr);
             if( errhdl ) { break; }
 
@@ -981,6 +992,12 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                       o_dataSize );
         if( errhdl ) { break; }
 
+        // Override the data size value if we've got a stored actual
+        if( iv_actuals[i_section] != ACTUAL_NOT_SET )
+        {
+            TRACFCOMP( g_trac_runtime, "getHostDataSection> Data size overridden from %d->%d", o_dataSize, iv_actuals[i_section] );
+            o_dataSize = iv_actuals[i_section] * record_size;
+        }
     } while(0);
 
     TRACFCOMP( g_trac_runtime, "getHostDataSection> o_dataAddr=0x%X, o_dataSize=%d", o_dataAddr, o_dataSize );
@@ -1415,21 +1432,15 @@ errlHndl_t get_host_data_section( SectionId i_section,
       getHostDataSection(i_section,i_instance, o_dataAddr, o_dataSize);
 }
 
-errlHndl_t update_host_data_section_actual( SectionId i_section,
-                                            uint16_t i_count )
+void saveActualCount( RUNTIME::SectionId i_id,
+                      uint16_t i_count )
 {
-    return Singleton<hdatService>::instance().
-      updateHostDataSectionActual(i_section,i_count);
+    Singleton<hdatService>::instance().saveActualCount(i_id,i_count);
 }
 
-void update_MDRT_Count(uint16_t i_count )
+errlHndl_t writeActualCount( RUNTIME::SectionId i_id )
 {
-    Singleton<hdatService>::instance().updateMdrtCount(i_count);
-}
-
-errlHndl_t write_MDRT_Count( void )
-{
-    return Singleton<hdatService>::instance().writeMdrtCount();
+    return Singleton<hdatService>::instance().writeActualCount(i_id);
 }
 
 /**

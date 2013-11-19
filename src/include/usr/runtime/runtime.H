@@ -64,7 +64,8 @@ errlHndl_t load_host_data( void );
  */
 enum SectionId
 {
-    HSVC_NODE_DATA,       //< HostServices Node Attributes
+    FIRST_SECTION,        //< Placeholder for arrays
+    HSVC_NODE_DATA = FIRST_SECTION, //< HostServices Node Attributes
     HSVC_SYSTEM_DATA,     //< HostServices System Attributes
     IPLPARMS_SYSTEM,      //< IPL Parms
     MS_DUMP_SRC_TBL,      //< MDST: Memory Dump Source Table
@@ -74,6 +75,7 @@ enum SectionId
     SPIRA_H,              //< SPIRA-H
     SPIRA_L,              //< Legacy SPIRA
     NACA,                 //< NACA
+    LAST_SECTION = NACA   //< Placeholder for arrays
 };
 
 /**
@@ -97,32 +99,23 @@ errlHndl_t get_host_data_section( SectionId i_section,
 const size_t DATA_SIZE_UNKNOWN = 0xFFFFFFFFFFFFFFFF;
 
 /**
- * @brief  Update the actual count of section.  Only supported for
- *         memory dump results table
+ * @brief  Store the actual count of a section in local memory.  
  *
- * @param[in] i_section  Chunk of data to find
- * @param[out] i_count   Actual countPhysical memory address of data
+ * @param[in] i_section  Chunk of data to update
+ * @param[in] i_count   Actual number of entries
+ *
+ */
+void saveActualCount( RUNTIME::SectionId i_id,
+                      uint16_t i_count );
+
+/**
+ * @brief  Write the stored actual count to SPIRA
+ *
+ * @param[in] i_section  Chunk of data to update
  *
  * @return errlHndl_t  NULL on success
  */
-errlHndl_t update_host_data_section_actual( SectionId i_section,
-                                            uint16_t i_count );
-
-/**
- * @brief This function updates the actual count for the MDRT
- * May be called at anytime, but the actual value is updated
- * to the SPIRA during populate_attributes
- *
- */
-void update_MDRT_Count(uint16_t i_count);
-
-/**
- * @brief This function writes the stored count for the MDRT
- * out to the SPIRA
- *
- * @return  errlHndl_t
- */
-errlHndl_t write_MDRT_Count(void);
+errlHndl_t writeActualCount( RUNTIME::SectionId i_id );
 
 /*
  * @brief  Retrieve and log FFDC data relevant to a given section of

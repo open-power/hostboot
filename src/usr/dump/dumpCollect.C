@@ -566,7 +566,8 @@ errlHndl_t doDumpCollect(void)
             }
 
             //Update actual count in RUNTIME
-            RUNTIME::update_MDRT_Count(l_resultCount);
+            RUNTIME::saveActualCount(RUNTIME::MS_DUMP_RESULTS_TBL,
+                                     l_resultCount);
         }while(0);// end of do-while loop
 
         // Got an errorlog back from get_host_data_sections

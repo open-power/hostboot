@@ -244,38 +244,46 @@ namespace RUNTIME
         hdatSpira_t* iv_spiraS;
 
         /**
-         * Count of number of MDRT entries present
-         * on MPIPL/Dump.  A value of 0 implies it
-         * doesn't need to be written
+         * Save the actual count value for sections
+         * -Used to keep track of things across HDAT writes
+         *  from FSP
          */
-        uint16_t iv_mdrtCnt;
+        uint16_t iv_actuals[RUNTIME::LAST_SECTION+1];
+
+        /**
+         * Dummy value for unassigned actual
+         */
+        enum {
+            ACTUAL_NOT_SET = 0xFFFF
+        };
 
       public:
         /**
-         * @brief  Update the actual count of MDRT.  Called by dump
-         *  and needs to be saved away till populate_attributes.  Can't
-         *  be directly written by dump since FSP will load new value over
-
+         * @brief  Store the actual count of a section.  
+         *
+         * @param[in] i_section  Chunk of data to update
          * @param[in] i_count   Actual count for MDRT entries
          *
          */
-        void updateMdrtCount( uint16_t i_count )
+        void saveActualCount( RUNTIME::SectionId i_id,
+                              uint16_t i_count )
         {
-            iv_mdrtCnt = i_count;
+            iv_actuals[i_id] = i_count;
         }
 
         /**
-         * @brief  Write the MDRT stored value to SPIRA
+         * @brief  Write the stored actual count to SPIRA
+         *
+         * @param[in] i_section  Chunk of data to update
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t writeMdrtCount( void )
+        errlHndl_t writeActualCount( RUNTIME::SectionId i_id )
         {
             errlHndl_t l_err = NULL;
-            if(iv_mdrtCnt)
+            if(iv_actuals[i_id] != ACTUAL_NOT_SET)
             {
-                l_err = updateHostDataSectionActual(
-                                   MS_DUMP_RESULTS_TBL,iv_mdrtCnt);
+                l_err = updateHostDataSectionActual( i_id, iv_actuals[i_id] );
             }
             return l_err;
         }

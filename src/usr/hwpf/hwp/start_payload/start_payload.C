@@ -299,7 +299,7 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             }
 
             //Update the MDRT value (for MS Dump)
-            l_err = RUNTIME::write_MDRT_Count();
+            l_err = RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);
             if(l_err != NULL)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
