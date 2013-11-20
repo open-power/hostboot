@@ -56,19 +56,12 @@
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
-
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "mc_config_custom.C" and include the prototypes here.
-//  #include    "mc_config_custom.H"
-
 #include    "mc_config.H"
 
-//  Uncomment these files as they become available:
-// #include    "host_collect_dimm_spd/host_collect_dimm_spd.H"
 #include    "mss_volt/mss_volt.H"
 #include    "mss_freq/mss_freq.H"
 #include    "mss_eff_config/mss_eff_config.H"
+#include    "mss_eff_config/mss_eff_config_thermal.H"
 #include    "mss_eff_config/mss_eff_grouping.H"
 #include    "mss_eff_config/opt_memmap.H"
 
@@ -79,7 +72,6 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
-using   namespace   fapi;
 
 
 
@@ -156,7 +148,7 @@ void*   call_mss_volt( void *io_pArgs )
                     l_membuf_target->getAttr<ATTR_VMEM_ID>(),
                     TARGETING::get_huid(l_membuf_target));
     
-                fapi::Target l_membuf_fapi_target( TARGET_TYPE_MEMBUF_CHIP,
+                fapi::Target l_membuf_fapi_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
                         (const_cast<TARGETING::Target*>(l_membuf_target)) );
 
                 l_membufFapiTargets.push_back( l_membuf_fapi_target );
@@ -224,7 +216,7 @@ void*    call_mss_freq( void *io_pArgs )
 
         //  call the HWP with each target   ( if parallel, spin off a task )
         // $$const fapi::Target l_fapi_membuf_target(
-        fapi::Target l_fapi_membuf_target( TARGET_TYPE_MEMBUF_CHIP,
+        fapi::Target l_fapi_membuf_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
                     (const_cast<TARGETING::Target*>(l_membuf_target)) );
 
         FAPI_INVOKE_HWP(l_err, mss_freq, l_fapi_membuf_target);
@@ -281,7 +273,7 @@ errlHndl_t call_mss_eff_grouping()
                 TARGETING::get_huid(l_cpu_target));
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_cpu_target( TARGET_TYPE_PROC_CHIP,
+        const fapi::Target l_fapi_cpu_target(fapi::TARGET_TYPE_PROC_CHIP,
                     (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
         TARGETING::TargetHandleList l_membufsList;
@@ -298,7 +290,7 @@ errlHndl_t call_mss_eff_grouping()
             const TARGETING::Target* l_pTarget = *l_membuf_iter;
 
             // cast OUR type of target to a FAPI type of target.
-            const fapi::Target l_fapi_centaur_target( TARGET_TYPE_MEMBUF_CHIP,
+            const fapi::Target l_fapi_centaur_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
                    (const_cast<TARGETING::Target*>(l_pTarget)) );
 
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -350,7 +342,7 @@ errlHndl_t call_opt_memmap()
         const TARGETING::Target*  l_target = *l_iter;
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_target( TARGET_TYPE_PROC_CHIP,
+        const fapi::Target l_fapi_target(fapi::TARGET_TYPE_PROC_CHIP,
                     (const_cast<TARGETING::Target*>(l_target)) );
 
         l_fapi_procs.push_back(l_fapi_target);
@@ -379,75 +371,86 @@ errlHndl_t call_opt_memmap()
 void*    call_mss_eff_config( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-
     IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
 
+    // Get all functional MBA chiplets
     TARGETING::TargetHandleList l_mbaTargetList;
     getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
-    for (TargetHandleList::const_iterator
-            l_mba_iter = l_mbaTargetList.begin();
-            l_mba_iter != l_mbaTargetList.end();
-            ++l_mba_iter)
+    // Iterate over all MBAs, calling mss_eff_config and mss_eff_config_thermal
+    for (TargetHandleList::const_iterator l_mba_iter = l_mbaTargetList.begin();
+            l_mba_iter != l_mbaTargetList.end(); ++l_mba_iter)
     {
-        //  make a local copy of the target for ease of use
+        // Get the TARGETING::Target pointer and its HUID
         const TARGETING::Target* l_mba_target = *l_mba_iter;
+        uint32_t l_huid = TARGETING::get_huid(l_mba_target);
 
-        //  print call to hwp and dump physical path of the target(s)
+        // Create a FAPI target representing the MBA
+        const fapi::Target l_fapi_mba_target(fapi::TARGET_TYPE_MBA_CHIPLET,
+            (const_cast<TARGETING::Target*>(l_mba_target)));
+
+        // Call the mss_eff_config HWP
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  mss_eff_config HWP "
-                "target HUID %.8X",
-                TARGETING::get_huid(l_mba_target));
-
-        // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
-                    (const_cast<TARGETING::Target*>(l_mba_target)) );
-
-        //  call the HWP with each fapi::Target
+            "=====  mss_eff_config HWP. MBA HUID %.8X", l_huid);
         FAPI_INVOKE_HWP(l_err, mss_eff_config, l_fapi_mba_target);
 
-        //  process return code.
-        if ( l_err )
+        if (l_err)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  mss_eff_config HWP ",
-                    l_err->reasonCode());
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X:  mss_eff_config HWP ", l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_mba_target);
-
-            // capture the target data in the elog
-            myDetails.addToLog( l_err );
-
-            break; // break out mba loop
+            // Ensure istep error created and has same plid as this error
+            ErrlUserDetailsTarget(l_mba_target).addToLog(l_err);
+            l_StepError.addErrorDetails(l_err);
+            errlCommit(l_err, HWPF_COMP_ID);
         }
         else
         {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS :  mss_eff_config HWP");
+
+            // Call the mss_eff_config_thermal HWP
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  mss_eff_config HWP");
+                "=====  mss_eff_config_thermal HWP. MBA HUID %.8X", l_huid);
+            FAPI_INVOKE_HWP(l_err, mss_eff_config_thermal, l_fapi_mba_target);
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  mss_eff_config_thermal HWP ", l_err->reasonCode());
+
+                // Ensure istep error created and has same plid as this error
+                ErrlUserDetailsTarget(l_mba_target).addToLog(l_err);
+                l_StepError.addErrorDetails(l_err);
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_eff_config_thermal HWP");
+            }
         }
-    }   // endfor
-
-    TARGETING::TargetHandleList l_procs;
-    getAllChips(l_procs, TYPE_PROC);
-
-    for (TARGETING::TargetHandleList::const_iterator
-         l_iter = l_procs.begin();
-         l_iter != l_procs.end() && !l_err;
-         ++l_iter)
-    {
-        TARGETING::Target*  l_target = *l_iter;
-
-        uint64_t l_base = 0;
-        l_target->setAttr<ATTR_MEM_BASE>( l_base  );
-
-        l_base = 0x0002000000000000;	// 512TB
-        l_target->setAttr<ATTR_MIRROR_BASE>( l_base );
     }
-    
-    if (!l_err)
+
+    if (l_StepError.isNull())
     {
+        TARGETING::TargetHandleList l_procs;
+        getAllChips(l_procs, TYPE_PROC);
+
+        for (TARGETING::TargetHandleList::const_iterator
+           l_iter = l_procs.begin(); l_iter != l_procs.end(); ++l_iter)
+        {
+            TARGETING::Target*  l_target = *l_iter;
+
+            uint64_t l_base = 0;
+            l_target->setAttr<ATTR_MEM_BASE>( l_base  );
+
+            l_base = 0x0002000000000000UL; // 512TB
+            l_target->setAttr<ATTR_MIRROR_BASE>( l_base );
+        }
+
         l_err = call_mss_eff_grouping();
 
         if (!l_err)
@@ -459,15 +462,13 @@ void*    call_mss_eff_config( void *io_pArgs )
                 l_err = call_mss_eff_grouping();
             }
         }
-    }
 
-    if (l_err)
-    {
-        // Create IStep error log and cross reference to error that occurred
-        l_StepError.addErrorDetails( l_err );
-
-        // Commit Error
-        errlCommit( l_err, HWPF_COMP_ID );
+        if (l_err)
+        {
+            // Ensure istep error created and has same plid as this error
+            l_StepError.addErrorDetails( l_err );
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config exit" );
