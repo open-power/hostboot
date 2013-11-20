@@ -2307,6 +2307,44 @@ This Attribute is to be interpreted as an Integer</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_VPD_CDIMM_SENSOR_MAP_PRIMARY</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Custom DIMM Sensor Map for Primary I2C Port (1 byte of data):
+0x00 No sensors attached
+0x01 DIMM sensor 0 attached
+0x02 DIMM sensor 1 attached
+0x04 DIMM sensor 2 attached
+0x08 DIMM sensor 3 attached
+0x10 DIMM sensor 4 attached
+0x20 DIMM sensor 5 attached
+0x40 DIMM sensor 6 attached
+0x80 DIMM sensor 7 attached
+Comes from the VPD MW Keyword</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_CDIMM_SENSOR_MAP_SECONDARY</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Custom DIMM Sensor Map for Secondary I2C Port (1 byte of data):
+0x00 No sensors attached
+0x01 DIMM sensor 0 attached
+0x02 DIMM sensor 1 attached
+0x04 DIMM sensor 2 attached
+0x08 DIMM sensor 3 attached
+0x10 DIMM sensor 4 attached
+0x20 DIMM sensor 5 attached
+0x40 DIMM sensor 6 attached
+0x80 DIMM sensor 7 attached
+Comes from the VPD MW Keyword</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
     <id>ATTR_VPD_DRAM_2N_MODE_ENABLED</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Describes if this MBA is in 2N address mode.  The DIMM attributes associated with this MBA describes if this mode is needed for SI. Come from the VPD and consumed in the mba_def.initfile.</description>

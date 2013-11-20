@@ -27,6 +27,8 @@
 // set to 1 for doing unit tests, set to 0 for production
 #define UNITTESTfwt 0
 #define UNITTEST2fwt 0
+#define HWPMBVPDACCESSORTEST_UT0 0 // 0 = just one chip, 1 = all
+#define HWPMBVPDACCESSORTEST_UT7 0 // 0 = min sensor map tests
 
 /**
  *  @file fapiwinkletest.H
@@ -50,6 +52,7 @@
 #include    <mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include    <mvpd_accessors/getMBvpdVersion.H>
 #include    <mvpd_accessors/getMBvpdDram2NModeEnabled.H>
+#include    <mvpd_accessors/getMBvpdSensorMap.H>
 
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
@@ -72,7 +75,7 @@ public:
      */
     void    testGetMvpd()
     {
-        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        fapi::ReturnCode    l_fapirc;
         uint8_t             *l_pdRRecord            =   NULL;
         uint32_t            l_pdRLen                =   0;
 
@@ -173,7 +176,7 @@ public:
      */
     void    testGetMBvpd()
     {
-        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        fapi::ReturnCode    l_fapirc;
         uint8_t             *l_pRecord            =   NULL;
         uint32_t            l_len                =   0;
 
@@ -305,7 +308,7 @@ public:
      */
     void    testGetSlopeInterceptData()
     {
-        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        fapi::ReturnCode    l_fapirc;
         getMBvpdSlopeInterceptData_FP_t (l_getMBvpdSlopeInterceptData)
                               = &getMBvpdSlopeInterceptData;
         uint32_t l_val = 0xFFFFFFFF;
@@ -409,12 +412,96 @@ public:
     }
 
     /**
+     * @brief call getMBvpdSensorMap to fetch sensor map
+     *        attributes from the MW keyword
+     *
+     */
+    void    testGetSensorMap()
+    {
+        fapi::ReturnCode    l_fapirc;
+        uint8_t l_val = 0xFF;
+
+        TS_TRACE( "testGetSensorMap entry" );
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        TS_TRACE( "testGetSensorMap l_memBufList.size()=%d",
+                                      l_memBufList.size() );
+        // loop thru memory buffers
+#if HWPMBVPDACCESSORTEST_UT0
+        uint8_t l_mbNum = 0;    // check them all in unit test
+#else
+        uint8_t l_mbNum = (l_memBufList.size() > 0) ? l_memBufList.size()-1 : 0;
+#endif
+        for (; l_mbNum < l_memBufList.size(); l_mbNum++ )
+        {
+            //  make a local copy of the memory buffer target
+            TARGETING::Target*  l_mb_target = l_memBufList[l_mbNum];
+
+            //  dump physical path to target
+            EntityPath l_path;
+            l_path  =   l_mb_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // cast OUR type of target to a FAPI type of target.
+            fapi::Target l_fapi_mb_target(
+                                          TARGET_TYPE_MEMBUF_CHIP,
+                   (const_cast<TARGETING::Target*>(l_mb_target)) );
+
+#if HWPMBVPDACCESSORTEST_UT7
+            // test accessor directly
+            getMBvpdSensorMap_FP_t (l_getMBvpdSensorMap) = &getMBvpdSensorMap;
+
+            // Primary Sensor Map
+            l_fapirc = (*l_getMBvpdSensorMap)(l_fapi_mb_target,
+                fapi::SENSOR_MAP_PRIMARY, l_val);
+            if (l_fapirc) break;
+                TS_TRACE( "testSensorMap accessor "
+                "SENSOR_MAP_PRIMARY=0x%02x", l_val);
+
+            // Secondary Sensor Map
+            l_fapirc = (*l_getMBvpdSensorMap)(l_fapi_mb_target,
+                fapi::SENSOR_MAP_SECONDARY, l_val);
+            if (l_fapirc) break;
+                TS_TRACE( "testSensorMap accessor "
+                "SENSOR_MAP_SECONDARY=0x%02x", l_val);
+
+            // test attribute
+            // Primary Sensor Map
+            l_fapirc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_PRIMARY,
+                &l_fapi_mb_target, l_val);
+            if (l_fapirc) break;
+                TS_TRACE( "testSensorMap attr "
+                "SENSOR_MAP_PRIMARY=0x%02x", l_val);
+#endif
+
+            // Secondary Sensor Map
+            l_fapirc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_SECONDARY,
+                &l_fapi_mb_target, l_val);
+            if (l_fapirc) break;
+                TS_TRACE( "testSensorMap attr "
+                "SENSOR_MAP_SECONDARY=0x%02x", l_val);
+        }
+
+        if (l_fapirc)
+        {
+           TS_FAIL( "fapiGetSensorMap: FAPI_ATTR_GET fail rc=0x%x",
+                 static_cast<uint32_t>(l_fapirc) );
+           fapiLogError(l_fapirc);
+        }
+
+        TS_TRACE( "testGetSensorMap exit" );
+
+    }
+
+    /**
      * @brief call getMBvpdVersion to fetch vpd version
      *
      */
     void    testGetVersion()
     {
-        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        fapi::ReturnCode    l_fapirc;
         getMBvpdVersion_FP_t (l_getMBvpdVersion)
                               = &getMBvpdVersion;
 
@@ -521,7 +608,7 @@ public:
      */
     void    testGetDram2NModeEnabled()
     {
-        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        fapi::ReturnCode    l_fapirc;
         getMBvpdDram2NModeEnabled_FP_t (l_getMBvpdDram2NModeEnabled)
                               = &getMBvpdDram2NModeEnabled;
 
@@ -605,7 +692,7 @@ public:
      */
     void    testGetAddrMirrorData()
     {
-        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        fapi::ReturnCode    l_fapirc;
         getMBvpdAddrMirrorData_FP_t (l_getMBvpdAddrMirrorData)
                               = &getMBvpdAddrMirrorData;
 
@@ -689,7 +776,7 @@ public:
      */
     void    testGetTermData()
     {
-        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        fapi::ReturnCode    l_fapirc;
         uint8_t val1[2][2] = {{0xFF,0xFF},{0xFF,0xFF}};
 #if UNITTESTfwt
         uint8_t val2[2][2][4]={
@@ -1054,7 +1141,7 @@ public:
      */
     void    testGetPhaseRotatorData()
     {
-        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        fapi::ReturnCode    l_fapirc;
         const uint8_t PORT_SIZE = 2;
         uint8_t l_attr_eff_cen_phase_rot[PORT_SIZE];
 
@@ -1584,7 +1671,7 @@ public:
      */
     void testRepairRings()
     {
-        fapi::ReturnCode    l_fapirc        =   fapi::FAPI_RC_SUCCESS;
+        fapi::ReturnCode    l_fapirc;
         uint8_t             *l_pRingBuf     =   NULL;
         uint32_t            l_ringBufsize   =   0;
         uint32_t            l_ringId        =   0;

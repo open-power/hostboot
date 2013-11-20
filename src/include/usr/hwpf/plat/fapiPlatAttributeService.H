@@ -51,6 +51,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
 #include <hwpf/hwp/spd_accessors/getSpdAttrAccessor.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
 #include <vpd/spdenums.H>
@@ -445,7 +446,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_EX_L2_SINGLE_MEMBER_ENABLE. It should not be called directly.
  *
- *  @param[in]  i_pTarget Target pointer
+ *  @param[in]  i_pTarget Target MB pointer
  *  @param[out] o_val     ATTR_EX_L2_SINGLE_MEMBER_ENABLE value
  *  @return     ReturnCode. Zero on success, else platform specified error
  */
@@ -458,7 +459,7 @@ fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
  * the Phase Rotator Data attributes
  * It should not be called directly.
  *
- *  @param[in]  i_pTarget   Target pointer
+ *  @param[in]  i_pTarget   Target mba pointer
  *  @param[in]  i_attr      Phase Rotator Data enumerator item
  *  @param[out] o_val       Phase Rotator Data for each of the 2 ports
  *  @return     ReturnCode. Zero on success, else platform specified error
@@ -486,7 +487,7 @@ fapi::ReturnCode fapiPlatGetAddrMirrorData (
  * the Termination Data attributes
  * It should not be called directly.
  *
- *  @param[in]  i_pTarget   Target pointer
+ *  @param[in]  i_pTarget   Target MB pointer
  *  @param[in]  i_attr      Termination Data attribute enumerator
  *  @param[out] o_pVal      Pointer to variable typed output values
  *  @param[in]  i_valSize   Size of output variable
@@ -502,7 +503,7 @@ fapi::ReturnCode fapiPlatGetTermData (
  * the Slope Intercept Data attributes
  * It should not be called directly.
  *
- *  @param[in]  i_pTarget   Target pointer
+ *  @param[in]  i_pTarget   Target MB pointer
  *  @param[in]  i_attr      Slope Intercept Data attribute enumerator
  *  @param[out] o_Val       Slope Intercept Data
  *  @return     ReturnCode. Zero on success, else platform specified error
@@ -510,7 +511,22 @@ fapi::ReturnCode fapiPlatGetTermData (
 fapi::ReturnCode fapiPlatGetSlopeInterceptData (
                               const fapi::Target * i_pTarget,
                               const fapi::MBvpdSlopeIntercept i_attr,
-                              uint32_t  & o_Val);
+                              uint32_t  & o_val);
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the sensor map attributes
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target MB pointer
+ *  @param[in]  i_attr      Sensor map attribute enumerator
+ *  @param[out] o_Val       Sensor map data
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetSensorMap (
+                              const fapi::Target * i_pTarget,
+                              const fapi::MBvpdSensorMap i_attr,
+                              uint8_t  & o_val);
 
 //------------------------------------------------------------------------------
 // Prototypes to support BAD_DQ_BITMAP attribute
@@ -1687,5 +1703,17 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetDram2NModeEnabled\
         (PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACROS to support MBVPD Get Sensor Map Data
+//------------------------------------------------------------------------------
+#define ATTR_VPD_CDIMM_SENSOR_MAP_PRIMARY_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetSensorMap\
+        (PTARGET, fapi::SENSOR_MAP_PRIMARY, VAL)
+#define ATTR_VPD_CDIMM_SENSOR_MAP_SECONDARY_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetSensorMap\
+        (PTARGET, fapi::SENSOR_MAP_SECONDARY, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

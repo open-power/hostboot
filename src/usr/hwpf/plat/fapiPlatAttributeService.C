@@ -49,6 +49,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
 #include <fapiPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
@@ -1299,6 +1300,17 @@ fapi::ReturnCode fapiPlatGetDram2NModeEnabled (
     // Get the data using the HWP accessor
     fapi::ReturnCode l_rc;
     FAPI_EXEC_HWP(l_rc, getMBvpdDram2NModeEnabled, * i_pFapiTarget, o_val);
+    return l_rc;
+}
+
+fapi::ReturnCode fapiPlatGetSensorMap (
+              const   fapi::Target * i_pFapiTarget,
+              const   fapi::MBvpdSensorMap i_attr,
+              uint8_t & o_val)
+{
+    // Get the data using the HWP accessor
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getMBvpdSensorMap, * i_pFapiTarget, i_attr, o_val);
     return l_rc;
 }
 
