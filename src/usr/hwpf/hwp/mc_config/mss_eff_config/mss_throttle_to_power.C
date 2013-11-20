@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_throttle_to_power.C,v 1.10 2013/09/19 19:02:19 bellows Exp $
+// $Id: mss_throttle_to_power.C,v 1.11 2013/11/14 17:28:30 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_throttle_to_power.C,v $
 //------------------------------------------------------------------------------
@@ -47,6 +47,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.11  | pardeik  |13-NOV-13| changed MAX_UTIL from 75 to 56.25
 //   1.10  | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 //   1.9   | pardeik  |04-DEC-12| update lines to have a max width of 80 chars
 //         |          |         | added FAPI_ERR before return code lines
@@ -203,7 +204,7 @@ extern "C" {
 	const uint8_t MAX_NUM_DIMMS = 2;
 // Maximum theoretical data bus utilization (percent of max) (for ceiling)
 // If this is changed, also change mss_bulk_pwr_throttles MAX_UTIL
-	const float MAX_UTIL = 75;				
+	const float MAX_UTIL = 56.25;				
 
 	uint32_t l_power_slope_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
 	uint32_t l_power_int_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];

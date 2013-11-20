@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.14 2013/09/19 19:02:06 bellows Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.15 2013/11/14 17:28:44 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -53,13 +53,14 @@
 // Note that throttle_n_per_chip takes on different meaning depending on how
 // cfg_count_other_mba_dis is set
 //  Can be per-chip OR per-mba throttling
+// These inits here are done in mss_scominit
 // ISDIMM:  These registers need to be setup to these values, will be able to
 //  do per slot or per MBA throttling
 //   cfg_nm_per_slot_enabled = 1
 //   cfg_count_other_mba_dis = 1
 // CDIMM:  These registers need to be setup to these values, will be able to
-//  do per slot or per chip throttling
-//   cfg_nm_per_slot_enabled = 1
+//  do per mba or per chip throttling
+//   cfg_nm_per_slot_enabled = 0
 //   cfg_count_other_mba_dis = 0
 //
 //
@@ -70,6 +71,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.15  | pardeik  |13-NOV-13| changed MAX_UTIL from 75 to 56.25
+//         |          |         | get default M throttle value from MRW
+//         |          |         | return error if not enough memory power
+//         |          |         | comment fixes to align with scominit settings
 //   1.14  | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 //   1.13  | pardeik  |19-JUL-13| removed code to identify if throttles are 
 //         |          |         |   based on thermal or power reasons since the
@@ -165,15 +170,7 @@ extern "C" {
 	const float MIN_UTIL = 1;
 // max utilization (percent of max) allowed for ceiling
 // If MAX_UTIL is changed, also change mss_throttle_to_power MAX_UTIL
-	const float MAX_UTIL = 75;
-// cfg_nm_m default
-	const uint32_t MEM_THROTTLE_D_DEFAULT = 512;
-// cfg_nm_n_per_mba default
-	const uint32_t MEM_THROTTLE_N_DEFAULT_PER_MBA =
-	  (int)(MEM_THROTTLE_D_DEFAULT * (MAX_UTIL / 100) / 4);
-//cfg_nm_n_per_chip default
-	const uint32_t MEM_THROTTLE_N_DEFAULT_PER_CHIP =
-	  (int)(MEM_THROTTLE_D_DEFAULT * (MAX_UTIL / 100) / 4);
+	const float MAX_UTIL = 56.25;
 
 	fapi::Target target_chip;
 	std::vector<fapi::Target> target_mba_array;
@@ -208,6 +205,11 @@ extern "C" {
 	rc = FAPI_ATTR_GET(ATTR_MSS_POWER_INT, &i_target_mba, power_int_array);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_MSS_POWER_INT");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR, NULL, throttle_d);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR");
 	    return rc;
 	}
 
@@ -263,11 +265,9 @@ extern "C" {
 // If over limit, then increase throttle value until it is at or below limit
 // If unable to get power below limit, then call out an error
 
-// Set runtime throttles to default values as a starting value
-	throttle_n_per_mba = MEM_THROTTLE_N_DEFAULT_PER_MBA;
-	throttle_n_per_chip = MEM_THROTTLE_N_DEFAULT_PER_CHIP *
+	throttle_n_per_mba = (int)(throttle_d * (MAX_UTIL / 100) / 4);
+	throttle_n_per_chip = (int)(throttle_d * (MAX_UTIL / 100) / 4) *
 	  num_mba_with_dimms;
-	throttle_d = MEM_THROTTLE_D_DEFAULT;
 
 // Adjust power limit value as needed here
 // For CDIMM, we want the throttles to be per-chip, and to allow all commands to
@@ -395,18 +395,11 @@ extern "C" {
 
 	if (not_enough_available_power == true)
 	{
+// return error for TMGT to handle if there is not enough available memory power
+// at the minimum utilization throttle setting
 	    FAPI_ERR("Not enough available memory power [Channel Pair Power %4.2f/%d cW]", channel_pair_power, channel_pair_watt_target);
-// Log an error against firmware (power subsystem does not have enough power
-// for all the hardware, or power allocation values in firmware are off).  Do
-// not deconfigure or gard.
-	    const fapi::Target & MEM_CHIP = i_target_mba;
-	    uint32_t FFDC_DATA_1 = (int)channel_pair_power;
-	    uint32_t FFDC_DATA_2 = channel_pair_watt_target;
-	    uint32_t FFDC_DATA_3 = throttle_n_per_mba;
-	    uint32_t FFDC_DATA_4 = throttle_n_per_chip;
-	    uint32_t FFDC_DATA_5 = throttle_d;
 	    FAPI_SET_HWP_ERROR(rc, RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER);
-	    if (rc) fapiLogError(rc);
+	    return rc;
 	}
 
 	FAPI_IMP("*** %s COMPLETE on %s ***", procedure_name,

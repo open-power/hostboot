@@ -20,13 +20,18 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: cen_dmi_scominit_errors.xml,v 1.3 2013/06/25 15:37:38 cswenson Exp $ -->
+<!-- $Id: cen_dmi_scominit_errors.xml,v 1.4 2013/10/28 23:07:36 jmcgill Exp $ -->
 <!-- Error definitions for cen_dmi_scominit procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
-  <!-- $Id: cen_dmi_scominit_errors.xml,v 1.3 2013/06/25 15:37:38 cswenson Exp $ -->
+  <!-- $Id: cen_dmi_scominit_errors.xml,v 1.4 2013/10/28 23:07:36 jmcgill Exp $ -->
   <hwpError>
     <rc>RC_CEN_DMI_SCOMINIT_INVALID_TARGET</rc>
+    <ffdc>TARGET</ffdc>
     <description>Invalid target type presented to cen_dmi_scominit HWP (expects TARGET_TYPE_MEMBUF_CHIP).</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_dmi_scominit.H,v 1.2 2013/01/24 20:21:23 thomsen Exp $
+// $Id: cen_dmi_scominit.H,v 1.3 2013/10/28 23:07:08 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_dmi_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -37,12 +37,13 @@
 // *!
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-//  Version		Date		Owner		Description
+//  Version     Date        Owner       Description
 //------------------------------------------------------------------------------
-//    1.3	   	01/23/13	thomsen		Added separate calls to base & customized scominit files. Removed separate calls to SIM vs. HW scominit files
-//    1.2	   	01/09/13	thomsen		Added SIM and HW scominit filename strings
-//										Added *_OVERRIDE_IF to allow DMI initfile overrides for specific bus instances
-//    1.1       8/11/12     jmcgill		Initial release
+//    1.4       10/28/13    jmcgill     Updates for RAS review
+//    1.3       01/23/13    thomsen     Added separate calls to base & custom
+//                                      scominit files. Removed separate calls
+//                                      to SIM vs. HW scominit files
+//    1.1       08/11/12    jmcgill     Initial release
 //------------------------------------------------------------------------------
 
 

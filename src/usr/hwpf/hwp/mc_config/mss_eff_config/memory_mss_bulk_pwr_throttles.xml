@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.1 2013/06/19 18:27:39 bellows Exp $ -->
+<!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.2 2013/11/14 17:29:18 pardeik Exp $ -->
 <!-- For file ../../ipl/fapi/mss_bulk_pwr_throttles.C -->
 <!-- // *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com -->
 <!-- // *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com -->
@@ -30,13 +30,6 @@
   <hwpError>
     <rc>RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER</rc>
     <description>Unable to find throttle setting that has DIMM power underneath the limit.  Callout Firmware.</description>
-    <ffdc>MEM_CHIP</ffdc>	
-    <ffdc>FFDC_DATA_1</ffdc>	
-    <ffdc>FFDC_DATA_2</ffdc>
-    <ffdc>FFDC_DATA_3</ffdc>
-    <ffdc>FFDC_DATA_4</ffdc>
-    <ffdc>FFDC_DATA_5</ffdc>
-    <!-- TODO:  callout firmware -->
 </hwpError>
 
 
