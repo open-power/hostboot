@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_fir_isolation.C,v 1.9 2013/04/19 10:28:27 jaswamin Exp $
+// $Id: io_fir_isolation.C,v 1.11 2013/11/13 10:50:44 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 2012  , 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -52,8 +52,8 @@
 
 #include <fapi.H>
 #include "io_fir_isolation.H"
-//#include "gcr_funcs.H"
-//#include "io_clear_firs.H"
+#include "gcr_funcs.H"
+
 
 extern "C" {
 
@@ -76,19 +76,20 @@ ReturnCode io_fir_too_many_bus_err_isolation(const fapi::Target &i_target,
     
         ReturnCode o_rc;
         ecmdDataBufferBase    error_data(16);
-        uint32_t bitPos=0x0080;
+        //uint32_t bitPos=0x0080;
         
         
         o_rc=GCR_read(i_target ,  i_chip_interface, rx_fir_training_pg,  i_current_group,0, error_data);
         if(o_rc)
                 return o_rc;
         if(error_data.isBitSet(8,1)){
-            error_data.setAnd(bitPos,0,16);
+            //error_data.setAnd(bitPos,0,16);
             ecmdDataBufferBase & BUS_ERROR_REG = error_data; //bit1 of the register represnts the spare deployed bit.
             const fapi::Target & CHIP_TARGET= i_target;
             FAPI_SET_HWP_ERROR(o_rc,IO_FIR_TOO_MANY_BUS_ERROR_RC);
+			fapiLogError(o_rc,FAPI_ERRL_SEV_UNRECOVERABLE);
         }
-        return(o_rc);
+        return(FAPI_RC_SUCCESS); 
 }
 
  //! Function    : io_fir_recal_error_isolation
@@ -107,18 +108,19 @@ ReturnCode io_fir_recal_error_isolation(const fapi::Target &i_target,
     
         ReturnCode o_rc;
         ecmdDataBufferBase    error_data(16);
-        uint32_t bitPos=0x1200;
+        //uint32_t bitPos=0x1200;
         
         o_rc=GCR_read(i_target ,  i_chip_interface, rx_fir_training_pg,  i_current_group,0, error_data);
         if(o_rc)
                 return o_rc;
         if(error_data.isBitSet(3,1) || error_data.isBitSet(6,1)){       //can be caused by dynamic repair or recal error (bits 3 and 6 respectively)
-            error_data.setAnd(bitPos,0,16);
+            //error_data.setAnd(bitPos,0,16);
             ecmdDataBufferBase & RECAL_ERROR_REG = error_data ; //bit1 of the register represnts the spare deployed bit.
             const fapi::Target & CHIP_TARGET= i_target;
             FAPI_SET_HWP_ERROR(o_rc,IO_FIR_RECALIBRATION_ERROR_RC);
+			fapiLogError(o_rc,FAPI_ERRL_SEV_RECOVERED);
         }
-        return(o_rc);
+        return(FAPI_RC_SUCCESS); // bilicon: This needs to be changed to "return(o_rc)"
 }
 
  //! Function    : io_fir_max_spares_exceeded_isolation
@@ -137,18 +139,19 @@ ReturnCode io_fir_max_spares_exceeded_isolation(const fapi::Target &i_target,
     
         ReturnCode o_rc;
         ecmdDataBufferBase    error_data(16);
-        uint32_t bitPos=0x2680;
+        //uint32_t bitPos=0x2680;
         
         o_rc=GCR_read(i_target ,  i_chip_interface, rx_fir_training_pg,  i_current_group,0, error_data);
         if(o_rc)
                 return o_rc;
         if(error_data.isBitSet(2,1) || error_data.isBitSet(5,1)|| error_data.isBitSet(8,1)){    // can be caused by a static (pre training - bit 2) or dynamic (post training - bit 5) or recal(bit 8)
-            error_data.setAnd(bitPos,0,16);
+            //error_data.setAnd(bitPos,0,16);
             ecmdDataBufferBase & SPARE_ERROR_REG = error_data; //bit2 /bit 5 /bit 8of the register represents the max spare exceeded bit.To determine what caused the max spares exceeded error
             const fapi::Target & CHIP_TARGET= i_target;
             FAPI_SET_HWP_ERROR(o_rc,IO_FIR_MAX_SPARES_EXCEEDED_FIR_RC);
+			fapiLogError(o_rc,FAPI_ERRL_SEV_UNRECOVERABLE);
         }
-        return(o_rc);
+        return(FAPI_RC_SUCCESS); // bilicon: This needs to be changed to "return(o_rc)"
 }
 
  //! Function    : io_fir_spare_deployed_isolation
@@ -167,18 +170,19 @@ ReturnCode io_fir_spare_deployed_isolation(const fapi::Target &i_target,
     
         ReturnCode o_rc;
         ecmdDataBufferBase    error_data(16);
-        uint32_t bitPos=0x6900;
+        //uint32_t bitPos=0x6900;
         
         o_rc=GCR_read(i_target ,  i_chip_interface, rx_fir_training_pg,  i_current_group,0, error_data);
         if(o_rc)
                 return o_rc;
         if(error_data.isBitSet(1,1) || error_data.isBitSet(4,1) || error_data.isBitSet(7,1)){ // can be caused by a spare deployment prior to training , post training or during recal
-            error_data.setAnd(bitPos,0,16);
+            //error_data.setAnd(bitPos,0,16);
             ecmdDataBufferBase & SPARE_ERROR_REG = error_data; //bit1 /bit4 / bit 7 of the register represnts the spare deployed bit. To determine which type of error caused the spare to be deployed
             const fapi::Target & CHIP_TARGET= i_target;
             FAPI_SET_HWP_ERROR(o_rc,IO_FIR_SPARES_DEPLOYED_FIR_RC);
+			fapiLogError(o_rc,FAPI_ERRL_SEV_RECOVERED);
         }
-        return(o_rc);
+        return(FAPI_RC_SUCCESS);// bilicon: This needs to be changed to "return(o_rc)"
 }
 
  //! Function    : io_fir_tx_parity_isolation
@@ -221,8 +225,7 @@ ReturnCode io_fir_tx_parity_isolation(const fapi::Target &i_target,
                 else{
                         group=i_current_group;
                 }
-                if(o_rc)
-                                fapiLogError(o_rc);
+                
                 o_rc=GCR_read(i_target ,  i_chip_interface, tx_fir_pl,  group,loop_val, error_data);
                 if(o_rc){
                     FAPI_ERR("io_fir_isolation: Error reading rx fir per lane register\n");
@@ -232,33 +235,32 @@ ReturnCode io_fir_tx_parity_isolation(const fapi::Target &i_target,
                 if(error_data.isBitSet(0,1)){
                     
                     // find the current lane and group to send information
-                    if(o_rc)
-                        fapiLogError(o_rc);
+                    
                     uint32_t & LANE_ID = loop_val;
                     ecmdDataBufferBase & TX_ERROR_REG = error_data;
                     const fapi::Target & CHIP_TARGET= i_target;
                     FAPI_DBG("io_fir_rx_parity_isolation:A per lane register or state machine error has occured. Lane is %d\n",loop_val);
                     FAPI_SET_HWP_ERROR(o_rc,IO_FIR_LANE_TX_PARITY_ERROR_RC);
+					fapiLogError(o_rc,FAPI_ERRL_SEV_RECOVERED);
                 }
         }
         
-        if(o_rc)
-                fapiLogError(o_rc);
+        
         o_rc=GCR_read(i_target ,i_chip_interface, tx_fir_pg,  i_current_group,0, error_data);
         if(o_rc)
                 return o_rc;
         for(loop_val=0;loop_val<16;loop_val++){
             
                 if(error_data.isBitSet(loop_val,1)){
-                    if(o_rc)
-                        fapiLogError(o_rc);
+                    
                     ecmdDataBufferBase & TX_ERROR_REG = error_data;
                     const fapi::Target & CHIP_TARGET= i_target;
                     FAPI_SET_HWP_ERROR(o_rc,IO_FIR_GROUP_TX_PARITY_ERROR_RC);
+					fapiLogError(o_rc,FAPI_ERRL_SEV_RECOVERED);
                 }
         }
         
-        return(o_rc);
+        return(FAPI_RC_SUCCESS);
         
 }
 
@@ -304,8 +306,7 @@ ReturnCode io_fir_rx_parity_isolation(const fapi::Target &i_target,
                 else{
                         group=i_current_group;
                 }
-                if(o_rc)
-                                fapiLogError(o_rc);
+                
                 o_rc=GCR_read(i_target ,  i_chip_interface, rx_fir_pl,  group,loop_val, error_data);
                 
                 if(o_rc){
@@ -315,68 +316,64 @@ ReturnCode io_fir_rx_parity_isolation(const fapi::Target &i_target,
                 //bit 0 for rx_fir_pl in case of X and bit 0 and 1 for A and DMI
                 if(error_data.isBitSet(0,1) || error_data.isBitSet(1,1)){
                     
-                    if(o_rc)
-                        fapiLogError(o_rc);
+                    
                     // find the current lane and group to send information
                     uint32_t & LANE_ID = loop_val;
                     ecmdDataBufferBase & RX_ERROR_REG = error_data;
                     const fapi::Target & CHIP_TARGET= i_target;
                     FAPI_DBG("io_fir_rx_parity_isolation:A per lane register or state machine error has occured. Lane is %d\n",loop_val);
                     FAPI_SET_HWP_ERROR(o_rc,IO_FIR_LANE_RX_PARITY_ERROR_RC);
+					fapiLogError(o_rc,FAPI_ERRL_SEV_RECOVERED);
                 }
         }
         
         //for fir1_reg and fir2_reg it is group wise hence do not need lane information
-        if(o_rc)
-                        fapiLogError(o_rc);
+        
         o_rc=GCR_read(i_target ,i_chip_interface, rx_fir1_pg,  i_current_group,0, error_data);
         if(o_rc)
                 return o_rc;
         for(loop_val=0;loop_val<16;loop_val++){
             
                 if(error_data.isBitSet(loop_val,1)){
-                    if(o_rc)
-                        fapiLogError(o_rc);
                     ecmdDataBufferBase & RX_ERROR_REG = error_data;
                     const fapi::Target & CHIP_TARGET= i_target;
                     FAPI_DBG("io_fir_isolation: %s\n",fir1_reg[loop_val]);
                     FAPI_SET_HWP_ERROR(o_rc,IO_FIR_GROUP_RX_PARITY_ERROR_RC);
+					fapiLogError(o_rc,FAPI_ERRL_SEV_RECOVERED);
+                        
                 }
         }
         
-        if(o_rc)
-                fapiLogError(o_rc);
+        
         o_rc=GCR_read(i_target ,  i_chip_interface, rx_fir2_pg,  i_current_group,0, error_data);
         if(o_rc)
                 return o_rc;
         for(loop_val=0;loop_val<16;loop_val++){
             
                 if(error_data.isBitSet(loop_val,1)){
-                        if(o_rc)
-                                fapiLogError(o_rc);
                     ecmdDataBufferBase & RX_ERROR_REG = error_data;
                     const fapi::Target & CHIP_TARGET= i_target;
                     FAPI_DBG("io_fir_isolation: %s\n",fir2_reg[loop_val]);
                     FAPI_SET_HWP_ERROR(o_rc,IO_FIR_GROUP_RX_PARITY_ERROR_RC);
+					fapiLogError(o_rc,FAPI_ERRL_SEV_RECOVERED);
+					
                 }
         }
         
-        if(o_rc)
-                        fapiLogError(o_rc);
+        
         o_rc=GCR_read(i_target,i_chip_interface,rx_fir_pb,i_current_group,0,error_data);
         if(o_rc)
                 return o_rc;
         for(loop_val=0;loop_val<16;loop_val++){
             
                 if(error_data.isBitSet(loop_val,1)){
-                        if(o_rc)
-                                fapiLogError(o_rc);
                     ecmdDataBufferBase & RX_ERROR_REG = error_data;
                     const fapi::Target & CHIP_TARGET= i_target;
                     FAPI_SET_HWP_ERROR(o_rc,IO_FIR_BUS_RX_PARITY_ERROR_RC);
+					fapiLogError(o_rc,FAPI_ERRL_SEV_RECOVERED);
                 }
         }
-        return(o_rc);
+        return(FAPI_RC_SUCCESS);
 }
 
  //! Function    : io_error_isolation
@@ -394,35 +391,34 @@ ReturnCode io_error_isolation(const fapi::Target &i_target,
                               ecmdDataBufferBase &i_fir_data){
         
         ReturnCode o_rc;
-        ecmdDataBufferBase    error_data(16),id_data(16);
+        //ecmdDataBufferBase    error_data(16),id_data(16);
         
         
         //need to determine what error it represents.
         
         //if it is a rx_parity error
         if(i_fir_data.isBitSet(RX_PARITY,1)){    
-                if(o_rc)
-                        fapiLogError(o_rc);
                 o_rc=io_fir_rx_parity_isolation(i_target,i_chip_interface,i_current_group);
+				if(o_rc)
+                        return(o_rc);
         }
         
         //check for tx_parity error
         if(i_fir_data.isBitSet(TX_PARITY,1)){
-                if(o_rc)
-                        fapiLogError(o_rc);
             
                 o_rc=io_fir_tx_parity_isolation(i_target,i_chip_interface,i_current_group);
-            
+				if(o_rc)
+                        return(o_rc);
         }
         
         //GCR hang error
         if(i_fir_data.isBitSet(GCR_HANG_ERROR,1)){    
             //check whether the gcr hang error bit is set
            
-                if(o_rc)
-                        fapiLogError(o_rc);
+                
                 const fapi::Target & CHIP_TARGET= i_target;
                 FAPI_SET_HWP_ERROR(o_rc,IO_FIR_GCR_HANG_ERROR_RC);
+                fapiLogError(o_rc,FAPI_ERRL_SEV_UNRECOVERABLE); //since the logging of error needs to happen here for this error.
            
             
         }
@@ -433,11 +429,10 @@ ReturnCode io_error_isolation(const fapi::Target &i_target,
            i_fir_data.isBitSet(BUS2_SPARE_DEPLOYED,1) ||
            i_fir_data.isBitSet(BUS3_SPARE_DEPLOYED,1) ||
            i_fir_data.isBitSet(BUS4_SPARE_DEPLOYED,1) ){    
-            
-                if(o_rc)
-                        fapiLogError(o_rc);
-            
-                o_rc=io_fir_spare_deployed_isolation(i_target,i_chip_interface,i_current_group);
+           
+           o_rc=io_fir_spare_deployed_isolation(i_target,i_chip_interface,i_current_group);
+		   if(o_rc)
+                        return(o_rc);
             
             
         }
@@ -448,12 +443,10 @@ ReturnCode io_error_isolation(const fapi::Target &i_target,
            i_fir_data.isBitSet(BUS2_MAX_SPARES_EXCEEDED,1) ||
            i_fir_data.isBitSet(BUS3_MAX_SPARES_EXCEEDED,1) ||
            i_fir_data.isBitSet(BUS4_MAX_SPARES_EXCEEDED,1)){    
-            
-                if(o_rc)
-                        fapiLogError(o_rc);
-            
-                o_rc=io_fir_max_spares_exceeded_isolation(i_target,i_chip_interface,i_current_group);
-            
+                           
+           o_rc=io_fir_max_spares_exceeded_isolation(i_target,i_chip_interface,i_current_group);
+           if(o_rc)
+                return(o_rc);
             
         }
         
@@ -463,11 +456,11 @@ ReturnCode io_error_isolation(const fapi::Target &i_target,
            i_fir_data.isBitSet(BUS2_RECALIBRATION_ERROR,1) ||
            i_fir_data.isBitSet(BUS3_RECALIBRATION_ERROR,1) ||
            i_fir_data.isBitSet(BUS4_RECALIBRATION_ERROR,1)){    
+                          
             
-                if(o_rc)
-                        fapiLogError(o_rc);
-            
-                o_rc=io_fir_recal_error_isolation(i_target,i_chip_interface,i_current_group);
+           o_rc=io_fir_recal_error_isolation(i_target,i_chip_interface,i_current_group);
+		   if(o_rc)
+				return(o_rc);
            
         }
         
@@ -477,15 +470,14 @@ ReturnCode io_error_isolation(const fapi::Target &i_target,
            i_fir_data.isBitSet(BUS2_TOO_MANY_BUS_ERRORS,1) ||
            i_fir_data.isBitSet(BUS3_TOO_MANY_BUS_ERRORS,1) ||
            i_fir_data.isBitSet(BUS4_TOO_MANY_BUS_ERRORS,1)){    
-            
-                if(o_rc)
-                        fapiLogError(o_rc);
-            
-                o_rc=io_fir_too_many_bus_err_isolation(i_target,i_chip_interface,i_current_group);
+                           
+           o_rc=io_fir_too_many_bus_err_isolation(i_target,i_chip_interface,i_current_group);
+		   if(o_rc)
+				return(o_rc);
             
         }
         
-        return(o_rc);
+        return(FAPI_RC_SUCCESS); // Currently this does not cause any harm as you are returning all the errors in the middle of the function, but it is good to change this to  "return(o_r)".
 }
 
 ReturnCode io_fir_isolation(const fapi::Target &i_target){
@@ -551,7 +543,8 @@ ReturnCode io_fir_isolation(const fapi::Target &i_target){
         FAPI_ERR("Invalid io_clear_firs HWP invocation . Target doesnt belong to DMI/X/A instances");
         FAPI_SET_HWP_ERROR(o_rc, IO_CLEAR_FIRS_INVALID_INVOCATION_RC);
      }
-     return(o_rc);      //the last error needs to be logged in the wrapper code if there is one.
+	 
+     return(o_rc);      
 
     
 }

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_restore_erepair.C,v 1.15 2013/08/06 14:15:48 varkeykv Exp $
+// $Id: io_restore_erepair.C,v 1.16 2013/11/14 08:50:21 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -45,6 +45,7 @@
 #include <fapi.H>
 #include "io_restore_erepair.H"
 #include "gcr_funcs.H"
+#include "io_power_down_lanes.H"
 #include <erepairAccessorHwpFuncs.H>
 
 extern "C" {
@@ -66,13 +67,10 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
   ReturnCode rc;
   ecmdDataBufferBase data_one(16);
   ecmdDataBufferBase data_two(16);
-  ecmdDataBufferBase data_one1(16);
-  ecmdDataBufferBase data_two2(16);
   ecmdDataBufferBase mode_reg(16);
   ecmdDataBufferBase mask(16);
-  bool msbswap=false;
   uint8_t lane=0;
-  uint8_t end_lane=0;
+  bool lane_valid=false;
 
   io_interface_t interface=CP_IOMC0_P0; // Since G
   uint32_t rc_ecmd=0;
@@ -132,86 +130,6 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
    FAPI_INF("Restoring erepair data \n");
 
     for(uint8_t clock_group=start_group;clock_group<=end_group;++clock_group){
-      //Collect the TX bad lanes into a single buffer
-      rc_ecmd|=data_one.flushTo0();
-      rc_ecmd|=data_two.flushTo0();
-      
-      // Read in values for RMW 
-      rc = GCR_read( target,interface,tx_lane_disabled_vec_0_15_pg, clock_group,  0,  data_one);
-      if(rc){return rc;}
-      rc = GCR_read( target,interface,tx_lane_disabled_vec_16_31_pg, clock_group,  0,  data_two);
-      if(rc){return rc;}
-      
-
-      
-      if(rc_ecmd)
-      {
-          rc.setEcmdError(rc_ecmd);
-          return(rc);
-      }
-      rc = GCR_read( target, interface,tx_mode_pg, clock_group,  0,  mode_reg);
-      if(rc){return rc;}
-      
-      if(mode_reg.isBitSet(5)){
-        FAPI_DBG("TX MSB-LSB SWAP MODE ON on this target \n");
-        msbswap=true;
-      }
-      if(msbswap){
-        // We can read out tx_end_lane_id now for swap correction
-        rc = GCR_read( target, interface,tx_id3_pg, clock_group,  0,  mode_reg);
-        if(rc){return rc;}
-        rc_ecmd=mode_reg.extract(&end_lane,9,7);
-        if(rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-        end_lane=end_lane>>1;// move left aligned extract by 1
-        FAPI_DBG("END lane id is %d\n",end_lane);
-      }
-      
-      for(uint8_t i=0;i<tx_lanes.size();++i){
-        if(msbswap){
-          //assume that MSB-LSB swap exists only on A or MC bus 
-                  lane=end_lane-tx_lanes[i];
-                  FAPI_DBG("Corrected lane is  %d\n",lane);
-        }
-        else{
-              // Do lane number shifting for X bus
-            if(interface==CP_FABRIC_X0){
-                  if(clock_group==0 && tx_lanes[i]<20){
-                    lane=tx_lanes[i];
-                  }
-                  else if(clock_group==1 && (tx_lanes[i]>19 && tx_lanes[i]<40)){
-                    lane=tx_lanes[i]-20;
-                  }
-                  else if(clock_group==2 && (tx_lanes[i]>39 && tx_lanes[i]<60)){
-                    lane=tx_lanes[i]-40;
-                  }
-                  else if(clock_group==3 && (tx_lanes[i]>59 && tx_lanes[i]<80) ){
-                    lane=tx_lanes[i]-60;
-                  }
-            }
-            else{
-              lane=tx_lanes[i];
-            }
-        }
-          if (lane < 16) {
-             data_one.setBit(lane);
-          }
-          else {
-             data_two.setBit(lane-16);
-          }
-      }
-      //Now write the bad lanes on TX side on this target
-      FAPI_DBG("#2 Corrected TX lane is  %d\n",lane);
-
-      rc = GCR_write( target, interface, tx_lane_disabled_vec_0_15_pg, clock_group,  0,  data_one,mask );
-      if(rc){return rc;}
-      rc = GCR_write( target, interface, tx_lane_disabled_vec_16_31_pg, clock_group,  0,  data_two,mask);
-      if(rc){return rc;}
-
-      
       rc_ecmd|=data_one.flushTo0();
       rc_ecmd|=data_two.flushTo0();
       
@@ -223,15 +141,10 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
       
       // Read in original data
       
-      rc = GCR_read( target,interface,rx_lane_disabled_vec_0_15_pg, clock_group,  0,  data_one);
-      if(rc){return rc;}
-      rc = GCR_read( target,interface,rx_lane_disabled_vec_16_31_pg, clock_group,  0,  data_two);
-      if(rc){return rc;}
-      
       // Read in values for RMW 
-      rc = GCR_read( target,interface,rx_lane_bad_vec_0_15_pg, clock_group,  0,  data_one1);
+      rc = GCR_read( target,interface,rx_lane_bad_vec_0_15_pg, clock_group,  0,  data_one);
       if(rc){return rc;}
-      rc = GCR_read( target,interface,rx_lane_bad_vec_16_31_pg, clock_group,  0,  data_two2);
+      rc = GCR_read( target,interface,rx_lane_bad_vec_16_31_pg, clock_group,  0,  data_two);
       if(rc){return rc;}
       
       // RX lane records 
@@ -241,45 +154,51 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
             if(interface==CP_FABRIC_X0){
                   if(clock_group==0 && rx_lanes[i]<20){
                     lane=rx_lanes[i];
+                    lane_valid=true;
                   }
                   else if(clock_group==1 && (rx_lanes[i]>19 && rx_lanes[i]<40)){
                     lane=rx_lanes[i]-20;
+                    lane_valid=true;
                   }
                   else if(clock_group==2 && (rx_lanes[i]>39 && rx_lanes[i]<60)){
                     lane=rx_lanes[i]-40;
+                    lane_valid=true;
                   }
                   else if(clock_group==3 && (rx_lanes[i]>59 && rx_lanes[i]<80) ){
                     lane=rx_lanes[i]-60;
+                    lane_valid=true;
+                  }
+                  else{
+                    lane_valid=false;
                   }
             }
             else{
               lane=rx_lanes[i];
+              lane_valid=true;
             }
-          if (lane < 16) {
+          if (lane < 16 && lane_valid) {
              data_one.setBit(lane);
-             data_one1.setBit(lane);
           }
-          else {
+          else if(lane>=16 && lane_valid) {
              data_two.setBit(lane-16);
-             data_two2.setBit(lane-16);
           }
       }
        FAPI_DBG("#2 Corrected RX lane is  %d\n",lane);
       //Now write the bad lanes in one shot on the slave side RX
-      rc = GCR_write( target, interface, rx_lane_disabled_vec_0_15_pg, clock_group,  0,  data_one,mask );
-      if(rc){return rc;}
-      rc = GCR_write( target, interface, rx_lane_disabled_vec_16_31_pg, clock_group,  0,  data_two,mask);
-      if(rc){return rc;}
-      //Now write the bad lanes in one shot on the slave side RX
-      rc = GCR_write( target, interface, rx_lane_bad_vec_0_15_pg, clock_group,  0,  data_one1,mask );
-      if(rc){return rc;}
-      rc = GCR_write( target, interface, rx_lane_bad_vec_16_31_pg, clock_group,  0,  data_two2,mask);
-      if(rc){return rc;}
-
-
+      if(!data_one.isBitClear(0,16)){
+        rc = GCR_write( target, interface, rx_lane_bad_vec_0_15_pg, clock_group,  0,  data_one,mask );
+        if(rc){return rc;}
+      }
+       if(!data_two.isBitClear(0,16)){
+        //Now write the bad lanes in one shot on the slave side RX
+        rc = GCR_write( target, interface, rx_lane_bad_vec_16_31_pg, clock_group,  0,  data_two,mask);
+        if(rc){return rc;}
+       }
     }
+    FAPI_EXEC_HWP(rc, io_power_down_lanes,target,tx_lanes,rx_lanes);
   return rc;
 }
+
 
 } //end extern C
 

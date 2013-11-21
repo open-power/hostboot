@@ -20,13 +20,13 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_power_down_lanes.C,v 1.7 2013/04/30 17:48:50 mjjones Exp $
+// $Id: io_power_down_lanes.C,v 1.10 2013/11/20 00:57:38 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
 // *!                   *** IBM Confidential ***
 // *!***************************************************************************
-// *! FILENAME             : io_read_erepair.C
+// *! FILENAME             : io_power_down_lanes.C
 // *! TITLE                : 
 // *! DESCRIPTION          : Power down bad lanes
 // *! CONTEXT              : 
@@ -39,7 +39,6 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.7   |mjjones |04/30/13| Removed unused variables
 //   1.0   |varkeykv||Initial check in 
 //------------------------------------------------------------------------------
 
@@ -73,6 +72,7 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
   io_interface_t interface=CP_IOMC0_P0; // Since G
   uint32_t rc_ecmd=0;
   uint8_t clock_group=0;
+  uint8_t start_group=0;
   
     rc_ecmd=mask.flushTo1();
     if(rc_ecmd)
@@ -90,15 +90,19 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
   
   // Check which type of bus this is and do setup needed 
   if(target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT) {
+    start_group=0;
     interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT 
   }
   else if(target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT ) {
+    start_group=0;
     interface=CP_FABRIC_X0; // base scom for X bus
   }
   else if(target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET){
+    start_group=3;
     interface=CP_IOMC0_P0; // base scom for MC bus
   }
   else if(target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP){
+    start_group=0;
     interface=CEN_DMI; // base scom Centaur chip
   }
   else{
@@ -118,26 +122,27 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
           return(rc);
       }
       
-      rc = GCR_read( target, interface,tx_mode_pg, clock_group,  0,  mode_reg);
+      rc = GCR_read( target, interface,tx_mode_pg, start_group,  0,  mode_reg);
       if(rc){return rc;}
       
       if(mode_reg.isBitSet(5)){
-        FAPI_DBG("TX MSB-LSB SWAP MODE ON on this target \n",tx_end_lane_id);
+        FAPI_DBG("TX MSB-LSB SWAP MODE ON on this target %d \n",tx_end_lane_id);
         msbswap=true;
       }
       
     //TX Lanes power down 
       for(uint8_t i=0;i<tx_lanes.size();++i){
-        clock_group=0;
         lane=tx_lanes[i];
         //For Xbus figure out the clock group number 
         if(interface==CP_FABRIC_X0){
+          clock_group=start_group;
           while(lane>(xbus_lanes_per_group-1)){
             lane=lane-xbus_lanes_per_group;
             clock_group++;
           }
         }
         else{
+          clock_group=start_group;
           // MSBLSB SWAP condition can be there in MC or A 
              if(msbswap){
                 // We can read out tx_end_lane_id now for swap correction
@@ -154,22 +159,24 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
                 lane=end_lane-tx_lanes[i]; // GFW VPD does not know about MSBSWAP , this adjusts for swapping
              }
         }
-        //Power down this lane 
+        //Power down this lane
         rc = GCR_write( target, interface, tx_mode_pl, clock_group,  lane,  data,mask );
         if(rc){return rc;}
-
       }
 
       // Process RX lane powerdown 
       for(uint8_t i=0;i<rx_lanes.size();++i){
-        clock_group=0;
         lane=rx_lanes[i];
         //For X bus set the right clock group number
         if(interface==CP_FABRIC_X0){
+          clock_group=start_group;
           while(lane>(xbus_lanes_per_group-1)){
             lane=lane-xbus_lanes_per_group;
             clock_group++;
           }
+        }
+        else{
+          clock_group=start_group;
         }
         //Power down this lane 
         rc = GCR_write( target, interface, rx_mode_pl, clock_group,  lane,  data,mask );
