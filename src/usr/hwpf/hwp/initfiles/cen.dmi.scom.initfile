@@ -1,4 +1,4 @@
-#-- $Id: cen.dmi.scom.initfile,v 1.17 2013/08/21 18:34:27 jgrell Exp $ 
+#-- $Id: cen.dmi.scom.initfile,v 1.18 2013/10/28 21:59:47 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,13 +7,14 @@
 ##      Based on SETUP_ID_MODE DMI_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODNC_MB_TOP.IODNC_MB_TOP.figdb
 ##
-##   Created on Wed Aug 21 12:18:42 CDT 2013, by jgrell
+##   Created on Mon Oct 28 11:08:13 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jgr13102800| jgr     |10-28-13| zcal address fix and rx_ds_timeout_sel change (110 -> 111)
  ## -- jgr13082100| jgr     |08-21-13| Added tx_zcal inits so they can be removed from scan
  ## -- jfg13072400| jfg     |07-24-13| HW253558: change pgooddly to MAX from lab feedback
  ## -- mbs13071200| mbs     |07-12-13| Disable recal adjustment for allv1 (DFE bug)     
@@ -72,13 +73,13 @@ include edi.io.define
 
 
 #BUSCTL.BUS_CTL_REGS.TX_IMPCAL_P_4X_PB
-scom 0x800F1C600201043F { 
+scom 0x800F1C000201043F { 
 	bits, scom_data, expr;
 	tx_zcal_p_4x, 0b00100, any;
 }
 
 #BUSCTL.BUS_CTL_REGS.TX_IMPCAL_SWO2_PB
-scom 0x800F2C600201043F { 
+scom 0x800F2C000201043F { 
 	bits, scom_data, expr;
 	tx_zcal_sm_max_val, 0b1000110, any;
      tx_zcal_sm_min_val,  0b0010101   , def_IS_HW;
@@ -318,7 +319,7 @@ scom 0x800898000201043F {
 	bits, scom_data, expr;
      rx_ds_bl_timeout_sel,  0b101   , def_IS_HW;
      rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
-     rx_ds_timeout_sel,  0b110   , def_IS_HW;
+     rx_ds_timeout_sel,  0b111   , def_IS_HW;
      rx_ds_timeout_sel,  0b010  , def_IS_VBU;
 	rx_sls_timeout_sel, 0b110, any;
      rx_wt_timeout_sel,  0b111   , def_IS_HW;
