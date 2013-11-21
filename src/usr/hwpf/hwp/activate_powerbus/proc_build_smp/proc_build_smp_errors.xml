@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_build_smp_errors.xml,v 1.5 2013/09/26 18:16:09 jmcgill Exp $ -->
+<!-- $Id: proc_build_smp_errors.xml,v 1.7 2013/11/13 13:59:51 jmcgill Exp $ -->
 <!-- Error definitions for proc_build_smp -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -69,15 +69,33 @@
     <description>Command rate pacing table lookup error.</description>
   </hwpError>
   <hwpError>
+    <rc>RC_PROC_BUILD_SMP_CORE_FREQ_RANGE_ERR</rc>
+    <description>Invalid relationship between ceiling/nominal/floor core frequency attributes.</description>
+    <ffdc>CEILING</ffdc>
+    <ffdc>NOM</ffdc>
+    <ffdc>FLOOR</ffdc>
+  </hwpError>
+  <hwpError>
     <rc>RC_PROC_BUILD_SMP_CORE_FLOOR_FREQ_RATIO_ERR</rc>
     <description>Unsupported core floor to PB frequency ratio.</description>
     <ffdc>FREQ_PB</ffdc>
     <ffdc>FREQ_CORE_FLOOR</ffdc>
   </hwpError>
   <hwpError>
+    <rc>RC_PROC_BUILD_SMP_CORE_CEILING_FREQ_RATIO_ERR</rc>
+    <description>Unsupported core ceiling to PB frequency ratio.</description>
+    <ffdc>FREQ_PB</ffdc>
+    <ffdc>FREQ_CORE_CEILING</ffdc>
+  </hwpError>
+  <hwpError>
     <rc>RC_PROC_BUILD_SMP_CORE_FLOOR_RATIO_ERR</rc>
     <description>Unsupported core floor frequency enumerated value.</description>
     <ffdc>CORE_FLOOR_RATIO</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_CORE_CEILING_RATIO_ERR</rc>
+    <description>Unsupported core ceiling frequency enumerated value.</description>
+    <ffdc>CORE_CEILING_RATIO</ffdc>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_BUILD_SMP_INVALID_GROUP_SIZE_ERR</rc>

@@ -1769,7 +1769,7 @@
 </attribute>
 
 <attribute>
-    <id>FREQ_CORE_FLOOR</id>
+    <id>MIN_FREQ_MHZ</id>
     <description>
         System attribute.
         The lowest frequency that a core can be set to in MHz.
@@ -1779,6 +1779,7 @@
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_CORE_FLOOR</id>
         <macro>DIRECT</macro>
@@ -2831,16 +2832,19 @@
 
 <attribute>
     <id>NOMINAL_FREQ_MHZ</id>
-    <description>Nominal frequency in mhz for all processors in the system based on module VPD processing.</description>
-    <simpleType>
-        <uint16_t>
-            <default>0</default>
-        </uint16_t>
-    </simpleType>
-    <!-- @TODO via RTC: 35451 - This really should be p1, not p3 -->
+    <description>
+      The nominal core frequency in MHz.
+      This is the same for all cores in the system.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_CORE_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>

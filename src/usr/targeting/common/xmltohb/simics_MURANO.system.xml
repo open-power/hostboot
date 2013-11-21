@@ -76,8 +76,12 @@
         <default>0x1900</default>
     </attribute>
     <attribute>
-        <id>FREQ_CORE_FLOOR</id>
-        <default>0x2580</default>
+        <id>MIN_FREQ_MHZ</id>
+        <default>0x0000061E</default>
+    </attribute>
+    <attribute>
+        <id>NOMINAL_FREQ_MHZ</id>
+        <default>0x00000C3D</default>
     </attribute>
     <attribute>
         <id>FREQ_PB</id>

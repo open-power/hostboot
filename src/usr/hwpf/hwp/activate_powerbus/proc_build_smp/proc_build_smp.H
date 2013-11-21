@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.H,v 1.12 2013/10/18 21:36:02 jmcgill Exp $
+// $Id: proc_build_smp.H,v 1.13 2013/11/13 01:41:53 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -158,15 +158,15 @@ struct proc_build_smp_node
     proc_fab_smp_node_id node_id;
 };
 
-// core floor/nest frequency ratio cutpoints (epsilon)
-enum proc_build_smp_core_floor_ratio
+// core/nest frequency ratio cutpoints (epsilon)
+enum proc_build_smp_core_ratio
 {
-    PROC_BUILD_SMP_CORE_FLOOR_RATIO_8_8 = 0,
-    PROC_BUILD_SMP_CORE_FLOOR_RATIO_7_8 = 1,
-    PROC_BUILD_SMP_CORE_FLOOR_RATIO_6_8 = 2,
-    PROC_BUILD_SMP_CORE_FLOOR_RATIO_5_8 = 3,
-    PROC_BUILD_SMP_CORE_FLOOR_RATIO_4_8 = 4,
-    PROC_BUILD_SMP_CORE_FLOOR_RATIO_2_8 = 5
+    PROC_BUILD_SMP_CORE_RATIO_8_8 = 0,
+    PROC_BUILD_SMP_CORE_RATIO_7_8 = 1,
+    PROC_BUILD_SMP_CORE_RATIO_6_8 = 2,
+    PROC_BUILD_SMP_CORE_RATIO_5_8 = 3,
+    PROC_BUILD_SMP_CORE_RATIO_4_8 = 4,
+    PROC_BUILD_SMP_CORE_RATIO_2_8 = 5
 };
 
 // core floor/nest frequency ratio cutpoints (CPU delay)
@@ -226,9 +226,10 @@ struct proc_build_smp_system
     uint32_t freq_core_nom;
     uint32_t freq_core_ceiling;
     uint32_t freq_pcie;
-    // core floor/pb frequency ratio
-    proc_build_smp_core_floor_ratio core_floor_ratio;
-    // CPU ratios
+    // core/pb frequency ratios
+    proc_build_smp_core_ratio core_floor_ratio;
+    proc_build_smp_core_ratio core_ceiling_ratio;
+    // CPU delay/RCMD highwater settings
     proc_build_smp_cpu_delay nom_cpu_delay;
     proc_build_smp_cpu_delay full_cpu_delay;
 
@@ -286,6 +287,12 @@ extern "C"
 //          RC_PROC_FAB_SMP_EPSILON_GB_DIRECTION_ATTR_ERR if attribute value is
 //              invalid,
 //          RC_PROC_BUILD_SMP_CORE_FLOOR_FREQ_RATIO_ERR if cache/nest frequency
+//              ratio is unsupported,
+//          RC_PROC_BUILD_SMP_CORE_CEILING_FREQ_RATIO_ERR if cache/nest frequency
+//              ratio is unsupported,
+//          RC_PROC_BUILD_SMP_CORE_FLOOR_RATIO_ERR if cache/nest frequency
+//              ratio is unsupported,
+//          RC_PROC_BUILD_SMP_CORE_CEILING_RATIO_ERR if cache/nest frequency
 //              ratio is unsupported,
 //          RC_PROC_FAB_SMP_ASYNC_SAFE_MODE_ATTR_ERR if attribute value is
 //              invalid,

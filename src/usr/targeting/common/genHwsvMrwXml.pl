@@ -114,7 +114,6 @@ my $reqPol = $sysPolicy->{"required-policy-settings"};
 
 my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
 
-#TODO: SW187611 remove the hard core value for FREQ_CORE_FLOOR
 #@TODO RTC: 66365
 # Setting ALL_MCS_IN_INTERLEAVING_GROUP to zero. Need to replace with:
 # $reqPol->{'all_mcs_in_interleaving_group"}
@@ -128,7 +127,6 @@ push @systemAttr,
     "ALL_MCS_IN_INTERLEAVING_GROUP", "0",
     "BOOT_FREQ_MHZ", $reqPol->{'boot-frequency'}->{content},
     "FREQ_A", $reqPol->{'proc_a_frequency'}->{content},
-    "FREQ_CORE_FLOOR", "0x2580",
     "FREQ_PB", $reqPol->{'proc_pb_frequency'}->{content},
     "NEST_FREQ_MHZ", $reqPol->{'proc_pb_frequency'}->{content},
     "FREQ_PCIE", $reqPol->{'proc_pcie_frequency'}->{content},
@@ -1650,10 +1648,6 @@ sub generate_sys
     <attribute>
         <id>MSS_CLEANER_ENABLE</id>
         <default>1</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_CORE_MAX</id>
-        <default>4000</default>
     </attribute>";
     generate_max_config();
 

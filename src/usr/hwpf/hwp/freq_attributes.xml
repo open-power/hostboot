@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: freq_attributes.xml,v 1.7 2013/08/09 15:14:59 mjjones Exp $ -->
+<!-- $Id: freq_attributes.xml,v 1.8 2013/10/16 20:42:30 jmcgill Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are frequency attributes.
@@ -73,6 +73,18 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
       The lowest frequency that a core can be set to in MHz.
+      This is the same for all cores in the system.
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_CORE_NOMINAL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The nominal core frequency in MHz.
       This is the same for all cores in the system.
       Provided by the Machine Readable Workbook.
     </description>

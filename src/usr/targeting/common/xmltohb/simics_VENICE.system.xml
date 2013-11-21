@@ -80,10 +80,6 @@
         <default>0x1900</default>
     </attribute>
     <attribute>
-        <id>FREQ_CORE_FLOOR</id>
-        <default>2500</default>
-    </attribute>
-    <attribute>
         <id>FREQ_PB</id>
         <default>0x960</default>
     </attribute>

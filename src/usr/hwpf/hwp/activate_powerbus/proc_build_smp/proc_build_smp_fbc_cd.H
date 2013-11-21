@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.H,v 1.11 2013/09/26 18:01:39 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.H,v 1.15 2013/11/13 01:52:36 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -192,19 +192,46 @@ const bool    PB_SCONFIG_C7_SLOW_GO_RATE = true;
 // PBH_CMD_SNOOPER (center, chain #8) field/bit definitions
 //
 
-const proc_build_smp_sconfig_def PB_SCONFIG_C8_DEF = { 0x8, 37, false, { false, true, false } };
+const proc_build_smp_sconfig_def PB_SCONFIG_C8_DEF_VER1 = { 0x8, 37, false, { false, true, false } };
+const proc_build_smp_sconfig_def PB_SCONFIG_C8_DEF_VER2 = { 0x8, 39, false, { false, true, false } };
+const proc_build_smp_sconfig_def PB_SCONFIG_C8_DEF_VER3 = { 0x8, 43, false, { false, true, false } };
 
-const uint32_t PB_SCONFIG_C8_HANG_CMD_RATE_START_BIT[PB_SCONFIG_NUM_HANG_LEVELS] = { 27, 31, 35, 39, 43, 47, 51 };
-const uint32_t PB_SCONFIG_C8_HANG_CMD_RATE_END_BIT[PB_SCONFIG_NUM_HANG_LEVELS]   = { 30, 34, 38, 42, 46, 50, 54 };
-const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL_START_BIT = 55;
-const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL_END_BIT = 57;
-const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_START_BIT = 58;
-const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_END_BIT = 63;
+const uint32_t PB_SCONFIG_C8_HANG_CMD_RATE_START_BIT_VER1[PB_SCONFIG_NUM_HANG_LEVELS] = { 27, 31, 35, 39, 43, 47, 51 };
+const uint32_t PB_SCONFIG_C8_HANG_CMD_RATE_END_BIT_VER1[PB_SCONFIG_NUM_HANG_LEVELS]   = { 30, 34, 38, 42, 46, 50, 54 };
+const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL_START_BIT_VER1 = 55;
+const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL_END_BIT_VER1 = 57;
+const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_START_BIT_VER1 = 58;
+const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_END_BIT_VER1 = 63;
 
-const uint8_t  PB_SCONFIG_C8_HANG_CMD_RATE[PB_SCONFIG_NUM_HANG_LEVELS] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL = 0x3;
-const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL = 0xF;
+const uint32_t PB_SCONFIG_C8_HANG_CMD_RATE_START_BIT_VER2[PB_SCONFIG_NUM_HANG_LEVELS] = { 25, 29, 33, 37, 41, 45, 49 };
+const uint32_t PB_SCONFIG_C8_HANG_CMD_RATE_END_BIT_VER2[PB_SCONFIG_NUM_HANG_LEVELS]   = { 28, 32, 36, 40, 44, 48, 52 };
+const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL_START_BIT_VER2 = 53;
+const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL_END_BIT_VER2 = 55;
+const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_START_BIT_VER2 = 56;
+const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_END_BIT_VER2 = 61;
+const uint32_t PB_SCONFIG_C8_P7_SLEEP_BACKOFF_START_BIT_VER2 = 62;
+const uint32_t PB_SCONFIG_C8_P7_SLEEP_BACKOFF_END_BIT_VER2 = 63;
 
+const uint32_t PB_SCONFIG_C8_HANG_CMD_RATE_START_BIT_VER3[PB_SCONFIG_NUM_HANG_LEVELS] = { 21, 25, 29, 33, 37, 41, 45 };
+const uint32_t PB_SCONFIG_C8_HANG_CMD_RATE_END_BIT_VER3[PB_SCONFIG_NUM_HANG_LEVELS]   = { 24, 28, 32, 36, 40, 44, 48 };
+const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL_START_BIT_VER3 = 49;
+const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL_END_BIT_VER3 = 51;
+const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_START_BIT_VER3 = 52;
+const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_END_BIT_VER3 = 57;
+const uint32_t PB_SCONFIG_C8_P7_SLEEP_BACKOFF_START_BIT_VER3 = 58;
+const uint32_t PB_SCONFIG_C8_P7_SLEEP_BACKOFF_END_BIT_VER3 = 59;
+const uint32_t PB_SCONFIG_C8_RTY_PERCENTAGE_START_BIT_VER3 = 60;
+const uint32_t PB_SCONFIG_C8_RTY_PERCENTAGE_END_BIT_VER3 = 62;
+const uint32_t PB_SCONFIG_C8_INCLUDE_LPC_RTY_BIT_VER3 = 63;
+
+const uint8_t PB_SCONFIG_C8_HANG_CMD_RATE[PB_SCONFIG_NUM_HANG_LEVELS] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+const uint8_t PB_SCONFIG_C8_CPO_JUMP_LEVEL = 0x3;
+const uint8_t PB_SCONFIG_C8_CPO_RTY_LEVEL = 0x4;
+
+const uint8_t PB_SCONFIG_C8_P7_SLEEP_BACKOFF = 0x2; // backoff_1k
+
+const uint8_t PB_SCONFIG_C8_RTY_PERCENTAGE  = 0x0;  // 000
+const uint8_t PB_SCONFIG_C8_INCLUDE_LPC_RTY = 0x0;  // off
 
 //
 // PBH_CMD_CENTRAL_ARB (center, chain #9) field/bit definitions
@@ -227,11 +254,11 @@ const uint32_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_END_BIT = 61;
 const uint32_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_START_BIT = 62;
 const uint32_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_END_BIT = 63;
 
-const uint8_t PB_SCONFIG_C9_CP_STARVE_LIMIT  = 0x80;
-const uint8_t PB_SCONFIG_C9_GP_STARVE_LIMIT  = 0x80;
-const uint8_t PB_SCONFIG_C9_RGP_STARVE_LIMIT = 0x80;
-const uint8_t PB_SCONFIG_C9_SP_STARVE_LIMIT  = 0x80;
-const uint8_t PB_SCONFIG_C9_FP_STARVE_LIMIT  = 0x80;
+const uint8_t PB_SCONFIG_C9_CP_STARVE_LIMIT  = 0x10;
+const uint8_t PB_SCONFIG_C9_GP_STARVE_LIMIT  = 0x10;
+const uint8_t PB_SCONFIG_C9_RGP_STARVE_LIMIT = 0x10;
+const uint8_t PB_SCONFIG_C9_SP_STARVE_LIMIT  = 0x10;
+const uint8_t PB_SCONFIG_C9_FP_STARVE_LIMIT  = 0x10;
 const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE = 0x0; // LFSR_ONLY
 const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE = 0x2; // LFSR_ON_STARVATION_ELSE_RR
 
@@ -240,12 +267,25 @@ const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE = 0x2; // LFSR_ON_STARVATION_ELSE_
 // PBH_CMD_CENTRAL_ARB (center, chain #10) field/bit definitions
 //
 
-const proc_build_smp_sconfig_def PB_SCONFIG_C10_DEF = { 0xA, 20, false, { false, true, false } };
+const proc_build_smp_sconfig_def PB_SCONFIG_C10_DEF_VER1 = { 0xA, 20, false, { false, true, false } };
+const proc_build_smp_sconfig_def PB_SCONFIG_C10_DEF_VER2 = { 0xA, 23, false, { false, true, false } };
 
-const uint32_t PB_SCONFIG_C10_CMD_CPU_RATIO_START_BIT[PB_SCONFIG_NUM_CPU_RATIOS] = { 59, 54, 49, 44 };
-const uint32_t PB_SCONFIG_C10_CMD_CPU_RATIO_END_BIT[PB_SCONFIG_NUM_CPU_RATIOS]   = { 63, 58, 53, 48 };
+const uint32_t PB_SCONFIG_C10_CMD_CPU_RATIO_START_BIT_VER1[PB_SCONFIG_NUM_CPU_RATIOS] = { 59, 54, 49, 44 };
+const uint32_t PB_SCONFIG_C10_CMD_CPU_RATIO_END_BIT_VER1[PB_SCONFIG_NUM_CPU_RATIOS]   = { 63, 58, 53, 48 };
 
-const uint8_t PB_SCONFIG_C10_CMD_CPU_RATIO[PB_SCONFIG_NUM_CPU_RATIOS] = { 3, 7, 11, 15 };
+const uint32_t PB_SCONFIG_C10_CMD_CPU_RATIO_START_BIT_VER2[PB_SCONFIG_NUM_CPU_RATIOS] = { 56, 51, 46, 41 };
+const uint32_t PB_SCONFIG_C10_CMD_CPU_RATIO_END_BIT_VER2[PB_SCONFIG_NUM_CPU_RATIOS]   = { 60, 55, 50, 45 };
+const uint32_t PB_SCONFIG_C10_DAT_X_LINK_HOLDOFF_ENABLE_BIT_VER2 = 61;
+const uint32_t PB_SCONFIG_C10_DAT_A_LINK_HOLDOFF_ENABLE_BIT_VER2 = 62;
+const uint32_t PB_SCONFIG_C10_DAT_LINK_HOLDOFF_MULTIPLIER_BIT_VER2 = 63;
+
+const uint8_t PB_SCONFIG_C10_CMD_CPU_RATIO_TABLE[PROC_BUILD_SMP_CPU_DELAY_NUM_SETPOINTS] = { 15, 14, 13, 12, 11, 11, 10, 10,  9,  9,  8,  8,  7 };
+
+const uint8_t PB_SCONFIG_C10_CMD_CPU_RATIO_QUARTER = 3;
+const uint8_t PB_SCONFIG_C10_CMD_CPU_RATIO_HALF    = 7;
+const uint8_t PB_SCONFIG_C10_DAT_X_LINK_HOLDOFF_ENABLE   = 0x0; // disable
+const uint8_t PB_SCONFIG_C10_DAT_A_LINK_HOLDOFF_ENABLE   = 0x0; // disable
+const uint8_t PB_SCONFIG_C10_DAT_LINK_HOLDOFF_MULTIPLIER = 0x0; // x2
 
 
 //
@@ -257,8 +297,10 @@ const proc_build_smp_sconfig_def PB_SCONFIG_C11_DEF = { 0xB, 20, false, { false,
 const uint32_t PB_SCONFIG_C11_RSP_CPU_RATIO_START_BIT[PB_SCONFIG_NUM_CPU_RATIOS] = { 59, 54, 49, 44 };
 const uint32_t PB_SCONFIG_C11_RSP_CPU_RATIO_END_BIT[PB_SCONFIG_NUM_CPU_RATIOS]   = { 63, 58, 53, 48 };
 
-const uint8_t PB_SCONFIG_C11_RSP_CPU_RATIO[PB_SCONFIG_NUM_CPU_RATIOS] = { 4, 8, 12, 16 };
+const uint8_t PB_SCONFIG_C11_RSP_CPU_RATIO_TABLE[PROC_BUILD_SMP_CPU_DELAY_NUM_SETPOINTS] = { 16, 15, 14, 13, 12, 12, 11, 11, 10, 10,  9,  9,  8 };
 
+const uint8_t PB_SCONFIG_C11_RSP_CPU_RATIO_QUARTER = 4;
+const uint8_t PB_SCONFIG_C11_RSP_CPU_RATIO_HALF    = 8;
 
 //
 // PBH_PBIEX_EH (east/west, chain #0) field/bit definitions
@@ -306,12 +348,12 @@ const uint32_t PB_SCONFIG_WE0_FP_I2C_HSHAKE_BIT = 50;
 const uint32_t PB_SCONFIG_WE0_FP_I2C_SPARE_MODE_BIT  = 51;
 const uint32_t PB_SCONFIG_WE0_FP_C2I_DONE_LAUNCH_BIT = 52;
 const uint32_t PB_SCONFIG_WE0_FP_C2I_SPARE_MODE_BIT = 53;
-const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_FULL_START_BIT = 54;
-const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_FULL_END_BIT = 58;
-const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_NOM_START_BIT  = 59;
-const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_NOM_END_BIT = 63;
+const uint32_t PB_SCONFIG_WE0_CPU_DELAY_FULL_START_BIT = 54;
+const uint32_t PB_SCONFIG_WE0_CPU_DELAY_FULL_END_BIT = 58;
+const uint32_t PB_SCONFIG_WE0_CPU_DELAY_NOM_START_BIT  = 59;
+const uint32_t PB_SCONFIG_WE0_CPU_DELAY_NOM_END_BIT = 63;
 
-const uint8_t  PB_SCONFIG_WE0_CMD_C2I_LATE_RD_MODE = true;             // on
+const bool     PB_SCONFIG_WE0_CMD_C2I_LATE_RD_MODE = true;             // on
 const uint8_t  PB_SCONFIG_WE0_CMD_C2I_DELAY_SP_RD = 0x0;               // rc_p1
 const bool     PB_SCONFIG_WE0_CMD_C2I_SPARE_MODE = false;              // spare
 const uint8_t  PB_SCONFIG_WE0_PRSP_C2I_DONE_LAUNCH = 0x0;              // rc_p1
@@ -335,8 +377,8 @@ const uint8_t  PB_SCONFIG_WE0_FP_I2C_HSHAKE = false;                   // off
 const bool     PB_SCONFIG_WE0_FP_I2C_SPARE_MODE = false;               // spare
 const uint8_t  PB_SCONFIG_WE0_FP_C2I_DONE_LAUNCH = 0x0;                // rc_p1
 const bool     PB_SCONFIG_WE0_FP_C2I_SPARE_MODE = false;               // spare
-const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_FULL = 0x0E;             // 14
-const uint32_t PB_SCONFIG_WE0_CPU_RATIO_TABLE_NOM = 0x12;              // 18
+
+const uint8_t PB_SCONFIG_WE0_CPU_DELAY_TABLE[PROC_BUILD_SMP_CPU_DELAY_NUM_SETPOINTS] = { 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
 
 
 //
@@ -499,6 +541,8 @@ extern "C"
 // returns: FAPI_RC_SUCCESS if register reads are successful and all shadow
 //               registers are equivalent,
 //          RC_PROC_BUILD_SMP_CORE_FLOOR_RATIO_ERR if cache/nest frequency
+//              ratio is unsupported,
+//          RC_PROC_BUILD_SMP_CORE_CEILING_RATIO_ERR if cache/nest frequency
 //              ratio is unsupported,
 //          else error
 //------------------------------------------------------------------------------

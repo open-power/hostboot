@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.10 2013/09/26 18:14:05 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.13 2013/11/13 01:44:13 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -73,7 +73,7 @@ extern "C"
 //          RC_PROC_BUILD_SMP_CORE_FLOOR_FREQ_RATIO_ERR if cache/nest frequency
 //              ratio is unsupported,
 //          RC_PROC_FAB_SMP_ASYNC_SAFE_MODE_ATTR_ERR if attribute value is
-//              invalid,
+//             invalid,
 //          else error
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_build_smp_process_system(
@@ -89,7 +89,8 @@ fapi::ReturnCode proc_build_smp_process_system(
 
     do
     {
-        // TODO: link to attribute if PB AVP mode support is needed
+
+	// ToDO: link to attribute if PB AVP mode support is needed
         io_smp.avp_mode = false;
 
         // get PB frequency attribute
@@ -127,12 +128,45 @@ fapi::ReturnCode proc_build_smp_process_system(
 
         // get core floor frequency attribute
         FAPI_DBG("proc_build_smp_process_system: Querying core floor frequency attribute");
-        rc = FAPI_ATTR_GET(ATTR_BOOT_FREQ_MHZ,
+        rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_FLOOR,
                            NULL,
                            io_smp.freq_core_floor);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_BOOT_FREQ_MHZ");
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR)");
+            break;
+        }
+
+        // get core nominal frequency attribute
+        FAPI_DBG("proc_build_smp_process_system: Querying core nominal frequency attribute");
+        rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_NOMINAL,
+                           NULL,
+                           io_smp.freq_core_nom);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_NOMINAL)");
+            break;
+        }
+
+        // get core ceiling frequency attribute
+        FAPI_DBG("proc_build_smp_process_system: Querying core ceiling frequency attribute");
+        rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_MAX,
+                           NULL,
+                           io_smp.freq_core_ceiling);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_MAX)");
+            break;
+        }
+
+        if (!((io_smp.freq_core_ceiling >= io_smp.freq_core_nom) &&
+              (io_smp.freq_core_nom     >= io_smp.freq_core_floor)))
+        {
+            const uint32_t& CEILING = io_smp.freq_core_ceiling;
+            const uint32_t& NOM = io_smp.freq_core_nom;
+            const uint32_t& FLOOR = io_smp.freq_core_floor;
+            FAPI_SET_HWP_ERROR(rc,
+                RC_PROC_BUILD_SMP_CORE_FREQ_RANGE_ERR);
             break;
         }
 
@@ -414,32 +448,32 @@ fapi::ReturnCode proc_build_smp_process_system(
         FAPI_DBG("proc_build_smp_process_system: Calculating core floor to nest frequency ratio");
         if ((io_smp.freq_core_floor) >= (2 * io_smp.freq_pb))
         {
-            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_FLOOR_RATIO_8_8;
+            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_RATIO_8_8;
         }
         // breakpoint ratio: core floor 4.2, pb 2.4 (cache floor :: pb = 7/8)
         else if ((4 * io_smp.freq_core_floor) >= (7 * io_smp.freq_pb))
         {
-            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_FLOOR_RATIO_7_8;
+            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_RATIO_7_8;
         }
         // breakpoint ratio: core floor 3.6, pb 2.4 (cache floor :: pb = 6/8)
         else if ((2 * io_smp.freq_core_floor) >= (3 * io_smp.freq_pb))
         {
-            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_FLOOR_RATIO_6_8;
+            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_RATIO_6_8;
         }
         // breakpoint ratio: core floor 3.0, pb 2.4 (cache floor :: pb = 5/8)
         else if ((4 * io_smp.freq_core_floor) >= (5 * io_smp.freq_pb))
         {
-            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_FLOOR_RATIO_5_8;
+            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_RATIO_5_8;
         }
         // breakpoint ratio: core floor 2.4, pb 2.4 (cache floor :: pb = 4/8)
         else if (io_smp.freq_core_floor >= io_smp.freq_pb)
         {
-            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_FLOOR_RATIO_4_8;
+            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_RATIO_4_8;
         }
         // breakpoint ratio: core floor 1.2, pb 2.4 (cache floor :: pb = 2/8)
         else if ((2 * io_smp.freq_core_floor) >= io_smp.freq_pb)
         {
-            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_FLOOR_RATIO_2_8;
+            io_smp.core_floor_ratio = PROC_BUILD_SMP_CORE_RATIO_2_8;
         }
         // under-range, raise error
         else
@@ -451,6 +485,147 @@ fapi::ReturnCode proc_build_smp_process_system(
             FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_CORE_FLOOR_FREQ_RATIO_ERR);
             break;
         }
+
+        // determine table index based on pb/core ceiling frequency ratio
+        // breakpoint ratio: core ceiling 4.8, pb 2.4 (cache ceiling :: pb = 8/8)
+        FAPI_DBG("proc_build_smp_process_system: Calculating core ceiling to nest frequency ratio");
+        if ((io_smp.freq_core_ceiling) >= (2 * io_smp.freq_pb))
+        {
+            io_smp.core_ceiling_ratio = PROC_BUILD_SMP_CORE_RATIO_8_8;
+        }
+        // breakpoint ratio: core ceiling 4.2, pb 2.4 (cache ceiling :: pb = 7/8)
+        else if ((4 * io_smp.freq_core_ceiling) >= (7 * io_smp.freq_pb))
+        {
+            io_smp.core_ceiling_ratio = PROC_BUILD_SMP_CORE_RATIO_7_8;
+        }
+        // breakpoint ratio: core ceiling 3.6, pb 2.4 (cache ceiling :: pb = 6/8)
+        else if ((2 * io_smp.freq_core_ceiling) >= (3 * io_smp.freq_pb))
+        {
+            io_smp.core_ceiling_ratio = PROC_BUILD_SMP_CORE_RATIO_6_8;
+        }
+        // breakpoint ratio: core ceiling 3.0, pb 2.4 (cache ceiling :: pb = 5/8)
+        else if ((4 * io_smp.freq_core_ceiling) >= (5 * io_smp.freq_pb))
+        {
+            io_smp.core_ceiling_ratio = PROC_BUILD_SMP_CORE_RATIO_5_8;
+        }
+        // breakpoint ratio: core ceiling 2.4, pb 2.4 (cache ceiling :: pb = 4/8)
+        else if (io_smp.freq_core_ceiling >= io_smp.freq_pb)
+        {
+            io_smp.core_ceiling_ratio = PROC_BUILD_SMP_CORE_RATIO_4_8;
+        }
+        // breakpoint ratio: core ceiling 1.2, pb 2.4 (cache ceiling :: pb = 2/8)
+        else if ((2 * io_smp.freq_core_ceiling) >= io_smp.freq_pb)
+        {
+            io_smp.core_ceiling_ratio = PROC_BUILD_SMP_CORE_RATIO_2_8;
+        }
+        // under-range, raise error
+        else
+        {
+            FAPI_ERR("proc_build_smp_process_system: Unsupported core ceiling/PB frequency ratio (=%d/%d)",
+                     io_smp.freq_core_ceiling, io_smp.freq_pb);
+            const uint32_t& FREQ_PB = io_smp.freq_pb;
+            const uint32_t& FREQ_CORE_CEILING = io_smp.freq_core_ceiling;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_CORE_CEILING_FREQ_RATIO_ERR);
+            break;
+        }
+
+        // determine full CPU delay settings
+        FAPI_DBG("proc_build_smp_process_system: Calculating full CPU delay settings:");
+        if ((2400 * io_smp.freq_core_ceiling) >= (4800 * io_smp.freq_pb))
+        {
+            io_smp.full_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_4800_2400;
+        }
+        else if ((2400 * io_smp.freq_core_ceiling) >= (4431 * io_smp.freq_pb))
+        {
+            io_smp.full_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_4431_2400;
+        }
+        else if ((2400 * io_smp.freq_core_ceiling) >= (4114 * io_smp.freq_pb))
+        {
+            io_smp.full_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_4114_2400;
+        }
+        else if ((2400 * io_smp.freq_core_ceiling) >= (3840 * io_smp.freq_pb))
+        {
+            io_smp.full_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3840_2400;
+        }
+        else if ((2400 * io_smp.freq_core_ceiling) >= (3338 * io_smp.freq_pb))
+        {
+            io_smp.full_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3338_2400;
+        }
+        else if ((2400 * io_smp.freq_core_ceiling) >= (3032 * io_smp.freq_pb))
+        {
+            io_smp.full_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3032_2400;
+        }
+        else
+        {
+            io_smp.full_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_2743_2400;
+        }
+
+        // determine nominal CPU delay settings
+        FAPI_DBG("proc_build_smp_process_system: Calculating nominal CPU delay settings:");
+        if ((2400 * io_smp.freq_core_nom) >= (4800 * io_smp.freq_pb))
+        {
+            // shift to avoid equivalent index
+            io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_4431_2400;
+        }
+        else if ((2400 * io_smp.freq_core_nom) >= (4431 * io_smp.freq_pb))
+        {
+            io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_4431_2400;
+            // shift to avoid equivalent index
+            if (io_smp.nom_cpu_delay == io_smp.full_cpu_delay)
+            {
+                io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_4114_2400;
+            }
+        }
+        else if ((2400 * io_smp.freq_core_nom) >= (4114 * io_smp.freq_pb))
+        {
+            io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_4114_2400;
+            // shift to avoid equivalent index
+            if (io_smp.nom_cpu_delay == io_smp.full_cpu_delay)
+            {
+                io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3840_2400;
+            }
+        }
+        else if ((2400 * io_smp.freq_core_nom) >= (3840 * io_smp.freq_pb))
+        {
+            io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3840_2400;
+            // shift to avoid equivalent index
+            if (io_smp.nom_cpu_delay == io_smp.full_cpu_delay)
+            {
+                io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3338_2400;
+            }
+        }
+        else if ((2400 * io_smp.freq_core_nom) >= (3338 * io_smp.freq_pb))
+        {
+            io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3338_2400;
+            // shift to avoid equivalent index
+            if (io_smp.nom_cpu_delay == io_smp.full_cpu_delay)
+            {
+                io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3032_2400;
+            }
+        }
+        else if ((2400 * io_smp.freq_core_nom) >= (3032 * io_smp.freq_pb))
+        {
+            io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_3032_2400;
+            // shift to avoid equivalent index
+            if (io_smp.nom_cpu_delay == io_smp.full_cpu_delay)
+            {
+                io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_2743_2400;
+            }
+        }
+        else if ((2400 * io_smp.freq_core_nom) >= (2743 * io_smp.freq_pb))
+        {
+            io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_2743_2400;
+            // shift to avoid equivalent index
+            if (io_smp.nom_cpu_delay == io_smp.full_cpu_delay)
+            {
+                io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_2504_2400;
+            }
+        }
+        else
+        {
+            io_smp.nom_cpu_delay = PROC_BUILD_SMP_CPU_DELAY_2504_2400;
+        }
+
     } while(0);
 
     // mark function entry

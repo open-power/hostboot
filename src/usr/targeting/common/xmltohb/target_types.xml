@@ -89,7 +89,6 @@
     <attribute><id>FREQ_PROC_REFCLOCK</id></attribute>
     <attribute><id>FREQ_PROC_REFCLOCK_KHZ</id></attribute>
     <attribute><id>FREQ_MEM_REFCLOCK</id></attribute>
-    <attribute><id>FREQ_CORE_FLOOR</id></attribute>
     <attribute><id>FREQ_PB</id></attribute>
     <attribute><id>FREQ_A</id></attribute>
     <attribute><id>FREQ_X</id></attribute>
@@ -217,6 +216,9 @@
     <attribute><id>PCI_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>MEM_FILTER_PLL_SOURCE</id></attribute>
     <attribute><id>EFFECTIVE_EC</id></attribute>
+    <attribute><id>MIN_FREQ_MHZ</id></attribute>
+
+
 </targetType>
 
 <targetType>
