@@ -1,8 +1,9 @@
-#-- $Id: cen.dmi.custom.scom.initfile,v 1.15 2013/09/24 20:22:33 jgrell Exp $
+#-- $Id: cen.dmi.custom.scom.initfile,v 1.16 2013/10/28 21:59:47 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.16|jgrell  |10/28/13|Re-enabled recal bits for DD2+ hw
 #--     1.15|jgrell  |09/24/13|Changed "1" expression to "any"
 #--     1.13|jgrell  |09/17/13|Added DD2 specific inits
 #--     1.11|jgrell  |09/12/13|Re-added "Override" scoms
@@ -323,9 +324,9 @@ scom_data;
 
 scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
 bits,                         	scom_data, 	expr;
-rx_rc_enable_dfe_h1_cal,      	0b0,       	any;  #ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0 || ATTR_DMI_DFE_OVERRIDE==1;
-rx_rc_enable_ddc,		0b0,		any;  #ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
-rx_rc_enable_ctle_cal,		0b0,		any;  #ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
+rx_rc_enable_dfe_h1_cal,      	0b0,       	ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0 || ATTR_DMI_DFE_OVERRIDE==1;
+rx_rc_enable_ddc,		0b0,		ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
+rx_rc_enable_ctle_cal,		0b0,		ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
 rx_rc_enable_h1ap_tweak,        0b0,            ATTR_DMI_DFE_OVERRIDE==1;
 }
 
@@ -371,6 +372,17 @@ scom 0x800.0b(rx_timeout_sel_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
     rx_cl_timeout_sel_dd2,        0b010,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
     rx_wt_timeout_sel_dd2,        0b111,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
     rx_ds_timeout_sel_dd2,        0b110,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
+}
+
+#--**************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------
+# Power Down Unused Lanes
+#----------------------------------------------------------------------------------------------------------------
+#--**************************************************************************************************************
+
+scom 0x800.0b(rx_mode_pl)(rx_grp0)(lane_17).0x(cn_gcr_addr) {
+bits,                         	scom_data;
+rx_lane_pdwn,			0b1;
 }
 
 ############################################################################################
