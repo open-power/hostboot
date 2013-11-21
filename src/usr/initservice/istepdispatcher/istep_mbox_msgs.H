@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -44,6 +44,7 @@ enum
 {
     HWSVR_MSG_SUCCESS            = 0x00,
     HWSVR_INVALID_MESSAGE        = 0x01,
+    HWSVR_MSG_ERROR              = 0x02,
 };
 
 // ------------------------------------------------------------------
@@ -57,6 +58,7 @@ enum
     HWSVR_SYNC_POINT            = 0x10,
     HWSVR_IPL_PROGRESS_CODE     = 0x11,
     HWSVR_DO_IOVALID_PROCESSING = 0xC1,
+    HWSVR_COALESCE_HOST         = 0xC2,
     HWSVR_DO_SHUTDOWN           = 0x12
 };
 
@@ -79,6 +81,8 @@ enum
                                 HWSVR_IPL_PROGRESS_CODE,
     SHUTDOWN                = MBOX::FIRST_UNSECURE_MSG |
                                 HWSVR_DO_SHUTDOWN,
+    COALESCE_HOST           = MBOX::FIRST_UNSECURE_MSG |
+                                HWSVR_COALESCE_HOST,
 
 };
 

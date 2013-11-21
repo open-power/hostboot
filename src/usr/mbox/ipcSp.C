@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -128,6 +128,20 @@ void IpcSp::msgHandler()
                 
                 break;
 
+            case IPC_TEST_CONNECTION:
+
+                TRACFCOMP( g_trac_ipc,
+                           "IPC received the test connection msg - %d:%d",
+                            msg->data[0], msg->data[1] );
+
+                //Send a response to indicate the connection has been
+                //established
+                err = MBOX::send(MBOX::HB_COALESCE_MSGQ, msg, msg->data[1] );
+                if (err)
+                {
+                    errlCommit(err,IPC_COMP_ID);
+                }
+                break;
             default:
 
                 TRACFCOMP( g_trac_ipc,

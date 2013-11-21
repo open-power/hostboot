@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -50,6 +50,7 @@ namespace MBOX
         HB_LID_MSGQ             = 8, //For transferring LIDs from FSP.
         HB_IPC_MSGQ             = 9, //For inter-drawer HB messages
         HB_POP_ATTR_MSGQ        = 10, // populate Attribute response
+        HB_COALESCE_MSGQ        = 11, //host_coalesce response
 
         // Add HB mbox msg queue ids (services) before this line
         HB_LAST_VALID_MSGQ,          // end of valid HB mbox msgQ ids

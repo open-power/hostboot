@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,6 +33,7 @@ namespace IPC
     enum ipc_msg_type_t
     {
         IPC_POPULATE_ATTRIBUTES = MBOX::FIRST_SECURE_MSG + 1,
+        IPC_TEST_CONNECTION = MBOX::FIRST_SECURE_MSG + 2,
     };
 
 }; // namespace IPC

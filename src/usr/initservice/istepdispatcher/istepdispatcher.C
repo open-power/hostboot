@@ -750,6 +750,7 @@ void IStepDispatcher::msgHndlr()
     {
         msg_t * pMsg = NULL;
         pMsg = msg_wait(iv_msgQ);
+        errlHndl_t l_errLog = NULL;
 
         switch(pMsg->type)
         {
@@ -773,6 +774,26 @@ void IStepDispatcher::msgHndlr()
                     TRACFCOMP(g_trac_initsvc, ERR_MRK"msgHndlr: Ignoring IStep msg in non-IStep mode!");
                 }
                 break;
+            case COALESCE_HOST:
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"msgHndlr: COALESCE_HOST");
+                l_errLog = handleCoalesceHostMsg();
+                if (l_errLog)
+                {
+                    errlCommit(l_errLog, INITSVC_COMP_ID);
+
+                    // Send the message back as a response
+                    pMsg->data[0] = HWSVR_MSG_ERROR;
+                }
+                else
+                {
+                    pMsg->data[0] = HWSVR_MSG_SUCCESS;
+                }
+
+                msg_respond(iv_msgQ, pMsg);
+                pMsg = NULL;
+
+                break;
+
             case SHUTDOWN:
                 // Shutdown requested from Fsp
                 TRACFCOMP(g_trac_initsvc, INFO_MRK"msgHndlr: SHUTDOWN");
@@ -1379,6 +1400,37 @@ void IStepDispatcher::getIstepInfo ( uint8_t & o_iStep,
     o_iStep = iv_curIStep;
     o_subStep = iv_curSubStep;
     mutex_unlock( &iv_mutex );
+}
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::handleCoalesceHostMsg()
+// ----------------------------------------------------------------------------
+errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
+{
+    TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleCoalesceHostMsg");
+
+    // Ensure the library is loaded
+    errlHndl_t err = VFS::module_load("libestablish_system_smp.so");
+
+    if (err)
+    {
+        TRACFCOMP(g_trac_initsvc, "handleCoalesceHostMsg: Error loading module, PLID = 0x%x",
+                  err->plid());
+    }
+    else
+    {
+        err = ESTABLISH_SYSTEM_SMP::call_host_coalesce_host();
+        if (err)
+        {
+            TRACFCOMP(g_trac_initsvc, "handleCoalesceHostMsg: Error with "
+                      "call_host_coalese_host function LID = 0x%x",
+                      err->plid());
+        }
+    }
+
+    TRACFCOMP( g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleCoalesceHostMsg");
+
+    return err;
 }
 
 } // namespace

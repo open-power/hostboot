@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -64,6 +64,7 @@ namespace fapi
         MOD_PLAT_ATTR_SVC_GET_SPARE_DATA           = 0x19,
         MOD_PLAT_ATTR_SVC_GET_BADDQ_DATA           = 0x1A,
         MOD_PLAT_ATTR_SVC_SET_BADDQ_DATA           = 0x1B,
+        MOD_HOST_COALESCE_HOST                     = 0x1C,
     };
 
     /**
@@ -109,6 +110,8 @@ namespace fapi
         RC_INCORRECT_MSG_TYPE         = HWPF_COMP_ID | 0x28,
 
         RC_NO_SINGLE_MBA              = HWPF_COMP_ID | 0x29,
+        RC_HOST_TIMER_EXPIRED         = HWPF_COMP_ID | 0x2A,
+        RC_HOST_TIMER_THREAD_FAIL     = HWPF_COMP_ID | 0x2B,
     };
 
     /**

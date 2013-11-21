@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -73,17 +73,26 @@ namespace   ESTABLISH_SYSTEM_SMP
         TARGETING::EntityPath drawers[0];  //! Place holder for data
     };
 
+ /**
+ *  enum used for sending messages within establishing system smp
+ */
+    enum
+    {
+        HOST_COALESCE_TIMER_MSG =   0xA1,
+    };
+
 /**
  *  @brief   host_coalesce_host
  *
  *           Create single host image
  *
- *  param[in,out]   -   pointer to any arguments, usually NULL
+ *  param[in,out] io_pMsg - input message buffer
+ *                          also used for response message to FSP
  *
  *  return any errlogs to istep
  *
  */
-void*    call_host_coalesce_host( void    *io_pArgs );
+errlHndl_t call_host_coalesce_host( );
 
 /**
  *  @brief   host_sys_fab_iovalid_processing

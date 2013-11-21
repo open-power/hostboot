@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -27,10 +27,8 @@
  * @file    istep18list.H
  *
  *  IStep 18    Establish System SMP
- *  IPL FLow Doc        v1.35 (04/11/13)
+ *  IPL FLow Doc        v1.39 (12/09/13)
  *
- *    18.12    host_coalesce_host
- *          : Create single host image
  *    18.13    proc_tod_setup
  *          : Create TOD topology
  *    18.14    proc_tod_init
@@ -187,12 +185,12 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(18,12,"host_coalesce_host"),
-                ESTABLISH_SYSTEM_SMP::call_host_coalesce_host,
+                ISTEPNAME(18,12,""),
+                NULL,
                 {
-                        START_FN,
+                        NONE,
                         EXT_IMAGE,
-                        NORMAL_IPL_OP | MPIPL_OP,
+                        IPL_NOOP,
                         false,
                 }
         },

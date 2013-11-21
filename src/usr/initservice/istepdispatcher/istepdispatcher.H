@@ -247,6 +247,15 @@ private:
     void handleProcFabIovalidMsg(msg_t * & io_pMsg);
 
     /**
+     * @brief Handles the CoalesceHost message.
+     *
+     * Executes the processing required for the host_coalesce_host istep
+     *
+     * @return errlHndl_t - the error log generated
+     */
+    errlHndl_t handleCoalesceHostMsg();
+
+    /**
      * @brief Handles an IStepRequest message
      *
      * Executes the requested IStep and returns result in response message

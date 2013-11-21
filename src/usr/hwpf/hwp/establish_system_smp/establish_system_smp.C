@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,6 +38,7 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
+#include <sys/time.h>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -58,11 +59,11 @@
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
+#include    <hwpf/hwpf_reasoncodes.H>
 
 #include    "establish_system_smp.H"
-
-//  Uncomment these files as they become available:
-// #include    "host_coalesce_host/host_coalesce_host.H"
+#include    <mbox/ipc_msg_types.H>
+#include    <intr/interrupt.H>
 
 namespace   ESTABLISH_SYSTEM_SMP
 {
@@ -73,50 +74,317 @@ using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   EDI_EI_INITIALIZATION;
 
-//
-//  Wrapper function to call host_coalesce_host
-//
-void*    call_host_coalesce_host( void    *io_pArgs )
+/******************************************************************************/
+// Globals/Constants
+/******************************************************************************/
+const uint8_t HB_COALESCE_WAITING_FOR_MSG = 0x0;
+const uint8_t HB_COALESCE_MSG_DONE = 0x1;
+const uint8_t MAX_TIME_ALLOWED_MS = 10;
+const uint8_t NUMBER_OF_POSSIBLE_NODES = 8;
+const uint8_t CONTINUE_WAIT_FOR_MSGS = 0x2;
+const uint8_t TIME_EXPIRED=0x3;
+
+//******************************************************************************
+//host_coalese_timer function
+//******************************************************************************
+void* host_coalese_timer(void* i_msgQPtr)
+
+{
+    int rc=0;
+
+    msg_t* msg = msg_allocate();
+    msg->type = HOST_COALESCE_TIMER_MSG;
+    uint8_t l_time_ms =0;
+
+    msg_q_t* msgQ = static_cast<msg_q_t*>(i_msgQPtr);
+
+
+    //this loop will be broken when the main thread recieves
+    //all the messages and the timer thread recieves the
+    //HB_COALESCE_MSG_DONE message
+
+    do
+    {
+        if (l_time_ms < MAX_TIME_ALLOWED_MS)
+        {
+            msg->data[1] = CONTINUE_WAIT_FOR_MSGS;
+        }
+        else
+        {
+            msg->data[1]=TIME_EXPIRED;
+        }
+
+        rc= msg_sendrecv(*msgQ, msg);
+        if (rc)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "coalese host message timer failed msg sendrecv.");
+        }
+        if (msg->data[1] == HB_COALESCE_MSG_DONE)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "coalese host message timer not needed.");
+            break;
+        }
+
+        nanosleep(0,NS_PER_MSEC);
+        l_time_ms++;
+
+    }while(1);
+
+    msg_free(msg);
+
+    return NULL;
+}
+
+//******************************************************************************
+// call_host_coalesce_host function
+//******************************************************************************
+errlHndl_t call_host_coalesce_host( )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_coalesce_host entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    std::vector<TARGETING::EntityPath> present_drawers;
 
-    //  write HUID of target
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l));
 
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, host_coalesce_host, _args_...);
-    if ( l_errl )
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    if (sys == NULL)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_coalesce_host: error getting system target");
+        assert(0);
+    }
+
+    TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
+
+    hb_existing_image = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+    if (hb_existing_image == 0)
+    {
+        //single node system so do nothing
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_coalesce_host on a single node system is a no-op" );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        // This msgQ catches the reponses to messages sent from each
+        //node to verify the IPC connection
+        msg_q_t msgQ = msg_q_create();
+        l_errl = MBOX::msgq_register(MBOX::HB_COALESCE_MSGQ,msgQ);
+
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "call_host_coalesce_host:msgq_register failed" );
+            return l_errl;
+        }
+
+        //multi-node system
+        uint8_t node_map[NUMBER_OF_POSSIBLE_NODES];
+        uint64_t msg_count = 0;
+
+        bool rc =
+            sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>
+            (node_map);
+        if (rc == false)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "call_host_coalesce_host:failed to get node map" );
+            assert(0);
+        }
+
+        // The assertion is that the hostboot instance must be equal to
+        // the logical node we are running on. The ideal would be to have
+        // a function call that would return the HB instance number.
+        const INTR::PIR_t masterCpu = task_getcpuid();
+        uint64_t this_node = masterCpu.nodeId;
+
+
+        //loop though all possible drawers whether they exist or not
+        // An invalid or non-existant logical node number in that drawer
+        // indicates that the drawer does not exist.
+
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x0;
+
+        for(uint16_t drawer = 0; drawer < NUMBER_OF_POSSIBLE_NODES; ++drawer)
+        {
+            uint16_t node = node_map[drawer];
+
+            if(node < NUMBER_OF_POSSIBLE_NODES)
+            {
+
+                // set mask to msb
+                mask = 0x1 <<
+                    (NUMBER_OF_POSSIBLE_NODES -1);
+
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "mask=%X,hb_existing_image=%X",
+                           mask,hb_existing_image);
+                if( 0 != ((mask >> node) & hb_existing_image ) )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "send coalese host message to drawer %d",
+                               drawer );
+                    ++msg_count;
+                    msg_t * msg = msg_allocate();
+                    msg->type = IPC::IPC_TEST_CONNECTION;
+                    msg->data[0] = drawer;     // target drawer
+                    msg->data[1] = this_node;  // node to send a msg back to
+                    l_errl = MBOX::send(MBOX::HB_IPC_MSGQ, msg, node);
+                    if (l_errl)
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "MBOX::send failed");
+                        break;
+                    }
+                }
+            }
+        }
+
+        //if the send failed we just want to indicate that the
+        //istep failed and not wait for messages to come back from
+        //the other nodes
+        if(l_errl == NULL)
+        {
+            //wait for all hb images to respond
+            //want to spawn a timer thread
+            tid_t l_progTid = task_create(
+                       ESTABLISH_SYSTEM_SMP::host_coalese_timer,&msgQ);
+            assert( l_progTid > 0 );
+            while(msg_count)
+            {
+                msg_t* msg = msg_wait(msgQ);
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "coalese host message for drawer %d completed.",
+                         msg->data[0]);
+                if (msg->type == HOST_COALESCE_TIMER_MSG)
+                {
+                    if (msg->data[1] == TIME_EXPIRED)
+                    {
+                        //timer has expired
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "call_host_coalesce_host failed to "
+                                "receive messages from all hb images in time" );
+                        //tell the timer thread to exit
+                        msg->data[1] = HB_COALESCE_MSG_DONE;
+                        msg_respond(msgQ,msg);
+
+                        //generate an errorlog
+                        /*@
+                         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                         *  @moduleid       fapi::MOD_HOST_COALESCE_HOST,
+                         *  @reasoncode     fapi::RC_HOST_TIMER_EXPIRED,
+                         *  @userdata1      MAX_TIME_ALLOWED_MS
+                         *  @userdata2      Number of nodes that have not
+                         *                  responded
+                         *
+                         *  @devdesc        messages from other nodes have
+                         *                  not returned in time
+                         */
+                        l_errl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                        fapi::MOD_HOST_COALESCE_HOST,
+                                        fapi::RC_HOST_TIMER_EXPIRED,
+                                        MAX_TIME_ALLOWED_MS,
+                                        msg_count   );
+                        l_errl->collectTrace("ISTEPS_TRACE");
+                        l_errl->collectTrace("IPC");
+                        l_errl->collectTrace("MBOXMSG");
+                        return l_errl;
+
+                    }
+                    else if( msg->data[1] == CONTINUE_WAIT_FOR_MSGS)
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "coalese host timer continue waiting message.");
+                        msg->data[1] =HB_COALESCE_WAITING_FOR_MSG;
+                        msg_respond(msgQ,msg);
+                    }
+                }
+                else if (msg->type == IPC::IPC_TEST_CONNECTION)
+                {
+                   TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Got response from node %d", msg->data[0] );
+                    --msg_count;
+                    msg_free(msg);
+                }
+
+            }
+
+            //the msg_count should be 0 at this point to have
+            //exited from the loop above.  If the msg count
+            //is not zero then the timer must have expired
+            //and the code would have asserted
+            //Now need to tell the child timer thread to exit
+
+            //temp change while simics takes a long time for BRAZOS to IPL
+            //tmp check to tell the child timer thread to exit if didn't
+            //already timeout
+            if (msg_count ==0)
+            {
+                msg_t* msg = msg_wait(msgQ);
+                if (msg->type == HOST_COALESCE_TIMER_MSG)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "call_host_coalesce_host received all hb "
+                            "images in time");
+
+                    msg->data[1] = HB_COALESCE_MSG_DONE;
+                    msg_respond(msgQ,msg);
+                }
+            }
+
+            //wait for the child thread to end
+            int l_childsts =0;
+            void* l_childrc = NULL;
+            tid_t l_tidretrc = task_wait_tid(l_progTid,&l_childsts,&l_childrc);
+            if ((static_cast<int16_t>(l_tidretrc) < 0)
+                || (l_childsts != TASK_STATUS_EXITED_CLEAN ))
+            {
+                // the launched task failed or crashed,
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "task_wait_tid failed; l_tidretrc=0x%x, l_childsts=0x%x",
+                    l_tidretrc, l_childsts);
+
+                        //generate an errorlog
+                        /*@
+                         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                         *  @moduleid       fapi::MOD_HOST_COALESCE_HOST,
+                         *  @reasoncode     fapi::RC_HOST_TIMER_THREAD_FAIL,,
+                         *  @userdata1      l_tidretrc,
+                         *  @userdata2      l_childsts,
+                         *
+                         *  @devdesc        host coalesce host timer thread
+                         *                  failed
+                         */
+                        l_errl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                        fapi::MOD_HOST_COALESCE_HOST,
+                                        fapi::RC_HOST_TIMER_THREAD_FAIL,
+                                        l_tidretrc,
+                                        l_childsts);
+
+                        l_errl->collectTrace("ISTEPS_TRACE");
+                        return l_errl;
+            }
+        }
+
+        MBOX::msgq_unregister(MBOX::HB_COALESCE_MSGQ);
+        msg_q_destroy(msgQ);
+
+
+    }
+
+
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_coalesce_host exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
     return l_errl;
 }
 
@@ -182,7 +450,7 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
 
             // set mask to msb of bitmap
             TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
-                ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+                (NUMBER_OF_POSSIBLE_NODES -1);
 
             // set bit for this logical node.
             hb_existing_image |= (mask >> logical_node);
