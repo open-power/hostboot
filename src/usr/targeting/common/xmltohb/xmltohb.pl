@@ -5042,28 +5042,34 @@ sub generateTargetingImage {
     my @targetsAoH = ();
     my $targetCount = 0;
     my $moveSysTarget = 0;
+    my $targetSystemInstance = 0;
+    my $targetNodeInstance = 0;
+    my $targetSysCnt = 0;
+    my $targetNodeCnt = 0;
 
     # To support the iterator code, we dont want sys target to be the
     # first in order. So we have specifically moved system target to second,
-    # if it is in first place.
+    # and the first place has been reserved by a node target for all binaries.
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
-        # for the first Target, check if Sys Target
-        if(($targetCount == 0) && ($targetInstance->{id} eq "sys0"))
+        if(($targetInstance->{type} =~ m/^sys-sys-/) && ($targetSysCnt == 0))
         {
-            # mark a flag here that we need to interchange 1&2 targets,
-            # so as to push system target to second place
-            $moveSysTarget = 1;
-            $targetCount = $targetCount + 1;
+            $targetSysCnt = 1;
+            $targetSystemInstance = $targetInstance;
+            next;
+        }
+        elsif(($targetInstance->{type} eq "enc-node-power8") && ($targetNodeCnt == 0))
+        {
+            $targetNodeCnt = 1;
+            $targetNodeInstance = $targetInstance;
+            next;
         }
         push(@targetsAoH, $targetInstance);
     }
-    if($moveSysTarget == 1)
-    {
-        @targetsAoH[0,1] = @targetsAoH[1,0];
-    }
-    my $numTargets = @targetsAoH;
+    unshift(@targetsAoH, $targetSystemInstance); 
+    unshift(@targetsAoH, $targetNodeInstance);
 
+    my $numTargets = @targetsAoH;
     my $numAttributes = 0;
     foreach my $targetInstance (@targetsAoH)
     {
