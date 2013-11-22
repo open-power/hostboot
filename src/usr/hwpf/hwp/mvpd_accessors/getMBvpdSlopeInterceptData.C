@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSlopeInterceptData.C,v 1.2 2013/07/19 18:41:09 whs Exp $
+// $Id: getMBvpdSlopeInterceptData.C,v 1.3 2013/11/22 22:14:11 whs Exp $
 /**
  *  @file getMBvpdSlopeInterceptData.C
  *
@@ -82,7 +82,7 @@ fapi::ReturnCode getMBvpdSlopeInterceptData(
        case SUPPLIER_POWER_INTERCEPT:
            l_fapirc = getMBvpdSupplierData(i_mbTarget, i_attr, o_val);
            break;
-       default: // Hard to do, but needs to be caught
+       default: // Unlikely, but needs to be caught
            FAPI_ERR("getMBvpdSlopeInterceptData: invalid attribute ID 0x%02x",
                        i_attr);
            const fapi::MBvpdSlopeIntercept & ATTR_ID = i_attr;
@@ -191,13 +191,34 @@ fapi::ReturnCode getMBvpdSupplierData(
 {
 
     //#I keyword layout
-    const uint32_t  PDI_KEYWORD_SIZE = 256;
+    const uint32_t  PDI_DDR3_KEYWORD_SIZE = 256;
+    const uint32_t  PDI_DDR4_KEYWORD_SIZE = 512; // assumed size for DDR4
+    const uint8_t   SPD_DDR3 = 0xB;
+    const uint8_t   SPD_DDR4 = 0xC;
     struct pdI_keyword
     {
-        uint8_t   filler1[117]; // other fields and reserved bytes
-        uint8_t   moduleID_MSB; // at offset 117. Big endian order
-        uint8_t   moduleID_LSB; // VPD data CCIN_31E1_v.5.3.ods
-        uint8_t   filler2[PDI_KEYWORD_SIZE-117-2]; // trailing space
+        union
+        {
+            struct // common
+            {
+                uint8_t   filler1[2];
+                uint8_t   mem_type;
+            } common;
+            struct // DDR3 layout of #I
+            {
+                uint8_t   filler1[117]; // other fields and reserved bytes
+                uint8_t   moduleID_MSB; // at offset 117. Big endian order
+                uint8_t   moduleID_LSB; // VPD data CCIN_31E1_v.5.3.ods
+                uint8_t   filler2[PDI_DDR3_KEYWORD_SIZE-117-2]; //trailing space
+            } ddr3;
+            struct // DDR4 layout of #I
+            {
+                uint8_t   filler1[320]; // other fields and reserved bytes
+                uint8_t   moduleID_MSB; // at offset 320. Big endian order
+                uint8_t   moduleID_LSB; //
+                uint8_t   filler2[PDI_DDR4_KEYWORD_SIZE-320-2]; //trailing space
+            } ddr4;
+        } pdI;
     };
 
     //MV keyword layout
@@ -211,7 +232,7 @@ fapi::ReturnCode getMBvpdSupplierData(
         uint8_t   supplierPowerIntercept_LSB;
         uint8_t   reserved[4];
     };
-    struct mv_keyword //variable length
+    struct mv_keyword //variable length. Structure is size of 1 entry.
     {
         uint8_t   version;
         uint8_t   numEntries;
@@ -246,21 +267,58 @@ fapi::ReturnCode getMBvpdSupplierData(
             break;  //  break out with fapirc
         }
 
-        // Check that sufficient #I was returned.
-        if (l_pdIBufsize < PDI_KEYWORD_SIZE )
+        FAPI_DBG("getMBvpdSupplierData: #I mem type=0x%02x ",
+            l_pPdIBuffer->pdI.common.mem_type);
+
+        // check for DDR3 or DDR4
+        if (SPD_DDR3 == l_pPdIBuffer->pdI.common.mem_type )
+        {
+            // Check that sufficient #I was returned.
+            if (l_pdIBufsize < PDI_DDR3_KEYWORD_SIZE )
+            {
+                FAPI_ERR("getMBvpdSupplierData:"
+                         " less DDR3 #I keyword returned than expected %d < %d",
+                           l_pdIBufsize, PDI_DDR3_KEYWORD_SIZE);
+                const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_PDI;
+                const uint32_t & RETURNED_SIZE = l_pdIBufsize;
+                FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
+                break;  //  break out with fapirc
+            }
+
+            // grab module ID
+            l_moduleID_LSB = l_pPdIBuffer->pdI.ddr3.moduleID_LSB;
+            l_moduleID_MSB = l_pPdIBuffer->pdI.ddr3.moduleID_MSB;
+        }
+        else if (SPD_DDR4 == l_pPdIBuffer->pdI.common.mem_type )
+        {
+            // Check that sufficient #I was returned.
+            if (l_pdIBufsize < PDI_DDR4_KEYWORD_SIZE )
+            {
+                FAPI_ERR("getMBvpdSupplierData:"
+                         " less DDR4 #I keyword returned than expected %d < %d",
+                           l_pdIBufsize, PDI_DDR4_KEYWORD_SIZE);
+                const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_PDI;
+                const uint32_t & RETURNED_SIZE = l_pdIBufsize;
+                FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
+                break;  //  break out with fapirc
+            }
+
+            // grab module ID
+            l_moduleID_LSB = l_pPdIBuffer->pdI.ddr4.moduleID_LSB;
+            l_moduleID_MSB = l_pPdIBuffer->pdI.ddr4.moduleID_MSB;
+        }
+        else
         {
             FAPI_ERR("getMBvpdSupplierData:"
-                     " less #I keyword returned than expected %d < %d",
-                       l_pdIBufsize, PDI_KEYWORD_SIZE);
-            const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_PDI;
-            const uint32_t & RETURNED_SIZE = l_pdIBufsize;
-            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
+                     " unexpected memory type in #I");
+            const uint8_t & MEM_TYPE = l_pPdIBuffer->pdI.common.mem_type;
+            FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_UNEXPECTED_MEM_TYPE);
             break;  //  break out with fapirc
         }
 
-        // grab module ID and free buffer
-        l_moduleID_LSB = l_pPdIBuffer->moduleID_LSB;
-        l_moduleID_MSB = l_pPdIBuffer->moduleID_MSB;
+        // Done with #I buffer. Error paths free buffer at end.
+        delete l_pPdIBuffer;
+        l_pPdIBuffer = NULL;
 
         FAPI_DBG("getMBvpdSupplierData: #I moduleID=0x%08x ",
             l_moduleID_LSB+(l_moduleID_MSB<<8));
@@ -327,6 +385,32 @@ fapi::ReturnCode getMBvpdSupplierData(
             }
             l_offset += sizeof (mv_vendorInfo);
             l_pVendorInfo++;
+        }
+
+        // If not found, see if first supplier should be used
+        // and there is one (unlikely that there is not one).
+        if ( ! l_found &&
+             0 < l_pMvBuffer->numEntries &&
+             sizeof (mv_keyword) <= l_mvBufsize)
+        {
+            uint8_t l_checkUseFirstSupplier = 0;
+            l_fapirc = FAPI_ATTR_GET(
+                       ATTR_CENTAUR_EC_USE_FIRST_SUPPLIER_FOR_INVALID_MODULE_ID,
+                       &i_mbTarget,
+                       l_checkUseFirstSupplier);
+            if (l_fapirc)
+            {
+                FAPI_ERR("getMBvpdSupplierData:"
+                         " get attr use first supplier failed");
+                break;  //  break out with fapirc
+            }
+            FAPI_DBG("getMBvpdSupplierData: attr use first supplier = 0x%02x",
+                      l_checkUseFirstSupplier);
+            if ( l_checkUseFirstSupplier)
+            {
+                l_pVendorInfo = &(l_pMvBuffer->firstVendorInfo);
+                l_found = true;
+            }
         }
 
         // Return requested value if found

@@ -22,7 +22,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-  <!-- $Id: centaur_ec_attributes.xml,v 1.14 2013/10/31 13:17:30 bwieman Exp $ -->
+<!-- $Id: centaur_ec_attributes.xml,v 1.15 2013/11/22 22:13:33 whs Exp $ -->
   <attribute>
     <id>ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -263,6 +263,27 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
         <ec>
           <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CENTAUR_EC_USE_FIRST_SUPPLIER_FOR_INVALID_MODULE_ID</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        The getMBvpdSlopeInterceptData Attribute Accessor returns power data from the MW (master) and MV (supplier) Centaur DIMM VPD.
+        For MV attributes, the Attribute Accessor finds the Manufacturer-ID from JEDEC SPD (#I) and then matches it to a Supplier-ID in the array of supplier entries in the MV field .
+        For Centaur DD 1.X chips, the Manufacturer-ID may be invalid.
+The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matching Supplier-ID in MV, will  return the data for the first supplier on Centaur DD 1.X chips.
+       This is true for Centaur 1.*
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>
