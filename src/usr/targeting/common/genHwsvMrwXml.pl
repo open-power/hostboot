@@ -936,7 +936,7 @@ my @fru_paths;
 my $hasProc = 0;
 my $hash_ax_buses;
 my $axBusesHuidInit = 0;
-
+my $vmem_count =0;
 
 for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++)
 {
@@ -1162,7 +1162,6 @@ my $memb;
 my $membMcs;
 my $mba_count = 0;
 my $vmem_id =0;
-my $vmem_count =0;
 
 for my $i ( 0 .. $#STargets )
 {
