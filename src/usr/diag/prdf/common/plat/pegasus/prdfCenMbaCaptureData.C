@@ -54,9 +54,9 @@ namespace CenMbaCaptureData
 
 //------------------------------------------------------------------------------
 
-void addMbaFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd )
+void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd )
 {
-    #define PRDF_FUNC "[CenMbaCaptureData::addMbaFirRegs] "
+    #define PRDF_FUNC "[CenMbaCaptureData::addMemChipletFirRegs] "
 
     int32_t l_rc = SUCCESS;
 
@@ -75,57 +75,44 @@ void addMbaFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd )
             break;
         }
 
-        SCAN_COMM_REGISTER_CLASS * cs_reg, * re_reg, * firmsk_reg;
-        cs_reg     = i_membChip->getRegister("MEM_CHIPLET_CS_FIR");
-        re_reg     = i_membChip->getRegister("MEM_CHIPLET_RE_FIR");
-        firmsk_reg = i_membChip->getRegister("MEM_CHIPLET_FIR_MASK");
-
-        SCAN_COMM_REGISTER_CLASS * spa_reg, * spamsk_reg;
-        spa_reg    = i_membChip->getRegister("MEM_CHIPLET_SPA");
-        spamsk_reg = i_membChip->getRegister("MEM_CHIPLET_SPA_MASK");
-
-        l_rc  = cs_reg->Read() | re_reg->Read() | firmsk_reg->Read();
-        l_rc |= spa_reg->Read() | spamsk_reg->Read();
+        SCAN_COMM_REGISTER_CLASS * cs_global, * re_global, * spa_global;
+        cs_global  = i_membChip->getRegister("GLOBAL_CS_FIR");
+        re_global  = i_membChip->getRegister("GLOBAL_RE_FIR");
+        spa_global = i_membChip->getRegister("GLOBAL_SPA");
+        l_rc  = cs_global->Read() | re_global->Read() | spa_global->Read();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to read a MEM_CHIPLET register on "
+            PRDF_ERR( PRDF_FUNC"Failed to read a GLOBAL register on "
                       "0x%08x", i_membChip->GetId() );
             break;
         }
 
-        uint16_t cs_tmp  = cs_reg->GetBitFieldJustified(0,16);
-        uint16_t re_tmp  = re_reg->GetBitFieldJustified(0,16) >> 2;
-        uint16_t msk_tmp = firmsk_reg->GetBitFieldJustified(0,16);
+        // If global bit 3 is not on, can't scom mem chiplets or mba's
+        if( ! (cs_global->IsBitSet(3) ||
+               re_global->IsBitSet(3) ||
+               spa_global->IsBitSet(3)) )
+        {
+            break;
+        }
 
-        uint16_t csre_attns = (cs_tmp | re_tmp) & ~msk_tmp;
-
-        uint16_t spa_attns = spa_reg->GetBitFieldJustified(0,16) &
-                             ~spamsk_reg->GetBitFieldJustified(0,16);
-
-        uint16_t mba_csre_msk[] = { 0x0648,   // bits 5, 6,  9, 12
-                                    0x01a4 }; // bits 7, 8, 10, 13
-        uint16_t mba_spa_msk[]  = { 0x8000,   // bit 0
-                                    0x4000 }; // bit 1
+        i_membChip->CaptureErrorData(io_cd,
+                                     Util::hashString("MemChipletRegs"));
 
         CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
 
         for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
         {
-            if ( (0 != (csre_attns & mba_csre_msk[i])) ||
-                 (0 != (spa_attns  & mba_spa_msk[i] )) )
+            ExtensibleChip * mbaChip = membdb->getMbaChip(i);
+            if ( NULL == mbaChip )
             {
-                ExtensibleChip * mbaChip = membdb->getMbaChip(i);
-                if ( NULL == mbaChip )
-                {
-                    PRDF_ERR( PRDF_FUNC"MEM_CHIPLET registers indicated an "
-                              "attention but no chip found: i_membChip=0x%08x "
-                              "i=%d", i_membChip->GetId(), i );
-                    continue;
-                }
-
-                mbaChip->CaptureErrorData(io_cd, Util::hashString("FirRegs") );
-                mbaChip->CaptureErrorData(io_cd, Util::hashString("CerrRegs"));
+                PRDF_ERR( PRDF_FUNC"MEM_CHIPLET registers indicated an "
+                          "attention but no chip found: i_membChip=0x%08x "
+                          "i=%d", i_membChip->GetId(), i );
+                continue;
             }
+
+            mbaChip->CaptureErrorData(io_cd,
+                                      Util::hashString("MemChipletRegs") );
         }
 
     } while (0);

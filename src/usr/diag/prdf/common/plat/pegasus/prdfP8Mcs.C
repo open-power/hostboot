@@ -126,7 +126,7 @@ int32_t PreAnalysis( ExtensibleChip * i_mcsChip, STEP_CODE_DATA_STRUCT & i_sc,
         membChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
         membChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
 
-        CenMbaCaptureData::addMbaFirRegs( membChip, cd );
+        CenMbaCaptureData::addMemChipletFirRegs( membChip, cd );
     }
 
     // Check for a Centaur Checkstop

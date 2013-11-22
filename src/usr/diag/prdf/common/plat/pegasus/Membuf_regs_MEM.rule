@@ -29,40 +29,40 @@
     {
         name        "TCM.XFIR";
         scomaddr    0x03040000;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MEM_CHIPLET_RE_FIR
     {
         name        "TCM.RFIR";
         scomaddr    0x03040001;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MEM_CHIPLET_FIR_MASK
     {
         name        "TCM.FIR_MASK";
         scomaddr    0x03040002;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MEM_CHIPLET_SPA
     {
         name        "TCM.EPS.FIR.SPATTN";
         scomaddr    0x03040004;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MEM_CHIPLET_SPA_MASK
     {
         name        "TCM.EPS.FIR.SPA_MASK";
         scomaddr    0x03040007;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     ############################################################################
@@ -75,16 +75,16 @@
         scomaddr    0x0304000a;
         reset       (&, 0x0304000b);
         mask        (|, 0x0304000f);
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MEM_LFIR_MASK
     {
         name        "TCM.EPS.FIR.LOCAL_FIR_MASK";
         scomaddr    0x0304000d;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MEM_LFIR_ACT0
@@ -92,8 +92,8 @@
         name        "TCM.EPS.FIR.LOCAL_FIR_ACTION0";
         scomaddr    0x03040010;
         capture     type secondary;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
         capture     req nonzero("MEM_LFIR");
     };
 
@@ -102,8 +102,8 @@
         name        "TCM.EPS.FIR.LOCAL_FIR_ACTION1";
         scomaddr    0x03040011;
         capture     type secondary;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
         capture     req nonzero("MEM_LFIR");
     };
 
@@ -117,8 +117,8 @@
     {
         name        "FBIST.FBM.FBM_FIR_REG";
         scomaddr    0x03010480;
-        capture     group default;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     ############################################################################
@@ -129,7 +129,7 @@
     {
         name        "TCM.ERROR_STATUS";
         scomaddr    0x03030009;
-        capture     group default;
         capture     group CerrRegs;
+        capture     group MemChipletRegs;
     };
 

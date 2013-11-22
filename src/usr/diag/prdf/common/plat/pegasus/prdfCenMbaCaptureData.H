@@ -43,7 +43,7 @@ namespace CenMbaCaptureData
 {
 
 /**
- * @brief Adds all MBA FirRegs and CerrRegs to the capture data for any MBA
+ * @brief Adds all Mem chiplet and MBA regs to the capture data for any MBA
  *        reporting an active attention via the MEM_CHIPLET_FIRs.
  * @note  This is only intended to be called in the MCS or MEMBUF PreAnalysis()
  *        plugins to capture the required FIR registers for FFDC.
@@ -53,7 +53,7 @@ namespace CenMbaCaptureData
  * @param i_membChip A MEMBUF chip.
  * @param io_cd     Capture data struct.
  */
-void addMbaFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd );
+void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd );
 
 /**
  * @brief Adds Memory ECC FFDC to an error log.

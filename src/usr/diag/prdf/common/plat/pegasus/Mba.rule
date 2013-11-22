@@ -69,6 +69,7 @@ chip Mba
         reset       (&, 0x03010601);
         mask        (|, 0x03010605);
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MBAFIR_MASK
@@ -76,6 +77,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRMASK";
         scomaddr    0x03010603;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MBAFIR_ACT0
@@ -83,6 +85,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
         scomaddr    0x03010606;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
         capture     req nonzero("MBAFIR");
     };
 
@@ -91,6 +94,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT1";
         scomaddr    0x03010607;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
         capture     req nonzero("MBAFIR");
     };
 
@@ -106,6 +110,7 @@ chip Mba
         scomaddr    0x0301041b;
         reset       (&, 0x0301041c);
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     ############################################################################
@@ -119,6 +124,7 @@ chip Mba
         reset       (&, 0x800200910301143F);
         mask        (|, 0x800200950301143F);
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MBADDRPHYFIR_AND
@@ -134,6 +140,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_MASK_REG";
         scomaddr    0x800200930301143F;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MBADDRPHYFIR_ACT0
@@ -141,6 +148,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_ACTION0_REG";
         scomaddr    0x800200960301143F;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
         capture     req nonzero("MBADDRPHYFIR");
     };
 
@@ -149,6 +157,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_ACTION1_REG";
         scomaddr    0x800200970301143F;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
         capture     req nonzero("MBADDRPHYFIR");
     };
 
@@ -163,6 +172,7 @@ chip Mba
         reset       (&, 0x03010401);
         mask        (|, 0x03010405);
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MBACALFIR_AND
@@ -178,6 +188,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_MASK";
         scomaddr    0x03010403;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MBACALFIR_ACT0
@@ -185,6 +196,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION0";
         scomaddr    0x03010406;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
         capture     req nonzero("MBACALFIR");
     };
 
@@ -193,6 +205,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION1";
         scomaddr    0x03010407;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
         capture     req nonzero("MBACALFIR");
     };
 
@@ -207,6 +220,7 @@ chip Mba
         reset       (&, 0x03010612);
         mask        (|, 0x03010614);
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     register MBASPA_AND
@@ -222,6 +236,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAMSKQ";
         scomaddr    0x03010614;
         capture     group FirRegs;
+        capture     group MemChipletRegs;
     };
 
     ############################################################################
@@ -233,6 +248,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBA_ERR_REPORTQ";
         scomaddr    0x0301041A;
         capture     group CerrRegs;
+        capture     group MemChipletRegs;
     };
 
     register MBA_MCBERRPTQ
@@ -240,6 +256,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBA_MCBERRPTQ";
         scomaddr    0x030106E7;
         capture     group CerrRegs;
+        capture     group MemChipletRegs;
     };
 
     register DDRPHY_APB_FIR_ERR0_P0
@@ -247,6 +264,7 @@ chip Mba
         name        "DPHY01.DDRPHY_APB_FIR_ERR0_P0";
         scomaddr    0x8000D0060301143F;
         capture     group CerrRegs;
+        capture     group MemChipletRegs;
     };
 
     register DDRPHY_APB_FIR_ERR1_P0
@@ -254,6 +272,7 @@ chip Mba
         name        "DPHY01.DDRPHY_APB_FIR_ERR1_P0";
         scomaddr    0x8000D0070301143F;
         capture     group CerrRegs;
+        capture     group MemChipletRegs;
     };
 
     register DDRPHY_APB_FIR_ERR0_P1
@@ -261,6 +280,7 @@ chip Mba
         name        "DPHY01.DDRPHY_APB_FIR_ERR0_P1";
         scomaddr    0x8001D0060301143F;
         capture     group CerrRegs;
+        capture     group MemChipletRegs;
     };
 
     register DDRPHY_APB_FIR_ERR1_P1
@@ -268,6 +288,7 @@ chip Mba
         name        "DPHY01.DDRPHY_APB_FIR_ERR1_P1";
         scomaddr    0x8001D0070301143F;
         capture     group CerrRegs;
+        capture     group MemChipletRegs;
     };
 
     ############################################################################
