@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2000,2013              */
+/* COPYRIGHT International Business Machines Corp. 2000,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -62,6 +62,14 @@ class PRDcallout
         iv_type(PRDcalloutData::TYPE_TARGET)
     { iv_meldValue.target = i_target; }
 
+    /** @brief Constructor from TargetHandle_t
+     *         with clock type info
+     */
+    PRDcallout( TARGETING::TargetHandle_t i_target,
+                PRDcalloutData::MruType i_type ) :
+        iv_type(i_type)
+    { iv_meldValue.target = i_target; }
+
     /** @brief Constructor from MemoryMru */
     PRDcallout( const MemoryMru & i_memmru ) :
         iv_type(PRDcalloutData::TYPE_MEMMRU)
@@ -78,6 +86,8 @@ class PRDcallout
         switch ( iv_type )
         {
             case PRDcalloutData::TYPE_TARGET:
+            case PRDcalloutData::TYPE_PROCCLK:
+            case PRDcalloutData::TYPE_PCICLK:
                 iv_meldValue.target = PlatServices::getTarget(i_val); break;
             case PRDcalloutData::TYPE_MEMMRU:
             case PRDcalloutData::TYPE_SYMFRU:

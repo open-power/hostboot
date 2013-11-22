@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -131,22 +131,6 @@ int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 }
 PRDF_PLUGIN_DEFINE( Membuf, MaskPll );
 
-/**
- * @brief Adds to the callout list for Centaur PLL errors.
- * @param  i_chip Centaur chip.
- * @param  i_sc     The step code data struct.
- * @return SUCCESS.
- */
-int32_t CalloutPll( ExtensibleChip * i_chip,
-                    STEP_CODE_DATA_STRUCT & i_sc )
-{
-    // FIXME: RTC: 51628 will address clock target issue
-    // set Level 2 callout since we don't have clock target yet
-    i_sc.service_data->SetCallout( NextLevelSupport_ENUM );
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( Membuf, CalloutPll );
 
 } // end namespace Membuf
 

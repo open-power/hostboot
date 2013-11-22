@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <fapi.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 
 // Pegasus includes
 #include <prdfCenAddress.H>
@@ -1284,95 +1285,66 @@ uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
 //##
 //##############################################################################
 
-// FIXME: RTC: 51628 will address clock target issue
-bool areClocksOn(TARGETING::TargetHandle_t i_pGivenTarget)
-{
-    bool o_clocksOn = false;
-
-    #ifdef __HOSTBOOT_MODULE
-
-    o_clocksOn = true;
-
-    #else
-
-    if ( NULL != i_pGivenTarget )
-    {
-        errlHndl_t errl = NULL;
-        //errl =HWSV::hwsvClockQueryOn(i_pGivenTarget,
-        //                  HWSV::NO_MODE, o_clocksOn);
-        if ( NULL != errl )
-        {
-            PRDF_ERR( "[areClocksOn] In areClocksOn failed" );
-            PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
-        }
-    }
-    else
-    {
-        PRDF_ERR( "[areClocksOn] given target is null" );
-    }
-
-    #endif
-
-    return o_clocksOn;
-}
-
-//------------------------------------------------------------------------------
-
-// FIXME: RTC: 51628 will address clock target issue
 TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
                             i_pGivenTarget,
-                            TARGETING ::TYPE targetype)
+                            TARGETING ::TYPE i_connType)
 {
+    #define PRDF_FUNC "[PlatServices::getClockId] "
     TargetHandleList l_clockCardlist;
+    TargetHandle_t l_target = i_pGivenTarget;
     TargetHandle_t o_pClockCardHandle = NULL;
 
-    return o_pClockCardHandle;
-}
-
-//------------------------------------------------------------------------------
-
-// FIXME: RTC: 51628 will address clock target issue
-TARGETING::TargetHandle_t getClockMux(TARGETING::TargetHandle_t
-                            i_pGivenTarget)
-{
-    //Modeling info of card and Clock mux is required
-    // PredicateCTM l_ClockMux(CLASS_UNIT,TYPE_CLOCK_MUX);
-    //defined for compilation
-    PredicateCTM l_ClockMux(CLASS_UNIT);
-    TargetHandle_t o_ptargetClockMux = NULL;
-    #if 0
     do
     {
-        if(NULL != i_pGivenTarget)
+        // If membuf target, use the connected proc target
+        if(TYPE_MEMBUF == getTargetType(i_pGivenTarget))
         {
-            TargetHandleList l_list;
-            if(TYPE_PROC==(i_pGivenTarget->getAttr<ATTR_TYPE>()))
+            l_target = getConnectedParent(i_pGivenTarget, TYPE_PROC);
+            if(NULL == l_target)
             {
-                    targetService().getAssociated(l_list,
-                                        i_pGivenTarget,
-                                        TargetService::CHILD_BY_AFFINITY,
-                                        TargetService::ALL,
-                                        &l_ClockMux);
+                PRDF_ERR(PRDF_FUNC"failed to get proc target "
+                         "connected to membuf 0x%.8X",
+                         getHuid(l_target));
+                break;
             }
-            else
-            {
-                //TODO: If given target is not a proc  how to query all mux units
-                //      which relation  to be used
-            }
+        }
 
-            if (l_list.size() > 0)
-            {
-                // Pick out first item
-                o_ptargetClockMux = l_list[0];
-            }
-        }
-        else
+        PredicateIsFunctional l_funcFilter;
+        PredicateCTM l_oscFilter(CLASS_CHIP, i_connType);
+        PredicateCTM l_peerFilter(CLASS_UNIT,
+                                  (i_connType == TYPE_OSCREFCLK ?
+                                   TYPE_REFCLKENDPT: TYPE_PCICLKENDPT));
+        PredicatePostfixExpr l_funcAndOscFilter, l_funcAndPeerFilter;
+        l_funcAndOscFilter.push(&l_oscFilter).push(&l_funcFilter).And();
+        l_funcAndPeerFilter.push(&l_peerFilter).push(&l_funcFilter).And();
+
+        //PROC <---> CLKTYPE <---> PEER <---> CLKTYPE <---> OSC
+        //Get the oscillators related to this proc
+        getPeerTargets( l_clockCardlist,    // List of connected OSCs
+                        l_target,           // to this proc
+                        // filter to get to clock endpoints
+                        &l_funcAndPeerFilter/*&l_peerFilter*/,
+                        // filter to get the driving OSC
+                        &l_funcAndOscFilter/*&l_oscFilter*/);
+
+        for(TargetHandleList::iterator l_itr = l_clockCardlist.begin();
+            l_itr != l_clockCardlist.end();
+            ++l_itr)
         {
-            PRDF_ERR("[getClockMux] given target is NULL");
+            PRDF_TRAC(PRDF_FUNC"OSC 0x%.8X is connected to proc 0x%.8X",
+                      getHuid(*l_itr), getHuid(l_target));
         }
-    }while(0);
-    #endif
-    return o_ptargetClockMux;
+
+        if( 0 < l_clockCardlist.size())
+        {
+            o_pClockCardHandle = l_clockCardlist[0];
+        }
+
+    } while(0);
+
+    return o_pClockCardHandle;
+
+    #undef PRDF_FUNC
 }
 
 //##############################################################################

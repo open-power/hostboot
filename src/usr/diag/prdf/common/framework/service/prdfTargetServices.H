@@ -386,34 +386,16 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
 //##############################################################################
 
 /**
- * @brief   Queries if this chip's clocks are on.
- * @param   i_pTargetHandle Handle of a chip or any logical entity.
- * @return  TRUE if this chip's clocks are on, FALSE otherwise.
- * @pre     None.
- * @post    None.
- */
-bool areClocksOn( TARGETING::TargetHandle_t i_pTargetHandle );
-
-/**
  * @brief   Gets handle of the clock card for the given target.
- * @param   i_pTargetHandle     Handle of a functional unit.
- * @param   i_targetType        Type of clock source  desired.
+ * @param   i_pTargetHandle    Handle of a functional unit.
+ * @param   i_peerType         Type of peer clock source
  * @return  Handle_t of clock source.
  * @pre     None.
  * @post    None.
  */
 TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
-                             i_pTargetHandle,TARGETING::TYPE i_targetType);
-
-/**
- * @brief   Get TargetHandle_t of clock mux.
- * @param   i_pFabricHandle Handle of a fabric.
- * @return  Handle of clock mux.
- * @pre     Fabric must be a handle of a functioning fabric.
- * @post    None.
- */
-TARGETING::TargetHandle_t getClockMux(TARGETING::TargetHandle_t
-                             i_pFabricHandle);
+                             i_pTargetHandle,
+                             TARGETING::TYPE i_peerType);
 
 //##############################################################################
 //##                     MNFG Policy Flag Functions

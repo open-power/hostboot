@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -261,5 +261,23 @@
         capture     type secondary;
         capture     group default;
         capture     req nonzero("IOPCIFIR_1");
+    };
+
+    ############################################################################
+    # PCIE Chiplet PLL Registers
+    ############################################################################
+
+    register PCI_ERROR_REG
+    {
+        name        "EH.TPCHIP.NET.PCBSLPCI.ERROR_REG";
+        scomaddr    0x090F001F;
+        capture     group PllFIRs;
+    };
+
+    register PCI_CONFIG_REG
+    {
+        name        "EH.TPCHIP.NET.PCBSLPCI.SLAVE_CONFIG_REG";
+        scomaddr    0x090F001E;
+        capture     group PllFIRs;
     };
 

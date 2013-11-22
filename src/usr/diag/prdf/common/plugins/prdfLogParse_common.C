@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2013              */
+/* COPYRIGHT International Business Machines Corp. 2003,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -496,6 +496,8 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                         break;
 
                     case PRDcalloutData::TYPE_TARGET:
+                    case PRDcalloutData::TYPE_PROCCLK:
+                    case PRDcalloutData::TYPE_PCICLK:
                         strcat( data, "(HUID)" );
                         i_parser.PrintString( header, data );
                         break;

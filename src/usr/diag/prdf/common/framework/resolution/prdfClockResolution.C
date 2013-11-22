@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2013              */
+/* COPYRIGHT International Business Machines Corp. 2001,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,31 +43,54 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
     using namespace TARGETING;
 
     uint32_t l_rc = SUCCESS;
-    // Use clock routines for CLOCK_CARD types.
-    // FIXME: RTC: 51628 will address clock target issue
-    if ( (iv_targetType == TYPE_PROC) || (iv_targetType == TYPE_MEMBUF) )
+    // callout clock osc
+    if ( (iv_targetType == TYPE_PROC) ||
+         (iv_targetType == TYPE_PCI) ||
+         (iv_targetType == TYPE_MEMBUF) )
     {
         // Get clock card.
-        TargetHandle_t l_ptargetClock = PlatServices::getClockId(
-                                                                iv_ptargetClock,
-                                                                iv_targetType );
+        TYPE oscType = (iv_targetType == TYPE_PCI) ?
+                    TYPE_OSCPCICLK : TYPE_OSCREFCLK;
 
-        // Find mux if no clock card available.
-        if(NULL == l_ptargetClock)
-        {
-            l_ptargetClock = PlatServices::getClockMux(iv_ptargetClock);
-        }
+        TargetHandle_t l_ptargetClock =
+            PlatServices::getClockId(iv_ptargetClock, oscType);
 
         // Callout this chip if nothing else.
+        // FIXME - RTC: 91939
+        // will re-write this block of code when
+        // we can get osc targets from targeting again.
+        // In the mean time, we don't want to call out the
+        // chip for this.
         if(NULL == l_ptargetClock)
         {
-            l_ptargetClock = iv_ptargetClock;
-        }
+            //l_ptargetClock = iv_ptargetClock;
 
-        //Just callout the clock source.
-        //There is no clock target now so we don't want to make
-        //any incorrect callout until it's implemented.
-        //serviceData.service_data->SetCallout(l_ptargetClock);
+            //in hostboot, getClockId() won't work
+            //so use the chip target and clock type
+            #ifdef __HOSTBOOT_MODULE
+            serviceData.service_data->SetCallout(
+                      PRDcallout(iv_ptargetClock,
+                                 iv_targetType == TYPE_PCI ?
+                                  PRDcalloutData::TYPE_PCICLK :
+                                  PRDcalloutData::TYPE_PROCCLK));
+             #endif
+        }
+        else
+        {
+            // callout the clock source
+            // HB does not have the osc target modeled
+            // so we need to use the proc target with
+            // osc clock type to call out
+            #ifndef __HOSTBOOT_MODULE
+            serviceData.service_data->SetCallout(l_ptargetClock);
+            #else
+            serviceData.service_data->SetCallout(
+                      PRDcallout(l_ptargetClock,
+                                 iv_targetType == TYPE_PCI ?
+                                  PRDcalloutData::TYPE_PCICLK :
+                                  PRDcalloutData::TYPE_PROCCLK));
+             #endif
+        }
     }
     // Get all connected chips for non-CLOCK_CARD types.
     else

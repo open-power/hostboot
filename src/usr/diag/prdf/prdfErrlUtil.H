@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -205,6 +205,15 @@
                         HWAS::DELAYED_DECONFIG : i_deconfigState),   \
                         (const HWAS::GARD_ErrorType)i_gardErrType);  \
   (void)(i_diag_need)
+
+/**
+ * @brief Add clock callout
+ */
+#define PRDF_ADD_CLOCK_CALLOUT(io_errl, i_target, i_clockType, i_priority) \
+    io_errl->addClockCallout(i_target,                          \
+                (PRDcalloutData::TYPE_PROCCLK == i_clockType) ? \
+                 HWAS::OSCREFCLK_TYPE : HWAS::OSCPCICLK_TYPE,   \
+                             (const HWAS::callOutPriority)i_priority);
 
 /**
  * @brief Process's pending deconfig and GARD service actions

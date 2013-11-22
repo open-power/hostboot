@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2006,2013              */
+/* COPYRIGHT International Business Machines Corp. 2006,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -47,54 +47,77 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain,
 
 #ifdef __HOSTBOOT_MODULE
 
-    /** @fn PllDomain
-     *  @brief Constructor
-     *  @param DOMAIN_ID - the domain ID
-     *  @param Resolution to callout the correct clock source
-     *  @param ThresholdResolution::ThresholdPolicy
+    /**
+     * @brief Constructor
+     * @param DOMAIN_ID  the domain ID
+     * @param Resolution to callout the correct clock source
+     * @param ThresholdResolution::ThresholdPolicy
      */
     PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
                const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
 
+    /**
+     * @brief Constructor
+     * @param DOMAIN_ID  the domain ID
+     * @param Resolution to callout the correct second clock source
+     * @param Resolution to callout the correct clock source
+     * @param ThresholdResolution::ThresholdPolicy
+     */
+    PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
+               Resolution & clockSource,
+               const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
+
 #else // not __HOSTBOOT_MODULE
 
-    /** @fn PllDomain
-     *  @brief Constructor
-     *  @param DOMAIN_ID - the domain ID
-     *  @param Resolution to callout the correct clock source
-     *  @param Dump content
-     *  @param ThresholdResolution::ThresholdPolicy
+    /**
+     * @brief Constructor
+     * @param DOMAIN_ID  the domain ID
+     * @param Resolution to callout the correct clock source
+     * @param Dump content
+     * @param ThresholdResolution::ThresholdPolicy
      */
     PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
+               hwTableContent i_hwdc,
+               const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
+
+    /**
+     * @brief Constructor
+     * @param DOMAIN_ID  the domain ID
+     * @param Resolution to callout the correct second clock source
+     * @param Resolution to callout the correct clock source
+     * @param Dump content
+     * @param ThresholdResolution::ThresholdPolicy
+     */
+    PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
+               Resolution & clockSource,
                hwTableContent i_hwdc,
                const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
 
 #endif // not __HOSTBOOT_MODULE
 
   /**
-   Perform any initialization required by the hardware
-   @returns error code
-   @post  PLL errors cleared in hardware.
+   *  @brief Perform any initialization required by the hardware
+   *  @returns error code
+   *  @post  PLL errors cleared in hardware.
    */
   virtual int32_t Initialize(void);
 
   /**
-   Query if anything in this domain is at the attention type specified
-   @param Attention type to query for. (@see iipsdbug.h)
-   @returns [true|false]
-   @pre Initialize()
-   @post NONE
+   * @brief Query if anything in this domain is at the attention type specified
+   * @param Attention type to query for. (@see iipsdbug.h)
+   * @returns [true|false]
+   * @pre Initialize()
    */
   virtual bool Query(ATTENTION_TYPE attentionType);
 
   /**
-   Analyze errors within the domain
-   @param service data collector
-   @param attentiont type (@see iipsdbug.h)
-   @returns service data collector - completed
-   @return return code
-   @pre Initialize(); Query() == true
-   @post domain element order may be modified.
+   * @brief Analyze errors within the domain
+   * @param service data collector
+   * @param attentiont type (@see iipsdbug.h)
+   * @returns service data collector - completed
+   * @return return code
+   * @pre Initialize(); Query() == true
+   * @post domain element order may be modified.
    */
   virtual int32_t Analyze( STEP_CODE_DATA_STRUCT & serviceData,
                            ATTENTION_TYPE attentionType );
@@ -122,10 +145,10 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain,
 protected:
 
   /**
-   Order the domain - with detecting element at the top
-   @param Attention type (@see iipsdbug.h)
-   @post domain elemenet order may be altered
-   @note this is called by Analyze()
+   * @brief Order the domain - with detecting element at the top
+   * @param Attention type (@see iipsdbug.h)
+   * @post domain elemenet order may be altered
+   * @note this is called by Analyze()
    */
   virtual void Order(ATTENTION_TYPE attentionType);
 
@@ -161,6 +184,19 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
                                 i_mfgThresh ) )
 {}
 
+inline
+PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
+                      Resolution & clockSource,
+                      const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
+    RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
+    ExtensibleDomain("PllDomain"),
+    closeClockSource(secondClockSource),
+    farClockSource(clockSource),
+    iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
+                                ThresholdResolution::cv_pllDefault,
+                                i_mfgThresh ) )
+{}
+
 #else // not __HOSTBOOT_MODULE
 
 inline
@@ -170,6 +206,21 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
     RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
     ExtensibleDomain("PllDomain"),
     closeClockSource(clockSource),
+    farClockSource(clockSource),
+    iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
+                                ThresholdResolution::cv_pllDefault,
+                                i_mfgThresh ) ),
+    iv_dumpContent(i_hwdc)
+{}
+
+inline
+PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
+                      Resolution & clockSource,
+                      hwTableContent i_hwdc,
+                      const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
+    RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
+    ExtensibleDomain("PllDomain"),
+    closeClockSource(secondClockSource),
     farClockSource(clockSource),
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
                                 ThresholdResolution::cv_pllDefault,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,8 +43,12 @@
 #include <iipSystem.h>
 #include <prdrLoadChipCache.H>  // To flush chip-file cache.
 
+using namespace TARGETING;
+
 namespace PRDF
 {
+
+using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 
@@ -298,34 +302,50 @@ void PegasusConfigurator::addChipsToPllDomain(
  ScanFacility               & i_scanFac,
  ResolutionFactory          & i_resFac)
 {
-    using namespace TARGETING;
-
     do
     {
         uint32_t l_node = _getNodePosition(i_pTarget);
 
-        // Fabric PLL - only one per node as all fabs on node have same clock source
+        // Fabric PLL - only one per node as all fabs
+        // on node have same clock source
         if(NULL != io_pllDomains)
         {
             if(NULL == (*io_pllDomains)[l_node])
             {
-                if((CLOCK_DOMAIN_FAB    == i_domainId) ||
-                   (CLOCK_DOMAIN_MEMBUF == i_domainId))
+                if(CLOCK_DOMAIN_FAB == i_domainId)
                 {
-                    Resolution & l_clock =(CLOCK_DOMAIN_FAB == i_domainId) ?
-                        i_resFac.GetClockResolution(i_pTarget, TYPE_PROC) :
-                        i_resFac.GetClockResolution(i_pTarget, TYPE_MEMBUF);
+                    Resolution & procClock = i_resFac.GetClockResolution(
+                                                    i_pTarget, TYPE_PROC);
 
+                    Resolution & ioClock = i_resFac.GetClockResolution(
+                                                    i_pTarget, TYPE_PCI);
                     #ifdef __HOSTBOOT_MODULE
                     (*io_pllDomains)[l_node] = new PllDomain(
-                                        i_domainId, l_clock,
+                                        i_domainId, ioClock, procClock,
                                         ThresholdResolution::cv_pllDefault );
                     #else
                     (*io_pllDomains)[l_node] = new PllDomain(
-                                        i_domainId, l_clock, CONTENT_HW,
+                                        i_domainId, ioClock, procClock,
+                                        CONTENT_HW,
                                         ThresholdResolution::cv_pllDefault );
                     #endif
                 }
+                else if(CLOCK_DOMAIN_MEMBUF == i_domainId)
+                {
+                    Resolution & clock = i_resFac.GetClockResolution(
+                                                 i_pTarget, TYPE_MEMBUF);
+
+                    #ifdef __HOSTBOOT_MODULE
+                    (*io_pllDomains)[l_node] = new PllDomain(
+                                        i_domainId, clock,
+                                        ThresholdResolution::cv_pllDefault );
+                    #else
+                    (*io_pllDomains)[l_node] = new PllDomain(
+                                        i_domainId, clock, CONTENT_HW,
+                                        ThresholdResolution::cv_pllDefault );
+                    #endif
+                }
+
                 else
                 {
                     PRDF_ERR( "[addChipsToPllDomain] Unsupported PLL Domain: "

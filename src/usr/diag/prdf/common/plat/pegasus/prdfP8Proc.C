@@ -31,6 +31,7 @@
 #include <prdfPluginMap.H>
 #include <prdfLaneRepair.H>
 #include <prdfPhbUtils.H>
+#include <prdfP8DataBundle.H>
 
 using namespace TARGETING;
 
@@ -55,6 +56,7 @@ namespace Proc
  */
 int32_t Initialize( ExtensibleChip * i_chip )
 {
+    i_chip->getDataBundle() = new P8DataBundle( i_chip );
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Proc, Initialize );

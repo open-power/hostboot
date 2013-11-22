@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2013              */
+/* COPYRIGHT International Business Machines Corp. 2003,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,6 +36,9 @@
 #include <prdfPluginDef.H>
 #include <prdfGlobal.H>
 #include <iipSystem.h>
+#include <UtilHash.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -114,6 +117,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     CcAutoDeletePointerVector<ChipPtr> chip(new ChipPtr[GetSize()]());
     int count = 0;
     int32_t rc = SUCCESS;
+    bool calloutProcOsc = false;
+    bool calloutPciOsc = false;
 
     // Due to clock issues some chips may be moved to non-functional during
     // analysis. In this case, these chips will need to be removed from their
@@ -125,14 +130,38 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     for(unsigned int index = 0; index < GetSize(); ++index)
     {
         ExtensibleChip * l_chip = LookUp(index);
-        ExtensibleChipFunction * l_query = l_chip->getExtensibleFunction("QueryPll");
-        bool atAttn;
-        rc = (*l_query)(l_chip,PluginDef::bindParm<bool &>(atAttn));
-        if(atAttn == true)
+        bool atProcAttn = false;
+        bool atPciAttn = false;
+
+        if( CLOCK_DOMAIN_FAB == GetId() )
         {
+            ExtensibleChipFunction * queryProc =
+                l_chip->getExtensibleFunction("QueryProcPll");
+            rc |= (*queryProc)(l_chip,PluginDef::bindParm<bool &>(atProcAttn));
+            ExtensibleChipFunction * queryPci =
+                l_chip->getExtensibleFunction("QueryPciPll");
+            rc |= (*queryPci)(l_chip,PluginDef::bindParm<bool &>(atPciAttn));
+        }
+        else
+        {
+            ExtensibleChipFunction * l_query =
+                   l_chip->getExtensibleFunction("QueryPll");
+            rc |= (*l_query)(l_chip,PluginDef::bindParm<bool &>(atProcAttn));
+        }
+
+        if(atProcAttn || atPciAttn)
+        {
+            if( atProcAttn ) calloutProcOsc = true;
+            if( atPciAttn )  calloutPciOsc = true;
+
             chip()[count] = LookUp(index);
             ++count;
-            l_chip->CaptureErrorData(serviceData.service_data->GetCaptureData());
+            l_chip->CaptureErrorData(
+                    serviceData.service_data->GetCaptureData());
+            // Capture PllFIRs group
+            l_chip->CaptureErrorData(
+                    serviceData.service_data->GetCaptureData(),
+                    Util::hashString("PllFIRs"));
         }
         else if ( !PlatServices::isFunctional(l_chip->GetChipHandle()) )
         {
@@ -148,10 +177,13 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
 
     // always suspect the clock source
-    closeClockSource.Resolve(serviceData);  // dg06c
-    if(&closeClockSource != &farClockSource)
+    if( calloutPciOsc )
     {
-        farClockSource.Resolve(serviceData); // dg06c
+        closeClockSource.Resolve(serviceData);
+    }
+    if( calloutProcOsc )
+    {
+        farClockSource.Resolve(serviceData);
     }
 
     // If only one detected the error, add it to the callout list.

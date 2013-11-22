@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -382,6 +382,26 @@ chip Ex
         name        "Capture Data for L3 Trace Array";
         capture     group never;
     };
+
+    ############################################################################
+    # EX Chiplet PLL Registers
+    ############################################################################
+
+    register EX_ERROR_REG
+    {
+        name        "EH.TPCHIP.NET.PCBSLEX.TP_PCB_SLAVE_INST.ERROR_REG";
+        scomaddr    0x100F001F;
+        capture     group PllFIRs;
+    };
+
+    register EX_CONFIG_REG
+    {
+        name        "EH.TPCHIP.NET.PCBSLEX.TP_PCB_SLAVE_INST.SLAVE_CONFIG_REG";
+        scomaddr    0x100F001E;
+        capture     group PllFIRs;
+    };
+
+
 };
 
  ##############################################################################

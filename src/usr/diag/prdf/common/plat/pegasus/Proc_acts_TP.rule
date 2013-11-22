@@ -267,7 +267,7 @@ group gTpLFir filter singlebit
      *  These should never trigger directly themselves.
      *  Should be handled by global PRD PLL code.
      */
-    (TpLFir, bit(19)) ? threshold32pday;
+    (TpLFir, bit(19)) ? PllError;
 
     /** TP_LFIR[20]
      *  Sbe indicated error_event0to4 enabled by mask bit 5 to 9
@@ -1149,6 +1149,13 @@ actionclass ThresholdNoCallout
     threshold( field(32 / day), mfg( 1 ) );
     calloutSelfMed;
     funccall("ClearServiceCallFlag");
+};
+
+/** PLL error action */
+actionclass PllError
+{
+    capture(PllFIRs);
+    threshold32pday;
 };
 
 # TOD Actions:

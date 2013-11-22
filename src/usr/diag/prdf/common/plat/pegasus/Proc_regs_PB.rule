@@ -804,3 +804,21 @@
         capture     req nonzero("IOMCFIR_1");
     };
 
+    ############################################################################
+    # PB Chiplet PLL Registers
+    ############################################################################
+
+    register PB_ERROR_REG
+    {
+        name        "EH.TPCHIP.NET.PCBSLNEST.ERROR_REG";
+        scomaddr    0x020F001F;
+        capture     group PllFIRs;
+    };
+
+    register PB_CONFIG_REG
+    {
+        name        "EH.TPCHIP.NET.PCBSLNEST.SLAVE_CONFIG_REG";
+        scomaddr    0x020F001E;
+        capture     group PllFIRs;
+    };
+

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2013              */
+/* COPYRIGHT International Business Machines Corp. 2009,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -63,7 +63,6 @@ public:
    * @param[in] i_targetType  type of target connected to clock source
    * @return    Non-SUCCESS if an internal function fails, SUCCESS otherwise.
   */
-    // FIXME: The default target type needs to be set to a PROC clock card.
     ClockResolution( TARGETING::TargetHandle_t i_pTargetHandle = NULL,
                          TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC ) :
                          iv_ptargetClock( i_pTargetHandle ),

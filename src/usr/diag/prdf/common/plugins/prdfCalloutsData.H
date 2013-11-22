@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -51,6 +51,8 @@ enum MruType
     TYPE_TARGET,
     TYPE_MEMMRU,
     TYPE_SYMFRU,
+    TYPE_PROCCLK,
+    TYPE_PCICLK,
 };
 
 } // end namespace PRDcalloutData
