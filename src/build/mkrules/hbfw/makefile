@@ -32,16 +32,16 @@
 .if(${CONTEXT:R} == "ppc")
 
 EXPINC_SUBDIRS   += fsp
-OBJECTS_SUBDIRS  += 
+OBJECTS_SUBDIRS  +=
 EXPLIB_SUBDIRS   += fsp
 EXPSHLIB_SUBDIRS += fsp
 STANDARD_SUBDIRS += fsp img simics
-RUNBVT_SUBDIRS   += 
+RUNBVT_SUBDIRS   +=
 
 .elseif(${CONTEXT} == "x86.nfp")
 
 EXPINC_SUBDIRS   += fsp
-OBJECTS_SUBDIRS  += 
+OBJECTS_SUBDIRS  +=
 EXPLIB_SUBDIRS   += fsp
 EXPSHLIB_SUBDIRS += fsp
 STANDARD_SUBDIRS += fsp
@@ -52,7 +52,7 @@ RUNBVT_SUBDIRS   +=
 # Directives to expand tar files and ensure expansion before
 # subdirectory traversal.
 #
-# If you add a new tarfile and subdirectory, you must add the 
+# If you add a new tarfile and subdirectory, you must add the
 # corresponding _SUBDIR/BUILD/EXPINC/subdir dependency.
 
 TARFILES = fsp.tar simics.tar
@@ -64,6 +64,7 @@ _SUBDIR/BUILD/EXPINC/simics: expand_tars_simics.tar
 
 # TODO RTC 91690 - Re-enable epub_check
 EXPINC_TARGETS += expand_tars
+EXPLIB_TARGETS += epub_check
 
 expand_tars: ${TARFILES:S/^/expand_tars_/g}
 expand_tars_%: $${@:S/expand_tars_//}
