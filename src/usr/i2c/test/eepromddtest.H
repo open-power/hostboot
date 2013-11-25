@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -76,24 +76,28 @@ class EEPROMTest: public CxxTest::TestSuite
             } testData[] =
 
             {
-
                 // MVPD of processor - chip 0
-                // Write:
-                { 0x0000, VPD_PRIMARY, 0xfedcba9876543210, 8, false },
-                // Read:
-                { 0x0000, VPD_PRIMARY, 0xfedcba9876543210, 8, true  },
+                // Read - Only
+                { 0x0000, VPD_PRIMARY, 0x000f17ba00000000, 4, true  },
 
                 // SBE Primary of processor - chip 2
-                // Write:
-                { 0x0100, SBE_PRIMARY, 0xaabb000000000000, 2, false },
+                // Write: over 128-byte page boundary:
+                { 0x017F, SBE_PRIMARY, 0xaabb000000000000, 2, false },
                 // Read:
-                { 0x0100, SBE_PRIMARY, 0xaabb000000000000, 2, true  },
+                { 0x017F, SBE_PRIMARY, 0xaabb000000000000, 2, true  },
 
                 // SBE Backup of processor - chip 3
-                // Write:
-                { 0x00F0, SBE_BACKUP, 0x1122334400000000, 4, false },
+                // Write: over 256-byte page boundary:
+                { 0x01FD, SBE_BACKUP, 0x1122334400000000, 4, false },
                 // Read:
-                { 0x00F0, SBE_BACKUP, 0x1122334400000000, 4, true  },
+                { 0x01FD, SBE_BACKUP, 0x1122334400000000, 4, true  },
+
+                // SBE Backup of processor - chip 3
+                // Write: inside 128 page boundary:
+                { 0x005B, SBE_BACKUP, 0xbad5adcabf0b7000, 7, false },
+                // Read:
+                { 0x005B, SBE_BACKUP, 0xbad5adcabf0b7000, 7, true  },
+
             };
 
             const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
@@ -157,7 +161,7 @@ class EEPROMTest: public CxxTest::TestSuite
                     {
                         uint64_t data;
 
-                        // if a read, initialize data, else, set data to write
+                        // if a read, clear data; else, set data to write
                         if( testData[i].rnw )
                         {
                             data = 0x0ull;
@@ -214,12 +218,12 @@ class EEPROMTest: public CxxTest::TestSuite
 
         /**
          * @brief EEPROM Read/Write Large Test
-         *      This test will read and write 1KB of data to SBE Backup
+         *      This test will read and write 603 bytes of data to SBE Backup
          *      VPD.  It will attempt to restore the original data at
          *      the end of the test.
          *
-         *      Note: 1st 1K of SBE EEPROM data is currently blank, so this
-         *      test will read and write to that address space
+         *      Note: 1st 768 bytes of SBE EEPROM data is currently blank, so
+         *            this test will read and write below that address space
          */
         void testEEPROMReadWriteLarge ( void )
         {
@@ -228,11 +232,14 @@ class EEPROMTest: public CxxTest::TestSuite
             int num_ops = 0;
             int cmds = 0;
 
-            // Create 1KB buffers
-            size_t  testBufLen = 1024;
+            // Create 603-byte buffers
+            size_t  testBufLen = 603;
             uint8_t testBuffer[testBufLen];
             uint8_t new_data[testBufLen];
             uint8_t original_data[testBufLen];
+
+            // Use small offset to force more complicated page-boundary testing
+            uint8_t offset = 0x11;
 
 
             TRACFCOMP( g_trac_eeprom,
@@ -255,7 +262,7 @@ class EEPROMTest: public CxxTest::TestSuite
                 TargetHandleList fullList;
                 fullList.push_back( testTarget );
 
-                // 5 operations of 1K data per target (details below)
+                // 5 operations per target (details below)
                 const uint32_t NUM_CMDS = 5;
 
                 // Number of total operations
@@ -297,9 +304,8 @@ class EEPROMTest: public CxxTest::TestSuite
 
                 }
 
-                //  Valid Buffer, so memcpy the first 1KB
+                //  Valid Buffer, so memcpy the first 603 bytes
                 memcpy( new_data, tmp_ptr, testBufLen );
-
 
                 /************************************************************/
                 /* Loop through targets and perform operations              */
@@ -318,11 +324,9 @@ class EEPROMTest: public CxxTest::TestSuite
 
                     // Before starting, clear original data buffer
                     memset(original_data, 0x0, testBufLen);
-
                     for (uint8_t j = 1; j <= NUM_CMDS; j++)
                     {
-
-                        // Details: 5 operations of 1K data per target
+                        // Details: 5 operations per target
                         // 1) Read Original Data and Save It
                         // 2) Write New Data
                         // 3) Read New Data and Compare
@@ -356,7 +360,8 @@ class EEPROMTest: public CxxTest::TestSuite
                                 fullList[0],
                                 testBuffer,
                                 testBufLen,
-                                DEVICE_EEPROM_ADDRESS(SBE_BACKUP,0x0));
+                                DEVICE_EEPROM_ADDRESS(SBE_BACKUP,
+                                                      offset));
 
                         if( err )
                         {
@@ -550,7 +555,6 @@ class EEPROMTest: public CxxTest::TestSuite
                 // Set max length and offset
                 dataSize = 0xFFFFFFFFFFFFFFFF;
                 offset = 0xFFFFFFFFFFFFFFFF;
-
                 num_ops++;
                 err = deviceOp( DeviceFW::WRITE,
                                 testTarget,
@@ -578,7 +582,7 @@ class EEPROMTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_eeprom,
-                       "testEEPROMInvalidChip - End: %d/%d fails",
+                       "testEEPROMOverflow - End: %d/%d fails",
                        fails, num_ops );
         }
 

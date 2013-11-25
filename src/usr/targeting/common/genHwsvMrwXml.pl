@@ -3238,6 +3238,7 @@ sub addEeproms
         print "             <field><id>byteAddrOffset</id><value>0x02</value></field>\n";
         print "             <field><id>maxMemorySizeKB</id><value>0x40</value></field>\n";
         print "             <field><id>writePageSize</id><value>0x80</value></field>\n";
+        print "             <field><id>writeCycleTime</id><value>0x05</value></field>\n";
         print "        </default>\n";
         print "    </attribute>\n";
     }

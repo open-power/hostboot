@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -528,6 +528,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -540,6 +541,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -552,6 +554,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -564,6 +567,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -1706,6 +1710,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -1718,6 +1723,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -1730,6 +1736,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -1742,6 +1749,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -2884,6 +2892,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -2896,6 +2905,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -2908,6 +2918,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -2920,6 +2931,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -4062,6 +4074,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -4074,6 +4087,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -4086,6 +4100,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -4098,6 +4113,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -5239,6 +5255,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -5251,6 +5268,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -5263,6 +5281,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -5275,6 +5294,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -6385,6 +6405,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -6397,6 +6418,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -6409,6 +6431,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -6421,6 +6444,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -7529,6 +7553,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -7541,6 +7566,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -7553,6 +7579,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -7565,6 +7592,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -8673,6 +8701,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -8685,6 +8714,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -8697,6 +8727,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
     <attribute>
@@ -8709,6 +8740,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x40</value></field>
              <field><id>writePageSize</id><value>0x80</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -9616,6 +9648,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9729,6 +9762,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9842,6 +9876,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -9955,6 +9990,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10068,6 +10104,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10181,6 +10218,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10294,6 +10332,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10407,6 +10446,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10520,6 +10560,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10633,6 +10674,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10746,6 +10788,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10859,6 +10902,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -10972,6 +11016,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11085,6 +11130,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11198,6 +11244,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11311,6 +11358,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11424,6 +11472,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11537,6 +11586,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11650,6 +11700,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11763,6 +11814,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11876,6 +11928,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -11989,6 +12042,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12102,6 +12156,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12215,6 +12270,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12328,6 +12384,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12441,6 +12498,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12554,6 +12612,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12667,6 +12726,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12780,6 +12840,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -12893,6 +12954,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -13006,6 +13068,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -13119,6 +13182,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
      <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -13232,6 +13296,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13342,6 +13407,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13452,6 +13518,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13562,6 +13629,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13672,6 +13740,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13782,6 +13851,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -13892,6 +13962,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14002,6 +14073,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14112,6 +14184,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14222,6 +14295,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14332,6 +14406,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14442,6 +14517,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14552,6 +14628,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14662,6 +14739,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14772,6 +14850,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14882,6 +14961,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -14992,6 +15072,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15102,6 +15183,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15212,7 +15294,8 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
-         </default>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
+        </default>
      </attribute>
 </targetInstance>
 
@@ -15322,6 +15405,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15432,6 +15516,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15542,6 +15627,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15652,6 +15738,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15762,6 +15849,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15872,6 +15960,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -15982,6 +16071,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -16092,6 +16182,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -16202,6 +16293,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -16312,6 +16404,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -16422,6 +16515,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -16532,6 +16626,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>
@@ -16642,6 +16737,7 @@
              <field><id>byteAddrOffset</id><value>0x02</value></field>
              <field><id>maxMemorySizeKB</id><value>0x04</value></field>
              <field><id>writePageSize</id><value>0x20</value></field>
+             <field><id>writeCycleTime</id><value>0x05</value></field>
          </default>
      </attribute>
 </targetInstance>

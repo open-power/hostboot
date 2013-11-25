@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -72,11 +72,12 @@ enum i2cReasonCode
     I2C_FIFO_TIMEOUT                    = I2C_COMP_ID | 0x03,   // Timed out waiting on FIFO
     I2C_BUS_NOT_READY                   = I2C_COMP_ID | 0x04,   // Bus Not ready
     I2C_CMD_COMP_TIMEOUT                = I2C_COMP_ID | 0x05,   // Timeout waiting for Cmd Complete
-    I2C_HW_ERROR_FOUND                  = I2C_COMP_ID | 0x06,   // Error found in Status register
+    I2C_HW_ERROR_FOUND                  = I2C_COMP_ID | 0x06,   // Error found in status register
     I2C_MASTER_SENTINEL_TARGET          = I2C_COMP_ID | 0x07,   // Master Sentinel used as target
     I2C_NO_CENTAUR_FOUND                = I2C_COMP_ID | 0x08,   // No Centaur chip found
     I2C_NO_PROC_FOUND                   = I2C_COMP_ID | 0x09,   // No Processor chip found
     I2C_INVALID_BUS_SPEED_MODE          = I2C_COMP_ID | 0x0A,   // Invalid Bus Speed Mode
+    I2C_NACK_ONLY_FOUND                 = I2C_COMP_ID | 0x0B,   // Only NACK found in status register
 };
 
 };  // end I2C

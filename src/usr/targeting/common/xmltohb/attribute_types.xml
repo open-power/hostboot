@@ -1078,6 +1078,14 @@
             <type>uint64_t</type>
             <default>0x0</default>
         </field>
+        <field>
+            <name>writeCycleTime</name>
+            <description>The amount of time in milliseconds a device requires
+                         on the completion of a write command to update its
+                         internal memory.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
     </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -1136,6 +1144,14 @@
             <description>The maximum number of bytes that can be written to
                          a device at one time. 'Zero' value means no maximum
                          value is expected or checked.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>writeCycleTime</name>
+            <description>The amount of time in milliseconds a device requires
+                         on the completion of a write command to update its
+                         internal memory.</description>
             <type>uint64_t</type>
             <default>0x0</default>
         </field>
@@ -1200,6 +1216,14 @@
             <type>uint64_t</type>
             <default>0x0</default>
         </field>
+        <field>
+            <name>writeCycleTime</name>
+            <description>The amount of time in milliseconds a device requires
+                         on the completion of a write command to update its
+                         internal memory.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
     </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -1258,6 +1282,14 @@
             <description>The maximum number of bytes that can be written to
                          a device at one time. 'Zero' value means no maximum
                          value is expected or checked.</description>
+            <type>uint64_t</type>
+            <default>0x0</default>
+        </field>
+        <field>
+            <name>writeCycleTime</name>
+            <description>The amount of time in milliseconds a device requires
+                         on the completion of a write command to update its
+                         internal memory.</description>
             <type>uint64_t</type>
             <default>0x0</default>
         </field>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -34,16 +34,16 @@
 // ----------------------------------------------
 #include <string.h>
 #include <sys/time.h>
-
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
-#include <sys/time.h>
 #include <i2c/eepromddreasoncodes.H>
 #include <i2c/eepromif.H>
+#include <i2c/i2creasoncodes.H>
 #include "eepromdd.H"
 
 // ----------------------------------------------
@@ -55,7 +55,7 @@ mutex_t g_eepromMutex = MUTEX_INITIALIZER;
 // Trace definitions
 // ----------------------------------------------
 trace_desc_t* g_trac_eeprom = NULL;
-TRAC_INIT( & g_trac_eeprom, "EEPROM", KILOBYTE );
+TRAC_INIT( & g_trac_eeprom, EEPROM_COMP_NAME, KILOBYTE );
 
 trace_desc_t* g_trac_eepromr = NULL;
 TRAC_INIT( & g_trac_eepromr, "EEPROMR", KILOBYTE );
@@ -68,7 +68,9 @@ TRAC_INIT( & g_trac_eepromr, "EEPROMR", KILOBYTE );
 // Defines
 // ----------------------------------------------
 #define MAX_BYTE_ADDR 2
+#define EEPROM_MAX_NACK_RETRIES 2
 // ----------------------------------------------
+
 
 namespace EEPROM
 {
@@ -115,7 +117,6 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
     TRACUCOMP (g_trac_eeprom, ENTER_MRK"eepromPerformOp(): "
                "i_opType=%d, chip=%d, offset=%d, len=%d",
                (uint64_t) i_opType, i2cInfo.chip, i2cInfo.offset, io_buflen);
-
 
     do
     {
@@ -171,6 +172,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
             break;
         }
 
+
         // Do the read or write
         if( i_opType == DeviceFW::READ )
         {
@@ -179,10 +181,11 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
                               io_buflen,
                               i2cInfo );
 
-            if( err )
+            if ( err )
             {
                 break;
             }
+
         }
         else if( i_opType == DeviceFW::WRITE )
         {
@@ -191,10 +194,11 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
                                io_buflen,
                                i2cInfo );
 
-            if( err )
+            if ( err )
             {
                 break;
             }
+
         }
         else
         {
@@ -221,9 +225,10 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
     } while( 0 );
 
 
-    // If there is an error, add target to log
+    // If there is an error, add target and trace to log
     if ( (err != NULL) && (i_target != NULL) )
     {
+        err->collectTrace(EEPROM_COMP_NAME);
         ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(err);
     }
 
@@ -244,6 +249,7 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
                         eeprom_addr_t i_i2cInfo )
 {
     errlHndl_t err = NULL;
+    errlHndl_t err_NACK = NULL;
     uint8_t byteAddr[MAX_BYTE_ADDR];
     size_t byteAddrSize = 0;
     bool unlock = false;
@@ -270,50 +276,173 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
         mutex_lock( &g_eepromMutex );
         unlock = true;
 
-        // Only write the byte address if we have data to write
-        if( 0 != byteAddrSize )
+        /***********************************************************/
+        /* Attempt read multiple times ONLY on NACK fails         */
+        /***********************************************************/
+        for (uint8_t retry = 0;
+             retry <= EEPROM_MAX_NACK_RETRIES;
+             retry++)
         {
 
-            // Use the I2C OFFSET Interface for the READ
-            err = deviceOp( DeviceFW::READ,
-                            i_target,
-                            o_buffer,
-                            i_buflen,
-                            DEVICE_I2C_ADDRESS_OFFSET(
+            // Only write the byte address if we have data to write
+            if( 0 != byteAddrSize )
+            {
+                // Use the I2C OFFSET Interface for the READ
+                err = deviceOp( DeviceFW::READ,
+                                i_target,
+                                o_buffer,
+                                i_buflen,
+                                DEVICE_I2C_ADDRESS_OFFSET(
                                        i_i2cInfo.port,
                                        i_i2cInfo.engine,
                                        i_i2cInfo.devAddr,
                                        byteAddrSize,
                                        reinterpret_cast<uint8_t*>(&byteAddr)));
 
-            if( err )
-            {
-                TRACFCOMP(g_trac_eeprom,
-                          ERR_MRK"eepromRead(): I2C Read-Offset failed on "
-                          "%d/%d/0x%X",
-                          i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr);
-                break;
-            }
-        }
-        else
-        {
-            // Do the actual read via I2C
-            err = deviceOp( DeviceFW::READ,
-                            i_target,
-                            o_buffer,
-                            i_buflen,
-                            DEVICE_I2C_ADDRESS( i_i2cInfo.port,
-                                                i_i2cInfo.engine,
-                                                i_i2cInfo.devAddr ) );
+                if( err )
+                {
+                    TRACFCOMP(g_trac_eeprom,
+                              ERR_MRK"eepromRead(): I2C Read-Offset failed on "
+                              "%d/%d/0x%X aS=%d",
+                              i_i2cInfo.port, i_i2cInfo.engine,
+                              i_i2cInfo.devAddr, byteAddrSize);
+                    TRACFBIN(g_trac_eeprom, "byteAddr[]",
+                             &byteAddr, byteAddrSize);
 
-            if( err )
+                    // Don't break here -- error handled below
+                }
+            }
+            else
             {
-                TRACFCOMP(g_trac_eeprom,
-                          ERR_MRK"eepromRead(): I2C Read failed on %d/%d/0x%0X",
-                          i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr);
+                // Do the actual read via I2C
+                err = deviceOp( DeviceFW::READ,
+                                i_target,
+                                o_buffer,
+                                i_buflen,
+                                DEVICE_I2C_ADDRESS( i_i2cInfo.port,
+                                                    i_i2cInfo.engine,
+                                                    i_i2cInfo.devAddr ) );
+
+                if( err )
+                {
+                    TRACFCOMP(g_trac_eeprom,
+                              ERR_MRK"eepromRead(): I2C Read failed on "
+                              "%d/%d/0x%0X", i_i2cInfo.port, i_i2cInfo.engine,
+                              i_i2cInfo.devAddr);
+
+                    // Don't break here -- error handled below
+                }
+            }
+
+            if ( err == NULL )
+            {
+                // Operation completed successfully
+                // break from retry loop
                 break;
             }
+            else if ( err->reasonCode() != I2C::I2C_NACK_ONLY_FOUND )
+            {
+                // Only retry on NACK failures: break from retry loop
+                TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromRead(): Non-Nack "
+                           "Error: rc=0x%X, tgt=0x%X, No Retry (retry=%d)",
+                            err->reasonCode(),
+                            TARGETING::get_huid(i_target), retry);
+
+                err->collectTrace(EEPROM_COMP_NAME);
+
+                // break from retry loop
+                break;
+            }
+            else // Handle NACK error
+            {
+                // If op will be attempted again: save log and continue
+                if ( retry < EEPROM_MAX_NACK_RETRIES )
+                {
+                    // Only save original NACK error
+                    if ( err_NACK == NULL )
+                    {
+                        // Save original NACK error
+                        err_NACK = err;
+
+                        TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromRead(): "
+                                   "NACK Error rc=0x%X, eid=%d, tgt=0x%X, "
+                                   "retry/MAX=%d/%d. Save error and retry",
+                                   err_NACK->reasonCode(),
+                                   err_NACK->eid(),
+                                   TARGETING::get_huid(i_target),
+                                   retry, EEPROM_MAX_NACK_RETRIES);
+
+                        err_NACK->collectTrace(EEPROM_COMP_NAME);
+                    }
+                    else
+                    {
+                        // Add data to original NACK error
+                        TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromRead(): "
+                                   "Another NACK Error rc=0x%X, eid=0x%X "
+                                   "plid=0x%X, tgt=0x%X, retry/MAX=%d/%d. "
+                                   "Delete error and retry",
+                                   err->reasonCode(), err->eid(), err->plid(),
+                                   TARGETING::get_huid(i_target),
+                                   retry, EEPROM_MAX_NACK_RETRIES);
+
+                        ERRORLOG::ErrlUserDetailsString(
+                                  "Another NACK ERROR found")
+                                  .addToLog(err_NACK);
+
+                        // Delete this new NACK error
+                        delete err;
+                        err = NULL;
+                    }
+
+                    // continue to retry
+                    continue;
+                }
+                else // no more retries: trace and break
+                {
+                    TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromRead(): "
+                               "Error rc=0x%X, eid=%d, tgt=0x%X. No More "
+                               "Retries (retry/MAX=%d/%d). Returning Error",
+                               err->reasonCode(), err->eid(),
+                               TARGETING::get_huid(i_target),
+                               retry, EEPROM_MAX_NACK_RETRIES);
+
+                    err->collectTrace(EEPROM_COMP_NAME);
+
+                    // break from retry loop
+                    break;
+                }
+            }
+
+        } // end of retry loop
+
+        // Handle saved NACK error, if any
+        if (err_NACK)
+        {
+            if (err)
+            {
+                // commit original NACK error with new err PLID
+                err_NACK->plid(err->plid());
+                TRACFCOMP(g_trac_eeprom, "eepromRead(): Committing saved NACK "
+                          "err eid=0x%X with plid of returned err: 0x%X",
+                          err_NACK->eid(), err_NACK->plid());
+
+                ERRORLOG::ErrlUserDetailsTarget(i_target)
+                                               .addToLog(err_NACK);
+
+                errlCommit(err_NACK, EEPROM_COMP_ID);
+            }
+            else
+            {
+                // Since we eventually succeeded, delete original NACK error
+                TRACFCOMP(g_trac_eeprom, "eepromRead(): Op successful, "
+                          "deleting saved NACK err eid=0x%X, plid=0x%X",
+                          err_NACK->eid(), err_NACK->plid());
+
+                delete err_NACK;
+                err_NACK = NULL;
+            }
         }
+
 
         mutex_unlock( &g_eepromMutex );
         unlock = false;
@@ -347,11 +476,14 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                          eeprom_addr_t i_i2cInfo )
 {
     errlHndl_t err = NULL;
+    errlHndl_t err_NACK = NULL;
     uint8_t byteAddr[MAX_BYTE_ADDR];
     size_t byteAddrSize = 0;
     uint8_t * newBuffer = NULL;
     bool needFree = false;
     bool unlock = false;
+    uint32_t data_left = 0;
+    uint32_t diff_wps = 0;
 
     TRACDCOMP( g_trac_eeprom,
                ENTER_MRK"eepromWrite()" );
@@ -392,36 +524,29 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
         size_t loop_data_length = 0;
         size_t total_bytes_written = 0;
 
-        for ( uint64_t i = 0 ;
-              (i * i_i2cInfo.writePageSize) < io_buflen ;
-              i++)
-        {
 
-            if ( (io_buflen - (i * i_i2cInfo.writePageSize) )
-                 >= i_i2cInfo.writePageSize)
-            {
-                // Data to write >= to writePageSize, so write
-                //  the maximum amount: writePageSize
-                loop_data_length = i_i2cInfo.writePageSize;
-            }
-            else
-            {
-                // Less than writePageSize to write
-                loop_data_length = io_buflen % i_i2cInfo.writePageSize;
-            }
+        for ( uint64_t i = 0 ;
+              total_bytes_written < io_buflen ;
+              i++ )
+        {
+            // Determine how much data can be written in this loop
+            // Can't go over a writePageSize boundary
+
+            // Total data left to write
+            data_left = io_buflen - total_bytes_written;
+
+            // Difference to next writePageSize boundary
+            diff_wps = i_i2cInfo.writePageSize -
+                                (i_i2cInfo.offset % i_i2cInfo.writePageSize);
+
+            // Take the lesser of the 2 options
+            loop_data_length = (data_left < diff_wps ) ? data_left : diff_wps;
 
             // Add the data the user wanted to write
             memcpy( newBuffer,
-                    &l_data_ptr[i * i_i2cInfo.writePageSize],
-                    loop_data_length);
+                    &l_data_ptr[total_bytes_written],
+                    loop_data_length );
 
-
-
-            // Update the offset for each loop after the first one
-            if ( i > 0 )
-            {
-                i_i2cInfo.offset += i_i2cInfo.writePageSize;
-            }
 
             // Setup offset/address parms
             err = eepromPrepareAddress(  &byteAddr,
@@ -433,19 +558,25 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                 break;
             }
 
-
             TRACUCOMP(g_trac_eeprom,"eepromWrite() Loop: %d/%d/0x%X "
-                "loop=%d, l_d_l=%d, offset=0x%X, bAS=%d",
+                "loop=%d, l_d_l=%d, offset=0x%X, bAS=%d, diffs=%d/%d",
                 i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr,
-                i, loop_data_length, i_i2cInfo.offset, byteAddrSize);
+                i, loop_data_length, i_i2cInfo.offset, byteAddrSize,
+                data_left, diff_wps);
 
-
-            // Do the actual data write
-            err = deviceOp( DeviceFW::WRITE,
-                            i_target,
-                            newBuffer,
-                            loop_data_length,
-                            DEVICE_I2C_ADDRESS_OFFSET(
+            /***********************************************************/
+            /* Attempt write multiple times ONLY on NACK fails         */
+            /***********************************************************/
+            for (uint8_t retry = 0;
+                 retry <= EEPROM_MAX_NACK_RETRIES;
+                 retry++)
+            {
+                // Do the actual data write
+                err = deviceOp( DeviceFW::WRITE,
+                                i_target,
+                                newBuffer,
+                                loop_data_length,
+                                DEVICE_I2C_ADDRESS_OFFSET(
                                                i_i2cInfo.port,
                                                i_i2cInfo.engine,
                                                i_i2cInfo.devAddr,
@@ -453,26 +584,152 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                                                reinterpret_cast<uint8_t*>(
                                                &byteAddr)));
 
-            if( err )
-            {
-                TRACFCOMP(g_trac_eeprom,
-                    ERR_MRK"eepromWrite(): I2C Write failed on %d/%d/0x%X "
-                    "loop=%d, l_d_l=%d, offset=0x%X, aS=%d",
-                    i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr, i,
-                    loop_data_length, i_i2cInfo.offset, i_i2cInfo.addrSize);
 
+                if ( err == NULL )
+                {
+                    // Operation completed successfully
+                    // break from retry loop
+                    break;
+                }
+                else if ( err->reasonCode() != I2C::I2C_NACK_ONLY_FOUND )
+                {
+                    // Only retry on NACK failures: break from retry loop
+                    TRACFCOMP(g_trac_eeprom, ERR_MRK"eepromWrite(): I2C "
+                              "Write Non-NACK fail %d/%d/0x%X loop=%d, "
+                              "ldl=%d, offset=0x%X, aS=%d, retry=%d",
+                              i_i2cInfo.port, i_i2cInfo.engine,
+                              i_i2cInfo.devAddr, i, loop_data_length,
+                              i_i2cInfo.offset, i_i2cInfo.addrSize, retry);
+
+                    err->collectTrace(EEPROM_COMP_NAME);
+
+                    // break from retry loop
+                    break;
+                }
+                else // Handle NACK error
+                {
+                    TRACFCOMP(g_trac_eeprom, ERR_MRK"eepromWrite(): I2C "
+                              "Write NACK fail %d/%d/0x%X loop=%d, "
+                              "ldl=%d, offset=0x%X, aS=%d",
+                              i_i2cInfo.port, i_i2cInfo.engine,
+                              i_i2cInfo.devAddr, i, loop_data_length,
+                              i_i2cInfo.offset, i_i2cInfo.addrSize);
+
+                    // If op will be attempted again: save error and continue
+                    if ( retry < EEPROM_MAX_NACK_RETRIES )
+                    {
+                        // Only save original NACK error
+                        if ( err_NACK == NULL )
+                        {
+                            // Save original NACK error
+                            err_NACK = err;
+
+                            TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromWrite(): "
+                                       "Error rc=0x%X, eid=0x%X plid=0x%X, "
+                                       "tgt=0x%X, retry/MAX=%d/%d. Save error "
+                                       "and retry",
+                                       err_NACK->reasonCode(),
+                                       err_NACK->eid(),
+                                       err_NACK->plid(),
+                                       TARGETING::get_huid(i_target),
+                                       retry, EEPROM_MAX_NACK_RETRIES);
+
+                            err_NACK->collectTrace(EEPROM_COMP_NAME);
+                        }
+                        else
+                        {
+                            // Add data to original NACK error
+                            TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromWrite(): "
+                                       "Another NACK Error rc=0x%X, eid=0x%X "
+                                       "plid=0x%X, tgt=0x%X, retry/MAX=%d/%d. "
+                                       "Delete error and retry",
+                                       err->reasonCode(), err->eid(),
+                                       err->plid(),
+                                       TARGETING::get_huid(i_target),
+                                       retry, EEPROM_MAX_NACK_RETRIES);
+
+                            ERRORLOG::ErrlUserDetailsString(
+                                      "Another NACK ERROR found")
+                                      .addToLog(err_NACK);
+
+                            // Delete this new NACK error
+                            delete err;
+                            err = NULL;
+                        }
+
+                        // continue to retry
+                        continue;
+                    }
+                    else // no more retries: trace and break
+                    {
+                        TRACFCOMP( g_trac_eeprom, ERR_MRK"eepromWrite(): "
+                                   "Error rc=0x%X, tgt=0x%X. No More Retries "
+                                   "(retry/MAX=%d/%d). Returning Error",
+                                   err->reasonCode(),
+                                   TARGETING::get_huid(i_target),
+                                   retry, EEPROM_MAX_NACK_RETRIES);
+
+                        err->collectTrace(EEPROM_COMP_NAME);
+
+                        // break from retry loop
+                        break;
+                    }
+                }
+
+            } // end of retry loop
+            /***********************************************************/
+
+            // Handle saved NACK errors, if any
+            if (err_NACK)
+            {
+                if (err)
+                {
+                    // commit original NACK error with new err PLID
+                    err_NACK->plid(err->plid());
+                    TRACFCOMP(g_trac_eeprom, "eepromWrite(): Committing saved "
+                              "NACK err eid=0x%X with plid of returned err: "
+                              "0x%X",
+                              err_NACK->eid(), err_NACK->plid());
+
+                    ERRORLOG::ErrlUserDetailsTarget(i_target)
+                                                    .addToLog(err_NACK);
+
+                    errlCommit(err_NACK, EEPROM_COMP_ID);
+                }
+                else
+                {
+                    // Since we eventually succeeded, delete original NACK error
+                    TRACFCOMP(g_trac_eeprom, "eepromWrite(): Op successful, "
+                              "deleting saved NACK err eid=0x%X, plid=0x%X",
+                              err_NACK->eid(), err_NACK->plid());
+
+                    delete err_NACK;
+                    err_NACK = NULL;
+                }
+            }
+
+            if ( err )
+            {
                 // Can't assume that anything was written if
                 // there was an error, so no update to total_bytes_written
                 // for this loop
                 break;
             }
 
-            // Wait 5ms for EEPROM o write data to its internal memory
-            nanosleep(0,5 * NS_PER_MSEC);   // 5 msec
-
+            // Wait for EEPROM to write data to its internal memory
+            // i_i2cInfo.writeCycleTime value in milliseconds
+            nanosleep(0, i_i2cInfo.writeCycleTime * NS_PER_MSEC);
 
             // Update how much data was written
             total_bytes_written += loop_data_length;
+
+            // Update offset
+            i_i2cInfo.offset += loop_data_length;
+
+            TRACUCOMP(g_trac_eeprom,"eepromWrite() Loop %d End: "
+                      "l_d_l=%d, offset=0x%X, t_b_w=%d, io_buflen=%d",
+                      i, loop_data_length, i_i2cInfo.offset,
+                      total_bytes_written, io_buflen);
 
         } // end of write for-loop
 
@@ -510,6 +767,7 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                EXIT_MRK"eepromWrite()" );
 
     return err;
+
 } // end eepromWrite
 
 
@@ -710,6 +968,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         o_i2cInfo.i2cMasterPath = eepromData.i2cMasterPath;
         o_i2cInfo.writePageSize = eepromData.writePageSize;
         o_i2cInfo.devSize_KB    = eepromData.maxMemorySizeKB;
+        o_i2cInfo.writeCycleTime = eepromData.writeCycleTime;
 
         // Convert attribute info to eeprom_addr_size_t enum
         if ( eepromData.byteAddrOffset == 0x2 )
@@ -754,10 +1013,11 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() %d/%d/0x%X "
-              "wpw=0x%X, dsKb=0x%X, aS=%d (%d)",
+              "wpw=0x%X, dsKb=0x%X, aS=%d (%d), wct=%d",
               o_i2cInfo.port, o_i2cInfo.engine, o_i2cInfo.devAddr,
               o_i2cInfo.writePageSize, o_i2cInfo.devSize_KB,
-              o_i2cInfo.addrSize, eepromData.byteAddrOffset);
+              o_i2cInfo.addrSize, eepromData.byteAddrOffset,
+              o_i2cInfo.writeCycleTime);
 
 
     TRACDCOMP( g_trac_eeprom,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -68,7 +68,6 @@ class I2CTest: public CxxTest::TestSuite
          */
         void testI2CDirect ( void )
         {
-
             errlHndl_t err = NULL;
             int cmds = 0;
             int fails = 0;
@@ -115,58 +114,58 @@ class I2CTest: public CxxTest::TestSuite
                 // Read/Write SBE Primary:  Murano-0, port-0
                 // Safe to write to first 0x300: 0x0-0x2FF
 
-                { 0x00, 0x00, 0xAC, 0x0000ababcdcdefef,
-                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0000
+                { 0x00, 0x00, 0xAC, 0x0020ababcdcdefef,
+                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0020
 
-                { 0x00, 0x00, 0xAC, 0x0000000000000000,
+                { 0x00, 0x00, 0xAC, 0x0020000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
                 { 0x00, 0x00, 0xAc, 0xababcdcdefef0000,
                      6, true, TARGETING::TYPE_PROC  }, // Read data back
 
-                { 0x00, 0x00, 0xAC, 0x0003000000000000,
+                { 0x00, 0x00, 0xAC, 0x0023000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
                 { 0x00, 0x00, 0xAC, 0xcdefef0000000000,
                      3, true, TARGETING::TYPE_PROC  }, // Read data back
 
-                { 0x00, 0x00, 0xAC, 0x0005ee1200000000,
-                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0005
+                { 0x00, 0x00, 0xAC, 0x0025831200000000,
+                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0025
 
-                { 0x00, 0x00, 0xAC, 0x0005000000000000,
+                { 0x00, 0x00, 0xAC, 0x0024000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
-                { 0x00, 0x00, 0xAC, 0xee12000000000000,
-                     2, true, TARGETING::TYPE_PROC  }, // Read data back
+                { 0x00, 0x00, 0xAC, 0xef83120000000000,
+                     3, true, TARGETING::TYPE_PROC  }, // Read data back
 
 
 
                 // Read/Write SBE Backup:  Murano-0, port-0
                 // Safe to write to first 0x300: 0x0-0x2FF
 
-                { 0x00, 0x00, 0xAE, 0x0000ababcdcdefef,
-                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0000
+                { 0x00, 0x00, 0xAE, 0x0030ababcdcdefef,
+                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0030
 
-                { 0x00, 0x00, 0xAE, 0x0000000000000000,
+                { 0x00, 0x00, 0xAE, 0x0030000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
                 { 0x00, 0x00, 0xAE, 0xababcdcdefef0000,
                      6, true, TARGETING::TYPE_PROC  }, // Read data back
 
-                { 0x00, 0x00, 0xAE, 0x0003000000000000,
+                { 0x00, 0x00, 0xAE, 0x0033000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
                 { 0x00, 0x00, 0xAE, 0xcdefef0000000000,
                      3, true, TARGETING::TYPE_PROC  }, // Read data back
 
-                { 0x00, 0x00, 0xAE, 0x0005ee1200000000,
-                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0005
+                { 0x00, 0x00, 0xAE, 0x0035971200000000,
+                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0035
 
-                { 0x00, 0x00, 0xAE, 0x0005000000000000,
+                { 0x00, 0x00, 0xAE, 0x0034000000000000,
                      2, false, TARGETING::TYPE_PROC }, // Write addr for read
 
-                { 0x00, 0x00, 0xAE, 0xee12000000000000,
-                     2, true, TARGETING::TYPE_PROC  }, // Read data back
+                { 0x00, 0x00, 0xAE, 0xef97120000000000,
+                     3, true, TARGETING::TYPE_PROC  }, // Read data back
 
 
                 // MEMBUF TESTS
@@ -310,6 +309,13 @@ class I2CTest: public CxxTest::TestSuite
                         continue;
                     }
 
+                    // If a write op, wait 5ms for EEPROM to write data
+                    // to its internal memory
+                    if (testData[i].rnw == false)
+                    {
+                        nanosleep(0,5 * NS_PER_MSEC);   // 5 msec
+                    }
+
                     // compare data for the read, but ignore case where
                     //  data = I2C_TEST_IGNORE_DATA_COMPARE
                     if( ( testData[i].rnw ) &&
@@ -346,7 +352,6 @@ class I2CTest: public CxxTest::TestSuite
          */
         void testI2COffset ( void )
         {
-
             errlHndl_t err = NULL;
             int cmds = 0;
             int fails = 0;
@@ -492,7 +497,6 @@ class I2CTest: public CxxTest::TestSuite
                     // Before starting, clear original data buffer
                     original_data = 0x0ull;
 
-
                     for (uint8_t j = 1; j <= 5; j++)
                     {
 
@@ -533,6 +537,14 @@ class I2CTest: public CxxTest::TestSuite
                             delete err;
                             fails++;
                             continue;
+                        }
+
+
+                        // If a write op, wait 5ms for EEPROM to write data
+                        // to its internal memory
+                        if ( (j%2) == 0 )
+                        {
+                            nanosleep(0,5 * NS_PER_MSEC);   // 5 msec
                         }
 
                         // Handle loop-specific results

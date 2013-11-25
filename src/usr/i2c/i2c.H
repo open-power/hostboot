@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -53,13 +53,13 @@ namespace I2C
 /**
  * @brief I2C Clock setting values
  *
- * The clock divisors are found by using a 600Mhz local bus, using the
+ * The clock divisors are found by using a 500Mhz local bus, using the
  * equation that was given in the I2C Master Spec.
  *
  */
 #define I2C_MAX_BUS_SPEED           400
-#define I2C_CLOCK_DIVISOR_100KHZ    1499    // 0x5DB
-#define I2C_CLOCK_DIVISOR_400KHZ    374     // 0x176
+#define I2C_CLOCK_DIVISOR_100KHZ    1250    // 0x4E2
+#define I2C_CLOCK_DIVISOR_400KHZ    312     // 0x138
 
 /**
  * @brief I2C Clock delay polling values

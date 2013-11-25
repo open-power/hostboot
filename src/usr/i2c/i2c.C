@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -65,8 +65,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 // ----------------------------------------------
 // Defines
 // ----------------------------------------------
-#define I2C_COMMAND_ATTEMPTS 2      // 1 Retry on failure
-#define I2C_RETRY_DELAY 10000000    // Sleep for 10 ms before retrying
+#define I2C_RESET_DELAY_NS (5 * NS_PER_MSEC)  // Sleep for 5 ms after reset
 #define MAX_I2C_ENGINES 3           // Maximum of 3 engines per I2C Master
 #define P8_MASTER_ENGINES 2         // Number of Engines used in P8
 #define CENTAUR_MASTER_ENGINES 1    // Number of Engines in a Centaur
@@ -98,6 +97,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          va_list i_args )
 {
     errlHndl_t err = NULL;
+    errlHndl_t err_reset = NULL;
 
     mutex_t * engineLock = NULL;
     bool mutex_needs_unlock = false;
@@ -204,169 +204,180 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
         if( err )
         {
+            // Skip performing the actual I2C Operation
             break;
         }
 
 
-        for( int attempt = 0; attempt < I2C_COMMAND_ATTEMPTS; attempt++ )
+        /*******************************************************/
+        /*  Perform the I2C Operation                          */
+        /*******************************************************/
+
+        /***********************************************/
+        /* I2C Read with Offset                        */
+        /***********************************************/
+        if( i_opType        == DeviceFW::READ &&
+            l_offset_length != 0 )
         {
-            if( err )
+
+            // First WRITE offset to device without a stop
+            args.read_not_write  = false;
+            args.with_stop       = false;
+            args.skip_mode_setup = false;
+
+            err = i2cWrite( i_target,
+                            l_offset_buffer,
+                            l_offset_length,
+                            args );
+
+            if( err == NULL )
             {
-                // Catch and commit the log here if we failed on first attempt.
-                TRACFCOMP( g_trac_i2c,
-                           ERR_MRK"Error Encountered, Attempt %d out of %d",
-                           (attempt + 1),   // Add 1 since we started counting at 0
-                           I2C_COMMAND_ATTEMPTS );
+                // Now do the READ with a stop
+                args.read_not_write = true;
+                args.with_stop      = true;
 
-                errlCommit( err,
-                            I2C_COMP_ID );
-
-                // Reset the I2C Master
-                err = i2cReset( i_target,
-                                args );
-
-                if( err )
-                {
-                    break;
-                }
-
-                // Sleep before trying again.
-                nanosleep( 0, I2C_RETRY_DELAY );
-            }
-
-
-            if( i_opType        == DeviceFW::READ &&
-                l_offset_length != 0 )
-            {
-
-                // First WRITE offset to device without a stop
-                args.read_not_write  = false;
-                args.with_stop       = false;
-                args.skip_mode_setup = false;
-
-                err = i2cWrite( i_target,
-                                l_offset_buffer,
-                                l_offset_length,
-                                args );
-
-                if( err == NULL )
-                {
-                    // Now do the READ with a stop
-                    args.read_not_write = true;
-                    args.with_stop      = true;
-
-                    // Skip mode setup on this cmd -
-                    // already set with previous cmd
-                    args.skip_mode_setup = true;
-
-                    err = i2cRead( i_target,
-                                   io_buffer,
-                                   io_buflen,
-                                   args );
-                }
-            }
-
-            else if( i_opType        == DeviceFW::WRITE &&
-                     l_offset_length != 0 )
-            {
-
-                // Add the Offset Information to the start of the data and
-                // then send as a single write operation
-
-                size_t newBufLen = l_offset_length + io_buflen;
-                uint8_t * newBuffer = static_cast<uint8_t*>(malloc(newBufLen));
-
-                // Add the Offset to the buffer
-                memcpy( newBuffer, l_offset_buffer, l_offset_length);
-
-                // Now add the data the user wanted to write
-                memcpy( &newBuffer[l_offset_length], io_buffer, io_buflen);
-
-                // Write parms:
-                args.read_not_write  = false;
-                args.with_stop       = true;
-                args.skip_mode_setup = false;
-
-                err = i2cWrite( i_target,
-                                newBuffer,
-                                newBufLen,
-                                args );
-
-
-                free( newBuffer );
-
-            }
-
-            else if ( i_opType        == DeviceFW::READ &&
-                      l_offset_length == 0 )
-            {
-                // Do a direct READ
-                args.read_not_write  = true;
-                args.with_stop       = true;
-                args.skip_mode_setup = false;
+                // Skip mode setup on this cmd -
+                // already set with previous cmd
+                args.skip_mode_setup = true;
 
                 err = i2cRead( i_target,
                                io_buffer,
                                io_buflen,
-                               args);
-            }
-
-
-            else if( i_opType        == DeviceFW::WRITE &&
-                     l_offset_length == 0 )
-            {
-                // Do a direct WRITE with a stop
-                args.read_not_write  = false;
-                args.with_stop       = true;
-                args.skip_mode_setup = false;
-
-                err = i2cWrite( i_target,
-                                io_buffer,
-                                io_buflen,
-                                args);
-            }
-            else
-            {
-                TRACFCOMP( g_trac_i2c, ERR_MRK"i2cPerformOp() - "
-                           "Unsupported Op/Offset-Type Combination=%d/%d",
-                           i_opType, l_offset_length );
-                uint64_t userdata2 = l_offset_length;
-                userdata2 = (userdata2 << 16) | args.port;
-                userdata2 = (userdata2 << 16) | args.engine;
-                userdata2 = (userdata2 << 16) | args.devAddr;
-
-                /*@
-                 * @errortype
-                 * @reasoncode       I2C_INVALID_OP_TYPE
-                 * @severity         ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         I2C_PERFORM_OP
-                 * @userdata1        i_opType
-                 * @userdata2[0:15]  Offset Length
-                 * @userdata2[16:31] Master Port
-                 * @userdata2[32:47] Master Engine
-                 * @userdata2[48:63] Slave Device Address
-                 * @devdesc          Invalid Operation type.
-                 */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               I2C_PERFORM_OP,
-                                               I2C_INVALID_OP_TYPE,
-                                               i_opType,
-                                               userdata2 );
-
-                break;
-            }
-
-            // If no errors, break here
-            if( err == NULL )
-            {
-                break;
+                               args );
             }
         }
 
-        if( err )
+        /***********************************************/
+        /* I2C Write with Offset                       */
+        /***********************************************/
+        else if( i_opType        == DeviceFW::WRITE &&
+                 l_offset_length != 0 )
         {
+
+            // Add the Offset Information to the start of the data and
+            // then send as a single write operation
+
+            size_t newBufLen = l_offset_length + io_buflen;
+            uint8_t * newBuffer = static_cast<uint8_t*>(malloc(newBufLen));
+
+            // Add the Offset to the buffer
+            memcpy( newBuffer, l_offset_buffer, l_offset_length);
+
+            // Now add the data the user wanted to write
+            memcpy( &newBuffer[l_offset_length], io_buffer, io_buflen);
+
+            // Write parms:
+            args.read_not_write  = false;
+            args.with_stop       = true;
+            args.skip_mode_setup = false;
+
+            err = i2cWrite( i_target,
+                            newBuffer,
+                            newBufLen,
+                            args );
+
+
+            free( newBuffer );
+
+        }
+
+        /***********************************************/
+        /* I2C Read (no offset)                        */
+        /***********************************************/
+        else if ( i_opType        == DeviceFW::READ &&
+                  l_offset_length == 0 )
+        {
+            // Do a direct READ
+            args.read_not_write  = true;
+            args.with_stop       = true;
+            args.skip_mode_setup = false;
+
+            err = i2cRead( i_target,
+                           io_buffer,
+                           io_buflen,
+                           args);
+        }
+
+
+        /***********************************************/
+        /* I2C Write (no offset)                       */
+        /***********************************************/
+        else if( i_opType        == DeviceFW::WRITE &&
+                 l_offset_length == 0 )
+        {
+            // Do a direct WRITE with a stop
+            args.read_not_write  = false;
+            args.with_stop       = true;
+            args.skip_mode_setup = false;
+
+            err = i2cWrite( i_target,
+                            io_buffer,
+                            io_buflen,
+                            args);
+        }
+
+        /********************************************************/
+        /* Error - Unsupported I2C Op/Offset Type Combination   */
+        /********************************************************/
+        else
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cPerformOp() - "
+                       "Unsupported Op/Offset-Type Combination=%d/%d",
+                       i_opType, l_offset_length );
+            uint64_t userdata2 = l_offset_length;
+            userdata2 = (userdata2 << 16) | args.port;
+            userdata2 = (userdata2 << 16) | args.engine;
+            userdata2 = (userdata2 << 16) | args.devAddr;
+
+            /*@
+             * @errortype
+             * @reasoncode       I2C_INVALID_OP_TYPE
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         I2C_PERFORM_OP
+             * @userdata1        i_opType
+             * @userdata2[0:15]  Offset Length
+             * @userdata2[16:31] Master Port
+             * @userdata2[32:47] Master Engine
+             * @userdata2[48:63] Slave Device Address
+             * @devdesc          Invalid Operation type.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_PERFORM_OP,
+                                           I2C_INVALID_OP_TYPE,
+                                           i_opType,
+                                           userdata2 );
+
+            // No Operation performed, so can break and skip the section
+            // that handles operation errors
             break;
         }
+
+        // Handle Error from I2C Operation
+        if( err )
+        {
+            // Reset the I2C Master
+            err_reset = i2cReset( i_target,
+                                  args );
+
+            if( err_reset )
+            {
+                // 2 error logs, so commit the reset log here
+                TRACFCOMP( g_trac_i2c, ERR_MRK"i2cPerformOp() - "
+                           "Previous error (rc=0x%X, eid=0x%X) before "
+                           "i2cReset() failed.  Committing reset error "
+                           "(rc=0x%X, eid=0x%X) and returning original error",
+                           err->reasonCode(), err->eid(),
+                           err_reset->reasonCode(), err_reset->eid() );
+
+                errlCommit( err_reset, I2C_COMP_ID );
+            }
+
+            // Sleep to allow devices to recover from reset
+            nanosleep( 0, I2C_RESET_DELAY_NS );
+
+            break;
+        }
+
     } while( 0 );
 
     // Check if we need to unlock the mutex
@@ -895,6 +906,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
     bool errorFound = false;
+    bool nackFound  = false;
     uint64_t intRegVal = 0x0;
 
     TRACDCOMP( g_trac_i2c,
@@ -944,7 +956,8 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 
         if( 1 == i_statusVal.nack_received )
         {
-            errorFound = true;
+            // Rather than using 'errorFound', use specific nackFound
+            nackFound  = true;
             TRACFCOMP( g_trac_i2c,
                        ERR_MRK"I2C NACK Received! - status reg: %016llx",
                        i_statusVal.value );
@@ -983,7 +996,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         if( errorFound )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"i2cCheckForErrors() - Error(s) found after command complete!" );
+                       ERR_MRK"i2cCheckForErrors() - Error(s) found" );
 
             /*@
              * @errortype
@@ -1005,6 +1018,33 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 
             break;
         }
+
+        else if ( nackFound )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"i2cCheckForErrors() - NACK found (only error)" );
+
+            /*@
+             * @errortype
+             * @reasoncode     I2C_NACK_ONLY_FOUND
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       I2C_CHECK_FOR_ERRORS
+             * @userdata1      Status Register Value
+             * @userdata2      Interrupt Register Value
+             * @devdesc        Error was found in I2C status register.  Check
+             *                 userdata1 to determine what the error was.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_CHECK_FOR_ERRORS,
+                                           I2C_NACK_ONLY_FOUND,
+                                           i_statusVal.value,
+                                           intRegVal );
+
+            // @todo RTC:69113 - Add target and I2C traces to the errorlog.
+
+            break;
+        }
+
     } while( 0 );
 
     TRACDCOMP( g_trac_i2c,
@@ -1189,7 +1229,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
         TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
                   "mode[0x%lx]: 0x%016llx",
-                  masterAddrs[engine].mode, mode.value );
+                  masterAddrs[i_args.engine].mode, mode.value );
 
         err = deviceWrite( i_target,
                            &mode.value,
@@ -1207,7 +1247,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
         TRACUCOMP(g_trac_i2c,"i2cSendSlaveStop(): "
                   "cmd[0x%lx]: 0x%016llx",
-                  masterAddrs[engine].command, cmd.value );
+                  masterAddrs[i_args.engine].command, cmd.value );
 
         err = deviceWrite( i_target,
                            &cmd.value,
@@ -1269,7 +1309,7 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
 
         TRACUCOMP(g_trac_i2c,"i2cGetInterrupts(): "
                   "interrupt[0x%lx]: 0x%016llx",
-                  masterAddrs[engine].interrupt, intreg.value );
+                  masterAddrs[i_args.engine].interrupt, intreg.value );
 
         // Return the data read
         o_intRegValue = intreg.value;
@@ -1597,7 +1637,6 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
 
 
     } while( 0 );
-
 
     TRACUCOMP(g_trac_i2c,"i2cSetBusVariables(): e/p/dA=%d/%d/0x%x: "
               "mode=%d: b_sp=%d, b_r_d=0x%x, to_i=%d, to_c = %d",

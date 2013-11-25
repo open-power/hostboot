@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -65,6 +65,7 @@ typedef struct
     TARGETING::EntityPath i2cMasterPath;
     uint64_t writePageSize;  // in bytes
     uint64_t devSize_KB;     // in kilobytes
+    uint64_t writeCycleTime;  // in milliseconds
 } eeprom_addr_t;
 
 /**
