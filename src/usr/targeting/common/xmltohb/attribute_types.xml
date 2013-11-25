@@ -9734,6 +9734,40 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>PROC_SELECT_BOOT_SEEPROM_IMAGE</id>
+    <description>Enumeration indicating which SEEPROM image should be used to boot a processor</description>
+    <enumerator>
+        <name>FIRST</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>SECOND</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+  <id>PROC_SELECT_BOOT_SEEPROM_IMAGE</id>
+  <description>
+    Specifies which SEEPROM image should be used to boot a processor
+      FIRST  - the first image was selected
+      SECOND - the second image was selected
+  </description>
+  <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_SELECT_BOOT_SEEPROM_IMAGE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 <attribute>
     <id>ENABLED_THREADS</id>
     <description>
