@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -909,7 +909,7 @@ will also be removed. Need to confirm if this code is required anymore.
 
                 if (centaurHandle)
                 {
-                    int32_t l_rc = PRDF_RUNTIME_DECONFIG(centaurHandle);
+                    int32_t l_rc = PRDF_RUNTIME_DECONFIG(centaurHandle, o_errl);
                     if ( SUCCESS != l_rc )
                     {
                         PRDF_ERR( PRDF_FUNC"runtime deconfig failed 0x%08x",
@@ -920,7 +920,7 @@ will also be removed. Need to confirm if this code is required anymore.
             }
             else
             {
-                int32_t l_rc = PRDF_RUNTIME_DECONFIG( dumpTrgt );
+                int32_t l_rc = PRDF_RUNTIME_DECONFIG( dumpTrgt, o_errl );
                 if ( SUCCESS == l_rc )
                 {
                     // Call Dump for Proc Core CS

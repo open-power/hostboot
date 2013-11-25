@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -74,7 +74,7 @@
  */
 // FIXME:RTC: 65609 will address this issue.
 // need to implement in Hostboot
-#define PRDF_RUNTIME_DECONFIG( i_pTarget ) \
+#define PRDF_RUNTIME_DECONFIG( i_pTarget, i_errl ) \
   SUCCESS
 
 /**
