@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.68 2013/09/16 13:56:31 bellows Exp $
+// $Id: mss_draminit_training.C,v 1.69 2013/11/06 16:22:45 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.69   | jdsloat  |06-OCT-13| Removed Control Switch Attribute
 //  1.68   | bellows  |16-SEP-13| Hostboot compile update
 //  1.67   | kcook    |13-SEP-13| Updated define FAPI_LRDIMM token.
 //  1.66   | kcook    |27-AUG-13| Moved main LRDIMM sections into separate file. 
@@ -330,9 +331,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type); 
     if(rc) return rc;
 
-    uint8_t control_switch = 0;
-    rc = FAPI_ATTR_GET(ATTR_MSS_CONTROL_SWITCH, NULL, control_switch);
-    if(rc) return rc;
 
     uint8_t dram_gen = 0;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
@@ -402,15 +400,14 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc = fapiPutScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
     if(rc) return rc;
 
-    if ( ( control_switch && 0x01 )  )
+
+    rc = mss_set_bbm_regs (i_target);
+    if(rc)
     {
-        rc = mss_set_bbm_regs (i_target);
-        if(rc)
-        {
-	   FAPI_ERR( "Error Moving bad bit information to the Phy regs. Exiting.");
-	   return rc;
-        }
+   	FAPI_ERR( "Error Moving bad bit information to the Phy regs. Exiting.");
+   	return rc;
     }
+
 
     if ( ( cal_steps_8.isBitSet(0) ) ||
 	 ( (cal_steps_8.isBitClear(0)) && (cal_steps_8.isBitClear(1)) &&
@@ -765,14 +762,12 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		if(rc) return rc;
     }
 
-    if ( ( control_switch && 0x01 )  )
+
+    rc = mss_get_bbm_regs(i_target);
+    if(rc)
     {
-    	rc = mss_get_bbm_regs(i_target);
-    	if(rc)
-		{
-		FAPI_ERR( "Error Moving bad bit information from the Phy regs. Exiting.");
-		return rc;
-		}
+	FAPI_ERR( "Error Moving bad bit information from the Phy regs. Exiting.");
+	return rc;
     }
 
     if (complete_status == MSS_INIT_CAL_STALL)
