@@ -118,6 +118,14 @@ my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
 # Setting ALL_MCS_IN_INTERLEAVING_GROUP to zero. Need to replace with:
 # $reqPol->{'all_mcs_in_interleaving_group"}
 
+#No mirroring supported yet so the policy is just based on multi-node or not
+my $placement = 0x0; #NORMAL
+if ($sysname eq "brazos")
+{
+    $placement = 0x3; #DRAWER
+}
+
+
 push @systemAttr,
 [
     "FREQ_PROC_REFCLOCK", $reqPol->{'processor-refclock-frequency'}->{content},
@@ -174,6 +182,7 @@ push @systemAttr,
     "PROC_R_LOADLINE_VCS", $reqPol->{'proc_r_loadline_vcs'},
     "PROC_R_DISTLOSS_VCS", $reqPol->{'proc_r_distloss_vcs'},
     "PROC_VRM_VOFFSET_VCS", $reqPol->{'proc_vrm_voffset_vcs'},
+    "MEM_MIRROR_PLACEMENT_POLICY", $placement,
 ];
 
 #------------------------------------------------------------------------------

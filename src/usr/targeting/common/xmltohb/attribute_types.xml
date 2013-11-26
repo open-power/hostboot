@@ -11397,6 +11397,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         NORMAL  = non-mirrored start: 0, mirrored start: 512TB
         FLIPPED = mirrored start: 0, non-mirrored start: 512TB
         SELECTIVE = non-mirrored/mirrored start (interleaved): 0
+        DRAWER = non-mirrored start: 1TB*drawer, mirrored start: 512TB+(1TB*drawer/2)
     </description>
     <simpleType>
       <uint8_t>

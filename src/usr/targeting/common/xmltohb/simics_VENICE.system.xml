@@ -227,6 +227,10 @@
         <id>PROC_VRM_VOFFSET_VCS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>MEM_MIRROR_PLACEMENT_POLICY</id>
+        <default>0</default><!-- NORMAL -->
+    </attribute>
     <!-- End System Attributes from MRW -->
     <attribute>
         <id>ISTEP_MODE</id>

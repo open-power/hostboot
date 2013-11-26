@@ -324,7 +324,7 @@ errlHndl_t call_mss_eff_grouping()
     return l_err;
 }
 
-errlHndl_t call_opt_memmap()
+errlHndl_t call_opt_memmap( bool i_initBase )
 {
     errlHndl_t l_err = NULL;
 
@@ -348,8 +348,7 @@ errlHndl_t call_opt_memmap()
         l_fapi_procs.push_back(l_fapi_target);
     }
 
-    bool l_initProcMemBaseAttr = false;
-    FAPI_INVOKE_HWP(l_err, opt_memmap, l_fapi_procs, l_initProcMemBaseAttr);
+    FAPI_INVOKE_HWP(l_err, opt_memmap, l_fapi_procs, i_initBase);
 
     if ( l_err )
     {
@@ -436,30 +435,24 @@ void*    call_mss_eff_config( void *io_pArgs )
 
     if (l_StepError.isNull())
     {
-        TARGETING::TargetHandleList l_procs;
-        getAllChips(l_procs, TYPE_PROC);
-
-        for (TARGETING::TargetHandleList::const_iterator
-           l_iter = l_procs.begin(); l_iter != l_procs.end(); ++l_iter)
-        {
-            TARGETING::Target*  l_target = *l_iter;
-
-            uint64_t l_base = 0;
-            l_target->setAttr<ATTR_MEM_BASE>( l_base  );
-
-            l_base = 0x0002000000000000UL; // 512TB
-            l_target->setAttr<ATTR_MIRROR_BASE>( l_base );
-        }
-
-        l_err = call_mss_eff_grouping();
+        // Flush out BASE attributes to starting values
+        l_err = call_opt_memmap(true);
 
         if (!l_err)
         {
-            l_err = call_opt_memmap();
+            // Stack the memory on each chip
+            l_err = call_mss_eff_grouping();
 
             if (!l_err)
             {
-                l_err = call_mss_eff_grouping();
+                // Move the BASES around to the real final values
+                l_err = call_opt_memmap(false);
+
+                if (!l_err)
+                {
+                    // Stack the memory again based on system-wide positions
+                    l_err = call_mss_eff_grouping();
+                }
             }
         }
 

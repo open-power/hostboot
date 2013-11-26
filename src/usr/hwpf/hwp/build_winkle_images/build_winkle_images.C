@@ -361,7 +361,6 @@ void*    call_host_build_winkle( void    *io_pArgs )
     uint32_t    l_poreSize      =   0;
     void        *l_pRealMemBase = NULL;
     void* l_pVirtMemBase        = NULL;
-    uint64_t l_memBase   = VMM_HOMER_REGION_START_ADDR;
 
     ISTEP_ERROR::IStepError     l_StepError;
 
@@ -376,13 +375,21 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
 
     do  {
+        // Get the node-offset for our instance by looking at the HRMOR
+        uint64_t l_memBase = cpu_spr_value(CPU_SPR_HRMOR);
+        // mask off the secureboot offset
+        l_memBase = 0xFFFFF00000000000 & l_memBase;
+
+        // Now offset up to our hardcoded region
+        l_memBase += VMM_HOMER_REGION_START_ADDR;
+
         //  Get a chunk of real memory big enough to store all the possible
         //  SLW images.
 
         assert(VMM_HOMER_REGION_SIZE <= THIRTYTWO_GB,
                "host_build_winkle: Unsupported HOMER Region size");
 
-        //If running Sapphire need to place this at the top of memory
+        //If running Sapphire need to place this at the top of memory instead
         if(is_sapphire_load())
         {
             l_memBase = get_top_mem_addr();
