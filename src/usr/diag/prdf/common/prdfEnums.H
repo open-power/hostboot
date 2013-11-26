@@ -103,7 +103,6 @@ enum MFG_THRES_SYNC_MSG_TYPE
     {
         typedef uint32_t hwsvDiagUpdate;
         typedef uint32_t hwsvTermEnum;
-        typedef uint32_t hwsvGardEnum;
         typedef uint32_t hwsvDeconfigSchedule;
 
         enum
@@ -114,10 +113,6 @@ enum MFG_THRES_SYNC_MSG_TYPE
             // hwsvDiagUpdate
             HWSV_DIAG_NOT_NEEDED = 0,
             HWSV_DIAG_NEEDED,
-
-            // hwsvGardEnum
-            HWSV_NO_GARD = 0,
-            HWSV_DECONFIG_GARD,
 
             //hwsvDeconfigSchedule
             HWSV_DECONFIG_IMMEDIATE = 0,

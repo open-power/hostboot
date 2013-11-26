@@ -226,8 +226,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     sdc = i_sdc;
 
     GardAction::ErrorType prdGardErrType;
-    // TODO: RTC - 89322: Consolidate gardSate and prdGardErrType values.
-    HWSV::hwsvGardEnum gardState;  // defined in src/hwsv/server/hwsvTypes.H
     HWAS::GARD_ErrorType gardErrType = HWAS::GARD_NULL;
     HWAS::DeconfigEnum deconfigState = HWAS::NO_DECONFIG;
 
@@ -398,8 +396,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Set Gard Error Type and state
     //**************************************************************
 
-    gardState = HWSV::HWSV_DECONFIG_GARD;
-
     // If gardErrType was determined during UE/SUE processing for Check Stop,
     // use that and not determine gardErrType from the sdc values.
     if (gardErrType != HWAS::GARD_Fatal)
@@ -408,7 +404,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         switch (prdGardErrType)
         {
             case GardAction::NoGard:
-                gardState =  HWSV::HWSV_NO_GARD;
                 gardErrType = HWAS::GARD_NULL;
                 break;
             case GardAction::Predictive:
@@ -424,16 +419,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 }
                 else
                 {
-                    gardState =  HWSV::HWSV_NO_GARD;
                     gardErrType = HWAS::GARD_NULL;
                 }
                 break;
             case GardAction::DeconfigNoGard:
-                gardState =  HWSV::HWSV_NO_GARD;
                 gardErrType = HWAS::GARD_NULL;
                 break;
             default:
-                gardState =  HWSV::HWSV_NO_GARD;
                 gardErrType = HWAS::GARD_NULL;
                 PRDF_DTRAC( PRDF_FUNC"Unknown prdGardErrType" );
                 break;
@@ -445,7 +437,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // If NoGard was specified in this switched sdc, then keep the NoGard
         if ( sdc.QueryGard() == GardAction::NoGard )
         {
-            gardState = HWSV::HWSV_NO_GARD;
             gardErrType = HWAS::GARD_NULL;
             prdGardErrType = GardAction::NoGard;
         }
@@ -457,7 +448,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     if (sdc.IsThermalEvent() && (MACHINE_CHECK != i_attnType) )
     {  //Force No Gard
-        gardState = HWSV::HWSV_NO_GARD;
         gardErrType = HWAS::GARD_NULL;
     }
 
@@ -551,8 +541,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     // Deferred Deconfig should be used throughout all of Hostboot (both
     // checkForIplAttns() and MDIA).
-    if ( (HWSV::HWSV_NO_GARD != gardState ||
-          GardAction::DeconfigNoGard == prdGardErrType ) )
+    if ( (HWAS::GARD_NULL != gardErrType) ||
+         (GardAction::DeconfigNoGard == prdGardErrType) )
     {
         deferDeconfig = true;
         deconfigState = HWAS::DECONFIG;
@@ -688,7 +678,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     TargetHandle_t dumpTrgt = NULL;
 
     initPfaData( sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
-                 prdGardErrType, gardState, pfaData, dumpTrgt );
+                 prdGardErrType, pfaData, dumpTrgt );
 
     HUID dumpId       = pfaData.msDumpInfo.id;
     TYPE dumpTrgtType = getTargetType( dumpTrgt );
@@ -1029,7 +1019,7 @@ will also be removed. Need to confirm if this code is required anymore.
 void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
                                   uint32_t i_attnType, bool i_deferDeconfig,
                                   uint32_t i_errlAct, uint32_t i_errlSev,
-                                  uint32_t i_prdGardType, uint32_t i_gardState,
+                                  uint32_t i_prdGardType,
                                   PfaData & o_pfa, TargetHandle_t & o_dumpTrgt )
 {
     // Dump info
@@ -1075,7 +1065,6 @@ void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
     // Misc
     o_pfa.serviceActionCounter = iv_serviceActionCounter;
     o_pfa.prdGardErrType       = i_prdGardType;
-    o_pfa.hwasGardState        = i_gardState;
 
     // Attention types
     o_pfa.priAttnType = i_attnType;

@@ -192,7 +192,7 @@ class ErrDataService
     void initPfaData( ServiceDataCollector & i_sdc,
                       uint32_t i_attnType, bool i_deferDeconfig,
                       uint32_t i_errlAct, uint32_t i_errlSev,
-                      uint32_t i_prdGardType, uint32_t i_gardState,
+                      uint32_t i_prdGardType,
                       PfaData & o_pfa, TARGETING::TargetHandle_t & o_dumpTrgt );
 
     /**

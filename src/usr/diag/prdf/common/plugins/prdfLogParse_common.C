@@ -457,7 +457,6 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
         tmpStr = GardAction::ToString( pfa.prdGardErrType );
         snprintf( tmp, 50, "%s (0x%X) ", tmpStr, pfa.prdGardErrType );
         i_parser.PrintString( "PRD GARD Error Type", tmp );
-        i_parser.PrintNumber( "HWAS GARD State", "0x%02X", pfa.hwasGardState );
 
         // MRU callouts
         if ( 0 < pfa.mruListCount )
