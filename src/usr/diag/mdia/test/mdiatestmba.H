@@ -65,9 +65,9 @@ class MdiaMbaTest : public CxxTest::TestSuite
                             "unexpectedly");
                 }
 
-                if(mode != INIT_ONLY)
+                if(mode != ONE_PATTERN)
                 {
-                    TS_FAIL("mode != INIT_ONLY");
+                    TS_FAIL("mode != ONE_PATTERN");
                 }
             }
 
@@ -100,9 +100,9 @@ class MdiaMbaTest : public CxxTest::TestSuite
                             "failed unexpectedly");
                 }
 
-                if(mode != INIT_ONLY)
+                if(mode != ONE_PATTERN)
                 {
-                    TS_FAIL("mode != INIT_ONLY");
+                    TS_FAIL("mode != ONE_PATTERN");
                 }
             }
 
@@ -110,6 +110,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
 
             expected.push_back(RESTORE_DRAM_REPAIRS);
             expected.push_back(START_PATTERN_0);
+            expected.push_back(START_SCRUB);
             expected.push_back(CLEAR_HW_CHANGED_STATE);
 
             err = getMbaWorkFlow(mode, wf, globals);

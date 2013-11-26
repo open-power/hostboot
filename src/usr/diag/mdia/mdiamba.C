@@ -41,7 +41,7 @@ errlHndl_t getMbaDiagnosticMode(
         TargetHandle_t i_mba,
         DiagMode & o_mode)
 {
-    o_mode = INIT_ONLY;
+    o_mode = ONE_PATTERN;
 
     do
     {
@@ -72,13 +72,12 @@ errlHndl_t getMbaDiagnosticMode(
         }
 
         // Only need to check hw changed state attributes
-        // when not already set to standard or exhaustive
-        if(!((FOUR_PATTERNS == o_mode) ||
-             (NINE_PATTERNS == o_mode)))
+        // when not already set to exhaustive
+        if( NINE_PATTERNS != o_mode )
         {
             if(isHWStateChanged(i_mba))
             {
-                o_mode = FOUR_PATTERNS;
+                o_mode = NINE_PATTERNS;
             }
         }
 
@@ -139,11 +138,6 @@ errlHndl_t getMbaWorkFlow(
         case SCRUB_ONLY:
 
             o_wf.push_back(START_SCRUB);
-            break;
-
-        case INIT_ONLY:
-
-            o_wf.push_back(START_PATTERN_0);
             break;
 
         default:
