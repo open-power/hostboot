@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_startclocks.C,v 1.11 2013/07/08 13:38:27 mfred Exp $
+// $Id: cen_mem_startclocks.C,v 1.12 2013/11/15 16:30:02 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_startclocks.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -277,7 +277,9 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
         if ( scom_data.getDoubleWord(0) != MEM_CLK_STATUS_REG_EXP_DATA )
         {
             FAPI_ERR("Unexpected clock status! Clk Status Reg 0x03030008 = %16llX, but %16llX was expected.",scom_data.getDoubleWord(0),MEM_CLK_STATUS_REG_EXP_DATA);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_MEM_CLK_STATUS);
+            uint64_t MEM_CLK_STATUS_REG = scom_data.getDoubleWord(0);
+            const fapi::Target & MEMBUF_CHIP_IN_ERROR = i_target;
+            FAPI_SET_HWP_ERROR(rc, RC_CEN_MEM_STARTCLOCKS_UNEXPECTED_CLOCK_STATUS);
             break;
         }
 
@@ -393,6 +395,9 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_startclocks.C,v $
+Revision 1.12  2013/11/15 16:30:02  mfred
+Changes made by Mike Jones for gerrit review, mostly for improved error handling.
+
 Revision 1.11  2013/07/08 13:38:27  mfred
 Change one hwp_error usage from RC_MSS_UNEXPECTED_CLOCK_STATUS to RC_MSS_UNEXPECTED_MEM_CLK_STATUS.
 

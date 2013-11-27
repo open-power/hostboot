@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/dram_training/mss_scominit/memory_mss_scominit.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/dram_training/mem_startclocks/cen_mem_startclocks_errors.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,36 +20,34 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: memory_mss_scominit.xml,v 1.2 2013/11/18 22:32:03 mwuu Exp $ -->
-<!-- For file ../../ipl/fapi/mss_scominit.C -->
-<!-- // *! OWNER NAME  : Menlo Wuu         Email: menlowuu@us.ibm.com -->
-<!-- // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com -->
-
+<!-- $Id: cen_mem_startclocks_errors.xml,v 1.2 2013/11/21 15:47:35 mjjones Exp $ -->
+<!-- Error definitions for cen_mem_startclocks -->
 <hwpErrors>
-  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_MSS_SCOMINIT_NUM_MBA_ERROR</rc>
+    <rc>RC_CEN_MEM_STARTCLOCKS_UNEXPECTED_CLOCK_STATUS</rc>
     <description>
-        mss_scominit did not see 2 present membuf child MBAs returned by
-        fapiGetChildChiplets
+        cen_mem_startclocks got unexpected clock status in the
+          MEM_CLK_STATUS register.
+        Membuf chip is most likely bad, but could be reference clock.
     </description>
-    <ffdc>NUM_MBAS</ffdc>
+    <ffdc>MEM_CLK_STATUS_REG</ffdc>
+    <ffdc>MEM_CLK_STATUS_REG_EXP_DATA</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+     <target>MEMBUF_CHIP_IN_ERROR</target>
+     <priority>HIGH</priority>
     </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_MSS_SCOMINIT_NUM_L4_ERROR</rc>
-    <description>
-        mss_scominit did not see 1 present membuf child L4 returned by
-        fapiGetChildChiplets
-    </description>
-    <ffdc>NUM_L4S</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <hw>
+        <hwid>MEM_REF_CLOCK</hwid>
+        <refTarget>MEMBUF_CHIP_IN_ERROR</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
     </callout>
+    <deconfigure>
+      <target>MEMBUF_CHIP_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
 </hwpErrors>

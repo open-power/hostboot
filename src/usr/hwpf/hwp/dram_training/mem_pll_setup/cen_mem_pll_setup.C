@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_setup.C,v 1.24 2013/03/04 17:56:26 mfred Exp $
+// $Id: cen_mem_pll_setup.C,v 1.25 2013/11/15 16:30:00 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_setup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -44,18 +44,13 @@
 #include <cen_scom_addresses.H>
 #include <cen_mem_pll_setup.H>
 
-
-
 //  Constants
 const uint64_t  DELAY_100NS             = 100;     // General purpose 100 ns delay for HW mode   (2000 sim cycles if simclk - 20ghz)
 const uint64_t  DELAY_2000SIMCYCLES     = 2000;    // General purpose 2000 sim cycle delay for sim mode     (100 ns if simclk = 20Ghz)
 const uint16_t  POLL_COUNT_MAX          = 50;      // Number of times to poll for PLL lock before timing out.
 
-
 // CFAM FSI STATUS register bit/field definitions
 const uint8_t FSI_STATUS_MEM_PLL_LOCK_BIT = 25;
-
-
 
 extern "C" {
 
@@ -64,18 +59,15 @@ using namespace fapi;
 fapi::ReturnCode cen_mem_pll_setup(const fapi::Target & i_target)
 {
     // Target is centaur
-
     fapi::ReturnCode rc;
     ecmdDataBufferBase cfam_data(32);
 
     uint32_t  poll_count           = 0;
     uint32_t  done_polling         = 0;
 
-
     FAPI_INF("********* cen_mem_pll_setup start *********");
     do
     {
-
         //---------------------------------------
         // Poll for PLL lock bit
         //---------------------------------------
@@ -105,19 +97,18 @@ fapi::ReturnCode cen_mem_pll_setup(const fapi::Target & i_target)
         } while ((done_polling == 0) && (poll_count < POLL_COUNT_MAX)); // Poll until PLL is locked or max count is reached.
         if (rc) break;    // Go to end of proc if error found inside polling loop.
 
-
         if ( (poll_count == POLL_COUNT_MAX) && ( done_polling != 1 ) )
         {
             FAPI_ERR("Centaur MEM PLL failed to lock!  Polling timed out after %d loops.",POLL_COUNT_MAX);
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLL_LOCK_TIMEOUT);
+            ecmdDataBufferBase & CFAM_FSI_STATUS = cfam_data;
+            const fapi::Target & MEMBUF_CHIP_IN_ERROR = i_target;
+            FAPI_SET_HWP_ERROR(rc, RC_CEN_MEM_PLL_SETUP_PLL_LOCK_TIMEOUT);
             break;
         }
         else
         {
             FAPI_INF("Centaur MEM PLL is now locked.");
         }
-
-
 
     } while(0);
 
@@ -134,6 +125,9 @@ fapi::ReturnCode cen_mem_pll_setup(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_setup.C,v $
+Revision 1.25  2013/11/15 16:30:00  mfred
+Changes made by Mike Jones for gerrit review, mostly for improved error handling.
+
 Revision 1.24  2013/03/04 17:56:26  mfred
 Add some header comments for BACKUP and SCREEN.
 

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_initf.H,v 1.2 2013/01/29 21:50:56 mfred Exp $
+// $Id: cen_mem_pll_initf.H,v 1.3 2013/11/15 16:29:59 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_initf.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -43,9 +43,10 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //  1.0    | mfred    | 08/09/12| Initial creation
+//  1.3    | mjjones  | 11/12/13| Deleted internal func prototype
 
-#ifndef CEN_MEM_PLL_INITFHWPB_H_
-#define CEN_MEM_PLL_INITFHWPB_H_
+#ifndef CEN_MEM_PLL_INITF_H_
+#define CEN_MEM_PLL_INITF_H_
 
 #include <fapi.H>
 
@@ -53,34 +54,18 @@ typedef fapi::ReturnCode (*cen_mem_pll_initf_FP_t)(const fapi::Target& i_target)
 
 extern "C"
 {
-    // Target is centaur
-
 
 /**
- * @brief cen_load_pll_ring_from_attribute procedure.  The purpose of this procedure is to scan the right values in to the Centaur PLL scan chain.
+ * @brief cen_mem_pll_initf procedure.
+ *
+ * The purpose of this procedure is to scan the right values in to the Centaur
+ * MEM PLL controller..
  *
  * @param[in]  i_target  Reference to centaur target
  * @return ReturnCode
  */
-    fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target& i_target,
-                                                   ecmdDataBufferBase i_scan_ring_data
-                                                   );
-
-    // Target is centaur
-
-
-/**
- * @brief cen_mem_pll_initf procedure.  The purpose of this procedure is to scan the right values in to the Centaur MEM PLL controller..
- *
- * @param[in]  i_target  Reference to centaur target
- * @return ReturnCode
- */
-    fapi::ReturnCode cen_mem_pll_initf(const fapi::Target& i_target);
-    // Target is centaur
-
-
-
+fapi::ReturnCode cen_mem_pll_initf(const fapi::Target& i_target);
 
 } // extern "C"
 
-#endif // CEN_MEM_PLL_INITFHWPB_H_
+#endif // CEN_MEM_PLL_INITF_H_

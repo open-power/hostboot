@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_scominit.C,v 1.17 2013/07/02 21:05:23 mwuu Exp $
+// $Id: mss_scominit.C,v 1.18 2013/11/18 21:49:25 mwuu Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -41,6 +41,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//	 1.18  | menlowuu |14-NOV-13| Added Mike Jones changes for callouts
 //	 1.17  | menlowuu |02-JUL-13| Fixed vector insert for L4 targets
 //	 1.16  | menlowuu |02-JUL-13| Added L4 targets for MBS initfile
 //	 1.15  | menlowuu |11-NOV-12| Removed include of dimmBadDqBitmapFuncs.H>
@@ -121,10 +122,10 @@ ReturnCode mss_scominit(const Target & i_target) {
 	}
 	else if (vector_targets.size() != 2)
 	{
-		FAPI_ERR("fapiGetChildChiplets returned present MBAs != 2");
-		FAPI_SET_HWP_ERROR(rc, RC_MSS_NUM_MBA_ERROR);
-		FAPI_ERR("Present MBAs = %i, generating RC_MSS_NUM_MBA_ERROR = 0x%x",
-				vector_targets.size(), static_cast<uint32_t>(rc));
+		FAPI_ERR("fapiGetChildChiplets returned %d present MBAs, expected 2",
+                 vector_targets.size());
+        uint32_t NUM_MBAS = vector_targets.size();
+		FAPI_SET_HWP_ERROR(rc, RC_MSS_SCOMINIT_NUM_MBA_ERROR);
 		return (rc);
 	}
 	else
@@ -146,8 +147,10 @@ ReturnCode mss_scominit(const Target & i_target) {
 		
 		if (vector_l4_targets.size() != 1)
 		{
-			FAPI_ERR("Error target does not have L4!");
-			FAPI_ERR("RC = 0x%x", static_cast<uint32_t>(rc));
+			FAPI_ERR("fapiGetChildChiplets returned %d present L4s, expected 1",
+                     vector_l4_targets.size());
+            uint32_t NUM_L4S = vector_l4_targets.size();
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_SCOMINIT_NUM_L4_ERROR);
 			return (rc);
 		}
 

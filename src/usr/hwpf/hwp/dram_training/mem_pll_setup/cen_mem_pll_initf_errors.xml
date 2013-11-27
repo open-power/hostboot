@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/dram_training/mss_scominit/memory_mss_scominit.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/dram_training/mem_pll_setup/cen_mem_pll_initf_errors.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,20 +20,17 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: memory_mss_scominit.xml,v 1.2 2013/11/18 22:32:03 mwuu Exp $ -->
-<!-- For file ../../ipl/fapi/mss_scominit.C -->
-<!-- // *! OWNER NAME  : Menlo Wuu         Email: menlowuu@us.ibm.com -->
-<!-- // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com -->
-
+<!-- $Id: cen_mem_pll_initf_errors.xml,v 1.1 2013/11/15 16:30:43 mfred Exp $ -->
+<!-- Error definitions for cen_mem_pll_initf -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_MSS_SCOMINIT_NUM_MBA_ERROR</rc>
+    <rc>RC_CEN_MEM_PLL_INITF_UNSUPPORTED_MSS_FREQ</rc>
     <description>
-        mss_scominit did not see 2 present membuf child MBAs returned by
-        fapiGetChildChiplets
+        cen_mem_pll_initf found unsupported memory channel frequency in
+        ATTR_MSS_FREQ attribute.
     </description>
-    <ffdc>NUM_MBAS</ffdc>
+    <ffdc>MSS_FREQ</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -41,12 +38,12 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_MSS_SCOMINIT_NUM_L4_ERROR</rc>
+    <rc>RC_CEN_MEM_PLL_INITF_UNSUPPORTED_NEST_FREQ</rc>
     <description>
-        mss_scominit did not see 1 present membuf child L4 returned by
-        fapiGetChildChiplets
+        cen_mem_pll_initf found unsupported nest frequency in
+        ATTR_FREQ_PB attribute.
     </description>
-    <ffdc>NUM_L4S</ffdc>
+    <ffdc>NEST_FREQ</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_initf.C,v 1.8 2013/10/02 16:09:38 mfred Exp $
+// $Id: cen_mem_pll_initf.C,v 1.9 2013/11/15 16:29:56 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -90,9 +90,7 @@ const uint64_t CLK_REGION_FOR_SETPULSE = 0x0010040000000000ull;
 // Pervasive LFIR Register field/bit definitions
 const uint8_t PERV_LFIR_SCAN_COLLISION_BIT = 3;
 
-const bool     i_mask_scan_collision    = true;
-const uint32_t i_chiplet_base_scom_addr = TP_CHIPLET_0x01000000;
-
+const bool MASK_SCAN_COLLISION  = true;
 
 extern "C" {
 
@@ -107,7 +105,6 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
                                                ecmdDataBufferBase i_scan_ring_data
                                                )
 {
-
     // Target is centaur
 
     fapi::ReturnCode    rc;
@@ -122,7 +119,7 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
         //  Mask Pervasive LFIR
         //------------------------------------------
 
-        if (i_mask_scan_collision)
+        if (MASK_SCAN_COLLISION)
         {
             FAPI_DBG("Masking Pervasive LFIR scan collision bit ...");
             rc_ecmd |= scom_data.setBit(PERV_LFIR_SCAN_COLLISION_BIT);
@@ -132,7 +129,7 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
                 rc.setEcmdError(rc_ecmd);
                 break;
             }
-            rc = fapiPutScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_MASK_OR_0x0004000F, scom_data);
+            rc = fapiPutScom(i_target, TP_PERV_LFIR_MASK_OR_0x0104000F, scom_data);
             if (!rc.ok())
             {
                 FAPI_ERR("Error writing Pervasive LFIR Mask OR Register.");
@@ -207,8 +204,6 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
             break;
         }
 
-
-
         //------------------------------------------------
         //  Scan new ring data into tp_pll_bndy scan ring.
         //------------------------------------------------
@@ -219,7 +214,6 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
             break;
         }
         FAPI_DBG("Loading of the scan ring data for ring tp_pll_bndy is done.\n");
-
 
         //-------------------------------------------
         //  Set the OPCG back to a good state
@@ -256,12 +250,10 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
             break;
         }
 
-
         //-------------------------------------------
         //  Clear & Unmask Pervasive LFIR
         //------------------------------------------
-
-        if (i_mask_scan_collision)
+        if (MASK_SCAN_COLLISION)
         {
             FAPI_DBG("Clearing Pervasive LFIR scan collision bit ...");
             rc_ecmd |= scom_data.flushTo1();
@@ -272,7 +264,7 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
                 rc.setEcmdError(rc_ecmd);
                 break;
             }
-            rc = fapiPutScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_AND_0x0004000B, scom_data);
+            rc = fapiPutScom(i_target, TP_PERV_LFIR_AND_0x0104000B, scom_data);
             if (!rc.ok())
             {
                 FAPI_ERR("Error writing Pervasive LFIR AND Register.");
@@ -280,7 +272,7 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
             }
 
             FAPI_DBG("Unmasking Pervasive LFIR scan collision bit ...");
-            rc = fapiPutScom(i_target, i_chiplet_base_scom_addr | GENERIC_PERV_LFIR_MASK_AND_0x0004000E, scom_data);
+            rc = fapiPutScom(i_target, TP_PERV_LFIR_MASK_AND_0x0104000E, scom_data);
             if (!rc.ok())
             {
                 FAPI_ERR("Error writing Pervasive LFIR Mask And Register.");
@@ -294,18 +286,12 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
     return rc;
 }
 
-
-
-
-
-
 //------------------------------------------------------------------------------
 // cen_mem_pll_initf
 //------------------------------------------------------------------------------
 fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 {
     // Target is centaur
-
     fapi::ReturnCode    rc;
     uint32_t            rc_ecmd         = 0;
     uint8_t             is_simulation   = 0;
@@ -315,13 +301,10 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
     uint8_t             attrRingData[80]={0};   // Set to 80 bytes to match length in XML file, not actual scan ring length.
     ecmdDataBufferBase  ring_data;
 
-
     FAPI_INF("********* cen_mem_pll_initf start *********");
     do
     {
-
         FAPI_DBG("Setting up the Centaur MEM PLL.");
-
 
         //------------------------------------------
         //  Read attributes for setting the PLL data
@@ -329,12 +312,12 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 
         // The code that loads the PLL scan ring data should choose the correct data to load based on
         // the DDR frequency and voltage settings and a lab override value.
-        // The supported frequencies are 800, 1066, 1333, 1600, 1866, and 2133 MHz  (These are the DDR frequencies and the PLL output B frequencies.)
+        // The supported frequencies are 800, 1066, 1333, 1600, 1866, and 2133 MHz
+        // (These are the DDR frequencies and the PLL output B frequencies.)
         // The DDR frequency can be determined from attribute ATTR_MSS_FREQ  (in MHz)
         // The DDR voltage can be determined from attribute ATTR_MSS_VOLT  (in millivolts)
         // Get another attribute for selecting the "override" ring.    Use CQ to request an attribute.
         // (The selection of rings should include an "override ring that can be used in the lab")
-
 
         // Read the attributes
         rc = FAPI_ATTR_GET( ATTR_IS_SIMULATION, NULL, is_simulation);
@@ -361,7 +344,6 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
         FAPI_DBG("DDR frequency is set to : %d.", mss_freq);
         FAPI_DBG("NEST frequency is set to : %d.", nest_freq);
 
-
         // Read in the PLL Ring LENGTH based on the frequency attributes.
         if ( is_simulation )
         {
@@ -370,31 +352,53 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
         else if ( nest_freq == 2000 )
         {
             switch (mss_freq) {
-                case 1066 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH, &i_target, ring_length);   break;
-                case 1333 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH, &i_target, ring_length);   break;
-                case 1600 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH, &i_target, ring_length);   break;
-                case 1866 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH, &i_target, ring_length);   break;
-                default   : FAPI_ERR("Un-Supported DDR frequency detected: %d.", mss_freq);
-                            FAPI_ERR("DDR frequency of 1066, 1333, 1600, or 1866 expected.");
-                            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+                case 1066 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH, &i_target, ring_length);
+                    break;
+                case 1333 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH, &i_target, ring_length);
+                    break;
+                case 1600 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH, &i_target, ring_length);
+                    break;
+                case 1866 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH, &i_target, ring_length);
+                    break;
+                default   :
+                    FAPI_ERR("Un-Supported DDR frequency detected: %d.", mss_freq);
+                    FAPI_ERR("DDR frequency of 1066, 1333, 1600, or 1866 expected.");
+                    uint32_t & MSS_FREQ = mss_freq;
+                    FAPI_SET_HWP_ERROR(rc, RC_CEN_MEM_PLL_INITF_UNSUPPORTED_MSS_FREQ);
             }
         }
         else if ( nest_freq == 2400 )
         {
             switch (mss_freq) {
-                case 1066 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH, &i_target, ring_length);   break;
-                case 1333 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH, &i_target, ring_length);   break;
-                case 1600 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH, &i_target, ring_length);   break;
-                case 1866 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH, &i_target, ring_length);   break;
-                default   : FAPI_ERR("Un-Supported DDR frequency detected: %d.", mss_freq);
-                            FAPI_ERR("DDR frequency of 1066, 1333, 1600, or 1866 expected.");
-                            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+                case 1066 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH, &i_target, ring_length);
+                    break;
+                case 1333 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH, &i_target, ring_length);
+                    break;
+                case 1600 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH, &i_target, ring_length);
+                    break;
+                case 1866 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH, &i_target, ring_length);
+                    break;
+                default   :
+                    FAPI_ERR("Un-Supported DDR frequency detected: %d.", mss_freq);
+                    FAPI_ERR("DDR frequency of 1066, 1333, 1600, or 1866 expected.");
+                    uint32_t & MSS_FREQ = mss_freq;
+                    FAPI_SET_HWP_ERROR(rc, RC_CEN_MEM_PLL_INITF_UNSUPPORTED_MSS_FREQ);
             }
         }
         else
         {
             FAPI_ERR("Un-Supported NEST frequency detected: %d.", nest_freq);
             FAPI_ERR("NEST frequency of 2000 or 2400 expected.");
+            uint32_t & NEST_FREQ = nest_freq;
+            FAPI_SET_HWP_ERROR(rc, RC_CEN_MEM_PLL_INITF_UNSUPPORTED_NEST_FREQ);
             break;
         }
         if (rc)
@@ -404,7 +408,6 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
         }
         FAPI_DBG("PLL ring LENGTH attribute is set to : %d.", ring_length);
 
-
         // Read in the PLL Ring DATA based on the frequency attributes.
         if ( is_simulation )
         {
@@ -413,31 +416,53 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
         else if ( nest_freq == 2000 )
         {
             switch (mss_freq) {
-                case 1066 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA, &i_target, attrRingData);   break;
-                case 1333 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA, &i_target, attrRingData);   break;
-                case 1600 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA, &i_target, attrRingData);   break;
-                case 1866 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA, &i_target, attrRingData);   break;
-                default   : FAPI_ERR("Un-Supported DDR frequency detected: %d.", mss_freq);
-                            FAPI_ERR("DDR frequency of 1066, 1333, 1600, or 1866 expected.");
-                            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+                case 1066 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA, &i_target, attrRingData);
+                    break;
+                case 1333 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA, &i_target, attrRingData);
+                    break;
+                case 1600 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA, &i_target, attrRingData);
+                    break;
+                case 1866 :
+                    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA, &i_target, attrRingData);
+                    break;
+                default   :
+                    FAPI_ERR("Un-Supported DDR frequency detected: %d.", mss_freq);
+                    FAPI_ERR("DDR frequency of 1066, 1333, 1600, or 1866 expected.");
+                    uint32_t & MSS_FREQ = mss_freq;
+                    FAPI_SET_HWP_ERROR(rc, RC_CEN_MEM_PLL_INITF_UNSUPPORTED_MSS_FREQ);
             }
         }
         else if ( nest_freq == 2400 )
         {
             switch (mss_freq) {
-                case 1066 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA, &i_target, attrRingData);   break;
-                case 1333 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA, &i_target, attrRingData);   break;
-                case 1600 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA, &i_target, attrRingData);   break;
-                case 1866 : rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA, &i_target, attrRingData);   break;
-                default   : FAPI_ERR("Un-Supported DDR frequency detected: %d.", mss_freq);
-                            FAPI_ERR("DDR frequency of 1066, 1333, 1600, or 1866 expected.");
-                            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+                case 1066 :
+                    rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA, &i_target, attrRingData);
+                    break;
+                case 1333 :
+                    rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA, &i_target, attrRingData);
+                    break;
+                case 1600 :
+                    rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA, &i_target, attrRingData);
+                    break;
+                case 1866 :
+                    rc = FAPI_ATTR_GET( ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA, &i_target, attrRingData);
+                    break;
+                default   :
+                    FAPI_ERR("Un-Supported DDR frequency detected: %d.", mss_freq);
+                    FAPI_ERR("DDR frequency of 1066, 1333, 1600, or 1866 expected.");
+                    uint32_t & MSS_FREQ = mss_freq;
+                    FAPI_SET_HWP_ERROR(rc, RC_CEN_MEM_PLL_INITF_UNSUPPORTED_MSS_FREQ);
             }
         }
         else
         {
             FAPI_ERR("Un-Supported NEST frequency detected: %d.", nest_freq);
             FAPI_ERR("NEST frequency of 2000 or 2400 expected.");
+            uint32_t & NEST_FREQ = nest_freq;
+            FAPI_SET_HWP_ERROR(rc, RC_CEN_MEM_PLL_INITF_UNSUPPORTED_NEST_FREQ);
             break;
         }
         if (rc)
@@ -445,8 +470,6 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             FAPI_ERR("Failed to get the PLL ring DATA attribute.");
             break;
         }
-
-
 
         // Set the ring_data buffer to the right length for the ring data
         rc_ecmd |= ring_data.setBitLength(ring_length);   // This length needs to match the real scan length in the scandef file (Required for hostboot.)
@@ -457,7 +480,6 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             break;
         }
 
-
         // Put the ring data from the attribute into the buffer
         rc_ecmd |= ring_data.insert(attrRingData, 0, ring_length, 0);
         if (rc_ecmd)
@@ -467,7 +489,6 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             break;
         }
 
-
         // Call the subroutine to load the data into the simulation or HW model
         rc = cen_load_pll_ring_from_buffer ( i_target, ring_data );
         if (rc)
@@ -475,8 +496,6 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             FAPI_ERR("Subroutine: cen_load_pll_ring_from_buffer failed!");
             break;
         }
-
-
 
     } while(0);
 
@@ -493,6 +512,9 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_initf.C,v $
+Revision 1.9  2013/11/15 16:29:56  mfred
+Changes made by Mike Jones for gerrit review, mostly for improved error handling.
+
 Revision 1.8  2013/10/02 16:09:38  mfred
 Mask FIR bit during scanning to resolve HW255774.  Add code to load desired MEM PLL freq after determining DDR freq.
 
