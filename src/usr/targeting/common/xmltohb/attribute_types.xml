@@ -5864,9 +5864,9 @@ firmware notes: Used as override attribute for pstate procedure
       create an image with at least this many EXs.
     </description>
     <simpleType>
-        <uint8_t>
+        <uint32_t>
             <default>3</default>
-        </uint8_t>
+        </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -12727,5 +12727,44 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <writeable/>
 </attribute>
+
+<attribute>
+  <id>PROC_PBA_UNTRUSTED_BAR_BASE_ADDR</id>
+    <description>PBA Untrusted BAR base address (secure mode)
+      creator: platform
+      firmware notes:
+        64-bit address representing BAR RA
+    </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PBA_UNTRUSTED_BAR_BASE_ADDR</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PBA_UNTRUSTED_BAR_SIZE</id>
+    <description>PBA Untrusted BAR size (secure mode)
+      creator: platform
+      firmware notes:
+        mask applied to RA 23:43
+    </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PBA_UNTRUSTED_BAR_SIZE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 
 </attributes>

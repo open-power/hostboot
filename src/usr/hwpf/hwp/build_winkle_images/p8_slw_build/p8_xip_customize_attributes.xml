@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_xip_customize_attributes.xml,v 1.7 2013/05/07 22:56:16 wenning Exp $ -->
+<!-- $Id: p8_xip_customize_attributes.xml,v 1.11 2013/11/07 21:51:13 dcrowell Exp $ -->
 <!-- p8_xip_customize_attributes.xml -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -90,6 +90,56 @@
     </description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PBA_UNTRUSTED_BAR_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PBA Untrusted BAR base address (secure mode)
+      creator: platform
+      firmware notes:
+        64-bit address representing BAR RA
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PBA_UNTRUSTED_BAR_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PBA Untrusted BAR size (secure mode)
+      creator: platform
+      firmware notes:
+        mask applied to RA 23:43
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        2_TB = 0x000001FFFFF00000,
+        1_TB = 0x000000FFFFF00000,
+      512_GB = 0x0000007FFFF00000,
+      256_GB = 0x0000003FFFF00000,
+      128_GB = 0x0000001FFFF00000,
+       64_GB = 0x0000000FFFF00000,
+       32_GB = 0x00000007FFF00000,
+       16_GB = 0x00000003FFF00000,
+        8_GB = 0x00000001FFF00000,
+        4_GB = 0x00000000FFF00000,
+        2_GB = 0x000000007FF00000,
+        1_GB = 0x000000003FF00000,
+      512_MB = 0x000000001FF00000,
+      256_MB = 0x000000000FF00000,
+      128_MB = 0x0000000007F00000,
+       64_MB = 0x0000000003F00000,
+       32_MB = 0x0000000001F00000,
+       16_MB = 0x0000000000F00000,
+        8_MB = 0x0000000000700000,
+        4_MB = 0x0000000000300000,
+        2_MB = 0x0000000000100000,
+        1_MB = 0x0000000000000000
+    </enum>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -280,6 +330,19 @@
         64-bit proc_sbe_security_setup_vector
     </description>
     <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SBE_IMAGE_MINIMUM_VALID_EXS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+       The minimum number of valid EXs that is required to be used when
+       customizing a SBE image. The customization will fail if it cannot
+       create an image with at least this many EXs.
+    </description>
+    <valueType>uint32</valueType>
     <platInit/>
     <persistRuntime/>
   </attribute>

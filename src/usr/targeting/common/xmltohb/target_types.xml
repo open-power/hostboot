@@ -495,6 +495,8 @@
     <attribute><id>PROC_AS_MMIO_BAR_ENABLE</id></attribute>
     <attribute><id>PROC_AS_MMIO_BAR_SIZE</id></attribute>
     <attribute><id>PROC_BOOT_VOLTAGE_VID</id></attribute>
+    <attribute><id>PROC_PBA_UNTRUSTED_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_PBA_UNTRUSTED_BAR_SIZE</id></attribute>
 </targetType>
 
 <targetType>

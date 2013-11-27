@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.H,v 1.6 2013/09/26 17:57:02 jmcgill Exp $
+// $Id: proc_adu_utils.H,v 1.7 2013/11/11 22:34:59 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -315,6 +315,9 @@ const uint32_t PROC_ADU_UTILS_ADU_MAX_PRE_INIT_DELAY = ((1ULL << 10)-1ULL);
 // auto-increment constant definitions
 const uint32_t PROC_ADU_UTILS_AUTO_INCREMENT_BOUNDARY_MASK = 0x7FFFFULL;
 const uint32_t PROC_ADU_UTILS_AUTO_INCREMENT_BOUNDARY = 0x7FFF8ULL;
+
+// Security Switch register field/bit definitions
+const uint32_t OTPC_M_SECURITY_SWITCH_TRUSTED_BOOT_BIT = 1;
 
 // ADU Control register field/bit definitions
 const uint32_t ADU_CONTROL_FBC_TTYPE_START_BIT = 0;

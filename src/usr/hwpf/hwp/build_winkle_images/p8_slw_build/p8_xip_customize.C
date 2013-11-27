@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.58 2013/10/29 16:51:57 jeshua Exp $
+// $Id: p8_xip_customize.C,v 1.65 2013/11/18 20:09:00 jmcgill Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -29,15 +29,16 @@
 //
 /* *! EXTENDED DESCRIPTION :                                                    */
 //
-/* *! USAGE : To build (for Hostboot) -                                         */
-//              buildfapiprcd  -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c" -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C,p8_pore_table_gen_api_fixed.C"  -e "$PROC_PATH/../../xml/error_info/p8_xip_customize_errors.xml,$HWPF_PATH/hwp/xml/error_info/mvpd_errors.xml"  p8_xip_customize.C
-//            To build (for VBU/command-line) -
-//              buildfapiprcd  -r ver-13-0  -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c" -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C,p8_pore_table_gen_api_fixed.C"  -e "../../xml/error_info/p8_xip_customize_errors.xml,../../../../../../hwpf/hwp/xml/error_info/mvpd_errors.xml"  -u "XIPC_COMMAND_LINE"  p8_xip_customize.C
-//            Other usages -
-//                          using "IMGBUILD_PPD_IGNORE_VPD" will ignore adding MVPD rings.
-//                          using "IMGBUILD_PPD_IGNORE_VPD_FIELD" will ignore using fapiGetMvpdField.
-//                          using "IMGBUILD_PPD_IGNORE_PLL_UPDATE" will ignore PLL attribute ring.
-//													using "IMGBUILD_PPD_IGNORE_L3_BAR" will ignore updating L3 Bar Scoms.
+/* *! USAGE : 
+              To build (for Hostboot) -
+              buildfapiprcd   -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c"   -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C,p8_pore_table_gen_api_fixed.C,p8_mailbox_utils.C"   -e "../../xml/error_info/p8_xip_customize_errors.xml,../../xml/error_info/p8_mailbox_utils_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml,../../../../../../hwpf/hwp/xml/error_info/mvpd_errors.xml"   p8_xip_customize.C
+              To build (for VBU/command-line) -
+              buildfapiprcd   -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c"   -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C,p8_pore_table_gen_api_fixed.C,p8_mailbox_utils.C"   -e "../../xml/error_info/p8_xip_customize_errors.xml,../../xml/error_info/p8_mailbox_utils_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml,../../../../../../hwpf/hwp/xml/error_info/mvpd_errors.xml"   -u "XIPC_COMMAND_LINE"   p8_xip_customize.C
+              Other usages -
+                            using "IMGBUILD_PPD_IGNORE_VPD" will ignore adding MVPD rings.
+                            using "IMGBUILD_PPD_IGNORE_VPD_FIELD" will ignore using fapiGetMvpdField.
+                            using "IMGBUILD_PPD_IGNORE_PLL_UPDATE" will ignore PLL attribute ring.
+                                                                                */
 //
 /* *! ASSUMPTIONS :                                                             */
 //
@@ -60,7 +61,6 @@ extern "C"  {
 
 using namespace fapi;
 
-  const uint32_t MINIMUM_VALID_EXS = 3;
 
 
 //------------------------------------------------------------------------------
@@ -641,6 +641,9 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	  uint64_t   attrAduUntrustedBarBase;
     uint64_t   attrAduUntrustedBarSize;
 
+	  uint64_t   attrPbaUntrustedBarBase;
+    uint64_t   attrPbaUntrustedBarSize;
+
 	  uint64_t   attrPsiUntrustedBar0Base;
     uint64_t   attrPsiUntrustedBar0Size;
 
@@ -661,6 +664,20 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	  rc = FAPI_ATTR_GET(ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE, &i_target, attrAduUntrustedBarSize);
 	  if (rc)  {
 	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE) returned error.\n");
+	    return rc;
+	  }
+
+    //-------------------------------------------------------------------------------------------
+    // PBA BAR
+	  rc = FAPI_ATTR_GET(ATTR_PROC_PBA_UNTRUSTED_BAR_BASE_ADDR, &i_target, attrPbaUntrustedBarBase);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PBA_UNTRUSTED_BAR_BASE_ADDR) returned error.\n");
+	    return rc;
+	  }
+
+	  rc = FAPI_ATTR_GET(ATTR_PROC_PBA_UNTRUSTED_BAR_SIZE, &i_target, attrPbaUntrustedBarSize);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PBA_UNTRUSTED_BAR_SIZE) returned error.\n");
 	    return rc;
 	  }
 
@@ -716,6 +733,24 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
  	  *(untrustbar_field + 4) = myRev64(attrPsiUntrustedBar1Base);
 	  *(untrustbar_field + 5) = myRev64(attrPsiUntrustedBar1Size);
+
+   //Look up fabric_config_pba location
+	  rcLoc = sbe_xip_find( o_imageOut, UNTRUSTED_PBA_BAR_TOC_NAME, &xipTocItem);
+	  if (rcLoc)  {
+	    FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+	    FAPI_ERR("Probable cause:");
+	    FAPI_ERR("\tThe keyword (=%s) was not found.",UNTRUSTED_PBA_BAR_TOC_NAME);
+	    uint32_t & RC_LOCAL = rcLoc;
+	    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+	    return rc;
+	  }
+	  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostAduUntrustedBar);
+    untrustbar_field = (uint64_t*)hostAduUntrustedBar;
+	  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
+							UNTRUSTED_PBA_BAR_TOC_NAME);
+
+	  *(untrustbar_field + 0) = myRev64(attrPbaUntrustedBarBase);
+	  *(untrustbar_field + 1) = myRev64(attrPbaUntrustedBarSize);
 
 	}
 
@@ -1223,18 +1258,52 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                                                       xipSectionDcrings
                                                       );
           if (rc) {
-            // fail out unless this was an overflow error for IPL and we've already met the mimimum
-            if ((validEXCount < MINIMUM_VALID_EXS) ||
-                (rc != RC_PROC_XIPC_RING_WRITE_WOULD_OVERFLOW) ||
-                (i_sysPhase!=0)) {
-              FAPI_DBG("Was only able to put %i EXs into the image (minimum is %i for IPL, all for SLW)", validEXCount, MINIMUM_VALID_EXS);
+            // Check if this is just a case of trying to fit in too many EXs
+            if ((i_sysPhase == 0) &&
+                (rc == RC_PROC_XIPC_RING_WRITE_WOULD_OVERFLOW))
+            {
+
+              uint32_t MINIMUM_VALID_EXS;
+              fapi::ReturnCode lrc;
+              lrc = FAPI_ATTR_GET(ATTR_SBE_IMAGE_MINIMUM_VALID_EXS, NULL, MINIMUM_VALID_EXS);
+              if (lrc)
+              {
+                FAPI_DBG("Unable to determine ATTR_SBE_IMAGE_MINIMUM_VALID_EXS, so don't know if the minimum was met");
+                fapiLogError(lrc);
+                uint32_t & VALID_COUNT = validEXCount;
+                uint32_t & MINIMUM = MINIMUM_VALID_EXS;
+                const uint32_t & DESIRED_CORES = desiredBootCoreMask;
+                uint32_t & BOOT_CORE_MASK = io_bootCoreMask;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RING_WRITE_WOULD_OVERFLOW_ADD_INFO);
+                return rc;
+              }
+
+              if (validEXCount < MINIMUM_VALID_EXS)
+              {
+                FAPI_ERR("Was only able to put %i EXs into the IPL image (minimum is %i)", validEXCount, MINIMUM_VALID_EXS);
+                fapiLogError(rc);
+                uint32_t & VALID_COUNT = validEXCount;
+                uint32_t & MINIMUM = MINIMUM_VALID_EXS;
+                const uint32_t & DESIRED_CORES = desiredBootCoreMask;
+                uint32_t & BOOT_CORE_MASK = io_bootCoreMask;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_OVERFLOW_BEFORE_REACHING_MINIMUM_EXS);
+                return rc;
+              }
+              else
+              {
+                // out of space for this chiplet, but got enough EXs in to run
+                // so jump to the end of EXs and continue
+                rc = FAPI_RC_SUCCESS;
+                chipletId = CHIPLET_ID_EX_MAX;
+                FAPI_DBG("Skipping the rest of the EX rings because image is full");
+              }
+            }
+            else
+            {
+              //This is a real error, so return it
+              FAPI_DBG("Hit an error adding cores to the image");
               return rc;
             }
-            // out of space for this chiplet, but got enough EXs in to run
-            // so jump to the end of EXs and continue
-            rc = FAPI_RC_SUCCESS;
-            chipletId = CHIPLET_ID_EX_MAX;
-            FAPI_DBG("Skipping the rest of the rings because image is full");
           } else {
             // Successfully added this chiplet
             // Update tracking of valid EX chiplets in the image
@@ -1549,7 +1618,6 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // Retrieval method:  Attribute.
   // System phase:      IPL and SLW sysPhase.
   // ==========================================================================
-#ifndef IMGBUILD_PPD_IGNORE_L3_BAR
   rc = FAPI_ATTR_GET(ATTR_PROC_L3_BAR1_REG, &i_target, attrL3BAR1);
   if (rc)  {
     FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_L3_BAR1_REG) returned error.\n");
@@ -1654,7 +1722,6 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   else  {
     FAPI_INF("No active cores found. Did not update SCOM NC table w/L3 BAR data (3).\n");
   }
-#endif
 
 
     
@@ -1663,42 +1730,110 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // Retrieval method:  N/A.
   // System phase:      SLW sysPhase. (By MikeO)
   // ==========================================================================
-    uint8_t   threadId;
-    uint64_t  lpcrData=(uint64_t)0x00005000; // Set bit(49) and bit(51).
-    uint64_t  hmeerData=((uint64_t)0x80000000)<<32; // Set bit(0).
-    for (coreId=0; coreId<=15; coreId++)  {
-      // Do the LPCR rams.
-      for (threadId=0; threadId<=7; threadId++)  {
-        rcLoc = p8_pore_gen_cpureg_fixed( 
-                        o_imageOut, 
-                        i_modeBuild,
-                        (uint32_t)P8_SPR_LPCR,
-                        lpcrData,
-                        coreId,
-                        threadId);
-        if (rcLoc)  {
-          FAPI_ERR("Updating RAM table w/LPCR ram unsuccessful (rcLoc=%i)\n",rcLoc);
-          uint32_t & RC_LOCAL = rcLoc;
-          FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_RAM_ERROR); 
-          return rc;
-        }
-      }  // End of for(threadId)
-      // Do the HMEER rams.
+  uint8_t   threadId;
+  uint64_t  lpcrData=(uint64_t)0x00005000; // Set bit(49) and bit(51).
+  uint64_t  hmeerData=((uint64_t)0x80000000)<<32; // Set bit(0).
+  for (coreId=0; coreId<=15; coreId++)  {
+    // Do the LPCR rams.
+    for (threadId=0; threadId<=7; threadId++)  {
       rcLoc = p8_pore_gen_cpureg_fixed( 
                       o_imageOut, 
                       i_modeBuild,
-                      (uint32_t)P8_SPR_HMEER,
-                      hmeerData,
+                      (uint32_t)P8_SPR_LPCR,
+                      lpcrData,
                       coreId,
-                      0);
+                      threadId);
       if (rcLoc)  {
-        FAPI_ERR("Updating RAM table w/HMEER ram unsuccessful (rcLoc=%i)\n",rcLoc);
+        FAPI_ERR("Updating RAM table w/LPCR ram unsuccessful (rcLoc=%i)\n",rcLoc);
         uint32_t & RC_LOCAL = rcLoc;
         FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_RAM_ERROR); 
         return rc;
       }
-    }  // End of for(coreId)
+    }  // End of for(threadId)
+    // Do the HMEER rams.
+    rcLoc = p8_pore_gen_cpureg_fixed( 
+                    o_imageOut, 
+                    i_modeBuild,
+                    (uint32_t)P8_SPR_HMEER,
+                    hmeerData,
+                    coreId,
+                    0);
+    if (rcLoc)  {
+      FAPI_ERR("Updating RAM table w/HMEER ram unsuccessful (rcLoc=%i)\n",rcLoc);
+      uint32_t & RC_LOCAL = rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_GEN_RAM_ERROR); 
+      return rc;
+    }
+  }  // End of for(coreId)
 
+
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Workaround for HW273115. (By MikeO)
+  // Descr.:            If ivrm-enabled, initialize ivrm in special way for 
+  //                    winkles for S1-1.x, S1-2.0 and P8-1.x.
+  // Retrieval method:  Attribute.
+  // System phase:      SLW sysPhase.
+  // Assumptions:       ATTR_PM_IVRMS_ENABLED fully supported on FSP/HOST.
+  // ==========================================================================
+  uint8_t   attrIvrmEnabled=0, attrFixIvrmWinkleBug=1;
+  uint64_t  slwControlVector=0;
+ 
+#ifdef FAPIECMD  // This section only included for Cronus builds.
+  //int type;
+  //fapi::fapiCheckIdType(ATTR_PM_IVRMS_ENABLED, type);
+  //FAPI_DBG("fapiCheckIdType(ATTR_PM_IVRMS_ENABLED) returned type=%i\n",type);
+  //if (!type)  {  // If attrib doesn't exist, create it and init to zero.
+    FAPI_DBG("ATTR_PM_IVRMS_ENABLED doesn't exit. Create and init to zero.\n");
+    attrIvrmEnabled = 1;
+    rc = FAPI_ATTR_SET(ATTR_PM_IVRMS_ENABLED, &i_target, attrIvrmEnabled);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_PUT(ATTR_PM_IVRMS_ENABLED) return error.\n");
+      return rc;
+    }
+  //}
+#endif
+
+  rc = FAPI_ATTR_GET(ATTR_PM_IVRMS_ENABLED, &i_target, attrIvrmEnabled);
+  if (rc)  {
+    FAPI_ERR("FAPI_ATTR_GET(ATTR_PM_IVRMS_ENABLED) returned error.\n");
+    return rc;
+  }
+
+  rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_IVRM_WINKLE_BUG, &i_target, attrFixIvrmWinkleBug);
+  if (rc)  {
+    FAPI_ERR("FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_IVRM_WINKLE_BUG) returned error.\n");
+    return rc;
+  }
+
+  if (attrIvrmEnabled && !attrFixIvrmWinkleBug)  {
+    rcLoc = sbe_xip_get_scalar( o_imageOut, "slw_control_vector", &slwControlVector);
+    if (rcLoc)  {
+      FAPI_ERR("sbe_xip_get_scalar() failed w/rc=%i", rcLoc);
+      FAPI_ERR("Probable cause: Key word =slw_control_vector not found in image.");
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+      return rc;
+    }
+    FAPI_DBG("slwControlVector=0x%016llx",slwControlVector); 
+    slwControlVector = slwControlVector | BIT(63); 
+    FAPI_DBG("slwControlVector=0x%016llx",slwControlVector); 
+    rcLoc = sbe_xip_set_scalar( o_imageOut, "slw_control_vector", slwControlVector);
+    if (rcLoc)  {
+      FAPI_ERR("sbe_xip_set_scalar() failed w/rc=%i", rcLoc);
+      FAPI_ERR("Probable cause: Key word =slw_control_vector not found in image.");
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+      return rc;
+    }
+    FAPI_INF("Updated slw_control_vector to trigger iVRM winkle bug fix.\n");
+  }
+  else  {
+    FAPI_INF("Did NOT update slw_control_vector to trigger iVRM winkle bug fix.\n");
+  }
+  
+  
+  
   }  // End of if (i_sysPhase==1)
 
 
