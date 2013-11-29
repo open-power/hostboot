@@ -354,6 +354,12 @@ int32_t cleanupSecondaryFirBits( ExtensibleChip * i_chip,
             if (!mcsTgt) break;
             mbChip = i_chip;
         }
+        else
+        {
+            // We only need to clean secondary FIR bits for DMI bus
+            l_rc = SUCCESS;
+            break;
+        }
 
         SCAN_COMM_REGISTER_CLASS * mciFir =
           mcsChip->getRegister( "MCIFIR" );
