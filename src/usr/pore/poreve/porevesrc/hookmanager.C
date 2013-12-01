@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: hookmanager.C,v 1.15 2012/12/06 18:03:51 bcbrock Exp $
+// $Id: hookmanager.C,v 1.17 2013/11/27 20:04:36 thi Exp $
 
 /// \file hookmanager.C
 /// \brief A portable symbol table and hook execution facility
@@ -29,6 +29,10 @@
 #include <string.h>
 
 #include "hookmanager.H"
+
+#ifndef __HOSTBOOT_MODULE
+#include <dlfcn.h>
+#endif
 
 using namespace vsbe;
 using namespace fapi;
@@ -83,8 +87,28 @@ HookManager::HookManager() :
 }
 
 
+/// \todo This destructor leaks memory; We need to add code to delete all of
+/// the dynamic objects.
+
 HookManager::~HookManager()
 {
+#ifndef __HOSTBOOT_MODULE
+
+    std::vector<void*>::size_type i;
+    int rc;
+
+    for (i = 0; i < iv_dllHandles.size(); i++) {
+        
+        rc = ::dlclose(iv_dllHandles[i]);
+        FAPI_DBG("%d <-- dlclose(%p)", rc, iv_dllHandles[i]);
+        if (rc != 0) {
+            FAPI_ERR("%s:%d: dlclose(%p) (iv_dllHandles[%d]) "
+                     "failed with the error below\n%s",
+                     __FILE__, __LINE__, iv_dllHandles[i], i, ::dlerror());
+        }
+    }
+        
+#endif  // __HOSTBOOT_MODULE
 }
 
 
@@ -312,6 +336,25 @@ HookManager::report(const int i_options)
 
 
 //////////////////////////// Manipulators ////////////////////////////
+
+void*
+HookManager::dlopen(const char* i_fileName, int i_flags)
+{
+    void* handle = 0;
+
+#ifndef __HOSTBOOT_MODULE
+
+    handle = ::dlopen(i_fileName, i_flags);
+    FAPI_DBG("%p <-- dlopen(%s, %d)", handle, i_fileName, i_flags);
+    if (handle != 0) {
+        instance()->iv_dllHandles.push_back(handle);
+    }
+
+#endif  // __HOSTBOOT_MODULE
+
+    return handle;
+}
+
 
 HookError
 HookManager::registerInstructionHook(const uint32_t i_index, 

@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: pore_model.h,v 1.17 2013/11/27 17:13:23 thi Exp $
 #ifndef __PORE_MODEL__
 #define __PORE_MODEL__
 

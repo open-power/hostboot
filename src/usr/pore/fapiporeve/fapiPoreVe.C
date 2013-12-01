@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: fapiPoreVe.C,v 1.32 2013/04/05 19:35:32 jeshua Exp $
+// $Id: fapiPoreVe.C,v 1.33 2013/06/25 19:08:33 thi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/poreve/working/fapiporeve/fapiPoreVe.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -845,6 +845,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they are included here.
 
 $Log: fapiPoreVe.C,v $
+Revision 1.33  2013/06/25 19:08:33  thi
+Fix Hostboot compile error
+
 Revision 1.32  2013/04/05 19:35:32  jeshua
 Use dumpOnce() instead of trying to track it ourselves
 

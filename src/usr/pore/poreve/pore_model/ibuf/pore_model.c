@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: pore_model.c,v 1.26 2013/11/27 15:52:41 thi Exp $
 /******************************************************************************
  *
  * Virtual PORe Engine
@@ -486,8 +487,10 @@ static int setAluFlags(pore_model_t p, int64_t op1, int64_t op2,
 	}
 
 	/* C: set carry bit */
-	if (((op1 & 0x7fffffffffffffffull) +
-	     (op2 & 0x7FFFFFFFFFFFFFFFull)) & (0x1ull << 63)) {
+	if( op2 == 0) {
+	  id_flags->c = 1;
+	} else if (((op1 & 0x7fffffffffffffffull) +
+	            (op2 & 0x7FFFFFFFFFFFFFFFull)) & (0x1ull << 63)) {
 
 		if ((PORE_GET_BIT(op1,0) + PORE_GET_BIT(op2,0) + 1 ) >> 1) {
 			id_flags->c = 1;
@@ -1063,10 +1066,9 @@ int pore_writeReg(pore_model_t p, pore_reg_t reg, uint64_t val, uint64_t msk)
 	case PORE_R_CONTROL:				/* SIDE EFFECTS */
 		return pore_control_reg_write(p, val, msk);
 
-	case PORE_R_RESET:
-		write_under_mask(&p->reset.val,
-				 val & PORE_RESET_VALID_BITS, msk);
-		break;
+	case PORE_R_RESET:                              /* SIDE EFFECTS */
+                return pore_reset_reg_write(p, val, msk);
+
 	case PORE_R_ERROR_MASK:
 		write_under_mask(&p->error_mask.val,
 				 val & PORE_ERROR_MASK_VALID_BITS, msk);

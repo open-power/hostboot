@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pibmem.C,v 1.3 2012/12/06 18:03:51 bcbrock Exp $
+// $Id: pibmem.C,v 1.4 2013/02/05 16:14:39 bcbrock Exp $
 
 /// \file pibmem.C
 /// \brief A model of the P8 "PIB-attached Memory"
@@ -290,7 +290,8 @@ Pibmem::memoryOperation(Transaction& io_transaction,
 
             if (rc) {
                 FAPI_ERR("The previous error was from a PIBMEM operation "
-                         "targeting the indicated address, issued "
+                         "targeting the indicated address.\n"
+                         "The operation was issued "
                          "indirectly through the PIBMEM control "
                          "register 0x%08x",
                          saveAddress);

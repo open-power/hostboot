@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: poremodel.C,v 1.24 2012/08/06 15:11:06 jeshua Exp $
+// $Id: poremodel.C,v 1.25 2013/05/30 00:30:43 bcbrock Exp $
 
 /// \file poremodel.C
 /// \brief The PORE hardware engine model and interface to the virtual
@@ -132,26 +132,26 @@ PoreModel::run(const uint64_t i_instructions, uint64_t& o_ran)
     ModelError me = ME_SUCCESS;
     bool stepped;
     bool writeControl = false;
-    int iv_status;
+    int status;
 
     do {
         
         o_ran = 0;
         iv_stopCode = 0;
-        iv_status = getStatus();
+        status = getStatus();
 
-        if (iv_status & (PORE_STATUS_ERROR_HALT | PORE_STATUS_MODEL_ERROR)) {
+        if (status & (PORE_STATUS_ERROR_HALT | PORE_STATUS_MODEL_ERROR)) {
             break;
         }
 
         me = registerRead(PORE_CONTROL, control);
         if (me != 0) break;
 
-        if (iv_status & PORE_STATUS_HARDWARE_STOP) {
+        if (status & PORE_STATUS_HARDWARE_STOP) {
             control &= ~BE64_BIT(0);
             writeControl = true;
         }
-        if (iv_status & (PORE_STATUS_BREAKPOINT | PORE_STATUS_TRAP)) {
+        if (status & (PORE_STATUS_BREAKPOINT | PORE_STATUS_TRAP)) {
             control |= BE64_BIT(1);
             writeControl = true;
         }
