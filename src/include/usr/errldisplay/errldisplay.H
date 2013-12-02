@@ -155,6 +155,15 @@ private:
      */
     static const char * findComponentName (compId_t i_compId);
 
+    /**
+     * @brief Displays a "callout" type error log component
+     */
+    static void displayCallout (void *data, size_t size);
+
+    /**
+     * @brief Displays a "target" type error log component
+     */
+    static void displayTarget (void *data, size_t size);
 };
 
 } // End namespace

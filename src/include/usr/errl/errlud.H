@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,7 +36,10 @@
 #include <errl/errlsctn.H>
 #include <errl/errlsctnhdr.H>
 
-
+namespace ERRORLOGDISPLAY
+{
+class ErrLogDisplay;
+}
 
 namespace ERRORLOG
 {
@@ -48,6 +54,7 @@ class ErrlUD : public ErrlSctn
     // you would expect to be part of ErrlEntry are actually instance data
     // in this class.
     friend class ErrlEntry;
+    friend class ERRORLOGDISPLAY::ErrLogDisplay;
 
 
 private:

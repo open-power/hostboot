@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -58,7 +61,10 @@
 #include <targeting/common/target.H>
 #include <attributeenums.H>
 
-
+namespace ERRORLOGDISPLAY
+{
+class ErrLogDisplay;
+}
 namespace ERRORLOG
 {
 class ErrlEntry;
@@ -88,6 +94,7 @@ class ErrlEntry
 {
 
     friend class ErrlManager;
+    friend class ERRORLOGDISPLAY::ErrLogDisplay;
 
 
 

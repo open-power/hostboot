@@ -53,12 +53,18 @@
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
+#include <errl/errlud.H>
+#include <errl/errludtarget.H>
+#include <errl/errlsctn.H>
+#include <errl/errlreasoncodes.H>
 #include <errldisplay/errldisplay.H>
 #include <stdlib.h>
 #include <string.h>
 #include <initservice/taskargs.H>
 #include <algorithm>
 #include <console/consoleif.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/common/iterators/targetiterator.H>
 
 namespace ERRORLOGDISPLAY
 {
@@ -138,18 +144,172 @@ const char * ErrLogDisplay::findComponentName (compId_t i_compId)
     return "unknown";
 }
 
+void ErrLogDisplay::displayCallout (void *data, size_t size)
+{
+    // Parse encoded callout data.  See ErrlUserDetailsCallout class in
+    // errludcallout.C for (undocumented) encoding details.
+    if (size >= sizeof(HWAS::callout_ud_t))
+    {
+        HWAS::callout_ud_t* callout =
+            reinterpret_cast<HWAS::callout_ud_t*>(data);
+        size_t l_curSize = sizeof(HWAS::callout_ud_t);
+
+        switch ( callout->type )
+        {
+            case HWAS::CLOCK_CALLOUT:
+                CONSOLE::displayf(NULL, "  CLOCK ERROR\n" );
+                CONSOLE::displayf(NULL, "  clockType: %d\n",
+                                 static_cast<int>( callout->clockType ) );
+                break;
+            case HWAS::BUS_CALLOUT:
+                CONSOLE::displayf(NULL, "  BUS ERROR\n" );
+                CONSOLE::displayf(NULL, "  busType: %d\n",
+                                 static_cast<int>( callout->busType ) );
+                // Data is formatted as a callout_ud_t followed by 2 entity paths
+                // representing each side of the link.
+                if (size < (l_curSize + sizeof(uint8_t)))
+                {
+                    break;
+                }
+                callout++;
+
+                CONSOLE::displayf(NULL, "  First link: " );
+                if( *reinterpret_cast<uint8_t*>( callout )
+                    == HWAS::TARGET_IS_SENTINEL )
+                {
+                    CONSOLE::displayf(NULL, "MASTER PROCESSOR SENTINEL\n" );
+                }
+                else
+                {
+                    if (size < (l_curSize + sizeof(TARGETING::EntityPath)))
+                    {
+                        break;
+                    }
+                    l_curSize += sizeof(TARGETING::EntityPath);
+
+                    TARGETING::EntityPath *ep =
+                        reinterpret_cast<TARGETING::EntityPath*>( callout );
+                    CONSOLE::displayf(NULL, "%s\n", ep->toString() );
+
+                    if (size < (l_curSize + sizeof(uint8_t)) )
+                    {
+                        break;
+                    }
+                    ep++;
+
+                    CONSOLE::displayf(NULL, "  Second link: " );
+                    if( *reinterpret_cast<uint8_t*>( ep )
+                        == HWAS::TARGET_IS_SENTINEL )
+                    {
+                        CONSOLE::displayf(NULL, "MASTER PROCESSOR SENTINEL\n" );
+                    }
+                    else
+                    {
+                        if (size < (l_curSize + sizeof(TARGETING::EntityPath)))
+                        {
+                            break;
+                        }
+                        CONSOLE::displayf(NULL, "%s\n", ep->toString() );
+                    }
+                }
+                break;
+            case HWAS::HW_CALLOUT:
+                CONSOLE::displayf(NULL, "  HW CALLOUT\n" );
+                CONSOLE::displayf(NULL, "  Reporting CPU ID: %d\n",
+                                  callout->cpuid );
+                // Data is formatted as a callout_ud_t followed by an entity path.
+                if (size < (l_curSize + sizeof(uint8_t)))
+                {
+                    break;
+                }
+                callout++;
+
+                CONSOLE::displayf(NULL, "  Called out entity:" );
+                if( *reinterpret_cast<uint8_t*>( callout )
+                    == HWAS::TARGET_IS_SENTINEL )
+                {
+                    CONSOLE::displayf(NULL, "MASTER PROCESSOR SENTINEL\n" );
+                }
+                else
+                {
+                    if (size < (l_curSize + sizeof(TARGETING::EntityPath)))
+                    {
+                        break;
+                    }
+                    TARGETING::EntityPath *ep =
+                        reinterpret_cast<TARGETING::EntityPath*>( callout );
+                    CONSOLE::displayf(NULL, "%s\n", ep->toString() );
+                }
+                break;
+            case HWAS::PROCEDURE_CALLOUT:
+                CONSOLE::displayf(NULL, "  PROCEDURE ERROR\n" );
+                CONSOLE::displayf(NULL, "  Procedure: %d\n",
+                                 static_cast<int>( callout->procedure ) );
+                break;
+        }
+    }
+}
+
+void ErrLogDisplay::displayTarget(void *data, size_t size)
+{
+    char *char_buf = reinterpret_cast<char*>( data );
+
+    // The first part of the buffer is a TargetLabel_t.
+    ERRORLOG::TargetLabel_t *label =
+        reinterpret_cast<ERRORLOG::TargetLabel_t*>( char_buf );
+
+    CONSOLE::displayf(NULL, "  Label tag: %s %08x\n", label->x, label->tag );
+    if( label->tag == 0xffffffff )
+    {
+        CONSOLE::displayf(NULL, "  MASTER PROCESSOR SENTINEL\n" );
+    }
+    else
+    {
+        // The second part of the buffer contains the encoded target.
+        // See Target::targetFFDC for encoding details.
+        // We only care about the HUID and can look up the Target based on that.
+        char_buf += sizeof(ERRORLOG::TargetLabel_t);
+        TARGETING::AttributeTraits<TARGETING::ATTR_HUID>::Type *huid =
+            reinterpret_cast<TARGETING::AttributeTraits<
+                TARGETING::ATTR_HUID>::Type*>( char_buf );
+        CONSOLE::displayf(NULL, "  HUID: %08x\n", *huid );
+
+        // Look up the HUID across all targets.
+        for ( TARGETING::TargetIterator ti = TARGETING::targetService().begin();
+            ti != TARGETING::targetService().end(); ++ti )
+        {
+            TARGETING::AttributeTraits<TARGETING::ATTR_HUID>::Type tmp_huid;
+            if( ti->tryGetAttr<TARGETING::ATTR_HUID>( tmp_huid ) &&
+                tmp_huid == *huid )
+            {
+                TARGETING::Target *target = *ti;
+                CONSOLE::displayf(NULL,
+                    "  Phys path: %s\n",
+                    target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString() );
+                CONSOLE::displayf(NULL,
+                    "  Affinity path: %s\n",
+                    target->getAttr<TARGETING::ATTR_AFFINITY_PATH>().toString() );
+                break;
+            }
+        }
+    }
+}
+
+//
+// Display a human-readable form of an error.
 void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
                                 compId_t i_committerComp)
 {
     TRACFCOMP( g_trac_errldisp, ENTER_MRK "ErrLogDisplay::msgDisplay" );
 
-    const ErrLogDisplay::errLogInfo* info = findErrLogInfo(i_err->moduleId(),
-                                                           i_err->reasonCode());
+    const errLogInfo *info = findErrLogInfo ( i_err->moduleId(),
+                                              i_err->reasonCode());
 
     CONSOLE::displayf(NULL,
                       "================================================\n");
     CONSOLE::displayf(NULL, "Error reported by %s (0x%04X)\n",
-                      findComponentName(i_committerComp), i_committerComp);
+                     findComponentName( i_committerComp ),
+                     i_committerComp );
     CONSOLE::displayf(NULL, "  %s\n", info->descriptString);
     CONSOLE::displayf(NULL, "  ModuleId   0x%02x %s\n",
                       i_err->moduleId(), info->moduleName);
@@ -160,6 +320,39 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
     CONSOLE::displayf(NULL, "  UserData2  %s : 0x%016lx\n",
                       info->userData2String, i_err->getUserData2());
 
+    // Loop through and print all of the user data sections.
+    for ( size_t i = 0; i < i_err->iv_SectionVector.size(); ++i )
+    {
+        ERRORLOG::ErrlUD *user_data = i_err->iv_SectionVector[i];
+        CONSOLE::displayf(NULL, "User Data Section %d, type %c%c\n", (int) i,
+                         (user_data->iv_header.iv_sid >> 8) & 0xff,
+                         user_data->iv_header.iv_sid & 0xff );
+        CONSOLE::displayf(NULL, "  Subsection type 0x%02x\n",
+                         user_data->iv_header.iv_sst );
+        CONSOLE::displayf(NULL, "  ComponentId %s (0x%04x)\n",
+                         findComponentName( user_data->iv_header.iv_compId ),
+                         user_data->iv_header.iv_compId );
+        switch ( user_data->iv_header.iv_sst )
+        {
+            case ERRORLOG::ERRL_UDT_TARGET:
+                CONSOLE::displayf(NULL, "  TARGET\n" );
+                displayTarget( user_data->iv_pData, user_data->iv_Size );
+                break;
+            case ERRORLOG::ERRL_UDT_CALLOUT:
+                CONSOLE::displayf(NULL, "  CALLOUT\n" );
+                displayCallout( user_data->iv_pData, user_data->iv_Size );
+                break;
+            case ERRORLOG::ERRL_UDT_STRING:
+                CONSOLE::displayf(NULL, "  STRING\n" );
+                CONSOLE::displayf(NULL,
+                    "  %s\n",
+                    reinterpret_cast<char*>( user_data->iv_pData ) );
+                break;
+        }
+    }
+
+    CONSOLE::displayf(NULL,
+                      "================================================\n" );
     CONSOLE::flush();
 
     TRACFCOMP( g_trac_errldisp, EXIT_MRK "ErrLogDisplay::msgDisplay" );
@@ -193,3 +386,4 @@ errlHndl_t ErrLogDisplay::init()
 }
 
 } // End namespace
+
