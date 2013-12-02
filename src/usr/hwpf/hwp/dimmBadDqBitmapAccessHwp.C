@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: dimmBadDqBitmapAccessHwp.C,v 1.6 2013/10/03 20:40:51 dedahle Exp $
+// $Id: dimmBadDqBitmapAccessHwp.C,v 1.8 2013/12/02 17:03:36 dedahle Exp $
 /**
  *  @file dimmBadDqBitmapAccessHwp.C
  *
@@ -38,6 +38,12 @@
  *                          dedahle     09/20/2013  Temporarily use
  *                                                  ATTR_EFF_DIMM_SPARE
  *                          dedahle     09/20/2013  Support manufacturing mode
+ *                          dedahle     10/11/2013  Add memset for gcc version
+ *                                                  constructor syntax issue
+ *                          dedahle     12/01/2013  Fix
+ *                                                  dimmUpdateDqBitmapSpareByte
+ *                                                  to not set bits for
+ *                                                  connected DQs
  */
 
 #include <dimmBadDqBitmapAccessHwp.H>
@@ -129,17 +135,16 @@ fapi::ReturnCode dimmUpdateDqBitmapSpareByte(
                     break;
 
                 case fapi::ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE:
-                    o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] = 0x0F;
+                    o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] |= 0x0F;
                     break;
 
                 case fapi::ENUM_ATTR_VPD_DIMM_SPARE_HIGH_NIBBLE:
-                    o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] = 0xF0;
+                    o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] |= 0xF0;
                     break;
 
-                case fapi::ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE:
                 // As erroneous value will not be encountered.
+                case fapi::ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE:
                 default:
-                    o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] = 0x00;
                     break;
             }
         }
@@ -234,10 +239,18 @@ fapi::ReturnCode dimmBadDqBitmapAccessHwp(
         *(reinterpret_cast<uint8_t(*)[DIMM_DQ_NUM_DQS]>
             (new uint8_t[DIMM_DQ_NUM_DQS]()));
 
+    // memset to avoid known syntax issue with previous compiler versions
+    // and ensure zero initialized array.
+    memset(l_wiringData, 0, sizeof(l_wiringData));
+
     // DQ SPD Attribute
     uint8_t (&l_spdData)[DIMM_DQ_SPD_DATA_SIZE] =
         *(reinterpret_cast<uint8_t(*)[DIMM_DQ_SPD_DATA_SIZE]>
             (new uint8_t[DIMM_DQ_SPD_DATA_SIZE]()));
+
+    // memset to avoid known syntax issue with previous compiler versions
+    // and ensure zero initialized array.
+    memset(l_spdData, 0, sizeof(l_spdData));
 
     dimmBadDqDataFormat * l_pSpdData =
         reinterpret_cast<dimmBadDqDataFormat *>(l_spdData);
@@ -361,6 +374,10 @@ fapi::ReturnCode dimmBadDqBitmapAccessHwp(
                                      [DIMM_DQ_RANK_BITMAP_SIZE] =
                 *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS]
                                      [DIMM_DQ_RANK_BITMAP_SIZE]>(l_pBuf));
+                // memset to avoid known syntax issue with previous
+                // compiler versions and ensure zero initialized array.
+                memset(l_data, 0, sizeof(l_data));
+
                 // Check ECC.
                 l_rc = dimmUpdateDqBitmapEccByte(i_dimm, l_data);
                 if (l_rc)
@@ -434,6 +451,10 @@ fapi::ReturnCode dimmBadDqBitmapAccessHwp(
                                      [DIMM_DQ_RANK_BITMAP_SIZE] =
                 *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS]
                                      [DIMM_DQ_RANK_BITMAP_SIZE]>(l_pBuf));
+                // memset to avoid known syntax issue with previous
+                // compiler versions and ensure zero initialized array.
+                memset(l_data, 0, sizeof(l_data));
+
                 // Check ECC.
                 l_rc = dimmUpdateDqBitmapEccByte(i_dimm, l_data);
                 if (l_rc)
