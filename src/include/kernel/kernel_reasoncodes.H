@@ -41,6 +41,7 @@
         //  without a MODULE ID.
         RC_ASSERT            = KERNEL_COMP_ID | 0x01, /**< Assert */
         RC_SHUTDOWN          = KERNEL_COMP_ID | 0x02, /**< Shutdown */
+        RC_UNHANDLED_EX      = KERNEL_COMP_ID | 0x03, /**< Unhandled Except. */
     };
 
 #endif

@@ -32,6 +32,10 @@
 #include <errno.h>
 #include <kernel/vmmmgr.H>
 #include <kernel/machchk.H>
+#include <kernel/terminate.H>
+#include <kernel/hbterminatetypes.H>
+#include <kernel/kernel_reasoncodes.H>
+
 
 namespace ExceptionHandles
 {
@@ -369,4 +373,17 @@ void kernel_execute_external()
     // SRR1 [33:36,42:47] set to zero
     //      all others copied from MSR
     InterruptMsgHdlr::handleInterrupt();
+}
+
+extern "C"
+void kernel_execute_unhandled_exception()
+{
+    task_t* t = TaskManager::getCurrentTask();
+    uint64_t exception = getSPRG2();
+
+    printk("Unhandled exception %lx by task %d @ %p\n",
+           exception, t->tid, t->context.nip);
+
+    termWriteSRC(TI_UNHANDLED_EX, RC_UNHANDLED_EX, exception);
+    terminateExecuteTI();
 }

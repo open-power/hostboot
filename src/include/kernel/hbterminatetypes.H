@@ -104,6 +104,7 @@ enum hb_terminate_source
     TI_KERNEL_ASSERT = 0x0001,
     TI_CRIT_ASSERT =   0x0002,
     TI_SHUTDOWN =      0x0003,
+    TI_UNHANDLED_EX =  0x0004,
 };
 
 

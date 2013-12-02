@@ -68,7 +68,7 @@ void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr)
 
     // Update TID data area with the SRC info we have avail
     kernel_TIDataArea.src.ID = 0xBC;
-    kernel_TIDataArea.src.subsystem = 0x11;
+    kernel_TIDataArea.src.subsystem = 0x8A;
     kernel_TIDataArea.src.reasoncode = i_reasoncode;
     kernel_TIDataArea.src.moduleID = 0;
     kernel_TIDataArea.src.iType = TI_WITH_SRC;

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2012
+# COPYRIGHT International Business Machines Corp. 2010,2013
 #
 # p1
 #
@@ -51,30 +51,30 @@ _start_postmsr:
     lwsync
 1:
     ldarx r3, 0, r2
-    cmpwi r3, 0	;// Non-zero means this thread wasn't first.
+    cmpwi r3, 0 ;// Non-zero means this thread wasn't first.
     bnel cr0, _other_thread_spinlock
-    stdcx. r4, 0, r2	;// Attempt to store 2.
+    stdcx. r4, 0, r2    ;// Attempt to store 2.
     bne 1b ;// Loop until sucessful at stwcx.
     isync
 
     b _main
 /*
     ;// Relocate code
-    bl pre_relocate	;// fill LR with address
+    bl pre_relocate     ;// fill LR with address
 pre_relocate:
     mflr r2
     lis r1,0x0010
-    cmpl cr0,r2,r1		;// Check LR is less than 1MB
-    blt finished_relocate	;// No need to relocate if less than 1MB
+    cmpl cr0,r2,r1              ;// Check LR is less than 1MB
+    blt finished_relocate       ;// No need to relocate if less than 1MB
 
     ;// Get addresses for relocation.
     ;// Write address in r5
     ;// Read address in r1
     li r5,0
-    lis r1, -1	;// fill r1 with ffff..ff0000
+    lis r1, -1  ;// fill r1 with ffff..ff0000
 
     and r1,r1,r2 ;// and with pre_relocate's address from r2 to get start of
-		 ;// rom section.
+                 ;// rom section.
 
     ;// Update LR to low address.
     clrldi r2,r2,48  ;// Equiv to ~(0x0FFFF)
@@ -114,40 +114,59 @@ finished_relocate:
 ;// Interrupt vectors.
 
 #define UNIMPL_INTERRUPT(name, address) \
-    .org _start + address; \
-    intvect_##name: \
-	or 1,1,1; /* Drop thread priority while in loop. */ \
-	b intvect_##name
+        .org _start + address; \
+        UNIMPL_INTERRUPT_NOADDR(name, address)
+
+#define UNIMPL_INTERRUPT_STUB(name, address) \
+        .org _start + address; \
+        b intvect_unimpl_##name;
+
+#define UNIMPL_INTERRUPT_NOADDR(name, address) \
+    intvect_unimpl_##name: \
+        or 2,2,2; /* Ensure thread priority is high. */ \
+        mtsprg0 r1; /* Save GRP1 */ \
+        li r1, address; /* Save exception address. */ \
+        mtsprg2 r1; /* Move exception address to SPRG2 */ \
+            ;/* Retrieve processing address for interrupt. */ \
+        lis r1, intvect_unhandled_finish_save@h; \
+        ori r1, r1, intvect_unhandled_finish_save@l; \
+            ;/* Save processing address in SPRG0 */ \
+        mtsprg0 r1; \
+        mfsprg1 r1; /* Restore GPR1 */ \
+        b kernel_save_task ; /* Save current task. */
 
 #define STD_INTERRUPT(name, address) \
         .org _start + address; \
         STD_INTERRUPT_NOADDR(name)
 
+#define STD_INTERRUPT_STUB(name, address) \
+        .org _start + address; \
+    intvect_stub_##name: \
+        b intvect_##name;
+
 #define STD_INTERRUPT_NOADDR(name) \
     intvect_##name: \
-	or 2,2,2; /* Ensure thread priority is high. */ \
-	mtsprg1 r1; /* Save GPR1 */ \
-	    ;/* Retrieve processing address for interrupt. */ \
-	lis r1, intvect_##name##_finish_save@h; \
-	ori r1, r1, intvect_##name##_finish_save@l; \
-	    ;/* Save interrupt address in SPRG0 */ \
-	mtsprg0 r1; \
-	mfsprg1 r1; /* Restore GPR1 */ \
-	b kernel_save_task ; /* Save current task. */ \
+        or 2,2,2; /* Ensure thread priority is high. */ \
+        mtsprg1 r1; /* Save GPR1 */ \
+            ;/* Retrieve processing address for interrupt. */ \
+        lis r1, intvect_##name##_finish_save@h; \
+        ori r1, r1, intvect_##name##_finish_save@l; \
+            ;/* Save interrupt address in SPRG0 */ \
+        mtsprg0 r1; \
+        mfsprg1 r1; /* Restore GPR1 */ \
+        b kernel_save_task ; /* Save current task. */ \
     intvect_##name##_finish_save: \
-	; /* Get TOC entry for kernel C function */ \
-	lis r2, kernel_execute_##name##@h; \
-	ori r2, r2, kernel_execute_##name##@l; \
-	ld r0, 0(r2); /* Load call address */ \
-	mtlr r0; \
-	ld r2, 8(r2); /* Load TOC base. */ \
-	blrl; /* Call kernel function */ \
-	nop; \
-	b kernel_dispatch_task; /* Return to task */
+        ; /* Get TOC entry for kernel C function */ \
+        lis r2, kernel_execute_##name##@h; \
+        ori r2, r2, kernel_execute_##name##@l; \
+        ld r0, 0(r2); /* Load call address */ \
+        mtlr r0; \
+        ld r2, 8(r2); /* Load TOC base. */ \
+        blrl; /* Call kernel function */ \
+        nop; \
+        b kernel_dispatch_task; /* Return to task */
 
-.org _start + 0x100
-intvect_system_reset_stub:
-    b intvect_system_reset
+STD_INTERRUPT_STUB(system_reset, 0x100)
 
 .org _start + 0x180
 intvect_inst_start:
@@ -188,20 +207,15 @@ intvect_system_call_fast:
     bge  cr0, system_call_fast_path
 STD_INTERRUPT(system_call, 0xC08)
 
-UNIMPL_INTERRUPT(trace, 0xD00)
-UNIMPL_INTERRUPT(hype_data_storage, 0xE00)
-UNIMPL_INTERRUPT(hype_inst_storage, 0xE20)
-
-.org _start + 0xE40
-hype_emu_assist_stub:
-    b intvect_hype_emu_assist
-
-UNIMPL_INTERRUPT(hype_maint, 0xE60)
-UNIMPL_INTERRUPT(perf_monitor, 0xF00)
-UNIMPL_INTERRUPT(vector_unavail, 0xF20)
-UNIMPL_INTERRUPT(vsx_unavail, 0xF40)
-
-UNIMPL_INTERRUPT(fac_unavail, 0xF60)
+UNIMPL_INTERRUPT_STUB(trace, 0xD00)
+UNIMPL_INTERRUPT_STUB(hype_data_storage, 0xE00)
+UNIMPL_INTERRUPT_STUB(hype_inst_storage, 0xE20)
+STD_INTERRUPT_STUB(hype_emu_assist, 0xE40)
+UNIMPL_INTERRUPT_STUB(hype_maint, 0xE60)
+UNIMPL_INTERRUPT_STUB(perf_monitor, 0xF00)
+UNIMPL_INTERRUPT_STUB(vector_unavail, 0xF20)
+UNIMPL_INTERRUPT_STUB(vsx_unavail, 0xF40)
+UNIMPL_INTERRUPT_STUB(fac_unavail, 0xF60)
 
     ;// P8 has a new HFSCR register which allows the hypervisor to disable
     ;// access to facilities such as floating point to a partition, even if
@@ -254,7 +268,7 @@ kernel_descriptor:
 
 
 ;// _main:
-;//	Set up stack and TOC and call kernel's main.
+;//     Set up stack and TOC and call kernel's main.
 _main:
     ;// Set up initial TOC Base
     lis r2, main@h
@@ -272,9 +286,9 @@ _main_loop:
     b _main_loop
 
 ;// _other_thread_spinlock:
-;//	Used for threads other than first to wait for the system to boot to a
-;//	stable point where we can start the other threads.  At this point
-;//	nothing is initalized in the thread.
+;//     Used for threads other than first to wait for the system to boot to a
+;//     stable point where we can start the other threads.  At this point
+;//     nothing is initalized in the thread.
 _other_thread_spinlock:
     ;// Read spinlock value.
     lis r2, kernel_other_thread_spinlock@h
@@ -301,15 +315,15 @@ _other_thread_spinlock_complete:
     beq- 1f
     mfspr r1, PIR               ;// Extract on-node CPU id.
     clrlslwi r1, r1, 22, 3
-    ldx r3, r1, r2		;// Load CPU object.
+    ldx r3, r1, r2              ;// Load CPU object.
     cmpi cr0, r3, 0             ;// Check for NULL CPU object.
     beq- 1f
-    ld r1, CPU_KERNEL_STACK(r3)	;// Load initial stack.
+    ld r1, CPU_KERNEL_STACK(r3) ;// Load initial stack.
 
-    lis r2, smp_slave_main@h 	;// Load TOC base.
+    lis r2, smp_slave_main@h    ;// Load TOC base.
     ori r2, r2, smp_slave_main@l
     ld r2, 8(r2)
-    bl smp_slave_main		;// Call smp_slave_main
+    bl smp_slave_main           ;// Call smp_slave_main
     b _main_loop
 1:
     ;// No CPU object available, nap this CPU.
@@ -330,63 +344,63 @@ _other_thread_spinlock_complete:
     ;//     * SPRG0 -> Return address.
     ;//     * SPRG1 -> Safe for scratch (temporary save of r1)
 kernel_save_task:
-    mtsprg1 r1		;// Save r1.
-    mfsprg3 r1		;// Get task structure.
+    mtsprg1 r1          ;// Save r1.
+    mfsprg3 r1          ;// Get task structure.
 
-    std r0, TASK_GPR_0(r1)	;// Save GPR0
+    std r0, TASK_GPR_0(r1)      ;// Save GPR0
     mfsrr0 r0
-    std r0, TASK_NIP(r1)	;// Save NIP
+    std r0, TASK_NIP(r1)        ;// Save NIP
     mflr r0
-    std r0, TASK_LR(r1)		;// Save LR
+    std r0, TASK_LR(r1)         ;// Save LR
     mfcr r0
-    std r0, TASK_CR(r1)		;// Save CR
+    std r0, TASK_CR(r1)         ;// Save CR
     mfctr r0
-    std r0, TASK_CTR(r1)	;// Save CTR
+    std r0, TASK_CTR(r1)        ;// Save CTR
     mfxer r0
-    std r0, TASK_XER(r1)	;// Save XER
+    std r0, TASK_XER(r1)        ;// Save XER
     mfsprg1 r0
-    std r0, TASK_GPR_1(r1)	;// Save GPR1
-    std r2, TASK_GPR_2(r1)	;// Save GPR2
-    std r3, TASK_GPR_3(r1)	;// Save GPR3
-    std r4, TASK_GPR_4(r1)	;// Save GPR4
-    std r5, TASK_GPR_5(r1)	;// Save GPR5
-    std r6, TASK_GPR_6(r1)	;// Save GPR6
-    std r7, TASK_GPR_7(r1)	;// Save GPR7
-    std r8, TASK_GPR_8(r1)	;// Save GPR8
-    std r9, TASK_GPR_9(r1)	;// Save GPR9
-    std r10, TASK_GPR_10(r1)	;// Save GPR10
-    std r11, TASK_GPR_11(r1)	;// Save GPR11
-    std r12, TASK_GPR_12(r1)	;// Save GPR12
-    std r13, TASK_GPR_13(r1)	;// Save GPR13
-    std r14, TASK_GPR_14(r1)	;// Save GPR14
-    std r15, TASK_GPR_15(r1)	;// Save GPR15
-    std r16, TASK_GPR_16(r1)	;// Save GPR16
-    std r17, TASK_GPR_17(r1)	;// Save GPR17
-    std r18, TASK_GPR_18(r1)	;// Save GPR18
-    std r19, TASK_GPR_19(r1)	;// Save GPR19
-    std r20, TASK_GPR_20(r1)	;// Save GPR20
-    std r21, TASK_GPR_21(r1)	;// Save GPR21
-    std r22, TASK_GPR_22(r1)	;// Save GPR22
-    std r23, TASK_GPR_23(r1)	;// Save GPR23
-    std r24, TASK_GPR_24(r1)	;// Save GPR24
-    std r25, TASK_GPR_25(r1)	;// Save GPR25
-    std r26, TASK_GPR_26(r1)	;// Save GPR26
-    std r27, TASK_GPR_27(r1)	;// Save GPR27
-    std r28, TASK_GPR_28(r1)	;// Save GPR28
-    std r29, TASK_GPR_29(r1)	;// Save GPR29
-    std r30, TASK_GPR_30(r1)	;// Save GPR30
-    std r31, TASK_GPR_31(r1)	;// Save GPR31
+    std r0, TASK_GPR_1(r1)      ;// Save GPR1
+    std r2, TASK_GPR_2(r1)      ;// Save GPR2
+    std r3, TASK_GPR_3(r1)      ;// Save GPR3
+    std r4, TASK_GPR_4(r1)      ;// Save GPR4
+    std r5, TASK_GPR_5(r1)      ;// Save GPR5
+    std r6, TASK_GPR_6(r1)      ;// Save GPR6
+    std r7, TASK_GPR_7(r1)      ;// Save GPR7
+    std r8, TASK_GPR_8(r1)      ;// Save GPR8
+    std r9, TASK_GPR_9(r1)      ;// Save GPR9
+    std r10, TASK_GPR_10(r1)    ;// Save GPR10
+    std r11, TASK_GPR_11(r1)    ;// Save GPR11
+    std r12, TASK_GPR_12(r1)    ;// Save GPR12
+    std r13, TASK_GPR_13(r1)    ;// Save GPR13
+    std r14, TASK_GPR_14(r1)    ;// Save GPR14
+    std r15, TASK_GPR_15(r1)    ;// Save GPR15
+    std r16, TASK_GPR_16(r1)    ;// Save GPR16
+    std r17, TASK_GPR_17(r1)    ;// Save GPR17
+    std r18, TASK_GPR_18(r1)    ;// Save GPR18
+    std r19, TASK_GPR_19(r1)    ;// Save GPR19
+    std r20, TASK_GPR_20(r1)    ;// Save GPR20
+    std r21, TASK_GPR_21(r1)    ;// Save GPR21
+    std r22, TASK_GPR_22(r1)    ;// Save GPR22
+    std r23, TASK_GPR_23(r1)    ;// Save GPR23
+    std r24, TASK_GPR_24(r1)    ;// Save GPR24
+    std r25, TASK_GPR_25(r1)    ;// Save GPR25
+    std r26, TASK_GPR_26(r1)    ;// Save GPR26
+    std r27, TASK_GPR_27(r1)    ;// Save GPR27
+    std r28, TASK_GPR_28(r1)    ;// Save GPR28
+    std r29, TASK_GPR_29(r1)    ;// Save GPR29
+    std r30, TASK_GPR_30(r1)    ;// Save GPR30
+    std r31, TASK_GPR_31(r1)    ;// Save GPR31
 
     ld r2, TASK_FP_CONTEXT(r1)  ;// Load FP Context pointer.
     cmpi cr0, r2, 0
     bne- cr0, 1f                ;// Jump to FP-save if != NULL.
 2:
 
-    ld r1, TASK_CPUPTR(r1)	;// Get CPU pointer
-    ld r1, CPU_KERNEL_STACK(r1)	;// Get kernel stack pointer.
+    ld r1, TASK_CPUPTR(r1)      ;// Get CPU pointer
+    ld r1, CPU_KERNEL_STACK(r1) ;// Get kernel stack pointer.
 
-    mfsprg0 r0		;// Retrieve return address from SPRG0
-    mtlr r0		;// Call
+    mfsprg0 r0          ;// Retrieve return address from SPRG0
+    mtlr r0             ;// Call
     blr
         ;// Save FP context.
 1:
@@ -442,72 +456,72 @@ kernel_save_task:
     ;//     * Current contents of registers are not needed.
 kernel_dispatch_task:
 .global kernel_dispatch_task
-    mfsprg3 r1		;// Load task structure to r1.
+    mfsprg3 r1          ;// Load task structure to r1.
 
-    ldarx r0, TASK_CPUPTR, r1	;// Clear the reservation by loading / storing
-    stdcx. r0, TASK_CPUPTR, r1	;// the CPU pointer in the task.
+    ldarx r0, TASK_CPUPTR, r1   ;// Clear the reservation by loading / storing
+    stdcx. r0, TASK_CPUPTR, r1  ;// the CPU pointer in the task.
 
-    mfmsr r2		;// Get current MSR
-    ori r2,r2, 0xD030	;// Enable MSR[EE,ME,PR,IR,DR].
+    mfmsr r2            ;// Get current MSR
+    ori r2,r2, 0xD030   ;// Enable MSR[EE,ME,PR,IR,DR].
     rldicl r2,r2,50,1   ;// Clear ...
     rotldi r2,r2,14     ;//     MSR[FP]
     ld r3, TASK_MSR_MASK(r1) ;// Load MSR mask.
     xor r2, r2, r3      ;// Apply MSR mask (XOR).
-    mtsrr1 r2		;// Set task MSR (SRR1)
+    mtsrr1 r2           ;// Set task MSR (SRR1)
 
-    ld r2, TASK_NIP(r1)	;// Load NIP from context.
-    mtsrr0 r2		;// Set task NIP (SRR0)
+    ld r2, TASK_NIP(r1) ;// Load NIP from context.
+    mtsrr0 r2           ;// Set task NIP (SRR0)
 
                         ;// Check if FP enabled, load context.
     ld r2, TASK_FP_CONTEXT(r1)
     cmpi cr0, r2, 0
     bne- 1f
 2:
-			;// Restore GPRs from context.
-    ld r0, TASK_GPR_0(r1)	;// GPR0
-    ld r2, TASK_GPR_2(r1)	;// GPR2
-    ld r3, TASK_GPR_3(r1)	;// GPR3
-    ld r4, TASK_GPR_4(r1)	;// GPR4
-    ld r5, TASK_GPR_5(r1)	;// GPR5
-    ld r6, TASK_GPR_6(r1)	;// GPR6
-    ld r7, TASK_GPR_7(r1)	;// GPR7
-    ld r8, TASK_GPR_8(r1)	;// GPR8
-    ld r9, TASK_GPR_9(r1)	;// GPR9
-    ld r10, TASK_GPR_10(r1)	;// GPR10
-    ld r11, TASK_GPR_11(r1)	;// GPR11
-    ld r12, TASK_GPR_12(r1)	;// GPR12
-    ld r13, TASK_GPR_13(r1)	;// GPR13
-    ld r14, TASK_GPR_14(r1)	;// GPR14
-    ld r15, TASK_GPR_15(r1)	;// GPR15
-    ld r16, TASK_GPR_16(r1)	;// GPR16
-    ld r17, TASK_GPR_17(r1)	;// GPR17
-    ld r18, TASK_GPR_18(r1)	;// GPR18
-    ld r19, TASK_GPR_19(r1)	;// GPR19
-    ld r20, TASK_GPR_20(r1)	;// GPR20
-    ld r21, TASK_GPR_21(r1)	;// GPR21
-    ld r22, TASK_GPR_22(r1)	;// GPR22
-    ld r23, TASK_GPR_23(r1)	;// GPR23
-    ld r24, TASK_GPR_24(r1)	;// GPR24
-    ld r25, TASK_GPR_25(r1)	;// GPR25
-    ld r26, TASK_GPR_26(r1)	;// GPR26
-    ld r27, TASK_GPR_27(r1)	;// GPR27
+                        ;// Restore GPRs from context.
+    ld r0, TASK_GPR_0(r1)       ;// GPR0
+    ld r2, TASK_GPR_2(r1)       ;// GPR2
+    ld r3, TASK_GPR_3(r1)       ;// GPR3
+    ld r4, TASK_GPR_4(r1)       ;// GPR4
+    ld r5, TASK_GPR_5(r1)       ;// GPR5
+    ld r6, TASK_GPR_6(r1)       ;// GPR6
+    ld r7, TASK_GPR_7(r1)       ;// GPR7
+    ld r8, TASK_GPR_8(r1)       ;// GPR8
+    ld r9, TASK_GPR_9(r1)       ;// GPR9
+    ld r10, TASK_GPR_10(r1)     ;// GPR10
+    ld r11, TASK_GPR_11(r1)     ;// GPR11
+    ld r12, TASK_GPR_12(r1)     ;// GPR12
+    ld r13, TASK_GPR_13(r1)     ;// GPR13
+    ld r14, TASK_GPR_14(r1)     ;// GPR14
+    ld r15, TASK_GPR_15(r1)     ;// GPR15
+    ld r16, TASK_GPR_16(r1)     ;// GPR16
+    ld r17, TASK_GPR_17(r1)     ;// GPR17
+    ld r18, TASK_GPR_18(r1)     ;// GPR18
+    ld r19, TASK_GPR_19(r1)     ;// GPR19
+    ld r20, TASK_GPR_20(r1)     ;// GPR20
+    ld r21, TASK_GPR_21(r1)     ;// GPR21
+    ld r22, TASK_GPR_22(r1)     ;// GPR22
+    ld r23, TASK_GPR_23(r1)     ;// GPR23
+    ld r24, TASK_GPR_24(r1)     ;// GPR24
+    ld r25, TASK_GPR_25(r1)     ;// GPR25
+    ld r26, TASK_GPR_26(r1)     ;// GPR26
+    ld r27, TASK_GPR_27(r1)     ;// GPR27
 
     ld r28, TASK_LR(r1)     ;// Load from context: LR, CR, CTR, XER
     ld r29, TASK_CR(r1)
     ld r30, TASK_CTR(r1)
     ld r31, TASK_XER(r1)
-    mtlr  r28		;// Restore LR
-    mtcr  r29		;// Restore CR
-    mtctr r30		;// Restore CTR
-    mtxer r31		;// Restore XER
+    mtlr  r28           ;// Restore LR
+    mtcr  r29           ;// Restore CR
+    mtctr r30           ;// Restore CTR
+    mtxer r31           ;// Restore XER
 
-    ld r28, TASK_GPR_28(r1)	;// GPR28
-    ld r29, TASK_GPR_29(r1)	;// GPR29
-    ld r30, TASK_GPR_30(r1)	;// GPR30
-    ld r31, TASK_GPR_31(r1)	;// GPR31
-    ld r1, TASK_GPR_1(r1)	;// GPR1
+    ld r28, TASK_GPR_28(r1)     ;// GPR28
+    ld r29, TASK_GPR_29(r1)     ;// GPR29
+    ld r30, TASK_GPR_30(r1)     ;// GPR30
+    ld r31, TASK_GPR_31(r1)     ;// GPR31
+    ld r1, TASK_GPR_1(r1)       ;// GPR1
 
-    rfid			;// Execute task.
+    rfid                        ;// Execute task.
 
         ;// Load FP context.
 1:
@@ -592,7 +606,7 @@ intvect_system_reset:
     beq- _start
     mfspr r1, PIR               ;// Extract on-node CPU id.
     clrlslwi r1, r1, 22, 3
-    ldx r2, r1, r2		;// Load CPU object.
+    ldx r2, r1, r2              ;// Load CPU object.
     cmpi cr0, r2, 0             ;// Check for NULL CPU object.
     beq- _start
 
@@ -657,8 +671,8 @@ intvect_system_reset_decrementer:
     std r2, TASK_NIP(r1)
 
     ;// Restore kernel stack.
-    ld r1, TASK_CPUPTR(r1)	;// Get CPU pointer
-    ld r1, CPU_KERNEL_STACK(r1)	;// Get kernel stack pointer.
+    ld r1, TASK_CPUPTR(r1)      ;// Get CPU pointer
+    ld r1, CPU_KERNEL_STACK(r1) ;// Get kernel stack pointer.
 
     ;// Jump to post-save portion of decrementer.
     b intvect_decrementer_finish_save
@@ -783,8 +797,31 @@ task_end_stub:
     li r3, 2  ;// TASK_END -> r3 (syscall number)
     sc
 
+    ;// @fn intvect_unhandled_finish_save
+    ;// Tail-end of a intvect_*_finish_save code block generated by
+    ;// STD_INTERRUPT_NOADDR for use by the unhandled interrupt code.  This is
+    ;// used by the UNIMPL_INTERRUPT_* macros so that we have a single C
+    ;// function to deal with the unhandled / unimplemented interrupt.
+intvect_unhandled_finish_save: \
+    ; /* Get TOC entry for kernel C function */
+    lis r2, kernel_execute_unhandled_exception@h;
+    ori r2, r2, kernel_execute_unhandled_exception@l;
+    ld r0, 0(r2); /* Load call address */
+    mtlr r0;
+    ld r2, 8(r2); /* Load TOC base. */
+    blrl; /* Call kernel function */
+    nop;
+    b kernel_dispatch_task; /* Return to task */
 
 STD_INTERRUPT_NOADDR(hype_emu_assist)
+UNIMPL_INTERRUPT_NOADDR(trace, 0xD00)
+UNIMPL_INTERRUPT_NOADDR(hype_data_storage, 0xE00)
+UNIMPL_INTERRUPT_NOADDR(hype_inst_storage, 0xE20)
+UNIMPL_INTERRUPT_NOADDR(hype_maint, 0xE60)
+UNIMPL_INTERRUPT_NOADDR(perf_monitor, 0xF00)
+UNIMPL_INTERRUPT_NOADDR(vector_unavail, 0xF20)
+UNIMPL_INTERRUPT_NOADDR(vsx_unavail, 0xF40)
+UNIMPL_INTERRUPT_NOADDR(fac_unavail, 0xF60)
 
     ;// @fn kernel_execute_winkle
     ;//

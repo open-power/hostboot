@@ -103,6 +103,23 @@ inline uint64_t getPIR()
 }
 
 ALWAYS_INLINE
+inline uint64_t getSPRG2()
+{
+    register uint64_t sprg2 = 0;
+    asm volatile("mfsprg2 %0" : "=r" (sprg2));
+    return sprg2;
+}
+
+ALWAYS_INLINE
+inline void setSPRG2(uint64_t _sprg2)
+{
+    register uint64_t sprg2 = _sprg2;
+    asm volatile("mtsprg2 %0" : : "r" (sprg2));
+    return;
+}
+
+
+ALWAYS_INLINE
 inline uint64_t getSPRG3()
 {
     register uint64_t sprg3 = 0;
