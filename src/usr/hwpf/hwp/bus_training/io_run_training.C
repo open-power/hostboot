@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.42 2013/07/11 12:13:05 varkeykv Exp $
+// $Id: io_run_training.C,v 1.51 2013/11/25 07:10:38 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -46,17 +46,274 @@
 #include <fapi.H>
 #include "io_run_training.H"
 #include "io_funcs.H"
+#include <p8_scom_addresses.H>
+#include "proc_a_x_pci_dmi_pll_utils.H"
+
 
 
 extern "C" {
      using namespace fapi;
+     
+     
+          
+ReturnCode io_training_set_pll_post_wiretest(const Target& target){
+    ReturnCode rc;
+    uint8_t pb_bndy_dmipll_data[231]={0},ab_bndy_pll_data[80]={0},tp_bndy_pll_data[80]={0};
+     
+     // For the PLL Partial updation logic we need PFD360 offsets into the Ring now 
+     uint32_t proc_dmi_cupll_pfd360_offset[8];
+     uint32_t memb_dmi_cupll_pfd360_offset;
+     uint32_t proc_abus_cupll_pfd360_offset[3];
+     // REFCLK SEL offsets 
+     //uint32_t proc_dmi_cupll_refclksel_offset[8];
+    // uint32_t memb_dmi_cupll_refclksel_offset;
+     //uint32_t proc_abus_cupll_refclksel_offset[3];
+     
+    ecmdDataBufferBase ring_data;
+    fapi::Target parent_target;
+     uint32_t ring_length=0;
+     uint32_t rc_ecmd=0;
+     uint8_t chip_unit = 0;
+
+    FAPI_DBG("Running PLL updation code");
+    
+
+
+    // This is a DMI/MC bus
+    if (target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET)
+    {
+        FAPI_DBG("This is a Processor DMI bus using base DMI scom address");
+        
+        // Lets get chip unit pos , used for PLL table lookup 
+           rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
+                               &target,
+                               chip_unit);
+     
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error retreiving MCS chiplet number!");
+                return rc;
+            }
+            
+        // obtain parent chip target needed for ring manipulation
+	    rc = fapiGetParentChip(target, parent_target);
+        if (rc)
+        {
+            FAPI_ERR("Error from fapiGetParentChip");
+            return(rc);
+        }
+
+        // install PLL config for dccal operation
+	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_LENGTH)");
+            return(rc);
+        }
+//	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_dmipll_FOR_RUNTIME_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
+	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA)");
+            return(rc);
+        }
+        
+        // Now we need the partial offset data also . First let us get PFD360 offsets
+         rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_PFD360_OFFSET, &parent_target, proc_dmi_cupll_pfd360_offset);	// -- get length of scan ring
+          if (rc)
+        {
+            FAPI_ERR("Error fetching PFD360 offsets on MCS");
+            return(rc);
+        }
+        //rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET, &parent_target, proc_dmi_cupll_refclksel_offset);	// -- get length of scan ring
+        //if (rc)
+        //{
+        //    FAPI_ERR("Error fetching REFCLKSEL offsets on MCS");
+        //    return(rc);
+        //}
+              
+	    rc_ecmd |= ring_data.setBitLength(ring_length);
+            
+            rc_ecmd |=fapiGetRing(parent_target,PB_BNDY_DMIPLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE); 
+            FAPI_DBG("PFD bit to be cleared for DMI unit %d is %d",chip_unit,proc_dmi_cupll_pfd360_offset[chip_unit]);
+            ring_data.clearBit(proc_dmi_cupll_pfd360_offset[chip_unit]);
+            // Now 
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
+                                            NEST_CHIPLET_0x02000000,
+                                            PB_BNDY_DMIPLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
+
+        
+    }
+    else if (target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)
+    {
+        FAPI_DBG("This is a Centaur DMI bus using base DMI scom address");
+
+        // install PLL config for dccal operation
+	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_LENGTH, &target, ring_length);	// -- get length of scan ring
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_LENGTH)");
+            return(rc);
+        }
+//  	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_FOR_RUNTIME_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
+  	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA)");
+            return(rc);
+        }
+              
+        // Now we need the partial offset data also . First let us get PFD360 offsets
+         rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET, &target, memb_dmi_cupll_pfd360_offset);	// -- get length of scan ring
+          if (rc)
+        {
+            FAPI_ERR("Error fetching PFD360 offsets on Centaur");
+            return(rc);
+        }
+        //rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET, &target, memb_dmi_cupll_refclksel_offset);	// -- get length of scan ring
+        //if (rc)
+        //{
+        //    FAPI_ERR("Error fetching REFCLKSEL offsets on Centaur");
+        //    return(rc);
+        //}
+
+          FAPI_DBG("Centaur PFD offset = %d",memb_dmi_cupll_pfd360_offset);
+         // FAPI_DBG("Centaur REFCLKSEL offset = %d",memb_dmi_cupll_refclksel_offset);
+     
+        FAPI_DBG("Ring length is %d",ring_length);
+	    rc_ecmd |= ring_data.setBitLength(ring_length);
+            
+           rc_ecmd |=fapiGetRing(target,TP_BNDY_PLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE); 
+	   // rc_ecmd |= ring_data.insert(pb_bndy_dmipll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
+            FAPI_DBG("PFD bit to be cleared for centaur is %d",memb_dmi_cupll_pfd360_offset);
+            ring_data.clearBit(memb_dmi_cupll_pfd360_offset);
+            
+	    //rc_ecmd |= ring_data.insert(tp_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
+                                            TP_CHIPLET_0x01000000,
+                                            TP_BNDY_PLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
+
+        
+	}
+    //This is an X Bus
+    else if (target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT)
+    {
+        FAPI_DBG("This is a X Bus training invocation");
+    }
+    //This is an A Bus
+    else if (target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT)
+    {
+        FAPI_DBG("This is an A Bus training invocation");
+
+          // Lets get chip unit pos , used for PLL table lookup 
+        rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
+                            &target,
+                            chip_unit);
+  
+         if (!rc.ok())
+         {
+             FAPI_ERR("Error retreiving Abus chiplet number!");
+             return rc;
+         }
+         
+        // obtain parent chip target needed for ring manipulation
+	    rc = fapiGetParentChip(target, parent_target);
+        if (rc)
+        {
+            FAPI_ERR("Error from fapiGetParentChip");
+            return(rc);
+        }
+
+        // install PLL config for dccal operation
+  	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_LENGTH)");
+            return(rc);
+        }
+//	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_FOR_RUNTIME_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
+	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA)");
+            return(rc);
+        }
+        
+                       
+        // Now we need the partial offset data also . First let us get PFD360 offsets
+         rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET, &parent_target, proc_abus_cupll_pfd360_offset);	// -- get length of scan ring
+          if (rc)
+        {
+            FAPI_ERR("Error fetching PFD360 offsets on Abus");
+            return(rc);
+        }
+        //rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET, &parent_target, proc_abus_cupll_refclksel_offset);	// -- get length of scan ring
+        //if (rc)
+        //{
+        //    FAPI_ERR("Error fetching REFCLKSEL offsets on Abus");
+        //    return(rc);
+        //}
+            rc_ecmd |= ring_data.setBitLength(ring_length);
+            rc_ecmd |=fapiGetRing(parent_target,AB_BNDY_PLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE); 
+            FAPI_DBG("PFD bit to be cleared for Abus number %d is %d",chip_unit,proc_abus_cupll_pfd360_offset[chip_unit]);
+            ring_data.clearBit(proc_abus_cupll_pfd360_offset[chip_unit]);
+
+        if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
+                                            A_BUS_CHIPLET_0x08000000,
+                                            AB_BNDY_PLL_RING_ADDR,
+                                            ring_data,
+                                            true);
+        if (rc)
+        {
+            FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+            return(rc);
+        }
+
+    }
+    else
+    {
+        FAPI_ERR("Invalid target passed to PLL Update code.. target does not belong to DMI/X/A instances");
+        FAPI_SET_HWP_ERROR(rc, IO_DCCAL_INVALID_INVOCATION_RC);
+    }
+    return rc;
+}
+
 // For clearing the FIR mask , used by io run training 
 ReturnCode clear_fir_mask_reg(const Target &i_target,fir_io_interface_t i_chip_interface){
 
     ReturnCode rc;
     uint32_t rc_ecmd = 0;
     uint8_t chip_unit = 0;
-    uint8_t link_fir_unmask_data = 0x8F;
+    uint8_t link_fir_unmask_data = 0xFF;
     ecmdDataBufferBase data(64);
     FAPI_INF("io_run_training:In the Clear FIR MASK register function ");
 
@@ -66,8 +323,7 @@ ReturnCode clear_fir_mask_reg(const Target &i_target,fir_io_interface_t i_chip_i
         rc_ecmd |= data.invert();
 
         // set FIR mask appropriately based on interface type / link being trained
-    	if ((i_chip_interface == FIR_CP_FABRIC_X0) ||
-    	    (i_chip_interface == FIR_CP_FABRIC_A0) ||
+    	if ((i_chip_interface == FIR_CP_FABRIC_A0) ||
             (i_chip_interface == FIR_CP_IOMC0_P0))
         {
             rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
@@ -75,27 +331,53 @@ ReturnCode clear_fir_mask_reg(const Target &i_target,fir_io_interface_t i_chip_i
                                chip_unit);
             if (!rc.ok())
             {
-                FAPI_ERR("Error retreiving MCS chiplet number!");
+                FAPI_ERR("Error retreiving chiplet number!");
                 break;
             }
 
-            // swizzle to DMI number
+            // adjust for DMI number
             if (i_chip_interface == FIR_CP_IOMC0_P0)
             {
                 chip_unit = chip_unit % 4;
-                if (chip_unit == 3)
+                if (chip_unit == 0)
+                {
+                    chip_unit = 3;
+                }
+                else if (chip_unit == 1)
                 {
                     chip_unit = 2;
                 }
                 else if (chip_unit == 2)
                 {
-                    chip_unit = 3;
+                    chip_unit = 0;
                 }
+                else
+                {
+                    chip_unit = 1;
+                }
+                link_fir_unmask_data = 0x8F;
+            }
+            // adjust for ABUS number
+            else
+            {
+                chip_unit = chip_unit + 1;
+                link_fir_unmask_data = 0x87;
             }
         }
-        else if (i_chip_interface == FIR_CEN_DMI)
+
+        // SW228820 , for Xbus all data goes into BUS0 fields regardless of instance
+        else if ((i_chip_interface == FIR_CEN_DMI) ||
+                 (i_chip_interface == FIR_CP_FABRIC_X0))
         {
             chip_unit = 0;
+            if (i_chip_interface == FIR_CEN_DMI)
+            {
+                link_fir_unmask_data = 0x8F;
+            }
+            else
+            {
+                link_fir_unmask_data = 0x87;
+            }
     	}
 
         rc_ecmd |= data.insert(link_fir_unmask_data,
@@ -618,8 +900,14 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
      edi_training init1(SELECTED,SELECTED,SELECTED, NOT_RUNNING, NOT_RUNNING); // Run WDE first
      
      // For Xbus DLL Workaround , we need Wiretest alone , then DE and RF 
+     
+     // For Xbus DLL Workaround , we need Wiretest alone , then DE and RF 
      edi_training init_w(SELECTED,NOT_RUNNING, NOT_RUNNING, NOT_RUNNING, NOT_RUNNING); // Run W for Xbus
      edi_training init_wde(SELECTED,SELECTED,SELECTED, NOT_RUNNING, NOT_RUNNING); // Run DE next for X bus
+     
+     // For the PLL workaround we need a DE Object since DE + RF should be separate as per original guidelines
+     edi_training init_de(NOT_RUNNING,SELECTED,SELECTED, NOT_RUNNING, NOT_RUNNING);
+     
      // Need an object to restore object state after one wiretest run. 
      edi_training copy_w=init_w;
      // DE & RF needs to be split due to HW 220654 
@@ -632,12 +920,12 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
      ecmdDataBufferBase master_data_one_old[4];
      ecmdDataBufferBase master_data_two_old[4];
 
-     
+  
      // This is a DMI/MC bus 
      if( (master_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET )&&
           (slave_target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP))
      {
-          FAPI_DBG("This is a DMI bus using base DMI scom address");
+                 FAPI_DBG("This is a DMI bus using base DMI scom address");
           master_interface=CP_IOMC0_P0; // base scom for MC bus
           slave_interface=CEN_DMI; // Centaur scom base
           master_group=3; // Design requires us to do this as per scom map and layout
@@ -648,11 +936,38 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                                       master_data_one_old,master_data_two_old);
           if(rc) return rc;
           // Workaround - HW 220654 -- Need to split WDERF into WDE + RF due to sync problem
-          rc=init1.run_training(master_target,master_interface,master_group,
+          // For PLL workaround now we run W alone , followed by DE then RF 
+          rc=init_w.run_training(master_target,master_interface,master_group,
                                 slave_target,slave_interface,slave_group);
           if(!rc.ok()){
                return rc;
           }
+          
+          // Now Set PLL to runtime setting and continue with training
+          // Call Janani's PLL ring set function from DCCAL module. It in turn uses Joe's funcs
+          
+          rc=io_training_set_pll_post_wiretest(slave_target);
+         //FAPI_DBG("Waiting for 1s after PLL Update on slave");
+          //rc=fapiDelay(1000000,1000);
+          
+          if(!rc.ok()){
+               FAPI_DBG("PLL SETTING FAILED ON SLAVE SIDE "); 
+               return rc;
+          }
+          rc=io_training_set_pll_post_wiretest(master_target);
+          if(!rc.ok()){
+               FAPI_DBG("PLL SETTING FAILED ON MASTER SIDE "); 
+               return rc;
+          }
+         // FAPI_DBG("Waiting for 1s after PLL Update on master");
+        //  rc=fapiDelay(1000000,1000); 
+          // Run DE Now - as per Gary 
+          rc=init_de.run_training(master_target,master_interface,master_group,
+                                slave_target,slave_interface,slave_group);
+          if(!rc.ok()){
+               return rc;
+          }
+          //Now Run RF 
           rc=init2.run_training(master_target,master_interface,master_group,
                                 slave_target,slave_interface,slave_group);
           rc=fir_workaround_post_training(master_target,master_interface,
@@ -665,6 +980,7 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
           if(rc) return rc;
                rc=handle_max_spare(slave_target,slave_interface,slave_group);
           if(rc) return rc;
+          
           
      }
      //This is an X Bus
@@ -849,33 +1165,90 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                if(!is_master)
                {
                     FAPI_DBG("A Bus ..target swap performed");
-                    rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
-                                                slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    
+                    rc=fir_workaround_pre_training(slave_target,slave_interface,
+                                                    slave_group,slave_target,
+                                                    slave_interface,slave_group,
+                                                 slave_data_one_old,slave_data_two_old,
+                                                 master_data_one_old,master_data_two_old);
+                   
                     if(rc) return rc;
-                    rc=init1.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
+                    rc=init_w.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
+                    
+                    if(!rc.ok()){
+                         return rc;
+                    }
+          
+                    // Now Set PLL to runtime setting and continue with training
+                    // Call Janani's PLL ring set function from DCCAL module. It in turn uses Joe's funcs
+                    
+                    rc=io_training_set_pll_post_wiretest(slave_target);
+                    
+                    if(!rc.ok()){
+                         FAPI_DBG("PLL SETTING FAILED ON SLAVE SIDE "); 
+                         return rc;
+                    }
+                    rc=io_training_set_pll_post_wiretest(master_target);
+                    if(!rc.ok()){
+                         FAPI_DBG("PLL SETTING FAILED ON MASTER SIDE ");
+                         return rc;
+                    }
+                    rc=init_de.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
                     if(rc) return rc;
-                    rc=init2.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
-                    rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
-                                                 slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
+                    
+                    // Now do RF
+                    rc=init2.run_training(slave_target,slave_interface,slave_group,
+                                master_target,master_interface,master_group);
+                    if(rc) return rc;
+                    rc=fir_workaround_post_training(slave_target,
+                                                         slave_interface,
+                                                         slave_group,
+                                                         slave_target,
+                                                         slave_interface,
+                                                         slave_group,
+                                                         slave_data_one_old,
+                                                         slave_data_two_old,
+                                                        master_data_one_old,
+                                                        master_data_two_old);
                     if(rc) return rc;
                }
                else
                {
+               
                     rc=fir_workaround_pre_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                 slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
                     if(rc) return rc;
-                    rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                    rc=init_w.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                    
+                    if(!rc.ok()){
+                         return rc;
+                    }
+          
+                    // Now Set PLL to runtime setting and continue with training
+                    // Call Janani's PLL ring set function from DCCAL module. It in turn uses Joe's funcs
+                    
+                    rc=io_training_set_pll_post_wiretest(slave_target);
+                    
+                    if(!rc.ok()){
+                         FAPI_DBG("PLL SETTING FAILED ON SLAVE SIDE "); 
+                         return rc;
+                    }
+                    rc=io_training_set_pll_post_wiretest(master_target);
+                    if(!rc.ok()){
+                         FAPI_DBG("PLL SETTING FAILED ON MASTER SIDE ");
+                         return(rc);
+                    }
+                    rc=init_de.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
                     if(rc) return rc;
-                    rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                    
+                    // Now do RF
+                    rc=init2.run_training(master_target,master_interface,master_group,
+                                slave_target,slave_interface,slave_group);
+                    if(rc) return rc;
                     rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                  slave_data_one_old,slave_data_two_old,master_data_one_old,master_data_two_old);
                     if(rc) return rc;
-                    
                }
-               rc=handle_max_spare(master_target,master_interface,master_group);
-               if(rc) return rc;
-               rc=handle_max_spare(slave_target,slave_interface,slave_group);
-               if(rc) return rc;
           }
      }
      else{
@@ -884,7 +1257,6 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
      }
      return rc;
 }
-
 
 
 } // extern 

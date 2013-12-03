@@ -20,7 +20,6 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: io_errors.xml,v 1.10 2013/07/23 22:05:40 rjknight Exp $ -->
 <!-- Error definitions for IO HWPS  -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -66,26 +65,31 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>IO_RUN_TRAINING_WIRETEST_TIMEOUT_RC</rc>
+        <ffdc>FFDC_NUM_CYCLES</ffdc>
     <description>io run training wiretest timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
   </hwpError>
    <!-- *********************************************************************** -->
   <hwpError>
     <rc>IO_RUN_TRAINING_DESKEW_TIMEOUT_RC</rc>
+        <ffdc>FFDC_NUM_CYCLES</ffdc>
     <description>io run training deskew timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
   </hwpError>
    <!-- *********************************************************************** -->
   <hwpError>
     <rc>IO_RUN_TRAINING_EYE_OPT_TIMEOUT_RC</rc>
+    <ffdc>FFDC_NUM_CYCLES</ffdc>
     <description>io run training eye opt timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
   </hwpError>
    <!-- *********************************************************************** -->
   <hwpError>
     <rc>IO_RUN_TRAINING_REPAIR_TIMEOUT_RC</rc>
+        <ffdc>FFDC_NUM_CYCLES</ffdc>
     <description>io run training repair timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
   </hwpError>
    <!-- *********************************************************************** -->
   <hwpError>
     <rc>IO_RUN_TRAINING_FUNC_MODE_TIMEOUT_RC</rc>
+        <ffdc>FFDC_NUM_CYCLES</ffdc>
     <description>io run training functional mode timed out waiting for pass/fail indication in the p8 or centaur Status Registers</description>
   </hwpError>
   <!-- *********************************************************************** -->

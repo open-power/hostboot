@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_funcs.C,v 1.17 2013/03/20 10:47:08 varkeykv Exp $
+// $Id: io_funcs.C,v 1.18 2013/11/25 07:46:07 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -204,6 +204,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
     rc_ecmd|=status_data.setBitLength(16);
     rc_ecmd|=status_data.flushTo0();
 
+
     if(rc_ecmd)
     {
           FAPI_ERR("io_run_training: Failed buffer intialization in training_function_status\n");
@@ -213,9 +214,10 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
     {
         uint64_t  curr_cyc = 0;         // start time
         uint64_t end_cycle=max_poll_cycles ;
-    
+
+	uint64_t &FFDC_NUM_CYCLES=curr_cyc;
         int state,fail_bit;
-    
+
         while ( curr_cyc < end_cycle )
             {
                     // Reads Status Register for interface

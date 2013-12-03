@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_funcs.H,v 1.15 2013/03/20 10:47:08 varkeykv Exp $
+// $Id: io_funcs.H,v 1.16 2013/11/25 07:10:39 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -77,7 +77,7 @@ public:
 	bus_status    repair_status;
 	bus_status    functional_status;
         //Updating max cycles to suit 280ms theoretical max timeout as per Mike Spear
-	static const uint32_t      max_poll_cycles=300;
+	static const uint32_t      max_poll_cycles=1000;
 	static const uint32_t      increment_poll_cycles=1;
 	uint32_t endpoints_set; // How many end points have we accessed so far
 
