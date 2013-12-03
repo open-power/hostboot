@@ -72,9 +72,6 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
             globals.mfgPolicy |=
               MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST;
         }
-
-        uint8_t isMpipl = top->getAttr<ATTR_IS_MPIPL_HB>();
-        globals.mpipl = (isMpipl ? true:false);
     }
 
     // get the workflow for each target mba passed in.

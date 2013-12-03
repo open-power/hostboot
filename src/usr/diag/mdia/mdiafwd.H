@@ -62,7 +62,6 @@ struct WorkFlowProperties;
  */
 enum DiagMode
 {
-    SCRUB_ONLY,
     ONE_PATTERN,
     FOUR_PATTERNS,
     NINE_PATTERNS,

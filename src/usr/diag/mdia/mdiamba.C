@@ -45,14 +45,6 @@ errlHndl_t getMbaDiagnosticMode(
 
     do
     {
-        // Can't do any pattern testing in MPIPL since
-        // that may cause customers data corruption
-        if(i_globals.mpipl)
-        {
-            o_mode = SCRUB_ONLY;
-            break;
-        }
-
         if(MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
            & i_globals.mfgPolicy)
         {
@@ -132,11 +124,6 @@ errlHndl_t getMbaWorkFlow(
         case ONE_PATTERN:
 
             o_wf.push_back(START_PATTERN_0); // 0's pattern, must be last
-
-            // fall through
-
-        case SCRUB_ONLY:
-
             o_wf.push_back(START_SCRUB);
             break;
 
@@ -150,12 +137,7 @@ errlHndl_t getMbaWorkFlow(
         o_wf.push_back(ANALYZE_IPL_MNFG_CE_STATS);
     }
 
-    // only clear HW changed state attribute
-    // after any pattern test
-    if(SCRUB_ONLY != i_mode)
-    {
-        o_wf.push_back(CLEAR_HW_CHANGED_STATE);
-    }
+    o_wf.push_back(CLEAR_HW_CHANGED_STATE);
 
     return 0;
 }

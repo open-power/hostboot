@@ -48,11 +48,6 @@ struct Globals
      * @brief user interface policy
      */
     uint64_t userPolicy;
-
-    /**
-     * @brief memory preserving ipl flag
-     */
-    bool mpipl;
 };
 }
 #endif
