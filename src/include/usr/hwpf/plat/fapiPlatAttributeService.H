@@ -167,28 +167,6 @@ fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_pFapiTarget,
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_MSS_MEMORY_BASE. It should not be called directly
- *
- * @param[in]  i_pMcsTarget MCS target pointer
- * @param[out] o_addr       Address of MCS BAR register
- * @return ReturnCode.  Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetMemoryBaseAddr(const fapi::Target * i_pMcsTarget,
-                                           uint64_t & o_addr);
-
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
- * ATTR_MSS_MIRROR_BASE. It should not be called directly
- *
- * @param[in]  i_pMcsTarget MCS target pointer
- * @param[out] o_addr       Address of MCS BAR register
- * @return ReturnCode.  Zero on success, else platform specified error
- */
-fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
-                                           uint64_t & o_addr);
-
-/**
- * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_CEN_DQ_TO_DIMM_CONN_DQ. It should not be called directly
  *
  * @param[in]  i_pDimmFapiTarget DIMM target pointer
@@ -1019,16 +997,6 @@ fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
 #define ATTR_SPD_CRC_MNFG_SEC_DDR4_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MANUFACTURING_SECTION_CRC, &(VAL), sizeof(VAL) )
-
-//------------------------------------------------------------------------------
-// MACROs to route ATTR Base Address accesses to the correct Hostboot function
-//------------------------------------------------------------------------------
-#define ATTR_MSS_MEMORY_BASE_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetMemoryBaseAddr(PTARGET, VAL)
-#define ATTR_MSS_MIRROR_BASE_GETMACRO(ID, PTARGET, VAL) \
-    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
-    fapi::platAttrSvc::fapiPlatGetMirrorBaseAddr(PTARGET, VAL)
 
 //------------------------------------------------------------------------------
 // MACRO to route ATTR_CEN_DQ_TO_DIMM_CONN_DQ access to the correct Hostboot
