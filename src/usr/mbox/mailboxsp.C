@@ -171,6 +171,9 @@ errlHndl_t MailboxSp::_init()
 
     if(mbxComm)
     {
+        // Enable the mailbox
+        iv_disabled = false;
+
         // Send message to FSP on base DMA buffer zone
         msg_t * msg = msg_allocate();
         msg->type = MSG_INITIAL_DMA;
@@ -183,8 +186,6 @@ errlHndl_t MailboxSp::_init()
         INITSERVICE::registerShutdownEvent(iv_msgQ,
                                            MSG_MBOX_SHUTDOWN,
                                            INITSERVICE::MBOX_PRIORITY);
-
-        iv_disabled = false;
     }
     // else leave iv_disabled as true;
 
