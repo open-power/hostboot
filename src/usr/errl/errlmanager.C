@@ -515,9 +515,15 @@ msg_t *ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
         if (iv_isMboxEnabled)
         {
             errlHndl_t l_err = MBOX::send( MBOX::FSP_ERROR_MSGQ, msg );
-            if( l_err )
+            if( !l_err )
             {
-               TRACFCOMP(g_trac_errl, ERR_MRK "Failed sending error log to FSP");
+                // clear this - we're done with the message;
+                // the receiver will free the storage when it's done
+                msg = NULL;
+            }
+            else
+            {
+               TRACFCOMP(g_trac_errl, ERR_MRK"Failed sending error log to FSP");
 
                //Free the extra data due to the error
                if( (msg != NULL) && (msg->extra_data != NULL) )
