@@ -552,6 +552,36 @@ PLUGIN_PHB_CONFIGURED( 2 )
 //------------------------------------------------------------------------------
 
 /**
+ * @brief   calls out master Ex of the node
+ * @param   i_chip   P8 chip
+ * @param   i_sc     service data collector
+ * @returns Success
+ */
+int32_t calloutMasterCore( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[calloutMasterCore] "
+
+    TargetHandle_t l_procTgt = i_chip->GetChipHandle();
+
+    TargetHandle_t l_masterCore = PlatServices::getMasterCore( l_procTgt );
+    if( NULL == l_masterCore )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed to get master core: PROC = 0x%08x",
+                  i_chip->GetId() );
+    }
+    else
+        io_sc.service_data->SetCallout( l_masterCore );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Proc, calloutMasterCore );
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief   When not in MNFG mode, clear the service call flag so that
  *          thresholding will still be done, but no visible error log committed.
  * @param   i_chip P8 chip

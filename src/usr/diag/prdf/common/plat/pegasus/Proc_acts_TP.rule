@@ -329,10 +329,15 @@ group gTpLFir filter singlebit
      */
     (TpLFir, bit(35)) ? threshold32pday;
 
-    /** TP_LFIR[36|37|38|39]
+    /** TP_LFIR[36]
+     *  Deadman Timer
+     */
+    (TpLFir, bit(36)) ? calloutMasterCoreThr1;
+
+    /** TP_LFIR[37|38|39]
      *  Unused error
      */
-    (TpLFir, bit(36|37|38|39)) ? defaultMaskedError;
+    (TpLFir, bit(37|38|39)) ? defaultMaskedError;
 
     /** TP_LFIR[40]
      *  Malfunction alert
@@ -1314,3 +1319,13 @@ actionclass todRestoreMISC
     selfCaptThr32;
     todRestorePSMSCR;
 };
+
+/** callout the master core of the Proc */
+actionclass calloutMasterCoreThr1
+{
+    funccall("calloutMasterCore");
+    callout2ndLvlMed;
+    threshold1;
+    dumpSH;
+};
+

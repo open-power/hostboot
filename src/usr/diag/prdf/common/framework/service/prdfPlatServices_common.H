@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: ./common/framework/service/prdfPlatServices_common.H $        */
+/* $Source: src/usr/diag/prdf/common/framework/service/prdfPlatServices_common.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -300,6 +300,15 @@ int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
 int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenAddr & o_startAddr,
                          CenAddr & o_endAddr, bool i_slaveOnly = false );
+
+/**
+ * @brief   Returns master core for the master proc
+ * @param   i_procTgt proc target
+ * @return  target for master core or NULL
+ * @note    if given proc is not master, master proc is found and target for
+ *          master core is returned.
+ */
+TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt );
 
 /**
  * @brief   Returns the memory buffer raw card type (i.e. R/C A).

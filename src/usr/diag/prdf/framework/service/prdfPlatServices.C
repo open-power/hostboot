@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: ./framework/service/prdfPlatServices.C $                      */
+/* $Source: src/usr/diag/prdf/framework/service/prdfPlatServices.C $      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -216,6 +216,21 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
+
+TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt )
+{
+    #define PRDF_FUNC "[PlatServices::getMasterCore] "
+
+    PRDF_ERR( PRDF_FUNC"MasterCore info not available in hostboot: PROC = "
+              "0x%08x ",getHuid( i_procTgt ) );
+    return NULL;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 } // end namespace PlatServices
 
