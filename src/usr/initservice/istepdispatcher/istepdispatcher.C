@@ -503,7 +503,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                       err->plid());
         }
         // Check for any attentions and invoke PRD for analysis
-        else if (true == theStep->taskflags.check_attn)
+        // if not in MPIPL mode
+        else if ((true == theStep->taskflags.check_attn) &&
+                 (false == iv_mpiplMode))
         {
             TRACDCOMP(g_trac_initsvc,
                       INFO_MRK"Check for attentions and invoke PRD" );
