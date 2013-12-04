@@ -5,7 +5,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2014
+# [+] International Business Machines Corp.
+# [+] Google Inc.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,6 +54,8 @@ OBJS += p8_build_pstate_datablock.o
 OBJS += proc_get_voltage.o
 OBJS += pstates.o
 OBJS += pstate_tables.o
+
+OBJS += proc_set_max_pstate.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

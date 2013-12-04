@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2013,2014                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Google Inc.                                                        */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -22,7 +23,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.39 2014/07/22 21:45:45 daviddu Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.00039 2014/07/22 21:45:45 daviddu Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -705,6 +706,36 @@ ReturnCode proc_get_attributes(const Target& i_target,
   return l_rc;
 }
 
+const uint8_t NON_ECO_VOLTAGE_BUCKET_OFFFSET = 0x04;
+const uint8_t ALTERNATE_BUCKET_OFFSET = 0x05;
+const uint8_t BUCKET_ID_MASK = 0x0F;
+const uint8_t VPD_VINI_PR_DATA_LENGTH = 8;
+
+const uint8_t DEFAULT_BUCKET = 1;
+
+static int get_bucket_from_pr(const Target&     i_target)
+{
+    ReturnCode l_rc;
+    uint8_t l_buffer[VPD_VINI_PR_DATA_LENGTH];
+    uint32_t l_bufferSize = sizeof(l_buffer);
+
+    l_rc = fapiGetMvpdField(fapi::MVPD_RECORD_VINI,
+                            fapi::MVPD_KEYWORD_PR,
+                            i_target,
+                            l_buffer,
+                            l_bufferSize);
+
+    if (l_rc)
+    {
+        return DEFAULT_BUCKET;
+    }
+
+    uint8_t l_bucketId = l_buffer[NON_ECO_VOLTAGE_BUCKET_OFFFSET] &
+        BUCKET_ID_MASK;
+
+    return l_bucketId != 0 ? l_bucketId : DEFAULT_BUCKET;
+}
+
 /// ----------------------------------------------------------------
 /// \brief Get #V data and put into array
 /// \param[in]    i_target          => Chip Target
@@ -735,6 +766,7 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
   uint8_t    ii               = 0;
   uint8_t    first_chplt      = 1;
   uint8_t    bucket_id        = 0;
+  uint8_t    pr_bucket_id     = 0;
   uint16_t   cal_data[4];
 
   do
@@ -795,6 +827,16 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
         break;
       }
 
+      // Get the correct bucket according to FRU PR data.
+      pr_bucket_id = get_bucket_from_pr(i_target);
+      if (l_bufferSize < PDV_BUFFER_SIZE * pr_bucket_id) {
+        const uint32_t &BUFFER_SIZE = l_bufferSize;
+        const Target  &CHIP_TARGET= i_target;
+        FAPI_ERR("**** ERROR : Not enough buckets returned from fapiGetMvpdField for #V => %d", l_bufferSize );
+        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_BUFFER_SIZE_ERROR);
+        break;
+      }
+
       // clear array
       memset(chiplet_mvpd_data, 0, sizeof(chiplet_mvpd_data));
 
@@ -802,9 +844,15 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
       #define UINT16_GET(__uint8_ptr)   ((uint16_t)( ( (*((const uint8_t *)(__uint8_ptr)) << 8) | *((const uint8_t *)(__uint8_ptr) + 1) ) ))
 
       // use copy of allocated buffer pointer to increment through buffer
-      l_buffer_inc = l_buffer;
+      // Skip version and 'PNP' from header.
+      l_buffer_inc = l_buffer + 4;
 
       bucket_id = *l_buffer_inc;
+      while (bucket_id != pr_bucket_id &&
+          (l_buffer_inc - l_buffer) < l_bufferSize) {
+          l_buffer_inc += PDV_BUFFER_SIZE;
+          bucket_id = *l_buffer_inc;
+      }
       l_buffer_inc++;
 
       FAPI_INF("#V chiplet = %u bucket id = %u", l_chipNum, bucket_id);
@@ -1282,7 +1330,7 @@ ReturnCode proc_res_clock (PstateSuperStructure *pss,
         freq_khz = attr_list->attr_name; \
         FAPI_INF("Converting %s (%u khz) to Pstate", #attr_name, freq_khz); \
         rc = freq2pState(&(pss->gpst), freq_khz, &pstate); \
-        if (rc) break; \
+        if ((rc) && (rc != -PSTATE_LT_PSTATE_MIN)) break; \
         rc = pstate_minmax_chk(&(pss->gpst), &pstate); \
         if (rc == -GPST_PSTATE_GT_GPST_PMAX) { \
           pstate = gpst_pmax(&(pss->gpst)); \

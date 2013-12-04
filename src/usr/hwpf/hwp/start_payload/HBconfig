@@ -1,0 +1,4 @@
+config SET_NOMINAL_PSTATE
+    default n
+    help
+        Set the PState to Nominal just before starting the payload.

@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -48,6 +51,7 @@
 
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
+#include    <config.h>
 
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/start_payload/start_payload.H"
@@ -83,6 +87,9 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libstart_payload.so),
         DEP_LIB(libruntime.so),
         DEP_LIB(libdevtree.so),
+#ifdef CONFIG_SET_NOMINAL_PSTATE
+        DEP_LIB(libpstates.so),
+#endif
 /*
  *      This library is loaded dynamically when needed in start_payload.
  *      Adding statement here to make listdeps.pl happy.

@@ -5,7 +5,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2014
+# [+] International Business Machines Corp.
+# [+] Google Inc.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,6 +47,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/start_payload
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS += start_payload.o

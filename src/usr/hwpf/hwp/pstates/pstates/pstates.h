@@ -5,7 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* [+] International Business Machines Corp.                              */
+/* [+] Google Inc.                                                        */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +32,10 @@
 /// \brief Pstate structures and support routines for OCC product firmware
 
 #include "pgp_common.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 ////////////////////////////////////////////////////////////////////////////
 // Global and Local Pstate Tables
@@ -604,6 +611,10 @@ lpst_pmax(const LocalPstateArray* lpsa)
 {
     return (int)(lpsa->pmin) + (int)(lpsa->entries) - 1;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif    /* __ASSEMBLER__ */
 

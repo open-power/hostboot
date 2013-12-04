@@ -73,6 +73,7 @@
 #include    "p8_cpu_special_wakeup.H"
 #include    "p8_pore_table_gen_api.H"
 #include    <p8_scom_addresses.H>
+#include    "proc_set_max_pstate.H"
 
 #include    "start_payload.H"
 #include    <runtime/runtime.H>
@@ -84,6 +85,7 @@
 #include    <pnor/pnorif.H>
 #include    <sys/mm.h>
 #include    <algorithm>
+#include    <config.h>
 
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
@@ -216,6 +218,59 @@ errlHndl_t clearPoreBars ( void )
     return l_errl;
 }
 
+#ifdef CONFIG_SET_NOMINAL_PSTATE
+errlHndl_t setMaxPstate ( void )
+{
+    errlHndl_t l_errl = NULL;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "Speed up to max P-state" );
+
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    // loop thru all the cpus
+    for (TargetHandleList::const_iterator
+         l_proc_iter = l_procTargetList.begin();
+         l_proc_iter != l_procTargetList.end();
+         ++l_proc_iter)
+    {
+        //  make a local copy of the CPU target
+        const TARGETING::Target* l_proc_target = *l_proc_iter;
+
+        //  trace HUID
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "target HUID %.8X", TARGETING::get_huid(l_proc_target));
+
+        // cast OUR type of target to a FAPI type of target.
+        fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
+                                         (const_cast<TARGETING::Target*>(
+                                                         l_proc_target)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl,
+                         proc_set_max_pstate,
+                         l_fapi_proc_target);
+        if ( l_errl )
+        {
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : setMaxPstate, PLID=0x%x",
+                      l_errl->plid()  );
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : setMaxPstate" );
+        }
+    }   // end for
+
+    return l_errl;
+}
+#endif
 
 //
 //  Wrapper function to call host_runtime_setup
@@ -313,6 +368,16 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 break;
             }
         }
+
+#ifdef CONFIG_SET_NOMINAL_PSTATE
+        // Speed up processors.
+        l_err = setMaxPstate();
+        if (l_err)
+        {
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+        }
+#endif
 
         if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
         {

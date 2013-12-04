@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2013,2014                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Google Inc.                                                        */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -42,6 +43,10 @@
 
 
 #ifndef __ASSEMBLER__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /// A VPD operating point
 ///
@@ -196,6 +201,10 @@ void fit_file(int n,
 void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
                       double C[],
                       PstateSuperStructure*   pss);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif // __ASSEMBLER__
 
