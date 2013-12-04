@@ -319,11 +319,8 @@ void ErrlManager::errlogMsgHndlr ()
                                TRACFCOMP(g_trac_errl, ERR_MRK "Failed sending error log to FSP");
 
                                //Free the extra data due to the error
-                               if( (msg != NULL) && (msg->extra_data != NULL) )
-                               {
-                                   free( msg->extra_data );
-                                   msg_free( msg );
-                               }
+                               free( msg->extra_data );
+                               msg_free( msg );
 
                                delete l_err;
                                l_err = NULL;
@@ -425,7 +422,33 @@ void ErrlManager::errlogMsgHndlr ()
                     uint32_t l_tmpPlid = theMsg->data[0]>>32;
                     TRACFCOMP( g_trac_errl, INFO_MRK"ack: %.8x", l_tmpPlid);
 
-                    ackErrLogInPnor(l_tmpPlid);
+                    bool didAck = ackErrLogInPnor(l_tmpPlid);
+
+                    if (!didAck)
+                    {
+                        // couldn't find that errlog in PNOR, look in our
+                        // ToSave list - maybe it's there waiting
+                        for (std::list<errlHndl_t>::iterator
+                            it = iv_errlToSave.begin();
+                            it != iv_errlToSave.end();
+                            it++)
+                        {
+                            errlHndl_t l_err = *it;
+                            if (l_err->eid() == l_tmpPlid)
+                            {
+                                // we found it
+                                // done with the error log handle so delete it.
+                                delete l_err;
+                                l_err = NULL;
+
+                                // delete from the list
+                                iv_errlToSave.erase(it);
+
+                                // break out of the for loop - we're done
+                                break;
+                            }
+                        } // for
+                    }
 
                     msg_free(theMsg);
 
@@ -448,7 +471,7 @@ void ErrlManager::errlogMsgHndlr ()
                             // delete from the list
                             iv_errlToSave.pop_front();
                         }
-                        // else, still couldn't save it (for some reason??) so
+                        // else, still couldn't save it (for some reason) so
                         // it's still on the list.
                     }
                     break;
@@ -526,12 +549,9 @@ msg_t *ErrlManager::sendErrLogToMbox ( errlHndl_t& io_err )
                TRACFCOMP(g_trac_errl, ERR_MRK"Failed sending error log to FSP");
 
                //Free the extra data due to the error
-               if( (msg != NULL) && (msg->extra_data != NULL) )
-               {
-                   free( msg->extra_data );
-                   msg_free( msg );
-                   msg = NULL;
-               }
+               free( msg->extra_data );
+               msg_free( msg );
+               msg = NULL;
 
                delete l_err;
                l_err = NULL;
@@ -947,7 +967,8 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
         char *l_pnorAddr = iv_pnorAddr + (PNOR_ERROR_LENGTH * iv_pnorOpenSlot);
         TRACDBIN( g_trac_errl, INFO_MRK"saveErrLogToPnor: l_pnorAddr before",
             l_pnorAddr, 128);
-        int l_errSize = io_err->flatten(l_pnorAddr, PNOR_ERROR_LENGTH, true);
+        uint64_t l_errSize = io_err->flatten(l_pnorAddr,
+                                PNOR_ERROR_LENGTH, true);
         if (l_errSize !=0)
         {
             TRACFCOMP( g_trac_errl, INFO_MRK"saveErrLogToPnor: %d bytes flattened into %p, slot %d",
@@ -984,9 +1005,10 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::ackErrLogInPnor()
 ///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::ackErrLogInPnor( uint32_t i_errEid )
+bool ErrlManager::ackErrLogInPnor( uint32_t i_errEid )
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK"ackErrLogInPnor(%.8x)", i_errEid);
+    bool rc = true;
 
     // look for an un-ACKed log that matches this eid
     uint32_t i;
@@ -1009,10 +1031,12 @@ void ErrlManager::ackErrLogInPnor( uint32_t i_errEid )
     {
         //could not find the errorlog to mark for acknowledgment
         TRACFCOMP( g_trac_errl, ERR_MRK"ackErrLogInPnor failed to find the error log" );
+        rc = false;
     }
 
-    TRACFCOMP( g_trac_errl, EXIT_MRK"ackErrLogInPnor" );
-    return;
+    TRACFCOMP( g_trac_errl, EXIT_MRK"ackErrLogInPnor returning %s",
+            rc ? "true" : "false");
+    return rc;
 } // ackErrLogInPnor
 
 

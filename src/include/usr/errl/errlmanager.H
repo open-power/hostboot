@@ -355,10 +355,10 @@ private:
      * @brief find the flattened error log in PNOR and set it's ACK bit
      *
      * @param[in]   i_errEid EID of the error log to look for
-     * @return NONE
-     *
+     * @return      true if we successfully set the ACK bit,
+     *              false if we couldn't find that errlog in PNOR
      */
-    void ackErrLogInPnor( uint32_t i_errEid );
+    bool ackErrLogInPnor( uint32_t i_errEid );
 
     /**
      * @brief check the state of the PNOR 'slot'
