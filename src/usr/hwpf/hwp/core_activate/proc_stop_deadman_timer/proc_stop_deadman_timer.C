@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_stop_deadman_timer.C,v 1.8 2013/06/05 14:40:54 jeshua Exp $
+// $Id: proc_stop_deadman_timer.C,v 1.9 2013/11/08 22:10:44 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_stop_deadman_timer.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -52,10 +52,10 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_stop_deadman_timer.H"
-#include "p8_scom_addresses.H"
-#include "p8_istep_num.H"
-#include "proc_sbe_trigger_winkle.H"
+#include <proc_stop_deadman_timer.H>
+#include <p8_scom_addresses.H>
+#include <p8_istep_num.H>
+#include <proc_sbe_trigger_winkle.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -119,7 +119,7 @@ extern "C"
                 const fapi::Target & CHIP_IN_ERROR = i_target;
                 ecmdDataBufferBase & SBE_VITAL = data;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_STOP_DEADMAN_TIMER_BAD_ISTEP_NUM);
-                break;
+                fapiLogError(rc);
             }
 
             if( substep_num != SUBSTEP_DEADMAN_WAITING_FOR_HOSTBOOT )
@@ -130,7 +130,7 @@ extern "C"
                 const fapi::Target & CHIP_IN_ERROR = i_target;
                 ecmdDataBufferBase & SBE_VITAL = data;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_STOP_DEADMAN_TIMER_BAD_SUBSTEP_NUM);
-                break;
+                fapiLogError(rc);
             }
 
             //Notify SBE that HB is alive again

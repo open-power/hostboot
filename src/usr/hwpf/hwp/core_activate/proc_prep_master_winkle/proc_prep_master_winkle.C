@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_prep_master_winkle.C,v 1.13 2013/07/30 15:23:25 jeshua Exp $
+// $Id: proc_prep_master_winkle.C,v 1.14 2013/11/08 22:48:47 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_prep_master_winkle.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -55,10 +55,10 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_prep_master_winkle.H"
-#include "p8_scom_addresses.H"
-#include "p8_istep_num.H"
-#include "proc_sbe_trigger_winkle.H"
+#include <proc_prep_master_winkle.H>
+#include <p8_scom_addresses.H>
+#include <p8_istep_num.H>
+#include <proc_sbe_trigger_winkle.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -77,13 +77,13 @@ extern "C"
 //
 // parameters: i_ex_target     => Reference to master chiplet target
 //             i_useRealSBE => True if proc_sbe_trigger_winkle is supposed to be
-//                             running on the real SBE (default is true), else
+//                             running on the real SBE (usually true), else
 //                             false if proc_sbe_trigger_winkle is running on
 //                             the FSP (via poreve).
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_prep_master_winkle(const fapi::Target & i_ex_target, 
-                                             const bool & i_useRealSBE = true)
+                                             const bool & i_useRealSBE)
     {
         // data buffer to hold register values
         ecmdDataBufferBase data(64);

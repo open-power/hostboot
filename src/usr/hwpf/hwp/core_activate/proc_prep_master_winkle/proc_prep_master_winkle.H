@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_prep_master_winkle.H,v 1.7 2013/07/01 18:41:37 stillgs Exp $
+// $Id: proc_prep_master_winkle.H,v 1.8 2013/11/08 22:47:42 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_prep_master_winkle.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -69,7 +69,7 @@ extern "C"
  *
  * @param[in] i_ex_target  Reference to master chiplet target
  * @param[in] i_useRealSBE True if proc_sbe_trigger_winkle is supposed to be
- *                         running on the real SBE (default is true), else
+ *                         running on the real SBE (usually true), else
  *                         false if proc_sbe_trigger_winkle is running on
  *                         the FSP (via poreve).
  *

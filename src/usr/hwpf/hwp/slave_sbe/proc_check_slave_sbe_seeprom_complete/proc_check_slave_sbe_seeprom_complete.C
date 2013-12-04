@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.10 2013/10/28 16:46:40 jeshua Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.11 2013/11/05 22:08:23 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -43,12 +43,12 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_check_slave_sbe_seeprom_complete.H"
-#include "p8_scom_addresses.H"
-#include "p8_istep_num.H"
-#include "proc_sbe_check_master.H"
-#include "proc_sbe_enable_pnor.H"
-#include "proc_extract_sbe_rc.H"
+#include <proc_check_slave_sbe_seeprom_complete.H>
+#include <p8_scom_addresses.H>
+#include <p8_istep_num.H>
+#include <proc_sbe_check_master.H>
+#include <proc_sbe_enable_pnor.H>
+#include <proc_extract_sbe_rc.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions

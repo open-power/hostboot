@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_extract_sbe_rc.C,v 1.8 2013/09/20 15:26:29 jeshua Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.9 2013/11/05 22:16:08 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -50,8 +50,8 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_extract_sbe_rc.H"
-#include "p8_scom_addresses.H"
+#include <proc_extract_sbe_rc.H>
+#include <p8_scom_addresses.H>
 
 
 //------------------------------------------------------------------------------
