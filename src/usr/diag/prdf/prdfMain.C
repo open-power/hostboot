@@ -117,12 +117,6 @@ errlHndl_t startScrub()
 
     do
     {
-        if ( isMemoryPreservingIpl() )
-        {
-            PRDF_INF( PRDF_FUNC"Not supported during MP-IPLs." );
-            break;
-        }
-
         // This is run in Hostboot so there should only be one node.
         TargetHandleList list = getFunctionalTargetList( TYPE_NODE );
         if ( 1 != list.size() )

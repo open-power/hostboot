@@ -339,13 +339,6 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
 
     do
     {
-        if ( isMemoryPreservingIpl() )
-        {
-            // Power is preserved on a Centaur for a MPIPL. So the marks and
-            // spares will not need to be restored.
-            break;
-        }
-
         std::vector<CenRank> ranks;
         int32_t l_rc = getMasterRanks( i_mba, ranks );
         if ( SUCCESS != l_rc )
