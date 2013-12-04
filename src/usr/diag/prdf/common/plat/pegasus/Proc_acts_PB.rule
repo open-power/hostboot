@@ -241,7 +241,7 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[1]
      *  ICS invalid state error FIR bit
      */
-    (NxDmaEngFir, bit(1)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(1)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[2|3]
      *  Reserved
@@ -306,12 +306,12 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[15]
      *  DMA invalid state error
      */
-    (NxDmaEngFir, bit(15)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(15)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[16]
      *  DMA invalid state error
      */
-    (NxDmaEngFir, bit(16)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(16)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[17]
      *  DMA array uncorrectable ECC error
@@ -331,42 +331,42 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[20]
      *  Channel 0 invalid state error
      */
-    (NxDmaEngFir, bit(20)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(20)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[21]
      *  Channel 1 invalid state error
      */
-    (NxDmaEngFir, bit(21)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(21)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[22]
      *  Channel 2 invalid state error
      */
-    (NxDmaEngFir, bit(22)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(22)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[23]
      *  Channel 3 invalid state error
      */
-    (NxDmaEngFir, bit(23)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(23)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[24]
      *  Channel 4 invalid state error
      */
-    (NxDmaEngFir, bit(24)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(24)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[25]
      *  Channel 5 invalid state error
      */
-    (NxDmaEngFir, bit(25)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(25)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[26]
      *  Channel 6 invalid state error
      */
-    (NxDmaEngFir, bit(26)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(26)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[27]
      *  Channel 7 invalid state error
      */
-    (NxDmaEngFir, bit(27)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(27)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[28]
      *  Channel 5 AMF array uncorrectable ECC error
@@ -386,7 +386,7 @@ group gNxDmaEngFir filter singlebit
     /** NXDMAENGFIR[31]
      *  UE error on CRB(CSB address, CCB)
      */
-    (NxDmaEngFir, bit(31)) ? calloutNxOnPhypIntp;
+    (NxDmaEngFir, bit(31)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[32]
      *  SUE error on CRB(CSB address, CCB)
@@ -504,7 +504,7 @@ group gNxCqFir filter singlebit
     /** NXCQFIR[12]
      *  CRB kill ISN received while holding ISN with UE error
      */
-    (NxCqFir, bit(12)) ? calloutNxOnPhypIntp;
+    (NxCqFir, bit(12)) ? defaultMaskedError;
 
     /** NXCQFIR[13]
      *  ACK_DEAD cresp received by read command
@@ -560,7 +560,7 @@ group gNxAsFir filter singlebit
     /** NXASFIR[1]
      *  MMIO_DAT_UE
      */
-    (NxAsFir, bit(1)) ? calloutNxOnPhypIntp;
+    (NxAsFir, bit(1)) ? defaultMaskedError;
 
     /** NXASFIR[2]
      *  COPREQ_DAT_UE
@@ -570,7 +570,7 @@ group gNxAsFir filter singlebit
     /** NXASFIR[3]
      *  PBCQ_Q_INFO_PE
      */
-    (NxAsFir, bit(3)) ? calloutNxOnPhypIntp;
+    (NxAsFir, bit(3)) ? defaultMaskedError;
 
     /** NXASFIR[4]
      *  RCMD0_ADDR_PE
@@ -595,7 +595,7 @@ group gNxAsFir filter singlebit
     /** NXASFIR[8]
      *  MAL_FMD_MMIO_ST
      */
-    (NxAsFir, bit(8)) ? calloutNxOnPhypIntp;
+    (NxAsFir, bit(8)) ? defaultMaskedError;
 
     /** NXASFIR[9]
      *  DATA_HANG
@@ -725,7 +725,7 @@ group gNxAsFir filter singlebit
     /** NXASFIR[34]
      *  DSLC_INTF_PE
      */
-    (NxAsFir, bit(34)) ? calloutNxOnPhypIntp;
+    (NxAsFir, bit(34)) ? defaultMaskedError;
 
     /** NXASFIR[35]
      *  AS_IN_CE
@@ -1043,8 +1043,7 @@ group gMcdFir filter singlebit
     /** MCDFIR[3]
      *  MCD_SM_ERR
      */
-    #FIXME RTC 23127 NX target not available as yet
-    (McdFir, bit(3)) ? TBDDefaultCallout;
+    (McdFir, bit(3)) ? calloutNxThr1;
 
     /** MCDFIR[4]
      *  MCD_REC_HANG_ERR
@@ -1754,7 +1753,7 @@ group gIcpFir filter singlebit
     /** ICPFIR[13]
      *  ADDRESS_CORE_FIELD_MMIO
      */
-    (IcpFir, bit(13)) ? TBDDefaultCallout;
+    (IcpFir, bit(13)) ? defaultMaskedError;
 
     /** ICPFIR[14]
      *  UNSOLICITED_CRESP
@@ -3357,13 +3356,6 @@ actionclass calloutNxThr1
 actionclass calloutNx
 {
     callout(connected(TYPE_NX, 0), MRU_MED);
-};
-
-#RTC 86494 This action is under discussion.
-/** callout Nx through Phyp */
-actionclass calloutNxOnPhypIntp
-{
-    TBDDefaultCallout;
 };
 
 /** callout Nx-AS connected to Proc*/

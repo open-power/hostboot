@@ -348,8 +348,6 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[32]
      *  MCIFIRQ_MIRROR_ACTION_OCCURRED
      */
-    # FIXME RTC 23127 TBD if this is needed as part of mirror error handling
-    # Need to talk to Marc
     (MciFir, bit(32)) ? defaultMaskedError;
 
     /** MCIFIR[33]
@@ -390,8 +388,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[40]
      *  CHANNEL TIMEOUT ERROR
      */
-    # FIXME RTC 23127 Need to talk to Marc on this
-    (MciFir, bit(40)) ? TBDDefaultCallout;
+    (MciFir, bit(40)) ? calloutDmiBusTh1;
 
     /** MCIFIR[41]
      *  CENTAUR FAULT LINE
