@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.26 2013/10/16 01:40:02 jmcgill Exp $
+// $Id: io_dccal.C,v 1.29 2013/12/04 10:35:50 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -270,7 +270,7 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
                 FAPI_ERR("Timed out waiting for Done bit to be set");
                 //Set HWP error
                 FAPI_SET_HWP_ERROR(rc,IO_DCCAL_OFFCAL_TIMEOUT_RC);
-                //return rc;
+                return rc;
         }
         else
         {
@@ -315,7 +315,7 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
 			// rc_ecmd|=set_bits.insert(bits,9,3);
 		// }
 		// else
-		rc_ecmd |= set_bits.clearBit(9);
+		//rc_ecmd |= set_bits.clearBit(9);
         bits=rx_wt_timeout_sel_clear;
         rc_ecmd|=clear_bits.insert(bits,0,16);
         if(rc_ecmd)
