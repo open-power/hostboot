@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/spd_accessors/getDimmSpdDataErrors.xml $     -->
+<!-- $Source: src/usr/hwpf/hwp/pll_accessors/getPllRingInfoAttrErrors.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: getPllRingInfoAttrErrors.xml,v 1.1 2013/12/05 18:23:56 mjjones Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>

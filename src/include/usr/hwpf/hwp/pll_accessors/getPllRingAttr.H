@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/getPllRingAttr.H $                   */
+/* $Source: src/include/usr/hwpf/hwp/pll_accessors/getPllRingAttr.H $     */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getPllRingAttr.H,v 1.1 2013/09/16 15:40:22 dpeterso Exp $
+// $Id: getPllRingAttr.H,v 1.1 2013/12/05 18:23:24 mjjones Exp $
 /**
  *  @file getPllRingAttr.H
  *
