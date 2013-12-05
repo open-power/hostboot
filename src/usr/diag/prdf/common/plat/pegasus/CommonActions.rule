@@ -46,9 +46,6 @@
 #   <threshold_count> [/ [timbase_count] <sec|min|hour|day>]
 #
 # Note that <mfg_theshold> can be found in prdfMfgThresholds.lst
-# FIXME: mfg_file() is currently not supported in Hostboot because there
-#        currently is no way to get the values from the FSP command line to
-#        Hostboot.
 #
 # Examples:
 #   threshold( field( 1        ) );

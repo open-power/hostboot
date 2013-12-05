@@ -1081,9 +1081,9 @@ group gMcdFir filter singlebit
 # PB Chiplet PBEASTFIR and PBWESTFIR
 ################################################################################
 
-# TODO - All these FIRs should have the same bit definition. Idealy, we will
-#        only want to have one copy of the bit definition. Unfortuately, the
-#        rule code parser does not have the support for something like this.
+#        All these FIRs should have the same bit definition. Ideally, we want
+#        to have only one copy of the bit definition. Currently rule code
+#        parser does not have the support for something like this.
 #        Maybe we can add this as a later feature.
 
 ################################################################################
@@ -2276,9 +2276,9 @@ group gEnHcaFir filter singlebit
 # PB Chiplet PCINESTFIRs
 ################################################################################
 
-# TODO - All these FIRs should have the same bit definition. Idealy, we will
-#        only want to have one copy of the bit definition. Unfortuately, the
-#        rule code parser does not have the support for something like this.
+#        All these FIRs should have the same bit definition. Ideally, we want
+#        to have only one copy of the bit definition. Currently rule code
+#        parser does not have the support for something like this.
 #        Maybe we can add this as a later feature.
 
 ################################################################################

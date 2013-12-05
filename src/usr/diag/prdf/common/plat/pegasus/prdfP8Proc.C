@@ -55,7 +55,6 @@ namespace Proc
  */
 int32_t Initialize( ExtensibleChip * i_chip )
 {
-    // FIXME: Add proper initialization as per requirement
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Proc, Initialize );

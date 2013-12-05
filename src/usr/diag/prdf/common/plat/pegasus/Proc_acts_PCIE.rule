@@ -457,10 +457,11 @@ group gPbfFir filter singlebit
 # PCIE Chiplet IOPCIFIRs
 ################################################################################
 
-# TODO - All these FIRs should have the same bit definition. Idealy, we will
-#        only want to have one copy of the bit definition. Unfortuately, the
-#        rule code parser does not have the support for something like this.
+#        All these FIRs should have the same bit definition. Ideally, we want
+#        to have only one copy of the bit definition. Currently rule code
+#        parser does not have the support for something like this.
 #        Maybe we can add this as a later feature.
+
 ################################################################################
 # based on p8dd1_mss_FFDC_59.xls
 ################################################################################
