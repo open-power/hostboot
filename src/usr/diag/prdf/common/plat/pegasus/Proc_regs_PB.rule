@@ -178,12 +178,12 @@
     # PB Chiplet NXASFIR
     ############################################################################
 
+    # NXASFIR has been modeled merely to collect FFDC. No attentions are
+    # expected from it.
     register NXASFIR
     {
         name        "EN.NX.AS.FIR_REG";
         scomaddr    0x020130c0;
-        reset       (&, 0x020130c1);
-        mask        (|, 0x020130c5);
         capture     group default;
     };
 
@@ -192,24 +192,6 @@
         name        "EN.NX.AS.FIR_MASK_REG";
         scomaddr    0x020130c3;
         capture     group default;
-    };
-
-    register NXASFIR_ACT0
-    {
-        name        "EN.NX.AS.FIR_ACTION0_REG";
-        scomaddr    0x020130c6;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("NXASFIR");
-    };
-
-    register NXASFIR_ACT1
-    {
-        name        "EN.NX.AS.FIR_ACTION1_REG";
-        scomaddr    0x020130c7;
-        capture     type secondary;
-        capture     group default;
-        capture     req nonzero("NXASFIR");
     };
 
     ############################################################################
