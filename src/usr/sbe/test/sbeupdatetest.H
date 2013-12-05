@@ -28,7 +28,7 @@
  *  @brief Test cases for SBE Update code
  */
 #include <sys/time.h>
-
+#include <vector>
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
@@ -401,7 +401,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
         do{
 
             /****************************************************/
-            /* Get Functional Target and Load SBE Module        */
+            /* Get Functional Target and Create VMM Space       */
             /****************************************************/
             TARGETING::Target * theTarget =
                                 getFunctionalTarget(TARGETING::TYPE_PROC);
@@ -509,7 +509,13 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // force backup to SEEPROM 1 just in case
             if ( !(sbeState.update_actions & DO_UPDATE ) )
             {
+                sbeState.update_actions =
+                    static_cast<sbeUpdateActions_t>
+                         (DO_UPDATE|UPDATE_MVPD|UPDATE_SBE),
+
                 sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+
+                sbeState.new_readBack_check = true;
             }
             total++;
 
@@ -518,6 +524,18 @@ class SBEUpdateTest: public CxxTest::TestSuite
             {
                 fails++;
                 TS_FAIL("testSbeUpdateTarget() - performUpdateActions() failed.");
+                break;
+            }
+
+            // Make sure MVPD and SBE were updated
+            if ( ! ( ( sbeState.update_actions & MVPD_UPDATE_COMPLETE ) &&
+                     ( sbeState.update_actions & SBE_UPDATE_COMPLETE  ) ) )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
+                           "'COMPLETE' actions were not found: 0x%.8X",
+                           sbeState.update_actions);
+                fails++;
+                TS_FAIL("testSbeUpdateTarget() - performUpdateActions() did not complete actions");
                 break;
             }
 
@@ -575,7 +593,8 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - make cur=perm
             // - re-IPL
             { 0xE0, SBE_SEEPROM0, 0x80,
-              static_cast<sbeUpdateActions_t>(DO_UPDATE|IPL_RESTART),
+              static_cast<sbeUpdateActions_t>
+                     (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_BACKUP, 0x40 },
 
 
@@ -585,7 +604,8 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - make cur=perm
             // - re-IPL
             { 0xC0, SBE_SEEPROM1, 0x00,
-              static_cast<sbeUpdateActions_t>(DO_UPDATE|IPL_RESTART),
+              static_cast<sbeUpdateActions_t>
+                     (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_PRIMARY, 0x80 },
 
             // case 0xA0: cur=temp, cur=clean, alt=dirty
@@ -594,7 +614,8 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - make cur=perm
             // - Continue IPL
             { 0xA0, SBE_SEEPROM1, 0x00,
-              static_cast<sbeUpdateActions_t>(DO_UPDATE),
+              static_cast<sbeUpdateActions_t>
+                     (DO_UPDATE|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_PRIMARY, 0x80 },
 
             // case 0x80: cur=temp, cur=clean, alt=clean
@@ -610,7 +631,8 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - update alt=1
             // - re-IPL
             { 0x60, SBE_SEEPROM0, 0x00,
-              static_cast<sbeUpdateActions_t>(DO_UPDATE|IPL_RESTART),
+              static_cast<sbeUpdateActions_t>
+                     (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_BACKUP, 0x40 },
 
             // case 0x40: cur=perm, cur=dirty, alt=clean
@@ -620,7 +642,15 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - update alt=0
             // - re-IPL
             { 0x40, SBE_SEEPROM1, 0x80,
-              static_cast<sbeUpdateActions_t>(DO_UPDATE|IPL_RESTART),
+              static_cast<sbeUpdateActions_t>
+                     (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
+              EEPROM::SBE_PRIMARY, 0x80 },
+
+            // Repeat previous case to make sure global variables are used
+            // correctly to save MBOX value
+            { 0x40, SBE_SEEPROM1, 0x80,
+              static_cast<sbeUpdateActions_t>
+                     (DO_UPDATE|IPL_RESTART|UPDATE_MVPD|UPDATE_SBE),
               EEPROM::SBE_PRIMARY, 0x80 },
 
             // case 0x20: cur=perm, cur=clean, alt=dirty
@@ -628,7 +658,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // - update alt=1
             // - Continue IPL
             { 0x20, SBE_SEEPROM0, 0x00,
-              static_cast<sbeUpdateActions_t>(DO_UPDATE),
+              static_cast<sbeUpdateActions_t>(DO_UPDATE|UPDATE_SBE),
               EEPROM::SBE_BACKUP, 0x00 },
 
             // case 0x00: cur=perm, cur=clean, alt=clean
@@ -709,7 +739,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
                     testData[i].i_cur, testData[i].i_flags);
 
                     TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeDecisionTree() - "
-                    "Expected/Returned: update_actions=0x%.4X/0x%.4x, "
+                    "Expected/Returned: update_actions=0x%.4X/0x%.4X, "
                     "update seeprom=%d/%d, flags=0x%.2X/0x%.2X",
                     testData[i].o_update_actions, sbeState.update_actions,
                     testData[i].o_seeprom, sbeState.seeprom_side_to_update,
@@ -728,6 +758,155 @@ class SBEUpdateTest: public CxxTest::TestSuite
                    EXIT_MRK"testSbeDecisionTree() - %d/%d fails",
                    fails, total );
     }
+
+    /**
+     * @brief This function will call preReIplCheck() and make sure that
+              all the targets are ready for the Re-Ipl Request
+     */
+    void testSbePreReIplCheck ( void )
+    {
+
+
+        TRACFCOMP( g_trac_sbe,
+                   ENTER_MRK"testSbePreReIplCheck");
+
+        uint64_t fails = 0x0;
+        uint64_t total = 0x0;
+        errlHndl_t err = NULL;
+
+        std::vector<sbeTargetState_t> sbeStates_vector;
+        sbeTargetState_t sbeState;
+
+        struct
+        {
+            // Inputs
+            sbeUpdateActions_t      i_update_actions;
+            uint8_t                 i_flags;   // mvpdSbKeyword.flags
+
+            // Expected Output
+            sbeUpdateActions_t      o_update_actions;
+            uint8_t                 o_flags;   // mvpdSbKeyword.flags
+
+        }  testData[] =
+        {
+
+            // Update already done -- Flags match
+            { static_cast<sbeUpdateActions_t>(MVPD_UPDATE_COMPLETE), 0x00,
+              static_cast<sbeUpdateActions_t>(MVPD_UPDATE_COMPLETE), 0x00},
+
+            // Update already done -- Flags don't match A
+            { static_cast<sbeUpdateActions_t>(MVPD_UPDATE_COMPLETE), 0x80,
+              static_cast<sbeUpdateActions_t>(MVPD_UPDATE_COMPLETE), 0x80},
+
+            // Update already done -- Flags don't match B
+            { static_cast<sbeUpdateActions_t>(MVPD_UPDATE_COMPLETE), 0x40,
+              static_cast<sbeUpdateActions_t>(MVPD_UPDATE_COMPLETE), 0x40},
+
+            // Update Not Done -- Flags match 0
+            { static_cast<sbeUpdateActions_t>(CLEAR_ACTIONS), 0x00,
+              static_cast<sbeUpdateActions_t>(CLEAR_ACTIONS), 0x00},
+
+            // Update Not Done -- Flags match 1
+            // AND testing that other actions aren't being lost
+            { static_cast<sbeUpdateActions_t>(DO_UPDATE), 0xC0,
+              static_cast<sbeUpdateActions_t>(DO_UPDATE), 0xC0},
+
+            // Update Note Done -- Flags don't match A
+            { static_cast<sbeUpdateActions_t>(CLEAR_ACTIONS), 0x80,
+              static_cast<sbeUpdateActions_t>(MVPD_UPDATE_COMPLETE), 0xC0},
+
+            // Update Note Done -- Flags don't match B
+            { static_cast<sbeUpdateActions_t>(CLEAR_ACTIONS), 0x40,
+              static_cast<sbeUpdateActions_t>(MVPD_UPDATE_COMPLETE), 0x00},
+
+
+
+        };
+
+        const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
+
+        do{
+
+
+            /****************************************************/
+            /* Get Functional Target and Create VMM Space       */
+            /****************************************************/
+            TARGETING::Target * theTarget =
+                                getFunctionalTarget(TARGETING::TYPE_PROC);
+            if(theTarget == NULL)
+            {
+                total++;
+                fails++;
+                TS_FAIL("testSbePreReIplCheck() - No Functional Targets found!");
+                break;
+            }
+
+            /****************************************************/
+            /* Create vector of sbeStates for testing           */
+            /****************************************************/
+            for (uint8_t i = 0; i < NUM_CMDS ; i++)
+            {
+                // Setup Test Data
+                sbeState.mvpdSbKeyword.flags = testData[i].i_flags;
+                sbeState.update_actions = testData[i].i_update_actions;
+
+                // Put the same target into each sbeState
+                sbeState.target = theTarget;
+
+                // Push this sbeState onto the vector
+                sbeStates_vector.push_back(sbeState);
+            }
+
+
+            /****************************************************/
+            /* Call preReIplCheck()                             */
+            /****************************************************/
+            total++;
+            err = preReIplCheck(sbeStates_vector);
+            if(err)
+            {
+                fails++;
+                TS_FAIL("testSbePreReIplCheck() - preReIplCheck() failed");
+                break;
+            }
+
+            /****************************************************/
+            /* Check Ouput Values                               */
+            /****************************************************/
+            for (uint8_t i = 0; i < NUM_CMDS ; i++)
+            {
+                if (( testData[i].o_update_actions !=
+                                  sbeStates_vector[i].update_actions )
+                     ||
+                    ( testData[i].o_flags !=
+                                  sbeStates_vector[i].mvpdSbKeyword.flags )
+                   )
+                {
+                    fails++;
+
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"testSbePreReIplCheck() - "
+                    "Fail! Unexpected results (i=%d): Input/Expected/Returned "
+                    "flags=0x%.2X/0x%.2X/0x%.2X, update_actions=0x%.4X/0x%.4x"
+                    "/0x%.4X", i, testData[i].i_flags, testData[i].o_flags,
+                    sbeStates_vector[i].mvpdSbKeyword.flags,
+                    testData[i].i_update_actions,
+                    testData[i].o_update_actions,
+                    sbeStates_vector[i].update_actions);
+
+                    TS_FAIL("testSbePreReIplCheck() - Fail! Unexpected results for pass %d", i);
+
+                    // Don't break - complete the remaining tests
+                }
+            }
+
+        }while(0);
+
+        TRACFCOMP( g_trac_sbe, EXIT_MRK
+                   EXIT_MRK"testSbePreReIplCheck() - %d/%d fails",
+                   fails, total );
+    }
+
+
 
 
     /**

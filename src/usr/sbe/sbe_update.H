@@ -47,6 +47,10 @@ namespace SBE
     const uint32_t SBE_SEEPROM_STRUCT_VERSION        = 0x00000001;
     const uint32_t SBE_SEEPROM_STRUCT_SIMICS_VERSION = 0x5A5A5A5A;
 
+    // Constant written to SBE SEEPROM version struct to invalidate the
+    // struct and the image - 'INVALID\0'
+    const uint64_t SBE_SEEPROM_STRUCT_INVALID = 0x494E56414C494400;
+
     // Used for locations of SBE_Version and SBE Image on a SEEPROM
     const uint64_t SBE_IMAGE_SEEPROM_ADDRESS    = 0x400; // 1KB
     const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = 0x300; // 1KB - 256B
@@ -107,9 +111,9 @@ namespace SBE
     // Used to keep track of perm/temp, and cur/alt
     enum sbeSeepromSide_t
     {
-        SBE_SEEPROM0,         // corresponds to EEPROM::SBE_PRIMARY
-        SBE_SEEPROM1,         // corresponts to EEPROM::SBE_BACKUP
-        SBE_SEEPROM_INVALID,
+        SBE_SEEPROM0         = 0x00,   // corresponds to EEPROM::SBE_PRIMARY
+        SBE_SEEPROM1         = 0x01,   // corresponts to EEPROM::SBE_BACKUP
+        SBE_SEEPROM_INVALID  = 0xFF,
     };
 
     // Actions can be combined
@@ -118,8 +122,11 @@ namespace SBE
         CLEAR_ACTIONS          = 0x00000000,
         DO_UPDATE              = 0x00000001,
         IPL_RESTART            = 0x00000002,
-        CALLOUT_SBE_CODE       = 0x00000004,
-        UNSUPPORTED_SITUATION  = 0x00000008,
+        UPDATE_MVPD            = 0x00000004,
+        MVPD_UPDATE_COMPLETE   = 0x00000008,
+        UPDATE_SBE             = 0x00000010,
+        SBE_UPDATE_COMPLETE    = 0x00000020,
+        UNSUPPORTED_SITUATION  = 0x80000000,
     };
 
 
@@ -141,6 +148,8 @@ namespace SBE
         uint8_t   data_crc[SBE_DATA_CRC_SIZE];
     } PACKED;
 
+    // This line forces a compile fail if struct is NOT 8-byte-alaigned
+    CPPASSERT(0 == (sizeof(sbeSeepromVersionInfo_t) % 8));
 
     /**
      * @brief Struct of individual SBE entry in SBE and SBEC
@@ -351,10 +360,19 @@ namespace SBE
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
      *                              and the information to be used for updating
      *                              the SBE State of the target
+     *
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t updateSeepromSide(sbeTargetState_t i_sbeState);
 
+    /**
+     * @brief Check and Update all targets before Re-IPL Request
+     *
+     * @param[io/out] io_sbeStates_v   Vector of SBE State structs
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t preReIplCheck(std::vector<sbeTargetState_t>& io_sbeStates_v);
 
 
     /******************************************/
