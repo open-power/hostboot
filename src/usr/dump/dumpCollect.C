@@ -568,6 +568,13 @@ errlHndl_t doDumpCollect(void)
             //Update actual count in RUNTIME
             RUNTIME::saveActualCount(RUNTIME::MS_DUMP_RESULTS_TBL,
                                      l_resultCount);
+
+
+            //Write actual count into memory as well
+            // We know this will get whacked when FSP reloads the PHYP
+            // lid, but we want it to be valid before that to allow
+            // FSP code to consume the data from mainstore
+            RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);
         }while(0);// end of do-while loop
 
         // Got an errorlog back from get_host_data_sections
