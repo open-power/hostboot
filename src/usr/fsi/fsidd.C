@@ -1226,7 +1226,7 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                                   uint32_t* o_readData)
 {
     errlHndl_t l_err = NULL;
-    enum { MAX_OPB_TIMEOUT_NS = 4000000 }; //=4ms
+    enum { MAX_OPB_TIMEOUT_NS = 10000000 }; //=10ms
 
     do {
         // poll for complete
@@ -1858,7 +1858,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
             databuf = 0x50040400;
 
             //Setup timeout so that:
-            //   code(4ms) > masterproc (0.9ms) > remote fsi master (0.8ms)
+            //   code(10ms) > masterproc (0.9ms) > remote fsi master (0.8ms)
             if( i_master == iv_master )
             {
                 // 26:27= Timeout (b01) = 0.9ms
