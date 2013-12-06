@@ -48,6 +48,7 @@
 #include    <hwpisteperror.H>
 
 #include    <istep_mbox_msgs.H>
+#include    <vfs/vfs.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -196,8 +197,36 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "$TODO RTC:63128 - hb instances exchange and agree on cfg");
 
-        // after agreement, open abuses as required
-        l_errl = smp_unfencing_inter_enclosure_abus_links();
+        bool l_libloaded = false;
+        if ( !VFS::module_is_loaded( "libedi_ei_initialization.so" ) )
+        {
+            l_errl = VFS::module_load( "libedi_ei_initialization.so" );
+            if ( l_errl )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                          "Could not load libedi_ei_initialization.so");
+            }
+            else
+            {
+                l_libloaded = true;
+            }
+        }
+
+        if(!l_errl)
+        {
+            // after agreement, open abuses as required
+            l_errl = smp_unfencing_inter_enclosure_abus_links();
+        }
+
+        if(l_libloaded) // loaded locally
+        {
+            l_errl = VFS::module_unload( "libedi_ei_initialization.so" );
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                          "Could not un-load libedi_ei_initialization.so");
+            }
+        }
 
         // release the storage from the message
         free(io_pMsg->extra_data);
