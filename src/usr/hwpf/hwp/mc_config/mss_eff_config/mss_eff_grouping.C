@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.27 2013/08/13 09:52:18 gpaulraj Exp $
+// $Id: mss_eff_grouping.C,v 1.28 2013/11/21 08:50:19 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.28   | gpaulraj | 11-21-13| modified 8MCS/group id as per spec
 //  1.27   | gpaulraj | 08-13-13| Fixed alternate BAR settings for Mirror
 //  1.26   | gpaulraj | 08-12-13| added mirror policy and HTM/OCC Bar setup
 //  1.25   | gpaulraj | 05-23-13| Fixed FW review feedback
@@ -360,10 +361,10 @@ const uint8_t LARGEST_MBA_SIZE = 15;
                    eff_grouping_data.groupID[0][MCS_IN_GROUP] = 8;
                    eff_grouping_data.groupID[0][MEMBERS_START_ID+0] = 0;
                    eff_grouping_data.groupID[0][MEMBERS_START_ID+1] = 4;
-                   eff_grouping_data.groupID[0][MEMBERS_START_ID+2] = 1;
-                   eff_grouping_data.groupID[0][MEMBERS_START_ID+3] = 5;
-                   eff_grouping_data.groupID[0][MEMBERS_START_ID+4] = 2;
-                   eff_grouping_data.groupID[0][MEMBERS_START_ID+5] = 6;
+                   eff_grouping_data.groupID[0][MEMBERS_START_ID+2] = 2;
+                   eff_grouping_data.groupID[0][MEMBERS_START_ID+3] = 6;
+                   eff_grouping_data.groupID[0][MEMBERS_START_ID+4] = 1;
+                   eff_grouping_data.groupID[0][MEMBERS_START_ID+5] = 5;
                    eff_grouping_data.groupID[0][MEMBERS_START_ID+6] = 3;
                    eff_grouping_data.groupID[0][MEMBERS_START_ID+7] = 7;
                    for(uint8_t i=1;i<16;i++)
