@@ -52,7 +52,7 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
     fapi::ReturnCode l_rc;
     TargetHandleList l_targetList;
 
-    FAPI_INF(ENTER_MRK "fapiGetOtherSideOfMemChannel. State: 0x%08x",
+    FAPI_DBG(ENTER_MRK "fapiGetOtherSideOfMemChannel. State: 0x%08x",
              i_state);
 
    TargetHandle_t   l_target =
@@ -194,11 +194,10 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
 
     }
 
-    FAPI_INF(EXIT_MRK "fapiGetOtherSideOfMemChannel. rc = 0x%x",
+    FAPI_DBG(EXIT_MRK "fapiGetOtherSideOfMemChannel. rc = 0x%x",
            static_cast<uint32_t>(l_rc));
 
     return l_rc;
-
 }
 
 //******************************************************************************
@@ -210,7 +209,7 @@ fapi::ReturnCode fapiGetChildChiplets(
     std::vector<fapi::Target> & o_chiplets,
     const fapi::TargetState i_state)
 {
-    FAPI_INF(ENTER_MRK "fapiGetChildChiplets. Chiplet Type:0x%08x State:0x%08x",
+    FAPI_DBG(ENTER_MRK "fapiGetChildChiplets. Chiplet Type:0x%08x State:0x%08x",
              i_chipletType, i_state);
 
     fapi::ReturnCode l_rc;
@@ -343,7 +342,7 @@ fapi::ReturnCode fapiGetChildChiplets(
         }
     }
 
-    FAPI_INF(EXIT_MRK "fapiGetChildChiplets. %d results", o_chiplets.size());
+    FAPI_DBG(EXIT_MRK "fapiGetChildChiplets. %d results", o_chiplets.size());
     return l_rc;
 }
 
@@ -355,7 +354,7 @@ fapi::ReturnCode fapiGetAssociatedDimms(
     std::vector<fapi::Target> & o_dimms,
     const fapi::TargetState i_state)
 {
-    FAPI_INF(ENTER_MRK "fapiGetAssociatedDimms. State: 0x%08x", i_state);
+    FAPI_DBG(ENTER_MRK "fapiGetAssociatedDimms. State: 0x%08x", i_state);
 
     fapi::ReturnCode l_rc;
     o_dimms.clear();
@@ -418,7 +417,7 @@ fapi::ReturnCode fapiGetAssociatedDimms(
         }
     }
 
-    FAPI_INF(EXIT_MRK "fapiGetAssociatedDimms. %d results", o_dimms.size());
+    FAPI_DBG(EXIT_MRK "fapiGetAssociatedDimms. %d results", o_dimms.size());
     return l_rc;
 }
 
@@ -429,7 +428,7 @@ fapi::ReturnCode fapiGetParentChip(
     const fapi::Target& i_chiplet,
     fapi::Target & o_chip)
 {
-    FAPI_INF(ENTER_MRK "fapiGetParentChip");
+    FAPI_DBG(ENTER_MRK "fapiGetParentChip");
 
     fapi::ReturnCode l_rc;
 
@@ -520,7 +519,7 @@ fapi::ReturnCode fapiGetParentChip(
         }
     }
 
-    FAPI_INF(EXIT_MRK "fapiGetParentChip");
+    FAPI_DBG(EXIT_MRK "fapiGetParentChip");
     return l_rc;
 }
 
