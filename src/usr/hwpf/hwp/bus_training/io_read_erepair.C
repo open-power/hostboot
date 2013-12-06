@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_read_erepair.C,v 1.6 2013/07/14 15:50:02 varkeykv Exp $
+// $Id: io_read_erepair.C,v 1.7 2013/10/22 11:46:38 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -61,7 +61,6 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 {
   ReturnCode rc;
   ecmdDataBufferBase data_one(16);
-  ecmdDataBufferBase data_two(16);
   ecmdDataBufferBase mask(16);
   uint8_t lane=0;
 
@@ -125,7 +124,6 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 
       //Collect the RX bad lanes 
       rc_ecmd|=data_one.flushTo0();
-      rc_ecmd|=data_two.flushTo0();
             
       if(rc_ecmd)
       {
@@ -133,22 +131,28 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
           return(rc);
       }
       
-      rc = GCR_read( target, interface, rx_lane_bad_vec_0_15_pg, clock_group,  0,  data_one);
-      if(rc){return rc;}
-      rc = GCR_read( target, interface, rx_lane_bad_vec_16_31_pg, clock_group,  0,  data_two);
+      rc = GCR_read( target, interface,  rx_bad_lane_enc_gcrmsg_pg, clock_group,  0,  data_one);
       if(rc){return rc;}
 
       // RX lane records 
       // Set the RX bad lanes in the RX vector
       
-      for(uint8_t i=0;i<16;++i){
-          if (data_one.isBitSet(i)) {
-             rx_lanes.push_back(lane+i); // 0 to 15 bad lanes
-          }
-          if(data_two.isBitSet(i)){
-            rx_lanes.push_back(lane+i+16); // 16 to 31 bad lanes 
-          }
+      // Get first bad lane
+      if(!data_one.isBitClear(0,7))
+      {
+        data_one.extract(&lane,0,7);
+        lane=lane>>1;
+        FAPI_DBG("First bad lane is %d",lane);
+        rx_lanes.push_back(lane); // 0 to 15 bad lanes
       }
+      // Get second bad lane if any 
+      if(!data_one.isBitClear(7,7)){
+        data_one.extract(&lane,7,7);
+        lane=lane>>1;
+        FAPI_DBG("Second bad lane is %d",lane);
+        rx_lanes.push_back(lane); // 16 to 31 bad lanes 
+      }
+
 
     }
   return rc;
