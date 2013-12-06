@@ -730,6 +730,15 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
                                        DEVICE_FSI_ADDRESS(dump_regs[x]));
             }
         }
+        regdata2.addToLog(io_log);
+
+        // Grab the security reg (per Cedric)
+        if( i_target != iv_master )
+        {
+            ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
+            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00010005ull));
+            l_scom_data.addToLog(io_log);
+        }
     }
     else if( FSI::FFDC_OPB_FAIL == i_ffdc_type )
     {
