@@ -20,18 +20,32 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_get_voltage_errors.xml,v 1.5 2013/05/03 16:10:12 jimyac Exp $ -->
+<!-- $Id: proc_get_voltage_errors.xml,v 1.6 2013/12/04 18:55:29 jimyac Exp $ -->
 <!-- Error definitions for proc_get_voltage procedure -->
+
 <hwpErrors>
  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_GET_VOLTAGE_FREQ_PSTATE_GT_PMAX_ERROR</rc>
     <description>Pstate for given frequency is greater than pmax</description>
+    <ffdc>FREQ_PSTATE</ffdc>
+    <ffdc>PMAX</ffdc>
+    <ffdc>PMIN</ffdc>
+    <ffdc>ENTRIES</ffdc>
+    <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority> 
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_GET_VOLTAGE_FREQ2PSTATE_ERROR</rc>
     <description>Procedure freq2pState() returned an error</description>
-    <ffdc>RETURN_CODE</ffdc>
+    <ffdc>FREQ_MHZ</ffdc>
+    <ffdc>FREQ2PSTATE_RC</ffdc>
+    <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority> 
+    </callout>
   </hwpError>    
 </hwpErrors>
