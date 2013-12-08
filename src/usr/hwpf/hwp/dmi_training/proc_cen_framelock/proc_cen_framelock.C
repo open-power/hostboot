@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.18 2013/11/08 17:50:52 baysah Exp $
+/// $Id: proc_cen_framelock.C,v 1.21 2013/12/10 21:25:35 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -35,15 +35,20 @@
 // *!
 //------------------------------------------------------------------------------
 
+// Change Log
+// Version | who      |Date     | Comment
+//   1.20  | bellows  |25-NOV-13| Changed include to use <> instead of "" for hostboot
+//   1.19  | bellows  |08-NOV-13| Added ATTR_MSS_INIT_STATE to track IPL states
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_cen_framelock.H"
+#include <proc_cen_framelock.H>
 
 
 extern "C"
 {
+using namespace fapi;
 
 //------------------------------------------------------------------------------
 // function: utility subroutine to clear the Centaur MBI Status Register
@@ -1861,14 +1866,16 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
     // (Action0, Action1, Mask)
     // ------------------------
     // (0,0,0) = Checkstop
-    // (0,1,0) = Recoverable
-    // (1,0,x) = Report Unused
+    // (0,1,0) = Recoverable Error
+    // (1,0,x) = Recoverable Interrupt
     // (1,1,0) = Machine Check
     // (x,x,1) = MASKED
     // (1,0,0) = Use this setting for non-implemented bits
 
     // Set P8 MCI FIR ACT0
     //     Set action regs to recoverable interrupt (action0=1, action1=0) for MCIFIR's 12,15,16 and 17
+    //     On 4/25/2013, PRD asked to change bit 12 action from recov intr to recover error
+    //     On 12/10/2013, PRD asked to change bit 12 action back from recov error to recover interrupt
     l_ecmdRc |= mci_data.flushTo0();
     l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
     l_ecmdRc |= mci_data.setBit(15);    //Centaur Recoverable Attention
@@ -1900,6 +1907,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.setBit(8);     //MCI Internal Control Parity Error
     l_ecmdRc |= mci_data.setBit(9);     //MCI Data Flow Parity Error
     l_ecmdRc |= mci_data.setBit(10);    //CRC Performance Degradation
+    //l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
     l_ecmdRc |= mci_data.setBit(20);    //Scom Register parity error
     l_ecmdRc |= mci_data.setBit(22);    //mcicfgq parity error
     l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
@@ -2082,6 +2090,12 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Fir Mask Register");
         return l_rc;
     }
+
+      // set the init state attribute to DMI_ACTIVE
+    uint8_t l_attr_mss_init_state;
+    l_attr_mss_init_state=ENUM_ATTR_MSS_INIT_STATE_DMI_ACTIVE;
+    l_rc = FAPI_ATTR_SET(ATTR_MSS_INIT_STATE, &i_mem_target, l_attr_mss_init_state);
+    if(l_rc) return l_rc;
 
     // mark HWP exit
     FAPI_IMP("proc_cen_framelock: Exiting ...");

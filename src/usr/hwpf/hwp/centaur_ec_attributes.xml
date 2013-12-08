@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/centaur_ec_attributes.xml $                  -->
+<!-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/xml/attribute_info/centaur_ec_attributes.xml,v $                  -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-<!-- $Id: centaur_ec_attributes.xml,v 1.15 2013/11/22 22:13:33 whs Exp $ -->
+  <!-- $Id: centaur_ec_attributes.xml,v 1.15 2013/11/22 22:13:33 whs Exp $ -->
   <attribute>
     <id>ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>

@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_switch_rec_attn.C,v 1.2 2013/04/12 19:23:36 mfred Exp $
+// $Id: proc_switch_rec_attn.C,v 1.3 2013/11/25 17:13:06 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_switch_rec_attn.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -41,8 +41,8 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p8_scom_addresses.H"
-#include "proc_switch_rec_attn.H"
+#include <p8_scom_addresses.H>
+#include <proc_switch_rec_attn.H>
 #include <fapi.H>
 
 
@@ -184,6 +184,9 @@ extern "C"
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_switch_rec_attn.C,v $
+Revision 1.3  2013/11/25 17:13:06  mfred
+Change include statements to avoid problems.  (From Gerrit review.)
+
 Revision 1.2  2013/04/12 19:23:36  mfred
 Avoid clearing bit 18 of the MCIFIRMASK by reading the reg first. (Fix for SW197032).
 

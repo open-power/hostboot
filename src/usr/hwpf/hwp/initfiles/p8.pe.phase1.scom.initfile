@@ -1,4 +1,4 @@
-#-- $Id: p8.pe.phase1.scom.initfile,v 1.4 2013/05/15 04:24:37 jmcgill Exp $
+#-- $Id: p8.pe.phase1.scom.initfile,v 1.5 2013/11/22 17:24:47 ricmata Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -23,7 +23,8 @@ SyntaxVersion = 1
 #-- Defines
 #--------------------------------------------------------------------------------
 
-define lane32 = (ATTR_CHIP_EC_FEATURE_32_PCIE_LANES != 0);
+define lane32        = (ATTR_CHIP_EC_FEATURE_32_PCIE_LANES != 0);
+define zcal_override = (ATTR_CHIP_EC_FEATURE_ZCAL_OVERRIDE != 0);
 
 #--------------------------------------------------------------------------------
 #-- SCOM initializations
@@ -759,6 +760,294 @@ scom 0x800003F70901143F {
     48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][15];
 }
 
+#-- RX Phase Rotator Flywheel Control Register (A0)
+scom 0x8000002F0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A1)
+scom 0x8000006F0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A2)
+scom 0x800000AF0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A3)
+scom 0x800000EF0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A4)
+scom 0x8000012F0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A5)
+scom 0x8000016F0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A6)
+scom 0x800001AF0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A7)
+scom 0x800001EF0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B0)
+scom 0x8000022F0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B1)
+scom 0x8000026F0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B2)
+scom 0x800002AF0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B3)
+scom 0x800002EF0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B4)
+scom 0x8000032F0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B5)
+scom 0x8000036F0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B6)
+scom 0x800003AF0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B7)
+scom 0x800003EF0901143F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- DFE Function Control Register 1 (A0)
+scom 0x8000001F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A1)
+scom 0x8000005F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A2)
+scom 0x8000009F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A3)
+scom 0x800000DF0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A4)
+scom 0x8000011F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A5)
+scom 0x8000015F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A6)
+scom 0x8000019F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A7)
+scom 0x800001DF0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B0)
+scom 0x8000021F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B1)
+scom 0x8000025F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B2)
+scom 0x8000029F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B3)
+scom 0x800002DF0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B4)
+scom 0x8000031F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B5)
+scom 0x8000035F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B6)
+scom 0x8000039F0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B7)
+scom 0x800003DF0901143F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- Receiver Configuration Mode Register (A0)
+scom 0x800000000901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A1)
+scom 0x800000400901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A2)
+scom 0x800000800901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A3)
+scom 0x800000C00901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A4)
+scom 0x800001000901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A5)
+scom 0x800001400901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A6)
+scom 0x800001800901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A7)
+scom 0x800001C00901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B0)
+scom 0x800002000901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B1)
+scom 0x800002400901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B2)
+scom 0x800002800901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B3)
+scom 0x800002C00901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B4)
+scom 0x800003000901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B5)
+scom 0x800003400901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B6)
+scom 0x800003800901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B7)
+scom 0x800003C00901143F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
 #-- ZCAL Control Register
 scom 0x800008400901143F {
     bits,     scom_data;
@@ -767,8 +1056,8 @@ scom 0x800008400901143F {
 
 #-- ZCAL Override Register
 scom 0x800008420901143F {
-    bits,     scom_data;
-    48:63,    0xEC30;
+    bits,     scom_data,    expr;
+    48:63,    0xEC30,       (zcal_override);
 }
 
 
@@ -1502,6 +1791,294 @@ scom 0x800003F70901187F {
     48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][15],  (lane32);
 }
 
+#-- RX Phase Rotator Flywheel Control Register (A0)
+scom 0x8000002F0901187F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A1)
+scom 0x8000006F0901187F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A2)
+scom 0x800000AF0901187F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A3)
+scom 0x800000EF0901187F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A4)
+scom 0x8000012F0901187F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A5)
+scom 0x8000016F0901187F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A6)
+scom 0x800001AF0901187F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (A7)
+scom 0x800001EF0901187F {
+    bits,     scom_data;
+    56:59,    0b1110;
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B0)
+scom 0x8000022F0901187F {
+    bits,     scom_data,    expr;
+    56:59,    0b1110,       (lane32);
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B1)
+scom 0x8000026F0901187F {
+    bits,     scom_data,    expr;
+    56:59,    0b1110,       (lane32);
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B2)
+scom 0x800002AF0901187F {
+    bits,     scom_data,    expr;
+    56:59,    0b1110,       (lane32);
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B3)
+scom 0x800002EF0901187F {
+    bits,     scom_data,    expr;
+    56:59,    0b1110,       (lane32);
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B4)
+scom 0x8000032F0901187F {
+    bits,     scom_data,    expr;
+    56:59,    0b1110,       (lane32);
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B5)
+scom 0x8000036F0901187F {
+    bits,     scom_data,    expr;
+    56:59,    0b1110,       (lane32);
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B6)
+scom 0x800003AF0901187F {
+    bits,     scom_data,    expr;
+    56:59,    0b1110,       (lane32);
+}
+
+#-- RX Phase Rotator Flywheel Control Register (B7)
+scom 0x800003EF0901187F {
+    bits,     scom_data,    expr;
+    56:59,    0b1110,       (lane32);
+}
+
+#-- DFE Function Control Register 1 (A0)
+scom 0x8000001F0901187F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A1)
+scom 0x8000005F0901187F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A2)
+scom 0x8000009F0901187F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A3)
+scom 0x800000DF0901187F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A4)
+scom 0x8000011F0901187F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A5)
+scom 0x8000015F0901187F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A6)
+scom 0x8000019F0901187F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (A7)
+scom 0x800001DF0901187F {
+    bits,     scom_data;
+    49,       0b0;
+}
+
+#-- DFE Function Control Register 1 (B0)
+scom 0x8000021F0901187F {
+    bits,     scom_data,    expr;
+    49,       0b0,          (lane32);
+}
+
+#-- DFE Function Control Register 1 (B1)
+scom 0x8000025F0901187F {
+    bits,     scom_data,    expr;
+    49,       0b0,          (lane32);
+}
+
+#-- DFE Function Control Register 1 (B2)
+scom 0x8000029F0901187F {
+    bits,     scom_data,    expr;
+    49,       0b0,          (lane32);
+}
+
+#-- DFE Function Control Register 1 (B3)
+scom 0x800002DF0901187F {
+    bits,     scom_data,    expr;
+    49,       0b0,          (lane32);
+}
+
+#-- DFE Function Control Register 1 (B4)
+scom 0x8000031F0901187F {
+    bits,     scom_data,    expr;
+    49,       0b0,          (lane32);
+}
+
+#-- DFE Function Control Register 1 (B5)
+scom 0x8000035F0901187F {
+    bits,     scom_data,    expr;
+    49,       0b0,          (lane32);
+}
+
+#-- DFE Function Control Register 1 (B6)
+scom 0x8000039F0901187F {
+    bits,     scom_data,    expr;
+    49,       0b0,          (lane32);
+}
+
+#-- DFE Function Control Register 1 (B7)
+scom 0x800003DF0901187F {
+    bits,     scom_data,    expr;
+    49,       0b0,          (lane32);
+}
+
+#-- Receiver Configuration Mode Register (A0)
+scom 0x800000000901187F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A1)
+scom 0x800000400901187F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A2)
+scom 0x800000800901187F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A3)
+scom 0x800000C00901187F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A4)
+scom 0x800001000901187F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A5)
+scom 0x800001400901187F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A6)
+scom 0x800001800901187F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (A7)
+scom 0x800001C00901187F {
+    bits,     scom_data;
+    49,       0b1;
+}
+
+#-- Receiver Configuration Mode Register (B0)
+scom 0x800002000901187F {
+    bits,     scom_data,    expr;
+    49,       0b1,          (lane32);
+}
+
+#-- Receiver Configuration Mode Register (B1)
+scom 0x800002400901187F {
+    bits,     scom_data,    expr;
+    49,       0b1,          (lane32);
+}
+
+#-- Receiver Configuration Mode Register (B2)
+scom 0x800002800901187F {
+    bits,     scom_data,    expr;
+    49,       0b1,          (lane32);
+}
+
+#-- Receiver Configuration Mode Register (B3)
+scom 0x800002C00901187F {
+    bits,     scom_data,    expr;
+    49,       0b1,          (lane32);
+}
+
+#-- Receiver Configuration Mode Register (B4)
+scom 0x800003000901187F {
+    bits,     scom_data,    expr;
+    49,       0b1,          (lane32);
+}
+
+#-- Receiver Configuration Mode Register (B5)
+scom 0x800003400901187F {
+    bits,     scom_data,    expr;
+    49,       0b1,          (lane32);
+}
+
+#-- Receiver Configuration Mode Register (B6)
+scom 0x800003800901187F {
+    bits,     scom_data,    expr;
+    49,       0b1,          (lane32);
+}
+
+#-- Receiver Configuration Mode Register (B7)
+scom 0x800003C00901187F {
+    bits,     scom_data,    expr;
+    49,       0b1,          (lane32);
+}
+
 #-- ZCAL Control Register
 scom 0x800008400901187F {
     bits,     scom_data;
@@ -1510,6 +2087,6 @@ scom 0x800008400901187F {
 
 #-- ZCAL Override Register
 scom 0x800008420901187F {
-    bits,     scom_data;
-    48:63,    0xEC30;
+    bits,     scom_data,    expr;
+    48:63,    0xEC30,       (zcal_override);
 }
