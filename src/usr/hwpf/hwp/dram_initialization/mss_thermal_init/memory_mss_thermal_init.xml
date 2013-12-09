@@ -21,9 +21,21 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_thermal_init.xml,v 1.1 2013/06/19 18:28:33 bellows Exp $ -->
+<!-- $Id: memory_mss_thermal_init.xml,v 1.2 2013/12/02 22:46:55 pardeik Exp $ -->
 <!-- For file ../../ipl/fapi/mss_thermal_init.C -->
-<!-- // *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com -->
-<!-- // *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com -->
+<!-- // *! OWNER NAME  : Michael Pardeik   Email: pardeik@us.ibm.com -->
+<!-- // *! BACKUP NAME : Jacob Sloat   Email: jdsloat@us.ibm.com -->
+
+<hwpError>
+    <rc>RC_MSS_CDIMM_INVALID_NUMBER_SENSORS</rc>
+    <description>Invalid number of dimm temperature sensors specified in the CDIMM VPD MW keyword.  Number of sensors greater than 8.</description>
+    <ffdc>FFDC_DATA_1</ffdc>
+    <ffdc>FFDC_DATA_2</ffdc>	
+   <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
+ <!-- Deconfigure MEM_CHIP -->
+  <deconfigure><target>MEM_CHIP</target></deconfigure>
+  <!-- Create GARD record for MEM_CHIP -->
+  <gard><target>MEM_CHIP</target></gard>	
+</hwpError>
 
 </hwpErrors>

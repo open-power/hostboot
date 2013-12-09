@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_thermal_init.C,v 1.9 2013/10/11 15:51:56 pardeik Exp $
+// $Id: mss_thermal_init.C,v 1.10 2013/12/02 22:47:26 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_thermal_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -29,9 +29,11 @@
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_thermal_init
 // *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com
-// *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com
+// *! OWNER NAME  : Michael Pardeik   Email: pardeik@us.ibm.com
+// *! BACKUP NAME : Jacob Sloat       Email: jdsloat@us.ibm.com
 // *! ADDITIONAL COMMENTS :
+//
+// applicable CQ component memory_screen
 //
 // DESCRIPTION:
 // The purpose of this procedure is to configure and start the OCC cache and Centaur thermal cache
@@ -45,6 +47,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.10  | pardeik  |21-NOV-13| added support for dimm temperature sensor attributes
 //   1.9   | pardeik  |11-OCT-13| gerrit review updates to remove uneeded items
 //   1.8   | pardeik  |04-OCT-13| changes done from gerrit review
 //   1.7   | pardeik  |01-AUG-13| Functional corrections to procedure
@@ -83,7 +86,7 @@ extern "C" {
    
 fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 {
-    // Target is centaur.mba
+    // Target is centaur
     
     fapi::ReturnCode l_rc;
     
@@ -139,18 +142,30 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       const uint32_t I2C_SETUP_LOWER_HALF = 0x05000000;
       const uint32_t ACT_MASK_UPPER_HALF = 0x00018000;
       const uint32_t ACT_MASK_LOWER_HALF = 0x00000000;
-      const uint32_t SENSOR_ADDR_MAP_ISDIMM = 0x012389ab;
-      const uint32_t SENSOR_ADDR_MAP_CDIMM = 0x01234567;
+      const uint32_t SENSOR_ADDR_MAP_ISDIMM = 0x01234567;
 // OCC polls cacheline every 2 ms.
 // For I2C bus at 50kHz (9.6 ms max to read 8 sensors), use interval of 5 to prevent stall error
       const uint32_t CONFIG_INTERVAL_TIMER = 5;
       const uint32_t CONFIG_STALL_TIMER = 128;
+      const uint8_t I2C_BUS_ENCODE_PRIMARY = 0;
+      const uint8_t I2C_BUS_ENCODE_SECONDARY = 8;
+      const uint8_t MAX_NUM_DIMM_SENSORS = 8;
 
       // Variable declaration
       uint8_t l_dimm_ranks_array[l_NUM_MBAS][l_NUM_PORTS][l_NUM_DIMMS];	// Number of ranks for each configured DIMM in each MBA
       uint8_t l_custom_dimm[l_NUM_MBAS];				// Custom DIMM
       uint8_t l_mba_pos = 0;						// Current MBA for populating rank array
       ecmdDataBufferBase l_data(64);
+      ecmdDataBufferBase l_data_scac_enable(64);
+      ecmdDataBufferBase l_data_scac_addrmap(64);
+      uint8_t l_cdimm_sensor_map;
+      uint8_t l_cdimm_sensor_map_primary;
+      uint8_t l_cdimm_sensor_map_secondary;
+      uint8_t l_cdimm_number_dimm_temp_sensors;
+      uint8_t l_i2c_address_map;
+      uint8_t l_data_scac_addrmap_offset;
+      uint8_t l_i2c_bus_encode;
+      uint8_t l_sensor_map_mask;
 
 //********************************************
 // Centaur internal temperature polling setup 
@@ -226,6 +241,12 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 	 FAPI_INF("ATTR_EFF_CUSTOM_DIMM: %d", l_custom_dimm[l_mba_pos]);
       }
 
+      l_rc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_PRIMARY, &i_target, l_cdimm_sensor_map_primary);
+      if (l_rc) return l_rc;
+      l_rc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_SECONDARY, &i_target, l_cdimm_sensor_map_secondary);
+      if (l_rc) return l_rc;
+
+
       // Configure Centaur Thermal Cache
 
       // ---------------------------------
@@ -262,30 +283,6 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       if (l_rc) return l_rc;
 
       // ---------------------------------
-      // Program SensorAddressMap Register
-      // ---------------------------------
-
-      uint32_t l_addr_map_data_int;
-
-      l_rc = fapiGetScom(i_target, SCAC_ADDRMAP, l_data);
-      if (l_rc) return l_rc;
-
-      if ((l_custom_dimm[0] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (l_custom_dimm[1] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)){
-	 l_addr_map_data_int = SENSOR_ADDR_MAP_ISDIMM;
-      }
-      else{
-	 l_addr_map_data_int = SENSOR_ADDR_MAP_CDIMM;
-      }
-
-      l_ecmd_rc |= l_data.insert(l_addr_map_data_int, 0, 32, 0);
-      if(l_ecmd_rc) {
-         l_rc.setEcmdError(l_ecmd_rc);
-	 return l_rc;
-      }
-      l_rc = fapiPutScom(i_target, SCAC_ADDRMAP, l_data);
-      if (l_rc) return l_rc;
-
-      // ---------------------------------
       // Program PibTarget Register
       // ---------------------------------
 
@@ -303,7 +300,6 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 
       // ---------------------------------
       // Program I2CMCtrl Register
-      // TODO: Check if this can be setup at scan time, since it should be constant
       // ---------------------------------
 
       l_rc = fapiGetScom(i_target, SCAC_I2CMCTRL, l_data);
@@ -353,18 +349,86 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       l_rc = fapiPutScom(i_target, SCAC_CONFIG, l_data);
       if (l_rc) return l_rc;
 
-      // ---------------------------------
-      // Program SensorCacheEnable Register
-      // ---------------------------------
+      // --------------------------------------------------------
+      // Program SensorCacheEnable and SensorAddressMap Registers
+      // --------------------------------------------------------
 
-      l_rc = fapiGetScom(i_target, SCAC_ENABLE, l_data);
+      l_rc = fapiGetScom(i_target, SCAC_ENABLE, l_data_scac_enable);
       if (l_rc) return l_rc;
 
-      if ((l_custom_dimm[0] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (l_custom_dimm[1] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)){
+      l_rc = fapiGetScom(i_target, SCAC_ADDRMAP, l_data_scac_addrmap);
+      if (l_rc) return l_rc;
 
-	  
-         l_ecmd_rc |= l_data.setBit(0);
-	 l_ecmd_rc |= l_data.setBit(4);
+      if ((l_custom_dimm[0] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) || (l_custom_dimm[1] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)){
+
+	  l_cdimm_number_dimm_temp_sensors = 0;
+	  // cycle through both primary and secondary i2c busses, determine i2c address and enable bits
+	  for (uint8_t k = 0; k < 2; k++)
+	  {
+	      for (uint8_t i = 0; i < 8; i++)
+	      {
+		  if (k == 0)
+		  {
+		      l_i2c_bus_encode = I2C_BUS_ENCODE_PRIMARY;
+		      l_cdimm_sensor_map = l_cdimm_sensor_map_primary;
+		  }
+		  else
+		  {
+		      l_i2c_bus_encode = I2C_BUS_ENCODE_SECONDARY;
+		      l_cdimm_sensor_map = l_cdimm_sensor_map_secondary;
+		  }
+		  switch (i)
+		  {
+		      case 0:
+			  l_sensor_map_mask = 0x01;
+			  break;
+		      case 1:
+			  l_sensor_map_mask = 0x02;
+			  break;
+		      case 2:
+			  l_sensor_map_mask = 0x04;
+			  break;
+		      case 3:
+			  l_sensor_map_mask = 0x08;
+			  break;
+		      case 4:
+			  l_sensor_map_mask = 0x10;
+			  break;
+		      case 5:
+			  l_sensor_map_mask = 0x20;
+			  break;
+		      case 6:
+			  l_sensor_map_mask = 0x40;
+			  break;
+		      case 7:
+			  l_sensor_map_mask = 0x80;
+			  break;
+		      default:
+			  l_sensor_map_mask = 0x00;		
+		  }
+		  if ((l_cdimm_sensor_map & l_sensor_map_mask) != 0)
+		  {
+		      l_ecmd_rc |= l_data_scac_enable.setBit(l_cdimm_number_dimm_temp_sensors);
+		      l_i2c_address_map = i + l_i2c_bus_encode;
+		      l_data_scac_addrmap_offset = l_cdimm_number_dimm_temp_sensors * 4;
+		      l_ecmd_rc |= l_data_scac_addrmap.insert(l_i2c_address_map, l_data_scac_addrmap_offset , 4, 4);
+		      l_cdimm_number_dimm_temp_sensors++;
+		      if(l_ecmd_rc) {
+			  l_rc.setEcmdError(l_ecmd_rc);
+			  return l_rc;
+		      }
+		      if (l_cdimm_number_dimm_temp_sensors > MAX_NUM_DIMM_SENSORS)
+		      {
+			  FAPI_ERR("Invalid number of dimm temperature sensors specified in the CDIMM VPD MW keyword");
+			  const fapi::Target & MEM_CHIP = i_target;
+			  uint8_t FFDC_DATA_1 = l_cdimm_sensor_map_primary;
+			  uint8_t FFDC_DATA_2 = l_cdimm_sensor_map_secondary;
+			  FAPI_SET_HWP_ERROR(l_rc, RC_MSS_CDIMM_INVALID_NUMBER_SENSORS);
+			  return l_rc;
+		      }
+		  }
+	      }
+	  }
       }
       else{
          // Iterate through the num_ranks array to determine what DIMMs are plugged
@@ -372,30 +436,40 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
          uint32_t l_iterator = 0;
          for (uint32_t i = 0; i < 2; i++){
 	    if (l_dimm_ranks_array[i][0][0] != 0){
-	       l_ecmd_rc |= l_data.setBit(l_iterator);
+	       l_ecmd_rc |= l_data_scac_enable.setBit(l_iterator);
 	    }
 	    l_iterator++;
 	    if (l_dimm_ranks_array[i][0][1] != 0){
-	       l_ecmd_rc |= l_data.setBit(l_iterator);
+	       l_ecmd_rc |= l_data_scac_enable.setBit(l_iterator);
 	    }
 	    l_iterator++;
 	    if (l_dimm_ranks_array[i][1][0] != 0){
-	       l_ecmd_rc |= l_data.setBit(l_iterator);
+	       l_ecmd_rc |= l_data_scac_enable.setBit(l_iterator);
 	    }
 	    l_iterator++;
 	    if (l_dimm_ranks_array[i][1][1] != 0){
-	       l_ecmd_rc |= l_data.setBit(l_iterator);
+	       l_ecmd_rc |= l_data_scac_enable.setBit(l_iterator);
 	    }
 	    l_iterator++;
 	 }
+	 l_ecmd_rc |= l_data_scac_addrmap.insert(SENSOR_ADDR_MAP_ISDIMM, 0, 32, 0);
+	 if(l_ecmd_rc) {
+	     l_rc.setEcmdError(l_ecmd_rc);
+	     return l_rc;
+	 }
+
       }
+
 
       if(l_ecmd_rc) {
          l_rc.setEcmdError(l_ecmd_rc);
 	 return l_rc;
       }
 
-      l_rc = fapiPutScom(i_target, SCAC_ENABLE, l_data);
+      l_rc = fapiPutScom(i_target, SCAC_ENABLE, l_data_scac_enable);
+      if (l_rc) return l_rc;
+
+      l_rc = fapiPutScom(i_target, SCAC_ADDRMAP, l_data_scac_addrmap);
       if (l_rc) return l_rc;
 
       //---------------------------------
