@@ -2342,34 +2342,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[2]
      *  PB_TO_PEC_CE
      */
-    # FIXME RTC 23127 PB_TO_PEC under discussion
-    (PciNestFir_0, bit(2)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(2)) ? calloutConnPci0Th32;
 
     /** PCINESTFIR_1[2]
      *  PB_TO_PEC_CE
      */
-    (PciNestFir_1, bit(2)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(2)) ? calloutConnPci1Th32;
 
     /** PCINESTFIR_2[2]
      *  PB_TO_PEC_CE
      */
-    (PciNestFir_2, bit(2)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(2)) ? calloutConnPci2Th32;
 
     /** PCINESTFIR_0[3]
      *  PB_TO_PEC_UE
      */
-    # FIXME RTC 23127 PB_TO_PEC under discussion
-    (PciNestFir_0, bit(3)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(3)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[3]
      *  PB_TO_PEC_UE
      */
-    (PciNestFir_1, bit(3)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(3)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[3]
      *  PB_TO_PEC_UE
      */
-    (PciNestFir_2, bit(3)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(3)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[4]
      *  PB_TO_PEC_SUE
@@ -2449,18 +2447,17 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[9]
      *  PB_INTERFACE_PE
      */
-    # FIXME RTC 23127 MRU PB to PEC under discussion
-    (PciNestFir_0, bit(9)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(9)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_1, bit(9)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(9)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_2, bit(9)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(9)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[10]
      *  PB_DATA_HANG_ERRORS
@@ -2525,18 +2522,17 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[14]
      *  PCI_HANG_ERROR
      */
-    # FIXME RTC 23127 PCI All under discussion
-    (PciNestFir_0, bit(14)) ? calloutConnPci0AndIsolatePathTh1;
+    (PciNestFir_0, bit(14)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[14]
      *  PCI_HANG_ERROR
      */
-    (PciNestFir_1, bit(14)) ? calloutConnPci1AndIsolatePathTh1;
+    (PciNestFir_1, bit(14)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[14]
      *  PCI_HANG_ERROR
      */
-    (PciNestFir_2, bit(14)) ? calloutConnPci2AndIsolatePathTh1;
+    (PciNestFir_2, bit(14)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[15]
      *  PCI_CLOCK_ERROR
@@ -3157,27 +3153,6 @@ actionclass calloutConnPci1Th32 { calloutConnPci1; threshold32pday; };
 
 /** Callout the connected PCI 2 controller, threshold 32 per day */
 actionclass calloutConnPci2Th32 { calloutConnPci2; threshold32pday; };
-
-/** Callout the connected PCI 0 controller and path to adapter, threshold 1 */
-actionclass calloutConnPci0AndIsolatePathTh1
-{
-    #FIXME RTC 23127 Need to find right Procedure for PCI path isolation
-    calloutConnPci0Th1;
-};
-
-/** Callout the connected PCI 1 controller and path to adapter, threshold 1 */
-actionclass calloutConnPci1AndIsolatePathTh1
-{
-    #FIXME RTC 23127 Need to find right Procedure for PCI path isolation
-    calloutConnPci1Th1;
-};
-
-/** Callout the connected PCI 2 controller and path to adapter, threshold 1 */
-actionclass calloutConnPci2AndIsolatePathTh1
-{
-    #FIXME RTC 23127 Need to find right Procedure for PCI path isolation
-    calloutConnPci2Th1;
-};
 
 /** Callout the DMI bus 0 */
 actionclass calloutDmiBus0
