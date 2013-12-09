@@ -23,7 +23,7 @@
 #ifndef __PORE_INLINE_H__
 #define __PORE_INLINE_H__
 
-// $Id: pore_inline.h,v 1.18 2013/02/06 01:10:35 bcbrock Exp $
+// $Id: pore_inline.h,v 1.19 2013/11/20 14:06:40 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -795,6 +795,14 @@ pore_STI(PoreInlineContext *ctx, int32_t offset, int base, uint64_t imm)
 			       PGAS_OPCODE_STI, 0, offset, base, imm);
 }
 
+
+#ifdef IGNORE_HW274735
+
+// BSI and BCI are redacted as instructions and reimplemented as "macros" due
+// to HW274735, unless specifically overridden. Note that the inline assembler
+// will allow D1 to be used as scratch here, unlike the underlying hardware
+// instruction. 
+
 PORE_STATIC inline int
 pore_BSI(PoreInlineContext *ctx, 
          int src, int32_t offset, int base, uint64_t imm) 
@@ -812,6 +820,29 @@ pore_BCI(PoreInlineContext *ctx,
 	pore_inline_load_store(ctx, 
 			       PGAS_OPCODE_BCI, src, offset, base, imm);
 }
+
+#else
+
+PORE_STATIC inline int
+pore_BSI(PoreInlineContext *ctx, 
+         int src, int32_t offset, int base, uint64_t imm) 
+{
+    return 
+        ((pore_LD(ctx, src, offset, base) ||
+          pore_ORI(ctx, src, src, imm)    ||
+          pore_STD(ctx, src, offset, base)) ? ctx->error : 0);
+}
+
+PORE_STATIC inline int
+pore_BCI(PoreInlineContext *ctx, 
+         int src, int32_t offset, int base, uint64_t imm) 
+{
+    return 
+        ((pore_LDANDI(ctx, src, offset, base, ~imm) ||
+          pore_STD(ctx, src, offset, base)) ? ctx->error : 0);
+}
+
+#endif // IGNORE_HW274735
 
 
 // BRAIA

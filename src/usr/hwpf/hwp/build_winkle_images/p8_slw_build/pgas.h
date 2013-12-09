@@ -25,7 +25,7 @@
 
 #define __PGAS__
 
-// $Id: pgas.h,v 1.20 2013/05/04 13:02:11 bcbrock Exp $
+// $Id: pgas.h,v 1.21 2013/11/20 14:06:39 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area, the hardware procedure area,   **
@@ -140,12 +140,18 @@
 #define PGAS_OPCODE_LD1       PORE_OPCODE_SCR2RD  /* Used by LD */
 #define PGAS_OPCODE_LD1ANDI   PORE_OPCODE_SCR2RDA /* Used by LDANDI */
 #define PGAS_OPCODE_STI       PORE_OPCODE_WRI     
-#define PGAS_OPCODE_BSI       PORE_OPCODE_BS      
-#define PGAS_OPCODE_BCI       PORE_OPCODE_BC      
 #define PGAS_OPCODE_STD0      PORE_OPCODE_SCR1WR  /* Used by STD */
 #define PGAS_OPCODE_STD1      PORE_OPCODE_SCR2WR  /* Used by STD */
 #define PGAS_OPCODE_SCAND     PORE_OPCODE_SCAND   
 
+#ifdef IGNORE_HW274735
+
+// BSI and BCI are normally redacted due to HW274735. See also pgas.h
+
+#define PGAS_OPCODE_BSI       PORE_OPCODE_BS      
+#define PGAS_OPCODE_BCI       PORE_OPCODE_BC      
+
+#endif // IGNORE_HW274735
 
 // These are the programmer-visible register names as defined by the PORE
 // hardware manual.  All of these names (except the PC) appear differently in
@@ -584,6 +590,32 @@
 	.long	(\space)
 	.long	(\offset)
 	.endm
+
+        //////////////////////////////////////////////////////////////////////
+        // Bug workarounds
+        //////////////////////////////////////////////////////////////////////
+
+#ifndef IGNORE_HW274735
+
+        // HW274735 documents that BC and BS are broken for the PORE-GPE0/1
+        // pair. This bug is unfixed in POWER8, and by default we require BSI
+        // and BCI to be implemented as macros on all engines. For
+        // compatability we continue to require that dx == D0.
+
+        .macro  bsi, dx:req, offset:req, base:req, imm:req
+        ..d0    (\dx)
+        ld      D0, (\offset), (\base)
+        ori     D0, D0, (\imm)
+        std     D0, (\offset), (\base)
+        .endm
+
+        .macro  bci, dx:req, offset:req, base:req, imm:req
+        ..d0    (\dx)
+        ldandi  D0, (\offset), (\base), ~(\imm)
+        std     D0, (\offset), (\base)
+        .endm
+
+#endif // IGNORE_HW274735
 
 	//////////////////////////////////////////////////////////////////////
 	// "A"- and "IA"-form Instructions

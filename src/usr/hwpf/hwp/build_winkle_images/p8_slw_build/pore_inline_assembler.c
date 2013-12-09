@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pore_inline_assembler.c,v 1.20 2013/05/23 21:33:40 dcrowell Exp $
+// $Id: pore_inline_assembler.c,v 1.21 2013/11/20 14:06:40 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -367,6 +367,10 @@
 /// PORE_INLINE_DISASSEMBLE_UNKNOWN then putative data embedded in a text
 /// section will be disassembled as data.  For complete information see the
 /// documentation for pore_inline_disassemble().
+
+#ifdef PPC_HYP
+#include <HvPlicModule.H>
+#endif
 
 #define __PORE_INLINE_ASSEMBLER_C__
 #include "pore_inline.h"
@@ -1230,6 +1234,8 @@ pore_LI(PoreInlineContext *ctx, int dest, uint64_t imm)
 }
 
 
+// BSI and BCI are normally redacted as instructions due to HW274735
+
 // LD, LDANDI, STD, STI, BSI, BCI
 
 PORE_STATIC void
@@ -1331,13 +1337,19 @@ pore_inline_load_store(PoreInlineContext *ctx,
         }
         break;
 
-    case PGAS_OPCODE_BSI:
-    case PGAS_OPCODE_BCI:
+#ifdef IGNORE_HW274735
 
-        if (src_dest != D0) {
-            ctx->error = PORE_INLINE_ILLEGAL_REGISTER;
-        }
-        break;
+        // BSI and BCI are normally redacted as instructions due to HW274735
+        
+        case PGAS_OPCODE_BSI:
+        case PGAS_OPCODE_BCI:
+        
+            if (src_dest != D0) {
+                ctx->error = PORE_INLINE_ILLEGAL_REGISTER;
+            }
+            break;
+
+#endif // IGNORE_HW274735
 
     case PGAS_OPCODE_STI:
         break;
