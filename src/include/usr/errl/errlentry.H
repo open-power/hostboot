@@ -452,12 +452,19 @@ public:
      *  @param[in]  i_target        The hardware target fed by the clock
      *  @param[in]  i_clockType     The hardware clock type
      *  @param[in]  i_priority      Priority of the callout
+     *  @param[in]  i_deconfigState Enum indicating whether the failing part
+     *                              should be deconfigured.
+     *  @param[in]  i_gardErrorType To indicate what type of failure occured
      *
      *  @return void
      */
     void addClockCallout(const TARGETING::Target *i_target,
                        const HWAS::clockTypeEnum i_clockType,
-                       const HWAS::callOutPriority i_priority);
+                       const HWAS::callOutPriority i_priority,
+                       const HWAS::DeconfigEnum
+                                   i_deconfigState = HWAS::NO_DECONFIG,
+                       const HWAS::GARD_ErrorType
+                                   i_gardErrorType = HWAS::GARD_NULL);
 
     /**
      *  @brief Add a bus callout

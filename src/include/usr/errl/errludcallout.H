@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -42,6 +42,9 @@ namespace TARGETING
 namespace ERRORLOG
 {
 
+// Forward class declaration
+class ErrlEntry;
+
 /**
  * @class ErrlUserDetailsCallout
  *
@@ -49,7 +52,15 @@ namespace ERRORLOG
  */
 class ErrlUserDetailsCallout : public ErrlUserDetails
 {
-public:
+
+    friend class ErrlEntry;
+
+private:
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~ErrlUserDetailsCallout() { };
 
     /**
      *  @brief Construct a clock callout user detail
@@ -58,15 +69,19 @@ public:
      *  @param[in]  i_targetDataLength    length of i_pTargetData
      *  @param[in]  i_clockType     clock type Enum
      *  @param[in]  i_priority      Priority of the callout
+     *  @param[in]  i_deconfigState Enum indicating whether the failing part
+     *                              should be deconfigured.
+     *  @param[in]  i_gardErrorType To indicate what type of failure occured
      *
      *  @return void
      */
     ErrlUserDetailsCallout(
-                        const void *i_pTargetData,
-                        uint32_t i_targetDataLength,
-                        const HWAS::clockTypeEnum i_clockType,
-                        const HWAS::callOutPriority i_priority);
-
+                       const void *i_pTargetData,
+                       uint32_t i_targetDataLength,
+                       const HWAS::clockTypeEnum i_clockType,
+                       const HWAS::callOutPriority i_priority,
+                       const HWAS::DeconfigEnum i_deconfigState,
+                       const HWAS::GARD_ErrorType i_gardErrorType);
     /**
      *  @brief Construct a bus callout user detail
      *
@@ -118,12 +133,8 @@ public:
      */
     ErrlUserDetailsCallout(const HWAS::epubProcedureID i_procedure,
                         const HWAS::callOutPriority i_priority);
-    /**
-     *  @brief Destructor
-     */
-    virtual ~ErrlUserDetailsCallout() { };
 
-private:
+
     // Disabled
     ErrlUserDetailsCallout(const ErrlUserDetailsCallout &);
     ErrlUserDetailsCallout & operator=(const ErrlUserDetailsCallout &);

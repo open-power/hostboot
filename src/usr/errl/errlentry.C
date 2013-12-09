@@ -313,7 +313,9 @@ void ErrlEntry::removeBackTrace()
 ////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
                         const HWAS::clockTypeEnum i_clockType,
-                        const HWAS::callOutPriority i_priority)
+                        const HWAS::callOutPriority i_priority,
+                        const HWAS::DeconfigEnum i_deconfigState,
+                        const HWAS::GARD_ErrorType i_gardErrorType)
 {
     TRACFCOMP(g_trac_errl, ENTER_MRK"addClockCallout(%p, %d, 0x%x)",
                 i_target, i_clockType, i_priority);
@@ -339,7 +341,16 @@ void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
     }
 
     ErrlUserDetailsCallout( pData, size, i_clockType,
-            i_priority).addToLog(this);
+            i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
+
+    if (i_gardErrorType != GARD_NULL)
+    {
+        setGardBit();
+    }
+    if (i_deconfigState != NO_DECONFIG)
+    {
+        setDeconfigBit();
+    }
 
 } // addClockCallout
 

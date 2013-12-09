@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -87,7 +87,38 @@ case HWAS::_type: i_parser.PrintString( "Clock Type", #_type); break;
                         i_parser.PrintNumber( "Clock Type", "UNKNOWN: 0x%X",
                                         ntohl(pData->clockType) );
                 } // switch clockType
-
+#undef case_CLOCK_TYPE
+                switch (ntohl(pData->clkDeconfigState))
+                {
+#define case_DECONFIG_STATE(_type) \
+case HWAS::_type: i_parser.PrintString( "Deconfig State", #_type); break;
+                    case_DECONFIG_STATE(NO_DECONFIG)
+                    case_DECONFIG_STATE(DECONFIG)
+                    case_DECONFIG_STATE(DELAYED_DECONFIG)
+                    default:
+                        i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
+                                        ntohl(pData->clkDeconfigState) );
+                        break;
+                } // switch clkDeconfigState
+#undef case_DECONFIG_STATE
+                switch (ntohl(pData->clkGardErrorType))
+                {
+#define case_GARD_ERROR_TYPE(_type) \
+case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
+                    case_GARD_ERROR_TYPE(GARD_NULL)
+                    case_GARD_ERROR_TYPE(GARD_User_Manual)
+                    case_GARD_ERROR_TYPE(GARD_Unrecoverable)
+                    case_GARD_ERROR_TYPE(GARD_Fatal)
+                    case_GARD_ERROR_TYPE(GARD_Predictive)
+                    case_GARD_ERROR_TYPE(GARD_Power)
+                    case_GARD_ERROR_TYPE(GARD_PHYP)
+                    case_GARD_ERROR_TYPE(GARD_Void)
+                    default:
+                        i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
+                                        ntohl(pData->clkGardErrorType) );
+                        break;
+                } // switch clkGardErrorType
+#undef case_GARD_ERROR_TYPE
                 // what follows the pData structure is one entity path
                 // print it out
                 uint8_t *l_ptr = reinterpret_cast<uint8_t *>(pData+1);
@@ -111,7 +142,7 @@ case HWAS::_type: i_parser.PrintString( "Bus Type", #_type); break;
                         i_parser.PrintNumber( "Bus Type", "UNKNOWN: 0x%X",
                                         ntohl(pData->busType) );
                 } // switch busType
-
+#undef case_BUS_TYPE
                 // what follows the pData structure is Two entity paths
                 // print them out
                 uint8_t *l_ptr = reinterpret_cast<uint8_t *>(pData+1);
@@ -143,7 +174,7 @@ case HWAS::_type: i_parser.PrintString( "Deconfig State", #_type); break;
                                         ntohl(pData->deconfigState) );
                         break;
                 } // switch deconfigState
-
+#undef case_DECONFIG_STATE
                 switch (ntohl(pData->gardErrorType))
                 {
 #define case_GARD_ERROR_TYPE(_type) \
@@ -161,7 +192,7 @@ case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                                         ntohl(pData->gardErrorType) );
                         break;
                 } // switch deconfigState
-
+#undef case_GARD_ERROR_TYPE
                 break; // HW_CALLOUT
             }
             case HWAS::PROCEDURE_CALLOUT:
@@ -195,6 +226,7 @@ case HWAS::_type: i_parser.PrintString( "Procedure", #_type); break;
                                         ntohl(pData->procedure) );
                         break;
                 } // switch procedure
+#undef case_PROCEDURE
                 break; // PROCEDURE_CALLOUT
             }
             default:
@@ -218,6 +250,7 @@ case HWAS::_type: i_parser.PrintString( "Priority", #_type); break;
                                     ntohl(pData->priority) );
             break;
         } // switch priority
+#undef case_PRIORITY
     } // parse
 
 private:

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,7 +43,9 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
         const void *i_pTargetData,
         uint32_t i_targetDataLength,
         const HWAS::clockTypeEnum i_clockType,
-        const HWAS::callOutPriority i_priority)
+        const HWAS::callOutPriority i_priority,
+        const HWAS::DeconfigEnum i_deconfigState,
+        const HWAS::GARD_ErrorType i_gardErrorType)
 {
     TRACDCOMP(g_trac_errl, "ClockCallout entry");
 
@@ -59,6 +61,8 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData->type = HWAS::CLOCK_CALLOUT;
     pData->clockType = i_clockType;
     pData->priority = i_priority;
+    pData->clkDeconfigState = i_deconfigState;
+    pData->clkGardErrorType = i_gardErrorType;
     memcpy(pData + 1, i_pTargetData, i_targetDataLength);
 
     TRACDCOMP(g_trac_errl, "ClockCallout exit; pDataLength %d", pDataLength);

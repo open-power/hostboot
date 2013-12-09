@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -326,6 +326,14 @@ public:
                 pExList[0],
                 HWAS::TODCLK_TYPE,
                 HWAS::SRCI_PRIORITY_MED);
+
+            // Clock callout using deconfig/GARD parameters
+            errl->addClockCallout(
+                pExList[0],
+                HWAS::TODCLK_TYPE,
+                HWAS::SRCI_PRIORITY_HIGH,
+                HWAS::DECONFIG,
+                HWAS::GARD_Fatal);
 
             if (pExList.size() > 1)
             {

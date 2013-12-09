@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -146,6 +146,8 @@ typedef struct callout_ud
         };
         struct {    // type == CLOCK_CALLOUT
             clockTypeEnum   clockType;      // uint32_t
+            DeconfigEnum    clkDeconfigState;  // uint32_t
+            GARD_ErrorType  clkGardErrorType;  // uint32_t
             // one Target will follow
         };
     };
@@ -235,6 +237,8 @@ errlHndl_t platHandleBusCallout(
  * @param[in]  i_clockType      Enum indicating which type of clock
  * @param[in]  i_priority       Enum indicating the priority of the callout
  * @param[in]  io_errl          reference to errlHnld for this errlog
+ * @param[in]  i_deconfigState  Enum indicating whether to deconfig or not
+ * @param[in]  i_gardErrType    Enum indicating the type of failure
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error,
  *                          NULL if no errors;
@@ -243,7 +247,9 @@ errlHndl_t platHandleClockCallout(
         TARGETING::Target *i_pTarget,
         clockTypeEnum i_clockType,
         callOutPriority i_priority,
-        errlHndl_t &io_errl);
+        errlHndl_t &io_errl,
+        DeconfigEnum    i_deconfigState = DECONFIG,
+        GARD_ErrorType  i_gardErrorType = GARD_Fatal);
 
 #endif // not PARSER
 

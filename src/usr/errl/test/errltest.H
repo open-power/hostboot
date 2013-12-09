@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -423,8 +423,8 @@ public:
             errlCommit(errl, CXXTEST_COMP_ID);
             errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE);
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
 
             errl->addHwCallout(pTarget,
                     HWAS::SRCI_PRIORITY_MED,
@@ -434,8 +434,8 @@ public:
             errlCommit(errl, CXXTEST_COMP_ID);
             errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE);
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_LOW,
@@ -446,8 +446,8 @@ public:
             errlCommit(errl, CXXTEST_COMP_ID);
             errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE);
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_MED,
@@ -458,8 +458,8 @@ public:
             errlCommit(errl, CXXTEST_COMP_ID);
             errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE);
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
 
             errl->addProcedureCallout(
                     HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
@@ -468,13 +468,21 @@ public:
             errlCommit(errl, CXXTEST_COMP_ID);
             errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ERRL_TEST_MOD_ID,
-                                    ERRL_TEST_REASON_CODE);
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
 
             errl->addClockCallout(
                 pExList[0],
                 HWAS::TODCLK_TYPE,
                 HWAS::SRCI_PRIORITY_MED);
+
+            // Clock callout using deconfig/GARD parameters
+            errl->addClockCallout(
+                pExList[0],
+                HWAS::TODCLK_TYPE,
+                HWAS::SRCI_PRIORITY_HIGH,
+                HWAS::NO_DECONFIG,
+                HWAS::GARD_NULL);
 
             if (pExList.size() > 1)
             {

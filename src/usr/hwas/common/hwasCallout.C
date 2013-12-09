@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -196,7 +196,9 @@ void processCallout(errlHndl_t &io_errl,
                                         pTarget,
                                         pCalloutUD->clockType,
                                         pCalloutUD->priority,
-                                        io_errl);
+                                        io_errl,
+                                        pCalloutUD->clkDeconfigState,
+                                        pCalloutUD->clkGardErrorType);
                 if (errl)
                 {
                     HWAS_ERR("processCallout: error from platHandleClockCallout");
