@@ -59,6 +59,7 @@
 #include <dimmConsts.H>
 #include <util/singleton.H>
 #include <procMemConsts.H>
+#include <fapiL3DeltaDataAttr.H>
 
 //******************************************************************************
 // Interface
@@ -677,6 +678,17 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
     const fapi::getSpdAttr::Attr i_attr,
     void * o_pVal,
     size_t i_len);
+
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_PROC_EX_FUNC_L3_DELTA_DATA attribute. It should not be called
+ *        directly.
+ *
+ *  @param[in]  i_pProcTarget Processor Chip Target pointer
+ *  @param[out] o_data        Reference to output data
+ */
+fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
+                                     uint32_t (&o_data)[DELTA_DATA_SIZE]);
 
 } // namespace platAttrSvc
 
@@ -1745,5 +1757,12 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
                                                sizeof(VAL), &VAL),\
     fapi::platAttrSvc::fapiPlatL4BankDelete\
         (PTARGET, VAL, fapi::SET_L4_BANK_DELETE_MODE)
+
+//------------------------------------------------------------------------------
+//  MACRO to support L3 DELTA DATA Ring Attribute
+//------------------------------------------------------------------------------
+#define ATTR_PROC_EX_FUNC_L3_DELTA_DATA_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetL3DDAttr(PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

@@ -39,6 +39,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml  \
     hwp/mvpd_accessors/mvpd_errors.xml \
     hwp/spd_accessors/getSpdAttrAccessorErrors.xml \
+    hwp/winkle_ring_accessors/proc_l3_delta_data_errors.xml \
     hwp/pll_accessors/getPllRingInfoAttrErrors.xml \
     ../pore/fapiporeve/fapiPoreVe_errors.xml \
     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
@@ -166,7 +167,7 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/runtime_attributes/memory_occ_attributes.xml
 
 #------------------------------------------------------------------------------
-# PLL files
+# PLL Ring Data files
 #------------------------------------------------------------------------------
 HWP_PLL_FILES = hwp/pll_attributes/s1_10_pll_ring.attributes \
                 hwp/pll_attributes/s1_13_pll_ring.attributes \
@@ -175,6 +176,15 @@ HWP_PLL_FILES = hwp/pll_attributes/s1_10_pll_ring.attributes \
                 hwp/pll_attributes/p8_10_pll_ring.attributes \
                 hwp/pll_attributes/centaur_10_pll_ring.attributes \
                 hwp/pll_attributes/centaur_20_pll_ring.attributes
+
+#------------------------------------------------------------------------------
+# Winkle Ring data files
+#------------------------------------------------------------------------------
+HWP_WINKLE_RING_FILES = hwp/winkle_ring_accessors/s1_10_winkle_ring.attributes \
+                        hwp/winkle_ring_accessors/s1_13_winkle_ring.attributes \
+                        hwp/winkle_ring_accessors/s1_20_winkle_ring.attributes \
+                        hwp/winkle_ring_accessors/s1_21_winkle_ring.attributes \
+                        hwp/winkle_ring_accessors/p8_10_winkle_ring.attributes
 
 #------------------------------------------------------------------------------
 # Initfiles
@@ -244,8 +254,11 @@ PLAT_HWP_ERR_PARSER = fapiPlatHwpErrParser.H
 # The FAPI attribute id file generated from Attribute XML files
 FAPI_ATTR_ID_TARGET = fapiAttributeIds.H
 
-# The FAPI PLL attribute file generated from pll files
+# The FAPI PLL attribute header file generated from data files
 FAPI_PLL_TARGET = fapiPllRingAttr.H
+
+# The FAPI Winkle Ring attribute heaer file generated from data files
+FAPI_WINKLE_RING_TARGET = fapiL3DeltaDataAttr.H
 
 # The FAPI files generated from Attribute XML files
 FAPI_ATTR_TARGETS = fapiChipEcFeature.C fapiAttributePlatCheck.H \
@@ -275,7 +288,8 @@ GENFILES = ${IF_CMP_YACC_C_TARGET} \
            ${FAPI_ATTR_TARGETS} \
            ${HWP_IF_ALL_TARGETS} \
            ${FAPI_ATTR_IF_TARGET} \
-           ${FAPI_PLL_TARGET}
+           ${FAPI_PLL_TARGET} \
+           ${FAPI_WINKLE_RING_TARGET}
 
 GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER}
 
@@ -352,6 +366,13 @@ $(call GENTARGET, ${FAPI_ATTR_ID_TARGET} ${FAPI_ATTR_TARGETS}) : \
 $(call GENTARGET, ${FAPI_PLL_TARGET}) : \
         fapi/fapiCreatePllRingAttrVals.pl ${HWP_PLL_FILES}
 	$< $(dir $@) ${HWP_PLL_FILES}
+
+#------------------------------------------------------------------------------
+# The Winkle Ring attribute file
+#------------------------------------------------------------------------------
+$(call GENTARGET, ${FAPI_WINKLE_RING_TARGET}) : \
+        fapi/fapiCreateL3DeltaVals.pl ${HWP_WINKLE_RING_FILES}
+	$< $(dir $@) ${HWP_WINKLE_RING_FILES}
 
 #------------------------------------------------------------------------------
 # The binary, list and attr files generated from Initfiles

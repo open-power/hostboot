@@ -1,0 +1,58 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/winkle_ring_accessors/proc_l3_delta_data_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_l3_delta_data_errors.xml,v 1.2 2013/12/11 22:49:43 mjjones Exp $ -->
+<!-- Error definitions for getL3DeltaData  procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_GET_L3_DELTA_DATA_ERR</rc>
+    <description>No matching entry was found for requested chip type and EC level.</description>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_GET_L3_DELTA_DATA_PARAMETER_ERR</rc>
+    <description>Invalid target type passed on invocation.</description>
+    <ffdc>TARGET_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_GET_L3_DELTA_DATA_SELECT_ERR</rc>
+    <description>
+        The ATTR_PROC_PBIEX_ASYNC_SEL attribute, used to select the correct
+        data to return is not valid.
+    </description>
+    <ffdc>SELECT_VAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+</hwpErrors>

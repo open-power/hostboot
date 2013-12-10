@@ -54,6 +54,7 @@ SUBDIRS	=   dmi_training.d  sbe_centaur_init.d mc_config.d \
 include mvpd_accessors/mvpd.mk
 include spd_accessors/spd.mk
 include pll_accessors/pll.mk
+include winkle_ring_accessors/winkle_ring.mk
 include utility_procedures/utils.mk
 
 include ${ROOTPATH}/config.mk

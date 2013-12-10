@@ -54,6 +54,7 @@
 #include <fapiPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
+#include <hwpf/hwp/winkle_ring_accessors/getL3DeltaDataAttr.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -1625,6 +1626,14 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor(
     return l_rc;
 }
 
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
+                                     uint32_t (&o_data)[DELTA_DATA_SIZE])
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getL3DeltaDataAttr, *i_pProcTarget, o_data);
+    return l_rc;
+}
 
 } // End platAttrSvc namespace
 
