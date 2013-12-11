@@ -1029,6 +1029,25 @@ int32_t checkChnlReplayTimeOut( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 } PRDF_PLUGIN_DEFINE( Membuf, checkChnlReplayTimeOut );
 
+/**
+ * @brief  When not in MNFG mode, clear the service call flag so that
+ *          thresholding will still be done, but not visible errorlog.
+ * @param  i_chip   The Centaur chip
+ * @param  i_sc     service data collector
+ * @returns Success
+ */
+int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc )
+{
+    if( i_sc.service_data->IsAtThreshold() && !mfgMode() )
+    {
+        i_sc.service_data->ClearFlag(ServiceDataCollector::SERVICE_CALL);
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Membuf, ClearServiceCallFlag );
+
 //------------------------------------------------------------------------------
 
 // Define the plugins for memory ECC errors.

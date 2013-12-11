@@ -1320,17 +1320,19 @@ actionclass callout2ndLvlMedThr1UE
 /** Clear MBS SecondaryBits and Line Delete*/
 actionclass clearSecMbsBitsAndLineDelete
 {
+    calloutSelfMed;
+    threshold( field(32 / day), mfg_file(CEN_L4_CACHE_CES));
+    funccall("ClearServiceCallFlag");
     funccall("ClearMbsSecondaryBits");
-    #TODO via RTC 22872 ( L4 Line Delete )
-    TBDDefaultCallout;
 };
 
 /** Clear MBACAL SecondaryBits and Line Delete*/
 actionclass clearSecMbaCalBitsAndLineDelete
 {
+    calloutSelfMed;
+    threshold( field(32 / day), mfg_file(CEN_L4_CACHE_CES));
+    funccall("ClearServiceCallFlag");
     funccall("ClearMbaCalSecondaryBits");
-    #TODO via RTC 22872 ( L4 Line Delete )
-    TBDDefaultCallout;
 };
 
 /** Clear MBACAL SecondaryBits and Line SelfMedThr1*/
