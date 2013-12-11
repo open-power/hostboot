@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -161,6 +161,25 @@ int32_t CalloutMbaAndDimm( ExtensibleChip * i_chip,
     }
     return o_rc;
 }
+
+/**
+ * @brief  When not in MNFG mode, clear the service call flag so that
+ *          thresholding will still be done, but not visible errorlog.
+ * @param  i_chip   MemBuf chip
+ * @param  i_sc     service data collector
+ * @returns Success
+ */
+int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc )
+{
+    if( i_sc.service_data->IsAtThreshold() && !mfgMode() )
+    {
+        i_sc.service_data->ClearFlag(ServiceDataCollector::SERVICE_CALL);
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Mba, ClearServiceCallFlag );
 
 } // end namespace Mba
 

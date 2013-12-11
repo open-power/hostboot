@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -25,6 +25,7 @@
 PRDF_RULE_PLUGINS_PEGASUS = \
     prdfP8Proc.o \
     prdfPlatP8Ex.o \
+    prdfP8Ex.o \
     prdfP8Mcs.o \
     prdfP8Pll.o \
     prdfCenMba.o \

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -312,17 +312,17 @@ group gIoxFir_0 filter singlebit
     /** IOXFIR_0[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_0, bit(0)) ? defaultMaskedError;
+    (IoxFir_0, bit(0)) ? thresholdMaskXbus0;
 
     /** IOXFIR_0[1]
      * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_0, bit(1)) ? defaultMaskedError;
+    (IoxFir_0, bit(1)) ? thresholdMaskXbus0;
 
     /** IOXFIR_0[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (IoxFir_0, bit(2)) ? SelfHighThr1;
+    (IoxFir_0, bit(2)) ? calloutXbus0InterfaceTh1;
 
     /** IOXFIR_0[3:7]
      *  Reserved
@@ -347,7 +347,7 @@ group gIoxFir_0 filter singlebit
     /** IOXFIR_0[11]
      *  Recalibration or Dynamic Repair Error
      */
-    (IoxFir_0, bit(11)) ? calloutXbus0InterfaceTh1;
+    (IoxFir_0, bit(11)) ? defaultMaskedError;
 
     /** IOXFIR_0[12]
      *  Too Many Bus Errors
@@ -405,17 +405,17 @@ group gIoxFir_1 filter singlebit
     /** IOXFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_1, bit(0)) ? defaultMaskedError;
+    (IoxFir_1, bit(0)) ? thresholdMaskXbus1;
 
     /** IOXFIR_1[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_1, bit(1)) ? defaultMaskedError;
+    (IoxFir_1, bit(1)) ? thresholdMaskXbus1;
 
     /** IOXFIR_1[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (IoxFir_1, bit(2)) ? SelfHighThr1;
+    (IoxFir_1, bit(2)) ? calloutXbus1InterfaceTh1;
 
     /** IOXFIR_1[3:7]
      *  Reserved
@@ -440,7 +440,7 @@ group gIoxFir_1 filter singlebit
     /** IOXFIR_1[11]
      *  Recalibration or Dynamic Repair Error
      */
-    (IoxFir_1, bit(11)) ? calloutXbus1InterfaceTh1;
+    (IoxFir_1, bit(11)) ? defaultMaskedError;
 
     /** IOXFIR_1[12]
      *  Too Many Bus Errors
@@ -498,17 +498,17 @@ group gIoxFir_2 filter singlebit
     /** IOXFIR_2[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_2, bit(0)) ? defaultMaskedError;
+    (IoxFir_2, bit(0)) ? thresholdMaskXbus2;
 
     /** IOXFIR_2[1]
      * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_2, bit(1)) ? defaultMaskedError;
+    (IoxFir_2, bit(1)) ? thresholdMaskXbus2;
 
     /** IOXFIR_2[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (IoxFir_2, bit(2)) ? SelfHighThr1;
+    (IoxFir_2, bit(2)) ? calloutXbus2InterfaceTh1;
 
     /** IOXFIR_2[3:7]
      *  Reserved
@@ -533,7 +533,7 @@ group gIoxFir_2 filter singlebit
     /** IOXFIR_2[11]
      *  Recalibration or Dynamic Repair Error
      */
-    (IoxFir_2, bit(11)) ? calloutXbus2InterfaceTh1;
+    (IoxFir_2, bit(11)) ? defaultMaskedError;
 
     /** IOXFIR_2[12]
      *  Too Many Bus Errors
@@ -591,17 +591,17 @@ group gIoxFir_3 filter singlebit
     /** IOXFIR_3[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_3, bit(0)) ? defaultMaskedError;
+    (IoxFir_3, bit(0)) ? thresholdMaskXbus3;
 
     /** IOXFIR_3[1]
      * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_3, bit(1)) ? defaultMaskedError;
+    (IoxFir_3, bit(1)) ? thresholdMaskXbus3;
 
     /** IOXFIR_3[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (IoxFir_3, bit(2)) ? SelfHighThr1;
+    (IoxFir_3, bit(2)) ? calloutXbus3InterfaceTh1;
 
     /** IOXFIR_3[3:7]
      *  Reserved
@@ -626,7 +626,7 @@ group gIoxFir_3 filter singlebit
     /** IOXFIR_3[11]
      *  Recalibration or Dynamic Repair Error
      */
-    (IoxFir_3, bit(11)) ? calloutXbus3InterfaceTh1;
+    (IoxFir_3, bit(11)) ? defaultMaskedError;
 
     /** IOXFIR_3[12]
      *  Too Many Bus Errors
@@ -794,4 +794,32 @@ actionclass calloutXbus3InterfaceTh5pDay
     calloutXbus3Interface;
     threshold5pday;
     funccall("ClearServiceCallFlag");
+};
+
+/** Threshold and Mask the xbus0 error in non mnfg environment */
+actionclass thresholdMaskXbus0
+{
+    calloutXbus0Interface;
+    threshold32pDayAndMask;
+};
+
+/** Threshold and Mask the xbus1 error in non mnfg environment */
+actionclass thresholdMaskXbus1
+{
+    calloutXbus1Interface;
+    threshold32pDayAndMask;
+};
+
+/** Threshold and Mask the xbus2 error in non mnfg environment */
+actionclass thresholdMaskXbus2
+{
+    calloutXbus2Interface;
+    threshold32pDayAndMask;
+};
+
+/** Threshold and Mask the xbus3 error in non mnfg environment */
+actionclass thresholdMaskXbus3
+{
+    calloutXbus3Interface;
+    threshold32pDayAndMask;
 };

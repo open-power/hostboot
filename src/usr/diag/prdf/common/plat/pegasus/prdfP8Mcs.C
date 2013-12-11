@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -251,6 +251,25 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 } PRDF_PLUGIN_DEFINE( Mcs, ClearMbsSecondaryBits );
+
+/**
+ * @brief  When not in MNFG mode, clear the service call flag so that
+ *          thresholding will still be done, but not visible errorlog.
+ * @param  i_chip   Mcs rulechip
+ * @param  i_sc     service data collector
+ * @returns Success
+ */
+int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc )
+{
+    if( i_sc.service_data->IsAtThreshold() && !PlatServices::mfgMode() )
+    {
+        i_sc.service_data->ClearFlag(ServiceDataCollector::SERVICE_CALL);
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Mcs, ClearServiceCallFlag );
 
 } // end namespace Mcs
 } // end namespace PRDF

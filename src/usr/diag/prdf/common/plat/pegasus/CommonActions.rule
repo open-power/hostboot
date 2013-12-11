@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -89,6 +89,16 @@ actionclass threshold5pday
 actionclass thresholdOnNode
 {
     threshold( field(32 / day), mfg_file(P8CHIP_ONNODE_BUS_CES));
+};
+
+################################################################################
+#                               Threshold and Mask
+################################################################################
+/** actionclass Threshold and Mask if not in mnfg mode */
+actionclass threshold32pDayAndMask
+{
+    threshold32pday;
+    funccall("ClearServiceCallFlag");
 };
 
 ################################################################################
