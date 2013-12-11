@@ -31,6 +31,7 @@
  */
 
 #include <builtins.h>
+#include <endian.h>
 
 namespace TARGETING
 {
@@ -50,6 +51,15 @@ union AbstractPointer
      *      address translation to traverse associations, and presumes that
      *      byte 0 of any virtual address is never set.
      */
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    struct {
+        uint64_t ptr : 56;   ///< Node ID indexed to 1.  Value of 0
+                             ///< indicates node ID should not be used
+                             ///< for address translation
+        uint64_t nodeId : 8; ///< Address to translate
+
+    } TranslationEncoded;
+#else
     struct {
         uint64_t nodeId : 8; ///< Node ID indexed to 1.  Value of 0
                              ///< indicates node ID should not be used
@@ -57,7 +67,7 @@ union AbstractPointer
         uint64_t ptr : 56;   ///< Address to translate
 
     } TranslationEncoded;
-
+#endif
     /**
      *  @brief Returns the AbstractPointer as a platform specific pointer
      *
@@ -105,6 +115,7 @@ union AbstractPointer
  */
 #define TARG_TO_PLAT_PTR(__PTR__) \
     ((__PTR__))
+
 
 /**
  *  @biref Macro which accepts an AbstractPointer<T>, customizes the pointer to

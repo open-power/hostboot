@@ -3488,7 +3488,6 @@ sub pack8byte {
     my($quad) = @_;
 
     my $value = unhexify($quad);
-
     my $binaryData;
     if($cfgBigEndian)
     {
@@ -3504,6 +3503,20 @@ sub pack8byte {
 
     return $binaryData;
 }
+
+sub pack64bitsDecimal {
+    my($quad) = @_;
+
+    my $package = unpack("H*", pack8byte($quad));
+    if(!$cfgBigEndian)
+    {
+        my $val1 = sprintf("%08x", ((hex($package) >> 32)  & 0xFFFFFFFF));
+        my $val2 = sprintf("%08x", (hex($package) & 0xFFFFFFFF));
+        $package = $val1.$val2;
+    }
+    return hex($package);
+}
+
 
 ################################################################################
 # Pack 4 byte value into a buffer using configured endianness
@@ -4892,12 +4905,20 @@ sub updateTargetAssociationPointers
                 "offsetToPtrTo" . $associationType . "Associations"};
             my $pointer = $targetAddrHashRef->{$id}{ $associationType . "Ptr" };
             ASSOC_DBG("Seeking to offset: $seek");
-            ASSOC_DBG("Writing pointer value of: " . toDecAndHex($pointer) );
+            # Keeping the actual pointer as it is, making a copy of it and
+            # using it for inversion if little endian
+            my $myPointer = pack64bitsDecimal($pointer);
+            ASSOC_IMP("Writing pointer value of: " . toDecAndHex($pointer) );
+            ASSOC_IMP("Writing myPointer value of: " . toDecAndHex($myPointer));
+
             for(my $pointerByte=0; $pointerByte<8; ++$pointerByte)
             {
+                my $val = sprintf("%02x",(($myPointer >>
+                        ((BYTE_RIGHT_BIT_INDEX-$pointerByte)*BITS_PER_BYTE)) &
+                         LOW_BYTE_MASK));
+                ASSOC_IMP("Writing byte value : $val");
                 vec($$targetsBinDataRef, $seek+$pointerByte,BITS_PER_BYTE) =
-                    (($pointer >> ((BYTE_RIGHT_BIT_INDEX-$pointerByte)
-                        *BITS_PER_BYTE)) & LOW_BYTE_MASK);
+                                                                  hex($val);
             }
         }
     }
