@@ -12747,5 +12747,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
+<attribute>
+    <id>MRU_ID</id>
+    <description>MRU ID attribute for chip/unit class</description>
+    <simpleType>
+        <uint32_t>
+            <default>0x00</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
 
 </attributes>

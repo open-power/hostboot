@@ -241,6 +241,9 @@
         <default>NO_MASTER</default>
     </attribute>
     <attribute>
+        <id>MRU_ID</id>
+    </attribute>
+    <attribute>
         <id>FSI_MASTER_PORT</id>
     </attribute>
     <attribute>
@@ -525,6 +528,9 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
     </attribute>
     <attribute>
         <id>PRIMARY_CAPABILITIES</id>

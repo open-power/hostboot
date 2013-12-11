@@ -103,6 +103,10 @@ if ($sysname eq "brazos")
     $MAXNODE = 4;
 }
 
+open (FH, "<$mrwdir/${sysname}-mru-ids.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-mru-ids.xml\n";
+close (FH);
+my $mruAttr = XMLin("$mrwdir/${sysname}-mru-ids.xml");
 #------------------------------------------------------------------------------
 # Process the system-policy MRW file
 #------------------------------------------------------------------------------
@@ -1870,6 +1874,7 @@ sub generate_proc
         $dcm_installed = 1;
     }
 
+    my $mruData = get_mruid($ipath);
     print "
     <!-- $SYSNAME n${node}p${proc} processor chip -->
 
@@ -1889,6 +1894,10 @@ sub generate_proc
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2152,6 +2161,7 @@ sub generate_ex
 {
     my ($proc, $ex, $ordinalId, $ipath) = @_;
     my $uidstr = sprintf("0x%02X06%04X",${node},$ex+$proc*16);
+    my $mruData = get_mruid($ipath);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}ex$ex</id>
@@ -2160,6 +2170,10 @@ sub generate_ex
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/ex-$ex</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2186,6 +2200,7 @@ sub generate_ex_core
 {
     my ($proc, $ex, $ordinalId, $ipath) = @_;
     my $uidstr = sprintf("0x%02X07%04X",${node},$ex+$proc*16);
+    my $mruData = get_mruid($ipath);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}ex${ex}core0</id>
@@ -2194,6 +2209,10 @@ sub generate_ex_core
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/ex-$ex/core-0</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2220,6 +2239,7 @@ sub generate_mcs
 {
     my ($proc, $mcs, $ordinalId, $ipath) = @_;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$mcs+$proc*8+${node}*8*8);
+    my $mruData = get_mruid($ipath);
 
     my $lognode;
     my $logid;
@@ -2264,6 +2284,10 @@ sub generate_mcs
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2451,6 +2475,7 @@ sub generate_ax_buses
                 last;
             }
         }
+        my $mruData = get_mruid($ipath);
         my $phys_path =
             "physical:sys-${sys}/node-${node}/proc-${proc}/${type}bus-${i}";
         print "
@@ -2464,6 +2489,10 @@ sub generate_ax_buses
     <attribute>
         <id>PHYS_PATH</id>
         <default>$phys_path</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2543,6 +2572,7 @@ sub generate_ax_buses
 sub generate_nx
 {
     my ($proc, $ordinalId, $ipath) = @_;
+    my $mruData = get_mruid($ipath);
     my $uidstr = sprintf("0x%02X1E%04X",${node},$proc);
     print "\n<!-- $SYSNAME n${node}p$proc NX units -->\n";
     print "
@@ -2553,6 +2583,10 @@ sub generate_nx
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2580,6 +2614,7 @@ sub generate_nx
 sub generate_pore
 {
     my ($proc, $ordinalId, $ipath) = @_;
+    my $mruData = get_mruid($ipath);
     my $uidstr = sprintf("0x%02X1F%04X",${node},$proc);
     print "\n<!-- $SYSNAME n${node}p$proc PORE units -->\n";
     print "
@@ -2590,6 +2625,10 @@ sub generate_pore
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2660,6 +2699,7 @@ sub generate_centaur
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
+    my $mruData = get_mruid($ipath);
     my $uidstr = sprintf("0x%02X04%04X",${node},$mcs+$proc*8+${node}*8*8);
 
     my $lane_swap = 0;
@@ -2693,6 +2733,10 @@ sub generate_centaur
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/membuf-$ctaur</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2756,6 +2800,7 @@ sub generate_mba
 
     my $uidstr = sprintf("0x%02X0D%04X",
                           ${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
+    my $mruData = get_mruid($ipath);
 
     print "
 <targetInstance>
@@ -2766,6 +2811,10 @@ sub generate_mba
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/membuf-$ctaur/"
             . "mba-$mba</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2797,6 +2846,7 @@ sub generate_l4
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
     my $uidstr = sprintf("0x%02X0C%04X",${node},$mcs+$proc*8+${node}*8*8);
+    my $mruData = get_mruid($ipath);
 
     print "
 <targetInstance>
@@ -2812,6 +2862,10 @@ sub generate_l4
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur/l4-$l4</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -3103,7 +3157,20 @@ sub addEeproms
     }
 
 }
-
+sub get_mruid
+{
+    my($ipath) = @_;
+    my $mruData = 0;
+    foreach my $i (@{$mruAttr->{'mru-id'}})
+    {
+        if ($ipath eq $i->{'instance-path'})
+        {
+            $mruData = $i->{'mrid-value'};
+            last;
+        }
+    }
+    return $mruData;
+}
 
 sub display_help
 {
