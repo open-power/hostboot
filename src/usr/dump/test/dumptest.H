@@ -166,7 +166,11 @@ class DumpTest: public CxxTest::TestSuite
         uint64_t result_data[] = {
                       DUMP_TEST_SRC_DATA_AREA,
                       DUMP_TEST_DST_DATA_AREA,
-                      64 *2, 0,
+                      64, 0,
+
+                      DUMP_TEST_SRC_DATA_AREA +64,
+                      DUMP_TEST_DST_DATA_AREA +64,
+                      64, 0,
 
                       DUMP_TEST_SRC_DATA_AREA+192,
                       DUMP_TEST_DST_DATA_AREA+256,
@@ -386,7 +390,10 @@ class DumpTest: public CxxTest::TestSuite
         // results output data expected
         uint64_t result_data[] = {
             DUMP_TEST_SRC_DATA_AREA+256,
-            DUMP_TEST_DST_DATA_AREA+1024, 96, 0,
+            DUMP_TEST_DST_DATA_AREA+1024, 64, 0,
+
+            DUMP_TEST_SRC_DATA_AREA+256+64,
+            DUMP_TEST_DST_DATA_AREA+1024+64, 32, 0,
 
             DUMP_TEST_SRC_DATA_AREA+256+64+32,
             DUMP_TEST_DST_DATA_AREA+1024+256, 32, 0,

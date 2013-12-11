@@ -113,8 +113,6 @@ errlHndl_t doDumpCollect(void)
         int rc = 0;
         bool invalidSrcSize = false;
         bool invalidDestSize = false;
-        bool l_contiguous = false;
-        uint64_t l_prevSrcAddr = 0xFFFFFFFFFFFFFFFF;
         uint32_t l_resultCount = 0x0;
 
         // local src table info
@@ -369,18 +367,13 @@ errlHndl_t doDumpCollect(void)
                     curDestTableAddr = destTableEntry[curDestIndex].dataAddr;
                     bytesLeftInDest = destTableEntry[curDestIndex].dataSize;
 
-                    //check to see if this destination addr is contiguous
-                    l_contiguous = false;
-                    if(curDestIndex !=0)
+                    //check to see if there are contiguous destination addresses
+                    while ((destTableEntry[curDestIndex].dataAddr +
+                            destTableEntry[curDestIndex].dataSize) ==
+                           destTableEntry[curDestIndex+1].dataAddr)
                     {
-                        if(((destTableEntry[curDestIndex-1].dataAddr +
-                            destTableEntry[curDestIndex-1].dataSize)
-                            == curDestTableAddr)
-                           && (l_prevSrcAddr == curSrcTableAddr))
-                        {
-                            l_contiguous = true;
-
-                        }
+                        curDestIndex++;
+                        bytesLeftInDest +=destTableEntry[curDestIndex].dataSize;
                     }
 
                     // If the current dest addr or the size to copy are zero.
@@ -461,23 +454,12 @@ errlHndl_t doDumpCollect(void)
                 if (curResultIndex < maxResultEntries)
                 {
                     // Update the results table
-                    if(l_contiguous)
-                    {
-                        (resultsTableEntry-1)->dataSize +=sizeToCopy;
-                    }
-                    else
-                    {
                         resultsTableEntry->srcAddr = curSrcTableAddr;
                         resultsTableEntry->destAddr = curDestTableAddr;
                         resultsTableEntry->dataSize = sizeToCopy;
                         resultsTableEntry++;
                         l_resultCount++;
                         curResultIndex++;
-                        if (curResultIndex < maxResultEntries)
-                        {
-                            resultsTableEntry->dataSize = 0x0;
-                        }
-                    }
                 }
                 else
                 {
@@ -515,8 +497,6 @@ errlHndl_t doDumpCollect(void)
                 curDestTableAddr += sizeToCopy;
                 vaSrcTableAddr += addrOffset;
                 vaDestTableAddr += addrOffset;
-                l_prevSrcAddr = curSrcTableAddr;  //src address last used
-
             } // end of while loop
 
 
