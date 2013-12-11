@@ -1,8 +1,9 @@
-#-- $Id: p8.xbus.custom.scom.initfile,v 1.6 2013/09/17 22:28:51 jgrell Exp $
+#-- $Id: p8.xbus.custom.scom.initfile,v 1.7 2013/12/04 17:25:29 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.7 |jgrell  |12/03/13|Set rx_sls_extend_sel to 001 for DD2
 #--     1.5 |jgrell  |09/17/13|Added DD2 specific inits
 #--     1.3 |jgrell  |03/14/13|Added temporary masking of the GCR Buffer Parity Checkers in the GCR Master until the source of the error can be found. This ungates the lab.
 #--     1.2 |thomsen |02/13/13|Cleaned up and Added Commented-out Lane Power Ups
@@ -80,7 +81,7 @@ define def_all_lanes=11111;
 
 #--***********************************************************************************
 #-------------------------------------------------------------------------------------
-#-- DD2 Murano
+#-- DD2+ Murano & Venice
 #-------------------------------------------------------------------------------------
 #--***********************************************************************************
 
@@ -115,6 +116,23 @@ scom 0x800.0b(rx_timeout_sel_pg)(rx_grp3)(lane_na).0x(xbus0_gcr_addr) {
     rx_cl_timeout_sel_dd2,        0b010,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
     rx_wt_timeout_sel_dd2,        0b111,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
     rx_ds_timeout_sel_dd2,        0b110,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+}
+
+scom 0x800.0b(rx_spare_mode_pg)(rx_grp0)(lane_na).0x(xbus0_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_sls_extend_sel,     	  0b001,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+}
+scom 0x800.0b(rx_spare_mode_pg)(rx_grp1)(lane_na).0x(xbus0_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_sls_extend_sel,     	  0b001,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+}
+scom 0x800.0b(rx_spare_mode_pg)(rx_grp2)(lane_na).0x(xbus0_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_sls_extend_sel,     	  0b001,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+}
+scom 0x800.0b(rx_spare_mode_pg)(rx_grp3)(lane_na).0x(xbus0_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_sls_extend_sel,     	  0b001,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
 }
 
 ############################################################################################

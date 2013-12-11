@@ -1,4 +1,4 @@
-#-- $Id: p8.dmi.scom.initfile,v 1.24 2013/10/28 21:59:13 jgrell Exp $ 
+#-- $Id: p8.dmi.scom.initfile,v 1.25 2013/12/04 17:25:28 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,13 +7,14 @@
 ##      Based on SETUP_ID_MODE DMI_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODPV_MC_WRAP.IODPV_MC_WRAP.figdb
 ##
-##   Created on Mon Oct 28 11:07:50 CDT 2013, by jgrell
+##   Created on Tue Nov 26 11:33:54 CST 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jgr13112600| jgr     |11-26-13| CYC rx_ds_timeout_sel setting changed to 111
  ## -- jgr13102800| jgr     |10-28-13| rx_ds_timeout_sel change (110 -> 111)
  ## -- jgr13082100| jgr     |08-21-13| Added tx_zcal inits so they can be removed from scan
  ## -- jfg13072400| jfg     |07-24-13| HW253558: change pgooddly to MAX from lab feedback
@@ -69,6 +70,11 @@ include edi.io.define
                     define def_IS_VBU = SYS.ATTR_IS_SIMULATION == 1;
                 
 
+
+#define def_bus_id3 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 7));
+#define def_bus_id2 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 6));
+#define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 1) || (ATTR_CHIP_UNIT_POS == 5));
+#define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 0) || (ATTR_CHIP_UNIT_POS == 4));
 
 define def_bus_id3 = ((ATTR_CHIP_UNIT_POS == 0) || (ATTR_CHIP_UNIT_POS == 4));
 define def_bus_id2 = ((ATTR_CHIP_UNIT_POS == 1) || (ATTR_CHIP_UNIT_POS == 5));
@@ -939,20 +945,10 @@ scom 0x8008986002011A3F {
 	rx_ds_bl_timeout_sel, 0b001, def_IS_VBU && def_bus_id1;
 	rx_ds_bl_timeout_sel, 0b101, def_IS_HW && def_bus_id2;
 	rx_ds_bl_timeout_sel, 0b001, def_IS_VBU && def_bus_id2;
-     rx_ds_timeout_sel,  0b111,   def_IS_HW && def_bus_id3;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id0;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id0;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id1;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id1;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id2;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id2;
-     rx_ds_timeout_sel,  0b010,  def_IS_VBU && def_bus_id3;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id0;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id0;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id1;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id1;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id2;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id2;
+	rx_ds_timeout_sel, 0b111, def_bus_id3;
+	rx_ds_timeout_sel, 0b111, def_bus_id0;
+	rx_ds_timeout_sel, 0b111, def_bus_id1;
+	rx_ds_timeout_sel, 0b111, def_bus_id2;
 	rx_sls_timeout_sel, 0b110, def_bus_id3;
 	rx_sls_timeout_sel, 0b110, def_bus_id0;
 	rx_sls_timeout_sel, 0b110, def_bus_id1;

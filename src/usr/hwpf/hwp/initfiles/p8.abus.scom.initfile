@@ -1,4 +1,4 @@
-#-- $Id: p8.abus.scom.initfile,v 1.17 2013/10/28 21:59:13 jgrell Exp $ 
+#-- $Id: p8.abus.scom.initfile,v 1.18 2013/12/04 17:25:20 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,13 +7,14 @@
 ##      Based on SETUP_ID_MODE A_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODUV_ABUS_WRAP.IODUV_ABUS_WRAP.figdb
 ##
-##   Created on Mon Oct 28 11:08:02 CDT 2013, by jgrell
+##   Created on Tue Nov 26 11:34:06 CST 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jgr13112600| jgr     |11-26-13| CYC rx_ds_timeout_sel setting changed to 111
  ## -- jgr13102800| jgr     |10-28-13| rx_ds_timeout_sel change (110 -> 111)
  ## -- jgr13092400| jgr     |09-24-13| Fixed tx_zcal inits scom address
  ## -- jgr13082100| jgr     |08-21-13| Added tx_zcal inits so they can be removed from scan
@@ -736,16 +737,9 @@ scom 0x8008980008010C3F {
 	rx_ds_bl_timeout_sel, 0b001, def_IS_VBU && def_bus_id1;
 	rx_ds_bl_timeout_sel, 0b101, def_IS_HW && def_bus_id2;
 	rx_ds_bl_timeout_sel, 0b001, def_IS_VBU && def_bus_id2;
-     rx_ds_timeout_sel,  0b111,   def_IS_HW && def_bus_id0;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id1;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id1;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id2;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id2;
-     rx_ds_timeout_sel,  0b010,  def_IS_VBU && def_bus_id0;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id1;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id1;
-	rx_ds_timeout_sel, 0b111, def_IS_HW && def_bus_id2;
-	rx_ds_timeout_sel, 0b010, def_IS_VBU && def_bus_id2;
+	rx_ds_timeout_sel, 0b111, def_bus_id0;
+	rx_ds_timeout_sel, 0b111, def_bus_id1;
+	rx_ds_timeout_sel, 0b111, def_bus_id2;
 	rx_sls_timeout_sel, 0b110, def_bus_id0;
 	rx_sls_timeout_sel, 0b110, def_bus_id1;
 	rx_sls_timeout_sel, 0b110, def_bus_id2;

@@ -1,8 +1,10 @@
-#-- $Id: p8.dmi.custom.scom.initfile,v 1.18 2013/10/28 21:59:13 jgrell Exp $
+#-- $Id: p8.dmi.custom.scom.initfile,v 1.20 2013/12/04 17:25:28 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.20|jgrell  |12/03/13|Set rx_eo_ddc_timeout_sel to 110 for DD2
+#--     1.19|jgrell  |10/29/13|Changed rx_ds_timeout_sel setting to 111
 #--     1.18|jgrell  |10/28/13|Re-enabled recal bits for DD2+ hw
 #--     1.17|jgrell  |09/24/13|Changed "1" expression to "any"
 #--     1.15|jgrell  |09/17/13|Added DD2 specific inits
@@ -304,7 +306,7 @@ rx_amp_gain,		      	0b1001,		ATTR_DMI_DFE_OVERRIDE==1;
 
 #--***********************************************************************************
 #-------------------------------------------------------------------------------------
-#-- DD2 Murano
+#-- DD2+ Murano & Venice
 #-------------------------------------------------------------------------------------
 #--***********************************************************************************
 
@@ -314,7 +316,12 @@ scom 0x800.0b(rx_timeout_sel_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
     rx_ds_bl_timeout_sel_dd2,     0b101,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
     rx_cl_timeout_sel_dd2,        0b010,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
     rx_wt_timeout_sel_dd2,        0b111,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
-    rx_ds_timeout_sel_dd2,        0b110,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+    rx_ds_timeout_sel_dd2,        0b111,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
+}
+
+scom 0x800.0b(rx_timeout_sel1_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_eo_ddc_timeout_sel,        0b110,		ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG==0;
 }
 
 ############################################################################################

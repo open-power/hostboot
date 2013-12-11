@@ -1,8 +1,11 @@
-#-- $Id: cen.dmi.custom.scom.initfile,v 1.16 2013/10/28 21:59:47 jgrell Exp $
+#-- $Id: cen.dmi.custom.scom.initfile,v 1.18 2013/12/04 17:43:34 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.18|jgrell  |11/21/13|Added rx_trc_grp setting at the request of Yuen Tschang
+#--                           |Set rx_eo_ddc_timeout_sel to 110 for DD2
+#--     1.17|jgrell  |10/29/13|Changed rx_ds_timeout_sel setting to 111
 #--     1.16|jgrell  |10/28/13|Re-enabled recal bits for DD2+ hw
 #--     1.15|jgrell  |09/24/13|Changed "1" expression to "any"
 #--     1.13|jgrell  |09/17/13|Added DD2 specific inits
@@ -361,7 +364,7 @@ rx_amp_gain,		      	0b1001,		ATTR_DMI_DFE_OVERRIDE==1;
 
 #--***********************************************************************************
 #-------------------------------------------------------------------------------------
-#-- DD2 Murano
+#-- DD2 Centaur
 #-------------------------------------------------------------------------------------
 #--***********************************************************************************
 
@@ -371,8 +374,19 @@ scom 0x800.0b(rx_timeout_sel_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
     rx_ds_bl_timeout_sel_dd2,     0b101,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
     rx_cl_timeout_sel_dd2,        0b010,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
     rx_wt_timeout_sel_dd2,        0b111,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
-    rx_ds_timeout_sel_dd2,        0b110,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
+    rx_ds_timeout_sel_dd2,        0b111,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
 }
+
+scom 0x800.0b(rx_trace_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
+    bits,             scom_data,	expr;
+    rx_trc_grp,       0b000000,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
+}
+
+scom 0x800.0b(rx_timeout_sel1_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
+    bits,                   	  scom_data,		expr;
+    rx_eo_ddc_timeout_sel,        0b110,		ATTR_CENTAUR_EC_MCBIST_RANDOM_ADDRESS==1;
+}
+
 
 #--**************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------

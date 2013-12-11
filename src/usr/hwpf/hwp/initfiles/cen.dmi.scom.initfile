@@ -1,4 +1,4 @@
-#-- $Id: cen.dmi.scom.initfile,v 1.18 2013/10/28 21:59:47 jgrell Exp $ 
+#-- $Id: cen.dmi.scom.initfile,v 1.20 2013/12/04 17:43:33 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,13 +7,14 @@
 ##      Based on SETUP_ID_MODE DMI_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODNC_MB_TOP.IODNC_MB_TOP.figdb
 ##
-##   Created on Mon Oct 28 11:08:13 CDT 2013, by jgrell
+##   Created on Tue Nov 26 11:34:19 CST 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jgr13112600| jgr     |11-26-13| CYC rx_ds_timeout_sel setting changed to 111
  ## -- jgr13102800| jgr     |10-28-13| zcal address fix and rx_ds_timeout_sel change (110 -> 111)
  ## -- jgr13082100| jgr     |08-21-13| Added tx_zcal inits so they can be removed from scan
  ## -- jfg13072400| jfg     |07-24-13| HW253558: change pgooddly to MAX from lab feedback
@@ -319,8 +320,7 @@ scom 0x800898000201043F {
 	bits, scom_data, expr;
      rx_ds_bl_timeout_sel,  0b101   , def_IS_HW;
      rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
-     rx_ds_timeout_sel,  0b111   , def_IS_HW;
-     rx_ds_timeout_sel,  0b010  , def_IS_VBU;
+	rx_ds_timeout_sel, 0b111, any;
 	rx_sls_timeout_sel, 0b110, any;
      rx_wt_timeout_sel,  0b111   , def_IS_HW;
      rx_wt_timeout_sel,  0b011  , def_IS_VBU;
