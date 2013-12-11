@@ -5419,6 +5419,9 @@ sub generateTargetingImage {
                 my ($heapZeroInitData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
+                
+                my $hex = unpack ("H*",$heapZeroInitData);
+                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($heapZeroInitOffset
@@ -5439,7 +5442,9 @@ sub generateTargetingImage {
                 my ($heapPnorInitData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
-
+                
+                my $hex = unpack ("H*",$heapPnorInitData);
+                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
                 # Align the data as necessary
                 my $pads = ($alignment - ($heapPnorInitOffset
                             % $alignment)) % $alignment;
