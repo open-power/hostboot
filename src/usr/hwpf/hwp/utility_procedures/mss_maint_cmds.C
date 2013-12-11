@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.28 2013/10/31 20:42:54 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.29 2013/12/02 18:58:05 bellows Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -82,6 +82,7 @@
 //         |          |         | ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR
 //         |          |         |     DD2: enable (fixed)
 //         |          |         |     DD1: disable (broken)
+//   1.29  | 11/19/13 | bellows | Swapped to use ATTR_VPD_DIMM_SPARE
 
 
 //------------------------------------------------------------------------------
@@ -4632,7 +4633,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
     //     l_spare_dram[port][dimm][rank]
     //     NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3
     //     NOTE: Typically will same value for whole Centaur.
-    l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SPARE, &i_target, l_spare_dram);
+    l_rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_SPARE, &i_target, l_spare_dram);
     if(l_rc)
     {
         FAPI_ERR("Error reading attribute to see if spare exists on %s.",i_target.toEcmdString());

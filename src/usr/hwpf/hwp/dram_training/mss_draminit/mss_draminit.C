@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.58 2013/10/15 14:16:33 jdsloat Exp $
+// $Id: mss_draminit.C,v 1.59 2013/11/11 20:50:06 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.59   | jdsloat  | 11/11/13| Changed EFF attributes to VPD named attributes
 //  1.58   | jdsloat  | 10/15/13| Added rc checks in ddr4 shadow regs check per review request
 //  1.57   | jdsloat  | 10/09/13| Added mrs_load_ddr4 with defines for ddr4 usage, added shadow regs, removed complicated flow
 //  1.56   | bellows  | 09/16/13| Hostboot compile fix
@@ -293,7 +294,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
     if(rc) return rc;
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
 
@@ -1387,11 +1388,11 @@ ReturnCode mss_mrs_load(
     if(rc) return rc;
 
     uint8_t dram_2n_mode = 0;
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_2N_MODE_ENABLED, &i_target, dram_2n_mode);
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_2N_MODE_ENABLED, &i_target, dram_2n_mode);
     if(rc) return rc;
 
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
 
@@ -1517,10 +1518,10 @@ ReturnCode mss_mrs_load(
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_DLL_ENABLE, &i_target, dll_enable);
     if(rc) return rc;
     uint8_t out_drv_imp_cntl[2][2];
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RON, &i_target, out_drv_imp_cntl);
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RON, &i_target, out_drv_imp_cntl);
     if(rc) return rc;
     uint8_t dram_rtt_nom[2][2][4];
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RTT_NOM, &i_target, dram_rtt_nom);
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_NOM, &i_target, dram_rtt_nom);
     if(rc) return rc;
     uint8_t dram_al;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_AL, &i_target, dram_al);
@@ -1598,7 +1599,7 @@ ReturnCode mss_mrs_load(
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_SRT, &i_target, sr_temp);
     if(rc) return rc;
     uint8_t dram_rtt_wr[2][2][4];
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RTT_WR, &i_target, dram_rtt_wr);
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_WR, &i_target, dram_rtt_wr);
     if(rc) return rc;
 
     if (pt_arr_sr == ENUM_ATTR_EFF_DRAM_PASR_FULL)
@@ -1750,42 +1751,42 @@ ReturnCode mss_mrs_load(
                     {
                         dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x00;
                     }
-                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_DISABLE)
+                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_DISABLE)
                     {
                         dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x00;
                     }
-                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM20)
+                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM20)
                     {
                         dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x20;
                     }
-                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM30)
+                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM30)
                     {
                         dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0xA0;
                     }
-                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM40)
+                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM40)
                     {
                         dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0xC0;
                     }
-                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM60)
+                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM60)
                     {
                         dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x80;
                     }
-                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM120)
+                    else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM120)
                     {
                         dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x40;
                     }
                     else
                     {
-                        FAPI_ERR( "mss_mrs_load: Error determining ATTR_EFF_DRAM_RTT_NOM value: %d from attribute", dram_rtt_nom[i_port_number][dimm_number][rank_number]);
+                        FAPI_ERR( "mss_mrs_load: Error determining ATTR_VPD_DRAM_RTT_NOM value: %d from attribute", dram_rtt_nom[i_port_number][dimm_number][rank_number]);
                         FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
                         return rc;
                     }
 
-                    if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_EFF_DRAM_RON_OHM40)
+                    if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_VPD_DRAM_RON_OHM40)
                     {
                         out_drv_imp_cntl[i_port_number][dimm_number] = 0x00;
                     }
-                    else if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_EFF_DRAM_RON_OHM34)
+                    else if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_VPD_DRAM_RON_OHM34)
                     {
                         out_drv_imp_cntl[i_port_number][dimm_number] = 0x80;
                     }
@@ -1811,21 +1812,21 @@ ReturnCode mss_mrs_load(
                     {
                         dram_rtt_wr[i_port_number][dimm_number][rank_number] = dram_rtt_wr[i_port_number][dimm_number][0];
                     }
-                    else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_WR_DISABLE)
+                    else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_WR_DISABLE)
                     {
                         dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x00;
                     }
-                    else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_WR_OHM60)
+                    else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_WR_OHM60)
                     {
                         dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x80;
                     }
-                    else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_WR_OHM120)
+                    else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_WR_OHM120)
                     {
                         dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x40;
                     }
 		    else
 		    {
-                        FAPI_ERR( "mss_mrs_load: Error determining ATTR_EFF_DRAM_RTT_WR value: %d from attribute", dram_rtt_wr[i_port_number][dimm_number][rank_number]);
+                        FAPI_ERR( "mss_mrs_load: Error determining ATTR_VPD_DRAM_RTT_WR value: %d from attribute", dram_rtt_wr[i_port_number][dimm_number][rank_number]);
                         FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
                         return rc;
                     }
@@ -1910,7 +1911,7 @@ ReturnCode mss_mrs_load(
 			}
 
 
-			if (dram_2n_mode  == ENUM_ATTR_EFF_DRAM_2N_MODE_ENABLED_TRUE)
+			if (dram_2n_mode  == ENUM_ATTR_VPD_DRAM_2N_MODE_ENABLED_TRUE)
 			{
 
                         // Send out to the CCS array a "setup" cycle

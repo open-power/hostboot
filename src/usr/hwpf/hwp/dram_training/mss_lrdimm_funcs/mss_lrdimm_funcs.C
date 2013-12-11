@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_lrdimm_funcs.C,v 1.4 2013/09/16 13:56:38 bellows Exp $
+// $Id: mss_lrdimm_funcs.C,v 1.5 2013/12/03 22:51:13 kcook Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.5    | 12/03/13 | kcook   | Updated VPD attributes. 
 //  1.4    | 09/16/13 | bellows | Hostboot compile update
 //  1.3    | 09/16/13 | bellows | Added ID tag.
 //  1.2    | 09/13/13 | kcook   | Updated define FAPI_LRDIMM token.
@@ -585,11 +586,11 @@ fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,
         if(rc) return rc;
         rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target, rcd_array);
         if(rc) return rc;
-        rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+        rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
         if(rc) return rc;
         rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
         if(rc) return rc;
-        rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_2N_MODE_ENABLED, &i_target, dram_2n_mode);
+        rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_2N_MODE_ENABLED, &i_target, dram_2n_mode);
         if(rc) return rc;
 
         //MRS1
@@ -597,10 +598,10 @@ fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,
         rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_DLL_ENABLE, &i_target, dll_enable);
         if(rc) return rc;
         uint8_t out_drv_imp_cntl[2][2];
-        rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RON, &i_target, out_drv_imp_cntl);
+        rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RON, &i_target, out_drv_imp_cntl);
         if(rc) return rc;
         uint8_t dram_rtt_nom[2][2][4];
-        rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RTT_NOM, &i_target, dram_rtt_nom);
+        rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_NOM, &i_target, dram_rtt_nom);
         if(rc) return rc;
         uint8_t dram_al;
         rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_AL, &i_target, dram_al);
@@ -799,36 +800,36 @@ fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,
            rc_num = rc_num | csn_8.setBit(0,8);
            rc_num = rc_num | address_16.clearBit(0, 16);
 
-           if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_DISABLE)
+           if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_DISABLE)
            {
                dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x00;
            }
-           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM20)
+           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM20)
            {
                dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x20;
            }
-           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM30)
+           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM30)
            {
                dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0xA0;
            }
-           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM40)
+           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM40)
            {
                dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0xC0;
            }
-           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM60)
+           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM60)
            {
                dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x80;
            }
-           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM120)
+           else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM120)
            {
                dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x40;
            }
 
-           if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_EFF_DRAM_RON_OHM40)
+           if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_VPD_DRAM_RON_OHM40)
            {
                out_drv_imp_cntl[i_port_number][dimm_number] = 0x00;
            }
-           else if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_EFF_DRAM_RON_OHM34)
+           else if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_VPD_DRAM_RON_OHM34)
            {
                out_drv_imp_cntl[i_port_number][dimm_number] = 0x80;
            }
@@ -885,7 +886,7 @@ fapi::ReturnCode mss_lrdimm_mrs_load( Target& i_target , uint32_t i_port_number,
            }
 
 
-           if (dram_2n_mode  == ENUM_ATTR_EFF_DRAM_2N_MODE_ENABLED_TRUE)
+           if (dram_2n_mode  == ENUM_ATTR_VPD_DRAM_2N_MODE_ENABLED_TRUE)
            {
 
               // Send out to the CCS array
@@ -1584,10 +1585,10 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
    // Fetch impacted attributes
    uint64_t l_attr_eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target_mba, l_attr_eff_dimm_rcd_cntl_word_0_15); if(rc) return rc;
-   rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RON, &i_target_mba, attr_eff_dram_ron); if(rc) return rc;
-   rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RTT_NOM, &i_target_mba, attr_eff_dram_rtt_nom); if(rc) return rc;
-   rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RTT_WR, &i_target_mba, attr_eff_dram_rtt_wr); if(rc) return rc;
-   rc = FAPI_ATTR_GET(ATTR_EFF_ODT_WR, &i_target_mba, attr_eff_odt_wr); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RON, &i_target_mba, attr_eff_dram_ron); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_NOM, &i_target_mba, attr_eff_dram_rtt_nom); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_WR, &i_target_mba, attr_eff_dram_rtt_wr); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_VPD_ODT_WR, &i_target_mba, attr_eff_odt_wr); if(rc) return rc;
 
    // Fetch impacted attributes
    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target_mba, l_num_drops_per_port); if(rc) return rc;
@@ -1734,9 +1735,9 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
          l_dram_rtt_wr[l_port][l_dimm]  = (l_lrdimm_mr12_u8array[l_port][l_dimm] & 0xC0) >> 6; // Pulled from SPD LR MR1,2 DRAM RTT_WR [7:6]
 
          if ( l_dram_ron[l_port][l_dimm] == 0 ) {
-            l_dram_ron[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RON_OHM40;
+            l_dram_ron[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RON_OHM40;
          } else if ( l_dram_ron[l_port][l_dimm] == 1 ) {
-            l_dram_ron[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RON_OHM34;
+            l_dram_ron[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RON_OHM34;
          } else {
             FAPI_ERR("Invalid SPD LR MR1,2 DRAM drv imp on %s!", i_target_mba.toEcmdString());
             FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
@@ -1746,17 +1747,17 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
          FAPI_INF("Set LRDIMM DRAM_RON to SPD LR MR1,2 DRAM drv imp");
 
          switch (l_dram_rtt_nom[l_port][l_dimm]) {
-            case 0 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_NOM_DISABLE;
+            case 0 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_DISABLE;
                 break;
-            case 1 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM60;
+            case 1 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM60;
                 break;
-            case 2 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM120;
+            case 2 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM120;
                 break;
-            case 3 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM40;
+            case 3 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM40;
                 break;
-            case 4 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM20;
+            case 4 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM20;
                 break;
-            case 5 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM30;
+            case 5 : l_dram_rtt_nom[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM30;
                 break;
             default: FAPI_ERR("Invalid SPD LR MR1,2 DRAM RTT_NOM on %s!", i_target_mba.toEcmdString());
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
@@ -1764,11 +1765,11 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
          }
 
          switch (l_dram_rtt_wr[l_port][l_dimm]) {
-            case 0 : l_dram_rtt_wr[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_WR_DISABLE;
+            case 0 : l_dram_rtt_wr[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_WR_DISABLE;
                 break;
-            case 1 : l_dram_rtt_wr[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_WR_OHM60;
+            case 1 : l_dram_rtt_wr[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_WR_OHM60;
                 break;
-            case 2 : l_dram_rtt_wr[l_port][l_dimm] = fapi::ENUM_ATTR_EFF_DRAM_RTT_WR_OHM120;
+            case 2 : l_dram_rtt_wr[l_port][l_dimm] = fapi::ENUM_ATTR_VPD_DRAM_RTT_WR_OHM120;
                 break;
             default: FAPI_ERR("Invalid SPD LR MR1,2 DRAM RTT_WR on %s!", i_target_mba.toEcmdString());
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
@@ -1777,8 +1778,8 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
 
          uint8_t l_rank;
          for ( l_rank = 0; l_rank < RANK_SIZE; l_rank++ ) {           // clear RTT_NOM & RTT_WR
-            attr_eff_dram_rtt_nom[l_port][l_dimm][l_rank] = fapi::ENUM_ATTR_EFF_DRAM_RTT_NOM_DISABLE;
-            attr_eff_dram_rtt_wr[l_port][l_dimm][l_rank] = fapi::ENUM_ATTR_EFF_DRAM_RTT_WR_DISABLE;
+            attr_eff_dram_rtt_nom[l_port][l_dimm][l_rank] = fapi::ENUM_ATTR_VPD_DRAM_RTT_NOM_DISABLE;
+            attr_eff_dram_rtt_wr[l_port][l_dimm][l_rank] = fapi::ENUM_ATTR_VPD_DRAM_RTT_WR_DISABLE;
          }
 
          if ( l_num_ranks_per_dimm_u8array[l_port][l_dimm] > 0 ) { // Set RTT_NOM Rank 0 for multi rank LRDIMM
@@ -1812,10 +1813,10 @@ fapi::ReturnCode mss_lrdimm_term_atts(const Target& i_target_mba)
    } // end port loop
 
    // Set adjusted attributes
-   rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_RON, &i_target_mba, attr_eff_dram_ron); if(rc) return rc;
-   rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_RTT_NOM, &i_target_mba, attr_eff_dram_rtt_nom); if(rc) return rc;
-   rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_RTT_WR, &i_target_mba, attr_eff_dram_rtt_wr); if(rc) return rc;
-   rc = FAPI_ATTR_SET(ATTR_EFF_ODT_WR, &i_target_mba, attr_eff_odt_wr); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_VPD_DRAM_RON, &i_target_mba, attr_eff_dram_ron); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_VPD_DRAM_RTT_NOM, &i_target_mba, attr_eff_dram_rtt_nom); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_VPD_DRAM_RTT_WR, &i_target_mba, attr_eff_dram_rtt_wr); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_VPD_ODT_WR, &i_target_mba, attr_eff_odt_wr); if(rc) return rc;
 
    rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target_mba, l_attr_eff_dimm_rcd_cntl_word_0_15); if(rc) return rc;
 

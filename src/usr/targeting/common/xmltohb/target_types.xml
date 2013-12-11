@@ -1194,6 +1194,7 @@
     <attribute><id>CDIMM_SENSOR_MAP_SECONDARY</id></attribute>
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
     <attribute><id>DMI_DFE_OVERRIDE</id></attribute>
+    <attribute><id>MSS_INIT_STATE</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->

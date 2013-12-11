@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.69 2013/11/06 16:22:45 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.70 2013/11/11 20:51:15 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.70   | jdsloat  | 11/11/13| Changed EFF attributes to VPD named attributes
 //  1.69   | jdsloat  |06-OCT-13| Removed Control Switch Attribute
 //  1.68   | bellows  |16-SEP-13| Hostboot compile update
 //  1.67   | kcook    |13-SEP-13| Updated define FAPI_LRDIMM token.
@@ -2590,7 +2591,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     if(rc) return rc;
 
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
 

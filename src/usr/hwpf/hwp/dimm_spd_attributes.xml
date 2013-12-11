@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.28 2013/10/11 19:58:00 mjjones Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.33 2013/11/11 17:14:23 bellows Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -1409,19 +1409,18 @@ file
         RANK3_MIRRORED = 0x01
     </enum>
     <platInit/>
-    <array> 2 2 </array>
+    <array> 2 2</array>
 </attribute>
 
-<!-- Not yet supported by firmware
+<!-- TODO: RTC 82331 - Add this attribute to the Accessor HWP
 <attribute>
     <id>ATTR_VPD_DRAM_2N_MODE</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>
         The 2N/2T characteristic of the DIMM from the VPD MR keyword.  If the memory controller needs to run on 2N mode, the address is presented for two cycles.  By default, 2N should be set to INVALID until the platform initializes it.
     </description>
     <valueType>uint8</valueType>
-    <enum>INVALID = 0x00, 1N = 0x01, 2N = 0x02</enum>
-    <array>2</array>
+    <enum>FALSE = 0, TRUE = 1</enum>
     <platInit/>
 </attribute>
 
@@ -1477,7 +1476,7 @@ consumer: various.C files (no initfile)
 firmware notes: none
 This Attribute is to be interpreted as an Integer </description>
     <valueType>uint8</valueType>
-    <enum>INVALID =0, OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
+    <enum>INVALID = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>
@@ -2306,6 +2305,87 @@ This Attribute is to be interpreted as an Integer</description>
     <array> 2</array>
 </attribute>
 
+<!-- Spare attribute found in eclipz/hwpf/hwp/xml/attribute_info/dimm_attributes.xml -->
+<!-- <attribute> -->
+<!--     <id>ATTR_VPD_DIMM_SPARE</id>  -->
+<!--     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>  -->
+<!--     <description>Spare DRAM availability. It comes from the VPD or SPD in ISDIMM systems</description>  -->
+<!--     <valueType>uint8</valueType>  -->
+<!--     <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>  -->
+<!--     <odmVisable/>  -->
+<!--     <odmChangeable/>  -->
+<!--     <array> 2 2 4</array>  -->
+<!-- </attribute>  -->
+
+<attribute>
+    <id>ATTR_VPD_CKE_PRI_MAP</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This value comes from the VPD keyword MT bytes 54 and 55 MT(54:55) for the Logical DIMM associated with port A.  Bytes 118:119 for port B, 182:183 for port C and 246:247 for port D.  In the end, the AB and CD portions form a 32 bit word for each mba to write into the corresponding ddrphy register</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <array>2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_CKE_PWR_MAP</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This value comes from the VPD keyword MT bytes 56 to 59 MT(56:59) for the Logical DIMM associated with port A.  Bytes 120:123 for port B, 184:187 for port C and 248:251 for port D. The values for Port A concatenated with port B forms the value for one MBA.  C concat D forms the value for the other MBA</description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_GPO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <array>2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_RLO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This value comes from the VPD keyword MT byte 60 bits 4:7 for the Logical DIMM associated with port A.  Byte 124 bits 4:7 for port B, 188 bits 4:7 for port C and 252 bits 4:7 for port D</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <array>2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_WLO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This value comes from the VPD keyword MT byte 60 bits 0:3 for the Logical DIMM associated with port A.  Byte 124 bits 0:3 for port B, 188 bits 0:3 for port C and 252 bits 0:3 for port D</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <array>2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_TSYS_ADR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This value comes from the VPD MR keyword byte 49 for ports A and B and byte 177 for port C and D.    This means that all ADR blocks use this value on an mba level</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <array>2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_TSYS_DP18</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>This value comes from the VPD MR keyword byte 113 for ports A and B and byte 241 for port C and D.  This means all DP18 blocks use this value on a mba level</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <array>2</array>
+</attribute>
+
 <attribute>
     <id>ATTR_VPD_CDIMM_SENSOR_MAP_PRIMARY</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2344,6 +2424,48 @@ Comes from the VPD MW Keyword</description>
     <odmVisable/>
 </attribute>
 
+<!-- TODO: RTC 82331 - Add this attribute to the Accessor HWP
+<attribute>
+    <id>ATTR_VPD_CDIMM_MASTER_POWER_SLOPE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Master Power Slope that comes from the VPD MW Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_CDIMM_MASTER_POWER_INTERCEPT</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Master Power Intercept that comes from the VPD MW Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_CDIMM_SUPPLIER_POWER_SLOPE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Supplier Power Slope that comes from the VPD the MV Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_CDIMM_SUPPLIER_POWER_INTERCEPT</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Supplier Power Intercept that comes from MV Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+-->
+
 <attribute>
     <id>ATTR_VPD_DRAM_2N_MODE_ENABLED</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2353,6 +2475,7 @@ Comes from the VPD MW Keyword</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
+
 
 
 </attributes>

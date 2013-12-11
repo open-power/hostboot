@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.22 2013/09/24 22:14:02 mwuu Exp $
+// $Id: mss_termination_control.C,v 1.23 2013/12/02 18:55:39 bellows Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.23   | bellows  |02-Dec-13| VPD attribute update
 //  1.22   | mwuu     |20-Sep-13| Updated ADR DDR3 slew calibration table for 1 setting,
 //  							  1066 20ohms, 4V/ns, changed from 11 to 10.
 //  1.21   | sasethur |16-Apr-13| Added DDR4 settings for rd_vref
@@ -1466,63 +1467,63 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 //				slew_imp_val[SLEW_TYPE_DATA][IMP][j]);
 	}
 	// Get desired ADR control slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_CNTL, &i_target_mba,
+	rc = FAPI_ATTR_GET(ATTR_VPD_CEN_SLEW_RATE_CNTL, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_CNTL][SLEW]);
 	if (rc)
 	{
-		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_CNTL");
+		FAPI_ERR("Failed to get attribute: ATTR_VPD_CEN_SLEW_RATE_CNTL");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_CNTL, &i_target_mba,
+	rc = FAPI_ATTR_GET(ATTR_VPD_CEN_DRV_IMP_CNTL, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_CNTL][IMP]);
 	if (rc)
 	{
-		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_DRV_IMP_CNTL");
+		FAPI_ERR("Failed to get attribute: ATTR_VPD_CEN_DRV_IMP_CNTL");
 		return rc;
 	}
 	// Get desired ADR command slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_ADDR, &i_target_mba,
+	rc = FAPI_ATTR_GET(ATTR_VPD_CEN_SLEW_RATE_ADDR, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_ADDR][SLEW]);
 	if (rc)
 	{
-		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_ADDR");
+		FAPI_ERR("Failed to get attribute: ATTR_VPD_CEN_SLEW_RATE_ADDR");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_ADDR, &i_target_mba,
+	rc = FAPI_ATTR_GET(ATTR_VPD_CEN_DRV_IMP_ADDR, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_ADDR][IMP]);
 	if (rc)
 	{
-		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_DRV_IMP_ADDR");
+		FAPI_ERR("Failed to get attribute: ATTR_VPD_CEN_DRV_IMP_ADDR");
 		return rc;
 	}
 	// Get desired ADR clock slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_CLK, &i_target_mba,
+	rc = FAPI_ATTR_GET(ATTR_VPD_CEN_SLEW_RATE_CLK, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_CLK][SLEW]);
 	if (rc)
 	{
-		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_CLK");
+		FAPI_ERR("Failed to get attribute: ATTR_VPD_CEN_SLEW_RATE_CLK");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_CLK, &i_target_mba,
+	rc = FAPI_ATTR_GET(ATTR_VPD_CEN_DRV_IMP_CLK, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_CLK][IMP]);
 	if (rc)
 	{
-		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_DRV_IMP_CLK");
+		FAPI_ERR("Failed to get attribute: ATTR_VPD_CEN_DRV_IMP_CLK");
 		return rc;
 	}
 	// Get desired ADR Spare clock slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_SPCKE, &i_target_mba,
+	rc = FAPI_ATTR_GET(ATTR_VPD_CEN_SLEW_RATE_SPCKE, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_SPCKE][SLEW]);
 	if (rc)
 	{
-		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_SPCKE");
+		FAPI_ERR("Failed to get attribute: ATTR_VPD_CEN_SLEW_RATE_SPCKE");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_SPCKE, &i_target_mba,
+	rc = FAPI_ATTR_GET(ATTR_VPD_CEN_DRV_IMP_SPCKE, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_SPCKE][IMP]);
 	if (rc)
 	{
-		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_DRV_IMP_SPCKE");
+		FAPI_ERR("Failed to get attribute: ATTR_VPD_CEN_DRV_IMP_SPCKE");
 		return rc;
 	}
 
