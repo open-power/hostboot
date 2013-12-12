@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -141,8 +141,11 @@ namespace MBOX
             void msgHandler();
 
             /**
-             * Send or queue up a message to the device driver
-             * @param[in] i_mbox_msg, the mailbox message
+             * Send or queue up the next message to the device driver
+             * @param[in] i_mbox_msg, ptr to the mailbox message | NULL
+             * @NOTE if the mailbox message ptr is NULL then no new message is
+             * added to the queue, but the next message on the queue is sent
+             * provided there is one available.
              */
             void send_msg(mbox_msg_t * i_msg = NULL);
 

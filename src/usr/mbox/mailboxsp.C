@@ -461,7 +461,20 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
             iv_respondq.insert(response);
         }
 
-        send_msg(&mbox_msg);
+        // NOTE:This message could still get sent if iv_suspended == true.
+        // This could happen if a suspend action has been requested, but the
+        // response to the suspend request has not yet been sent.
+        // (that is, the iv_sendq has not had a chance to "drain" yet.)
+        if(!iv_suspended)
+        {
+            send_msg(&mbox_msg);
+        }
+        else
+        {
+            iv_sendq.push_back(mbox_msg);
+            TRACFCOMP(g_trac_mbox,"I>Mailbox suspending or suspended.");
+            trace_msg("QUEUED",mbox_msg);
+        }
     }
 
 }
@@ -477,13 +490,9 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
     // Can't send now if:
     //  - busy (waiting for ACK)
     //  - a DMA buffer request is pending
-    //  - The mailbox is suspended
     //  - there is nothing to send
     //
-    //  Future enhancement: If both iv_rts and iv_dma_pend are true then
-    //  could look for a mesaage from a different msgq in the sendq that does
-    //  not require a DMA buffer and send it.
-    if(!iv_rts || iv_dma_pend || iv_suspended || iv_sendq.size() == 0)
+    if(!iv_rts || iv_dma_pend || iv_sendq.size() == 0)
     {
         return;
     }
@@ -790,7 +799,6 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
 
                 mbox_msg.msg_payload.extra_data = NULL;
                 mbox_msg.msg_payload.__reserved__async = 0; // async
-
 
                 send_msg(&mbox_msg);
 
@@ -1607,19 +1615,6 @@ void MailboxSp::handleShutdown()
 
 void MailboxSp::suspend()
 {
-    // Mask interrupts in the mbox hardware
-    errlHndl_t err = mboxddMaskInterrupts(iv_trgt);
-    if(err)  // SCOM failed.
-    {
-        // If this failed, the whole system is probably buggered up.
-
-        errlCommit(err,MBOX_COMP_ID);
-
-        TRACFCOMP(g_trac_mbox,
-                  ERR_MRK"MBOXSP Suspend. HALTED on critical error!");
-        crit_assert(0);
-    }
-
     msg_respond(iv_msgQ,iv_suspend_msg);
     TRACFCOMP(g_trac_mbox,INFO_MRK"Mailbox is suspended");
 }
@@ -1630,18 +1625,6 @@ void MailboxSp::resume()
 
     if(!iv_disabled)
     {
-        // Enable the mbox hardware
-        errlHndl_t err = mboxInit(iv_trgt);
-        if(err)  // SCOM failed.
-        {
-            // If this failed, the whole system is probably buggered up.
-
-            errlCommit(err,MBOX_COMP_ID);
-
-            TRACFCOMP(g_trac_mbox,
-                      ERR_MRK"MBOXSP Resume. HALTED on critical error!");
-            crit_assert(0);
-        }
         send_msg();   // send next message on queue
     }
 }
