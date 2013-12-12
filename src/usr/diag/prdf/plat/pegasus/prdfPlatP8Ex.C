@@ -109,9 +109,8 @@ int32_t L3UE( ExtensibleChip * i_chip,
 int32_t L3CE( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & i_sc )
 {
-    PRDF_ERR( "[L3CE] Unexpected attention in Hostboot: "
-              "HUID=0x%08x", i_chip->GetId() );
-    CalloutUtil::defaultError( i_sc );
+    // We can get these errors during hostboot, but will wait for runtime
+    // to attempt repairs
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(Ex, L3CE);
 
@@ -136,11 +135,22 @@ int32_t L2UE( ExtensibleChip * i_chip,
 int32_t L2CE( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & i_sc )
 {
-    PRDF_ERR( "[L2CE] Unexpected attention in Hostboot: "
-              "HUID=0x%08x", i_chip->GetId() );
-    CalloutUtil::defaultError( i_sc );
+    // We can get these errors during hostboot, but will wait for runtime
+    // to attempt repairs
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(Ex, L2CE);
+
+/**
+ * @brief Check if we're running in hostboot
+ * @param i_chip Ex chip.
+ * @param i_stepcode Step Code data struct
+ * @return SUCCESS because this is the Hostboot file
+ */
+int32_t InHostboot( ExtensibleChip * i_chip,
+                    STEP_CODE_DATA_STRUCT & i_stepcode )
+{
+    return SUCCESS;
+} PRDF_PLUGIN_DEFINE(Ex, InHostboot);
 
 } // end namespace Ex
 } // end namespace PRDF

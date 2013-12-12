@@ -1471,19 +1471,31 @@ actionclass L3UE
     funccall("L3UE");
 };
 
-actionclass L3CE
+# Thresholding and runtime handling (line deletes and column repairs)
+# for cache CEs
+actionclass thrAndL2CE
 {
-    calloutSelfHigh;
+    threshold( field(32 / day), mfg_file(P8EX_L2_CACHE_CES) );
+    funccall("L2CE");
+};
+actionclass thrAndL3CE
+{
     threshold( field(32 / day), mfg_file(P8EX_L3_CACHE_CES) );
     funccall("L3CE");
 };
 
+actionclass L3CE
+{
+    calloutSelfHigh;
+    # only threshold and attempt repairs on FSP
+    try(funccall("InHostboot"), thrAndL3CE);
+};
 
 actionclass L2CE
 {
     calloutSelfHigh;
-    threshold( field(32 / day), mfg_file(P8EX_L2_CACHE_CES) );
-    funccall("L2CE");
+    # only threshold and attempt repairs on FSP
+    try(funccall("InHostboot"), thrAndL2CE);
 };
 
 actionclass L2UE
