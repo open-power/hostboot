@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -446,6 +446,12 @@ bool mnfgTerminate();
  * @return TRUE if MNFG_NO_RBS is set, FALSE otherwise.
  */
 bool areDramRepairsDisabled();
+
+/**
+ * @brief  Returns the state of the MNFG_FAST_BACKGROUND_SCRUB policy flag.
+ * @return TRUE if MNFG_FAST_BACKGROUND_SCRUB is set, FALSE otherwise.
+ */
+bool enableFastBgScrub();
 
 /**
  * @brief  Returns the state of the

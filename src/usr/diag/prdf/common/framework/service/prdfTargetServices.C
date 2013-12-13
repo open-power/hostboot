@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -1416,6 +1416,9 @@ bool mnfgTerminate()
 
 bool areDramRepairsDisabled()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_DISABLE_DRAM_REPAIRS ); }
+
+bool enableFastBgScrub()
+{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_FAST_BACKGROUND_SCRUB ); }
 
 bool mnfgSpareDramDeploy()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_TEST_DRAM_REPAIRS ); }
