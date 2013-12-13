@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -716,7 +716,7 @@
         scomaddr    0x02011A00;
         reset       (&, 0x02011A01);
         mask        (|, 0x02011A05);
-        capture     req funccall("isVeniceProc");
+        capture     req funccall("mcsBlockConfigured_0");
         capture     group default;
     };
 
@@ -724,7 +724,7 @@
     {
         name        "IOMC0.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x02011A03;
-        capture     req funccall("isVeniceProc");
+        capture     req funccall("mcsBlockConfigured_0");
         capture     group default;
     };
 
@@ -741,7 +741,7 @@
         scomaddr    0x02011A06;
         capture     type secondary;
         capture     group default;
-        capture     req funccall("isVeniceProc");
+        capture     req funccall("mcsBlockConfigured_0");
         capture     req nonzero("IOMCFIR_0");
     };
 
@@ -751,7 +751,7 @@
         scomaddr    0x02011A07;
         capture     type secondary;
         capture     group default;
-        capture     req funccall("isVeniceProc");
+        capture     req funccall("mcsBlockConfigured_0");
         capture     req nonzero("IOMCFIR_0");
     };
 
@@ -766,6 +766,7 @@
         reset       (&, 0x02011E01);
         mask        (|, 0x02011E05);
         capture     group default;
+        capture     req funccall("mcsBlockConfigured_1");
     };
 
     register IOMCFIR_1_MASK
@@ -773,6 +774,7 @@
         name        "IOMC1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x02011E03;
         capture     group default;
+        capture     req funccall("mcsBlockConfigured_1");
     };
 
     register IOMCFIR_1_MASK_OR
@@ -788,6 +790,7 @@
         scomaddr    0x02011E06;
         capture     type secondary;
         capture     group default;
+        capture     req funccall("mcsBlockConfigured_1");
         capture     req nonzero("IOMCFIR_1");
     };
 
@@ -797,6 +800,7 @@
         scomaddr    0x02011E07;
         capture     type secondary;
         capture     group default;
+        capture     req funccall("mcsBlockConfigured_1");
         capture     req nonzero("IOMCFIR_1");
     };
 

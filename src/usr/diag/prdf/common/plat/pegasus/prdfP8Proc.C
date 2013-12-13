@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -426,20 +426,50 @@ PLUGIN_LANE_REPAIR( abus, TYPE_ABUS, 2 )
 #undef PLUGIN_LANE_REPAIR
 
 /**
- * @brief  checks if proc is Venice chip.
+ * @brief  checks if MCS block is configured.
  * @param  i_chip P8 chip.
- * @param  isVenice TRUE if chip is venice false otherwise.
+ * @param  i_mcsBlk MCS block ( 0 : ( 0- 3 MCS) ), ( 1 :( 4-7 MCS ))
+ * @param  o_isMcsBlkConfigured TRUE if block is configured false otherwise.
  * @return SUCCESS
  */
-int32_t isVeniceProc( ExtensibleChip * i_chip, bool & o_isVenice )
+int32_t mcsBlockConfigured( ExtensibleChip * i_chip,
+                            uint8_t i_mcsBlk,
+                            bool & o_isMcsBlkConfigured )
 {
-    o_isVenice = false;
-    if( MODEL_VENICE == getProcModel( i_chip->GetChipHandle() ) )
-        o_isVenice = true;
+    o_isMcsBlkConfigured = false;
+
+    // Starting MCS position for MCS block
+    uint8_t firstMcsPos[ 2 ] = { 0, 4 };
+
+    // Get functional MCS list
+    TargetHandleList l_mcsList =
+        PlatServices::getConnected(i_chip->GetChipHandle(), TYPE_MCS);
+
+    for ( TargetHandleList::iterator i = l_mcsList.begin();
+          i != l_mcsList.end(); ++i )
+    {
+        uint8_t pos = getTargetPosition(*i);
+        if( ( pos >= firstMcsPos[ i_mcsBlk ] ) &&
+            ( pos <= ( firstMcsPos[ i_mcsBlk ] + 3) ) )
+        {
+            o_isMcsBlkConfigured = true;
+            break;
+        }
+    }
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( Proc, isVeniceProc );
+
+#define PLUGIN_MCS_BLOCK_CONFIGURED( POS ) \
+int32_t mcsBlockConfigured_##POS( ExtensibleChip * i_chip, \
+                             bool & o_isMcsBlkConfigured ) \
+{ return mcsBlockConfigured( i_chip, POS, o_isMcsBlkConfigured ); } \
+PRDF_PLUGIN_DEFINE( Proc, mcsBlockConfigured_##POS );
+
+PLUGIN_MCS_BLOCK_CONFIGURED( 0 )
+PLUGIN_MCS_BLOCK_CONFIGURED( 1 )
+
+#undef PLUGIN_MCS_BLOCK_CONFIGURED
 
 //------------------------------------------------------------------------------
 // Callout plugins
