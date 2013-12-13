@@ -518,7 +518,8 @@ errlHndl_t DeconfigGard::deconfigureTarget(Target & i_target,
             // TODO RTC 88471: use attribute vs hardcoded list.
             if (!((target_type == TYPE_MEMBUF) ||
                   (target_type == TYPE_NX) ||
-                  (target_type == TYPE_EX)))
+                  (target_type == TYPE_EX) ||
+                  (target_type == TYPE_PORE)))
             {
                 HWAS_ERR("Skipping deconfigureTarget: eventAtRunTime with unexpected target %.8X type %d -- SKIPPING",
                     get_huid(&i_target), target_type);
@@ -1262,6 +1263,19 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
                 }
                 break;
             } // TYPE_XBUS, TYPE_ABUS
+            case TYPE_PORE:
+            {
+                // Get parent proc target of PORE
+                const Target * l_pParentProc = getParentChip(&i_target);
+                // Deconfigure parent proc
+                HWAS_INF("deconfigByAssoc parent proc: %.8X",
+                    get_huid(l_pParentProc));
+                _deconfigureTarget(const_cast<Target &> (*l_pParentProc),
+                                                             i_errlEid);
+                _deconfigureByAssoc(const_cast<Target &> (*l_pParentProc),
+                                                             i_errlEid);
+                break;
+            } // TYPE_PORE
             default:
                 // no action
             break;
