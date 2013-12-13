@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_slw_registers.xml,v 1.1 2013/10/08 15:45:18 stillgs Exp $ -->
+<!-- $Id: p8_slw_registers.xml,v 1.3 2013/12/05 21:22:27 stillgs Exp $ -->
 <!-- Definition of SLW registers to collect on some errors -->
 <hwpErrors>
   <registerFfdc>
@@ -57,5 +57,23 @@
     <scomRegister>PMC_LFIR_0x01010840</scomRegister>
     <scomRegister>OCC_LFIR_0x01010800</scomRegister>
     <scomRegister>PBA_FIR_0x02010840</scomRegister>
+  </registerFfdc>
+    <registerFfdc>
+    <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
+    <scomRegister>PMC_MODE_REG_0x00062000</scomRegister>
+    <scomRegister>PMC_STATUS_REG_0x00062009</scomRegister>
+    <scomRegister>PMC_CORE_DECONFIG_REG_0x0006200D</scomRegister>
+    <scomRegister>PMC_FSMSTATE_STATUS_REG_0x00062020</scomRegister>
+    <scomRegister>PMC_PORRR0_REG_0x0006208E</scomRegister>
+    <scomRegister>PMC_PORRR1_REG_0x0006208F</scomRegister>
+    <scomRegister>PMC_PORE_REQ_REG0_0x0006208E</scomRegister>
+    <scomRegister>PMC_DEEPEXIT_MASK_0x00062092</scomRegister>
+  </registerFfdc>
+    <registerFfdc>
+    <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
+    <scomRegister>PBA_BAR2_0x02013F02</scomRegister>
+    <scomRegister>PBA_BARMSK2_0x02013F06</scomRegister>
+    <scomRegister>PBA_CONFIG_0x0201084B</scomRegister>
+    <scomRegister>PBA_SLVCTL2_0x00064006</scomRegister>
   </registerFfdc>
 </hwpErrors>
