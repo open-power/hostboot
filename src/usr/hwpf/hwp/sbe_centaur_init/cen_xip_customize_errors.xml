@@ -20,6 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: cen_xip_customize_errors.xml,v 1.2 2013/05/07 22:56:26 wenning Exp $ -->
 <!-- Error definitions for proc_slw_build procedure -->
 <hwpErrors>
 <!-- *********************************************************************** -->
@@ -41,7 +42,7 @@
   <description>PLL ring size returned from attribute is too large.</description>
   <ffdc>DATA_ATTRIBUTE_RING_SIZE</ffdc>
   <ffdc>DATA_MAX_PLL_RING_SIZE</ffdc>
-	<ffdc>DATA_SIZE_OF_BUF1</ffdc>
+        <ffdc>DATA_SIZE_OF_BUF1</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
@@ -54,7 +55,7 @@
   <rc>RC_CEN_XIPC_PLL_RING_BLOCK_TOO_LARGE</rc>
   <description>PLL ring block is too large.</description>
   <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
-	<ffdc>DATA_SIZE_OF_BUF1</ffdc>
+        <ffdc>DATA_SIZE_OF_BUF1</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>

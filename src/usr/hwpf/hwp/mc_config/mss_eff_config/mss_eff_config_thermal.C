@@ -145,7 +145,6 @@ const uint8_t ACTIVE_DIMM_UTILIZATION = 70;
 const uint8_t DATA_BUS_READ_PERCENT = 66;
 const uint8_t DATA_BUS_WRITE_PERCENT = 34;
 
-//@thi - Change all FAPI_INF to FAPI_INF
 
 extern "C" {
 
@@ -774,7 +773,7 @@ extern "C" {
 			      (rc, RC_MSS_DIMM_POWER_CURVE_DATA_INVALID);
 			    if (rc) fapiLogError(rc);
 			}
-			FAPI_INF("CDIMM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]", port, dimm, power_slope_array[port][dimm], power_int_array[port][dimm], power_slope2_array[port][dimm], power_int2_array[port][dimm]);
+			FAPI_DBG("CDIMM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]", port, dimm, power_slope_array[port][dimm], power_int_array[port][dimm], power_slope2_array[port][dimm], power_int2_array[port][dimm]);
 		    }
 // ISDIMM power slope/intercept will come from equation
 		    else
@@ -935,9 +934,9 @@ extern "C" {
 				}
 
 				found_entry_in_table = 1;
-				FAPI_INF("FOUND ENTRY:  GEN=%s WIDTH=X%d RANK=%d IDLE(%d%%)=%d ACTIVE(%d%%)=%d ADDER[TYPE=%d WCTERM=%4.2f] Multiplier[VOLT=%4.2f FREQ=%4.2f]", dram_gen_str, power_table[entry].dram_width, power_table[entry].dimm_ranks, IDLE_DIMM_UTILIZATION, power_table[entry].rank_power.idle, ACTIVE_DIMM_UTILIZATION, power_table[entry].rank_power.active, dimm_power_adder_type, dimm_power_adder_termination_wc, dimm_power_multiplier_volt, dimm_power_mulitiplier_freq);
-				FAPI_INF("ISDIMM Power [P%d:D%d][%s:X%d:R%d/%d:%d:%d][IDLE(%d%%)=%4.2f:ACTIVE(%d%%)=%4.2f cW][SLOPE=%d:INT=%d cW]", port, dimm, dram_gen_str, power_table[entry].dram_width, dimm_master_ranks_array[port][dimm], (dimm_ranks_array[port][dimm] - dimm_master_ranks_array[port][dimm]), dimm_voltage, dimm_frequency, IDLE_DIMM_UTILIZATION, dimm_idle_power, ACTIVE_DIMM_UTILIZATION, dimm_active_power, power_slope_array[port][dimm], power_int_array[port][dimm]);
-				FAPI_INF("ISDIMM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]", port, dimm, power_slope_array[port][dimm], power_int_array[port][dimm], power_slope2_array[port][dimm], power_int2_array[port][dimm]);
+				FAPI_DBG("FOUND ENTRY:  GEN=%s WIDTH=X%d RANK=%d IDLE(%d%%)=%d ACTIVE(%d%%)=%d ADDER[TYPE=%d WCTERM=%4.2f] Multiplier[VOLT=%4.2f FREQ=%4.2f]", dram_gen_str, power_table[entry].dram_width, power_table[entry].dimm_ranks, IDLE_DIMM_UTILIZATION, power_table[entry].rank_power.idle, ACTIVE_DIMM_UTILIZATION, power_table[entry].rank_power.active, dimm_power_adder_type, dimm_power_adder_termination_wc, dimm_power_multiplier_volt, dimm_power_mulitiplier_freq);
+				FAPI_DBG("ISDIMM Power [P%d:D%d][%s:X%d:R%d/%d:%d:%d][IDLE(%d%%)=%4.2f:ACTIVE(%d%%)=%4.2f cW][SLOPE=%d:INT=%d cW]", port, dimm, dram_gen_str, power_table[entry].dram_width, dimm_master_ranks_array[port][dimm], (dimm_ranks_array[port][dimm] - dimm_master_ranks_array[port][dimm]), dimm_voltage, dimm_frequency, IDLE_DIMM_UTILIZATION, dimm_idle_power, ACTIVE_DIMM_UTILIZATION, dimm_active_power, power_slope_array[port][dimm], power_int_array[port][dimm]);
+				FAPI_DBG("ISDIMM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]", port, dimm, power_slope_array[port][dimm], power_int_array[port][dimm], power_slope2_array[port][dimm], power_int2_array[port][dimm]);
 				break;
 			    }
 
@@ -1354,7 +1353,7 @@ extern "C" {
 		      (eff_term_rd +
 		       i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt0_rank]);
 		}
-		FAPI_INF("[P%d:D%d:R%d] 0ODT0 RD TERMINATION = %4.2f (%d)", i_port, i_dimm, i_rank, eff_term_rd, i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt0_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] 0ODT0 RD TERMINATION = %4.2f (%d)", i_port, i_dimm, i_rank, eff_term_rd, i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt0_rank]);
 
 	    }
 //------------------------------------------------------------------------------
@@ -1380,7 +1379,7 @@ extern "C" {
 		      (eff_term_rd +
 		       i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt1_rank]);
 		}
-		FAPI_INF("[P%d:D%d:R%d] 0ODT1 RD TERMINATION = %4.2f (%d)", i_port, i_dimm, i_rank, eff_term_rd, i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt1_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] 0ODT1 RD TERMINATION = %4.2f (%d)", i_port, i_dimm, i_rank, eff_term_rd, i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt1_rank]);
 	    }
 //------------------------------------------------------------------------------
 // 1ODT0
@@ -1405,7 +1404,7 @@ extern "C" {
 		      (eff_term_rd +
 		       i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt0_rank]);
 		}
-		FAPI_INF("[P%d:D%d:R%d] 1ODT0 RD TERMINATION = %4.2f (%d)", i_port, i_dimm, i_rank, eff_term_rd, i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt0_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] 1ODT0 RD TERMINATION = %4.2f (%d)", i_port, i_dimm, i_rank, eff_term_rd, i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt0_rank]);
 	    }
 //------------------------------------------------------------------------------
 // 1ODT1
@@ -1430,7 +1429,7 @@ extern "C" {
 		      (eff_term_rd +
 		       i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt1_rank]);
 		}
-		FAPI_INF("[P%d:D%d:R%d] 1ODT1 RD TERMINATION = %4.2f (%d)", i_port, i_dimm, i_rank, eff_term_rd, i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt1_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] 1ODT1 RD TERMINATION = %4.2f (%d)", i_port, i_dimm, i_rank, eff_term_rd, i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt1_rank]);
 	    }
 
 // calculate out effective read termination
@@ -1526,7 +1525,7 @@ extern "C" {
 		    }
 
 		}
-		FAPI_INF("[P%d:D%d:R%d] WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_wr[i_port][i_dimm][i_rank], i_dram_rtt_nom[i_port][i_dimm][i_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_wr[i_port][i_dimm][i_rank], i_dram_rtt_nom[i_port][i_dimm][i_rank]);
 	    }
 //------------------------------------------------------------------------------
 // 0ODT0
@@ -1583,7 +1582,7 @@ extern "C" {
 		    }
 
 		}
-		FAPI_INF("[P%d:D%d:R%d] 0ODT0 WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt0_rank], i_dram_rtt_wr[i_port][ma0odt01_dimm][ma0odt0_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] 0ODT0 WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt0_rank], i_dram_rtt_wr[i_port][ma0odt01_dimm][ma0odt0_rank]);
 	    }
 //------------------------------------------------------------------------------
 // 0ODT1
@@ -1640,7 +1639,7 @@ extern "C" {
 		    }
 
 		}
-		FAPI_INF("[P%d:D%d:R%d] 0ODT1 WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt1_rank], i_dram_rtt_wr[i_port][ma0odt01_dimm][ma0odt1_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] 0ODT1 WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_nom[i_port][ma0odt01_dimm][ma0odt1_rank], i_dram_rtt_wr[i_port][ma0odt01_dimm][ma0odt1_rank]);
 	    }
 //------------------------------------------------------------------------------
 // 1ODT0
@@ -1697,7 +1696,7 @@ extern "C" {
 		    }
 
 		}
-		FAPI_INF("[P%d:D%d:R%d] 1ODT0 WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt0_rank], i_dram_rtt_wr[i_port][ma1odt01_dimm][ma1odt0_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] 1ODT0 WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt0_rank], i_dram_rtt_wr[i_port][ma1odt01_dimm][ma1odt0_rank]);
 	    }
 //------------------------------------------------------------------------------
 // 1ODT1
@@ -1754,7 +1753,7 @@ extern "C" {
 		    }
 
 		}
-		FAPI_INF("[P%d:D%d:R%d] 1ODT1 WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt1_rank], i_dram_rtt_wr[i_port][ma1odt01_dimm][ma1odt1_rank]);
+		FAPI_DBG("[P%d:D%d:R%d] 1ODT1 WR TERMINATION = %4.2f (%d/%d)", i_port, i_dimm, i_rank, eff_term_wr, i_dram_rtt_nom[i_port][ma1odt01_dimm][ma1odt1_rank], i_dram_rtt_wr[i_port][ma1odt01_dimm][ma1odt1_rank]);
 	    }
 
 
@@ -1810,8 +1809,8 @@ extern "C" {
 		(float(ACTIVE_DIMM_UTILIZATION) / 100) *
 		(float(DATA_BUS_WRITE_PERCENT) / 100) * (term_odt_mult_wr))
 	       );
-	    FAPI_INF("%s TERM:[P%d:D%d:R%d] CEN[DRV=%d RCV=%d] DRAM[DRV=%d ODT_RD=%4.2f ODT_WR=%4.2f]", i_nom_or_wc_term, i_port, i_dimm, i_rank, cen_dq_dqs_drv_imp_value, i_cen_dq_dqs_rcv_imp[i_port], i_dimm_dram_ron[i_port][i_dimm], eff_term_rd, eff_term_wr);
-	    FAPI_INF("%s TERM POWER:[P%d:D%d:R%d] RD[Nets=%d EffTerm=%3.2f ODTMult=%1.2f] WR[Nets=%d EffTerm=%3.2f ODTMult=%1.2f] TermPower(%d%%)=%2.2f W", i_nom_or_wc_term, i_port, i_dimm, i_rank, number_nets_term_rd, eff_net_term_rd, term_odt_mult_rd, number_nets_term_wr, eff_net_term_wr, term_odt_mult_wr, ACTIVE_DIMM_UTILIZATION, o_dimm_power_adder_termination);
+	    FAPI_DBG("%s TERM:[P%d:D%d:R%d] CEN[DRV=%d RCV=%d] DRAM[DRV=%d ODT_RD=%4.2f ODT_WR=%4.2f]", i_nom_or_wc_term, i_port, i_dimm, i_rank, cen_dq_dqs_drv_imp_value, i_cen_dq_dqs_rcv_imp[i_port], i_dimm_dram_ron[i_port][i_dimm], eff_term_rd, eff_term_wr);
+	    FAPI_DBG("%s TERM POWER:[P%d:D%d:R%d] RD[Nets=%d EffTerm=%3.2f ODTMult=%1.2f] WR[Nets=%d EffTerm=%3.2f ODTMult=%1.2f] TermPower(%d%%)=%2.2f W", i_nom_or_wc_term, i_port, i_dimm, i_rank, number_nets_term_rd, eff_net_term_rd, term_odt_mult_rd, number_nets_term_wr, eff_net_term_wr, term_odt_mult_wr, ACTIVE_DIMM_UTILIZATION, o_dimm_power_adder_termination);
 	}
 	else
 	{

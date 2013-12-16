@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_xip_customize.C,v 1.11 2013/08/12 20:05:18 dcrowell Exp $
+// $Id: cen_xip_customize.C,v 1.12 2013/12/03 05:46:24 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : cen_xip_customize.C                                               */
 /* *! DESCRIPTION : Customizes Centaur images from a Centaur reference image.   */
@@ -28,8 +28,9 @@
 //
 /* *! EXTENDED DESCRIPTION :                                                    */
 //
-/* *! USAGE : To build (for VBU/command-line) -                                 */
-//              buildfapiprcd  -c "sbe_xip_image.c" -C "p8_image_help.C,p8_image_help_base.C"  -e "../../xml/error_info/cen_xip_customize_errors.xml"  -u "IMGBUILD_PPD_CEN_XIP_CUSTOMIZE,XIPC_COMMAND_LINE"  cen_xip_customize.C
+/* *! USAGE : 
+              To build (for Hostboot) -
+              buildfapiprcd   -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c"   -C "p8_image_help.C,p8_image_help_base.C,p8_pore_table_gen_api_fixed.C,p8_scan_compression.C"   -e "../../xml/error_info/cen_xip_customize_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml,../../../../../../hwpf/hwp/xml/error_info/mvpd_errors.xml"   cen_xip_customize.C                                               */
 //
 /* *! ASSUMPTIONS :                                                             */
 //
@@ -221,9 +222,10 @@ ReturnCode cen_xip_customize(const fapi::Target &i_target,
 	                            attrChipletId, //=0xff,
 	                            &wfInline,
 	                            &wfInlineLenInWords, // Is 8-byte aligned on return.
-                              1,
+                              1,  // Always do flush optimization.
 	                            (uint32_t)scanMaxRotate,
-                              0); // No need to use waits for Centaur.
+                              0,  // No need to use waits for Centaur.
+                              0x00000010); // Centaur doesn't support scan polling.
 	if (rcLoc)  {
 	  FAPI_ERR("create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
 	  uint32_t &RC_LOCAL=rcLoc;

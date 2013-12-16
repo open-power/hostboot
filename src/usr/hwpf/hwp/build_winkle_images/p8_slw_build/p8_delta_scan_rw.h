@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.47 2013/11/11 22:29:51 jmcgill Exp $
+// $Id: p8_delta_scan_rw.h,v 1.48 2013/12/03 05:45:04 cmolsen Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -253,7 +253,8 @@ int  create_wiggle_flip_prg(
               uint32_t   *o_wfInlineLenInWords,
               uint8_t    i_flushOptimization,
 							uint32_t   i_scanMaxRotate,
-              uint32_t   i_waitsScanDelay);
+              uint32_t   i_waitsScanDelay,
+              uint32_t   i_ddLevel);
 
 uint64_t calc_ring_layout_entry_offset(
 							uint8_t  i_typeRingLayout,

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.21 2013/05/23 21:10:40 dcrowell Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.22 2013/12/03 05:43:33 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -207,8 +207,11 @@ CONST_UINT64_T( SCRATCH0_RESET_VALUE,           (0xABBA99EBBA33DADA) );
 #define SCAN_MAX_ROTATE_38XXX_NAME           "scan_max_rotate_38xxx"
 #define SCAN_ROTATE_DEFAULT                  110 // Limit suggested by Tilman.
 #define SCAN_MAX_ROTATE                      0x00000FE0
-//#define SCAN_MAX_ROTATE_LONG                 0x000FFFFF // BITS 12->31.
-#define SCAN_MAX_ROTATE_LONG                 0x000007C7 // Experimental max val
+#define SCAN_MAX_ROTATE_LONG                 0x000FFFFF // All 1s in BITS 12->31.
+//#define SCAN_MAX_ROTATE_LONG                 0x000000D0 // Experimental max val
+
+#define OVER_SAMPLING_POLL                   10
+#define WAITS_POLL_MIN                       32
 
 // RAM table defines
 #define XIPSIZE_RAM_ENTRY       ( (sizeof(RamTableEntry)+7)/8*8 )

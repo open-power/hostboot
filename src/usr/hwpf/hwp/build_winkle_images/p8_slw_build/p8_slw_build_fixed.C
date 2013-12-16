@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build_fixed.C,v 1.16 2013/07/25 15:50:47 dcrowell Exp $
+// $Id: p8_slw_build_fixed.C,v 1.18 2013/12/16 21:41:47 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build_fixed                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -31,27 +31,19 @@
 //
 /* *! EXTENDED DESCRIPTION :                                                    */
 //
-/* *! USAGE : To build (for Hostboot) -                                         */
-//              buildfapiprcd  -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  p8_slw_build_fixed.C
-//            To build (for command-line) -
-//              buildfapiprcd  -r ver-13-0  -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  -u "SLW_COMMAND_LINE,IMGBUILD_PPD_IGNORE_XIPC"  p8_slw_build_fixed.C
-//            Other Pre-Processor Directive (PPD) options - 
-//            To add worst-case PIB access to wf programs:
-//              -u "IMGBUILD_PPD_WF_WORST_CASE_PIB"
-//            To add polling protocol to wf programs:
-//              -u "IMGBUILD_PPD_WF_POLLING_PROT"
-//            To NOT run xip_customize:
-//              -u "IMGBUILD_PPD_IGNORE_XIPC"
+/* *! USAGE : 
+              To build (for Hostboot) -
+              buildfapiprcd   -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"   -c "sbe_xip_image.c,pore_inline_assembler.c"   -e "../../xml/error_info/p8_slw_build_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml"   p8_slw_build_fixed.C
+              To build (for command-line) -
+              buildfapiprcd   -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"   -c "sbe_xip_image.c,pore_inline_assembler.c"   -e "../../xml/error_info/p8_slw_build_errors.xml,../../xml/error_info/proc_sbe_decompress_scan_halt_codes.xml"   -u "SLW_COMMAND_LINE"   p8_slw_build_fixed.C
+              To add polling protocol to wf programs:
+                -u "IMGBUILD_PPD_WF_POLLING_PROT"
+              To NOT run xip_customize:
+                -u "IMGBUILD_PPD_IGNORE_XIPC"                                   */
 //
 /* *! ASSUMPTIONS :                                                             */
 //
 /* *! COMMENTS :                                                                */
-//    - All image content, incl .rings content and ring layout, is handled
-//      in BE format. No matter which platform.
-//    - A ring may only be requested with the sysPhase=0 or 1. Any other 
-//      sysPhase value, incl sysPhase=2, will cause no rings to be found.
-//    - io_sizeImageOut may only change value for SRAM mode 2. For modes 0 and 1,
-//      it should be the agreed upon fixed SLW image size of 1MB.
 //
 /*------------------------------------------------------------------------------*/
 
@@ -96,7 +88,7 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   uint32_t  ddLevel=0;
   uint8_t   sysPhase=1; // SLW image build phase.
   uint32_t  rcLoc=0, rcSearch=0, i, countWF=0;
-  uint32_t  sizeImage=0, sizeImageIn=0, sizeImageOutMax, sizeImageTmp, sizeImageOld;
+  uint32_t  sizeImage=0, sizeImageIn=0, sizeImageOutMax, sizeImageTmp;
   CompressedScanData *deltaRingRS4=NULL;
   DeltaRingLayout rs4RingLayout;
   void *nextRing=NULL;
@@ -107,7 +99,6 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   uint32_t  dataTmp1, dataTmp2, dataTmp3;
   uint64_t  ptrTmp1, ptrTmp2;
   uint32_t  bufLC;
-  uint32_t  bootCoreMask=0x000FFFF;
 
 	// Sanity checks on buffers and image.
   // - validate image.
@@ -542,7 +533,8 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
 	                                  &wfInlineLenInWords,
                                     deltaRingRS4->iv_flushOptimization,
 																		(uint32_t)scanMaxRotate,
-	                                  (uint32_t)waitsScanDelay);
+	                                  (uint32_t)waitsScanDelay,
+                                    ddLevel );
 	  if (rcLoc)  {
 	    FAPI_ERR("create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
 			uint32_t & RC_LOCAL=rcLoc;
@@ -631,12 +623,14 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
       return rc;
     }
 
+	  FAPI_DBG("\tUpdating image w/WF prg + ring header was successful.");
 	  
 	  // Update some variables for debugging and error reporting.
-	  sizeImageOld = sizeImageTmp;
+#ifdef IMGBUILD_PPD_IGNORE_XIPC
+	  uint32_t sizeImageOld = sizeImageTmp;
+#endif
 	  countWF++;
-          FAPI_DBG("\tUpdating image w/WF prg + ring header was successful.sizeImageOld=%d",sizeImageOld);
-
+	
 	}  // End of if (rcSearch!=DSLWB_RING_SEARCH_NO_MATCH)
 	
   // ============================================================================
@@ -648,6 +642,7 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
     if (countWF==0)
       FAPI_INF("ZERO WF programs appended to .rings section.");
 #ifndef IMGBUILD_PPD_IGNORE_XIPC
+    uint32_t  bootCoreMask=0x000FFFF;
 		//
 		// Do various customizations to image.
     //

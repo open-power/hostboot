@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.65 2013/11/18 20:09:00 jmcgill Exp $
+// $Id: p8_xip_customize.C,v 1.66 2013/12/03 05:20:34 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -1778,27 +1778,24 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // ==========================================================================
   uint8_t   attrIvrmEnabled=0, attrFixIvrmWinkleBug=1;
   uint64_t  slwControlVector=0;
- 
-#ifdef FAPIECMD  // This section only included for Cronus builds.
-  //int type;
-  //fapi::fapiCheckIdType(ATTR_PM_IVRMS_ENABLED, type);
-  //FAPI_DBG("fapiCheckIdType(ATTR_PM_IVRMS_ENABLED) returned type=%i\n",type);
-  //if (!type)  {  // If attrib doesn't exist, create it and init to zero.
-    FAPI_DBG("ATTR_PM_IVRMS_ENABLED doesn't exit. Create and init to zero.\n");
-    attrIvrmEnabled = 1;
-    rc = FAPI_ATTR_SET(ATTR_PM_IVRMS_ENABLED, &i_target, attrIvrmEnabled);
-    if (rc)  {
-      FAPI_ERR("FAPI_ATTR_PUT(ATTR_PM_IVRMS_ENABLED) return error.\n");
-      return rc;
-    }
-  //}
-#endif
 
   rc = FAPI_ATTR_GET(ATTR_PM_IVRMS_ENABLED, &i_target, attrIvrmEnabled);
   if (rc)  {
     FAPI_ERR("FAPI_ATTR_GET(ATTR_PM_IVRMS_ENABLED) returned error.\n");
     return rc;
   }
+
+#ifdef FAPIECMD  // This section only included for Cronus builds.
+  if (attrIvrmEnabled==0)  {
+    attrIvrmEnabled = 1;
+    FAPI_DBG("Setting ATTR_PM_IVRMS_ENABLED = 0x%x.\n",attrIvrmEnabled);
+    rc = FAPI_ATTR_SET(ATTR_PM_IVRMS_ENABLED, &i_target, attrIvrmEnabled);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_SET(ATTR_PM_IVRMS_ENABLED) return error.\n");
+      return rc;
+    }
+  }
+#endif
 
   rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_IVRM_WINKLE_BUG, &i_target, attrFixIvrmWinkleBug);
   if (rc)  {
