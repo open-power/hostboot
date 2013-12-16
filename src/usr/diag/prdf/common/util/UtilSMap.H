@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2007,2013              */
+/* COPYRIGHT International Business Machines Corp. 2007,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -105,7 +105,17 @@ class UtilSMap
 
         void clear()
             {
-                if (NULL != iv_memblock) free(iv_memblock);
+                if (NULL != iv_memblock)
+                {
+                    for( size_type i = 0; i < iv_size; i++ )
+                    {
+                        ((key_type *)&iv_memblock[i])->~key_type();
+                        ((data_type *)
+                         &iv_memblock[i + cv_firstSize])->~data_type();
+                    }
+                    free(iv_memblock);
+                }
+
                 iv_memblock = NULL;
                 iv_size = 0;
                 iv_blockCount = 2;
@@ -123,11 +133,13 @@ class UtilSMap
                     iv_memblock = (char *)
                             realloc(iv_memblock, cv_blockSize * iv_blockCount);
                 }
-                (*(key_type *)&iv_memblock[cv_blockSize * iv_size]) = k;
-                data_type * l_rc = (data_type *)
-                        &iv_memblock[cv_blockSize * iv_size + cv_firstSize];
 
-                (*l_rc) = v;
+                new ((key_type *)&iv_memblock[cv_blockSize * iv_size])
+                        (key_type) (k);
+
+                data_type * l_rc = new ((data_type *)
+                        &iv_memblock[cv_blockSize * iv_size + cv_firstSize])
+                        (data_type) (v);
 
                 iv_size++;
 
@@ -142,6 +154,47 @@ class UtilSMap
 
                 return *l_rc;
             };
+
+         UtilSMap & operator = (const UtilSMap & i_rhs )
+         {
+            if( &i_rhs == this ) return *this;
+
+            clear();
+            iv_size = i_rhs.iv_size;
+            iv_blockCount = i_rhs.iv_blockCount;
+
+            if( NULL != i_rhs.iv_memblock )
+            {
+                iv_memblock = (char *) malloc( cv_blockSize * iv_blockCount);
+                for( size_type i = 0; i < iv_size; i++ )
+                {
+                    new ((key_type *)&iv_memblock[i])
+                        (key_type)( i_rhs.iv_memblock[i] );
+
+                    new ((data_type *) &iv_memblock[ i + cv_firstSize])
+                        (data_type) (i_rhs.iv_memblock[ i + cv_firstSize]);
+                }
+            }
+            return *this;
+         };
+         UtilSMap (const UtilSMap & i_rhs )
+         {
+            iv_size = i_rhs.iv_size;
+            iv_blockCount = i_rhs.iv_blockCount;
+            iv_memblock = NULL;
+            if( NULL != i_rhs.iv_memblock )
+            {
+                iv_memblock = (char *) malloc( cv_blockSize * iv_blockCount);
+                for( size_type i = 0; i < iv_size; i++ )
+                {
+                    new ((key_type *)&iv_memblock[i])
+                        (key_type)( i_rhs.iv_memblock[i] );
+
+                    new ((data_type *) &iv_memblock[ i + cv_firstSize])
+                        (data_type) (i_rhs.iv_memblock[ i + cv_firstSize]);
+                }
+            }
+         };
 
     private:
         data_type * find(const key_type & k)
