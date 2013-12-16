@@ -2361,7 +2361,14 @@ sub generate_pcies
     my ($proc,$ordinalId) = @_;
     my $proc_name = "n${node}:p${proc}";
     print "\n<!-- $SYSNAME n${node}p${proc} PCI units -->\n";
-    for my $i ( 0 .. 2 )
+    my $max_index = 2;
+    # TODO RTC: 94803
+    if ($CHIPNAME eq "venice")
+    {
+        $max_index = 3;
+    }
+
+    for my $i ( 0 .. $max_index )
     {
         generate_a_pcie( $proc, $i, ($ordinalId*3)+$i );
     }
