@@ -197,6 +197,8 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
     errlHndl_t l_err = NULL;
     o_virtAddr = NULL;
     IBScomBase_t l_IBScomBaseAddr = 0;
+    mutex_t* l_mutex = NULL;
+    bool need_unlock = false;
 
     do
     {
@@ -209,6 +211,20 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
         // the virtual address and save it in the xscom address attribute.
         if (o_virtAddr == NULL)
         {
+            //lock around setting the attribute
+            l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_IBSCOM_MUTEX>();
+            mutex_lock(l_mutex);
+            need_unlock = true;
+
+            //double-check that another thread didn't slip in before we locked
+            o_virtAddr =  reinterpret_cast<uint64_t*>
+              (i_target->getAttr<ATTR_IBSCOM_VIRTUAL_ADDR>());
+            if( o_virtAddr != 0 )
+            {
+                mutex_unlock(l_mutex);
+                need_unlock = false;
+                break;
+            }
 
             TRACDCOMP(g_trac_ibscom, INFO_MRK
                       "getTargetVirtualAddress: Need to compute virtual address for Centaur");
@@ -274,25 +290,19 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
                             THIRTYTWO_GB));
 
             // Save the virtual address attribute.
-
-            // Leaving the comments as a discussion point...
-            // This issue is tracked under RTC: 35315
-            // Technically there is a race condition here. The mutex is
-            // a per-hardware thread mutex, not a mutex for the whole XSCOM
-            // logic. So there is possibility that this same thread is running
-            // on another thread at the exact same time. We can use atomic
-            // update instructions here.
-            // Comment for Nick: This is a good candidate for having a way
-            // to return a reference to the attribute instead of requiring
-            // to call setAttr. We currently have no way to SMP-safely update
-            // this attribute, where as if we had a reference to it we could use
-            // the atomic update functions (_sync_bool_compare_and_swap in
-            // this case.
             i_target->setAttr<ATTR_IBSCOM_VIRTUAL_ADDR>
               (reinterpret_cast<uint64_t>(o_virtAddr));
+
+            mutex_unlock(l_mutex);
+            need_unlock = false;
         }
 
     } while (0);
+
+    if( need_unlock && l_mutex )
+    {
+        mutex_unlock(l_mutex);
+    }
 
     TRACDCOMP(g_trac_ibscom, EXIT_MRK
               "getTargetVirtualAddress: o_Virtual Base Address   =  0x%llX",
