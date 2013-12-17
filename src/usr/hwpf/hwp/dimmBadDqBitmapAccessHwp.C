@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: dimmBadDqBitmapAccessHwp.C,v 1.9 2014/01/09 22:48:08 dedahle Exp $
+
+// $Id: dimmBadDqBitmapAccessHwp.C,v 1.12 2014/01/14 22:01:08 mjjones Exp $
 /**
  *  @file dimmBadDqBitmapAccessHwp.C
  *
@@ -46,6 +47,8 @@
  *                                                  connected DQs
  *                          dedahle     01/08/2014  Switch back to reading
  *                                                  ATTR_VPD_DIMM_SPARE
+ *                          smcprek     01/14/2014  Perform Reconfig Loop on
+ *                                                  Bad DQ set
  */
 
 #include <dimmBadDqBitmapAccessHwp.H>
@@ -65,7 +68,6 @@ struct dimmBadDqDataFormat
     uint8_t  iv_reserved3;
     uint8_t  iv_bitmaps[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE];
 };
-
 
 extern "C"
 {
@@ -153,7 +155,6 @@ fapi::ReturnCode dimmUpdateDqBitmapSpareByte(
     return l_rc;
 }
 
-
 /**
  * @brief Called by dimmBadDqBitmapAccessHwp() to query
  * ATTR_SPD_MODULE_MEMORY_BUS_WIDTH in order to determine
@@ -211,6 +212,420 @@ fapi::ReturnCode dimmUpdateDqBitmapEccByte(
     return l_rc;
 }
 
+/**
+ * @brief Called by dimmBadDqBitmapAccessHwp() to query ATTR_SPD_BAD_DQ_DATA
+ *
+ *
+ * @param[in] i_mba             Reference to MBA Target.
+ * @param[in] i_dimm            Reference to DIMM Target.
+ * @param[o]  o_data            Reference to Bad DQ Bitmap set by this function
+ * @param[in] i_wiringData      Reference to Centaur DQ to DIMM Connector
+ *                              DQ Wiring attribute.
+ * @param[in] i_allMnfgFlags    Manufacturing flags bitmap
+ *
+ * @return ReturnCode
+ */
+
+fapi::ReturnCode dimmBadDqBitmapGet(
+    const fapi::Target & i_mba,
+    const fapi::Target & i_dimm,
+    uint8_t (&o_data)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE],
+    const uint8_t (&i_wiringData)[DIMM_DQ_NUM_DQS],
+    uint64_t i_allMnfgFlags)
+{
+    fapi::ReturnCode l_rc;
+
+    // DQ SPD Attribute
+    uint8_t (&l_spdData)[DIMM_DQ_SPD_DATA_SIZE] =
+        *(reinterpret_cast<uint8_t(*)[DIMM_DQ_SPD_DATA_SIZE]>
+            (new uint8_t[DIMM_DQ_SPD_DATA_SIZE]()));
+
+    // memset to avoid known syntax issue with previous compiler versions
+    // and ensure zero initialized array.
+    memset(l_spdData, 0, sizeof(l_spdData));
+
+    dimmBadDqDataFormat * l_pSpdData =
+        reinterpret_cast<dimmBadDqDataFormat *>(l_spdData);
+
+    // Pointer which will be used to initialize a clean bitmap during
+    // manufacturing mode
+    uint8_t (*l_pBuf)[DIMM_DQ_RANK_BITMAP_SIZE] = NULL;
+
+    do
+    {
+        // Get the SPD DQ attribute
+        l_rc = FAPI_ATTR_GET(ATTR_SPD_BAD_DQ_DATA, &i_dimm, l_spdData);
+
+        if (l_rc)
+        {
+            FAPI_ERR("dimmBadDqBitmapAccessHwp: Error getting SPD data");
+            break;
+        }
+        // Zero caller's data
+        memset(o_data, 0, sizeof(o_data));
+        // Check the magic number and version number. Note that the
+        // magic number is stored in SPD in big endian format and
+        // platforms of any endianness can access it
+        if ((FAPI_BE32TOH(l_pSpdData->iv_magicNumber) !=
+               DIMM_BAD_DQ_MAGIC_NUMBER) ||
+            (l_pSpdData->iv_version != DIMM_BAD_DQ_VERSION))
+        {
+            FAPI_INF("dimmBadDqBitmapAccessHwp: SPD DQ not initialized");
+        }
+        else
+        {
+            // Translate bitmap from DIMM DQ to Centaur DQ point of view
+            // for each rank
+            for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
+            {
+                // Iterate through all the DQ bits in the rank
+                for (uint8_t j = 0; j < DIMM_DQ_NUM_DQS; j++)
+                {
+                    // There is a byte for each 8 DQs, j/8 gives the
+                    // byte number. The MSB in each byte is the lowest
+                    // DQ, (0x80 >> (j % 8)) gives the bit mask
+                    // corresponding to the DQ within the byte
+                    if ((l_pSpdData->iv_bitmaps[i][j/8]) &
+                        (0x80 >> (j % 8)))
+                    {
+                        // DIMM DQ bit is set in SPD data.
+                        // Set Centaur DQ bit in caller's data.
+                        // The wiring data maps Centaur DQ to DIMM DQ
+                        // Find the Centaur DQ that maps to this DIMM DQ
+                        uint8_t k = 0;
+                        for (; k < DIMM_DQ_NUM_DQS; k++)
+                        {
+                            if (i_wiringData[k] == j)
+                            {
+                                o_data[i][k/8] |= (0x80 >> (k % 8));
+                                break;
+                            }
+                        }
+
+                        if (k == DIMM_DQ_NUM_DQS)
+                        {
+                            FAPI_INF("dimmBadDqBitmapAccessHwp: "
+                                     "Centaur DQ not found for %d!",j);
+                        }
+                    }
+                }
+            }
+        }
+        // Set bits for any unconnected DQs.
+        // First, check ECC.
+        l_rc = dimmUpdateDqBitmapEccByte(i_dimm, o_data);
+        if (l_rc)
+        {
+            FAPI_ERR("dimmBadDqBitmapAccessHwp: "
+                     "Error getting ECC data");
+            break;
+        }
+        // Check spare DRAM
+        l_rc = dimmUpdateDqBitmapSpareByte(i_mba, i_dimm, o_data);
+        if (l_rc)
+        {
+            FAPI_ERR("dimmBadDqBitmapAccessHwp: "
+                     "Error getting spare DRAM data");
+            break;
+        }
+        // If system is in DISABLE_DRAM_REPAIRS mode
+        if (i_allMnfgFlags &
+            fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS)
+        {
+            // Flag to set if the discrepancies (described below)
+            // are found
+            bool mfgModeBadBitsPresent = false;
+            // Create a local zero-initialized bad dq bitmap
+            l_pBuf = new uint8_t[DIMM_DQ_MAX_DIMM_RANKS]
+                                         [DIMM_DQ_RANK_BITMAP_SIZE]();
+            uint8_t (&l_data)[DIMM_DQ_MAX_DIMM_RANKS]
+                                 [DIMM_DQ_RANK_BITMAP_SIZE] =
+            *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS]
+                                 [DIMM_DQ_RANK_BITMAP_SIZE]>(l_pBuf));
+            // memset to avoid known syntax issue with previous
+            // compiler versions and ensure zero initialized array.
+            memset(l_data, 0, sizeof(l_data));
+
+            // Check ECC.
+            l_rc = dimmUpdateDqBitmapEccByte(i_dimm, l_data);
+            if (l_rc)
+            {
+                FAPI_ERR("dimmBadDqBitmapAccessHwp: "
+                         "Error getting ECC data (Mfg mode)");
+                break;
+            }
+            // Check spare DRAM
+            l_rc = dimmUpdateDqBitmapSpareByte(i_mba, i_dimm, l_data);
+            if (l_rc)
+            {
+                FAPI_ERR("dimmBadDqBitmapAccessHwp: "
+                         "Error getting spare DRAM data (Mfg mode)");
+                break;
+            }
+            // Compare l_data, which represents a bad dq bitmap with the
+            // appropriate spare/ECC bits set (if any) and all other DQ
+            // lines functional, to caller's o_data.
+            // If discrepancies are found, we know this is the result of
+            // a manufacturing mode process and these bits should not be
+            // recorded.
+            for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
+            {
+                for (uint8_t j = 0; j < (DIMM_DQ_RANK_BITMAP_SIZE); j++)
+                {
+                    if (o_data[i][j] != l_data[i][j])
+                    {
+                        o_data[i][j] = l_data[i][j];
+                        mfgModeBadBitsPresent = true;
+                    }
+                }
+            }
+            // Create and log fapi error if discrepancies were found
+            if (mfgModeBadBitsPresent)
+            {
+                // Get this DIMM's position
+                uint32_t l_dimmPos = 0;
+                l_rc = FAPI_ATTR_GET(ATTR_POS, &i_dimm, l_dimmPos);
+                if (l_rc)
+                {
+                    FAPI_ERR("dimmBadDqBitmapAccessHwp: "
+                             "Error getting DIMM position,"
+                             " reporting as 0xFFFFFFFF");
+                    l_dimmPos = 0xFFFFFFFF;
+                }
+                FAPI_ERR("dimmBadDqBitmapAccessHwp: Read requested while"
+                         " in DISABLE_DRAM_REPAIRS mode found"
+                         " extra bad bits set for DIMM: %d",
+                         l_dimmPos);
+                const fapi::Target & DIMM = i_dimm;
+                FAPI_SET_HWP_ERROR(l_rc,
+                    RC_BAD_DQ_MFG_MODE_BITS_FOUND_DURING_GET);
+                fapiLogError(l_rc);
+            }
+        }
+    } while(0);
+    delete [] &l_spdData;
+    delete [] l_pBuf;
+    return l_rc;
+}
+
+/**
+ * @brief Called by dimmBadDqBitmapAccessHwp() to set ATTR_SPD_BAD_DQ_DATA
+ * Also checks if a bad Dq bit is set by first calling dimmBadDqBitmapGet()
+ * and sets ATTR_RECONFIGURE_LOOP with the 'OR' of the current value and
+ * the fapi enum BAD_DQ_BIT_SET if appropriate
+ *
+ * @param[in] i_mba             Reference to MBA Target.
+ * @param[in] i_dimm            Reference to DIMM Target.
+ * @param[in] i_data            Reference to Bad DQ Bitmap set by the caller
+ * @param[in] i_wiringData      Reference to Centaur DQ to DIMM Connector
+ *                              DQ Wiring attribute.
+ * @param[in] i_allMnfgFlags    Manufacturing flags bitmap
+ *
+ * @return ReturnCode
+ */
+
+fapi::ReturnCode dimmBadDqBitmapSet(
+    const fapi::Target & i_mba,
+    const fapi::Target & i_dimm,
+    const uint8_t (&i_data)[DIMM_DQ_MAX_DIMM_RANKS][DIMM_DQ_RANK_BITMAP_SIZE],
+    const uint8_t (&i_wiringData)[DIMM_DQ_NUM_DQS],
+    uint64_t i_allMnfgFlags)
+{
+    fapi::ReturnCode l_rc;
+
+    // Read current BadDqBitmap into l_prev_data
+    uint8_t (l_prev_data)[DIMM_DQ_MAX_DIMM_RANKS]
+                         [DIMM_DQ_RANK_BITMAP_SIZE];
+    bool badDQSet = false;
+    dimmBadDqBitmapGet(i_mba, i_dimm, l_prev_data, i_wiringData,
+                       i_allMnfgFlags);
+
+    // Check if Bad DQ bit set
+    for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
+    {
+        for (uint8_t j = 0; j < (DIMM_DQ_RANK_BITMAP_SIZE); j++)
+        {
+            if (i_data[i][j] != l_prev_data[i][j])
+            {
+                badDQSet = true;
+                break;
+            }
+        }
+        if (badDQSet)
+        {
+            break;
+        }
+    }
+
+    // Set ATTR_RECONFIGURE_LOOP to indicate a bad DqBitMap was set
+    if (badDQSet)
+    {
+        FAPI_INF("dimmBadDqBitmapAccessHwp: Reconfigure needed, Bad DQ set");
+
+        fapi::ATTR_RECONFIGURE_LOOP_Type l_reconfigAttr = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_RECONFIGURE_LOOP, NULL, l_reconfigAttr);
+        if (l_rc)
+        {
+            FAPI_ERR("dimmBadDqBitmapAccessHwp: Error getting "
+                     "ATTR_RECONFIGURE_LOOP");
+            return l_rc;
+        }
+
+        // 'OR' values in case of multiple reasons for reconfigure
+        l_reconfigAttr |= fapi::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
+
+        l_rc = FAPI_ATTR_SET(ATTR_RECONFIGURE_LOOP, NULL, l_reconfigAttr);
+        if (l_rc)
+        {
+            FAPI_ERR("dimmBadDqBitmapAccessHwp: Error setting "
+                     "ATTR_RECONFIGURE_LOOP");
+            return l_rc;
+        }
+    }
+
+    // DQ SPD Attribute
+    uint8_t (&l_spdData)[DIMM_DQ_SPD_DATA_SIZE] =
+        *(reinterpret_cast<uint8_t(*)[DIMM_DQ_SPD_DATA_SIZE]>
+            (new uint8_t[DIMM_DQ_SPD_DATA_SIZE]()));
+
+    // memset to avoid known syntax issue with previous compiler versions
+    // and ensure zero initialized array.
+    memset(l_spdData, 0, sizeof(l_spdData));
+
+    dimmBadDqDataFormat * l_pSpdData =
+        reinterpret_cast<dimmBadDqDataFormat *>(l_spdData);
+
+    // Pointer which will be used to initialize a clean bitmap during
+    // manufacturing mode
+    uint8_t (*l_pBuf)[DIMM_DQ_RANK_BITMAP_SIZE] = NULL;
+
+    do
+    {
+        // If system is in DISABLE_DRAM_REPAIRS mode
+        if (i_allMnfgFlags &
+            fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS)
+        {
+            // Flag to set if the discrepancies (described below)
+            // are found
+            bool mfgModeBadBitsPresent = false;
+            // Create a local zero-initialized bad dq bitmap
+            l_pBuf = new uint8_t[DIMM_DQ_MAX_DIMM_RANKS]
+                                         [DIMM_DQ_RANK_BITMAP_SIZE]();
+            uint8_t (&l_data)[DIMM_DQ_MAX_DIMM_RANKS]
+                                 [DIMM_DQ_RANK_BITMAP_SIZE] =
+            *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS]
+                                 [DIMM_DQ_RANK_BITMAP_SIZE]>(l_pBuf));
+            // memset to avoid known syntax issue with previous
+            // compiler versions and ensure zero initialized array.
+            memset(l_data, 0, sizeof(l_data));
+
+            // Check ECC.
+            l_rc = dimmUpdateDqBitmapEccByte(i_dimm, l_data);
+            if (l_rc)
+            {
+                FAPI_ERR("dimmBadDqBitmapAccessHwp: "
+                         "Error getting ECC data (Mfg mode)");
+                break;
+            }
+            // Check spare DRAM
+            l_rc = dimmUpdateDqBitmapSpareByte(i_mba, i_dimm, l_data);
+            if (l_rc)
+            {
+                FAPI_ERR("dimmBadDqBitmapAccessHwp: "
+                         "Error getting spare DRAM data (Mfg mode)");
+                break;
+            }
+            // Compare l_data, which represents a bad dq bitmap with the
+            // appropriate spare/ECC bits set (if any) and all other DQ
+            // lines functional, to caller's i_data.
+            // If discrepancies are found, we know this is the result of
+            // a manufacturing mode process and these bits should not be
+            // recorded.
+            for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
+            {
+                for (uint8_t j = 0; j < (DIMM_DQ_RANK_BITMAP_SIZE); j++)
+                {
+                    if (i_data[i][j] != l_data[i][j])
+                    {
+                        mfgModeBadBitsPresent = true;
+                        break;
+                    }
+                }
+                // Break out of this section when first
+                // discrepancy is noticed
+                if (mfgModeBadBitsPresent)
+                {
+                    break;
+                }
+            }
+            // Create and log fapi error if discrepancies were found
+            if (mfgModeBadBitsPresent)
+            {
+                // Get this DIMM's position
+                uint32_t l_dimmPos = 0;
+                l_rc = FAPI_ATTR_GET(ATTR_POS, &i_dimm, l_dimmPos);
+                if (l_rc)
+                {
+                    FAPI_ERR("dimmBadDqBitmapAccessHwp: "
+                             "Error getting DIMM position,"
+                             " reporting as 0xFFFFFFFF");
+                    l_dimmPos = 0xFFFFFFFF;
+                }
+                FAPI_ERR("dimmBadDqBitmapAccessHwp: Write requested while"
+                         " in DISABLE_DRAM_REPAIRS mode found"
+                         " extra bad bits set for DIMM: %d",
+                         l_dimmPos);
+                const fapi::Target & DIMM = i_dimm;
+                FAPI_SET_HWP_ERROR(l_rc,
+                    RC_BAD_DQ_MFG_MODE_BITS_FOUND_DURING_SET);
+                fapiLogError(l_rc);
+            }
+            // Don't write bad dq bitmap,
+            // Break out of do {...} while(0)
+            break;
+        }
+
+        // Set up the data to write to SPD
+        l_pSpdData->iv_magicNumber = FAPI_HTOBE32(DIMM_BAD_DQ_MAGIC_NUMBER);
+        l_pSpdData->iv_version = DIMM_BAD_DQ_VERSION;
+        l_pSpdData->iv_reserved1 = 0;
+        l_pSpdData->iv_reserved2 = 0;
+        l_pSpdData->iv_reserved3 = 0;
+        memset(l_pSpdData->iv_bitmaps, 0, sizeof(l_pSpdData->iv_bitmaps));
+
+        // Translate bitmap from Centaur DQ to DIMM DQ point of view for
+        // each rank
+        for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
+        {
+            // Iterate through all the DQ bits in the rank
+            for (uint8_t j = 0; j < DIMM_DQ_NUM_DQS; j++)
+            {
+                if ((i_data[i][j/8]) & (0x80 >> (j % 8)))
+                {
+                    // Centaur DQ bit set in callers data.
+                    // Set DIMM DQ bit in SPD data.
+                    // The wiring data maps Centaur DQ to DIMM DQ
+                    uint8_t dBit = i_wiringData[j];
+                    l_pSpdData->iv_bitmaps[i][dBit/8] |=
+                        (0x80 >> (dBit % 8));
+                }
+            }
+        }
+
+        // Set the SPD DQ attribute
+        l_rc = FAPI_ATTR_SET(ATTR_SPD_BAD_DQ_DATA, &i_dimm, l_spdData);
+
+        if (l_rc)
+        {
+            FAPI_ERR("dimmBadDqBitmapAccessHwp: Error setting SPD data");
+            break;
+        }
+    } while(0);
+    delete [] &l_spdData;
+    delete [] l_pBuf;
+    return l_rc;
+}
+
 }
 
 extern "C"
@@ -244,22 +659,6 @@ fapi::ReturnCode dimmBadDqBitmapAccessHwp(
     // and ensure zero initialized array.
     memset(l_wiringData, 0, sizeof(l_wiringData));
 
-    // DQ SPD Attribute
-    uint8_t (&l_spdData)[DIMM_DQ_SPD_DATA_SIZE] =
-        *(reinterpret_cast<uint8_t(*)[DIMM_DQ_SPD_DATA_SIZE]>
-            (new uint8_t[DIMM_DQ_SPD_DATA_SIZE]()));
-
-    // memset to avoid known syntax issue with previous compiler versions
-    // and ensure zero initialized array.
-    memset(l_spdData, 0, sizeof(l_spdData));
-
-    dimmBadDqDataFormat * l_pSpdData =
-        reinterpret_cast<dimmBadDqDataFormat *>(l_spdData);
-
-    // Pointer which will be used to initialize a clean bitmap during
-    // manufacturing mode
-    uint8_t (*l_pBuf)[DIMM_DQ_RANK_BITMAP_SIZE] = NULL;
-
     do
     {
         // Manufacturing flags attribute
@@ -284,285 +683,21 @@ fapi::ReturnCode dimmBadDqBitmapAccessHwp(
                      "Error getting wiring attribute");
             break;
         }
+
         if (i_get)
         {
-            // Get the SPD DQ attribute
-            l_rc = FAPI_ATTR_GET(ATTR_SPD_BAD_DQ_DATA, &i_dimm, l_spdData);
-
-            if (l_rc)
-            {
-                FAPI_ERR("dimmBadDqBitmapAccessHwp: Error getting SPD data");
-                break;
-            }
-            // Zero caller's data
-            memset(io_data, 0, sizeof(io_data));
-            // Check the magic number and version number. Note that the
-            // magic number is stored in SPD in big endian format and
-            // platforms of any endianness can access it
-            if ((FAPI_BE32TOH(l_pSpdData->iv_magicNumber) !=
-                   DIMM_BAD_DQ_MAGIC_NUMBER) ||
-                (l_pSpdData->iv_version != DIMM_BAD_DQ_VERSION))
-            {
-                FAPI_INF("dimmBadDqBitmapAccessHwp: SPD DQ not initialized");
-            }
-            else
-            {
-                // Translate bitmap from DIMM DQ to Centaur DQ point of view
-                // for each rank
-                for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
-                {
-                    // Iterate through all the DQ bits in the rank
-                    for (uint8_t j = 0; j < DIMM_DQ_NUM_DQS; j++)
-                    {
-                        // There is a byte for each 8 DQs, j/8 gives the
-                        // byte number. The MSB in each byte is the lowest
-                        // DQ, (0x80 >> (j % 8)) gives the bit mask
-                        // corresponding to the DQ within the byte
-                        if ((l_pSpdData->iv_bitmaps[i][j/8]) &
-                            (0x80 >> (j % 8)))
-                        {
-                            // DIMM DQ bit is set in SPD data.
-                            // Set Centaur DQ bit in caller's data.
-                            // The wiring data maps Centaur DQ to DIMM DQ
-                            // Find the Centaur DQ that maps to this DIMM DQ
-                            uint8_t k = 0;
-                            for (; k < DIMM_DQ_NUM_DQS; k++)
-                            {
-                                if (l_wiringData[k] == j)
-                                {
-                                    io_data[i][k/8] |= (0x80 >> (k % 8));
-                                    break;
-                                }
-                            }
-
-                            if (k == DIMM_DQ_NUM_DQS)
-                            {
-                                FAPI_INF("dimmBadDqBitmapAccessHwp: "
-                                         "Centaur DQ not found for %d!",j);
-                            }
-                        }
-                    }
-                }
-            }
-            // Set bits for any unconnected DQs.
-            // First, check ECC.
-            l_rc = dimmUpdateDqBitmapEccByte(i_dimm, io_data);
-            if (l_rc)
-            {
-                FAPI_ERR("dimmBadDqBitmapAccessHwp: "
-                         "Error getting ECC data");
-                break;
-            }
-            // Check spare DRAM
-            l_rc = dimmUpdateDqBitmapSpareByte(i_mba, i_dimm, io_data);
-            if (l_rc)
-            {
-                FAPI_ERR("dimmBadDqBitmapAccessHwp: "
-                         "Error getting spare DRAM data");
-                break;
-            }
-            // If system is in DISABLE_DRAM_REPAIRS mode
-            if (l_allMnfgFlags &
-                fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS)
-            {
-                // Flag to set if the discrepancies (described below)
-                // are found
-                bool mfgModeBadBitsPresent = false;
-                // Create a local zero-initialized bad dq bitmap
-                l_pBuf = new uint8_t[DIMM_DQ_MAX_DIMM_RANKS]
-                                             [DIMM_DQ_RANK_BITMAP_SIZE]();
-                uint8_t (&l_data)[DIMM_DQ_MAX_DIMM_RANKS]
-                                     [DIMM_DQ_RANK_BITMAP_SIZE] =
-                *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS]
-                                     [DIMM_DQ_RANK_BITMAP_SIZE]>(l_pBuf));
-                // memset to avoid known syntax issue with previous
-                // compiler versions and ensure zero initialized array.
-                memset(l_data, 0, sizeof(l_data));
-
-                // Check ECC.
-                l_rc = dimmUpdateDqBitmapEccByte(i_dimm, l_data);
-                if (l_rc)
-                {
-                    FAPI_ERR("dimmBadDqBitmapAccessHwp: "
-                             "Error getting ECC data (Mfg mode)");
-                    break;
-                }
-                // Check spare DRAM
-                l_rc = dimmUpdateDqBitmapSpareByte(i_mba, i_dimm, l_data);
-                if (l_rc)
-                {
-                    FAPI_ERR("dimmBadDqBitmapAccessHwp: "
-                             "Error getting spare DRAM data (Mfg mode)");
-                    break;
-                }
-                // Compare l_data, which represents a bad dq bitmap with the
-                // appropriate spare/ECC bits set (if any) and all other DQ
-                // lines functional, to caller's io_data.
-                // If discrepancies are found, we know this is the result of
-                // a manufacturing mode process and these bits should not be
-                // recorded.
-                for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
-                {
-                    for (uint8_t j = 0; j < (DIMM_DQ_RANK_BITMAP_SIZE); j++)
-                    {
-                        if (io_data[i][j] != l_data[i][j])
-                        {
-                            io_data[i][j] = l_data[i][j];
-                            mfgModeBadBitsPresent = true;
-                        }
-                    }
-                }
-                // Create and log fapi error if discrepancies were found
-                if (mfgModeBadBitsPresent)
-                {
-                    // Get this DIMM's position
-                    uint32_t l_dimmPos = 0;
-                    l_rc = FAPI_ATTR_GET(ATTR_POS, &i_dimm, l_dimmPos);
-                    if (l_rc)
-                    {
-                        FAPI_ERR("dimmBadDqBitmapAccessHwp: "
-                                 "Error getting DIMM position,"
-                                 " reporting as 0xFFFFFFFF");
-                        l_dimmPos = 0xFFFFFFFF;
-                    }
-                    FAPI_ERR("dimmBadDqBitmapAccessHwp: Read requested while"
-                             " in DISABLE_DRAM_REPAIRS mode found"
-                             " extra bad bits set for DIMM: %d",
-                             l_dimmPos);
-                    const fapi::Target & DIMM = i_dimm;
-                    FAPI_SET_HWP_ERROR(l_rc,
-                        RC_BAD_DQ_MFG_MODE_BITS_FOUND_DURING_GET);
-                    fapiLogError(l_rc);
-                }
-            }
-        }// Get
+            dimmBadDqBitmapGet(i_mba, i_dimm, io_data, l_wiringData,
+                               l_allMnfgFlags);
+        }
         else
         {
-            // If system is in DISABLE_DRAM_REPAIRS mode
-            if (l_allMnfgFlags &
-                fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS)
-            {
-                // Flag to set if the discrepancies (described below)
-                // are found
-                bool mfgModeBadBitsPresent = false;
-                // Create a local zero-initialized bad dq bitmap
-                l_pBuf = new uint8_t[DIMM_DQ_MAX_DIMM_RANKS]
-                                             [DIMM_DQ_RANK_BITMAP_SIZE]();
-                uint8_t (&l_data)[DIMM_DQ_MAX_DIMM_RANKS]
-                                     [DIMM_DQ_RANK_BITMAP_SIZE] =
-                *(reinterpret_cast<uint8_t(*)[DIMM_DQ_MAX_DIMM_RANKS]
-                                     [DIMM_DQ_RANK_BITMAP_SIZE]>(l_pBuf));
-                // memset to avoid known syntax issue with previous
-                // compiler versions and ensure zero initialized array.
-                memset(l_data, 0, sizeof(l_data));
+            dimmBadDqBitmapSet(i_mba, i_dimm, io_data, l_wiringData,
+                               l_allMnfgFlags);
+        }
 
-                // Check ECC.
-                l_rc = dimmUpdateDqBitmapEccByte(i_dimm, l_data);
-                if (l_rc)
-                {
-                    FAPI_ERR("dimmBadDqBitmapAccessHwp: "
-                             "Error getting ECC data (Mfg mode)");
-                    break;
-                }
-                // Check spare DRAM
-                l_rc = dimmUpdateDqBitmapSpareByte(i_mba, i_dimm, l_data);
-                if (l_rc)
-                {
-                    FAPI_ERR("dimmBadDqBitmapAccessHwp: "
-                             "Error getting spare DRAM data (Mfg mode)");
-                    break;
-                }
-                // Compare l_data, which represents a bad dq bitmap with the
-                // appropriate spare/ECC bits set (if any) and all other DQ
-                // lines functional, to caller's io_data.
-                // If discrepancies are found, we know this is the result of
-                // a manufacturing mode process and these bits should not be
-                // recorded.
-                for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
-                {
-                    for (uint8_t j = 0; j < (DIMM_DQ_RANK_BITMAP_SIZE); j++)
-                    {
-                        if (io_data[i][j] != l_data[i][j])
-                        {
-                            mfgModeBadBitsPresent = true;
-                            break;
-                        }
-                    }
-                    // Break out of this section when first
-                    // discrepancy is noticed
-                    if (mfgModeBadBitsPresent)
-                    {
-                        break;
-                    }
-                }
-                // Create and log fapi error if discrepancies were found
-                if (mfgModeBadBitsPresent)
-                {
-                    // Get this DIMM's position
-                    uint32_t l_dimmPos = 0;
-                    l_rc = FAPI_ATTR_GET(ATTR_POS, &i_dimm, l_dimmPos);
-                    if (l_rc)
-                    {
-                        FAPI_ERR("dimmBadDqBitmapAccessHwp: "
-                                 "Error getting DIMM position,"
-                                 " reporting as 0xFFFFFFFF");
-                        l_dimmPos = 0xFFFFFFFF;
-                    }
-                    FAPI_ERR("dimmBadDqBitmapAccessHwp: Write requested while"
-                             " in DISABLE_DRAM_REPAIRS mode found"
-                             " extra bad bits set for DIMM: %d",
-                             l_dimmPos);
-                    const fapi::Target & DIMM = i_dimm;
-                    FAPI_SET_HWP_ERROR(l_rc,
-                        RC_BAD_DQ_MFG_MODE_BITS_FOUND_DURING_SET);
-                    fapiLogError(l_rc);
-                }
-                // Don't write bad dq bitmap,
-                // Break out of do {...} while(0)
-                break;
-            }
-
-            // Set up the data to write to SPD
-            l_pSpdData->iv_magicNumber = FAPI_HTOBE32(DIMM_BAD_DQ_MAGIC_NUMBER);
-            l_pSpdData->iv_version = DIMM_BAD_DQ_VERSION;
-            l_pSpdData->iv_reserved1 = 0;
-            l_pSpdData->iv_reserved2 = 0;
-            l_pSpdData->iv_reserved3 = 0;
-            memset(l_pSpdData->iv_bitmaps, 0, sizeof(l_pSpdData->iv_bitmaps));
-
-            // Translate bitmap from Centaur DQ to DIMM DQ point of view for
-            // each rank
-            for (uint8_t i = 0; i < DIMM_DQ_MAX_DIMM_RANKS; i++)
-            {
-                // Iterate through all the DQ bits in the rank
-                for (uint8_t j = 0; j < DIMM_DQ_NUM_DQS; j++)
-                {
-                    if ((io_data[i][j/8]) & (0x80 >> (j % 8)))
-                    {
-                        // Centaur DQ bit set in callers data.
-                        // Set DIMM DQ bit in SPD data.
-                        // The wiring data maps Centaur DQ to DIMM DQ
-                        uint8_t dBit = l_wiringData[j];
-                        l_pSpdData->iv_bitmaps[i][dBit/8] |=
-                            (0x80 >> (dBit % 8));
-                    }
-                }
-            }
-
-            // Set the SPD DQ attribute
-            l_rc = FAPI_ATTR_SET(ATTR_SPD_BAD_DQ_DATA, &i_dimm, l_spdData);
-
-            if (l_rc)
-            {
-                FAPI_ERR("dimmBadDqBitmapAccessHwp: Error setting SPD data");
-                break;
-            }
-        }// Set
     }while(0);
 
     delete [] &l_wiringData;
-    delete [] &l_spdData;
-    delete [] l_pBuf;
     FAPI_INF("<<dimmBadDqBitmapAccessHwp");
     return l_rc;
 }

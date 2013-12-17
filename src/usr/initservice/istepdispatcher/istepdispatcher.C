@@ -257,7 +257,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
     errlHndl_t err = NULL;
     uint32_t istep = 0;
     uint32_t substep = 0;
-    bool l_deconfigs = false;
+    bool l_doReconfig = false;
     uint32_t numReconfigs = 0;
     const uint32_t MAX_NUM_RECONFIG_ATTEMPTS = 30;
 
@@ -268,10 +268,10 @@ errlHndl_t IStepDispatcher::executeAllISteps()
         substep = 0;
         while (substep < g_isteps[istep].numitems)
         {
-            err = doIstep(istep, substep, l_deconfigs);
+            err = doIstep(istep, substep, l_doReconfig);
 
-            // there were HW deconfigures that happened during the istep
-            if (l_deconfigs)
+            // Something occurred that requires a reconfig loop
+            if (l_doReconfig)
             {
                 TRACFCOMP(g_trac_initsvc,
                     ERR_MRK"executeAllISteps: Deconfigure(s) during IStep %d:%d",
@@ -402,10 +402,10 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 // ----------------------------------------------------------------------------
 errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                                     uint32_t i_substep,
-                                    bool & o_deconfigs)
+                                    bool & o_doReconfig)
 {
     errlHndl_t err = NULL;
-    o_deconfigs = false;
+    o_doReconfig = false;
 
     // Get the Task Info for this step
     const TaskInfo * theStep = findTaskInfo(i_istep, i_substep);
@@ -463,7 +463,10 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             iv_istepModulesLoaded = i_istep;
         }
 
-        uint32_t preDeconfigs = HWAS::theDeconfigGard().getDeconfigureStatus();
+        // Zero ATTR_RECONFIGURE_LOOP
+        TARGETING::Target* l_pTopLevel = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+        l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(0);
 
         err = InitService::getTheInstance().executeFn(theStep, NULL);
 
@@ -526,13 +529,13 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             HWAS::theDeconfigGard().processDeferredDeconfig();
         }
 
-        uint32_t postDeconfigs = HWAS::theDeconfigGard().getDeconfigureStatus();
-
-        if (postDeconfigs != preDeconfigs)
+        // Check if ATTR_RECONFIGURE_LOOP is non-zero
+        TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr = l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+        if (l_reconfigAttr)
         {
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Deconfigs happened, pre:%d, post:%d",
-                      preDeconfigs, postDeconfigs);
-            o_deconfigs = true;
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Reconfigure needed, ATTR_RECONFIGURE_LOOP = %d",
+                      l_reconfigAttr);
+            o_doReconfig = true;
         }
 
         TRACFCOMP(g_trac_initsvc, EXIT_MRK"doIstep: step %d, substep %d",
@@ -1081,7 +1084,7 @@ void IStepDispatcher::iStepBreakPoint(uint32_t i_info)
 void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 {
     errlHndl_t err = NULL;
-    bool l_deconfigs = false;
+    bool l_doReconfig = false;
 
     // find the step/substep. The step is in the top 32bits, the substep is in
     // the bottom 32bits and is a byte
@@ -1101,10 +1104,11 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
     io_pMsg = NULL;
     mutex_unlock(&iv_mutex);
 
-    err = doIstep (istep, substep, l_deconfigs);
+    err = doIstep (istep, substep, l_doReconfig);
 
-    // If there was no IStep error, but there were deconfig(s)
-    if ((!err) && l_deconfigs)
+    // If there was no IStep error, but something happened that requires a
+    // reconfigure
+    if ((!err) && l_doReconfig)
     {
         uint8_t newIstep = 0;
         uint8_t newSubstep = 0;

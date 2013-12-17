@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -248,7 +248,7 @@
     <valueType>uint32</valueType>
     <enum>
         RL0 = 0x000,
-        RL100 = 0x100  
+        RL100 = 0x100
     </enum>
     <platInit/>
   </attribute>
@@ -285,6 +285,21 @@
         PCI_REFCLK = 0x1
     </enum>
     <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_RECONFIGURE_LOOP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Used to inidicate if a reconfigure loop is needed
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        DECONFIGURE      = 0x1,
+        BAD_DQ_BIT_SET   = 0x2
+    </enum>
+    <platInit/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>

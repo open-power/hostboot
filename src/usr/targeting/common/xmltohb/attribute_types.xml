@@ -12872,4 +12872,42 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>RECONFIGURE_LOOP</id>
+    <description>
+        Used to inidicate if a reconfigure loop is needed.
+        Hostboot clears and sets this during istep dispatching.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_RECONFIGURE_LOOP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>RECONFIGURE_LOOP</id>
+    <description>Enumeration of RECONFIGURE_LOOP flags</description>
+    <!-- add enumerators (single bits) for anything that needs a reconfigure loop -->
+    <enumerator>
+        <description>
+            Indicates HW has been deconfigured
+        </description>
+        <name>DECONFIGURE</name>
+        <value>0x01</value>
+    </enumerator>
+    <enumerator>
+        <description>
+            Indicates a bad DQ bit was set in the BadDqBitmap
+        </description>
+        <name>BAD_DQ_BIT_SET</name>
+        <value>0x02</value>
+    </enumerator>
+</enumerationType>
+
 </attributes>

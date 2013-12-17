@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -116,8 +116,7 @@ DeconfigGard & theDeconfigGard()
 //******************************************************************************
 DeconfigGard::DeconfigGard()
 : iv_platDeconfigGard(NULL),
-  iv_XABusEndpointDeconfigured(false),
-  iv_deconfigCount(0)
+  iv_XABusEndpointDeconfigured(false)
 {
     HWAS_DBG("DeconfigGard Constructor");
     HWAS_MUTEX_INIT(iv_mutex);
@@ -1286,15 +1285,6 @@ void DeconfigGard::_deconfigureByAssoc(Target & i_target,
 } // _deconfigByAssoc
 
 //******************************************************************************
-uint32_t DeconfigGard::getDeconfigureStatus() const
-{
-    // no lock needed - just return the value.
-    uint32_t l_deconfigCount = iv_deconfigCount;
-    HWAS_DBG("getDeconfigureStatus returning %u", l_deconfigCount);
-    return l_deconfigCount;
-}
-
-//******************************************************************************
 void DeconfigGard::_deconfigureTarget(Target & i_target,
                                       const uint32_t i_errlEid)
 {
@@ -1324,8 +1314,15 @@ void DeconfigGard::_deconfigureTarget(Target & i_target,
         // if this is a real error, deconfigure
         if (i_errlEid & DECONFIGURED_BY_PLID_MASK)
         {
-            // increment the counter
-            iv_deconfigCount++;
+            // Set RECONFIGURE_LOOP attribute to indicate it was caused by
+            // a hw deconfigure
+            TARGETING::Target* l_pTopLevel = NULL;
+            TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+            TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+                    l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
+            // 'OR' values in case of multiple reasons for reconfigure
+            l_reconfigAttr |= TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
+            l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
         }
 
         // Do any necessary Deconfigure Actions

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -228,18 +228,6 @@ public:
                                  bool i_evenAtRunTime = false);
 
     /**
-     * @brief Get the Deconfigure Status
-     *
-     * This function returns a uint32_t counter that can be used to indicate
-     * whether Targets have been deconfigured. The counter wraps, so the user
-     * should just check for != to determine if a deconfigure has happened
-     * since the last time this was called.
-     *
-     * @return uint32_t 'counter' of deconfigure events
-     */
-    uint32_t getDeconfigureStatus() const;
-
-    /**
      * @brief Registers a Deferred Deconfigure
      *
      * Called from errludcallout, which is called
@@ -362,7 +350,6 @@ private:
      */
     static const uint8_t NUM_A_BUSES = 3; // Max number of ABus links
     static const uint8_t NUM_X_BUSES = 4; // Max number of XBus links
-
 
     /**
      * @brief  Struct representing a particular processor.  Used by
@@ -570,8 +557,6 @@ private:
      */
     bool iv_XABusEndpointDeconfigured;
 
-    // counter, used to tell if there were deconfigure 'events'.
-    uint32_t iv_deconfigCount;
 
 }; // DeconfigGard
 HWAS_DECLARE_SINGLETON(HWAS::DeconfigGard,theDeconfigGardSingleton);

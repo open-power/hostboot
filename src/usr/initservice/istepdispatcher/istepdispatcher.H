@@ -193,15 +193,14 @@ private:
     /**
      * @brief Executes the given istep
      *
-     * @param[in]  i_istep     The istep to be executed.
-     * @param[in]  i_substep   The substep to be executed.
-     * @param[out] o_deconfigs If error returned then true if HW was
-     *                         deconfigured during the istep
-     * @return errlHndl_t
+     * @param[in]  i_istep      The istep to be executed.
+     * @param[in]  i_substep    The substep to be executed.
+     * @param[out] o_doReconfig True if something ocurred that requires a
+     *                          reconfigure, false otherwise
      */
     errlHndl_t doIstep(uint32_t i_istep,
                        uint32_t i_substep,
-                       bool & o_deconfigs);
+                       bool & o_doReconfig);
 
     /**
      * @brief Handles all messages from the FSP or SPless user console
