@@ -66,8 +66,7 @@
 /**
  * @brief Commit the log
  */
-// FIXME:RTC: 65609 will address this issue.
-// hberr does not use i_actions for commit
+// NOTE: Hostboot error log commit function does not need the action flag
 #define PRDF_COMMIT_ERRL(io_errl, i_actions) \
     if(i_actions) {} \
     errlCommit(io_errl, PRDF_COMP_ID)
@@ -89,16 +88,8 @@
  * @brief Adds a software section to the log
  * mostly used as a stack call indicator
  */
-// FIXME:RTC: 65609 will address this issue.
-// hberrl hasn't added this in yet so make it a no-op for now
+// NOTE: hberrl doesn't support this so make it a no-op.
 #define PRDF_ADD_SW_ERR(io_errl, i_rc, i_fileId, i_codeloc)
-
-/**
- * @brief Set the platform Log Id
- */
-// FIXME:RTC: 65609 will address this issue.
-// hberrl doesn't have this setter method so make it a no-op for now
-#define PRDF_SET_PLID(io_errl, i_plid)
 
 /**
  * @brief Get the platform Log Id
@@ -109,16 +100,14 @@
 /**
  * @brief Set 32 bit user defined return code
  */
-// FIXME:RTC: 65609 will address this issue.
-// hberrl doesn't have this setter method so make it a no-op for now
+// NOTE: hberrl doesn't support this so make it a no-op.
 #define PRDF_SET_RC(io_errl, i_rc)
 
 /**
  * @brief Get 32 bit user defined return code
  */
-// FIXME:RTC: 65609 will address this issue.
-// hberrl doesn't have this setter method so make it a no-op for now
-#define PRDF_GET_RC(io_errl, o_rc)
+// NOTE: hberrl doesn't support this so make it a no-op.
+#define PRDF_GET_RC(io_errl, i_rc)
 
 /**
  * @brief Get reason code
@@ -127,26 +116,15 @@
     o_reasonCode = io_errl->reasonCode()
 
 /**
- * @brief get previously stored SRC
- *        A special index ( 0 ) is used to a
- *        ccess the primary src.
- */
-// FIXME:RTC: 65609 will address this issue.
-// hberrl doesn't have this setter method so make it a no-op for now
-#define PRDF_GET_SRC(io_errl, o_src, i_idx)
-
-/**
  * @brief Determine if the src is terminating
  */
-// FIXME:RTC: 65609 will address this issue.
-// hberrl doesn't have this setter method so make it a no-op for now
+// NOTE: hberrl doesn't support this so make it a no-op.
 #define PRDF_GET_TERM_SRC(io_errl, o_termSRC)
 
 /**
  * @brief write SRC termination flag
  */
-// FIXME:RTC: 65609 will address this issue.
-// hberrl doesn't have this setter method so make it a no-op for now
+// NOTE: hberrl doesn't support this so make it a no-op.
 #define PRDF_SRC_WRITE_TERM_STATE_ON(io_errl, i_flags)
 
 // end Singleton macros
@@ -154,12 +132,6 @@
 /*--------------------------------------------------------------------*/
 /*  HW Deconfig Errl macros for Hostboot                              */
 /*--------------------------------------------------------------------*/
-
-// FIXME:RTC: 65609 will address this issue.
-// defines for enums that are not available in hostboot
-// these ERRL sevs are currently not supported in HB
-#define ERRL_SEV_PREDICTIVE          ERRL_SEV_UNRECOVERABLE
-#define ERRL_SEV_RECOVERED           ERRL_SEV_INFORMATIONAL
 
 /**
  * @brief function to create an error log.
