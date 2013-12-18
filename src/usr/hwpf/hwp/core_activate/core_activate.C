@@ -34,6 +34,7 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
+#include    <errno.h>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -71,6 +72,7 @@
 #include    "proc_switch_rec_attn.H"
 #include    "cen_switch_rec_attn.H"
 #include    "proc_post_winkle.H"
+#include    "proc_check_slw_done.H"
 
 namespace   CORE_ACTIVATE
 {
@@ -279,6 +281,44 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 
             int rc = cpu_start_core(pir,en_threads);
 
+            // Handle time out error
+            if (ETIME == rc)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "call_host_activate_slave_cores: "
+                           "Time out rc from kernel %d on core %x",
+                           rc,
+                           pir);
+
+                // Get core's FAPI target
+                const fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
+                        (const_cast<TARGETING::Target*> (*l_core)) );
+
+                // TODO: It's safe to send in NULL for i_good_halt_address for now
+                // Greg Still will work on storing this address by attribute and use
+                // within the procedure.
+                FAPI_INVOKE_HWP( l_errl, proc_check_slw_done,
+                                 l_fapi_ex_target, NULL);
+                if (l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR : proc_check_slw_done" );
+                    // Add chip target info
+                    ErrlUserDetailsTarget(l_processor).addToLog( l_errl );
+                    // Create IStep error log
+                    l_stepError.addErrorDetails(l_errl);
+                    // Commit error
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS : proc_check_slw_done - SLW is in clean state");
+                }
+            }
+
+            // Create error log
             if (0 != rc)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

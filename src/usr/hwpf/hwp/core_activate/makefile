@@ -49,6 +49,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_post_winkle
 ##  "utility" library
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/switch_rec_attn
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_check_slw_done
+
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  core_activate.o \
@@ -57,7 +59,9 @@ OBJS =  core_activate.o \
         proc_switch_cfsim.o         \
         proc_switch_rec_attn.o      \
         cen_switch_rec_attn.o       \
-        proc_post_winkle.o
+        proc_post_winkle.o          \
+        proc_check_slw_done.o
+
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
@@ -68,6 +72,8 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_stop_deadman_timer
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_switch_cfsim
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/switch_rec_attn
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_post_winkle
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_check_slw_done
+
 
 include ${ROOTPATH}/config.mk
 
