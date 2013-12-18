@@ -32,7 +32,8 @@ PRDF_RULE_PLUGINS_PEGASUS = \
     prdfPlatCenMba.o \
     prdfCenMembuf.o \
     prdfP8TodPlugins.o \
-    prdfCenPll.o
+    prdfCenPll.o \
+    prdfPlatP8Proc.o
 
 # Object files for PRDF rule plugins, but include sim extensions.
 PRDF_RULE_PLUGINS_PEGASUS_WSIM = \
