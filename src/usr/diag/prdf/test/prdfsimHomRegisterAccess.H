@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -63,12 +63,12 @@ class SimScomAccessor : public ScomAccessor
      @param BIT_STRING_CLASS - holds data read or to write
      @param register address
      @param [READ|WRITE]
-     @returns [SUCCESS|FAIL]
+     @returns NULL if success, valid error handle otherwise
      @pre bs.Length() must be size of register data to read/write
      @post For read operation, bs is modified to reflect hardware register state
      @note
      */
-    virtual uint32_t Access(TARGETING::TargetHandle_t i_target,
+    virtual errlHndl_t Access(TARGETING::TargetHandle_t i_target,
                             BIT_STRING_CLASS & bs,
                             uint64_t registerId,
                             MopRegisterAccess::Operation operation) const;

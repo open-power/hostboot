@@ -60,6 +60,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ibscom
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 

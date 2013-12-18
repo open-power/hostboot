@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,13 +38,13 @@ SimScomAccessor::~SimScomAccessor()
 
 }
 
-uint32_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
+errlHndl_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                                      BIT_STRING_CLASS & bs,
                                      uint64_t registerId,
                                      MopRegisterAccess::Operation operation) const
 {
     PRDF_DENTER("SimScomAccessor::Access()");
-    uint32_t rc = SUCCESS;
+    errlHndl_t errlH = NULL;
     ScrDB::SimOp l_op = ScrDB::MAX_OP;
 
     do
@@ -65,7 +65,7 @@ uint32_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
 
     PRDF_DEXIT("SimScomAccessor::Access()");
 
-    return rc;
+    return errlH;
 }
 
 } // End namespace PRDF

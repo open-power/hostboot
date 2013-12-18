@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -60,20 +60,20 @@ class ScomAccessor
     inline virtual ~ScomAccessor() {}
 
     /**
-     Access the scan com register
-     @param i_target Target to access the register
-     @param BIT_STRING_CLASS - holds data read or to write
-     @param register address
-     @param [READ|WRITE]
-     @returns [SUCCESS|FAIL]
-     @pre bs.Length() must be size of register data to read/write
-     @post For read operation, bs is modified to reflect hardware register state
-     @note
+     * @brief Access the scan com register
+     * @param i_target    Target to access the register
+     * @param bs holds    data read or to write
+     * @param registerId  register address
+     * @param operation   [READ|WRITE]
+     * @returns NULL if Success, valid error handle otherwise.
+     * @pre bs.Length() must be size of register data to read/write
+     * @post For read operation, bs is modified to reflect hardware
+     *       register state
      */
-    virtual uint32_t Access(TARGETING::TargetHandle_t i_target,
-                            BIT_STRING_CLASS & bs,
-                            uint64_t registerId,
-                            MopRegisterAccess::Operation operation) const;
+    virtual errlHndl_t  Access( TARGETING::TargetHandle_t i_target,
+                                BIT_STRING_CLASS & bs,
+                                uint64_t registerId,
+                                MopRegisterAccess::Operation operation) const;
 
   private:
 

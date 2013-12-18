@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -32,6 +32,7 @@
 
 #ifdef __HOSTBOOT_MODULE
   #include <ecmdDataBufferBase.H>
+  #include <ibscomreasoncodes.H>
 #else
   #include <ecmdDataBuffer.H>
   #include <hwsvExecutionService.H>
@@ -118,11 +119,46 @@ uint32_t ScomService::Access(TARGETING::TargetHandle_t i_target,
                                  MopRegisterAccess::Operation operation) const
 {
     PRDF_DENTER("ScomService::Access()");
+    int32_t rc = SUCCESS;
 
-    uint32_t rc = iv_ScomAccessor->Access(i_target,
+    errlHndl_t errlH = iv_ScomAccessor->Access( i_target,
                                           bs,
                                           registerId,
                                           operation);
+    #ifdef __HOSTBOOT_MODULE
+    if( ( NULL != errlH ) && ( MopRegisterAccess::READ == operation )
+        && ( IBSCOM::IBSCOM_BUS_FAILURE == errlH->reasonCode() ))
+    {
+        PRDF_COMMIT_ERRL(errlH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
+        PRDF_INF( "Register access failed with reason code IBSCOM_BUS_FAILURE."
+                  " Trying again, Target HUID:0x%08X Register 0x%016X Op:%u",
+                  PlatServices::getHuid( i_target), registerId, operation );
+
+        errlH = iv_ScomAccessor->Access( i_target,
+                                         bs,
+                                         registerId,
+                                         operation);
+    }
+    #endif
+
+    if(errlH)
+    {
+        rc = PRD_SCANCOM_FAILURE;
+        PRDF_ADD_SW_ERR(errlH, rc, PRDF_HOM_SCOM, __LINE__);
+        PRDF_ADD_PROCEDURE_CALLOUT(errlH, SRCI_PRIORITY_MED, EPUB_PRC_SP_CODE);
+
+        bool l_isAbort = false;
+        PRDF_ABORTING(l_isAbort);
+        if (!l_isAbort)
+        {
+            PRDF_COMMIT_ERRL(errlH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
+        }
+        else
+        {
+            delete errlH;
+            errlH = NULL;
+        }
+    }
 
     PRDF_DEXIT("ScomService::Access(): rc=%d", rc);
 
@@ -130,14 +166,13 @@ uint32_t ScomService::Access(TARGETING::TargetHandle_t i_target,
 }
 
 
-uint32_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
+errlHndl_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                                   BIT_STRING_CLASS & bs,
                                   uint64_t registerId,
                                   MopRegisterAccess::Operation operation) const
 {
     PRDF_DENTER("ScomAccessor::Access()");
 
-    uint32_t rc = SUCCESS;
     errlHndl_t errH = NULL;
     uint32_t bsize = bs.GetLength();
 
@@ -224,28 +259,9 @@ uint32_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                          );
     }
 
-    if(errH)
-    {
-        rc = PRD_SCANCOM_FAILURE;
-        PRDF_ADD_SW_ERR(errH, rc, PRDF_HOM_SCOM, __LINE__);
-        PRDF_ADD_PROCEDURE_CALLOUT(errH, SRCI_PRIORITY_MED, EPUB_PRC_SP_CODE);
+    PRDF_DEXIT("ScomAccessor::Access()");
 
-        bool l_isAbort = false;
-        PRDF_ABORTING(l_isAbort);
-        if (!l_isAbort)
-        {
-            PRDF_COMMIT_ERRL(errH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
-        }
-        else
-        {
-            delete errH;
-            errH = NULL;
-        }
-    }
-
-    PRDF_DEXIT("ScomAccessor::Access(): rc=%d", rc);
-
-    return rc;
+    return errH;
 }
 
 //------------------------------------------------------------------------------
