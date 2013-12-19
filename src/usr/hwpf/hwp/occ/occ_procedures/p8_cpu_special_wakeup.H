@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_cpu_special_wakeup.H,v 1.6 2013/08/02 18:59:22 stillgs Exp $
+// $Id: p8_cpu_special_wakeup.H,v 1.7 2013/12/11 20:39:04 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_cpu_special_wakeup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -96,7 +96,7 @@ extern "C" {
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
-/// \param[in] i_target EX target
+/// \param[in] i_ex_target EX target
 /// \param[in] i_entity   Entity bit to use (OCC, PHYP, FSP)
 /// \param[in] i_operation   operation to use (SPCWKUP_ENABLE, SPCWKUP_DISABLE)
 
@@ -104,7 +104,7 @@ extern "C" {
 /// \retval ECMD_SUCCESS if something good happens,
 /// \retval BAD_RETURN_CODE otherwise
 fapi::ReturnCode 
-p8_cpu_special_wakeup(  const fapi::Target& i_target, 
+p8_cpu_special_wakeup(  const fapi::Target& i_ex_target, 
                         PROC_SPCWKUP_OPS i_operation , 
                         PROC_SPCWKUP_ENTITY i_entity );
 
