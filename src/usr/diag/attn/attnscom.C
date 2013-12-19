@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/diag/attn/attnscom.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/attn/attnscom.C $                                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file attnscom.C
  *
@@ -30,6 +29,7 @@
 #include "attnscom.H"
 #include "attntrace.H"
 #include <devicefw/userif.H>
+#include <ibscom/ibscomreasoncodes.H>
 
 using namespace TARGETING;
 using namespace DeviceFW;
@@ -101,7 +101,21 @@ errlHndl_t ScomImpl::putScom(
 {
     size_t size = sizeof(i_data);
 
-    return deviceWrite(i_target, &i_data, size, DEVICE_SCOM_ADDRESS(i_address));
+    errlHndl_t errlH =
+          deviceWrite(i_target, &i_data, size, DEVICE_SCOM_ADDRESS(i_address));
+
+    if( ( NULL != errlH ) &&
+        ( IBSCOM::IBSCOM_BUS_FAILURE ) == errlH->reasonCode() )
+    {
+        errlCommit( errlH, ATTN_COMP_ID );
+        ATTN_DBG( "deviceWrite() failed with reason code IBSCOM_BUS_FAILURE."
+                  " Trying again, Target HUID:0x%08X Register 0x%016X",
+                  get_huid( i_target), i_address );
+
+        errlH = deviceWrite( i_target, &i_data,
+                             size, DEVICE_SCOM_ADDRESS(i_address));
+    }
+    return errlH;
 }
 
 errlHndl_t ScomImpl::getScom(
@@ -111,7 +125,21 @@ errlHndl_t ScomImpl::getScom(
 {
     size_t size = sizeof(o_data);
 
-    return deviceRead(i_target, &o_data, size, DEVICE_SCOM_ADDRESS(i_address));
+    errlHndl_t errlH =
+        deviceRead(i_target, &o_data, size, DEVICE_SCOM_ADDRESS(i_address));
+
+    if( ( NULL != errlH ) &&
+        ( IBSCOM::IBSCOM_BUS_FAILURE ) == errlH->reasonCode() )
+    {
+        errlCommit( errlH, ATTN_COMP_ID );
+        ATTN_DBG( "deviceRead() failed with reason code IBSCOM_BUS_FAILURE."
+                  " Trying again, Target HUID:0x%08X Register 0x%016X",
+                  get_huid( i_target), i_address );
+
+        errlH = deviceRead( i_target, &o_data, size,
+                            DEVICE_SCOM_ADDRESS(i_address));
+    }
+    return errlH;
 }
 
 errlHndl_t ScomImpl::modifyScom(
