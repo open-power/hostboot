@@ -23,7 +23,13 @@
 #ifndef __PORE_INLINE_H__
 #define __PORE_INLINE_H__
 
-// $Id: pore_inline.h,v 1.19 2013/11/20 14:06:40 bcbrock Exp $
+// $Id: pore_inline.h,v 1.20 2013/12/11 00:11:13 bcbrock Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/pore_inline.h,v $
+//-----------------------------------------------------------------------------
+// *! (C) Copyright International Business Machines Corp. 2013
+// *! All Rights Reserved -- Property of IBM
+// *! *** IBM Confidential ***
+//-----------------------------------------------------------------------------
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -38,12 +44,14 @@
 /// necessary, i.e., only in C files that explicitly use inline assembly and
 /// disassembly.
 
+#ifndef PPC_HYP
 #include <ctype.h>
 #include <stddef.h>
 #include <stdint.h>
+#endif // PPC_HYP
 #include "pgas.h"
 
-#ifdef __cplusplus
+#if( defined(__cplusplus) && !defined(PLIC_MODULE) ) 
 extern "C" {
 #endif
 #if 0
@@ -62,6 +70,7 @@ extern "C" {
 
 #ifdef PPC_HYP
 #define PORE_STATIC
+#include <p8_pore_api_custom.h>
 #else
 #define PORE_STATIC static
 #endif
@@ -864,7 +873,7 @@ pore_SCAND(PoreInlineContext *ctx,
 #if 0
 { /* So __cplusplus doesn't mess w/auto-indent */
 #endif
-#ifdef __cplusplus
+#if( defined(__cplusplus) && !defined(PLIC_MODULE) ) 
 }
 #endif
 

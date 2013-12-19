@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: sbe_xip_image.c,v 1.27 2013/06/13 20:26:25 bcbrock Exp $
+// $Id: sbe_xip_image.c,v 1.28 2013/12/11 00:12:41 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.c,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,9 +44,12 @@
 /// ensure that no memory outside of the putative bounds of the image is ever
 /// referenced during validation.
 
-#ifdef PPC_HYP
-#include <HvPlicModule.H>
-#endif
+#ifndef PLIC_MODULE
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#endif // PLIC_MODULE
 
 #include <stddef.h>
 #include <stdint.h>
@@ -65,13 +68,12 @@
 
 #ifdef PPC_HYP
 
-#ifndef  _HVTYPES_H
-#include <HvTypes.H>
-#endif
+#ifdef PLIC_MODULE
 
 #define strcpy(dest, src) hvstrcpy(dest, src)
 #define strlen(s) hvstrlen(s)
 #define strcmp(s1, s2) hvstrcmp(s1, s2)
+#endif //PLIC_MODULE
 
 #define XIP_STATIC
         

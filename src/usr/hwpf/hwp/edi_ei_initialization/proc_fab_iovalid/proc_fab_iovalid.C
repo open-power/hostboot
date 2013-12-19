@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fab_iovalid.C,v 1.13 2013/10/28 03:57:09 jmcgill Exp $
+// $Id: proc_fab_iovalid.C,v 1.14 2013/12/13 16:03:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -220,66 +220,72 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
 
     do
     {
-        // query secure iovalid attribute
-        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_SECURE_IOVALID_PRESENT,
-                           &(i_proc_chip.this_chip),
-                           secure_iovalid_present_attr);
-        if (!rc.ok())
+        // do not attempt to drop secure iovalid
+        // running on FSP (stopclocks), this code will be unable to adjust this register
+        // clearing the GP0 settings should be sufficient to drop the downstream iovalids
+        if (i_set_not_clear)
         {
-            FAPI_ERR("proc_fab_iovalid_manage_a_links: Error querying ATTR_CHIP_EC_FEATURE_SECURE_IOVALID_PRESENT");
-            break;
-        }
-
-        if (i_proc_chip.a0)
-        {
-            FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A0 to active link mask");
-            rc_ecmd |= gp0_iovalid_active.setBit(A_GP0_A0_IOVALID_BIT);
-            if (secure_iovalid_present_attr)
+            // query secure iovalid attribute
+            rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_SECURE_IOVALID_PRESENT,
+                               &(i_proc_chip.this_chip),
+                               secure_iovalid_present_attr);
+            if (!rc.ok())
             {
-                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A0 to active link mask (secure)");
-                if (i_set_not_clear)
-                {
-                    rc_ecmd |= secure_iovalid_data.setBit(ADU_IOS_LINK_EN_A0_IOVALID_BIT);
-                }
-                rc_ecmd |= secure_iovalid_mask.setBit(ADU_IOS_LINK_EN_A0_IOVALID_BIT);
+                FAPI_ERR("proc_fab_iovalid_manage_a_links: Error querying ATTR_CHIP_EC_FEATURE_SECURE_IOVALID_PRESENT");
+                break;
             }
-        }
-        if (i_proc_chip.a1)
-        {
-            FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A1 to active link mask");
-            rc_ecmd |= gp0_iovalid_active.setBit(A_GP0_A1_IOVALID_BIT);
-            if (secure_iovalid_present_attr)
+            
+            if (i_proc_chip.a0)
             {
-                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A1 to active link mask (secure)");
-                if (i_set_not_clear)
+                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A0 to active link mask");
+                rc_ecmd |= gp0_iovalid_active.setBit(A_GP0_A0_IOVALID_BIT);
+                if (secure_iovalid_present_attr)
                 {
-                    rc_ecmd |= secure_iovalid_data.setBit(ADU_IOS_LINK_EN_A1_IOVALID_BIT);
+                    FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A0 to active link mask (secure)");
+                    if (i_set_not_clear)
+                    {
+                        rc_ecmd |= secure_iovalid_data.setBit(ADU_IOS_LINK_EN_A0_IOVALID_BIT);
+                    }
+                    rc_ecmd |= secure_iovalid_mask.setBit(ADU_IOS_LINK_EN_A0_IOVALID_BIT);
                 }
-                rc_ecmd |= secure_iovalid_mask.setBit(ADU_IOS_LINK_EN_A1_IOVALID_BIT);
             }
-        }
-        if (i_proc_chip.a2)
-        {
-            FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A2 to active link mask");
-            rc_ecmd |= gp0_iovalid_active.setBit(A_GP0_A2_IOVALID_BIT);
-            if (secure_iovalid_present_attr)
+            if (i_proc_chip.a1)
             {
-                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A2 to active link mask (secure)");
-                if (i_set_not_clear)
+                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A1 to active link mask");
+                rc_ecmd |= gp0_iovalid_active.setBit(A_GP0_A1_IOVALID_BIT);
+                if (secure_iovalid_present_attr)
                 {
-                    rc_ecmd |= secure_iovalid_data.setBit(ADU_IOS_LINK_EN_A2_IOVALID_BIT);
+                    FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A1 to active link mask (secure)");
+                    if (i_set_not_clear)
+                    {
+                        rc_ecmd |= secure_iovalid_data.setBit(ADU_IOS_LINK_EN_A1_IOVALID_BIT);
+                    }
+                    rc_ecmd |= secure_iovalid_mask.setBit(ADU_IOS_LINK_EN_A1_IOVALID_BIT);
                 }
-                rc_ecmd |= secure_iovalid_mask.setBit(ADU_IOS_LINK_EN_A2_IOVALID_BIT);
             }
-        }
-
-        // check aggregate return code from buffer manipulation operations
-        if (rc_ecmd)
-        {
-            FAPI_ERR("proc_fab_iovalid_manage_a_links: Error 0x%x setting up active link mask data buffersa",
-                     rc_ecmd);
-            rc.setEcmdError(rc_ecmd);
-            break;
+            if (i_proc_chip.a2)
+            {
+                FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A2 to active link mask");
+                rc_ecmd |= gp0_iovalid_active.setBit(A_GP0_A2_IOVALID_BIT);
+                if (secure_iovalid_present_attr)
+                {
+                    FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A2 to active link mask (secure)");
+                    if (i_set_not_clear)
+                    {
+                        rc_ecmd |= secure_iovalid_data.setBit(ADU_IOS_LINK_EN_A2_IOVALID_BIT);
+                    }
+                    rc_ecmd |= secure_iovalid_mask.setBit(ADU_IOS_LINK_EN_A2_IOVALID_BIT);
+                }
+            }
+            
+            // check aggregate return code from buffer manipulation operations
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_a_links: Error 0x%x setting up active link mask data buffersa",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
         }
 
         // write appropriate GP0 mask register to perform desired operation
@@ -295,7 +301,7 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
         }
 
         // adjust secure iovalids if present
-        if (secure_iovalid_present_attr)
+        if (secure_iovalid_present_attr && i_set_not_clear)
         {
             rc = fapiPutScomUnderMask(i_proc_chip.this_chip,
                                       ADU_IOS_LINK_EN_0x02020019,
