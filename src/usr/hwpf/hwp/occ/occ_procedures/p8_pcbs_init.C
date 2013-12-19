@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pcbs_init.C,v 1.22 2013-10-24 14:28:07 dcrowell Exp $
+// $Id: p8_pcbs_init.C,v 1.23 2013/12/16 18:52:09 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pcbs_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -917,6 +917,15 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
                         const fapi::Target& PROC_CHIP = i_target;
                         const uint64_t& LOOPCOUNT = (uint32_t)loopcount;
                         const uint64_t& PMSR = data.getDoubleWord(0);
+                        
+                        address =  EX_PCBS_FSM_MONITOR1_REG_0x100F0170 + ex_offset;
+                        GETSCOM(rc, i_target, address, data);
+                        const uint64_t& PCBSPM_MON1 = data.getDoubleWord(0);
+                        
+                        address =  EX_PCBS_FSM_MONITOR2_REG_0x100F0171 + ex_offset;
+                        GETSCOM(rc, i_target, address, data);
+                        const uint64_t& PCBSPM_MON2 = data.getDoubleWord(0);                        
+                        
                         FAPI_SET_HWP_ERROR(rc, RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT);
                         break;
                     }
@@ -1319,7 +1328,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pcbs_init.C,v $
-Revision 1.22  2013-10-24 14:28:07  dcrowell
+Revision 1.23  2013/12/16 18:52:09  stillgs
+
+Added additional FFDC for SAFE FSM TIME check to add hardware FSM monitor
+registers to those collected
+
+Revision 1.22  2013/10/24 14:28:07  dcrowell
 Fix scan0 value to not write read-only bit
 
 Revision 1.21  2013-10-23 19:00:30  stillgs

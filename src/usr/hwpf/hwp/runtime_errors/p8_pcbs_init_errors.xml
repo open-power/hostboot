@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pcbs_init_errors.xml,v 1.6 2013/08/02 19:15:39 stillgs Exp $ -->
+<!-- $Id: p8_pcbs_init_errors.xml,v 1.7 2013/12/16 15:28:41 stillgs Exp $ -->
 <!-- Error definitions for proc_pcbs_init procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -29,6 +29,8 @@
     <description>Psafe Pstate and FSM-stable timeout in proc_pcbs_init.</description>
     <ffdc>LOOPCOUNT</ffdc>
     <ffdc>PMSR</ffdc>
+    <ffdc>PCBSPM_MON1</ffdc>
+    <ffdc>PCBSPM_MON2</ffdc>
     <callout><target>PROC_CHIP</target><priority>HIGH</priority></callout>
   </hwpError>
   <!-- *********************************************************************** -->
