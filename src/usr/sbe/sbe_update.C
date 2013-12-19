@@ -47,7 +47,8 @@
 
 //  fapi support
 #include    <fapi.H>
-#include    <fapiPlatHwpInvoker.H>
+#include    <fapiHwpExecutor.H>
+#include    <hwpf/plat/fapiPlatHwpInvoker.H>
 #include    <hwpf/plat/fapiPlatTrace.H>
 
 //Procedures
@@ -592,9 +593,13 @@ namespace SBE
                                    size_t& o_actImgSize)
     {
         errlHndl_t err = NULL;
+        fapi::ReturnCode rc_fapi = fapi::FAPI_RC_SUCCESS;
         uint32_t coreMask = 0x0000FFFF;
         size_t maxCores = P8_MAX_EX_PER_PROC;
+        uint32_t coreCount = 0;
         uint32_t procIOMask = 0;
+        uint32_t tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
+        bool procedure_success = false;
 
         TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"procCustomizeSbeImg(): uid=0x%X, i_sbePnorPtr= "
@@ -613,82 +618,173 @@ namespace SBE
             // The p8_xip_customize() procedure tries to include as much core
             // information as possible, but is limited by SBE Image size
             // constraints.
-            // This loop is designed to remove the number of cores passed into
-            // p8_xip_customize() until an image can be created successfully.
+            // First, maximize core mask for the target
+            // Then loop on the procedure call, where the loop is designed to
+            // remove the number of cores passed into p8_xip_customize() until
+            // an image can be created successfully.
 
-            while( __builtin_popcount(procIOMask) <
-                   __builtin_popcount(coreMask))
+
+            // Maximize Core mask for this target
+            err = selectBestCores(i_target,
+                                  maxCores,
+                                  coreMask);
+            if(err)
             {
-
-                err = selectBestCores(i_target,
-                                      maxCores,
-                                      coreMask);
-                if(err)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
-                               "selectBestCores() failed rc=0x%X. "
-                               "MaxCores=0x%.8X. HUID=0x%.8X. Aborting Update",
-                               err->reasonCode(), maxCores,
-                               TARGETING::get_huid(i_target));
-                    break;
-                }
-
-                procIOMask = coreMask;
-
-                uint32_t tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
-
-                FAPI_INVOKE_HWP( err,
-                                 p8_xip_customize,
-                                 l_fapiTarg,
-                                 i_sbePnorPtr, //image in
-                                 io_imgPtr,    //image out
-                                 tmpImgSize,
-                                 0,  //IPL
-                                 0, //HB/IPL
-                                 (void*)RING_BUF1_VADDR,
-                                 (uint32_t)FIXED_RING_BUF_SIZE,
-                                 (void*)RING_BUF2_VADDR,
-                                 (uint32_t)FIXED_RING_BUF_SIZE,
-                                 procIOMask);
-
-                o_actImgSize = static_cast<size_t>(tmpImgSize);
-
-                maxCores = __builtin_popcount(procIOMask);
-
-                if ( err )
-                {
-                   TRACFCOMP( g_trac_sbe,
-                              ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
-                              "p8_xip_customize) failed with rc=0x%x04X, "
-                              "MaxCores=0x%.8X. HUID=0x%.8X. coreMask=0x%.8X, "
-                              "procIOMask=0x%.8X.",
-                              err->reasonCode(), maxCores,
-                              TARGETING::get_huid(i_target),
-                              coreMask, procIOMask);
-
-                    ERRORLOG::ErrlUserDetailsTarget(i_target,
-                                                    "Proc Target")
-                                                   .addToLog(err);
-
-                    // @todo RTC 89503 look for specific return code for
-                    // the case where he couldn't fix the cores we asked for
-                    // but could possibly fit a lesser amount
-
-                    break;
-                }
-
+                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
+                           "selectBestCores() failed rc=0x%X. "
+                           "MaxCores=0x%.8X. HUID=0x%X. Aborting "
+                           "Customization of SBE Image",
+                           err->reasonCode(), maxCores,
+                           TARGETING::get_huid(i_target));
+                break;
             }
 
+            // setup loop parameters
+            coreCount = __builtin_popcount(coreMask);
+            procIOMask = coreMask;
+
+            while( coreCount > 0 )
+            {
+
+                FAPI_EXEC_HWP( rc_fapi,
+                               p8_xip_customize,
+                               l_fapiTarg,
+                               i_sbePnorPtr, //image in
+                               io_imgPtr,    //image out
+                               tmpImgSize,
+                               0,  //IPL
+                               0, //HB/IPL
+                               (void*)RING_BUF1_VADDR,
+                               (uint32_t)FIXED_RING_BUF_SIZE,
+                               (void*)RING_BUF2_VADDR,
+                               (uint32_t)FIXED_RING_BUF_SIZE,
+                               procIOMask);
+
+                // Check the return code
+                if ( !rc_fapi )
+                {
+                    // Procedure was successful
+                    procedure_success = true;
+
+                    o_actImgSize = static_cast<size_t>(tmpImgSize);
+
+                    TRACUCOMP( g_trac_sbe, "procCustomizeSbeImg(): "
+                               "p8_xip_customize success=%d, procIOMask=0x%X ",
+                               "o_actImgSize=0x%X, rc_fapi=0x%X, ",
+                               procedure_success, procIOMask, o_actImgSize,
+                               uint32_t(rc_fapi));
+
+                    // exit loop
+                    break;
+                }
+                else
+                {
+                    // Look for a specific return code
+
+                    if ( static_cast<uint32_t>(rc_fapi) ==
+                         fapi::RC_PROC_XIPC_OVERFLOW_BEFORE_REACHING_MINIMUM_EXS
+                       )
+                    {
+                        // This is a specific return code from p8_xip_customize
+                        // where the cores sent in couldn't fit, but possibly
+                        // a different procIOMask would work
+
+                        TRACFCOMP( g_trac_sbe,
+                              ERR_MRK"procCustomizeSbeImg(): FAPI_EXEC_HWP("
+                              "p8_xip_customize) returned rc=0x%X, "
+                              "XIPC_OVERFLOW_BEFORE_REACHING_MINIMUM_EXS-Retry "
+                              "MaxCores=0x%.8X. HUID=0x%X. coreMask=0x%.8X, "
+                              "procIOMask=0x%.8X. coreCount=%d",
+                              uint32_t(rc_fapi), maxCores,
+                              TARGETING::get_huid(i_target),
+                              coreMask, procIOMask, coreCount);
+
+                        // Setup for next loop - trim original core mask
+                        procIOMask = trimBitMask(coreMask,
+                                                 --coreCount);
+
+                        TRACFCOMP( g_trac_sbe, "procCustomizeSbeImg(): for "
+                                   "next loop: procIOMask=0x%.8X, coreMask="
+                                   "0x%.8X, coreCount=%d",
+                                   procIOMask, coreMask, coreCount);
+
+                        // No break - keep looping
+                    }
+                    else
+                    {
+                        // Unexpected return code - create err and fail
+                        TRACFCOMP( g_trac_sbe,
+                              ERR_MRK"procCustomizeSbeImg(): FAPI_EXEC_HWP("
+                              "p8_xip_customize) failed with rc=0x%X, "
+                              "MaxCores=0x%X. HUID=0x%X. coreMask=0x%.8X, "
+                              "procIOMask=0x%.8X. coreCount=%d. Create "
+                              "err and break loop",
+                              uint32_t(rc_fapi), maxCores,
+                              TARGETING::get_huid(i_target),
+                              coreMask, procIOMask, coreCount);
+
+                        err = fapiRcToErrl(rc_fapi);
+
+                        ERRORLOG::ErrlUserDetailsTarget(i_target,
+                                                        "Proc Target")
+                                                       .addToLog(err);
+                        err->collectTrace(SBE_COMP_NAME, 256);
+
+                        // break from while loop
+                        break;
+                    }
+                }
+            }  // end of while loop
 
             if(err)
             {
+                // There was a previous error, so break here
                 break;
             }
+
+            if ( procedure_success == false )
+            {
+                // No err, but exit from while loop before successful
+                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
+                           "Failure to successfully complete p8_xip_customize()"
+                           ". HUID=0x%X, rc=0x%X, coreCount=%d, coreMask=0x%.8X"
+                           " procIOMask=0x%.8X, maxCores=0x%X",
+                           TARGETING::get_huid(i_target), uint32_t(rc_fapi),
+                           coreCount, coreMask, procIOMask, maxCores);
+                /*@
+                 * @errortype
+                 * @moduleid          SBE_CUSTOMIZE_IMG
+                 * @reasoncode        SBE_P8_XIP_CUSTOMIZE_UNSUCCESSFUL
+                 * @userdata1[0:31]   procIOMask in/out parameter
+                 * @userdata1[32:63]  rc of procedure
+                 * @userdata2[0:31]   coreMask of target
+                 * @userdata2[32:63]  coreCount - updated on the loops
+                 * @devdesc      Unsuccessful in creating Customized SBE Image
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_CUSTOMIZE_IMG,
+                                    SBE_P8_XIP_CUSTOMIZE_UNSUCCESSFUL,
+                                    TWO_UINT32_TO_UINT64(procIOMask,
+                                                         uint32_t(rc_fapi)),
+                                    TWO_UINT32_TO_UINT64(coreMask,
+                                                          coreCount));
+
+                ErrlUserDetailsTarget(i_target
+                                      ).addToLog(err);
+                err->collectTrace("FAPI", 256);
+                err->collectTrace(SBE_COMP_NAME, 256);
+                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH );
+            }
+
+
         }while(0);
 
         TRACUCOMP( g_trac_sbe,
                    EXIT_MRK"procCustomizeSbeImg(): io_imgPtr=%p, "
-                   "o_actImgSize=0x%X", io_imgPtr, o_actImgSize );
+                   "o_actImgSize=0x%X, rc_fapi=0x%X, procedure_success=%d",
+                   io_imgPtr, o_actImgSize, uint32_t(rc_fapi),
+                   procedure_success );
 
         return err;
     }

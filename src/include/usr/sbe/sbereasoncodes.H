@@ -51,6 +51,7 @@ enum sbeModuleId
     SBE_GET_TARGET_INFO_STATE           = 0x08,
     SBE_GET_SEEPROM_INFO                = 0x09,
     SBE_DECISION_TREE                   = 0x0A,
+    SBE_CUSTOMIZE_IMG                   = 0x0B,
 };
 
 /**
@@ -83,6 +84,7 @@ enum sbeReasonCode
     SBE_INVALID_SEEPROM_SIDE            = SBE_COMP_ID | 0x0E,
     SBE_ECC_FAIL                        = SBE_COMP_ID | 0x0F,
     SBE_PERM_SIDE_DIRTY_BAD_PATH        = SBE_COMP_ID | 0x10,
+    SBE_P8_XIP_CUSTOMIZE_UNSUCCESSFUL   = SBE_COMP_ID | 0x11,
 };
 
 };  // end SBE
