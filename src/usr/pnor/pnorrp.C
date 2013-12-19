@@ -39,6 +39,7 @@
 #include <pnor/ecc.H>
 #include <kernel/console.H>
 #include <endian.h>
+#include <util/align.H>
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -571,8 +572,13 @@ errlHndl_t PnorRP::readTOC()
                     iv_TOC[secId].version = ffsUserData->verCheck;
                     iv_TOC[secId].misc = ffsUserData->miscFlags;
 
-                    TRACFCOMP(g_trac_pnor, "PnorRP::readTOC: User Data %s", cur_entry->name);
-                    //TRACFBIN(g_trac_pnor, "PnorRP::readTOC: Bin Dump",ffsUserData, sizeof(ffs_hb_user_t) );
+                    TRACFCOMP(g_trac_pnor, "PnorRp::readTOC: User Data %s", cur_entry->name);
+
+                    if (iv_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
+                    {
+                        TRACFCOMP(g_trac_pnor, "PnorRP::readTOC: ECC enabled for %s", cur_entry->name);
+                        iv_TOC[secId].size = ALIGN_PAGE_DOWN((iv_TOC[secId].size * 8 ) / 9);
+                    }
 
                     if (iv_TOC[secId].version == FFS_VERS_SHA512)
                     {
@@ -594,7 +600,6 @@ errlHndl_t PnorRP::readTOC()
                         INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
                     }
                 }
-
                 cur_entry++;
             }
 

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -60,115 +60,117 @@ Layout Description
         <sideBOffset>0x8000</sideBOffset>
     </metadata>
     <section>
-        <description>Hostboot Extended image (5MB)</description>
-        <eyeCatch>HBI</eyeCatch>
+        <description>Hostboot Error Logs (144K)</description>
+        <eyeCatch>HBEL</eyeCatch>
         <physicalOffset>0x10000</physicalOffset>
-        <physicalRegionSize>0x500000</physicalRegionSize>
+        <physicalRegionSize>0x24000</physicalRegionSize>
+        <ecc/>
+    </section>
+    <section>
+        <description>Guard Data (20K)</description>
+        <eyeCatch>GUARD</eyeCatch>
+        <physicalOffset>0x58000</physicalOffset>
+        <physicalRegionSize>0x5000</physicalRegionSize>
+        <ecc/>
+    </section>
+    <section>
+        <description>Hostboot Data (1.125M)</description>
+        <eyeCatch>HBD</eyeCatch>
+        <physicalOffset>0x5D000</physicalOffset>
+        <physicalRegionSize>0x120000</physicalRegionSize>
+        <ecc/>
+    </section>
+    <section>
+        <description>DIMM JEDEC (288K)</description>
+        <eyeCatch>DJVPD</eyeCatch>
+        <!--NOTE: MUST update standalone.simics if offset changes -->
+         <physicalOffset>0x17D000</physicalOffset>
+        <physicalRegionSize>0x48000</physicalRegionSize>
+        <ecc/>
+    </section>
+    <section>
+        <description>Module VPD (576K)</description>
+        <eyeCatch>MVPD</eyeCatch>
+        <!--NOTE: MUST update standalone.simics if offset changes -->
+        <physicalOffset>0x1C5000</physicalOffset>
+        <physicalRegionSize>0x90000</physicalRegionSize>
+        <ecc/>
+    </section>
+    <section>
+        <description>Centaur VPD (288K)</description>
+        <eyeCatch>CVPD</eyeCatch>
+        <!--NOTE: MUST update standalone.simics if offset changes -->
+        <physicalOffset>0x255000</physicalOffset>
+        <physicalRegionSize>0x48000</physicalRegionSize>
+        <ecc/>
+    </section>
+    <section>
+        <description>Hostboot Extended image (5.625MB)</description>
+        <eyeCatch>HBI</eyeCatch>
+        <physicalOffset>0x29D000</physicalOffset>
+        <physicalRegionSize>0x5A0000</physicalRegionSize>
         <sha512Version/>
-        <side>A</side>  <!-- Choices: A, B -->
+        <ecc/>
     </section>
     <section>
-        <description>Centaur SBE (512K)</description>
+        <description>Centaur SBE (576K)</description>
         <eyeCatch>SBEC</eyeCatch>
-        <physicalOffset>0xA10000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
+        <physicalOffset>0x83D000</physicalOffset>
+        <physicalRegionSize>0x90000</physicalRegionSize>
+        <ecc/>
     </section>
     <section>
-        <description>SBE-IPL (Staging Area) (256K)</description>
+        <description>SBE-IPL (Staging Area) (288K)</description>
         <eyeCatch>SBE</eyeCatch>
-        <physicalOffset>0xB10000</physicalOffset>
-        <physicalRegionSize>0x40000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
+        <physicalOffset>0x8CD000</physicalOffset>
+        <physicalRegionSize>0x48000</physicalRegionSize>
+        <sha512perEC/>
+        <ecc/>
     </section>
     <section>
-        <description>Sleep Winkle Ref Image (1MB)</description>
+        <description>Sleep Winkle Ref Image (1.125MB)</description>
         <eyeCatch>WINK</eyeCatch>
-        <physicalOffset>0xB90000</physicalOffset>
-        <physicalRegionSize>0x100000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
+        <physicalOffset>0x915000</physicalOffset>
+        <physicalRegionSize>0x120000</physicalRegionSize>
+        <ecc/>
     </section>
     <section>
-        <description>Payload (20MB)</description>
-        <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalOffset>0xD90000</physicalOffset>
-        <physicalRegionSize>0x1400000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
-    </section>
-    <section>
-        <description>Hostboot Runtime Services for Sapphire (2MB)</description>
+        <description>Hostboot Runtime Services for Sapphire (2.25MB)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalOffset>0x2190000</physicalOffset>
-        <physicalRegionSize>0x200000</physicalRegionSize>
-        <side>A</side>
+        <physicalOffset>0xA35000</physicalOffset>
+        <physicalRegionSize>0x240000</physicalRegionSize>
+        <sha512Version/>
+        <ecc/>
     </section>
     <section>
-        <description>Special PNOR Test Space (32K)</description>
+        <description>Payload (22.5MB)</description>
+        <eyeCatch>PAYLOAD</eyeCatch>
+        <physicalOffset>0xC75000</physicalOffset>
+        <physicalRegionSize>0x1680000</physicalRegionSize>
+        <ecc/>
+    </section>
+    <section>
+        <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TEST</eyeCatch>
         <physicalOffset>0x3590000</physicalOffset>
-        <physicalRegionSize>0x8000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
+        <physicalRegionSize>0x9000</physicalRegionSize>
         <testonly/>
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Data (1M)</description>
-        <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0x3B82000</physicalOffset>
-        <physicalRegionSize>0x100000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
-    </section>
-    <section>
-        <description>Guard Data (16K)</description>
-        <eyeCatch>GUARD</eyeCatch>
-        <physicalOffset>0x3D82000</physicalOffset>
-        <physicalRegionSize>0x4000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
-    </section>
-    <section>
-        <description>Hostboot Error Logs (128K)</description>
-        <eyeCatch>HBEL</eyeCatch>
-        <physicalOffset>0x3D8A000</physicalOffset>
-        <physicalRegionSize>0x20000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
-    </section>
-    <section>
-        <description>DIMM JEDEC (256K)</description>
-        <eyeCatch>DJVPD</eyeCatch>
-      	<!--NOTE: MUST update standalone.simics if offset changes -->
-         <physicalOffset>0x3DCA000</physicalOffset>
-        <physicalRegionSize>0x40000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
-    </section>
-    <section>
-        <description>Module VPD (512K)</description>
-        <eyeCatch>MVPD</eyeCatch>
-       	<!--NOTE: MUST update standalone.simics if offset changes -->
-        <physicalOffset>0x3E0A000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
-    </section>
-    <section>
-        <description>Centaur VPD (256K)</description>
-        <eyeCatch>CVPD</eyeCatch>
-    	<!--NOTE: MUST update standalone.simics if offset changes -->
-        <physicalOffset>0x3E8A000</physicalOffset>
-        <physicalRegionSize>0x40000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
-    </section>
-    <section>
         <description>Hostboot Base (576K)</description>
+        <!--NOTE: MUST update standalone.simics if offset changes -->
         <eyeCatch>HBB</eyeCatch>
-        <physicalOffset>0x3ECE000</physicalOffset>
+        <physicalOffset>0x3F67000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
+        <sha512Version/>
         <ecc/>
     </section>
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x3FEE000</physicalOffset>
+        <physicalOffset>0x3FF7000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
-        <side>A</side>  <!-- Choices: A, B -->
+        <ecc/>
     </section>
 </pnor>

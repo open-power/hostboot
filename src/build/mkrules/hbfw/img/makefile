@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -37,7 +37,7 @@ DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
 build_all: cp_hbfiles
-install_all: build_sbe_partitions build_pnor_images
+install_all: inject_ecc build_sbe_partitions build_pnor_images
 
 #Some useful search paths
 HBFW_OBJPATH = ${.PATH:M*obj*}
@@ -53,6 +53,9 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 BASE_IMAGE = hostboot.bin
 EXT_IMAGE =  hostboot_extended.bin
 HBRT_IMAGE = hostboot_runtime.bin
+HBRT_SHA_IMAGE = hostboot_runtime.sha.bin
+HBRT_HEADER_IMAGE = hostboot_runtime.header.bin
+HBRT_ECC_HEADER_IMAGE = hostboot_runtime.header.bin.ecc
 BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
 BASE_W_HEADER_IMAGE = hostboot.header.bin
 BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
@@ -60,15 +63,22 @@ BASE_ECC_IMAGE = hostboot.bin.ecc
 BASE_SHA_IMAGE = hostboot.sha.bin
 EXT_PAD_IMAGE = hostboot_extended.bin.pad
 EXT_ECC_IMAGE = hostboot_extended.bin.ecc
-EXT_ECC_HEADER_IMAGE = hostboot_extended.header.ecc.bin
+EXT_ECC_HEADER_IMAGE = hostboot_extended.header.bin.ecc
 EXT_SHA_IMAGE = hostboot_extended.sha.bin
 EXT_HEADER_IMAGE = hostboot_extended.header.bin
+TEMP_IMAGE = hostboot.temp.bin
 TESTDATA = hbtestdata.bin
 TESTDATA_ECC = hbtestdata.bin.ecc
+HBEL_ECC_IMAGE = hbel.bin.ecc
+GUARD_ECC_IMAGE = guard.bin.ecc
+GOLBAL_ECC_IMAGE = global.bin.ecc
+
 ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${BASE_W_HEADER_IMAGE} \
                 ${BASE_ECC_IMAGE} ${EXT_ECC_IMAGE} \
                 ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE}\
+                ${HBRT_SHA_IMAGE} \
+                ${HBRT_HEADER_IMAGE} ${HBRT_ECC_HEADER_IMAGE} \
                 ${EXT_PAD_IMAGE} \
                 ${EXT_SHA_IMAGE} ${EXT_HEADER_IMAGE} \
                 ${EXT_ECC_HEADER_IMAGE} \
@@ -90,16 +100,31 @@ cp_hbfiles: .SPECTARG
 	# dd command will pad image up to the next 4K page
 	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
 	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
-	# add version header w/ sha hash
+	# add version header w/ HBRT sha hash
+	echo -en VERSION\\0 > ${HBRT_SHA_IMAGE}
+	sha512sum ${HBRT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${HBRT_SHA_IMAGE}
+	dd if=${HBRT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
+	cat ${HBRT_IMAGE} >> ${TEMP_IMAGE}
+	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=4k conv=sync
+	ecc --inject ${HBRT_HEADER_IMAGE} --output ${HBRT_ECC_HEADER_IMAGE} --p8
+	# add version header w/ HBI sha hash
 	echo -en VERSION\\0 > ${EXT_SHA_IMAGE}
 	sha512sum ${EXT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${EXT_SHA_IMAGE}
-	dd if=${EXT_SHA_IMAGE} of=${EXT_HEADER_IMAGE} ibs=4k conv=sync
-	dd if=${EXT_SHA_IMAGE} of=${EXT_ECC_HEADER_IMAGE} ibs=4k conv=sync
-	cat ${EXT_IMAGE} >> ${EXT_HEADER_IMAGE}
-	cat ${EXT_ECC_IMAGE} >> ${EXT_ECC_HEADER_IMAGE}
+	dd if=${EXT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
+	cat ${EXT_IMAGE} >> ${TEMP_IMAGE}
+	dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=4k conv=sync
+	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
 	# create data for a test partition in pnor
 	dd if=/dev/urandom of=${TESTDATA} bs=1 count=28K
 	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8
+	# HBEL, GUARD, and GLOBAL ECC
+	dd if=/dev/zero count=128K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	ecc --inject ${TEMP_IMAGE} --output ${HBEL_ECC_IMAGE} --p8
+	dd if=/dev/zero count=16K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	ecc --inject ${TEMP_IMAGE} --output ${GUARD_ECC_IMAGE} --p8
+	dd if=/dev/zero count=32K bs=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	ecc --inject ${TEMP_IMAGE} --output ${GOLBAL_ECC_IMAGE} --p8
+	rm ${TEMP_IMAGE}
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_HB_IMAGES} \
@@ -176,23 +201,39 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-#uncomment the below line to enable ECC in the extended image
-#HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_IMAGE},HBRT=${HBRT_IMAGE},TEST=${TESTDATA_ECC}
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_HEADER_IMAGE},HBRT=${HBRT_IMAGE},TEST=${TESTDATA_ECC}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},TEST=${TESTDATA_ECC},HBEL=${HBEL_ECC_IMAGE},GUARD=${GUARD_ECC_IMAGE},GLOBAL=${GOLBAL_ECC_IMAGE}
 
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 MURANO_TARG_IMG = simics_MURANO_targeting.bin
 VENICE_TARG_IMG = simics_VENICE_targeting.bin
-MURANO_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.bin}
-VENICE_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.bin}
+MURANO_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.hdr.bin}
+VENICE_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.hdr.bin}
+MURANO_LOCAL_SLW_IMG = s1.ref_image.hdr.bin
+VENICE_LOCAL_SLW_IMG = p8.ref_image.hdr.bin
 MURANO_SBE_IMG = s1SbePartition.bin
 VENICE_SBE_IMG = p8SbePartition.bin
 SBEC_IMG = centSbePartition.bin
-MURANO_SECT = HBD=${MURANO_TARG_IMG},SBE=${MURANO_SBE_IMG},SBEC=${SBEC_IMG},WINK=${MURANO_SLW_IMG}
-VENICE_SECT = HBD=${VENICE_TARG_IMG},SBE=${VENICE_SBE_IMG},SBEC=${SBEC_IMG},WINK=${VENICE_SLW_IMG}
+TEMP_IMG = temp.bin
 
+INPUT_ECC = ${${MURANO_TARG_IMG}:P} ${${VENICE_TARG_IMG}:P} \
+		${MURANO_LOCAL_SLW_IMG} ${VENICE_LOCAL_SLW_IMG} \
+		${MURANO_SBE_IMG} ${VENICE_SBE_IMG} \
+		${SBEC_IMG}
+
+inject_ecc: build_sbe_partitions
+	# cp file with full path to one with local path
+	cp ${MURANO_SLW_IMG} ${MURANO_LOCAL_SLW_IMG}
+	cp ${VENICE_SLW_IMG} ${VENICE_LOCAL_SLW_IMG}
+	for file in ${INPUT_ECC}; do\
+		dd if=$$file of=${TEMP_IMG} ibs=4k conv=sync; \
+		ecc --inject ${TEMP_IMG} --output $$file.ecc --p8; \
+	done
+	rm ${TEMP_IMG}
+
+MURANO_SECT = HBD=${MURANO_TARG_IMG}.ecc,SBE=${MURANO_SBE_IMG}.ecc,SBEC=${SBEC_IMG}.ecc,WINK=${MURANO_LOCAL_SLW_IMG}.ecc
+VENICE_SECT = HBD=${VENICE_TARG_IMG}.ecc,SBE=${VENICE_SBE_IMG}.ecc,SBEC=${SBEC_IMG}.ecc,WINK=${VENICE_LOCAL_SLW_IMG}.ecc
 
 PNOR_IMG_INFO = \
    murano.pnor:defaultPnorLayout.xml:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
@@ -246,7 +287,7 @@ clobber_build_pnor_images:
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
 FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE}
 
-update_images_for_sandbox: build_sbe_partitions build_pnor_images
+update_images_for_sandbox: inject_ecc build_sbe_partitions build_pnor_images
 	mkdir -p ${FLASH_DEST}
 	#Copy hostboot base image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}

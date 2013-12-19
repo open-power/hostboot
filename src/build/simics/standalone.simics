@@ -8,16 +8,16 @@
 foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
     try {
         run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
-            ($pnor).sfc_master_mem.load-file ./sysmvpd.dat 0x3E0A000
-            ($pnor).sfc_master_mem.load-file ./sysspd.dat 0x3DCA000
-            ($pnor).sfc_master_mem.load-file ./syscvpd.dat 0x3E8A000
+            ($pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x1C5000
+            ($pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x17D000
+            ($pnor).sfc_master_mem.load-file ./syscvpd.dat.ecc 0x255000
     } except { echo "ERROR: Failed to preload VPD into PNOR." }
 }
 
-#Write the PNOR MMIO addr into Scratch 2, 0x283A 
-#($hb_masterproc).proc_lbus_map.write 0x28e8 0xFFEF0000  #HB PNOR addr
+#Write the PNOR MMIO addr into Scratch 2, 0x283A
+#($hb_masterproc).proc_lbus_map.write 0x28e8 0xFFF78000  #HB PNOR addr
 foreach $cc in (get-object-list p8_proc) {
-    ($cc).proc_lbus_map.write 0x28e8 0xFFEF0000
+    ($cc).proc_lbus_map.write 0x28e8 0xFFF78000
 }
 
 # Loop through every processor chip
@@ -29,10 +29,10 @@ foreach $cc in (get-object-list p8_proc) {
     @mp="%s.proc_chip"%simenv.cc
     @SIM_get_interface(SIM_get_object(mp),"signal").signal_raise(SIM_get_object(mp))
 
-    #Trigger the flush, load, and SBE start 
+    #Trigger the flush, load, and SBE start
     echo "-Trigger SBE"
     ($cc).proc_lbus_map.write 0x28E0 0x0000F3FF  #NonFunc EX (only 4,5 is good)
-    ($cc).proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush) 
+    ($cc).proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush)
     ($cc).proc_lbus_map.write 0x2870 0xB0000000  #SBE Vital 0x281C (load)
     ($cc).proc_lbus_map.write 0x2870 0x90000000  #SBE Vital 0x281C (start)
 }
@@ -49,7 +49,7 @@ foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
     ($pnor).sfc_master->regs_ADRCBF = 0x0
     ($pnor).sfc_master->regs_ADRCMF = 0xF
 
-    #Direct Access Cache Disable 
+    #Direct Access Cache Disable
     ($pnor).sfc_master->regs_CONF = 0x00000002
 
     #Small Erase op code
@@ -57,7 +57,7 @@ foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
     #Erase Size
     ($pnor).sfc_master->regs_CONF5 = 0x1000
 
-    #Enable 4 byte address mode - must write via memory to trigger 
+    #Enable 4 byte address mode - must write via memory to trigger
     #model behavior
     ($pnor).fsi_local_lbus_map.write 0xC40 0x00006E00
 }

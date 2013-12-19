@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -56,6 +56,7 @@ my $spdFile = "dimmspd.dat";
 my $sysMVPD = "sysmvpd.dat";
 my $sysCVPD = "syscvpd.dat";
 my $sysSPD = "sysspd.dat";
+
 
 my $MAX_CENT_PER_PROC = 8;
 my $MAX_DIMMS_PER_CENT = 8;
@@ -247,6 +248,7 @@ sub createMVPDData
     my $result;
     my $sourceFile;
     my $sysMVPDFile = "$outputPath/$sysMVPD";
+    my $sysMVPDFileECC = $sysMVPDFile . ".ecc";
 
     if( -e $sysMVPDFile )
     {
@@ -259,7 +261,7 @@ sub createMVPDData
     # If this ever changes, building the MVPD data and SPD data will need to
     # be combined to not duplicate the logic for determining which processors
     # have which DIMMs.
-    
+
     # Create empty processor MVPD chunk.
     $cmd = "echo \"00FFFF: 00\" \| xxd -r \> $emptyMVPD";
     system( $cmd ) == 0 or die "Creating $emptyMVPD failed!";
@@ -288,6 +290,8 @@ sub createMVPDData
     if( -e $sysMVPDFile )
     {
         system( "chmod 775 $sysMVPDFile" );
+        system( "ecc --inject $sysMVPDFile --output $sysMVPDFileECC --p8" );
+        system( "chmod 775 $sysMVPDFileECC" );
     }
     debugMsg( "MVPD Done." );
 }
@@ -303,6 +307,7 @@ sub createCVPDData
     my $result;
     my $sourceFile;
     my $sysCVPDFile = "$outputPath/$sysCVPD";
+    my $sysCVPDFileECC = $sysCVPDFile . ".ecc";
 
     if( -e $sysCVPDFile )
     {
@@ -349,6 +354,8 @@ sub createCVPDData
     if( -e $sysCVPDFile )
     {
         system( "chmod 775 $sysCVPDFile" );
+        system( "ecc --inject $sysCVPDFile --output $sysCVPDFileECC --p8" );
+        system( "chmod 775 $sysCVPDFileECC" );
     }
     debugMsg( "CVPD Done." );
 }
@@ -365,6 +372,7 @@ sub createSPDData
     my $result;
     my $sourceFile;
     my $sysSPDFile = "$outputPath/$sysSPD";
+    my $sysSPDFileECC = $sysSPDFile . ".ecc";
 
     if( -e $sysSPDFile )
     {
@@ -409,6 +417,8 @@ sub createSPDData
     if( -e $sysSPDFile )
     {
         system( "chmod 775 $sysSPDFile" );
+        system( "ecc --inject $sysSPDFile --output $sysSPDFileECC --p8" );
+        system( "chmod 775 $sysSPDFileECC" );
     }
     debugMsg( "SPD Done." );
 }
