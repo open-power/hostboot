@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -182,6 +182,9 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
         if (( ! i_sc.service_data->IsUnitCS() ) ||
               (CHECK_STOP == i_sc.service_data->GetAttentionType()) )
             break;
+
+        // Set it as SUE generation point.
+        i_sc.service_data->SetFlag( ServiceDataCollector::UERE );
 
         CenMembufDataBundle * mbdb = getMembufDataBundle(i_mbChip);
         ExtensibleChip * mcsChip = mbdb->getMcsChip();
