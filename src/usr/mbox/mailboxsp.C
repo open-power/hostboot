@@ -1401,23 +1401,25 @@ void MailboxSp::handleIPC()
     // All IPC messages are secure
     uint64_t msg_q_id = KernelIpc::ipc_data_area.msg_queue_id;
 
-    // msg_q_id == 0  means no IPC message available
-    // msg_q_id == (all ones) means message incomming, but not ready and
-    //                not associated with this interupt
-    if(msg_q_id == 0xFFFFFFFFFFFFFFFFul)
+    // msg_q_id == IPC_DATA_AREA_CLEAR means no IPC message available
+    // msg_q_id == IPC_DATA_AREA_LOCKED means message incomming, but not ready
+    //             to be read and not associated with this interupt
+    if(msg_q_id == IPC_DATA_AREA_LOCKED)
     {
-        msg_q_id = 0;
+        msg_q_id = IPC_DATA_AREA_CLEAR;
     }
 
     // destination message queue id is lower 32 bits.
     msg_q_id &= 0x00000000FFFFFFFFull;
-    if(0 != msg_q_id)
+    if(IPC_DATA_AREA_CLEAR != msg_q_id)
     {
         msg_t * msg = msg_allocate();
         isync();
         *msg = KernelIpc::ipc_data_area.msg_payload;
         lwsync();
-        KernelIpc::ipc_data_area.msg_queue_id = 0; // set ready for next msg
+
+        // Signal message has been read, but keep locked/not ready for new msg
+        KernelIpc::ipc_data_area.msg_queue_id = IPC_DATA_AREA_READ;
 
         TRACFCOMP(g_trac_mboxmsg,
                   "MBOXSP IPC RECV MSG: msg_id:0x%08x",

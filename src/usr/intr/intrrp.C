@@ -207,7 +207,7 @@ errlHndl_t IntrRp::_init()
 
     KernelIpc::ipc_data_area.pir = iv_masterCpu.word;
     KernelIpc::ipc_data_area.hrmor_base = hrmor_base;
-    KernelIpc::ipc_data_area.msg_queue_id = 0;
+    KernelIpc::ipc_data_area.msg_queue_id = IPC_DATA_AREA_CLEAR;
 
     // Set the BAR scom reg
     err = setBAR(procTarget,iv_masterCpu);
@@ -453,6 +453,18 @@ void IntrRp::msgHandler()
                     // Writing the XIRR with the same value read earlier
                     // tells the interrupt presenter hardware to signal an EOI.
                     *xirrAddress = xirr;
+
+                    // indicate IPC data area clear after EOI has been sent
+                    if (type == INTERPROC_XISR)
+                    {
+                        if(KernelIpc::ipc_data_area.msg_queue_id ==
+                           IPC_DATA_AREA_READ)
+                        {
+                            KernelIpc::ipc_data_area.msg_queue_id =
+                                IPC_DATA_AREA_CLEAR;
+                        }
+                    }
+
                 }
                 break;
 

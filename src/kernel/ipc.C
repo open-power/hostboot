@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -62,7 +62,7 @@ void KernelIpc::send(uint64_t i_q, msg_t * i_msg)
     dest_addr += dest_hrmor;
     dest_addr |= 0x8000000000000000ul;
 
-    printkd("IPC Dest addr %lx\n",dest_addr);
+    printkd("IPC Dest addr %lx Q_id:%lx\n",dest_addr,i_q);
 
     // pointer to the ipc_data_area in the destination node
     ipc_data_area_t * p_dest = 
@@ -70,8 +70,8 @@ void KernelIpc::send(uint64_t i_q, msg_t * i_msg)
 
     // get lock on IPC data area in other node
     while(false == __sync_bool_compare_and_swap(&(p_dest->msg_queue_id),
-                                                0,
-                                                0xFFFFFFFFFFFFFFFFul))
+                                                IPC_DATA_AREA_CLEAR,
+                                                IPC_DATA_AREA_LOCKED))
     {
         setThreadPriorityLow();
     }
@@ -82,6 +82,8 @@ void KernelIpc::send(uint64_t i_q, msg_t * i_msg)
 
     p_dest->msg_queue_id = i_q;    // set destination queue id
     lwsync();
+
+    printkd("IPC send from PIR %lx to PIR %x\n",getPIR(),p_dest->pir);
 
     // send IPI
     InterruptMsgHdlr::sendIPI(p_dest->pir);

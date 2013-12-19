@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -24,6 +24,10 @@
 #define __IPC_H
 
 #include <sys/msg.h>
+
+#define IPC_DATA_AREA_LOCKED 0xFFFFFFFFFFFFFFFFul
+#define IPC_DATA_AREA_READ   0xFFFFFFFFFFFFFFFEul
+#define IPC_DATA_AREA_CLEAR  0
 
 namespace KernelIpc
 {
