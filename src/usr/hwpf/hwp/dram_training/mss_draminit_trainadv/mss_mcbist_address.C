@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.C,v 1.11 2013/05/16 22:00:24 sasethur Exp $
+// $Id: mss_mcbist_address.C,v 1.13 2013/12/18 10:40:10 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,8 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+// 1.13    |preet   |18-Dec-13| Added 64K default for few addr_mode
+// 1.12    |preet   |17-Dec-13| Added Addr modes
 // 1.11	   |preeragh|17-May-13| Fixed FW Review Comments
 // 1.10	   |preeragh|30-Apr-13| Fixed FW Review Comment
 // 1.9     |bellows |04-Apr-13| Changed program to be Hostboot compliant
@@ -99,16 +101,16 @@ rc = FAPI_ATTR_GET(ATTR_MCBIST_ADDR_INTER, &i_target_mba, l_addr_inter); if(rc) 
 
 
 //------------------------------ Debug Stuff -------------------------------
-FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[0][0]);
-FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[0][1]);
-FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][0]);
-FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][1]);
+//FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[0][0]);
+//FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[0][1]);
+//FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][0]);
+//FAPI_INF("ATTR_EFF_NUM_RANKS_PER_DIMM is %d ",l_num_ranks_per_dimm[1][1]);
 //------------------------------ Debug Stuff -------------------------------
 
-FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim0 is %d ",l_num_master_ranks[0][0]);
-FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim1 is %d ",l_num_master_ranks[0][1]);
-FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim0 is %d ",l_num_master_ranks[1][0]);
-FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim1 is %d ",l_num_master_ranks[1][1]);
+//FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim0 is %d ",l_num_master_ranks[0][0]);
+//FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p0_dim1 is %d ",l_num_master_ranks[0][1]);
+//FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim0 is %d ",l_num_master_ranks[1][0]);
+//FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim1 is %d ",l_num_master_ranks[1][1]);
 
 //-------------------------------------------------------------------------------
 
@@ -125,24 +127,24 @@ mr1_valid = 0;
 if( (l_num_ranks_p0_dim0 == 1 && l_num_ranks_p0_dim1 == 0) || (l_num_ranks_p1_dim0 == 1 && l_num_ranks_p1_dim1 == 0) )   //Single Rank case   -- default0
 	{
 		//do rank-only stuff for this
-		FAPI_INF("--- INSIDE 1R");
+		//FAPI_INF("--- INSIDE 1R");
 		l_addr_inter=3;
 	}
 	
 else if ( (l_num_ranks_p0_dim0 == 1 && l_num_ranks_p0_dim1 == 1) || (l_num_ranks_p1_dim0 == 1 && l_num_ranks_p1_dim1 == 1) )
 {
-	FAPI_INF("--- INSIDE p0d0 valid and p0d1 valid --- 0 4----  2R");
+	//FAPI_INF("--- INSIDE p0d0 valid and p0d1 valid --- 0 4----  2R");
 	mr1_valid=1;
 }
 
 else if ( (l_num_ranks_p0_dim0 == 2 && l_num_ranks_p0_dim1 == 0) || (l_num_ranks_p1_dim0 == 2 && l_num_ranks_p1_dim1 == 0) )
 {
-	FAPI_INF("--- INSIDE p0d0 valid and p0d1 valid --- 0 1----  2R");
+	//FAPI_INF("--- INSIDE p0d0 valid and p0d1 valid --- 0 1----  2R");
 	mr3_valid=1;
 }
 else if ((l_num_ranks_p0_dim0 == 2 && l_num_ranks_p0_dim1 == 2)|| (l_num_ranks_p1_dim0 == 2 && l_num_ranks_p1_dim1 == 2))   //Rank 01 and 45 case
 	{
-		FAPI_INF("--- INSIDE  --- 2R   0145");
+		//FAPI_INF("--- INSIDE  --- 2R   0145");
 		mr3_valid = 1;
 		mr1_valid=1;
 	}
@@ -162,20 +164,20 @@ else if ((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 4) || (l_num_ranks_
 else
 	
 	{
-		FAPI_INF("-- Error ---- Check Config ----- ");
+		FAPI_INF("-- Error ---- mcbist_addr_Check dimm_Config ----- ");
 	}
 	
-FAPI_INF("ATTR_EFF_DRAM_GEN is %d ",l_dram_gen);
-FAPI_INF("ATTR_EFF_DRAM_BANKS is %d ",l_dram_banks);
-FAPI_INF("ATTR_EFF_DRAM_ROWS is %d ",l_dram_rows);
-FAPI_INF("ATTR_EFF_DRAM_COLS is %d ",l_dram_cols);
-FAPI_INF("ATTR_EFF_DRAM_DENSITY is %d ",l_dram_density);
-FAPI_INF("ATTR_EFF_DRAM_WIDTH is %d ",l_dram_width);
-FAPI_INF("ATTR_ADDR_INTER Mode is %d ",l_addr_inter);
+//FAPI_INF("ATTR_EFF_DRAM_GEN is %d ",l_dram_gen);
+//FAPI_INF("ATTR_EFF_DRAM_BANKS is %d ",l_dram_banks);
+//FAPI_INF("ATTR_EFF_DRAM_ROWS is %d ",l_dram_rows);
+//FAPI_INF("ATTR_EFF_DRAM_COLS is %d ",l_dram_cols);
+//FAPI_INF("ATTR_EFF_DRAM_DENSITY is %d ",l_dram_density);
+//FAPI_INF("ATTR_EFF_DRAM_WIDTH is %d ",l_dram_width);
+//FAPI_INF("ATTR_ADDR_INTER Mode is %d ",l_addr_inter);
 
 
 
-FAPI_INF("--- BANK-RANK  Address interleave ---");
+//FAPI_INF("--- BANK-RANK  Address interleave ---");
 rc = parse_addr(i_target_mba,S0,mr3_valid,mr2_valid,mr1_valid,l_dram_rows,l_dram_cols,l_addr_inter);if(rc) return rc;
 		
 
@@ -203,7 +205,7 @@ uint8_t l_value_zero = 0;
 uint8_t l_user_end_addr = 0;
 ecmdDataBufferBase l_data_buffer_64(64);
 ecmdDataBufferBase l_data_buffer_rd64(64); 
-uint8_t l_attr_addr_mode = 3; //default Value - FULL Address Mode
+uint8_t l_attr_addr_mode = 0; 
 uint8_t l_num_cols = 0;
 uint8_t l_num_rows = 0;
 
@@ -241,24 +243,24 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		
-		//FAPI_INF("Inside strcmp ba2");
+		////FAPI_INF("Inside strcmp ba2");
 		l_sbit = 48;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
 		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);
 		rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		
-		//FAPI_INF("Inside strcmp ba3");
+		////FAPI_INF("Inside strcmp ba3");
 		l_sbit = 42;l_value =i;
 		//------- Enable these for DDR4 --- for now constant map to zero
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
-		FAPI_INF("ba3 Invalid");
+		//FAPI_INF("ba3 Invalid");
 		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);
 		rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
 		i++;
 		
 		
-		//FAPI_INF("Inside strcmp mr3");
+		////FAPI_INF("Inside strcmp mr3");
 		l_sbit = 18;l_value =i;
 			rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
 			if(mr3_valid==1)
@@ -272,19 +274,19 @@ rc_num = l_data_buffer_64.flushTo0();
 			{
 				rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 				rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
-				FAPI_INF("mr3 Invalid");
+				//FAPI_INF("mr3 Invalid");
 				i++;
 			}
 		
 		
 	
-		//FAPI_INF("Inside strcmp mr2");
+		////FAPI_INF("Inside strcmp mr2");
 		l_sbit = 12;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
 			if(mr2_valid==1)
 			{
 				rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
-				FAPI_INF("Inside mr2 --- l_addr_inter");
+				//FAPI_INF("Inside mr2 --- l_addr_inter");
 				rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
 				i--;
 			}
@@ -293,20 +295,20 @@ rc_num = l_data_buffer_64.flushTo0();
 			{	
 				rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 				rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
-				FAPI_INF("mr2 Invalid");
+				//FAPI_INF("mr2 Invalid");
 				i++;
 			}
 		
 		
 	
 	
-		//FAPI_INF("Inside strcmp mr1");
+		////FAPI_INF("Inside strcmp mr1");
 		l_sbit = 6;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
 			if(mr1_valid==1)
 			{
 				rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
-				FAPI_INF("Inside mr1 --- l_addr_inter");
+				//FAPI_INF("Inside mr1 --- l_addr_inter");
 				rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
 				i--;
 			}
@@ -314,7 +316,7 @@ rc_num = l_data_buffer_64.flushTo0();
 				{
 					rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 					rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
-					FAPI_INF("mr1 Invalid");
+					//FAPI_INF("mr1 Invalid");
 					i++;
 				}
 	
@@ -322,31 +324,31 @@ rc_num = l_data_buffer_64.flushTo0();
 	
 	
 	
-		//FAPI_INF("Inside strcmp mr0");
+		////FAPI_INF("Inside strcmp mr0");
 		l_sbit = 0;l_value =i;
 		//------- Enable these for DDR4 --- for now constant map to zero
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
 		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 		rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
 		i++;
-		//FAPI_INF("Value of i = %d",i);
-		FAPI_INF("mr0 Invalid\n");
+		////FAPI_INF("Value of i = %d",i);
+		//FAPI_INF("mr0 Invalid\n");
 		
 	
 	
-		//FAPI_INF("Inside strcmp cl3");
+		////FAPI_INF("Inside strcmp cl3");
 		l_sbit = 42;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106cb,l_data_buffer_64); if(rc) return rc;
 		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 		rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
 		i++;
-		FAPI_INF("col2 Invalid");
-		//FAPI_INF("Value of i = %d",i);
+		//FAPI_INF("col2 Invalid");
+		////FAPI_INF("Value of i = %d",i);
 		
 	
 	
 	
-		//FAPI_INF("Inside strcmp cl3");
+		////FAPI_INF("Inside strcmp cl3");
 		l_sbit = 36;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106cb,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 1)
@@ -359,11 +361,11 @@ rc_num = l_data_buffer_64.flushTo0();
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 3 -- Invalid");
+			//FAPI_INF("Col 3 -- Invalid");
 			i++;
 		}
 		
-		//FAPI_INF("Inside strcmp cl4");
+		////FAPI_INF("Inside strcmp cl4");
 		l_sbit = 30;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106cb,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 2)
@@ -373,18 +375,18 @@ rc_num = l_data_buffer_64.flushTo0();
 			i--;
 		
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 4 -- Invalid");
+			//FAPI_INF("Col 4 -- Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp cl5");
+		////FAPI_INF("Inside strcmp cl5");
 		l_sbit = 24;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106cb,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 3)
@@ -397,11 +399,11 @@ rc_num = l_data_buffer_64.flushTo0();
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 5 -- Invalid");
+			//FAPI_INF("Col 5 -- Invalid");
 			i++;
 		}
 		
-		//FAPI_INF("Inside strcmp cl6");
+		////FAPI_INF("Inside strcmp cl6");
 		l_sbit = 18;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106cb,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 4)
@@ -410,18 +412,18 @@ rc_num = l_data_buffer_64.flushTo0();
 			rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
 			i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 6 -- Invalid");
+			//FAPI_INF("Col 6 -- Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp cl7");
+		////FAPI_INF("Inside strcmp cl7");
 		l_sbit = 12;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106cb,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 5)
@@ -430,18 +432,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 7 -- Invalid");
+			//FAPI_INF("Col 7 -- Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp cl8");
+		////FAPI_INF("Inside strcmp cl8");
 		l_sbit = 6;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106cb,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 6)
@@ -450,18 +452,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 8 -- Invalid");
+			//FAPI_INF("Col 8 -- Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp cl9");
+		////FAPI_INF("Inside strcmp cl9");
 		l_sbit = 0;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106cb,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 7)
@@ -473,20 +475,33 @@ rc_num = l_data_buffer_64.flushTo0();
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106cb,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 9 -- Invalid");
+			//FAPI_INF("Col 9 -- Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp cl11");
+		////FAPI_INF("Inside strcmp cl11");
 		l_sbit = 54;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 11)
 		{
+		if(l_dram_cols >=11)
+		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
+				//FAPI_DBG("%s: Inside l_dram_cols > 10");
 			i--;
+			}
+			else
+			{
+			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
+			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
+			FAPI_DBG("%s:Col 11 -- Invalid",i_target_mba.toEcmdString());
+			i++;
+			}
+			
+		
 			
 			
 		}
@@ -494,16 +509,16 @@ rc_num = l_data_buffer_64.flushTo0();
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 11 -- Invalid");
+			//FAPI_INF("Col 11 -- Invalid");
 			i++;
 			
 		}
 		
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		
 	
 
-		//FAPI_INF("Inside strcmp cl13");
+		////FAPI_INF("Inside strcmp cl13");
 		l_sbit = 48;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_cols >= 12)
@@ -516,16 +531,16 @@ rc_num = l_data_buffer_64.flushTo0();
 		{	
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("Col 13 Invalid");
+			//FAPI_INF("Col 13 Invalid");
 			i++;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		
 	
 	
 
 
-		//FAPI_INF("Inside strcmp r0");
+		////FAPI_INF("Inside strcmp r0");
 		l_sbit = 42;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 0 )
@@ -533,18 +548,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 0 --  Invalid");
+			//FAPI_INF("row 0 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r1");
+		////FAPI_INF("Inside strcmp r1");
 		l_sbit = 36;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 1 )
@@ -552,19 +567,19 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 1 --  Invalid");
+			//FAPI_INF("row 1 --  Invalid");
 			i++;
 		}
 		
 	
 	
 	
-		//FAPI_INF("Inside strcmp r2");
+		////FAPI_INF("Inside strcmp r2");
 		l_sbit = 30;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 2 )
@@ -572,18 +587,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 2 --  Invalid");
+			//FAPI_INF("row 2 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r3");
+		////FAPI_INF("Inside strcmp r3");
 		l_sbit = 24;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 3 )
@@ -591,30 +606,30 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 3 --  Invalid");
+			//FAPI_INF("row 3 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r4");
+		////FAPI_INF("Inside strcmp r4");
 		l_sbit = 18;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 4 )
 		{rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 		rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
 		i--;}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 4 --  Invalid");
+			//FAPI_INF("row 4 --  Invalid");
 			i++;
 		}
 		
@@ -622,7 +637,7 @@ rc_num = l_data_buffer_64.flushTo0();
 	
 
 	
-		//FAPI_INF("Inside strcmp r5");
+		////FAPI_INF("Inside strcmp r5");
 		l_sbit = 12;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 5 )
@@ -630,18 +645,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 5 --  Invalid");
+			//FAPI_INF("row 5 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r6");
+		////FAPI_INF("Inside strcmp r6");
 		l_sbit = 6;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 6 )
@@ -649,18 +664,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 6 --  Invalid");
+			//FAPI_INF("row 6 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r7");
+		////FAPI_INF("Inside strcmp r7");
 		l_sbit = 0;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106ca,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 7 )
@@ -668,18 +683,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106ca,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 7 --  Invalid");
+			//FAPI_INF("row 7 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r8");
+		////FAPI_INF("Inside strcmp r8");
 		l_sbit = 54;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 8 )
@@ -687,19 +702,19 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 8 --  Invalid");
+			//FAPI_INF("row 8 --  Invalid");
 			i++;
 		}
 		
 	
 	
 
-		//FAPI_INF("Inside strcmp r9");
+		////FAPI_INF("Inside strcmp r9");
 		l_sbit = 48;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 9 )
@@ -707,18 +722,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 9 --  Invalid");
+			//FAPI_INF("row 9 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r10");
+		////FAPI_INF("Inside strcmp r10");
 		l_sbit = 42;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 10 )
@@ -726,18 +741,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 10 --  Invalid");
+			//FAPI_INF("row 10 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r11");
+		////FAPI_INF("Inside strcmp r11");
 		l_sbit = 36;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 11 )
@@ -745,18 +760,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 11 --  Invalid");
+			//FAPI_INF("row 11 --  Invalid");
 			i++;
 		}
 		
 	
 	
-		//FAPI_INF("Inside strcmp r12");
+		////FAPI_INF("Inside strcmp r12");
 		l_sbit = 30;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 12 )
@@ -764,18 +779,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 12 --  Invalid");
+			//FAPI_INF("row 12 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r13");
+		////FAPI_INF("Inside strcmp r13");
 		l_sbit = 24;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 13 )
@@ -783,18 +798,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 13 --  Invalid");
+			//FAPI_INF("row 13 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r14");
+		////FAPI_INF("Inside strcmp r14");
 		l_sbit = 18;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if(l_num_rows > 14 )
@@ -802,18 +817,18 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
 		i--;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		else
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 14 --  Invalid");
+			//FAPI_INF("row 14 --  Invalid");
 			i++;
 		}
 		
 	
 
-		//FAPI_INF("Inside strcmp r15");
+		////FAPI_INF("Inside strcmp r15");
 		l_sbit = 12;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if ( l_num_rows > 15 )
@@ -825,14 +840,14 @@ rc_num = l_data_buffer_64.flushTo0();
 		{
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
-			FAPI_INF("row 15 --  Invalid");
+			//FAPI_INF("row 15 --  Invalid");
 			i++;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		
 	
 
-		//FAPI_INF("Inside strcmp r16 and l_dram_rows = %d",l_dram_rows); 
+		////FAPI_INF("Inside strcmp r16 and l_dram_rows = %d",l_dram_rows); 
 		l_sbit = 6;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c9,l_data_buffer_64); if(rc) return rc;
 		if ( l_dram_rows >= 17 )
@@ -843,17 +858,17 @@ rc_num = l_data_buffer_64.flushTo0();
 		}
 		else
 		{
-			//FAPI_INF("r16 not used");
+			////FAPI_INF("r16 not used");
 			rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
-			FAPI_INF("Row 16 Invalid");
+			//FAPI_INF("Row 16 Invalid");
 			rc = fapiPutScom(i_target_mba,0x030106c9,l_data_buffer_64);  if(rc) return rc;
 			i++;
 		}
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		
 	
 
-		//FAPI_INF("Inside strcmp sl2");
+		////FAPI_INF("Inside strcmp sl2");
 		l_sbit = 36;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
 		//------- Enable these for later --- for now constant map to zero
@@ -861,13 +876,13 @@ rc_num = l_data_buffer_64.flushTo0();
 		{l_value =0;}
 		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 		rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
-		FAPI_INF("sl2 Invalid");
+		//FAPI_INF("sl2 Invalid");
 		i++;
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		
 	
 
-		//FAPI_INF("Inside strcmp sl1");
+		////FAPI_INF("Inside strcmp sl1");
 		l_sbit = 30;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
 		//------- Enable these for later --- for now constant map to zero
@@ -876,12 +891,12 @@ rc_num = l_data_buffer_64.flushTo0();
 		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 		rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
 		i++;
-		FAPI_INF("sl1 Invalid");
-		//FAPI_INF("Value of i = %d",i);
+		//FAPI_INF("sl1 Invalid");
+		////FAPI_INF("Value of i = %d",i);
 		
 	
 
-		//FAPI_INF("Inside strcmp sl0");
+		////FAPI_INF("Inside strcmp sl0");
 		l_sbit = 24;l_value =i;
 		rc = fapiGetScom(i_target_mba,0x030106c8,l_data_buffer_64); if(rc) return rc;
 		//------- Enable these for later --- for now constant map to zero
@@ -889,9 +904,9 @@ rc_num = l_data_buffer_64.flushTo0();
 		{l_value =0;}
 		rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);if (rc_num){FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);return rc;}
 		rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  if(rc) return rc;
-		FAPI_INF("sl0 Invalid");
+		//FAPI_INF("sl0 Invalid");
 		i++;
-		//FAPI_INF("Value of i = %d",i);
+		////FAPI_INF("Value of i = %d",i);
 		
 	
 	
@@ -900,11 +915,11 @@ rc_num = l_data_buffer_64.flushTo0();
 
   //------ Setting Start and end addr counters
   
-FAPI_INF("Debug - --------------- Setting Start and End Counters -----------\n");
+//FAPI_INF("Debug - --------------- Setting Start and End Counters -----------\n");
 rc_num = l_data_buffer_rd64.flushTo0();
 rc = fapiPutScom(i_target_mba,0x030106d0,l_data_buffer_rd64); if(rc) return rc;
 l_value = i+1;
-FAPI_INF("Setting end_addr Value of i = %d",i);
+//FAPI_INF("Setting end_addr Value of i = %d",i);
 rc_num = l_data_buffer_rd64.flushTo0();
 
 //Calculate and set Valid bits for end_addr
@@ -916,17 +931,15 @@ for(i=l_value;i <= 37;i++)
 	if (rc_num){FAPI_ERR( "Error in function  addr_gen:");rc.setEcmdError(rc_num);return rc;}
 
 l_readscom_value = l_data_buffer_rd64.getDoubleWord (0);
-FAPI_INF("Debug - Initial End addr for 0x030106d2 = %016llX",l_readscom_value);
+//FAPI_INF("Debug - Initial End addr for 0x030106d2 = %016llX",l_readscom_value);
 
 rc = FAPI_ATTR_GET(ATTR_EFF_SCHMOO_ADDR_MODE, &i_target_mba, l_attr_addr_mode); if(rc) return rc;
 
 rc = FAPI_ATTR_GET(ATTR_MCBIST_START_ADDR, &i_target_mba, l_start_addr); if(rc) return rc;
-FAPI_INF("User Defined ATTR - Start = %016llX",l_start_addr);
-
-rc = FAPI_ATTR_GET(ATTR_EFF_SCHMOO_ADDR_MODE, &i_target_mba, l_attr_addr_mode); if(rc) return rc;
+//FAPI_INF("User Defined ATTR - Start = %016llX",l_start_addr);
 rc = FAPI_ATTR_GET(ATTR_MCBIST_END_ADDR, &i_target_mba, l_end); if(rc) return rc;
 
-FAPI_INF("User defined END ATTR - End Address = %016llX",l_end);
+//FAPI_INF("User defined END ATTR - End Address = %016llX",l_end);
 
 rc = FAPI_ATTR_GET(ATTR_MCBIST_RANK, &i_target_mba, l_user_end_addr); if(rc) return rc;
 
@@ -947,28 +960,31 @@ rc = fapiPutScom(i_target_mba,0x030106d3,l_data_buffer_rd64); if(rc) return rc;
 else
 {
 
-l_attr_addr_mode = 3; //Default it for FW with Full Address Range
+//l_attr_addr_mode = 3; //Default it for FW with Full Address Range
 
 if(l_attr_addr_mode == 0)
 {
-	FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- Few Address Mode --------",l_attr_addr_mode);
+	//FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- Few Address Mode --------",l_attr_addr_mode);
 	l_sbit = 32;
 	rc_num = l_data_buffer_rd64.flushTo0();
 	l_start = 24;
 	l_len = 8;
 	l_value32 = 28;
 	rc_num=l_data_buffer_rd64.insert(l_value32,l_sbit,l_len,l_start);
+	
+	l_readscom_value = 0x000003FFF8000000ull;
+	rc_num  = l_data_buffer_rd64.setDoubleWord(0,l_readscom_value);if(rc_num) return rc;
 	rc = fapiPutScom(i_target_mba,0x030106d2,l_data_buffer_rd64); if(rc) return rc;
 	rc = fapiPutScom(i_target_mba,0x030106d3,l_data_buffer_rd64); if(rc) return rc;
 	l_readscom_value = l_data_buffer_rd64.getDoubleWord (0);
-	FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
+	//FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
 }
 
 else if(l_attr_addr_mode == 1)
 {
-	FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- QUARTER ADDRESSING Mode --------",l_attr_addr_mode);
+	//FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- QUARTER ADDRESSING Mode --------",l_attr_addr_mode);
 	l_readscom_value = l_readscom_value >> 2;
-	FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
+	//FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
 	rc_num  = l_data_buffer_rd64.setDoubleWord(0,l_readscom_value);if(rc_num) return rc;
 	rc = fapiPutScom(i_target_mba,0x030106d2,l_data_buffer_rd64); if(rc) return rc;
 	rc = fapiPutScom(i_target_mba,0x030106d3,l_data_buffer_rd64); if(rc) return rc;
@@ -976,17 +992,17 @@ else if(l_attr_addr_mode == 1)
 }
 else if(l_attr_addr_mode == 2)
 {
-	FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- HALF ADDRESSING Mode --------",l_attr_addr_mode);
+	//FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- HALF ADDRESSING Mode --------",l_attr_addr_mode);
 	l_readscom_value = l_readscom_value >> 1;
-	FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
+	//FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
 	rc_num  = l_data_buffer_rd64.setDoubleWord(0,l_readscom_value);if(rc_num) return rc;
 	rc = fapiPutScom(i_target_mba,0x030106d2,l_data_buffer_rd64); if(rc) return rc;
 	rc = fapiPutScom(i_target_mba,0x030106d3,l_data_buffer_rd64); if(rc) return rc;
 }
 else
 {
-	FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- FULL Address Mode --------",l_attr_addr_mode);
-	FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
+	//FAPI_INF("ATTR_EFF_SCHMOO_ADDR_MODE - %d ---- FULL Address Mode --------",l_attr_addr_mode);
+	//FAPI_INF("Debug - Final End addr for 0x030106d2 = %016llX",l_readscom_value);
 	rc = fapiPutScom(i_target_mba,0x030106d2,l_data_buffer_rd64); if(rc) return rc;
 	rc = fapiPutScom(i_target_mba,0x030106d3,l_data_buffer_rd64); if(rc) return rc;
 }

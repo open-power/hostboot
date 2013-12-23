@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.H,v 1.3 2013/04/03 14:17:30 bellows Exp $
+// $Id: mss_mcbist_address.H,v 1.4 2013/12/17 18:33:49 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,7 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 //  1.3    |bellows |03-Apr-13| Added Id for firmware
+//  1.4    |preeragh|17-Dec-14| Removed unwanted header includes
 // --------|--------|---------|--------------------------------------------------
 //------------------------------------------------------------------------------
 #ifndef MSS_MCBIST_ADDRESS_H
@@ -49,7 +50,6 @@
 #include <fapi.H>
 #include <cen_scom_addresses.H>
 #include <mss_access_delay_reg.H>
-#include <mss_shmoo_common.H>
 #include <mss_mcbist.H>
 #include<string.h>
 extern "C"

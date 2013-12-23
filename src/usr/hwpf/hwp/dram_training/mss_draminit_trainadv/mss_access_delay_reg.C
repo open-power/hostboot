@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.20 2013/10/22 06:17:40 sasethur Exp $
+// $Id: mss_access_delay_reg.C,v 1.21 2013/12/16 10:15:21 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -54,7 +54,7 @@
 //   1.16  | sauchadh |12-jun-13| ADDED	 CAC registers for read dqs
 //   1.17  | sauchadh |18-Jul-13| Added data bit disable registers
 //   1.19  | abhijsau |9-Oct-13 | Added mss_c4_phy() function 
-
+//   1.21  | abhijsau |16-Dec-13| Added function for fw  
 
 //----------------------------------------------------------------------
 //  My Includes
@@ -3269,7 +3269,1101 @@ fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, ui
    return rc; 
 }     
  
+fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose,uint16_t &io_value_u16)
+{
+   fapi::ReturnCode rc; 
+    
+   const uint8_t max_rp=8; 
+   uint8_t l_val=0;
+   uint8_t l_dram_width=0;
+   scom_location l_out;
+   uint64_t l_scom_add=0x0ull;
+   uint32_t l_sbit=0;
+   uint32_t l_len=0;
+   uint32_t l_value_u32=0;
+   uint32_t rc_num=0;
+   ecmdDataBufferBase data_buffer_64(64);
+   ecmdDataBufferBase data_buffer_32(32);
+   ecmdDataBufferBase out(16);
+   uint32_t l_output=0;
+   uint32_t l_start=0;
+   uint8_t l_rank_pair=9;
+   uint8_t l_rankpair_table[max_rp]={255};
+   uint8_t l_dimmtype=0;
+   uint8_t l_block=0;
+   uint8_t l_lane=0;
+   uint8_t l_start_bit=0;
+   uint8_t l_len8=0;
+   input_type l_type;
+   uint8_t l_mbapos=0;
+   const uint8_t l_ISDIMM_dqmax=71;
+   const uint8_t l_CDIMM_dqmax=79;
+   uint8_t l_adr=0;
+    const uint8_t addr_max=19;
+   const uint8_t cmd_max=3;
+   const uint8_t cnt_max=20;
+   const uint8_t clk_max=8;
+   const uint8_t addr_lanep0[addr_max]={1,5,3,7,10,6,4,10,13,12,9,9,0,0,6,4,1,4,8};
+   const uint8_t addr_adrp0[addr_max]={2,1,1,3,1,3,1,3,3,3,2,3,2,3,1,0,3,3,3};
+   const uint8_t addr_lanep1[addr_max]={7,10,3,6,8,12,6,1,5,8,2,0,13,4,5,9,6,11,9};
+   const uint8_t addr_adrp1[addr_max]={2,1,2,2,1,3,1,1,1,3,1,3,2,3,3,0,0,1,3};
+   const uint8_t addr_lanep2[addr_max]={8,0,7,1,12,10,1,5,9,5,13,5,4,2,4,9,10,9,0};
+   const uint8_t addr_adrp2[addr_max]={2,2,3,0,3,1,2,0,1,3,2,1,0,2,3,3,3,2,1};
+   const uint8_t addr_lanep3[addr_max]={6,2,9,9,2,3,4,10,0,5,1,5,4,1,8,11,5,12,1};
+   const uint8_t addr_adrp3[addr_max]={3,0,2,3,2,0,3,3,1,2,2,1,0,1,3,3,0,3,0};
+   
+   const uint8_t cmd_lanep0[cmd_max]={2,11,5};
+   const uint8_t cmd_adrp0[cmd_max]={3,1,3};
+   const uint8_t cmd_lanep1[cmd_max]={2,10,10};
+   const uint8_t cmd_adrp1[cmd_max]={2,3,2};
+   const uint8_t cmd_lanep2[cmd_max]={3,11,3};
+   const uint8_t cmd_adrp2[cmd_max]={1,3,0};
+   const uint8_t cmd_lanep3[cmd_max]={7,10,7};
+   const uint8_t cmd_adrp3[cmd_max]={1,1,3};
+   
+   const uint8_t cnt_lanep0[cnt_max]={0,7,3,1,7,8,8,3,8,6,7,2,2,0,9,1,3,6,9,2};
+   const uint8_t cnt_adrp0[cnt_max]={1,0,3,0,2,2,1,2,0,0,1,2,0,0,1,1,0,2,0,1};
+   const uint8_t cnt_lanep1[cnt_max]={5,4,0,5,11,9,10,7,1,11,0,4,12,3,6,8,1,4,7,7};
+   const uint8_t cnt_adrp1[cnt_max]={2,1,2,0,2,1,0,1,3,0,1,0,2,1,3,0,2,2,3,0};
+   const uint8_t cnt_lanep2[cnt_max]={0,4,7,13,11,5,12,2,3,6,11,6,7,1,10,8,8,2,4,1};
+   const uint8_t cnt_adrp2[cnt_max]={0,1,1,3,1,2,2,0,2,2,0,1,2,1,0,3,1,1,2,3};
+   const uint8_t cnt_lanep3[cnt_max]={0,11,9,8,4,7,0,3,8,6,13,8,7,0,6,6,1,2,9,5};
+   const uint8_t cnt_adrp3[cnt_max]={2,1,0,2,1,0,3,2,0,1,3,1,2,0,0,2,3,1,1,3};
+   
+   const uint8_t clk_lanep0[clk_max]={10,11,11,10,4,5,13,12};
+   const uint8_t clk_adrp0[clk_max]={0,0,2,2,2,2,2,2};
+   const uint8_t clk_lanep1[clk_max]={3,2,8,9,1,0,3,2};
+   const uint8_t clk_adrp1[clk_max]={3,3,2,2,0,0,0,0};
+   const uint8_t clk_lanep2[clk_max]={11,10,6,7,2,3,8,9};
+   const uint8_t clk_adrp2[clk_max]={2,2,0,0,3,3,0,0};
+   const uint8_t clk_lanep3[clk_max]={3,2,13,12,10,11,11,10};
+   const uint8_t clk_adrp3[clk_max]={3,3,2,2,0,0,2,2};
+   
+   
+   rc = mss_getrankpair(i_target_mba,i_port_u8,i_rank_u8,&l_rank_pair,l_rankpair_table);   if(rc) return rc;
+   
+   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+   
+   rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos);  if(rc) return rc;
+   
+   if(i_verbose==1)
+   {
+      FAPI_INF("dimm type=%d",l_dimmtype);
+      FAPI_INF("rank pair=%d",l_rank_pair);       
+   }
+   if((i_port_u8 >1) || (l_mbapos>1))
+   {
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+      FAPI_ERR("Wrong target or port specified rc = 0x%08X", uint32_t(rc));  
+      return rc;
+   }
+   
+   if((l_dram_width ==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) || (l_dram_width ==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8))   // Checking for dram width here so that checking can be skipped in called function
+   {
+      if(i_verbose==1)
+      {
+         FAPI_INF("dram width=%d",l_dram_width);
+      }
+   }
+   
+   else
+   {
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+      FAPI_ERR("Wrong dram width specified rc = 0x%08X", uint32_t(rc));
+      return rc;
+   }
+   
+   if(i_input_type_e==RD_DQ || i_input_type_e==WR_DQ) 
+   {
+      
+      if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+      {
+         l_type=CDIMM_DQ;
+         
+         if(i_input_index_u8>l_CDIMM_dqmax)    
+         {
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+            FAPI_ERR("Wrong input index specified rc = 0x%08X" ,uint32_t(rc));
+           return rc;      
+         }
+            
+      }
+      else if((l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+      {
+         l_type=ISDIMM_DQ;
+         if(i_input_index_u8>l_ISDIMM_dqmax)
+         {
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+            FAPI_ERR("Wrong input index specified rc = 0x%08X", uint32_t(rc));
+            return rc;
+         }
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong dimm type specified rc = 0x%08X", uint32_t(rc));
+         return rc;      
+      }
+      
+         
+      rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
+      
+      if(i_verbose==1)
+      {
+         FAPI_INF("C4 value is=%d",l_val);
+      }   
+      rc=cross_coupled(i_target_mba,i_port_u8,l_rank_pair,i_input_type_e,l_val,i_verbose,l_out); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_out.scom_addr);
+         FAPI_INF("start bit=%d",l_out.start_bit);
+         FAPI_INF("length=%d",l_out.bit_length);
+      }   
+      l_scom_add=l_out.scom_addr;
+      l_sbit=l_out.start_bit;
+      l_len=l_out.bit_length;
+	 
+   }
+   
+   else if(i_input_type_e==ADDRESS)
+   {
+      if(i_input_index_u8<=18) // 19 delay values for Address
+      {
+         if((i_port_u8==0) && (l_mbapos==0))
+         {
+            l_lane=addr_lanep0[i_input_index_u8];
+            l_adr=addr_adrp0[i_input_index_u8];
+         }
+         else if((i_port_u8==1) && (l_mbapos==0))
+         {
+            l_lane=addr_lanep1[i_input_index_u8];
+            l_adr=addr_adrp1[i_input_index_u8]; 
+         }
+         else if((i_port_u8==0) && (l_mbapos==1))
+         {
+            l_lane=addr_lanep2[i_input_index_u8];
+            l_adr=addr_adrp2[i_input_index_u8]; 
+         }
+         else
+         {
+            l_lane=addr_lanep3[i_input_index_u8];
+            l_adr=addr_adrp3[i_input_index_u8]; 
+         }
+         
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=ADDRESS_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("ADR=%d",l_adr);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      l_block=l_adr;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==DATA_DISABLE)
+   {
+      if(i_input_index_u8<=4) // 5 delay values for data bits disable register
+      {
+         l_block=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=DATA_DISABLE_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+      }
+      l_lane=0;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   
+   else if(i_input_type_e==COMMAND)
+   {
+      if(i_input_index_u8<=2) // 3 delay values for Command
+      {
+         if((i_port_u8==0) && (l_mbapos==0))
+         {
+            l_lane=cmd_lanep0[i_input_index_u8];
+            l_adr=cmd_adrp0[i_input_index_u8];
+         }
+         else if((i_port_u8==1) && (l_mbapos==0))
+         {
+            l_lane=cmd_lanep1[i_input_index_u8];
+            l_adr=cmd_adrp1[i_input_index_u8]; 
+         }
+         else if((i_port_u8==0) && (l_mbapos==1))
+         {
+            l_lane=cmd_lanep2[i_input_index_u8];
+            l_adr=cmd_adrp2[i_input_index_u8]; 
+         }
+         else
+         {
+            l_lane=cmd_lanep3[i_input_index_u8];
+            l_adr=cmd_adrp3[i_input_index_u8]; 
+         }
+         
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=COMMAND_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("ADR=%d",l_adr);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      l_block=l_adr;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }   
+   
+    else if(i_input_type_e==CONTROL)
+   {
+      if(i_input_index_u8<=19) // 20 delay values for Control
+      {
+         if((i_port_u8==0) && (l_mbapos==0))
+         {
+            l_lane=cnt_lanep0[i_input_index_u8];
+            l_adr=cnt_adrp0[i_input_index_u8];
+         }
+         else if((i_port_u8==1) && (l_mbapos==0))
+         {
+            l_lane=cnt_lanep1[i_input_index_u8];
+            l_adr=cnt_adrp1[i_input_index_u8]; 
+         }
+         else if((i_port_u8==0) && (l_mbapos==1))
+         {
+            l_lane=cnt_lanep2[i_input_index_u8];
+            l_adr=cnt_adrp2[i_input_index_u8]; 
+         }
+         else
+         {
+            l_lane=cnt_lanep3[i_input_index_u8];
+            l_adr=cnt_adrp3[i_input_index_u8]; 
+         }
+         
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=CONTROL_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("ADR=%d",l_adr);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      l_block=l_adr;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==CLOCK)
+   {
+      if(i_input_index_u8<=7) // 8 delay values for CLK
+      {
+         if((i_port_u8==0) && (l_mbapos==0))
+         {
+            l_lane=clk_lanep0[i_input_index_u8];
+            l_adr=clk_adrp0[i_input_index_u8];
+         }
+         else if((i_port_u8==1) && (l_mbapos==0))
+         {
+            l_lane=clk_lanep1[i_input_index_u8];
+            l_adr=clk_adrp1[i_input_index_u8]; 
+         }
+         else if((i_port_u8==0) && (l_mbapos==1))
+         {
+            l_lane=clk_lanep2[i_input_index_u8];
+            l_adr=clk_adrp2[i_input_index_u8]; 
+         }
+         else
+         {
+            l_lane=clk_lanep3[i_input_index_u8];
+            l_adr=clk_adrp3[i_input_index_u8]; 
+         }
+         
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=CLOCK_t;
+      if(i_verbose==1)
+      {
+         FAPI_INF("ADR=%d",l_adr);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      l_block=l_adr;
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }   
+   
+    
+   else if (i_input_type_e==RD_DQS || i_input_type_e==WR_DQS || i_input_type_e==DQS_ALIGN ||  i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
+   {
+     
+      if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+      {
+         l_type=CDIMM_DQS;
+      }
+      else if((l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+      {
+         l_type=ISDIMM_DQS;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong dimm type specified rc = 0x%08X", uint32_t(rc));
+         return rc;      
+      }
+      
+      
+      rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("C4 value is=%d",l_val);
+      }
+      rc=cross_coupled(i_target_mba,i_port_u8,l_rank_pair,i_input_type_e,l_val,i_verbose,l_out); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_out.scom_addr);
+         FAPI_INF("start bit=%d",l_out.start_bit);
+         FAPI_INF("length=%d",l_out.bit_length); 
+      }
+      l_scom_add=l_out.scom_addr;
+      l_sbit=l_out.start_bit;
+      l_len=l_out.bit_length;   
+         
+   }
+   
+   
+   else if(i_input_type_e==RAW_RDCLK_0 || i_input_type_e==RAW_RDCLK_1 || i_input_type_e==RAW_RDCLK_2 || i_input_type_e==RAW_RDCLK_3 || i_input_type_e==RAW_RDCLK_4) 
+   {
+      if(i_input_type_e==RAW_RDCLK_0)
+      {
+         l_block=0;
+      }
+      
+      else if(i_input_type_e==RAW_RDCLK_1)
+      {
+         l_block=1;
+      }
+      
+      else if(i_input_type_e==RAW_RDCLK_2)
+      {
+         l_block=2;
+      }
+      
+      else if(i_input_type_e==RAW_RDCLK_3)
+      {
+         l_block=3;
+      }
+      
+      else
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=3) // 4 delay values for RDCLK 
+      {
+         l_lane=i_input_index_u8;
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+     
+      ip_type_t l_input=RAW_RDCLK;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==RAW_DQSCLK_0 || i_input_type_e==RAW_DQSCLK_1 || i_input_type_e==RAW_DQSCLK_2 || i_input_type_e==RAW_DQSCLK_3 || i_input_type_e==RAW_DQSCLK_4)
+   {
+      if(i_input_type_e==RAW_DQSCLK_0)
+      {
+         l_block=0;
+      }
+      
+      else if(i_input_type_e==RAW_DQSCLK_1)
+      {
+         l_block=1;
+      }
+      
+      else if(i_input_type_e==RAW_DQSCLK_2)
+      {
+         l_block=2;
+      }
+      
+      else if(i_input_type_e==RAW_DQSCLK_3)
+      {
+         l_block=3;
+      }
+      
+      else
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=3) // 4 delay values for DQSCLK
+      {
+         l_lane=i_input_index_u8;
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      ip_type_t l_input=RAW_DQSCLK;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+         
+   else if(i_input_type_e==RAW_WR_DQ_0 || i_input_type_e==RAW_WR_DQ_1 || i_input_type_e==RAW_WR_DQ_2 || i_input_type_e==RAW_WR_DQ_3 || i_input_type_e==RAW_WR_DQ_4)
+   {
+      if(i_input_type_e==RAW_WR_DQ_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_WR_DQ_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_WR_DQ_2)
+      {
+         l_block=2;
+      }
+      else if(i_input_type_e==RAW_WR_DQ_3)
+      {
+         l_block=3;
+      }
+      else
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=15) // 16 Write delay values for DQ bits
+      {
+         l_lane=i_input_index_u8;
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+     
+      ip_type_t l_input=RAW_WR_DQ;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==RAW_RD_DQ_0 || i_input_type_e==RAW_RD_DQ_1 || i_input_type_e==RAW_RD_DQ_2 || i_input_type_e==RAW_RD_DQ_3 || i_input_type_e==RAW_RD_DQ_4)
+   {
+      if(i_input_type_e==RAW_RD_DQ_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_RD_DQ_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_RD_DQ_2)
+      {
+         l_block=2;
+      }
+      else if(i_input_type_e==RAW_RD_DQ_3)
+      {
+         l_block=3;
+      }
+      else 
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=15)   // 16 read delay values for DQ bits
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      ip_type_t l_input=RAW_RD_DQ;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==RAW_RD_DQS_0 || i_input_type_e==RAW_RD_DQS_1 || i_input_type_e==RAW_RD_DQS_2 || i_input_type_e==RAW_RD_DQS_3 || i_input_type_e==RAW_RD_DQS_4)
+   {
+      if(i_input_type_e==RAW_RD_DQS_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_RD_DQS_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_RD_DQS_2)
+      {
+         l_block=2;
+      }
+      else if(i_input_type_e==RAW_RD_DQS_3)
+      {
+         l_block=3;
+      }
+      else 
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=3) // 4 Read DQS delay values 
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      
+      ip_type_t l_input=RAW_RD_DQS;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==RAW_DQS_ALIGN_0 || i_input_type_e==RAW_DQS_ALIGN_1 || i_input_type_e==RAW_DQS_ALIGN_2 || i_input_type_e==RAW_DQS_ALIGN_3 || i_input_type_e==RAW_DQS_ALIGN_4)
+   {
+      if(i_input_type_e==RAW_DQS_ALIGN_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_DQS_ALIGN_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_DQS_ALIGN_2)
+      {
+         l_block=2;
+      }
+      else if(i_input_type_e==RAW_DQS_ALIGN_3)
+      {
+         l_block=3;
+      }
+      else 
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=3)     // 4 DQS alignment delay values
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      ip_type_t l_input=RAW_DQS_ALIGN;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   
+   else if(i_input_type_e==RAW_WR_DQS_0 || i_input_type_e==RAW_WR_DQS_1 || i_input_type_e==RAW_WR_DQS_2 || i_input_type_e==RAW_WR_DQS_3 || i_input_type_e==RAW_WR_DQS_4)
+   {
+      if(i_input_type_e==RAW_WR_DQS_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_WR_DQS_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_WR_DQS_2)
+      {
+         l_block=2;
+      }
+      else if(i_input_type_e==RAW_WR_DQS_3)
+      {
+         l_block=3;
+      }
+      else 
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=3)      // 4 Write DQS delay values
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc; 
+      }
+      ip_type_t l_input=RAW_WR_DQS;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   else if(i_input_type_e==RAW_SYS_CLK_0 || i_input_type_e==RAW_SYS_CLK_1 || i_input_type_e==RAW_SYS_CLK_2 || i_input_type_e==RAW_SYS_CLK_3 || i_input_type_e==RAW_SYS_CLK_4)
+   {
+      if(i_input_type_e==RAW_SYS_CLK_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_SYS_CLK_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_SYS_CLK_2)
+      {
+         l_block=2;
+      }
+      else if(i_input_type_e==RAW_SYS_CLK_3)
+      {
+         l_block=3;
+      }
+      else 
+      {
+         l_block=4;
+      } 
+      if(i_input_index_u8==0) // 1 system clock delay value
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc; 
+      }
+      ip_type_t l_input=RAW_SYS_CLK;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==RAW_SYS_ADDR_CLK)
+   {
+      if(i_input_index_u8<=1)   // 1 system address clock delay value
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc; 
+      }
+      ip_type_t l_input=RAW_SYS_ADDR_CLKS0S1;
+      if(i_verbose==1)
+      {
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   
+   else if(i_input_type_e==RAW_WR_CLK_0 || i_input_type_e==RAW_WR_CLK_1 || i_input_type_e==RAW_WR_CLK_2 || i_input_type_e==RAW_WR_CLK_3 || i_input_type_e==RAW_WR_CLK_4)
+   {
+      if(i_input_type_e==RAW_WR_CLK_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_WR_CLK_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_WR_CLK_2)
+      {
+         l_block=2;
+      }
+      else if(i_input_type_e==RAW_WR_CLK_3)
+      {
+         l_block=3;
+      }
+      else 
+      {
+         l_block=4;
+      } 
+      if(i_input_index_u8==0)           //  1 Write clock delay value
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc; 
+      }
+      ip_type_t l_input=RAW_WR_CLK;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==RAW_ADDR_0 || i_input_type_e==RAW_ADDR_1 || i_input_type_e==RAW_ADDR_2 || i_input_type_e==RAW_ADDR_3)
+   {
+      if(i_input_type_e==RAW_ADDR_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_ADDR_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_ADDR_2)
+      {
+         l_block=2;
+      }
+      else 
+      {
+         l_block=3;
+      }
+      if(i_input_index_u8<=15)      //  16 Addr delay values
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc; 
+      }
+      ip_type_t l_input=RAW_ADDR;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+  
+   else if(i_input_type_e==RAW_DQS_GATE_0 || i_input_type_e==RAW_DQS_GATE_1 || i_input_type_e==RAW_DQS_GATE_2 || i_input_type_e==RAW_DQS_GATE_3 || i_input_type_e==RAW_DQS_GATE_4)
+   {
+      if(i_input_type_e==RAW_DQS_GATE_0)
+      {
+         l_block=0;
+      }
+      else if(i_input_type_e==RAW_DQS_GATE_1)
+      {
+         l_block=1;
+      }
+      else if(i_input_type_e==RAW_DQS_GATE_2)
+      {
+         l_block=2;
+      }
+      else if(i_input_type_e==RAW_DQS_GATE_3)
+      {
+         l_block=3;
+      }
+      else 
+      {
+         l_block=4;
+      }
+              
+      if(i_input_index_u8<=3)     // 4 Gate Delay values
+      {
+         l_lane=i_input_index_u8;
+      }
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc; 
+      }
+      ip_type_t l_input=RAW_DQS_GATE;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   } 
+   
+   else
+   {
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+      FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
+      return rc;      
+   } 
+     
+   if(i_access_type_e==READ)   
+   {
+      rc=fapiGetScom(i_target_mba,l_scom_add,data_buffer_64);if(rc) return rc;
+      rc_num= rc_num | data_buffer_64.extractToRight(&l_output,l_sbit,l_len);
+      if(rc_num)
+      {
+        FAPI_ERR( "ecmd error on l_scom_add extract");       
+	rc.setEcmdError(rc_num);
+        return rc;
+      }    
+	  	rc_num  = data_buffer_32.setWord(0,l_output);if(rc_num) return rc;
+io_value_u16=data_buffer_32.getHalfWord(1);
+      //io_value_u32=l_output;
+	  
+      //FAPI_INF(" Abhijit Delay value=%d and original=%d",io_value_u16,l_output);
+   }
+   
+   else if(i_access_type_e==WRITE)
+   {
+      
+      if(i_input_type_e==RD_DQ || i_input_type_e==RD_DQS || i_input_type_e==RAW_RD_DQ_0 || i_input_type_e==RAW_RD_DQ_1 || i_input_type_e==RAW_RD_DQ_2 || i_input_type_e==RAW_RD_DQ_3 || i_input_type_e==RAW_RD_DQ_4 || i_input_type_e==RAW_RD_DQS_0 || i_input_type_e==RAW_RD_DQS_1 || i_input_type_e==RAW_RD_DQS_2 || i_input_type_e==RAW_RD_DQS_3 || i_input_type_e==RAW_RD_DQS_4
+      || i_input_type_e==RAW_SYS_ADDR_CLK || i_input_type_e==RAW_SYS_CLK_0 || i_input_type_e==RAW_SYS_CLK_1 || i_input_type_e==RAW_SYS_CLK_2 || i_input_type_e==RAW_SYS_CLK_3 || i_input_type_e==RAW_SYS_CLK_4 || i_input_type_e==RAW_WR_CLK_0 || i_input_type_e==RAW_WR_CLK_1 || i_input_type_e==RAW_WR_CLK_2 || i_input_type_e==RAW_WR_CLK_3 || i_input_type_e==RAW_WR_CLK_4
+      || i_input_type_e==RAW_ADDR_0 || i_input_type_e==RAW_ADDR_1 || i_input_type_e==RAW_ADDR_2 || i_input_type_e==RAW_ADDR_3 || i_input_type_e==RAW_DQS_ALIGN_0 || i_input_type_e==RAW_DQS_ALIGN_1 || i_input_type_e==RAW_DQS_ALIGN_2 || i_input_type_e==RAW_DQS_ALIGN_3 || i_input_type_e==RAW_DQS_ALIGN_4
+      || i_input_type_e==DQS_ALIGN || i_input_type_e==COMMAND || i_input_type_e==ADDRESS || i_input_type_e==CONTROL || i_input_type_e==CLOCK )   
+      {
+         l_start=25;   // l_start is starting bit of delay value in the register. There are different registers and each register has a different field for delay
+      }
+      else if(i_input_type_e==WR_DQ || i_input_type_e==WR_DQS || i_input_type_e==RAW_WR_DQ_0 || i_input_type_e==RAW_WR_DQ_1 || i_input_type_e==RAW_WR_DQ_2 || i_input_type_e==RAW_WR_DQ_3 || i_input_type_e==RAW_WR_DQ_4 || i_input_type_e==RAW_WR_DQS_0 || i_input_type_e==RAW_WR_DQS_1 || i_input_type_e==RAW_WR_DQS_2 || i_input_type_e==RAW_WR_DQS_3 || i_input_type_e==RAW_WR_DQS_4 )
+      {
+         l_start=22;
+      }
+   
+      else if(i_input_type_e==RAW_DQS_GATE_0 || i_input_type_e==RAW_DQS_GATE_1 || i_input_type_e==RAW_DQS_GATE_2 || i_input_type_e==RAW_DQS_GATE_3 || i_input_type_e==RAW_DQS_GATE_4 || i_input_type_e==DQS_GATE)
+      {
+         l_start=29;
+      }
+      
+      else if(i_input_type_e==RAW_RDCLK_0 || i_input_type_e==RAW_RDCLK_1 || i_input_type_e==RAW_RDCLK_2 || i_input_type_e==RAW_RDCLK_3 || i_input_type_e==RAW_RDCLK_4 || i_input_type_e==RDCLK || i_input_type_e==RAW_DQSCLK_0 || i_input_type_e==RAW_DQSCLK_1 || i_input_type_e==RAW_DQSCLK_2 || i_input_type_e==RAW_DQSCLK_3 || i_input_type_e==RAW_DQSCLK_4 || i_input_type_e==DQSCLK)
+      {
+         l_start=30;  
+      }
+      
+      else if(i_input_type_e==DATA_DISABLE)
+      {
+         l_start=16;
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      if(i_verbose==1)
+      {
+         FAPI_INF("value given=%d",io_value_u16);
+      }
+      rc_num  = data_buffer_32.setHalfWord(1,io_value_u16);if(rc_num) return rc;
+	  l_value_u32  = data_buffer_32.getWord(0);
+	  
+	 // FAPI_INF("\n Abhijit the original passed=%d and the changed=%d ",io_value_u16,l_value_u32);
+      rc=fapiGetScom(i_target_mba,l_scom_add,data_buffer_64);if(rc) return rc;	  
+      rc_num=data_buffer_64.insert(l_value_u32,l_sbit,l_len,l_start);
+      if(rc_num)
+      {
+        FAPI_ERR( "ecmd error on l_scom_add extract");       
+	rc.setEcmdError(rc_num);
+        return rc;
+      }    
+      rc=fapiPutScom(i_target_mba,l_scom_add,data_buffer_64); if(rc) return rc;
+   }
+   return rc;
+}
 
+   
 
 
 } // extern "C"

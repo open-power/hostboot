@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,16 +20,16 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.H,v 1.38 2013/09/18 10:10:47 lapietra Exp $
+// $Id: mss_mcbist.H,v 1.41 2013/12/17 18:34:53 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
 // *!                   *** IBM Confidential ***
 // *!***************************************************************************
 // *! FILENAME             :  mss_mcbist.H
-// *! TITLE                : 
+// *! TITLE                :
 // *! DESCRIPTION          : MCBIST procedures
-// *! CONTEXT              : 
+// *! CONTEXT              :
 // *!
 // *! OWNER  NAME          : Devashikamani, Aditya        Email: adityamd@in.ibm.com
 // *! BACKUP               : Sethuraman, Saravanan        Email: saravanans@in.ibm.com
@@ -38,6 +38,9 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.41  |aditya  |12/17/13 |Updated mcb_error_map function parameters
+//   1.40  |rwheeler|10/29/13 |added W_ONLY_INFINITE_RAND test
+//   1.39  |aditya  |10/29/13 |Updated mcb_error_map function parameters
 //   1.38  |aditya  |09/18/13 |Updated parameters for random seed attribute
 //   1.37  |aditya  |08/02/13 |Updated parameters in mcb_error_map_print function
 //   1.36  |aditya  |07/09/13 |Added l_random_addr_enable and l_fixed_addr_enable for struct Subtest_info
@@ -50,21 +53,21 @@
 //   1.27  |aditya  |02/13/13 |updated testtypes
 //   1.25  |aditya  |02/12/13 |updated testtypes
 //   1.24  |aditya  |01/30/13 |Updated fw comments
-//   1.23  |aditya  |01/16/13 |added a parameter to setup_mcbist function 
-//   1.22  |aditya  |01/11/13 |added a parameter to setup_mcbist function   
-//   1.21  |aditya  |01/07/13 | Updated FW Review Comments 
-//   1.20  |aditya  |01/03/13 | Updated FW Comments 
-//   1.18  |aditya  |12/18/12 | Updated Review Comments 
-//   1.17  |aditya  |12/14/12 |Updated FW review comments   
+//   1.23  |aditya  |01/16/13 |added a parameter to setup_mcbist function
+//   1.22  |aditya  |01/11/13 |added a parameter to setup_mcbist function
+//   1.21  |aditya  |01/07/13 | Updated FW Review Comments
+//   1.20  |aditya  |01/03/13 | Updated FW Comments
+//   1.18  |aditya  |12/18/12 | Updated Review Comments
+//   1.17  |aditya  |12/14/12 |Updated FW review comments
 //   1.16  |aditya  |12/6/12  | Updated Review Comments
 //   1.15  |aditya  |11/15/12 | Updated for FW REVIEW COMMENTS
 //   1.13  |aditya  |10/29/12 | Updated from ReturnCode to fapi::ReturnCode and Target to const fapi::Target &
-//   1.12  |aditya  |10/18/12 | Changed Parameters for Function mcb_write_test_mem  
+//   1.12  |aditya  |10/18/12 | Changed Parameters for Function mcb_write_test_mem
 //   1.11  |aditya  |10/17/12 | updated code to be compatible with ecmd 13 release
-//   1.10  |aditya  |15-Oct-12| Moved scom address to cen_scom_addresses.H, added user option 
+//   1.10  |aditya  |15-Oct-12| Moved scom address to cen_scom_addresses.H, added user option
 //   1.9   |bellows |16-Jul-12| Added in Id tag
 //   1.6   |gaushard|26/03/12 | Removed Extra Comments/Codes
-//   1.5   |gaushard|26/03/12 | Updated Function Declaration 
+//   1.5   |gaushard|26/03/12 | Updated Function Declaration
 //   1.4   |sasethur|23/03/12 | Added enum for shmoo mode
 //   1.3   |gaushard|22/03/12 | Added address generation function
 //   1.2   |sasethur|24/02/12 | Updated Typo
@@ -79,7 +82,7 @@
 #include <fapi.H>
 #include <cen_scom_addresses.H>
 #include <mss_access_delay_reg.H>
-#include <mss_shmoo_common.H>
+
 extern "C"
 {
 using namespace fapi;
@@ -126,12 +129,13 @@ enum mcbist_test_mem
     R_INFINITE_RF,
     MARCH,
     SIMPLE_FIX_RF,
-	SHMOO_STRESS,
-	SIMPLE_RAND_RA,
-	SIMPLE_FIX_RA,
-	SIMPLE_FIX_RF_RA,
-	TEST_RR,
-	TEST_RF
+    SHMOO_STRESS,
+    SIMPLE_RAND_RA,
+    SIMPLE_FIX_RA,
+    SIMPLE_FIX_RF_RA,
+    TEST_RR,
+    TEST_RF,
+    W_ONLY_INFINITE_RAND
 };
 
 enum mcbist_data_gen
@@ -199,8 +203,8 @@ enum mcbist_oper_type
 enum mcbist_data_mode
 {
     FIX,
-    DATA_RF,         
-    DATA_RR,         
+    DATA_RF,
+    DATA_RR,
     RECCF,
     RECCB,
     DEA,
@@ -264,9 +268,9 @@ enum shmoo_mode
 
 enum shmoo_addr_mode
 {
-   FEW_ADDR= 0, 
-   QUARTER_ADDR = 1, 
-   HALF_ADDR = 2, 
+   FEW_ADDR= 0,
+   QUARTER_ADDR = 1,
+   HALF_ADDR = 2,
    FULL_ADDR = 3
 };
 
@@ -279,11 +283,11 @@ uint8_t l_random_data_enable;
 uint8_t l_fixed_data_enable;
 uint8_t l_random_addr_enable;
 uint8_t l_fixed_addr_enable;
-};   
+};
 
 
 fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,uint8_t *o_mcb_status,struct Subtest_info l_sub_info[30],uint8_t i_flag);
-fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,uint8_t  o_error_map[][8][10][2]);
+fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,uint8_t  o_error_map[][8][10][2],uint8_t i_CDarray0[80],uint8_t i_CDarray1[80],uint8_t count_bad_dq[2]);
 fapi::ReturnCode mcb_write_test_mem(const fapi::Target & i_target_mba,const uint64_t i_reg_addr,mcbist_oper_type i_operation_type,uint8_t i_cfg_test_123_cmd,mcbist_addr_mode i_addr_mode,mcbist_data_mode i_data_mode,uint8_t i_done,mcbist_data_select_mode i_data_select_mode, mcbist_add_select_mode i_addr_select_mode,uint8_t i_testnumber,uint8_t i_testnumber1,uint8_t i_total_no,struct Subtest_info l_sub_info[30]);
 fapi::ReturnCode cfg_mcb_test_mem(const fapi::Target & i_target_mba,mcbist_test_mem i_test_type,struct Subtest_info l_sub_info[30]);
 fapi::ReturnCode mcb_reset_trap(const fapi::Target & i_target_mba);
@@ -293,7 +297,7 @@ fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba);
 fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,struct Subtest_info l_sub_info[30]);
 //fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & i_mcb_fail_320,uint8_t i_port);
 //fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & l_mcb_fail_160,uint8_t i_port,uint8_t l_array[200],uint8_t l_number);
-fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & l_mcb_fail_160,uint8_t i_port,uint8_t l_array[200],uint8_t l_number,ecmdDataBufferBase l_data_buf_port,ecmdDataBufferBase l_data_buf_spare);
+fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & l_mcb_fail_160,uint8_t i_port,uint8_t l_array[80],uint8_t l_number,ecmdDataBufferBase l_data_buf_port,ecmdDataBufferBase l_data_buf_spare);
 fapi::ReturnCode mss_conversion_testtype(const fapi::Target & i_target_mba,uint8_t l_pattern,mcbist_test_mem &i_mcbtest );
 fapi::ReturnCode mss_conversion_data(const fapi::Target & i_target_mba,uint8_t l_pattern,mcbist_data_gen  &i_mcbpatt);
 

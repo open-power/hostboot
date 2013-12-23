@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_shmoo_common.H,v 1.17 2013/10/07 08:35:41 sasethur Exp $
+// $Id: mss_shmoo_common.H,v 1.18 2013/12/17 18:46:49 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM 
@@ -52,23 +52,23 @@ enum shmoo_type_t { TEST_NONE=0,MCBIST=1,WR_EYE=2, WRT_DQS=8,RD_EYE=4,RD_GATE=16
 
 enum shmoo_algorithm_t { SEQ_LIN}; // Parallel bytes/ranks here .. no parallel targets in HB
 const uint8_t NINE = 9;
-const uint8_t MAX_RPS=4;// 4 Rank pairs in this design
-const uint8_t MAX_SHMOO=18;
+//const uint8_t MAX_RPS=4;// 4 Rank pairs in this design
+const uint8_t MAX_SHMOO=1;
 const uint8_t MAX_RANK_DIMM=4;
 const uint8_t MAX_NIBBLES=2;
 const uint8_t MAX_BITS=4;
 const uint8_t MAX_DQ=80;
 const uint8_t MAX_DQS=20;
 const uint8_t SCHMOO_NIBBLES=20;
-const uint16_t read_counter_threshold=1000;
-const uint16_t error_threshold_count=400;
+//const uint16_t read_counter_threshold=1000;
+//const uint16_t error_threshold_count=400;
 const uint8_t MAX_PORT = 2;
 const uint8_t MAX_BYTE = 10;
 const uint8_t MAX_RANK = 8;
-const uint8_t MAX_CMDS = 3;
-const uint8_t MAX_ADDR = 20;
-const uint8_t MAX_CNTRL = 20;
-const uint8_t MAX_CLK = 8;
+//const uint8_t MAX_CMDS = 1;
+//const uint8_t MAX_ADDR = 20;
+//const uint8_t MAX_CNTRL = 20;
+//const uint8_t MAX_CLK = 8;
 
 //const uint8_t MAX_NIBBLE = 1;
 
@@ -87,29 +87,16 @@ struct shmoo_knob_data_t{
     // config data and results
     //uint32_t curr_val[MAX_BLOCK][MAX_INSTANCE][MAX_RPS];
     bool done;
-    uint32_t lb_regval[MAX_DQ][MAX_RPS]; // Left Bound register/Hex value
-    uint32_t rb_regval[MAX_DQ][MAX_RPS];// Right Bound register/Hex value
-    uint32_t total_margin[MAX_DQ][MAX_RPS]; //Left bound+ right bound value
-    uint32_t nom_val[MAX_DQ][MAX_RPS]; // nominal value of this instance of the knob
-	uint32_t last_pass[MAX_DQ][MAX_RPS];
-	uint32_t last_fail[MAX_DQ][MAX_RPS];
-	uint32_t curr_val[MAX_DQ][MAX_RPS];
-	uint32_t curr_diff[MAX_DQ][MAX_RPS];
-    uint32_t right_margin_val[MAX_DQ][MAX_RPS];
-    uint32_t left_margin_val[MAX_DQ][MAX_RPS];
-	uint32_t right_err_cnt[MAX_DQ][MAX_RPS];
-	uint32_t left_err_cnt[MAX_DQ][MAX_RPS];
-	uint32_t cmd_lb_regval[MAX_PORT][MAX_CMDS][SCHMOO_NIBBLES]; // Left Bound register/Hex value
-    uint32_t cmd_rb_regval[MAX_PORT][MAX_CMDS][SCHMOO_NIBBLES];// Right Bound register/Hex value
-    uint32_t cmd_total_margin[MAX_PORT][MAX_CMDS][SCHMOO_NIBBLES]; //Left bound+ right bound value
-    uint32_t cmd_nom_val[MAX_CMDS]; // nominal value of this instance of the knob
-    uint32_t cmd_right_margin_val[MAX_PORT][MAX_CMDS][SCHMOO_NIBBLES];
-    uint32_t cmd_left_margin_val[MAX_PORT][MAX_CMDS][SCHMOO_NIBBLES];
-	uint32_t addr_nom_val[MAX_ADDR]; 
-	uint32_t cntrl_nom_val[MAX_CNTRL]; 
-	uint32_t clk_nom_val[MAX_CLK]; 
-	uint32_t datadis_nom_val[MAX_CLK];
-	uint32_t offset[SCHMOO_NIBBLES]; 
+    uint16_t lb_regval[MAX_DQ]; // Left Bound register/Hex value
+    uint16_t rb_regval[MAX_DQ];// Right Bound register/Hex value
+    //uint32_t total_margin[MAX_DQ][MAX_RPS]; //Left bound+ right bound value
+    uint16_t nom_val[MAX_DQ]; // nominal value of this instance of the knob
+	 uint16_t last_pass[MAX_DQ];
+	 uint16_t last_fail[MAX_DQ];
+	 uint16_t curr_val[MAX_DQ];
+	// uint32_t curr_diff[MAX_DQ];
+    uint16_t right_margin_val[MAX_DQ];
+    uint16_t left_margin_val[MAX_DQ];
 	
 };
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.C,v 1.43 2013/10/04 06:32:21 sasethur Exp $
+// $Id: mss_mcbist.C,v 1.45 2013/12/17 18:36:53 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.45  |aditya  |12/17/13|Added Simple_fix_rf
 //   1.43  |aditya  |10/05/13|Updated fw comments
 //   1.42  |aditya  |09/18/13|Updated Call for functions
 //   1.41  |aditya  |08/10/13|Minor Fix for Hostboot compile
@@ -85,7 +86,7 @@ extern "C"
 {
 using namespace fapi;
 
-
+const uint8_t MAX_BYTE = 10;
 //*****************************************************************/
 // Funtion name : cfg_mcb_test_mem
 // Description  : This function executes different MCBIST subtests
@@ -213,6 +214,18 @@ fapi::ReturnCode  cfg_mcb_test_mem(const fapi::Target & i_target_mba,mcbist_test
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,DATA_RF,0,DEFAULT,FIX_ADDR,0,4,4,l_sub_info); if(rc) return rc;        
     }
     
+	else if (i_test_type == SIMPLE_FIX_RF)
+    {
+	FAPI_DBG("%s:Current MCBIST TESTTYPE : SIMPLE_FIX_RF ",i_target_mba.toEcmdString());
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,SF,DATA_RF, 0,DEFAULT,FIX_ADDR,0,0,4,l_sub_info); if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,DATA_RF, 1,DEFAULT,FIX_ADDR,1,1,4,l_sub_info); if(rc) return rc;
+        l_done_bit = 1;
+		rc = FAPI_ATTR_SET(ATTR_MCBIST_ADDR_BANK, &i_target_mba, l_done_bit); if(rc) return rc;
+		//rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,DATA_RF, 1,DEFAULT,FIX_ADDR,2,2,4,l_sub_info); if(rc) return rc;
+        //rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,OPER_RAND,0,RF,DATA_RF, 1,DEFAULT,FIX_ADDR,3,3,4,l_sub_info); if(rc) return rc;
+        
+        //rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,DATA_RF,0,DEFAULT,FIX_ADDR,0,4,4,l_sub_info); if(rc) return rc;  
+    }
     else
     {
 	    
@@ -305,6 +318,7 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
     uint32_t l_mbs23_mcb_random[MAX_BYTE] = {0x02011775,0x02011776,0x02011777,0x02011778,0x02011779,0x0201177a,0x0201177b,0x0201177c,0x0201177d,0x0201177e};
 	
 	
+	
 	uint8_t l_index,l_index1 = 0;
     uint32_t l_rand_32 = 0;
 	
@@ -317,6 +331,16 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
     FAPI_INF(" Data mode is %d ",i_datamode);}
     uint8_t l_mbaPosition =0;   
     
+	
+	fapi::Target i_target_centaur ;
+		rc = fapiGetParentChip(i_target_mba, i_target_centaur); 
+		if (rc)
+		{
+		if(l_print == 0)FAPI_INF("Error in getting parent chip!"); return rc;
+		}
+		
+	
+	
     if(l_print == 0)FAPI_INF("Function cfg_mcb_dgen");
     //Read MBA position attribute 0 - MBA01 1 - MBA23
     rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbaPosition);
@@ -484,12 +508,6 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
 			return rc;
 		}
 		
-		fapi::Target i_target_centaur ;
-		rc = fapiGetParentChip(i_target_mba, i_target_centaur); 
-		if (rc)
-		{
-		if(l_print == 0)FAPI_INF("Error in getting parent chip!"); return rc;
-		}
 		
 		if(i_datamode == MCBIST_2D_CUP_PAT5)
 		{
@@ -710,13 +728,13 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
 		if(l_mbaPosition == 0)
 		{
 		
-			rc = fapiPutScom(i_target_mba, l_mbs01_mcb_random[l_index] , l_data_buffer_64); if(rc) return rc;//added
+			rc = fapiPutScom(i_target_centaur, l_mbs01_mcb_random[l_index] , l_data_buffer_64); if(rc) return rc;//added
 		
 		}
 		else
 		{
 		
-			rc = fapiPutScom(i_target_mba, l_mbs23_mcb_random[l_index] , l_data_buffer_64); if(rc) return rc;//added
+			rc = fapiPutScom(i_target_centaur, l_mbs23_mcb_random[l_index] , l_data_buffer_64); if(rc) return rc;//added
 		
 		}
 		}

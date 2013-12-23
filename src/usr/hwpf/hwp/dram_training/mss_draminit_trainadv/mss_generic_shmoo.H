@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.H,v 1.22 2013/08/08 11:08:58 sasethur Exp $
+// $Id: mss_generic_shmoo.H,v 1.24 2013/12/17 18:45:02 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.24  |abhijit |12/17/13|modified as per to support firmware 
 //   1.22  |abhijit |8/08/13 |added binary schmoo functions 
 //   1.20  |abhijit |7/17/13 |added functions for read dqs 
 //   1.11  |abhijit |1/21/13 |fixed constructor definition  
@@ -77,7 +78,7 @@ class generic_shmoo
                struct PORT{
                    struct RANK{
                         shmoo_knob_data_t K; // Set of knobs used by this shmoo 
-                   }S[MAX_RANK];
+                   }S[MAX_RANK_DIMM];
                } P[MAX_PORT];
            }MBA;
            shmoo_knob_config_t static_knob; // Static info regarding the knob
@@ -89,6 +90,7 @@ class generic_shmoo
         shmoo_algorithm_t algorithm;
         shmoo_mode mcbist_mode;
         uint8_t mcbist_error_map[MAX_PORT][MAX_RANK][MAX_BYTE][MAX_NIBBLES];
+		uint8_t count_bad_dq[MAX_PORT];
 		uint8_t schmoo_error_map[MAX_PORT][MAX_RANK][20];
 		uint8_t binary_done_map[MAX_PORT][MAX_RANK][20];
 		shmoo_type_t shmoo_mask;
@@ -98,11 +100,11 @@ class generic_shmoo
 	uint32_t iv_pattern;
 	uint32_t iv_test_type;
 	uint8_t iv_dmm_type;
-	uint8_t iv_DQS_ON;
+	uint8_t iv_SHMOO_ON;
 	uint8_t iv_shmoo_type;
-	uint32_t iv_shmoo_param;
-	uint32_t iv_binary_diff;
-	uint32_t iv_vref_mul;
+	uint16_t iv_shmoo_param;
+	uint16_t iv_binary_diff;
+	uint16_t iv_vref_mul;
 	uint8_t valid_rank[MAX_RANK];
 
         
@@ -116,26 +118,27 @@ class generic_shmoo
         generic_shmoo(uint8_t iv_addr,shmoo_type_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm);// Constructor
         generic_shmoo(){};
         ~generic_shmoo(){};  // Destructor
-        void  init_multi_array(uint32_t (&array)[MAX_DQ][MAX_RPS],uint32_t init_val); //initialize multi dim arrays to known value
-	fapi::ReturnCode init_multi_array_dqs(uint32_t (&array)[MAX_DQ][MAX_RPS],uint32_t init_val);
+        void  init_multi_array(uint16_t (&array)[MAX_DQ],uint16_t init_val); //initialize multi dim arrays to known value
+	//fapi::ReturnCode init_multi_array_dqs(uint32_t (&array)[MAX_DQ][MAX_RPS],uint32_t init_val);
         fapi::ReturnCode get_all_noms(const fapi::Target & i_target); //! Read in all the Nominal values of the relevant knobs
+		//fapi::ReturnCode get_all_bad_dq(const fapi::Target & i_target);
 		fapi::ReturnCode set_all_binary(const fapi::Target & i_target,bound_t bound);
 		fapi::ReturnCode get_all_noms_dqs(const fapi::Target & i_target); //! Read in all the Nominal values of the relevant knobs
-		fapi::ReturnCode get_all_noms_gate(const fapi::Target & i_target); //! Read in all the Nominal values of the relevant knobs
-		fapi::ReturnCode get_all_noms_data_disable(const fapi::Target & i_target);
-		fapi::ReturnCode put_all_noms_data_disable(const fapi::Target & i_target,uint8_t flag);
+		//fapi::ReturnCode get_all_noms_gate(const fapi::Target & i_target); //! Read in all the Nominal values of the relevant knobs
+		//fapi::ReturnCode get_all_noms_data_disable(const fapi::Target & i_target);
+		//fapi::ReturnCode put_all_noms_data_disable(const fapi::Target & i_target,uint8_t flag);
 		//fapi::ReturnCode put_all_zero_data_disable(const fapi::Target & i_target);
         fapi::ReturnCode find_bound(const fapi::Target & i_target,bound_t); // generic Right bound
         fapi::ReturnCode knob_update(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); // Increment or decrement the knob
 		fapi::ReturnCode knob_update_bin(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); 
-	fapi::ReturnCode knob_update_gate(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t pass,bool &flag); // Increment or decrement the knob
+	//fapi::ReturnCode knob_update_gate(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t pass,bool &flag); // Increment or decrement the knob
 	//fapi::ReturnCode knob_update_gate(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); 
-	fapi::ReturnCode knob_update_gate_train(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t pass);
+	//fapi::ReturnCode knob_update_gate_train(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t pass);
 	fapi::ReturnCode knob_update_dqs_by8(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); 
 	fapi::ReturnCode knob_update_dqs_by4(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag);
-        fapi::ReturnCode print_report(const fapi::Target & i_target); // Print Shmoo report to  STDOUT
+       fapi::ReturnCode print_report(const fapi::Target & i_target); // Print Shmoo report to  STDOUT
         fapi::ReturnCode print_report_dqs(const fapi::Target & i_target);
-		fapi::ReturnCode print_report_gate(const fapi::Target & i_target);
+		//fapi::ReturnCode print_report_gate(const fapi::Target & i_target);
 		//fapi::ReturnCode print_shmoo_parms();
 	fapi::ReturnCode get_margin(const fapi::Target & i_target);
 	fapi::ReturnCode get_margin_dqs_by8(const fapi::Target & i_target);
@@ -147,8 +150,8 @@ class generic_shmoo
         fapi::ReturnCode  check_error_map(const fapi::Target & i_target,uint8_t port,uint8_t &pass);
         fapi::ReturnCode sanity_check(const fapi::Target & i_target);
 		fapi::ReturnCode schmoo_setup_mcb( const fapi::Target & i_target);
-		fapi::ReturnCode get_error_cnt(const fapi::Target & i_target,uint8_t port,uint8_t rank,uint8_t rank_pair,uint8_t bit,bound_t bound);
-		fapi::ReturnCode knob_update_dqs_by8_isdimm(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); 
+		//fapi::ReturnCode get_error_cnt(const fapi::Target & i_target,uint8_t port,uint8_t rank,uint8_t rank_pair,uint8_t bit,bound_t bound);
+		//fapi::ReturnCode knob_update_dqs_by8_isdimm(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); 
 	fapi::ReturnCode knob_update_dqs_by4_isdimm(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag);
         fapi::ReturnCode run(const fapi::Target & i_target,uint32_t *right_min_margin,uint32_t *left_min_margin,uint32_t i_vref_mul);
 	fapi::ReturnCode shmoo_save_rest(const fapi::Target & i_target,uint64_t i_content_array[],uint8_t i_mode);
