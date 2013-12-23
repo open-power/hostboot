@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.29 2013/12/04 10:35:50 jaswamin Exp $
+// $Id: io_dccal.C,v 1.30 2013/12/10 14:39:02 mfred Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -741,7 +741,7 @@ ReturnCode io_dccal(const Target& target){
         }
         rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
                                             TP_CHIPLET_0x01000000,
-                                            TP_BNDY_PLL_RING_ADDR,
+                                            MEMB_TP_BNDY_PLL_RING_ADDR,
                                             ring_data,
                                             true);
         if (rc)
@@ -782,7 +782,7 @@ ReturnCode io_dccal(const Target& target){
 
         rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
                                             TP_CHIPLET_0x01000000,
-                                            TP_BNDY_PLL_RING_ADDR,
+                                            MEMB_TP_BNDY_PLL_RING_ADDR,
                                             ring_data,
                                             true);
         if (rc)

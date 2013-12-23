@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.H,v 1.2 2013/09/30 16:09:57 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.H,v 1.3 2013/12/10 02:50:34 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -49,10 +49,11 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
-const uint32_t TP_BNDY_PLL_RING_ADDR    = 0x00030088;
-const uint32_t PB_BNDY_DMIPLL_RING_ADDR = 0x02030088;
-const uint32_t AB_BNDY_PLL_RING_ADDR    = 0x08030088;
-const uint32_t PCI_BNDY_PLL_RING_ADDR   = 0x09030088;
+const uint32_t TP_BNDY_PLL_RING_ADDR      = 0x00030088;
+const uint32_t MEMB_TP_BNDY_PLL_RING_ADDR = 0x01030088;
+const uint32_t PB_BNDY_DMIPLL_RING_ADDR   = 0x02030088;
+const uint32_t AB_BNDY_PLL_RING_ADDR      = 0x08030088;
+const uint32_t PCI_BNDY_PLL_RING_ADDR     = 0x09030088;
 
 const uint32_t DMI_PLL_VCO_WORKAROUND_THRESHOLD_FREQ = 4800;
 

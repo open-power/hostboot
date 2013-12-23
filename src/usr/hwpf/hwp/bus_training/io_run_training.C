@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.51 2013/11/25 07:10:38 varkeykv Exp $
+// $Id: io_run_training.C,v 1.53 2013/12/20 08:32:10 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -89,7 +89,7 @@ ReturnCode io_training_set_pll_post_wiretest(const Target& target){
                                &target,
                                chip_unit);
      
-            if (!rc.ok())
+            if (rc)
             {
                 FAPI_ERR("Error retreiving MCS chiplet number!");
                 return rc;
@@ -133,16 +133,26 @@ ReturnCode io_training_set_pll_post_wiretest(const Target& target){
         //}
               
 	    rc_ecmd |= ring_data.setBitLength(ring_length);
-            
-            rc_ecmd |=fapiGetRing(parent_target,PB_BNDY_DMIPLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE); 
-            FAPI_DBG("PFD bit to be cleared for DMI unit %d is %d",chip_unit,proc_dmi_cupll_pfd360_offset[chip_unit]);
-            ring_data.clearBit(proc_dmi_cupll_pfd360_offset[chip_unit]);
-            // Now 
-        if (rc_ecmd)
+         if (rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
+            
+          rc =fapiGetRing(parent_target,PB_BNDY_DMIPLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE);
+          if (rc)
+          {
+              FAPI_ERR("Error performing GetRing operation on PB_BNDY_DMIPLL");
+              return(rc);
+          }
+            FAPI_DBG("PFD bit to be cleared for DMI unit %d is %d",chip_unit,proc_dmi_cupll_pfd360_offset[chip_unit]);
+          rc_ecmd |= ring_data.clearBit(proc_dmi_cupll_pfd360_offset[chip_unit]);
+              // Now 
+          if (rc_ecmd)
+          {
+              rc.setEcmdError(rc_ecmd);
+              return(rc);
+          }
         rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
                                             NEST_CHIPLET_0x02000000,
                                             PB_BNDY_DMIPLL_RING_ADDR,
@@ -194,11 +204,21 @@ ReturnCode io_training_set_pll_post_wiretest(const Target& target){
      
         FAPI_DBG("Ring length is %d",ring_length);
 	    rc_ecmd |= ring_data.setBitLength(ring_length);
+       if (rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
             
-           rc_ecmd |=fapiGetRing(target,TP_BNDY_PLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE); 
+           rc=fapiGetRing(target,MEMB_TP_BNDY_PLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE);
+          if (rc)
+          {
+              FAPI_ERR("Get ring error on MEMB ");
+              return(rc);
+          }
 	   // rc_ecmd |= ring_data.insert(pb_bndy_dmipll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
             FAPI_DBG("PFD bit to be cleared for centaur is %d",memb_dmi_cupll_pfd360_offset);
-            ring_data.clearBit(memb_dmi_cupll_pfd360_offset);
+             rc_ecmd |=ring_data.clearBit(memb_dmi_cupll_pfd360_offset);
             
 	    //rc_ecmd |= ring_data.insert(tp_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
         if (rc_ecmd)
@@ -208,7 +228,7 @@ ReturnCode io_training_set_pll_post_wiretest(const Target& target){
         }
         rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
                                             TP_CHIPLET_0x01000000,
-                                            TP_BNDY_PLL_RING_ADDR,
+                                            MEMB_TP_BNDY_PLL_RING_ADDR,
                                             ring_data,
                                             true);
         if (rc)
@@ -278,15 +298,25 @@ ReturnCode io_training_set_pll_post_wiretest(const Target& target){
         //    return(rc);
         //}
             rc_ecmd |= ring_data.setBitLength(ring_length);
-            rc_ecmd |=fapiGetRing(parent_target,AB_BNDY_PLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE); 
+          if (rc_ecmd)
+          {
+              rc.setEcmdError(rc_ecmd);
+              return(rc);
+          }
+            rc =fapiGetRing(parent_target,AB_BNDY_PLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE);
+               if (rc)
+               {
+                   FAPI_ERR("GetRing error on AB ring");
+                   return(rc);
+               }
             FAPI_DBG("PFD bit to be cleared for Abus number %d is %d",chip_unit,proc_abus_cupll_pfd360_offset[chip_unit]);
-            ring_data.clearBit(proc_abus_cupll_pfd360_offset[chip_unit]);
+            rc_ecmd|=ring_data.clearBit(proc_abus_cupll_pfd360_offset[chip_unit]);
 
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
+          if (rc_ecmd)
+          {
+              rc.setEcmdError(rc_ecmd);
+              return(rc);
+          }
         rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
                                             A_BUS_CHIPLET_0x08000000,
                                             AB_BNDY_PLL_RING_ADDR,

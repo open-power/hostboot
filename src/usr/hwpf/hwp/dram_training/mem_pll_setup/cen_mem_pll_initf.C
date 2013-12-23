@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_initf.C,v 1.9 2013/11/15 16:29:56 mfred Exp $
+// $Id: cen_mem_pll_initf.C,v 1.10 2013/12/10 03:41:34 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -86,6 +86,8 @@ const uint64_t OPCG_REG0_FOR_SETPULSE  = 0x818C000000000000ull;
 const uint64_t OPCG_REG2_FOR_SETPULSE  = 0x0000000000002000ull;
 const uint64_t OPCG_REG3_FOR_SETPULSE  = 0x6000000000000000ull;
 const uint64_t CLK_REGION_FOR_SETPULSE = 0x0010040000000000ull;
+
+const uint32_t MEMB_TP_BNDY_PLL_RING_ADDR  = 0x01030088;
 
 // Pervasive LFIR Register field/bit definitions
 const uint8_t PERV_LFIR_SCAN_COLLISION_BIT = 3;
@@ -207,7 +209,7 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
         //------------------------------------------------
         //  Scan new ring data into tp_pll_bndy scan ring.
         //------------------------------------------------
-        rc = fapiPutRing(i_target, 0x00030088, i_scan_ring_data, RING_MODE_SET_PULSE);
+        rc = fapiPutRing(i_target, MEMB_TP_BNDY_PLL_RING_ADDR, i_scan_ring_data, RING_MODE_SET_PULSE);
         if (rc)
         {
             FAPI_ERR("fapiPutRing failed with rc = 0x%x", (uint32_t)rc);
@@ -512,6 +514,9 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_initf.C,v $
+Revision 1.10  2013/12/10 03:41:34  mfred
+Make changes to support TP_BNDY scan chain addresses changing to chiplet 1 for zSeries.
+
 Revision 1.9  2013/11/15 16:29:56  mfred
 Changes made by Mike Jones for gerrit review, mostly for improved error handling.
 
