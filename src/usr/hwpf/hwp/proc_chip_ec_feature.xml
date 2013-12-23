@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,8 +20,10 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.42 2013/11/14 17:02:12 stillgs Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.43 2013/11/20 18:52:33 bellows Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
+
+
 <attributes>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC</id>
@@ -898,8 +900,8 @@
     </chipEcFeature>
   </attribute>
   <attribute>
-    <id>ATTR_PROC_EC_THROTTLE_SYNC_POSSIBLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <id>ATTR_CEN_EC_THROTTLE_SYNC_POSSIBLE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
     </description>
     <chipEcFeature>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -76,6 +76,7 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 #include    "mss_draminit_trainadv/mss_draminit_training_advanced.H"
 #include    "mss_draminit_mc/mss_draminit_mc.H"
 #include    "mss_dimm_power_test/mss_dimm_power_test.H"
+#include    "proc_throttle_sync.H"
 
 namespace   DRAM_TRAINING
 {
@@ -405,53 +406,106 @@ void*    call_mss_scominit( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit entry" );
 
-    // Get all Centaur targets
-    TARGETING::TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
-
-    for (TargetHandleList::const_iterator
-            l_membuf_iter = l_membufTargetList.begin();
-            l_membuf_iter != l_membufTargetList.end();
-            ++l_membuf_iter)
+    do
     {
-        //  make a local copy of the target for ease of use
-        const TARGETING::Target* l_pCentaur = *l_membuf_iter;
+        // Get all Centaur targets
+        TARGETING::TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-        // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running mss_scominit HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = l_membufTargetList.begin();
+                l_membuf_iter != l_membufTargetList.end();
+                ++l_membuf_iter)
+        {
+            //  make a local copy of the target for ease of use
+            const TARGETING::Target* l_pCentaur = *l_membuf_iter;
 
-        // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
-                (const_cast<TARGETING::Target*>(l_pCentaur)) );
+            // Dump current run on target
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running mss_scominit HWP on "
+                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
-        //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP(l_err, mss_scominit, l_fapi_centaur);
+            // Cast to a FAPI type of target.
+            const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
+                    (const_cast<TARGETING::Target*>(l_pCentaur)) );
 
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP(l_err, mss_scominit, l_fapi_centaur);
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: mss_scominit HWP returns error",
+                          l_err->reasonCode());
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
+
+                // Create IStep error log and cross reference to error that occurred
+                l_stepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, HWPF_COMP_ID );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  mss_scominit HWP( )" );
+            }
+        }
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: mss_scominit HWP returns error",
-                      l_err->reasonCode());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
-
-            // Create IStep error log and cross reference to error that occurred
-            l_stepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
-
             break;
         }
-        else
+
+        // Run proc throttle sync
+        // Get all functional proc chip targets
+        TARGETING::TargetHandleList l_cpuTargetList;
+        getAllChips(l_cpuTargetList, TYPE_PROC);
+
+        for (TARGETING::TargetHandleList::const_iterator
+             l_cpuIter = l_cpuTargetList.begin();
+             l_cpuIter != l_cpuTargetList.end();
+             ++l_cpuIter)
         {
+            const TARGETING::Target* l_pTarget = *l_cpuIter;
+            fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP,
+                 (const_cast<TARGETING::Target*>(l_pTarget)));
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS :  mss_scominit HWP( )" );
+                    "Running proc_throttle_sync HWP on "
+                    "target HUID %.8X", TARGETING::get_huid(l_pTarget));
+
+            // Call proc_throttle_sync
+            FAPI_INVOKE_HWP( l_err, proc_throttle_sync, l_fapiproc_target );
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: proc_throttle_sync HWP returns error",
+                          l_err->reasonCode());
+
+                // Capture the target data in the elog
+                ErrlUserDetailsTarget(l_pTarget).addToLog(l_err);
+
+                // Create IStep error log and cross reference to error that occurred
+                l_stepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, HWPF_COMP_ID );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  proc_throttle_sync HWP( )" );
+            }
         }
-    }
+
+    } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit exit" );
 

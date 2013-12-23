@@ -131,7 +131,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_training/mem_startclocks/cen_mem_startclocks_errors.xml \
     hwp/dram_training/mem_pll_setup/cen_mem_pll_initf_errors.xml \
     hwp/dram_training/mem_pll_setup/cen_mem_pll_setup_errors.xml \
-    hwp/core_activate/proc_check_slw_done/proc_check_slw_done_errors.xml
+    hwp/core_activate/proc_check_slw_done/proc_check_slw_done_errors.xml \
+    hwp/dram_initialization/proc_throttle_sync/proc_throttle_sync_errors.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \

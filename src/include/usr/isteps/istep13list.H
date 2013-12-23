@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __ISTEPS_ISTEP13LIST_H
 #define __ISTEPS_ISTEP13LIST_H
+
 
 /**
  * @file    istep13list.H
@@ -210,6 +211,7 @@ const   TaskInfo    g_istep13[]  =   {
 const DepModInfo  g_istep13Dependancies = {
     {
         DEP_LIB(libdram_training.so),
+        DEP_LIB(libdram_initialization.so),
         { 0 },
     }
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -34,7 +34,6 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
-
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
@@ -71,6 +70,7 @@
 #include    "proc_pcie_config/proc_pcie_config.H"
 #include    "proc_exit_cache_contained/proc_exit_cache_contained.H"
 #include    "mss_power_cleanup/mss_power_cleanup.H"
+#include    "proc_throttle_sync/proc_throttle_sync.H"
 //remove these once memory setup workaround is removed
 #include <devicefw/driverif.H>
 #include <vpd/spdenums.H>
@@ -244,57 +244,117 @@ void*   call_mss_memdiag( void    *io_pArgs )
 void*    call_mss_thermal_init( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
-
     IStepError  l_StepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_mss_thermal_init entry" );
-
-    // Get all Centaur targets
-    TARGETING::TargetHandleList l_memBufTargetList;
-    getAllChips(l_memBufTargetList, TYPE_MEMBUF );
-
-    //  --------------------------------------------------------------------
-    //  run mss_thermal_init on all Centaurs
-    //  --------------------------------------------------------------------
-    for (TargetHandleList::const_iterator
-            l_iter = l_memBufTargetList.begin();
-            l_iter != l_memBufTargetList.end();
-            ++l_iter)
+    do
     {
-        //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_pCentaur = *l_iter;
+        // Get all Centaur targets
+        TARGETING::TargetHandleList l_memBufTargetList;
+        getAllChips(l_memBufTargetList, TYPE_MEMBUF );
 
-        //  write HUID of target
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
-
-        // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_pCentaur( TARGET_TYPE_MEMBUF_CHIP,
-                (const_cast<TARGETING::Target*>(l_pCentaur)) );
-
-        //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP( l_errl, mss_thermal_init, l_fapi_pCentaur );
-
-        if ( l_errl )
+        //  --------------------------------------------------------------------
+        //  run mss_thermal_init on all Centaurs
+        //  --------------------------------------------------------------------
+        for (TargetHandleList::const_iterator
+                l_iter = l_memBufTargetList.begin();
+                l_iter != l_memBufTargetList.end();
+                ++l_iter)
         {
+            //  make a local copy of the target for ease of use
+            const TARGETING::Target*  l_pCentaur = *l_iter;
+
+            //  write HUID of target
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X: mss_thermal_init HWP returns error",
-                    l_errl->reasonCode());
+                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pCentaur).addToLog( l_errl );
+            // cast OUR type of target to a FAPI type of target.
+            const fapi::Target l_fapi_pCentaur( TARGET_TYPE_MEMBUF_CHIP,
+                    (const_cast<TARGETING::Target*>(l_pCentaur)) );
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_errl );
+            // Current run on target
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running call_mss_thermal_init HWP on "
+                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
-            // Commit Error
-            errlCommit( l_errl, HWPF_COMP_ID );
 
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP( l_errl, mss_thermal_init, l_fapi_pCentaur );
+
+            if ( l_errl )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X: mss_thermal_init HWP returns error",
+                        l_errl->reasonCode());
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_pCentaur).addToLog( l_errl );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS : mss_thermal_init HWP( )" );
+            }
+        }
+        if (l_errl)
+        {
             break;
         }
 
-    }
+        // Run proc throttle sync
+        // Get all functional proc chip targets
+        TARGETING::TargetHandleList l_cpuTargetList;
+        getAllChips(l_cpuTargetList, TYPE_PROC);
+
+        for (TARGETING::TargetHandleList::const_iterator
+             l_cpuIter = l_cpuTargetList.begin();
+             l_cpuIter != l_cpuTargetList.end();
+             ++l_cpuIter)
+        {
+            const TARGETING::Target* l_pTarget = *l_cpuIter;
+            fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP,
+                 (const_cast<TARGETING::Target*>(l_pTarget)));
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running proc_throttle_sync HWP on "
+                    "target HUID %.8X", TARGETING::get_huid(l_pTarget));
+
+            // Call proc_throttle_sync
+            FAPI_INVOKE_HWP( l_errl, proc_throttle_sync, l_fapiproc_target );
+
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: proc_throttle_sync HWP returns error",
+                          l_errl->reasonCode());
+
+                // Capture the target data in the elog
+                ErrlUserDetailsTarget(l_pTarget).addToLog(l_errl);
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  proc_throttle_sync HWP( )" );
+            }
+        }
+
+    } while (0);
+
 
     if(l_StepError.isNull())
     {
@@ -302,14 +362,9 @@ void*    call_mss_thermal_init( void    *io_pArgs )
                    "SUCCESS : call_mss_thermal_init" );
     }
 
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_mss_thermal_init exit" );
-
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
-
 
 //
 //  Wrapper function to call proc_pcie_config
