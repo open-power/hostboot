@@ -170,12 +170,12 @@ group gDmiFir filter singlebit
     /** DMIFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (DmiFir, bit(0)) ? SelfHighThr1;
+    (DmiFir, bit(0)) ? defaultMaskedError;
 
     /** DMIFIR[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (DmiFir, bit(1)) ? SelfHighThr1;
+    (DmiFir, bit(1)) ? defaultMaskedError;
 
     /** DMIFIR[2]
      *  FIR_GCR_HANG_ERROR

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -418,12 +418,19 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[48]
      *  MCIFIRQ_INTERNAL_SCOM_ERROR
      */
-    (MciFir, bit(48)) ? defaultMaskedError;
+    (MciFir, bit(48)) ? thresholdAndMask_self;
 
     /** MCIFIR[49]
      *  MCIFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (MciFir, bit(49)) ? defaultMaskedError;
+    (MciFir, bit(49)) ? thresholdAndMask_self;
+
+    /** MCIFIR[50:63]
+     *  RESERVED
+     */
+    (MciFir, bit( 50|51|52|53|54|55|56|57|58|59|
+                  60|61|62|63 )) ? defaultMaskedError;
+
 };
 
  ##############################################################################

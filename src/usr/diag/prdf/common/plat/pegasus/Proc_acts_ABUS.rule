@@ -127,6 +127,11 @@ group gAbusLFir filter singlebit
      *  FIR_IN12: unused local errors
      */
     (AbusLFir, bit(31|32|33|34|35|36|37|38|39)) ? defaultMaskedError;
+
+    /** ABUS_LFIR[40]
+     *  Malfunction alert
+     */
+    (AbusLFir, bit(40)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -360,12 +365,12 @@ group gIoaFir filter singlebit
     /** IOAFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoaFir, bit(0)) ? thresholdAndMask_self;
+    (IoaFir, bit(0)) ? defaultMaskedError;
 
     /** IOAFIR[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoaFir, bit(1)) ? thresholdAndMask_self;
+    (IoaFir, bit(1)) ? defaultMaskedError;
 
     /** IOAFIR[2]
      *  FIR_GCR_HANG_ERROR

@@ -1355,12 +1355,12 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[8]
      *  INVALID_TTYPE
      */
-    (PsiHbFir, bit(8)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(8)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[9]
      *  INVALID_CRESP
      */
-    (PsiHbFir, bit(9)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(9)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[10]
      *  PB_DATA_TIME_OUT
@@ -1380,7 +1380,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[13]
      *  UNEXPECTED_PB
      */
-    (PsiHbFir, bit(13)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(13)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[14]
      *  INTERRUPT_REG_CHANGE_WHILE_ACTIVE
@@ -1390,32 +1390,32 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[15]
      *  INTERRUPT0_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(15)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(15)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[16]
      *  INTERRUPT1_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(16)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(16)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[17]
      *  INTERRUPT2_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(17)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(17)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[18]
      *  INTERRUPT3_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(18)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(18)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[19]
      *  INTERRUPT4_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(19)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(19)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[20]
      *  INTERRUPT5_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(20)) ? callout2ndLvlMedThr1;
+    (PsiHbFir, bit(20)) ? calloutProcLevel2MedThr1;
 
     /** PSIHBFIR[21]
      *  TCBR_TP_PSI_GLB_ERR_0
@@ -1453,7 +1453,7 @@ group gPsiHbFir filter singlebit
 # PB Chiplet ICPFIR
 ################################################################################
 
-#Based on p8dd1_mss_FFDC_54.xls
+#Based on p8dd1_mss_FFDC_70.xls
 rule IcpFir
 {
     CHECK_STOP:  ICPFIR & ~ICPFIR_MASK & ~ICPFIR_ACT0 & ~ICPFIR_ACT1;
@@ -1462,8 +1462,6 @@ rule IcpFir
 
 group gIcpFir filter singlebit
 {
-    # TODO RTC23127 Here we are calling out proc but in RAS spreadsheet
-    # ICR target is mentioned. Verify.
     /** ICPFIR[0]
      *  INT_HW_ERROR_EOI_Q
      */
@@ -1484,7 +1482,6 @@ group gIcpFir filter singlebit
      */
     (IcpFir, bit(3)) ? SelfMedThr32PerDay;
 
-    # TODO RTC23127 verify bit 4
     /** ICPFIR[4]
      *  INT_HW_ERROR_ADDRI
      */
@@ -1520,8 +1517,18 @@ group gIcpFir filter singlebit
      */
     (IcpFir, bit(10)) ? SelfMedThr32PerDay;
 
+    /** ICPFIR[11]
+     *  LOOP IN CHAIN OF LINK REGISTER OR INVALID CORE ID
+     */
+    (IcpFir, bit(11)) ? defaultMaskedError;
+
+    /** ICPFIR[12]
+     *  INVALID CORE NUMBER IN INTERRUPT COMMANDS
+     */
+    (IcpFir, bit(12)) ? defaultMaskedError;
+
     /** ICPFIR[13]
-     *  ADDRESS_CORE_FIELD_MMIO
+     *  INVALID CORE NUMBER IN MMIO COMMANDS
      */
     (IcpFir, bit(13)) ? defaultMaskedError;
 
@@ -1600,18 +1607,15 @@ group gIcpFir filter singlebit
      */
     (IcpFir, bit(28)) ? SelfMedThr32PerDay;
 
-    #TODO RTC 23127 : Check for bits 29 and 30. Unused in scomdef
-    # but defined in RAS spreadsheet.
-
     /** ICPFIR[29]
      *  RESERVED
      */
-    (IcpFir, bit(29)) ? TBDDefaultCallout;
+    (IcpFir, bit(29)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[30]
      *  RESERVED
      */
-    (IcpFir, bit(30)) ? TBDDefaultCallout;
+    (IcpFir, bit(30)) ? SelfMedThr32PerDay;
 
     /** ICPFIR[31]
      *  RESERVED
@@ -1633,7 +1637,6 @@ group gIcpFir filter singlebit
      */
     (IcpFir, bit(34)) ? SelfMedThr32PerDay;
 
-    # TODO RTC23127 : Not defined in RAS spreadsheet.
     /** ICPFIR[35]
      *  EXT_XSTOP
      */
@@ -1685,7 +1688,7 @@ group gPbaFir filter singlebit
     /** PBAFIR[5]
      *  PBAFIR_PB_CE_FW
      */
-    (PbaFir, bit(5)) ? callout2ndLvlMedThr1;
+    (PbaFir, bit(5)) ? callout2ndLvlMedThr32perDay;
 
     /** PBAFIR[6]
      *  PBAFIR_OCI_SLAVE_INIT
@@ -2571,12 +2574,12 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_0, bit(0)) ? SelfHighThr1;
+    (IomcFir_0, bit(0)) ? defaultMaskedError;
 
     /** IOMCFIR_0[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_0, bit(1)) ? SelfHighThr1;
+    (IomcFir_0, bit(1)) ? defaultMaskedError;
 
     /** IOMCFIR_0[2]
      *  FIR_GCR_HANG_ERROR
@@ -2740,12 +2743,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_1, bit(0)) ? SelfHighThr1;
+    (IomcFir_1, bit(0)) ? defaultMaskedError;
 
     /** IOMCFIR_1[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_1, bit(1)) ? SelfHighThr1;
+    (IomcFir_1, bit(1)) ? defaultMaskedError;
 
     /** IOMCFIR_1[2]
      *  FIR_GCR_HANG_ERROR

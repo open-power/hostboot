@@ -559,10 +559,16 @@ group gExLFir filter singlebit
      */
     (ExLFir, bit(17)) ? calloutParentChipHighThr32;
 
-    /** EX_LFIR[18:30]
+    /** EX_LFIR[18:39]
      *  Unused local errors
      */
-    (ExLFir, bit(18|19|20|21|22|23|24|25|26|27|28|29|30)) ? defaultMaskedError;
+    (ExLFir, bit( 18|19|20|21|22|23|24|25|26|27|28|29|
+                  30|31|32|33|34|35|36|37|38|39 )) ? defaultMaskedError;
+
+    /** EX_LFIR[40]
+     *  Malfunction alert - local checkstop in another chiplet
+     */
+    (ExLFir, bit(40)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -622,7 +628,7 @@ group gCoreFir filter singlebit
     /** COREFIR[8]
      *  RECOV_FIR_CHKSTOP_ERR: recovery core check stop
      */
-    (CoreFir, bit(8)) ? spareOrSelfHighThr1;
+    (CoreFir, bit(8)) ? SelfHighThr1;
 
     /** COREFIR[9]
      *  SD_RFILE_REC_ERR: RegFile recoverable error
@@ -889,7 +895,7 @@ group gCoreFir filter singlebit
     /** COREFIR[63]
      *  SPRD_PHYP_ERR_INJ: Phyp Xstop via SPRC / SPRD
      */
-    (CoreFir, bit(63)) ? callout2ndLvlMed;
+    (CoreFir, bit(63)) ? calloutProcLow2ndLvlMedThr1;
 };
 
 ################################################################################
@@ -967,12 +973,12 @@ group gL2Fir filter singlebit
     /** L2FIR[12]
      *  RC_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(12)) ? callout2ndLvlMed;
+    (L2Fir, bit(12)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[13]
      *  NCU_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(13)) ? callout2ndLvlMed;
+    (L2Fir, bit(13)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[14]
      *  HW_CONTROL_ERROR
@@ -1037,7 +1043,7 @@ group gL2Fir filter singlebit
     /** L2FIR[26]
      *  HA_LOG_STOP_SW_ERR
      */
-    (L2Fir, bit(26)) ? calloutSelfAndLevel2MedThr1;
+    (L2Fir, bit(26)) ? callout2ndLvlMedThr1;
 
     /** L2FIR[27]
      *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
@@ -1290,7 +1296,7 @@ group gL3Fir filter singlebit
     /** L3FIR[35]
      *  L3 HA Log Overflow
      */
-    (L3Fir, bit(35)) ? callout2ndLvlMed;
+    (L3Fir, bit(35)) ? callout2ndLvlMedThr1;
 
     /** L3FIR[36]
      *  SCOM_ERR: scom error
@@ -1564,20 +1570,19 @@ actionclass SelfAndLevel2MedThr5PerHr
 };
 
 /** callouts Proc on first instance. Calls for second level support as well*/
-actionclass calloutProcLow2ndLvlMedThr1SUE
+actionclass calloutProcLow2ndLvlMedThr1
 {
     calloutParentProcLow;
     callout2ndLvlMed;
     threshold1;
-    flag(SUE);
 };
 
-/** Callouts core with high priority on first instance if sparing not done */
-actionclass spareOrSelfHighThr1
+/** callouts Proc on first instance. Calls for second level support as well.
+ *  Set SUE flag */
+actionclass calloutProcLow2ndLvlMedThr1SUE
 {
-    #FIXME RTC 23127  Need to figure out extension bit to determine if sparing
-    #      is  done
-    TBDDefaultCallout;
+    calloutProcLow2ndLvlMedThr1;
+    flag(SUE);
 };
 
 /** callout connected parent proc with high priority.*/

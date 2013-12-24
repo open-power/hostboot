@@ -254,7 +254,7 @@ group gPbenFir filter singlebit
     /** PBENFIR[15]
      *  X_LINK_CR_OVERFLOW: x link command/response/data buffer overflow
      */
-    (PbenFir, bit(15)) ? callout2ndLvlMed;
+    (PbenFir, bit(15)) ? calloutProcLevel2MedThr1;
 
     /** PBENFIR[16]
      *  X0_LINK_FMR_ERR: x0 link framer error
@@ -312,12 +312,12 @@ group gIoxFir_0 filter singlebit
     /** IOXFIR_0[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_0, bit(0)) ? thresholdAndMask_xbus0;
+    (IoxFir_0, bit(0)) ? defaultMaskedError;
 
     /** IOXFIR_0[1]
      * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_0, bit(1)) ? thresholdAndMask_xbus0;
+    (IoxFir_0, bit(1)) ? defaultMaskedError;
 
     /** IOXFIR_0[2]
      *  FIR_GCR_HANG_ERROR
@@ -405,12 +405,12 @@ group gIoxFir_1 filter singlebit
     /** IOXFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_1, bit(0)) ? thresholdAndMask_xbus1;
+    (IoxFir_1, bit(0)) ? defaultMaskedError;
 
     /** IOXFIR_1[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_1, bit(1)) ? thresholdAndMask_xbus1;
+    (IoxFir_1, bit(1)) ? defaultMaskedError;
 
     /** IOXFIR_1[2]
      *  FIR_GCR_HANG_ERROR
@@ -498,12 +498,12 @@ group gIoxFir_2 filter singlebit
     /** IOXFIR_2[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_2, bit(0)) ? thresholdAndMask_xbus2;
+    (IoxFir_2, bit(0)) ? defaultMaskedError;
 
     /** IOXFIR_2[1]
      * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_2, bit(1)) ? thresholdAndMask_xbus2;
+    (IoxFir_2, bit(1)) ? defaultMaskedError;
 
     /** IOXFIR_2[2]
      *  FIR_GCR_HANG_ERROR
@@ -591,12 +591,12 @@ group gIoxFir_3 filter singlebit
     /** IOXFIR_3[0]
      * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_3, bit(0)) ? thresholdAndMask_xbus3;
+    (IoxFir_3, bit(0)) ? defaultMaskedError;
 
     /** IOXFIR_3[1]
      * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoxFir_3, bit(1)) ? thresholdAndMask_xbus3;
+    (IoxFir_3, bit(1)) ? defaultMaskedError;
 
     /** IOXFIR_3[2]
      *  FIR_GCR_HANG_ERROR

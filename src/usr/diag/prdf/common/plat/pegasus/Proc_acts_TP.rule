@@ -651,7 +651,7 @@ group gPbamFir filter singlebit
     /** PBAMFIR[3]
      *  OPB_ERROR
      */
-    (PbamFir, bit(3)) ? SelfHighThr1;
+    (PbamFir, bit(3)) ? defaultMaskedError;
 
     /** PBAMFIR[4]
      *  OPB_TIMEOUT
