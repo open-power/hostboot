@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -500,8 +500,9 @@ void*    call_host_ipl_complete( void    *io_pArgs )
 
 
         //  call proc_switch_cfsim
-	// TODO - Comment out to work around Centaur FSI scom issue during BU
-	// RTC 64136 is opened to undo this when in-band scoms are available.
+    // TODO: RTC 64136 - Comment out to work around Centaur FSI scom issue
+    // during BU
+    // RTC 64136 is opened to undo this when in-band scoms are available.
 #if 0
         FAPI_INVOKE_HWP(l_err, proc_switch_cfsim, l_fapi_proc_target,
                         true, // RESET
@@ -527,7 +528,8 @@ void*    call_host_ipl_complete( void    *io_pArgs )
             // commit errorlog
             errlCommit( l_err, HWPF_COMP_ID );
 
-            // break to end
+            //break to end because if proc_switch_cfsim fails
+            //then FSP does not have FSI control again and system is toast
             break;
         }
         else
@@ -586,11 +588,6 @@ void*    call_host_ipl_complete( void    *io_pArgs )
             }
         }   // endfor
 
-        // check if any errors were collected above.  If so, drop out here.
-        if ( !l_stepError.isNull() )
-        {
-            break;
-        }
 
         //  Loop through all the mcs in the system
         //  and run proc_switch_rec_attn
@@ -643,12 +640,6 @@ void*    call_host_ipl_complete( void    *io_pArgs )
 
         }   //  endfor
 
-
-        // check if any errors were collected above.  If so, drop out here.
-        if ( !l_stepError.isNull() )
-        {
-            break;
-        }
 
         //If Sapphire Payload need to set payload base to zero
         if (is_sapphire_load())

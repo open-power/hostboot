@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -302,7 +302,6 @@ void*    call_mss_getecid( void *io_pArgs )
 
                         // Commit Error
                         errlCommit(l_err, HWPF_COMP_ID);
-                        break;
                     }
                 }
             }
@@ -552,7 +551,6 @@ void* call_dmi_erepair( void *io_pArgs )
 
             // Commit Error
             errlCommit(l_errPtr, HWPF_COMP_ID);
-
             break;
         }
 
@@ -944,7 +942,6 @@ void*    call_dmi_io_run_training( void *io_pArgs )
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-            break; // Break out target list loop
         }
         else
         {
@@ -1129,7 +1126,6 @@ void*    call_proc_cen_framelock( void *io_pArgs )
                 // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
 
-                break; // break out of mem num loop
             }
             else
             {
@@ -1139,12 +1135,6 @@ void*    call_proc_cen_framelock( void *io_pArgs )
             }
 
         }   // end mem
-
-        // if there is already an error, bail out.
-        if ( !l_StepError.isNull() )
-        {
-            break; // break out of mcs loop
-        }
 
     }   // end mcs
 
@@ -1229,7 +1219,6 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
                 // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
 
-                break; // break out of mcs loop
             }
             else
             {
@@ -1239,10 +1228,6 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
         }   // end for mcs
 
         l_err = l_StepError.getErrorHandle();
-        if(l_err)
-        {
-            break;
-        }
 
         //Now enable Inband SCOM for all membuf chips.
         IBSCOM::enableInbandScoms();

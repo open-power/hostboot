@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -255,7 +255,6 @@ void*   call_mss_volt( void *io_pArgs )
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-            break;
 
         }
         else
@@ -320,7 +319,6 @@ void*    call_mss_freq( void *io_pArgs )
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
-            break; // break out memBuf loop
          }
         else
         {

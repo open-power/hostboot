@@ -169,7 +169,6 @@ void*    call_fabric_erepair( void    *io_pArgs )
 
                 // Commit Error
                 errlCommit(l_errl, HWPF_COMP_ID);
-
                 break;
             }
 

@@ -323,7 +323,6 @@ void*    call_mem_startclocks( void *io_pArgs )
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
-            break;
         }
         else
         {

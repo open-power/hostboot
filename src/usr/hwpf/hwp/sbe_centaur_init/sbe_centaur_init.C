@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -57,7 +57,7 @@
 #include "cen_xip_customize.H"
 
 extern fapi::ReturnCode fapiPoreVe(const fapi::Target i_target,
-		   std::list<uint64_t> & io_sharedObjectArgs);
+           std::list<uint64_t> & io_sharedObjectArgs);
 
 const uint64_t REPAIR_LOADER_RETRY_CTR_MASK = 0x000007FC00000000ull;
 
@@ -134,7 +134,7 @@ void*    call_sbe_centaur_init( void *io_pArgs )
 
             // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
-            break;
+            continue;
         }
 
         char l_header[10];
@@ -293,8 +293,6 @@ void*    call_sbe_centaur_init( void *io_pArgs )
 
             // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
-
-            break; // break out of memBuf loop
         }
         else
         {

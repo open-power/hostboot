@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -185,8 +185,6 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
-           break;
         }
         else
         {
@@ -284,8 +282,6 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
-
-            break;
         }
         else
         {
@@ -459,7 +455,6 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
-            break; // break out of cpuNum
         }
         else
         {
@@ -776,7 +771,6 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
             // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
 
-            break;
         }
         else
         {

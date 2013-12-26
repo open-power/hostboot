@@ -99,7 +99,6 @@ void*    call_proc_build_smp( void    *io_pArgs )
             l_StepError.addErrorDetails( l_errl);
             // Commit error
             errlCommit( l_errl, HWPF_COMP_ID );
-            break;
         }
 
         // Get XBUS connections
@@ -112,7 +111,6 @@ void*    call_proc_build_smp( void    *io_pArgs )
             l_StepError.addErrorDetails( l_errl);
             // Commit error
             errlCommit( l_errl, HWPF_COMP_ID );
-            break;
         }
 
         // Populate l_proc_Chips vector for each good processor chip
@@ -151,17 +149,19 @@ void*    call_proc_build_smp( void    *io_pArgs )
             }
 
             // Get A-BUS
+            //abus connections were found so can get the a-bus
             TARGETING::TargetHandleList l_abuses;
-            getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
+               getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
 
             for (TARGETING::TargetHandleList::const_iterator
-                 l_abusIter = l_abuses.begin();
-                 l_abusIter != l_abuses.end();
-                 ++l_abusIter)
+                    l_abusIter = l_abuses.begin();
+                    l_abusIter != l_abuses.end();
+                    ++l_abusIter)
             {
                 const TARGETING::Target * l_target = *l_abusIter;
                 uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
-                TargetPairs_t::iterator l_itr = l_abusConnections.find(l_target);
+                TargetPairs_t::iterator l_itr =
+                                        l_abusConnections.find(l_target);
                 if ( l_itr == l_abusConnections.end() )
                 {
                     continue;
@@ -172,14 +172,21 @@ void*    call_proc_build_smp( void    *io_pArgs )
 
                 switch (l_srcID)
                 {
-                    case 0: l_procEntry.a0_chip = l_fapiEndpointTarget; break;
-                    case 1: l_procEntry.a1_chip = l_fapiEndpointTarget; break;
-                    case 2: l_procEntry.a2_chip = l_fapiEndpointTarget; break;
-                   default: break;
+                    case 0:
+                        l_procEntry.a0_chip = l_fapiEndpointTarget;
+                        break;
+                    case 1:
+                        l_procEntry.a1_chip = l_fapiEndpointTarget;
+                        break;
+                    case 2:
+                        l_procEntry.a2_chip = l_fapiEndpointTarget;
+                        break;
+                    default:
+                        break;
                 }
 
                 const TARGETING::Target *l_pParent =
-                       getParentChip(
+                           getParentChip(
                              (const_cast<TARGETING::Target*>(l_itr->second)));
 
                 l_procEntry.f0_node_id = static_cast<proc_fab_smp_node_id>(
@@ -193,28 +200,38 @@ void*    call_proc_build_smp( void    *io_pArgs )
             getChildChiplets( l_xbuses, l_pTarget, TYPE_XBUS );
 
             for (TARGETING::TargetHandleList::const_iterator
-                 l_xbusIter = l_xbuses.begin();
-                 l_xbusIter != l_xbuses.end();
-                 ++l_xbusIter)
+                    l_xbusIter = l_xbuses.begin();
+                    l_xbusIter != l_xbuses.end();
+                    ++l_xbusIter)
             {
                 const TARGETING::Target * l_target = *l_xbusIter;
                 uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
-                TargetPairs_t::iterator l_itr = l_xbusConnections.find(l_target);
+                TargetPairs_t::iterator l_itr =
+                                l_xbusConnections.find(l_target);
                 if ( l_itr == l_xbusConnections.end() )
                 {
                     continue;
                 }
 
-                fapi::Target l_fapiEndpointTarget( TARGET_TYPE_XBUS_ENDPOINT,
+                fapi::Target l_fapiEndpointTarget(TARGET_TYPE_XBUS_ENDPOINT,
                             (const_cast<TARGETING::Target*>(l_itr->second)) );
 
                 switch (l_srcID)
                 {
-                    case 0: l_procEntry.x0_chip = l_fapiEndpointTarget; break;
-                    case 1: l_procEntry.x1_chip = l_fapiEndpointTarget; break;
-                    case 2: l_procEntry.x2_chip = l_fapiEndpointTarget; break;
-                    case 3: l_procEntry.x3_chip = l_fapiEndpointTarget; break;
-                   default: break;
+                    case 0:
+                        l_procEntry.x0_chip = l_fapiEndpointTarget;
+                        break;
+                    case 1:
+                        l_procEntry.x1_chip = l_fapiEndpointTarget;
+                        break;
+                    case 2:
+                        l_procEntry.x2_chip = l_fapiEndpointTarget;
+                        break;
+                    case 3:
+                        l_procEntry.x3_chip = l_fapiEndpointTarget;
+                        break;
+                    default:
+                        break;
                 }
             }
 
