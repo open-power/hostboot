@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2013              */
+/* COPYRIGHT International Business Machines Corp. 1997,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -52,20 +52,20 @@
 
 #include <iipconst.h>
 #include <prdfGlobal.H>
-#include <prdfFlyWeight.H>                                   // dg01
+#include <prdfFlyWeight.H>
 #include <prdfFlyWeightS.H>
 #include <iipCalloutResolution.h>
-#include <prdfThresholdResolutions.H>                       // dg02a
-#include <prdfCalloutConnected.H>                           // dg04a
-#include <prdfAnalyzeConnected.H>                           // dg05a
-#include <prdfPluginCallResolution.H>                       // dg06a
-#include <iipEregResolution.h>                              // dg06a
-#include <xspprdTryResolution.h>                            // dg06a
-#include <xspprdFlagResolution.h>                           // dg06a
-#include <xspprdDumpResolution.h>                           // dg06a
-#include <xspprdGardResolution.h>                           // dg06a
-#include <prdfCaptureResolution.H>                            // pw01
-#include <prdfClockResolution.H>                            // jl01a
+#include <prdfThresholdResolutions.H>
+#include <prdfCalloutConnected.H>
+#include <prdfAnalyzeConnected.H>
+#include <prdfPluginCallResolution.H>
+#include <iipEregResolution.h>
+#include <xspprdTryResolution.h>
+#include <xspprdFlagResolution.h>
+#include <prdDumpResolution.H>
+#include <xspprdGardResolution.h>
+#include <prdfCaptureResolution.H>
+#include <prdfClockResolution.H>
 
 namespace PRDF
 {
@@ -228,15 +228,8 @@ public:
    * @return    reference to a resolution
    * @post      only one instance of this obect with these paramaters will exist
    */
-  #ifdef __HOSTBOOT_MODULE
-  Resolution & GetDumpResolution(/* FIXME: hwTableContent
-                                    iDumpRequestContent = CONTENT_HW*/
-                                 );
-  #else
   Resolution & GetDumpResolution( hwTableContent iDumpRequestContent =
                                     CONTENT_HW );
-
-  #endif    //ifdef __HOSTBOOT_MODULE
 
   /**
    * @brief     Get a Gard Resolution
@@ -245,8 +238,6 @@ public:
    * @post      only one instance of this object with this param will exist
    */
   Resolution & GetGardResolution( GardAction::ErrorType i_gardErrorType );
-
-  // dg06a - end
 
   /**
    * @brief     Get a Capture Resolution

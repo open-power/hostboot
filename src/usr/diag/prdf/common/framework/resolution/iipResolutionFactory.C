@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2013              */
+/* COPYRIGHT International Business Machines Corp. 1997,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -237,21 +237,11 @@ Resolution & ResolutionFactory::GetFlagResolution(
     return iv_flagResolutionFW.get( FlagResolution( i_flag ) );
 }
 
-#ifdef __HOSTBOOT_MODULE
-Resolution & ResolutionFactory::GetDumpResolution(
-                             /* FIXME: hwTableContent iDumpRequestContent, */
-                                                 )
-{
-    return iv_dumpResolutionFW.get( DumpResolution(
-                                    /*FIXME: iDumpRequestContent,*/ ) );
-}
-#else
 Resolution & ResolutionFactory::GetDumpResolution(
                                     hwTableContent iDumpRequestContent )
 {
     return iv_dumpResolutionFW.get(DumpResolution( iDumpRequestContent ) );
 }
-#endif
 
 Resolution & ResolutionFactory::GetGardResolution(GardAction::ErrorType et)
 {

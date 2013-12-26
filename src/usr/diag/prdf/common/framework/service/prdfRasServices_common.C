@@ -1040,14 +1040,9 @@ void ErrDataService::initPfaData( ServiceDataCollector & i_sdc,
     o_pfa.msDumpLabel[0] = 0x4D532020; // Start of MS Dump flags
     o_pfa.msDumpLabel[1] = 0x44554D50; // 'MS  DUMP'
 
-    // FIXME: RTC 51618 Need add DUMP support in Hostboot
-#ifdef  __HOSTBOOT_MODULE
-    i_sdc.GetDumpRequest( o_dumpTrgt );
-#else
     hwTableContent dumpContent;
     i_sdc.GetDumpRequest( dumpContent, o_dumpTrgt );
     o_pfa.msDumpInfo.content = dumpContent;
-#endif
 
     o_pfa.msDumpInfo.id = getHuid(o_dumpTrgt);
 

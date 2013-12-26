@@ -47,7 +47,6 @@ chip Mcs
     name        "Power8 MCS Chiplet";
     targettype  TYPE_MCS;
     sigoff      0x8000;
-# FIXME May need to update dump type
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 

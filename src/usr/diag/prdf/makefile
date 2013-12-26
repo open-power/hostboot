@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -50,6 +50,7 @@ VPATH =  \
     framework/config \
     framework/rule \
     framework/service \
+    framework/resolution \
     plat \
     plat/pegasus \
 
@@ -80,6 +81,7 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
 EXTRAINCDIR += ${PRD_USR_PATH}/framework/config
+EXTRAINCDIR += ${PRD_USR_PATH}/framework/resolution
 EXTRAINCDIR += ${PRD_USR_PATH}/plat/pegasus
 
 # Conditionally enables profiling of flyweight register and resolution object

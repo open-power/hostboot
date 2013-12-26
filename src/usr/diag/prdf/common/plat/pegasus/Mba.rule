@@ -40,7 +40,6 @@ chip Mba
     name        "Centaur MBA Chiplet";
     targettype  TYPE_MBA;
     sigoff      0x8000;
-# FIXME May need to update dump type
     dump        DUMP_CONTENT_HWSUPERNOVA;
     scomlen     64;
 

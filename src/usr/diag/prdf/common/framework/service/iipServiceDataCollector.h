@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1998,2013              */
+/* COPYRIGHT International Business Machines Corp. 1998,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -50,9 +50,9 @@
 #include <time.h>
 #include <prdfCallouts.H>
 #include <prdfMain.H>
-#if !defined(PRDFTIMER_H) // dg08
-#include <prdfTimer.H>    // dg08
-#endif                    // dg08
+#if !defined(PRDFTIMER_H)
+#include <prdfTimer.H>
+#endif
 #include <xspprdGardResolution.h>     // for ErrorType
 #include <prdfAssert.h>
 #if( !defined(CONTEXT_x86_nfp) && !defined(_NFP) ) //only for ppc context (@54)
@@ -60,10 +60,10 @@
 #include <iipsdbug.h>
 #endif
 
-#ifndef __HOSTBOOT_MODULE
-
+#ifdef __HOSTBOOT_MODULE
+#include <prdfGlobal.H>
+#else
 #include <hdctContent.H>
-
 #endif
 #include <list>
 #include <prdfExtensibleChip.H>
@@ -782,9 +782,7 @@ private:  // functions
 
 private:  // Data
 
-  #ifndef __HOSTBOOT_MODULE
   hwTableContent ivDumpRequestContent;
-  #endif
 
   ErrorSignature     error_signature;
   CaptureData        captureData;
@@ -868,23 +866,13 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-#ifdef __HOSTBOOT_MODULE
-  void SetDump(/*FIXME: hwTableContent iDumpRequestContent,*/
-               TARGETING::TargetHandle_t iDumpRequestChipHandle =NULL)
-  {
-    SetFlag(DUMP);
-    /* FIXME: ivDumpRequestContent = iDumpRequestContent;*/
-    ivpDumpRequestChipHandle = iDumpRequestChipHandle;
-  }
-#else
-  void SetDump(hwTableContent iDumpRequestContent,
-               TARGETING::TargetHandle_t iDumpRequestChipHandle =NULL)
+  void SetDump( hwTableContent iDumpRequestContent,
+                TARGETING::TargetHandle_t iDumpRequestChipHandle = NULL )
   {
     SetFlag(DUMP);
     ivDumpRequestContent = iDumpRequestContent;
     ivpDumpRequestChipHandle = iDumpRequestChipHandle;
   }
-#endif
 
   /**
    Has a Dump been requested
@@ -910,24 +898,13 @@ public:
    <br><b>Notes:       </b> If IsDump()==false than dumpRequestType returned is DUMP_NO_DUMP
    </ul><br>
    */
-#ifdef __HOSTBOOT_MODULE
-  void GetDumpRequest(  /*FIXME: hwTableContent & oDumpRequestContent,*/
-                        TARGETING::TargetHandle_t&
-                        opDumpRequestChipHandle) const
-  {
-    /*FIXME: oDumpRequestContent = ivDumpRequestContent;*/
-    opDumpRequestChipHandle = ivpDumpRequestChipHandle;
-  }
-#else
   void GetDumpRequest(  hwTableContent & oDumpRequestContent,
                         TARGETING::TargetHandle_t&
-                        opDumpRequestChipHandle) const
+                        opDumpRequestChipHandle ) const
   {
     oDumpRequestContent = ivDumpRequestContent;
     opDumpRequestChipHandle = ivpDumpRequestChipHandle;
   }
-
-#endif
 
 // --------------------------------------
 // FSP only functions end

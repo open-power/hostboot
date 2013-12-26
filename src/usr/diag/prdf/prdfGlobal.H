@@ -83,4 +83,16 @@
  */
 #define PRDF_SYSTEM_SCOPELOCK
 
+/**
+ * @brief   defined dump content to get through hostboot compilation.
+ *          hwTableContent is a FSP specific enum originally defined in dump.
+ */
+typedef uint32_t hwTableContent;
+
+/**
+ * @brief   defined dump content type to get through hostboot compilation.
+ *          CONTENT_HW is a FSP specific enum val originally defined in dump.
+ */
+const uint32_t CONTENT_HW = 0x40000000;
+
 #endif // PRDF_GLOBAL_HB_H

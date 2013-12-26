@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -920,11 +920,10 @@ action_try: PRDR_ACT_TRY '(' actionline ',' actionline ')'
     }
 ;
 
-action_dump: PRDR_ACT_DUMP '(' PRDR_ID ')'  //@ecdf
+action_dump: PRDR_ACT_DUMP '(' PRDR_ID ')'
     {
         $$ = new ExprAct_Dump($3);
     }
-    // TODO: Allow Dump connected.
 ;
 
 action_gard: PRDR_ACT_GARD '(' PRDR_ID ')'

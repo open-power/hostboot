@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2005,2013
+# COPYRIGHT International Business Machines Corp. 2005,2014
 #
 # p1
 #
@@ -62,11 +62,11 @@ prd_resolution = \
  iipResolutionFactory.o \
  prdfResolutionMap.o \
  prdfThresholdResolutions.o \
- xspprdDumpResolution.o \
  xspprdFlagResolution.o \
  xspprdGardResolution.o \
  prdfClockResolution.o \
- prdfCaptureResolution.o
+ prdfCaptureResolution.o \
+ prdfDumpResolution.o
 
 prd_register = \
  iipscr.o \

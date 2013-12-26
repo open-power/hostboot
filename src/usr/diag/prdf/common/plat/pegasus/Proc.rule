@@ -44,7 +44,6 @@ chip Proc
     name        "Power8 Chip";
     targettype  TYPE_PROC;
     sigoff      0x8000;
-# FIXME May need to update dump type
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 

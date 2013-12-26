@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/resolution/xspprdDumpResolution.h $ */
+/* $Source: src/usr/diag/prdf/common/framework/resolution/prdDumpResolution.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2013              */
+/* COPYRIGHT International Business Machines Corp. 2001,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,8 +21,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef xspprdDumpResolution_h
-#define xspprdDumpResolution_h
+#ifndef prdDumpResolution_H
+#define prdDumpResolution_H
 // Class Description *************************************************
 //
 //  Name:  DumpResolution
@@ -38,10 +38,10 @@
 //--------------------------------------------------------------------
 #include <iipResolution.h>
 
-#ifndef __HOSTBOOT_MODULE
-
+#ifdef __HOSTBOOT_MODULE
+#include <prdfGlobal.H>
+#else
 #include <hdctContent.H>
-
 #endif
 
 #include <prdfPlatServices.H>
@@ -66,12 +66,8 @@ public:
    * @param[in] iDumpRequestContent
    * @return    Non-SUCCESS in internal function fails, SUCCESS otherwise.
    */
-  #ifdef __HOSTBOOT_MODULE
-  DumpResolution(/*FIXME: hwTableContent iDumpRequestContent = CONTENT_HW, */)
-  #else
   DumpResolution( hwTableContent iDumpRequestContent = CONTENT_HW )
     : ivDumpContent( iDumpRequestContent )
-  #endif
   {}
 
   /*
@@ -94,8 +90,6 @@ public:
    */
   virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_serviceData );
 
-#ifndef __HOSTBOOT_MODULE
-
   /*
    * base class defines operator== so one is needed here
    * or the base class version will be used (bad)
@@ -105,14 +99,10 @@ public:
     return ( ivDumpContent  == r.ivDumpContent );
   }
 
-#endif
-
 private:  // functions
 private:  // Data
 
-  #ifndef __HOSTBOOT_MODULE
   hwTableContent ivDumpContent;
-  #endif
 
 };
 

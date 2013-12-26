@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -385,16 +385,9 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
     int32_t l_rc = SUCCESS;
     ExtensibleChip * l_chipAnalyzed = ServiceDataCollector::getChipAnalyzed( );
     ServiceDataCollector & i_sdc = *(i_serviceData.service_data);
-    // Set default dump flags.  //@ecdf
-    //FIXME:RTC 51618  Take out hwTableContent for now for Hostboot
-    #ifdef __HOSTBOOT_MODULE
-    i_sdc.SetDump(/*(hwTableContent)cv_dumpType,*/
-                    l_chipAnalyzed->GetChipHandle() );
-    #else
+    // Set default dump flags.
     i_sdc.SetDump( (hwTableContent)cv_dumpType,
                     l_chipAnalyzed->GetChipHandle() );
-    #endif
-
     // Add statement below for Drop call.
     CaptureData & capture = i_serviceData.service_data->GetCaptureData();
     // Get capture data for this chip.  Allow override.
@@ -875,16 +868,9 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
             break;
 
 
-        case Prdr::ACT_DUMP: // DUMP : TODO: Allow dump connected.
-            #ifdef __HOSTBOOT_MODULE
-            //FIXME: comment out hwtablecontent for hostboot
-            l_rc = &i_data.cv_reslFactory.GetDumpResolution(
-                                /*(hwTableContent)    i_action->cv_value[0].i,*/
-                                );
-            #else
+        case Prdr::ACT_DUMP:
             l_rc = &i_data.cv_reslFactory.GetDumpResolution(
                                 (hwTableContent)    i_action->cv_value[0].i );
-            #endif
             break;
 
         case Prdr::ACT_GARD: // GARD

@@ -53,7 +53,6 @@ chip Ex
     name        "Power8 EX Chiplet";
     targettype  TYPE_EX;
     sigoff      0x8000;
-# FIXME May need to update dump type
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 

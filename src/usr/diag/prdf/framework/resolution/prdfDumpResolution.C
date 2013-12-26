@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/resolution/xspprdDumpResolution.C $ */
+/* $Source: src/usr/diag/prdf/framework/resolution/prdfDumpResolution.C $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2013              */
+/* COPYRIGHT International Business Machines Corp. 2001,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,46 +21,25 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// Module Description **************************************************
-//
-// Description:
-//
-// End Module Description **********************************************
+/**
+ @file  prdfDumpResolution.C
+ @brief defines resolve action for dump resolution for hostboot platform
+ */
 
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
-#define xspprdDumpResolution_C
 
-#include <xspprdDumpResolution.h>
+#include <prdDumpResolution.H>
 #include <iipServiceDataCollector.h>
-
-#undef xspprdDumpResolution_C
 
 namespace PRDF
 {
 
-//---------------------------------------------------------------------
-// Member Function Specifications
-//---------------------------------------------------------------------
-
 int32_t DumpResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
-    uint32_t rc = SUCCESS;
-    TARGETING::TargetHandle_t l_ptarget =
-                            ServiceDataCollector::getTargetAnalyzed( );
-
-    #ifdef __HOSTBOOT_MODULE
-
-    io_serviceData.service_data->SetDump(/*FIXME: ivDumpContent,*/ l_ptarget );
-
-    #else
-
-    io_serviceData.service_data->SetDump( ivDumpContent,l_ptarget );
-
-    #endif
-
-    return rc;
+    // Note: Dump is not supported on hostboot.
+    return SUCCESS;
 }
 
 } // end namespace PRDF

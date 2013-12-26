@@ -42,7 +42,6 @@ chip Membuf
     name        "Centaur Chip";
     targettype  TYPE_MEMBUF;
     sigoff      0x8000;
-# FIXME May need to update dump type
     dump        DUMP_CONTENT_HWSUPERNOVA;
     scomlen     64;
 

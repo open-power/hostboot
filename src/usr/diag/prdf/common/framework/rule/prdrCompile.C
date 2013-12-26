@@ -497,8 +497,8 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         g_ActionArgMap[tmpStr] = errType;
 
 #ifdef __HOSTBOOT_MODULE
-        // FIXME: RTC 88391 Hostboot currently does not support dump contents.
-        //        This is a temporary fix.
+        //Note: Hostboot does not support dump.So,defining dump type here
+        //to retain common rule code for hostboot and FSP.
         g_ActionArgMap["DUMP_CONTENT_SW"]           = 0x80000000;
         g_ActionArgMap["DUMP_CONTENT_HW"]           = 0x40000000;
         g_ActionArgMap["DUMP_CONTENT_SH"]           = 0x20000000;
