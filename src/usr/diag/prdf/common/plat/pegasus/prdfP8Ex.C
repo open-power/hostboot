@@ -38,20 +38,22 @@
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 namespace Ex
 {
 
 /**
  * @brief   When not in MNFG mode, clear the service call flag so that
- *          thresholding will still be done, but not visible errorlog.
- * @param   i_chip   Ex rulechip
- * @param   i_sc     service data collector
- * @returns Success
+ *          thresholding will still be done, but no visible error log committed.
+ * @param   i_chip EX chip
+ * @param   i_sc   Step code data struct
+ * @returns SUCCESS always
  */
 int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
                               STEP_CODE_DATA_STRUCT & i_sc )
 {
-    if( i_sc.service_data->IsAtThreshold() && !PlatServices::mfgMode() )
+    if ( i_sc.service_data->IsAtThreshold() && !mfgMode() )
     {
         i_sc.service_data->ClearFlag(ServiceDataCollector::SERVICE_CALL);
     }
@@ -59,7 +61,6 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Ex, ClearServiceCallFlag );
-
 
 } // namespace Ex ends
 

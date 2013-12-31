@@ -351,12 +351,12 @@ group gIoaFir filter singlebit
     /** IOAFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoaFir, bit(0)) ? thresholdMaskAbus;
+    (IoaFir, bit(0)) ? thresholdAndMask_self;
 
     /** IOAFIR[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoaFir, bit(1)) ? thresholdMaskAbus;
+    (IoaFir, bit(1)) ? thresholdAndMask_self;
 
     /** IOAFIR[2]
      *  FIR_GCR_HANG_ERROR
@@ -539,15 +539,6 @@ actionclass calloutAbus2InterfaceTh5
     calloutAbus2Interface;
     threshold5pday;
     funccall("ClearServiceCallFlag");
-};
-
-/** Threshold and Mask the abus error in non mnfg environment */
-actionclass thresholdMaskAbus
-{
-    # Since we don't know which abus instance has caused the error,
-    # so calling out Proc.
-    calloutSelfMed;
-    threshold32pDayAndMask;
 };
 
 /** Lane Repair: spare deployed - ABUS 0 */

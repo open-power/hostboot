@@ -92,13 +92,24 @@ actionclass thresholdOnNode
 };
 
 ################################################################################
-#                               Threshold and Mask
+#                       Threshold and Mask policy
 ################################################################################
-/** actionclass Threshold and Mask if not in mnfg mode */
-actionclass threshold32pDayAndMask
+
+/**
+ * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
+ * threshold in the field, instead just mask.
+ */
+actionclass thresholdAndMask
 {
     threshold32pday;
     funccall("ClearServiceCallFlag");
+};
+
+/** Callout self with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_self
+{
+    calloutSelfMed;
+    thresholdAndMask;
 };
 
 ################################################################################
@@ -162,15 +173,13 @@ actionclass SelfHighThr1
 
 actionclass SelfMedThr1UE
 {
-    calloutSelfMed;
-    threshold1;
+    SelfMedThr1;
     SUEGenerationPoint;
 };
 
 actionclass SelfHighThr1UE
 {
-    calloutSelfHigh;
-    threshold1;
+    SelfHighThr1;
     SUEGenerationPoint;
 };
 
@@ -238,6 +247,13 @@ actionclass callout2ndLvlMedThr1
 {
     callout2ndLvlMed;
     threshold1;
+};
+
+/** Callout 2nd Level Medium,  set SUE generation point */
+actionclass callout2ndLvlMedThr1UE
+{
+    callout2ndLvlMedThr1;
+    SUEGenerationPoint;
 };
 
 ################################################################################

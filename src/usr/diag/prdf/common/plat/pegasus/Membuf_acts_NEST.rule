@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -100,9 +100,7 @@ group gNestLFir filter singlebit
     /** NEST_LFIR[0]
      *  CFIR internal parity error
      */
-    #TODO via RTC 23125
-    # bit is not defined in RAS spreadsheet
-    (NestLFir, bit(0)) ? TBDDefaultCallout;
+    (NestLFir, bit(0)) ? thresholdAndMask_self;
 
     /** NEST_LFIR[1]
      *  Local errors from GPIO (PCB error)
@@ -117,7 +115,7 @@ group gNestLFir filter singlebit
     /** NEST_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (NestLFir, bit(3)) ? SelfMedThr1;
+    (NestLFir, bit(3)) ? defaultMaskedError;
 
     /** NEST_LFIR[4]
      *  Local errors from PSC (PCB error)
@@ -129,19 +127,15 @@ group gNestLFir filter singlebit
      */
     (NestLFir, bit(5)) ? defaultMaskedError;
 
-    #TODO via RTC 23125
-    # bit is defined in RAS spreadsheet but some question are present there.
     /** NEST_LFIR[6]
      *  Local errors from Thermal (parity error)
      */
-    (NestLFir, bit(6)) ? SelfMedThr1;
+    (NestLFir, bit(6)) ? defaultMaskedError;
 
-    #TODO via RTC 23125
-    # bit is defined in RAS spreadsheet but some question are present there.
     /** NEST_LFIR[7]
      *  Local errors from Thermal (PCB error)
      */
-    (NestLFir, bit(7)) ? SelfMedThr1;
+    (NestLFir, bit(7)) ? defaultMaskedError;
 
     /** NEST_LFIR[8:10]
      *  Local errors from Thermal (Trip error)
@@ -176,12 +170,12 @@ group gDmiFir filter singlebit
     /** DMIFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (DmiFir, bit(0)) ? defaultMaskedError;
+    (DmiFir, bit(0)) ? SelfHighThr1;
 
     /** DMIFIR[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (DmiFir, bit(1)) ? defaultMaskedError;
+    (DmiFir, bit(1)) ? SelfHighThr1;
 
     /** DMIFIR[2]
      *  FIR_GCR_HANG_ERROR
@@ -216,7 +210,7 @@ group gDmiFir filter singlebit
     /** DMIFIR[12]
      *  Too Many Bus Errors
      */
-    (DmiFir, bit(12)) ? defaultMaskedError;
+    (DmiFir, bit(12)) ? thresholdAndMask_dmiBus;
 
     /** DMIFIR[13:15]
      *  Reserved
@@ -246,12 +240,12 @@ group gDmiFir filter singlebit
     /** DMIFIR[48]
      *  FIR_SCOMFIR_ERROR
      */
-    (DmiFir, bit(48)) ? defaultMaskedError;
+    (DmiFir, bit(48)) ? thresholdAndMask_self;
 
     /** DMIFIR[49]
      *  FIR_SCOMFIR_ERROR_CLONE
      */
-    (DmiFir, bit(49)) ? defaultMaskedError;
+    (DmiFir, bit(49)) ? thresholdAndMask_self;
 };
 
 ################################################################################
@@ -270,122 +264,127 @@ group gScacFir filter singlebit
     /** SCACFIR[0]
      *  SCAC_LFIR_I2CMINVADDR
      */
-    (ScacFir, bit(0)) ? TBDDefaultCallout;
+    (ScacFir, bit(0)) ? defaultMaskedError;
 
     /** SCACFIR[1]
      *  SCAC_LFIR_I2CMINVWRITE
      */
-    (ScacFir, bit(1)) ? TBDDefaultCallout;
+    (ScacFir, bit(1)) ? defaultMaskedError;
 
     /** SCACFIR[2]
      *  SCAC_LFIR_I2CMINVREAD
      */
-    (ScacFir, bit(2)) ? TBDDefaultCallout;
+    (ScacFir, bit(2)) ? defaultMaskedError;
 
     /** SCACFIR[3]
      *  SCAC_LFIR_I2CMAPAR
      */
-    (ScacFir, bit(3)) ? TBDDefaultCallout;
+    (ScacFir, bit(3)) ? defaultMaskedError;
 
     /** SCACFIR[4]
      *  SCAC_LFIR_I2CMPAR
      */
-    (ScacFir, bit(4)) ? TBDDefaultCallout;
+    (ScacFir, bit(4)) ? defaultMaskedError;
 
     /** SCACFIR[5]
      *  SCAC_LFIR_I2CMLBPAR
      */
-    (ScacFir, bit(5)) ? TBDDefaultCallout;
+    (ScacFir, bit(5)) ? defaultMaskedError;
+
+    /** SCACFIR[6:9]
+     *  Expansion (Reserved at 0 for exernal macro expansion reporting)
+     */
+    (ScacFir, bit(6|7|8|9)) ? defaultMaskedError;
 
     /** SCACFIR[10]
      *  SCAC_LFIR_I2CMINVCMD
      */
-    (ScacFir, bit(10)) ? TBDDefaultCallout;
+    (ScacFir, bit(10)) ? defaultMaskedError;
 
     /** SCACFIR[11]
      *  SCAC_LFIR_I2CMPERR
      */
-    (ScacFir, bit(11)) ? TBDDefaultCallout;
+    (ScacFir, bit(11)) ? defaultMaskedError;
 
     /** SCACFIR[12]
      *  SCAC_LFIR_I2CMOVERRUN
      */
-    (ScacFir, bit(12)) ? TBDDefaultCallout;
+    (ScacFir, bit(12)) ? defaultMaskedError;
 
     /** SCACFIR[13]
      *  SCAC_LFIR_I2CMACCESS
      */
-    (ScacFir, bit(13)) ? TBDDefaultCallout;
+    (ScacFir, bit(13)) ? defaultMaskedError;
 
     /** SCACFIR[14]
      *  SCAC_LFIR_I2CMARB
      */
-    (ScacFir, bit(14)) ? TBDDefaultCallout;
+    (ScacFir, bit(14)) ? defaultMaskedError;
 
     /** SCACFIR[15]
      *  SCAC_LFIR_I2CMNACK
      */
-    (ScacFir, bit(15)) ? TBDDefaultCallout;
+    (ScacFir, bit(15)) ? defaultMaskedError;
 
     /** SCACFIR[16]
      *  SCAC_LFIR_I2CMSTOP
      */
-    (ScacFir, bit(16)) ? TBDDefaultCallout;
+    (ScacFir, bit(16)) ? defaultMaskedError;
 
     /** SCACFIR[17]
      *  SCAC_LFIR_LOCALPIB1
      */
-    (ScacFir, bit(17)) ? TBDDefaultCallout;
+    (ScacFir, bit(17)) ? defaultMaskedError;
 
     /** SCACFIR[18]
      *  SCAC_LFIR_LOCALPIB2
      */
-    (ScacFir, bit(18)) ? TBDDefaultCallout;
+    (ScacFir, bit(18)) ? defaultMaskedError;
 
     /** SCACFIR[19]
      *  SCAC_LFIR_LOCALPIB3
      */
-    (ScacFir, bit(19)) ? TBDDefaultCallout;
+    (ScacFir, bit(19)) ? defaultMaskedError;
 
     /** SCACFIR[20]
      *  SCAC_LFIR_LOCALPIB4
      */
-    (ScacFir, bit(20)) ? TBDDefaultCallout;
+    (ScacFir, bit(20)) ? defaultMaskedError;
 
     /** SCACFIR[21]
      *  SCAC_LFIR_LOCALPIB5
      */
-    (ScacFir, bit(21)) ? TBDDefaultCallout;
+    (ScacFir, bit(21)) ? defaultMaskedError;
 
     /** SCACFIR[22]
      *  SCAC_LFIR_LOCALPIB6
      */
-    (ScacFir, bit(22)) ? TBDDefaultCallout;
+    (ScacFir, bit(22)) ? defaultMaskedError;
 
     /** SCACFIR[23]
      *  SCAC_LFIR_LOCALPIB7
      */
-    (ScacFir, bit(23)) ? TBDDefaultCallout;
+    (ScacFir, bit(23)) ? defaultMaskedError;
 
     /** SCACFIR[24]
      *  SCAC_LFIR_STALLERROR
      */
-    (ScacFir, bit(24)) ? TBDDefaultCallout;
+    (ScacFir, bit(24)) ? defaultMaskedError;
 
     /** SCACFIR[25]
      *  SCAC_LFIR_REGPARERR
      */
-    (ScacFir, bit(25)) ? TBDDefaultCallout;
+    (ScacFir, bit(25)) ? SelfMedThr1UE;
 
     /** SCACFIR[26]
      *  SCAC_LFIR_REGPARERRX
      */
-    (ScacFir, bit(26)) ? TBDDefaultCallout;
+    (ScacFir, bit(26)) ? SelfMedThr1UE;
 
     /** SCACFIR[32]
      *  SCAC_LFIR_SMERR
      */
-    (ScacFir, bit(32)) ? TBDDefaultCallout;
+    (ScacFir, bit(32)) ? SelfMedThr1;
 
     /** SCACFIR[33]
      *  SCAC_LFIR_REGACCERR
@@ -395,17 +394,17 @@ group gScacFir filter singlebit
     /** SCACFIR[34]
      *  SCAC_LFIR_RESETERR
      */
-    (ScacFir, bit(34)) ? TBDDefaultCallout;
+    (ScacFir, bit(34)) ? defaultMaskedError;
 
     /** SCACFIR[35]
      *  SCAC_LFIR_INTERNAL_SCOM_ERROR
      */
-    (ScacFir, bit(35)) ? TBDDefaultCallout;
+    (ScacFir, bit(35)) ? thresholdAndMask_self;
 
     /** SCACFIR[36]
      *  SCAC_LFIR_INTERNAL_SCOM_ERROR_CLONE
      */
-    (ScacFir, bit(36)) ? TBDDefaultCallout;
+    (ScacFir, bit(36)) ? thresholdAndMask_self;
 };
 
 ################################################################################
@@ -515,7 +514,7 @@ group gMbiFir filter singlebit
     /** MBIFIR[18]
      *  MBIFIRQ_MULTIPLE_REPLAY
      */
-    (MbiFir, bit(18)) ? defaultMaskedError;
+    (MbiFir, bit(18)) ? thresholdAndMask_dmiBus;
 
     /** MBIFIR[19]
      *  MBIFIRQ_MBICFG_PARITY_SCOM_ERROR
@@ -535,12 +534,12 @@ group gMbiFir filter singlebit
     /** MBIFIR[25]
      *  MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (MbiFir, bit(25)) ? defaultMaskedError;
+    (MbiFir, bit(25)) ? thresholdAndMask_self;
 
     /** MBIFIR[26]
      *  MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE_COPY
      */
-    (MbiFir, bit(26)) ? defaultMaskedError;
+    (MbiFir, bit(26)) ? thresholdAndMask_self;
 };
 
 ################################################################################
@@ -589,7 +588,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[6]
      *  MBS_FIR_REG_INT_BUFFER_UE
      */
-    (MbsFir, bit(6)) ? SelfMedThr1;
+    (MbsFir, bit(6)) ? SelfMedThr1UE;
 
     /** MBSFIR[7]
      *  MBS_FIR_REG_INT_BUFFER_SUE
@@ -610,7 +609,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[10]
      *  MBS_FIR_REG_CACHE_SRW_UE
      */
-    (MbsFir, bit(10)) ? clearSecMbsBitsAndSelfMedThr1;
+    (MbsFir, bit(10)) ? clearSecMbsBitsAndConnL4UE;
 
     /** MBSFIR[11]
      *  MBS_FIR_REG_CACHE_SRW_SUE
@@ -626,7 +625,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[13]
      *  MBS_FIR_REG_CACHE_CO_UE
      */
-    (MbsFir, bit(13)) ? clearSecMbaCalBitsAndSelfMedThr1;
+    (MbsFir, bit(13)) ? clearSecMbaCalBitsAndConnL4UE;
 
     /** MBSFIR[14]
      *  MBS_FIR_REG_CACHE_CO_SUE
@@ -636,12 +635,12 @@ group gMbsFir filter singlebit
     /** MBSFIR[15]
      *  MBS_FIR_REG_DIR_CE
      */
-    (MbsFir, bit(15)) ? SelfMedThr32PerDay;
+    (MbsFir, bit(15)) ? L4CalloutMedThr32PerDay;
 
     /** MBSFIR[16]
      *  MBS_FIR_REG_DIR_UE
      */
-    (MbsFir, bit(16)) ? SelfMedThr1UE;
+    (MbsFir, bit(16)) ? L4CalloutMedThr1UE;
 
     /** MBSFIR[17]
      *  MBS_FIR_REG_DIR_MEMBER_DELETED
@@ -651,17 +650,17 @@ group gMbsFir filter singlebit
     /** MBSFIR[18]
      *  MBS_FIR_REG_DIR_ALL_MEMBERS_DELETED
      */
-    (MbsFir, bit(18)) ? SelfMedThr1UE;
+    (MbsFir, bit(18)) ? L4CalloutMedThr1UE;
 
     /** MBSFIR[19]
      *  MBS_FIR_REG_LRU_ERROR
      */
-    (MbsFir, bit(19)) ? SelfMedThr32PerDay;
+    (MbsFir, bit(19)) ? L4CalloutMedThr32PerDay;
 
     /** MBSFIR[20]
      *  MBS_FIR_REG_EDRAM_ERROR
      */
-    (MbsFir, bit(20)) ? SelfMedThr1UE;
+    (MbsFir, bit(20)) ? L4CalloutMedThr1UE;
 
     /** MBSFIR[21]
      *  MBS_FIR_REG_EMERGENCY_THROTTLE_SET
@@ -696,7 +695,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[27]
      *  MBS_FIR_REG_SRB_BUFFER_UE
      */
-    (MbsFir, bit(27)) ? SelfMedThr1;
+    (MbsFir, bit(27)) ? SelfMedThr1UE;
 
     /** MBSFIR[28]
      *  MBS_FIR_REG_SRB_BUFFER_SUE
@@ -706,12 +705,12 @@ group gMbsFir filter singlebit
     /** MBSFIR[29]
      *  MBS_FIR_REG_INTERNAL_SCOM_ERROR
      */
-    (MbsFir, bit(29)) ? defaultMaskedError;
+    (MbsFir, bit(29)) ? thresholdAndMask_self;
 
     /** MBSFIR[30]
      *  MBS_FIR_REG_INTERNAL_SCOM_ERROR_COPY
      */
-    (MbsFir, bit(30)) ? defaultMaskedError;
+    (MbsFir, bit(30)) ? thresholdAndMask_self;
 };
 
 ################################################################################
@@ -994,62 +993,62 @@ group gMbsEccFir filter priority(19,41) # UEs highest priority
     /** MBA0_MBSECCFIR[46]
      *  MBECCFIR_RECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (Mba0_MbsEccFir, bit(46)) ? SelfMedThr1;
+    (Mba0_MbsEccFir, bit(46)) ? MBA0CalloutMedThr1;
 
     /** MBA1_MBSECCFIR[46]
      *  MBECCFIR_RECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (Mba1_MbsEccFir, bit(46)) ? SelfMedThr1;
+    (Mba1_MbsEccFir, bit(46)) ? MBA1CalloutMedThr1;
 
     /** MBA0_MBSECCFIR[47]
      *  MBECCFIR_UNRECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (Mba0_MbsEccFir, bit(47)) ? SelfMedThr1UE;
+    (Mba0_MbsEccFir, bit(47)) ? MBA0CalloutMedThr1UE;
 
     /** MBA1_MBSECCFIR[47]
      *  MBECCFIR_UNRECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (Mba1_MbsEccFir, bit(47)) ? SelfMedThr1UE;
+    (Mba1_MbsEccFir, bit(47)) ? MBA1CalloutMedThr1UE;
 
     /** MBA0_MBSECCFIR[48]
      *  MBECCFIR_MASKABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (Mba0_MbsEccFir, bit(48)) ? defaultMaskedError;
+    (Mba0_MbsEccFir, bit(48)) ? thresholdAndMask_mba0;
 
     /** MBA1_MBSECCFIR[48]
      *  MBECCFIR_MASKABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (Mba1_MbsEccFir, bit(48)) ? defaultMaskedError;
+    (Mba1_MbsEccFir, bit(48)) ? thresholdAndMask_mba1;
 
     /** MBA0_MBSECCFIR[49]
      *  MBECCFIR_ECC_DATAPATH_PARITY_ERROR
      */
-    (Mba0_MbsEccFir, bit(49)) ? SelfMedThr1UE;
+    (Mba0_MbsEccFir, bit(49)) ? MBA0CalloutMedThr1UE;
 
     /** MBA1_MBSECCFIR[49]
      *  MBECCFIR_ECC_DATAPATH_PARITY_ERROR
      */
-    (Mba1_MbsEccFir, bit(49)) ? SelfMedThr1UE;
+    (Mba1_MbsEccFir, bit(49)) ? MBA1CalloutMedThr1UE;
 
     /** MBA0_MBSECCFIR[50]
      *  MBECCFIR_INTERNAL_SCOM_ERROR
      */
-    (Mba0_MbsEccFir, bit(50)) ? defaultMaskedError;
+    (Mba0_MbsEccFir, bit(50)) ? thresholdAndMask_mba0;
 
     /** MBA1_MBSECCFIR[50]
      *  MBECCFIR_INTERNAL_SCOM_ERROR
      */
-    (Mba1_MbsEccFir, bit(50)) ? defaultMaskedError;
+    (Mba1_MbsEccFir, bit(50)) ? thresholdAndMask_mba1;
 
     /** MBA0_MBSECCFIR[51]
      *  MBECCFIR_INTERNAL_SCOM_ERROR_COPY
      */
-    (Mba0_MbsEccFir, bit(51)) ? defaultMaskedError;
+    (Mba0_MbsEccFir, bit(51)) ? thresholdAndMask_mba0;
 
     /** MBA1_MBSECCFIR[51]
      *  MBECCFIR_INTERNAL_SCOM_ERROR_COPY
      */
-    (Mba1_MbsEccFir, bit(51)) ? defaultMaskedError;
+    (Mba1_MbsEccFir, bit(51)) ? thresholdAndMask_mba1;
 };
 
 ################################################################################
@@ -1082,22 +1081,22 @@ group gMcbistFir filter singlebit
     /** MBA0_MCBISTFIR[0]
      *  MBSFIRQ_SCOM_PAR_ERRORS
      */
-    (Mba0_McbistFir, bit(0)) ? SelfMedThr1;
+    (Mba0_McbistFir, bit(0)) ? MBA0CalloutMedThr1;
 
     /** MBA1_MCBISTFIR[0]
      *  MBSFIRQ_SCOM_PAR_ERRORS
      */
-    (Mba1_McbistFir, bit(0)) ? SelfMedThr1;
+    (Mba1_McbistFir, bit(0)) ? MBA1CalloutMedThr1;
 
     /** MBA0_MCBISTFIR[1]
      *  MBSFIRQ_MBX_PAR_ERRORS
      */
-    (Mba0_McbistFir, bit(1)) ? SelfMedThr1UE;
+    (Mba0_McbistFir, bit(1)) ? MBA0CalloutMedThr1UE;
 
     /** MBA1_MCBISTFIR[1]
      *  MBSFIRQ_MBX_PAR_ERRORS
      */
-    (Mba1_McbistFir, bit(1)) ? SelfMedThr1UE;
+    (Mba1_McbistFir, bit(1)) ? MBA1CalloutMedThr1UE;
 
     /** MBA0_MCBISTFIR[2:14]
      *  Reserved
@@ -1112,22 +1111,22 @@ group gMcbistFir filter singlebit
     /** MBA0_MCBISTFIR[15]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR
      */
-    (Mba0_McbistFir, bit(15)) ? defaultMaskedError;
+    (Mba0_McbistFir, bit(15)) ? thresholdAndMask_mba0;
 
     /** MBA1_MCBISTFIR[15]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR
      */
-    (Mba1_McbistFir, bit(15)) ? defaultMaskedError;
+    (Mba1_McbistFir, bit(15)) ? thresholdAndMask_mba1;
 
     /** MBA0_MCBISTFIR[16]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (Mba0_McbistFir, bit(16)) ? defaultMaskedError;
+    (Mba0_McbistFir, bit(16)) ? thresholdAndMask_mba0;
 
     /** MBA1_MCBISTFIR[16]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (Mba1_McbistFir, bit(16)) ? defaultMaskedError;
+    (Mba1_McbistFir, bit(16)) ? thresholdAndMask_mba1;
 };
 
 ################################################################################
@@ -1146,32 +1145,46 @@ group gMbsSecureFir filter singlebit
     /** MBSSECUREFIR[0]
      *  MBSSIRQ_INVALID_MBSXCR_ACCESS
      */
-    (MbsSecureFir, bit(0)) ? TBDDefaultCallout;
+    (MbsSecureFir, bit(0)) ? callout2ndLvlMedThr1UE;
 
     /** MBSSECUREFIR[1]
      *  MBSSIRQ_INVALID_MBAXCR01_ACCESS
      */
-    (MbsSecureFir, bit(1)) ? TBDDefaultCallout;
+    (MbsSecureFir, bit(1)) ? callout2ndLvlMedThr1UE;
 
     /** MBSSECUREFIR[2]
      *  MBSSIRQ_INVALID_MBAXCR23_ACCESS
      */
-    (MbsSecureFir, bit(2)) ? TBDDefaultCallout;
+    (MbsSecureFir, bit(2)) ? callout2ndLvlMedThr1UE;
 
     /** MBSSECUREFIR[3]
      *  MBSSIRQ_INVALID_MBAXCRMS_ACCRESS
      */
-    (MbsSecureFir, bit(3)) ? TBDDefaultCallout;
+    (MbsSecureFir, bit(3)) ? callout2ndLvlMedThr1UE;
+
+    /** MBSSECUREFIR[4]
+     *  MBSSIRQ_SPARE (Spare)
+     */
+    (MbsSecureFir, bit(4)) ? callout2ndLvlMedThr1UE;
 
     /** MBSSECUREFIR[5]
      *  MBSSIRQ_INVALID_SIR_MASK_OR_ACTION_REGISTER_ACCESS
      */
-    (MbsSecureFir, bit(5)) ? TBDDefaultCallout;
+    (MbsSecureFir, bit(5)) ? callout2ndLvlMedThr1UE;
 };
 
 ################################################################################
 # Actions specific to NEST chiplet
 ################################################################################
+
+/** Callout the connected MBA 0 */
+actionclass calloutMba0 { callout(connected(TYPE_MBA, 0), MRU_MED); };
+
+/** Callout the connected MBA 1 */
+actionclass calloutMba1 { callout(connected(TYPE_MBA, 1), MRU_MED); };
+
+/** Callout the connected L4 */
+actionclass calloutL4 { callout(connected(TYPE_L4), MRU_MED); };
 
 /** Callout the DMI bus */
 actionclass calloutDmiBus
@@ -1308,19 +1321,25 @@ actionclass analyzeFetchPreUe0 { funccall("AnalyzeFetchPreUe0"); };
 actionclass analyzeFetchPreUe1 { funccall("AnalyzeFetchPreUe1"); };
 
 /** Analyze a fetch UE on MBA0 */
-actionclass analyzeFetchUe0 { funccall("AnalyzeFetchUe0"); threshold1; };
+actionclass analyzeFetchUe0
+{
+    funccall("AnalyzeFetchUe0");
+    threshold1;
+    SUEGenerationPoint;
+};
 
 /** Analyze a fetch UE on MBA1 */
-actionclass analyzeFetchUe1 { funccall("AnalyzeFetchUe1"); threshold1; };
-
-/** Callout 2nd Level Medium,  set SUE generation point */
-actionclass callout2ndLvlMedThr1UE
-{ callout2ndLvlMed; threshold1;SUEGenerationPoint; };
+actionclass analyzeFetchUe1
+{
+     funccall("AnalyzeFetchUe1");
+     threshold1;
+     SUEGenerationPoint;
+};
 
 /** Clear MBS SecondaryBits and Line Delete*/
 actionclass clearSecMbsBitsAndLineDelete
 {
-    calloutSelfMed;
+    calloutL4;
     threshold( field(32 / day), mfg_file(CEN_L4_CACHE_CES));
     funccall("ClearServiceCallFlag");
     funccall("ClearMbsSecondaryBits");
@@ -1329,22 +1348,70 @@ actionclass clearSecMbsBitsAndLineDelete
 /** Clear MBACAL SecondaryBits and Line Delete*/
 actionclass clearSecMbaCalBitsAndLineDelete
 {
-    calloutSelfMed;
+    calloutL4;
     threshold( field(32 / day), mfg_file(CEN_L4_CACHE_CES));
     funccall("ClearServiceCallFlag");
     funccall("ClearMbaCalSecondaryBits");
 };
 
-/** Clear MBACAL SecondaryBits and Line SelfMedThr1*/
-actionclass clearSecMbaCalBitsAndSelfMedThr1
+/** Clear MBACAL SecondaryBits and callout Connected L4*/
+actionclass clearSecMbaCalBitsAndConnL4UE
 {
     funccall("ClearMbaCalSecondaryBits");
-    SelfMedThr1;
+    calloutL4;
+    SUEGenerationPoint;
 };
 
-/** Clear MBS SecondaryBits and Line SelfMedThr1*/
-actionclass clearSecMbsBitsAndSelfMedThr1
+/** Clear MBS SecondaryBits and callout Connected L4*/
+actionclass clearSecMbsBitsAndConnL4UE
 {
     funccall("ClearMbsSecondaryBits");
-    SelfMedThr1;
+    calloutL4;
+    SUEGenerationPoint;
+};
+
+/** Callout DMI bus with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus { calloutDmiBus; thresholdAndMask; };
+
+/** Callout MBA0 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_mba0 { calloutMba0; thresholdAndMask; };
+
+/** Callout MBA1 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_mba1 { calloutMba1; thresholdAndMask; };
+
+actionclass L4CalloutMedThr32PerDay
+{
+    calloutL4;
+    threshold32pday;
+};
+
+actionclass L4CalloutMedThr1UE
+{
+    calloutL4;
+    threshold1;
+    SUEGenerationPoint;
+};
+
+actionclass MBA0CalloutMedThr1
+{
+    calloutMba0;
+    threshold1;
+};
+
+actionclass MBA1CalloutMedThr1
+{
+    calloutMba1;
+    threshold1;
+};
+
+actionclass MBA0CalloutMedThr1UE
+{
+    MBA0CalloutMedThr1;
+    SUEGenerationPoint;
+};
+
+actionclass MBA1CalloutMedThr1UE
+{
+    MBA1CalloutMedThr1;
+    SUEGenerationPoint;
 };

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -123,9 +123,7 @@ group gMemLFir filter singlebit
     /** MEM_LFIR[0]
      *  CFIR internal parity error
      */
-    #TODO via RTC 23125
-    # bit is not defined in RAS spreadsheet
-    (MemLFir, bit(0)) ? TBDDefaultCallout;
+    (MemLFir, bit(0)) ? thresholdAndMask_self;
 
     /** MEM_LFIR[1]
      *  Local errors from GPIO (PCB error)
@@ -140,7 +138,7 @@ group gMemLFir filter singlebit
     /** MEM_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (MemLFir, bit(3)) ? SelfMedThr1;
+    (MemLFir, bit(3)) ? defaultMaskedError;
 
     /** MEM_LFIR[4]
      *  Local errors from PSC (PCB error)

@@ -67,6 +67,7 @@ enum PositionBounds
     MAX_MBA_PER_MEMBUF  = 2,
     MAX_PORT_PER_MBA    = 2,
     MAX_DIMM_PER_PORT   = 2,
+    MAX_L4_PER_MEMBUF   = 1,
 
     INVALID_POSITION_BOUND = 0xffffffff,
 };

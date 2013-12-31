@@ -2571,12 +2571,12 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_0, bit(0)) ? defaultMaskedError;
+    (IomcFir_0, bit(0)) ? SelfHighThr1;
 
     /** IOMCFIR_0[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_0, bit(1)) ? defaultMaskedError;
+    (IomcFir_0, bit(1)) ? SelfHighThr1;
 
     /** IOMCFIR_0[2]
      *  FIR_GCR_HANG_ERROR
@@ -2611,7 +2611,7 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[12]
      *  MCS0 Too Many Bus Errors
      */
-    (IomcFir_0, bit(12)) ? tooManyBusErrors_dmiBus0;
+    (IomcFir_0, bit(12)) ? thresholdAndMask_dmiBus0;
 
     /** IOMCFIR_0[13:15]
      *  Reserved
@@ -2641,7 +2641,7 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[20]
      *  MCS1 Too Many Bus Errors
      */
-    (IomcFir_0, bit(20)) ? tooManyBusErrors_dmiBus1;
+    (IomcFir_0, bit(20)) ? thresholdAndMask_dmiBus1;
 
     /** IOMCFIR_0[21:23]
      *  Reserved
@@ -2671,7 +2671,7 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[28]
      *  MCS2 Too Many Bus Errors
      */
-    (IomcFir_0, bit(28)) ? tooManyBusErrors_dmiBus2;
+    (IomcFir_0, bit(28)) ? thresholdAndMask_dmiBus2;
 
     /** IOMCFIR_0[29:31]
      *  Reserved
@@ -2701,7 +2701,7 @@ group gIomcFir_0 filter singlebit
     /** IOMCFIR_0[36]
      *  MCS3 Too Many Bus Errors
      */
-    (IomcFir_0, bit(36)) ? tooManyBusErrors_dmiBus3;
+    (IomcFir_0, bit(36)) ? thresholdAndMask_dmiBus3;
 
     /** IOMCFIR_0[37:39]
      *  Reserved
@@ -2740,12 +2740,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_1, bit(0)) ? defaultMaskedError;
+    (IomcFir_1, bit(0)) ? SelfHighThr1;
 
     /** IOMCFIR_1[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_1, bit(1)) ? defaultMaskedError;
+    (IomcFir_1, bit(1)) ? SelfHighThr1;
 
     /** IOMCFIR_1[2]
      *  FIR_GCR_HANG_ERROR
@@ -2780,7 +2780,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[12]
      *  MCS4 Too Many Bus Errors
      */
-    (IomcFir_1, bit(12)) ? tooManyBusErrors_dmiBus4;
+    (IomcFir_1, bit(12)) ? thresholdAndMask_dmiBus4;
 
     /** IOMCFIR_1[13:15]
      *  Reserved
@@ -2810,7 +2810,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[20]
      *  MCS5 Too Many Bus Errors
      */
-    (IomcFir_1, bit(20)) ? tooManyBusErrors_dmiBus5;
+    (IomcFir_1, bit(20)) ? thresholdAndMask_dmiBus5;
 
     /** IOMCFIR_1[21:23]
      *  Reserved
@@ -2840,7 +2840,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[28]
      *  MCS6 Too Many Bus Errors
      */
-    (IomcFir_1, bit(28)) ? tooManyBusErrors_dmiBus6;
+    (IomcFir_1, bit(28)) ? thresholdAndMask_dmiBus6;
 
     /** IOMCFIR_1[29:31]
      *  Reserved
@@ -2870,7 +2870,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[36]
      *  MCS7 Too Many Bus Errors
      */
-    (IomcFir_1, bit(36)) ? tooManyBusErrors_dmiBus7;
+    (IomcFir_1, bit(36)) ? thresholdAndMask_dmiBus7;
 
     /** IOMCFIR_1[37:39]
      *  Reserved
@@ -3076,61 +3076,29 @@ actionclass maxSparesExceeded_dmiBus6
 actionclass maxSparesExceeded_dmiBus7
 { calloutDmiBus7Th1; funccall("maxSparesExceeded_dmiBus7"); };
 
-/** Threshold and Mask too many bus errors  on dmi bus0*/
-actionclass tooManyBusErrors_dmiBus0
-{
-    calloutDmiBus0;
-    threshold32pDayAndMask;
-};
+/** Callout DMI bus 0 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus0 { calloutDmiBus0; thresholdAndMask; };
 
-/** Threshold and Mask too many bus errors  on dmi bus1*/
-actionclass tooManyBusErrors_dmiBus1
-{
-    calloutDmiBus1;
-    threshold32pDayAndMask;
-};
+/** Callout DMI bus 1 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus1 { calloutDmiBus1; thresholdAndMask; };
 
-/** Threshold and Mask too many bus errors  on dmi bus2*/
-actionclass tooManyBusErrors_dmiBus2
-{
-    calloutDmiBus2;
-    threshold32pDayAndMask;
-};
+/** Callout DMI bus 2 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus2 { calloutDmiBus2; thresholdAndMask; };
 
-/** Threshold and Mask too many bus errors  on dmi bus3*/
-actionclass tooManyBusErrors_dmiBus3
-{
-    calloutDmiBus3;
-    threshold32pDayAndMask;
-};
+/** Callout DMI bus 3 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus3 { calloutDmiBus3; thresholdAndMask; };
 
-/** Threshold and Mask too many bus errors  on dmi bus4*/
-actionclass tooManyBusErrors_dmiBus4
-{
-    calloutDmiBus4;
-    threshold32pDayAndMask;
-};
+/** Callout DMI bus 4 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus4 { calloutDmiBus4; thresholdAndMask; };
 
-/** Threshold and Mask too many bus errors  on dmi bus5*/
-actionclass tooManyBusErrors_dmiBus5
-{
-    calloutDmiBus5;
-    threshold32pDayAndMask;
-};
+/** Callout DMI bus 5 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus5 { calloutDmiBus5; thresholdAndMask; };
 
-/** Threshold and Mask too many bus errors  on dmi bus6*/
-actionclass tooManyBusErrors_dmiBus6
-{
-    calloutDmiBus6;
-    threshold32pDayAndMask;
-};
+/** Callout DMI bus 6 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus6 { calloutDmiBus6; thresholdAndMask; };
 
-/** Threshold and Mask too many bus errors  on dmi bus7*/
-actionclass tooManyBusErrors_dmiBus7
-{
-    calloutDmiBus7;
-    threshold32pDayAndMask;
-};
+/** Callout DMI bus 7 with "Threshold and Mask" policy. */
+actionclass thresholdAndMask_dmiBus7 { calloutDmiBus7; thresholdAndMask; };
 
 /** Callout 2nd level support of first instance */
 actionclass callout2ndLvlMedThr1

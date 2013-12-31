@@ -408,7 +408,7 @@ group gOccFir filter singlebit
     /** OCCFIR[10]
      *  OCC_SCOM_OCCFIR_SRT_CE
      */
-    (OccFir, bit(10)) ? ThresholdNoCallout;
+    (OccFir, bit(10)) ? thresholdAndMask_self;
 
     /** OCCFIR[11]
      *  OCC_SCOM_OCCFIR_SRT_READ_ERROR
@@ -553,12 +553,12 @@ group gOccFir filter singlebit
     /** OCCFIR[39]
      *  OCC_SCOM_OCCFIR_C405_ECC_CE
      */
-    (OccFir, bit(39)) ? ThresholdNoCallout;
+    (OccFir, bit(39)) ? thresholdAndMask_self;
 
     /** OCCFIR[40]
      *  OCC_SCOM_OCCFIR_C405_OCI_MACHINECHECK
      */
-        (OccFir, bit(40)) ? defaultMaskedError;
+    (OccFir, bit(40)) ? defaultMaskedError;
 
     /** OCCFIR[41]
      *  OCC_SCOM_OCCFIR_SRAM_SPARE_DIRECT_ERROR0
@@ -1140,15 +1140,6 @@ actionclass analyzeMcs30
 actionclass analyzeMcs31
 {
     analyze(connected(TYPE_MCS, 7));
-};
-
-
-/** In the field, don't callout hw */
-actionclass ThresholdNoCallout
-{
-    threshold( field(32 / day), mfg( 1 ) );
-    calloutSelfMed;
-    funccall("ClearServiceCallFlag");
 };
 
 /** PLL error action */
