@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -505,15 +505,29 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
+        per_node = 0x200000000000
         hb_hrmor = cpu.hrmor
-        node_num = (hb_hrmor - 0x8000000)/0x200000000000
+        node_num = hb_hrmor//per_node
+        mem_object = None
+
+        # Find the entry in the memory map that includes our
+        #  base memory region
+        mem_map_entries = (conf.system_cmp0.phys_mem).map
+        for entry in mem_map_entries:
+            #print ">> %d:%s" % (entry[0], entry[1])
+            if entry[0] == (node_num*per_node): 
+                mem_object = simics.SIM_object_name(entry[1])
+                #print "Found entry %s for hrmor %d" % (mem_object, hb_hrmor)
+                break
+        if mem_object == None:
+            print "Could not find entry for hrmor %d" % (hb_hrmor)
+            SIM_break_simulation( "No memory for trace" )
+            return
 
         # Figure out if we are running out of the cache or mainstore
-        runStr = "(system_cmp0.phys_mem)->map[%d][1]" % (2*node_num)
-        ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
         # Add the HRMOR if we're running from memory
-        if 'cache' not in result:
-            hb_tracBinaryBuffer = hb_tracBinaryBuffer + hb_hrmor
+        if 'cache' not in mem_object:
+            hb_tracBinaryBuffer = hb_tracBinaryBuffer + hb_hrmor - per_node*node_num
 
         tracbin = ["hbTracBINARY","hbTracBINARY1","hbTracBINARY2","hbTracBINARY3"]
         tracmerg = ["hbTracMERG","hbTracMERG1","hbTracMERG2","hbTracMERG3"]
@@ -523,11 +537,12 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # tracMERG.  Once we extract the trace buffer, we need to reset
         # mailbox scratch 1 (to 0) so that the trace daemon knows it can
         # continue.
-        cmd1 = "(system_cmp0.phys_mem)->map[%d][1]->image.save %s 0x%x %d"\
-                %(2*node_num,\
+        cmd1 = "(%s)->image.save %s 0x%x %d"%(
+                mem_object,\
                 tracbin[node_num],\
                 hb_tracBinaryBuffer,\
                 hb_tracBinaryBufferSz)
+        
 
         cmd2 = "(shell \"(fsp-trace ./%s -s %s/hbotStringFile >> %s 2>/dev/null) || true\")"\
                 %(tracbin[node_num],\
