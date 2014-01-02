@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -57,6 +57,13 @@ class ExtensibleChip : public CHIP_CLASS
      */
     virtual int32_t CaptureErrorData( CaptureData & i_cap,
                                int i_group = 1 ) = 0;
+
+    /**
+     * @brief       Returns signature offset associated with registes of a
+     *              RuleChip.
+     * @return      Error signature offset
+     */
+    virtual uint32_t getSignatureOffset() = 0;
 
 };
 

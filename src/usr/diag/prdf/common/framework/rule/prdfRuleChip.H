@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -125,6 +125,13 @@ class RuleChip : public ExtensibleChip
          * @return      returns DataBundle&
          */
         DataBundle *& getDataBundle() { return cv_dataBundle; };
+
+        /**
+         * @brief       Returns signature offset associated with registes of a
+         *              RuleChip.
+         * @return      Error signature offset
+         */
+         uint32_t getSignatureOffset();
 
         /**
          * @brief       Captures  register  data

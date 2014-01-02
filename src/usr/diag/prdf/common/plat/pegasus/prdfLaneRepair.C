@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <prdfCalloutUtil.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfP8McsDataBundle.H>
+#include <prdfP8LaneRprExtraSig.H>
 
 using namespace TARGETING;
 
@@ -122,10 +123,12 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 
         // Add failed lane capture data to errorlog
         i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                Util::hashString("NEW_FAILED_LANES_0TO63"),
+                                ( Util::hashString("NEW_FAILED_LANES_0TO63") ^
+                                  i_chip->getSignatureOffset() ),
                                 l_newLaneMap0to63);
         i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                Util::hashString("NEW_FAILED_LANES_64TO127"),
+                                ( Util::hashString("NEW_FAILED_LANES_64TO127") ^
+                                  i_chip->getSignatureOffset() ),
                                 l_newLaneMap64to127);
 
         if (!mfgMode()) // Don't read/write VPD in mfg mode
@@ -158,11 +161,13 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 
             // Add failed lane capture data to errorlog
             i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                Util::hashString("VPD_FAILED_LANES_0TO63"),
+                                ( Util::hashString("VPD_FAILED_LANES_0TO63") ^
+                                  i_chip->getSignatureOffset() ),
                                 l_vpdLaneMap0to63);
             i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
-                                Util::hashString("VPD_FAILED_LANES_64TO127"),
-                                l_vpdLaneMap64to127);
+                               ( Util::hashString("VPD_FAILED_LANES_64TO127") ^
+                                 i_chip->getSignatureOffset() ),
+                               l_vpdLaneMap64to127);
 
             if (i_spareDeployed)
             {
@@ -196,6 +201,11 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                               "rxBusTgt=0x%08x txBusTgt=0x%08x",
                               getHuid(rxBusTgt), getHuid(txBusTgt) );
                     break;
+                }
+                if( thrExceeded )
+                {
+                    i_sc.service_data->SetErrorSig(
+                                            PRDFSIG_ERepair_FWThrExceeded );
                 }
             }
         }
@@ -250,6 +260,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
         PRDF_ERR( PRDF_FUNC"i_chip: 0x%08x i_busType:%d i_busPos:%d",
                   i_chip->GetId(), i_busType, i_busPos );
 
+        i_sc.service_data->SetErrorSig( PRDFSIG_ERepair_ERROR );
         CalloutUtil::defaultError( i_sc );
     }
 

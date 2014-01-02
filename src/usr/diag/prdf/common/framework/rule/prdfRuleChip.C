@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -147,6 +147,13 @@ int32_t RuleChip::CaptureErrorData( CaptureData & io_cap,int i_group )
 }
 
 //------------------------------------------------------------------------------
+
+uint32_t RuleChip::getSignatureOffset()
+{
+    //this pointer is retained in stack just for the scope of this function
+    PRDF_DEFINE_CHIP_SCOPE( this );
+    return iv_pRuleData->getSignatureOffset();
+}
 
 } // end namespace PRDF
 
