@@ -1209,8 +1209,7 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
 
         // Using namespace explicitly in ATTR_EFF_DIMM_SPARE as otherwise it
         // has conflict with fapi namespace.
-        if ( SUCCESS != i_mba->tryGetAttr< TARGETING::ATTR_EFF_DIMM_SPARE>
-                                                                    ( attr ))
+        if (  !i_mba->tryGetAttr< TARGETING::ATTR_EFF_DIMM_SPARE>( attr ))
         {
             PRDF_ERR( PRDF_FUNC"Failed to get ATTR_EFF_DIMM_SPARE for Target:"
                       "0x%08X", getHuid( i_mba ) );
