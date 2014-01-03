@@ -2,11 +2,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/targeting/xmltohb/genHwsvMrwXml.pl $
+# $Source: src/usr/targeting/common/genHwsvMrwXml.pl $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -1159,14 +1159,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             generate_pcies($proc,$proc_ordinal_id);
             generate_ax_buses($proc, "A",$proc_ordinal_id);
             generate_ax_buses($proc, "X",$proc_ordinal_id);
-            # TODO RTC: 87142
-            # instance path to be added
-            $ipath = "";
-            generate_nx($proc,$proc_ordinal_id,$ipath);
-            # TODO RTC: 87142
-            # instance path to be added
-            $ipath = "";
-            generate_pore($proc,$proc_ordinal_id,$ipath);
+            generate_nx($proc,$proc_ordinal_id,$node);
+            generate_pore($proc,$proc_ordinal_id,$node);
         }
     }
 }
@@ -1786,8 +1780,43 @@ sub generate_max_config
     </attribute>";
 }
 
+my $computeNodeInit = 0;
+my %computeNodeList = ();
+sub generate_compute_node_ipath
+{
+    open (FH, "<$::mrwdir/${sysname}-location-codes.xml") ||
+        die "ERROR: unable to open $::mrwdir/${sysname}-location-codes.xml\n";
+    close (FH);
+
+    my $nodeTargets = XMLin("$::mrwdir/${sysname}-location-codes.xml");
+
+    #get the node (compute) ipath details
+    foreach my $Target (@{$nodeTargets->{'location-code-entry'}})
+    {
+        if($Target->{'assembly-type'} eq "compute")
+        {
+            my $ipath = $Target->{'instance-path'};
+            my $assembly = $Target->{'assembly-type'};
+            my $position = $Target->{position};
+
+            $computeNodeList{$position} = {
+                'position'     => $position,
+                'assembly'     => $assembly,
+                'instancePath' => $ipath,
+            }
+        }
+    }
+}
+
 sub generate_system_node
 {
+    # Get the node ipath info
+    if ($computeNodeInit == 0)
+    {
+        generate_compute_node_ipath;
+        $computeNodeInit = 1;
+    }
+
     # Brazos node4 is the fsp node and we'll let the fsp
     # MRW parser handle that.
     if( !( ($sysname eq "brazos") && ($node == $MAXNODE) ) )
@@ -1809,7 +1838,7 @@ sub generate_system_node
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:node:TO_BE_ADDED</default>
+        <default>instance:$computeNodeList{$node}->{'instancePath'}</default>
     </compileAttribute>";
         # add fsp extensions
         do_plugin('fsp_node_add_extensions', $node);
@@ -2445,34 +2474,37 @@ sub generate_ax_buses
         my $ipath = "abus_or_xbus:TO_BE_ADDED";
         foreach my $pbus ( @pbus )
         {
-            if (($pbus->[PBUS_FIRST_END_POINT_INDEX] eq
-                "n${node}:p${proc}:${type}${i}" )&&
-                ($pbus->[PBUS_SECOND_END_POINT_INDEX] ne "invalid"))
+            if ($pbus->[PBUS_FIRST_END_POINT_INDEX] eq
+                "n${node}:p${proc}:${type}${i}" )
             {
-                $peer = 1;
-                $p_proc = $pbus->[PBUS_SECOND_END_POINT_INDEX];
-                $p_port = $p_proc;
-                $p_node = $pbus->[PBUS_SECOND_END_POINT_INDEX];
-                $p_node =~ s/^n(.*):p.*:.*$/$1/;
-                $p_proc =~ s/^.*:p(.*):.*$/$1/;
-                $p_port =~ s/.*:p.*:.(.*)$/$1/;
                 $ipath = $pbus->[PBUS_ENDPOINT_INSTANCE_PATH];
-                # Calculation from Pete Thomsen for 'master' chip
-                if(((${node}*100) + $proc) < (($p_node*100) + $p_proc))
+                if ($pbus->[PBUS_SECOND_END_POINT_INDEX] ne "invalid")
                 {
-                    # This chip is lower so it's master so it gets
-                    # the downstream data.
-                    $lane_swap = $pbus->[PBUS_DOWNSTREAM_INDEX];
-                    $msb_swap = $pbus->[PBUS_TX_MSB_LSB_SWAP];
+                    $peer = 1;
+                    $p_proc = $pbus->[PBUS_SECOND_END_POINT_INDEX];
+                    $p_port = $p_proc;
+                    $p_node = $pbus->[PBUS_SECOND_END_POINT_INDEX];
+                    $p_node =~ s/^n(.*):p.*:.*$/$1/;
+                    $p_proc =~ s/^.*:p(.*):.*$/$1/;
+                    $p_port =~ s/.*:p.*:.(.*)$/$1/;
+
+                    # Calculation from Pete Thomsen for 'master' chip
+                    if(((${node}*100) + $proc) < (($p_node*100) + $p_proc))
+                    {
+                        # This chip is lower so it's master so it gets
+                        # the downstream data.
+                        $lane_swap = $pbus->[PBUS_DOWNSTREAM_INDEX];
+                        $msb_swap = $pbus->[PBUS_TX_MSB_LSB_SWAP];
+                    }
+                    else
+                    {
+                        # This chip is higher so it's the slave chip
+                        # and gets the upstream
+                        $lane_swap = $pbus->[PBUS_UPSTREAM_INDEX];
+                        $msb_swap = $pbus->[PBUS_RX_MSB_LSB_SWAP];
+                    }
+                    last;
                 }
-                else
-                {
-                    # This chip is higher so it's the slave chip
-                    # and gets the upstream
-                    $lane_swap = $pbus->[PBUS_UPSTREAM_INDEX];
-                    $msb_swap = $pbus->[PBUS_RX_MSB_LSB_SWAP];
-                }
-                last;
             }
         }
         my $mruData = get_mruid($ipath);
@@ -2569,11 +2601,57 @@ sub generate_ax_buses
     }
 }
 
+my $poreNxInit = 0;
+my %poreList = ();
+my %nxList = ();
+sub generate_pore_nx_ipath
+{
+    #get the PORE ipath detail using previously computed $eTargets
+    foreach my $Target (@{$eTargets->{target}})
+    {
+        if($Target->{'ecmd-common-name'} eq "pore")
+        {
+            my $ipath = $Target->{'instance-path'};
+            my $node = $Target->{node};
+            my $position = $Target->{position};
+
+            $poreList{$node}{$position} = {
+                'node'         => $node,
+                'position'     => $position,
+                'instancePath' => $ipath,
+            }
+        }
+        #get the nx ipath detail
+        if($Target->{'ecmd-common-name'} eq "nx")
+        {
+            my $ipath = $Target->{'instance-path'};
+            my $node = $Target->{node};
+            my $position = $Target->{position};
+
+            $nxList{$node}{$position} = {
+                'node'         => $node,
+                'position'     => $position,
+                'instancePath' => $ipath,
+            }
+        }
+    }
+}
+
 sub generate_nx
 {
-    my ($proc, $ordinalId, $ipath) = @_;
-    my $mruData = get_mruid($ipath);
+    my ($proc, $ordinalId, $node) = @_;
     my $uidstr = sprintf("0x%02X1E%04X",${node},$proc);
+
+    # Get the nx and PORE info
+    if ($poreNxInit == 0)
+    {
+        generate_pore_nx_ipath;
+        $poreNxInit = 1;
+    }
+
+    my $ipath = $nxList{$node}{$proc}->{'instancePath'};
+    my $mruData = get_mruid($ipath);
+
     print "\n<!-- $SYSNAME n${node}p$proc NX units -->\n";
     print "
 <targetInstance>
@@ -2593,10 +2671,8 @@ sub generate_nx
         <default>affinity:sys-$sys/node-$node/proc-$proc/nx-0</default>
     </attribute>
     <compileAttribute>
-        <id>INSTANCE_PATH</id>";
-        # TODO RTC: 87142
-        print "
-        <default>instance:nx:TO_BE_ADDED</default>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2613,9 +2689,19 @@ sub generate_nx
 
 sub generate_pore
 {
-    my ($proc, $ordinalId, $ipath) = @_;
-    my $mruData = get_mruid($ipath);
+    my ($proc, $ordinalId, $node) = @_;
     my $uidstr = sprintf("0x%02X1F%04X",${node},$proc);
+
+    # Get the nx and PORE info
+    if ($poreNxInit == 0)
+    {
+        generate_pore_nx_ipath;
+        $poreNxInit = 1;
+    }
+
+    my $ipath = $poreList{$node}{$proc}->{'instancePath'};
+    my $mruData = get_mruid($ipath);
+
     print "\n<!-- $SYSNAME n${node}p$proc PORE units -->\n";
     print "
 <targetInstance>
@@ -2635,10 +2721,8 @@ sub generate_pore
         <default>affinity:sys-$sys/node-$node/proc-$proc/pore-0</default>
     </attribute>
     <compileAttribute>
-        <id>INSTANCE_PATH</id>";
-        # TODO RTC: 87142
-        print "
-        <default>instance:pore:TO_BE_ADDED</default>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2666,6 +2750,7 @@ sub generate_logicalDimms
     #get the DRAM details
     foreach my $Target (@{$dramTargets->{drams}->{dram}})
     {
+        my $node = $Target->{'assembly-position'};
         my $ipath = $Target->{'dram-instance-path'};
         my $dimmIpath = $Target->{'dimm-instance-path'};
         my $mbaIpath = $Target->{'mba-instance-path'};
@@ -2675,7 +2760,8 @@ sub generate_logicalDimms
         my $dimm = substr($dimmIpath, index($dimmIpath, 'dimm-')+5);
         my $mba = substr($mbaIpath, index($mbaIpath, 'mba')+3);
 
-        $logicalDimmList{$dimm}{$mba}{$mbaPort}{$mbaSlot} = {
+        $logicalDimmList{$node}{$dimm}{$mba}{$mbaPort}{$mbaSlot} = {
+                'node'             => $node,
                 'dimmIpath'        => $dimmIpath,
                 'mbaIpath'         => $mbaIpath,
                 'dimm'             => $dimm,
@@ -2942,7 +3028,7 @@ sub generate_dimm
     }
 
     my $logicalDimmInstancePath = "instance:"
-        . $logicalDimmList{$relativePos}{$mbanum}{$y}{$z}->{'logicalDimmIpath'};
+        . $logicalDimmList{$node}{$relativePos}{$mbanum}{$y}{$z}->{'logicalDimmIpath'};
 
     print "
 <targetInstance>
