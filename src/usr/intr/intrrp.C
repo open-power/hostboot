@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -1328,7 +1328,6 @@ void IntrRp::shutDown()
         }
     }
 
-    // TODO secure boot - how do we know a processor chip has been added?
     PSIHB_ISRN_REG_t reg;               //zeros self
     size_t scom_len = sizeof(reg);
 
