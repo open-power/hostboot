@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -213,9 +213,12 @@ errlHndl_t discoverTargets()
                 errl = platReadIDEC(pTarget);
 
                 if (errl)
-                {   // read of ID/EC failed even tho we were present..
+                {   // read of ID/EC failed even tho we THOUGHT we were present.
                     HWAS_INF("pTarget %.8X - read IDEC failed (eid 0x%X) - bad",
                         errl->eid(), pTarget->getAttr<ATTR_HUID>());
+                    // chip NOT present and NOT functional, so that FSP doesn't
+                    // include this for HB to process
+                    chipPresent = false;
                     chipFunctional = false;
                     errlEid = errl->eid();
 
@@ -223,6 +226,7 @@ errlHndl_t discoverTargets()
                     errlCommit(errl, HWAS_COMP_ID);
                     // errl is now NULL
                 }
+                else
                 if (pTarget->getAttr<ATTR_TYPE>() == TYPE_PROC)
                 {
                     // read partialGood vector from these as well.
