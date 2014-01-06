@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,8 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_init.C,v 1.22 2013/10/30 17:13:08 stillgs Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_init.C,v $
+// $Id: p8_pm_init.C,v 1.23 2013/12/03 19:42:40 stillgs Exp $
+// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -604,7 +604,8 @@ pm_list(const Target& i_target, const Target& i_target2, uint32_t i_mode)
 fapi::ReturnCode
 clear_occ_special_wakeups (const fapi::Target &i_target)
 {
-    fapi::ReturnCode                rc; 
+    fapi::ReturnCode                rc;
+    uint32_t                        e_rc = 0; 
     uint64_t                        SP_WKUP_REG_ADDRS;
     ecmdDataBufferBase              data(64);   
     std::vector<fapi::Target>       l_exChiplets;
@@ -628,38 +629,26 @@ clear_occ_special_wakeups (const fapi::Target &i_target)
         // Iterate through the returned chiplets
         for (uint8_t j=0; j < l_exChiplets.size(); j++)
         {
-
             // Build the SCOM address
-            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
+            rc = FAPI_ATTR_GET( ATTR_CHIP_UNIT_POS, 
+                                &l_exChiplets[j], 
+                                l_ex_number);
             if (rc)
             {
                 FAPI_ERR("Error from ATTR_GET for chip position!");
                 break;
             }
-            FAPI_DBG("Running special wakeup on ex chiplet %d ", l_ex_number);
-
-            // Set special wakeup for EX
-            // Commented due to attribute errors
-            SP_WKUP_REG_ADDRS = PM_SPECIAL_WKUP_OCC_0x100F010C + (l_ex_number  * 0x01000000) ;
-            rc=fapiGetScom(i_target, SP_WKUP_REG_ADDRS , data);
-            if(rc)
-            {
-                FAPI_ERR("Error from GetScom of OCC SPWKUP");
-                break;
-            }
-            FAPI_DBG("  Before clear of SPWKUP_REG PM_SPECIAL_WKUP_OCC_(0x%08llx) => =>0x%16llx",  
-                            SP_WKUP_REG_ADDRS, 
-                            data.getDoubleWord(0));
-
-            if (data.isBitSet(0))
-            {
-                rc = fapiSpecialWakeup(l_exChiplets[j], false);
-                if (rc)
-                {
-                    FAPI_ERR("p8_cpu_special_wakeup: Failed to put CORE into special wakeup. With rc = 0x%x", (uint32_t)rc);
-                    break;
-                }
-            }
+            FAPI_DBG("Clearing OCC special wakeup on ex chiplet %d ", 
+                                l_ex_number);
+                        
+            e_rc |= data.flushTo0();
+            E_RC_CHECK(e_rc, rc);
+            
+            SP_WKUP_REG_ADDRS = PM_SPECIAL_WKUP_OCC_0x100F010C + 
+                                (l_ex_number  * 0x01000000) ;
+            
+            PUTSCOM(rc, i_target, SP_WKUP_REG_ADDRS, data);
+            
         }  // chiplet loop
         if (!rc.ok())
         {
@@ -671,4 +660,3 @@ clear_occ_special_wakeups (const fapi::Target &i_target)
 
 
 } //end extern C
-
