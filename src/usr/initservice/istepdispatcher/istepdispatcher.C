@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -232,17 +232,8 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
             if(err)
             {
-                // Sync all attributes to FSP
-                TRACFCOMP( g_trac_initsvc, "sync attributes to FSP");
-
-                errlHndl_t l_syncAttrErrl = TARGETING::syncAllAttributesToFsp();
-
-                if(l_syncAttrErrl)
-                {
-                    TRACFCOMP(g_trac_initsvc, "Attribute sync failed, see"
-                            "%x for details", l_syncAttrErrl->eid());
-                    errlCommit(l_syncAttrErrl, INITSVC_COMP_ID);
-                }
+                TRACFCOMP(g_trac_initsvc, "ERROR: Failed executing all isteps,"
+                          " see %x for details", err->eid());
                 break;
             }
 
