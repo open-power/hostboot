@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -171,6 +171,7 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
 HWP_PLL_FILES = hwp/pll_attributes/s1_10_pll_ring.attributes \
                 hwp/pll_attributes/s1_13_pll_ring.attributes \
                 hwp/pll_attributes/s1_20_pll_ring.attributes \
+                hwp/pll_attributes/s1_21_pll_ring.attributes \
                 hwp/pll_attributes/p8_10_pll_ring.attributes \
                 hwp/pll_attributes/centaur_10_pll_ring.attributes \
                 hwp/pll_attributes/centaur_20_pll_ring.attributes
