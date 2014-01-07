@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -205,9 +205,11 @@ class PnorDD
 
 
     enum {
-        SFC_CMDBUF_SIZE = 256,   /**< SFC Command buffer is 0x100/256 bytes/0x40 words */
+        SFC_CMDBUF_SIZE = 256,   /**< SFC Command buffer is
+                                  0x100/256 bytes/0x40 words */
 
-        SFC_POLL_TIME_NS = 400000, /**< todo: Find out Max time to wait */
+        SFC_POLL_TIME_NS = 400000, /**< todo: RTC:62718 Find out
+                                    Max time to wait */
         SFC_POLL_INCR_NS = 10,     /**< minimum increment during poll */
 
     };

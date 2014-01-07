@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,8 +40,6 @@
 #include <arch/ppc.H>
 #include <errl/errlmanager.H>
 
-#define MBOX_TRACE_NAME MBOX_COMP_NAME
-
 // Local functions
 namespace MBOX
 {
@@ -54,7 +52,6 @@ using namespace MBOX;
 extern trace_desc_t * g_trac_mbox;
 extern trace_desc_t * g_trac_mboxmsg;
 
-const char MBOXMSG_TRACE_NAME[] = "MBOXMSG";
 trace_desc_t* g_trac_mboxmsg = NULL; // g_trac_mbox;
 TRAC_INIT(&g_trac_mboxmsg, MBOXMSG_TRACE_NAME,
           2*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -128,11 +125,9 @@ errlHndl_t MailboxSp::_init()
              MBOX::MOD_MBOXSRV_INIT,
              MBOX::RC_KERNEL_REG_FAILED,    //  reason Code
              rc,                        // rc from msg_send
-             0
+             0,
+             true //Add HB Software Callout
             );
-
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
 
         return err;
     }
@@ -369,11 +364,9 @@ void MailboxSp::msgHandler()
                      MBOX::MOD_MBOXSRV_HNDLR,
                      MBOX::RC_INVALID_MBOX_MSG_TYPE,    //  reason Code
                      msg->type,                         // msg type
-                     0
+                     0,
+                     true //Add HB Software Callout
                     );
-
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
 
                 errlCommit(err,MBOX_COMP_ID);
                 err = NULL;
@@ -428,11 +421,9 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
                  MBOX::MOD_MBOXSRV_SENDMSG,
                  MBOX::RC_MAILBOX_DISABLED,        //  reason Code
                  i_msg->data[0],                   // queue id
-                 payload->type                     // message type
+                 payload->type,                    // message type
+                 true //Add HB Software Callout
                 );
-
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
 
             i_msg->data[1] = reinterpret_cast<uint64_t>(err);
 
@@ -587,11 +578,9 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                          MBOX::MOD_MBOXSRV_SENDMSG,
                          MBOX::RC_INVALID_DMA_LENGTH,      //  reason Code
                          payload->data[1],                 // DMA data len
-                         iv_msg_to_send.msg_queue_id       // MSG queueid
+                         iv_msg_to_send.msg_queue_id,      // MSG queueid
+                         true //Add HB Software Callout
                         );
-
-                    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                             HWAS::SRCI_PRIORITY_HIGH);
 
                     send_msg();  // drop this message, but send next message
                 }
@@ -642,11 +631,13 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                     delete response;
                 }
                 // else could be request for more DMA buffers
-                // - for now just commit the error. TODO recovery options?
+                // - for now just commit the error.
+                //@TODO- RTC:93751 recovery options?
             }
             // else msg is a HB response to a FSP originating sync msg
             // What do we do here? Can't respond to the FSP.
-            // For now just commit the error. TODO recovery options?
+            // For now just commit the error.
+            //@TODO- RTC:93751 recovery options?
         }
         // else msg was HB originating async - Just commit it.
 
@@ -760,20 +751,16 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                          MBOX::MOD_MBOXSRV_RCV,
                          MBOX::RC_MSG_SEND_ERROR,   //  reason Code
                          rc,                        // rc from msg_send
-                         i_mbox_msg.msg_queue_id
+                         i_mbox_msg.msg_queue_id,
+                         true //Add HB Software Callout
                         );
 
-                    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                             HWAS::SRCI_PRIORITY_HIGH);
-
-                    UserDetailsMboxMsg
-                        ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
-                             sizeof(mbox_msg_t),
-                             reinterpret_cast<uint64_t*>(msg->extra_data),
-                             msg->data[1]);
-
-                    ffdc.addToLog(err);
-
+                    //@todo: RTC:93750 Create real parseable FFDC class
+                    err->addFFDC(MBOX_COMP_ID,
+                                 msg,
+                                 sizeof(msg_t),
+                                 1,//version
+                                 MBOX_UDT_MSG_DATA);//subsect
                     err->collectTrace(MBOXMSG_TRACE_NAME);
                     errlCommit(err,MBOX_COMP_ID);
 
@@ -828,11 +815,9 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                      MBOX::MOD_MBOXSRV_RCV,
                      MBOX::RC_INVALID_MESSAGE_TYPE  ,    //  reason Code
                      i_mbox_msg.msg_queue_id,            // rc from msg_send
-                     msg->type
+                     msg->type,
+                     true //Add HB Software Callout
                     );
-
-                err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
 
                 UserDetailsMboxMsg
                     ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
@@ -922,11 +907,9 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
              MBOX::MOD_MBOXSRV_FSP_MSG,
              MBOX::RC_INVALID_QUEUE,
              bad_mbox_msg->msg_queue_id,
-             bad_msg->type
+             bad_msg->type,
+             true //Add HB Software Callout
             );
-
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
 
         UserDetailsMboxMsg
             ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
@@ -1097,11 +1080,9 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
                  MBOX::MOD_MBOXSRV_SEND,                 //  moduleid
                  MBOX::RC_INVALID_QUEUE,                 //  reason Code
                  rc,                                     //  msg_sendrecv errno
-                 i_q_id                                  //  msg queue id
+                 i_q_id,                                 //  msg queue id
+                 true //Add HB Software Callout
                 );
-
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
 
             // This Trace has the msg
             err->collectTrace(MBOXMSG_TRACE_NAME);
@@ -1125,11 +1106,9 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
              MBOX::MOD_MBOXSRV_SEND,                 //  moduleid
              MBOX::RC_MBOX_SERVICE_NOT_READY,        //  reason Code
              i_q_id,                                 //  queue id
-             0                                       //
+             0,                                      //
+             true //Add HB Software Callout
             );
-
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
     }
 
     return err;
@@ -1189,11 +1168,10 @@ errlHndl_t MailboxSp::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
                  MBOX::MOD_MBOXREGISTER,              // moduleid
                  MBOX::RC_ALREADY_REGISTERED,         // reason code
                  i_queue_id,
-                 0
+                 0,
+                 true //Add HB Software Callout
                 );
 
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
         }
     }
     return err;
@@ -1316,11 +1294,9 @@ errlHndl_t MailboxSp::handleInterrupt()
                      MBOX::MOD_MBOXSRV_HNDLR,
                      MBOX::RC_DATA_WRITE_ERR,  //  reason Code
                      mbox_status,              //  Status from DD
-                     0
+                     0,
+                     true //Add HB Software Callout
                     );
-
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
 
                 err->collectTrace(MBOX_TRACE_NAME);
                 err->collectTrace(MBOXMSG_TRACE_NAME);
@@ -1473,11 +1449,9 @@ void MailboxSp::handleIPC()
                      MBOX::MOD_MBOXSRV_IPC_MSG,
                      MBOX::RC_MSG_SEND_ERROR,   //  reason Code
                      rc,                        // rc from msg_send
-                     msg_q_id
+                     msg_q_id,
+                     true //Add HB Software Callout
                     );
-
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
 
                 UserDetailsMboxMsg
                     ffdc(reinterpret_cast<uint64_t*>(msg),
@@ -1514,11 +1488,9 @@ void MailboxSp::handleIPC()
                  MBOX::MOD_MBOXSRV_IPC_MSG,
                  MBOX::RC_INVALID_QUEUE,
                  msg_q_id,
-                 msg->type
+                 msg->type,
+                 true //Add HB Software Callout
                 );
-
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
 
             UserDetailsMboxMsg
                 ffdc(reinterpret_cast<uint64_t*>(msg), sizeof(msg_t));
@@ -1714,11 +1686,10 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
                      MBOX::MOD_MBOX_SEND,                   //  moduleid
                      MBOX::RC_INVALID_QUEUE,                //  reason Code
                      rc,                                    //  msg_send errno
-                     q_handle                               //  msg queue id
+                     q_handle,                              //  msg queue id
+                     true //Add HB Software Callout
                     );
 
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
                 // This Trace has the msg
                 err->collectTrace(MBOXMSG_TRACE_NAME);
             }
@@ -1741,11 +1712,10 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
                  MBOX::MOD_MBOX_SEND,                    //  moduleid
                  MBOX::RC_IPC_INVALID_NODE,              //  reason Code
                  i_q_id,                                 //  queue id
-                 i_node                                  //
+                 i_node,                                 //
+                 true //Add HB Software Callout
                 );
 
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
         }
     }
     return err;
@@ -1809,11 +1779,10 @@ errlHndl_t MBOX::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
              MBOX::MOD_MBOXREGISTER,              // moduleid
              MBOX::RC_MBOX_SERVICE_NOT_READY,     // reason code
              i_queue_id,
-             0
+             0,
+             true //Add HB Software Callout
             );
 
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
     }
 
     return err;
@@ -1955,11 +1924,9 @@ errlHndl_t MBOX::makeErrlMsgQSendFail(uint64_t i_errno)
              MBOX::MOD_MBOX_MSGQ_FAIL,            // moduleid
              MBOX::RC_MSG_SEND_ERROR,             // reason code
              i_errno,
-             0
+             0,
+             true //Add HB Software Callout
             );
 
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
-        
         return err;
 }

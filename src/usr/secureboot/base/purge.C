@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -82,6 +82,16 @@ namespace SECUREBOOT
                                             MOD_SECURE_BLINDPURGE,
                                             RC_PURGEOP_PENDING,
                                             data, task_getcpuid());
+                // Probably a code bug
+                l_errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                             HWAS::SRCI_PRIORITY_HIGH );
+                // But there might be something wrong with the chip
+                //  or the SBE image
+                l_errl->addHwCallout(
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          HWAS::SRCI_PRIORITY_LOW,
+                          HWAS::NO_DECONFIG,
+                          HWAS::GARD_NULL );
                 break;
             }
 
@@ -121,7 +131,7 @@ namespace SECUREBOOT
                  * @errortype
                  * @moduleid    SECUREBOOT::MOD_SECURE_BLINDPURGE
                  * @reasoncode  SECUREBOOT::RC_PURGEOP_FAIL_COMPLETE
-                 * @userdata1   SCOM value.
+                 * @userdata1   SCOM value of Reg 0x1001080E
                  * @devdesc     Purge operation never completed.
                  */
                 l_errl =
@@ -129,6 +139,15 @@ namespace SECUREBOOT
                                             MOD_SECURE_BLINDPURGE,
                                             RC_PURGEOP_FAIL_COMPLETE,
                                             data);
+                // Most likely a hardware issue of some sort
+                l_errl->addHwCallout(
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          HWAS::SRCI_PRIORITY_HIGH,
+                          HWAS::NO_DECONFIG,
+                          HWAS::GARD_NULL );
+                // Could also be a code bug
+                l_errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                             HWAS::SRCI_PRIORITY_MED );
                 break;
             }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -114,7 +114,8 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
                      const uint8_t i_modId,
                      const uint16_t i_reasonCode,
                      const uint64_t i_user1,
-                     const uint64_t i_user2) :
+                     const uint64_t i_user2,
+                     const bool i_hbSwError ) :
     iv_Private( static_cast<compId_t>(i_reasonCode & 0xFF00)),
     iv_User( i_sev ),
     // The SRC_ERR_INFO becomes part of the SRC; example, B1 in SRC B180xxxx
@@ -125,6 +126,12 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );
     // Collect the Backtrace and add it to the error log
     iv_pBackTrace = new ErrlUserDetailsBackTrace();
+    // Automatically add a software callout if asked
+    if( i_hbSwError )
+    {
+        addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                             HWAS::SRCI_PRIORITY_HIGH );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

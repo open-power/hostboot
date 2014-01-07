@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -26,6 +26,9 @@
 #include <sys/msg.h>
 #include <errl/errlentry.H>
 #include <mbox/mbox_queues.H>
+
+#define MBOX_TRACE_NAME MBOX_COMP_NAME
+#define MBOXMSG_TRACE_NAME "MBOXMSG"
 
 namespace MBOX
 {

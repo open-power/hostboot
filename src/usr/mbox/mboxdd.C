@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -385,12 +385,10 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
                                             MBOX::MOD_MBOXDD_WRITE,
                                             MBOX::RC_INVALID_LENGTH,
                                             TARGETING::get_huid(i_target),
-                                            TO_UINT64(i_buflen));
+                                            TO_UINT64(i_buflen),
+                                            true /*Add HB Software Callout*/);
 
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_HIGH);
-
-            l_err->collectTrace("MBOX",1024);
+            l_err->collectTrace(MBOX_TRACE_NAME,1024);
 
             // Set the i_buflen to 0 to indicate no write occured
             i_buflen = 0;
@@ -517,17 +515,15 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
              * @devdesc      MboxDD::write> Message still pending
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            MBOX::MOD_MBOXDD_WRITE,
-                                            MBOX::RC_MSG_PENDING,
-                                            TARGETING::get_huid(i_target),
-                                            reinterpret_cast<uint64_t>(l_64bitBuf));
-
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_HIGH);
+                                        MBOX::MOD_MBOXDD_WRITE,
+                                        MBOX::RC_MSG_PENDING,
+                                        TARGETING::get_huid(i_target),
+                                        reinterpret_cast<uint64_t>(l_64bitBuf),
+                                        true /*Add HB Software Callout*/);
 
             // Set the i_buflen to 0 to indicate no write occured
             i_buflen = 0;
-            l_err->collectTrace("MBOX",1024);
+            l_err->collectTrace(MBOX_TRACE_NAME,1024);
             break;
         }
 

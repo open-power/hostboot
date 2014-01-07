@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -722,7 +722,7 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
         if( l_err ) { break; }
 
         // check for errors or timeout
-        // TODO: What errors do we check?
+        // TODO: RTC:62718 What errors do we check?
         if( (sfc_stat.done == 0) )
         {
             TRACFCOMP(g_trac_pnor,
@@ -746,8 +746,8 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
                                                                  poll_time),
                                             TWO_UINT32_TO_UINT64(sfc_stat.data32,0));
 
-            l_err->collectTrace("PNOR");
-            l_err->collectTrace("XSCOM");
+            l_err->collectTrace(PNOR_COMP_NAME);
+            l_err->collectTrace(XSCOM_COMP_NAME);
             //@todo (RTC:37744) - Any cleanup or recovery needed?
             break;
         }
@@ -849,8 +849,8 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
                                                                  poll_time),
                                             TWO_UINT32_TO_UINT64(opStatus,0));
 
-            l_err->collectTrace("PNOR");
-            l_err->collectTrace("XSCOM");
+            l_err->collectTrace(PNOR_COMP_NAME);
+            l_err->collectTrace(XSCOM_COMP_NAME);
 
             //Erase & Program error bits are sticky, so they need to be cleared.
 
@@ -1366,8 +1366,8 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
                                             PNOR::RC_LPC_ERROR,
                                             TWO_UINT32_TO_UINT64(i_addr,poll_time),
                                             eccb_stat.data64);
-            l_err->collectTrace("PNOR");
-            l_err->collectTrace("XSCOM");
+            l_err->collectTrace(PNOR_COMP_NAME);
+            l_err->collectTrace(XSCOM_COMP_NAME);
             //@todo (RTC:37744) - Any cleanup or recovery needed?
             break;
         }
@@ -1475,8 +1475,8 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
                                             PNOR::RC_LPC_ERROR,
                                             TWO_UINT32_TO_UINT64(0,i_addr),
                                             eccb_stat.data64);
-            l_err->collectTrace("PNOR");
-            l_err->collectTrace("XSCOM");
+            l_err->collectTrace(PNOR_COMP_NAME);
+            l_err->collectTrace(XSCOM_COMP_NAME);
             //@todo (RTC:37744) - Any cleanup or recovery needed?
             break;
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -431,7 +431,9 @@ class PnorRpTest : public CxxTest::TestSuite
      */
     void test_AddrReadWrite(void)
     {
-        return; //@todo - enable this after Task 3445
+        // Leaving disabled because a regular boot tests all of this anyway,
+        //  but want to leave this here for possible future unit testing.
+        return;
         TRACFCOMP( g_trac_pnor, "PnorRpTest::test_AddrReadWrite> Start" );
         uint64_t fails = 0;
         uint64_t total = 0;

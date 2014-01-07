@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <assert.h>
 
 trace_desc_t* g_trac_tce = NULL;
-TRAC_INIT(&g_trac_tce, "TCE", 4*KILOBYTE);
+TRAC_INIT(&g_trac_tce, TCE_TRACE_NAME, 4*KILOBYTE);
 
 
 namespace TCE
@@ -145,8 +145,8 @@ namespace TCE
                                                RUNTIME::MOD_TCE_MAP,
                                                RUNTIME::RC_TCE_INVALID_SIZE,
                                                tceTablePhysAddr,
-                                               tceTableSize);
-
+                                               tceTableSize,
+                                               true /*Add HB SW Callout*/);
                 break;
 
             }
@@ -170,8 +170,8 @@ namespace TCE
                                                RUNTIME::MOD_TCE_MAP,
                                                RUNTIME::RC_TCE_ADDR_NOT_ALIGNED,
                                                tceTablePhysAddr,
-                                               0);
-
+                                               0,
+                                               true /*Add HB SW Callout*/);
                 break;
             }
 
@@ -211,7 +211,8 @@ namespace TCE
                                     RUNTIME::MOD_TCE_MAP,
                                     RUNTIME::RC_TCE_DEV_MAP_FAIL,
                                     tceTablePhysAddr,
-                                    tceTableSize);
+                                    tceTableSize,
+                                    true /*Add HB SW Callout*/);
                 }
             }
         }while(0);
@@ -323,7 +324,8 @@ namespace TCE
                                          RUNTIME::MOD_TCE_INIT_HDW,
                                          RUNTIME::RC_TCE_DEV_MAP_FAIL,
                                          PsiBridgeAddr,
-                                         tceTablePhysAddr);
+                                         tceTablePhysAddr,
+                                         true /*Add HB SW Callout*/);
                         break;
                     }
 
@@ -371,7 +373,8 @@ namespace TCE
                                        RUNTIME::MOD_TCE_INIT_HDW,
                                        RUNTIME::RC_TCE_DEV_UNMAP_FAIL,
                                        reinterpret_cast<uint64_t>(mmio_ptr),
-                                       rc);
+                                       rc,
+                                       true /*Add HB SW Callout*/);
                         break;
                     }
 
@@ -439,7 +442,9 @@ namespace TCE
                                                RUNTIME::MOD_TCE_ALLOCATE,
                                                RUNTIME::RC_TCE_INIT_NOT_RUN,
                                                i_startingAddress,
-                                               i_size);
+                                               i_size,
+                                               true /*Add HB SW Callout*/);
+                errl->collectTrace(TCE_TRACE_NAME,KILOBYTE);
 
                 break;
             }
@@ -480,8 +485,8 @@ namespace TCE
                                                RUNTIME::MOD_TCE_ALLOCATE,
                                                RUNTIME::RC_TCE_ADDR_NOT_ALIGNED,
                                                i_startingAddress,
-                                               i_size);
-
+                                               i_size,
+                                               true /*Add HB SW Callout*/);
                 break;
             }
 
@@ -506,7 +511,8 @@ namespace TCE
                                                RUNTIME::MOD_TCE_ALLOCATE,
                                                RUNTIME::RC_TCE_INVALID_SIZE,
                                                i_startingAddress,
-                                               i_size);
+                                               i_size,
+                                               true /*Add HB SW Callout*/);
                 break;
             }
 
@@ -612,8 +618,9 @@ namespace TCE
                                         RUNTIME::MOD_TCE_ALLOCATE,
                                         RUNTIME::RC_TCE_NOT_ENOUGH_FREE_ENTRIES,
                                         i_startingAddress,
-                                        i_size);
-
+                                        i_size,
+                                        true /*Add HB SW Callout*/);
+                break;
             }
         }while(0);
 
@@ -673,7 +680,9 @@ namespace TCE
                                                RUNTIME::MOD_TCE_DEALLOCATE,
                                                RUNTIME::RC_TCE_INVALID_SIZE,
                                                startingIndex,
-                                               numTcesNeeded);
+                                               numTcesNeeded,
+                                               true /*Add HB SW Callout*/);
+                errl->collectTrace(TCE_TRACE_NAME,KILOBYTE);
 
                 errlCommit(errl,RUNTIME_COMP_ID);
 
@@ -731,10 +740,11 @@ namespace TCE
                                           RUNTIME::MOD_TCE_DEALLOCATE,
                                           RUNTIME::RC_TCE_ENTRY_NOT_CONTIGUOUS,
                                           i_startingToken,
-                                          i_size);
-
+                                          i_size,
+                                          true /*Add HB SW Callout*/);
+                errl->collectTrace(TCE_TRACE_NAME,KILOBYTE);
                 errlCommit(errl,RUNTIME_COMP_ID);
-
+                break;
             }
 
         }while(0);

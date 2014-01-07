@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -169,9 +169,10 @@ errlHndl_t SecureROM::initialize()
                                             SECUREBOOT::MOD_SECURE_ROM_INIT,
                                             SECUREBOOT::RC_DEV_MAP_FAIL,
                                             TO_UINT64(tbrom_reg_addr),
-                                            tbrom_reg_data);
+                                            tbrom_reg_data,
+                                            true /*Add HB Software Callout*/ );
 
-            l_errl->collectTrace("SECURE",256);
+            l_errl->collectTrace(SECURE_COMP_NAME,256);
             break;
 
         }
@@ -227,9 +228,10 @@ errlHndl_t SecureROM::initialize()
                                    SECUREBOOT::MOD_SECURE_ROM_INIT,
                                    SECUREBOOT::RC_SET_PERMISSION_FAIL_EXE,
                                    TO_UINT64(l_rc),
-                                   reinterpret_cast<uint64_t>(iv_device_ptr));
+                                   reinterpret_cast<uint64_t>(iv_device_ptr),
+                                   true /*Add HB Software Callout*/ );
 
-            l_errl->collectTrace("SECURE",256);
+            l_errl->collectTrace(SECURE_COMP_NAME,256);
             break;
 
         }
@@ -247,7 +249,7 @@ errlHndl_t SecureROM::initialize()
             TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::initialize():"
             " SecureROM::getHwHashKeys() returned an error");
 
-            l_errl->collectTrace("SECURE",256);
+            l_errl->collectTrace(SECURE_COMP_NAME,256);
             break;
 
         }
@@ -360,9 +362,12 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
                                          SECUREBOOT::MOD_SECURE_ROM_VERIFY,
                                          SECUREBOOT::RC_ROM_VERIFY,
                                          l_rc,
-                                         l_hw_parms.log);
+                                         l_hw_parms.log,
+                                         true /*Add HB Software Callout*/ );
+            // Callout code to force a rewrite of the contents
+            //@todo RTC:93870 - Define new callout for verification fail
 
-            l_errl->collectTrace("SECURE",256);
+            l_errl->collectTrace(SECURE_COMP_NAME,256);
             break;
 
         }
@@ -454,9 +459,10 @@ void SecureROM::_cleanup()
                                     SECUREBOOT::MOD_SECURE_ROM_CLEANUP,
                                     SECUREBOOT::RC_SET_PERMISSION_FAIL_WRITE,
                                     TO_UINT64(l_rc),
-                                    reinterpret_cast<uint64_t>(iv_device_ptr));
+                                    reinterpret_cast<uint64_t>(iv_device_ptr),
+                                    true /*Add HB Software Callout*/ );
 
-            l_errl->collectTrace("SECURE",256);
+            l_errl->collectTrace(SECURE_COMP_NAME,256);
 
             // Commit here because funtion doesn't return error handle
             errlCommit(l_errl, SECURE_COMP_ID);

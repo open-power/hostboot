@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -141,14 +141,14 @@ errlHndl_t hdatService::verify_hdat_address( void* i_addr,
                             RUNTIME::RC_INVALID_ADDRESS,
                             reinterpret_cast<uint64_t>(i_addr),
                             reinterpret_cast<uint64_t>(i_size));
-        errhdl->collectTrace("RUNTIME",1024);
+        errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
 
         // most likely this is a HB code bug
         errhdl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
         // but it could also be a FSP bug in setting up the HDAT data
         errhdl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                    HWAS::SRCI_PRIORITY_HIGH);
+                                    HWAS::SRCI_PRIORITY_MED);
     }
 
     return errhdl;
@@ -201,7 +201,11 @@ errlHndl_t hdatService::check_header( hdatHDIF_t* i_header,
                                         RUNTIME::RC_BAD_HDAT_HEADER,
                                         actual.flatten(),
                                         i_exp.flatten());
-            errhdl->collectTrace("RUNTIME",1024);
+            errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_MED );
+            errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_MED );
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
             break;
         }
     } while(0);
@@ -243,7 +247,11 @@ errlHndl_t hdatService::check_tuple( const RUNTIME::SectionId i_section,
                                          TWO_UINT32_TO_UINT64(
                                                       i_tuple->hdatAllocCnt,
                                                       i_tuple->hdatAllocSize));
-            errhdl->collectTrace("RUNTIME",1024);
+            errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_MED );
+            errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_MED );
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
             RUNTIME::UdTuple(i_tuple).addToLog(errhdl);
             break;
         }
@@ -301,11 +309,12 @@ errlHndl_t hdatService::get_standalone_section(
          * @devdesc      Section is not valid in standalone mode
          */
         errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         RUNTIME::MOD_HDATSERVICE_GET_STANDALONE_SECTION,
-                                         RUNTIME::RC_INVALID_STANDALONE,
-                                         i_section,
-                                         i_instance);
-        errhdl->collectTrace("RUNTIME",1024);
+                          RUNTIME::MOD_HDATSERVICE_GET_STANDALONE_SECTION,
+                          RUNTIME::RC_INVALID_STANDALONE,
+                          i_section,
+                          i_instance,
+                          true /*Add HB Software Callout*/);
+        errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
     }
 
     return errhdl;
@@ -373,8 +382,9 @@ errlHndl_t hdatService::mapRegion(uint64_t i_addr, size_t i_bytes,
                                         RUNTIME::MOD_HDATSERVICE_MAPREGION,
                                         RUNTIME::RC_CANNOT_MAP_MEMORY,
                                         l_mem.phys_addr,
-                                        l_mem.size );
-            errhdl->collectTrace("RUNTIME",1024);
+                                        l_mem.size,
+                                        true /*Add HB Software Callout*/);
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
             break;
         }
 
@@ -611,8 +621,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                               RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                               RUNTIME::RC_INVALID_PAYLOAD_KIND,
                               payload_kind,
-                              i_section);
-            errhdl->collectTrace("RUNTIME",1024);
+                              i_section,
+                              true /*Add HB Software Callout*/);
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
             break;
         }
 
@@ -830,7 +841,11 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                   phys_addr,
                                   TWO_UINT32_TO_UINT64(i_instance,
                                                        found_instances));
-                errhdl->collectTrace("RUNTIME",1024);
+                errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                             HWAS::SRCI_PRIORITY_MED );
+                errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                             HWAS::SRCI_PRIORITY_MED );
+                errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
                 break;
             }
 
@@ -982,8 +997,9 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                            RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                            RUNTIME::RC_INVALID_SECTION,
                            i_section,
-                           0);
-            errhdl->collectTrace("RUNTIME",1024);
+                           0,
+                           true /*Add HB Software Callout*/);
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
             break;
         }
 
@@ -1064,7 +1080,11 @@ errlHndl_t hdatService::findSpira( void )
                             reinterpret_cast<uint64_t>(phys_addr),
                             TWO_UINT32_TO_UINT64(payload_base,
                                                  payload_kind));
-            errhdl->collectTrace("RUNTIME",1024);
+            errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_MED );
+            errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_MED );
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
             RUNTIME::UdNaca(naca).addToLog(errhdl);
             break;
         }
@@ -1188,7 +1208,11 @@ errlHndl_t hdatService::findSpira( void )
                                                 ERRL_GETEID_SAFE(errhdl_l)),
                            TWO_UINT32_TO_UINT64(ERRL_GETRC_SAFE(errhdl_s),
                                                 ERRL_GETEID_SAFE(errhdl_s)));
-            errhdl->collectTrace("RUNTIME",1024);
+            errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_MED );
+            errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_MED );
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
 
             // commit the errors related to each SPIRA
             if( errhdl_s )
@@ -1259,8 +1283,9 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
                               RUNTIME::MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL,
                               RUNTIME::RC_INVALID_PAYLOAD_KIND,
                               payload_kind,
-                              i_section);
-            errhdl->collectTrace("RUNTIME",1024);
+                              i_section,
+                              true /*Add HB Software Callout*/);
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
             break;
         }
 
@@ -1310,8 +1335,9 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
                            RUNTIME::MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL,
                            RUNTIME::RC_INVALID_SECTION,
                            i_section,
-                           0);
-            errhdl->collectTrace("RUNTIME",1024);
+                           0,
+                           true /*Add HB Software Callout*/);
+            errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
             break;
         }
 

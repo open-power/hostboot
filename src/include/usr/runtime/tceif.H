@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
 
+#define TCE_TRACE_NAME "TCE"
 
 namespace TCE
 {

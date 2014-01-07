@@ -27,9 +27,10 @@
 #include <mbox/ipc_reasoncodes.H>
 #include <mbox/mboxif.H>
 #include <errl/errlmanager.H>
+#include <mbox/mbox_reasoncodes.H>
 
 trace_desc_t* g_trac_ipc = NULL;
-TRAC_INIT(&g_trac_ipc, "IPC", KILOBYTE);
+TRAC_INIT(&g_trac_ipc, IPC_TRACE_NAME, KILOBYTE);
 
 using namespace IPC;
 using namespace ERRORLOG;
@@ -153,7 +154,7 @@ void IpcSp::msgHandler()
                  * @moduleid   IPC::MOD_IPCSP_MSGHDLR
                  * @reasoncode IPC::RC_INVALID_MSG_TYPE
                  * @userdata1  Message type
-                 * @userdata2  <unused>
+                 * @userdata2  Data word 0 of message
                  *
                  * @devdesc    IPC service provider received an unexpected
                  *             message.
@@ -165,8 +166,18 @@ void IpcSp::msgHandler()
                      IPC::MOD_IPCSP_MSGHDLR,              // moduleid
                      IPC::RC_INVALID_MSG_TYPE,            // reason code
                      msg->type,
-                     0
+                     msg->data[0],
+                     true //Add HB Software Callout
                     );
+                //@todo: RTC:93750 Create real parseable FFDC class
+                err->addFFDC(MBOX_COMP_ID,
+                             msg,
+                             sizeof(msg_t),
+                             1,//version
+                             MBOX::MBOX_UDT_MSG_DATA);//subsect
+
+                err->collectTrace(MBOXMSG_TRACE_NAME);
+                err->collectTrace(IPC_TRACE_NAME);
 
                 errlCommit(err, IPC_COMP_ID);
 

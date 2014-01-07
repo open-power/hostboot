@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -118,13 +118,16 @@ public:
      *                              in the primary SRC
      * @param[in]   i_user2         64 bits of user data which are placed
      *                              in the primary SRC
+     * @param[in]   i_hbSwError     if true, will automatically add a HIGH
+     *                              severity callout for EPUB_PRC_HB_CODE
      * @return  None
      */
     ErrlEntry(const errlSeverity_t i_sev,
               const uint8_t i_modId,
               const uint16_t i_reasonCode,
               const uint64_t i_user1 = 0,
-              const uint64_t i_user2 = 0);
+              const uint64_t i_user2 = 0,
+              const bool i_hbSwError = false );
 
     /**
      * @brief   Destructor

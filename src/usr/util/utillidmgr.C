@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -257,9 +257,8 @@ errlHndl_t UtilLidMgr::getLidPnor(void* i_dest,
                                  Util::UTIL_LIDMGR_INVAL_SIZE,
                                  TWO_UINT32_TO_UINT64(lidSize,
                                                       i_destSize),
-                                 iv_lidId);
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_MED);
+                                 iv_lidId,
+                                 true /*Add HB Software Callout*/);
             break;
         }
 
@@ -431,11 +430,9 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                                          Util::UTIL_LIDMGR_INVAL_SIZE,
                                          TWO_UINT32_TO_UINT64(i_destSize,
                                                               needed_size),
-                                         iv_lidId
+                                         iv_lidId,
+                                         true /*Add HB Software Callout*/
                                          );
-
-                    errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                              HWAS::SRCI_PRIORITY_HIGH);
 
                     free(l_pMsg->extra_data);
                     l_pMsg->extra_data = NULL;

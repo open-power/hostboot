@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -232,11 +232,13 @@ void PnorRP::initDaemon()
              * @userdata2    rc from mm_alloc_block
              * @devdesc      PnorRP::initDaemon> Error from mm_alloc_block
              */
-            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               PNOR::MOD_PNORRP_INITDAEMON,
-                                               PNOR::RC_EXTERNAL_ERROR,
-                                               TO_UINT64(BASE_VADDR),
-                                               TO_UINT64(rc));
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           PNOR::MOD_PNORRP_INITDAEMON,
+                           PNOR::RC_EXTERNAL_ERROR,
+                           TO_UINT64(BASE_VADDR),
+                           TO_UINT64(rc),
+                           true /*Add HB SW Callout*/);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
             break;
         }
@@ -298,7 +300,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
                                                PNOR::RC_STARTUP_FAIL,
                                                TO_UINT64(i_section),
-                                               rc);
+                                               rc,
+                                               true /*Add HB SW Callout*/);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
 
             // set the return section to our invalid data
@@ -323,7 +326,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
                                                PNOR::RC_INVALID_SECTION,
                                                TO_UINT64(i_section),
-                                               iv_TOC_used);
+                                               iv_TOC_used,
+                                               true /*Add HB SW Callout*/);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
 
             // set the return section to our invalid data
@@ -681,13 +685,16 @@ void PnorRP::waitForMessage()
                          * @reasoncode   PNOR::RC_INVALID_MESSAGE_TYPE
                          * @userdata1    Message type
                          * @userdata2    Requested Virtual Address
-                         * @devdesc      PnorRP::waitForMessage> Unrecognized message type
+                         * @devdesc      PnorRP::waitForMessage> Unrecognized
+                         *               message type
                          */
-                        l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                        PNOR::MOD_PNORRP_WAITFORMESSAGE,
-                                                        PNOR::RC_INVALID_MESSAGE_TYPE,
-                                                        TO_UINT64(message->type),
-                                                        (uint64_t)eff_addr);
+                        l_errhdl = new ERRORLOG::ErrlEntry(
+                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           PNOR::MOD_PNORRP_WAITFORMESSAGE,
+                                           PNOR::RC_INVALID_MESSAGE_TYPE,
+                                           TO_UINT64(message->type),
+                                           (uint64_t)eff_addr,
+                                           true /*Add HB SW Callout*/);
                         l_errhdl->collectTrace(PNOR_COMP_NAME);
                         status_rc = -EINVAL; /* Invalid argument */
                 }
@@ -704,11 +711,13 @@ void PnorRP::waitForMessage()
                  * @userdata2    Requested Virtual Address
                  * @devdesc      PnorRP::waitForMessage> Unrecognized message type
                  */
-                l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                   PNOR::MOD_PNORRP_WAITFORMESSAGE,
-                                                   PNOR::RC_INVALID_ASYNC_MESSAGE,
-                                                   TO_UINT64(message->type),
-                                                   (uint64_t)eff_addr);
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         PNOR::MOD_PNORRP_WAITFORMESSAGE,
+                                         PNOR::RC_INVALID_ASYNC_MESSAGE,
+                                         TO_UINT64(message->type),
+                                         (uint64_t)eff_addr,
+                                         true /*Add HB SW Callout*/);
                 l_errhdl->collectTrace(PNOR_COMP_NAME);
                 status_rc = -EINVAL; /* Invalid argument */
             }
@@ -924,7 +933,8 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
                                         PNOR::MOD_PNORRP_COMPUTEDEVICEADDR,
                                         PNOR::RC_INVALID_ADDRESS,
                                         l_vaddr,
-                                        BASE_VADDR);
+                                        BASE_VADDR,
+                                        true /*Add HB SW Callout*/);
         l_errhdl->collectTrace(PNOR_COMP_NAME);
         return l_errhdl;
     }

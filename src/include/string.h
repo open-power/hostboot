@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,6 +38,7 @@ extern "C"
                  const void *needle, size_t needlelen) __attribute__((pure));
 
     char* strcpy(char* d, const char* s);
+    char* strncpy(char* d, const char* s, size_t l);
     int strcmp(const char* s1, const char* s2) __attribute__((pure));
     size_t strlen(const char* s1) __attribute__((pure));
     size_t strnlen(const char* s1, size_t n) __attribute__((pure));

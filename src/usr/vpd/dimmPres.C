@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -109,7 +109,8 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                                            VPD::VPD_SPD_PRESENCE_DETECT,
                                            VPD::VPD_INSUFFICIENT_BUFFER_SIZE,
                                            TO_UINT64(io_buflen),
-                                           0x0 );
+                                           0x0,
+                                           true /*Add HB Software Callout*/);
 
             break;
         }

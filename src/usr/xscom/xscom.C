@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -47,7 +47,7 @@
 
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
-TRAC_INIT(&g_trac_xscom, "XSCOM", 2*KILOBYTE, TRACE::BUFFER_SLOW);
+TRAC_INIT(&g_trac_xscom, XSCOM_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
 
 namespace XSCOM
 {
@@ -171,7 +171,8 @@ errlHndl_t xscomOpSanityCheck(const DeviceFW::OperationType i_opType,
                                             XSCOM_SANITY_CHECK,
                                             XSCOM_INVALID_DATA_BUFFER,
                                             i_buflen,
-                                            va_arg(i_args,uint64_t));
+                                            va_arg(i_args,uint64_t),
+                                            true /*Add HB Software Callout*/);
             break;
         }
 
@@ -191,7 +192,8 @@ errlHndl_t xscomOpSanityCheck(const DeviceFW::OperationType i_opType,
                                             XSCOM_SANITY_CHECK,
                                             XSCOM_INVALID_OP_TYPE,
                                             i_opType,
-                                            va_arg(i_args,uint64_t));
+                                            va_arg(i_args,uint64_t),
+                                            true /*Add HB Software Callout*/);
             break;
         }
 
@@ -301,6 +303,8 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
             if (__sync_bool_compare_and_swap(&g_masterProcVirtAddr,
                                      NULL, NULL))
             {
+                // Note: can't call TARGETING code prior to PNOR being
+                // brought up.
                 uint64_t* l_tempVirtAddr = getCpuIdVirtualAddress();
                 if (!__sync_bool_compare_and_swap(&g_masterProcVirtAddr,
                                          NULL, l_tempVirtAddr))
@@ -326,7 +330,8 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                                 XSCOM_GET_TARGET_VIRT_ADDR,
                                 XSCOM_MMIO_UNMAP_ERR,
                                 rc,
-                                reinterpret_cast<uint64_t>(l_tempVirtAddr));
+                                reinterpret_cast<uint64_t>(l_tempVirtAddr),
+                                true /*Add HB Software Callout*/);
                         break;
                     }
                 }
@@ -361,14 +366,7 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                 xscomChipId =
                   i_target->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
-                //@todo
-                // Save the node id of the master chip in a global as well and
-                // update it. For Rainer systems the node id of the master chip may
-                // not be 0 if it is on a second node.
-
                 // Get system XSCOM base address
-                // Note: can't call TARGETING code prior to PNOR being
-                // brought up.
                 TARGETING::TargetService& l_targetService =
                                         TARGETING::targetService();
                 TARGETING::Target* l_pTopLevel = NULL;

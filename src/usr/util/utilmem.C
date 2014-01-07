@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2013              */
+/* COPYRIGHT International Business Machines Corp. 2003,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -227,7 +227,8 @@ uint32_t UtilMem::read(
             UTIL_MOD_MEM_READ,
             l_erc,
             TWO_UINT32_TO_UINT64(task_gettid(), iv_eof),
-            reinterpret_cast<uint64_t>(iv_memStart)
+            reinterpret_cast<uint64_t>(iv_memStart),
+            true /*Add HB Software Callout*/
             );
 
         // collect some trace by default
@@ -332,7 +333,8 @@ uint32_t UtilMem::write(
             UTIL_MOD_MEM_WRITE,
             l_erc,
             TWO_UINT32_TO_UINT64(task_gettid(), iv_eof),
-            reinterpret_cast<uint64_t>(iv_memStart)
+            reinterpret_cast<uint64_t>(iv_memStart),
+            true /*Add HB Software Callout*/
             );
 
         // collect some trace by default

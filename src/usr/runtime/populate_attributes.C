@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,7 +43,7 @@
 #include <kernel/cpu.H> // for KERNEL_MAX_SUPPORTED_CPUS_PER_NODE
 
 trace_desc_t *g_trac_runtime = NULL;
-TRAC_INIT(&g_trac_runtime, "RUNTIME", KILOBYTE);
+TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
 
 /**
  * @brief Read a FAPI attribute and stick it into mainstore
@@ -343,8 +343,6 @@ errlHndl_t populate_system_attributes( void )
         assert( *_num_attr < system_data_t::MAX_ATTRIBUTES );
 
         TRACFCOMP( g_trac_runtime, "Run: system_cmp0.memory_ln4->image.save attributes.sys.bin 0x%X %d", sys_data,  sizeof(system_data_t) );
-
-        //@todo - Walk through attribute headers to look for duplicates?
     } while(0);
 
     // Handle any errors from FAPI_ATTR_GET
@@ -362,8 +360,9 @@ errlHndl_t populate_system_attributes( void )
                                           RUNTIME::MOD_RUNTIME_POP_SYS_ATTR,
                                           RUNTIME::RC_ATTR_GET_FAIL,
                                           _rc,
-                                          _failed_attribute );
-
+                                          _failed_attribute,
+                                          true /*Add HB Software Callout*/);
+        errhdl->collectTrace(TARG_COMP_NAME,KILOBYTE/2);
     }
 
     return errhdl;
@@ -412,7 +411,8 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
                                           RUNTIME::MOD_RUNTIME_POP_NODE_ATTR,
                                           RUNTIME::RC_INVALID_SECTION,
                                           node_data_addr,
-                                          node_data_size );
+                                          node_data_size,
+                                          true /*Add HB Software Callout*/ );
             break;
         }
         else if( sizeof(node_data_t) > node_data_size )
@@ -616,8 +616,9 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
                                           RUNTIME::MOD_RUNTIME_POP_NODE_ATTR,
                                           RUNTIME::RC_ATTR_GET_FAIL,
                                           _rc,
-                                          _failed_attribute );
-
+                                          _failed_attribute,
+                                          true /*Add HB Software Callout*/ );
+        errhdl->collectTrace(TARG_COMP_NAME,KILOBYTE/2);
     }
 
     return errhdl;

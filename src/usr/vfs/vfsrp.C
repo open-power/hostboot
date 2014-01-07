@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include "vfsrp.H"
 #include <pnor/pnorif.H>
 #include <util/align.H>
+#include <errl/errludstring.H>
 
 using namespace VFS;
 
@@ -129,7 +130,7 @@ errlHndl_t VfsRp::_init()
             );
         if(rc == 0)
         {
-            // TODO set permissions here or are defaults OK?
+            // Note: permissions are set elsewhere
 
             // Start msg_handler
             //  NOTE: This would be a weak consistancy issues if
@@ -143,7 +144,7 @@ errlHndl_t VfsRp::_init()
              * @moduleid        VFS_MODULE_ID
              * @reasoncode      VFS_ALLOC_VMEM_FAILED
              * @userdata1       returncode from mm_alloc_block()
-             * @userdata2       0
+             * @userdata2       Size of memory to allocate
              *
              * @devdesc         Could not allocate virtual memory.
              *
@@ -154,7 +155,8 @@ errlHndl_t VfsRp::_init()
                  VFS::VFS_MODULE_ID,                     //  moduleid
                  VFS::VFS_ALLOC_VMEM_FAILED,             //  reason Code
                  rc,                                     //  user1 = rc
-                 0                                       //  user2
+                 l_pnor_info.size,                       //  user2 = size
+                 true /*Add HB Software Callout*/
                 );
         }
     }
@@ -317,7 +319,7 @@ void VfsRp::_load_unload(msg_t * i_msg)
              * @moduleid        VFS_MODULE_ID
              * @reasoncode      VFS_PERMS_VMEM_FAILED
              * @userdata1       returncode from mm_set_permission()
-             * @userdata2       0
+             * @userdata2       message type (LOAD or UNLOAD)
              *
              * @devdesc         Could not set permissions on virtual memory.
              *
@@ -328,8 +330,8 @@ void VfsRp::_load_unload(msg_t * i_msg)
                  VFS::VFS_MODULE_ID,                     //  moduleid
                  VFS_PERMS_VMEM_FAILED,                  //  reason Code
                  rc,                                     //  user1 = rc
-                 0                                       //  user2 = 0
-                );
+                 i_msg->type,                            //  user2
+                 true /*Add HB Software Callout*/ );
         }
     }
     else
@@ -364,6 +366,10 @@ void VfsRp::_load_unload(msg_t * i_msg)
                  name[0],
                  name[1]
                 );
+            err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH );
+            err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                      HWAS::SRCI_PRIORITY_LOW );
         }
     }
     i_msg->data[0] = (uint64_t) err;
@@ -528,7 +534,8 @@ errlHndl_t VFS::module_load_unload(const char * i_module, VfsMessages i_msgtype)
              VFS::VFS_MODULE_ID,                     //  moduleid
              VFS::VFS_LOAD_FAILED,                   //  reason Code
              rc,                                     //  user1 = msg_sendrecv rc
-             i_msgtype                               //  user2 = message type
+             i_msgtype,                              //  user2 = message type
+             true /*Add HB Software Callout*/
             );
     }
 
@@ -562,12 +569,14 @@ errlHndl_t VFS::module_address(const char * i_name, const char *& o_address, siz
     if(!vfs || (vfs->text != vfs->data))
     {
         // module not found or is not a data module
+        uint64_t name[2] = { 0, 0 };
+        strncpy( reinterpret_cast<char*>(name), i_name, sizeof(uint64_t)*2 );
         /*@ errorlog tag
          * @errortype       ERRL_SEV_INFORMATIONAL
          * @moduleid        VFS_MODULE_ID
          * @reasoncode      VFS_INVALID_DATA_MODULE
-         * @userdata1       0
-         * @userdata2       0
+         * @userdata1       First 8 bytes of module name
+         * @userdata2       Next 8 bytes of module name
          *
          * @devdesc         Module is not a data module
          *
@@ -577,9 +586,11 @@ errlHndl_t VFS::module_address(const char * i_name, const char *& o_address, siz
              ERRORLOG::ERRL_SEV_INFORMATIONAL,       //  severity
              VFS::VFS_MODULE_ID,                     //  moduleid
              VFS::VFS_INVALID_DATA_MODULE,           //  reason Code
-             0,
-             0
+             name[0],
+             name[1],
+             true /*Add HB Software Callout*/
             );
+        ERRORLOG::ErrlUserDetailsString(i_name).addToLog(err);
     }
     else
     {

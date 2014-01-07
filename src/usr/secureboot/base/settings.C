@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -27,7 +27,7 @@
 
 // SECUREBOOT : General driver traces
 trace_desc_t* g_trac_secure = NULL;
-TRAC_INIT(&g_trac_secure, "SECURE", KILOBYTE); //1K
+TRAC_INIT(&g_trac_secure, SECURE_COMP_NAME, KILOBYTE); //1K
 
 
 namespace SECUREBOOT

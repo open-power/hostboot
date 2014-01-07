@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,9 +22,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include "utilbase.H"
 #include <limits.h>
+#include <hbotcompid.H>
 
 namespace Util
 {
     trace_desc_t* g_util_trace;
-    TRAC_INIT(&g_util_trace, "UTIL", KILOBYTE);
+    TRAC_INIT(&g_util_trace, UTIL_COMP_NAME, KILOBYTE);
 };

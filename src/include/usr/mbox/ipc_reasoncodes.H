@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -24,6 +24,8 @@
 #define __IPC_REASONCODES_H
 
 #include <hbotcompid.H>
+
+#define IPC_TRACE_NAME "IPC"
 
 namespace IPC
 {
