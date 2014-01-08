@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: dimmBadDqBitmapAccessHwp.C,v 1.8 2013/12/02 17:03:36 dedahle Exp $
+// $Id: dimmBadDqBitmapAccessHwp.C,v 1.9 2014/01/09 22:48:08 dedahle Exp $
 /**
  *  @file dimmBadDqBitmapAccessHwp.C
  *
@@ -44,6 +44,8 @@
  *                                                  dimmUpdateDqBitmapSpareByte
  *                                                  to not set bits for
  *                                                  connected DQs
+ *                          dedahle     01/08/2014  Switch back to reading
+ *                                                  ATTR_VPD_DIMM_SPARE
  */
 
 #include <dimmBadDqBitmapAccessHwp.H>
@@ -95,9 +97,8 @@ fapi::ReturnCode dimmUpdateDqBitmapSpareByte(
         // all DIMMs associated with the target MBA.
         uint8_t l_mbaSpare[DIMM_DQ_MAX_MBA_PORTS][DIMM_DQ_MAX_MBAPORT_DIMMS]
                                                  [DIMM_DQ_MAX_DIMM_RANKS] = {};
-        // TODO RTC 84506 Change to use ATTR_VPD_DIMM_SPARE once Cronus
-        // makes transition to reading VPD.
-        l_rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_SPARE, &i_mba, l_mbaSpare);
+
+        l_rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_SPARE, &i_mba, l_mbaSpare);
         if (l_rc)
         {
             FAPI_ERR("dimmUpdateDqBitmapSpareByte: "
