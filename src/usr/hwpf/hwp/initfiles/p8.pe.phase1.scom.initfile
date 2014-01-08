@@ -1,4 +1,4 @@
-#-- $Id: p8.pe.phase1.scom.initfile,v 1.5 2013/11/22 17:24:47 ricmata Exp $
+#-- $Id: p8.pe.phase1.scom.initfile,v 1.6 2013/12/13 02:28:52 ricmata Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -758,6 +758,198 @@ scom 0x800003B70901143F {
 scom 0x800003F70901143F {
     bits,     scom_data;
     48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][15];
+}
+
+#-- TX GEN1 Coefficient Override Register (A0)
+scom 0x800004100901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][0];
+}
+
+#-- TX GEN1 Coefficient Override Register (A1)
+scom 0x800004500901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][1];
+}
+
+#-- TX GEN1 Coefficient Override Register (A2)
+scom 0x800004900901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][2];
+}
+
+#-- TX GEN1 Coefficient Override Register (A3)
+scom 0x800004D00901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][3];
+}
+
+#-- TX GEN1 Coefficient Override Register (A4)
+scom 0x800005100901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][4];
+}
+
+#-- TX GEN1 Coefficient Override Register (A5)
+scom 0x800005500901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][5];
+}
+
+#-- TX GEN1 Coefficient Override Register (A6)
+scom 0x800005900901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][6];
+}
+
+#-- TX GEN1 Coefficient Override Register (A7)
+scom 0x800005D00901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][7];
+}
+
+#-- TX GEN1 Coefficient Override Register (B0)
+scom 0x800006100901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][8];
+}
+
+#-- TX GEN1 Coefficient Override Register (B1)
+scom 0x800006500901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][9];
+}
+
+#-- TX GEN1 Coefficient Override Register (B2)
+scom 0x800006900901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][10];
+}
+
+#-- TX GEN1 Coefficient Override Register (B3)
+scom 0x800006D00901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][11];
+}
+
+#-- TX GEN1 Coefficient Override Register (B4)
+scom 0x800007100901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][12];
+}
+
+#-- TX GEN1 Coefficient Override Register (B5)
+scom 0x800007500901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][13];
+}
+
+#-- TX GEN1 Coefficient Override Register (B6)
+scom 0x800007900901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][14];
+}
+
+#-- TX GEN1 Coefficient Override Register (B7)
+scom 0x800007D00901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[0][15];
+}
+
+#-- TX GEN2 Coefficient Override Register (A0)
+scom 0x800004110901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][0];
+}
+
+#-- TX GEN2 Coefficient Override Register (A1)
+scom 0x800004510901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][1];
+}
+
+#-- TX GEN2 Coefficient Override Register (A2)
+scom 0x800004910901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][2];
+}
+
+#-- TX GEN2 Coefficient Override Register (A3)
+scom 0x800004D10901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][3];
+}
+
+#-- TX GEN2 Coefficient Override Register (A4)
+scom 0x800005110901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][4];
+}
+
+#-- TX GEN2 Coefficient Override Register (A5)
+scom 0x800005510901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][5];
+}
+
+#-- TX GEN2 Coefficient Override Register (A6)
+scom 0x800005910901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][6];
+}
+
+#-- TX GEN2 Coefficient Override Register (A7)
+scom 0x800005D10901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][7];
+}
+
+#-- TX GEN2 Coefficient Override Register (B0)
+scom 0x800006110901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][8];
+}
+
+#-- TX GEN2 Coefficient Override Register (B1)
+scom 0x800006510901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][9];
+}
+
+#-- TX GEN2 Coefficient Override Register (B2)
+scom 0x800006910901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][10];
+}
+
+#-- TX GEN2 Coefficient Override Register (B3)
+scom 0x800006D10901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][11];
+}
+
+#-- TX GEN1 Coefficient Override Register (B4)
+scom 0x800007110901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][12];
+}
+
+#-- TX GEN2 Coefficient Override Register (B5)
+scom 0x800007510901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][13];
+}
+
+#-- TX GEN2 Coefficient Override Register (B6)
+scom 0x800007910901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][14];
+}
+
+#-- TX GEN2 Coefficient Override Register (B7)
+scom 0x800007D10901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[0][15];
 }
 
 #-- RX Phase Rotator Flywheel Control Register (A0)
@@ -1789,6 +1981,198 @@ scom 0x800003B70901187F {
 scom 0x800003F70901187F {
     bits,     scom_data,                         expr;
     48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][15],  (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (A0)
+scom 0x800004100901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][0];
+}
+
+#-- TX GEN1 Coefficient Override Register (A1)
+scom 0x800004500901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][1];
+}
+
+#-- TX GEN1 Coefficient Override Register (A2)
+scom 0x800004900901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][2];
+}
+
+#-- TX GEN1 Coefficient Override Register (A3)
+scom 0x800004D00901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][3];
+}
+
+#-- TX GEN1 Coefficient Override Register (A4)
+scom 0x800005100901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][4];
+}
+
+#-- TX GEN1 Coefficient Override Register (A5)
+scom 0x800005500901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][5];
+}
+
+#-- TX GEN1 Coefficient Override Register (A6)
+scom 0x800005900901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][6];
+}
+
+#-- TX GEN1 Coefficient Override Register (A7)
+scom 0x800005D00901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][7];
+}
+
+#-- TX GEN1 Coefficient Override Register (B0)
+scom 0x800006100901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][8],    (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (B1)
+scom 0x800006500901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][9],    (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (B2)
+scom 0x800006900901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][10],   (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (B3)
+scom 0x800006D00901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][11],   (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (B4)
+scom 0x800007100901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][12],   (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (B5)
+scom 0x800007500901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][13],   (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (B6)
+scom 0x800007900901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][14],   (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (B7)
+scom 0x800007D00901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN1[1][15],   (lane32);
+}
+
+#-- TX GEN2 Coefficient Override Register (A0)
+scom 0x800004110901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][0];
+}
+
+#-- TX GEN2 Coefficient Override Register (A1)
+scom 0x800004510901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][1];
+}
+
+#-- TX GEN2 Coefficient Override Register (A2)
+scom 0x800004910901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][2];
+}
+
+#-- TX GEN2 Coefficient Override Register (A3)
+scom 0x800004D10901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][3];
+}
+
+#-- TX GEN2 Coefficient Override Register (A4)
+scom 0x800005110901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][4];
+}
+
+#-- TX GEN2 Coefficient Override Register (A5)
+scom 0x800005510901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][5];
+}
+
+#-- TX GEN2 Coefficient Override Register (A6)
+scom 0x800005910901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][6];
+}
+
+#-- TX GEN2 Coefficient Override Register (A7)
+scom 0x800005D10901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][7];
+}
+
+#-- TX GEN2 Coefficient Override Register (B0)
+scom 0x800006110901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][8],    (lane32);
+}
+
+#-- TX GEN2 Coefficient Override Register (B1)
+scom 0x800006510901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][9],    (lane32);
+}
+
+#-- TX GEN2 Coefficient Override Register (B2)
+scom 0x800006910901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][10],   (lane32);
+}
+
+#-- TX GEN2 Coefficient Override Register (B3)
+scom 0x800006D10901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][11],   (lane32);
+}
+
+#-- TX GEN1 Coefficient Override Register (B4)
+scom 0x800007110901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][12],   (lane32);
+}
+
+#-- TX GEN2 Coefficient Override Register (B5)
+scom 0x800007510901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][13],   (lane32);
+}
+
+#-- TX GEN2 Coefficient Override Register (B6)
+scom 0x800007910901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][14],   (lane32);
+}
+
+#-- TX GEN2 Coefficient Override Register (B7)
+scom 0x800007D10901187F {
+    bits,     scom_data,       	                       expr;
+    48:63,    ATTR_PROC_PCIE_IOP_TX_FFE_GEN2[1][15],   (lane32);
 }
 
 #-- RX Phase Rotator Flywheel Control Register (A0)

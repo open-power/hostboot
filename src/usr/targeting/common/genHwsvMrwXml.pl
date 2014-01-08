@@ -285,8 +285,10 @@ foreach my $i (@{$ProcPcie->{'processor-settings'}})
                      $i->{proc_pcie_iop_tx_rcvrdetcntl_iop0},
                      $i->{proc_pcie_iop_tx_rcvrdetcntl_iop1},
                      "PROC_PCIE_IOP_ZCAL_CONTROL",
-                     $i->{proc_pcie_iop_zcal_control_iop0},
-                     $i->{proc_pcie_iop_zcal_control_iop1}];
+                     0x00000080, 0x00000080];
+# TODO RTC 94725 - Restore PROC_PCIE_IOP_ZCAL_CONTROL when MRW values are updated.
+#                     $i->{proc_pcie_iop_zcal_control_iop0},
+#                     $i->{proc_pcie_iop_zcal_control_iop1}];
 }
 
 my @SortedPcie = sort byNodePos @procPcie;

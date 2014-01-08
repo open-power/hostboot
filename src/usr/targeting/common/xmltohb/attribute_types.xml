@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -12772,6 +12772,50 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <id>ATTR_MSS_INIT_STATE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_FFE_GEN1</id>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe TX FFE (Gen1)
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+    </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN1</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_FFE_GEN2</id>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe TX FFE (Gen2)
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+    </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN2</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
 </attribute>
 
 </attributes>
