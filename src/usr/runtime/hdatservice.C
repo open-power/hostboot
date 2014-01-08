@@ -325,9 +325,9 @@ hdatService::hdatService(void)
 ,iv_spiraH(NULL)
 ,iv_spiraS(NULL)
 {
-    for( RUNTIME::SectionId id = RUNTIME::FIRST_SECTION;
-         id <= RUNTIME::LAST_SECTION;
-         id = (RUNTIME::SectionId)(id+1) )
+    for( uint8_t id = static_cast<uint8_t>(RUNTIME::FIRST_SECTION);
+         id <= static_cast<uint8_t>(RUNTIME::LAST_SECTION);
+         id++ )
     {
         iv_actuals[id] = ACTUAL_NOT_SET;
     }
@@ -586,7 +586,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         assert(sys != NULL);
 
         // Figure out what kind of payload we have
-        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
+        TARGETING::PAYLOAD_KIND payload_kind
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
 #ifdef REAL_HDAT_TEST
@@ -1057,7 +1057,7 @@ errlHndl_t hdatService::findSpira( void )
             // Figure out what kind of payload we have
             TARGETING::Target * sys = NULL;
             TARGETING::targetService().getTopLevelTarget( sys );
-            TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
+            TARGETING::PAYLOAD_KIND payload_kind
               = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
             // Go get the physical address we mapped in
@@ -1257,7 +1257,7 @@ errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
         assert(sys != NULL);
 
         // Figure out what kind of payload we have
-        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
+        TARGETING::PAYLOAD_KIND payload_kind
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
         if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -47,68 +47,6 @@ using namespace TARGETING;
 class FsiDDTest : public CxxTest::TestSuite
 {
   public:
-    /**
-     * @brief FSI DD test - Initialization
-     *        Test FSI Master/Slave Initialization
-     */
-    void test_init(void)
-    {
-#if 0  //istep is calling this now
-        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_init> Start" );
-        uint64_t fails = 0;
-        uint64_t total = 0; 
-        errlHndl_t l_err = NULL;
-
-        total++;
-        l_err = FSI::initializeHardware();
-        if( l_err )
-        {
-            fails++;
-            TRACFCOMP(g_trac_fsi, "FsiDDTest::test_init> Error from device : RC=%X", l_err->reasonCode() );
-            TS_FAIL( "FsiDDTest::test_init> ERROR : Unexpected error log from initMaster" );
-            errlCommit(l_err,FSI_COMP_ID);
-        }
-
-        TRACFCOMP( g_trac_fsi, "FsiDDTest::test_init> %d/%d fails", fails, total );
-#endif
-    };
-
-
-    //testcode for Simics verification
-    void test_blah(void)
-    {
-#if 0 
-        return;
-        errlHndl_t l_err = NULL;
-        TARGETING::Target* fsi_target = NULL;
-
-        // master processor target
-        TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-        epath.addLast(TARGETING::TYPE_SYS,0);
-        epath.addLast(TARGETING::TYPE_NODE,0);
-        epath.addLast(TARGETING::TYPE_PROC,0);
-        fsi_target = TARGETING::targetService().toTarget(epath);
-
-        uint32_t read_data = 0;
-        size_t op_size = sizeof(read_data);
-
-        while(1)
-        {
-            nanosleep( 1, 0 );
-            op_size = sizeof(read_data);
-            l_err = DeviceFW::deviceRead( fsi_target, 
-                                          &read_data,
-                                          op_size,
-                                          DEVICE_FSI_ADDRESS(0x3418) );
-            if( l_err )
-            {
-                TRACFCOMP(g_trac_fsi, "FsiDDTest::test_blah> Error from device : RC=%X", l_err->reasonCode() );
-                delete l_err;
-            }
-        }
-#endif
-    };
-
     /**
      * @brief FSI DD test - Read/Write
      *        Perform basic read/write operations

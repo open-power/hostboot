@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -662,7 +662,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
             ctl_reg|FSI_MDTRB0_1DC
         };
 
-        for( size_t x=0; x<(sizeof(dump_regs)/dump_regs[0]); x++ )
+        for( size_t x=0; x<(sizeof(dump_regs)/sizeof(dump_regs[0])); x++ )
         {
             tmp_err = read( dump_regs[x], &data );
             if( tmp_err )
@@ -716,7 +716,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
             0x285C,//2817=GP8
         };
         uint32_t databuf = 32;
-        for( size_t x=0; x<(sizeof(dump_regs)/dump_regs[0]); x++ )
+        for( size_t x=0; x<(sizeof(dump_regs)/sizeof(dump_regs[0])); x++ )
         {
             tmp_err = read( i_target, dump_regs[x], &databuf );
             if( tmp_err )
@@ -1129,7 +1129,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                 else
                 {
                     // bits 0:3 are a specific error code
-                    switch( (mesrb0_data & 0xF) >> 28 )
+                    switch( (mesrb0_data & 0xF0000000) >> 28 )
                     {
                         case(0x1) : //OPB error
                         case(0x2) : //invalid state of OPB state machine
