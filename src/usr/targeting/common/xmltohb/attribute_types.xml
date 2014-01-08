@@ -8286,7 +8286,7 @@ firmware notes: Used as override attribute for pstate procedure
     <description>Prefteching enable. 1 = enable, 0 = disable.</description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
+            <default>1</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -8302,7 +8302,7 @@ firmware notes: Used as override attribute for pstate procedure
     <description>L4 cleaner enable. 1 = enable, 0 = disable.</description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
+            <default>1</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>

@@ -143,11 +143,9 @@ push @systemAttr,
     "NEST_FREQ_MHZ", $reqPol->{'proc_pb_frequency'}->{content},
     "FREQ_PCIE", $reqPol->{'proc_pcie_frequency'}->{content},
     "FREQ_X", $reqPol->{'proc_x_frequency'}->{content},
-    "MSS_CLEANER_ENABLE", $reqPol->{'mss_cleaner_enable'},
     "MSS_MBA_ADDR_INTERLEAVE_BIT", $reqPol->{'mss_mba_addr_interleave_bit'},
     "MSS_MBA_CACHELINE_INTERLEAVE_MODE",
         $reqPol->{'mss_mba_cacheline_interleave_mode'},
-    "MSS_PREFETCH_ENABLE", $reqPol->{'mss_prefetch_enable'},
     "PROC_EPS_TABLE_TYPE", $reqPol->{'proc_eps_table_type'},
     "PROC_FABRIC_PUMP_MODE", $reqPol->{'proc_fabric_pump_mode'},
     "PROC_X_BUS_WIDTH", $reqPol->{'proc_x_bus_width'},
@@ -1649,15 +1647,8 @@ sub generate_sys
     <attribute>
         <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
         <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MSS_PREFETCH_ENABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MSS_CLEANER_ENABLE</id>
-        <default>1</default>
     </attribute>";
+
     generate_max_config();
 
     # HDAT drawer number (physical node) to
