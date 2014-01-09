@@ -1,9 +1,13 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.11 2013/07/18 13:56:05 jmcgill Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.12 2014/01/08 18:22:31 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.12|baysah  |01/08/14|- Moved ECC bypass qualifier from MCMODE1(63) TO MCMODE1(62), bit 63 is perfmon.
+#--         |        |        |
 #--     1.10|jmcgill |05/07/13|- Qualify ECC bypass disable by risk level
+#--         |        |        |
 #--      1.9|baysah  |05/05/13|- Disabled MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS and MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL.
 #--         |        |        |
 #--      1.7|baysah  |04/26/13|- Disabled MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP per firmware request for MPIPL.
@@ -95,8 +99,8 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      53:59,                    0b0000000           ,     any              ;    # MCMODE1Q_DISABLE_MCS_COMMAND_BYPASS
      60   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_DISABLE_SPEC_READ_FOR_NONDMA_GROUP_PUMP_LOCAL_READ
      61   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_DISABLE_SPEC_READ_FOR_NONDMA_SYSTEM_PUMP_LOCAL_READ
-     62   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_FASTPATH_MCS_COMMAND_BYPASS
-     63   ,                    0b1                 , (ecc_bypass_disable) ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
+     62   ,                    0b1                 , (ecc_bypass_disable) ;    # MCMODE1Q_DISABLE_FASTPATH_MCS_COMMAND_BYPASS
+     63   ,                    0b1                 ,     any              ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
 
  }
 
