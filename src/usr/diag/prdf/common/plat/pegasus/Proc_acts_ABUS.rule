@@ -143,6 +143,7 @@ rule PbesFir
         PBESFIR & ~PBESFIR_MASK & ~PBESFIR_ACT0 &  PBESFIR_ACT1;
 };
 
+
 group gPbesFir filter singlebit
 {
     /** PBESFIR[0]
@@ -334,6 +335,14 @@ group gPbesFir filter singlebit
      *  FIR_SCOM_ERR
      */
     (PbesFir, bit(37)) ? defaultMaskedError;
+
+    # If bit 4 and 11 turn on simultaneously, action should be same as
+    # incase of bit 11.
+
+    /** PBESFIR[4,11]
+     *  A1LINK_PSR_UNC_ERR
+     */
+    (PbesFir, bit(4,11)) ? calloutAbus1InterfaceTh1;
 };
 
 ################################################################################
