@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_thermal_init.C,v 1.10 2013/12/02 22:47:26 pardeik Exp $
+// $Id: mss_thermal_init.C,v 1.12 2014/01/06 19:49:16 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_thermal_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -47,6 +47,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.12  | pardeik  |06-JAN-14| enable writing of safemode IPL throttles
+//   1.11  | pardeik  |20-DEC-13| Only get sensor map attributes if a custom dimm
 //   1.10  | pardeik  |21-NOV-13| added support for dimm temperature sensor attributes
 //   1.9   | pardeik  |11-OCT-13| gerrit review updates to remove uneeded items
 //   1.8   | pardeik  |04-OCT-13| changes done from gerrit review
@@ -241,11 +243,14 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 	 FAPI_INF("ATTR_EFF_CUSTOM_DIMM: %d", l_custom_dimm[l_mba_pos]);
       }
 
-      l_rc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_PRIMARY, &i_target, l_cdimm_sensor_map_primary);
-      if (l_rc) return l_rc;
-      l_rc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_SECONDARY, &i_target, l_cdimm_sensor_map_secondary);
-      if (l_rc) return l_rc;
-
+	  // Get attributes for dimm temperature sensor mapping for only a custom dimm so we don't get an error
+      if ((l_custom_dimm[0] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) || (l_custom_dimm[1] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES))
+      {
+	  l_rc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_PRIMARY, &i_target, l_cdimm_sensor_map_primary);
+	  if (l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_VPD_CDIMM_SENSOR_MAP_SECONDARY, &i_target, l_cdimm_sensor_map_secondary);
+	  if (l_rc) return l_rc;
+      }
 
       // Configure Centaur Thermal Cache
 
@@ -545,82 +550,39 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
 
 
 // Write the IPL Safe Mode Throttles
-// TODO:  Enable once OCC writes the runtime memory throttles (SW227937)
-/*
-      uint32_t l_safemode_throttle_n_per_mba;
-      uint32_t l_safemode_throttle_n_per_chip;
-      uint32_t l_safemode_throttle_d;
+// For centaur DD2 and above since OCC only writes runtime throttles for this
 
-      l_rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA, NULL, l_safemode_throttle_n_per_mba);
+      uint8_t l_enable_safemode_throttle = 0;
+      l_rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_ENABLE_SAFEMODE_THROTTLE, &i_target, l_enable_safemode_throttle);
       if (l_rc) return l_rc;
-      l_rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP, NULL, l_safemode_throttle_n_per_chip);
-      if (l_rc) return l_rc;
-      l_rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR, NULL, l_safemode_throttle_d);
-      if (l_rc) return l_rc;
+
+      if (l_enable_safemode_throttle)
+      {
+	  uint32_t l_safemode_throttle_n_per_mba;
+	  uint32_t l_safemode_throttle_n_per_chip;
+	  uint32_t l_throttle_d;
+
+	  l_rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA, NULL, l_safemode_throttle_n_per_mba);
+	  if (l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP, NULL, l_safemode_throttle_n_per_chip);
+	  if (l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_MRW_MEM_THROTTLE_DENOMINATOR, NULL, l_throttle_d);
+	  if (l_rc) return l_rc;
 // write the N/M throttle control register
-      for (uint8_t mba_index = 0; mba_index < l_target_mba_array.size(); mba_index++){
-	  l_rc = fapiGetScom(l_target_mba_array[mba_index], MBA01_MBA_FARB3Q_0x03010416, l_data);
-	  if (l_rc) return l_rc;
-	  l_ecmd_rc |= l_data.insertFromRight(l_safemode_throttle_n_per_mba, 0, 15);
-	  l_ecmd_rc |= l_data.insertFromRight(l_safemode_throttle_n_per_chip, 15, 16);
-	  l_ecmd_rc |= l_data.insertFromRight(l_safemode_throttle_d, 31, 14);
-	  if(l_ecmd_rc) {
-	      l_rc.setEcmdError(l_ecmd_rc);
-	      return l_rc;
-	  }
-	  l_rc = fapiPutScom(l_target_mba_array[mba_index], MBA01_MBA_FARB3Q_0x03010416, l_data);
-	  if (l_rc) return l_rc;
-      }
-*/
-
-// Update the runtime throttle attributes if needed for non custom DIMMs since those run power tests
-// TODO:  Enable once dimm_power_test is running and updating attributes (SW227941)
-/*
-      uint32_t l_runtime_throttle_n_per_mba;
-      uint32_t l_runtime_throttle_n_per_chip;
-      uint32_t l_runtime_throttle_d;
-      uint32_t l_dimm_power_test_throttle_n_per_mba;
-      uint32_t l_dimm_power_test_throttle_n_per_chip;
-      uint32_t l_dimm_power_test_throttle_d;
-
-      for (uint8_t mba_index = 0; mba_index < l_target_mba_array.size(); mba_index++){
-	  if (l_custom_dimm[mba_index] == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO){
-
-	      l_rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA, &l_target_mba_array[mba_index], l_runtime_throttle_n_per_mba);
+	  for (uint8_t mba_index = 0; mba_index < l_target_mba_array.size(); mba_index++){
+	      l_rc = fapiGetScom(l_target_mba_array[mba_index], MBA01_MBA_FARB3Q_0x03010416, l_data);
 	      if (l_rc) return l_rc;
-	      l_rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP, &l_target_mba_array[mba_index], l_runtime_throttle_n_per_chip);
-	      if (l_rc) return l_rc;
-	      l_rc = FAPI_ATTR_GET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR, &l_target_mba_array[mba_index], l_runtime_throttle_d);
-	      if (l_rc) return l_rc;
-	      l_rc = FAPI_ATTR_GET(ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_MBA, &l_target_mba_array[mba_index], l_dimm_power_test_throttle_n_per_mba);
-	      if (l_rc) return l_rc;
-	      l_rc = FAPI_ATTR_GET(ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_NUMERATOR_PER_CHIP, &l_target_mba_array[mba_index], l_dimm_power_test_throttle_n_per_chip);
-	      if (l_rc) return l_rc;
-	      l_rc = FAPI_ATTR_GET(ATTR_MSS_DIMM_POWER_TEST_MEM_THROTTLE_DENOMINATOR, &l_target_mba_array[mba_index], l_dimm_power_test_throttle_d);
-	      if (l_rc) return l_rc;
-// update the runtime throttle attributes with the dimm power test attributes if they are different
-	      if (
-		  (l_runtime_throttle_n_per_mba != l_dimm_power_test_throttle_n_per_mba)
-		  ||
-		  (l_runtime_throttle_n_per_chip != l_dimm_power_test_throttle_n_per_chip)
-		  ||
-		  (l_runtime_throttle_d != l_dimm_power_test_throttle_d)
-		  )
-	      {
-		  l_rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
-				       &l_target_mba_array[mba_index], l_dimm_power_test_throttle_n_per_mba);
-		  if (l_rc) return l_rc;
-		  l_rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
-				       &l_target_mba_array[mba_index], l_dimm_power_test_throttle_n_per_chip);
-		  if (l_rc) return l_rc;
-		  l_rc = FAPI_ATTR_SET(ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
-				       &l_target_mba_array[mba_index], l_dimm_power_test_throttle_d);
-		  if (l_rc) return l_rc;
-
+	      l_ecmd_rc |= l_data.insertFromRight(l_safemode_throttle_n_per_mba, 0, 15);
+	      l_ecmd_rc |= l_data.insertFromRight(l_safemode_throttle_n_per_chip, 15, 16);
+	      l_ecmd_rc |= l_data.insertFromRight(l_throttle_d, 31, 14);
+	      if(l_ecmd_rc) {
+		  l_rc.setEcmdError(l_ecmd_rc);
+		  return l_rc;
 	      }
+	      l_rc = fapiPutScom(l_target_mba_array[mba_index], MBA01_MBA_FARB3Q_0x03010416, l_data);
+	      if (l_rc) return l_rc;
 	  }
       }
-*/
 
       FAPI_INF("*** %s COMPLETE ***", procedure_name);
       return l_rc;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.23 2013/12/02 22:46:01 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.24 2013/12/20 15:43:30 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -53,6 +53,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.24  | pardeik  |20-DEC-13| only get power curve attributes if custom dimm
 //   1.23  | pardeik  |02-DEC-13| enable supplier power curve attributes
 //   1.22  | pardeik  |18-NOV-13| rename attributes (eff to vpd)
 //   1.21  | pardeik  |14-NOV-13| hardcode supplier power curves until lab is
@@ -444,32 +445,35 @@ extern "C" {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_NUM_DROPS_PER_PORT");
 	    return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_SLOPE,
-			   &target_chip, cdimm_master_power_slope);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_MASTER_POWER_SLOPE");
-	    return rc;
-	}
-	rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT,
-			   &target_chip, cdimm_master_power_intercept);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT");
-	    return rc;
-	}
+	// Only get power curve values for custom dimms to prevent errors
+	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
+	{
+	    rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_SLOPE,
+			       &target_chip, cdimm_master_power_slope);
+	    if (rc) {
+		FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_MASTER_POWER_SLOPE");
+		return rc;
+	    }
+	    rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT,
+			       &target_chip, cdimm_master_power_intercept);
+	    if (rc) {
+		FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT");
+		return rc;
+	    }
 
-	rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE,
-			   &target_chip, cdimm_supplier_power_slope);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE");
-	    return rc;
+	    rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE,
+			       &target_chip, cdimm_supplier_power_slope);
+	    if (rc) {
+		FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE");
+		return rc;
+	    }
+	    rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT,
+			       &target_chip, cdimm_supplier_power_intercept);
+	    if (rc) {
+		FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT");
+		return rc;
+	    }
 	}
-	rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT,
-			   &target_chip, cdimm_supplier_power_intercept);
-	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT");
-	    return rc;
-	}
-
 	rc = FAPI_ATTR_GET(ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT,
 			   NULL, dimm_thermal_power_limit);
 	if (rc) {

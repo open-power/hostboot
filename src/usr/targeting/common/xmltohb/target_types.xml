@@ -217,8 +217,9 @@
     <attribute><id>MEM_FILTER_PLL_SOURCE</id></attribute>
     <attribute><id>EFFECTIVE_EC</id></attribute>
     <attribute><id>MIN_FREQ_MHZ</id></attribute>
-
-
+    <attribute><id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id></attribute>
+    <attribute><id>MRW_MEM_THROTTLE_DENOMINATOR</id></attribute>
+    <attribute><id>MRW_MAX_DRAM_DATABUS_UTIL</id></attribute>
 </targetType>
 
 <targetType>

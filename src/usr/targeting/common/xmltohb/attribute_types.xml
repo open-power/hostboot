@@ -12826,4 +12826,46 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+    <description>Machine Readable Workbook DIMM power curve percent uplift for this system</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_MEM_THROTTLE_DENOMINATOR</id>
+    <description>Machine Readable Workbook throttle value for denominator cfg_nm_m</description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_MEM_THROTTLE_DENOMINATOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_MAX_DRAM_DATABUS_UTIL</id>
+    <description>Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).  Used to determine memory throttle values.</description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_MAX_DRAM_DATABUS_UTIL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

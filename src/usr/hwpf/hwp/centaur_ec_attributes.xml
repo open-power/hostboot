@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/xml/attribute_info/centaur_ec_attributes.xml,v $                  -->
+<!-- $Source: src/usr/hwpf/hwp/centaur_ec_attributes.xml $                  -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-  <!-- $Id: centaur_ec_attributes.xml,v 1.15 2013/11/22 22:13:33 whs Exp $ -->
+  <!-- $Id: centaur_ec_attributes.xml,v 1.16 2013/12/19 17:12:52 pardeik Exp $ -->
   <attribute>
     <id>ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -284,6 +284,23 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CENTAUR_EC_ENABLE_SAFEMODE_THROTTLE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.   If true, this will enable safe mode throttle values to be set during the IPL in mss_thermal_init.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>

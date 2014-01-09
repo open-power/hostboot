@@ -287,6 +287,18 @@
     <attribute><id>MAX_MCS_PER_SYSTEM</id>
         <default>16</default>
     </attribute>
+    <attribute>
+        <id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>MRW_MEM_THROTTLE_DENOMINATOR</id>
+        <default>512</default>
+    </attribute>
+    <attribute>
+        <id>MRW_MAX_DRAM_DATABUS_UTIL</id>
+        <default>5625</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

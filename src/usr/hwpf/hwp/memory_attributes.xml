@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -3674,7 +3674,6 @@ will originates from VPD for custom DIMMs in the MW keyword byte 5 (MSB is on th
     <odmChangeable/>
 </attribute>
 
-<!-- NOT USED YET BY PROCEDURES
 <attribute>
     <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3704,7 +3703,6 @@ will originates from VPD for custom DIMMs in the MW keyword byte 5 (MSB is on th
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_MSS_INIT_STATE</id>

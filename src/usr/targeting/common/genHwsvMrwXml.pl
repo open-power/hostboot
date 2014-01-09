@@ -185,6 +185,12 @@ push @systemAttr,
     "PROC_R_DISTLOSS_VCS", $reqPol->{'proc_r_distloss_vcs'},
     "PROC_VRM_VOFFSET_VCS", $reqPol->{'proc_vrm_voffset_vcs'},
     "MEM_MIRROR_PLACEMENT_POLICY", $placement,
+    "MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT",
+        $reqPol->{'dimm_power_curve_percent_uplift'},
+    "MRW_MEM_THROTTLE_DENOMINATOR",
+        $reqPol->{'mem_throttle_denominator'},
+    "MRW_MAX_DRAM_DATABUS_UTIL",
+        $reqPol->{'max_dram_databus_util'},
 ];
 
 #------------------------------------------------------------------------------
