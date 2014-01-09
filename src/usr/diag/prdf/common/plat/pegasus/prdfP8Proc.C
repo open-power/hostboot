@@ -660,6 +660,22 @@ PLUGIN_CALLOUT_PHB( 1 )
 
 #undef PLUGIN_CALLOUT_PHB
 
+/**
+  * @brief  checks if proc is Venice chip.
+  * @param  i_chip P8 chip.
+  * @param  isVenice TRUE if chip is venice false otherwise.
+  * @return SUCCESS
+  */
+int32_t isVeniceProc( ExtensibleChip * i_chip, bool & o_isVenice )
+{
+    o_isVenice = false;
+    if( MODEL_VENICE == getProcModel( i_chip->GetChipHandle() ) )
+        o_isVenice = true;
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Proc, isVeniceProc );
+
 } // end namespace Proc
 
 } // end namespace PRDF
