@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -63,6 +63,8 @@ use lib dirname (__FILE__);
 #------------------------------------------------------------------------------
 my $ReleaseYear = `date +%Y`;
 chomp( $ReleaseYear );
+
+$ReleaseYear = $ENV{'DATE_OVERRIDE'} if defined $ENV{'DATE_OVERRIDE'};
 
 my $copyrightSymbol = "";
 # my $copyrightSymbol = "(C)";  # Uncomment if unable to use  character.
