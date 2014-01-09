@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/erepairAccessorHwpFuncs.C $                  */
+/* $Source: src/usr/hwpf/hwp/bus_training/erepairAccessorHwpFuncs.C $     */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -137,32 +137,6 @@ fapi::ReturnCode geteRepairThreshold(const fapi::Target &i_endp_target,
                                      const bool         i_mfgModeIPL,
                                      uint8_t            &o_threshold);
 
-
-/**
- * @brief This function checks if the fail lane numbers are functional lanes
- *        or spare lanes. If any lanes are spare lanes, they are not supposed
- *        to be restored and hence removed from the vector.
- *        The passed vectors will be removed of lane numbers which are
- *        spare lanes numbers
- *
- * @param [in]  i_endp_target  The target for whose type, the spare lane
- *                             numbers are verified against
- * @param [out] o_txFaillanes  Reference to the vector having the Tx side fail
- *                             lanes of the target passed as first param
- * @param [out] o_rxFaillanes  Reference to the vector having the Rx side fail
- *                             lanes of the target passed as first param
- * @param [out] o_sparesFound  If TRUE, indicates that there were spare lanes
- *                             in the VPD.
- *                             If FALSE, indicates that there were no spare
- *                             lanes in the VPD
- * @return ReturnCode
- */
-fapi::ReturnCode removeSpareLanes(const fapi::Target   &i_endp_target,
-                                  std::vector<uint8_t> &o_txFaillanes,
-                                  std::vector<uint8_t> &o_rxFaillanes,
-                                  bool                 &o_sparesFound);
-
-
 /**
  * @brief This function determines the lane numbers that needs to be spared
  *        to support Corner testing.
@@ -267,7 +241,6 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
     bool                    l_disableFabricERepair = false;
     bool                    l_disableMemoryERepair = false;
     bool                    l_thresholdExceed      = false;
-    bool                    l_sparesFound          = false;
     uint8_t                 l_threshold            = 0;
     uint64_t                l_allMnfgFlags         = 0;
     uint32_t                l_numTxFailLanes       = 0;
@@ -585,57 +558,6 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             }
         }
 #endif
-
-        /***** Do not allow spare lanes to be restored *****/
-
-        // Check if the fail lanes of endp1 are spare lanes
-        if(o_endp1_txFaillanes.size() || o_endp1_rxFaillanes.size())
-        {
-            l_sparesFound = false;
-            l_rc = removeSpareLanes(i_endp1_target,
-                                    o_endp1_txFaillanes,
-                                    o_endp1_rxFaillanes,
-                                    l_sparesFound);
-
-            if(l_rc)
-            {
-                FAPI_ERR("erepairGetRestoreLanes: Error from"
-                         " removeSpareLanes(endp1)");
-                break;
-            }
-
-            if(l_sparesFound)
-            {
-                const fapi::Target &FFDC_TARGET = i_endp1_target;
-                FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD);
-                fapiLogError(l_rc);
-            }
-        }
-
-        // Check if the fail lanes of endp2 are spare lanes
-        if(o_endp2_rxFaillanes.size() || o_endp2_txFaillanes.size())
-        {
-            l_sparesFound = false;
-            l_rc = removeSpareLanes(i_endp2_target,
-                                    o_endp2_txFaillanes,
-                                    o_endp2_rxFaillanes,
-                                    l_sparesFound);
-
-            if(l_rc)
-            {
-                FAPI_ERR("erepairGetRestoreLanes: Error from"
-                         " removeSpareLanes(endp2)");
-                break;
-            }
-
-            if(l_sparesFound)
-            {
-                const fapi::Target &FFDC_TARGET = i_endp2_target;
-                FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD);
-                fapiLogError(l_rc);
-            }
-        }
-
         if(l_mnfgModeIPL)
         {
             // Check if MNFG_DMI_DEPLOY_LANE_SPARES is enabled
@@ -785,131 +707,6 @@ void getCornerTestingLanes(const fapi::TargetType i_tgtType,
         o_endp2_rxFaillanes = o_endp1_rxFaillanes;
 
     }while(0);
-}
-
-fapi::ReturnCode removeSpareLanes(const fapi::Target   &i_endp_target,
-                                  std::vector<uint8_t> &o_txFaillanes,
-                                  std::vector<uint8_t> &o_rxFaillanes,
-                                  bool                 &o_sparesFound)
-{
-    fapi::ReturnCode  l_rc;
-    fapi::TargetType  l_tgtType     = fapi::TARGET_TYPE_NONE;
-    uint8_t           l_spareIndx   = 0;
-    uint8_t           l_maxSpares   = 0;
-    uint8_t           l_xBusWidth   = 0;
-    uint8_t           *l_txSparePtr = NULL;
-    uint8_t           *l_rxSparePtr = NULL;
-    std::vector<uint8_t>::iterator l_it;
-
-    uint8_t l_x8ByteSpareLanes[XBUS_MAXSPARES_IN_HW] = {XBUS_8_SPARE_LANE_1,
-                                                        XBUS_8_SPARE_LANE_2};
-
-    uint8_t l_x4ByteSpareLanes[XBUS_MAXSPARES_IN_HW] = {XBUS_4_SPARE_LANE_1,
-                                                        XBUS_4_SPARE_LANE_2};
-
-    uint8_t l_aSpareLanes[ABUS_MAXSPARES_IN_HW] = {ABUS_SPARE_LANE_1};
-
-    uint8_t l_dmiUpSpareLanes[DMIBUS_MAXSPARES_IN_HW] =
-                                                {DMIBUS_UPSTREAM_SPARE_LANE_1,
-                                                 DMIBUS_UPSTREAM_SPARE_LANE_2};
-
-    uint8_t l_dmiDownSpareLanes[DMIBUS_MAXSPARES_IN_HW] =
-                                               {DMIBUS_DOWNSTREAM_SPARE_LANE_1,
-                                                DMIBUS_DOWNSTREAM_SPARE_LANE_2};
-
-    do
-    {
-        l_tgtType = i_endp_target.getType();
-        o_sparesFound = false;
-
-        switch(l_tgtType)
-        {
-            case fapi::TARGET_TYPE_XBUS_ENDPOINT:
-
-                l_rc = FAPI_ATTR_GET(ATTR_PROC_X_BUS_WIDTH, NULL, l_xBusWidth);
-
-                if(l_rc)
-                {
-                    FAPI_ERR("removeSpareLanes: Unable to read attribute"
-                             " - ATTR_PROC_X_BUS_WIDTH");
-                    break;
-                }
-
-                l_maxSpares = XBUS_MAXSPARES_IN_HW;
-                if(l_xBusWidth == TARGETING::PROC_X_BUS_WIDTH_W4BYTE)
-                {
-                    l_txSparePtr = l_rxSparePtr = l_x4ByteSpareLanes;
-                }
-                else if(l_xBusWidth == TARGETING::PROC_X_BUS_WIDTH_W8BYTE)
-                {
-                    l_txSparePtr = l_rxSparePtr = l_x8ByteSpareLanes;
-                }
-                break;
-
-            case fapi::TARGET_TYPE_ABUS_ENDPOINT:
-                l_maxSpares = ABUS_MAXSPARES_IN_HW;
-                l_txSparePtr = l_rxSparePtr = l_aSpareLanes;
-                break;
-
-            case fapi::TARGET_TYPE_MCS_CHIPLET:
-                l_maxSpares = DMIBUS_MAXSPARES_IN_HW;
-                l_txSparePtr = l_dmiDownSpareLanes;
-                l_rxSparePtr = l_dmiUpSpareLanes;
-                break;
-
-            case fapi::TARGET_TYPE_MEMBUF_CHIP:
-                l_maxSpares = DMIBUS_MAXSPARES_IN_HW;
-                l_txSparePtr = l_dmiUpSpareLanes;
-                l_rxSparePtr = l_dmiDownSpareLanes;
-                break;
-
-            default:
-                FAPI_ERR("removeSpareLanes: Invalid target type %d",l_tgtType);
-                break;
-        };
-
-        if(l_rc)
-        {
-            break;
-        }
-
-        for(l_spareIndx = 0; l_spareIndx < l_maxSpares; l_spareIndx++)
-        {
-            // Find if there are spares as faillanes on Tx side,
-            // and erase all instances
-            l_it = std::remove(o_txFaillanes.begin(),
-                               o_txFaillanes.end(),
-                               l_txSparePtr[l_spareIndx]);
-
-            if(l_it != o_txFaillanes.end())
-            {
-                FAPI_ERR("removeSpareLanes: Error, spare lane %d"
-                        " cannot be repaired",
-                        l_txSparePtr[l_spareIndx]);
-
-                o_sparesFound = true;
-                o_txFaillanes.erase(l_it, o_txFaillanes.end());
-            }
-
-            // Find if there are spares as faillanes on Rx side,
-            // and erase all instances
-            l_it = std::remove(o_rxFaillanes.begin(),
-                               o_rxFaillanes.end(),
-                               l_rxSparePtr[l_spareIndx]);
-
-            if(l_it != o_rxFaillanes.end())
-            {
-                FAPI_ERR("removeSpareLanes: Error, spare lane %d"
-                         " cannot be repaired",
-                         l_rxSparePtr[l_spareIndx]);
-
-                o_sparesFound = true;
-                o_rxFaillanes.erase(l_it, o_rxFaillanes.end());
-            }
-        }
-    }while(0);
-
-    return (l_rc);
 }
 
 fapi::ReturnCode geteRepairThreshold(const fapi::Target &i_endp_target,
@@ -1601,9 +1398,7 @@ fapi::ReturnCode erepairSetFieldFailedLanes(
                                       const std::vector<uint8_t> &i_txFailLanes,
                                       const std::vector<uint8_t> &i_rxFailLanes)
 {
-    fapi::ReturnCode     l_rc;
-    std::vector<uint8_t> l_txFailedLanes;
-    std::vector<uint8_t> l_rxFailedLanes;
+    fapi::ReturnCode l_rc;
 
     do
     {

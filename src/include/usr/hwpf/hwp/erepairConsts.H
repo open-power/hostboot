@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -56,13 +56,9 @@ const uint8_t INVALID_FAIL_LANE_NUMBER = 0xFF;
 // Spare lanes numbering: 44, 45 in 8 byte mode
 const uint8_t XBUS_8_ACTIVE_LANE_START   = 0;
 const uint8_t XBUS_8_ACTIVE_LANE_END     = 77;
-const uint8_t XBUS_8_SPARE_LANE_1        = 78;
-const uint8_t XBUS_8_SPARE_LANE_2        = 79;
 
 const uint8_t XBUS_4_ACTIVE_LANE_START   = 0;
 const uint8_t XBUS_4_ACTIVE_LANE_END     = 43;
-const uint8_t XBUS_4_SPARE_LANE_1        = 44;
-const uint8_t XBUS_4_SPARE_LANE_2        = 45;
 
 const uint8_t XBUS_SPARE_DEPLOY_LANE_1   = 0;
 const uint8_t XBUS_SPARE_DEPLOY_LANE_2   = 1;
@@ -74,7 +70,6 @@ const uint8_t XBUS_MAXSPARES_IN_HW       = 2;
 const uint8_t ABUS_ACTIVE_LANE_START     = 0;
 const uint8_t ABUS_ACTIVE_LANE_END       = 20;
 
-const uint8_t ABUS_SPARE_LANE_1          = 21;
 const uint8_t ABUS_SPARE_DEPLOY_LANE_1   = 0;
 const uint8_t ABUS_MAXSPARES_IN_HW       = 1;
 
@@ -84,17 +79,11 @@ const uint8_t ABUS_MAXSPARES_IN_HW       = 1;
 const uint8_t DMIBUS_UPSTREAM_ACTIVE_LANE_START   = 0;
 const uint8_t DMIBUS_UPSTREAM_ACTIVE_LANE_END     = 20;
 
-const uint8_t DMIBUS_UPSTREAM_SPARE_LANE_1        = 21;
-const uint8_t DMIBUS_UPSTREAM_SPARE_LANE_2        = 22;
-
 // DownStream DMI-Bus is 14+2 lanes wide.
 // Data lanes numbering:  0 - 13
 // Spare lanes numbering: 14, 15
 const uint8_t DMIBUS_DOWNSTREAM_ACTIVE_LANE_START = 0;
 const uint8_t DMIBUS_DOWNSTREAM_ACTIVE_LANE_END   = 13;
-
-const uint8_t DMIBUS_DOWNSTREAM_SPARE_LANE_1      = 14;
-const uint8_t DMIBUS_DOWNSTREAM_SPARE_LANE_2      = 15;
 
 const uint8_t DMIBUS_SPARE_DEPLOY_LANE_1          = 0;
 const uint8_t DMIBUS_SPARE_DEPLOY_LANE_2          = 1;
