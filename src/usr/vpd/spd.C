@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/spd/spd.C $                                           */
+/* $Source: src/usr/vpd/spd.C $                                           */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
@@ -43,6 +44,7 @@
 #include "spd.H"
 #include "spdDDR3.H"
 #include "spdDDR4.H"
+#include "errlud_vpd.H"
 
 // ----------------------------------------------
 // Trace definitions
@@ -134,6 +136,8 @@ errlHndl_t getModType ( modSpecTypes_t & o_memType,
  *
  * @param[in] i_memType - The memory type of the target.
  *
+ * @param[in] i_target - Target (only used for callouts)
+ *
  * @param[out] o_entry - The table entry corresponding to the keyword.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to
@@ -141,6 +145,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_memType,
  */
 errlHndl_t getKeywordEntry ( uint64_t i_keyword,
                              uint64_t i_memType,
+                             TARGETING::Target * i_target,
                              const KeywordData *& o_entry );
 
 
@@ -231,9 +236,34 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
                                            memType,
                                            keyword );
 
+            // User could have installed a bad/unsupported dimm
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::DECONFIG,
+                               HWAS::GARD_NULL );
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->collectTrace( "SPD", 256);
+
             break;
         }
     } while( 0 );
+
+    // If there is an error, add parameter info to log
+    if ( err != NULL )
+    {
+        VPD::UdVpdParms( i_target,
+                         io_buflen,
+                         0,
+                         keyword,
+                         true ) // read
+                       .addToLog(err);
+    }
 
     TRACSSCOMP( g_trac_spd,
                 EXIT_MRK"spdGetKeywordValue()" );
@@ -305,9 +335,35 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
                                            memType,
                                            keyword );
 
+            // User could have installed a bad/unsupported dimm
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::DECONFIG,
+                               HWAS::GARD_NULL );
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->collectTrace( "SPD", 256);
+
             break;
         }
     } while( 0 );
+
+    // If there is an error, add parameter info to log
+    if ( err != NULL )
+    {
+        VPD::UdVpdParms( i_target,
+                         io_buflen,
+                         0,
+                         keyword,
+                         false ) // write
+                       .addToLog(err);
+    }
+
 
     TRACSSCOMP( g_trac_spd,
                 EXIT_MRK"spdWriteKeywordValue()" );
@@ -425,7 +481,10 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
                                            VPD::VPD_SPD_WRITE_DATA,
                                            VPD::VPD_INVALID_WRITE_METHOD,
                                            i_offset,
-                                           i_numBytes );
+                                           i_numBytes,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
 
             break;
         }
@@ -458,6 +517,7 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
         const KeywordData * entry = NULL;
         err = getKeywordEntry( i_keyword,
                                i_DDRRev,
+                               i_target,
                                entry );
 
         if( err )
@@ -487,7 +547,10 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
                                            VPD::VPD_NULL_ENTRY,
                                            i_keyword,
                                            TWO_UINT32_TO_UINT64( io_buflen,
-                                                                 i_DDRRev ) );
+                                                                 i_DDRRev ),
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
 
             break;
         }
@@ -586,6 +649,7 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
         const KeywordData * entry = NULL;
         err = getKeywordEntry( i_keyword,
                                i_DDRRev,
+                               i_target,
                                entry );
 
         if( err )
@@ -614,7 +678,10 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
                                            VPD::VPD_NULL_ENTRY,
                                            i_keyword,
                                            TWO_UINT32_TO_UINT64( io_buflen,
-                                                                 i_DDRRev ) );
+                                                                 i_DDRRev ),
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
 
             break;
         }
@@ -643,7 +710,10 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
                                            VPD::VPD_KEYWORD_NOT_WRITABLE,
                                            i_keyword,
                                            TWO_UINT32_TO_UINT64( io_buflen,
-                                                                 i_DDRRev ) );
+                                                                 i_DDRRev ),
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
 
             break;
         }
@@ -686,7 +756,10 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
                                            TWO_UINT16_ONE_UINT32_TO_UINT64(
                                                       entry->length,
                                                       entry->bitMask,
-                                                      i_DDRRev ) );
+                                                      i_DDRRev ),
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
 
             break;
         }
@@ -816,7 +889,11 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
                                            VPD::VPD_SPD_DDR3_SPECIAL_CASES,
                                            VPD::VPD_INVALID_SPD_KEYWORD,
                                            i_kwdData.keyword,
-                                           0x0 );
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
+
             break;
     };
 
@@ -952,7 +1029,11 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
                                            VPD::VPD_SPD_DDR4_SPECIAL_CASES,
                                            VPD::VPD_INVALID_SPD_KEYWORD,
                                            i_kwdData.keyword,
-                                           0x0 );
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
+
             break;
     };
 
@@ -1006,6 +1087,20 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
                                            i_kwdData.keyword,
                                            i_DDRRev );
 
+           // User could have installed a bad/unsupported dimm
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::DECONFIG,
+                               HWAS::GARD_NULL );
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->collectTrace( "SPD", 256);
+
             break;
         }
     } while( 0 );
@@ -1051,7 +1146,11 @@ errlHndl_t spdCheckSize ( size_t i_bufferSz,
                                        VPD::VPD_INSUFFICIENT_BUFFER_SIZE,
                                        i_keyword,
                                        TWO_UINT32_TO_UINT64( i_bufferSz,
-                                                             i_expBufferSz ) );
+                                                             i_expBufferSz ),
+                                       true /*Add HB SW Callout*/ );
+
+        err->collectTrace( "SPD", 256);
+
     }
 
     return err;
@@ -1150,7 +1249,10 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
                                            VPD::VPD_SPD_READ_BINARY_FILE,
                                            VPD::VPD_INSUFFICIENT_FILE_SIZE,
                                            fileSize,
-                                           tmpData );
+                                           tmpData,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
 
             break;
         }
@@ -1247,6 +1349,19 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                     TWO_UINT32_TO_UINT64( modType, i_memType ),
                     TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                           i_kwdData.modSpec ) );
+
+                // HB code asked for an unsupprted keyword for this Module
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                // Or user could have installed a bad/unsupported dimm
+                err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                err->collectTrace( "SPD", 256);
+
                 break;
             }
         }
@@ -1276,6 +1391,19 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                     TWO_UINT32_TO_UINT64( modType, i_memType ),
                     TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                           i_kwdData.modSpec ) );
+
+                // HB code asked for an unsupprted keyword for this Module
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                // Or user could have installed a bad/unsupported dimm
+                err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                err->collectTrace( "SPD", 256);
+
                 break;
             }
         }
@@ -1305,6 +1433,19 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                     TWO_UINT32_TO_UINT64( modType, i_memType ),
                     TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                           i_kwdData.modSpec ) );
+
+                // HB code asked for an unsupprted keyword for this Module
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                // Or user could have installed a bad/unsupported dimm
+                err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                err->collectTrace( "SPD", 256);
+
                 break;
             }
         }
@@ -1334,6 +1475,19 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                     TWO_UINT32_TO_UINT64( modType, i_memType ),
                     TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                           i_kwdData.modSpec ) );
+
+                // HB code asked for an unsupprted keyword for this Module
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                // Or user could have installed a bad/unsupported dimm
+                err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                err->collectTrace( "SPD", 256);
+
                 break;
             }
         }
@@ -1363,6 +1517,19 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                 TWO_UINT32_TO_UINT64( modType, i_memType ),
                 TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                 i_kwdData.modSpec ) );
+
+                // HB code asked for an unsupprted keyword for this Module
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                // Or user could have installed a bad/unsupported dimm
+                err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::DECONFIG,
+                                   HWAS::GARD_NULL );
+
+            err->collectTrace( "SPD", 256);
+
             break;
         }
 
@@ -1482,7 +1649,10 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 VPD::VPD_SPD_GET_MOD_TYPE,
                 VPD::VPD_MOD_SPECIFIC_UNSUPPORTED,
-                modTypeVal, i_memType);
+                modTypeVal, i_memType,
+                true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
         }
         else
         {
@@ -1501,6 +1671,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
 // ------------------------------------------------------------------
 errlHndl_t getKeywordEntry ( uint64_t i_keyword,
                              uint64_t i_memType,
+                             TARGETING::Target * i_target,
                              const KeywordData *& o_entry )
 {
     errlHndl_t err = NULL;
@@ -1542,6 +1713,20 @@ errlHndl_t getKeywordEntry ( uint64_t i_keyword,
                                            i_keyword,
                                            i_memType );
 
+            // User could have installed a bad/unsupported dimm
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::DECONFIG,
+                               HWAS::GARD_NULL );
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->collectTrace( "SPD", 256);
+
             break;
         }
 
@@ -1572,7 +1757,10 @@ errlHndl_t getKeywordEntry ( uint64_t i_keyword,
                                            VPD::VPD_SPD_GET_KEYWORD_ENTRY,
                                            VPD::VPD_KEYWORD_NOT_FOUND,
                                            i_keyword,
-                                           0x0 );
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "SPD", 256);
 
             break;
         }

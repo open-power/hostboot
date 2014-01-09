@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -105,6 +105,7 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                      HWAS::SRCI_PRIORITY_HIGH);
 
+            err->collectTrace( "VPD", 256);
         }
     }
     else // interface not set
@@ -126,6 +127,8 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
 
         err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
+
+        err->collectTrace( "VPD", 256);
     }
 
     if(!err)
@@ -167,6 +170,8 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
 
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                          HWAS::SRCI_PRIORITY_HIGH);
+
+                err->collectTrace( "VPD", 256);
 
                 break;
         }
@@ -276,6 +281,8 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
     err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                              HWAS::SRCI_PRIORITY_HIGH);
 
+    err->collectTrace( "VPD", 256);
+
     return err;
 }
 
@@ -319,7 +326,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
     err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                              HWAS::SRCI_PRIORITY_HIGH);
 
-
+    err->collectTrace( "VPD", 256);
 
     return err;
 }

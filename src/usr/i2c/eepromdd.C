@@ -45,6 +45,7 @@
 #include <i2c/eepromif.H>
 #include <i2c/i2creasoncodes.H>
 #include "eepromdd.H"
+#include "errlud_i2c.H"
 
 // ----------------------------------------------
 // Globals
@@ -168,7 +169,11 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
                                            TWO_UINT32_TO_UINT64(
                                                i2cInfo.offset,
                                                io_buflen       ),
-                                           i2cInfo.devSize_KB );
+                                           i2cInfo.devSize_KB,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( EEPROM_COMP_NAME );
+
             break;
         }
 
@@ -218,18 +223,23 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
                                            EEPROM_PERFORM_OP,
                                            EEPROM_INVALID_OPERATION,
                                            i_opType,
-                                           i2cInfo.chip );
+                                           i2cInfo.chip,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( EEPROM_COMP_NAME );
 
             break;
         }
     } while( 0 );
 
-
-    // If there is an error, add target and trace to log
-    if ( (err != NULL) && (i_target != NULL) )
+    // If there is an error, add parameter info to log
+    if ( err != NULL )
     {
-        err->collectTrace(EEPROM_COMP_NAME);
-        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(err);
+        EEPROM::UdEepromParms( i_opType,
+                               i_target,
+                               io_buflen,
+                               i2cInfo )
+                             .addToLog(err);
     }
 
     TRACDCOMP( g_trac_eeprom,
@@ -830,7 +840,11 @@ errlHndl_t eepromPrepareAddress ( void * io_buffer,
                                                EEPROM_PREPAREADDRESS,
                                                EEPROM_INVALID_DEVICE_TYPE,
                                                i_i2cInfo.addrSize,
-                                               i_i2cInfo.chip);
+                                               i_i2cInfo.chip,
+                                               true /*Add HB SW Callout*/ );
+
+                err->collectTrace( EEPROM_COMP_NAME );
+
                 break;
         }
 
@@ -928,7 +942,10 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                                            EEPROM_READATTRIBUTES,
                                            EEPROM_INVALID_CHIP,
                                            o_i2cInfo.chip,
-                                           TARGETING::get_huid(i_target) );
+                                           TARGETING::get_huid(i_target),
+                                           true /*Add HB SW Callout*/ );
+
+                err->collectTrace( EEPROM_COMP_NAME );
 
                 break;
         }
@@ -956,6 +973,14 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                                     EEPROM_ATTR_INFO_NOT_FOUND,
                                     TARGETING::get_huid(i_target),
                                     o_i2cInfo.chip);
+
+                // Could be FSP or HB code's fault
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_MED);
+                err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_MED);
+
+                err->collectTrace( EEPROM_COMP_NAME );
 
                 break;
 
@@ -1004,7 +1029,10 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                                     EEPROM_READATTRIBUTES,
                                     EEPROM_INVALID_ADDR_OFFSET_SIZE,
                                     TARGETING::get_huid(i_target),
-                                    o_i2cInfo.addrSize);
+                                    o_i2cInfo.addrSize,
+                                    true /*Add HB SW Callout*/ );
+
+                err->collectTrace( EEPROM_COMP_NAME );
 
                 break;
 
@@ -1078,7 +1106,10 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                                     EEPROM_GETI2CMASTERTARGET,
                                     EEPROM_DIMM_I2C_MASTER_PATH_ERROR,
                                     i_i2cInfo.chip,
-                                    TARGETING::get_huid(i_target) );
+                                    TARGETING::get_huid(i_target),
+                                    true /*Add HB SW Callout*/ );
+
+                err->collectTrace( EEPROM_COMP_NAME );
 
                 break;
             }
@@ -1105,7 +1136,10 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                                                EEPROM_GETI2CMASTERTARGET,
                                                EEPROM_TARGET_NULL,
                                                i_i2cInfo.chip,
-                                               TARGETING::get_huid(i_target) );
+                                               TARGETING::get_huid(i_target),
+                                               true /*Add HB SW Callout*/ );
+
+                err->collectTrace( EEPROM_COMP_NAME );
 
                 break;
             }

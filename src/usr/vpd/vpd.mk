@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -21,4 +21,4 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects with runtime
-OBJS = ipvpd.o mvpd.o cvpd.o spd.o
+OBJS = ipvpd.o mvpd.o cvpd.o spd.o errlud_vpd.o

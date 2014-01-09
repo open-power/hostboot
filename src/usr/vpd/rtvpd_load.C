@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -85,11 +85,10 @@ errlHndl_t bld_vpd_image(PNOR::SectionId vpd_type,
                  VPD::VPD_BLD_RT_IMAGE,
                  VPD::VPD_INSUFFICIENT_SPACE_FOR_IMAGE,
                  i_size,
-                 (((uint64_t)vpd_type) << 32) + info.size );
+                 (((uint64_t)vpd_type) << 32) + info.size,
+                 true /*Add HB Software Callout*/);
 
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
-
+            err->collectTrace( "VPD", 256);
         }
     }
 

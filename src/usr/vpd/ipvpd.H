@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -379,11 +379,14 @@ class IpVpdFacade
      *
      * @param[in] i_expectedSize - The minimum size the buffer should be.
      *
+     * @param[in] i_target - Target device. (Only used for error callout)
+     *
      * @return errlHndl_t - An error log will be returned if the buffer is not
      *      large enough.
      */
     errlHndl_t checkBufferSize( size_t i_bufferSize,
-                                size_t i_expectedSize );
+                                size_t i_expectedSize,
+                                TARGETING::Target * i_target );
 
 
   protected: // Variables

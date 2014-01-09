@@ -112,6 +112,8 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                                            0x0,
                                            true /*Add HB Software Callout*/);
 
+            err->collectTrace( "SPD", 256);
+
             break;
         }
 

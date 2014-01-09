@@ -44,6 +44,8 @@
 #include <i2c/i2cif.H>
 
 #include "i2c.H"
+#include "errlud_i2c.H"
+
 // ----------------------------------------------
 // Globals
 // ----------------------------------------------
@@ -73,6 +75,40 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 
 namespace I2C
 {
+
+/**
+ * @brief Addresses for each of the registers in each engine.
+ */
+static i2c_addrs_t masterAddrs[] =
+{
+    { /* Master 0 */
+        I2C_MASTER0_ADDR | 0x4,         // FIFO
+        I2C_MASTER0_ADDR | 0x5,         // Command Register
+        I2C_MASTER0_ADDR | 0x6,         // Mode Register
+        I2C_MASTER0_ADDR | 0x8,         // Interrupt Mask Register
+        I2C_MASTER0_ADDR | 0xA,         // Interrupt Register
+        I2C_MASTER0_ADDR | 0xB,         // Status Register (Read)
+        I2C_MASTER0_ADDR | 0xB,         // Reset (Write)
+    },
+    { /* Master 1 */
+        I2C_MASTER1_ADDR | 0x4,         // FIFO
+        I2C_MASTER1_ADDR | 0x5,         // Command Register
+        I2C_MASTER1_ADDR | 0x6,         // Mode Register
+        I2C_MASTER1_ADDR | 0x8,         // Interrupt Mask Register
+        I2C_MASTER1_ADDR | 0xA,         // Interrupt Register
+        I2C_MASTER1_ADDR | 0xB,         // Status Register (Read)
+        I2C_MASTER1_ADDR | 0xB,         // Reset (Write)
+    },
+    { /* Master 2 */
+        I2C_MASTER2_ADDR | 0x4,         // FIFO
+        I2C_MASTER2_ADDR | 0x5,         // Command Register
+        I2C_MASTER2_ADDR | 0x6,         // Mode Register
+        I2C_MASTER2_ADDR | 0x8,         // Interrupt Mask Register
+        I2C_MASTER2_ADDR | 0xA,         // Interrupt Register
+        I2C_MASTER2_ADDR | 0xB,         // Status Register (Read)
+        I2C_MASTER2_ADDR | 0xB,         // Reset (Write)
+    }
+};
 
 // Register the perform Op with the routing code for Procs.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
@@ -159,7 +195,10 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                                            I2C_PERFORM_OP,
                                            I2C_MASTER_SENTINEL_TARGET,
                                            i_opType,
-                                           0x0 );
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "I2C", 256);
 
             break;
         }
@@ -345,7 +384,10 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                                            I2C_PERFORM_OP,
                                            I2C_INVALID_OP_TYPE,
                                            i_opType,
-                                           userdata2 );
+                                           userdata2,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "I2C", 256);
 
             // No Operation performed, so can break and skip the section
             // that handles operation errors
@@ -390,10 +432,16 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                    args.engine );
     }
 
-    // If there is an error, add target to log
-    if ( (err != NULL) && (i_target != NULL) )
+    // If there is an error, add parameter info to log
+    if ( err != NULL )
     {
-        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(err);
+
+        I2C::UdI2CParms( i_opType,
+                         i_target,
+                         io_buflen,
+                         i_accessType,
+                         args  )
+                       .addToLog(err);
     }
 
     TRACDCOMP( g_trac_i2c,
@@ -512,6 +560,21 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
                                                    status.value,
                                                    userdata2 );
 
+                    // For now limited in what we can call out:
+                    // Could be an issue with Processor or its bus
+                    // -- both on the same FRU
+                    // @todo RTC 94872 - update this callout
+                    err->addHwCallout( i_target,
+                                       HWAS::SRCI_PRIORITY_HIGH,
+                                       HWAS::NO_DECONFIG,
+                                       HWAS::GARD_NULL );
+
+                    // Or HB code failed to do the procedure correctly
+                    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                             HWAS::SRCI_PRIORITY_LOW);
+
+                    err->collectTrace( "I2C", 256);
+
                     break;
                 }
             }
@@ -527,7 +590,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
                               &fifo.value,
                               size,
                               DEVICE_SCOM_ADDRESS(
-                                  masterAddrs[i_args.engine].fifo ) );
+                                  I2C::masterAddrs[i_args.engine].fifo ) );
 
             TRACUCOMP( g_trac_i2c,
                        INFO_MRK"i2cRead() - FIFO[0x%lx] = 0x%016llx",
@@ -830,6 +893,22 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
                                                status.value,
                                                engine );
 
+
+                // For now limited in what we can call out:
+                // Could be an issue with Processor or its bus
+                // -- both on the same FRU
+                // @todo RTC 94872 - update this callout
+                err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_HIGH,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                // Or HB code failed to do the procedure correctly
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+
+                err->collectTrace( "I2C", 256);
+
                 break;
             }
         } while( 0 == status.command_complete ); /* Command Complete */
@@ -1014,7 +1093,20 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
                                            i_statusVal.value,
                                            intRegVal );
 
-            // @todo RTC:69113 - Add target and I2C traces to the errorlog.
+            // For now limited in what we can call out:
+            // Could be an issue with Processor or its bus
+            // -- both on the same FRU
+            // @todo RTC 94872 - update this callout
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_NULL );
+
+            // Or HB code failed to do the procedure correctly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->collectTrace( "I2C" );
 
             break;
         }
@@ -1040,7 +1132,20 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
                                            i_statusVal.value,
                                            intRegVal );
 
-            // @todo RTC:69113 - Add target and I2C traces to the errorlog.
+            // For now limited in what we can call out:
+            // Could be an issue with Processor or its bus
+            // -- both on the same FRU
+            // @todo RTC 94872 - update this callout
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_NULL );
+
+            // Or HB code failed to do the procedure correctly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            err->collectTrace( "I2C" );
 
             break;
         }
@@ -1129,6 +1234,21 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
                                                I2C_FIFO_TIMEOUT,
                                                status.value,
                                                0x0 );
+
+                // For now limited in what we can call out:
+                // Could be an issue with Processor or its bus
+                // -- both on the same FRU
+                // @todo RTC 94872 - update this callout
+                err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_HIGH,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                // Or HB code failed to do the procedure correctly
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+
+                err->collectTrace( "I2C", 256);
 
                 break;
             }
@@ -1359,24 +1479,7 @@ errlHndl_t i2cSetupMasters ( void )
         if( 0 == centList.size() )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"i2cSetupMasters: No Centaur chips found!" );
-
-            /*@
-             * @errortype
-             * @reasoncode       I2C_NO_CENTAUR_FOUND
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         I2C_SETUP_MASTERS
-             * @userdata1        <UNUSED>
-             * @userdata2        <UNUSED>
-             * @frucallout       <NONE>
-             * @devdesc          No Centaur chips found to programm I2C bus
-             * divisor
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           I2C_SETUP_MASTERS,
-                                           I2C_NO_CENTAUR_FOUND,
-                                           0x0, 0x0 );
-            break;
+                       INFO_MRK"i2cSetupMasters: No Centaur chips found!" );
         }
 
         TRACUCOMP( g_trac_i2c,
@@ -1468,24 +1571,7 @@ errlHndl_t i2cSetupMasters ( void )
         if( 0 == procList.size() )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"i2cSetupMasters: No Processor chips found!" );
-
-            /*@
-             * @errortype
-             * @reasoncode       I2C_NO_PROC_FOUND
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         I2C_SETUP_MASTERS
-             * @userdata1        <UNUSED>
-             * @userdata2        <UNUSED>
-             * @frucallout       <NONE>
-             * @devdesc          No Centaur chips found to programm I2C bus
-             * divisor
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           I2C_SETUP_MASTERS,
-                                           I2C_NO_PROC_FOUND,
-                                           0x0, 0x0 );
-            break;
+                       INFO_MRK"i2cSetupMasters: No Processor chips found!" );
         }
 
         TRACUCOMP( g_trac_i2c,
@@ -1630,7 +1716,11 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
                                            I2C_SET_BUS_VARIABLES,
                                            I2C_INVALID_BUS_SPEED_MODE,
                                            i_mode,
-                                           0x0 );
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( "I2C", 256);
+
             break;
 
         }

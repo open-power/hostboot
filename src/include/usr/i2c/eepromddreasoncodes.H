@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -71,6 +71,12 @@ enum eepromReasonCode
     EEPROM_TARGET_NULL                      = EEPROM_COMP_ID | 0x06,
     EEPROM_INVALID_ADDR_OFFSET_SIZE         = EEPROM_COMP_ID | 0x07,
     EEPROM_OVERFLOW_ERROR                   = EEPROM_COMP_ID | 0x08,
+};
+
+enum UserDetailsTypes
+{
+        EEPROM_UDT_NO_FORMAT       = 0x0,
+        EEPROM_UDT_PARAMETERS      = 0x1,
 };
 
 };  // end EEPROM

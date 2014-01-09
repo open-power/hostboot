@@ -117,40 +117,6 @@ struct i2c_addrs_t
 };
 
 /**
- * @brief Addresses for each of the registers in each engine.
- */
-static i2c_addrs_t masterAddrs[] =
-{
-    { /* Master 0 */
-        I2C_MASTER0_ADDR | 0x4,         // FIFO
-        I2C_MASTER0_ADDR | 0x5,         // Command Register
-        I2C_MASTER0_ADDR | 0x6,         // Mode Register
-        I2C_MASTER0_ADDR | 0x8,         // Interrupt Mask Register
-        I2C_MASTER0_ADDR | 0xA,         // Interrupt Register
-        I2C_MASTER0_ADDR | 0xB,         // Status Register (Read)
-        I2C_MASTER0_ADDR | 0xB,         // Reset (Write)
-    },
-    { /* Master 1 */
-        I2C_MASTER1_ADDR | 0x4,         // FIFO
-        I2C_MASTER1_ADDR | 0x5,         // Command Register
-        I2C_MASTER1_ADDR | 0x6,         // Mode Register
-        I2C_MASTER1_ADDR | 0x8,         // Interrupt Mask Register
-        I2C_MASTER1_ADDR | 0xA,         // Interrupt Register
-        I2C_MASTER1_ADDR | 0xB,         // Status Register (Read)
-        I2C_MASTER1_ADDR | 0xB,         // Reset (Write)
-    },
-    { /* Master 2 */
-        I2C_MASTER2_ADDR | 0x4,         // FIFO
-        I2C_MASTER2_ADDR | 0x5,         // Command Register
-        I2C_MASTER2_ADDR | 0x6,         // Mode Register
-        I2C_MASTER2_ADDR | 0x8,         // Interrupt Mask Register
-        I2C_MASTER2_ADDR | 0xA,         // Interrupt Register
-        I2C_MASTER2_ADDR | 0xB,         // Status Register (Read)
-        I2C_MASTER2_ADDR | 0xB,         // Reset (Write)
-    }
-};
-
-/**
  * @brief Structure used to pass important variables between functions
  */
 struct misc_args_t

@@ -80,6 +80,13 @@ enum i2cReasonCode
     I2C_NACK_ONLY_FOUND                 = I2C_COMP_ID | 0x0B,   // Only NACK found in status register
 };
 
+
+enum UserDetailsTypes
+{
+        I2C_UDT_NO_FORMAT       = 0x0,
+        I2C_UDT_PARAMETERS      = 0x1,
+};
+
 };  // end I2C
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
@@ -35,6 +36,7 @@
 
 #include "vpd.H"
 #include "ipvpd.H"
+#include "errlud_vpd.H"
 
 // ------------------------
 // Macros for unit testing
@@ -147,6 +149,17 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
 
     } while( 0 );
 
+    // If there is an error, add parameter info to log
+    if ( err != NULL )
+    {
+        VPD::UdVpdParms( i_target,
+                         io_buflen,
+                         i_args.record,
+                         i_args.keyword,
+                         true ) // read
+                       .addToLog(err);
+    }
+
     TRACSSCOMP( g_trac_vpd,
                 EXIT_MRK"IpVpdFacade::read()" );
 
@@ -218,6 +231,17 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
 
     } while( 0 );
 
+    // If there is an error, add parameter info to log
+    if ( err != NULL )
+    {
+        VPD::UdVpdParms( i_target,
+                         io_buflen,
+                         i_args.record,
+                         i_args.keyword,
+                         false ) // write
+                       .addToLog(err);
+    }
+
     TRACSSCOMP( g_trac_vpd,
                 EXIT_MRK"IpVpdFacade::Write()" );
 
@@ -266,8 +290,10 @@ errlHndl_t IpVpdFacade::translateRecord ( ipVpdRecord i_record,
                                            VPD::VPD_IPVPD_TRANSLATE_RECORD,
                                            VPD::VPD_RECORD_NOT_FOUND,
                                            i_record,
-                                           0x0 );
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
 
+            err->collectTrace( "VPD" );
             break;
         }
 
@@ -326,6 +352,13 @@ errlHndl_t IpVpdFacade::translateKeyword ( ipVpdKeyword i_keyword,
                                            i_keyword,
                                            0x0 );
 
+            // Could be FSP or HB code's fault
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_MED);
+            err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                     HWAS::SRCI_PRIORITY_MED);
+
+            err->collectTrace( "VPD" );
             break;
         }
 
@@ -434,6 +467,21 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                                        VPD::VPD_RECORD_NOT_FOUND,
                                        i_args.record,
                                        i_args.keyword );
+
+        // Could be the VPD of the target wasn't set up properly
+        // -- DECONFIG so that we can possibly keep booting
+        err->addHwCallout( i_target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DECONFIG,
+                           HWAS::GARD_NULL );
+        // Or FSP code didn't set up the VPD properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                 HWAS::SRCI_PRIORITY_MED);
+
+        // Or HB code didn't look for the record properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
+
         // Add trace to the log so we know what record was being requested.
         err->collectTrace( "VPD" );
     }
@@ -490,7 +538,8 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
 
         // check size of usr buffer with io_buflen
         err = checkBufferSize( io_buflen,
-                               (size_t)keywordSize );
+                               (size_t)keywordSize,
+                               i_target );
         if( err )
         {
             break;
@@ -635,6 +684,22 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                            VPD::VPD_RECORD_MISMATCH,
                                            offset,
                                            i_offset );
+
+            // Could be the VPD of the target wasn't set up properly
+            // -- DECONFIG so that we can possibly keep booting
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::DECONFIG,
+                               HWAS::GARD_NULL );
+
+            // Or FSP code didn't set up the VPD properly
+            err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                     HWAS::SRCI_PRIORITY_MED);
+
+            // Or HB code didn't look for the record properly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
             // Add trace so we see what record was being compared
             err->collectTrace( "VPD" );
 
@@ -755,6 +820,21 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                        TWO_UINT32_TO_UINT64( i_args.record,
                                                              i_args.keyword ) );
 
+        // Could be the VPD of the target wasn't set up properly
+        // -- DECONFIG so that we can possibly keep booting
+        err->addHwCallout( i_target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DECONFIG,
+                           HWAS::GARD_NULL );
+
+        // Or FSP code didn't set up the VPD properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                 HWAS::SRCI_PRIORITY_MED);
+
+        // Or HB code didn't look for the record properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
+
         // Add trace so we know what Record/Keyword was missing
         err->collectTrace( "VPD" );
     }
@@ -804,7 +884,8 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 
         // check size of usr buffer with io_buflen
         err = checkBufferSize( i_buflen,
-                               keywordSize );
+                               keywordSize,
+                               i_target );
         if( err )
         {
             break;
@@ -863,7 +944,8 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 // IpVpdFacade::checkBufferSize
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::checkBufferSize( size_t i_bufferSize,
-                                         size_t i_expectedSize )
+                                         size_t i_expectedSize,
+                                         TARGETING::Target * i_target )
 {
     errlHndl_t err = NULL;
 
@@ -889,6 +971,24 @@ errlHndl_t IpVpdFacade::checkBufferSize( size_t i_bufferSize,
                                        VPD::VPD_INSUFFICIENT_BUFFER_SIZE,
                                        i_bufferSize,
                                        i_expectedSize );
+
+        // Could be the VPD of the target wasn't set up properly
+        // -- DECONFIG so that we can possibly keep booting
+        err->addHwCallout( i_target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DECONFIG,
+                           HWAS::GARD_NULL );
+
+        // Or FSP code didn't set up the VPD properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                 HWAS::SRCI_PRIORITY_MED);
+
+        // Or HB code didn't look for the record properly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
+
+        err->collectTrace( "VPD" );
+
     }
 
     return err;

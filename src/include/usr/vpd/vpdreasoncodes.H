@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -115,6 +115,20 @@ enum vpdReasonCode
     VPD_RT_NULL_VPD_PTR                 = VPD_COMP_ID | 0x1a,
     VPD_INSUFFICIENT_SPACE_FOR_IMAGE    = VPD_COMP_ID | 0x1b,
     VPD_MBOX_NOT_SUPPORTED_RT           = VPD_COMP_ID | 0x1c,
+};
+
+
+/**
+ * @enum VPD::UserDetailsTypes
+ *
+ * @brief UserDetailsTypes for VPD User Details Section
+ *
+ */
+
+enum UserDetailsTypes
+{
+    VPD_UDT_NO_FORMAT       = 0x0,
+    VPD_UDT_PARAMETERS      = 0x1,
 };
 
 };  // end MVPD
