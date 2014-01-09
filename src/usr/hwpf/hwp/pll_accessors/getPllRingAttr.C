@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getPllRingAttr.C,v 1.1 2013/12/05 18:22:57 mjjones Exp $
+// $Id: getPllRingAttr.C,v 1.2 2014/01/10 19:37:13 dedahle Exp $
 /**
  *  @file getPllRingAttr.C
  *
@@ -30,7 +30,7 @@
  *               (i.e. _DATA, _FLUSH & _LENGTH) for each PLL ring have
  *               been listed with those that are not currently defined
  *               being commented out.  This was done to help show that
- *               these were not accidentally left out.  
+ *               these were not accidentally left out.
  *
  */
 
@@ -85,9 +85,9 @@ extern "C"
         uint16_t                l_arrayEntryLength = 0;
         // Up to 4 frequencies to query to get PLL data
         uint32_t                l_freqKeys[MAX_FREQ_KEYS] =  {0,0,0,0};
-        PLL_RING_ATTR_WITH_4_KEYS * l_pllArrayPtr = NULL;
-        PLL_RING_ATTR_WITH_2_KEYS * l_2KeyPllArrayPtr = NULL;
-        PLL_RING_ATTR_WITH_1_KEYS * l_1KeyPllArrayPtr = NULL;
+        const PLL_RING_ATTR_WITH_4_KEYS * l_pllArrayPtr = NULL;
+        const PLL_RING_ATTR_WITH_2_KEYS * l_2KeyPllArrayPtr = NULL;
+        const PLL_RING_ATTR_WITH_1_KEYS * l_1KeyPllArrayPtr = NULL;
 
 
         // Initialize array pointers to base EC level arrays
@@ -280,7 +280,7 @@ extern "C"
                 break;
 
             default:
-                FAPI_ERR("getPllRingAttr:  Requested attribute not supported. attrId=0x%x", i_attrId); 
+                FAPI_ERR("getPllRingAttr:  Requested attribute not supported. attrId=0x%x", i_attrId);
                 rc = FAPI_RC_INVALID_ATTR_GET;
                 break;
             };
@@ -303,20 +303,20 @@ extern "C"
                 // Is chip type Murano or Venice
                 if (l_chipType == ENUM_ATTR_NAME_MURANO) {
                     // Establish default array to S1 EC 10 array
-                    l_pllArrayPtr =  reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_AB_BNDY_PLL_DATA_array);
+                    l_pllArrayPtr =  reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_AB_BNDY_PLL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(S1_10_ATTR_PROC_AB_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                     // For EC 13 use EC specific array
                     if (l_attrDdLevel == 0x13) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(&S1_13_ATTR_PROC_AB_BNDY_PLL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_13_ATTR_PROC_AB_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_13_ATTR_PROC_AB_BNDY_PLL_DATA_array)/l_arrayEntryLength;
 		    } else if (l_attrDdLevel == 0x20) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_AB_BNDY_PLL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_AB_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_AB_BNDY_PLL_DATA_array)/l_arrayEntryLength;
 		    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_AB_BNDY_PLL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_AB_BNDY_PLL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(P8_10_ATTR_PROC_AB_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                 } else {
@@ -332,20 +332,20 @@ extern "C"
                 // Is chip type Murano or Venice
                 if (l_chipType == ENUM_ATTR_NAME_MURANO) {
                     // Establish default array to S1 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(S1_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
                     // For EC 13 use EC specific array
                     if (l_attrDdLevel == 0x13) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
                         l_arySize = sizeof(S1_13_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
 		    } else if (l_attrDdLevel == 0x20) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
 		    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(P8_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
                 } else {
@@ -362,20 +362,20 @@ extern "C"
                 // Is chip type Murano or Venice
                 if (l_chipType == ENUM_ATTR_NAME_MURANO) {
                     // Establish default array to S1 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(S1_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array)/l_arrayEntryLength;
                     // For EC 13 use EC specific array
                     if (l_attrDdLevel == 0x13) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
                         l_arySize = sizeof(S1_13_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array)/l_arrayEntryLength;
                     } else if (l_attrDdLevel == 0x20) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array)/l_arrayEntryLength;
 		    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(P8_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array)/l_arrayEntryLength;
                 } else {
@@ -392,20 +392,20 @@ extern "C"
                 // Is chip type Murano or Venice
                 if (l_chipType == ENUM_ATTR_NAME_MURANO) {
                     // Establish default array to S1 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(S1_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
                     // For EC 13 use EC specific array
                     if (l_attrDdLevel == 0x13) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
                         l_arySize = sizeof(S1_13_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
                     } else if (l_attrDdLevel == 0x20) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
                     }
                 } else if  (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(P8_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
                 } else {
@@ -422,20 +422,20 @@ extern "C"
                 // Is chip type Murano or Venice
                 if (l_chipType == ENUM_ATTR_NAME_MURANO) {
                     // Establish default array to S1 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(&S1_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(S1_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                     // For EC 13 use EC specific array
                     if (l_attrDdLevel == 0x13) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_13_ATTR_PROC_PCI_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                     } else if (l_attrDdLevel == 0x20) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_PCI_BNDY_PLL_DATA_array)/l_arrayEntryLength;
 		    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(P8_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                 } else {
@@ -453,20 +453,20 @@ extern "C"
                 if (l_chipType == ENUM_ATTR_NAME_MURANO) {
                     // Establish default array to S1 EC 10 array
                     l_pllArrayPtr =
-                    reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
+                    reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(S1_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                     // For EC 13 use EC specific array
                     if (l_attrDdLevel == 0x13) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&S1_13_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_13_ATTR_PROC_PERV_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                     } else if (l_attrDdLevel == 0x20) {
-                        l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array)/l_arrayEntryLength;
 		    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
                     // Save # of array entries
                     l_arySize = sizeof(P8_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                 } else {
@@ -481,12 +481,12 @@ extern "C"
             case fapi::ATTR_MEMB_TP_BNDY_PLL_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_DATA_array);
                 // Save # of array entries
                 l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_DATA_array)/l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -494,12 +494,12 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array);
                 // Save # of array entries
                 l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -507,12 +507,12 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA_array);
                 // Save # of array entries
                 l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA_array)/l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -520,12 +520,12 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA_array);
                 // Save # of array entries
                 l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA_array)/l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -533,12 +533,12 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA_array);
                 // Save # of array entries
                 l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA_array)/l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -546,12 +546,12 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA_array);
                 // Save # of array entries
                 l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA_array)/l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -559,12 +559,12 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA_array);
                 // Save # of array entries
                 l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA_array)/l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -572,12 +572,12 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA_array);
                 // Save # of array entries
                 l_arySize = sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA_array)/l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -585,14 +585,14 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA_array);
                 // Save # of array entries
                 l_arySize =
                   sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA_array)
                   /l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -600,14 +600,14 @@ extern "C"
 //            case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_FLUSH:
             case fapi::ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH:
                 // Establish default array to Centaur EC 10 array
-                l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_array);
+                l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_array);
                 // Save # of array entries
                 l_arySize =
                   sizeof(Centaur_10_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_array)
                   /l_arrayEntryLength;
                 if (l_attrDdLevel == 0x20) {
                     // Reestablish default array to Centaur EC 20 array
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_array);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_array);
                     l_arySize = sizeof(Centaur_20_ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA_array)/l_arrayEntryLength;
 		}
                 break;
@@ -649,7 +649,7 @@ extern "C"
                     // Move to next entry
                     uint64_t l_rawAddr = reinterpret_cast<uint64_t>(l_pllArrayPtr);
                     l_rawAddr += l_arrayEntryLength;
-                    l_pllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_4_KEYS*>(l_rawAddr);
+                    l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(l_rawAddr);
                 }
             }
             if (l_foundMatch) {
@@ -658,8 +658,8 @@ extern "C"
                 // of keys and attribute type (i.e. data, flush, length)
                 // 1. Set return attr value
 
-                l_1KeyPllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_1_KEYS *>(l_pllArrayPtr);
-                l_2KeyPllArrayPtr = reinterpret_cast<PLL_RING_ATTR_WITH_2_KEYS *>(l_pllArrayPtr);
+                l_1KeyPllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_1_KEYS *>(l_pllArrayPtr);
+                l_2KeyPllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_2_KEYS *>(l_pllArrayPtr);
                 switch (i_attrId)
                 {
                 case fapi::ATTR_PROC_AB_BNDY_PLL_DATA:

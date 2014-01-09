@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -21,13 +21,12 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-
-# $Id: fapiCreatePllRingAttrVals.pl,v 1.1 2013/12/05 20:31:59 mjjones Exp $
+# $Id: fapiCreatePllRingAttrVals.pl,v 1.4 2014/01/13 15:49:47 dedahle Exp $
 #
 # Purpose:  This perl script will parse HWP Attribute XML files
 # and add attribute information to a file called fapiAttributeIds.H
 #
-# Author: Kahn Evans 
+# Author: Kahn Evans
 # Last Updated: 09/16/2013
 #
 # Version: 1.0
@@ -37,7 +36,7 @@
 #  Flag  Track#    Userid    Date      Description
 #  ----  --------  --------  --------  -----------
 #                  dpeterso  09/16/13  Modified Kahn Evans/John Farrugia script to gen .H
-#                                      
+#
 #
 # End Change Log ******************************************************
 
@@ -61,8 +60,8 @@ my $VERBOSE = 0;
 my $chip = "";
 my $capChip = "";
 my $ec = "";
-my  $fileName = "fapiPllRingAttr.H"; 
- 
+my  $fileName = "fapiPllRingAttr.H";
+
 my %cronusNameToFapi = (
                         ATTR_MSS_FREQ                => "MEMB_MEM_FREQ",
                         ATTR_FREQ_X_mem                => "MEMB_NEST_FREQ",
@@ -74,7 +73,7 @@ my %cronusNameToFapi = (
                         ATTR_FREQ_PROC_REFCLOCK        => "PU_REF_CLOCK",
                         ATTR_FREQ_X                => "PU_XBUS_FREQ",
                         );
-      
+
 # Frequencies to query for each attribute type
 # NOTE: For each attribute the frequencies must be listed in alphabetical order
 my %attrToFreqs = (
@@ -220,19 +219,19 @@ while (defined($line = <ALLFILES>))
         print "Output File: $outputFile\n";
     }
 
-    while (<FILE>) 
-    {    
+    while (<FILE>)
+    {
         # Each section we are interested in begins with ===BEGIN and ends with ===END
         if (/\===BEGIN/../\===END/)
         {
             # Keep track of how many instances we have in the file and reset some sub-counters.
-            if (/\===BEGIN/) 
+            if (/\===BEGIN/)
             {
                 $count++;
                 $freqCount = 0;
                 $dataCount = 0;
                 $flushCount = 0;
-            }            
+            }
             # Determine if we are dealing with SIM or HW and store it in an array
             if (m/\#ENV\=/)
             {
@@ -254,11 +253,11 @@ while (defined($line = <ALLFILES>))
                 chomp $freq;
                 ($freqType[$count - 1][$freqCount - 1], $freqVals[$count - 1][$freqCount - 1]) = split " = ",$freq;
                 # Strip the # off the name and convert to lower case
-                $freqType[$count - 1][$freqCount - 1] =~ tr/\#//d ; 
+                $freqType[$count - 1][$freqCount - 1] =~ tr/\#//d ;
                 $freqValSize[$count - 1] = $freqCount;
 
                 # Determine if this is the first instance of a particular name
-                # If it is, then store it away in the uniq array.                     
+                # If it is, then store it away in the uniq array.
                 if ($uniqFreqTypeCount == 0)
                 {
                     $uniqFreqType[$uniqFreqTypeCount] = $freqType[$count - 1][$freqCount - 1];
@@ -404,7 +403,7 @@ while (defined($line = <ALLFILES>))
             if ($uniqAttrs[$q] eq $pllDataName[$r])
             {
                 $uniqAttrSize[$q] = $pllDataSize[$r];
-                last;               
+                last;
             }
         }
     }
@@ -416,7 +415,7 @@ while (defined($line = <ALLFILES>))
             if ($uniqFlushAttrs[$q] eq $pllFlushName[$r])
             {
                 $uniqFlushAttrSize[$q] = $pllFlushSize[$r];
-                last;               
+                last;
             }
         }
     }
@@ -460,13 +459,13 @@ while (defined($line = <ALLFILES>))
             $attr_prefix = $1;
             $y = scalar @{$attrToFreqs{$attr_prefix}};
         }
-        print OUTFILE "\n" . "PLL_RING_ATTR_WITH_" . $y . "_KEYS $capChip" . "_" . $ec . "_" . "$uniqAttrs[$x]_array [] = {\n";
+        print OUTFILE "\n" . "const PLL_RING_ATTR_WITH_" . $y . "_KEYS $capChip" . "_" . $ec . "_" . "$uniqAttrs[$x]_array [] = {\n";
 
-        for (my $y=0 ; $y < $count; $y++) {    
+        for (my $y=0 ; $y < $count; $y++) {
             if ($pllDataName[$y] eq $uniqAttrs[$x])
-            {            
+            {
                 if ($envType[$y] eq "HW")
-                {                
+                {
                     #This attribute has HW values.
                     $isDefHw = 1;
                     if ($firstAttr == 1)
@@ -525,7 +524,7 @@ while (defined($line = <ALLFILES>))
                 # 1.  No frequency values
                 # 2.  Only one set of values per attribute
                 elsif ($envType[$y] eq "SIM")
-                {                
+                {
                     $isDefSim = 1;
                     $simString = "            \{        // Entry 0\n";
                     %freqHash = ();
@@ -540,7 +539,7 @@ while (defined($line = <ALLFILES>))
                         for (my $freqIdx = 0; $freqIdx <= $#{$attrToFreqs{$attr_prefix}}; $freqIdx++)
                         {
                             # Frequency is supported for this attribute
-                            #                                if ($attrToFreqs{$attr_prefix}[$freqIdx] eq $cronusNameToFapi{$freq}) { 
+                            #                                if ($attrToFreqs{$attr_prefix}[$freqIdx] eq $cronusNameToFapi{$freq}) {
                             $simString = $simString . "            $freqHash{$cronusNameToFapi{$attrToFreqs{$attr_prefix}[$freqIdx]}},   \t// $attrToFreqs{$attr_prefix}[$freqIdx] = $cronusNameToFapi{$attrToFreqs{$attr_prefix}[$freqIdx]} \n";
                         }
                     }
@@ -606,7 +605,7 @@ while (defined($line = <ALLFILES>))
     } # end for loop over uniq attributes
 
     if ($VERBOSE)
-    { 
+    {
         print "Number of sections in file: $count \n";
         print "Number of Freqs: @freqValSize \n";
         print "Number of Data Vals: @pllDataSize \n";
@@ -620,8 +619,8 @@ while (defined($line = <ALLFILES>))
         print "Number of Uniq Attrs: $uniqAttrCount \n";
         print "Number of Uniq Flush Attrs: $uniqFlushAttrCount \n";
 
-        print "envType: @envType \n \n"; 
-        print "pllDataName: @pllDataName \n \n"; 
+        print "envType: @envType \n \n";
+        print "pllDataName: @pllDataName \n \n";
         print "pllFlushName: @pllFlushName \n \n";
 
         my $item1, my $item2;
@@ -630,7 +629,7 @@ while (defined($line = <ALLFILES>))
         {
             foreach $item2 (@{$item1})
             {
-                print "$item2 ";  
+                print "$item2 ";
             }
             print "\n";
         }
@@ -639,7 +638,7 @@ while (defined($line = <ALLFILES>))
         {
             foreach $item2 (@{$item1})
             {
-                print "$item2 ";  
+                print "$item2 ";
             }
             print "\n";
         }
