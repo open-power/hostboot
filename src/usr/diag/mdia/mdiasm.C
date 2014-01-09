@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -674,7 +674,8 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
     // uint64_t timeout = i_wfp.memSize / 1024; // TODO RTC 47590
-    uint64_t timeout = 60000000000;
+    // TODO RTC 47590 temporarily double the timeout to 120 secs
+    uint64_t timeout = 120000000000;
     errlHndl_t err = NULL;
 
     uint64_t stopCondition =
