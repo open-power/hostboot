@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -233,23 +233,20 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
             break;
 
-        if ( NULL == mcsChip )
-        {
-            PRDF_ERR( PRDF_FUNC"CenMembufDataBundle::getMcsChip() failed" );
-            o_rc = FAIL; break;
-        }
+        // MCIFIR[31] is not always reliable if the unit CS originated on the
+        // Centaur. This is due to packets not getting forwarded to the MCS.
+        // Instead, check for non-zero GLOBAL_CS_FIR.
 
-        // Check MCIFIR[31] for presence of Centaur checkstop
-        SCAN_COMM_REGISTER_CLASS * fir = mcsChip->getRegister("MCIFIR");
+        SCAN_COMM_REGISTER_CLASS * fir = i_mbChip->getRegister("GLOBAL_CS_FIR");
         o_rc = fir->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to read MCIFIR on 0x%08x",
-                      mcsChip->GetId() );
+            PRDF_ERR( PRDF_FUNC"Failed to read GLOBAL_CS_FIR on 0x%08x",
+                      i_mbChip->GetId() );
             break;
         }
 
-        if ( !fir->IsBitSet(31) ) break; // No unit checkstop
+        if ( fir->BitStringIsZero() ) break; // No unit checkstop
 
         // Set Unit checkstop flag
         i_sc.service_data->SetFlag(ServiceDataCollector::UNIT_CS);

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -28,6 +28,8 @@
 rule TpChipletFir
 {
   CHECK_STOP:
+     (TP_CHIPLET_CS_FIR       & `1000000000000000`) & ~TP_CHIPLET_FIR_MASK;
+  UNIT_CS:
      (TP_CHIPLET_CS_FIR       & `1000000000000000`) & ~TP_CHIPLET_FIR_MASK;
   RECOVERABLE:
     ((TP_CHIPLET_RE_FIR >> 2) & `1000000000000000`) & ~TP_CHIPLET_FIR_MASK;
