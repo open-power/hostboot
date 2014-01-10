@@ -88,7 +88,18 @@ public:
         GARD_NOT_APPLIED,   //  not applied for other reason
     };
 
-    // enums to indicated non-error reason for a targets deconfiguration.
+    // enums to indicate to deconfigureTarget() specific RUNTIME behaviors
+    enum DeconfigureRuntime
+    {
+        NOT_AT_RUNTIME,     // non-runtime behavior - if the system is at
+                            // runtime, no deconfigs happen;
+
+                            // runtime behaviors:
+        FULLY_AT_RUNTIME,   // - functional=false,dumpfunctional=false
+        DUMP_AT_RUNTIME,    // - functional=false,dumpfunctional=true
+    };
+
+    // enums to indicate non-error reason for a targets deconfiguration.
     //  used in TARGETING::HwasSate.deconfiguredByEid
     enum DeconfiguredByReason
     {
@@ -224,12 +235,14 @@ public:
      *
      * @param[in] i_target   Reference to Target to deconfigure.
      * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
-     * @param[in] i_evenAtRunTime Deconfigure even if at RunTime
+     * @param[in] i_runTimeDeconfigRule Deconfigure Runtime options -
+     *              default not at runtime
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t deconfigureTarget(TARGETING::Target & i_target,
-                                 const uint32_t i_errlEid,
-                                 bool i_evenAtRunTime = false);
+                           const uint32_t i_errlEid,
+                           const DeconfigureRuntime i_runTimeDeconfigRule =
+                                    NOT_AT_RUNTIME);
 
     /**
      * @brief Registers a Deferred Deconfigure
@@ -385,11 +398,13 @@ private:
      *
      * @param[in] i_target   Reference to base Target.
      * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
-     * @param[in] i_atRunTime if true, at runtime - bypass some associations
+     * @param[in] i_runTimeDeconfigRule Deconfigure Runtime options -
+     *              default not at runtime
      */
     void _deconfigureByAssoc(TARGETING::Target & i_target,
                              const uint32_t i_errlEid,
-                             bool i_atRunTime = false);
+                             const DeconfigureRuntime i_runTimeDeconfigRule =
+                                    NOT_AT_RUNTIME);
 
     /**
      * @brief Deconfigures a Target.
@@ -399,9 +414,13 @@ private:
      *
      * @param[in] i_target   Reference to Target to deconfigure.
      * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
+     * @param[in] i_runTimeDeconfigRule Deconfigure Runtime options -
+     *              default not at runtime
      */
     void _deconfigureTarget(TARGETING::Target & i_target,
-                            const uint32_t i_errlEid);
+                            const uint32_t i_errlEid,
+                            const DeconfigureRuntime i_runTimeDeconfigRule =
+                                    NOT_AT_RUNTIME);
 
     /**
      * @brief Performs Deconfigure Actions.

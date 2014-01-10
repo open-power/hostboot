@@ -126,6 +126,7 @@ errlHndl_t discoverTargets()
         hwasState.poweredOn             = false;
         hwasState.present               = false;
         hwasState.functional            = false;
+        hwasState.dumpfunctional        = false;
         target->setAttr<ATTR_HWAS_STATE>(hwasState);
     }
 
@@ -226,8 +227,7 @@ errlHndl_t discoverTargets()
                     errlCommit(errl, HWAS_COMP_ID);
                     // errl is now NULL
                 }
-                else
-                if (pTarget->getAttr<ATTR_TYPE>() == TYPE_PROC)
+                else if (pTarget->getAttr<ATTR_TYPE>() == TYPE_PROC)
                 {
                     // read partialGood vector from these as well.
                     errl = platReadPartialGood(pTarget, pgData);
