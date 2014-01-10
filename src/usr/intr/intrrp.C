@@ -698,7 +698,12 @@ errlHndl_t IntrRp::getPsiIRSN(TARGETING::Target * i_target,
             break;
         }
 
-        o_irsn = reg.irsn & reg.mask;
+        //only calc IRSN if downstream interrupts are enabled
+        o_irsn = 0;
+        if(reg.die == 1)  //downstream interrupt enable = 1
+        {
+            o_irsn = reg.irsn & reg.mask;
+        }
     }while(0);
 
 
@@ -727,16 +732,20 @@ errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target,
             break;
         }
 
-        uint32_t l_mask = ((static_cast<uint32_t>(reg >> NX_IRSN_MASK_SHIFT)
-                    & NX_IRSN_MASK_MASK) | NX_IRSN_UPPER_MASK);
+        //only calc IRSN if downstream interrupts are enabled
+        o_irsn = 0;
+        if(reg &(1ull << (63-NX_BUID_ENABLE)))  //reg has NX_BUID_ENABLE set
+        {
+            uint32_t l_mask = ((static_cast<uint32_t>(reg >> NX_IRSN_MASK_SHIFT)
+                                & NX_IRSN_MASK_MASK) | NX_IRSN_UPPER_MASK);
 
-        o_irsn = ((static_cast<uint32_t>(reg >> NX_IRSN_COMP_SHIFT)
-                   & IRSN_COMP_MASK) & l_mask);
+            o_irsn = ((static_cast<uint32_t>(reg >> NX_IRSN_COMP_SHIFT)
+                       & IRSN_COMP_MASK) & l_mask);
 
-        //To get the number of interrupts, we need to "count" the 0 bits
-        //cheat by extending mask to FFF8 + mask, then invert and add 1
-        o_num = (~((~IRSN_COMP_MASK) | l_mask)) +1;
-
+            //To get the number of interrupts, we need to "count" the 0 bits
+            //cheat by extending mask to FFF8 + mask, then invert and add 1
+            o_num = (~((~IRSN_COMP_MASK) | l_mask)) +1;
+        }
     }while(0);
 
 
@@ -755,6 +764,7 @@ errlHndl_t IntrRp::getPcieIRSNs(TARGETING::Target * i_target,
 
     uint64_t reg = 0;
     uint64_t mask = 0;
+    uint64_t bar = 0;
 
     size_t scom_len = sizeof(uint64_t);
 
@@ -792,16 +802,34 @@ errlHndl_t IntrRp::getPcieIRSNs(TARGETING::Target * i_target,
                 break;
             }
 
-            uint64_t l_irsn64 = reg & mask;
-            l_irsn64 >>=PE_IRSN_SHIFT;
-            uint32_t l_irsn =  l_irsn64;
+            scom_len = sizeof(uint64_t);
+            err = deviceRead
+              (
+               i_target,
+               &bar,
+               scom_len,
+               DEVICE_SCOM_ADDRESS(cv_PE_BAR_SCOM_LIST[i])
+               );
+            if(err)
+            {
+                break;
+            }
 
-            //To get the number of interrupts, we need to "count" the 0 bits
-            //cheat by extending mask to FFF8 + mask, then invert and add 1
-            mask >>=PE_IRSN_SHIFT;
-            uint32_t l_intNum = mask;
-            l_intNum = (~((~IRSN_COMP_MASK) | l_intNum)) +1;
+            //only calc IRSN if downstream interrupts are enabled
+            uint32_t l_irsn  = 0;
+            uint32_t l_intNum = 0;
+            if(bar & (1ull << (63-PE_IRSN_DOWNSTREAM)))
+            {
+                uint64_t l_irsn64 = reg & mask;
+                l_irsn64 >>=PE_IRSN_SHIFT;
+                l_irsn =  l_irsn64;
 
+                //To get the number of interrupts, we need to "count" the 0 bits
+                //cheat by extending mask to FFF8 + mask, then invert and add 1
+                mask >>=PE_IRSN_SHIFT;
+                l_intNum = mask;
+                l_intNum = (~((~IRSN_COMP_MASK) | l_intNum)) +1;
+            }
             TRACFCOMP(g_trac_intr,"PE_ISRN[0x%08x] PE%d intNum: 0x%x  ",
                       l_irsn, i, l_intNum);
             if(l_irsn != 0x0)
