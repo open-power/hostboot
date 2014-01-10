@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,36 +20,36 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pba_firinit.C,v 1.16 2013/08/26 12:44:34 stillgs Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pba_firinit.C,v $
+// $Id: p8_pm_pba_firinit.C,v 1.17 2014/01/06 18:29:14 stillgs Exp $
+// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pba_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Pradeep CN         Email: pradeepcn@in.ibm.com
-// *!
-// *! General Description:
-// *!
-// *!   The purpose of this procedure is to ......
-// *!
-// *!   High-level procedure flow:
-// *!     o Set the particluar bits of databuffers action0 , action 1 and mask for the correspoding actions via MACROS
-// *!     o Write the action1 , actionn0 and mask registers of FIRs
-// *!     o
-// *!     o
-// *!     o
-// *!     o
-// *!     o Check if all went well
-// *!     o   If so celebrate
-// *!     o   Else write logs, set bad return code
-// *!
-// *!
-// *! Procedure Prereq:
-// *!   o System clocks are running
-// *!
+// *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
+/// \file p8_pm_pba_firinit.C
+/// \brief Configure the PBA FIR
+///
+/// \verbatim
+/// 
+///   if RESET
+///       masks all bits of the FIR k
+///   
+///   else
+///       using macros defined in p8_pm.H to establish the respective 
+///       mask/action bits in the relevant ecmdbuffer for one of the following
+///       settings:
+///           a) Masked
+///           b) Recoverable Attention
+///           c) Checkstop
+/// 
+///  Procedure Prereq:
+///    o System clocks are running
+/// 
+/// \endverbatim
 //------------------------------------------------------------------------------
-
 
 
 // ----------------------------------------------------------------------
@@ -66,14 +66,6 @@ using namespace fapi;
 // ----------------------------------------------------------------------
 // Constant definitions
 // ----------------------------------------------------------------------
-
-
-    // \todo move these to p8_scom_addresses after testing
-  //   CONST_UINT64_T( PBA_FIR_ACTION1_0x02010847        , ULL(0x02010847)) ;
-  //   CONST_UINT64_T( PBA_FIR_ACTION0_0x02010846        , ULL(0x02010846)) ;
-   CONST_UINT64_T( PBA_FIR_MASK_WR_0x02010843        , ULL(0x02010843)) ;
-   CONST_UINT64_T( PBA_FIR_MASK_WR_AND_0x02010844        , ULL(0x02010844)) ;
-   CONST_UINT64_T( PBA_FIR_MASK_WR_OR_0x02010845        , ULL(0x02010845)) ;
 
 // ----------------------------------------------------------------------
 // Global variables
@@ -122,10 +114,10 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             //--******************************************************************************
             //-- PBA_FIR_MASK (W0_OR_45) (WR_43) (WO_AND_44)
             //--******************************************************************************
-            rc = fapiPutScom(i_target, PBA_FIR_MASK_WR_0x02010843, mask );
+            rc = fapiPutScom(i_target, PBA_FIR_MASK_0x02010843, mask );
             if (rc)
             {
-	            FAPI_ERR("fapiPutScom(PBA_FIR_MASK_WR_0x02010843) failed.");
+                FAPI_ERR("fapiPutScom(PBA_FIR_MASK_0x02010843) failed.");
                 break;
             }
         }
@@ -150,7 +142,7 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             SET_RECOV_ATTN  (PBAFIR_OCI_SLAVE_INIT    ) ; // 6   PBAFIR_OCI_SLAVE_INIT
             SET_RECOV_ATTN  (PBAFIR_OCI_WRPAR_ERR     ) ; // 7   PBAFIR_OCI_WRPAR_ERR
             SET_RECOV_ATTN  (PBAFIR_OCI_REREQTO       ) ; // 8   PBAFIR_OCI_REREQTO
-            SET_RECOV_ATTN  (PBAFIR_PB_UNEXPCRESP     ) ; // 9   PBAFIR_PB_UNEXPCRESP
+            SET_FIR_MASKED  (PBAFIR_PB_UNEXPCRESP     ) ; // 9   PBAFIR_PB_UNEXPCRESP
             SET_RECOV_ATTN  (PBAFIR_PB_UNEXPDATA      ) ; // 10  PBAFIR_PB_UNEXPDATA
             SET_RECOV_ATTN  (PBAFIR_PB_PARITY_ERR     ) ; // 11  PBAFIR_PB_PARITY_ERR
             SET_RECOV_ATTN  (PBAFIR_PB_WRADRERR_FW    ) ; // 12  PBAFIR_PB_WRADRERR_FW
@@ -215,7 +207,7 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             rc = fapiPutScom(i_target, PBA_FIR_ACTION0_0x02010846, action_0 );
             if (rc)
             {
-	            FAPI_ERR("fapiPutScom(PBA_FIR_ACTION0_0x02010846) failed.");
+                FAPI_ERR("fapiPutScom(PBA_FIR_ACTION0_0x02010846) failed.");
                 break;
             }
 
@@ -226,17 +218,17 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             rc = fapiPutScom(i_target, PBA_FIR_ACTION1_0x02010847, action_1 );
             if (rc)
             {
-	            FAPI_ERR("fapiPutScom(PBA_FIR_ACTION1_0x02010847) failed.");
+                FAPI_ERR("fapiPutScom(PBA_FIR_ACTION1_0x02010847) failed.");
                 break;
             }
 
             //--******************************************************************************
             //-- PBA_FIR_MASK (W0_OR_45) (WR_43) (WO_AND_44)
             //--******************************************************************************
-            rc = fapiPutScom(i_target, PBA_FIR_MASK_WR_0x02010843, mask );
+            rc = fapiPutScom(i_target, PBA_FIR_MASK_0x02010843, mask );
             if (rc)
             {
-	            FAPI_ERR("fapiPutScom(PBA_FIR_MASK_WR_0x02010843) failed.");
+                FAPI_ERR("fapiPutScom(PBA_FIR_MASK_0x02010843) failed.");
                  break;
             }
         } // Mode
