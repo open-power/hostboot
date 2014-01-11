@@ -2359,9 +2359,11 @@ sub generate_pcies
         $max_index = 3;
     }
 
+    my $max_pcie = $max_index+1;
+
     for my $i ( 0 .. $max_index )
     {
-        generate_a_pcie( $proc, $i, ($ordinalId*3)+$i );
+        generate_a_pcie( $proc, $i, $max_pcie, ($ordinalId*$max_pcie)+$i );
     }
 }
 
@@ -2398,8 +2400,9 @@ sub generate_phb
 
 sub generate_a_pcie
 {
-    my ($proc, $phb, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X10%04X",${node},$phb+$proc*3+${node}*8*3);
+    my ($proc, $phb, $max_pcie, $ordinalId) = @_;
+    my $uidstr = sprintf("0x%02X10%04X",${node},$phb+$proc*$max_pcie+
+                                        ${node}*8*$max_pcie);
 
     # Get the PHB info
     if ($phbInit == 0)
