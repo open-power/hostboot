@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdPhaseRotatorData.C,v 1.4 2013/06/12 21:12:49 whs Exp $
+// $Id: getMBvpdPhaseRotatorData.C,v 1.7 2014/01/11 13:35:43 whs Exp $
 /**
  *  @file getMBvpdPhaseRotatorData.C
  *
@@ -33,6 +33,7 @@
 //  fapi support
 #include    <fapi.H>
 #include    <getMBvpdPhaseRotatorData.H>
+#include    <getMBvpdVersion.H>
 
 extern "C"
 {
@@ -105,35 +106,22 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
         // Check if the old vpd layout is different for this attr
         if (PHASE_ROT_CHK60 & i_attr) // need to check vpd version for this attr
         {
-            uint16_t l_vpdVersion = 0;
-            uint32_t l_bufSize = sizeof(l_vpdVersion);
-            const uint16_t VPD_VERSION_V60=0x3130; // Version 6.0 is ascii "10"
+            uint32_t l_vpdVersion = 0;
+            const uint32_t VPD_VERSION_V60=0x3130; // Version 6.0 is ascii "10"
 
-            // get vpd version from record VINI keyword VZ
-            l_fapirc = fapiGetMBvpdField(fapi::MBVPD_RECORD_VINI,
-                                     fapi::MBVPD_KEYWORD_VZ,
-                                     l_mbTarget,
-                                     reinterpret_cast<uint8_t *>(&l_vpdVersion),
-                                     l_bufSize);
+            // get vpd version
+            FAPI_EXEC_HWP(l_fapirc,
+                          getMBvpdVersion,
+                          i_mbaTarget,
+                          l_vpdVersion);
             if (l_fapirc)
             {
-                FAPI_ERR("getMBvpdPhaseRotatorData: Read of VZ keyword failed");
+                FAPI_ERR("getMBvpdPhaseRotatorData: getMBvpdVersion failed");
                 break;  //  break out with fapirc
             }
+
             FAPI_DBG("getMBvpdPhaseRotatorData: vpd version=0x%08x",
                 l_vpdVersion);
-
-            // Check that sufficient size was returned.
-            if (l_bufSize < sizeof(l_vpdVersion) )
-            {
-                FAPI_ERR("getMBvpdPhaseRotatorData:"
-                     " less keyword data returned than expected %d < %d",
-                       l_bufSize, sizeof(l_vpdVersion));
-                const uint32_t & KEYWORD = sizeof(l_vpdVersion);
-                const uint32_t & RETURNED_SIZE = l_bufSize;
-                FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
-                break;  //  break out with fapirc
-            }
 
             // Check if work around needed
             if (l_vpdVersion < VPD_VERSION_V60)
