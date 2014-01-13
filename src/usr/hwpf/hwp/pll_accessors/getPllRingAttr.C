@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getPllRingAttr.C,v 1.2 2014/01/10 19:37:13 dedahle Exp $
+// $Id: getPllRingAttr.C,v 1.3 2014/01/13 20:42:17 thi Exp $
 /**
  *  @file getPllRingAttr.C
  *
@@ -313,6 +313,9 @@ extern "C"
 		    } else if (l_attrDdLevel == 0x20) {
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_AB_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_AB_BNDY_PLL_DATA_array)/l_arrayEntryLength;
+		    } else if (l_attrDdLevel == 0x21) {
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_21_ATTR_PROC_AB_BNDY_PLL_DATA_array);
+                        l_arySize = sizeof(S1_21_ATTR_PROC_AB_BNDY_PLL_DATA_array)/l_arrayEntryLength;
 		    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
@@ -342,6 +345,9 @@ extern "C"
 		    } else if (l_attrDdLevel == 0x20) {
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
+		    } else if (l_attrDdLevel == 0x21) {
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_21_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
+                        l_arySize = sizeof(S1_21_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
 		    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
@@ -372,7 +378,10 @@ extern "C"
                     } else if (l_attrDdLevel == 0x20) {
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array)/l_arrayEntryLength;
-		    }
+                    } else if (l_attrDdLevel == 0x21) {
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_21_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
+                        l_arySize = sizeof(S1_21_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array)/l_arrayEntryLength;
+                    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
                     l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
@@ -402,6 +411,9 @@ extern "C"
                     } else if (l_attrDdLevel == 0x20) {
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
+                    } else if (l_attrDdLevel == 0x21) {
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_21_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
+                        l_arySize = sizeof(S1_21_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array)/l_arrayEntryLength;
                     }
                 } else if  (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
@@ -432,7 +444,10 @@ extern "C"
                     } else if (l_attrDdLevel == 0x20) {
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_PCI_BNDY_PLL_DATA_array)/l_arrayEntryLength;
-		    }
+                    } else if (l_attrDdLevel == 0x21) {
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_21_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
+                        l_arySize = sizeof(S1_21_ATTR_PROC_PCI_BNDY_PLL_DATA_array)/l_arrayEntryLength;
+                    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
                     l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
@@ -463,7 +478,10 @@ extern "C"
                     } else if (l_attrDdLevel == 0x20) {
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(S1_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array)/l_arrayEntryLength;
-		    }
+                    } else if (l_attrDdLevel == 0x21) {
+                        l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS*>(&S1_21_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
+                        l_arySize = sizeof(S1_21_ATTR_PROC_PERV_BNDY_PLL_DATA_array)/l_arrayEntryLength;
+                    }
                 } else if (l_chipType == ENUM_ATTR_NAME_VENICE) {
                     // Reestablish default array to P8 EC 10 array
                     l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(&P8_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
