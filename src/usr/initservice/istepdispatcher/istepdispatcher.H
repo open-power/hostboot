@@ -163,6 +163,13 @@ public:
     void getIstepInfo ( uint8_t & o_iStep,
                         uint8_t & o_subStep );
 
+    /**
+     * @brief This function determines if a shutdown was requested or not
+     *
+     * @return bool - true if shutdown requested, false if not
+     */
+    bool isShutdownRequested();
+
 protected:
 
     /**

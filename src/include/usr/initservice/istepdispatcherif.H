@@ -58,6 +58,14 @@ errlHndl_t sendSyncPoint ( void );
  */
 errlHndl_t sendIstepCompleteMsg ( void );
 
+/**
+ * @brief This function is to be used by external code to check whether
+ *      a shutdown has been requested
+ *
+ * @return bool - true if shutdown requested, false if not
+ */
+bool isShutdownRequested ( void );
+
 }
 
 #endif

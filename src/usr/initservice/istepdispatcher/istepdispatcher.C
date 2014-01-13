@@ -1079,6 +1079,21 @@ void IStepDispatcher::iStepBreakPoint(uint32_t i_info)
 }
 
 // ----------------------------------------------------------------------------
+// IStepDispatcher::isShutdownRequested()
+// ----------------------------------------------------------------------------
+bool IStepDispatcher::isShutdownRequested()
+{
+    TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::isShutdownRequested");
+
+    mutex_lock(&iv_mutex);
+    bool isShutdownRequested = iv_shutdown;
+    mutex_unlock(&iv_mutex);
+
+    TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::isShutdownRequested");
+    return isShutdownRequested;
+}
+
+// ----------------------------------------------------------------------------
 // IStepDispatcher::handleIStepRequestMsg()
 // ----------------------------------------------------------------------------
 void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
@@ -1462,6 +1477,11 @@ errlHndl_t sendIstepCompleteMsg()
 void iStepBreakPoint(uint32_t i_info)
 {
     IStepDispatcher::getTheInstance().iStepBreakPoint( i_info );
+}
+
+bool isShutdownRequested()
+{
+    return IStepDispatcher::getTheInstance().isShutdownRequested();
 }
 
 // ----------------------------------------------------------------------------
