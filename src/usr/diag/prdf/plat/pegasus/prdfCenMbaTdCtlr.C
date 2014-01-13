@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -1301,7 +1301,9 @@ int32_t CenMbaTdCtlr::mnfgCeSetup()
     {
         const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
         SCAN_COMM_REGISTER_CLASS * mbstr = iv_membChip->getRegister( reg_str );
-        o_rc = mbstr->Read();
+        // MBSTR's content could be modified from cleanupCmd()
+        // so we need to refresh
+        o_rc = mbstr->ForceRead();
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
