@@ -148,10 +148,11 @@ namespace KernelMisc
 
                 // Find the start_payload_data_area on the master node
                 uint64_t hrmor_base = KernelIpc::ipc_data_area.hrmor_base;
-                uint64_t this_node =
-                    getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+                uint64_t this_hb_instance =
+                    l_lowestPIR/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
 
-                uint64_t hrmor_offset = getHRMOR() - (this_node * hrmor_base);
+                uint64_t hrmor_offset =
+                    getHRMOR() - (this_hb_instance * hrmor_base);
 
                 uint64_t dest_hrmor =
                     (g_masterHBInstance * hrmor_base) + hrmor_offset;
