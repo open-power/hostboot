@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -263,7 +263,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
                           " restored Tx lane %d, of %s, of endpoint %s",
-                          l_endp1_txFaillanes[l_count],
+                          l_endp2_txFaillanes[l_count],
                           l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
                           "A-Bus", l_fapi_endp2_target.toEcmdString());
             }
