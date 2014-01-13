@@ -202,14 +202,18 @@
         <name>PORE</name>
         <value>31</value>
     </enumerator>
+    <enumerator>
+        <name>PCIESWITCH</name>
+        <value>32</value>
+    </enumerator>
     <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
     <enumerator>
         <name>TEST_FAIL</name>
-        <value>32</value>
+        <value>33</value>
     </enumerator>
     <enumerator>
         <name>LAST_IN_RANGE</name>
-        <value>33</value>
+        <value>34</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>

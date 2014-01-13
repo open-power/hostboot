@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -362,6 +362,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "REFClockEndPoint";
         case TYPE_PCICLKENDPT:
             return "PCIClockEndPoint";
+        case TYPE_PCIESWITCH:
+             return "PCIESWITCH";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:
