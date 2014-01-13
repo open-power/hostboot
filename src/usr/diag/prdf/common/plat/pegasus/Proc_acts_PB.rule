@@ -2589,29 +2589,29 @@ group gIomcFir_0 filter singlebit
     (IomcFir_0, bit(3|4|5|6|7)) ? defaultMaskedError;
 
     /** IOMCFIR_0[8]
-     *  MCS0 Training Error
+     *  MCS2 Training Error
      */
     (IomcFir_0, bit(8)) ? defaultMaskedError;
 
     /** IOMCFIR_0[9]
-     *  MCS0 Spare Deployed
+     *  MCS2 Spare Deployed
      */
-    (IomcFir_0, bit(9)) ? spareDeployed_dmiBus0;
+    (IomcFir_0, bit(9)) ? spareDeployed_dmiBus2;
 
     /** IOMCFIR_0[10]
-     *  MCS0 Max Spares Exceeded
+     *  MCS2 Max Spares Exceeded
      */
-    (IomcFir_0, bit(10)) ? maxSparesExceeded_dmiBus0;
+    (IomcFir_0, bit(10)) ? maxSparesExceeded_dmiBus2;
 
     /** IOMCFIR_0[11]
-     *  MCS0 Recalibration or Dynamic Repair Error
+     *  MCS2 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_0, bit(11)) ? calloutDmiBus0Th1;
+    (IomcFir_0, bit(11)) ? calloutDmiBus2Th1;
 
     /** IOMCFIR_0[12]
-     *  MCS0 Too Many Bus Errors
+     *  MCS2 Too Many Bus Errors
      */
-    (IomcFir_0, bit(12)) ? thresholdAndMask_dmiBus0;
+    (IomcFir_0, bit(12)) ? thresholdAndMask_dmiBus2;
 
     /** IOMCFIR_0[13:15]
      *  Reserved
@@ -2619,29 +2619,29 @@ group gIomcFir_0 filter singlebit
     (IomcFir_0, bit(13|14|15)) ? defaultMaskedError;
 
     /** IOMCFIR_0[16]
-     *  MCS1 Training Error
+     *  MCS3 Training Error
      */
     (IomcFir_0, bit(16)) ? defaultMaskedError;
 
     /** IOMCFIR_0[17]
-     *  MCS1 Spare Deployed
+     *  MCS3 Spare Deployed
      */
-    (IomcFir_0, bit(17)) ? spareDeployed_dmiBus1;
+    (IomcFir_0, bit(17)) ? spareDeployed_dmiBus3;
 
     /** IOMCFIR_0[18]
-     *  MCS1 Max Spares Exceeded
+     *  MCS3 Max Spares Exceeded
      */
-    (IomcFir_0, bit(18)) ? maxSparesExceeded_dmiBus1;
+    (IomcFir_0, bit(18)) ? maxSparesExceeded_dmiBus3;
 
     /** IOMCFIR_0[19]
-     *  MCS1 Recalibration or Dynamic Repair Error
+     *  MCS3 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_0, bit(19)) ? calloutDmiBus1Th1;
+    (IomcFir_0, bit(19)) ? calloutDmiBus3Th1;
 
     /** IOMCFIR_0[20]
-     *  MCS1 Too Many Bus Errors
+     *  MCS3 Too Many Bus Errors
      */
-    (IomcFir_0, bit(20)) ? thresholdAndMask_dmiBus1;
+    (IomcFir_0, bit(20)) ? thresholdAndMask_dmiBus3;
 
     /** IOMCFIR_0[21:23]
      *  Reserved
@@ -2649,29 +2649,29 @@ group gIomcFir_0 filter singlebit
     (IomcFir_0, bit(21|22|23)) ? defaultMaskedError;
 
     /** IOMCFIR_0[24]
-     *  MCS2 Training Error
+     *  MCS1 Training Error
      */
     (IomcFir_0, bit(24)) ? defaultMaskedError;
 
     /** IOMCFIR_0[25]
-     *  MCS2 Spare Deployed
+     *  MCS1 Spare Deployed
      */
-    (IomcFir_0, bit(25)) ? spareDeployed_dmiBus2;
+    (IomcFir_0, bit(25)) ? spareDeployed_dmiBus1;
 
     /** IOMCFIR_0[26]
-     *  MCS2 Max Spares Exceeded
+     *  MCS1 Max Spares Exceeded
      */
-    (IomcFir_0, bit(26)) ? maxSparesExceeded_dmiBus2;
+    (IomcFir_0, bit(26)) ? maxSparesExceeded_dmiBus1;
 
     /** IOMCFIR_0[27]
-     *  MCS2 Recalibration or Dynamic Repair Error
+     *  MCS1 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_0, bit(27)) ? calloutDmiBus2Th1;
+    (IomcFir_0, bit(27)) ? calloutDmiBus1Th1;
 
     /** IOMCFIR_0[28]
-     *  MCS2 Too Many Bus Errors
+     *  MCS1 Too Many Bus Errors
      */
-    (IomcFir_0, bit(28)) ? thresholdAndMask_dmiBus2;
+    (IomcFir_0, bit(28)) ? thresholdAndMask_dmiBus1;
 
     /** IOMCFIR_0[29:31]
      *  Reserved
@@ -2679,29 +2679,29 @@ group gIomcFir_0 filter singlebit
     (IomcFir_0, bit(29|30|31)) ? defaultMaskedError;
 
     /** IOMCFIR_0[32]
-     *  MCS3 Training Error
+     *  MCS0 Training Error
      */
     (IomcFir_0, bit(32)) ? defaultMaskedError;
 
     /** IOMCFIR_0[33]
-     *  MCS3 Spare Deployed
+     *  MCS0 Spare Deployed
      */
-    (IomcFir_0, bit(33)) ? spareDeployed_dmiBus3;
+    (IomcFir_0, bit(33)) ? spareDeployed_dmiBus0;
 
     /** IOMCFIR_0[34]
-     *  MCS3 Max Spares Exceeded
+     *  MCS0 Max Spares Exceeded
      */
-    (IomcFir_0, bit(34)) ? maxSparesExceeded_dmiBus3;
+    (IomcFir_0, bit(34)) ? maxSparesExceeded_dmiBus0;
 
     /** IOMCFIR_0[35]
-     *  MCS3 Recalibration or Dynamic Repair Error
+     *  MCS0 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_0, bit(35)) ? calloutDmiBus3Th1;
+    (IomcFir_0, bit(35)) ? calloutDmiBus0Th1;
 
     /** IOMCFIR_0[36]
-     *  MCS3 Too Many Bus Errors
+     *  MCS0 Too Many Bus Errors
      */
-    (IomcFir_0, bit(36)) ? thresholdAndMask_dmiBus3;
+    (IomcFir_0, bit(36)) ? thresholdAndMask_dmiBus0;
 
     /** IOMCFIR_0[37:39]
      *  Reserved
@@ -2758,29 +2758,29 @@ group gIomcFir_1 filter singlebit
     (IomcFir_1, bit(3|4|5|6|7)) ? defaultMaskedError;
 
     /** IOMCFIR_1[8]
-     *  MCS4 Training Error
+     *  MCS6 Training Error
      */
     (IomcFir_1, bit(8)) ? defaultMaskedError;
 
     /** IOMCFIR_1[9]
-     *  MCS4 Spare Deployed
+     *  MCS6 Spare Deployed
      */
-    (IomcFir_1, bit(9)) ? spareDeployed_dmiBus4;
+    (IomcFir_1, bit(9)) ? spareDeployed_dmiBus6;
 
     /** IOMCFIR_1[10]
-     *  MCS4 Max Spares Exceeded
+     *  MCS6 Max Spares Exceeded
      */
-    (IomcFir_1, bit(10)) ? maxSparesExceeded_dmiBus4;
+    (IomcFir_1, bit(10)) ? maxSparesExceeded_dmiBus6;
 
     /** IOMCFIR_1[11]
-     *  MCS4 Recalibration or Dynamic Repair Error
+     *  MCS6 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_1, bit(11)) ? calloutDmiBus4Th1;
+    (IomcFir_1, bit(11)) ? calloutDmiBus6Th1;
 
     /** IOMCFIR_1[12]
-     *  MCS4 Too Many Bus Errors
+     *  MCS6 Too Many Bus Errors
      */
-    (IomcFir_1, bit(12)) ? thresholdAndMask_dmiBus4;
+    (IomcFir_1, bit(12)) ? thresholdAndMask_dmiBus6;
 
     /** IOMCFIR_1[13:15]
      *  Reserved
@@ -2788,29 +2788,29 @@ group gIomcFir_1 filter singlebit
     (IomcFir_1, bit(13|14|15)) ? defaultMaskedError;
 
     /** IOMCFIR_1[16]
-     *  MCS5 Training Error
+     *  MCS7 Training Error
      */
     (IomcFir_1, bit(16)) ? defaultMaskedError;
 
     /** IOMCFIR_1[17]
-     *  MCS5 Spare Deployed
+     *  MCS7 Spare Deployed
      */
-    (IomcFir_1, bit(17)) ? spareDeployed_dmiBus5;
+    (IomcFir_1, bit(17)) ? spareDeployed_dmiBus7;
 
     /** IOMCFIR_1[18]
-     *  MCS5 Max Spares Exceeded
+     *  MCS7 Max Spares Exceeded
      */
-    (IomcFir_1, bit(18)) ? maxSparesExceeded_dmiBus5;
+    (IomcFir_1, bit(18)) ? maxSparesExceeded_dmiBus7;
 
     /** IOMCFIR_1[19]
-     *  MCS5 Recalibration or Dynamic Repair Error
+     *  MCS7 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_1, bit(19)) ? calloutDmiBus5Th1;
+    (IomcFir_1, bit(19)) ? calloutDmiBus7Th1;
 
     /** IOMCFIR_1[20]
-     *  MCS5 Too Many Bus Errors
+     *  MCS7 Too Many Bus Errors
      */
-    (IomcFir_1, bit(20)) ? thresholdAndMask_dmiBus5;
+    (IomcFir_1, bit(20)) ? thresholdAndMask_dmiBus7;
 
     /** IOMCFIR_1[21:23]
      *  Reserved
@@ -2818,29 +2818,29 @@ group gIomcFir_1 filter singlebit
     (IomcFir_1, bit(21|22|23)) ? defaultMaskedError;
 
     /** IOMCFIR_1[24]
-     *  MCS6 Training Error
+     *  MCS5 Training Error
      */
     (IomcFir_1, bit(24)) ? defaultMaskedError;
 
     /** IOMCFIR_1[25]
-     *  MCS6 Spare Deployed
+     *  MCS5 Spare Deployed
      */
-    (IomcFir_1, bit(25)) ? spareDeployed_dmiBus6;
+    (IomcFir_1, bit(25)) ? spareDeployed_dmiBus5;
 
     /** IOMCFIR_1[26]
-     *  MCS6 Max Spares Exceeded
+     *  MCS5 Max Spares Exceeded
      */
-    (IomcFir_1, bit(26)) ? maxSparesExceeded_dmiBus6;
+    (IomcFir_1, bit(26)) ? maxSparesExceeded_dmiBus5;
 
     /** IOMCFIR_1[27]
-     *  MCS6 Recalibration or Dynamic Repair Error
+     *  MCS5 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_1, bit(27)) ? calloutDmiBus6Th1;
+    (IomcFir_1, bit(27)) ? calloutDmiBus5Th1;
 
     /** IOMCFIR_1[28]
-     *  MCS6 Too Many Bus Errors
+     *  MCS5 Too Many Bus Errors
      */
-    (IomcFir_1, bit(28)) ? thresholdAndMask_dmiBus6;
+    (IomcFir_1, bit(28)) ? thresholdAndMask_dmiBus5;
 
     /** IOMCFIR_1[29:31]
      *  Reserved
@@ -2848,29 +2848,29 @@ group gIomcFir_1 filter singlebit
     (IomcFir_1, bit(29|30|31)) ? defaultMaskedError;
 
     /** IOMCFIR_1[32]
-     *  MCS7 Training Error
+     *  MCS4 Training Error
      */
     (IomcFir_1, bit(32)) ? defaultMaskedError;
 
     /** IOMCFIR_1[33]
-     *  MCS7 Spare Deployed
+     *  MCS4 Spare Deployed
      */
-    (IomcFir_1, bit(33)) ? spareDeployed_dmiBus7;
+    (IomcFir_1, bit(33)) ? spareDeployed_dmiBus4;
 
     /** IOMCFIR_1[34]
-     *  MCS7 Max Spares Exceeded
+     *  MCS4 Max Spares Exceeded
      */
-    (IomcFir_1, bit(34)) ? maxSparesExceeded_dmiBus7;
+    (IomcFir_1, bit(34)) ? maxSparesExceeded_dmiBus4;
 
     /** IOMCFIR_1[35]
-     *  MCS7 Recalibration or Dynamic Repair Error
+     *  MCS4 Recalibration or Dynamic Repair Error
      */
-    (IomcFir_1, bit(35)) ? calloutDmiBus7Th1;
+    (IomcFir_1, bit(35)) ? calloutDmiBus4Th1;
 
     /** IOMCFIR_1[36]
-     *  MCS7 Too Many Bus Errors
+     *  MCS4 Too Many Bus Errors
      */
-    (IomcFir_1, bit(36)) ? thresholdAndMask_dmiBus7;
+    (IomcFir_1, bit(36)) ? thresholdAndMask_dmiBus4;
 
     /** IOMCFIR_1[37:39]
      *  Reserved
