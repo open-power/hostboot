@@ -54,6 +54,7 @@ int32_t analyzeMpIPL( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
+PRDF_PLUGIN_DEFINE( Proc, analyzeMpIPL );
 
 }//namespace Proc ends
 
