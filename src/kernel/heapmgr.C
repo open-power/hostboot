@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -119,8 +119,8 @@ void* HeapManager::_allocate(size_t i_sz)
             g_smallheap_alloc_hw = g_smallheap_allocated;
         // test_pages();
 #endif
-        crit_assert(chunk->free);
-        chunk->free = false;
+        crit_assert(chunk->free == 'F');
+        chunk->free = '\0';
         return &chunk->next;
     }
 }
@@ -197,7 +197,7 @@ void HeapManager::_free(void * i_ptr)
         __sync_sub_and_fetch(&g_smallheap_count,1);
         __sync_sub_and_fetch(&g_smallheap_allocated,bucketByteSize(chunk->bucket));
 #endif
-        crit_assert(!chunk->free);
+        crit_assert(chunk->free != 'F');
         push_bucket(chunk, chunk->bucket);
     }
 }
@@ -240,7 +240,7 @@ HeapManager::chunk_t* HeapManager::pop_bucket(size_t i_bucket)
 void HeapManager::push_bucket(chunk_t* i_chunk, size_t i_bucket)
 {
     if (i_bucket >= BUCKETS) return;
-    i_chunk->free = true;
+    i_chunk->free = 'F';
     first_chunk[i_bucket].push(i_chunk);
 }
 
@@ -330,10 +330,10 @@ void HeapManager::_coalesce()
         chunk = NULL;
         while(NULL != (chunk = first_chunk[bucket].pop()))
         {
-            kassert(chunk->free);
+            kassert(chunk->free == 'F');
 
             chunk->next = head;
-            chunk->coalesce = true;
+            chunk->coalesce = 'C';
             head = chunk;
         }
     }
@@ -354,7 +354,7 @@ void HeapManager::_coalesce()
             {
                 // This chunk might already be combined with a chunk earlier
                 // in the loop.
-                if((!chunk->coalesce) || (!chunk->free))
+                if((chunk->coalesce != 'C') || (chunk->free != 'F'))
                 {
                     break;
                 }
@@ -373,7 +373,7 @@ void HeapManager::_coalesce()
                 }
 
                 // Cannot merge if buddy is not free.
-                if ((!buddy->free) || (!buddy->coalesce))
+                if ((buddy->free != 'F') || (buddy->coalesce != 'C'))
                 {
                     break;
                 }
@@ -390,7 +390,7 @@ void HeapManager::_coalesce()
                 }
 
                 // Do merge.
-                buddy->free = buddy->coalesce = false;
+                buddy->free = '\0'; buddy->coalesce = '\0';
                 chunk->bucket = newBucket;
                 incrementChunk = false;
                 mergedChunks = true;
@@ -410,7 +410,7 @@ void HeapManager::_coalesce()
         chunk = head;
         while (NULL != chunk)
         {
-            if ((chunk->free) && (chunk->coalesce))
+            if ((chunk->free == 'F') && (chunk->coalesce == 'C'))
             {
                 chunk_t* temp = chunk->next;
                 chunk->next = newHead;
@@ -437,7 +437,7 @@ void HeapManager::_coalesce()
     {
         chunk_t * temp = chunk->next;
 
-        chunk->coalesce = false;
+        chunk->coalesce = '\0';
         push_bucket(chunk,chunk->bucket);
 
         ++cv_free_chunks;

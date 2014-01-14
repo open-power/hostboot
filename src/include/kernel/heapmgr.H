@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -134,9 +134,9 @@ class HeapManager
         {
             struct
             {
-                bool    free:1;         //!< Is chunk free
-                bool    coalesce:1;     //!< Is chunk being coalesced
-                uint64_t bucket:62;     //!< Which bucket this chunk belongs to
+                char    free:8;         //!< Is chunk free
+                char    coalesce:8;     //!< Is chunk being coalesced
+                uint64_t bucket:48;     //!< Which bucket this chunk belongs to
             } PACKED;
 
             chunk_t* next;      //!< Next chunk (for unallocated chunks only)
