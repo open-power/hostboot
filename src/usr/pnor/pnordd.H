@@ -208,8 +208,8 @@ class PnorDD
         SFC_CMDBUF_SIZE = 256,   /**< SFC Command buffer is
                                   0x100/256 bytes/0x40 words */
 
-        SFC_POLL_TIME_NS = 400000, /**< todo: RTC:62718 Find out
-                                    Max time to wait */
+        //@todo-RTC:95125 Find out Max time to wait*/
+        SFC_POLL_TIME_NS = 1000000000, /**< Max time to wait for SFC Op */
         SFC_POLL_INCR_NS = 10,     /**< minimum increment during poll */
 
     };

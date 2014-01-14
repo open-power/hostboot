@@ -233,7 +233,7 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
                               size_t& io_buflen,
                               uint64_t i_address)
 {
-    //TRACDCOMP(g_trac_pnor, "PnorDD::writeFlash(i_address=0x%llx)> ", i_address);
+    TRACFCOMP(g_trac_pnor, "PnorDD::writeFlash(i_address=0x%llx)> ", i_address);
     errlHndl_t l_err = NULL;
 
     do{
@@ -339,6 +339,7 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
     {
         io_buflen = 0;
     }
+    TRACDCOMP(g_trac_pnor,"PnorDD::writeFlash> io_buflen=%.8X",io_buflen);
 
     return l_err;
 }
@@ -376,6 +377,9 @@ PnorDD::PnorDD( PnorMode_t i_mode,
     {
         iv_vpoMode =  mmio_scratch_read(MMIO_SCRATCH_PNOR_MODE);
     }
+    //@fixme-RTC:95130
+    //Force to not be in VPO mode
+    iv_vpoMode = 0;
 
     //In the normal case we will choose the mode for the caller
     if( MODEL_UNKNOWN == iv_mode )
@@ -413,7 +417,7 @@ PnorDD::PnorDD( PnorMode_t i_mode,
         sfcInit( );
     }
 
-    TRACFCOMP(g_trac_pnor, "PnorDD::PnorDD()> Using mode %d", iv_mode);
+    TRACFCOMP(g_trac_pnor, "PnorDD::PnorDD()> Using mode %d, vpo=%d", iv_mode, iv_vpoMode);
 }
 
 /**
@@ -714,8 +718,7 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
             // want to start out incrementing by small numbers then get bigger
             //  to avoid a really tight loop in an error case so we'll increase
             //  the wait each time through
-            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
-            //nanosleep( 0, SFC_POLL_INCR_NS*(++loop) );
+            nanosleep( 0, SFC_POLL_INCR_NS*(++loop) );
             ++loop;
             poll_time += SFC_POLL_INCR_NS*loop;
         }
@@ -751,7 +754,7 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
             //@todo (RTC:37744) - Any cleanup or recovery needed?
             break;
         }
-
+        TRACDCOMP(g_trac_pnor,"pollSfcOpComplete> command took %d ns", poll_time);
 
     }while(0);
 
@@ -1544,14 +1547,14 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
         if(need_write == false)
         {
             //No write actually needed, break out here
-            TRACDCOMP(g_trac_pnor,"compareAndWriteBlock>  NO Write Needed! Exiting FUnction");
+            TRACFCOMP(g_trac_pnor,"compareAndWriteBlock>  NO Write Needed! Exiting FUnction");
             break;
         }
 
         //STEP 3: If the need to erase was detected, read out the rest of the Erase block
         if(need_erase)
         {
-            TRACDCOMP(g_trac_pnor,"compareAndWriteBlock> Need to perform Erase");
+            TRACFCOMP(g_trac_pnor,"compareAndWriteBlock> Need to perform Erase");
             //Get data before write section
             if(i_writeStart > i_blockStart)
             {
@@ -1618,6 +1621,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
         else //
         {
             //STEP 4 ALT: No erase needed, only write the parts that changed.
+            TRACFCOMP(g_trac_pnor,"compareAndWriteBlock> No erase, just writing");
 
             for(uint32_t cword = 0; cword < wordsToWrite; cword++)
             {
@@ -1654,7 +1658,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
 errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
 {
     errlHndl_t l_err = NULL;
-    TRACDCOMP(g_trac_pnor, ">>PnorDD::eraseFlash> Block 0x%.8X", i_address );
+    TRACFCOMP(g_trac_pnor, ">>PnorDD::eraseFlash> Block 0x%.8X", i_address );
 
     do {
         if( findEraseBlock(i_address) != i_address )
