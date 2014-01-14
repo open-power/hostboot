@@ -293,7 +293,7 @@ errlHndl_t IpVpdFacade::translateRecord ( ipVpdRecord i_record,
                                            0x0,
                                            true /*Add HB SW Callout*/ );
 
-            err->collectTrace( "VPD" );
+            err->collectTrace( "VPD", 256 );
             break;
         }
 
@@ -358,7 +358,7 @@ errlHndl_t IpVpdFacade::translateKeyword ( ipVpdKeyword i_keyword,
             err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                      HWAS::SRCI_PRIORITY_MED);
 
-            err->collectTrace( "VPD" );
+            err->collectTrace( "VPD", 256 );
             break;
         }
 
@@ -483,7 +483,7 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
                                  HWAS::SRCI_PRIORITY_LOW);
 
         // Add trace to the log so we know what record was being requested.
-        err->collectTrace( "VPD" );
+        err->collectTrace( "VPD", 256 );
     }
 
     // Return the offset found, after byte swapping it.
@@ -701,7 +701,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                      HWAS::SRCI_PRIORITY_LOW);
 
             // Add trace so we see what record was being compared
-            err->collectTrace( "VPD" );
+            err->collectTrace( "VPD", 256 );
 
             break;
         }
@@ -836,7 +836,7 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                                  HWAS::SRCI_PRIORITY_LOW);
 
         // Add trace so we know what Record/Keyword was missing
-        err->collectTrace( "VPD" );
+        err->collectTrace( "VPD", 256 );
     }
 
     TRACSSCOMP( g_trac_vpd,
@@ -987,7 +987,7 @@ errlHndl_t IpVpdFacade::checkBufferSize( size_t i_bufferSize,
         err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_LOW);
 
-        err->collectTrace( "VPD" );
+        err->collectTrace( "VPD", 256 );
 
     }
 

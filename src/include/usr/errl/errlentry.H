@@ -46,6 +46,7 @@
 // I n c l u d e s
 /*****************************************************************************/
 #include <stdint.h>
+#include <limits.h>
 #include <vector>
 #include <errl/hberrltypes.H>
 #include <errl/errlsctn.H>
@@ -426,12 +427,17 @@ public:
      *  @param[in]  i_name          Trace buffer name
      *  @param[in]  i_max           Size of trace to capture.
      *
+     *  @note: 'i_max = 0' implies to collect all of the trace available for
+     *         that component.  This is actually dangerous in Hostboot because
+     *         our trace buffer are not hard-limited.  The default of this
+     *         function will be 1K to keep us at a reasonable limit.
+     *
      *  @return A Boolean indication of success.  False likely means
      *  the trace buffer name given is not found. However, check the ERRL
      *  trace buffer for the cause of the failure.
      */
     bool collectTrace(const char i_name[],
-                      const uint64_t i_max = 0);
+                      const uint64_t i_max = KILOBYTE);
 
     /**
      *  @brief Remove the back trace user detail data

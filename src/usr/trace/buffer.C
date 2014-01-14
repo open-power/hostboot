@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -483,6 +483,10 @@ namespace TRACE
                         entry = entry->next;
                         continue;
                     }
+                }
+                else // This entry was too big to fit, so roll back one.
+                {
+                    entry = entry->prev;
                 }
                 break;
             }
