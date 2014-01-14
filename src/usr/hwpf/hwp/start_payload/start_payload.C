@@ -547,7 +547,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
                 break;
             }
 
-            // Load payload data in Sapphire mode when 
+            // Load payload data in Sapphire mode when
             // SP Base Services not enabled
             if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()))
             {
@@ -651,6 +651,7 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
         if(hb_images == 0)
         {
             // Single node system
+            KernelIpc::start_payload_data_area.node_count = 1;
             break;
         }
 
@@ -680,7 +681,7 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
                 {
                     ++node_count;
                 }
-            } 
+            }
         }
 
         KernelIpc::start_payload_data_area.node_count = node_count;
@@ -713,7 +714,7 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
                         break;
                     }
                 }
-            } 
+            }
         }
 
     } while(0);
