@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -248,8 +248,10 @@ void hwasErrorUpdatePlid(errlHndl_t & io_errl,
  * Else io_plid is updated with the plid used in the newly created Error Logs
  *
  * @param[io] io_plid Reference to plid.
+ * @param[in] i_node  node target to restrict hw check
  */
-void platCheckMinimumHardware(uint32_t & io_plid);
+void platCheckMinimumHardware(uint32_t & io_plid,
+                            const TARGETING::ConstTargetHandle_t i_node = NULL);
 
 } // namespace HWAS
 

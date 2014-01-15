@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -431,12 +431,28 @@ errlHndl_t hwasChangeDetection()
 
 //******************************************************************************
 //  platCheckMinimumHardware()
-//      Don't forget to add a procedure callout and update the common plid
-//      if you add something here.
 //******************************************************************************
-void platCheckMinimumHardware(uint32_t & io_plid)
+void platCheckMinimumHardware(uint32_t & io_plid,
+                            const TARGETING::ConstTargetHandle_t i_node)
 {
+    //errlHndl_t l_errl = NULL;
+
     //  nothing to do yet...
+
+    //  if you add something here, don't forget to
+    //      add a procedure callout
+    //l_errl->addProcedureCallout( EPUB_PRC_FIND_DECONFIGURED_PART,
+    //                             SRCI_PRIORITY_HIGH);
+
+    //      and update the common plid
+    //if (io_plid != 0)
+    //{
+    //    l_errl->plid(io_plid) ;
+    //}
+    //else
+    //{
+    //    io_plid = l_errl->plid();
+    //}
 }
 
 

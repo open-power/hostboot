@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -117,9 +117,12 @@ errlHndl_t restrictEXunits(
  *  Error logs will also be created for each hardware module that is not
  *  running.
  *
+ * @param[in] i_node  node target to restrict hw check
+ *
  * @return error log handle
  */
-errlHndl_t checkMinimumHardware();
+errlHndl_t checkMinimumHardware(
+    const TARGETING::ConstTargetHandle_t i_node = NULL);
 
 };   // end namespace
 

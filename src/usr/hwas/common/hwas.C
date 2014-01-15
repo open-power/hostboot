@@ -707,7 +707,7 @@ errlHndl_t restrictEXunits(
     return errl;
 } // restrictEXunits
 
-errlHndl_t checkMinimumHardware()
+errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
 {
     errlHndl_t l_errl = NULL;
     HWAS_INF("checkMinimumHardware entry");
@@ -718,6 +718,21 @@ errlHndl_t checkMinimumHardware()
         //  Common present and functional hardware checks.
         //*********************************************************************/
         uint32_t l_commonPlid = 0;
+
+        // top 'starting' point - TopLevelTarget if no i_node
+        Target *pTop;
+        if (i_node == NULL)
+        {
+            targetService().getTopLevelTarget(pTop);
+            HWAS_INF("checkMinimumHardware: i_node = NULL, using %.8X",
+                    get_huid(pTop));
+        }
+        else
+        {
+            pTop = const_cast<Target *>(i_node);
+            HWAS_INF("checkMinimumHardware: i_node %.8X",
+                    get_huid(pTop));
+        }
 
         PredicateHwas l_present;
         l_present.present(true);
@@ -732,21 +747,19 @@ errlHndl_t checkMinimumHardware()
             HWAS_ERR("Insufficient HW to continue IPL: (no master proc)");
 
             // determine some numbers to help figure out what's up..
-            Target* pSys;
-            targetService().getTopLevelTarget(pSys);
             PredicateCTM l_proc(CLASS_CHIP, TYPE_PROC);
             TargetHandleList l_plist;
 
             PredicatePostfixExpr l_checkExprPresent;
             l_checkExprPresent.push(&l_proc).push(&l_present).And();
-            targetService().getAssociated(l_plist, pSys,
+            targetService().getAssociated(l_plist, pTop,
                     TargetService::CHILD, TargetService::ALL,
                     &l_checkExprPresent);
             uint32_t procs_present = l_plist.size();
 
             PredicatePostfixExpr l_checkExprFunctional;
             l_checkExprFunctional.push(&l_proc).push(&l_functional).And();
-            targetService().getAssociated(l_plist, pSys,
+            targetService().getAssociated(l_plist, pTop,
                     TargetService::CHILD, TargetService::ALL,
                     &l_checkExprFunctional);
             uint32_t procs_functional = l_plist.size();
@@ -832,22 +845,24 @@ errlHndl_t checkMinimumHardware()
 
         //  check here for functional dimms
         TargetHandleList l_dimms;
-        getAllLogicalCards(l_dimms, TYPE_DIMM, true );
+        PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+        PredicatePostfixExpr l_checkExprFunctional;
+        l_checkExprFunctional.push(&l_dimm).push(&l_functional).And();
+        targetService().getAssociated(l_dimms, pTop,
+                TargetService::CHILD, TargetService::ALL,
+                &l_checkExprFunctional);
         HWAS_DBG( "checkMinimumHardware: %d functional dimms",
                   l_dimms.size());
+
         if (l_dimms.empty())
         {
             HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)");
 
             // determine some numbers to help figure out what's up..
-            Target* pSys;
-            targetService().getTopLevelTarget(pSys);
-            PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
             TargetHandleList l_plist;
-
             PredicatePostfixExpr l_checkExprPresent;
             l_checkExprPresent.push(&l_dimm).push(&l_present).And();
-            targetService().getAssociated(l_plist, pSys,
+            targetService().getAssociated(l_plist, pTop,
                     TargetService::CHILD, TargetService::ALL,
                     &l_checkExprPresent);
             uint32_t dimms_present = l_plist.size();
@@ -887,15 +902,16 @@ errlHndl_t checkMinimumHardware()
         //  Need to read an attribute set by PHYP?
 
 
-        //  check for minimum hardware that is specific to HostBoot.
-        //  if it exists, create and commit an error, and tie it to the
+        //  check for minimum hardware that is specific to platform that we're
+        //  running on (ie, hostboot or fsp in hwsv).
+        //  if there is an issue, create and commit an error, and tie it to the
         //  the rest of them with the common plid.
-        platCheckMinimumHardware( l_commonPlid );
+        platCheckMinimumHardware(l_commonPlid, i_node);
 
         //  ---------------------------------------------------------------
         // if the common plid got set anywhere above, we have an error.
         //  ---------------------------------------------------------------
-        if ( l_commonPlid  )
+        if (l_commonPlid)
         {
 
             /*@
@@ -904,13 +920,13 @@ errlHndl_t checkMinimumHardware()
              * @moduleid     MOD_CHECK_MIN_HW
              * @reasoncode   RC_SYSAVAIL_INSUFFICIENT_HW
              * @devdesc      Insufficient hardware to continue.
-             * @userdata1    0
+             * @userdata1    Top level HUID
              * @userdata2    0
              */
             l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
                                     MOD_CHECK_MIN_HW,
                                     RC_SYSAVAIL_INSUFFICIENT_HW,
-                                    0,
+                                    pTop->getAttr<ATTR_HUID>(),
                                     0 );
             //  call out the procedure to find the deconfigured part.
             hwasErrorAddProcedureCallout( l_errl,
