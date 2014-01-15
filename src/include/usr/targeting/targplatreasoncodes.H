@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -53,6 +53,7 @@ enum PlatTargetingModuleId
 {
     TARG_MOD_QUERY_MASTER_PROC_CHIP               = 0x80,
     TARG_MOD_SET_MASTER_NODE                      = 0x81,
+    TARG_MOD_ATTRRP_RT                            = 0x82,
 };
 
 /**

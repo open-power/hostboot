@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -105,9 +105,13 @@ class AttrRP
         void* translateAddr(
             void* i_pAddress,
             const Target* i_pUnused)
+#ifndef __HOSTBOOT_RUNTIME
         {
             return i_pAddress;
         }
+#else
+        ;
+#endif
 
         /**
          *  @brief Translates given address, according to the resource
@@ -129,11 +133,14 @@ class AttrRP
         void* translateAddr(
             void* i_pAddress,
             const TARGETING::NODE_ID i_unused)
+#ifndef __HOSTBOOT_RUNTIME
         {
             return i_pAddress;
         }
+#else
+        ;
+#endif
 
-#ifndef __HOSTBOOT_RUNTIME
         /**
          *  @brief Initializes and starts the AttrRP daemon.
          *
@@ -147,6 +154,21 @@ class AttrRP
          *        service.
          */
         static void init(errlHndl_t& io_taskRetErrl);
+
+#ifndef __HOSTBOOT_RUNTIME
+        /**
+         *  @brief Copies all present attribute sections to memory.
+         *
+         *  The copy will grow down from the input address.
+         *
+         *  @param[in,out] i_addr
+         *      Physical address at the top of the desired region to
+         *      place.  After function will be the address at the bottom of
+         *      the region.
+         *
+         *  @return Virtual address to the region.
+         */
+        static void* save(uint64_t& io_addr);
 #endif
 
     protected:
@@ -211,7 +233,6 @@ class AttrRP
 
     private:
 
-#ifndef __HOSTBOOT_RUNTIME
         /**
          *  @brief Performs the startup of the daemon instance.
          *
@@ -226,6 +247,8 @@ class AttrRP
          *      on failure
          */
         void startup(errlHndl_t& io_taskRetErrl);
+
+#ifndef __HOSTBOOT_RUNTIME
 
         /**
          *  @brief Processes daemon messages
@@ -263,6 +286,9 @@ class AttrRP
          *      on failure
          */
         errlHndl_t createVmmSections();
+
+        /** Internal implementation of save function. */
+        void* _save(uint64_t&);
 
         /**
          *  @brief Starts the attribute provider's message processor

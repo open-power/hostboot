@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -55,6 +55,12 @@ namespace TARGETING
 #endif
 
         TARG_ASSERT(false);
+    }
+
+    void AttrRP::init(errlHndl_t &io_taskRetErrl)
+    {
+        // Call startup on singleton instance.
+        Singleton<AttrRP>::instance().startup(io_taskRetErrl);
     }
 
     bool AttrRP::writeSectionData(

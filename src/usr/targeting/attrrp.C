@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -51,12 +51,6 @@ using namespace ERRORLOG;
 
 namespace TARGETING
 {
-    void AttrRP::init(errlHndl_t &io_taskRetErrl)
-    {
-        // Call startup on singleton instance.
-        Singleton<AttrRP>::instance().startup(io_taskRetErrl);
-    }
-
     void* AttrRP::getBaseAddress(const NODE_ID i_nodeIdUnused)
     {
         return reinterpret_cast<void*>(VMM_VADDR_ATTR_RP);
@@ -476,6 +470,47 @@ namespace TARGETING
         } while (false);
 
         return l_errl;
+    }
+
+    void* AttrRP::save(uint64_t& io_addr)
+    {
+        // Call save on singleton instance.
+        return Singleton<AttrRP>::instance()._save(io_addr);
+    }
+
+    void* AttrRP::_save(uint64_t& io_addr)
+    {
+        TRACDCOMP(g_trac_targeting, "AttrRP::save: top @ 0x%lx", io_addr);
+        io_addr = ALIGN_PAGE_DOWN(io_addr);
+
+        // Find total size of the sections.
+        uint64_t l_size = 0;
+        for(size_t i = 0; i < iv_sectionCount; ++i)
+        {
+            l_size += ALIGN_PAGE(iv_sections[i].size);
+        }
+
+        // Determine bottom of the address region.
+        io_addr = io_addr - l_size;
+
+
+        // Map in region.
+        void* region = mm_block_map(reinterpret_cast<void*>(io_addr),
+                                    l_size);
+        uint8_t* pointer = reinterpret_cast<uint8_t*>(region);
+
+        // Copy content.
+        for (size_t i = 0; i < iv_sectionCount; ++i)
+        {
+            memcpy(pointer,
+                   reinterpret_cast<void*>(iv_sections[i].vmmAddress),
+                   iv_sections[i].size);
+
+            pointer = &pointer[ALIGN_PAGE(iv_sections[i].size)];
+        }
+
+        TRACFCOMP(g_trac_targeting, "AttrRP::save: bottom @ 0x%lx", io_addr);
+        return region;
     }
 
 };

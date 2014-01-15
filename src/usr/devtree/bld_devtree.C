@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -39,6 +39,7 @@ $ */
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/attrrp.H>
 #include <devtree/devtree_reasoncodes.H>
 #include <devtree/devtreeif.H>
 #include "devtree.H"
@@ -451,7 +452,10 @@ uint32_t bld_intr_node(devTree * i_dt, dtOffset_t & i_parentNode,
 void add_reserved_mem(devTree * i_dt,
                       uint64_t i_homerAddr[],
                       size_t i_num,
-                      uint64_t i_vpd_addr)
+                      uint64_t i_extraAddr[],
+                      uint64_t i_extraSize[],
+                      const char* i_extraStr[],
+                      uint64_t i_extraCnt)
 {
     /*
      * The reserved-names and reserve-names properties work hand in hand.
@@ -477,12 +481,11 @@ void add_reserved_mem(devTree * i_dt,
     dtOffset_t rootNode = i_dt->findNode("/");
 
     const char* homerStr = "ibm,slw-occ-image";
-    const char* vpdStr   = "ibm,hbrt-vpd-image";
-    const char* reserve_strs[i_num+2];
-    uint64_t ranges[i_num+1][2];
+    const char* reserve_strs[i_num+i_extraCnt+1];
+    uint64_t ranges[i_num+i_extraCnt][2];
     uint64_t cell_count = sizeof(ranges) / sizeof(uint64_t);
-    uint64_t res_mem_addrs[i_num+1];
-    uint64_t res_mem_sizes[i_num+1];
+    uint64_t res_mem_addrs[i_num+i_extraCnt];
+    uint64_t res_mem_sizes[i_num+i_extraCnt];
 
     for(size_t i = 0; i<i_num; i++)
     {
@@ -493,22 +496,28 @@ void add_reserved_mem(devTree * i_dt,
         res_mem_sizes[i] = VMM_HOMER_INSTANCE_SIZE;
     }
 
-    if(i_vpd_addr)
+    for(size_t i = 0; i < i_extraCnt; i++)
     {
-        reserve_strs[i_num] = vpdStr;
-        ranges[i_num][0] = i_vpd_addr;
-        ranges[i_num][1] = VMM_RT_VPD_SIZE;
+        if (i_extraAddr[i])
+        {
+            TRACFCOMP( g_trac_devtree, "Reserved Region %s @ %lx, %lx",
+                       i_extraStr[i], i_extraAddr[i], i_extraSize[i]);
 
-        res_mem_addrs[i_num] = i_vpd_addr;
-        res_mem_sizes[i_num] = VMM_RT_VPD_SIZE;
+            reserve_strs[i_num] = i_extraStr[i];
+            ranges[i_num][0] = i_extraAddr[i];
+            ranges[i_num][1] = i_extraSize[i];
 
-        reserve_strs[i_num+1] = NULL;
+            res_mem_addrs[i_num] = i_extraAddr[i];
+            res_mem_sizes[i_num] = i_extraSize[i];
+
+            i_num++;
+        }
+        else
+        {
+            cell_count -= sizeof(ranges[0]);
+        }
     }
-    else
-    {
-        reserve_strs[i_num] = NULL;
-        cell_count -= sizeof(ranges[0]);
-    }
+    reserve_strs[i_num] = NULL;
 
     i_dt->addPropertyStrings(rootNode, "reserved-names", reserve_strs);
     i_dt->addPropertyCells64(rootNode, "reserved-ranges",
@@ -517,7 +526,7 @@ void add_reserved_mem(devTree * i_dt,
 
     // added per comment from Dean Sanner
     // cell_count has limit of DT_MAX_MEM_RESERVE  = 16. Is this enough
-    // for all processors + 1 vpd area?
+    // for all processors + 1 vpd area + 1 target area?
     i_dt->populateReservedMem(res_mem_addrs, res_mem_sizes, cell_count);
 }
 
@@ -535,13 +544,13 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt)
     i_dt->addPropertyCell32(cpusNode, "#size-cells", 0);
 
     // Get all functional proc chip targets
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
-    uint64_t l_homerAddr[l_cpuTargetList.size()];
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+    uint64_t l_homerAddr[l_procTargetList.size()];
 
-    for ( size_t proc = 0; (!errhdl) && (proc < l_cpuTargetList.size()); proc++)
+    for (size_t proc = 0; (!errhdl) && (proc < l_procTargetList.size()); proc++)
     {
-        const TARGETING::Target * l_pProc = l_cpuTargetList[proc];
+        const TARGETING::Target * l_pProc = l_procTargetList[proc];
 
         uint32_t l_chipid = getProcChipId(l_pProc);
 
@@ -593,12 +602,26 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt)
 
     errhdl = VPD::vpd_load_rt_image(l_vpd_addr);
 
+    // Targeting
+    uint64_t l_targ_addr = l_vpd_addr;
+    TARGETING::AttrRP::save(l_targ_addr);
 
-    //Add in reserved memory for HOMER images and VPD image
+
+    uint64_t l_extra_addrs[] = { l_vpd_addr, l_targ_addr };
+    uint64_t l_extra_sizes[] = { VMM_RT_VPD_SIZE, l_vpd_addr - l_targ_addr };
+    const char* l_extra_addrs_str[] =
+                    { "ibm,hbrt-vpd-image" ,
+                      "ibm,hbrt-target-image" };
+    size_t l_extra_addr_cnt = sizeof(l_extra_addrs) / sizeof(uint64_t);
+
+    //Add in reserved memory for HOMER images and HBRT sections.
     add_reserved_mem(i_dt,
                      l_homerAddr,
-                     l_cpuTargetList.size(),
-                     l_vpd_addr);
+                     l_procTargetList.size(),
+                     l_extra_addrs,
+                     l_extra_sizes,
+                     l_extra_addrs_str,
+                     l_extra_addr_cnt);
 
     return errhdl;
 }

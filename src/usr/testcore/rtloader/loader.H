@@ -28,6 +28,7 @@
 #include <sys/mm.h>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/attributes.H>
+#include <targeting/attrrp.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
 #include <util/utillidmgr.H>
@@ -304,6 +305,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         {
             if (0 == strcmp(i_region, "ibm,hbrt-vpd-image"))
                 return rt_get_vpd();
+            else if (0 == strcmp(i_region, "ibm,hbrt-target-image"))
+                return rt_get_targ();
             else
                 return 0;
         }
@@ -318,15 +321,13 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             // runtime VPD area not setup yet.
             // Need to map the area into virtual memory
-
-            uint64_t phys_addr = 0;
-            errlHndl_t err = VPD::vpd_load_rt_image(phys_addr);
+            errlHndl_t err = VPD::vpd_load_rt_image(cv_vpd_phys_addr);
 
             if(!err)
             {
 
                 uint8_t * vpd_ptr =
-                    reinterpret_cast<uint8_t *>(phys_addr);
+                    reinterpret_cast<uint8_t *>(cv_vpd_phys_addr);
 
                 void * vptr = mm_block_map(vpd_ptr, VMM_RT_VPD_SIZE);
 
@@ -346,13 +347,38 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
         }
 
+        static uint64_t rt_get_targ()
+        {
+            if (cv_targ_addr != 0)
+            {
+                return cv_targ_addr;
+            }
+
+            // Ensure cv_vpd_phys_addr is primed.
+            rt_get_vpd();
+
+            cv_targ_phys_addr = cv_vpd_phys_addr;
+            cv_targ_addr = reinterpret_cast<uint64_t>(
+                    TARGETING::AttrRP::save(cv_targ_phys_addr));
+
+            return cv_targ_addr;
+        }
+
         static uint64_t cv_vpd_addr;
+        static uint64_t cv_vpd_phys_addr;
+        static uint64_t cv_targ_addr;
+        static uint64_t cv_targ_phys_addr;
 };
 
 
 RuntimeLoaderTest::SCOM_MAP RuntimeLoaderTest::cv_scomMap;
 std::map<void*, UtilLidMgr*> RuntimeLoaderTest::cv_loadedLids;
 uint64_t RuntimeLoaderTest::cv_vpd_addr = 0;
+uint64_t RuntimeLoaderTest::cv_vpd_phys_addr = 0;
+uint64_t RuntimeLoaderTest::cv_targ_addr = 0;
+uint64_t RuntimeLoaderTest::cv_targ_phys_addr = 0;
+
+
 
 
 #endif
