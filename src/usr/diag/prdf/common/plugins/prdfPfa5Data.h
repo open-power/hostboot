@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2013              */
+/* COPYRIGHT International Business Machines Corp. 2003,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -68,8 +68,6 @@ enum ErrlSubsect
     ErrlSectPFA5_2   = 52,
     ErrlCapData_1    = 1,
     ErrlCapData_2    = 2,
-    ErrlAVPData_1    = 41,
-    ErrlAVPData_2    = 42,
     ErrlMruData_1    = 61, // This will only be used in non-attenion code when
                            // we want to add MRU.
     ErrlString       = 10,

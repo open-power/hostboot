@@ -116,12 +116,6 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
 bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                    ErrlUsrParser & i_parser );
 
-bool parseAVPData( void * i_buffer, uint32_t i_buflen,
-                   ErrlUsrParser & i_parser );
-
-bool parseHdatAVPData( void * i_buffer, uint32_t i_buflen,
-                       ErrlUsrParser & i_parser );
-
 //##############################################################################
 //##
 //##                          Utility Functions
@@ -546,65 +540,6 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-bool parseAVPData( void * i_buffer, uint32_t i_buflen,
-                   ErrlUsrParser & i_parser )
-{
-    bool rc = true;
-
-    if (i_buffer)
-    {
-        //To get endianness correct
-        uint32_t l_avpTCNumber;
-        UtilMem l_membuf1(i_buffer,i_buflen);
-        l_membuf1 >> l_avpTCNumber;
-
-        i_parser.PrintHeading("");
-        i_parser.PrintHeading("PRD AVP Test Case Data");
-
-        i_parser.PrintNumber("AVP Test Case Number", "0x%08x", l_avpTCNumber);
-    }
-
-    // Set return code to false, so that the hex data is dumped out, for now.
-    rc = false;
-
-    return rc;
-}
-
-//------------------------------------------------------------------------------
-
-bool parseHdatAVPData( void * i_buffer, uint32_t i_buflen,
-                       ErrlUsrParser & i_parser )
-{
-    bool rc = true;
-    char l_buffer[29];
-
-    if (i_buffer)
-    {
-        uint32_t l_avpTCInfo;
-        uint8_t  l_avpTCInfoByte;
-
-        i_parser.PrintHeading("");
-        i_parser.PrintHeading("PRD HDAT AVP Test Case Data");
-
-        memcpy(l_buffer, i_buffer, 29);
-        memcpy(&l_avpTCInfo, l_buffer, 4);
-        i_parser.PrintNumber("AVP Test Case Number", "0x%08x", l_avpTCInfo);
-        memcpy(&l_avpTCInfo, &l_buffer[4], 4);
-        i_parser.PrintNumber("AVP Test List Entry", "0x%08x", l_avpTCInfo);
-        memcpy(&l_avpTCInfoByte, &l_buffer[8], 1);
-        i_parser.PrintNumber("AVP Test Corner", "0x%02x", l_avpTCInfoByte);
-        l_buffer[28] = '\0';
-        i_parser.PrintString("AVP Description", &l_buffer[9]);
-    }
-
-    // Set return code to false, so that the hex data is dumped out, for now.
-    rc = false;
-
-    return rc;
-}
-
-//------------------------------------------------------------------------------
-
 bool parseMemMru( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
 {
     bool o_rc = true;
@@ -655,14 +590,6 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
 
         case ErrlCapData_1:  // Assume version 1 for now
             rc = parseCaptureData(i_buffer, i_buflen, i_parser, i_ver);
-            break;
-
-        case ErrlAVPData_1:
-            rc = parseAVPData(i_buffer, i_buflen, i_parser);
-            break;
-
-        case ErrlAVPData_2:
-            rc = parseHdatAVPData(i_buffer, i_buflen, i_parser);
             break;
 
         case ErrlMruData_1:

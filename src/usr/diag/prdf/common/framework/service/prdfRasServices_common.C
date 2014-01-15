@@ -773,66 +773,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                    ErrlVer1, ErrlSectPFA5_1 );
 
     //**************************************************************
-    // Check for Manufacturing AVP mode
-    // If needed: Add the AVP mode data to Error Log User Data
-    //**************************************************************
-
-   /* FIXME - The MDIA component is being removed from FSP code. This means this MDIA registry variable
-will also be removed. Need to confirm if this code is required anymore.
-    if ( PlatServices::avpMode() )
-    {
-        //Get the AVP Test Case Number from the AVP Test Case Data Registry. The Test Case Number is the first four bytes.
-        uint32_t avpTCNumber = 0;
-        size_t  sz_uint32    = sizeof(uint32_t);
-        errlHndl_t errorLog = UtilReg::read ("mdia/AvpTestCaseData", &avpTCNumber, sz_uint32);
-        // printf("AVP Test Case Number from registry: %.8x \n", avpTCNumber);
-        if (errorLog)
-        {
-            errorLog->commit(PRDF_COMP_ID,ERRL_ACTION_REPORT);
-            PRDF_ERR( "PRDTRACE: RasServices Failure in AVP Test Case Registry read" );
-            delete errorLog;
-            errorLog = NULL;
-        }
-        else
-        {
-            //Add Test Case Number to Error Log User Data
-            UtilMem l_membuf;
-            l_membuf << avpTCNumber;
-            o_errl->addUsrDtls(l_membuf.base(),l_membuf.size(),PRDF_COMP_ID,ErrlVer1,ErrlAVPData_1);
-        }
-    }
-*/
-
-#ifndef __HOSTBOOT_MODULE
-    // FIXME: do we need support for AVP in Hostboot?  probably not
-    if ( PlatServices::hdatAvpMode() )
-    {
-        //Get the AVP Test Case Data from the AVP Test Case Data Registry.
-        uint8_t avpTCData[64];
-        size_t  sz_avpTCData    = sizeof(avpTCData);
-        errlHndl_t errorLog = UtilReg::read ("hdat/AvpTestCaseData", avpTCData, sz_avpTCData);
-
-        if (errorLog)
-        {
-            PRDF_ERR( PRDF_FUNC"Failure in hdat AVP Test Case Registry read" );
-            PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
-        }
-        else
-        {
-            //Add Test Case Data to Error Log User Data
-            const size_t sz_usrDtlsTCData = 29;
-            uint8_t usrDtlsTCData[sz_usrDtlsTCData];
-            memcpy(usrDtlsTCData, avpTCData, 4);
-            memcpy(&usrDtlsTCData[4], &avpTCData[40], 4);
-            memcpy(&usrDtlsTCData[8], &avpTCData[37], 1);
-            memcpy(&usrDtlsTCData[9], &avpTCData[44], 20);
-            PRDF_ADD_FFDC( o_errl, (const char*)usrDtlsTCData, sz_usrDtlsTCData,
-                           ErrlVer1, ErrlAVPData_2 );
-        }
-    }
-#endif // if not __HOSTBOOT_MODULE
-
-    //**************************************************************
     // Add SDC Capture data to Error Log User Data
     //**************************************************************
     // Pulled some code out to incorporate into AddCapData

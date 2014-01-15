@@ -409,12 +409,6 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
 bool mfgMode();
 
 /**
- * @brief   Returns the state of the MNFG_HDAT_AVP_ENABLE policy flag.
- * @return  TRUE if MNFG_HDAT_AVP_ENABLE is set, FALSE otherwise.
- */
-bool hdatAvpMode();
-
-/**
  * @brief   Returns status of MNFG_SRC_TERM manufacturing policy flag.
  * @param   None.
  * @return  TRUE if MNFG_SRC_TERM policy flag is set, FALSE

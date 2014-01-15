@@ -1379,9 +1379,6 @@ bool isMnfgFlagSet( uint32_t i_flag )
 bool mfgMode()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_THRESHOLDS      ); }
 
-bool hdatAvpMode()
-{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE ); }
-
 bool mnfgTerminate()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_SRC_TERM        ); }
 
