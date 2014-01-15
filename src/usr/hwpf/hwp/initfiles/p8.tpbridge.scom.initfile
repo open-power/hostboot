@@ -1,4 +1,4 @@
-#-- $Id: p8.tpbridge.scom.initfile,v 1.5 2013/07/17 16:48:42 jmcgill Exp $
+#-- $Id: p8.tpbridge.scom.initfile,v 1.6 2013/12/16 14:20:14 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -85,13 +85,13 @@ scom 0x02010986 {
 # EH FIR ACTION1
 scom 0x02010987 {
     bits,    scom_data;
-    0:63,    0xFFFFFFFFF0000000;
+    0:63,    0x3333333300000000;
 }
 
 # EH FIR MASK
 scom 0x02010983 {
     bits,    scom_data;
-    0:63,    0x0000000000000000;
+    0:63,    0xCCCCCCCCF0000000;
 }
 
 # EN FIR ACTION0
@@ -103,12 +103,12 @@ scom 0x02010946 {
 # EN FIR ACTION1
 scom 0x02010947 {
     bits,    scom_data;
-    0:63,    0xFFC0000000000000;
+    0:63,    0xE000000000000000;
 }
 
 # EN FIR MASK
 scom 0x02010943 {
     bits,    scom_data;
-    0:63,    0x0000000000000000;
+    0:63,    0x1FC0000000000000;
 }
 

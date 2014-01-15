@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // $Id: p8_pm_pba_firinit.C,v 1.17 2014/01/06 18:29:14 stillgs Exp $
-// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pba_firinit.C,v $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pba_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -117,7 +117,7 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             rc = fapiPutScom(i_target, PBA_FIR_MASK_0x02010843, mask );
             if (rc)
             {
-                FAPI_ERR("fapiPutScom(PBA_FIR_MASK_0x02010843) failed.");
+	            FAPI_ERR("fapiPutScom(PBA_FIR_MASK_0x02010843) failed.");
                 break;
             }
         }
@@ -207,7 +207,7 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             rc = fapiPutScom(i_target, PBA_FIR_ACTION0_0x02010846, action_0 );
             if (rc)
             {
-                FAPI_ERR("fapiPutScom(PBA_FIR_ACTION0_0x02010846) failed.");
+	            FAPI_ERR("fapiPutScom(PBA_FIR_ACTION0_0x02010846) failed.");
                 break;
             }
 
@@ -218,7 +218,7 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             rc = fapiPutScom(i_target, PBA_FIR_ACTION1_0x02010847, action_1 );
             if (rc)
             {
-                FAPI_ERR("fapiPutScom(PBA_FIR_ACTION1_0x02010847) failed.");
+	            FAPI_ERR("fapiPutScom(PBA_FIR_ACTION1_0x02010847) failed.");
                 break;
             }
 
@@ -228,7 +228,7 @@ p8_pm_pba_firinit(const fapi::Target&  i_target , uint32_t mode )
             rc = fapiPutScom(i_target, PBA_FIR_MASK_0x02010843, mask );
             if (rc)
             {
-                FAPI_ERR("fapiPutScom(PBA_FIR_MASK_0x02010843) failed.");
+	            FAPI_ERR("fapiPutScom(PBA_FIR_MASK_0x02010843) failed.");
                  break;
             }
         } // Mode

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_throttle_sync.C,v 1.5 2013/12/13 18:55:31 bellows Exp $
+// $Id: proc_throttle_sync.C,v 1.6 2013/12/19 22:22:03 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_throttle_sync.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.6   | bellows  |19-DEC-13| Fixed the minor (not functional) setting of rc_ecmd = for next set of data buffer commands
 //   1.5   | bellows  |13-DEC-13| One missed firmware review comment
 //   1.4   | bellows  |13-DEC-13| Firmware review updates
 //   1.3   | bellows  |06-DEC-13| Handle the MCS functional but no centaur case
@@ -204,8 +205,7 @@ extern "C" {
 // 4.) Generate the Sync Command to Centaur from the master MCS
 //      Bit 0 of MCS Mode3 Register (Scom addr 201180A)
 //      (This bit needs a reset before another set, it does not reset automatically)
-          rc_ecmd = ECMD_DBUF_SUCCESS;
-          rc_ecmd |= data_buffer_64.clearBit(0,64);
+          rc_ecmd = data_buffer_64.clearBit(0,64);
           rc_ecmd |= data_buffer_64.setBit(0);
           rc_ecmd |= mask_buffer_64.clearBit(0,64);
           rc_ecmd |= mask_buffer_64.setBit(0);
