@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -56,5 +56,6 @@ include spd_accessors/spd.mk
 include pll_accessors/pll.mk
 include winkle_ring_accessors/winkle_ring.mk
 include utility_procedures/utils.mk
+include chip_accessors/chip.mk
 
 include ${ROOTPATH}/config.mk

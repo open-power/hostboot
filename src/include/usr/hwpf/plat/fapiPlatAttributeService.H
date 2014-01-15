@@ -667,6 +667,17 @@ fapi::ReturnCode fapiPlatGetSpdAttrAccessor (
  */
 fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
                                      uint32_t (&o_data)[DELTA_DATA_SIZE]);
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting the
+ *        ATTR_PCI_OSCSWITCH_CONFIG attribute. It should not be called
+ *        directly.
+ *
+ *  @param[in]  i_pProcTarget Processor Chip Target pointer
+ *  @param[out] o_data        Reference to output data
+ */
+fapi::ReturnCode fapiPlatGetPciOscswitchConfig
+                                     (const fapi::Target * i_pProcTarget,
+                                     uint8_t &o_val);
 
 } // namespace platAttrSvc
 
@@ -1737,5 +1748,13 @@ fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
 #define ATTR_PROC_EX_FUNC_L3_DELTA_DATA_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetL3DDAttr(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACRO to support pci osc switch config
+//------------------------------------------------------------------------------
+#define ATTR_PCI_OSCSWITCH_CONFIG_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPciOscswitchConfig(PTARGET, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

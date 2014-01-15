@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -51,6 +51,7 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
 #include <hwpf/hwp/mvpd_accessors/accessMBvpdL4BankDelete.H>
+#include <hwpf/hwp/chip_accessors/getPciOscswitchConfig.H>
 #include <fapiPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingAttr.H>
 #include <hwpf/hwp/pll_accessors/getPllRingInfoAttr.H>
@@ -1432,6 +1433,16 @@ fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
 {
     fapi::ReturnCode l_rc;
     FAPI_EXEC_HWP(l_rc, getL3DeltaDataAttr, *i_pProcTarget, o_data);
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------
+fapi::ReturnCode fapiPlatGetPciOscswitchConfig
+                                     (const fapi::Target * i_pProcTarget,
+                                     uint8_t &o_val)
+{
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getPciOscswitchConfig, *i_pProcTarget, o_val);
     return l_rc;
 }
 

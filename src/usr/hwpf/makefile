@@ -33,7 +33,8 @@ SUBDIRS = fapi.d hwp.d plat.d test.d
 HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dmi_training/proc_cen_framelock/proc_cen_framelock_errors.xml \
     hwp/bus_training/io_errors.xml \
-    hwp/dimm_errors.xml	\
+    hwp/dimm_errors.xml \
+    hwp/chip_accessors/chip_errors.xml \
     hwp/dram_training/memory_errors.xml \
     hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml \
     hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml  \
