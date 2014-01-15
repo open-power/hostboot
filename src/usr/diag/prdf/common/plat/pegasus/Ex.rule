@@ -150,7 +150,6 @@ chip Ex
     {
         name        "EX00.EC.PC.PC_NE.FIR.CORE_FIR";
         scomaddr    0x10013100;
-        reset       (&, 0x10013101);
         mask        (|, 0x10013105);
         capture     group default;
     };
@@ -178,6 +177,14 @@ chip Ex
         capture     type secondary;
         capture     group default;
         capture     req nonzero("COREFIR");
+    };
+
+    register COREFIRWOF
+    {
+        name        "Core FIR WOF";
+        scomaddr    0x10013108;
+        reset       (|, 0x10013108);
+        capture     group default;
     };
 
     ############################################################################
@@ -564,9 +571,9 @@ group gExLFir filter singlebit
 
 rule CoreFir
 {
-    CHECK_STOP:  COREFIR & ~COREFIR_MASK &  COREFIR_ACT0 & ~COREFIR_ACT1;
-    PROC_CS:     COREFIR & ~COREFIR_MASK &  COREFIR_ACT0 &  COREFIR_ACT1;
-    RECOVERABLE: COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
+    CHECK_STOP:  COREFIR    & ~COREFIR_MASK &  COREFIR_ACT0 & ~COREFIR_ACT1;
+    PROC_CS:     COREFIR    & ~COREFIR_MASK &  COREFIR_ACT0 &  COREFIR_ACT1;
+    RECOVERABLE: COREFIRWOF & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
 #Based on RAS SpreadSheet p8dd1_mss_FFDC_51.xls
