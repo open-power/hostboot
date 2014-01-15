@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -308,7 +308,7 @@ void * call_host_slave_sbe_update( void * io_pArgs )
 
     // Call to check state of Processor SBE SEEPROMs and
     // make any necessary updates
-    l_errl = SBE::updateProcessorSbeSeeproms();
+    // l_errl = SBE::updateProcessorSbeSeeproms();
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update exit" );
