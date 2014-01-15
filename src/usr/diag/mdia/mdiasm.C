@@ -230,6 +230,62 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
         {
             if((*wit)->timer == *monitorIt)
             {
+                TargetHandle_t target = getTarget(**wit);
+                ecmdDataBufferBase buffer(64);
+                uint64_t mbaspa = 0;
+                uint64_t mbaspamask = 0;
+                // check MBASPA for maint cmd complete bit
+                // if set then don't time out
+                fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, target);
+                ReturnCode fapirc = fapiGetScom( fapiMba,  MBA01_SPA, buffer);
+
+                err = fapiRcToErrl(fapirc);
+                if(err)
+                {
+                    MDIA_FAST("sm: fapiGetScom on 0x%08X failed HUID:0x%08X",
+                              MBA01_SPA, get_huid(target));
+                    //commit locally and let it timeout
+                    errlCommit(err, MDIA_COMP_ID);
+                }
+                else
+                {
+                    mbaspa = buffer.getDoubleWord(0) & 0x8080000000000000;
+                }
+
+                if(0 != mbaspa)
+                {
+                    fapirc = fapiGetScom( fapiMba,  MBA01_SPA_MASK, buffer);
+
+                    err = fapiRcToErrl(fapirc);
+                    if(err)
+                    {
+                        MDIA_FAST("sm: fapiGetScom on 0x%08X failed "
+                                  "HUID:0x%08X",
+                                  MBA01_SPA_MASK, get_huid(target));
+                        //commit locally and let it timeout
+                        errlCommit(err, MDIA_COMP_ID);
+                    }
+                    else
+                    {
+                        mbaspamask = buffer.getDoubleWord(0);
+                    }
+                }
+
+                // Pending maint cmd complete, reset timer
+                if(mbaspa & ~mbaspamask)
+                {
+                    MDIA_FAST("sm: work item %d reset timed out on: %x",
+                        *((*wit)->workItem),
+                        get_huid(target));
+                    // register a new timeout monitor
+                    uint64_t monitorId = getMonitor().addMonitor(MBA_TIMEOUT);
+                    (*wit)->timer = monitorId;
+
+                    break;
+                }
+
+                // If maint cmd complete bit is not on, time out
+
                 stopCmds.push_back(static_cast<mss_MaintCmd *>((*wit)->data));
                 (*wit)->data = NULL;
 
@@ -237,9 +293,6 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 wkflprop = *wit;
 
                 // log a timeout event
-
-                TargetHandle_t target = getTarget(**wit);
-
                 MDIA_ERR("sm: command %p: %d timed out on: %x",
                         stopCmds.back(),
                         *((*wit)->workItem),
@@ -674,8 +727,6 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
     // uint64_t timeout = i_wfp.memSize / 1024; // TODO RTC 47590
-    // TODO RTC 47590 temporarily double the timeout to 120 secs
-    uint64_t timeout = 120000000000;
     errlHndl_t err = NULL;
 
     uint64_t stopCondition =
@@ -694,7 +745,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     mutex_lock(&iv_mutex);
 
     // starting a maint cmd ...  register a timeout monitor
-    uint64_t monitorId = getMonitor().addMonitor(timeout);
+    uint64_t monitorId = getMonitor().addMonitor(MBA_TIMEOUT);
 
     i_wfp.timer = monitorId;
     workItem = *i_wfp.workItem;
