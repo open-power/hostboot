@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.C,v 1.4 2013/01/20 19:28:14 jmcgill Exp $
+// $Id: proc_pcie_config.C,v 1.6 2014/01/14 19:25:02 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -102,8 +102,9 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
     const fapi::Target & i_target)
 {
     fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
 
-    ecmdDataBufferBase zero_data(64);
+    ecmdDataBufferBase data(64);
 
     // mark function entry
     FAPI_INF("proc_pcie_config_pbcq_fir: Start");
@@ -112,9 +113,17 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
     for (size_t i = 0; i < PROC_PCIE_CONFIG_NUM_PHB; i++)
     {
         // clear FIR
+        rc_ecmd |= data.flushTo0();
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error 0x%x setting up PCIE Nest FIR clear data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR[i],
-                         zero_data);
+                         data);
         if (!rc.ok())
         {
             FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_0x%08X)",
@@ -125,7 +134,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
         // clear FIR WOF
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_WOF[i],
-                         zero_data);
+                         data);
         if (!rc.ok())
         {
             FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_WOF_0x%08X)",
@@ -133,10 +142,59 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
             break;
         }
 
-        // clear FIR mask
+        // set action0
+        rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0_VAL);
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error 0x%x setting up PCIE Nest FIR Action0 register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        rc = fapiPutScom(i_target,
+                         PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0[i],
+                         data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_ACTION0_0x%08X)",
+                     i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0[i]);
+            break;
+        }
+
+        // set action1
+        rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1_VAL);
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error 0x%x setting up PCIE Nest FIR Action1 register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        rc = fapiPutScom(i_target,
+                         PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[i],
+                         data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_ACTION1_0x%08X)",
+                     i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[i]);
+            break;
+        }
+
+        // set mask
+        rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK_VAL);
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_pcie_config_pbcq_fir: Error 0x%x setting up PCIE Nest FIR Mask register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[i],
-                         zero_data);
+                         data);
         if (!rc.ok())
         {
             FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%d_FIR_MASK_0x%08X)",

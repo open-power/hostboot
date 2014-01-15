@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.H,v 1.1 2012/11/05 21:52:37 jmcgill Exp $
+// $Id: proc_pcie_config.H,v 1.2 2014/01/13 18:21:59 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -91,6 +91,11 @@ const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[PROC_PCIE_CONFIG_NUM_PHB] =
     PCIE1_FIR_MASK_0x02012403,
     PCIE2_FIR_MASK_0x02012803
 };
+
+const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0_VAL = 0x5B8F819000000000ULL;
+const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1_VAL = 0x7F8F819000000000ULL;
+const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK_VAL = 0x0030006E00000000ULL;
+
 
 //------------------------------------------------------------------------------
 // Structure definitions
