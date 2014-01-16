@@ -690,7 +690,7 @@ group gMbsFir filter singlebit
     /** MBSFIR[26]
      *  MBS_FIR_REG_SRB_BUFFER_CE
      */
-    (MbsFir, bit(26)) ? SelfMedThr32PerDay;
+    (MbsFir, bit(26)) ? thresholdAndMask_self;
 
     /** MBSFIR[27]
      *  MBS_FIR_REG_SRB_BUFFER_UE
