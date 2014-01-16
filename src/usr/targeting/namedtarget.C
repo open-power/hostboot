@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -53,7 +53,11 @@ namespace TARGETING
 
 const TARGETING::Target *   getMasterCore( )
 {
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
     uint64_t l_masterCoreID                     =   task_getcpuid() & ~7;
+    task_affinity_unpin();
+
     const   TARGETING::Target * l_masterCore    =   NULL;
 
     TARGETING::Target * l_processor =   NULL;

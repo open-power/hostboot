@@ -40,7 +40,7 @@
 #include "common/hsvc_attribute_structs.H"
 #include <mbox/ipc_msg_types.H>
 #include <sys/task.h>
-#include <kernel/cpu.H> // for KERNEL_MAX_SUPPORTED_CPUS_PER_NODE
+#include <intr/interrupt.H>
 
 trace_desc_t *g_trac_runtime = NULL;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
@@ -688,8 +688,10 @@ errlHndl_t populate_attributes( void )
         // The assertion is that the hostboot instance must be equal to
         // the logical node we are running on. The ideal would be to have
         // a function call that would return the HB instance number.
-        uint64_t this_node =
-            task_getcpuid()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+        task_affinity_pin();
+        task_affinity_migrate_to_master();
+        uint64_t this_node = INTR::PIR_t(task_getcpuid()).nodeId;
+        task_affinity_unpin();
 
 
         //loop though all possible drawers whether they exist or not
@@ -723,7 +725,7 @@ errlHndl_t populate_attributes( void )
                         break;
                     }
                 }
-            } 
+            }
         }
 
         if(errhdl == NULL)

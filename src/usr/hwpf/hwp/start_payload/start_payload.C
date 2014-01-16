@@ -70,7 +70,7 @@
 #include    <runtime/runtime.H>
 #include    <devtree/devtreeif.H>
 #include    <sys/task.h>
-#include    <kernel/cpu.H> // for KERNEL_MAX_SUPPORTED_CPUS_PER_NODE
+#include    <intr/interrupt.H>
 #include    <kernel/ipc.H> // for internode data areas
 #include    <mbox/ipc_msg_types.H>
 
@@ -405,8 +405,14 @@ void*    call_host_start_payload( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_host_start_payload entry" );
 
-    uint64_t this_node =
-        task_getcpuid()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+    // For single-node systems, the non-master processors can be in a
+    // different logical (powerbus) node.  Need to migrate task to master.
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+
+    uint64_t this_node = INTR::PIR_t(task_getcpuid()).nodeId;
+
+    task_affinity_unpin();
 
     // broadcast shutdown to other HB instances.
     l_errl = broadcastShutdown(this_node);
