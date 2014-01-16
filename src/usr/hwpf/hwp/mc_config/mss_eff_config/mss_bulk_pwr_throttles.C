@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.15 2013/11/14 17:28:44 pardeik Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.16 2014/01/06 19:48:46 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -30,8 +30,8 @@
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_bulk_pwr_throttles
 // *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com
-// *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com
+// *! OWNER NAME  : Michael Pardeik   Email: pardeik@us.ibm.com
+// *! BACKUP NAME : Jacob Sloat       Email: jdsloat@us.ibm.com
 // *! ADDITIONAL COMMENTS :
 //
 // applicable CQ component memory_screen
@@ -71,6 +71,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.16  | pardeik  |06-JAN-14| use max utiliation from MRW for MAX_UTIL
+//         |          |         | Use ATTR_MRW_MEM_THROTTLE_DENOMINATOR instead
+//         |          |         |  of ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR
 //   1.15  | pardeik  |13-NOV-13| changed MAX_UTIL from 75 to 56.25
 //         |          |         | get default M throttle value from MRW
 //         |          |         | return error if not enough memory power
@@ -168,9 +171,6 @@ extern "C" {
 	const uint8_t MAX_NUM_DIMMS = 2;
 // min utilization (percent of max) allowed for floor
 	const float MIN_UTIL = 1;
-// max utilization (percent of max) allowed for ceiling
-// If MAX_UTIL is changed, also change mss_throttle_to_power MAX_UTIL
-	const float MAX_UTIL = 56.25;
 
 	fapi::Target target_chip;
 	std::vector<fapi::Target> target_mba_array;
@@ -188,14 +188,20 @@ extern "C" {
 	uint8_t num_mba_with_dimms;
 	uint32_t power_int_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
 	uint8_t mba_index;
+	uint32_t l_max_dram_databus_util;
 
 // Get input attributes
+	rc = FAPI_ATTR_GET(ATTR_MRW_MAX_DRAM_DATABUS_UTIL,
+			   NULL, l_max_dram_databus_util);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_MAX_DRAM_DATABUS_UTIL");
+	    return rc;
+	}
 	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, custom_dimm);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_CUSTOM_DIMM");
 	    return rc;
 	}
-
 	rc = FAPI_ATTR_GET(ATTR_MSS_MEM_WATT_TARGET,
 			   &i_target_mba, channel_pair_watt_target);
 	if (rc) {
@@ -207,11 +213,15 @@ extern "C" {
 	    FAPI_ERR("Error getting attribute ATTR_MSS_POWER_INT");
 	    return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR, NULL, throttle_d);
+	rc = FAPI_ATTR_GET(ATTR_MRW_MEM_THROTTLE_DENOMINATOR, NULL, throttle_d);
 	if (rc) {
-	    FAPI_ERR("Error getting attribute ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR");
+	    FAPI_ERR("Error getting attribute ATTR_MRW_MEM_THROTTLE_DENOMINATOR");
 	    return rc;
 	}
+
+// max utilization (percent of max) allowed for ceiling
+// Comes from MRW value in c% - convert to %
+	float MAX_UTIL = (float) l_max_dram_databus_util / 100;
 
 // get number of mba's  with dimms for a CDIMM
 	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)

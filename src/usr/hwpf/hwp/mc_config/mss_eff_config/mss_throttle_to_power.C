@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_throttle_to_power.C,v 1.11 2013/11/14 17:28:30 pardeik Exp $
+// $Id: mss_throttle_to_power.C,v 1.12 2014/01/06 19:49:21 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_throttle_to_power.C,v $
 //------------------------------------------------------------------------------
@@ -47,6 +47,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.12  | pardeik  |06-JAN-14| added dimm power curve uplift from MRW
+//         |          |         | use max utiliation from MRW for MAX_UTIL
 //   1.11  | pardeik  |13-NOV-13| changed MAX_UTIL from 75 to 56.25
 //   1.10  | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 //   1.9   | pardeik  |04-DEC-12| update lines to have a max width of 80 chars
@@ -202,9 +204,6 @@ extern "C" {
 
 	const uint8_t MAX_NUM_PORTS = 2;
 	const uint8_t MAX_NUM_DIMMS = 2;
-// Maximum theoretical data bus utilization (percent of max) (for ceiling)
-// If this is changed, also change mss_bulk_pwr_throttles MAX_UTIL
-	const float MAX_UTIL = 56.25;				
 
 	uint32_t l_power_slope_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
 	uint32_t l_power_int_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
@@ -218,8 +217,23 @@ extern "C" {
 	uint32_t l_channel_power_array_integer[MAX_NUM_PORTS];
 	uint32_t l_channel_pair_power_integer;
 	uint8_t l_num_dimms_on_port;
+	uint8_t l_power_curve_percent_uplift;
+	uint32_t l_max_dram_databus_util;
+;
 
 // get input attributes
+	rc = FAPI_ATTR_GET(ATTR_MRW_MAX_DRAM_DATABUS_UTIL,
+			   NULL, l_max_dram_databus_util);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_MAX_DRAM_DATABUS_UTIL");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT,
+			   NULL, l_power_curve_percent_uplift);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT");
+	    return rc;
+	}
 	rc = FAPI_ATTR_GET(ATTR_MSS_POWER_SLOPE,
 			   &i_target_mba, l_power_slope_array);
 	if (rc) {
@@ -244,6 +258,10 @@ extern "C" {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_NUM_DROPS_PER_PORT");
 	    return rc;
 	}
+
+// Maximum theoretical data bus utilization (percent of max) (for ceiling)
+// Comes from MRW value in c% - convert to %
+	float MAX_UTIL = (float) l_max_dram_databus_util / 100;
 
 // add up the power from all dimms for this MBA (across both channels) using the
 // throttle values
@@ -348,15 +366,19 @@ extern "C" {
 		    }
 		}
 // Get dimm power in integer format (add on 1 since value will get truncated)
+// Include any system uplift here too
 		if (l_dimm_power_array[l_port][l_dimm] > 0)
 		{
+		    l_dimm_power_array[l_port][l_dimm] =
+		      l_dimm_power_array[l_port][l_dimm]
+		      * (1 + (float)l_power_curve_percent_uplift / 100);
 		    l_dimm_power_array_integer[l_port][l_dimm] =
 		      (int)l_dimm_power_array[l_port][l_dimm] + 1;
 		}
 // calculate channel power by adding up the power of each dimm
 		l_channel_power_array[l_port] = l_channel_power_array[l_port] +
 		  l_dimm_power_array[l_port][l_dimm];
-		FAPI_DBG("[P%d:D%d][CH Util %4.2f/%4.2f][Slope:Int %d:%d][Power %4.2f cW]", l_port, l_dimm, l_utilization, MAX_UTIL, l_power_slope_array[l_port][l_dimm], l_power_int_array[l_port][l_dimm], l_dimm_power_array[l_port][l_dimm]);
+		FAPI_DBG("[P%d:D%d][CH Util %4.2f/%4.2f][Slope:Int %d:%d][UpliftPercent %d][Power %4.2f cW]", l_port, l_dimm, l_utilization, MAX_UTIL, l_power_slope_array[l_port][l_dimm], l_power_int_array[l_port][l_dimm], l_power_curve_percent_uplift, l_dimm_power_array[l_port][l_dimm]);
 	    }
 	    FAPI_DBG("[P%d][Power %4.2f cW]", l_port, l_channel_power_array[l_port]);
 	}

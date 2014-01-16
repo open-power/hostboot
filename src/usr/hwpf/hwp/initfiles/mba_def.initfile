@@ -1,9 +1,10 @@
 
-#-- $Id: mba_def.initfile,v 1.54 2013/11/21 19:21:40 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.55 2014/01/10 17:03:04 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.55|tschang | 1/07/14| ATTR_EFF_DRAM_TFAW attribute used for TFAW timing register.
 #--     1.54|tschang |11/21/13| HW271989 - updated SCOM write to do a full 64 bit write instead of a RMW
 #--     1.53|tschang |11/12/13|EFF to VPD attribute update
 #--     1.52|tschang |11/12/13|wrdata_dly updated with def_WLO parameter and RW_dly updated for LRDIMMS
@@ -2066,16 +2067,16 @@ scom 0x0301040C     {
     7:13    ,   0b0110001    ,          1            ,   (def_mba_tmr1q_cfg_twap49 == 1); # cfg_twap     17
     7:13    ,   0b0110011    ,          1            ,   (def_mba_tmr1q_cfg_twap51 == 1); # cfg_twap     17
     7:13    ,   0b0110101    ,          1            ,   (def_mba_tmr1q_cfg_twap53 == 1); # cfg_twap     17
-#    14:19   ,   ATTR_EFF_DRAM_TFAW,          1             ,   any; # cfg_tfaw    # uncomment when Anuwat has added in fix
-    14:19   ,   0b010100    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly20 == 1); # cfg_tfaw     18
-    14:19   ,   0b010110    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly22 == 1); # cfg_tfaw     18
-    14:19   ,   0b010111    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly23 == 1); # cfg_tfaw     18
-    14:19   ,   0b011000    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly24 == 1); # cfg_tfaw     18
-    14:19   ,   0b011010    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly26 == 1); # cfg_tfaw     18
-    14:19   ,   0b011011    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly27 == 1); # cfg_tfaw     18
-    14:19   ,   0b011110    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly30 == 1); # cfg_tfaw     18
-    14:19   ,   0b100000    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly32 == 1); # cfg_tfaw     18
-    14:19   ,   0b100001    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly33 == 1); # cfg_tfaw     18
+    14:19   ,   ATTR_EFF_DRAM_TFAW,          1             ,   any; # cfg_tfaw    # uncomment when Anuwat has added in fix
+#    14:19   ,   0b010100    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly20 == 1); # cfg_tfaw     18
+#    14:19   ,   0b010110    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly22 == 1); # cfg_tfaw     18
+#    14:19   ,   0b010111    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly23 == 1); # cfg_tfaw     18
+#    14:19   ,   0b011000    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly24 == 1); # cfg_tfaw     18
+#    14:19   ,   0b011010    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly26 == 1); # cfg_tfaw     18
+#    14:19   ,   0b011011    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly27 == 1); # cfg_tfaw     18
+#    14:19   ,   0b011110    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly30 == 1); # cfg_tfaw     18
+#    14:19   ,   0b100000    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly32 == 1); # cfg_tfaw     18
+#    14:19   ,   0b100001    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly33 == 1); # cfg_tfaw     18
     20:23   ,   0b0000      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys0 == 1); # RRSBG_dly    19
     20:23   ,   0b0101      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys5 == 1); # RRSBG_dly    19
     20:23   ,   0b0110      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys6 == 1); # RRSBG_dly    19
