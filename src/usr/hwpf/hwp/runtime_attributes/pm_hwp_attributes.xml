@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: pm_hwp_attributes.xml,v 1.9 2013/09/13 21:07:46 stillgs Exp $ -->
+<!-- $Id: pm_hwp_attributes.xml,v 1.10 2013/12/19 14:43:14 stillgs Exp $ -->
 <!--
     XML file specifying Power Management HWPF attributes.
     These attributes are initialized to zero by the platform and set to a
@@ -791,6 +791,28 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <description>
     Stores the offset in SLW image of this control vector for later use by scripts to control error injection.
     This value is added to the contents of PBABAR2 for given chip to calculated the memory address for this vector per chip.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Stores the offset in SLW image of the halt point for a good Deep Winkle Exit transition.  
+    This is value may used by FAPI code to check that the SLW engine achieved an expected state.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Stores the offset in SLW image of the halt point for a good Deep Sleep Exit transition.  
+    This is value may used by FAPI code to check that the SLW engine achieved an expected state.
     </description>
     <valueType>uint32</valueType>
     <writeable/>

@@ -20,10 +20,8 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.43 2013/11/20 18:52:33 bellows Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.46 2013/12/19 15:53:50 bwieman Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
-
-
 <attributes>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC</id>
@@ -570,6 +568,32 @@
     </chipEcFeature>
   </attribute>
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_RR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano/Venice EC greater than or equal to 0x20 (RR mode)
+      False otherwise:
+        Set LFSR mode
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C10_VER2</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -929,6 +953,49 @@
           <test>LESS_THAN</test>
         </ec>
       </chip>      
+    </chipEcFeature>
+  </attribute>
+    <attribute>
+    <id>ATTR_PROC_EC_PBA_PREFETCH_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    True if chip can support PBA prefetch as HW258436 is fixed
+        Murano EC greater than or equal to 0x21
+        Venice EC greater than or equal to 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x21</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip> 
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>    
+    </chipEcFeature>
+  </attribute>
+    <attribute>
+    <id>ATTR_PROC_EC_OHA_L3_PURGE_ABORT_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    True if chip can support the enablement of L3 purge aborts during Winkle as HW276505 is fixed
+        Not fixed on any Murano EC 
+        Venice EC 0x20 or greater
+    </description>    
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>    
     </chipEcFeature>
   </attribute>
 </attributes>

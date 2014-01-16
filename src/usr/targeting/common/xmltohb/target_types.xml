@@ -221,6 +221,10 @@
     <attribute><id>MRW_MEM_THROTTLE_DENOMINATOR</id></attribute>
     <attribute><id>MRW_MAX_DRAM_DATABUS_UTIL</id></attribute>
     <attribute><id>RECONFIGURE_LOOP</id></attribute>
+    <attribute><id>PM_SYSTEM_IVRMS_ENABLED</id></attribute>
+    <attribute><id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id></attribute>
+    <attribute><id>PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR</id></attribute>
+    <attribute><id>PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR</id></attribute>
 </targetType>
 
 <targetType>

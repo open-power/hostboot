@@ -278,6 +278,12 @@
         <id>MRW_MAX_DRAM_DATABUS_UTIL</id>
         <default>5625</default>
     </attribute>
+    <attribute><id>PM_SYSTEM_IVRMS_ENABLED</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

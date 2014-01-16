@@ -12910,4 +12910,76 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </enumerator>
 </enumerationType>
 
+<attribute>
+    <id>PM_SYSTEM_IVRMS_ENABLED</id>
+    <description>System control to allow (if all other attribute tests yield true values) or categorically disallow IVRM enablement
+     Producer: MRWB
+     Consumer:  p8_build_pstate_datablock.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SYSTEM_IVRMS_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id>
+    <description>Version level of #M that represents the minimum for IVRM characterized parts.
+     If this value is non-zero and the #M version level is less than this value, IVRMs are disabled.
+     If the #M version is greater than or equal to this value, the IVRMs are allowed to be enable from a level of part perspective.
+     Producer: MRWB
+     Consumer:  p8_build_pstate_datablock.C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR</id>
+    <description>
+    Stores the offset in SLW image of the halt point for a good Deep Winkle Exit transition.
+    This is value may used by FAPI code to check that the SLW engine achieved an expected state.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR</id>
+    <description>
+    Stores the offset in SLW image of the halt point for a good Deep Sleep Exit transition.
+    This is value may used by FAPI code to check that the SLW engine achieved an expected state.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

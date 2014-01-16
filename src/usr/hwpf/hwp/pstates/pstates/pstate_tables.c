@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pstate_tables.c,v 1.13 2013/10/30 17:35:57 jimyac Exp $
+// $Id: pstate_tables.c,v 1.14 2014/01/15 17:37:18 jimyac Exp $
 
 /// \file pstate_tables.c
 /// \brief This file contains code used to generate Pstate tables from real or
@@ -755,15 +755,15 @@ lpst_create(const GlobalPstateTable *gpst,
       // --------------------
       // compute power ratios
       // -------------------- 
-      float  sigma = 0;
+      float  sigma = 3;
       float  iac_wc;
       float  iac;
       float  vout;
       float  pwrratio_f;
       uint8_t pwrratio;
       
-      // convert to mV (note: vdd_uv is the max of the vdd values for this lpst entry)
-      vout = (float)(vdd_uv/1000); 
+      // convert to mV and subract 100 mV (note: vdd_uv is the max of the vdd values for this lpst entry)
+      vout = (float)((vdd_uv/1000) - 100); 
             
       // equations from Josh
       iac_wc     = 1.25 * ( 28.5 * 1.25 - 16 ) * ( 1 - 0.05 * 2) * 40/71;        // testsite equation & ratio of testsite to anticipated produ
@@ -1169,6 +1169,7 @@ void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
   double TEMP_UPLIFT;
   double Ical[40][40];
   double Iratio[40][40];
+  double Iratio_clip;
   uint8_t Iratio_int[40][40];  
   int temp;
   uint8_t ratio_val;
@@ -1176,7 +1177,7 @@ void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
   
   NUM_VIN     = i_ivrm_parms->vin_entries_per_vds;
   NUM_VDS     = i_ivrm_parms->vds_region_entries;
-  VIN_MIN     = 800;
+  VIN_MIN     = 600;
   VDS_MIN     = 100;
   LSB_CURRENT = 4.1;
   TEMP_UPLIFT = 1.1;
@@ -1201,24 +1202,30 @@ void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
            Ical[i][j]   = C[0] + C[1]*Vin[i] + C[2]*Vds[j] + C[3]*Vin[i]*Vds[j]; // compute cal current
            Iratio[i][j] = TEMP_UPLIFT * LSB_CURRENT / Ical[i][j];
            
-           temp = (int) (Iratio[i][j]+1/16>3.875 ? 3.875 : Iratio[i][j]+1/16);
-// jwy           dec2bin(temp, 2);
+           // clip at 3.875 and use for both temp calculations
+           Iratio_clip = (Iratio[i][j]+1/16>3.875 ? 3.875 : Iratio[i][j]+1/16); 
+// bug           temp = (int) (Iratio[i][j]+1/16>3.875 ? 3.875 : Iratio[i][j]+1/16); 
+           temp = (int) Iratio_clip; 
+//           printf("%2.2f %2.2f %u ", Ical[i][j], Iratio_clip, temp);
+//           dec2bin(temp, 2);
            ratio_val = 0;
            ratio_val = (temp << 3) & 0x018;          // jwy shift temp left 3 and clear out lower 3 bits - this gets bits 0:1 of value
-           //printf(".");
+//           printf(".");
            
-           temp = (int) ((Iratio[i][j] - temp)*8 + 0.5);
-// jwy           dec2bin(temp, 3);
+           temp = (int) ( (Iratio_clip - temp)*8 + 0.5);
+           temp = temp > 7 ? 7 : temp;  // bug fix - clip to 7 if overflow
+           
+//           dec2bin(temp, 3);
            ratio_val = (temp & 0x07)| ratio_val;     // jwy OR lower 3 bits of temp with upper 2 bits already in 0:1 - this merges bits 2:4 with 0:1 for final value
            Iratio_int[i][j] = ratio_val; 
-//           printf(" %u",ratio_val);
+// jwy           printf(" %u",ratio_val);
 // jwy           printf("\t");
         } else {
            Iratio[i][j]     = 0;
            Iratio_int[i][j] = 0;
 // jwy           printf("0*\t");
         }
-        //printf("%lf\t", Iratio[i][j]);
+// jwy        printf("%lf\t", Iratio[i][j]);
      }
 // jwy     printf("\n");
   }

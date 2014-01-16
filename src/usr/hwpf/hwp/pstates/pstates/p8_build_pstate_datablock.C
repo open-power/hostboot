@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.27 2013/11/14 20:45:55 jimyac Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.28 2014/01/15 17:36:37 jimyac Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -60,7 +60,7 @@ using namespace fapi;
 // ----------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------
-ReturnCode proc_get_mvpd_data    (const Target& i_target, uint32_t attr_mvpd_data[PV_D][PV_W], ivrm_mvpd_t *ivrm_mvpd, uint8_t *present_chiplets, uint8_t *functional_chiplets, uint8_t *poundm_valid);
+ReturnCode proc_get_mvpd_data    (const Target& i_target, uint32_t attr_mvpd_data[PV_D][PV_W], ivrm_mvpd_t *ivrm_mvpd, uint8_t *present_chiplets, uint8_t *functional_chiplets, uint8_t *poundm_valid,  uint8_t *poundm_ver);
 ReturnCode proc_get_attributes   (const Target& i_target, AttributeList *attr_list);
 ReturnCode proc_get_extint_bias  (uint32_t attr_mvpd_data[PV_D][PV_W], const AttributeList *attr, double *volt_int_vdd_bias, double *volt_int_vcs_bias);
 ReturnCode proc_boost_gpst       (PstateSuperStructure *pss, uint32_t attr_boost_percent);
@@ -85,12 +85,14 @@ p8_build_pstate_datablock(const Target& i_target,
 
   AttributeList attr;
   ChipCharacterization* characterization;
-  uint8_t i                     = 0;
-  uint8_t present_chiplets      = 0;
-  uint8_t functional_chiplets   = 0;
-  uint8_t poundm_valid          = 1;  // assume valid until code determines invalid
-  uint8_t lpst_valid            = 1;  // assume valid until code determines invalid
-  uint8_t attr_pm_ivrms_enabled = 0;
+  uint8_t i                        = 0;
+  uint8_t present_chiplets         = 0;
+  uint8_t functional_chiplets      = 0;
+  uint8_t poundm_ver               = 0;    
+  uint8_t poundm_valid             = 1;  // assume valid until code determines invalid
+  uint8_t lpst_valid               = 1;  // assume valid until code determines invalid
+  uint8_t attr_pm_ivrms_enabled_wr = 0;
+  uint8_t attr_pm_ivrms_enabled_rd = 0;
 
   const uint8_t pv_op_order[S132A_POINTS] = PV_OP_ORDER;
 
@@ -149,7 +151,7 @@ p8_build_pstate_datablock(const Target& i_target,
     memset(attr_mvpd_voltage_control, 0, sizeof(attr_mvpd_voltage_control));
     memset(&ivrm_mvpd,                0, sizeof(ivrm_mvpd));
 
-    l_rc = proc_get_mvpd_data(i_target, attr_mvpd_voltage_control, &ivrm_mvpd, &present_chiplets, &functional_chiplets, &poundm_valid);
+    l_rc = proc_get_mvpd_data(i_target, attr_mvpd_voltage_control, &ivrm_mvpd, &present_chiplets, &functional_chiplets, &poundm_valid, &poundm_ver);
     if (l_rc) {
       break;
     }
@@ -342,7 +344,7 @@ p8_build_pstate_datablock(const Target& i_target,
         break;
       }
       else if (rc == -LPST_GPST_WARNING) {
-        FAPI_IMP("No Local Pstate Generated  - Global Pstate Table is completely within Deadzone" );
+        FAPI_IMP("No Local Pstate Generated  - Global Pstate Table is completely within Deadzone - set PSTATE_NO_INSTALL_LPSA" );
 
         // indicate no LPST installed in PSS
         (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
@@ -433,25 +435,35 @@ p8_build_pstate_datablock(const Target& i_target,
     //  -------------------
     //  uint32_t ATTR_PM_PSTATE0_FREQUENCY // Binary in Khz
     FAPI_IMP("Writing Attribute Values");
-    
-    // check to see if IVRMs should be enabled based on VPD findings
-    if (poundm_valid && lpst_valid) 
-      attr_pm_ivrms_enabled = 1;
-    else 
-      attr_pm_ivrms_enabled = 0;
-    
-    SETATTR(l_rc, ATTR_PM_IVRMS_ENABLED, "ATTR_PM_IVRMS_ENABLED", &i_target, attr_pm_ivrms_enabled);   
 
-    // Read back attribute to see if overridden 
-    GETATTR (l_rc, ATTR_PM_IVRMS_ENABLED, "ATTR_PM_IVRMS_ENABLED", &i_target, attr_pm_ivrms_enabled);
-
-    if (attr_pm_ivrms_enabled && (!poundm_valid || !lpst_valid)) {
-      FAPI_INF("WARNING : Attribute ATTR_PM_IVRMS_ENABLED was overridden to 1, but #V or #M data is not valid for IVRMs");
+    // check if IVRMs should be enabled
+    if (poundm_valid && lpst_valid &&                              // IVRMs should be enabled based on VPD findings
+        attr.attr_pm_system_ivrms_enabled &&                       // Allowed by system
+        (attr.attr_pm_system_ivrm_vpd_min_level != 0) &&           // Attribute has a valid value
+        (attr.attr_pm_system_ivrm_vpd_min_level >= poundm_ver) &&  // Hardware characterized
+        attr.attr_chip_ec_feature_ivrm_winkle_bug)                 // Hardware has logic fixes
+    {
+      attr_pm_ivrms_enabled_wr = 1;
+    }
+    else
+    { 
+      attr_pm_ivrms_enabled_wr = 0;
+      FAPI_INF(" ATTR_PM_IVRMS_ENABLED will be set to 0 - set PSTATE_NO_INSTALL_LPSA");
       // indicate no LPST installed in PSS
       (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
-                                       PSTATE_NO_INSTALL_LPSA);    
+                                       PSTATE_NO_INSTALL_LPSA);      
     }
-    else if (!attr_pm_ivrms_enabled && poundm_valid && lpst_valid) {
+    
+    // write ATTR_PM_IVRMS_ENABLED
+    SETATTR(l_rc, ATTR_PM_IVRMS_ENABLED, "ATTR_PM_IVRMS_ENABLED", &i_target, attr_pm_ivrms_enabled_wr);   
+
+    // Read back attribute to see if overridden 
+    GETATTR (l_rc, ATTR_PM_IVRMS_ENABLED, "ATTR_PM_IVRMS_ENABLED", &i_target, attr_pm_ivrms_enabled_rd);
+
+    if (attr_pm_ivrms_enabled_rd && !attr_pm_ivrms_enabled_wr) {
+      FAPI_INF("WARNING : Attribute ATTR_PM_IVRMS_ENABLED was overridden to 1, but #V or #M data is not valid for IVRMs");
+    }
+    else if (!attr_pm_ivrms_enabled_rd && attr_pm_ivrms_enabled_wr) {
       FAPI_INF("WARNING : ATTR_PM_IVRMS_ENABLED was overriden to 0, but #V or #M data are valid - set PSTATE_NO_INSTALL_LPSA");
       // indicate no LPST installed in PSS
       (*io_pss).gpst.options.options = revle32(revle32((*io_pss).gpst.options.options) |
@@ -542,7 +554,12 @@ ReturnCode proc_get_attributes(const Target& i_target,
     // Read chip ec feature
     DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_RESONANT_CLK_VALID, &i_target, attr_chip_ec_feature_resonant_clk_valid);
     DATABLOCK_GET_ATTR(ATTR_PROC_EC_CORE_HANG_PULSE_BUG       , &i_target, attr_proc_ec_core_hang_pulse_bug);
-
+    DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_IVRM_WINKLE_BUG   , &i_target, attr_chip_ec_feature_ivrm_winkle_bug);
+    
+    // Read IVRM attributes 
+    DATABLOCK_GET_ATTR(ATTR_PM_SYSTEM_IVRMS_ENABLED           , NULL, attr_pm_system_ivrms_enabled);
+    DATABLOCK_GET_ATTR(ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL      , NULL, attr_pm_system_ivrm_vpd_min_level);
+    
     // --------------------------------------------------------------
     // do basic attribute value checking and generate error if needed
     // --------------------------------------------------------------
@@ -675,7 +692,8 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
                                      ivrm_mvpd_t *ivrm_mvpd,
                                      uint8_t     *present_chiplets,
                                      uint8_t     *functional_chiplets,
-                                     uint8_t     *poundm_valid)
+                                     uint8_t     *poundm_valid,
+                                     uint8_t     *poundm_ver)
 {
   ReturnCode l_rc;
   std::vector<fapi::Target>       l_exChiplets;
@@ -692,7 +710,6 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
   uint8_t    i                = 0;
   uint8_t    ii               = 0;
   uint8_t    first_chplt      = 1;
-  uint8_t    version_pdm      = 0;
   uint8_t    bucket_id        = 0;
   uint16_t   cal_data[4];
 
@@ -856,19 +873,19 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
         l_buffer_pdm_inc = l_buffer_pdm;
 
         // get #M version and advance pointer 1-byte to beginning of #M data
-        version_pdm = *l_buffer_pdm_inc;
-        ivrm_mvpd->header.version = version_pdm ;
+        *poundm_ver = *l_buffer_pdm_inc;
+        ivrm_mvpd->header.version = *poundm_ver ;
         l_buffer_pdm_inc++;
 
         // loop over 13 entries of #M data with 4 measurements per entry
-        FAPI_INF("#M chiplet = %u  version = %u", l_chipNum, version_pdm);
+        FAPI_INF("#M chiplet = %u  version = %u", l_chipNum, *poundm_ver);
 
         for (i=0; i < POUNDM_POINTS; i++) {
 
           for (ii=0; ii<4; ii++) {
             cal_data[ii] = UINT16_GET(l_buffer_pdm_inc);
 
-            if (version_pdm == 2)
+            if (*poundm_ver == 2)
               l_buffer_pdm_inc+= 4;
             else
               l_buffer_pdm_inc+= 2;
@@ -882,9 +899,8 @@ ReturnCode proc_get_mvpd_data(const Target&     i_target,
 
           FAPI_INF("#M data (hex & dec) = 0x%04x 0x%04x 0x%04x 0x%04x    %5u %5u %5u %5u", cal_data[0], cal_data[1], cal_data[2], cal_data[3], cal_data[0], cal_data[1], cal_data[2], cal_data[3]);
           
-          // #M validity check - not valid if any measurements are 0
-          if (cal_data[0] == 0 || cal_data[1] == 0 ||
-              cal_data[2] == 0 || cal_data[3] == 0 )
+          // #M validity check - not valid if measurements are 0 (exception : cal_data[0](Vg) can be 0)
+          if (cal_data[1] == 0 || cal_data[2] == 0 || cal_data[3] == 0 )
           {          
             FAPI_INF("**** Warning : #M has zero valued measurements - IVRMs will not be enabled");
             *poundm_valid = 0;         

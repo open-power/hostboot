@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.H,v 1.12 2013/11/14 20:45:59 jimyac Exp $
+// $Id: p8_build_pstate_datablock.H,v 1.13 2014/01/15 17:37:16 jimyac Exp $
 #ifndef _P8_BUILD_PSTATE_DATABLOCK_H_
 #define _P8_BUILD_PSTATE_DATABLOCK_H_
 
@@ -102,6 +102,9 @@ typedef struct {
 
   uint8_t  attr_chip_ec_feature_resonant_clk_valid;
   uint8_t  attr_proc_ec_core_hang_pulse_bug;
+  uint8_t  attr_chip_ec_feature_ivrm_winkle_bug;
+  uint8_t  attr_pm_system_ivrms_enabled;
+  uint8_t  attr_pm_system_ivrm_vpd_min_level;  
 
 } AttributeList;
 
