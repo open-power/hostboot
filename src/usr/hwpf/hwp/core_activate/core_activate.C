@@ -74,6 +74,9 @@
 #include    "proc_post_winkle.H"
 #include    "proc_check_slw_done.H"
 
+// mss_scrub support
+#include    <diag/prdf/prdfMain.H>
+
 namespace   CORE_ACTIVATE
 {
 
@@ -451,23 +454,27 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 //
 //  Wrapper function to call mss_scrub
 //
-void*    call_mss_scrub( void    *io_pArgs )
+void * call_mss_scrub( void * io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
+    IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_mss_scrub entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scrub entry" );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "Note: call_mss_scrub is not directly executed by Hostboot "
-               "but is instead triggered by PRD. "
-               "Cronus executes this HWP directly" );
+    errlHndl_t l_errl = PRDF::startScrub();
+    if ( NULL != l_errl )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Error returned from call to PRDF::startScrub" );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_mss_scrub exit" );
+        l_stepError.addErrorDetails( l_errl );
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scrub exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 
