@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -503,6 +503,7 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         g_ActionArgMap["DUMP_CONTENT_HW"]           = 0x40000000;
         g_ActionArgMap["DUMP_CONTENT_SH"]           = 0x20000000;
         g_ActionArgMap["DUMP_CONTENT_HWSUPERNOVA"]  = 0x00001000;
+        g_ActionArgMap["DUMP_CONTENT_CORE"]         = 0x10000000;
 #else
         // Initialize Dump values. //@ecdf
         #include <hdctContent.H>

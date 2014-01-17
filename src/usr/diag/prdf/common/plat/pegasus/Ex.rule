@@ -582,48 +582,48 @@ rule CoreFir
     RECOVERABLE: COREFIRWOF & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
-#Based on RAS SpreadSheet p8dd1_mss_FFDC_51.xls
+#Based on RAS SpreadSheet p8dd1_mss_FFDC_72.xls
 group gCoreFir filter singlebit
 {
     /** COREFIR[0]
      *  IFU_SRAM_PARITY_ERR: SRAM recoverable error (ICACHE parity error, etc.)
      */
-    (CoreFir, bit(0)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(0)) ? calloutExThr5pHr;
 
     /** COREFIR[1]
      *  IF_SETDELETE_ERR: set deleted
      */
-    (CoreFir, bit(1)) ? SelfHighThr1;
+    (CoreFir, bit(1)) ? calloutExThr1;
 
     /** COREFIR[2]
      *  IF_RFILE_REC_ERR: RegFile recoverable error
      */
-    (CoreFir, bit(2)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(2)) ? calloutExThr5pHr;
 
     /** COREFIR[3]
      *  IF_RFILE_CHKSTOP_ERR: RegFile core check stop
      */
-    (CoreFir, bit(3)) ? SelfHighThr1;
+    (CoreFir, bit(3)) ? calloutExThr1;
 
     /** COREFIR[4]
      *  IF_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(4)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(4)) ? calloutExThr5pHr;
 
     /** COREFIR[5]
      *  IF_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(5)) ? SelfHighThr1;
+    (CoreFir, bit(5)) ? calloutExThr1;
 
     /** COREFIR[6]
      *  IF_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(6)) ? SelfMedThr32PerDay;
+    (CoreFir, bit(6)) ? calloutExThr32pDay;
 
     /** COREFIR[7]
      *  IF_CHKSTOP_ERR: system check stop
      */
-    (CoreFir, bit(7)) ? SelfHighThr1;
+    (CoreFir, bit(7)) ? calloutExThr1;
 
     /** COREFIR[8]
      *  RECOV_FIR_CHKSTOP_ERR: recovery core check stop
@@ -633,33 +633,33 @@ group gCoreFir filter singlebit
     /** COREFIR[9]
      *  SD_RFILE_REC_ERR: RegFile recoverable error
      */
-    (CoreFir, bit(9)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(9)) ? calloutExThr5pHr;
 
     /** COREFIR[10]
      *  SD_RFILE_CHKSTOP_ERR: RegFile core check stop (mapper error)
      */
-    (CoreFir, bit(10)) ? SelfHighThr1;
+    (CoreFir, bit(10)) ? calloutExThr1;
 
     /** COREFIR[11]
      *  SD_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(11)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(11)) ? calloutExThr5pHr;
 
     /** COREFIR[12]
      *  SD_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(12)) ? SelfHighThr1;
+    (CoreFir, bit(12)) ? calloutExThr1;
 
     /** COREFIR[13]
      *  SD_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(13)) ? SelfMedThr32PerDay;
+    (CoreFir, bit(13)) ? calloutExThr32pDay;
 
     /** COREFIR[14]
      *  SD_MCHK_AND_ME_EQ_0: MCHK received while ME=0 non recoverable
      */
     # FIXME: RTC 85697: Make sure this is SUE-CS bit
-    (CoreFir, bit(14)) ? calloutSelfHighSUE;
+    (CoreFir, bit(14)) ? calloutExThr1Sue;
 
     /** COREFIR[15]
      *  SD_PC_L2_UE_ERR: UE from L2
@@ -684,7 +684,7 @@ group gCoreFir filter singlebit
     /** COREFIR[19]
      *  FX_GPR_REC_ERR: GPR recoverable error
      */
-    (CoreFir, bit(19)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(19)) ? calloutExThr5pHr;
 
     /** COREFIR[20]
      *  UNUSED_3
@@ -694,37 +694,37 @@ group gCoreFir filter singlebit
     /** COREFIR[21]
      *  FX_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(21)) ? SelfHighThr1;
+    (CoreFir, bit(21)) ? calloutExThr1;
 
     /** COREFIR[22]
      *  FX_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(22)) ? SelfMedThr32PerDay;
+    (CoreFir, bit(22)) ? calloutExThr32pDay;
 
     /** COREFIR[23]
      *  VS_VRF_REC_ERR: VRF recoverable error
      */
-    (CoreFir, bit(23)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(23)) ? calloutExThr5pHr;
 
     /** COREFIR[24]
      *  VS_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(24)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(24)) ? calloutExThr5pHr;
 
     /** COREFIR[25]
      *  VS_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(25)) ? SelfHighThr1;
+    (CoreFir, bit(25)) ? calloutExThr1;
 
     /** COREFIR[26]
      *  RECOV_IN_MAINT_ERR: 26 = recov_in_maint
      */
-    (CoreFir, bit(26)) ? callout2ndLvlMed;
+    (CoreFir, bit(26)) ? callout2ndLvlDumpSh;
 
     /** COREFIR[27]
      *  DU_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(27)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(27)) ? calloutExThr5pHr;
 
     /** COREFIR[28]
      *  DU_LOG_CHKSTOP_ERR: logic core check stop
@@ -734,22 +734,22 @@ group gCoreFir filter singlebit
     /** COREFIR[29]
      *  LSU_SRAM_PARITY_ERR: SRAM recoverable error (DCACHE parity error, etc.)
      */
-    (CoreFir, bit(29)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(29)) ? calloutExThr5pHr;
 
     /** COREFIR[30]
      *  LS_SETDELETE_ERR: set deleted
      */
-    (CoreFir, bit(30)) ? SelfHighThr1;
+    (CoreFir, bit(30)) ? calloutExThr1;
 
     /** COREFIR[31]
      *  LS_RFILE_REC_ERR: RegFile recoverable error
      */
-    (CoreFir, bit(31)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(31)) ? calloutExThr5pHr;
 
     /** COREFIR[32]
      *  LS_RFILE_CHKSTOP_ERR: RegFile core check stop
      */
-    (CoreFir, bit(32)) ? SelfHighThr1;
+    (CoreFir, bit(32)) ? calloutExThr1;
 
     /** COREFIR[33]
      *  LS_TLB_MULTIHIT_ERR: special recovery error TLB multi hit error occurred
@@ -769,32 +769,32 @@ group gCoreFir filter singlebit
     /** COREFIR[36]
      *  FORWARD_PROGRESS_ERR: forward progress error
      */
-    (CoreFir, bit(36)) ? SelfHighThr1;
+    (CoreFir, bit(36)) ? calloutExThr1;
 
     /** COREFIR[37]
      *  LS_LOG_REC_ERR: logic recoverable error
      */
-    (CoreFir, bit(37)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(37)) ? calloutExThr5pHr;
 
     /** COREFIR[38]
      *  LS_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(38)) ? SelfHighThr1;
+    (CoreFir, bit(38)) ? calloutExThr1;
 
     /** COREFIR[39]
      *  LS_NOT_MT_REC_ERR: recoverable if not in MT window
      */
-    (CoreFir, bit(39)) ? SelfMedThr32PerDay;
+    (CoreFir, bit(39)) ? calloutExThr32pDay;
 
     /** COREFIR[40]
      *  LS_NOT_CI_REC_ERR: recoverable if not in CI window
      */
-    (CoreFir, bit(40)) ? SelfMedThr32PerDay;
+    (CoreFir, bit(40)) ? calloutExThr32pDay;
 
     /** COREFIR[41]
      *  LS_CHKSTOP_ERR: system check stop
      */
-    (CoreFir, bit(41)) ? SelfHighThr1;
+    (CoreFir, bit(41)) ? calloutExThr1;
 
     /** COREFIR[42]
      *  LS_GPR_RCV_CHKSTOP_ERR: UE from GPR/VRF recovery process
@@ -809,12 +809,12 @@ group gCoreFir filter singlebit
     /** COREFIR[44]
      *  FIR_LOG_RECOV_ERR: logic recoverable error
      */
-    (CoreFir, bit(44)) ? SelfHighThr5PerHour;
+    (CoreFir, bit(44)) ? calloutExThr5pHr;
 
     /** COREFIR[45]
      *  PC_LOG_CHKSTOP_ERR: PC logic core check stop
      */
-    (CoreFir, bit(45)) ? SelfHighThr1;
+    (CoreFir, bit(45)) ? calloutExThr1;
 
     /** COREFIR[46]
      *  RESERVED
@@ -829,7 +829,7 @@ group gCoreFir filter singlebit
     /** COREFIR[48]
      *  SPRD_FIR_HYP_RES_P_ERR: Hypervisor Resource error - core check stop
      */
-    (CoreFir, bit(48)) ? SelfHighThr1;
+    (CoreFir, bit(48)) ? calloutExThr1;
 
     /** COREFIR[49]
      *  TFC_FIR_P_ERR: TFAC parity error
@@ -849,7 +849,7 @@ group gCoreFir filter singlebit
     /** COREFIR[52]
      *  CORE_HUNG: Hang recovery failed (core check stop)
      */
-    (CoreFir, bit(52)) ? SelfHighThr1;
+    (CoreFir, bit(52)) ? calloutExThr1;
 
     /** COREFIR[53]
      *  CORE_HANG_DETECT: Internal hang detected (core hang)
@@ -859,7 +859,7 @@ group gCoreFir filter singlebit
     /** COREFIR[54]
      *  AMBI_HANG_DETECT: Hang detected unknown source
      */
-    (CoreFir, bit(54)) ? calloutSelfAndLevel2MedThr1;
+    (CoreFir, bit(54)) ? calloutExAndSecLvlThr1;
 
     /** COREFIR[55]
      *  NEST_HANG_DETECT: External Hang detected
@@ -1116,12 +1116,12 @@ group gL3Fir filter singlebit
     /** L3FIR[0]
      *  PowerBus Command Error - Overrun condition.
      */
-    (L3Fir, bit(0)) ? SelfLowLevel2MedThr1;
+    (L3Fir, bit(0)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** L3FIR[1]
      *  PowerBus Data Error - Overrun condition.
      */
-    (L3Fir, bit(1)) ? SelfLowLevel2MedThr1;
+    (L3Fir, bit(1)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** L3FIR[2]
      *  Spare
@@ -1201,7 +1201,7 @@ group gL3Fir filter singlebit
     /** L3FIR[16]
      *  L3 Store Address Error
      */
-    (L3Fir, bit(16)) ? SelfLowLevel2MedThr1;
+    (L3Fir, bit(16)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** L3FIR[17]
      *  L3 Load Address Error (from Prefetch Machine)
@@ -1236,7 +1236,7 @@ group gL3Fir filter singlebit
     /** L3FIR[23]
      *  L3 Machine Hang
      */
-    (L3Fir, bit(23)) ? SelfLowLevel2MedThr1;
+    (L3Fir, bit(23)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** L3FIR[24]
      *  L3 Hw Control Error
@@ -1246,7 +1246,7 @@ group gL3Fir filter singlebit
     /** L3FIR[25]
      *  L3 Snoop Sw error detected
      */
-    (L3Fir, bit(25)) ? SelfLowLevel2MedThr1;
+    (L3Fir, bit(25)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** L3FIR[26]
      *  L3 Line Delete CE done
@@ -1296,7 +1296,7 @@ group gL3Fir filter singlebit
     /** L3FIR[35]
      *  L3 HA Log Overflow
      */
-    (L3Fir, bit(35)) ? callout2ndLvlMedThr1;
+    (L3Fir, bit(35)) ? callout2ndLvlDumpSW;
 
     /** L3FIR[36]
      *  SCOM_ERR: scom error
@@ -1330,18 +1330,18 @@ group gNcuFir filter singlebit
     /** NCUFIR[1]
      *  TLBIE_SW_ERR: TLBIE received illegal AP/LP field from core.
      */
-    (NcuFir, bit(1)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(1)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[2]
-     *  ST_ADDR_ERR: Store address machine or TLBIE/sync machine received 
+     *  ST_ADDR_ERR: Store address machine or TLBIE/sync machine received
      *  addr_err cresp.
      */
-    (NcuFir, bit(2)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(2)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[3]
      *  LD_ADDR_ERR: Load address machine received addr_err cresp.
      */
-    (NcuFir, bit(3)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(3)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[4]
      *  ST_FOREIGN0_ACK_DEAD: Store received ack_dead on foreign link0.
@@ -1371,12 +1371,12 @@ group gNcuFir filter singlebit
     /** NCUFIR[9]
      *  STORE_TIMEOUT: Store timed out on PB.
      */
-    (NcuFir, bit(9)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(9)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[10]
      *  TLBIE_MASTER_TIMEOUT: TLBIE master timed out on PB.
      */
-    (NcuFir, bit(10)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(10)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[11]
      *  TLBIE_SNOOP_TIMEOUT: TLBIE snooper timed out waiting for core.
@@ -1386,22 +1386,22 @@ group gNcuFir filter singlebit
     /** NCUFIR[12]
      *  HTM_IMA_TIMEOUT: HTM/IMA address machine timed out on PB.
      */
-    (NcuFir, bit(12)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(12)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[13]
      *  IMA_CRESP_ADDR_ERR: IMA received addr_err cresp.
      */
-    (NcuFir, bit(13)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(13)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[14]
      *  IMA_FOREIGN0_ACK_DEAD: IMA received ack_dead on foreign link0.
      */
-    (NcuFir, bit(14)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(14)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[15]
      *  IMA_FOREIGN1_ACK_DEAD: IMA received ack_dead on foreign link1.
      */
-    (NcuFir, bit(15)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(15)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[16]
      *  HTM_GOT_ACK_DEAD: HTM received ack_dead on any foreign link.
@@ -1417,7 +1417,7 @@ group gNcuFir filter singlebit
     /** NCUFIR[18]
      *  TLBIE_CONTROL_ERR: TLBIE control error.
      */
-    (NcuFir, bit(18)) ? SelfLowLevel2MedThr1;
+    (NcuFir, bit(18)) ? calloutExLowSecLvlThr1MedDumpSh;
 
     /** NCUFIR[19|20|21|22|23]
      *  SPARE
@@ -1596,4 +1596,52 @@ actionclass calloutParentChipHighThr32
 {
     calloutParentProcHigh;
     threshold32pday;
+};
+
+/** Dump Core */
+actionclass dumpCore
+{
+    dump( DUMP_CONTENT_CORE );
+};
+
+/** callout core, threshold 5 per day, and initiate core dump*/
+actionclass calloutExThr5pHr
+{
+    SelfHighThr5PerHour;
+    dumpCore;
+};
+
+/** callout core, threshold 1 and initiate core dump*/
+actionclass calloutExThr1
+{
+    SelfHighThr1;
+    dumpCore;
+};
+
+/** callout core, threshold 32per day and initiate core dump*/
+actionclass calloutExThr32pDay
+{
+    SelfMedThr32PerDay;
+    dumpCore;
+};
+
+/** callout core, threshold 1, and initiate core dump*/
+actionclass calloutExThr1Sue
+{
+    calloutSelfHighSUE;
+    dumpCore;
+};
+
+/** callout Ex,Sec Level on first instance ,initiate software
+ *  and Hardware dump */
+actionclass calloutExAndSecLvlThr1
+{
+    calloutSelfAndLevel2MedThr1;
+    dumpSH;
+};
+
+actionclass calloutExLowSecLvlThr1MedDumpSh
+{
+    SelfLowLevel2MedThr1;
+    dumpSH;
 };

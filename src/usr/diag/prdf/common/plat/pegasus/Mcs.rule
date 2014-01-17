@@ -158,7 +158,7 @@ chip Mcs
 
 ################################################################################
 # PB Chiplet MCIFIR
-# Reviewed p8dd1_mss_FFDC_59.xls on 10/07/13
+# Reviewed p8dd1_mss_FFDC_72.xls on 01/16/14
 ################################################################################
 
 rule MciFir
@@ -320,7 +320,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[27]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
      */
-    (MciFir, bit(27)) ? callout2ndLvlMedThr1;
+    (MciFir, bit(27)) ? callout2ndLvlDumpSh;
 
     /** MCIFIR[28]
      *  MCIFIRQ_MULTIPLE_RCMD_OR_CRESP_ACTIVE
@@ -458,6 +458,7 @@ actionclass calloutConnCenTh1
 {
     callout(connected(TYPE_MEMBUF), MRU_MED);
     threshold1;
+    dumpHwMembuf;
 };
 
 /** Callout the DMI bus (MEDA) */
@@ -466,6 +467,7 @@ actionclass calloutDmiBus
     calloutSelfMedA;
     callout(connected(TYPE_MEMBUF), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
 };
 
 /** Clear MBS SecondaryBits and calloutDmiBusTh1 */
@@ -475,7 +477,7 @@ actionclass clearSecMbsBitsCalloutDmiBusTh1
     calloutDmiBusTh1;
 };
 
-/** Callout the DMI bus (MEDA), threshold 1 */
+/** Callout the DMI bus (MEDA), threshold 1*/
 actionclass calloutDmiBusTh1
 {
     calloutDmiBus;
@@ -500,12 +502,5 @@ actionclass CalloutDmiBusAndThr2pd
 actionclass analyzeSpareBitAndThr
 {
     try( funccall("checkSpareBit"), CalloutDmiBusAndThr2pd );
-};
-
-/** Callout 2nd Level and dump SW */
-actionclass callout2ndLvlDumpSW
-{
-    callout2ndLvlMedThr1;
-    dumpSW;
 };
 

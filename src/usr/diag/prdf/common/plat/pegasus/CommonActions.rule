@@ -221,19 +221,6 @@ actionclass calloutSelfAndLevel2MedThr1
     threshold1;
 };
 
-actionclass calloutProcLevel2MedThr1
-{
-    calloutSelfLow;
-    callout2ndLvlMed;
-    threshold1;
-};
-
-actionclass calloutProcHighThr1SUE
-{
-    calloutSelfHigh;
-    SUEGenerationPoint;
-    threshold1;
-};
 
 /** Callout 2nd level support of afer 32 events per day */
 actionclass callout2ndLvlMedThr32perDay
@@ -272,6 +259,30 @@ actionclass dumpSW
     dump(DUMP_CONTENT_SW);
 };
 
+
+/** Dump hardware content for memory buffer */
+actionclass dumpHwMembuf
+{
+    dump( DUMP_CONTENT_HWSUPERNOVA );
+};
+
+################################################################################
+#                              Callout sec lvl support with dump               #
+################################################################################
+
+/** callout second lvl on first instance, initiaite SH dump */
+actionclass callout2ndLvlDumpSh
+{
+    callout2ndLvlMedThr1;
+    dumpSH;
+};
+
+/** Callout 2nd Level and dump SW */
+actionclass callout2ndLvlDumpSW
+{
+    callout2ndLvlMedThr1;
+    dumpSW;
+};
 ################################################################################
 #                               Default callouts                               #
 ################################################################################

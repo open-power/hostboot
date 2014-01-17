@@ -254,7 +254,7 @@ group gPbenFir filter singlebit
     /** PBENFIR[15]
      *  X_LINK_CR_OVERFLOW: x link command/response/data buffer overflow
      */
-    (PbenFir, bit(15)) ? calloutProcLevel2MedThr1;
+    (PbenFir, bit(15)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PBENFIR[16]
      *  X0_LINK_FMR_ERR: x0 link framer error
@@ -807,4 +807,5 @@ actionclass thresholdAndMask_xbus2 { calloutXbus2Interface; thresholdAndMask; };
 
 /** Callout XBUS 3 with "Threshold and Mask" policy. */
 actionclass thresholdAndMask_xbus3 { calloutXbus3Interface; thresholdAndMask; };
+
 

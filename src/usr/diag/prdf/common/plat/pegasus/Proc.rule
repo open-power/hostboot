@@ -406,3 +406,35 @@ actionclass analyzeEx13 { analyze(connected(TYPE_EX, 13)); };
 /** Analyze connected EX14 */
 actionclass analyzeEx14 { analyze(connected(TYPE_EX, 14)); };
 
+actionclass calloutProcLevel2MedThr1
+{
+    calloutSelfLow;
+    callout2ndLvlMed;
+    threshold1;
+    dumpSH;
+};
+
+/** callout Proc with low priority ,Sec level Med priority, Thr1
+ *  and dump type SH */
+actionclass calloutProcLevel2MedThr1dumpSh
+{
+    calloutProcLevel2MedThr1;
+    dumpSH;
+};
+
+/** callout Proc with low priority ,Sec level Med priority, Thr 32per day
+ *  and dump type SH */
+actionclass calloutProcLevel2MedThr32dumpSh
+{
+    calloutSelfLow;
+    callout2ndLvlMed;
+    threshold32pday;
+    dumpSH;
+};
+
+actionclass calloutProcHighThr1SUE
+{
+    calloutSelfHigh;
+    SUEGenerationPoint;
+    threshold1;
+};

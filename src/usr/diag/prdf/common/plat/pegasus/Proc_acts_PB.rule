@@ -1360,7 +1360,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[9]
      *  INVALID_CRESP
      */
-    (PsiHbFir, bit(9)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(9)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[10]
      *  PB_DATA_TIME_OUT
@@ -1380,7 +1380,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[13]
      *  UNEXPECTED_PB
      */
-    (PsiHbFir, bit(13)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(13)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[14]
      *  INTERRUPT_REG_CHANGE_WHILE_ACTIVE
@@ -1390,32 +1390,32 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[15]
      *  INTERRUPT0_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(15)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(15)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[16]
      *  INTERRUPT1_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(16)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(16)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[17]
      *  INTERRUPT2_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(17)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(17)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[18]
      *  INTERRUPT3_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(18)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(18)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[19]
      *  INTERRUPT4_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(19)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(19)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[20]
      *  INTERRUPT5_ADDRESS_ERROR
      */
-    (PsiHbFir, bit(20)) ? calloutProcLevel2MedThr1;
+    (PsiHbFir, bit(20)) ? calloutProcLevel2MedThr1dumpSh;
 
     /** PSIHBFIR[21]
      *  TCBR_TP_PSI_GLB_ERR_0
@@ -1431,7 +1431,7 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[23]
      *  UPSTREAM_FIR
      */
-    (PsiHbFir, bit(23)) ? callout2ndLvlMedThr32perDay;
+    (PsiHbFir, bit(23)) ? calloutProcLevel2MedThr32dumpSh;
 
     /** PSIHBFIR[24|25|26]
      *  SPARE_FIR
@@ -2730,7 +2730,7 @@ group gIomcFir_0 filter singlebit
 ################################################################################
 # PB Chiplet IOMCFIR_1
 ################################################################################
-# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
+# RAS spreadsheet: p8dd1_mss_FFDC_72_ reviewd.xls on Jan 18,2014
 
 rule IomcFir_1
 {
@@ -2933,6 +2933,8 @@ actionclass calloutDmiBus0
     callout(connected(TYPE_MCS,    0), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 0), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
+
 };
 
 /** Callout the DMI bus 1 */
@@ -2941,6 +2943,7 @@ actionclass calloutDmiBus1
     callout(connected(TYPE_MCS,    1), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 1), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 2 */
@@ -2949,6 +2952,7 @@ actionclass calloutDmiBus2
     callout(connected(TYPE_MCS,    2), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 2), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 3 */
@@ -2957,6 +2961,7 @@ actionclass calloutDmiBus3
     callout(connected(TYPE_MCS,    3), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 3), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 4 */
@@ -2965,6 +2970,7 @@ actionclass calloutDmiBus4
     callout(connected(TYPE_MCS,    4), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 4), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 5 */
@@ -2973,6 +2979,7 @@ actionclass calloutDmiBus5
     callout(connected(TYPE_MCS,    5), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 5), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 6 */
@@ -2981,6 +2988,7 @@ actionclass calloutDmiBus6
     callout(connected(TYPE_MCS,    6), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 6), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 7 */
@@ -2989,6 +2997,7 @@ actionclass calloutDmiBus7
     callout(connected(TYPE_MCS,    7), MRU_MEDA);
     callout(connected(TYPE_MEMBUF, 7), MRU_MEDA);
     calloutDmiBusSymFru;
+    dumpHwMembuf;
 };
 
 /** Callout the DMI bus 0, threshold 1 */
