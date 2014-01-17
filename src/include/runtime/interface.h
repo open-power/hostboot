@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,6 +33,9 @@
  *
  *  @note This file must be in C rather than C++.
  */
+/** Current interface version. */
+#define HOSTBOOT_RUNTIME_INTERFACE_VERSION 1
+#ifndef __HOSTBOOT_RUNTIME_INTERFACE_VERSION_ONLY
 
 #include <stdint.h>
 
@@ -44,6 +47,9 @@
  */
 typedef struct hostInterfaces
 {
+    /** Interface version. */
+    uint64_t interfaceVersion;
+
     /** Put a string to the console. */
     void (*puts)(const char*);
     /** Critical failure in runtime execution. */
@@ -105,20 +111,31 @@ typedef struct hostInterfaces
      */
     int (*lid_unload)(void*);
 
-    /** Get address of VPD image
-     * @return physical address of VPD image
-     */
-    uint64_t (*get_vpd_image_addr)();
+    /** Get the address of a reserved memory region by its devtree name.
+     *
+     *  @param[in] Devtree name (ex. "ibm,hbrt-vpd-image")
+     *  @return physical address of region (or NULL).
+     **/
+    uint64_t (*get_reserved_mem)(const char*);
+
+    // Reserve some space for future growth.
+    void (*reserved[32])(void);
 
 } hostInterfaces_t;
 
 typedef struct runtimeInterfaces
 {
+    /** Interface version. */
+    uint64_t interfaceVersion;
+
     /** Execute CxxTests that may be contained in the image.
      *
      *  @param[in] - Pointer to CxxTestStats structure for results reporting.
      */
     void (*cxxtestExecute)(void*);
+
+    // Reserve some space for future growth.
+    void (*reserved[32])(void);
 
 } runtimeInterfaces_t;
 
@@ -127,4 +144,5 @@ extern hostInterfaces_t* g_hostInterfaces;
 runtimeInterfaces_t* getRuntimeInterfaces();
 #endif
 
-#endif
+#endif //__HOSTBOOT_RUNTIME_INTERFACE_VERSION_ONLY
+#endif //__RUNTIME__INTERFACE_H

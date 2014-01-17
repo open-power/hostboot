@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -78,7 +78,10 @@ runtimeInterfaces_t* _main(hostInterfaces_t* intf, uint64_t base)
          i < ALIGN_PAGE_DOWN((uint64_t)&data_load_address);
          i += PAGESIZE)
     {
-        (intf->set_page_execute)(reinterpret_cast<void*>(i));
+        if (NULL != intf->set_page_execute)
+        {
+            (intf->set_page_execute)(reinterpret_cast<void*>(i));
+        }
     }
 
     // Tail-recurse to real entry point.
@@ -95,11 +98,15 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // Call C++ constructors.
     rt_cppBootstrap();
 
+    // Initialize runtime interfaces.
+    runtimeInterfaces_t* rtInterfaces = getRuntimeInterfaces();
+    rtInterfaces->interfaceVersion = HOSTBOOT_RUNTIME_INTERFACE_VERSION;
+
     // Initialize all modules.
     vfs_module_init();
 
     // Return our interface pointer structure.
-    return getRuntimeInterfaces();
+    return rtInterfaces;
 }
 
 void rt_cppBootstrap()

@@ -80,9 +80,9 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
 
     if(
        g_hostInterfaces != NULL &&
-       g_hostInterfaces->get_vpd_image_addr)
+       g_hostInterfaces->get_reserved_mem)
     {
-        vpd_addr = g_hostInterfaces->get_vpd_image_addr();
+        vpd_addr = g_hostInterfaces->get_reserved_mem("ibm,hbrt-vpd-image");
         if(vpd_addr == 0)
         {
             TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd: Failed to get VPD addr. "

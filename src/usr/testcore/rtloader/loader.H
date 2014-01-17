@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -101,6 +101,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             do
             {
                 hostInterfaces_t* intf = new hostInterfaces_t();
+                intf->interfaceVersion = HOSTBOOT_RUNTIME_INTERFACE_VERSION;
                 intf->puts = rt_puts;
                 intf->set_page_execute = rt_setPageExecute;
                 intf->malloc = malloc;
@@ -113,7 +114,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->scom_write = rt_scom_write;
                 intf->lid_load = rt_lid_load;
                 intf->lid_unload = rt_lid_unload;
-                intf->get_vpd_image_addr = rt_get_vpd;
+                intf->get_reserved_mem = rt_get_reserved_mem;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -298,6 +299,14 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return 0;
         }
 
+        //--------------------------------------------------------------------
+        static uint64_t rt_get_reserved_mem(const char* i_region)
+        {
+            if (0 == strcmp(i_region, "ibm,hbrt-vpd-image"))
+                return rt_get_vpd();
+            else
+                return 0;
+        }
 
         //--------------------------------------------------------------------
         static uint64_t rt_get_vpd()
@@ -324,7 +333,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 assert(vptr != NULL,"rt_get_vpd. Could not map VPD memory");
 
 
-                // Store the address in a class variable so we only 
+                // Store the address in a class variable so we only
                 // need to load vpd once.
                 cv_vpd_addr = reinterpret_cast<uint64_t>(vptr);
             }

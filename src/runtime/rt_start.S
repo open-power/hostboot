@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -22,7 +22,15 @@
 # IBM_PROLOG_END_TAG
 .include "kernel/ppcconsts.S"
 
+#define __HOSTBOOT_RUNTIME_INTERFACE_VERSION_ONLY 1
+#include <runtime/interface.h>
+
 .section .text.intvects
+
+.org 0x0;
+hbrt_desired_interface_version:
+    .quad 0x4842525456455253  # 'HBRTVERS' eyecatch.
+    .quad HOSTBOOT_RUNTIME_INTERFACE_VERSION
 
 .org 0x100;
 _init:

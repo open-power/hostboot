@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -44,7 +44,11 @@ void vfs_module_init()
                  i < (uint64_t)module->data;
                  i += PAGESIZE)
             {
-                g_hostInterfaces->set_page_execute(reinterpret_cast<void*>(i));
+                if (g_hostInterfaces->set_page_execute)
+                {
+                    g_hostInterfaces->set_page_execute(
+                            reinterpret_cast<void*>(i));
+                }
             }
         }
 
