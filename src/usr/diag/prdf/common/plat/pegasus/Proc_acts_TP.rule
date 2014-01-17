@@ -835,7 +835,7 @@ group gTodErrors filter singlebit
     /** TOD_ERRORREGISTER[0]
      *  M_PATH_CONTROL_REG_DATA_PARITY_ERROR
      */
-    (TodErrors,bit(0)) ? todRestoreMPCRAndPSMSCR;
+    (TodErrors,bit(0)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[1]
      *  M_PATH_0_PARITY_ERROR
@@ -850,37 +850,37 @@ group gTodErrors filter singlebit
     /** TOD_ERRORREGISTER[3]
      *  PCRP0_DATA_PARITY_ERROR
      */
-    (TodErrors,bit(3)) ? todRestorePCRP0;
+    (TodErrors,bit(3)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[4]
      *  PCRP1_DATA_PARITY_ERROR
      */
-    (TodErrors,bit(4)) ? todRestorePCRP1;
+    (TodErrors,bit(4)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[5]
      *  SCRP0_DATA_PARITY_ERROR
      */
-    (TodErrors,bit(5)) ? todRestoreSCRP0;
+    (TodErrors,bit(5)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[6]
      *  SCRP1_DATA_PARITY_ERROR
      */
-    (TodErrors,bit(6)) ? todRestoreSCRP1;
+    (TodErrors,bit(6)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[7]
      *  SPCR_DATA_PARITY_ERROR
      */
-    (TodErrors,bit(7)) ? todRestoreSPCR;
+    (TodErrors,bit(7)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[8]
      *  IPCR_DATA_PARITY_ERROR
      */
-    (TodErrors,bit(8)) ? todRestoreIPCR;
+    (TodErrors,bit(8)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[9]
      *  PSMSCR_DATA_PARITY_ERROR
      */
-    (TodErrors,bit(9)) ? todRestoreMISC;
+    (TodErrors,bit(9)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[10]
      *  S_PATH_0_PARITY_ERROr
@@ -1028,7 +1028,7 @@ group gTodErrors filter singlebit
      */
     (TodErrors,bit(38|39|40|41|42|43)) ? defaultMaskedError;
 
-    # For firmware all the TOD-PIB errors are informational by nature.So,
+    #Note: For firmware all the TOD-PIB errors are informational by nature.So,
     # not doing any special analysis.
     /** TOD_ERRORREGISTER[44]
      *  PIB_SLAVE_ADDR_INVALID_ERROR
@@ -1058,9 +1058,10 @@ group gTodErrors filter singlebit
     /** TOD_ERRORREGISTER[49]
      *  TTYPE_CONTROL_REG_DATA_PARITY_ERROR
      */
-    #FIXME RTC 80278 TTYPE_CONTROL Register need to be modeled by HWSV to let
-    #PRDF restoring it.
-    (TodErrors,bit(49)) ? TBDDefaultCallout;
+    #Note: Based on discussion with with Hardware Team and PHYP, this error
+    #shall be routed to PHYP instead of FSP
+
+    (TodErrors,bit(49)) ? defaultMaskedError;
 
     /** TOD_ERRORREGISTER[50|51|52]
      *  PIB_MASTER_RSP_INFO_ERROR
@@ -1233,102 +1234,6 @@ actionclass maskTodError
     capture(TODReg);
     funccall("clearServiceCallFlag");
     funccall("todNewTopologyIfBackupMDMT");
-};
-
-/**
- *  Tod Error, Restore PCRP0 register.
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestorePCRP0
-{
-    selfCaptThr32;
-    funccall("todRestorePCRP0");
-};
-
-/**
- *  Tod Error, Restore PCRP1 register.
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestorePCRP1
-{
-    selfCaptThr32;
-    funccall("todRestorePCRP1");
-};
-
-/**
- *  Tod Error, Restore SCRP0 register.
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestoreSCRP0
-{
-    selfCaptThr32;
-    funccall("todRestoreSCRP0");
-};
-
-/**
- *  Tod Error, Restore SCRP1 register.
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestoreSCRP1
-{
-    selfCaptThr32;
-    funccall("todRestoreSCRP1");
-};
-
-/** restores initial contents of MPCR and PSMCR register
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestoreMPCRAndPSMSCR
-{
-    todRestoreMPCR;
-    todRestorePSMSCR;
-};
-
-/** restores initial contents of MPCR register
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestoreMPCR
-{
-    selfCaptThr32;
-    funccall("todRestoreMPCR");
-};
-
-/** restores initial contents of MISC register
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestorePSMSCR
-{
- # this action is used along with other actions where thresholds are set.
- # So, we need not set any threshold here.
-
-    funccall("todRestorePSMSCR");
-};
-
-/** restores initial contents of IPCR register
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestoreIPCR
-{
-    selfCaptThr32;
-    funccall("todRestoreIPCR");
-};
-
-/** restores initial contents of SPCR register
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestoreSPCR
-{
-    selfCaptThr32;
-    funccall("todRestoreSPCR");
-};
-
-/** restores initial contents of MISC register
- *  threshold 32 for lab and field and 1 for mnfg
- */
-actionclass todRestoreMISC
-{
-    selfCaptThr32;
-    todRestorePSMSCR;
 };
 
 /** callout the master core of the Proc */
