@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -1633,6 +1633,11 @@ fapi::ReturnCode fapiPlatGetL3DDAttr(const fapi::Target * i_pProcTarget,
 #define ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetPllInfoAttr(PTARGET, fapi::getPllRingInfo::MEMB_DMI_CUPLL_REFCLKSEL_OFFSET, &VAL, sizeof(VAL))
+#define ATTR_MEMB_MEM_PLL_CFG_UPDATE_OFFSET_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS : \
+    fapi::platAttrSvc::fapiPlatGetPllInfoAttr(PTARGET,\
+        fapi::getPllRingInfo::MEMB_MEM_PLL_CFG_UPDATE_OFFSET, &VAL, sizeof(VAL))
 
 //------------------------------------------------------------------------------
 //  MACROs to support DIMM SPD Attributes that are handled by an Accessor HWP

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getPllRingInfoAttr.C,v 1.1 2013/12/05 18:23:19 mjjones Exp $
+// $Id: getPllRingInfoAttr.C,v 1.2 2014/01/17 23:50:05 whs Exp $
 /**
  *  @file getPllRingInfoAttr.C
  *
@@ -497,6 +497,38 @@ fapi::ReturnCode get_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET(
     return l_rc;
 }
 
+/**
+ * @brief Returns MEMB_MEM_PLL_CFG_UPDATE_OFFSET data
+ *
+ * This is the scan chain position of MEM PLL PLLCTRL1(44) bit in tp_pll_bndy
+ *   chain (Offset from beginning of chain)
+ *
+ * @param[in]  i_membChip Reference to Membuf Chip fapi target
+ * @param[out] o_pVal     Pointer to data buffer filled in with attribute data
+ * @param[in]  i_len      Size of o_pVal
+ *
+ * @return fapi::ReturnCode Indicating success or error
+ */
+fapi::ReturnCode get_MEMB_MEM_PLL_CFG_UPDATE_OFFSET(
+    const fapi::Target & i_membChip,
+    void * o_pVal,
+    const size_t i_len)
+{
+    fapi::ATTR_MEMB_MEM_PLL_CFG_UPDATE_OFFSET_Type & o_val =
+        *(reinterpret_cast<fapi::ATTR_MEMB_MEM_PLL_CFG_UPDATE_OFFSET_Type *>(
+            o_pVal));
+
+    fapi::ReturnCode l_rc = pllInfoCheckSize(
+        fapi::getPllRingInfo::MEMB_MEM_PLL_CFG_UPDATE_OFFSET, i_len,
+        sizeof(o_val));
+
+    if (!l_rc)
+    {
+        o_val = 322; // for all current Centaur ECs
+    }
+    return l_rc;
+}
+
 //-----------------------------------------------------------------------------
 // getPllRingInfoAttr HWP - See header file for details
 //-----------------------------------------------------------------------------
@@ -526,6 +558,9 @@ fapi::ReturnCode getPllRingInfoAttr(const fapi::Target & i_chip,
             break;
         case fapi::getPllRingInfo::MEMB_DMI_CUPLL_REFCLKSEL_OFFSET:
             l_rc = get_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET(i_chip, o_pVal, i_len);
+            break;
+        case fapi::getPllRingInfo::MEMB_MEM_PLL_CFG_UPDATE_OFFSET:
+            l_rc = get_MEMB_MEM_PLL_CFG_UPDATE_OFFSET(i_chip, o_pVal, i_len);
             break;
         default:
             FAPI_ERR("getPllRingInfoAttr: Invalid Attribute ID 0x%02x", i_attr);

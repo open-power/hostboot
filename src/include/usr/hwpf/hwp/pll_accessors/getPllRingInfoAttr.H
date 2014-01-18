@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getPllRingInfoAttr.H,v 1.1 2013/12/05 18:23:29 mjjones Exp $
+// $Id: getPllRingInfoAttr.H,v 1.2 2014/01/17 23:50:25 whs Exp $
 /**
  *  @file getPllRingInfoAttr.H
  *
@@ -46,6 +46,7 @@ namespace fapi
             PROC_ABUS_CUPLL_REFCLKSEL_OFFSET = 0x04,
             MEMB_DMI_CUPLL_PFD360_OFFSET     = 0x05,
             MEMB_DMI_CUPLL_REFCLKSEL_OFFSET  = 0x06,
+            MEMB_MEM_PLL_CFG_UPDATE_OFFSET   = 0x07,
         };
     }
 }
