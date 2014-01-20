@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -55,14 +55,22 @@ uint32_t devTree::getSize()
     return mHeader->totalSize;
 }
 
-void devTree::initialize(uint64_t i_addr, size_t i_maxSize)
+void devTree::initialize(uint64_t i_addr, size_t i_maxSize, bool i_virtual)
 {
     /* Initialize the device tree header. */
     mMaxSize = i_maxSize;
-    mPhysAddr = i_addr;
-    mSpace= static_cast<char*>
-                  (mm_block_map(reinterpret_cast<void*>(mPhysAddr),
-                   mMaxSize));
+    if (i_virtual)
+    {
+        mPhysAddr = 0;
+        mSpace = reinterpret_cast<char*>(i_addr);
+    }
+    else
+    {
+        mPhysAddr = i_addr;
+        mSpace= static_cast<char*>
+                    (mm_block_map(reinterpret_cast<void*>(mPhysAddr),
+                    mMaxSize));
+    }
     memset(mSpace, 0, mMaxSize);
     mNextPhandle = 1;
 
@@ -724,7 +732,10 @@ devTree::devTree()
  */
 devTree::~devTree()
 {
-    mm_block_unmap(mSpace);
+    if (mPhysAddr)
+    {
+        mm_block_unmap(mSpace);
+    }
 }
 
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -54,10 +54,11 @@ typedef size_t dtOffset_t;
 
         /**
          * Initialize the FDT at address and size
-         * @param[in] i_addr     Physical address to place FDT at
+         * @param[in] i_addr     Address to place FDT at
          * @param[in] i_maxSize  Size of FDT
+         * @param[in] i_virtual  Address is virtual.
          */
-        void initialize(uint64_t i_addr, size_t i_maxSize);
+        void initialize(uint64_t i_addr, size_t i_maxSize, bool i_virtual);
 
         /**
          * Find given node (e.g. "/lpc") in the FDT

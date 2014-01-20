@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -32,9 +32,16 @@ namespace DEVTREE
     /**
      * @brief Build flattened dev tree for Sapphire
      *
+     * @param[in] i_dtAddr - Address to load devtree.  0 will use a default
+     *                       data area appropriate for non-HDAT Sapphire.
+     * @param[in] i_dtSize - Allowable size for the devtree.
+     * @param[in] i_smallTree - Build a small devtree appropriate for inside
+     *                          the HDAT area.
+     *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t build_flatdevtree( void );
+    errlHndl_t build_flatdevtree( uint64_t i_dtAddr = 0, size_t i_dtSize = 0,
+                                  bool i_smallTree = false);
 
     /**
      * @brief Get the address of the flattened dev tree for Sapphire

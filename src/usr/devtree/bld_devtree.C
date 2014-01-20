@@ -50,7 +50,7 @@ $ */
 #include <pnor/pnorif.H>
 #include <sys/mm.h>
 #include <util/align.H>
-
+#include <vector>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -453,8 +453,7 @@ uint32_t bld_intr_node(devTree * i_dt, dtOffset_t & i_parentNode,
 
 
 void add_reserved_mem(devTree * i_dt,
-                      uint64_t i_homerAddr[],
-                      size_t i_num,
+                      std::vector<uint64_t>& i_homerAddr,
                       uint64_t i_extraAddr[],
                       uint64_t i_extraSize[],
                       const char* i_extraStr[],
@@ -483,14 +482,16 @@ void add_reserved_mem(devTree * i_dt,
 
     dtOffset_t rootNode = i_dt->findNode("/");
 
-    const char* homerStr = "ibm,slw-occ-image";
-    const char* reserve_strs[i_num+i_extraCnt+1];
-    uint64_t ranges[i_num+i_extraCnt][2];
-    uint64_t cell_count = sizeof(ranges) / sizeof(uint64_t);
-    uint64_t res_mem_addrs[i_num+i_extraCnt];
-    uint64_t res_mem_sizes[i_num+i_extraCnt];
+    size_t l_num = i_homerAddr.size();
 
-    for(size_t i = 0; i<i_num; i++)
+    const char* homerStr = "ibm,slw-occ-image";
+    const char* reserve_strs[l_num+i_extraCnt+1];
+    uint64_t ranges[l_num+i_extraCnt][2];
+    uint64_t cell_count = sizeof(ranges) / sizeof(uint64_t);
+    uint64_t res_mem_addrs[l_num+i_extraCnt];
+    uint64_t res_mem_sizes[l_num+i_extraCnt];
+
+    for(size_t i = 0; i<l_num; i++)
     {
         reserve_strs[i] = homerStr;
         ranges[i][0] = i_homerAddr[i];
@@ -506,21 +507,21 @@ void add_reserved_mem(devTree * i_dt,
             TRACFCOMP( g_trac_devtree, "Reserved Region %s @ %lx, %lx",
                        i_extraStr[i], i_extraAddr[i], i_extraSize[i]);
 
-            reserve_strs[i_num] = i_extraStr[i];
-            ranges[i_num][0] = i_extraAddr[i];
-            ranges[i_num][1] = i_extraSize[i];
+            reserve_strs[l_num] = i_extraStr[i];
+            ranges[l_num][0] = i_extraAddr[i];
+            ranges[l_num][1] = i_extraSize[i];
 
-            res_mem_addrs[i_num] = i_extraAddr[i];
-            res_mem_sizes[i_num] = i_extraSize[i];
+            res_mem_addrs[l_num] = i_extraAddr[i];
+            res_mem_sizes[l_num] = i_extraSize[i];
 
-            i_num++;
+            l_num++;
         }
         else
         {
             cell_count -= sizeof(ranges[0]);
         }
     }
-    reserve_strs[i_num] = NULL;
+    reserve_strs[l_num] = NULL;
 
     i_dt->addPropertyStrings(rootNode, "reserved-names", reserve_strs);
     i_dt->addPropertyCells64(rootNode, "reserved-ranges",
@@ -581,8 +582,13 @@ void load_hbrt_image(uint64_t& io_address)
 }
 
 
-errlHndl_t bld_fdt_cpu(devTree * i_dt)
+errlHndl_t bld_fdt_cpu(devTree * i_dt,
+                       std::vector<uint64_t>& o_homerRegions,
+                       bool i_smallTree)
 {
+    // Nothing to do for small trees currently.
+    if (i_smallTree) { return NULL; }
+
     errlHndl_t errhdl = NULL;
 
     /* Find the / node and add a cpus node under it. */
@@ -596,7 +602,6 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt)
     // Get all functional proc chip targets
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
-    uint64_t l_homerAddr[l_procTargetList.size()];
 
     for (size_t proc = 0; (!errhdl) && (proc < l_procTargetList.size()); proc++)
     {
@@ -608,7 +613,7 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt)
 
         //Each processor will have a HOMER image that needs
         //to be reserved -- save it away
-        l_homerAddr[proc] = getHomerPhysAddr(l_pProc);
+        o_homerRegions.push_back(getHomerPhysAddr(l_pProc));
 
         TARGETING::TargetHandleList l_exlist;
         getChildChiplets( l_exlist, l_pProc, TYPE_CORE );
@@ -647,6 +652,15 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt)
         }
     }
 
+    return errhdl;
+}
+
+errlHndl_t bld_fdt_reserved_mem(devTree * i_dt,
+                                std::vector<uint64_t>& i_homerRegions,
+                                bool i_smallTree)
+{
+    errlHndl_t errhdl = NULL;
+
     // VPD
     uint64_t l_vpd_addr = 0;
 
@@ -672,18 +686,21 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt)
 
     //Add in reserved memory for HOMER images and HBRT sections.
     add_reserved_mem(i_dt,
-                     l_homerAddr,
-                     l_procTargetList.size(),
+                     i_homerRegions,
                      l_extra_addrs,
                      l_extra_sizes,
                      l_extra_addrs_str,
                      l_extra_addr_cnt);
 
     return errhdl;
+
 }
 
-errlHndl_t bld_fdt_mem(devTree * i_dt)
+errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
 {
+    // Nothing to do for small trees currently.
+    if (i_smallTree) { return NULL; }
+
     errlHndl_t errhdl = NULL;
     bool rc;
 
@@ -858,26 +875,43 @@ errlHndl_t bld_fdt_mem(devTree * i_dt)
     return errhdl;
 }
 
-errlHndl_t build_flatdevtree( void )
+errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
+                              bool i_smallTree )
 {
     errlHndl_t errhdl = NULL;
     devTree * dt = &Singleton<devTree>::instance();
+    bool devTreeVirtual = true;
 
     do
     {
+        if (0 == i_dtAddr)
+        {
+            i_dtAddr = DEVTREE_DATA_ADDR;
+            i_dtSize = DEVTREE_SPACE_SIZE;
+            devTreeVirtual = false;
+        }
 
         TRACFCOMP( g_trac_devtree, "---devtree init---" );
-        dt->initialize(DEVTREE_DATA_ADDR, DEVTREE_SPACE_SIZE);
+        dt->initialize(i_dtAddr, i_dtSize, devTreeVirtual);
+
+        std::vector<uint64_t> l_homerRegions;
 
         TRACFCOMP( g_trac_devtree, "---devtree cpu ---" );
-        errhdl = bld_fdt_cpu(dt);
+        errhdl = bld_fdt_cpu(dt, l_homerRegions, i_smallTree);
+        if(errhdl)
+        {
+            break;
+        }
+
+        TRACFCOMP( g_trac_devtree, "---devtree reserved mem ---" );
+        errhdl = bld_fdt_reserved_mem(dt, l_homerRegions, i_smallTree);
         if(errhdl)
         {
             break;
         }
 
         TRACFCOMP( g_trac_devtree, "---devtree mem ---" );
-        errhdl = bld_fdt_mem(dt);
+        errhdl = bld_fdt_mem(dt, i_smallTree);
         if(errhdl)
         {
             break;

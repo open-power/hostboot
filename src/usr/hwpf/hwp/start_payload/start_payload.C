@@ -309,6 +309,31 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 break;
             }
         }
+        else if( is_sapphire_load() )
+        {
+            // Find area in HDAT to load devtree.
+            uint64_t l_dtAddr = 0;
+            size_t l_dtSize = 0;
+            l_err = RUNTIME::get_host_data_section(RUNTIME::HSVC_SYSTEM_DATA,
+                                                   0, l_dtAddr, l_dtSize);
+
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Could not find system data area for Devtree.");
+                break;
+            }
+
+            l_err = DEVTREE::build_flatdevtree(l_dtAddr, l_dtSize, true);
+
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Failed to build small dev-tree for HDAT.");
+                break;
+            }
+
+        }
         else if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
         {
             //If PHYP then clear out the PORE BARs
