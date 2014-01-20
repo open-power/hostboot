@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,6 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: fapiReturnCodes.H,v 1.13 2013/10/15 13:13:40 dcrowell Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCodes.H,v $
+
 /**
  *  @file fapiReturnCodes.H
  *
@@ -82,6 +85,9 @@ enum ReturnCodes
 
     // HWP attempted to create an unrecognized SBE error
     FAPI_RC_UNRECOGNIZED_SBE_ERROR      = FAPI_RC_FAPI_MASK | 0x03,
+
+    // Invalid parameters passed to a FAPI interface
+    FAPI_RC_INVALID_PARAM               = FAPI_RC_FAPI_MASK | 0x04,
 
     //--------------------------------------------------------------------------
     // PLAT generated return codes. Additional details may be contained in

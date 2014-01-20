@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,6 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: fapiHwAccess.C,v 1.14 2013/10/15 13:13:29 dcrowell Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiHwAccess.C,v $
+
 /**
  *  @file fapiHwAccess.C
  *
@@ -45,8 +48,11 @@
  *                                                  Ring funcs
  *                          rjknight    09/20/2012  Update fapiGetSpy to take
  *                                                  a string as input
- *                          jknight     04/02/2013  Add fapi put/getSpyImage
+ *          F876964         jknight     Apr, 02,2013  fapi get/setSpyImage
  *                                                  support
+ *          F873646         srimeesa    Mar 10,2013 64Bit SPYID and 
+ *                                                  ClockDomain ID support  
+ *          F883863         atendolk    05/06/2013  Update to support MultiScom
  */
 #include <fapi.H>
 #include <fapiPlatHwAccess.H>
@@ -146,6 +152,43 @@ fapi::ReturnCode fapiPutScomUnderMask(const fapi::Target& i_target,
 
     return l_rc;
 }
+
+//******************************************************************************
+// fapiMultiScom function
+//******************************************************************************
+#ifdef FAPI_SUPPORT_MULTI_SCOM
+fapi::ReturnCode fapiMultiScom (
+                    const   fapi::Target&       i_target,
+                            fapi::MultiScom&    io_multiScomObj)
+{
+    FAPI_DBG (ENTER_MRK "fapiMultiScom - i_target: %s, # input ops: %d",
+              i_target.toEcmdString (), io_multiScomObj.iv_ScomList.size ());
+
+    fapi::ReturnCode l_rc;
+
+    // Call the platform specific implemetation
+    l_rc = platMultiScom (i_target, io_multiScomObj);
+
+    if (!l_rc.ok ())
+    {
+        uint32_t l_retCode = l_rc;
+
+        FAPI_ERR ("fapiMultiScom Failed with RC: 0x%.8X! i_target: %s, "
+                  "# input ops: %d, # ops complete: %d", l_retCode,
+                  i_target.toEcmdString (),
+                  io_multiScomObj.iv_ScomList.size (),
+                  io_multiScomObj.iv_NumOfCompletes);
+    }
+
+    FAPI_DBG (EXIT_MRK "fapiMultiScom - i_target: %s, # input ops: %d, "
+              "#ops complete: %d", i_target.toEcmdString (),
+              io_multiScomObj.iv_ScomList.size (),
+              io_multiScomObj.iv_NumOfCompletes);
+
+    return l_rc;
+}
+#endif // FAPI_SUPPORT_MULTI_SCOM
+
 
 //******************************************************************************
 // fapiGetCfamRegister function
@@ -262,7 +305,7 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & o_data,
                              const uint32_t i_ringMode)
 {
@@ -274,13 +317,13 @@ fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
 
     if (l_rc)
     {
-        FAPI_ERR("fapiGetRing failed - Target %s, Addr 0x%.8X",
+        FAPI_ERR("fapiGetRing failed - Target %s, Addr 0x%.16llX", 
                   i_target.toEcmdString(), i_address);
     }
 
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : GETRING     : %s : %.8X %.16llX", 
+        FAPI_SCAN( "TRACE : GETRING     : %s : %.16llX %.16llX", 
                    i_target.toEcmdString(),
                    i_address,
                    o_data.getDoubleWord( 0 ) );
@@ -292,7 +335,7 @@ fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & i_data,
                              const uint32_t i_ringMode)
 {
@@ -304,13 +347,13 @@ fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
 
     if (l_rc)
     {
-        FAPI_ERR("fapiPutRing failed - Target %s, Addr 0x%.8X",
-                 i_target.toEcmdString(), i_address);
+        FAPI_ERR("fapiPutRing failed - Target %s, Addr 0x%.16llX",
+                  i_target.toEcmdString(), i_address);
     }
 
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : PUTRING     : %s : %.8X %.16llX",
+        FAPI_SCAN( "TRACE : PUTRING     : %s : %.16llX %.16llX",
                    i_target.toEcmdString(),
                    i_address,
                    i_data.getDoubleWord(0));
@@ -322,7 +365,7 @@ fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
-                                const uint32_t i_address,
+                                const scanRingId_t i_address,
                                 ecmdDataBufferBase & i_data,
                                 const fapi::ChipOpModifyMode i_modifyMode,
                                 const uint32_t i_ringMode)
@@ -335,7 +378,7 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
 
     if (l_rc)
     {
-        FAPI_ERR("platModifyRing failed - Target %s, Addr 0x%.8X,"
+        FAPI_ERR("platModifyRing failed - Target %s, Addr 0x%.16llX,"
                  "ModifyMode 0x%.8X", i_target.toEcmdString(),
                  i_address, i_modifyMode);
     }
@@ -362,7 +405,7 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
             l_pMode = "?";
         }
 
-        FAPI_SCAN( "TRACE : MODRING     : %s : %.8X %.16llX %s",
+        FAPI_SCAN( "TRACE : MODRING     : %s : %.16llX %.16llX %s",
                i_target.toEcmdString(),
                i_address,
                i_data.getDoubleWord(0),
@@ -381,10 +424,9 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 #ifdef FAPI_SUPPORT_SPY_AS_ENUM
 fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
-                            const uint32_t i_spyId,
+                            const spyId_t i_spyId,
                             ecmdDataBufferBase & o_data)
 {
-
     fapi::ReturnCode l_rc;
     bool l_traceit = platIsScanTraceEnabled();
 
@@ -393,13 +435,13 @@ fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
 
     if (l_rc)
     {
-        FAPI_ERR("fapiGetSpy failed - Target %s, SpyId 0x%.8X",
+        FAPI_ERR("fapiGetSpy failed - Target %s, SpyId 0x%.16llX",
                   i_target.toEcmdString(), i_spyId);
     }
 
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : GETSPY      : %s : %.8X %.16llX",
+        FAPI_SCAN( "TRACE : GETSPY      : %s : %.16llX %.16llX", 
                    i_target.toEcmdString(),
                    i_spyId,
                    o_data.getDoubleWord(0));
@@ -442,7 +484,7 @@ fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
-                            const uint32_t i_spyId,
+                            const spyId_t i_spyId,
                             ecmdDataBufferBase & i_data)
 {
     fapi::ReturnCode l_rc;
@@ -453,13 +495,13 @@ fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
 
     if (l_rc)
     {
-        FAPI_ERR("fapiPutSpy failed - Target %s, SpyId 0x%.8X",
-                 i_target.toEcmdString(), i_spyId);
+        FAPI_ERR("fapiPutSpy failed - Target %s, SpyId 0x%.16llX",
+                  i_target.toEcmdString(), i_spyId);
     }
 
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : PUTSPY      : %s : %.8X %.16llX",
+        FAPI_SCAN( "TRACE : PUTSPY      : %s : %.16llX %.16llX",
                    i_target.toEcmdString(),
                    i_spyId,
                    i_data.getDoubleWord(0));
@@ -567,7 +609,7 @@ fapi::ReturnCode _fapiPutSpyImage(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 fapi::ReturnCode _fapiGetSpyImage(const fapi::Target& i_target,
-                            const uint32_t i_spyId,
+                            const spyId_t i_spyId,
                             ecmdDataBufferBase & o_data,
                             const ecmdDataBufferBase & i_imageData)
 {
@@ -580,13 +622,13 @@ fapi::ReturnCode _fapiGetSpyImage(const fapi::Target& i_target,
 
     if (l_rc)
     {
-        FAPI_ERR("fapiGetSpyImage failed - Target %s, SpyId 0x%.8X",
+        FAPI_ERR("fapiGetSpyImage failed - Target %s, SpyId 0x%.16llX",
                   i_target.toEcmdString(), i_spyId);
     }
 
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : GETSPYIMG  : %s : %.8X %.16llX",
+        FAPI_SCAN( "TRACE : GETSPYIMG  : %s : %.16llX %.16llX",
                    i_target.toEcmdString(),
                    i_spyId,
                    o_data.getDoubleWord(0));
@@ -599,7 +641,7 @@ fapi::ReturnCode _fapiGetSpyImage(const fapi::Target& i_target,
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 fapi::ReturnCode _fapiPutSpyImage(const fapi::Target& i_target,
-                                const uint32_t i_spyId,
+                                const spyId_t i_spyId,
                                 const ecmdDataBufferBase & i_data,
                                 ecmdDataBufferBase & io_imageData)
 {
@@ -611,13 +653,13 @@ fapi::ReturnCode _fapiPutSpyImage(const fapi::Target& i_target,
 
     if (l_rc)
     {
-      FAPI_ERR("fapiPutSpyImage failed - Target %s, SpyId 0x%.8X",
+      FAPI_ERR("fapiPutSpyImage failed - Target %s, SpyId 0x%.16llX",
                 i_target.toEcmdString(), i_spyId);
     }
 
     if( l_traceit )
     {
-        FAPI_SCAN( "TRACE : PUTSPYIMG  : %s : %.8X %.16llX",
+        FAPI_SCAN( "TRACE : PUTSPYIMG  : %s : %.16llX %.16llX",
                    i_target.toEcmdString(),
                    i_spyId,
                    i_data.getDoubleWord(0));
@@ -628,4 +670,3 @@ fapi::ReturnCode _fapiPutSpyImage(const fapi::Target& i_target,
 }
 #endif
 } // extern "C"
-

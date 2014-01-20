@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -21,6 +21,7 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
+# $Id: fapiParseAttributeInfo.pl,v 1.21 2014/01/20 20:35:30 mjjones Exp $
 #
 # Purpose:  This perl script will parse HWP Attribute XML files
 # and add attribute information to a file called fapiAttributeIds.H

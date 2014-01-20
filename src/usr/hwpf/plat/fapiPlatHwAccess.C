@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,27 +20,6 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/plat/fapiPlatHwAccess.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END_TAG
 /**
  *  @file fapiPlatHwAccess.C
  *
@@ -575,7 +554,7 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
 // platGetRing function, the platform implementation
 //******************************************************************************
 fapi::ReturnCode platGetRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & o_data,
                              const uint32_t i_ringMode)
 {
@@ -609,7 +588,7 @@ fapi::ReturnCode platGetRing(const fapi::Target& i_target,
 // platPutRing function
 //******************************************************************************
 fapi::ReturnCode platPutRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & i_data,
                              const uint32_t i_ringMode)
 {
@@ -644,7 +623,7 @@ fapi::ReturnCode platPutRing(const fapi::Target& i_target,
 // platModifyRing function
 //******************************************************************************
 fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & i_data,
                              const fapi::ChipOpModifyMode i_modifyMode,
                              const uint32_t i_ringMode)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,25 +20,28 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: fapiPlatHwAccess.H,v 1.10 2014/01/20 20:58:47 mjjones Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiPlatHwAccess.H,v $
+
 /**
  *  @file fapiPlatHwAccess.H
  *
- *  @brief Defines hardware-access functions for the platform layer.
- *         Hardware procedure writers will not call these functions.
- *
+ *  @brief Defines hardware-access functions for the platform layer.  
+ *         Hardware procedure writers will not call these functions. 
+ *       
  *         Implementors of platform code will provide worker routines
  *         for these functions in file hwpf/plat/fapiPlatHwAccess.C.
  *         fapi.H will not include this file, so platform implementors
- *         will have to include this file explicitly.
- *
- *         These platform entry points are called by fapi functions from
- *         hwpf/fapi/fapiHwAccess.C which are wrapper functions that
- *         output scand traces common to all platforms.
- *
+ *         will have to include this file explicitly. 
+ * 
+ *         These platform entry points are called by fapi functions from 
+ *         hwpf/fapi/fapiHwAccess.C which are wrapper functions that 
+ *         output scand traces common to all platforms.  
+ * 
  *         These functions have the same argument signatures as the
- *         fapi-level functions, but the function names her start with
+ *         fapi-level functions, but the function names her start with 
  *         "plat."
- *
+ *     
  */
 
 /*
@@ -50,7 +53,10 @@
  *          836579          thi         May 22,2012 Spy/Ring supports
  *                          mjjones     07/12/2012  Add Pulse mode option to
  *                                                  Ring funcs
- *                          jknight     04/02/2013  Add fapi get/setSpyImage
+ *          F876964         jknight     Apr, 02,2013  fapi get/setSpyImage
+ *          F873646         srimeesa    Mar 10,2013 64Bit SPYID and 
+ *                                                  ClockDomain ID support  
+ *          F883863         atendolk    May 16,2013 fapi MultiScom support
  */
 
 #ifndef FAPIPLATHWACCESS_H_
@@ -60,7 +66,9 @@
 #include <ecmdDataBufferBase.H>
 #include <fapiReturnCode.H>
 #include <fapiTarget.H>
-
+#ifdef FAPI_SUPPORT_MULTI_SCOM
+#include <fapiMultiScom.H>
+#endif
 
 extern "C"
 {
@@ -73,8 +81,8 @@ extern "C"
 /**
  * @brief Platform-level implementation called by GetScom()
  * Hardware procedures writers will not call this function.
- *
- *
+ * 
+ * 
  * @param[in] i_target Target to operate on
  * @param[in] i_address Scom address to read from
  * @param[out] o_data ecmdDataBufferBase object that holds data read from
@@ -89,7 +97,7 @@ fapi::ReturnCode platGetScom(const fapi::Target& i_target,
 /**
  * @brief Platform-level implementation called by PutScom().
  * Hardware procedures writers will not call this function.
- *
+ * 
  * @param[in] i_target Target to operate on
  * @param[in] i_address Scom address to write to
  * @param[in] i_data ecmdDataBufferBase object that holds data to write into
@@ -104,7 +112,7 @@ fapi::ReturnCode platPutScom(const fapi::Target& i_target,
 /**
  * @brief Platform-level implementation called by PutScomUnderMask()
  * Hardware procedures writers will not call this function.
- *
+ * 
  * @param[in] i_target Target to operate on
  * @param[in] i_address Scom address to write to
  * @param[in] i_data ecmdDataBufferBase object that holds the data
@@ -117,11 +125,24 @@ fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
                                       ecmdDataBufferBase & i_data,
                                       ecmdDataBufferBase & i_mask);
 
+#ifdef FAPI_SUPPORT_MULTI_SCOM
+/**
+ * @brief Platform-level implementation called by fapiMultiScom()
+ * Hardware procedures writers will not call this function.
+ *
+ * @param[in]    i_target         Target to operate on
+ * @param[inout] io_multiScomList MultiScom object pre-populated with SCOMs to
+ *                                be performed on i_target
+ * @return       ReturnCode       Zero on success, else platform specified error
+ */
+fapi::ReturnCode platMultiScom (const fapi::Target&    i_target,
+                                      fapi::MultiScom& io_multiScomList);
+#endif
 
 /**
  * @brief Platorm-level implementation called by GetCfamRegister()
  * Hardware procedures writers will not call this function.
- *
+ * 
  * @param[in] i_target Target to operate on
  * @param[in] i_address CFAM address to read from
  * @param[out] o_data ecmdDataBufferBase object that holds data read from
@@ -136,7 +157,7 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
 /**
  * @brief Platform-level implementation called by PutCfamRegister()
  * Hardware procedures writers will not call this function.
- *
+ * 
  * @param[in] i_target Target to operate on
  * @param[in] i_address CFAM address to write to
  * @param[in] i_data ecmdDataBufferBase object that holds data to write into
@@ -151,7 +172,7 @@ fapi::ReturnCode platPutCfamRegister(const fapi::Target& i_target,
 /**
  * @brief Platform-level implementation of ModifyCfamRegister()
  * Hardware procedures writers will not call this function.
- *
+ * 
  * @param[in] i_target Target to operate on
  * @param[in] i_address CFAM address to write to
  * @param[in] i_data ecmdDataBufferBase object that holds the modifying data
@@ -167,7 +188,7 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
 /**
  * @brief Platform-level implementation called by fapiGetRing()
  * Hardware procedures writers will not call this function.
- *
+ * 
  * @param[in] i_target  Target to operate on
  * @param[in] i_address Ring address to read from
  * @param[out] o_data   ecmdDataBufferBase object that holds data read from
@@ -176,7 +197,7 @@ fapi::ReturnCode platModifyCfamRegister(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platGetRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & o_data,
                              const uint32_t i_ringMode);
 
@@ -193,7 +214,7 @@ fapi::ReturnCode platGetRing(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platPutRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & i_data,
                              const uint32_t i_ringMode);
 
@@ -210,7 +231,7 @@ fapi::ReturnCode platPutRing(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
-                                const uint32_t i_address,
+                                const scanRingId_t i_address,
                                 ecmdDataBufferBase & i_data,
                                 const fapi::ChipOpModifyMode i_modifyMode,
                                 const uint32_t i_ringMode);
@@ -232,7 +253,7 @@ fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
  */
 #ifdef FAPI_SUPPORT_SPY_AS_ENUM
 fapi::ReturnCode platGetSpy(const fapi::Target& i_target,
-                            const uint32_t i_spyId,
+                            const spyId_t i_spyId,
                             ecmdDataBufferBase & o_data);
 #endif
 
@@ -246,7 +267,7 @@ fapi::ReturnCode platGetSpy(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  *
  * @note:  This is only supported in the cronus environment
- *         it will not compile in FSP code
+ *         it will not compile in FSP code 
  */
 fapi::ReturnCode platGetSpy(const fapi::Target& i_target,
                              const char * const i_spyId,
@@ -266,7 +287,7 @@ fapi::ReturnCode platGetSpy(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platPutSpy(const fapi::Target& i_target,
-                            const uint32_t i_spyId,
+                            const spyId_t i_spyId,
                             ecmdDataBufferBase & i_data);
 #endif
 
@@ -288,7 +309,7 @@ fapi::ReturnCode platPutSpy(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platGetSpyImage(const fapi::Target& i_target,
-                                 const uint32_t i_spyId,
+                                 const spyId_t i_spyId,
                                  ecmdDataBufferBase & o_data,
                                  const ecmdDataBufferBase & i_imageData);
 #endif
@@ -322,7 +343,7 @@ fapi::ReturnCode platGetSpyImage(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platPutSpyImage(const fapi::Target& i_target,
-                                 const uint32_t i_spyId,
+                                 const spyId_t i_spyId,
                                  const ecmdDataBufferBase & i_data,
                                  ecmdDataBufferBase & io_imageData);
 #endif

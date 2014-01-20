@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,6 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: fapiHwAccess.H,v 1.12 2014/01/20 20:57:09 mjjones Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiHwAccess.H,v $
+
 /**
  *  @file fapiHwAccess.H
  *
@@ -42,8 +45,10 @@
  *          836579          thi         May 22,2012 Spy/Ring supports
  *                          mjjones     07/12/2012  Add mode options to Ring funcs
  *                          rjknight    09/20/2012  Update fapiSpy interfaces to
- *                                                  allow string inputs for cronus
- *                          jknight     04/02/2013  Add fapi get/setSpyImage
+ *          F876964         jknight     Apr, 02,2013  fapi get/setSpyImage
+ *          F873646         srimeesa    Mar 10,2013 64Bit SPYID and 
+ *                                                  ClockDomain ID support
+ *          F883863         atendolk    05/06/2013  Add MultiScom support
  */
 
 #ifndef FAPIHWACCESS_H_
@@ -57,6 +62,11 @@
 #include <ecmdDataBufferBase.H>
 #include <fapiReturnCode.H>
 #include <fapiTarget.H>
+
+#ifdef FAPI_SUPPORT_MULTI_SCOM
+#include <fapiMultiScom.H>
+#endif
+
 
 namespace fapi
 {
@@ -86,6 +96,9 @@ namespace fapi
 
 extern "C"
 {
+
+typedef uint64_t spyId_t;
+typedef uint64_t scanRingId_t;
 
 //------------------------------------------------------------------------------
 // HW Communication Functions
@@ -177,7 +190,7 @@ fapi::ReturnCode fapiModifyCfamRegister(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & o_data,
                              const uint32_t i_ringMode = 0);
 
@@ -191,7 +204,7 @@ fapi::ReturnCode fapiGetRing(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
-                             const uint32_t i_address,
+                             const scanRingId_t i_address,
                              ecmdDataBufferBase & i_data,
                              const uint32_t i_ringMode = 0);
 
@@ -206,7 +219,7 @@ fapi::ReturnCode fapiPutRing(const fapi::Target& i_target,
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
-                                const uint32_t i_address,
+                                const scanRingId_t i_address,
                                 ecmdDataBufferBase & i_data,
                                 const fapi::ChipOpModifyMode i_modifyMode,
                                 const uint32_t i_ringMode = 0);
@@ -261,7 +274,7 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
 
 #define fapiGetSpy(TARGET, ID, DATA) _fapiGetSpy(TARGET, FAPI_SPY_NAMES::ID.value, DATA )
 fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
-                            const uint32_t i_spyId,
+                            const spyId_t i_spyId,
                             ecmdDataBufferBase & o_data);
 #endif
 
@@ -318,7 +331,7 @@ fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
 */
 #define fapiPutSpy(TARGET, ID, DATA) _fapiPutSpy(TARGET, FAPI_SPY_NAMES::ID.value, DATA)
 fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
-                            const uint32_t i_spyId,
+                            const spyId_t i_spyId,
                             ecmdDataBufferBase & i_data);
 #endif
 
@@ -354,7 +367,7 @@ fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
                                                     FAPI_SPY_NAMES::ID.value, \
                                                     DATA1, DATA2)
 fapi::ReturnCode _fapiPutSpyImage(const fapi::Target& i_target,
-                                  const uint32_t i_spyId,
+                                  const spyId_t i_spyId,
                                   const ecmdDataBufferBase & i_data,
                                   ecmdDataBufferBase & o_imageData);
 #endif
@@ -393,7 +406,7 @@ fapi::ReturnCode _fapiPutSpyImage(const fapi::Target& i_target,
                                             FAPI_SPY_NAMES::ID.value, \
                                             DATA1, DATA2)
 fapi::ReturnCode _fapiGetSpyImage(const fapi::Target& i_target,
-                                  const uint32_t i_spyId,
+                                  const spyId_t i_spyId,
                                   ecmdDataBufferBase & o_data,
                                   const ecmdDataBufferBase & i_imageData);
 #endif
@@ -408,6 +421,52 @@ fapi::ReturnCode _fapiGetSpyImage(const fapi::Target& i_target,
                                   ecmdDataBufferBase & o_data,
                                   const ecmdDataBufferBase & i_imageData);
 #endif
+
+#ifdef FAPI_SUPPORT_MULTI_SCOM
+/**
+ *  @brief Performs a multiple SCOM operation
+ *
+ *  @par Description:
+ *    This interface performs multiple SCOM operations on a chip or chiplet,
+ *    in the order specified by the input MultiScom object. See fapiMultiScom.H
+ *    for details of how to populate the MultiScom object with SCOM operations
+ *
+ *  @param[in]      i_target        Chip/Chiplet target to do MultiScom on
+ *  @param[in/out]  io_MultiScomObj Reference to a MultiScom object,
+ *                                  pre-populated with SingleScomInfo entries
+ *                                  to perform multiple SCOMs on input target
+ *  @return ReturnCode              Zero on success, else platform specified
+ *                                  error
+ *
+ *  @note   This is a synchronous interface and would return after all the SCOM
+ *          operations are completed or on the first failed SCOM operation
+ *
+ *  @note   SCOMs will be performed in the order they were added to the input
+ *          MultiScom object
+ *
+ *  @note   In case of errors, the platform code is responsible to collect and
+ *          add all the required error info and FFDC into the error data for
+ *          debugging
+ *
+ *  @note   If the SCOM operations added are specific to a processor chip,
+ *          then the FSI Shift Engine configured in scatter-gather DMA mode
+ *          extension would be used to execute the SCOM operations in a
+ *          performance optimize mode. In this mode, the special
+ *          SCOM_BULK_READ_MODE and SCOM_BULK_WRITE_MODE operations are
+ *          supported that allow a large bulk of SCOM access (in multiple of 64
+ *          bits) for targets that support auto-increment. The
+ *          SCOM_WRITE_UNDER_MASK operation is not supported in this mode
+ *
+ *  @note   If the SCOM operations added are specific to a memory buffer chip,
+ *          then the regular SCOM engine is used to execute the SCOM operations.
+ *          SCOM_WRITE_UNDER_MASK operation is supported in this mode, but the
+ *          special SCOM_BULK_READ_MODE and SCOM_BULK_WRITE_MODE operations are
+ *          not supported due to hardware limitations.
+ */
+fapi::ReturnCode fapiMultiScom (
+                    const   fapi::Target&       i_target,
+                            fapi::MultiScom&    io_multiScomObj);
+#endif  // FAPI_SUPPORT_MULTI_SCOM
 
 
 } // extern "C"

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiMBvpdAccess.H,v 1.8 2013/11/21 14:52:26 whs Exp $
+// $Id: fapiMBvpdAccess.H,v 1.9 2014/01/20 20:03:18 mjjones Exp $
 /**
  *  @file fapiMBvpdAccess.H
  *
