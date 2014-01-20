@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.33 2013/09/16 13:56:33 bellows Exp $
+// $Id: mss_eff_config.C,v 1.36 2014/01/13 19:57:59 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,6 +44,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.35  | bellows  |13-JAN-14| Make VPD version available at mba level
+//   1.35  | asaetow  |13-JAN-14| Fixed ATTR_EFF_DRAM_DLL_PPD from SLOWEXIT to FASTEXIT.
+//         |          |         | Added comments and converted some attr to use enums.
+//   1.34  | bellows  |02-JAN-14| VPD attribute removal
 //   1.33  | bellows  |16-SEP-13| Hostboot compile update
 //   1.32  | kcook    |13-SEP-13| Added using namespace fapi.
 //   1.31  | kcook    |13-SEP-13| Updated define FAPI_LRDIMM token.
@@ -278,6 +282,7 @@ struct mss_eff_config_spd_data
     //                                              [DIMM_SIZE];
     // HERE uint8_t bad_dq_data[PORT_SIZE][DIMM_SIZE]
     //                                              [SPD_ATTR_SIZE_80];
+    uint32_t vpd_version[PORT_SIZE][DIMM_SIZE];
 };
 
 //------------------------------------------------------------------------------
@@ -291,10 +296,9 @@ struct mss_eff_config_atts
     // AST HERE: Needs SPD byte68:76
     uint64_t eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_size[PORT_SIZE][DIMM_SIZE];
-    uint8_t eff_dimm_spare[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
     uint8_t eff_dimm_type;
     uint8_t eff_custom_dimm;
-    uint8_t eff_dram_al; // initialized to 1
+    uint8_t eff_dram_al; // Always use AL = CL - 1.
     uint8_t eff_dram_asr;
     uint8_t eff_dram_bl;
     uint8_t eff_dram_banks;
@@ -304,14 +308,14 @@ struct mss_eff_config_atts
     uint8_t eff_dram_cwl;
     uint8_t eff_dram_density;
     uint8_t eff_dram_dll_enable;
-    uint8_t eff_dram_dll_ppd;
-    uint8_t eff_dram_dll_reset; // initialized to 1
+    uint8_t eff_dram_dll_ppd; // Always use fast exit.
+    uint8_t eff_dram_dll_reset; // Always reset DLL at start of IPL.
     uint8_t eff_dram_gen;
     uint8_t eff_dram_output_buffer;
     uint8_t eff_dram_pasr;
     uint8_t eff_dram_rbt;
     uint8_t eff_dram_rows;
-    uint8_t eff_dram_srt; // initialized to 1
+    uint8_t eff_dram_srt; // Always use extended operating temp range.
     uint8_t eff_dram_tdqs;
     uint8_t eff_dram_tfaw;
     uint32_t eff_dram_tfaw_u32;
@@ -367,6 +371,7 @@ struct mss_eff_config_atts
     uint8_t eff_stack_type[PORT_SIZE][DIMM_SIZE];
     uint32_t eff_zqcal_interval;
     uint8_t dimm_functional_vector;
+    uint32_t eff_vpd_version;
 
 };
 
@@ -623,6 +628,11 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         // HERE rc = FAPI_ATTR_GET(ATTR_SPD_BAD_DQ_DATA, &i_target_dimm,
             //p_o_spd_data->bad_dq_data[i_port][i_dimm]);
         //if(rc) break;
+
+        rc = FAPI_ATTR_GET(ATTR_VPD_VERSION, &i_target_dimm,
+                           p_o_spd_data->vpd_version[i_port][i_dimm]);
+        if(rc) break;
+
     } while(0);
 
     return rc;
@@ -1092,9 +1102,10 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     fapi::ReturnCode rc;
 
     // set select atts members to non-zero
-    p_o_atts->eff_dram_al = 1;
-    p_o_atts->eff_dram_dll_reset = 1;
-    p_o_atts->eff_dram_srt = 1;
+    p_o_atts->eff_dram_al = fapi::ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_1; // Always use AL = CL - 1. 
+    p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_FASTEXIT; // Always use fast exit.
+    p_o_atts->eff_dram_dll_reset = fapi::ENUM_ATTR_EFF_DRAM_DLL_RESET_YES; // Always reset DLL at start of IPL.
+    p_o_atts->eff_dram_srt = fapi::ENUM_ATTR_EFF_DRAM_SRT_EXTEND; // Always use extended operating temp range.
     // array init
     for(int i = 0; i < PORT_SIZE; i++)
     {
@@ -1590,6 +1601,9 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     // Added 10% margin to TRFI per defect HW248225
     p_o_atts->eff_dram_trfi = (p_o_atts->eff_dram_trfi * 9) / 10;
 
+    p_o_atts->eff_vpd_version = 0xFFFFFF; // set VPD version to a large number, searching for smallest
+    // the VPD version is 2 ASCI characters, so this is always later than that
+
     // Assigning dependent values to attributes
     for (int l_cur_mba_port = 0; l_cur_mba_port <
             PORT_SIZE; l_cur_mba_port += 1)
@@ -1639,25 +1653,6 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                 p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port]
                     [l_cur_mba_dimm] = 0x00;
             }
-            for (int l_cur_mba_rank = 0; l_cur_mba_rank <
-               RANK_SIZE; l_cur_mba_rank += 1)
-            {
-               if (( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
-                    && ( l_cur_mba_rank < p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] ))
-               {
-                  // Added for CDIMM RC_B which uses x4 parts
-                  if ( p_o_atts->eff_dram_width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4 ) {
-                     p_o_atts->eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank]
-                       = fapi::ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE;
-                  } else {
-                     p_o_atts->eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank]
-                       = fapi::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE;
-                  }
-               } else {
-                  p_o_atts->eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank] 
-                    = fapi::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
-               }  
-            }
 
             if ( p_i_data->sdram_device_type[l_cur_mba_port][l_cur_mba_dimm] == 
                  fapi::ENUM_ATTR_SPD_SDRAM_DEVICE_TYPE_NON_STANDARD) {
@@ -1702,13 +1697,6 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                  [l_cur_mba_dimm] = 0;
              p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port]
                  [l_cur_mba_dimm] = 0x00;
-            for (int l_cur_mba_rank = 0; l_cur_mba_rank <
-               RANK_SIZE; l_cur_mba_rank += 1)
-            {
-               p_o_atts->
-                eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank]
-                  = fapi::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
-            }
             p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
             p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
           }
@@ -1785,6 +1773,13 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             // p_o_atts->eff_dram_density, p_o_atts->
             // attr_eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm],
             // p_o_atts->eff_dram_width, i_target_mba.toEcmdString());
+//------------------------------------------------------------------------------
+            if(p_o_atts->eff_vpd_version == 0xFFFFFF ||
+               p_i_data->vpd_version[l_cur_mba_port][l_cur_mba_dimm] < p_o_atts->eff_vpd_version ) { // find the smallest VPD
+                p_o_atts->eff_vpd_version = p_i_data->vpd_version[l_cur_mba_port][l_cur_mba_dimm];
+            }
+//------------------------------------------------------------------------------
+
         } // inner for loop
     } // outer for loop
     return rc;
@@ -1823,9 +1818,6 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_SIZE, &i_target_mba,
                 p_i_atts->eff_dimm_size);
-        if(rc) break;
-        rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_SPARE, &i_target_mba,
-                p_i_atts->eff_dimm_spare);
         if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_TYPE, &i_target_mba,
                 p_i_atts->eff_dimm_type);
@@ -2033,6 +2025,13 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         rc = FAPI_ATTR_SET(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR, &i_target_mba,
                 p_i_atts->dimm_functional_vector);
         if(rc) break;
+        // Make the final VPD version be a number and not ascii
+        p_i_atts->eff_vpd_version=((p_i_atts->eff_vpd_version & 0x0f00)>> 4)|
+          ((p_i_atts->eff_vpd_version & 0x000f)>> 0);
+        rc = FAPI_ATTR_SET(ATTR_MSS_EFF_VPD_VERSION, &i_target_mba,
+                p_i_atts->eff_vpd_version);
+        if(rc) break;
+
     } while(0);
 
     return rc;

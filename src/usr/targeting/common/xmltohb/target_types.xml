@@ -27,6 +27,7 @@
      HOST BOOT TARGETS
      Contains the definition of the different types of targets
      ================================================================= -->
+
 <targetType>
     <id>base</id>
     <attribute><id>CLASS</id></attribute>
@@ -1076,6 +1077,7 @@
     <attribute><id>MCBIST_RANDOM_SEED_TYPE</id></attribute>
     <attribute><id>MSS_DATABUS_UTIL_PER_MBA</id></attribute>
     <attribute><id>MSS_UTIL_N_PER_MBA</id></attribute>
+    <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
 </targetType>
 
 <targetType>

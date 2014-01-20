@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.33 2013/11/11 17:14:23 bellows Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.34 2014/01/10 22:52:22 bellows Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -1412,30 +1412,6 @@ file
     <array> 2 2</array>
 </attribute>
 
-<!-- TODO: RTC 82331 - Add this attribute to the Accessor HWP
-<attribute>
-    <id>ATTR_VPD_DRAM_2N_MODE</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>
-        The 2N/2T characteristic of the DIMM from the VPD MR keyword.  If the memory controller needs to run on 2N mode, the address is presented for two cycles.  By default, 2N should be set to INVALID until the platform initializes it.
-    </description>
-    <valueType>uint8</valueType>
-    <enum>FALSE = 0, TRUE = 1</enum>
-    <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_EFF_DIMM_SPARE_TEMP</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>Spare DRAM availability. temporary version, will be replaced by the VPD version</description>
-    <valueType>uint8</valueType>
-    <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
-    <odmVisable/>
-    <writeable/>
-    <odmChangeable/>
-</attribute>
--->
-
 <!-- Attributes added to support the VPD which was formally using the EFF settings -->
 
 <attribute>
@@ -2312,6 +2288,7 @@ This Attribute is to be interpreted as an Integer</description>
 <!--     <description>Spare DRAM availability. It comes from the VPD or SPD in ISDIMM systems</description>  -->
 <!--     <valueType>uint8</valueType>  -->
 <!--     <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>  -->
+<!--     <platInit/>  -->
 <!--     <odmVisable/>  -->
 <!--     <odmChangeable/>  -->
 <!--     <array> 2 2 4</array>  -->
@@ -2424,9 +2401,19 @@ Comes from the VPD MW Keyword</description>
     <odmVisable/>
 </attribute>
 
-<!-- TODO: RTC 82331 - Add this attribute to the Accessor HWP
 <attribute>
-    <id>ATTR_VPD_CDIMM_MASTER_POWER_SLOPE</id>
+    <id>ATTR_VPD_DRAM_2N_MODE_ENABLED</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Describes if this MBA is in 2N address mode.  The DIMM attributes associated with this MBA describes if this mode is needed for SI. Come from the VPD and consumed in the mba_def.initfile.</description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_CDIMM_VPD_MASTER_POWER_SLOPE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Master Power Slope that comes from the VPD MW Keyword</description>
     <valueType>uint32</valueType>
@@ -2436,7 +2423,7 @@ Comes from the VPD MW Keyword</description>
 </attribute>
 
 <attribute>
-    <id>ATTR_VPD_CDIMM_MASTER_POWER_INTERCEPT</id>
+    <id>ATTR_CDIMM_VPD_MASTER_POWER_INTERCEPT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Master Power Intercept that comes from the VPD MW Keyword</description>
     <valueType>uint32</valueType>
@@ -2446,7 +2433,7 @@ Comes from the VPD MW Keyword</description>
 </attribute>
 
 <attribute>
-    <id>ATTR_VPD_CDIMM_SUPPLIER_POWER_SLOPE</id>
+    <id>ATTR_CDIMM_VPD_SUPPLIER_POWER_SLOPE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Supplier Power Slope that comes from the VPD the MV Keyword</description>
     <valueType>uint32</valueType>
@@ -2456,7 +2443,7 @@ Comes from the VPD MW Keyword</description>
 </attribute>
 
 <attribute>
-    <id>ATTR_VPD_CDIMM_SUPPLIER_POWER_INTERCEPT</id>
+    <id>ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Supplier Power Intercept that comes from MV Keyword</description>
     <valueType>uint32</valueType>
@@ -2464,18 +2451,18 @@ Comes from the VPD MW Keyword</description>
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
-    <id>ATTR_VPD_DRAM_2N_MODE_ENABLED</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Describes if this MBA is in 2N address mode.  The DIMM attributes associated with this MBA describes if this mode is needed for SI. Come from the VPD and consumed in the mba_def.initfile.</description>
-    <valueType>uint8</valueType>
-    <enum>FALSE = 0, TRUE = 1</enum>
-    <odmVisable/>
-    <odmChangeable/>
+    <id>ATTR_L4_BANK_DELETE_VPD</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>L4 Bank Delete settings in VPD.
+Denotes what banks have been deleted from the L4.
+Data will be pulled from CDIMM VPD if CDIMM present.
+Data will be pulled from backplane VPD if IS DIMMs present.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <persistent/>
 </attribute>
-
 
 
 </attributes>

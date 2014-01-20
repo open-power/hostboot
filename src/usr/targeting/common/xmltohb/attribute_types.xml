@@ -13088,4 +13088,21 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MSS_EFF_VPD_VERSION</id>
+    <description>
+        The lowest VPD Version of the DIMMs attached to the MBA. Comes directly (in ASCII) of the VINI VZ keyword
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_EFF_VPD_VERSION</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

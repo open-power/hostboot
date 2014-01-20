@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.28 2013/12/02 21:15:01 asaetow Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.29 2014/01/14 02:24:08 mwuu Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,8 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#		1.29|mwuu    |01/14/14|Added VPD attributes for TSYS_ADR, TSYS_DP18,
+#			|        |        |changed DIMM_TYPE for obsolete CDIMM enum
 #		1.28|mwuu    |11/22/13|Update for VPD attributes
 #		1.27|mwuu    |11/01/13|Had a typo for ATTR_VPD_CEN_PHASE_ROT_M_CMD_A8,
 #		                      |port A was getting the value of A9 phase rotator.
@@ -173,7 +175,7 @@ define def_not_ddr4	=	(ATTR_EFF_DRAM_GEN != ENUM_ATTR_EFF_DRAM_GEN_DDR4)	;	# not
 
 # shorter test for DIMM type
 define def_is_rdimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)	;	# RDIMM = 1
-#define def_is_udimm	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)	;	# UDIMM = 2
+define def_is_udimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)	;	# UDIMM = 2
 define def_is_lrdimm	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)	;	# LRDIMM = 3
 
 # shorter test for DRAM width
@@ -289,10 +291,10 @@ define def_cdi_spcke_ohm30_p1	=	(ATTR_VPD_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_VPD_
 define def_cdi_spcke_ohm40_p1	=	(ATTR_VPD_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_VPD_CEN_DRV_IMP_SPCKE_OHM40)	;	# OHM40 = 0x28 (40)
 
 # define for glacier1(1), glacier2=normal(0)   remove dimm_type != cdimm later
-define def_is_type1	=	((ATTR_MSS_DQS_SWIZZLE_TYPE == 1) && ((ATTR_EFF_CUSTOM_DIMM != ENUM_ATTR_EFF_CUSTOM_DIMM_YES) || (ATTR_EFF_DIMM_TYPE != ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)));
+define def_is_type1	=	((ATTR_MSS_DQS_SWIZZLE_TYPE == 1) && (ATTR_EFF_CUSTOM_DIMM != ENUM_ATTR_EFF_CUSTOM_DIMM_YES));
 
 # remove dimm_type == cdimm later
-define def_is_custom = ((ATTR_EFF_CUSTOM_DIMM == ENUM_ATTR_EFF_CUSTOM_DIMM_YES) || (ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM));
+define def_is_custom = ((ATTR_EFF_CUSTOM_DIMM == ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (def_is_udimm));
 
 # define for 2 cycle addressing mode (2N)
 define def_2N_mode	= (ATTR_VPD_DRAM_2N_MODE_ENABLED == ENUM_ATTR_VPD_DRAM_2N_MODE_ENABLED_TRUE) ;
@@ -4201,8 +4203,8 @@ scom 0x800(0,1)CC050301143F {	# _P[0:1]
 scom 0x800(0,1)3C030301143f {	# DIR1_P[0:1]_[0:4] via broadcast
 	bits	,	scom_data	,	expr			;
 #	0:47	,	0x000000000000,	any				;	# reserved
-#	48:52	,	0b000000	,	any				;	# reserved... used to be DATA_BIT_DIR_16_23
-	53		,	0b0			,	any				;	# DD2_FIX_DIS
+#	48:52	,	0b00000	    ,	any				;	# reserved... used to be DATA_BIT_DIR_16_23
+	53		,	0b0			,	any				;	# DD2_FIX_DIS, disable fixes for DP18 write logic
 	54		,	0b1			,	any				;	# TOXDRV_HIBERNATE	# Thin oxide driver hibernation disable.
 	55		,	0b0			,	any				;	# ATEST_MUX_CTL_EN
 	56		,	0b0			,	any				;	# WL_ADVANCE_DISABLE
@@ -4973,6 +4975,8 @@ scom 0x800(0,1)BC330301143F {		# _P[0:1]_ADR32S[0:1] via broadcast
 	# !! NOTE different depending on EC level, system voltage too?
 	# value in the scom_data field is right aligned
 	48:55	,	0x60		,	(def_is_sim)				;	# ADR32_TSYS_WRCLK	sim set to 0x60
+ 	48:55	,	0x70		,	(ATTR_MSS_EFF_VPD_VERSION < 0x10);	# if lower than v6.0 / VZ 0x10, use hardcode
+ 	48:55	,	(ATTR_VPD_TSYS_ADR[0]),	any					;
 # below is for fast process parts
 #	48:55	,	0x15		,	(CEN.ATTR_MSS_FREQ < 1458)	;	# 1333 Mbps, and 1066 (21)
 #	48:55	,	0x19		,	(CEN.ATTR_MSS_FREQ < 1724)	;	# 1600 Mbps (25)
@@ -4987,7 +4991,7 @@ scom 0x800(0,1)BC330301143F {		# _P[0:1]_ADR32S[0:1] via broadcast
 # 	48:55	,	0x35		,	(CEN.ATTR_MSS_FREQ < 1724)	;	# 1600 Mbps (53)
 # 	48:55	,	0x3E		,	any							;	# 1866 Mbps (62)
 #-------- debug -----------------------------
- 	48:55	,	0x70		,	any							;
+# 	48:55	,	0x70		,	any							;
 #	56:63	,	0x00		,	any							;	# reserved
 }
 
@@ -5012,6 +5016,8 @@ scom 0x800(0,1)3C740301143F {					#_P[0:1]_[0:4] via broadcast
 	# !! NOTE different depending on EC level
 	# value in the scom_data field is right aligned
 	48:55	,	0x60		,	(def_is_sim)				;	# DP18_TSYS_WRCLK	sim set to 0x60
+ 	48:55	,	0x6B		,	(ATTR_MSS_EFF_VPD_VERSION < 0x10);	# if lower than v6.0 / VZ 0x10, use hardcode
+	48:55	,	(ATTR_VPD_TSYS_DP18[0]),	any				;
 # below is for fast process parts
 #	48:55	,	0x14		,	(CEN.ATTR_MSS_FREQ < 1458)	;	# 1333 Mbps, and 1066 (20)
 #	48:55	,	0x18		,	(CEN.ATTR_MSS_FREQ < 1724)	;	# 1600 Mbps (24)
@@ -5026,7 +5032,7 @@ scom 0x800(0,1)3C740301143F {					#_P[0:1]_[0:4] via broadcast
 #	48:55	,	0x35		,	(CEN.ATTR_MSS_FREQ < 1724)	;	# 1600 Mbps (53)
 #	48:55	,	0x3E		,	any							;	# 1866 Mbps (62)
 #-------- debug -----------------------------
- 	48:55	,	0x6B		,	any							;
+#	48:55	,	0x6B		,	any							;
 #	56:63	,	0x00		,	any							;	# reserved
 }
 

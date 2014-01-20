@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_lrdimm_funcs.C,v 1.5 2013/12/03 22:51:13 kcook Exp $
+// $Id: mss_lrdimm_funcs.C,v 1.6 2014/01/07 21:50:11 bellows Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -40,11 +40,12 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//  1.5    | 12/03/13 | kcook   | Updated VPD attributes. 
-//  1.4    | 09/16/13 | bellows | Hostboot compile update
-//  1.3    | 09/16/13 | bellows | Added ID tag.
-//  1.2    | 09/13/13 | kcook   | Updated define FAPI_LRDIMM token.
-//  1.1    | 08/27/13 | kcook   | First drop of Centaur
+//  1.6    | bellows  |02-JAN-14| VPD attribute removal
+//  1.5    | kcook    |12/03/13 | Updated VPD attributes. 
+//  1.4    | bellows  |09/16/13 | Hostboot compile update
+//  1.3    | bellows  |09/16/13 | Added ID tag.
+//  1.2    | kcook    |09/13/13 | Updated define FAPI_LRDIMM token.
+//  1.1    | kcook    |08/27/13 | First drop of Centaur
 
 //----------------------------------------------------------------------
 //  Includes
@@ -1503,7 +1504,7 @@ fapi::ReturnCode mss_lrdimm_rewrite_odt( const Target& i_target_mba, uint32_t * 
 {
    ReturnCode rc;
    uint8_t l_num_ranks_per_dimm_u8array[PORT_SIZE][DIMM_SIZE];
-   uint8_t l_arr_offset;
+//   uint8_t l_arr_offset;
    uint32_t l_mss_freq = 0;
    uint8_t l_dram_width_u8;
    
@@ -1517,7 +1518,7 @@ fapi::ReturnCode mss_lrdimm_rewrite_odt( const Target& i_target_mba, uint32_t * 
    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, l_num_ranks_per_dimm_u8array); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width_u8); if(rc) return rc;
 
-   uint8_t l_start=44, l_end=60;
+//   uint8_t l_start=44, l_end=60;
    if ( (l_num_ranks_per_dimm_u8array[0][1] == 4) || (l_num_ranks_per_dimm_u8array[1][1] == 4) ) {
       odt_array = var_array_p_array[0];
       FAPI_INF("Setting LRDIMM ODT_RD as 4 rank dimm");
@@ -1538,9 +1539,10 @@ fapi::ReturnCode mss_lrdimm_rewrite_odt( const Target& i_target_mba, uint32_t * 
       FAPI_INF("Setting LRDIMM ODT_RD as 2 logical rank dimm");
    }
 
-   for ( l_arr_offset = l_start; l_arr_offset < l_end; l_arr_offset++ ) {
-      *(p_b_var_array + l_arr_offset) = *(odt_array + l_arr_offset);
-   }
+// mdb - we do not have eff config attributes, so we can't set this array.  This function probably goes away
+//   for ( l_arr_offset = l_start; l_arr_offset < l_end; l_arr_offset++ ) {
+//      *(p_b_var_array + l_arr_offset) = *(odt_array + l_arr_offset);
+//   }
 
    return rc;
 }
