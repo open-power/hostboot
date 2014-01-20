@@ -47,6 +47,9 @@ $ */
 #include <intr/interrupt.H>
 #include <vpd/vpd_if.H>
 #include <stdio.h>
+#include <pnor/pnorif.H>
+#include <sys/mm.h>
+#include <util/align.H>
 
 
 trace_desc_t *g_trac_devtree = NULL;
@@ -530,6 +533,53 @@ void add_reserved_mem(devTree * i_dt,
     i_dt->populateReservedMem(res_mem_addrs, res_mem_sizes, cell_count);
 }
 
+void load_hbrt_image(uint64_t& io_address)
+{
+    errlHndl_t l_errl = NULL;
+
+    do
+    {
+
+        PNOR::SectionInfo_t l_pnorInfo;
+        l_errl = getSectionInfo( PNOR::HB_RUNTIME , l_pnorInfo);
+        if (l_errl) { break; }
+
+            // Find start of image.
+            //     For Secureboot we might need to deal with the header but
+            //     for now that is hidden by the PNOR-RP.
+        uint64_t image_start = l_pnorInfo.vaddr;
+
+            // The "VFS_LAST_ADDRESS" variable is 2 pages in.
+        uint64_t vfs_last_address =
+                *reinterpret_cast<uint64_t*>(image_start + 2*PAGE_SIZE);
+
+            // At the end of the image are the relocations, get the number.
+        uint64_t relocate_count =
+                *reinterpret_cast<uint64_t*>(image_start + vfs_last_address);
+
+            // Sum up the total size.
+        uint64_t image_size = vfs_last_address +
+                              (relocate_count+1)*sizeof(uint64_t);
+
+        TRACFCOMP(g_trac_devtree, "HBRT image: start = %lx, size = %lx",
+                  image_start, image_size);
+        io_address -= ALIGN_PAGE(image_size);
+
+            // Copy image.
+        void* memArea = mm_block_map(reinterpret_cast<void*>(io_address),
+                                     ALIGN_PAGE(image_size));
+        memcpy(memArea, reinterpret_cast<void*>(image_start), image_size);
+        mm_block_unmap(memArea);
+
+    } while (0);
+
+    if (l_errl)
+    {
+        io_address = 0;
+        errlCommit(l_errl, DEVTREE_COMP_ID);
+    }
+}
+
 
 errlHndl_t bld_fdt_cpu(devTree * i_dt)
 {
@@ -606,12 +656,18 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt)
     uint64_t l_targ_addr = l_vpd_addr;
     TARGETING::AttrRP::save(l_targ_addr);
 
+    // HBRT image
+    uint64_t l_hbrt_addr = l_targ_addr;
+    load_hbrt_image(l_hbrt_addr);
 
-    uint64_t l_extra_addrs[] = { l_vpd_addr, l_targ_addr };
-    uint64_t l_extra_sizes[] = { VMM_RT_VPD_SIZE, l_vpd_addr - l_targ_addr };
+    uint64_t l_extra_addrs[] = { l_vpd_addr, l_targ_addr, l_hbrt_addr };
+    uint64_t l_extra_sizes[] = { VMM_RT_VPD_SIZE,
+                                 l_vpd_addr - l_targ_addr,
+                                 l_targ_addr - l_hbrt_addr};
     const char* l_extra_addrs_str[] =
                     { "ibm,hbrt-vpd-image" ,
-                      "ibm,hbrt-target-image" };
+                      "ibm,hbrt-target-image",
+                      "ibm,hbrt-code-image" };
     size_t l_extra_addr_cnt = sizeof(l_extra_addrs) / sizeof(uint64_t);
 
     //Add in reserved memory for HOMER images and HBRT sections.

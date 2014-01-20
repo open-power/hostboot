@@ -289,7 +289,11 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                     }
                 }
             }
-            break;
+
+            if (l_err)
+            {
+                break;
+            }
         }
 
         if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
