@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_setup.C,v 1.11 2013/04/17 22:38:42 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_setup.C,v 1.12 2014/01/07 14:43:34 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_setup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -42,9 +42,9 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p8_scom_addresses.H"
-#include "proc_a_x_pci_dmi_pll_setup.H"
-#include "proc_a_x_pci_dmi_pll_utils.H"
+#include <p8_scom_addresses.H>
+#include <proc_a_x_pci_dmi_pll_setup.H>
+#include <proc_a_x_pci_dmi_pll_utils.H>
 
 
 //------------------------------------------------------------------------------
@@ -223,6 +223,9 @@ extern "C"
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_setup.C,v $
+Revision 1.12  2014/01/07 14:43:34  mfred
+Checking in updates from Andrea Ma:  Include statements fixed and one fapi dbg statement changed.
+
 Revision 1.11  2013/04/17 22:38:42  jmcgill
 implement A/DMI PLL workaround for SW194943, reorganize code to use common subroutines for PLL scan/setup
 

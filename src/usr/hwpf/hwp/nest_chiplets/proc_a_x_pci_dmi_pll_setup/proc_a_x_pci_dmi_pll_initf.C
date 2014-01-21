@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.15 2013/09/30 16:09:56 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.16 2014/01/07 14:43:23 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -45,9 +45,9 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p8_scom_addresses.H"
-#include "proc_a_x_pci_dmi_pll_initf.H"
-#include "proc_a_x_pci_dmi_pll_utils.H"
+#include <p8_scom_addresses.H>
+#include <proc_a_x_pci_dmi_pll_initf.H>
+#include <proc_a_x_pci_dmi_pll_utils.H>
 
 using namespace fapi;
 
@@ -417,6 +417,9 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_initf.C,v $
+Revision 1.16  2014/01/07 14:43:23  mfred
+Checking in updates from Andrea Ma:  Include statements fixed and one fapi dbg statement changed.
+
 Revision 1.15  2013/09/30 16:09:56  jmcgill
 fix HW268965
 

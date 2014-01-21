@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.5 2013/10/28 06:45:46 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.6 2014/01/07 14:43:36 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -39,8 +39,8 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p8_scom_addresses.H"
-#include "proc_a_x_pci_dmi_pll_utils.H"
+#include <p8_scom_addresses.H>
+#include <proc_a_x_pci_dmi_pll_utils.H>
 #include <fapi.H>
 
 using namespace fapi;
@@ -437,7 +437,7 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_release_pll(
     fapi::ReturnCode rc;
 
     // mark function entry
-    FAPI_DBG("Start");
+    FAPI_DBG("Start proc_a_x_pci_dmi_pll_release_pll");
 
     do
     {
@@ -553,7 +553,7 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_release_pll(
     } while(0);
 
     // mark function entry
-    FAPI_DBG("End");
+    FAPI_DBG("End proc_a_x_pci_dmi_pll_release_pll");
     return rc;
 }
 

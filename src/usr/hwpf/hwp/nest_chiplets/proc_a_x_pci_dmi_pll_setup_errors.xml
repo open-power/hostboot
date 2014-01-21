@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,25 +20,37 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_a_x_pci_dmi_pll_setup_errors.xml,v 1.4 2013/06/25 15:38:20 cswenson Exp $ -->
-<!-- Halt codes for proc_a_x_pci_dmi_pll_setup -->
+<!-- $Id: proc_a_x_pci_dmi_pll_setup_errors.xml,v 1.5 2014/01/07 14:17:46 mfred Exp $ -->
+<!-- Halt codes for proc_a_x_pci_dmi_pll_setup --> 
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_A_X_PCI_DMI_PLL_SETUP_ABUS_PLL_NO_LOCK</rc>
     <ffdc>LOCK_STATUS</ffdc>
     <description>A_Bus PLL failed to lock.</description>
+    <callout>
+        <procedure>CODE </procedure>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_A_X_PCI_DMI_PLL_SETUP_DMI_PLL_NO_LOCK</rc>
     <ffdc>LOCK_STATUS</ffdc>
     <description>DMI PLL failed to lock.</description>
+    <callout>
+        <procedure>CODE </procedure>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_A_X_PCI_DMI_PLL_SETUP_PCIE_PLL_NO_LOCK</rc>
     <ffdc>LOCK_STATUS</ffdc>
     <description>PCIE PLL failed to lock.</description>
+    <callout>
+        <procedure>CODE </procedure>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>
