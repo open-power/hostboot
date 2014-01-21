@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,9 +36,10 @@
 #include <inttypes.h>
 #include <prdrToken.H>            // Token structure definition.
 #include <prdrCompile.y.H>  // Token enums from yacc code.
-
-#define YY_NO_UNPUT            // No "Unput" function defined.
 %}
+
+/* Suppress "yyunput defined but not used" warnings */
+%option nounput
 
 /* --- Basic type definitions --- */
 
