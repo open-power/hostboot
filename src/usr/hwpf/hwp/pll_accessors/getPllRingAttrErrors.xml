@@ -1,0 +1,115 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/pll_accessors/getPllRingAttrErrors.xml $     -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: getPllRingAttrErrors.xml,v 1.2 2014/01/22 14:04:34 mjjones Exp $ -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PLL_RING_ATTR_INVALID_ATTRIBUTE_ID</rc>
+    <description>
+      Request to get a PLL ring attribute with an invalid Attribute ID
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PLL_RING_ATTR_BAD_CHIP_NAME_EC</rc>
+    <description>
+      Request to get a PLL ring attribute with an unsupported
+      Processor Chip Name and EC level. The getPllRingAttr Attribute
+      Accessor needs updating to support this chip.
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PLL_RING_ATTR_UNSUPPORTED_FREQ_1</rc>
+    <description>
+      Request to get a PLL ring attribute with an unsupported frequency
+      attribute. Refer to the generated fapiPllRingAttr.H file to find
+      which frequency attribute corresponds to FREQ_1 and to find the
+      supported frequencies
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <ffdc>FREQ_1</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PLL_RING_ATTR_UNSUPPORTED_FREQ_2</rc>
+    <description>
+      Request to get a PLL ring attribute with an unsupported frequency
+      attribute. Refer to the generated fapiPllRingAttr.H file to find
+      which frequency attribute corresponds to FREQ_1/2 and to find the
+      supported frequencies
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <ffdc>FREQ_1</ffdc>
+    <ffdc>FREQ_2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_PLL_RING_ATTR_UNSUPPORTED_FREQ_4</rc>
+    <description>
+      Request to get a PLL ring attribute with an unsupported frequency
+      attribute. Refer to the generated fapiPllRingAttr.H file to find
+      which frequency attribute corresponds to FREQ_1/2/3/4 and to find the
+      supported frequencies
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <ffdc>FREQ_1</ffdc>
+    <ffdc>FREQ_2</ffdc>
+    <ffdc>FREQ_3</ffdc>
+    <ffdc>FREQ_4</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+</hwpErrors>

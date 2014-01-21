@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -250,6 +250,8 @@ foreach my $argnum (1 .. $#ARGV)
 #------------------------------------------------------------------------------
 print TGFILE "    default:\n";
 print TGFILE "        i_parser.PrintNumber(\"Unrecognized FFDC\", \"0x%x\", l_ffdcId);\n";
+print TGFILE "        if (l_buflen) ";
+print TGFILE "{i_parser.PrintHexDump(l_pBuffer, l_buflen);}\n";
 print TGFILE "    }\n\n";
 print TGFILE "}\n\n";
 

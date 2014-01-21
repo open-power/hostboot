@@ -41,6 +41,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/spd_accessors/getSpdAttrAccessorErrors.xml \
     hwp/winkle_ring_accessors/proc_l3_delta_data_errors.xml \
     hwp/pll_accessors/getPllRingInfoAttrErrors.xml \
+    hwp/pll_accessors/getPllRingAttrErrors.xml \
     ../pore/fapiporeve/fapiPoreVe_errors.xml \
     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit_errors.xml \
