@@ -719,15 +719,15 @@ actionclass calloutXbus3InterfaceTh1 { calloutXbus3Interface; threshold1; };
 
 /** Lane Repair: spare deployed - XBUS 0 */
 actionclass spareDeployed_xbus0
-{ calloutXbus1Interface; funccall("spareDeployed_xbus0"); };
+{ calloutXbus0Interface; funccall("spareDeployed_xbus0"); };
 
 /** Lane Repair: max spares exceeded - XBUS 0 */
 actionclass maxSparesExceeded_xbus0
-{ calloutXbus1InterfaceTh1; funccall("maxSparesExceeded_xbus0"); };
+{ calloutXbus0InterfaceTh1; funccall("maxSparesExceeded_xbus0"); };
 
 /** Lane Repair: too many bus errors - XBUS 0 */
 actionclass tooManyBusErrors_xbus0
-{ calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus0"); };
+{ calloutXbus0InterfaceTh1; funccall("tooManyBusErrors_xbus0"); };
 
 /** Lane Repair: spare deployed - XBUS 1 */
 actionclass spareDeployed_xbus1
@@ -743,27 +743,27 @@ actionclass tooManyBusErrors_xbus1
 
 /** Lane Repair: spare deployed - XBUS 2 */
 actionclass spareDeployed_xbus2
-{ calloutXbus1Interface; funccall("spareDeployed_xbus2"); };
+{ calloutXbus2Interface; funccall("spareDeployed_xbus2"); };
 
 /** Lane Repair: max spares exceeded - XBUS 2 */
 actionclass maxSparesExceeded_xbus2
-{ calloutXbus1InterfaceTh1; funccall("maxSparesExceeded_xbus2"); };
+{ calloutXbus2InterfaceTh1; funccall("maxSparesExceeded_xbus2"); };
 
 /** Lane Repair: too many bus errors - XBUS 2 */
 actionclass tooManyBusErrors_xbus2
-{ calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus2"); };
+{ calloutXbus2InterfaceTh1; funccall("tooManyBusErrors_xbus2"); };
 
 /** Lane Repair: spare deployed - XBUS 3 */
 actionclass spareDeployed_xbus3
-{ calloutXbus1Interface; funccall("spareDeployed_xbus3"); };
+{ calloutXbus3Interface; funccall("spareDeployed_xbus3"); };
 
 /** Lane Repair: max spares exceeded - XBUS 3 */
 actionclass maxSparesExceeded_xbus3
-{ calloutXbus1InterfaceTh1; funccall("maxSparesExceeded_xbus3"); };
+{ calloutXbus3InterfaceTh1; funccall("maxSparesExceeded_xbus3"); };
 
 /** Lane Repair: too many bus errors - XBUS 3 */
 actionclass tooManyBusErrors_xbus3
-{ calloutXbus1InterfaceTh1; funccall("tooManyBusErrors_xbus3"); };
+{ calloutXbus3InterfaceTh1; funccall("tooManyBusErrors_xbus3"); };
 
 /** Threshold 5 per day, mask but do not predictively callout XBUS 0 */
 actionclass calloutXbus0InterfaceTh5pDay
