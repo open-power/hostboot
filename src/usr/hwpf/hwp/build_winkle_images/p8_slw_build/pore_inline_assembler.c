@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,13 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pore_inline_assembler.c,v 1.21 2013/11/20 14:06:40 bcbrock Exp $
+// $Id: pore_inline_assembler.c,v 1.22 2013/12/11 00:11:14 bcbrock Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/pore_inline_assembler.c,v $
+//-----------------------------------------------------------------------------
+// *! (C) Copyright International Business Machines Corp. 2013
+// *! All Rights Reserved -- Property of IBM
+// *! *** IBM Confidential ***
+//-----------------------------------------------------------------------------
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -368,9 +374,6 @@
 /// section will be disassembled as data.  For complete information see the
 /// documentation for pore_inline_disassemble().
 
-#ifdef PPC_HYP
-#include <HvPlicModule.H>
-#endif
 
 #define __PORE_INLINE_ASSEMBLER_C__
 #include "pore_inline.h"

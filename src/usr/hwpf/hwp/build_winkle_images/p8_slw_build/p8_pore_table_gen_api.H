@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.22 2013/12/03 05:43:33 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.23 2014/01/06 13:53:19 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -282,7 +282,7 @@ enum  {
 #define FIXED_SLW_SECTION_SIZE      (SLW_TABLE_SIZE_ALL/128+(SLW_TABLE_SIZE_ALL%128+127)/128)*128
 
 // FFDC section size (Ensure 128-byte alignment.)
-#define FIXED_FFDC_SECTION_SIZE     256*(SLW_MAX_CORES+1)
+#define FIXED_FFDC_SECTION_SIZE     640*(SLW_MAX_CORES+1)
 
 // SCOM/CID masks and ranges
 #define P8_CID_EX_LOW         0x10        // Lowest EX chiplet addr
