@@ -797,10 +797,15 @@ group gPmcFir filter singlebit
      */
     (PmcFir, bit(36)) ? defaultMaskedError;
 
-    /** PMCFIR[37:46]
+    /** PMCFIR[37]
+     *  SLW Malf Alert received by PHYP
+     */
+    (PmcFir, bit(37)) ? SLWRecovery;
+
+    /** PMCFIR[38:46]
      *  SPARE
      */
-    (PmcFir, bit(37|38|39|40|41|42|43|44|45|46)) ? defaultMaskedError;
+    (PmcFir, bit(38|39|40|41|42|43|44|45|46)) ? defaultMaskedError;
 
     /** PMCFIR[47|48]
      *  FIR_PARITY_ERR
@@ -1329,3 +1334,11 @@ actionclass calloutMasterCoreThr1
     dumpSH;
 };
 
+/**
+ * Handle SLW malfunction alert event
+ */
+actionclass SLWRecovery
+{
+    funccall("slwRecovery");
+    threshold1;
+};

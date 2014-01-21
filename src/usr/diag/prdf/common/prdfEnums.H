@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -56,6 +56,7 @@ enum MFG_THRES_SYNC_MSG_TYPE
     #define EPUB_PRC_MEMBUS_ERROR   HWAS::EPUB_PRC_MEMBUS_ERROR
     #define EPUB_PRC_PROC_XYZ_BUS   HWAS::EPUB_PRC_PROC_XYZ_BUS
     #define EPUB_PRC_PROC_AB_BUS    HWAS::EPUB_PRC_PROC_AB_BUS
+    #define EPUB_PRC_MEMORY_UE      0x4F
 
     // FIXME: remove these mapping once the enums are made common
     #define SRCI_PRIORITY_HIGH  HWAS::SRCI_PRIORITY_HIGH
@@ -82,6 +83,7 @@ enum MFG_THRES_SYNC_MSG_TYPE
         EPUB_PRC_PROC_AB_BUS  = 0x30,
         EPUB_PRC_PROC_XYZ_BUS = 0x31,
         EPUB_PRC_MEMBUS_ERROR = 0x34,
+        EPUB_PRC_MEMORY_UE    = 0x4F,
 
         SRCI_PRIORITY_LOW   = 1,
         SRCI_PRIORITY_MEDC  = 2,

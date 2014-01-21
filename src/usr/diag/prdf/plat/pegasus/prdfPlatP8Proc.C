@@ -30,6 +30,7 @@
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
+#include <prdfCalloutUtil.H>
 
 using namespace TARGETING;
 
@@ -55,6 +56,24 @@ int32_t analyzeMpIPL( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Proc, analyzeMpIPL );
+
+
+/**
+ * @brief Handle SLW Malfunction alert
+ * @param i_chip P8 chip
+ * @param  i_sc   The step code data struct
+ * @returns Failure or Success
+ * @note
+ */
+int32_t slwRecovery( ExtensibleChip * i_chip,
+                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    PRDF_ERR( "slwRecovery functionality not supported during hostboot: "
+               "PROC = 0x%08x", i_chip->GetId() );
+    CalloutUtil::defaultError( i_sc );
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Proc, slwRecovery );
 
 }//namespace Proc ends
 

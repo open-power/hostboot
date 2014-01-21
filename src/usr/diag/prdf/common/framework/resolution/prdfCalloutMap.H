@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -81,6 +81,7 @@ PRDF_SYM_CALLOUT_ALIAS( NextLevelSupport_ENUM,        EPUB_PRC_LVL_SUPP       )
 PRDF_SYM_CALLOUT_ALIAS( MEMBUS_ERROR_ENUM,            EPUB_PRC_MEMBUS_ERROR   )
 PRDF_SYM_CALLOUT_ALIAS( PassiveFabric_OnNode_ENUM,    EPUB_PRC_PROC_XYZ_BUS   )
 PRDF_SYM_CALLOUT_ALIAS( PassiveFabric_OffNode_ENUM,   EPUB_PRC_PROC_AB_BUS    )
+PRDF_SYM_CALLOUT_ALIAS( ErrorCausedByMemUE_ENUM,      EPUB_PRC_MEMORY_UE      )
 
 PRDF_SYM_CALLOUT_MAP_END
 
