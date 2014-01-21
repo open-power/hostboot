@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -3440,14 +3440,24 @@ sub getAttributeIdEnumeration {
     {
         my $attributeHexVal28bit = getAttributeIdHashStr($attribute->{id});
 
+        # check if this Id has already been processed
         if(exists($attrValHash{$attributeHexVal28bit}))
         {
-            # if the name is the same, skip it
+            # fatal error if multiple IDs hash to same value
             if ( $attribute->{id} ne $attrValHash{$attributeHexVal28bit} )
             {
                fatal(
                  "Error:Duplicate AttributeId hashvalue for $attribute->{id} "
                      . "and $attrValHash{$attributeHexVal28bit}");
+            }
+            # fatal error if attribute has been defined more than once.
+            # Could be defined twice in same file or defined in two files
+            # that have been merged, such as attributes_types.xml and
+            # attribute_types_hb.xml or attributes_types_fsp.
+            else
+            {
+               fatal("Error: AttributeId $attribute->{id} "
+                     . "defined multiple times");
             }
         }
         else
