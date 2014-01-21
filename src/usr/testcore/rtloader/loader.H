@@ -108,7 +108,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->malloc = malloc;
                 intf->free = free;
                 intf->realloc = realloc;
-                intf->sleep = nanosleep;
                 intf->assert = rt_assert;
                 intf->sendErrorLog = rt_logErr;
                 intf->scom_read = rt_scom_read;
@@ -179,8 +178,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             assert(false);
         }
 
-        static int rt_scom_read(uint32_t chipid,
-                                 uint32_t addr,
+        static int rt_scom_read(uint64_t chipid,
+                                 uint64_t addr,
                                  void* data)
         {
             int rc = 0;
@@ -207,8 +206,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return rc;
         }
 
-        static int rt_scom_write(uint32_t chipid,
-                                  uint32_t addr,
+        static int rt_scom_write(uint64_t chipid,
+                                  uint64_t addr,
                                   void* data)
         {
             int rc = 0;
@@ -226,7 +225,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return rc;
         }
 
-        typedef std::pair<uint32_t,uint32_t> SCOM_KEY;
+        typedef std::pair<uint64_t,uint64_t> SCOM_KEY;
         typedef std::map<SCOM_KEY,uint64_t> SCOM_MAP;
         static SCOM_MAP cv_scomMap;
 

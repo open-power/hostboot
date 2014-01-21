@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -98,26 +98,31 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 {
 
     errlHndl_t l_err = NULL;
-    mutex_t* l_mutex = NULL;
-    uint64_t elapsed_indScom_time_ns = 0;
-    bool l_indScomError = false;
-    uint64_t temp_io_buffer = 0;
 
     enum { MAX_INDSCOM_TIMEOUT_NS = 100000 }; //=.1ms
 
+    // In HOSTBOOT_RUNTIME we always defer indirect scoms to Sapphire.
+#ifndef __HOSTBOOT_RUNTIME
     // If the indirect scom bit is 0, then doing a regular scom
     if( (i_addr & 0x8000000000000000) == 0)
     {
+#endif // __HOSTBOOT_RUNTIME
         l_err = doScomOp(i_opType,
                          i_target,
                          io_buffer,
                          io_buflen,
                          i_accessType,
                          i_addr);
+#ifndef __HOSTBOOT_RUNTIME
      }
     // We are performing an indirect scom.
     else
     {
+        mutex_t* l_mutex = NULL;
+        uint64_t elapsed_indScom_time_ns = 0;
+        bool l_indScomError = false;
+        uint64_t temp_io_buffer = 0;
+
         uint64_t l_io_buffer = 0;
         uint64_t temp_scomAddr = 0;
 
@@ -399,6 +404,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
             }
         } // end of write
     }
+#endif // __HOSTBOOT_RUNTIME
     return l_err;
 }
 

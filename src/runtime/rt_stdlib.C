@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <runtime/interface.h>
 #include <string.h>
-#include <sys/time.h>
 
 void* malloc(size_t s)
 {
@@ -54,9 +53,4 @@ void* calloc(size_t num, size_t size)
     }
 
     return mem;
-}
-
-void nanosleep( uint64_t sec, uint64_t nsec )
-{
-    g_hostInterfaces->sleep(sec,nsec);
 }

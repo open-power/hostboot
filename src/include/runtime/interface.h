@@ -64,8 +64,6 @@ typedef struct hostInterfaces
     void (*free)(void*);
     /** realloc */
     void* (*realloc)(void*, size_t);
-    /** sleep */
-    void (*sleep)(uint64_t sec, uint64_t nsec);
 
     /** sendErrorLog
      * @param[in] plid Platform Log identifier
@@ -81,7 +79,7 @@ typedef struct hostInterfaces
      * @param[in] pointer to 8-byte data buffer
      * @return 0 on success else return code
      */
-    int (*scom_read)(uint32_t, uint32_t, void*);
+    int (*scom_read)(uint64_t, uint64_t, void*);
 
     /** Scan communication write
      * @param[in] chip_id (based on devtree defn)
@@ -89,7 +87,7 @@ typedef struct hostInterfaces
      * @param[in] pointer to 8-byte data buffer
      * @return 0 on success else return code
      */
-    int (*scom_write)(uint32_t, uint32_t, void* );
+    int (*scom_write)(uint64_t, uint64_t, void* );
 
     /** lid_load
      *  Load a LID from PNOR, FSP, etc.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,7 +43,7 @@ namespace XSCOM
 enum
 {
     CHIPID_NODE_SHIFT = 3,  // CHIPID is 'NNNCCC'b, shift 3
-    MEMBUF_ID_SHIFT = 4,    // CHIPID for MEMBUF is 'NNNCCCMMMM'b 
+    MEMBUF_ID_SHIFT = 4,    // CHIPID for MEMBUF is 'NNNCCCMMMM'b
     MEMBUF_ID_FLAG  = 0x80000000, // MEMBUF chip id has MSbit on
 };
 
@@ -71,11 +71,11 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
 /**
  * @brief Convert target into chipId that the hypervisor uses
  * @param[in]   i_target   The HB TARGETING target
- * @param[out]  o_chipId    32-bit chipid
+ * @param[out]  o_chipId    Chipid
  * @return      errlHndl_t  Error handle if there was an error
  */
 errlHndl_t get_rt_target(TARGETING::Target* i_target,
-                         uint32_t & o_chipId);
+                         uint64_t & o_chipId);
 
 /**
  * @brief Internal routine that verifies the validity of input parameters
@@ -162,7 +162,7 @@ errlHndl_t xscomOpSanityCheck(const DeviceFW::OperationType i_opType,
 
 
 errlHndl_t get_rt_target(TARGETING::Target* i_target,
-                         uint32_t &o_chipId)
+                         uint64_t &o_chipId)
 {
     errlHndl_t l_err = NULL;
 
@@ -276,7 +276,7 @@ errlHndl_t get_rt_target(TARGETING::Target* i_target,
             o_chipId = (fabId << CHIPID_NODE_SHIFT) + procPos;
         }
     } while(0);
-    
+
     return l_err;
 }
 
@@ -286,12 +286,12 @@ errlHndl_t get_rt_target(TARGETING::Target* i_target,
  */
 errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
                       TARGETING::Target * i_target,
-                      uint32_t i_scomAddr,
+                      uint64_t i_scomAddr,
                       void * io_buffer)
 {
     errlHndl_t l_err = NULL;
     int rc = 0;
-    uint32_t proc_id = 0;
+    uint64_t proc_id = 0;
 
     // Convert target to something  Sapphire understands
     l_err = get_rt_target(i_target,
@@ -398,7 +398,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
         l_err = xScomDoOp(i_opType,
                           i_target,
-                          (uint32_t)l_addr,
+                          l_addr,
                           io_buffer);
     }
 
