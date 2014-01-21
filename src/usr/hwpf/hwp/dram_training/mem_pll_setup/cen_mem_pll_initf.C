@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_initf.C,v 1.10 2013/12/10 03:41:34 mfred Exp $
+// $Id: cen_mem_pll_initf.C,v 1.11 2014/01/15 03:34:28 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -300,6 +300,7 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
     uint32_t            mss_freq        = 0;
     uint32_t            nest_freq       = 0;
     uint32_t            ring_length     = 0;
+    uint32_t            mem_pll_update_bit_offset = 0;
     uint8_t             attrRingData[80]={0};   // Set to 80 bytes to match length in XML file, not actual scan ring length.
     ecmdDataBufferBase  ring_data;
 
@@ -473,6 +474,15 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             break;
         }
 
+        rc = FAPI_ATTR_GET(ATTR_MEMB_MEM_PLL_CFG_UPDATE_OFFSET, &i_target, mem_pll_update_bit_offset);
+        if (rc)
+        {
+            FAPI_ERR("Failed to get the MEM PLL PLLCTR1(44) offset attribute");
+            break;
+        }
+        FAPI_DBG("MEM PLL PLLCTR1(44) offset is set to : %d.", mem_pll_update_bit_offset);
+
+
         // Set the ring_data buffer to the right length for the ring data
         rc_ecmd |= ring_data.setBitLength(ring_length);   // This length needs to match the real scan length in the scandef file (Required for hostboot.)
         if (rc_ecmd)
@@ -482,23 +492,39 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             break;
         }
 
-        // Put the ring data from the attribute into the buffer
-        rc_ecmd |= ring_data.insert(attrRingData, 0, ring_length, 0);
-        if (rc_ecmd)
+        // in order to update its output frequency, the MEM PLL needs to see PLLCTRL1(44) toggle
+        // ensure output frequency changes by running three scans w/ setpulse (PLLCTRL1(44) = 0->1->0)
+        for (uint32_t scan_num = 0; scan_num < 3; scan_num++)
         {
-            FAPI_ERR("Error 0x%x loading scan chain attribute data into buffer.",  rc_ecmd);
-            rc.setEcmdError(rc_ecmd);
-            break;
-        }
+            // Put the ring data from the attribute into the buffer
+            rc_ecmd |= ring_data.insert(attrRingData, 0, ring_length, 0);
 
-        // Call the subroutine to load the data into the simulation or HW model
-        rc = cen_load_pll_ring_from_buffer ( i_target, ring_data );
+            // force desired value of PLLCTR1(44)
+            if (scan_num % 2) {
+                rc_ecmd |= ring_data.setBit(mem_pll_update_bit_offset);
+            }
+            else {
+                rc_ecmd |= ring_data.clearBit(mem_pll_update_bit_offset);
+            }
+            if (rc_ecmd)
+            {
+                FAPI_ERR("Error 0x%x loading scan chain attribute data into buffer (scan=%d).",  rc_ecmd, scan_num);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            // Call the subroutine to load the data into the simulation or HW model
+            rc = cen_load_pll_ring_from_buffer ( i_target, ring_data );
+            if (rc)
+            {
+                FAPI_ERR("Subroutine: cen_load_pll_ring_from_buffer failed (scan=%d)!", scan_num);
+                break;
+            }
+        }
         if (rc)
         {
-            FAPI_ERR("Subroutine: cen_load_pll_ring_from_buffer failed!");
             break;
         }
-
     } while(0);
 
     FAPI_INF("********* cen_mem_pll_initf complete *********");
@@ -514,6 +540,9 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_initf.C,v $
+Revision 1.11  2014/01/15 03:34:28  jmcgill
+scan ring 3x to ensure toggle on MEM PLLCTR1(44), which will guarantee output frequency change
+
 Revision 1.10  2013/12/10 03:41:34  mfred
 Make changes to support TP_BNDY scan chain addresses changing to chiplet 1 for zSeries.
 
