@@ -56,41 +56,24 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
             PlatServices::getClockId(iv_ptargetClock, oscType);
 
         // Callout this chip if nothing else.
-        // FIXME - RTC: 91939
-        // will re-write this block of code when
-        // we can get osc targets from targeting again.
-        // In the mean time, we don't want to call out the
-        // chip for this.
         if(NULL == l_ptargetClock)
         {
-            //l_ptargetClock = iv_ptargetClock;
+            l_ptargetClock = iv_ptargetClock;
+        }
 
-            //in hostboot, getClockId() won't work
-            //so use the chip target and clock type
-            #ifdef __HOSTBOOT_MODULE
-            serviceData.service_data->SetCallout(
-                      PRDcallout(iv_ptargetClock,
-                                 iv_targetType == TYPE_PCI ?
-                                  PRDcalloutData::TYPE_PCICLK :
-                                  PRDcalloutData::TYPE_PROCCLK));
-             #endif
-        }
-        else
-        {
-            // callout the clock source
-            // HB does not have the osc target modeled
-            // so we need to use the proc target with
-            // osc clock type to call out
-            #ifndef __HOSTBOOT_MODULE
-            serviceData.service_data->SetCallout(l_ptargetClock);
-            #else
-            serviceData.service_data->SetCallout(
-                      PRDcallout(l_ptargetClock,
-                                 iv_targetType == TYPE_PCI ?
-                                  PRDcalloutData::TYPE_PCICLK :
-                                  PRDcalloutData::TYPE_PROCCLK));
-             #endif
-        }
+        // callout the clock source
+        // HB does not have the osc target modeled
+        // so we need to use the proc target with
+        // osc clock type to call out
+        #ifndef __HOSTBOOT_MODULE
+        serviceData.service_data->SetCallout(l_ptargetClock);
+        #else
+        serviceData.service_data->SetCallout(
+                            PRDcallout(l_ptargetClock,
+                            iv_targetType == TYPE_PCI ?
+                                PRDcalloutData::TYPE_PCICLK :
+                                PRDcalloutData::TYPE_PROCCLK));
+        #endif
     }
     // Get all connected chips for non-CLOCK_CARD types.
     else

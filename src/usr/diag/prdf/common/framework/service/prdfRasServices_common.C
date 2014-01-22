@@ -604,19 +604,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         thiscallout = (*i).callout;
         if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
-            HWAS::DeconfigEnum thisDeconfigState = deconfigState;
-
-            #ifdef __HOSTBOOT_MODULE
-            // Special case for Hostboot.
-            if ( deferDeconfig )
-            {
-                thisDeconfigState = HWAS::DELAYED_DECONFIG;
-            }
-            #endif
-
             PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
-                                thisDeconfigState,
+                                deconfigState,
                                 o_errl,
                                 gardErrType,
                                 severityParm,
@@ -626,16 +616,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         else if(PRDcalloutData::TYPE_PROCCLK == thiscallout.getType() ||
                 PRDcalloutData::TYPE_PCICLK  == thiscallout.getType())
         {
-            // FIXME - RTC: 91939
-            // Can't call out osc clock in hostboot as informational
-            // until the change from above story is in.
-            if( sdc.IsAtThreshold() )
-            {
-                PRDF_ADD_CLOCK_CALLOUT(o_errl,
-                                       thiscallout.getTarget(),
-                                       thiscallout.getType(),
-                                       thispriority);
-            }
+            PRDF_ADD_CLOCK_CALLOUT(o_errl,
+                                   thiscallout.getTarget(),
+                                   thiscallout.getType(),
+                                   thispriority,
+                                   deconfigState,
+                                   gardErrType);
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {

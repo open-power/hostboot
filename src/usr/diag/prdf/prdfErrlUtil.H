@@ -181,11 +181,15 @@
 /**
  * @brief Add clock callout
  */
-#define PRDF_ADD_CLOCK_CALLOUT(io_errl, i_target, i_clockType, i_priority) \
+#define PRDF_ADD_CLOCK_CALLOUT(io_errl, i_target, i_clockType, i_priority, \
+                               i_deconfigState, i_gardErrType)             \
     io_errl->addClockCallout(i_target,                          \
                 (PRDcalloutData::TYPE_PROCCLK == i_clockType) ? \
                  HWAS::OSCREFCLK_TYPE : HWAS::OSCPCICLK_TYPE,   \
-                             (const HWAS::callOutPriority)i_priority);
+                (const HWAS::callOutPriority)i_priority,        \
+                (i_deconfigState == HWAS::DECONFIG ?            \
+                   HWAS::DELAYED_DECONFIG : i_deconfigState),   \
+                i_gardErrType);
 
 /**
  * @brief Process's pending deconfig and GARD service actions
