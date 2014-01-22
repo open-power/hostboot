@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -156,6 +156,16 @@ enum BlockPriority
 // the runtime image(s)  Currently below the OCC HOMER IMAGE
 #define VMM_RT_VPD_OFFSET (VMM_RT_VPD_SIZE + \
                            VMM_ALL_HOMER_OCC_MEMORY_SIZE)
+
+
+/** Internode communication area outside of the HB image.
+ * Preserved between mpipl.
+ *
+ * @node There is one area per hostboot instance.
+ *  Need to add (ATTR_HB_HRMOR_NODAL_BASE * hbinstance_num) to this
+ *  address to get the physical address
+ */
+#define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (96 * MEGABYTE)
 
 
 /**

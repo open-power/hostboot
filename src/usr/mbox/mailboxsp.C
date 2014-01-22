@@ -1665,6 +1665,7 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
         {
             uint64_t q_handle = i_q_id;
             q_handle |= (((uint64_t)MSGQ_TYPE_IPC | (uint64_t)i_node) << 32);
+
             TRACFCOMP(g_trac_mboxmsg,INFO_MRK
                       "MBOXSP IPC SEND MSG: Dest node %d. msg_id: %lx",
                       i_node,

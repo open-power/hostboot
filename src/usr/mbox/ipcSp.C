@@ -28,6 +28,7 @@
 #include <mbox/mboxif.H>
 #include <errl/errlmanager.H>
 #include <mbox/mbox_reasoncodes.H>
+#include <intr/interrupt.H>
 
 namespace START_PAYLOAD
 {
@@ -142,9 +143,17 @@ void IpcSp::msgHandler()
                            "IPC received the test connection msg - %d:%d",
                             msg->data[0], msg->data[1] );
 
+                // Tell this HB node about the other HB node
+                err = INTR::addHbNode(msg->data[1]);
+                if( err)
+                {
+                    errlCommit(err,IPC_COMP_ID);
+                }
+
                 //Send a response to indicate the connection has been
                 //established
                 err = MBOX::send(MBOX::HB_COALESCE_MSGQ, msg, msg->data[1] );
+
                 if (err)
                 {
                     errlCommit(err,IPC_COMP_ID);

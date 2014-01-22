@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -37,6 +37,10 @@ namespace INTR
         MOD_INTRRP_REGISTERINTERRUPT = 0x05, /**< intrrp.C : IntrRp::registerInterrupt */
         MOD_INTR_ENABLE_PSI_INTR     = 0x06, /**< intrrp.C : INTR::enablePsiIntr */
         MOD_INTR_INIT_XIVR           = 0x07, /**< intrrp.C : INTR::initXIVR */
+        MOD_INTR_INIT_MPIPLAREA      = 0x08, /**< intrrp.C : IntrRp::initailizeMpiplSyncArea() */
+        MOD_INTR_SYNC_NODES          = 0x09, /**< intrrp.C : IntrRp::syncNodes() */
+        MOD_INTR_SYNC_ADDNODE        = 0x0A, /**< intrrp.C : IntrRp::addHbNodeToMpiplSyncArea */
+        MOD_INTR_ADDHBNODE           = 0x0B, /**< intrrp.C : INTR::addHbNode */
     };
 
     enum IntrReasonCode
@@ -48,6 +52,7 @@ namespace INTR
         RC_BAD_ISN                    = INTR_COMP_ID | 0x05,
         //termination_rc
         RC_PERSISTENT_INTERRUPTS      = INTR_COMP_ID | 0x06,
+        RC_CANNOT_MAP_MEMORY          = INTR_COMP_ID | 0x07,
     };
 };
 

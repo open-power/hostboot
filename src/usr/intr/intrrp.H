@@ -31,6 +31,7 @@
 #include <sys/msg.h>
 #include <sys/misc.h>
 #include <sys/time.h>
+#include <sys/internode.h>
 #include <intr/interrupt.H>
 #include <map>
 #include <algorithm>
@@ -537,6 +538,28 @@ namespace INTR
              * Shutdown procedure
              */
             void shutDown();
+
+            /**
+             * Wait for all nodes to disable interrupts on MPIPL
+             * @param[in] i_sync_type, the type of event to sync on
+             *            @see src/include/sys/internode.h
+             * @return err log handle
+             */
+            errlHndl_t syncNodes(intr_mpipl_sync_t i_sync_type);
+
+            /**
+             * Initailize the mpipl node sync data area for this HB instance
+             * @return err log handle
+             */
+            errlHndl_t  initializeMpiplSyncArea();
+
+            /**
+             * Add the existance of another HB instance to this instance
+             * mpipl sync data area.
+             * @param[in] The instance number of the HB instance to add
+             * @return error log handle
+             */
+            errlHndl_t  addHbNodeToMpiplSyncArea(uint64_t i_hbNode);
 
             /**
              * Calculate the adress offset for the given cpu

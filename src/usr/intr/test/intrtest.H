@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -34,6 +34,8 @@
 #include <sys/mmio.h>
 #include <sys/task.h>
 #include <sys/misc.h>
+#include <sys/internode.h>
+#include <sys/mm.h>
 #include <kernel/intmsghandler.H>
 
 extern trace_desc_t * g_trac_intr;
@@ -154,6 +156,72 @@ class IntrTest: public CxxTest::TestSuite
                 TS_FAIL("Errl from INTER::enablePsiIntr");
                 errlCommit(err,INTR_COMP_ID);
             }
+        }
+
+        void test_mpipl_node_data( void )
+        {
+            errlHndl_t err = NULL;
+            for(uint64_t hb_node = 0; hb_node < MAX_NODES_PER_SYS; ++hb_node)
+            {
+                // This message is async so the NODE_INFO_AREA may take
+                // a bit to show the changes
+                err = INTR::addHbNode(hb_node);
+
+                if ( err )
+                {
+                    break;
+                }
+            }
+
+            if ( err )
+            {
+                TS_FAIL("Error log from INTR::addHbNode");
+                errlCommit(err, INTR_COMP_ID);
+            }
+
+            // Unregister a non-existant mesgq - This not only tests this
+            // interface using a bad param, but also serves to synchonize the
+            // async messages above so we don't check the NODE_DATA_AREA before
+            // it has been set.
+            msg_q_t msgQ = INTR::unRegisterMsgQ(0xff);
+            if(msgQ != NULL)
+            {
+                TS_FAIL("INTR: non-existant external interrupt type returned "
+                        "a valid msgQ");
+            }
+
+            void * node_info_ptr =
+                reinterpret_cast<void *>(VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+
+            internode_info_t * this_node_info =
+                reinterpret_cast<internode_info_t *>
+                (mm_block_map(node_info_ptr,INTERNODE_INFO_SIZE));
+
+            if(this_node_info)
+            {
+                if(this_node_info->eye_catcher != NODE_INFO_EYE_CATCHER)
+                {
+                    TS_FAIL("INTR: NODE_DATA_AREA not initialized");
+                }
+                for(uint64_t hb_node = 0;
+                    hb_node < MAX_NODES_PER_SYS;
+                    ++hb_node)
+                {
+                    if(this_node_info->exist[hb_node] != true)
+                    {
+                        TS_FAIL
+                            ("INTR: NODE_DATA_AREA.exist not true for node %d",
+                             hb_node);
+                    }
+                }
+
+                mm_block_unmap(this_node_info);
+            }
+            else
+            {
+                TS_FAIL("INTR Could not map memory of NODE_DATA_AREA");
+            }
+
         }
 
 

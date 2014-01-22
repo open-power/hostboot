@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -145,6 +145,7 @@ namespace INTR
         MSG_INTR_ENABLE_PSI_INTR,   //!< Enable PSI interrupts
         MSG_INTR_MPIPL_CLEANUP,     //!< Clean up interrupts on MPIPL
         MSG_INTR_ADD_CPU_TIMEOUT,   //!< Check for a timeout waiting for a core.
+        MSG_INTR_ADD_HBNODE,        //!< Add node info for MPIPL
     };
 
     /**
@@ -211,6 +212,13 @@ namespace INTR
      */
     uint64_t getIntpAddr(const TARGETING::Target * i_ex,
                          uint8_t i_thread);
+
+    /**
+     * Indicate the existance of another HB node in the system
+     * @param[in] The HB instance number (HB node)
+     * @return error log handle on error
+     */
+    errlHndl_t addHbNode(uint64_t i_hbNode);
 
 };
 

@@ -33,6 +33,7 @@
 #include <util/singleton.H>
 #include <intr/intr_reasoncodes.H>
 #include <sys/mmio.h>
+#include <sys/mm.h>
 #include <sys/misc.h>
 #include <kernel/console.H>
 #include <kernel/ipc.H>
@@ -46,6 +47,7 @@
 #include <sys/vfs.h>
 #include <hwas/common/hwasCallout.H>
 #include <fsi/fsiif.H>
+#include <arch/ppc.H>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
 
@@ -145,7 +147,6 @@ void IntrRp::init( errlHndl_t   &io_errlHndl_t )
     //  pass task error back to parent
     io_errlHndl_t = err ;
 }
-
 
 //  ICPBAR = INTP.ICP_BAR[0:25] in P8 = 0x3FFFF800 + (8*node) + procPos
 //  P8 Scom address = 0x020109c9
@@ -658,6 +659,17 @@ void IntrRp::msgHandler()
 
                     msg_respond(iv_msgQ, msg);
 
+                }
+                break;
+
+            case MSG_INTR_ADD_HBNODE:  // node info for mpipl
+                {
+                    errlHndl_t err = addHbNodeToMpiplSyncArea(msg->data[0]);
+                    if(err)
+                    {
+                        errlCommit(err,INTR_COMP_ID);
+                    }
+                    msg_free(msg); // async message
                 }
                 break;
 
@@ -2101,6 +2113,12 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
             break;
         }
 
+        err = syncNodes(INTR_MPIPL_UPSTREAM_DISABLED);
+        if ( err )
+        {
+            break;
+        }
+
         // Set interrupt presenter to allow all interrupts
         TRACFCOMP(g_trac_intr,"Allow interrupts");
         for(TARGETING::TargetHandleList::iterator
@@ -2123,6 +2141,12 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
             err = blindIssueEOIs(*proc);
         }
         if(err)
+        {
+            break;
+        }
+
+        err = syncNodes(INTR_MPIPL_DRAINED);
+        if( err )
         {
             break;
         }
@@ -2168,6 +2192,264 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
             break;
         }
     } while(0);
+    return err;
+}
+
+
+errlHndl_t syncNodesError(void * i_p, uint64_t i_len)
+{
+    TRACFCOMP(g_trac_intr,"Failure calling mm_block_map: phys_addr=%p",
+              i_p);
+    /*@
+     * @errortype    ERRL_SEV_UNRECOVERABLE
+     * @moduleid     INTR::MOD_INTR_SYNC_NODES
+     * @reasoncode   INTR::RC_CANNOT_MAP_MEMORY
+     * @userdata1    physical address
+     * @userdata2    Block size requested
+     * @devdesc      Error mapping in memory
+     */
+    return new ERRORLOG::ErrlEntry
+        (
+         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+         INTR::MOD_INTR_SYNC_NODES,
+         INTR::RC_CANNOT_MAP_MEMORY,
+         reinterpret_cast<uint64_t>(i_p),
+         i_len,
+         true /*Add HB Software Callout*/);
+}
+
+errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
+{
+    errlHndl_t err = NULL;
+    bool reported[MAX_NODES_PER_SYS] = { false,};
+
+    uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
+
+    void * node_info_ptr =
+        reinterpret_cast<void *>((iv_masterCpu.nodeId * hrmorBase) +
+                                 VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+
+    internode_info_t * this_node_info =
+        reinterpret_cast<internode_info_t *>
+        (mm_block_map(node_info_ptr,INTERNODE_INFO_SIZE));
+
+    do
+    {
+
+        if(this_node_info == NULL)
+        {
+            err = syncNodesError(this_node_info, INTERNODE_INFO_SIZE);
+            break;
+        }
+
+
+        if(this_node_info->eye_catcher != NODE_INFO_EYE_CATCHER)
+        {
+            TRACFCOMP(g_trac_intr, INFO_MRK
+                      "MPIPL, but INTR node data sync area unintialized."
+                      " Assuming single HB Intance system");
+
+            break;
+        }
+
+        // Map the internode data areas to a virtual address
+        internode_info_t * vaddr[MAX_NODES_PER_SYS];
+
+        for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
+        {
+            if (node == iv_masterCpu.nodeId)
+            {
+                vaddr[node] = this_node_info;
+            }
+            else if(this_node_info->exist[node])
+            {
+                node_info_ptr =
+                    reinterpret_cast<void *>
+                    ((node*hrmorBase)+VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+
+                internode_info_t * node_info =
+                    reinterpret_cast<internode_info_t *>
+                    (mm_block_map(node_info_ptr,
+                                  INTERNODE_INFO_SIZE));
+
+                if(node_info == NULL)
+                {
+                    err = syncNodesError(node_info_ptr,
+                                         INTERNODE_INFO_SIZE);
+                    break;
+                }
+                vaddr[node] = node_info;
+                reported[node] = false;
+            }
+        }
+        if (err)
+        {
+            break;
+        }
+
+
+        // This node has hit the sync point
+        this_node_info->mpipl_intr_sync = i_sync_type;
+        lwsync();
+
+        bool synched = false;
+        // Loop until all nodes have reached the sync point
+        while(synched == false)
+        {
+            synched = true;
+
+            for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
+            {
+                if(this_node_info->exist[node])
+                {
+                    intr_mpipl_sync_t sync_type =
+                        vaddr[node]->mpipl_intr_sync;
+                    if(sync_type < i_sync_type)
+                    {
+                        synched = false;
+                        // Insure simics does a context switch
+                        setThreadPriorityLow();
+                        setThreadPriorityHigh();
+                    }
+                    else if(reported[node] == false)
+                    {
+                        reported[node] = true;
+                        TRACFCOMP( g_trac_intr, INFO_MRK
+                                   "MPIPL node %ld reached syncpoint %d",
+                                   node, (uint32_t)i_sync_type);
+                    }
+                }
+            }
+        }
+        isync();
+
+        for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
+        {
+            if(this_node_info->exist[node])
+            {
+                // We are still using this_node_info area
+                // so unmap it later.
+                if(node != iv_masterCpu.nodeId)
+                {
+                    mm_block_unmap(vaddr[node]);
+                }
+            }
+        }
+
+        mm_block_unmap(this_node_info);
+
+    } while(0);
+
+    return err;
+}
+
+
+errlHndl_t  IntrRp::initializeMpiplSyncArea()
+{
+    errlHndl_t err = NULL;
+    uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
+    void * node_info_ptr =
+        reinterpret_cast<void *>((iv_masterCpu.nodeId * hrmorBase) +
+                                 VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+
+    internode_info_t * this_node_info =
+        reinterpret_cast<internode_info_t *>
+        (mm_block_map(node_info_ptr,INTERNODE_INFO_SIZE));
+
+    if(this_node_info)
+    {
+        TRACFCOMP( g_trac_intr,
+                   "MPIPL SYNC at phys %p virt %p value %lx\n",
+                   node_info_ptr, this_node_info, NODE_INFO_EYE_CATCHER );
+
+
+        this_node_info->eye_catcher = NODE_INFO_EYE_CATCHER;
+        this_node_info->version = NODE_INFO_VERSION;
+        this_node_info->mpipl_intr_sync = INTR_MPIPL_SYNC_CLEAR;
+        for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
+        {
+            if(iv_masterCpu.nodeId == node)
+            {
+                this_node_info->exist[node] = true;
+            }
+            else
+            {
+                this_node_info->exist[node] = false;
+            }
+        }
+
+        mm_block_unmap(this_node_info);
+    }
+    else
+    {
+        TRACFCOMP( g_trac_intr, "Failure calling mm_block_map : phys_addr=%p",
+                   node_info_ptr);
+        /*@
+         * @errortype    ERRL_SEV_UNRECOVERABLE
+         * @moduleid     INTR::MOD_INTR_INIT_MPIPLAREA
+         * @reasoncode   INTR::RC_CANNOT_MAP_MEMORY
+         * @userdata1    physical address
+         * @userdata2    Size
+         * @devdesc      Error mapping in memory
+         */
+        err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      INTR::MOD_INTR_INIT_MPIPLAREA,
+                                      INTR::RC_CANNOT_MAP_MEMORY,
+                                      reinterpret_cast<uint64_t>(node_info_ptr),
+                                      INTERNODE_INFO_SIZE,
+                                      true /*Add HB Software Callout*/);
+
+    }
+    return err;
+}
+
+errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
+{
+    errlHndl_t err = NULL;
+    uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
+    void * node_info_ptr =
+        reinterpret_cast<void *>((iv_masterCpu.nodeId * hrmorBase) +
+                                 VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+
+    internode_info_t * this_node_info =
+        reinterpret_cast<internode_info_t *>
+        (mm_block_map(node_info_ptr,INTERNODE_INFO_SIZE));
+
+    if(this_node_info)
+    {
+        if(this_node_info->eye_catcher != NODE_INFO_EYE_CATCHER)
+        {
+            // Initialize the mutli-node area for this node.
+            err = initializeMpiplSyncArea();
+        }
+
+        this_node_info->exist[i_hbNode] = true;
+        this_node_info->mpipl_intr_sync = INTR_MPIPL_SYNC_CLEAR;
+
+        mm_block_unmap(this_node_info);
+    }
+    else
+    {
+        TRACFCOMP( g_trac_intr, "Failure calling mm_block_map : phys_addr=%p",
+                   node_info_ptr);
+        /*@
+         * @errortype    ERRL_SEV_UNRECOVERABLE
+         * @moduleid     INTR::MOD_INTR_SYNC_ADDNODE
+         * @reasoncode   INTR::RC_CANNOT_MAP_MEMORY
+         * @userdata1    physical address
+         * @userdata2    Size
+         * @devdesc      Error mapping in memory
+         */
+        err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      INTR::MOD_INTR_SYNC_ADDNODE,
+                                      INTR::RC_CANNOT_MAP_MEMORY,
+                                      reinterpret_cast<uint64_t>(node_info_ptr),
+                                      INTERNODE_INFO_SIZE,
+                                      true /*Add HB Software Callout*/);
+
+    }
     return err;
 }
 
@@ -2433,3 +2715,41 @@ void* INTR::IntrRp::handleCpuTimeout(void* _pir)
 
     return NULL;
 }
+
+errlHndl_t INTR::addHbNode(uint64_t i_hbNode)
+{
+    errlHndl_t err = NULL;
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
+    TRACFCOMP( g_trac_intr,"Add node %d for MPIPL",i_hbNode);
+    if(intr_msgQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->data[0] = i_hbNode;
+        msg->type = MSG_INTR_ADD_HBNODE;
+        msg_send(intr_msgQ, msg);
+    }
+    else
+    {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_INFORMATIONAL
+         * @moduleid        INTR::MOD_INTR_ADDHBNODE
+         * @reasoncode      INTR::RC_RP_NOT_INITIALIZED
+         * @userdata1       MSG_INTR_ADD_HBNODE
+         * @userdata2       hbNode to add
+         *
+         * @devdesc         Interrupt resource provider not initialized yet.
+         *
+         */
+        err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,      // severity
+             INTR::MOD_INTR_ADDHBNODE,              // moduleid
+             INTR::RC_RP_NOT_INITIALIZED,           // reason code
+             static_cast<uint64_t>(MSG_INTR_ADD_HBNODE),
+             i_hbNode
+            );
+    }
+
+    return err;
+}
+
