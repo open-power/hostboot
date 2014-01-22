@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.H,v 1.15 2013/11/13 01:52:36 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.H,v 1.16 2014/01/18 18:31:12 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -106,11 +106,11 @@ const uint32_t PB_SCONFIG_C4_RGP_HI_RTY_THRESHOLD_END_BIT = 53;
 const uint32_t PB_SCONFIG_C4_SP_LO_RTY_THRESHOLD_START_BIT = 54;
 const uint32_t PB_SCONFIG_C4_SP_LO_RTY_THRESHOLD_END_BIT = 63;
 
-const uint32_t PB_SCONFIG_C4_GP_LO_RTY_THRESHOLD = 0x8;
-const uint32_t PB_SCONFIG_C4_GP_HI_RTY_THRESHOLD = 0x6;
-const uint32_t PB_SCONFIG_C4_RGP_LO_RTY_THRESHOLD = 0x8;
-const uint32_t PB_SCONFIG_C4_RGP_HI_RTY_THRESHOLD = 0x6;
-const uint32_t PB_SCONFIG_C4_SP_LO_RTY_THRESHOLD = 0x8;
+const uint32_t PB_SCONFIG_C4_GP_LO_RTY_THRESHOLD = 0x7;
+const uint32_t PB_SCONFIG_C4_GP_HI_RTY_THRESHOLD = 0x5;
+const uint32_t PB_SCONFIG_C4_RGP_LO_RTY_THRESHOLD = 0x5;
+const uint32_t PB_SCONFIG_C4_RGP_HI_RTY_THRESHOLD = 0x4;
+const uint32_t PB_SCONFIG_C4_SP_LO_RTY_THRESHOLD = 0x5;
 
 
 //
@@ -128,10 +128,10 @@ const uint32_t PB_SCONFIG_C5_RGP_CRESP_SAMPLE_TIME_END_BIT = 51;
 const uint32_t PB_SCONFIG_C5_SP_CRESP_SAMPLE_TIME_START_BIT = 52;
 const uint32_t PB_SCONFIG_C5_SP_CRESP_SAMPLE_TIME_END_BIT = 63;
 
-const uint32_t PB_SCONFIG_C5_SP_HI_RTY_THRESHOLD = 0x6;
-const uint32_t PB_SCONFIG_C5_GP_CRESP_SAMPLE_TIME = 256;
-const uint32_t PB_SCONFIG_C5_RGP_CRESP_SAMPLE_TIME = 256;
-const uint32_t PB_SCONFIG_C5_SP_CRESP_SAMPLE_TIME = 256;
+const uint32_t PB_SCONFIG_C5_SP_HI_RTY_THRESHOLD = 0x4;
+const uint32_t PB_SCONFIG_C5_GP_CRESP_SAMPLE_TIME = 321;
+const uint32_t PB_SCONFIG_C5_RGP_CRESP_SAMPLE_TIME = 539;
+const uint32_t PB_SCONFIG_C5_SP_CRESP_SAMPLE_TIME = 781;
 
 
 //
@@ -225,7 +225,7 @@ const uint32_t PB_SCONFIG_C8_RTY_PERCENTAGE_END_BIT_VER3 = 62;
 const uint32_t PB_SCONFIG_C8_INCLUDE_LPC_RTY_BIT_VER3 = 63;
 
 const uint8_t PB_SCONFIG_C8_HANG_CMD_RATE[PB_SCONFIG_NUM_HANG_LEVELS] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-const uint8_t PB_SCONFIG_C8_CPO_JUMP_LEVEL = 0x3;
+const uint8_t PB_SCONFIG_C8_CPO_JUMP_LEVEL = 0x7;
 const uint8_t PB_SCONFIG_C8_CPO_RTY_LEVEL = 0x4;
 
 const uint8_t PB_SCONFIG_C8_P7_SLEEP_BACKOFF = 0x2; // backoff_1k
@@ -259,7 +259,8 @@ const uint8_t PB_SCONFIG_C9_GP_STARVE_LIMIT  = 0x10;
 const uint8_t PB_SCONFIG_C9_RGP_STARVE_LIMIT = 0x10;
 const uint8_t PB_SCONFIG_C9_SP_STARVE_LIMIT  = 0x10;
 const uint8_t PB_SCONFIG_C9_FP_STARVE_LIMIT  = 0x10;
-const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE = 0x0; // LFSR_ONLY
+const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_LFSR = 0x0; // LFSR_ONLY
+const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_RR = 0x1; // RR_ONLY
 const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE = 0x2; // LFSR_ON_STARVATION_ELSE_RR
 
 

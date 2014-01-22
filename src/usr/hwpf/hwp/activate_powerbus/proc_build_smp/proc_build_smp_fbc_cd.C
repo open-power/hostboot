@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.C,v 1.13 2013/11/13 01:51:47 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.C,v 1.14 2014/01/18 18:31:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -631,6 +631,7 @@ fapi::ReturnCode proc_build_smp_set_sconfig_c9(
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0x0;
     ecmdDataBufferBase data(64);
+    uint8_t ux_scope_arb_mode_rr = 0;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_set_sconfig_c9: Start");
@@ -674,8 +675,19 @@ fapi::ReturnCode proc_build_smp_set_sconfig_c9(
              PB_SCONFIG_C9_FP_STARVE_LIMIT_START_BIT+1));
 
         // ux_scope_arb_mode
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_RR,
+                           &(i_smp_chip.chip->this_chip),
+                           ux_scope_arb_mode_rr);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying Chip EC feature: ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_RR");
+            break;
+        }
+
         rc_ecmd |= data.insertFromRight(
-            PB_SCONFIG_C9_UX_SCOPE_ARB_MODE,
+            ((ux_scope_arb_mode_rr != 0)?
+             (PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_RR):
+             (PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_LFSR)),
             PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_START_BIT,
             (PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_END_BIT-
              PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_START_BIT+1));
