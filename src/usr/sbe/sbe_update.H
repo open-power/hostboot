@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -37,8 +37,6 @@ namespace SBE
     /******************************************/
     /*  Constants                             */
     /******************************************/
-    // Size of CRC used for version checking
-    const size_t   SBE_DATA_CRC_SIZE      = 4; // 4  bytes (32 bits)
 
     // Using only first 20 bytes of 64-byte sbe_image_version
     const size_t   SBE_MVPD_SHORT_IMAGE_VERSION_SIZE = 20;
@@ -144,8 +142,8 @@ namespace SBE
     struct sbeSeepromVersionInfo_t
     {
         uint32_t  struct_version;
+        uint32_t  data_crc;
         uint8_t   image_version[SBE_IMAGE_VERSION_SIZE];
-        uint8_t   data_crc[SBE_DATA_CRC_SIZE];
     } PACKED;
 
     // This line forces a compile fail if struct is NOT 8-byte-alaigned
@@ -180,10 +178,10 @@ namespace SBE
     {
         uint8_t flags;                 // 1 byte for various flags
 
-        uint8_t seeprom_0_data_crc[SBE_DATA_CRC_SIZE];
+        uint32_t seeprom_0_data_crc;
         uint8_t seeprom_0_short_version[SBE_MVPD_SHORT_IMAGE_VERSION_SIZE];
 
-        uint8_t seeprom_1_data_crc[SBE_DATA_CRC_SIZE];
+        uint32_t seeprom_1_data_crc;
         uint8_t seeprom_1_short_version[SBE_MVPD_SHORT_IMAGE_VERSION_SIZE];
     } PACKED;
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -293,7 +293,8 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Restart "
-                           "Needed (%d). Calling preReIplCheck()");
+                           "Needed (%d). Calling preReIplCheck()",
+                           l_restartNeeded);
 
                 err = preReIplCheck(sbeStates_vector);
 
@@ -669,8 +670,8 @@ namespace SBE
                     o_actImgSize = static_cast<size_t>(tmpImgSize);
 
                     TRACUCOMP( g_trac_sbe, "procCustomizeSbeImg(): "
-                               "p8_xip_customize success=%d, procIOMask=0x%X ",
-                               "o_actImgSize=0x%X, rc_fapi=0x%X, ",
+                               "p8_xip_customize success=%d, procIOMask=0x%X "
+                               "o_actImgSize=0x%X, rc_fapi=0x%X",
                                procedure_success, procIOMask, o_actImgSize,
                                uint32_t(rc_fapi));
 
@@ -966,12 +967,12 @@ namespace SBE
                                TARGETING::get_huid(i_target));
                     break;
                 }
-                TRACDBIN(g_trac_sbe, "MVPD:SB", &io_sb_keyword, vpdSize);
+                TRACDBIN(g_trac_sbe, "MVPD:SB:r", &io_sb_keyword, vpdSize);
 
             }
             else //write
             {
-                TRACDBIN(g_trac_sbe, "MVPD:SB", &io_sb_keyword, vpdSize);
+                TRACDBIN(g_trac_sbe, "MVPD:SB:w", &io_sb_keyword, vpdSize);
 
                 err = deviceWrite( i_target,
                                   reinterpret_cast<void*>( &io_sb_keyword ),
@@ -1759,37 +1760,51 @@ namespace SBE
         bool current_side_isDirty = false;
         bool alt_side_isDirty     = false;
 
+        bool pnor_check_dirty     = false;
+        bool crc_check_dirty      = false;
+        bool isSimics_check       = false;
 
         do{
-
-
 
             /**************************************************************/
             /*  Compare SEEPROM 0 with PNOR and Customized Image CRC --   */
             /*  -- dirty or clean?                                        */
             /**************************************************************/
-            if (
-                 ( // Standard Checks:
-
-                   // Check PNOR and SEEPROM 0 Version
-                   (0 != memcmp(&(io_sbeState.pnorVersion),
+            // Check PNOR and SEEPROM 0 Version
+            if ( 0 != memcmp(&(io_sbeState.pnorVersion),
                              &(io_sbeState.seeprom_0_ver.image_version),
-                             SBE_IMAGE_VERSION_SIZE))
-                   ||
-                   // Check CRC and SEEPROM 0 CRC
-                   (0 != memcmp(&(io_sbeState.customizedImage_crc),
-                                &(io_sbeState.seeprom_0_ver.data_crc),
-                                SBE_DATA_CRC_SIZE))
-                 )
-                 &&
-                 ( // Simics Check:
-                   // Look for simics specific version - consider clean if found
-                   ( io_sbeState.seeprom_0_ver.struct_version !=
-                                         SBE_SEEPROM_STRUCT_SIMICS_VERSION)
-                 )
-               )
+                             SBE_IMAGE_VERSION_SIZE) )
+            {
+                pnor_check_dirty = true;
+            }
+
+            // Check CRC and SEEPROM 0 CRC
+            if ( io_sbeState.customizedImage_crc !=
+                 io_sbeState.seeprom_0_ver.data_crc )
+            {
+                crc_check_dirty = true;
+            }
+
+            // Check if in simics
+            // @todo RTC 94883 - Update this check with a magic instruction
+            if ( io_sbeState.seeprom_0_ver.struct_version ==
+                 SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+            {
+                isSimics_check = true;
+            }
+
+
+            if ( (pnor_check_dirty || crc_check_dirty )
+                 && !isSimics_check )
             {
                 seeprom_0_isDirty = true;
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
+                           "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X), "
+                           "isSimics=%d",
+                           TARGETING::get_huid(io_sbeState.target),
+                           pnor_check_dirty, crc_check_dirty,
+                           io_sbeState.customizedImage_crc,
+                           io_sbeState.seeprom_0_ver.data_crc, isSimics_check);
             }
 
 
@@ -1798,35 +1813,76 @@ namespace SBE
             /*  Compare SEEPROM 1 with PNOR and Customized Image CRC --   */
             /*  -- dirty or clean?                                        */
             /**************************************************************/
-            if (
-                 ( // Standard Checks:
+            // reset dirty variables
+            pnor_check_dirty     = false;
+            crc_check_dirty      = false;
+            isSimics_check       = false;
 
-                   // Check PNOR and SEEPROM 1 Version
-                   (0 != memcmp(&(io_sbeState.pnorVersion),
-                                &(io_sbeState.seeprom_1_ver.image_version),
-                                SBE_IMAGE_VERSION_SIZE))
-                   ||
-                   // Check CRC and SEEPROM 1 CRC
-                   (0 != memcmp(&(io_sbeState.customizedImage_crc),
-                                &(io_sbeState.seeprom_1_ver.data_crc),
-                                SBE_DATA_CRC_SIZE))
-                 )
-                 &&
-                 ( // Simics Check:
-                   // Look for simics specific version - consider clean if found
-                   ( io_sbeState.seeprom_1_ver.struct_version !=
-                                         SBE_SEEPROM_STRUCT_SIMICS_VERSION)
-                 )
-               )
+            // Check PNOR and SEEPROM 1 Version
+            if ( 0 != memcmp(&(io_sbeState.pnorVersion),
+                             &(io_sbeState.seeprom_1_ver.image_version),
+                             SBE_IMAGE_VERSION_SIZE) )
+            {
+                pnor_check_dirty = true;
+            }
+
+            // Check CRC and SEEPROM 1 CRC
+            if ( io_sbeState.customizedImage_crc !=
+                 io_sbeState.seeprom_1_ver.data_crc )
+            {
+                crc_check_dirty = true;
+            }
+
+            // Check if in simics
+            // @todo RTC 94883 - Update this check with a magic instruction
+            if ( io_sbeState.seeprom_1_ver.struct_version ==
+                 SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+            {
+                isSimics_check = true;
+            }
+
+            if ( (pnor_check_dirty || crc_check_dirty )
+                 && !isSimics_check )
             {
                 seeprom_1_isDirty = true;
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
+                           "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X), "
+                           "isSimics=%d",
+                           TARGETING::get_huid(io_sbeState.target),
+                           pnor_check_dirty, crc_check_dirty,
+                           io_sbeState.customizedImage_crc,
+                           io_sbeState.seeprom_1_ver.data_crc, isSimics_check);
+            }
+
+
+            // Extra information for unit testing
+            if ( seeprom_0_isDirty || seeprom_1_isDirty )
+            {
+                TRACFBIN( g_trac_sbe,
+                          "PNOR Version",
+                          &(io_sbeState.pnorVersion),
+                          SBE_IMAGE_VERSION_SIZE ) ;
+
+                TRACFBIN( g_trac_sbe,
+                          "Seeprom0: Image Version",
+                          &(io_sbeState.seeprom_0_ver.image_version),
+                          SBE_IMAGE_VERSION_SIZE ) ;
+
+                TRACFBIN( g_trac_sbe,
+                          "Seeprom1: Image Version",
+                          &(io_sbeState.seeprom_1_ver.image_version),
+                          SBE_IMAGE_VERSION_SIZE ) ;
+
+                TRACFBIN( g_trac_sbe,
+                          "MVPD SB",
+                          &(io_sbeState.mvpdSbKeyword),
+                          sizeof(mvpdSbKeyword_t));
             }
 
 
             /**************************************************************/
             /*  Determine what side to update                             */
             /**************************************************************/
-
             // Set cur and alt isDirty values
             if( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 )
             {
@@ -1893,14 +1949,13 @@ namespace SBE
 
                 memcpy( &(io_sbeState.new_seeprom_ver.data_crc),
                         &(io_sbeState.customizedImage_crc),
-                        SBE_DATA_CRC_SIZE);
+                        sizeof(io_sbeState.new_seeprom_ver.data_crc));
 
                 // If there was an ECC fail on either SEEPROM, do a read-back
                 // Check when writing this information to the SEEPROM
                 io_sbeState.new_readBack_check = (
                                 io_sbeState.seeprom_0_ver_ECC_fail ||
                                 io_sbeState.seeprom_1_ver_ECC_fail);
-
 
                 TRACDBIN( g_trac_sbe,
                           "getTargetUpdateActions() - New SBE Version Info",
@@ -1919,7 +1974,7 @@ namespace SBE
                 {
                     memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_0_data_crc),
                            &(io_sbeState.customizedImage_crc),
-                           SBE_DATA_CRC_SIZE);
+                          sizeof(io_sbeState.mvpdSbKeyword.seeprom_0_data_crc));
 
                     memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_0_short_version),
                            &(io_sbeState.pnorVersion),
@@ -1929,7 +1984,7 @@ namespace SBE
                 {
                     memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_1_data_crc),
                            &(io_sbeState.customizedImage_crc),
-                           SBE_DATA_CRC_SIZE);
+                          sizeof(io_sbeState.mvpdSbKeyword.seeprom_1_data_crc));
 
                     memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_1_short_version),
                            &(io_sbeState.pnorVersion),
