@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.170 2013/11/13 21:21:53 bellows Exp $
+// $Id: p8_scom_addresses.H,v 1.171 2014/01/20 22:17:37 jdavidso Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -449,6 +449,7 @@ CONST_UINT64_T( PMC_PSTATE_MONITOR_AND_CTRL_REG_0x00062002, ULL(0x00062002)) ;
 CONST_UINT64_T( PMC_RAIL_BOUNDS_0x00062003            , ULL(0x00062003) );
 CONST_UINT64_T( PMC_GLOBAL_PSTATE_BOUNDS_0x00062004   , ULL(0x00062004) );
 CONST_UINT64_T( PMC_PARAMETER_REG1_0x00062006         , ULL(0x00062006) );
+CONST_UINT64_T( PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG_0x00062007, ULL(0x00062007) );
 CONST_UINT64_T( PMC_STATUS_REG_0x00062009             , ULL(0x00062009) );
 CONST_UINT64_T( PMC_OCC_HEARTBEAT_REG_0x00062066      , ULL(0x00062066) );
 CONST_UINT64_T( PMC_CORE_DECONFIG_REG_0x0006200D      , ULL(0x0006200D) );
@@ -459,11 +460,12 @@ CONST_UINT64_T( PMC_PORRS_REG_0x00062090              , ULL(0x00062090) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_0x00062092          , ULL(0x00062092) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_WAND_0x000620A0     , ULL(0x000620A0) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_WOR_0x000620A1      , ULL(0x000620A1) );
-CONST_UINT64_T( PMC_INTCHP_COMMAND_REG_0x00062014        , ULL(0x00062014) );
-CONST_UINT64_T( PMC_INTCHP_STATUS_REG_0x00062013                    , ULL(0x00062013) );
-CONST_UINT64_T( PMC_INTCHP_CTRL_REG1_0x00062010                    , ULL(0x00062010) );
-CONST_UINT64_T( PMC_INTCHP_CTRL_REG4_0x00062012                    , ULL(0x00062012) );
-CONST_UINT64_T( PMC_PORE_REQ_REG0_0x0006208E                   , ULL(0x0006208E) );
+CONST_UINT64_T( PMC_INTCHP_PSTATE_REG_0x00062017      , ULL(0x00062017) );
+CONST_UINT64_T( PMC_INTCHP_COMMAND_REG_0x00062014     , ULL(0x00062014) );
+CONST_UINT64_T( PMC_INTCHP_STATUS_REG_0x00062013      , ULL(0x00062013) );
+CONST_UINT64_T( PMC_INTCHP_CTRL_REG1_0x00062010       , ULL(0x00062010) );
+CONST_UINT64_T( PMC_INTCHP_CTRL_REG4_0x00062012       , ULL(0x00062012) );
+CONST_UINT64_T( PMC_PORE_REQ_REG0_0x0006208E          , ULL(0x0006208E) );
 CONST_UINT64_T( PMC_PARAMETER_REG0_0x00062005         , ULL(0x00062005) );
 CONST_UINT64_T( PMC_O2P_CTRL_STATUS_REG_0x00062061  , ULL (0x00062061));
 
@@ -2038,6 +2040,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.171  2014/01/20 22:17:37  jdavidso
+Added additional pmc registers for SW239845.
+
 Revision 1.170  2013/11/13 21:21:53  bellows
 updates for running centaur throttling sync support
 

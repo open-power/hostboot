@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,23 +20,59 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_force_vsafe_errors.xml,v 1.3 2013/08/02 19:40:57 stillgs Exp $ -->
+<!-- $Id: p8_force_vsafe_errors.xml,v 1.4 2014/01/20 22:12:13 jdavidso Exp $ -->
 <!-- Error definitions for proc_pmc_force_vsage procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_VLT_TIMEOUT</rc>
     <description>Voltage change timeout for the ongoing operation completion.</description>
+    <callout>
+       <target>CHIP</target> 
+       <priority>HIGH</priority> 
+    </callout>
     <ffdc>PSTATETARGET</ffdc>
     <ffdc>PSTATESTEPTARGET</ffdc>
     <ffdc>PSTATEACTUAL</ffdc>
     <ffdc>PMCSTATUS</ffdc>
+    <ffdc>PMC_LFIR</ffdc> 
+    <ffdc>PMC_LFIR_MASK_REG</ffdc> 
+    <ffdc>PMC_MODE_REG</ffdc> 
+    <ffdc>PMC_PSTATE_MONITOR_AND_CTRL_REG</ffdc> 
+    <ffdc>PMC_RAIL_BOUNDS</ffdc> 
+    <ffdc>PMC_PARAMETER_REG0</ffdc> 
+    <ffdc>PMC_PARAMETER_REG1</ffdc> 
+    <ffdc>PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG</ffdc> 
+    <ffdc>PMC_GLOBAL_ACTUAL_VOLTAGE_REG</ffdc> 
+    <ffdc>PMC_INTCHP_CTRL_REG1</ffdc> 
+    <ffdc>PMC_INTCHP_CTRL_REG4</ffdc> 
+    <ffdc>PMC_INTCHP_STATUS_REG</ffdc> 
+    <ffdc>PMC_INTCHP_PSTATE_REG</ffdc> 
+    <ffdc>PMC_INTCHP_COMMAND_REG</ffdc> 
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_VLT_ERROR</rc>
     <description>Voltage change not done because of  errors on the status register.</description>
+    <callout>
+       <target>CHIP</target> 
+       <priority>HIGH</priority> 
+    </callout>
     <ffdc>PMCSTATUS</ffdc>
+    <ffdc>PMC_LFIR</ffdc> 
+    <ffdc>PMC_LFIR_MASK_REG</ffdc> 
+    <ffdc>PMC_MODE_REG</ffdc> 
+    <ffdc>PMC_PSTATE_MONITOR_AND_CTRL_REG</ffdc> 
+    <ffdc>PMC_RAIL_BOUNDS</ffdc> 
+    <ffdc>PMC_PARAMETER_REG0</ffdc> 
+    <ffdc>PMC_PARAMETER_REG1</ffdc> 
+    <ffdc>PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG</ffdc> 
+    <ffdc>PMC_GLOBAL_ACTUAL_VOLTAGE_REG</ffdc> 
+    <ffdc>PMC_INTCHP_CTRL_REG1</ffdc> 
+    <ffdc>PMC_INTCHP_CTRL_REG4</ffdc> 
+    <ffdc>PMC_INTCHP_STATUS_REG</ffdc> 
+    <ffdc>PMC_INTCHP_PSTATE_REG</ffdc> 
+    <ffdc>PMC_INTCHP_COMMAND_REG</ffdc> 
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

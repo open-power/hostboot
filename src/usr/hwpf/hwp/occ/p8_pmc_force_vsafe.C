@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_force_vsafe.C,v 1.12 2013/08/02 19:26:22 stillgs Exp $
+// $Id: p8_pmc_force_vsafe.C,v 1.13 2014/01/20 22:15:56 jdavidso Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_force_vsafe.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -136,6 +136,20 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
     fapi::ReturnCode    rc;
     ecmdDataBufferBase  data(64);
     ecmdDataBufferBase  pmcstatusreg(64);
+    ecmdDataBufferBase  pmclfir(64);
+    ecmdDataBufferBase  pmclfirmaskreg(64);
+    ecmdDataBufferBase  pmcmodereg(64);
+    ecmdDataBufferBase  pmcpstatemonitor(64);
+    ecmdDataBufferBase  pmcrailbounds(64);
+    ecmdDataBufferBase  pmcparamreg0(64);
+    ecmdDataBufferBase  pmcparamreg1(64);
+    ecmdDataBufferBase  pmceffglobalact(64);
+    ecmdDataBufferBase  pmcglobalact(64);
+    ecmdDataBufferBase  pmcinttchpreg1(64);
+    ecmdDataBufferBase  pmcinttchpreg4(64);
+    ecmdDataBufferBase  pmcinttchpstatus(64);
+    ecmdDataBufferBase  pmcinttchppstate(64);
+    ecmdDataBufferBase  pmcinttchpcmd(64);
     uint32_t            e_rc = 0;
 
     // maximum number of status poll attempts to make before giving up
@@ -363,6 +377,135 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
                
                 FAPI_ERR("Error detected with PMC on-going deassertion during safe voltage movement ");
                 const uint64_t & PMCSTATUS  = data.getDoubleWord(0);
+
+                // need to add: (also in xml file for ffdc export)
+                // PMC_LFIR
+                rc = fapiGetScom(i_target, PMC_LFIR_0x01010840, pmclfir);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_LFIR_0x01010840) failed.");
+                    break;
+                }
+                const uint64_t & PMC_LFIR = pmclfir.getDoubleWord(0);
+
+                // PMC_LFIR_ERR_MASK_REG
+                rc = fapiGetScom(i_target, PMC_LFIR_MASK_0x01010843, pmclfirmaskreg);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_LFIR_MASK_REG_0x01010843) failed.");
+                    break;
+                }
+                const uint64_t& PMC_LFIR_MASK_REG = pmclfirmaskreg.getDoubleWord(0);
+
+                // PMC_MODE_REG
+                rc = fapiGetScom(i_target, PMC_MODE_REG_0x00062000, pmcmodereg);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+                    break;
+                }
+                const uint64_t & PMC_MODE_REG = pmcmodereg.getDoubleWord(0);
+
+                // PMC_PSTATE_MONITOR_AND_CTRL_REG
+                rc = fapiGetScom(i_target, PMC_PSTATE_MONITOR_AND_CTRL_REG_0x00062002, pmcpstatemonitor);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_PSTATE_MONITOR_AND_CTRL_REG_0x00062002) failed.");
+                    break;
+                }
+                const uint64_t& PMC_PSTATE_MONITOR_AND_CTRL_REG = pmcpstatemonitor.getDoubleWord(0);
+
+                // PMC_RAIL_BOUNDS_REGISTER
+                rc = fapiGetScom(i_target, PMC_RAIL_BOUNDS_0x00062003, pmcrailbounds);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_RAIL_BOUNDS_0x00062003) failed.");
+                    break;
+                }
+                const uint64_t& PMC_RAIL_BOUNDS = pmcrailbounds.getDoubleWord(0);
+
+                // PMC_PARAMETER_REG0
+                rc = fapiGetScom(i_target, PMC_PARAMETER_REG0_0x00062005, pmcparamreg0);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_PARAMETER_REG0_0x00062005) failed.");
+                    break;
+                }
+                const uint64_t& PMC_PARAMETER_REG0 = pmcparamreg0.getDoubleWord(0);
+
+                // PMC_PARAMETER_REG1
+                rc = fapiGetScom(i_target, PMC_PARAMETER_REG1_0x00062006, pmcparamreg1);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_PARAMETER_REG1_0x00062006) failed.");
+                    break;
+                }
+                const uint64_t& PMC_PARAMETER_REG1 = pmcparamreg1.getDoubleWord(0);
+
+                // PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG
+                rc = fapiGetScom(i_target, PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG_0x00062007, pmceffglobalact);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG_0x00062007) failed.");
+                    break;
+                }
+                const uint64_t& PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG = pmceffglobalact.getDoubleWord(0);
+
+                // PMC_GLOBAL_ACTUAL_VOLTAGE_REG
+                rc = fapiGetScom(i_target, PMC_PSTATE_MONITOR_AND_CTRL_REG_0x00062002, pmcglobalact);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG_0x00062007) failed.");
+                    break;
+                }
+                const uint64_t& PMC_GLOBAL_ACTUAL_VOLTAGE_REG = pmcglobalact.getDoubleWord(0);
+
+                // PMC_INTCHP_CTRL_REG1
+                rc = fapiGetScom(i_target, PMC_INTCHP_CTRL_REG1_0x00062010, pmcinttchpreg1);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_INTCHP_CTRL_REG1_0x00062010) failed.");
+                    break;
+                }
+                const uint64_t& PMC_INTCHP_CTRL_REG1 = pmcinttchpreg1.getDoubleWord(0);
+
+                // PMC_INTCHP_CTRL_REG4
+                rc = fapiGetScom(i_target, PMC_INTCHP_CTRL_REG4_0x00062012, pmcinttchpreg4);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_INTCHP_CTRL_REG4_0x00062012) failed.");
+                    break;
+                }
+                const uint64_t& PMC_INTCHP_CTRL_REG4 = pmcinttchpreg4.getDoubleWord(0);
+
+                // PMC_INTCHP_STATUS_REG
+                rc = fapiGetScom(i_target, PMC_INTCHP_STATUS_REG_0x00062013, pmcinttchpstatus);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_INTCHP_STATUS_REG_0x00062013) failed.");
+                    break;
+                }
+                const uint64_t& PMC_INTCHP_STATUS_REG = pmcinttchpstatus.getDoubleWord(0);
+
+                // PMC_INTCHP_PSTATE_REG
+                rc = fapiGetScom(i_target, PMC_INTCHP_PSTATE_REG_0x00062017, pmcinttchppstate);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_INTCHP_PSTATE_REG_0x00062017) failed.");
+                    break;
+                }
+                const uint64_t& PMC_INTCHP_PSTATE_REG = pmcinttchppstate.getDoubleWord(0);
+
+                // PMC_INTCHP_COMMAND_REG
+                rc = fapiGetScom(i_target, PMC_INTCHP_COMMAND_REG_0x00062014, pmcinttchpcmd);
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    break;
+                }
+                const uint64_t& PMC_INTCHP_COMMAND_REG = pmcinttchpcmd.getDoubleWord(0);
+
+                const fapi::Target & CHIP = i_target;
                 FAPI_SET_HWP_ERROR(rc, RC_PROCPM_VLT_ERROR);
                 break;
 
@@ -485,6 +628,21 @@ p8_pmc_force_vsafe(const fapi::Target& i_target  )
             const uint64_t & PSTATESTEPTARGET = (uint64_t)pstate_step_target;
             const uint64_t & PSTATEACTUAL = (uint64_t)pstate_actual;
             const uint64_t & PMCSTATUS = pmcstatusreg.getDoubleWord(0);     
+            const uint64_t & PMC_LFIR = pmclfir.getDoubleWord(0);
+            const uint64_t& PMC_LFIR_MASK_REG = pmclfirmaskreg.getDoubleWord(0);
+            const uint64_t & PMC_MODE_REG = pmcmodereg.getDoubleWord(0);
+            const uint64_t& PMC_PSTATE_MONITOR_AND_CTRL_REG = pmcpstatemonitor.getDoubleWord(0);
+            const uint64_t& PMC_RAIL_BOUNDS = pmcrailbounds.getDoubleWord(0);
+            const uint64_t& PMC_PARAMETER_REG0 = pmcparamreg0.getDoubleWord(0);
+            const uint64_t& PMC_PARAMETER_REG1 = pmcparamreg1.getDoubleWord(0);
+            const uint64_t& PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG = pmceffglobalact.getDoubleWord(0);
+             const uint64_t& PMC_GLOBAL_ACTUAL_VOLTAGE_REG = pmcglobalact.getDoubleWord(0);
+            const uint64_t& PMC_INTCHP_CTRL_REG1 = pmcinttchpreg1.getDoubleWord(0);
+            const uint64_t& PMC_INTCHP_CTRL_REG4 = pmcinttchpreg4.getDoubleWord(0);
+            const uint64_t& PMC_INTCHP_STATUS_REG = pmcinttchpstatus.getDoubleWord(0);
+            const uint64_t& PMC_INTCHP_PSTATE_REG = pmcinttchppstate.getDoubleWord(0);
+            const uint64_t& PMC_INTCHP_COMMAND_REG = pmcinttchpcmd.getDoubleWord(0);
+            const fapi::Target & CHIP = i_target;
             FAPI_SET_HWP_ERROR(rc, RC_PROCPM_VLT_TIMEOUT);
             break;
         }
