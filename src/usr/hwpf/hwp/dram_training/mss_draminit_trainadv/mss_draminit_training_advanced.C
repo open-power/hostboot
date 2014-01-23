@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.40 2013/12/17 18:47:27 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.41 2014/01/16 17:22:58 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -80,6 +80,7 @@
 //  1.38   | bellows  |19-SEP-13| fixed possible buffer overrun found by stradale
 //  1.39   | abhijsau |17-OCT-13| fixed a logical bug 
 //  1.40   | abhijsau |17-DEC-13| added creation and deletion of schmoo object  
+//  1.41   | abhijsau |16-JAN-14| removed EFF_DIMM_TYPE attribute   
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
@@ -216,7 +217,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     uint8_t l_num_ranks_per_dimm_u8array[MAX_PORT][MAX_DIMM] = {{0}};
     //nuint8_t l_actual_dimm_size_u8 = 0;
     uint8_t l_port = 0;
-    uint8_t l_dimm_type_u8 = 0; //default is set to CDIMM
+   // uint8_t l_dimm_type_u8 = 0; //default is set to CDIMM
     uint32_t l_left_margin=0;  
     uint32_t l_right_margin=0;  
     uint32_t l_shmoo_param=0; 
@@ -235,8 +236,8 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     if(rc) return rc;
     
     //const fapi::Target is centaur.mba   
-    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimm_type_u8); 
-    if(rc) return rc;
+    //rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimm_type_u8); 
+    //if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target_mba, l_num_drops_per_port_u8); 
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, l_num_ranks_per_dimm_u8array); 
@@ -245,7 +246,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     FAPI_INF("freq = %d on %s.", l_attr_mss_freq_u32, l_target_centaur.toEcmdString());
     FAPI_INF("volt = %d on %s.", l_attr_mss_volt_u32, l_target_centaur.toEcmdString());
-    FAPI_INF("dimm_type = %d on %s.", l_dimm_type_u8, i_target_mba.toEcmdString());
+    //FAPI_INF("dimm_type = %d on %s.", l_dimm_type_u8, i_target_mba.toEcmdString());
     FAPI_INF("num_drops_per_port = %d on %s.", l_num_drops_per_port_u8, i_target_mba.toEcmdString());
     FAPI_INF("num_ranks_per_dimm = [%02d][%02d][%02d][%02d] on %s.", l_num_ranks_per_dimm_u8array[0][0],l_num_ranks_per_dimm_u8array[0][1], l_num_ranks_per_dimm_u8array[1][0],l_num_ranks_per_dimm_u8array[1][1], i_target_mba.toEcmdString());
     FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -269,12 +270,12 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 
     l_shmoo_type_valid=(shmoo_type_t)l_shmoo_type_valid_t;
     l_shmoo_param_valid=(shmoo_param)l_shmoo_param_valid_t;
-   FAPI_INF("running in simics before attr"); 
+   //FAPI_INF("running in simics before attr"); 
     FAPI_INF("+++++++++++++++++++++++++ Read Schmoo Attributes ++++++++++++++++++++++++++");
     FAPI_INF("Schmoo param valid = 0x%x on %s", l_shmoo_param_valid, i_target_mba.toEcmdString());
     FAPI_INF("Schmoo test valid = 0x%x on %s", l_shmoo_type_valid, i_target_mba.toEcmdString());
     FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-   FAPI_INF("running in simics after attr");
+   //FAPI_INF("running in simics after attr");
     //Check for Shmoo Parameter, if anyof them is enabled then go into the loop else the procedure exit 
 
     	    if (( l_num_ranks_per_dimm_u8array[0][0] > 0 ) || (l_num_ranks_per_dimm_u8array[0][1] > 0) || ( l_num_ranks_per_dimm_u8array[1][0] > 0 ) || (l_num_ranks_per_dimm_u8array[1][1] > 0))
@@ -1035,7 +1036,7 @@ fapi::ReturnCode delay_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
 		       uint32_t i_shmoo_param)
 {
     fapi::ReturnCode rc;
-    FAPI_INF(" Inside before the delay shmoo " );
+    //FAPI_INF(" Inside before the delay shmoo " );
     //Constructor CALL: generic_shmoo::generic_shmoo(uint8_t i_port, uint32_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm)
     //generic_shmoo mss_shmoo=generic_shmoo(i_port,2,SEQ_LIN);
 	generic_shmoo * l_pShmoo = new generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);

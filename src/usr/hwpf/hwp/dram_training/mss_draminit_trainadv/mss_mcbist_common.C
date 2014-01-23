@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.59 2013/12/17 18:37:58 sasethur Exp $
+// $Id: mss_mcbist_common.C,v 1.61 2014/01/16 15:56:09 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.61  |aditya  |01/15/14|Updated attr ATTR_EFF_CUSTOM_DIMM
+//   1.60  |aditya  |12/20/13|Updated max timeout for Mcbist Polling 
 //   1.59  |aditya  |12/17/13|Updated mcb_error_map function parameters
 //   1.58  |aditya  |12/10/13|Updated Target for MBS registers
 //   1.57  |rwheeler|10/29/13 |added W_ONLY_INFINITE_RAND test
@@ -115,7 +117,7 @@ const uint8_t MAX_RANK = 8;
 const uint8_t MAX_NIBBLES = 2;
 //const uint8_t MAX_NIBBLE = 1;
 const uint8_t MCB_TEST_NUM = 16;
-const uint64_t MCB_MAX_TIMEOUT = 0000000000000600ull;
+const uint64_t MCB_MAX_TIMEOUT = 0000000000060000ull;
 const uint64_t  DELAY_100US = 100000;   // general purpose 100 usec delay for HW mode (2000000 sim cycles if simclk = 20ghz)
 const uint64_t  DELAY_2000SIMCYCLES     = 2000;     // general purpose 2000 sim cycle delay for sim mode     (100 ns if simclk = 20Ghz)
 //const uint64_t END_ADDRESS = 0x0000000004;  //Will be fixed later, once the address generation function is ready
@@ -1235,7 +1237,7 @@ fapi::ReturnCode  mcb_error_map(const fapi::Target & i_target_mba, uint8_t  o_er
         }
     }
 
-   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_attr_eff_dimm_type_u8); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_attr_eff_dimm_type_u8); if(rc) return rc;
 
    //Adi
    //l_attr_eff_dimm_type_u8 = 0;
@@ -1501,7 +1503,7 @@ l_n=0;io_num0= 0;io_num1=0;
 			
 			
 			
-			if((l_attr_eff_dimm_type_u8 == 1) || (l_attr_eff_dimm_type_u8 == 3))
+			if(l_attr_eff_dimm_type_u8 != fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
 			{
 				
 				//For ISDIMM marray
@@ -1680,7 +1682,7 @@ FAPI_INF("______________________________________________________________________
 FAPI_INF("________________________________________________________________________________________________________");*/
 //To be in error map print function
 
-  if((l_attr_eff_dimm_type_u8 == 1) || (l_attr_eff_dimm_type_u8 == 3))  //Calling ISDIMM error mAP and LRDIMM
+  if(l_attr_eff_dimm_type_u8 != fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)  //Calling ISDIMM error mAP and LRDIMM
     {
 	FAPI_DBG("%s:#################  Error MAP for ISDIMM #################",i_target_mba.toEcmdString());
     for(l_port = 0; l_port < 2; l_port++)
@@ -2155,7 +2157,7 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba)
 	rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, num_ranks_per_dimm); if(rc) return rc;
 	uint8_t l_mbaPosition = 0;
 	uint8_t l_attr_eff_dimm_type_u8 = 0;
-	rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_attr_eff_dimm_type_u8); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_attr_eff_dimm_type_u8); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbaPosition);
 	//uint8_t l_print = 0;
 	//rc = FAPI_ATTR_GET(ATTR_MCBIST_PRINTING_DISABLE, &i_target_mba,l_print); if(rc) return rc;
@@ -2235,7 +2237,7 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba)
 	{
     if(l_port == 0)
     {
-	if((l_attr_eff_dimm_type_u8 == 1) || (l_attr_eff_dimm_type_u8 == 3)){
+	if(l_attr_eff_dimm_type_u8 != fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES){
 	rc_num =  l_data_buffer2_64.insertFromRight(l_sp_isdimm,8,8);if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
 	rc_num =  l_data_buffer2_64.insertFromRight(l_sp,0,8);if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
 	}else{
@@ -2254,7 +2256,7 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba)
     {
 	rc = fapiGetScom(i_target_centaur,MBS_MCBIST01_MCBCMABQ_0x02011674,l_data_buffer2_64); if(rc) return rc;
 	//rc = fapiGetScom(i_target_mba,MBS_MCBIST01_MCBCMA1Q_0x02011672,l_data_buffer3_64); if(rc) return rc;
-	if((l_attr_eff_dimm_type_u8 == 1) || (l_attr_eff_dimm_type_u8 == 3)){
+	if(l_attr_eff_dimm_type_u8 != fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES){
 	rc_num =  l_data_buffer2_64.insertFromRight(l_sp_isdimm,24,8);if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
 	rc_num =  l_data_buffer2_64.insertFromRight(l_sp,16,8);if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
 	}else{
@@ -2273,7 +2275,7 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba)
 	{
 	if(l_port == 0)
     {
-	if((l_attr_eff_dimm_type_u8 == 1) || (l_attr_eff_dimm_type_u8 == 3)){
+	if(l_attr_eff_dimm_type_u8 != fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES){
 	rc_num =  l_data_buffer2_64.insertFromRight(l_sp_isdimm,8,8);if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
 	rc_num =  l_data_buffer2_64.insertFromRight(l_sp,0,8);if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
 	}else{
@@ -2291,7 +2293,7 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba)
     else
     {
 	rc = fapiGetScom(i_target_centaur,0x02011774,l_data_buffer2_64); if(rc) return rc;
-	if((l_attr_eff_dimm_type_u8 == 1) || (l_attr_eff_dimm_type_u8 == 3)){
+	if(l_attr_eff_dimm_type_u8 != fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES){
 	rc_num =  l_data_buffer2_64.insertFromRight(l_sp_isdimm,24,8);if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
 	rc_num =  l_data_buffer2_64.insertFromRight(l_sp,16,8);if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
 	}else{

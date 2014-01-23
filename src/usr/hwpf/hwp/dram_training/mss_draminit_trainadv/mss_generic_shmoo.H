@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.H,v 1.24 2013/12/17 18:45:02 sasethur Exp $
+// $Id: mss_generic_shmoo.H,v 1.26 2014/01/17 06:11:27 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.26  |abhijit |01/17/14|enabled one more function 
 //   1.24  |abhijit |12/17/13|modified as per to support firmware 
 //   1.22  |abhijit |8/08/13 |added binary schmoo functions 
 //   1.20  |abhijit |7/17/13 |added functions for read dqs 
@@ -151,7 +152,7 @@ class generic_shmoo
         fapi::ReturnCode sanity_check(const fapi::Target & i_target);
 		fapi::ReturnCode schmoo_setup_mcb( const fapi::Target & i_target);
 		//fapi::ReturnCode get_error_cnt(const fapi::Target & i_target,uint8_t port,uint8_t rank,uint8_t rank_pair,uint8_t bit,bound_t bound);
-		//fapi::ReturnCode knob_update_dqs_by8_isdimm(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); 
+		fapi::ReturnCode knob_update_dqs_by8_isdimm(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); 
 	fapi::ReturnCode knob_update_dqs_by4_isdimm(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag);
         fapi::ReturnCode run(const fapi::Target & i_target,uint32_t *right_min_margin,uint32_t *left_min_margin,uint32_t i_vref_mul);
 	fapi::ReturnCode shmoo_save_rest(const fapi::Target & i_target,uint64_t i_content_array[],uint8_t i_mode);

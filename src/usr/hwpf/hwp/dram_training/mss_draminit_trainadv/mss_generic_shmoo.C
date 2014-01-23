@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: mss_generic_shmoo.C,v 1.83 2013/12/17 18:42:08 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.84 2014/01/16 17:39:18 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.84  |abhijit	|16-JAN-14| Changed EFF_DIMM_TYPE attribute to   ATTR_EFF_CUSTOM_DIMM 
 //   1.83  |abhijit	|17-DEC-13| Changed the whole code structure to enable run from firmware  
 //   1.81  |abhijit	|07-nov-13| Fixed memory release as per fw suggestion 
 //   1.80  |abhijit	|07-nov-13| Fixed array initialization of bad bit array as per fw suggestion
@@ -186,7 +187,7 @@ generic_shmoo:: generic_shmoo(uint8_t addr,shmoo_type_t shmoo_mask,shmoo_algorit
     {
     for(int j=0;j<iv_MAX_RANKS[i];++j)
     {
-        init_multi_array(SHMOO[k].MBA.P[i].S[j].K.nom_val,0);
+        init_multi_array(SHMOO[k].MBA.P[i].S[j].K.nom_val,250);
 		init_multi_array(SHMOO[k].MBA.P[i].S[j].K.lb_regval,0);
         init_multi_array(SHMOO[k].MBA.P[i].S[j].K.rb_regval,512);
 		init_multi_array(SHMOO[k].MBA.P[i].S[j].K.last_pass,0);
@@ -241,7 +242,7 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     
     rc = FAPI_ATTR_SET(ATTR_MCBIST_PRINTING_DISABLE, &i_target, l_mcbist_prnt_off); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_per_dimm); if(rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, l_attr_eff_dimm_type_u8); if(rc) return rc; 
+    rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target, l_attr_eff_dimm_type_u8); if(rc) return rc; 
     rc = FAPI_ATTR_GET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target, l_attr_schmoo_test_type_u8); if(rc) return rc;
 	rc = FAPI_ATTR_GET(ATTR_SCHMOO_MULTIPLE_SETUP_CALL, &i_target, l_attr_schmoo_multiple_setup_call_u8); if(rc) return rc;
     
@@ -265,7 +266,7 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     
     
     
-    if ( l_attr_eff_dimm_type_u8 == 0 )
+    if ( l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )
     {
 	iv_MAX_BYTES=10;
     }
@@ -275,6 +276,8 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
 	iv_dmm_type=1;
 	iv_MAX_BYTES=9;
     }
+	
+	//FAPI_INF(" Abhijit iv_dimm_type=%d and attribute=%d ",iv_dmm_type,l_attr_eff_dimm_type_u8);
     //rc = mss_getrankpair(i_target,iv_port,0,&rank_pair,valid_rank);if(rc) return rc; 
     FAPI_DBG("mss_generic_shmoo : run() for shmoo type %d",shmoo_mask);
      // Check if all bytes/bits are in a pass condition initially .Otherwise quit
@@ -404,7 +407,7 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
 	 
 	 FAPI_INF("%s:Minimum hold margin=%d ps and setup margin=%d ps",i_target.toEcmdString(), *o_left_min_margin,*o_right_min_margin);
  
-    shmoo_save_rest(i_target,i_content_array,1);
+   
 	}
 	l_mcbist_prnt_off=0;
 	rc = FAPI_ATTR_SET(ATTR_MCBIST_PRINTING_DISABLE, &i_target, l_mcbist_prnt_off); if(rc) return rc;
@@ -1550,6 +1553,8 @@ fapi::ReturnCode generic_shmoo::knob_update_dqs_by4(const fapi::Target & i_targe
     
     
     uint8_t  l_rp=0;
+	uint8_t  l_i=0;
+	
     input_type_t l_input_type_e = WR_DQ;
 	input_type_t l_input_type_e_dqs = WR_DQS;
     uint8_t l_dq=0;
@@ -1626,6 +1631,25 @@ fapi::ReturnCode generic_shmoo::knob_update_dqs_by4(const fapi::Target & i_targe
 		
 	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
 	 l_dq=4*l_n;
+	 
+	 if(l_p == 0){
+	
+		for(l_i=0;l_i<count_bad_dq[0];l_i++){
+		
+			if(l_CDarray0[l_i]==l_dq){
+			
+			schmoo_error_map[l_p][rank][l_n]=1;
+			}
+		}
+	}else{
+		for(l_i=0;l_i<count_bad_dq[1];l_i++){
+		
+			if(l_CDarray1[l_i]==l_dq){
+			
+			schmoo_error_map[l_p][rank][l_n]=1;
+			}
+		}
+	}
 	 if(schmoo_error_map[l_p][rank][l_n]==0){
 	 
 	 
@@ -1744,7 +1768,24 @@ fapi::ReturnCode generic_shmoo::knob_update_dqs_by4(const fapi::Target & i_targe
 		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
 	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
 	 l_dq=4*l_n;
+	if(l_p == 0){
 	
+		for(l_i=0;l_i<count_bad_dq[0];l_i++){
+		
+			if(l_CDarray0[l_i]==l_dq){
+			
+			schmoo_error_map[l_p][rank][l_n]=1;
+			}
+		}
+	}else{
+		for(l_i=0;l_i<count_bad_dq[1];l_i++){
+		
+			if(l_CDarray1[l_i]==l_dq){
+			
+			schmoo_error_map[l_p][rank][l_n]=1;
+			}
+		}
+	}
 	 if(schmoo_error_map[l_p][rank][l_n]==0){
 	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_n]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.curr_val[l_n]-l_delay;
 	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e_dqs,l_n,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_n]);if(rc) return rc;
@@ -2510,6 +2551,370 @@ rc=check_error_map(i_target,l_p,pass);
     
     return rc;	
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+fapi::ReturnCode generic_shmoo::knob_update_dqs_by8_isdimm(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag)
+{	
+    fapi::ReturnCode rc;
+    ecmdDataBufferBase data_buffer_64(64);
+    ecmdDataBufferBase data_buffer_64_1(64);
+    
+    
+    
+    uint8_t  l_rp=0;
+    input_type_t l_input_type_e = WR_DQ;
+	input_type_t l_input_type_e_dqs = WR_DQS;
+    uint8_t l_dq=0;
+	uint8_t l_dqs=0;
+    access_type_t l_access_type_e = WRITE;
+	uint8_t l_n=0;
+	//uint8_t l_scen_dqs=4;
+	uint8_t l_CDarray0[80]={0};
+	uint8_t l_CDarray1[80]={0};
+	
+	
+	
+	uint8_t l_p=0;
+    uint16_t l_delay=0;
+    //uint32_t l_max=0;
+	uint16_t l_max_limit=500;
+    uint8_t rank=0;
+	uint8_t l_rank=0;
+	//uint8_t l_SCHMOO_BYTES=10;
+	uint8_t l_SCHMOO_NIBBLES=20;
+	
+	//uint8_t i_rp=0;
+	
+	rc=do_mcbist_test(i_target);
+		if(rc)
+		{   
+		    FAPI_ERR("generic_shmoo::find_bound do_mcbist_test failed");
+		    return rc;
+		}
+		
+		rc=mcb_error_map(i_target,mcbist_error_map,l_CDarray0,l_CDarray1,count_bad_dq);
+    if(rc)
+    {
+        FAPI_ERR("generic_shmoo::do_mcbist_test: mcb_error_map failed!!"); 
+			
+        return rc;
+    }	
+	
+	if(iv_dmm_type==1)
+    {
+	//l_SCHMOO_BYTES=9;
+	l_SCHMOO_NIBBLES=18;
+	}
+    //rc = mss_getrankpair(i_target,iv_port,rank,&l_rp,valid_rank);if(rc) return rc; 
+	
+	for (l_p=0;l_p<MAX_PORT;l_p++){
+	for(int i=0;i<iv_MAX_RANKS[l_p];i++){
+	rc = mss_getrankpair(i_target,l_p,0,&l_rp,valid_rank);if(rc) return rc;
+		rank=valid_rank[i];
+	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
+	 schmoo_error_map[l_p][rank][l_n]=0;
+	 }
+	 }
+	 }
+	
+    
+	
+    
+    if(bound==RIGHT)
+    {
+        
+	if(algorithm==SEQ_LIN)
+        {
+		
+	
+	 for (l_delay=1;((pass==0));l_delay++){
+	 
+	 for (l_p=0;l_p<MAX_PORT;l_p++){
+	 for (l_rank=0;l_rank<iv_MAX_RANKS[l_p];++l_rank)
+    {
+	 l_dq=0;
+	 l_dqs=0;
+	 rc = mss_getrankpair(i_target,l_p,0,&l_rp,valid_rank);if(rc) return rc;
+		rank=valid_rank[l_rank];
+		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
+		
+	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
+	 l_dq=4*l_n;
+	 l_dqs=l_n/2;
+	 
+	 if((schmoo_error_map[l_p][rank][l_n]==0)&&(schmoo_error_map[l_p][rank][l_n+1]==0)){
+	 
+	 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dqs]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dqs]+l_delay;
+	
+	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e_dqs,l_dqs,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dqs]);if(rc) return rc;
+	 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]+l_delay;
+	 
+	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]+l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]+l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]+l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]);if(rc) return rc;
+	 l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]+l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]+l_delay;
+	
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]+l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]+l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dq]);if(rc) return rc;
+	  
+	 }
+	 
+	 if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.rb_regval[l_dqs]>l_max_limit){
+	
+	 schmoo_error_map[l_p][rank][l_n]=1;
+	 schmoo_error_map[l_p][rank][l_n+1]=1;
+	 }
+	 
+	 if((schmoo_error_map[l_p][rank][l_n]==1)||(schmoo_error_map[l_p][rank][l_n+1]==1)){
+		
+		schmoo_error_map[l_p][rank][l_n]=1;
+	 schmoo_error_map[l_p][rank][l_n+1]=1;
+	 }
+		
+		l_n=l_n+1;
+		
+		} 
+		
+		
+	}
+		
+	 }
+	 rc=do_mcbist_test(i_target);
+		if(rc)
+		{   
+		    FAPI_ERR("generic_shmoo::find_bound do_mcbist_test failed");
+		    return rc;
+		}
+		
+		rc=check_error_map(i_target,l_p,pass);
+		if(rc)
+		{   
+		    FAPI_ERR("generic_shmoo::find_bound do_mcbist_test failed");
+		    return rc;
+		}		
+	
+	 }
+		
+		
+	for (l_p=0;l_p<MAX_PORT;l_p++){
+	for (l_rank=0;l_rank<iv_MAX_RANKS[l_p];++l_rank)
+    {
+
+	 rc = mss_getrankpair(i_target,l_p,0,&l_rp,valid_rank);if(rc) return rc;
+		rank=valid_rank[l_rank];
+		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
+	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
+	 
+	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e_dqs,l_n,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_n]);if(rc) return rc;
+	 
+			} 
+		}
+		}
+		
+		for(int l_bit=0;l_bit<4;l_bit++){
+		for (l_p=0;l_p<MAX_PORT;l_p++){
+	for (l_rank=0;l_rank<iv_MAX_RANKS[l_p];++l_rank)
+    {
+	 l_dq=l_bit;
+	 rc = mss_getrankpair(i_target,l_p,0,&l_rp,valid_rank);if(rc) return rc;
+		rank=valid_rank[l_rank];
+		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
+	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
+	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]);if(rc) return rc;
+	 l_dq=l_dq+4;
+			} 
+		}
+	 }
+	}
+	
+	rc=do_mcbist_test(i_target);
+		if(rc)
+		{   
+		    FAPI_ERR("generic_shmoo::find_bound do_mcbist_test failed");
+		    return rc;
+		}
+		
+		rc=mcb_error_map(i_target,mcbist_error_map,l_CDarray0,l_CDarray1,count_bad_dq);
+    if(rc)
+    {
+        FAPI_ERR("generic_shmoo::do_mcbist_test: mcb_error_map failed!!"); 
+			
+        return rc;
+    }
+		
+		
+		
+	 }
+		
+	}
+ 	
+    if(bound==LEFT)
+    {
+        if(algorithm==SEQ_LIN)
+        {
+		
+		for (l_delay=1;(pass==0);l_delay++){
+	 
+	 for (l_p=0;l_p<MAX_PORT;l_p++){
+	 for (l_rank=0;l_rank<iv_MAX_RANKS[l_p];++l_rank)
+    {
+	 l_dq=0;
+	 l_dqs=0;
+	 rc = mss_getrankpair(i_target,l_p,0,&l_rp,valid_rank);if(rc) return rc;
+		rank=valid_rank[l_rank];
+		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
+	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
+	 l_dq=4*l_n;
+	
+	 l_dqs=l_n/2;
+	 
+	 if((schmoo_error_map[l_p][rank][l_n]==0)&&(schmoo_error_map[l_p][rank][l_n+1]==0)){
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dqs]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dqs]-l_delay;
+	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e_dqs,l_dqs,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dqs]);if(rc) return rc;
+	 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]-l_delay;
+	 
+	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]-l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]-l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]-l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]-l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]-l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]-l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]);if(rc) return rc;
+	  l_dq=l_dq+1;
+	  SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]-l_delay;
+	 
+	  rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dq]);if(rc) return rc;
+	 }
+	 if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.lb_regval[l_dqs] == 0){
+	 schmoo_error_map[l_p][rank][l_n] = 1;
+	 schmoo_error_map[l_p][rank][l_n+1] = 1;
+	 }
+	 
+	 if((schmoo_error_map[l_p][rank][l_n]==1)||(schmoo_error_map[l_p][rank][l_n+1]==1)){
+		
+		schmoo_error_map[l_p][rank][l_n]=1;
+	 schmoo_error_map[l_p][rank][l_n+1]=1;
+	 }
+	 
+	l_n=l_n+1;
+	
+			} 
+		}
+			
+	 }
+	 rc=do_mcbist_test(i_target);
+		if(rc)
+		{   
+		    FAPI_ERR("generic_shmoo::find_bound do_mcbist_test failed");
+		    return rc;
+		}
+		 
+rc=check_error_map(i_target,l_p,pass);
+		if(rc)
+		{   
+		    FAPI_ERR("generic_shmoo::find_bound do_mcbist_test failed");
+		    return rc;
+		}		
+		
+	
+	 }
+		
+		
+	for (l_p=0;l_p<MAX_PORT;l_p++){
+	for (l_rank=0;l_rank<iv_MAX_RANKS[l_p];++l_rank)
+    {
+
+	 rc = mss_getrankpair(i_target,l_p,0,&l_rp,valid_rank);if(rc) return rc;
+		rank=valid_rank[l_rank];
+		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
+	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
+	 
+	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e_dqs,l_n,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_n]);if(rc) return rc;
+	 
+			} 
+		}
+		}
+		
+		for(int l_bit=0;l_bit<4;l_bit++){
+		for (l_p=0;l_p<MAX_PORT;l_p++){
+	for (l_rank=0;l_rank<iv_MAX_RANKS[l_p];++l_rank)
+    {
+	 l_dq=l_bit;
+	 rc = mss_getrankpair(i_target,l_p,0,&l_rp,valid_rank);if(rc) return rc;
+		rank=valid_rank[l_rank];
+		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
+	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
+	 rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rank].K.nom_val[l_dq]);if(rc) return rc;
+	 l_dq=l_dq+4;
+			} 
+		}
+	 }
+	}
+	rc=do_mcbist_test(i_target);
+		if(rc)
+		{   
+		    FAPI_ERR("generic_shmoo::find_bound do_mcbist_test failed");
+		    return rc;
+		}
+		
+		rc=mcb_error_map(i_target,mcbist_error_map,l_CDarray0,l_CDarray1,count_bad_dq);
+    if(rc)
+    {
+        FAPI_ERR("generic_shmoo::do_mcbist_test: mcb_error_map failed!!"); 
+			
+        return rc;
+    }
+	
+	 }
+	 
+	    
+	}
+	
+	
+
+    
+    return rc;	
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*------------------------------------------------------------------------------
@@ -2552,7 +2957,7 @@ fapi::ReturnCode generic_shmoo::find_bound(const fapi::Target & i_target,bound_t
               }else{
 			  if(iv_dmm_type==1)
     {
-	//rc=knob_update_dqs_by8_isdimm(i_target,bound,iv_shmoo_type,l_bit,pass,flag); if(rc) return rc;
+	rc=knob_update_dqs_by8_isdimm(i_target,bound,iv_shmoo_type,l_bit,pass,flag); if(rc) return rc;
 	}else{
 	
 			   rc=knob_update_dqs_by4(i_target,bound,iv_SHMOO_ON,l_bit,pass,flag); if(rc) return rc;
@@ -2617,7 +3022,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
    
     rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, l_attr_mss_freq_u32); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, l_attr_mss_volt_u32); if(rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, l_attr_eff_dimm_type_u8); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target, l_attr_eff_dimm_type_u8); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target, l_attr_eff_num_drops_per_port_u8); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_attr_eff_dram_width_u8); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbapos);if(rc) return rc;
@@ -2627,7 +3032,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
     FAPI_INF("%s:      freq = %d on %s.",i_target.toEcmdString(),l_attr_mss_freq_u32, l_target_centaur.toEcmdString());
     FAPI_INF("%s: volt = %d on %s.",i_target.toEcmdString(), l_attr_mss_volt_u32, l_target_centaur.toEcmdString());
     FAPI_INF("%s: dimm_type = %d on %s.",i_target.toEcmdString(), l_attr_eff_dimm_type_u8, i_target.toEcmdString());
-    if ( l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM )
+    if ( l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )
     {
 	FAPI_INF("%s: It is a CDIMM",i_target.toEcmdString()); 
     }
@@ -2724,7 +3129,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
    
     rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, l_attr_mss_freq_u32); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, l_attr_mss_volt_u32); if(rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, l_attr_eff_dimm_type_u8); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target, l_attr_eff_dimm_type_u8); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target, l_attr_eff_num_drops_per_port_u8); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_attr_eff_dram_width_u8); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbapos);if(rc) return rc;
@@ -2746,7 +3151,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
 	FAPI_INF("%s:\n Number of ranks on port=1 is %d ",i_target.toEcmdString(),iv_MAX_RANKS[1]);
 	
 	
-    if ( l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM )
+    if ( l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )
     {
 	FAPI_INF("%s:It is a CDIMM",i_target.toEcmdString()); 
     }

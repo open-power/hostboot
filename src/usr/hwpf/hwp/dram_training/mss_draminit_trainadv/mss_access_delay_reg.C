@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.21 2013/12/16 10:15:21 sasethur Exp $
+// $Id: mss_access_delay_reg.C,v 1.22 2014/01/15 16:22:54 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -54,7 +54,8 @@
 //   1.16  | sauchadh |12-jun-13| ADDED	 CAC registers for read dqs
 //   1.17  | sauchadh |18-Jul-13| Added data bit disable registers
 //   1.19  | abhijsau |9-Oct-13 | Added mss_c4_phy() function 
-//   1.21  | abhijsau |16-Dec-13| Added function for fw  
+//   1.21  | abhijsau |16-Dec-13| Added function for fw
+//   1.22  |sauchadh  |10-Jan-14| changed dimmtype attribute to ATTR_EFF_CUSTOM_DIMM    
 
 //----------------------------------------------------------------------
 //  My Includes
@@ -155,10 +156,13 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    const uint8_t clk_lanep3[clk_max]={3,2,13,12,10,11,11,10};
    const uint8_t clk_adrp3[clk_max]={3,3,2,2,0,0,2,2};
    
+   //i_verbose=1;
    
    rc = mss_getrankpair(i_target_mba,i_port_u8,i_rank_u8,&l_rank_pair,l_rankpair_table);   if(rc) return rc;
    
-   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
+   
+   
    
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos);  if(rc) return rc;
@@ -193,10 +197,12 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    if(i_input_type_e==RD_DQ || i_input_type_e==WR_DQ) 
    {
       
-      if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+      
+      
+      if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
       {
          l_type=CDIMM_DQ;
-         
+                  
          if(i_input_index_u8>l_CDIMM_dqmax)    
          {
             FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
@@ -205,7 +211,7 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          }
             
       }
-      else if((l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+      else if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO) 
       {
          l_type=ISDIMM_DQ;
          if(i_input_index_u8>l_ISDIMM_dqmax)
@@ -485,11 +491,11 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    else if (i_input_type_e==RD_DQS || i_input_type_e==WR_DQS || i_input_type_e==DQS_ALIGN ||  i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
    {
      
-      if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+      if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
       {
          l_type=CDIMM_DQS;
       }
-      else if((l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+      else if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
       {
          l_type=ISDIMM_DQS;
       }
@@ -1223,7 +1229,7 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
       
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos); if(rc) return rc;
    
-   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
          
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
    
@@ -1419,7 +1425,7 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
             l_lane=lane_dqs[1];
          }
          
-         if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+         if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
          {
             if((i_input_index==1) || (i_input_index==3) || (i_input_index==5) || (i_input_index==7) || (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) || (i_input_index==17) || (i_input_index==19))
             {
@@ -1735,7 +1741,7 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,in
    const uint8_t GL_DQS_p3[l_maxdqs]={0,2,4,16,8,10,12,14,6,1,3,5,17,9,11,13,15,7};
    
    rc = FAPI_ATTR_GET(ATTR_MSS_DQS_SWIZZLE_TYPE, &i_target_mba, l_swizzle); if(rc) return rc;
-   
+   //FAPI_INF("input index in rosetta map=%d",i_input_index);
    
    if(l_swizzle ==0 || l_swizzle ==1)
    {
@@ -1761,9 +1767,9 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,in
       return rc;
    }
    
-   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
    
-   if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+   if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
    {
       if(i_input_index>l_CDIMM_dqmax)    
       {
@@ -1773,7 +1779,7 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,in
       }
    }
    
-   else if((l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+   else if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
    {
       if(i_input_index>l_ISDIMM_dqmax)
       {
@@ -2736,7 +2742,7 @@ fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, ui
       
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos); if(rc) return rc;
    
-   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
          
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
    
@@ -2981,7 +2987,7 @@ fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, ui
             l_lane=lane_dqs[1];
          }
          
-         if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+         if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
          {
             if((i_input_index==1) || (i_input_index==3) || (i_input_index==5) || (i_input_index==7) || (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) || (i_input_index==17) || (i_input_index==19))
             {
@@ -3339,10 +3345,13 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
    const uint8_t clk_lanep3[clk_max]={3,2,13,12,10,11,11,10};
    const uint8_t clk_adrp3[clk_max]={3,3,2,2,0,0,2,2};
    
+   //FAPI_INF("input index in access delay=%d",i_input_index_u8);
+   
+  //i_verbose=1;
    
    rc = mss_getrankpair(i_target_mba,i_port_u8,i_rank_u8,&l_rank_pair,l_rankpair_table);   if(rc) return rc;
    
-   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
    
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos);  if(rc) return rc;
@@ -3377,7 +3386,7 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
    if(i_input_type_e==RD_DQ || i_input_type_e==WR_DQ) 
    {
       
-      if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+      if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
       {
          l_type=CDIMM_DQ;
          
@@ -3389,7 +3398,7 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
          }
             
       }
-      else if((l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+      else if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
       {
          l_type=ISDIMM_DQ;
          if(i_input_index_u8>l_ISDIMM_dqmax)
@@ -3669,11 +3678,11 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
    else if (i_input_type_e==RD_DQS || i_input_type_e==WR_DQS || i_input_type_e==DQS_ALIGN ||  i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
    {
      
-      if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+      if(l_dimmtype==fapi:: ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
       {
          l_type=CDIMM_DQS;
       }
-      else if((l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM) || (l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM))
+      else if(l_dimmtype==fapi:: ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
       {
          l_type=ISDIMM_DQS;
       }
