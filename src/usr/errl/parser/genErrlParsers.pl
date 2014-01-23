@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -233,22 +233,6 @@ foreach my $file (@reasonCodeFiles)
                 exit(1);
             }
             $namespace = $1;
-
-            # Check for common code files where the reason codes do not contain
-            # component IDs. Expand this hash as needed to add more components
-            my %namespaceToCompHash = (
-                "HWAS" => "HWAS_COMP_ID");
-
-            if (exists $namespaceToCompHash{$namespace})
-            {
-                # Reason codes do not contain component IDs
-                $compId = $namespaceToCompHash{$namespace};
-            }
-            else
-            {
-                # Reason codes contain component IDs
-                $compId = "";
-            }
 
             next;
         }

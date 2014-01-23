@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -201,7 +201,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
 
             /*@
              * @errortype
-             * @moduleid     HWAS::MOD_DECONFIG_GARD
+             * @moduleid     HWAS::MOD_PLAT_DECONFIG_GARD
              * @reasoncode   HWAS::RC_TARGET_NOT_GARDABLE
              * @devdesc      Attempt to create a GARD Record for a target that
              *               is not GARDable
@@ -215,7 +215,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
                 (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
-                HWAS::MOD_DECONFIG_GARD,
+                HWAS::MOD_PLAT_DECONFIG_GARD,
                 HWAS::RC_TARGET_NOT_GARDABLE,
                 userdata1,
                 userdata2);
@@ -310,7 +310,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
 
             /*@
              * @errortype
-             * @moduleid     HWAS::MOD_DECONFIG_GARD
+             * @moduleid     HWAS::MOD_PLAT_DECONFIG_GARD
              * @reasoncode   HWAS::RC_GARD_REPOSITORY_FULL
              * @devdesc      Attempt to create a GARD Record and the GARD
              *               Repository is full
@@ -321,7 +321,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
                 i_errlEid;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
-                HWAS::MOD_DECONFIG_GARD,
+                HWAS::MOD_PLAT_DECONFIG_GARD,
                 HWAS::RC_GARD_REPOSITORY_FULL,
                 userdata1);
             break;

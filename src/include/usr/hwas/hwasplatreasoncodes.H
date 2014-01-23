@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwas/common/hwas_reasoncodes.H $              */
+/* $Source: src/include/usr/hwas/hwasplatreasoncodes.H $                  */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* COPYRIGHT International Business Machines Corp. 2014                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,31 +20,30 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef HWAS_REASONCODES_H
-#define HWAS_REASONCODES_H
+#ifndef HWASPLATREASONCODES_H
+#define HWASPLATREASONCODES_H
 
 namespace HWAS
 {
-    enum HwasModuleID
+    enum HwasPlatModuleID
     {
-        MOD_DECONFIG_GARD         = 0x01,
-        MOD_PROCESS_CALLOUT       = 0x02,
-        MOD_CHECK_MIN_HW          = 0x03,
+        //
+        // Code to identify discrete error locations/events
+        //
+        //  @note Must always start @ 0x80, since common module IDs occupy
+        //      0x00 -> 0x7F range
+        MOD_HOST_DISCOVER_TARGETS = 0x80,
+        MOD_HOST_GARD             = 0x81,
+        MOD_PLAT_DECONFIG_GARD    = 0x82,
     };
 
-    enum HwasReasonCode
+    enum HwasPlatReasonCode
     {
-        RC_TARGET_NOT_DECONFIGURABLE        = HWAS_COMP_ID | 0x01,
-        RC_TARGET_NOT_FOUND_FOR_GARD_RECORD = HWAS_COMP_ID | 0x02,
-        RC_INVALID_TARGET                   = HWAS_COMP_ID | 0x03,
-        //
-        //  System Availability Service codes
-        //  The first is a blanket error that will be returned to the caller,
-        //      further errors will be committed in the routine.
-        RC_SYSAVAIL_INSUFFICIENT_HW         = HWAS_COMP_ID | 0x04,
-        RC_SYSAVAIL_NO_CORES_FUNC           = HWAS_COMP_ID | 0x05,
-        RC_SYSAVAIL_NO_MEMORY_FUNC          = HWAS_COMP_ID | 0x06,
-        RC_SYSAVAIL_NO_PROCS_FUNC           = HWAS_COMP_ID | 0x07,
+        //  @note Must always start @ 0x80, since common reason codes occupy
+        //      0x00 -> 0x7F range
+        RC_TOP_LEVEL_TARGET_NULL            = HWAS_COMP_ID | 0x80,
+        RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x81,
+        RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
     };
 };
 
