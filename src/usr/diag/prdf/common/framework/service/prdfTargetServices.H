@@ -310,10 +310,14 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc );
  * @brief   Returns the list of configured master ranks for an MBA.
  * @param   i_memTrgt MBA target or child of MBA.
  * @param   o_ranks   The returned list.
+ * @param   i_ds      Dimm Slct for which rank information is required. If this
+ *                    equals to MAX_DIMM_PER_PORT, function will return rank
+ *                    information for both DIMMS on this MBA.
  * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
  */
 int32_t getMasterRanks( TARGETING::TargetHandle_t i_memTrgt,
-                        std::vector<CenRank> & o_ranks );
+                        std::vector<CenRank> & o_ranks,
+                        uint8_t i_ds = MAX_DIMM_PER_PORT );
 
 /**
  * @brief   Returns the DMI bus channel for the given memory target.
@@ -356,6 +360,24 @@ int32_t getMbaDimm( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm );
  * @return  true if DRAM with is X4 false otherwise
  */
 bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget);
+
+/**
+ * @brief   Get DRAM generation
+ * @param   i_mba     MBA target
+ * @param   o_dramGen DRAM generation ( 1 - DDR3,  2 - DDR4 )
+ * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
+ */
+int32_t getDramGen( TARGETING::TargetHandle_t i_mba, uint8_t & o_dramGen );
+
+/**
+ * @brief   Get DIMM number of rows and columns
+ * @param   i_mba    MBA target
+ * @param   o_rowNum Number of rows
+ * @param   o_colNum Number of columns
+ * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
+ */
+int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
+                       uint8_t & o_colNum );
 
 /**
  * @brief   Obtains number of ranks (including slave ranks) per DIMM select.

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -876,6 +876,17 @@
     {
         name        "MBU.MBS.ARB.RXLT.MBAXCR23Q";
         scomaddr    0x0201140C;
+        capture     group never;
+    };
+
+    ############################################################################
+    #  MBS Address Translate Control Register
+    ############################################################################
+
+    register MBSXCR
+    {
+        name        "MBU.MBS.ARB.RXLT.MBSXCRQ";
+        scomaddr    0x0201140A;
         capture     group never;
     };
 

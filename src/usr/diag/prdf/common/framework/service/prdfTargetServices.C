@@ -1039,7 +1039,8 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc )
 //##############################################################################
 
 int32_t getMasterRanks( TargetHandle_t i_memTrgt,
-                        std::vector<CenRank> & o_ranks )
+                        std::vector<CenRank> & o_ranks,
+                        uint8_t i_ds )
 {
     #define PRDF_FUNC "PlatServices::getMasterRanks] "
 
@@ -1058,6 +1059,12 @@ int32_t getMasterRanks( TargetHandle_t i_memTrgt,
             break;
         }
 
+        if( MAX_DIMM_PER_PORT < i_ds )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid value for Dimm Slct:%u", i_ds );
+            break;
+        }
+
         uint8_t info[MAX_PORT_PER_MBA][MAX_DIMM_PER_PORT];
         if ( !mbaTrgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
         {
@@ -1071,6 +1078,14 @@ int32_t getMasterRanks( TargetHandle_t i_memTrgt,
 
         for ( uint32_t ds = 0; ds < MAX_DIMM_PER_PORT; ds++ )
         {
+            // if we are requested to get master ranks on a specific
+            // DIMM, ignore if ds does not match the specific DIMM.
+            // We have kept MAX_DIMM_PER_PORT as special value ( default )
+            // for getting total ranks across both DIMMS.
+
+            if( ( MAX_DIMM_PER_PORT != i_ds ) && ( ds != i_ds ) )
+                continue;
+
             uint8_t rankMask = info[0][ds];
 
             if ( 0 == (rankMask & 0xf0) ) continue; // Nothing configured.
@@ -1183,6 +1198,61 @@ int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port )
 int32_t getMbaDimm( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm )
 {
     return i_dimmTarget->tryGetAttr<ATTR_MBA_DIMM>(o_dimm) ? SUCCESS : FAIL;
+}
+
+//------------------------------------------------------------------------------
+
+int32_t getDramGen( TARGETING::TargetHandle_t i_mba, uint8_t & o_dramGen )
+{
+    #define PRDF_FUNC "[PlatServices::getDramGen] "
+
+    int32_t o_rc = FAIL;
+    do
+    {
+        if ( TYPE_MBA != getTargetType( i_mba ) )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid Target. HUID:0X%08X",
+                      getHuid( i_mba ) );
+            break;
+        }
+
+        o_dramGen = i_mba->getAttr<ATTR_EFF_DRAM_GEN>( );
+
+        o_rc = SUCCESS;
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
+                       uint8_t & o_colNum )
+{
+    #define PRDF_FUNC "[PlatServices::getDimmRowCol] "
+
+    int32_t o_rc = FAIL;
+    do
+    {
+        if ( TYPE_MBA != getTargetType( i_mba ) )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid Target. HUID:0X%08X",
+                      getHuid( i_mba ) );
+            break;
+        }
+
+        o_rowNum = i_mba->getAttr<ATTR_EFF_DRAM_ROWS>();
+        o_colNum = i_mba->getAttr<ATTR_EFF_DRAM_COLS>();
+
+        o_rc = SUCCESS;
+
+    }while(0);
+
+    return o_rc;
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
