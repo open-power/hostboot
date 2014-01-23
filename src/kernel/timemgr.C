@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -25,19 +25,11 @@
 #include <util/singleton.H>
 #include <kernel/task.H>
 #include <kernel/cpumgr.H>
+#include <util/misc.H>
 
 uint64_t TimeManager::iv_timebaseFreq = 0xFFFFFFFF;
 
-bool isSimicsRunning() __attribute__((alias("__isSimicsRunning")));
-extern "C" void __isSimicsRunning() NEVER_INLINE;
-
-void __isSimicsRunning()
-{
-    asm volatile("li 3, 0");
-    MAGIC_INSTRUCTION(MAGIC_SIMICS_CHECK);
-}
-
-bool TimeManager::cv_isSimicsRunning = isSimicsRunning();
+bool TimeManager::cv_isSimicsRunning = Util::isSimicsRunning();
 
 void TimeManager::init()
 {

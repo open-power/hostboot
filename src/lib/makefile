@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2010,2014
 #
 # p1
 #
@@ -25,7 +25,7 @@ ROOTPATH = ../..
 OBJS = string.o string_ext.o stdlib.o ctype.o assert.o stdio.o math.o sprintf.o
 OBJS += syscall_stub.o syscall_task.o syscall_msg.o
 OBJS += syscall_mmio.o syscall_time.o sync.o syscall_misc.o
-OBJS += syscall_mm.o splaytree.o cxxtest_data.o crc32.o
+OBJS += syscall_mm.o splaytree.o cxxtest_data.o crc32.o utilmisc.o
 
 ifdef HOSTBOOT_MEMORY_LEAKS
 COMMONFLAGS += -DHOSTBOOT_MEMORY_LEAKS=1

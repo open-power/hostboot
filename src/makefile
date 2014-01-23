@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2010,2014
 #
 # p1
 #
@@ -27,7 +27,7 @@ SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d runtime.d
 IMGS = hbicore hbicore_test hbirt hbirt_test
 
 BASE_OBJECTS = string.o string_ext.o ctype.o math.o builtins.o stdio.o \
-	       splaytree.o cxxtest_data.o sprintf.o crc32.o
+	       splaytree.o cxxtest_data.o sprintf.o crc32.o utilmisc.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o
