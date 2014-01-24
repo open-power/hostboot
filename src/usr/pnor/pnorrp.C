@@ -580,6 +580,7 @@ errlHndl_t PnorRP::readTOC()
                         iv_TOC[secId].size = ALIGN_PAGE_DOWN((iv_TOC[secId].size * 8 ) / 9);
                     }
 
+                    // TODO RTC:96009 handle version header w/secureboot
                     if (iv_TOC[secId].version == FFS_VERS_SHA512)
                     {
                         TRACFCOMP(g_trac_pnor, "PnorRP::readTOC: Incrementing Flash Address for SHA Header");
