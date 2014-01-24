@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include "scom.H"
 #include "scomtrans.H"
 #include <scom/scomreasoncodes.H>
+#include <errl/errludtarget.H>
 
 // Trace definition
 extern trace_desc_t* g_trac_scom;
@@ -512,9 +513,11 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                                              SCOM_TRANSLATE,
                                              SCOM_TRANS_INVALID_TYPE,
                                              i_addr,
-                                             l_type);
-
-
+                                             l_type,
+                                             true/*SW Error*/);
+             //Add this target to the FFDC
+             ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+               .addToLog(l_err);
 	}
     }
 
@@ -536,8 +539,12 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                                        SCOM_TRANSLATE,
                                        SCOM_INVALID_ADDR,
                                        i_addr,
-                                       l_type);
-       l_err->collectTrace("SCOM",1024);
+                                       l_type,
+                                       true/*SW Error*/);
+       //Add this target to the FFDC
+       ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+         .addToLog(l_err);
+       l_err->collectTrace(SCOM_COMP_NAME,1024);
 
     }
 
@@ -587,6 +594,8 @@ errlHndl_t scomPerformTranslate(TARGETING::EntityPath i_epath,
     }
     else
     {
+        TRACFCOMP(g_trac_scom,"SCOMPERFORMTRANSLATE Invalid Address.i_addr =0x%X for mask = 0x%X", i_addr, i_mask);
+
         /*@
          * @errortype
          * @moduleid     SCOM::SCOM_PERFORM_TRANSLATE
@@ -596,14 +605,16 @@ errlHndl_t scomPerformTranslate(TARGETING::EntityPath i_epath,
          * @devdesc      Invalid Address for the mask passed in.
          */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        SCOM_PERFORM_TRANSLATE,
-                                        SCOM_INVALID_ADDR,
-                                        i_addr,
-                                        o_target->getAttr<TARGETING::ATTR_TYPE>());
+                                    SCOM_PERFORM_TRANSLATE,
+                                    SCOM_INVALID_ADDR,
+                                    i_addr,
+                                    o_target->getAttr<TARGETING::ATTR_TYPE>(),
+                                    true/*SW Error*/);
+        //Add this target to the FFDC
+        ERRORLOG::ErrlUserDetailsTarget(o_target,"SCOM Target")
+          .addToLog(l_err);
 
-        l_err->collectTrace("SCOM",1024);
-
-        TRACFCOMP(g_trac_scom,"SCOMPERFORMTRANSLATE Invalid Address.i_addr =0x%X for mask = 0x%X", i_addr, i_mask);
+        l_err->collectTrace(SCOM_COMP_NAME,1024);
 
         return (l_err);
     }
@@ -657,7 +668,7 @@ errlHndl_t scomfindParentTarget( TARGETING::EntityPath i_epath,
 
     if (!foundParent)
     {
-        // got and error.. bad address.. write an errorlog..
+        TRACFCOMP(g_trac_scom, "TRANSLATE..Did not find parent type=0x%X ", i_ptype);
         /*@
          * @errortype
          * @moduleid     SCOM::SCOM_PERFORM_TRANSLATE
@@ -670,12 +681,14 @@ errlHndl_t scomfindParentTarget( TARGETING::EntityPath i_epath,
                                      SCOM_FIND_PARENT_TARGET,
                                      SCOM_NO_MATCHING_PARENT,
                                      i_ptype,
-                                     o_target->getAttr<TARGETING::ATTR_TYPE>());
+                                     o_target->getAttr<TARGETING::ATTR_TYPE>(),
+                                     true/*SW Error*/);
 
-        l_err->collectTrace("SCOM",1024);
+        //Add this target to the FFDC
+        ERRORLOG::ErrlUserDetailsTarget(o_target,"SCOM Target")
+          .addToLog(l_err);
 
-        // Need to write and errorlog and return..
-        TRACFCOMP(g_trac_scom, "TRANSLATE..Did not find parent type=0x%X ", i_ptype);
+        l_err->collectTrace(SCOM_COMP_NAME,1024);
     }
 
     return l_err;

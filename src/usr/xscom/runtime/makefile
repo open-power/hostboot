@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -24,7 +24,7 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = xscom_rt
 
-OBJS = rt_xscom.o
+OBJS = rt_xscom.o piberror.o
 
 SUBDIRS = test.d
 

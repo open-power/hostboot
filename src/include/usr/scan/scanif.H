@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,7 +40,12 @@ namespace SCAN
     };
 
 
-
 }
+
+// Standard Traces
+#define SCANDD_TRACE_BUF "SCANDD"
+
+// Register Traces
+#define SCANDD_RTRACE_BUF "SCANDDR"
 
 #endif 

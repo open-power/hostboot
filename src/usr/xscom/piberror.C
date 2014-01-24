@@ -1,4 +1,3 @@
-
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
@@ -6,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /**
  *  @file piberror.C
  *
@@ -59,7 +59,7 @@ void addFruCallouts(TARGETING::Target* i_target,
                                     HWAS::SRCI_PRIORITY_HIGH);
        io_errl->addHwCallout( i_target,
                               HWAS::SRCI_PRIORITY_LOW,
-                              HWAS::NO_DECONFIG,
+                              HWAS::DECONFIG,
                               HWAS::GARD_NULL );
        break;
      case  PIB::PIB_PARTIAL_GOOD:

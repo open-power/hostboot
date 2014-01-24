@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <scan/scan_reasoncodes.H>
 #include <scan/scanif.H>
 #include "scandd.H"
+#include <errl/errludtarget.H>
 
 // ----------------------------------------------
 // Globals
@@ -50,10 +51,10 @@
 // Trace definitions
 // ----------------------------------------------
 trace_desc_t* g_trac_scandd = NULL;
-TRAC_INIT( & g_trac_scandd, "SCANDD", KILOBYTE );
+TRAC_INIT( & g_trac_scandd, SCANDD_TRACE_BUF, KILOBYTE );
 
 trace_desc_t* g_trac_scanddr = NULL;
-TRAC_INIT( & g_trac_scanddr, "SCANDDR", KILOBYTE );
+TRAC_INIT( & g_trac_scanddr, SCANDD_RTRACE_BUF, KILOBYTE );
 
 
 // ----------------------------------------------
@@ -112,9 +113,13 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
                                            SCAN::MOD_SCANDD_DDOP,
                                            SCAN::RC_INVALID_LENGTH,
                                            i_ring,
-                                           i_ringlength);
+                                           i_ringlength,
+                                           true/*SW Error*/);
+           //Add this target to the FFDC
+           ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+             .addToLog(l_err);
 
-           l_err->collectTrace("SCANDD",1024);
+           l_err->collectTrace(SCANDD_TRACE_BUF,1024);
            break;
        }
 
@@ -135,9 +140,13 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
                                            SCAN::MOD_SCANDD_DDOP,
                                            SCAN::RC_INVALID_RING_ADDRESS,
                                            i_ring,
-                                           TARGETING::get_huid(i_target));
+                                           TARGETING::get_huid(i_target),
+                                           true/*SW Error*/);
+           //Add this target to the FFDC
+           ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+             .addToLog(l_err);
 
-           l_err->collectTrace("SCANDD",1024);
+           l_err->collectTrace(SCANDD_TRACE_BUF,1024);
            break;
        }
 
@@ -158,9 +167,13 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
                                            SCAN::MOD_SCANDD_DDOP,
                                            SCAN::RC_INVALID_BUF_SIZE,
                                            io_buflen,
-                                           i_ringlength);
+                                           i_ringlength,
+                                           true/*SW Error*/);
+           //Add this target to the FFDC
+           ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+             .addToLog(l_err);
 
-           l_err->collectTrace("SCANDD",1024);
+           l_err->collectTrace(SCANDD_TRACE_BUF,1024);
            break;
        }
 
@@ -196,8 +209,12 @@ errlHndl_t scanPerformOp( DeviceFW::OperationType i_opType,
                                            SCAN::MOD_SCANDD_DDOP,
                                            SCAN::RC_INVALID_OPERATION,
                                            i_ring,
-                                           TO_UINT64(i_opType));
-           l_err->collectTrace("SCANDD",1024);
+                                           TO_UINT64(i_opType),
+                                           true/*SW Error*/);
+           //Add this target to the FFDC
+           ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+             .addToLog(l_err);
+           l_err->collectTrace(SCANDD_TRACE_BUF,1024);
            break;
        }
 
@@ -288,8 +305,10 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         {
             TRACFCOMP( g_trac_scandd, ERR_MRK
                        "SCAN::scanDoScan> SCOM Write to scan select register failed. i_ring=%lX, scanTypeData=%lX,scanTypeAddr=%lX, target =%.8X", i_ring, l_scanTypeData,l_scanTypeAddr, TARGETING::get_huid(i_target) );
-
-            // TODO:  Add usrDetails
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+              .addToLog(l_err);
+            l_err->collectTrace(SCANDD_TRACE_BUF,1024);
             break;
 
         }
@@ -337,8 +356,10 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
              if(l_err)
              {
                  TRACFCOMP( g_trac_scandd, ERR_MRK"SCAN::scanDoScan> ERROR i_ring=%.8X, target=%.8X , scanTypeData=%.8X, l_HeaderDataAddr=%.8X", i_ring, TARGETING::get_huid(i_target), l_buffer[0], l_headerDataAddr);
-
-                 // TODO:  Add usrDetails
+                 //Add this target to the FFDC
+                 ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+                   .addToLog(l_err);
+                 l_err->collectTrace(SCANDD_TRACE_BUF,1024);
                  break;
              }
         }
@@ -360,8 +381,10 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         if(l_err)
         {
             TRACFCOMP( g_trac_scandd, ERR_MRK"SCAN::scanDoScan> ERROR i_ring=%.8X, target=%.8X , scanTypeData=%.8X, l_HeaderDataAddr=%.8X", i_ring, TARGETING::get_huid(i_target), l_buffer[0], l_headerDataAddr);
-
-            // TODO:  Add usrDetails
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+              .addToLog(l_err);
+            l_err->collectTrace(SCANDD_TRACE_BUF,1024);
             break;
         }
 
@@ -453,8 +476,10 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
             if(l_err)
             {
                 TRACFCOMP( g_trac_scandd,ERR_MRK "SCAN::scanDoScan: Device OP error> i_ring=%.8X, target=%.8X , scanTypeData=%.8X, i_flag=%.8X,", i_ring, TARGETING::get_huid(i_target), l_scanDataAddr, i_flag );
-
-                // TODO:  Add user details
+                //Add this target to the FFDC
+                ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+                  .addToLog(l_err);
+                l_err->collectTrace(SCANDD_TRACE_BUF,1024);
                 break;
 
             }
@@ -534,8 +559,10 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
             if(l_err)
             {
                 TRACFCOMP( g_trac_scandd, ERR_MRK "SCAN::scanDoScan: OP and shift of < 32bits i_ring=%.8X, scanTypeDataAddr=%.8X, l_lastDataBits=%.8X, target=%.8X", i_ring, l_scanDataAddr, l_lastDataBits, TARGETING::get_huid(i_target) );
-
-                // TODO:  Add user details
+                //Add this target to the FFDC
+                ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+                  .addToLog(l_err);
+                l_err->collectTrace(SCANDD_TRACE_BUF,1024);
                 break;
             }
 
@@ -615,8 +642,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         if(l_err)
         {
             TRACFCOMP( g_trac_scandd,ERR_MRK "SCAN::scanDoScan> ERROR i_ring=%.8X, HeaderDataAddr=%.8X, i_flag=%.8X, target=%.8X", i_ring, l_headerDataAddr, i_flag, TARGETING::get_huid(i_target)  );
-
-            // TODO:  Add user details
+            l_err->collectTrace(SCANDD_TRACE_BUF,1024);
             break;
 
         }
@@ -626,9 +652,8 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
             // If the header data did not match..
             if ((l_buffer[0] != HEADER_CHECK_DATA))
             {
-                TRACDCOMP( g_trac_scandd,"SCAN::scanDoScan> Header Check Failed expect deadbeef.. i_ring=%.8X, i_opType=%.8X , ring data=%.8X, i_flag=%.8X,", i_ring, i_opType, l_buffer[0], i_flag );
-
-                TRACFCOMP( g_trac_scandd,"SCAN: HEADER DATA FAILED!! %.8x = %.8x  %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
+                TRACFCOMP( g_trac_scandd, "SCAN::scanDoScan> Header Check Failed on %.8X: i_ring=%.8X, i_opType=%.8X, i_flag=%.8X,", TARGETING::get_huid(i_target), i_ring, i_opType, i_flag );
+                TRACFCOMP( g_trac_scandd, "%.8X = %.8X_%.8X (expected 0xDEADBEEF)", l_headerDataAddr , l_buffer[0], l_buffer[1] );
 
                 /*@
                  * @errortype
@@ -636,14 +661,46 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                  * @reasoncode   SCAN::RC_HEADER_DATA_MISMATCH
                  * @userdata1    SCAN Ring Address
                  * @userdata2    Operation Type (i_opType)
-                 * @devdesc      ScanDD::scanDoScan> Got a data mismatch when reading back the header
+                 * @devdesc      ScanDD::scanDoScan> Got a data mismatch
+                 *               when reading back the header
                  */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                SCAN::MOD_SCANDD_DOSCAN,
-                                                SCAN::RC_HEADER_DATA_MISMATCH,
-                                                i_ring,
-                                                TO_UINT64(i_opType));
-                l_err->collectTrace("SCANDD",1024);
+                l_err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      SCAN::MOD_SCANDD_DOSCAN,
+                                      SCAN::RC_HEADER_DATA_MISMATCH,
+                                      i_ring,
+                                      TO_UINT64(i_opType) );
+                //Most like cause (based on experience) is some kind
+                // of a clock issue
+                TARGETING::TYPE type =
+                  i_target->getAttr<TARGETING::ATTR_TYPE>();
+                if( type == TARGETING::TYPE_PROC)
+                {
+                    l_err->addClockCallout(i_target,
+                                           HWAS::OSCREFCLK_TYPE,
+                                           HWAS::SRCI_PRIORITY_HIGH);
+                }
+                else if( type == TARGETING::TYPE_MEMBUF )
+                {
+                    l_err->addClockCallout(i_target,
+                                           HWAS::MEMCLK_TYPE,
+                                           HWAS::SRCI_PRIORITY_HIGH);
+                }
+                else // for anything else, just blame the refclock
+                {
+                    l_err->addClockCallout(i_target,
+                                           HWAS::OSCREFCLK_TYPE,
+                                           HWAS::SRCI_PRIORITY_HIGH);
+                }
+                //Could also be a busted chip
+                l_err->addHwCallout( i_target,
+                                     HWAS::SRCI_PRIORITY_LOW,
+                                     HWAS::DECONFIG, //allows us to continue
+                                     HWAS::GARD_NULL );
+                //Add this target to the FFDC
+                ERRORLOG::ErrlUserDetailsTarget(i_target,"Scan Target")
+                  .addToLog(l_err);
+                l_err->collectTrace(SCANDD_TRACE_BUF,1024);
                 break;
             }
 

@@ -108,26 +108,6 @@ HMER waitForHMERStatus()
 
 
 /**
- * @brief Internal routine that checks to see if retry is
- *        possible on an XSCOM error
- *
- * @return  true if retry is possible; false otherwise.
- */
-bool XSComRetry(const HMER i_hmer)
-{
-    bool l_retry = false;
-    switch (i_hmer.mXSComStatus)
-    {
-          case PIB::PIB_RESOURCE_OCCUPIED:
-            l_retry = true;
-            break;
-          default:
-            break;
-    }
-    return l_retry;
-}
-
-/**
  * @brief Internal routine that verifies the validity of input parameters
  * for an XSCOM access.
  *
@@ -494,8 +474,15 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
         {
             // print a trace message.. for debug purposes
             // incase we are stuck in a retry loop.
-            TRACFCOMP(g_trac_xscom,"xscomPerformOp - RESOUCE OCCUPIED LOOP Cntr = %d: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX", l_retryCtr, static_cast<uint64_t>(i_opType),i_xscomAddr,static_cast<uint64_t>(l_mmioAddr));
+            TRACFCOMP(g_trac_xscom,"xscomPerformOp - RESOURCE OCCUPIED LOOP Cntr = %d: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX, HMER=%.16X", l_retryCtr, static_cast<uint64_t>(i_opType), i_xscomAddr, static_cast<uint64_t>(l_mmioAddr), io_hmer.mRegister );
 
+            // we don't want to hang forever so break out after
+            //  an obscene amount of time
+            if( l_retryCtr > 500000 )
+            {
+                TRACFCOMP( g_trac_xscom, "Giving up, we're still locked..." );
+                break;
+            }
         }
     } while (io_hmer.mXSComStatus == PIB::PIB_RESOURCE_OCCUPIED);
 

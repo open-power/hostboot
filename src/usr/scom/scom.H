@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/scom/scom.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/scom/scom.H $                                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __SCOM_H
 #define __SCOM_H
 
@@ -31,13 +31,30 @@
 
 namespace SCOM
 {
-    enum ScomErrorMask
+/**
+ * @brief Indirect SCOM Status
+ */
+union IndirectScom_t
+{
+    uint64_t data64;
+    struct
     {
-        // checkf for complete bit .. bit 32
-        SCOM_IND_COMPLETE_MASK = 0x0000000080000000,
-        //check for bits 33-35  
-        SCOM_IND_ERROR_MASK =    0x0000000070000000
+        uint64_t :12;        //0:11
+        uint64_t addr:20;    //12:31
+        uint64_t done:1;     //32
+        uint64_t piberr:3;   //33:35
+        uint64_t userstat:4; //36:39
+        uint64_t :8;         //40:47
+        uint64_t data:16;    //48:63
     };
+};
+enum ScomErrorMask
+{
+    // checkf for complete bit .. bit 32
+    SCOM_IND_COMPLETE_MASK = 0x0000000080000000,
+    //check for bits 33-35
+    SCOM_IND_ERROR_MASK =    0x0000000070000000
+};
 
 
 
