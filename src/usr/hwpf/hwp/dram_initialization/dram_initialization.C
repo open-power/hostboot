@@ -435,7 +435,6 @@ void*    call_proc_pcie_config( void    *io_pArgs )
 //
 void*    call_mss_power_cleanup( void    *io_pArgs )
 {
-    errlHndl_t  l_err  =   NULL;
     IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -496,20 +495,27 @@ void*    call_mss_power_cleanup( void    *io_pArgs )
         const fapi::Target l_fapiMba1Target(TARGET_TYPE_MBA_CHIPLET,
                 (const_cast<TARGETING::Target*>(l_presMbas[1])));
         //  call the HWP with each fapi::Target
+        errlHndl_t  l_err  =   NULL;
         FAPI_INVOKE_HWP(l_err, mss_power_cleanup, l_fapiCentaurTarget,
                         l_fapiMba0Target, l_fapiMba1Target);
 
         if (l_err)
         {
+            // This is an indication that mss_power_cleanup was unable to
+            // perform all the cleanup procedures on this centaur.
+            // This procedure is designed to stop the clocks / power down
+            // non-functional centaurs/mbas, and throws an error if it cannot.
+            // It is possible for this to have happened before this step
+            // however, in the case of a garded centaur. Therefore
+            // we should note but ignore errors from this procedure.
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: mss_power_cleanup HWP returns error",
-                      l_err->reasonCode());
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
-            // Create IStep error log and cross reference error that occurred
-            l_stepError.addErrorDetails(l_err);
-            // Commit Error
-            errlCommit(l_err, HWPF_COMP_ID);
+                      "mss_power_cleanup HWP failed to perform"
+                      " cleanup on centaur: 0x%.8X, moving on to next"
+                      " centaur",
+                      l_currCentaurHuid);
+            // delete error
+            delete l_err;
+            l_err = NULL;
         }
         else
         {
