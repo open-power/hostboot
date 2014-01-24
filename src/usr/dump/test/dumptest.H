@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -122,12 +122,14 @@ class DumpTest: public CxxTest::TestSuite
 
         uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA, 64,  // 450000
                                 DUMP_TEST_SRC_DATA_AREA + 64, 64,
-                                DUMP_TEST_SRC_DATA_AREA + 192, 64,
+                                (0x8000000000000000 | DUMP_TEST_SRC_DATA_AREA)
+                                                      + 192, 64,
                                 DUMP_TEST_SRC_DATA_AREA + 256, 64};
 
 
         uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA, 64,   // 460000
-                                DUMP_TEST_DST_DATA_AREA + 64, 64,
+                                (0x8000000000000000 | DUMP_TEST_DST_DATA_AREA)
+                                                      + 64, 64,
                                 DUMP_TEST_DST_DATA_AREA + 256, 64,
                                 DUMP_TEST_DST_DATA_AREA + 512, 64};
 
@@ -164,21 +166,21 @@ class DumpTest: public CxxTest::TestSuite
 
         // results output data expected
         uint64_t result_data[] = {
-                      DUMP_TEST_SRC_DATA_AREA,
-                      DUMP_TEST_DST_DATA_AREA,
-                      64, 0,
+            0x8000000000000000|DUMP_TEST_SRC_DATA_AREA,
+            0x8000000000000000|DUMP_TEST_DST_DATA_AREA,
+            64, 0,
 
-                      DUMP_TEST_SRC_DATA_AREA +64,
-                      DUMP_TEST_DST_DATA_AREA +64,
-                      64, 0,
+            (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA) +64,
+            (0x8000000000000000|DUMP_TEST_DST_DATA_AREA) +64,
+            64, 0,
 
-                      DUMP_TEST_SRC_DATA_AREA+192,
-                      DUMP_TEST_DST_DATA_AREA+256,
-                      64, 0,
+            (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+192,
+            (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+256,
+            64, 0,
 
-                      DUMP_TEST_SRC_DATA_AREA+256,
-                      DUMP_TEST_DST_DATA_AREA+512,
-                      64, 0,
+            (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+256,
+            (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+512,
+            64, 0,
         };
 
         uint64_t *va_mapsrcTableAddr = 0;
@@ -389,20 +391,20 @@ class DumpTest: public CxxTest::TestSuite
 
         // results output data expected
         uint64_t result_data[] = {
-            DUMP_TEST_SRC_DATA_AREA+256,
-            DUMP_TEST_DST_DATA_AREA+1024, 64, 0,
+            (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+256,
+            (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+1024, 64, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+256+64,
-            DUMP_TEST_DST_DATA_AREA+1024+64, 32, 0,
+            (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+256+64,
+            (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+1024+64, 32, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+256+64+32,
-            DUMP_TEST_DST_DATA_AREA+1024+256, 32, 0,
+            (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+256+64+32,
+            (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+1024+256, 32, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+256+128,
-            DUMP_TEST_DST_DATA_AREA+1024+128, 64, 0,
+            (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+256+128,
+            (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+1024+128, 64, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+256+128+64,
-            DUMP_TEST_DST_DATA_AREA+1024+128+64, 64, 0,
+            (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+256+128+64,
+            (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+1024+128+64, 64, 0,
         };
 
         uint64_t *va_mapsrcTableAddr = 0;
@@ -710,27 +712,27 @@ class DumpTest: public CxxTest::TestSuite
 
 
         // results output data expected
-        uint64_t result_data[] = {
-            DUMP_TEST_SRC_DATA_AREA+1024,
-            DUMP_TEST_DST_DATA_AREA+2048,
-            16, 0,
+         uint64_t result_data[] = {
+             (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+1024,
+             (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+2048,
+             16, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+2048,
-            DUMP_TEST_DST_DATA_AREA+2048+16,
-            48, 0,
+             (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+2048,
+             (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+2048+16,
+             48, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+3072,
-            DUMP_TEST_DST_DATA_AREA+2048+128,
-            32, 0,
+             (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+3072,
+             (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+2048+128,
+             32, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+4096,
-            DUMP_TEST_DST_DATA_AREA+3072,
-            32, 0,
+             (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+4096,
+             (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+3072,
+             32, 0,
 
-            DUMP_TEST_SRC_DATA_AREA+4096+32,
-            DUMP_TEST_DST_DATA_AREA+3072+64,
-            128, 0,
-        };
+             (0x8000000000000000|DUMP_TEST_SRC_DATA_AREA)+4096+32,
+             (0x8000000000000000|DUMP_TEST_DST_DATA_AREA)+3072+64,
+             128, 0,
+         };
 
         do
         {
@@ -1184,14 +1186,16 @@ class DumpTest: public CxxTest::TestSuite
         uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(destTable);
 
         uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA, 64,  // 450000
-                                DUMP_TEST_SRC_DATA_AREA + 64, 64,
+                                (0x8000000000000000 | DUMP_TEST_SRC_DATA_AREA)
+                                                     + 64, 64,
                                 DUMP_TEST_SRC_DATA_AREA + 128, 64,
                                 DUMP_TEST_SRC_DATA_AREA + 192, 64};
 
 
         uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA+4096, 64,   // 4601000
                                 DUMP_TEST_DST_DATA_AREA + 4096 + 64, 64,
-                                DUMP_TEST_DST_DATA_AREA + 4096 + 128, 64,
+                                (0x8000000000000000 | DUMP_TEST_DST_DATA_AREA)
+                                                     + 4096 + 128, 64,
                                 DUMP_TEST_DST_DATA_AREA + 4096 + 192, 32};  // NOTE>> TOO SMALL of a space..
 
 
