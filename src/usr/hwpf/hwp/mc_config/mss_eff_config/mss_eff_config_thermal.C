@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.24 2013/12/20 15:43:30 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.25 2014/01/21 17:39:47 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -53,6 +53,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.25  | pardeik  |21-JAN-14| fixed default power curve values for CDIMM
+//         |          |         | removed unneeded comments
 //   1.24  | pardeik  |20-DEC-13| only get power curve attributes if custom dimm
 //   1.23  | pardeik  |02-DEC-13| enable supplier power curve attributes
 //   1.22  | pardeik  |18-NOV-13| rename attributes (eff to vpd)
@@ -112,10 +114,7 @@
 
 /*
 TODO ITEMS:
-
-Waiting for platinit attributes to enable sections in this procedure:
-1.  Call out error for CDIMM and lab VPD power curves when it makes sense
-2.  Update ISDIMM power table after hardware measurements are done
+1.  Update ISDIMM power table after hardware measurements are done (GA3)
 */
 
 //------------------------------------------------------------------------------
@@ -137,8 +136,9 @@ const uint8_t NUM_DIMMS = 2;
 const uint8_t NUM_RANKS = 4;
 const uint32_t ISDIMM_POWER_SLOPE_DEFAULT = 940;
 const uint32_t ISDIMM_POWER_INT_DEFAULT = 900;
-const uint32_t CDIMM_POWER_SLOPE_DEFAULT = 0x8240;
-const uint32_t CDIMM_POWER_INT_DEFAULT = 0x80CE;
+// Only use values here (not any valid bits or flag bits)
+const uint32_t CDIMM_POWER_SLOPE_DEFAULT = 0x0240;
+const uint32_t CDIMM_POWER_INT_DEFAULT = 0x00CE;
 // These are based on what was used when ISDIMM power values were taken from the
 // power calculator
 const uint8_t IDLE_DIMM_UTILIZATION = 0;
@@ -728,32 +728,7 @@ extern "C" {
 				   0x4000) == 0))
 				)
 			    {
-// TODO:  enable error reporting for this when it makes sense to do (after ship
-// level power curve data is known), remove warning message.  Log error and
-// allow IPL to continue and use the lab data if it is there.
 				FAPI_INF("WARNING:  power curve data is lab data, not ship level data. Using data anyways.");
-/*
-				power_slope_array[port][dimm] =
-				  CDIMM_POWER_SLOPE_DEFAULT;
-				power_int_array[port][dimm] =
-				  CDIMM_POWER_INT_DEFAULT;
-				power_slope2_array[port][dimm] =
-				  CDIMM_POWER_SLOPE_DEFAULT;
-				power_int2_array[port][dimm] =
-				  CDIMM_POWER_INT_DEFAULT;
-				FAPI_ERR("power curve data is lab data, not ship level data.  Use default values");
-				const fapi::Target & MEM_CHIP = target_chip;
-				uint32_t FFDC_DATA_1 = cdimm_master_power_slope;
-				uint32_t FFDC_DATA_2 =
-				  cdimm_master_power_intercept;
-				uint32_t FFDC_DATA_3 =
-				  cdimm_supplier_power_slope;
-				uint32_t FFDC_DATA_4 =
-				  cdimm_supplier_power_intercept;
-				FAPI_SET_HWP_ERROR
-				  (rc, RC_MSS_DIMM_POWER_CURVE_DATA_LAB);
-				if (rc) fapiLogError(rc);
-*/
 			    }
 			}
 			else

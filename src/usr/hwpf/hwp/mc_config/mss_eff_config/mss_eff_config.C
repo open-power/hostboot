@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.36 2014/01/13 19:57:59 bellows Exp $
+// $Id: mss_eff_config.C,v 1.37 2014/01/17 16:26:34 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,7 +44,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.35  | bellows  |13-JAN-14| Make VPD version available at mba level
+//   1.37  | bellows  |17-JAN-14| Fixed VPD version when only single drop
+//   1.36  | bellows  |13-JAN-14| Make VPD version available at mba level
 //   1.35  | asaetow  |13-JAN-14| Fixed ATTR_EFF_DRAM_DLL_PPD from SLOWEXIT to FASTEXIT.
 //         |          |         | Added comments and converted some attr to use enums.
 //   1.34  | bellows  |02-JAN-14| VPD attribute removal
@@ -664,7 +665,14 @@ fapi::ReturnCode mss_eff_config_get_spd_data(
     // Grab all DIMM/SPD data.
     do
     {
-        rc = fapiGetAssociatedDimms(i_target_mba, l_target_dimm_array);
+ //------------------------------------------------------------------------------
+// initialize vpd_version
+      for(l_cur_mba_port=0; l_cur_mba_port < PORT_SIZE ; l_cur_mba_port++)
+        for(l_cur_mba_dimm=0; l_cur_mba_dimm < DIMM_SIZE ; l_cur_mba_dimm++)
+          p_o_spd_data->vpd_version[l_cur_mba_port][l_cur_mba_dimm]=0xFFFFFFFF;
+//------------------------------------------------------------------------------
+
+       rc = fapiGetAssociatedDimms(i_target_mba, l_target_dimm_array);
         if(rc)
         {
             FAPI_ERR("Error retrieving assodiated dimms");

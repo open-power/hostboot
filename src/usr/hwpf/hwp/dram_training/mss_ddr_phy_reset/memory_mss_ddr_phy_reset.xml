@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,34 +21,93 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_ddr_phy_reset.xml,v 1.1 2013/06/19 18:27:43 bellows Exp $ -->
+<!-- $Id: memory_mss_ddr_phy_reset.xml,v 1.2 2014/01/16 20:55:42 mfred Exp $ -->
 <!-- For file ../../ipl/fapi/mss_ddr_phy_reset.C -->
 <!-- // *! OWNER NAME  : Mark Fredrickson  Email: mfred@us.ibm.com -->
 <!-- // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com -->
 
-<!-- Original Source for RC_MSS_DP18_0_PLL_FAILED_TO_LOCK memory_errors.xml -->
-  <hwpError>
-    <rc>RC_MSS_DP18_0_PLL_FAILED_TO_LOCK</rc>
-    <description>DP18  0x0C000 PLL failed to lock!  See lock status register at address: 0x8000C0000301143F</description>
+<hwpError>
+  <rc>RC_MSS_DP18_0_PLL_FAILED_TO_LOCK</rc>
+  <description>
+    mss_ddr_phy_reset: DP18  0x0C000 PLL failed to lock!
+    Value in DPHY01_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P0_0x8000C0000301143F
+      not as expected
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <callout>
+    <target>MBA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_IN_ERROR</target>
+  </gard>
 </hwpError>
 
-<!-- Original Source for RC_MSS_DP18_1_PLL_FAILED_TO_LOCK memory_errors.xml -->
-  <hwpError>
-    <rc>RC_MSS_DP18_1_PLL_FAILED_TO_LOCK</rc>
-    <description>DP18  0x1C000 PLL failed to lock!  See lock status register at address: 0x8001C0000301143F</description>
+<hwpError>
+  <rc>RC_MSS_DP18_1_PLL_FAILED_TO_LOCK</rc>
+  <description>
+    mss_ddr_phy_reset: DP18  0x1C000 PLL failed to lock!
+    Value in DPHY01_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P1_0x8001C0000301143F
+      not as expected
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <callout>
+    <target>MBA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_IN_ERROR</target>
+  </gard>
 </hwpError>
 
-<!-- Original Source for RC_MSS_AD32S_0_PLL_FAILED_TO_LOCK memory_errors.xml -->
-  <hwpError>
-    <rc>RC_MSS_AD32S_0_PLL_FAILED_TO_LOCK</rc>
-    <description>AD32S 0x0C001 PLL failed to lock!  See lock status register at address: 0x8000C0010301143F</description>
+<hwpError>
+  <rc>RC_MSS_AD32S_0_PLL_FAILED_TO_LOCK</rc>
+  <description>
+    mss_ddr_phy_reset: AD32S 0x0C001 PLL failed to lock!
+    Value in DPHY01_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P0_0x8000C0010301143F
+      not as expected
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <callout>
+    <target>MBA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_IN_ERROR</target>
+  </gard>
 </hwpError>
 
-<!-- Original Source for RC_MSS_AD32S_1_PLL_FAILED_TO_LOCK memory_errors.xml -->
-  <hwpError>
-    <rc>RC_MSS_AD32S_1_PLL_FAILED_TO_LOCK</rc>
-    <description>AD32S 0x1C001 PLL failed to lock!  See lock status register at address: 0x8001C0010301143F</description>
+<hwpError>
+  <rc>RC_MSS_AD32S_1_PLL_FAILED_TO_LOCK</rc>
+  <description>
+    mss_ddr_phy_reset: AD32S 0x1C001 PLL failed to lock!
+    Value in DPHY01_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P1_0x8001C0010301143F
+      not as expected
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <callout>
+    <target>MBA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_IN_ERROR</target>
+  </gard>
 </hwpError>
-
 
 </hwpErrors>

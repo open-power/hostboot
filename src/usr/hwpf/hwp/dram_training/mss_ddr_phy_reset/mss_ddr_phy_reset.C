@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr_phy_reset.C,v 1.26 2013/09/16 20:17:57 mwuu Exp $
+// $Id: mss_ddr_phy_reset.C,v 1.27 2014/01/16 20:54:48 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -427,6 +427,9 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 {
                     FAPI_ERR("One or more DP18 port 0 (0x0C000) PLL failed to lock!   Lock Status = %04X",dp_p0_lock_data.getHalfWord(3));
                     FAPI_ERR("DP18 PLL lock failed and this chip does not have the known DP18 lock bug.");
+                    const uint16_t & EXPECTED_STATUS = DP18_PLL_EXP_LOCK_STATUS;
+                    const uint16_t ACTUAL_STATUS = dp_p0_lock_data.getHalfWord(3);
+                    const fapi::Target & MBA_IN_ERROR = i_target;
                     FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_0_PLL_FAILED_TO_LOCK);
                     break;
                 }
@@ -447,6 +450,9 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 {
                     FAPI_ERR("One or more DP18 port 1 (0x1C000) PLL failed to lock!   Lock Status = %04X",dp_p1_lock_data.getHalfWord(3));
                     FAPI_ERR("DP18 PLL lock failed and this chip does not have the known DP18 lock bug.");
+                    const uint16_t & EXPECTED_STATUS = DP18_PLL_EXP_LOCK_STATUS;
+                    const uint16_t ACTUAL_STATUS = dp_p1_lock_data.getHalfWord(3);
+                    const fapi::Target & MBA_IN_ERROR = i_target;
                     FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_1_PLL_FAILED_TO_LOCK);
                     break;
                 }
@@ -459,6 +465,9 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
             if ( ad_p0_lock_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS )
             {
                 FAPI_ERR("One or more AD32S port 0 (0x0C001) PLL failed to lock!   Lock Status = %04X",ad_p0_lock_data.getHalfWord(3));
+                const uint16_t & EXPECTED_STATUS = AD32S_PLL_EXP_LOCK_STATUS;
+                const uint16_t ACTUAL_STATUS = ad_p0_lock_data.getHalfWord(3);
+                const fapi::Target & MBA_IN_ERROR = i_target;
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_AD32S_0_PLL_FAILED_TO_LOCK);
                 break;
             }
@@ -467,6 +476,9 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
             if ( ad_p1_lock_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS )
             {
                 FAPI_ERR("One or more AD32S port 1 (0x1C001) PLL failed to lock!   Lock Status = %04X",ad_p1_lock_data.getHalfWord(3));
+                const uint16_t & EXPECTED_STATUS = AD32S_PLL_EXP_LOCK_STATUS;
+                const uint16_t ACTUAL_STATUS = ad_p1_lock_data.getHalfWord(3);
+                const fapi::Target & MBA_IN_ERROR = i_target;
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_AD32S_1_PLL_FAILED_TO_LOCK);
                 break;
             }
@@ -1162,6 +1174,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: mss_ddr_phy_reset.C,v $
+Revision 1.27  2014/01/16 20:54:48  mfred
+Updates for passing more data to error handler.  From Mike Jones.
+
 Revision 1.26  2013/09/16 20:17:57  mwuu
 Cleanup of the calling functions so first fail will run unmask function.
 

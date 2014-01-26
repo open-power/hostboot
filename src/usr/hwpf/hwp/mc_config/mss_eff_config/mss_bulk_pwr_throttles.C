@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.16 2014/01/06 19:48:46 pardeik Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.18 2014/01/23 17:32:43 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -71,6 +71,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.18  | pardeik  |23-JAN-14| gerrit review updates to break out of for loop
+//   1.17  | pardeik  |21-JAN-14| updates to prevent a negative power limit
 //   1.16  | pardeik  |06-JAN-14| use max utiliation from MRW for MAX_UTIL
 //         |          |         | Use ATTR_MRW_MEM_THROTTLE_DENOMINATOR instead
 //         |          |         |  of ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR
@@ -176,6 +178,7 @@ extern "C" {
 	std::vector<fapi::Target> target_mba_array;
 	std::vector<fapi::Target> target_dimm_array;
 	uint32_t channel_pair_watt_target;
+	uint32_t channel_pair_watt_target_orig;
 	uint32_t throttle_n_per_mba;
 	uint32_t throttle_n_per_chip;
 	uint32_t throttle_d;
@@ -286,16 +289,36 @@ extern "C" {
 	{
 // Set channel pair power limit to whole CDIMM power limit (multiply by number
 // of MBAs used) and subtract off idle power for dimms on other MBA
+	    channel_pair_watt_target_orig = channel_pair_watt_target;
 	    channel_pair_watt_target = channel_pair_watt_target *
 	      num_mba_with_dimms;
 	    for (port=0; port < MAX_NUM_PORTS; port++)
 	    {
 		for (dimm=0; dimm < MAX_NUM_DIMMS; dimm++)
 		{
-		    channel_pair_watt_target = channel_pair_watt_target -
-		      ((num_mba_with_dimms - 1) *
-		       (power_int_array[port][dimm]));
+// Only subtract idle power of other MBA's dimms if less than the target wattage
+//   to prevent negative values for the limit
+		    if (
+			((num_mba_with_dimms - 1) * (power_int_array[port][dimm]))
+			<
+			channel_pair_watt_target
+			)
+		    {
+			channel_pair_watt_target = channel_pair_watt_target -
+			  ((num_mba_with_dimms - 1) *
+			   (power_int_array[port][dimm]));
+		    }
+		    else
+		    {
+			break;
+		    }
 		}
+	    }
+// check to see if calculated power limit is less than original power limit
+// if so then set them the same
+	    if (channel_pair_watt_target < channel_pair_watt_target_orig)
+	    {
+		channel_pair_watt_target = channel_pair_watt_target_orig;
 	    }
 	}
 

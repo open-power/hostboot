@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_stopclocks.C,v 1.15 2013/10/16 14:39:32 mfred Exp $
+// $Id: cen_stopclocks.C,v 1.16 2014/01/16 17:49:16 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_stopclocks.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -225,18 +225,9 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
             (!i_stop_tp_clks)    &&
             (!i_stop_vitl_clks))
         {
-            FAPI_INF("Specified input options are set to skip both the NEST and MEM chiplets, so there is nothing to do.  Returning.\n");
+            FAPI_INF("Specified input options are set to skip both the NEST and MEM chiplets, so there is nothing to do.  Returning.");
             break;
         }
-
-        if ((!i2_stop_nest_clks) && (i_stop_dram_rfrsh_clks))
-        {
-            FAPI_INF("Specified input options are incompatible.\n");
-            FAPI_INF("This procedure cannot stop the DRAM refresh clocks unless the NEST clocks are being stopped..\n");
-            break;
-        }
-
-
 
         //-----------------
         //   MEM Chiplet @@@ 03
@@ -266,7 +257,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Set flushmode_inhibit in Chiplet GP0
                 // multicast address "0x[xx]00 0005 WOR codepoint"   Data: bit(2) = 0b1  (0x2000 0000 0000 0000)
                 // MEM_GP0_OR_0x03000005
-                FAPI_DBG("Setting flushmode_inhibit in MEM chiplet GP0 Register (bit 2).\n");
+                FAPI_DBG("Setting flushmode_inhibit in MEM chiplet GP0 Register (bit 2).");
                 rc_ecmd |= scom_data.flushTo0();
                 rc_ecmd |= scom_data.setBit(GP0_FLUSHMODE_INHIBIT_BIT);
                 if (rc_ecmd)
@@ -286,7 +277,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Set force_align in Chiplet GP0
                 // multicast address "0x[xx]00 0005 WOR codepoint"   Data: bit(3) = 0b1  (0x1000 0000 0000 0000)   Cannot combine with previous step.
                 // MEM_GP0_OR_0x03000005
-                FAPI_DBG("Setting force_align in MEM chiplet GP0 register (bit 3).\n");
+                FAPI_DBG("Setting force_align in MEM chiplet GP0 register (bit 3).");
                 rc_ecmd |= scom_data.flushTo0();
                 rc_ecmd |= scom_data.setBit(GP0_FORCE_ALIGN_BIT);
                 if (rc_ecmd)
@@ -306,7 +297,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Write ClockControl, Scan Region Register, set all bits to zero prior clock stop
                 // multicast address 0x[xx]03 0007    Data:  0x0000 0000 0000 0000
                 // MEM_CLK_SCANSEL_0x03030007
-                FAPI_DBG("Writing Clock Control Scan Region Register to all zeros in MEM chiplet prior clock stop.\n");
+                FAPI_DBG("Writing Clock Control Scan Region Register to all zeros in MEM chiplet prior clock stop.");
                 rc_ecmd |= scom_data.flushTo0();
                 if (rc_ecmd)
                 {
@@ -329,7 +320,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Write ClockControl, Clock Region Register, Clock Stop command for MEM chiplet
                 // 0x0303 0006 Data: 0x8FE00E0000000000
                 // MEM_CLK_REGION_0x03030006
-                FAPI_DBG("Writing Clock Control Clock Region Register in MEM chiplet to stop the clocks.\n");
+                FAPI_DBG("Writing Clock Control Clock Region Register in MEM chiplet to stop the clocks.");
                 rc_ecmd |= scom_data.setDoubleWord(0, CLK_REGION_REG_DATA_TO_STOP_ALL);
                 if (rc_ecmd)
                 {
@@ -348,22 +339,27 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Read Clock Status Register (MEM chiplet)
                 // 0x0303 0008  Data: expected value: 0xFFFF FFFF FFFF FFFF
                 // MEM_CLK_STATUS_0x03030008
-                FAPI_DBG("Reading Clock Status Register in the MEM chiplet to see if clocks are stopped. Expected value = 0xFFFF FFFF FFFF FFFF.\n");
+                FAPI_DBG("Reading Clock Status Register in the MEM chiplet to see if clocks are stopped. Expected value = 0xFFFF FFFF FFFF FFFF.");
                 rc = fapiGetScom( i_target, MEM_CLK_STATUS_0x03030008, scom_data);
                 if (rc)
                 {
                     FAPI_ERR("Error reading MEM chiplet Clock Status Register.");
                     break;
                 }
-                if ( scom_data.getDoubleWord(0) != EXPECTED_CLOCK_STATUS )
+                uint64_t clock_status = scom_data.getDoubleWord(0);
+                if ( clock_status != EXPECTED_CLOCK_STATUS )
                 {
-                    FAPI_ERR("MEM chiplet clock status 0xFFFFFFFFFFFFFFFF was expected but read clock status = %16llX",scom_data.getDoubleWord(0));
-                    FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_CLOCK_STATUS);
+                    FAPI_ERR("MEM chiplet clock status 0x%016llX was expected but read clock status = 0x%016llX",
+                             EXPECTED_CLOCK_STATUS, clock_status);
+                    const uint64_t & EXPECTED_STATUS = EXPECTED_CLOCK_STATUS;
+                    const uint64_t & ACTUAL_STATUS = clock_status;
+                    const fapi::Target & MEMBUF_CHIP_IN_ERROR = i_target;
+                    FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_MEM_CLOCK_STATUS);
                     break;
                 }
                 else
                 {
-                    FAPI_INF("Expected clock status was read in MEM chiplet after stopping the clocks: %016llX ", EXPECTED_CLOCK_STATUS);
+                    FAPI_INF("Expected clock status was read in MEM chiplet after stopping the clocks: 0x%016llX ", EXPECTED_CLOCK_STATUS);
                 }
         
         
@@ -371,7 +367,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Reset MemReset Stablilty Control
                 // CFAM 0x13  bit(02) = 0
                 // CFAM_FSI_GP4_0x00001013
-                FAPI_DBG("Clearing CFAM FSI GP4 Register, bit 2 to reset MemReset Stablilty Control.\n");
+                FAPI_DBG("Clearing CFAM FSI GP4 Register, bit 2 to reset MemReset Stablilty Control.");
                 rc = fapiGetCfamRegister( i_target, CFAM_FSI_GP4_0x00001013, cfam_data);
                 if (rc)
                 {
@@ -396,7 +392,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Reset D3PHY PLL Control (Reset all D3PHY PLLs)
                 // CFAM 0x13  bit(04) = 0
                 // CFAM_FSI_GP4_0x00001013
-                FAPI_DBG("Clearing CFAM FSI GP4 Register, bit 4 to reset D3PHY PLL Control (Reset all D3PHY PLLs).\n");
+                FAPI_DBG("Clearing CFAM FSI GP4 Register, bit 4 to reset D3PHY PLL Control (Reset all D3PHY PLLs).");
                 rc = fapiGetCfamRegister( i_target, CFAM_FSI_GP4_0x00001013, cfam_data);
                 if (rc)
                 {
@@ -425,7 +421,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Does this make sense for Centaur?   (Centaur has no cores.)
                 // Multicast address: "0x[xx]00 0004  WAND codepoint" Data: bit(11) = 0b0   0xFFEF FFFF FFFF FFFF
                 // MEM_GP0_AND_0x03000004
-                FAPI_DBG("Clearing GP0 Register bit 11 in MEM chiplet to reset abist_mode_dc.\n");
+                FAPI_DBG("Clearing GP0 Register bit 11 in MEM chiplet to reset abist_mode_dc.");
                 rc_ecmd |= scom_data.flushTo1();
                 rc_ecmd |= scom_data.clearBit(GP0_ABIST_MODE_BIT);
                 if (rc_ecmd)
@@ -448,8 +444,8 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // assert perv fence GP0.63
                 // Multicast address: "0x[xx]00 0005  WOR codepoint"  bit(63) = 0b1  0x4000 0000 0000 0001  (Can be combined with previous step)
                 // MEM_GP0_OR_0x03000005
-                FAPI_DBG("Setting GP0 Register bit 1 in MEM chiplet to set synclk_muxsel (io_clk_sel).\n");
-                FAPI_DBG("Setting GP0 Register bit 63 in MEM chiplet to assert the pervasive fence.\n");
+                FAPI_DBG("Setting GP0 Register bit 1 in MEM chiplet to set synclk_muxsel (io_clk_sel).");
+                FAPI_DBG("Setting GP0 Register bit 63 in MEM chiplet to assert the pervasive fence.");
                 rc_ecmd |= scom_data.flushTo0();
                 rc_ecmd |= scom_data.setBit(GP0_SYNCCLK_MUXSEL_BIT);
                 rc_ecmd |= scom_data.setBit(GP0_PERV_FENCE_BIT);
@@ -471,7 +467,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Note: This action is probably un-needed for the MEM chiplet since it does not contain any EDRAM.
                 // Multicast address: "0x[xx]0F 0013  WAND codepoint"   bit(28) = 0b0   0xFFFF FFF7 FFFF FFFF
                 // MEM_GP3_AND_0x030F0013
-                FAPI_DBG("Clearing GP3 Register bit 28 in MEM chiplet to disable any EDRAM.\n");
+                FAPI_DBG("Clearing GP3 Register bit 28 in MEM chiplet to disable any EDRAM.");
                 rc_ecmd |= scom_data.flushTo1();
                 rc_ecmd |= scom_data.clearBit(GP3_EDRAM_ENABLE_BIT);
                 if (rc_ecmd)
@@ -491,7 +487,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // assert fence GP3.18
                 // Multicast address: "0x[xx]0F 0014  WOR codepoint"  bit(18) = 0b1   0x0000 2000 0000 0000
                 // MEM_GP3_OR_0x030F0014
-                FAPI_DBG("Setting GP3 Regsiter bit 18 in MEM chiplet to assert the fence.\n");
+                FAPI_DBG("Setting GP3 Regsiter bit 18 in MEM chiplet to assert the fence.");
                 rc_ecmd |= scom_data.flushTo0();
                 rc_ecmd |= scom_data.setBit(GP3_FENCE_EN_BIT);
                 if (rc_ecmd)
@@ -557,7 +553,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Set flushmode_inhibit in Chiplet GP0
                 // multicast address "0x[xx]00 0005 WOR codepoint"   Data: bit(2) = 0b1  (0x2000 0000 0000 0000)
                 // NEST_GP0_OR_0x02000005
-                FAPI_DBG("Setting flushmode_inhibit in NEST chiplet GP0 Register (bit 2).\n");
+                FAPI_DBG("Setting flushmode_inhibit in NEST chiplet GP0 Register (bit 2).");
                 rc_ecmd |= scom_data.flushTo0();
                 rc_ecmd |= scom_data.setBit(GP0_FLUSHMODE_INHIBIT_BIT);
                 if (rc_ecmd)
@@ -577,7 +573,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Set force_align in Chiplet GP0
                 // multicast address "0x[xx]00 0005 WOR codepoint"   Data: bit(3) = 0b1  (0x1000 0000 0000 0000)   Cannot combine with previous step.
                 // NEST_GP0_OR_0x02000005
-                FAPI_DBG("Setting force_align in NEST chiplet GP0 register (bit 3).\n");
+                FAPI_DBG("Setting force_align in NEST chiplet GP0 register (bit 3).");
                 rc_ecmd |= scom_data.flushTo0();
                 rc_ecmd |= scom_data.setBit(GP0_FORCE_ALIGN_BIT);
                 if (rc_ecmd)
@@ -597,7 +593,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Write ClockControl, Scan Region Register, set all bits to zero prior clock stop
                 // multicast address 0x[xx]03 0007    Data:  0x0000 0000 0000 0000
                 // NEST_CLK_SCANSEL_0x02030007
-                FAPI_DBG("Writing Clock Control Scan Region Register to all zeros in NEST chiplet prior clock stop.\n");
+                FAPI_DBG("Writing Clock Control Scan Region Register to all zeros in NEST chiplet prior clock stop.");
                 rc_ecmd |= scom_data.flushTo0();
                 if (rc_ecmd)
                 {
@@ -620,7 +616,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Write ClockControl, Clock Region Register, Clock Stop command for NEST chiplet
                 // 0x0203 0006  Data: 0x8FE00E0000000000
                 // NEST_CLK_REGION_0x02030006
-                FAPI_DBG("Writing Clock Control Clock Region Register in NEST chiplet to stop the clocks.\n");
+                FAPI_DBG("Writing Clock Control Clock Region Register in NEST chiplet to stop the clocks.");
                 if ( i_stop_dram_rfrsh_clks )
                 {
                     rc_ecmd |= scom_data.setDoubleWord(0, CLK_REGION_REG_DATA_TO_STOP_ALL);
@@ -648,42 +644,52 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // NEST_CLK_STATUS_0x02030008
                 if ( i_stop_dram_rfrsh_clks )
                 {
-                    FAPI_DBG("Reading Clock Status Register in the NEST chiplet to see if clocks are stopped. Expected value = 0xFFFF FFFF FFFF FFFF.\n");
+                    FAPI_DBG("Reading Clock Status Register in the NEST chiplet to see if clocks are stopped. Expected value = 0xFFFF FFFF FFFF FFFF.");
                     rc = fapiGetScom( i_target, NEST_CLK_STATUS_0x02030008, scom_data);
                     if (rc)
                     {
                         FAPI_ERR("Error reading NEST chiplet Clock Status Register.");
                         break;
                     }
-                    if ( scom_data.getDoubleWord(0) != EXPECTED_CLOCK_STATUS )
+                    uint64_t clock_status = scom_data.getDoubleWord(0);
+                    if ( clock_status != EXPECTED_CLOCK_STATUS )
                     {
-                        FAPI_ERR("NEST chiplet clock status 0xFFFFFFFFFFFFFFFF was expected but read clock status = %16llX",scom_data.getDoubleWord(0));
-                        FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_CLOCK_STATUS);
+                        FAPI_ERR("NEST chiplet clock status 0x%016llX was expected but read clock status = 0x%016llX",
+                                 EXPECTED_CLOCK_STATUS, clock_status);
+                        const uint64_t & EXPECTED_STATUS = EXPECTED_CLOCK_STATUS;
+                        const uint64_t & ACTUAL_STATUS = clock_status;
+                        const fapi::Target & MEMBUF_CHIP_IN_ERROR = i_target;
+                        FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_NEST_CLOCK_STATUS);
                         break;
                     }
                     else
                     {
-                        FAPI_INF("Expected clock status was read in NEST chiplet after stopping the clocks: %016llX ", EXPECTED_CLOCK_STATUS);
+                        FAPI_INF("Expected clock status was read in NEST chiplet after stopping the clocks: 0x%016llX ", EXPECTED_CLOCK_STATUS);
                     }
                 }
                 else
                 {
-                    FAPI_DBG("Reading Clock Status Register in the NEST chiplet to see if clocks are stopped. Expected value = 0xFFFF FF1F FFFF FFFF.\n");
+                    FAPI_DBG("Reading Clock Status Register in the NEST chiplet to see if clocks are stopped. Expected value = 0xFFFF FF1F FFFF FFFF.");
                     rc = fapiGetScom( i_target, NEST_CLK_STATUS_0x02030008, scom_data);
                     if (rc)
                     {
                         FAPI_ERR("Error reading NEST chiplet Clock Status Register.");
                         break;
                     }
-                    if ( scom_data.getDoubleWord(0) != EXPECTED_CLOCK_STATUS_W_REFRESH )
+                    uint64_t clock_status = scom_data.getDoubleWord(0);
+                    if ( clock_status != EXPECTED_CLOCK_STATUS_W_REFRESH )
                     {
-                        FAPI_ERR("NEST chiplet clock status 0xFFFFFF1FFFFFFFFF was expected but read clock status = %16llX",scom_data.getDoubleWord(0));
-                        FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_CLOCK_STATUS);
+                        FAPI_ERR("NEST chiplet clock status 0x%016llX was expected but read clock status = 0x%016llX",
+                                 EXPECTED_CLOCK_STATUS_W_REFRESH, clock_status);
+                        const uint64_t & EXPECTED_STATUS = EXPECTED_CLOCK_STATUS_W_REFRESH;
+                        const uint64_t & ACTUAL_STATUS = clock_status;
+                        const fapi::Target & MEMBUF_CHIP_IN_ERROR = i_target;
+                        FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_NEST_CLOCK_STATUS);
                         break;
                     }
                     else
                     {
-                        FAPI_INF("Expected clock status was read in NEST chiplet after stopping the clocks: %016llX ", EXPECTED_CLOCK_STATUS_W_REFRESH);
+                        FAPI_INF("Expected clock status was read in NEST chiplet after stopping the clocks: 0x%016llX ", EXPECTED_CLOCK_STATUS_W_REFRESH);
                     }
                 }
        
@@ -695,7 +701,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // Does this make sense for Centaur?   (Centaur has no cores.)
                 // Multicast address: "0x[xx]00 0004  WAND codepoint" Data: bit(11) = 0b0   0xFFEF FFFF FFFF FFFF
                 // NEST_GP0_AND_0x02000004
-                FAPI_DBG("Clearing GP0 Register bit 11 in NEST chiplet to reset abist_mode_dc.\n");
+                FAPI_DBG("Clearing GP0 Register bit 11 in NEST chiplet to reset abist_mode_dc.");
                 rc_ecmd |= scom_data.flushTo1();
                 rc_ecmd |= scom_data.clearBit(GP0_ABIST_MODE_BIT);
                 if (rc_ecmd)
@@ -718,8 +724,8 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // assert perv fence GP0.63
                 // Multicast address: "0x[xx]00 0005  WOR codepoint"  bit(63) = 0b1  0x4000 0000 0000 0001  (Can be combined with previous step)
                 // NEST_GP0_OR_0x02000005
-                FAPI_DBG("Setting GP0 Register bit 1 in NEST chiplet to set synclk_muxsel (io_clk_sel).\n");
-                FAPI_DBG("Setting GP0 Register bit 63 in NEST chiplet to assert the pervasive fence.\n");
+                FAPI_DBG("Setting GP0 Register bit 1 in NEST chiplet to set synclk_muxsel (io_clk_sel).");
+                FAPI_DBG("Setting GP0 Register bit 63 in NEST chiplet to assert the pervasive fence.");
                 rc_ecmd |= scom_data.flushTo0();
                 rc_ecmd |= scom_data.setBit(GP0_SYNCCLK_MUXSEL_BIT);
                 rc_ecmd |= scom_data.setBit(GP0_PERV_FENCE_BIT);
@@ -743,7 +749,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // NEST_GP3_AND_0x020F0013
                 if ( i_stop_dram_rfrsh_clks )
                 {
-                    FAPI_DBG("Clearing GP3 Register bit 28 in NEST chiplet to disable any EDRAM.\n");
+                    FAPI_DBG("Clearing GP3 Register bit 28 in NEST chiplet to disable any EDRAM.");
                     rc_ecmd |= scom_data.flushTo1();
                     rc_ecmd |= scom_data.clearBit(GP3_EDRAM_ENABLE_BIT);
                     if (rc_ecmd)
@@ -764,7 +770,7 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
                 // assert fence GP3.18
                 // Multicast address: "0x[xx]0F 0014  WOR codepoint"  bit(18) = 0b1   0x0000 2000 0000 0000
                 // NEST_GP3_OR_0x020F0014
-                FAPI_DBG("Setting GP3 Regsiter bit 18 in NEST chiplet to assert the fence.\n");
+                FAPI_DBG("Setting GP3 Regsiter bit 18 in NEST chiplet to assert the fence.");
                 rc_ecmd |= scom_data.flushTo0();
                 rc_ecmd |= scom_data.setBit(GP3_FENCE_EN_BIT);
                 if (rc_ecmd)
@@ -931,22 +937,27 @@ fapi::ReturnCode cen_stopclocks(const fapi::Target & i_target,
             // Read Clock Status Register (TP chiplet)
             // 0x0103 0008  Data: expected value: FFFFFFFFFFFFFFFF
             // TP_CLK_STATUS_0x01030008
-            FAPI_DBG("Reading Clock Status Register in the TP chiplet to see if clocks are stopped. Expected value = %016llX.", EXPECTED_CLOCK_STATUS);
+            FAPI_DBG("Reading Clock Status Register in the TP chiplet to see if clocks are stopped. Expected value = 0x%016llX.", EXPECTED_CLOCK_STATUS);
             rc = fapiGetScom( i_target, TP_CLK_STATUS_0x01030008, scom_data);
             if (rc)
             {
                 FAPI_ERR("Error reading TP chiplet Clock Status Register.");
                 break;
             }
-            if ( scom_data.getDoubleWord(0) != EXPECTED_CLOCK_STATUS )
+            uint64_t clock_status = scom_data.getDoubleWord(0);
+            if ( clock_status != EXPECTED_CLOCK_STATUS )
             {
-                FAPI_ERR("TP chiplet clock status %016llX was expected but read clock status = %016llX.",EXPECTED_CLOCK_STATUS,scom_data.getDoubleWord(0));
-                FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_CLOCK_STATUS);
+                FAPI_ERR("TP chiplet clock status 0x%016llX was expected but read clock status = 0x%016llX.",
+                         EXPECTED_CLOCK_STATUS, clock_status);
+                const uint64_t & EXPECTED_STATUS = EXPECTED_CLOCK_STATUS;
+                const uint64_t & ACTUAL_STATUS = clock_status;
+                const fapi::Target & MEMBUF_CHIP_IN_ERROR = i_target;
+                FAPI_SET_HWP_ERROR(rc, RC_MSS_UNEXPECTED_TP_CLOCK_STATUS);
                 break;
             }
             else
             {
-                FAPI_INF("Expected clock status was read in TP chiplet after stopping the clocks: %016llX ", EXPECTED_CLOCK_STATUS);
+                FAPI_INF("Expected clock status was read in TP chiplet after stopping the clocks: 0x%016llX ", EXPECTED_CLOCK_STATUS);
             }
 
 
@@ -1125,6 +1136,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_stopclocks.C,v $
+Revision 1.16  2014/01/16 17:49:16  mfred
+Updates for error msgs, error handling, and removing newline chars from msgs.  From Mike Jones.
+
 Revision 1.15  2013/10/16 14:39:32  mfred
 Set the FSI shifter pulse width before stopping the TP or VITL clocks.
 

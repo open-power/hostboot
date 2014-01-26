@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,15 +21,48 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_cen_stopclocks.xml,v 1.1 2013/06/19 18:27:32 bellows Exp $ -->
+<!-- $Id: memory_cen_stopclocks.xml,v 1.2 2014/01/16 17:50:23 mfred Exp $ -->
 <!-- For file ../../ipl/fapi/cen_stopclocks.C -->
 <!-- // *! OWNER NAME  : Mark Fredrickson  Email: mfred@us.ibm.com -->
 <!-- // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com -->
 
-<!-- Original Source for RC_MSS_UNEXPECTED_CLOCK_STATUS memory_errors.xml -->
-  <hwpError>
-    <rc>RC_MSS_UNEXPECTED_CLOCK_STATUS</rc>
-    <description>Unexpected clock status!  See previous error message for details.</description>
+<hwpError>
+  <rc>RC_MSS_UNEXPECTED_MEM_CLOCK_STATUS</rc>
+  <description>
+    cen_stopclocks got unexpected clock status in MEM_CLK_STATUS_0x03030008
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <callout>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_UNEXPECTED_NEST_CLOCK_STATUS</rc>
+  <description>
+    cen_stopclocks got unexpected clock status in NEST_CLK_STATUS_0x02030008
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <callout>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_UNEXPECTED_TP_CLOCK_STATUS</rc>
+  <description>
+    cen_stopclocks got unexpected clock status in TP_CLK_STATUS_0x01030008
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <callout>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
 
 <!-- Add some header comments for BACKUP and SCREEN. -->
