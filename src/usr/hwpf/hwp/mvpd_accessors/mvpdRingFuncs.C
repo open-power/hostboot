@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mvpdRingFuncs.C,v 1.7 2013/10/10 19:40:07 maploetz Exp $
+// $Id: mvpdRingFuncs.C,v 1.8 2014/01/26 12:57:15 whs Exp $
 /**
  *  @file mvpdRingFuncs.C
  *
@@ -44,24 +44,24 @@ using   namespace   fapi;
 
 // functions internal to this file
 // these functions are common for both mvpdRingFunc and mbvpdRingFunc
-fapi::ReturnCode validateRingHeader( CompressedScanData * i_pRing,
+fapi::ReturnCode mvpdValidateRingHeader( CompressedScanData * i_pRing,
                                      uint8_t              i_chipletId,
                                      uint8_t              i_ringId,
                                      uint32_t             i_ringBufsize);
 
-fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
+fapi::ReturnCode mvpdRingFuncFind( const uint8_t   i_chipletId,
                                const uint8_t       i_ringId,
                                uint8_t           * i_pRecordBuf,
                                uint32_t            i_recordBufLen,
                                uint8_t           * &o_rRingBuf,
                                uint32_t            &o_rRingBufsize);
 
-fapi::ReturnCode ringFuncGet ( uint8_t     *i_pRing,
+fapi::ReturnCode mvpdRingFuncGet ( uint8_t *i_pRing,
                                uint32_t     i_ringLen,
                                uint8_t     *i_pCallerRingBuf,
                                uint32_t    &io_rCallerRingBufLen);
 
-fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
+fapi::ReturnCode mvpdRingFuncSet ( uint8_t *i_pRecordBuf,
                                uint32_t     i_recordLen,
                                uint8_t     *i_pRing,
                                uint32_t     i_ringLen,
@@ -195,7 +195,7 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
             }
 
             // Validate ring header to protect vpd
-            l_fapirc =  validateRingHeader(
+            l_fapirc =  mvpdValidateRingHeader(
                          reinterpret_cast<CompressedScanData *>(i_pRingBuf),
                          i_chipletId,
                          i_ringId,
@@ -247,7 +247,7 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
         // find ring in the record. It is an error if not there for a "get".
         // Its ok if not there for a "set". The ring will be added.
         // l_ringLen set to 0 if not there with l_pRing at the start of padding.
-        l_fapirc = ringFuncFind (i_chipletId,
+        l_fapirc = mvpdRingFuncFind (i_chipletId,
                                      i_ringId,
                                      l_recordBuf,
                                      l_recordLen,
@@ -255,7 +255,7 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
                                      l_ringLen);
         if ( l_fapirc )
         {
-            FAPI_ERR("mvpdRingFunc: ringFuncFind failed rc=0x%x",
+            FAPI_ERR("mvpdRingFunc: mvpdRingFuncFind failed rc=0x%x",
                      static_cast<uint32_t>(l_fapirc));
             //  break out with fapirc
             break;
@@ -274,13 +274,13 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
             }
 
             // copy ring back to caller's buffer
-            l_fapirc = ringFuncGet ( l_pRing,
+            l_fapirc = mvpdRingFuncGet ( l_pRing,
                                          l_ringLen,
                                          i_pRingBuf,
                                          io_rRingBufsize);
             if ( l_fapirc )
             {
-                FAPI_ERR("mvpdRingFunc: ringFuncGet failed rc=0x%x",
+                FAPI_ERR("mvpdRingFunc: mvpdRingFuncGet failed rc=0x%x",
                      static_cast<uint32_t>(l_fapirc));
                 //  break out with fapirc
                 break;
@@ -289,7 +289,7 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
         } else {     // set operation
 
             // update record with caller's ring
-            l_fapirc = ringFuncSet ( l_recordBuf,
+            l_fapirc = mvpdRingFuncSet ( l_recordBuf,
                                          l_recordLen,
                                          l_pRing,
                                          l_ringLen,
@@ -297,7 +297,7 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
                                          io_rRingBufsize);
             if ( l_fapirc )
             {
-                FAPI_ERR("mvpdRingFunc: ringFuncSet failed rc=0x%x",
+                FAPI_ERR("mvpdRingFunc: mvpdRingFuncSet failed rc=0x%x",
                      static_cast<uint32_t>(l_fapirc));
                 //  break out with fapirc
                 break;
@@ -374,7 +374,8 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
                                       l_recordLen );
         if (l_fapirc)
         {
-            FAPI_ERR("mbvpdRingFunc:fapiGetMBvpdField failed to get buffer size");
+            FAPI_ERR("mbvpdRingFunc:fapiGetMBvpdField failed"
+                         " to get buffer size");
             //  break out with fapirc
             break;
         }
@@ -400,7 +401,7 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
         }
 
         // find ring in the record. It is an error if not there for a "get".
-        l_fapirc = ringFuncFind ( i_chipletId,
+        l_fapirc = mvpdRingFuncFind ( i_chipletId,
                                   i_ringId,
                                   l_recordBuf,
                                   l_recordLen,
@@ -408,7 +409,7 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
                                   l_ringLen);
         if (l_fapirc)
         {
-            FAPI_ERR("mbvpdRingFunc: ringFuncFind failed rc=0x%x",
+            FAPI_ERR("mbvpdRingFunc: mvpdRingFuncFind failed rc=0x%x",
                      static_cast<uint32_t>(l_fapirc));
             //  break out with fapirc
             break;
@@ -427,13 +428,13 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
             }
 
             // copy ring back to caller's buffer
-            l_fapirc = ringFuncGet ( l_pRing,
+            l_fapirc = mvpdRingFuncGet ( l_pRing,
                                      l_ringLen,
                                      i_pRingBuf,
                                      io_rRingBufsize);
             if (l_fapirc)
             {
-                FAPI_ERR("mbvpdRingFunc: ringFuncGet failed rc=0x%x",
+                FAPI_ERR("mbvpdRingFunc: mvpdRingFuncGet failed rc=0x%x",
                      static_cast<uint32_t>(l_fapirc));
                 //  break out with fapirc
                 break;
@@ -462,14 +463,14 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
 
 
 //******************************************************************************
-// ringFuncFind: step through the record looking at rings for a match.
+// mvpdRingFuncFind: step through the record looking at rings for a match.
 // o_rpRing returns a pointer to the ring if it is there in the record
 //          if not there, returns a pointer to the start of the padding after
 //          the last ring.
 // o_rRingLen returns the number of bytes in the ring (header and data)
 //          Will be 0 if ring not found.
 //******************************************************************************
-fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
+fapi::ReturnCode mvpdRingFuncFind( const uint8_t    i_chipletId,
                                 const uint8_t       i_ringId,
                                 uint8_t           * i_pRecordBuf,
                                 uint32_t            i_recordBufLen,
@@ -486,7 +487,7 @@ fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
     o_rpRing=NULL;
     o_rRingLen=0;
 
-    FAPI_DBG("ringFuncFind: entry chipletId=0x%x, ringId=0x%x ",
+    FAPI_DBG("mvpdRingFuncFind: entry chipletId=0x%x, ringId=0x%x ",
              i_chipletId,
              i_ringId  );
 
@@ -500,7 +501,7 @@ fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
         //  First byte in record should be the version number, skip
         //      over this.
         //
-        FAPI_DBG( "ringFuncFind: record version = 0x%x", *l_pRing );
+        FAPI_DBG( "mvpdRingFuncFind: record version = 0x%x", *l_pRing );
         l_pRing++;
         l_offset    =   0;
 
@@ -515,7 +516,7 @@ fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
             //  Check magic key to make sure this is a valid record.
             if ( FAPI_BE32TOH(l_pScanData->iv_magic) != RS4_MAGIC )
             {
-                FAPI_DBG("ringFuncFind:Header 0x%x offset 0x%x,end of list",
+                FAPI_DBG("mvpdRingFuncFind:Header 0x%x offset 0x%x,end of list",
                             FAPI_BE32TOH(l_pScanData->iv_magic),
                             l_offset  );
                 //  TODO: RTC 51917 how to tell the end of the list? Assume that
@@ -528,7 +529,8 @@ fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
                 break;
             }
             //  dump record info for debug
-            FAPI_DBG("ringFuncFind:%d ringId=0x%x chipletId=0x%x ringlen=0x%x size=0x%x",
+            FAPI_DBG("mvpdRingFuncFind:%d ringId=0x%x chipletId=0x%x"
+                        " ringlen=0x%x size=0x%x",
                         l_offset,
                         l_pScanData->iv_ringId,
                         l_pScanData->iv_chipletId,
@@ -539,7 +541,8 @@ fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
             if (    (l_pScanData->iv_ringId == i_ringId)
                  && (l_pScanData->iv_chipletId == i_chipletId) )
             {
-                FAPI_DBG( "ringFuncFind: Found it: ring=0x%x, chiplet=0x%x, ringlen=0x%x",
+                FAPI_DBG( "mvpdRingFuncFind: Found it: ring=0x%x, chiplet=0x%x,"
+                          " ringlen=0x%x",
                           i_ringId,
                           i_chipletId,
                           FAPI_BE32TOH(l_pScanData->iv_length) );
@@ -579,9 +582,11 @@ fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
     }  while ( 0 );
 
 
-
-    FAPI_DBG("ringFuncFind: exit *ring= 0x%p size=0x%x RC=0x%x",
-                          o_rpRing,
+    FAPI_DBG("mvpdRingFuncFind: exit *ring= 0x%p", o_rpRing);
+    FAPI_IMP("mvpdRingFuncFind: exit chipletId=0x%x, ringId=0x%x size=0x%x"
+                          " rc=0x%x",
+                          i_chipletId,
+                          i_ringId,
                           o_rRingLen,
                           static_cast<uint32_t>(l_fapirc) );
 
@@ -589,9 +594,9 @@ fapi::ReturnCode ringFuncFind( const uint8_t    i_chipletId,
 }
 
 //******************************************************************************
-// validateRingHeader
+// mvpdValidateRingHeader
 //******************************************************************************
-fapi::ReturnCode validateRingHeader( CompressedScanData * i_pRingBuf,
+fapi::ReturnCode mvpdValidateRingHeader( CompressedScanData * i_pRingBuf,
                                      uint8_t              i_chipletId,
                                      uint8_t              i_ringId,
                                      uint32_t             i_ringBufsize)
@@ -610,9 +615,9 @@ fapi::ReturnCode validateRingHeader( CompressedScanData * i_pRingBuf,
 }
 
 //******************************************************************************
-// ringFuncGet: copy the ring back to the caller
+// mvpdRingFuncGet: copy the ring back to the caller
 //******************************************************************************
-fapi::ReturnCode ringFuncGet ( uint8_t     *i_pRing,
+fapi::ReturnCode mvpdRingFuncGet ( uint8_t     *i_pRing,
                                uint32_t     i_ringLen,
                                uint8_t     *i_pCallerRingBuf,
                                uint32_t    &io_rCallerRingBufLen)
@@ -630,7 +635,7 @@ fapi::ReturnCode ringFuncGet ( uint8_t     *i_pRing,
         //  check if we have enough space
         if ( io_rCallerRingBufLen < i_ringLen )
         {
-            FAPI_ERR( "ringFuncGet: output buffer too small:  0x%x < 0x%x",
+            FAPI_ERR( "mvpdRingFuncGet: output buffer too small:  0x%x < 0x%x",
                           io_rCallerRingBufLen,
                           i_ringLen
                           );
@@ -644,7 +649,7 @@ fapi::ReturnCode ringFuncGet ( uint8_t     *i_pRing,
             break;
         }
        //  we're good, copy data into the passed-in buffer
-       FAPI_DBG( "ringFuncGet: memcpy 0x%p 0x%p 0x%x",
+       FAPI_DBG( "mvpdRingFuncGet: memcpy 0x%p 0x%p 0x%x",
                     i_pCallerRingBuf,
                     i_pRing,
                     i_ringLen );
@@ -653,7 +658,7 @@ fapi::ReturnCode ringFuncGet ( uint8_t     *i_pRing,
 
    }  while (0);
 
-   FAPI_DBG( "ringFuncGet: exit bufsize= 0x%x rc= 0x%x",
+   FAPI_DBG( "mvpdRingFuncGet: exit bufsize= 0x%x rc= 0x%x",
                           io_rCallerRingBufLen,
                           static_cast<uint32_t>(l_fapirc) );
 
@@ -661,9 +666,9 @@ fapi::ReturnCode ringFuncGet ( uint8_t     *i_pRing,
 }
 
 //******************************************************************************
-// ringFuncSet: update the record with the caller's ring.
+// mvpdRingFuncSet: update the record with the caller's ring.
 //******************************************************************************
-fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
+fapi::ReturnCode mvpdRingFuncSet ( uint8_t     *i_pRecordBuf,
                                uint32_t     i_recordLen,
                                uint8_t     *i_pRing,
                                uint32_t     i_ringLen,
@@ -676,7 +681,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
     uint32_t         l_len = 0;
     uint8_t          *l_pRingEnd; // pointer into record to start of pad at end
 
-    FAPI_DBG( "ringFuncSet: pRing=0x%p Len=0x%x pCaller=0x%p Len=0x%x",
+    FAPI_DBG( "mvpdRingFuncSet: pRing=0x%p rLen=0x%x pCaller=0x%p cLen=0x%x",
                        i_pRing,
                        i_ringLen,
                        i_pCallerRingBuf,
@@ -689,7 +694,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing;
             l_fr = i_pCallerRingBuf;
             l_len = i_callerRingBufLen;
-            FAPI_DBG( "ringFuncSet: update in place-memcpy 0x%p 0x%p 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: update in place-memcpy 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -700,7 +705,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
         }
 
         // will need the end for shifting... look for something invalid
-        l_fapirc = ringFuncFind (0x00,
+        l_fapirc = mvpdRingFuncFind (0x00,
                                      0x00,
                                      i_pRecordBuf,
                                      i_recordLen,
@@ -708,12 +713,12 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
                                      l_len);
         if ( l_fapirc )
         {
-            FAPI_ERR("ringFuncSet: ringFuncFind failed rc=0x%x",
+            FAPI_ERR("mvpdRingFuncSet: mvpdRingFuncFind failed rc=0x%x",
                      static_cast<uint32_t>(l_fapirc));
             //  break out with fapirc
             break;
         }
-        FAPI_DBG( "ringFuncSet: end= 0x%p",
+        FAPI_DBG( "mvpdRingFuncSet: end= 0x%p",
                                  l_pRingEnd);
 
         // if not there, then append if it fits
@@ -721,7 +726,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
         {
             if (l_pRingEnd+i_callerRingBufLen > i_pRecordBuf+i_recordLen)
             {
-          FAPI_ERR( "ringFuncSet: not enough room to append ");
+          FAPI_ERR( "mvpdRingFuncSet: not enough room to append ");
                 FAPI_SET_HWP_ERROR(l_fapirc,
                                  RC_MVPD_RING_FUNC_INSUFFICIENT_RECORD_SPACE );
                 //  break out of do block with fapi rc set
@@ -730,7 +735,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing;
             l_fr = i_pCallerRingBuf;
             l_len = i_callerRingBufLen;
-            FAPI_DBG( "ringFuncSet: append-memcpy 0x%p 0x%p 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: append-memcpy 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -746,7 +751,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing;
             l_fr = i_pCallerRingBuf;
             l_len = i_callerRingBufLen;
-            FAPI_DBG( "ringFuncSet: shrink-memcpy 0x%p 0x%p 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: shrink-memcpy 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -755,7 +760,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing+i_callerRingBufLen;
             l_fr = i_pRing+i_ringLen;
             l_len = (l_pRingEnd)-(i_pRing+i_ringLen);
-            FAPI_DBG( "ringFuncSet: shrink-memmove 0x%p 0x%p 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: shrink-memmove 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -763,7 +768,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
 
             l_to = (l_pRingEnd)-(i_ringLen-i_callerRingBufLen);
             l_len = i_ringLen-i_callerRingBufLen;
-            FAPI_DBG( "ringFuncSet: shrink-memset 0x%p 0x%x 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: shrink-memset 0x%p 0x%x 0x%x",
                        l_to,
                        0x00,
                        l_len);
@@ -781,7 +786,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
             if ((l_pRingEnd + (i_callerRingBufLen - i_ringLen))  >
                 (i_pRecordBuf + i_recordLen))
             {
-                FAPI_ERR( "ringFuncSet: not enough room to insert ");
+                FAPI_ERR( "mvpdRingFuncSet: not enough room to insert ");
                 FAPI_SET_HWP_ERROR(l_fapirc,
                                  RC_MVPD_RING_FUNC_INSUFFICIENT_RECORD_SPACE );
                 //  break out of do block with fapi rc set
@@ -791,7 +796,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing+i_callerRingBufLen;
             l_fr = i_pRing+i_ringLen;
             l_len = l_pRingEnd-(i_pRing+i_ringLen);
-            FAPI_DBG( "ringFuncSet: insert-memmove 0x%p 0x%p 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: insert-memmove 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -800,7 +805,7 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
             l_to = i_pRing;
             l_fr = i_pCallerRingBuf;
             l_len = i_callerRingBufLen;
-            FAPI_DBG( "ringFuncSet: insert-memcpy 0x%p 0x%p 0x%x",
+            FAPI_DBG( "mvpdRingFuncSet: insert-memcpy 0x%p 0x%p 0x%x",
                        l_to,
                        l_fr,
                        l_len);
@@ -809,11 +814,11 @@ fapi::ReturnCode ringFuncSet ( uint8_t     *i_pRecordBuf,
             // break out successful
             break;
         }
-        FAPI_ERR( "ringFuncSet: shouldn't get to here" );
+        FAPI_ERR( "mvpdRingFuncSet: shouldn't get to here" );
 
     } while (0);
 
-    FAPI_DBG( "ringFuncSet: exit  rc= 0x%x",
+    FAPI_DBG( "mvpdRingFuncSet: exit  rc= 0x%x",
                           static_cast<uint32_t>(l_fapirc) );
 
    return l_fapirc;
