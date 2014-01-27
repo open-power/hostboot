@@ -33,6 +33,7 @@
 #include <targeting/common/targetservice.H>
 #include <util/align.H>
 #include <util/crc32.H>
+#include <util/misc.H>
 #include <errno.h>
 #include <pnor/pnorif.H>
 #include <pnor/ecc.H>
@@ -1803,9 +1804,10 @@ namespace SBE
             }
 
             // Check if in simics
-            // @todo RTC 94883 - Update this check with a magic instruction
-            if ( io_sbeState.seeprom_0_ver.struct_version ==
-                 SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+            if ( ( io_sbeState.seeprom_0_ver.struct_version ==
+                   SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+                 && ( Util::isSimicsRunning() )
+               )
             {
                 isSimics_check = true;
             }
@@ -1851,9 +1853,10 @@ namespace SBE
             }
 
             // Check if in simics
-            // @todo RTC 94883 - Update this check with a magic instruction
-            if ( io_sbeState.seeprom_1_ver.struct_version ==
-                 SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+            if ( ( io_sbeState.seeprom_1_ver.struct_version ==
+                   SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+                 && ( Util::isSimicsRunning() )
+               )
             {
                 isSimics_check = true;
             }
