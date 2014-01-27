@@ -45,6 +45,7 @@ namespace HWAS
         RC_SYSAVAIL_NO_CORES_FUNC           = HWAS_COMP_ID | 0x05,
         RC_SYSAVAIL_NO_MEMORY_FUNC          = HWAS_COMP_ID | 0x06,
         RC_SYSAVAIL_NO_PROCS_FUNC           = HWAS_COMP_ID | 0x07,
+        RC_SYSAVAIL_NO_NODES_FUNC           = HWAS_COMP_ID | 0x08,
     };
 };
 

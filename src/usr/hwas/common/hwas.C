@@ -769,19 +769,62 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
 {
     errlHndl_t l_errl = NULL;
     HWAS_INF("checkMinimumHardware entry");
+    uint32_t l_commonPlid = 0;
 
     do
     {
         //*********************************************************************/
         //  Common present and functional hardware checks.
         //*********************************************************************/
-        uint32_t l_commonPlid = 0;
 
-        // top 'starting' point - TopLevelTarget if no i_node
+        PredicateHwas l_present;
+        l_present.present(true);
+        PredicateIsFunctional l_functional;
+
+        // top 'starting' point - use first node if no i_node given (hostboot)
         Target *pTop;
         if (i_node == NULL)
         {
-            targetService().getTopLevelTarget(pTop);
+            Target *pSys;
+            targetService().getTopLevelTarget(pSys);
+            PredicateCTM l_predEnc(CLASS_ENC);
+            PredicatePostfixExpr l_nodeFilter;
+            l_nodeFilter.push(&l_predEnc).push(&l_functional).And();
+            TargetHandleList l_nodes;
+            targetService().getAssociated( l_nodes, pSys,
+                TargetService::CHILD, TargetService::IMMEDIATE, &l_nodeFilter );
+
+            if (l_nodes.empty())
+            { // no functional nodes, get out now
+                HWAS_ERR("Insufficient HW to continue IPL: (no func nodes)");
+                /*@
+                 * @errortype
+                 * @severity          ERRL_SEV_UNRECOVERABLE
+                 * @moduleid          MOD_CHECK_MIN_HW
+                 * @reasoncode        RC_SYSAVAIL_NO_NODES_FUNC
+                 * @devdesc           checkMinimumHardware found no functional
+                 *                    nodes on the system
+                 */
+                l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                    MOD_CHECK_MIN_HW,
+                                    RC_SYSAVAIL_NO_NODES_FUNC);
+
+                // call out the procedure to find the deconfigured part.
+                hwasErrorAddProcedureCallout(l_errl,
+                                            EPUB_PRC_FIND_DECONFIGURED_PART,
+                                            SRCI_PRIORITY_HIGH);
+
+                //  if we already have an error, link this one to the earlier;
+                //  if not, set the common plid
+                hwasErrorUpdatePlid(l_errl, l_commonPlid);
+                errlCommit(l_errl, HWAS_COMP_ID);
+                // errl is now NULL
+                break;
+            }
+
+            // top level has at least 1 node - and it's our node.
+            pTop = l_nodes[0];
+
             HWAS_INF("checkMinimumHardware: i_node = NULL, using %.8X",
                     get_huid(pTop));
         }
@@ -792,13 +835,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
                     get_huid(pTop));
         }
 
-        PredicateHwas l_present;
-        l_present.present(true);
-        PredicateIsFunctional l_functional;
-
-        // check for functional Master Proc
+        // check for functional Master Proc on this node
         Target* l_pMasterProc = NULL;
-        targetService().masterProcChipTargetHandle(l_pMasterProc);
+        targetService().queryMasterProcChipTargetHandle(l_pMasterProc, pTop);
 
         if ((l_pMasterProc == NULL) || (!l_functional(l_pMasterProc)))
         {
@@ -824,18 +863,23 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
 
             /*@
              * @errortype
-             * @severity     ERRL_SEV_UNRECOVERABLE
-             * @moduleid     MOD_CHECK_MIN_HW
-             * @reasoncode   RC_SYSAVAIL_NO_PROCS_FUNC
-             * @devdesc      checkMinimumHardware found no functional
-             *               master processor
-             * @userdata1    number of present, non-functional procs
-             * @userdata2    number of present, functional, non-master procs
+             * @severity          ERRL_SEV_UNRECOVERABLE
+             * @moduleid          MOD_CHECK_MIN_HW
+             * @reasoncode        RC_SYSAVAIL_NO_PROCS_FUNC
+             * @devdesc           checkMinimumHardware found no functional
+             *                    master processor on this node
+             * @userdata1[00:31]  HUID of node
+             * @userdata2[00:31]  number of present procs
+             * @userdata2[32:63]  number of present functional non-master procs
              */
+            const uint64_t userdata1 =
+                (static_cast<uint64_t>(get_huid(pTop)) << 32);
+            const uint64_t userdata2 =
+                (static_cast<uint64_t>(procs_present) << 32) | procs_functional;
             l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
                                 MOD_CHECK_MIN_HW,
                                 RC_SYSAVAIL_NO_PROCS_FUNC,
-                                procs_present, procs_functional);
+                                userdata1, userdata2);
 
             // call out the procedure to find the deconfigured part.
             hwasErrorAddProcedureCallout(l_errl,
@@ -874,19 +918,24 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
 
                 /*@
                  * @errortype
-                 * @severity     ERRL_SEV_UNRECOVERABLE
-                 * @moduleid     MOD_CHECK_MIN_HW
-                 * @reasoncode   RC_SYSAVAIL_NO_CORES_FUNC
-                 * @devdesc      checkMinimumHardware found no functional
-                 *               processor cores on the master proc
-                 * @userdata1    HUID of master proc
-                 * @userdata2    number of present, non-functional cores
+                 * @severity          ERRL_SEV_UNRECOVERABLE
+                 * @moduleid          MOD_CHECK_MIN_HW
+                 * @reasoncode        RC_SYSAVAIL_NO_CORES_FUNC
+                 * @devdesc           checkMinimumHardware found no functional
+                 *                    processor cores on the master proc
+                 * @userdata1[00:31]  HUID of node
+                 * @userdata1[32:63]  HUID of master proc
+                 * @userdata2[00:31]  number of present, non-functional cores
                  */
+                const uint64_t userdata1 =
+                    (static_cast<uint64_t>(get_huid(pTop)) << 32) |
+                    get_huid(l_pMasterProc);
+                const uint64_t userdata2 =
+                    (static_cast<uint64_t>(exs_present) << 32);
                 l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
                                     MOD_CHECK_MIN_HW,
                                     RC_SYSAVAIL_NO_CORES_FUNC,
-                                    l_pMasterProc->getAttr<ATTR_HUID>(),
-                                    exs_present);
+                                    userdata1, userdata2);
 
                 //  call out the procedure to find the deconfigured part.
                 hwasErrorAddProcedureCallout( l_errl,
@@ -927,18 +976,22 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
 
             /*@
              * @errortype
-             * @severity     ERRL_SEV_UNRECOVERABLE
-             * @moduleid     MOD_CHECK_MIN_HW
-             * @reasoncode   RC_SYSAVAIL_NO_MEMORY_FUNC
-             * @devdesc      checkMinimumHardware found no
-             *               functional dimm cards.
-             * @userdata1    number of present, non-functional dimms
-             * @userdata2    0
+             * @severity          ERRL_SEV_UNRECOVERABLE
+             * @moduleid          MOD_CHECK_MIN_HW
+             * @reasoncode        RC_SYSAVAIL_NO_MEMORY_FUNC
+             * @devdesc           checkMinimumHardware found no
+             *                    functional dimm cards.
+             * @userdata1[00:31]  HUID of node
+             * @userdata2[00:31]  number of present, non-functional dimms
              */
+            const uint64_t userdata1 =
+                (static_cast<uint64_t>(get_huid(pTop)) << 32);
+            const uint64_t userdata2 =
+                (static_cast<uint64_t>(dimms_present) << 32);
             l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
                                 MOD_CHECK_MIN_HW,
                                 RC_SYSAVAIL_NO_MEMORY_FUNC,
-                                dimms_present, 0);
+                                userdata1, userdata2);
 
             //  call out the procedure to find the deconfigured part.
             hwasErrorAddProcedureCallout( l_errl,
@@ -965,37 +1018,33 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node)
         //  if there is an issue, create and commit an error, and tie it to the
         //  the rest of them with the common plid.
         platCheckMinimumHardware(l_commonPlid, i_node);
-
-        //  ---------------------------------------------------------------
-        // if the common plid got set anywhere above, we have an error.
-        //  ---------------------------------------------------------------
-        if (l_commonPlid)
-        {
-
-            /*@
-             * @errortype
-             * @severity     ERRL_SEV_UNRECOVERABLE
-             * @moduleid     MOD_CHECK_MIN_HW
-             * @reasoncode   RC_SYSAVAIL_INSUFFICIENT_HW
-             * @devdesc      Insufficient hardware to continue.
-             * @userdata1    Top level HUID
-             * @userdata2    0
-             */
-            l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
-                                    MOD_CHECK_MIN_HW,
-                                    RC_SYSAVAIL_INSUFFICIENT_HW,
-                                    pTop->getAttr<ATTR_HUID>(),
-                                    0 );
-            //  call out the procedure to find the deconfigured part.
-            hwasErrorAddProcedureCallout( l_errl,
-                                          EPUB_PRC_FIND_DECONFIGURED_PART,
-                                          SRCI_PRIORITY_HIGH );
-            //  if we already have an error, link this one to the earlier;
-            //  if not, set the common plid
-            hwasErrorUpdatePlid( l_errl, l_commonPlid );
-        }
     }
     while (0);
+
+    //  ---------------------------------------------------------------
+    // if the common plid got set anywhere above, we have an error.
+    //  ---------------------------------------------------------------
+    if (l_commonPlid)
+    {
+
+        /*@
+         * @errortype
+         * @severity          ERRL_SEV_UNRECOVERABLE
+         * @moduleid          MOD_CHECK_MIN_HW
+         * @reasoncode        RC_SYSAVAIL_INSUFFICIENT_HW
+         * @devdesc           Insufficient hardware to continue.
+         */
+        l_errl  =   hwasError(  ERRL_SEV_UNRECOVERABLE,
+                                MOD_CHECK_MIN_HW,
+                                RC_SYSAVAIL_INSUFFICIENT_HW);
+        //  call out the procedure to find the deconfigured part.
+        hwasErrorAddProcedureCallout( l_errl,
+                                      EPUB_PRC_FIND_DECONFIGURED_PART,
+                                      SRCI_PRIORITY_HIGH );
+        //  if we already have an error, link this one to the earlier;
+        //  if not, set the common plid
+        hwasErrorUpdatePlid( l_errl, l_commonPlid );
+    }
 
     HWAS_INF("checkMinimumHardware exit - minimum hardware %s",
             (l_errl == NULL) ? "available" : "NOT available");
