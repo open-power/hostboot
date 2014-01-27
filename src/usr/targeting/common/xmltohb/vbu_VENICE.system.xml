@@ -1428,7 +1428,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -2497,7 +2500,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute><id>MSS_CACHE_ENABLE</id><default>1</default></attribute>
@@ -2599,7 +2605,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
     <attribute><id>MSS_CACHE_ENABLE</id><default>1</default></attribute>
@@ -2701,7 +2710,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -2802,7 +2814,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -2903,7 +2918,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -3004,7 +3022,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -3105,7 +3126,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
@@ -3206,7 +3230,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id>

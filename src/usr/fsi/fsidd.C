@@ -2104,9 +2104,11 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
 
                 if( i_target->tryGetAttr<ATTR_FSI_MASTER_PORT>(info.port) )
                 {
-                    if( i_target->tryGetAttr<ATTR_FSI_SLAVE_CASCADE>(info.cascade) )
+                    if( i_target->tryGetAttr<ATTR_FSI_SLAVE_CASCADE>
+                        (info.cascade) )
                     {
-                        if( !i_target->tryGetAttr<ATTR_FSI_OPTION_FLAGS>(info.flags) )
+                        if( !i_target->tryGetAttr<ATTR_FSI_OPTION_FLAGS>
+                            (info.flagbits) )
                         {
                             info.master = NULL;
                         }
@@ -2140,13 +2142,13 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
     }
     else
     {
-        TARGETING::EntityPath epath;
-        if( info.master->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(epath) )
+        TARGETING::EntityPath master_phys;
+        if( info.master->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(master_phys) )
         {
             info.linkid.node =
-              epath.pathElementOfType(TARGETING::TYPE_NODE).instance;
+              master_phys.pathElementOfType(TARGETING::TYPE_NODE).instance;
             info.linkid.proc =
-              epath.pathElementOfType(TARGETING::TYPE_PROC).instance;
+              master_phys.pathElementOfType(TARGETING::TYPE_PROC).instance;
             info.linkid.type = static_cast<uint8_t>(info.type);
             info.linkid.port = info.port;
         }

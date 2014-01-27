@@ -3979,7 +3979,14 @@ sub getAttributeDefault {
                 if(   exists $attribute->{nativeType}->{name}
                    && ($attribute->{nativeType}->{name} eq "EntityPath"))
                 {
-                    $default =  "MustBeOverriddenByTargetInstance";
+                    if( exists $attribute->{nativeType}->{default} )
+                    {
+                        $default = $attribute->{nativeType}->{default};                        
+                    }
+                    else
+                    {
+                        $default =  "MustBeOverriddenByTargetInstance";
+                    }
                 }
                 else
                 {
@@ -4431,7 +4438,7 @@ sub packEntityPath {
     }
     else
     {
-        fatal("Unsupported enity path type of [$value], [$typeStr], [$path].");
+        fatal("Unsupported entity path type of [$value], [$typeStr], [$path].");
     }
 
     if( (scalar @paths) > $maxPathElements)

@@ -1530,7 +1530,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -2712,7 +2715,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -3894,7 +3900,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -5075,7 +5084,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -6225,7 +6237,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -7373,7 +7388,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -8521,7 +8539,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
@@ -9657,7 +9678,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute>
@@ -9771,7 +9795,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
     <attribute>
@@ -9885,7 +9912,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
     <attribute>
@@ -9999,7 +10029,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
     <attribute>
@@ -10113,7 +10146,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
     <attribute>
@@ -10227,7 +10263,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
     <attribute>
@@ -10341,7 +10380,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
     <attribute>
@@ -10455,7 +10497,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
     <attribute>
@@ -10569,7 +10614,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>8</default></attribute>
     <attribute>
@@ -10683,7 +10731,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>9</default></attribute>
     <attribute>
@@ -10797,7 +10848,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>10</default></attribute>
     <attribute>
@@ -10911,7 +10965,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>11</default></attribute>
     <attribute>
@@ -11025,7 +11082,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>12</default></attribute>
     <attribute>
@@ -11139,7 +11199,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>13</default></attribute>
     <attribute>
@@ -11253,7 +11316,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>14</default></attribute>
     <attribute>
@@ -11367,7 +11433,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>15</default></attribute>
     <attribute>
@@ -11481,7 +11550,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>16</default></attribute>
     <attribute>
@@ -11595,7 +11667,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>17</default></attribute>
     <attribute>
@@ -11709,7 +11784,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>18</default></attribute>
     <attribute>
@@ -11823,7 +11901,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>19</default></attribute>
     <attribute>
@@ -11937,7 +12018,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>20</default></attribute>
     <attribute>
@@ -12051,7 +12135,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>21</default></attribute>
     <attribute>
@@ -12165,7 +12252,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>22</default></attribute>
     <attribute>
@@ -12279,7 +12369,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>23</default></attribute>
     <attribute>
@@ -12393,7 +12486,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>24</default></attribute>
     <attribute>
@@ -12507,7 +12603,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>25</default></attribute>
     <attribute>
@@ -12621,7 +12720,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>26</default></attribute>
     <attribute>
@@ -12735,7 +12837,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>27</default></attribute>
     <attribute>
@@ -12849,7 +12954,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>28</default></attribute>
     <attribute>
@@ -12963,7 +13071,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>29</default></attribute>
     <attribute>
@@ -13077,7 +13188,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>30</default></attribute>
     <attribute>
@@ -13191,7 +13305,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>31</default></attribute>
     <attribute>
@@ -13305,7 +13422,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>32</default></attribute>
     <attribute>
@@ -13416,7 +13536,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>33</default></attribute>
     <attribute>
@@ -13527,7 +13650,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>34</default></attribute>
     <attribute>
@@ -13638,7 +13764,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>35</default></attribute>
     <attribute>
@@ -13749,7 +13878,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>36</default></attribute>
     <attribute>
@@ -13860,7 +13992,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>37</default></attribute>
     <attribute>
@@ -13971,7 +14106,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>38</default></attribute>
     <attribute>
@@ -14082,7 +14220,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>39</default></attribute>
     <attribute>
@@ -14193,7 +14334,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>40</default></attribute>
     <attribute>
@@ -14304,7 +14448,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>41</default></attribute>
     <attribute>
@@ -14415,7 +14562,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>42</default></attribute>
     <attribute>
@@ -14526,7 +14676,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>43</default></attribute>
     <attribute>
@@ -14637,7 +14790,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>44</default></attribute>
     <attribute>
@@ -14748,7 +14904,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>45</default></attribute>
     <attribute>
@@ -14859,7 +15018,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>46</default></attribute>
     <attribute>
@@ -14970,7 +15132,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>47</default></attribute>
     <attribute>
@@ -15081,7 +15246,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>48</default></attribute>
     <attribute>
@@ -15192,7 +15360,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>49</default></attribute>
     <attribute>
@@ -15303,7 +15474,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>50</default></attribute>
     <attribute>
@@ -15414,7 +15588,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>51</default></attribute>
     <attribute>
@@ -15525,7 +15702,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>52</default></attribute>
     <attribute>
@@ -15636,7 +15816,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>53</default></attribute>
     <attribute>
@@ -15747,7 +15930,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>54</default></attribute>
     <attribute>
@@ -15858,7 +16044,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>55</default></attribute>
     <attribute>
@@ -15969,7 +16158,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>56</default></attribute>
     <attribute>
@@ -16080,7 +16272,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>57</default></attribute>
     <attribute>
@@ -16191,7 +16386,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>58</default></attribute>
     <attribute>
@@ -16302,7 +16500,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>59</default></attribute>
     <attribute>
@@ -16413,7 +16614,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>60</default></attribute>
     <attribute>
@@ -16524,7 +16728,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>61</default></attribute>
     <attribute>
@@ -16635,7 +16842,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>62</default></attribute>
     <attribute>
@@ -16746,7 +16956,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>63</default></attribute>
     <attribute>
@@ -16861,7 +17074,10 @@
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 

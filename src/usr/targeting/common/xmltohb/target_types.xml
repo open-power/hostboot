@@ -242,8 +242,9 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_CHIP</id>
-        <!-- Default to a non-sensical value -->
-        <default>physical:na-0</default>
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
     </attribute>
     <attribute>
         <id>FSI_MASTER_TYPE</id>
@@ -254,6 +255,9 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_PORT</id>
     </attribute>
     <attribute>
         <id>FSI_SLAVE_CASCADE</id>

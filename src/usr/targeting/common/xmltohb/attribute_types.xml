@@ -713,9 +713,21 @@
 
 <attribute>
     <id>FSI_MASTER_CHIP</id>
-    <description>Chip which contains the FSI master logic that drives this slave</description>
+    <description>Chip which contains the FSI master logic that drives this slave when booting from the default master processor</description>
     <nativeType>
         <name>EntityPath</name>
+        <default>physical:sys-0</default>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ALTFSI_MASTER_CHIP</id>
+    <description>Chip which contains the FSI master logic that drives this slave when booting from the alternate master processor</description>
+    <nativeType>
+        <name>EntityPath</name>
+        <default>physical:sys-0</default>
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -727,6 +739,7 @@
     <simpleType>
         <enumeration>
             <id>FSI_MASTER_TYPE</id>
+            <default>NO_MASTER</default>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -736,10 +749,22 @@
 
 <attribute>
     <id>FSI_MASTER_PORT</id>
-    <description>Which port is this chip hanging off of</description>
+    <description>Which port is this chip hanging off of when booting from the default master processor</description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
+            <default>0xFF</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ALTFSI_MASTER_PORT</id>
+    <description>Which port is this chip hanging off of when booting from the alternate master processor</description>
+    <simpleType>
+        <uint8_t>
+            <default>0xFF</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -761,11 +786,26 @@
 <attribute>
     <id>FSI_OPTION_FLAGS</id>
     <description>Reserved for any special flags we might need to access FSI</description>
-    <simpleType>
-        <uint16_t>
+    <complexType>
+        <description>FSI flags</description>
+        <field>
+            <name>flipPort</name>
+            <description>
+                Set on master chips if their slave port is reversed when
+                the system is driven by the primary master chip.
+            </description>
+            <type>uint16_t</type>
+            <bits>1</bits>
             <default>0</default>
-        </uint16_t>
-    </simpleType>
+        </field>
+        <field>
+            <name>reserved</name>
+            <description>Reserved for future expansion</description>
+            <type>uint16_t</type>
+            <bits>15</bits>
+            <default>0</default>
+        </field>
+    </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>

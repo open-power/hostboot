@@ -1990,8 +1990,20 @@ sub generate_proc
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <field><id>flipPort</id><value>0</value></field>
+        <field><id>reserved</id><value>0</value></field>
     </attribute>";
+        #TODO RTC:35041 -- Parse out alternate FSI paths
+        print "
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
+        <default>physical:sys</default><!-- no alt path -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0xFF</default><!-- no alt path -->
+    </attribute>";
+
     }
 
     #TODO RTC [59707]

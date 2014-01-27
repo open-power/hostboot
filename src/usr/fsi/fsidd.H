@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -184,7 +184,10 @@ class FsiDD
         TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
         uint8_t port; ///< Which port is this chip hanging off of
         uint8_t cascade; ///< Slave cascade position
-        uint16_t flags; ///< Reserved for any special flags we might need
+        union {
+            TARGETING::FsiOptionFlags flagbits; ///< Special flags
+            uint16_t flags; ///< Special flags
+        }; 
         FsiLinkId_t linkid; ///< Id for traces and error logs
     };
 
