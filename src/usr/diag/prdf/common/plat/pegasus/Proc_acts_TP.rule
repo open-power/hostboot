@@ -835,12 +835,12 @@ group gTodErrors filter singlebit
     /** TOD_ERRORREGISTER[1]
      *  M_PATH_0_PARITY_ERROR
      */
-    (TodErrors,bit(1)) ? selfCaptThr32;
+    (TodErrors,bit(1)) ? selfCapThr32TopReConfig;
 
     /** TOD_ERRORREGISTER[2]
      *  M_PATH_1_PARITY_ERROR
      */
-    (TodErrors,bit(2)) ? selfCaptThr32;
+    (TodErrors,bit(2)) ? selfCapThr32TopReConfig;
 
     /** TOD_ERRORREGISTER[3]
      *  PCRP0_DATA_PARITY_ERROR
@@ -880,7 +880,7 @@ group gTodErrors filter singlebit
     /** TOD_ERRORREGISTER[10]
      *  S_PATH_0_PARITY_ERROr
      */
-    (TodErrors,bit(10)) ? selfCaptThr32;
+    (TodErrors,bit(10)) ? selfCapThr32TopReConfig;
 
     /** TOD_ERRORREGISTER[11]
      *  REG_0X08_DATA_PARITY_ERROR
@@ -931,7 +931,7 @@ group gTodErrors filter singlebit
     /** TOD_ERRORREGISTER[20]
      *  S_PATH_0_PARITY_ERROR
      */
-    (TodErrors,bit(20)) ? selfCaptThr32;
+    (TodErrors,bit(20)) ? selfCapThr32TopReConfig;
 
     /** TOD_ERRORREGISTER[21]
      *  S_PATH_1_STEP_CHECK_ERROR
@@ -941,7 +941,7 @@ group gTodErrors filter singlebit
     /** TOD_ERRORREGISTER[22]
      *  I_PATH_DELAY_STEP_CHECK_PARITY_ERROR
      */
-    (TodErrors,bit(22)) ? selfCaptThr32;
+    (TodErrors,bit(22)) ? selfCapThr32TopReConfig;
 
     /** TOD_ERRORREGISTER[23]
      *  REG_0X0C DATA_PARITY ERROR
@@ -1342,3 +1342,14 @@ actionclass SLWRecovery
     funccall("slwRecovery");
     threshold1;
 };
+
+/** callout Proc reporting error. If threshold reaches 32 per day, request
+ *  reconfiguration of topology.
+ */
+actionclass selfCapThr32TopReConfig
+{
+    capture(TODReg);
+    selfCaptThr32;
+    funccall("requestTopologySwitch");
+};
+

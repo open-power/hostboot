@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -61,6 +61,7 @@ PLUGIN_TOD_UNEXPECTED_ATTN( todRestoreSPCR )
 PLUGIN_TOD_UNEXPECTED_ATTN( clearServiceCallFlag )
 PLUGIN_TOD_UNEXPECTED_ATTN( todNewTopologyIfBackupMDMT )
 PLUGIN_TOD_UNEXPECTED_ATTN( todStepCheckFault )
+PLUGIN_TOD_UNEXPECTED_ATTN( requestTopologySwitch )
 
 #undef PLUGIN_TOD_UNEXPECTED_ATTN
 
