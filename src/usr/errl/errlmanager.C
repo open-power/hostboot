@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -604,7 +604,7 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::saveErrLogEntry( errlHndl_t& io_err )
 {
-    TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::saveErrLogEntry eid %.8x",
+    TRACDCOMP( g_trac_errl, ENTER_MRK"ErrlManager::saveErrLogEntry eid %.8x",
         io_err->eid());
     do
     {
@@ -643,7 +643,7 @@ void ErrlManager::saveErrLogEntry( errlHndl_t& io_err )
         iv_pStorage->cInserted++;
 
     } while( 0 );
-    TRACFCOMP( g_trac_errl, EXIT_MRK"ErrlManager::saveErrLogEntry" );
+    TRACDCOMP( g_trac_errl, EXIT_MRK"ErrlManager::saveErrLogEntry" );
     return;
 }
 #endif
@@ -954,50 +954,65 @@ bool ErrlManager::incrementPnorOpenSlot()
 bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor eid=%.8x", io_err->eid());
+    bool rc = false;
 
-    // save our current slot, and see if there's an open slot
-    uint32_t l_previousSlot = iv_pnorOpenSlot;  // in case flatten fails
-    bool l_slotFound = (iv_pnorAddr != NULL) && incrementPnorOpenSlot();
-
-    if (l_slotFound)
+    // actually, if it's an INFORMATIONAL log, we don't want to waste the write
+    // cycles, so we'll just 'say' that we saved it and go on.
+    if (io_err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
     {
-        // flatten into PNOR, truncate to the slot size
-        char *l_pnorAddr = iv_pnorAddr + (PNOR_ERROR_LENGTH * iv_pnorOpenSlot);
-        TRACDBIN( g_trac_errl, INFO_MRK"saveErrLogToPnor: l_pnorAddr before",
-            l_pnorAddr, 128);
-        uint64_t l_errSize = io_err->flatten(l_pnorAddr,
-                                PNOR_ERROR_LENGTH, true);
-        if (l_errSize !=0)
-        {
-            TRACFCOMP( g_trac_errl, INFO_MRK"saveErrLogToPnor: %d bytes flattened into %p, slot %d",
-                l_errSize, l_pnorAddr, iv_pnorOpenSlot );
-
-            TRACDBIN( g_trac_errl, INFO_MRK"saveErrLogToPnor: l_pnorAddr after",
-                l_pnorAddr, 128);
-
-            // Ensure that this error log is pushed out to PNOR
-            int l_rc = mm_remove_pages(FLUSH,
-                            (void *) l_pnorAddr, l_errSize);
-            if( l_rc )
-            {
-                //If mm_remove_pages returns none zero for error then
-                //log an error trace in this case.
-                TRACFCOMP(g_trac_errl, ERR_MRK "Fail to flush the page %p size %d",
-                        l_pnorAddr, PNOR_ERROR_LENGTH);
-            }
-        }
-        else
-        {
-            TRACFCOMP( g_trac_errl, ERR_MRK"saveErrLogToPnor: could not flatten data");
-            // restore slot so that our next save will find this slot
-            iv_pnorOpenSlot = l_previousSlot;
-        }
+        TRACDCOMP( g_trac_errl, INFO_MRK"saveErrLogToPnor: INFORMATIONAL log, skipping");
+        rc = true;
     }
     else
     {
-        TRACFCOMP( g_trac_errl, EXIT_MRK"saveErrLogToPnor: NOT SAVED");
+        // save our current slot, and see if there's an open slot
+        uint32_t l_previousSlot = iv_pnorOpenSlot;  // in case flatten fails
+
+        if ((iv_pnorAddr != NULL) && incrementPnorOpenSlot())
+        {
+            // flatten into PNOR, truncate to the slot size
+            char *l_pnorAddr =
+                iv_pnorAddr + (PNOR_ERROR_LENGTH * iv_pnorOpenSlot);
+            TRACDBIN( g_trac_errl, INFO_MRK"saveErrLogToPnor: l_pnorAddr before",
+                l_pnorAddr, 128);
+            uint64_t l_errSize = io_err->flatten(l_pnorAddr,
+                                    PNOR_ERROR_LENGTH, true);
+            if (l_errSize !=0)
+            {
+                TRACFCOMP( g_trac_errl, INFO_MRK"saveErrLogToPnor: %d bytes flattened into %p, slot %d",
+                    l_errSize, l_pnorAddr, iv_pnorOpenSlot );
+
+                TRACDBIN( g_trac_errl, INFO_MRK"saveErrLogToPnor: l_pnorAddr after",
+                    l_pnorAddr, 128);
+
+                // Ensure that this error log is pushed out to PNOR
+                int l_rc = mm_remove_pages(FLUSH,
+                                (void *) l_pnorAddr, l_errSize);
+                if( l_rc )
+                {
+                    //If mm_remove_pages returns none zero for error then
+                    //log an error trace in this case.
+                    TRACFCOMP(g_trac_errl, ERR_MRK "Fail to flush the page %p size %d",
+                            l_pnorAddr, PNOR_ERROR_LENGTH);
+                }
+            }
+            else
+            {
+                // flatten didn't work, so still return true - we don't want
+                // to try to save this errlog.
+
+                TRACFCOMP( g_trac_errl, ERR_MRK"saveErrLogToPnor: could not flatten data");
+                // restore slot so that our next save will find this slot
+                iv_pnorOpenSlot = l_previousSlot;
+            }
+            rc = true;
+        }
+        // else no open slot - return false
     }
-    return l_slotFound;
+
+    TRACFCOMP( g_trac_errl, EXIT_MRK"saveErrLogToPnor returning %s",
+            rc ?  "true" : "false");
+    return rc;
 } // saveErrLogToPnor
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1028,7 +1043,7 @@ bool ErrlManager::ackErrLogInPnor( uint32_t i_errEid )
     if (i == iv_maxErrlInPnor)
     {
         //could not find the errorlog to mark for acknowledgment
-        TRACFCOMP( g_trac_errl, ERR_MRK"ackErrLogInPnor failed to find the error log" );
+        TRACDCOMP( g_trac_errl, ERR_MRK"ackErrLogInPnor failed to find the error log" );
         rc = false;
     }
 
