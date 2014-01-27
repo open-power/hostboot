@@ -53,6 +53,9 @@ struct Globals
      * @brief flag to indicate running in simics env
      */
     bool simicsRunning;
+
+    Globals(): mfgPolicy(0), userPolicy(0) {}
+
 };
 }
 #endif

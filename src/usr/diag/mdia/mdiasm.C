@@ -40,6 +40,7 @@
 #include <devicefw/userif.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errludlogregister.H>
+#include <initservice/istepdispatcherif.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -760,13 +761,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     {
         fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, targetMba);
         ReturnCode fapirc;
-        TargetHandle_t top = NULL;
-        targetService().getTopLevelTarget(top);
-        uint64_t mfgPolicy = 0;
-        if( top )
-        {
-            mfgPolicy = top->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-        }
 
         // We will always do ce setup though CE calculation
         // is only done during MNFG. This will give use better ffdc.
@@ -778,7 +772,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             break;
         }
 
-        if( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING & mfgPolicy )
+        if( TARGETING::MNFG_FLAG_BIT_MNFG_IPL_MEMORY_CE_CHECKINGE
+            & iv_globals.mfgPolicy )
         {
             // For MNFG mode, check CE also
             stopCondition |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
@@ -1041,7 +1036,29 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         MDIA_FAST("sm: processing event for: %x, cmd: %p, type: %x",
                 get_huid(getTarget(wfp)), cmd, i_event.type);
 
-        switch(i_event.type)
+        MaintCommandEventType eventType = i_event.type;
+
+        // If shutdown is requested and we're not in MNFG mode
+        // skip testing on all MBAs
+        if(( INITSERVICE::isShutdownRequested() ) &&
+           (( COMMAND_COMPLETE == eventType ) ||
+            ( COMMAND_STOPPED  == eventType )) &&
+           ! (( MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
+                & iv_globals.mfgPolicy) ||
+              ( MNFG_FLAG_BIT_MNFG_ENABLE_STANDARD_PATTERN_TEST
+                & iv_globals.mfgPolicy) ||
+              ( MNFG_FLAG_BIT_MNFG_ENABLE_MINIMUM_PATTERN_TEST
+                & iv_globals.mfgPolicy)))
+        {
+            MDIA_FAST("sm: shutdown requested, overrding event "
+                      "for: %x, cmd: %p, type: %x, globals: %x",
+                get_huid(getTarget(wfp)), cmd,
+                i_event.type, iv_globals.mfgPolicy);
+
+            eventType = SKIP_MBA;
+        }
+
+        switch(eventType)
         {
             case COMMAND_COMPLETE:
 
@@ -1225,9 +1242,19 @@ StateMachine::~StateMachine()
 }
 
 StateMachine::StateMachine() : iv_monitor(0), iv_done(true), iv_shutdown(false),
-    iv_tp(0)
+    iv_tp(0), iv_globals()
 {
     mutex_init(&iv_mutex);
     sync_cond_init(&iv_cond);
 }
+
+void StateMachine::setGlobals(Globals & i_globals)
+{
+    mutex_lock(&iv_mutex);
+
+    iv_globals = i_globals;
+
+    mutex_unlock(&iv_mutex);
+}
+
 }

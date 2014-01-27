@@ -33,6 +33,7 @@
 #include <utility_procedures/mss_maint_cmds.H>
 #include "sys/sync.h"
 #include "mdiafwd.H"
+#include "mdiaglobals.H"
 
 namespace MDIA
 {
@@ -119,6 +120,13 @@ class StateMachine
          * @brief dtor
          */
         virtual ~StateMachine();
+
+        /**
+         * @brief set global params
+         *
+         * @param[in] i_globals global data
+         */
+        void setGlobals(Globals & i_globals);
 
     protected:
 
@@ -249,6 +257,11 @@ class StateMachine
          * @brief completion condition
          */
         sync_cond_t iv_cond;
+
+        /**
+         * @brief global struct
+         */
+        Globals iv_globals;
 
         /**
          * @brief copy disabled

@@ -31,7 +31,6 @@
 // $Id: mss_memdiags.C,v 1.23 2013/12/02 18:59:22 bellows Exp $
 
 #include "mdiafwd.H"
-#include "mdiaglobals.H"
 #include "mdiatrace.H"
 #include "mdiasm.H"
 #include "mdiasmimpl.H"
@@ -54,7 +53,7 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
     errlHndl_t err = 0;
 
-    Globals globals = {};
+    Globals globals;
 
     TargetHandle_t top = 0;
     targetService().getTopLevelTarget(top);
@@ -104,6 +103,9 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
     if(!err)
     {
+        // set global data
+        Singleton<StateMachine>::instance().setGlobals(globals);
+
         // TODO...run the workflow through the state machine
         err = Singleton<StateMachine>::instance().run(list);
     }
