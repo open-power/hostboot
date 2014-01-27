@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -53,42 +53,21 @@
 namespace   INITSERVICE
 {
     const   TaskInfo    g_istep09[]  =   {
-
         {
-
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,                              //true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(09,01,"proc_build_smp"),
                 ACTIVATE_POWERBUS::call_proc_build_smp,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(09,02,"host_slave_sbe_update"),
                 ACTIVATE_POWERBUS::call_host_slave_sbe_update,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-
-        //  END OF LIST!
 };
 
 const DepModInfo  g_istep09Dependancies = {
@@ -97,16 +76,14 @@ const DepModInfo  g_istep09Dependancies = {
         DEP_LIB(libdram_initialization.so),
         DEP_LIB(libsbe.so),
         DEP_LIB(libbuild_winkle_images.so),
-        { 0 },
+        NULL
     }
 };
 
-
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep09TaskList    =   {
-        &(g_istep09[0]),
-        ( sizeof(g_istep09)/sizeof(TaskInfo) ),
-        &g_istep09Dependancies //  later, depModules struct
+const ExtTaskInfo g_istep09TaskList = {
+    &(g_istep09[0]),
+    ( sizeof(g_istep09)/sizeof(TaskInfo) ),
+    &g_istep09Dependancies
 };
 
 };  // end namespace

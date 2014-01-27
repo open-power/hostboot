@@ -116,14 +116,12 @@ errlHndl_t  InitService::checkNLoadModule( const TaskInfo *i_ptask ) const
              *                  UserDetails will contain the name of the
              *                  function or task.
              */
+            const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                     INITSERVICE::BASE_INITSVC_MOD_ID,
                     INITSERVICE::INITSVC_LOAD_MODULE_FAILED,
-                    0,
-                    0 );
-
-            //  error, break out of do block
+                    0, 0, hbSwError);
             break;
         }
 
@@ -170,7 +168,6 @@ errlHndl_t InitService::startTask(
 
 
     assert( i_ptask != NULL );
-    // assert( i_ptask->taskflags.task_type == START_TASK );
 
     do  {
         // Base modules have already been loaded and initialized,
@@ -217,14 +214,12 @@ errlHndl_t InitService::startTask(
              *  @devdesc        Initialization Service failed to start a task.
              *
              */
+            const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                     INITSERVICE::BASE_INITSVC_MOD_ID,
                     INITSERVICE::START_TASK_FAILED,
-                    0,
-                    l_tidlnchrc );
-
-            //  break out of do block
+                    0, l_tidlnchrc, hbSwError);
             break;
         } // endif tidlnchrc
 
@@ -258,14 +253,12 @@ errlHndl_t InitService::startTask(
              *                  the task returned an error.
              *
              */
+            const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
                                     INITSERVICE::WAIT_TASK_FAILED,
-                                    l_tidretrc,
-                                    l_childsts );
-
-            //  break out of do block
+                                    l_tidretrc, l_childsts, hbSwError);
             break;
         } // endif tidretrc
 
@@ -344,14 +337,12 @@ errlHndl_t InitService::executeFn(
              *                  function within a module but the function
              *                  failed to launch
              */
+            const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
                                     INITSERVICE::START_FN_FAILED,
-                                    l_tidlnchrc,
-                                    0   );
-
-            //  break out with errorlog set
+                                    l_tidlnchrc, 0, hbSwError);
             break;
         } // endif tidlnchrc
 
@@ -380,12 +371,12 @@ errlHndl_t InitService::executeFn(
              *
              *
              */
+            const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
                                     INITSERVICE::WAIT_FN_FAILED,
-                                    l_tidretrc,
-                                    l_childsts );
+                                    l_tidretrc, l_childsts, hbSwError);
 
             TRACFCOMP(g_trac_initsvc,
                     "ERROR : task_wait_tid(0x%x). '%s', l_tidretrc=0x%x, l_childsts=0x%x",
@@ -425,18 +416,6 @@ errlHndl_t InitService::executeFn(
 
     return l_errl;
 }
-
-
-/**
- * @todo    this will make a system call to post the progress code.
- *
- */
-void InitService::setProgressCode( uint64_t i_progresscode ) const
-{
-
-    // do nothing for now
-}
-
 
 errlHndl_t  InitService::dispatchTask( const TaskInfo   *i_ptask,
                                        void             *io_pargs ) const
@@ -499,14 +478,14 @@ errlHndl_t  InitService::dispatchTask( const TaskInfo   *i_ptask,
 
 void InitService::init( void *io_ptr )
 {
+    // Detach this task from the parent
+    task_detach();
+
     errlHndl_t      l_errl              =   NULL;
     uint64_t        l_task              =   0;
     const TaskInfo  *l_ptask            =   NULL;
     //  init shutdown status to good.
     uint64_t        l_shutdownStatus    =   SHUTDOWN_STATUS_GOOD;
-
-    //  @todo detach from parent.
-    // $$ task_detach();
 
     printk( "InitService entry.\n" );
 
@@ -753,10 +732,12 @@ void InitService::doShutdown(uint64_t i_status,
              * @defdesc         Could not FLUSH virtual memory.
              *
              */
+            const bool hbSwError = true;
             l_err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                         INITSERVICE::BASE_INITSVC_MOD_ID,
-                        INITSERVICE::SHUTDOWN_FLUSH_FAILED,l_rc,0);
+                        INITSERVICE::SHUTDOWN_FLUSH_FAILED,
+                        l_rc, 0, hbSwError);
             //Commit and attempt flushing other registered blocks
             errlCommit( l_err, INITSVC_COMP_ID );
             l_err = NULL;

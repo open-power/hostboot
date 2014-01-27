@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -1412,73 +1412,6 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         l_pFapiTarget = NULL;
 
         TARG_TS_TRACE(EXIT_MRK "testFapiToHbMacros" );
-    }
-
-    void testFapiAttributes ()
-    {
-
-        TARG_TS_TRACE(ENTER_MRK "testFapiAttributes" );
-
-        using namespace TARGETING;
-        using namespace fapi;
-
-        fapi::ReturnCode l_rc;
-
-        //----------------------------------------------------------------------
-        // Test ATTR_MSS_EFF_PRIMARY_RANK
-        //----------------------------------------------------------------------
-
-// @TODO ATTR_MSS_EFF_PRIMARY_RANK - Enable once we pull in XML file with this attribute.
-#if ATTR_MSS_EFF_PRIMARY_RANK
-        // Find all MBA's in this system
-        PredicateCTM l_mba_pred(CLASS_UNIT,TYPE_MBA);
-        TargetRangeFilter l_mba_filter(
-                                       targetService().begin(),
-                                       targetService().end(),
-                                       &l_mba_pred);
-        // Loop through all MBA's and validate the attribute
-        for(;l_mba_filter;++l_mba_filter)
-        {
-            if(l_mba_filter->getAttr<ATTR_TYPE>() != TYPE_MBA)
-            {
-                TARG_TS_FAIL("Should only have returned type MBA!");
-                break;
-            }
-            else
-            {
-                uint8_t l_uint8_mss_eff_primary_rank[4][4];
-
-                fapi::Target* l_pFapiTarget = new fapi::Target(TARGET_TYPE_MBA_CHIPLET, *l_mba_filter);
-
-                // Test get
-                l_rc = FAPI_ATTR_GET(ATTR_MSS_EFF_PRIMARY_RANK, l_pFapiTarget,l_uint8_mss_eff_primary_rank);
-                if (l_rc)
-                {
-                    TARG_TS_FAIL("hwpTestAttributes: ATTR_MSS_EFF_PRIMARY_RANK. Error from GET");
-                    break;
-                }
-
-                // Test set
-                l_rc = FAPI_ATTR_SET(ATTR_MSS_EFF_PRIMARY_RANK, l_pFapiTarget, l_uint8_mss_eff_primary_rank);
-                if (l_rc)
-                {
-                    TARG_TS_FAIL("hwpTestAttributes: ATTR_MSS_EFF_PRIMARY_RANK. Error from SET");
-                    break;
-                }
-
-                delete l_pFapiTarget;
-                l_pFapiTarget = NULL;
-                TARG_TS_TRACE("hwpTestAttributes: Test of ATTR_MSS_EFF_PRIMARY_RANK Passed!");
-            }
-        }
-#endif
-        TARG_TS_TRACE(EXIT_MRK "testFapiAttributes" );
-
-        if(l_rc)
-        {
-            errlHndl_t l_pErrLog = static_cast<errlHndl_t>(l_rc.releasePlatData());
-            COMMON::ERRORLOG::errlCommit(l_pErrLog,TARG_COMP_ID);
-        }
     }
 
     void testPodNumericalTypes()

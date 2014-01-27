@@ -1992,9 +1992,6 @@ sub generate_proc
 
     }
 
-    #TODO RTC [59707]
-    #Update Lane equalization values
-
     # add EEPROM attributes
     addEeproms($sys, $node, $proc);
 

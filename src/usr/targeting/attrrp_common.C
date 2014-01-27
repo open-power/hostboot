@@ -176,8 +176,5 @@ namespace TARGETING
                 break;
             }
         }
-        // $TODO what if we dont find it??
     }
-
-
 }

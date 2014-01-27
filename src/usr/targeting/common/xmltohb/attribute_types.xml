@@ -1927,26 +1927,6 @@
 </attribute>
 
 <attribute>
-    <id>MVPD_FREQ_CORE_NOMINAL</id>
-    <description>
-        Chip attribute.
-        The nominal frequency of the processor cores in MHz.
-        TODO This attribute should be from MVPD.
-             When MVPD function is present, this attribute should be deleted.
-             The corresponding HWPF attribute request should map to a function
-             that calls the MVPD driver (in the same way as DIMM SPD).
-             For now, just default to 3GHz
-    </description>
-    <simpleType><uint32_t><default>3000</default></uint32_t></simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MVPD_FREQ_CORE_NOMINAL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>HUID</id>
     <description>
         Hardware Unit ID
@@ -2938,24 +2918,12 @@
 
 <attribute>
     <id>MNFG_FLAGS</id>
-    <description> Provides the mnfg flags
-        in a single value.  The bits are
-        masked together so the single value
-        will have data on several mnfg flags.
-        Should note that the MNFG_FLAG_BIT enum
-        is used to provide the value of the
-        different mnfg flags.  A user can bitwise
-        'OR' several of the MNFG_FLAG_BIT values
-        together to indicate that multiple mnfg
-        flags are set.
-        @TODO via RTC: 35451
-        The HostBoot side can only read the mnfg
-        flag attribute. However the FSP side will
-        need to read and write the mnfg flag
-        attributes.  For now making it so both sides
-        are read and writeable but will need to revisit
-        to find a better way to handle persistency when
-        the hostboot and FSP differ.
+    <description>
+        Provides the manufacturing flags. This is a bitfield.
+        Multiple flags can be set at once. Use MNFG_FLAG_BIT
+        to decode. Expected use-case is for FSP to write this
+        attribute based on the MNFG component flags and for
+        HWSV/Hostboot to read it.
     </description>
     <simpleType>
         <uint64_t>
@@ -4750,8 +4718,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Consumer: proc_pcbs_init.C
 
-      TODO: Dean said this may either be provided by the Machine Readable
-            Workbook or Todd R's power management def file.
+      Provided by the Machine Readable Workbook
     </description>
     <simpleType>
         <uint8_t></uint8_t>
@@ -4981,9 +4948,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 
       Consumers: proc_build_gpstate_table.C (among others)
 
-      TODO: Dean's proposal is that each platform will iterate over all chips,
-            reading the super-turbo frequency from MVPD #V and set this attribute
-            to the lowest value.
+      Set by the HWSV freq/voltage service based on MVPD #V
     </description>
     <simpleType>
         <uint32_t></uint32_t>

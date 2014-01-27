@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.C $    */
+/* $Source: src/usr/hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.C $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSlopeInterceptData.C,v 1.3 2013/11/22 22:14:11 whs Exp $
+// $Id: getMBvpdSlopeInterceptData.C,v 1.4 2014/02/12 22:12:00 mjjones Exp $
 /**
  *  @file getMBvpdSlopeInterceptData.C
  *
@@ -148,6 +148,7 @@ fapi::ReturnCode getMBvpdMasterData(
                        l_MwBufsize, MW_KEYWORD_SIZE);
             const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_MW;
             const uint32_t & RETURNED_SIZE = l_MwBufsize;
+            const fapi::Target & CHIP_TARGET = i_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
             break;  //  break out with fapirc
         }
@@ -281,6 +282,7 @@ fapi::ReturnCode getMBvpdSupplierData(
                            l_pdIBufsize, PDI_DDR3_KEYWORD_SIZE);
                 const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_PDI;
                 const uint32_t & RETURNED_SIZE = l_pdIBufsize;
+                const fapi::Target & CHIP_TARGET = i_mbTarget;
                 FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
                 break;  //  break out with fapirc
             }
@@ -299,6 +301,7 @@ fapi::ReturnCode getMBvpdSupplierData(
                            l_pdIBufsize, PDI_DDR4_KEYWORD_SIZE);
                 const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_PDI;
                 const uint32_t & RETURNED_SIZE = l_pdIBufsize;
+                const fapi::Target & CHIP_TARGET = i_mbTarget;
                 FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
                 break;  //  break out with fapirc
             }
@@ -312,6 +315,7 @@ fapi::ReturnCode getMBvpdSupplierData(
             FAPI_ERR("getMBvpdSupplierData:"
                      " unexpected memory type in #I");
             const uint8_t & MEM_TYPE = l_pPdIBuffer->pdI.common.mem_type;
+            const fapi::Target & MEMBUF_TARGET = i_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_UNEXPECTED_MEM_TYPE);
             break;  //  break out with fapirc
         }
@@ -360,6 +364,7 @@ fapi::ReturnCode getMBvpdSupplierData(
                        l_mvBufsize, l_offset);
             const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_MV;
             const uint32_t & RETURNED_SIZE = l_mvBufsize;
+            const fapi::Target & CHIP_TARGET = i_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
             break;  //  break out with fapirc
         }
@@ -436,6 +441,7 @@ fapi::ReturnCode getMBvpdSupplierData(
                     " supplier ID not found 0x%04x",
                       l_moduleID_LSB+(l_moduleID_MSB<<8));
            const uint32_t & MODULE_ID = l_moduleID_LSB+(l_moduleID_MSB<<8);
+           const fapi::Target & MEMBUF_TARGET = i_mbTarget;
            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_SUPPLIER_ID_NOT_IN_MV_VPD );
        }
 

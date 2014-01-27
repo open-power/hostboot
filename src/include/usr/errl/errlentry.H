@@ -541,7 +541,7 @@ private:
      *
      *  @return     subsystem ID
      */
-    epubSubSystem_t getSubSystem( TARGETING::TYPE );
+    epubSubSystem_t getSubSystem( TARGETING::TYPE i_target ) const;
 
     /**
      *  @brief maps the procedure to a corresponding subsystem ID
@@ -550,35 +550,25 @@ private:
      *
      *  @return     subsystem ID
      */
-    epubSubSystem_t getSubSystem( HWAS::epubProcedureID i_procedureId );
+    epubSubSystem_t getSubSystem( HWAS::epubProcedureID i_procedureId ) const;
 
-#if 0
     /**
-     *  @brief Adds a software section to the log which is
-     *         mostly used as a stack call indicator
+     *  @brief maps a bus type to a subsystem ID
      *
-     *  @param[in] i_cid        Component for which the section is being logged
-     *  @param[in] i_returnCode User supplied return code.
-     *  @param[in] i_fileId     User supplied file identifier
-     *  @param[in] i_codeloc    User supplied code location ( line # )
-     *  @param[in] i_objId      User supplied object identifier
+     *  @param[in]  i_busType   Bus Type.
      *
-     *  @return Token which identifies the newly added section
-     *          A negative token is considered to be invalid
-     *
-     *  @note   The section may be dropped if there is not enough
-     *          room available to contain it
-     *
-     *
+     *  @return     subsystem ID
      */
-    void addSwErr(const compId_t i_cid,
-                  const uint32_t i_returnCode,
-                  const uint16_t i_fileId,
-                  const uint16_t i_codeLoc,
-                  const uint32_t i_objId = 0);
+    epubSubSystem_t getSubSystem( HWAS::busTypeEnum i_busType ) const;
 
-#endif
-
+    /**
+     *  @brief maps a clock type to a subsystem ID
+     *
+     *  @param[in]  i_clockType   Bus Type.
+     *
+     *  @return     subsystem ID
+     */
+    epubSubSystem_t getSubSystem( HWAS::clockTypeEnum i_clockType ) const;
 
     /**
      * @brief The ErrlManager will call here to ask the

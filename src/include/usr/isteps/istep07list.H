@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -62,131 +62,71 @@
 namespace   INITSERVICE
 {
     const   TaskInfo    g_istep07[]  =   {
-
         {
-
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,                                  // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(07,01,"proc_attr_update"),
                 NEST_CHIPLETS::call_proc_attr_update,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,02,"proc_a_x_pci_dmi_pll_initf"),
                 NEST_CHIPLETS::call_proc_a_x_pci_dmi_pll_initf,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-
         {
                 ISTEPNAME(07,03,"proc_a_x_pci_dmi_pll_setup"),
                 NEST_CHIPLETS::call_proc_a_x_pci_dmi_pll_setup,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-
 
         {
                 ISTEPNAME(07,04,"proc_startclock_chiplets"),
                 NEST_CHIPLETS::call_proc_startclock_chiplets,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-
-
         {
                 ISTEPNAME(07,05,"proc_chiplet_scominit"),
                 NEST_CHIPLETS::call_proc_chiplet_scominit,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,06,"proc_xbus_scominit"),
                 NEST_CHIPLETS::call_proc_xbus_scominit,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,07,"proc_abus_scominit"),
                 NEST_CHIPLETS::call_proc_abus_scominit,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,08,"proc_pcie_scominit"),
                 NEST_CHIPLETS::call_proc_pcie_scominit,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,09,"proc_scomoverride_chiplets"),
                 NEST_CHIPLETS::call_proc_scomoverride_chiplets,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-
-
-        //  END OF LIST!
 };
 
 
-const DepModInfo  g_istep07Dependancies = {
+const DepModInfo g_istep07Dependancies = {
     {
         DEP_LIB(libnest_chiplets.so),
-        { 0 },
+        NULL
     }
 };
 
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep07TaskList    =   {
-        &(g_istep07[0]),
-        ( sizeof(g_istep07)/sizeof(TaskInfo) ),
-        &g_istep07Dependancies    //  later, depModules struct
+const ExtTaskInfo g_istep07TaskList = {
+    &(g_istep07[0]),
+    ( sizeof(g_istep07)/sizeof(TaskInfo) ),
+    &g_istep07Dependancies
 };
 
 };  // end namespace

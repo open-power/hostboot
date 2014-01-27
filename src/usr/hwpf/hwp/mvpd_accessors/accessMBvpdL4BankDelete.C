@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: accessMBvpdL4BankDelete.C,v 1.2 2013/11/21 17:17:59 whs Exp $
+// $Id: accessMBvpdL4BankDelete.C,v 1.3 2014/02/12 22:11:26 mjjones Exp $
 /**
  *  @file accessMBvpdL4BankDelete.C
  *
@@ -74,6 +74,7 @@ fapi::ReturnCode accessMBvpdL4BankDelete(
                        l_bufSize, sizeof(l_l4BankDelete));
                 const uint32_t & KEYWORD = sizeof(l_l4BankDelete);
                 const uint32_t & RETURNED_SIZE = l_bufSize;
+                const fapi::Target & CHIP_TARGET = i_mbTarget;
                 FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
                 break;  //  break out with fapirc
             }

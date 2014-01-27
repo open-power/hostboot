@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSpareDramData.C,v 1.4 2013/10/03 20:40:52 dedahle Exp $
+// $Id: getMBvpdSpareDramData.C,v 1.5 2014/02/12 22:14:28 mjjones Exp $
 #include  <stdint.h>
 
 //  fapi support
@@ -108,6 +108,7 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
                        l_AmBufSize, AM_KEYWORD_SIZE);
             const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_AM;
             const uint32_t & RETURNED_SIZE = l_AmBufSize;
+            const fapi::Target & CHIP_TARGET = l_mbTarget;
             FAPI_SET_HWP_ERROR(l_rc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
             break;
         }

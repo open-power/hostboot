@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,10 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// IMPORTED FROM eCMD on 11/10/2011
-
 #ifndef ecmdDataBufferBase_H 
 #define ecmdDataBufferBase_H
+/* $Header: /gsa/rchgsa/projects/e/ecmd/.cvsroot/capi/ecmdDataBufferBase.H,v 1.2 2012/09/14 18:52:12 farrugia Exp $ */
 // Copyright **********************************************************
 //                                                                      
 // File ecmdDataBufferBase.H                                               
@@ -52,7 +51,7 @@
 //--------------------------------------------------------------------
 #include <vector>
 #include <stdint.h>
-
+//#include <ecmdDefines.H>
 
 #ifdef ENABLE_MPATROL
  #include <mpatrol.h>
@@ -96,6 +95,7 @@ extern tracDesc_t g_etrc; /** Trace Descriptor **/
  #define ECMD_DBUF_NOT_OWNER                     (ECMD_ERR_ECMD | 0x2061) ///< Don't own this buffer so can't do this operation
  #define ECMD_DBUF_XSTATE_NOT_ENABLED            (ECMD_ERR_ECMD | 0x2063) ///< Xstate function called on a buffer that doesn't have xstates enabled
  #define ECMD_DBUF_MISMATCH                      (ECMD_ERR_ECMD | 0x2065) ///< There was a mismatch between a comparision operation in the buffer
+ #define ECMD_DBUF_NULL_POINTER                  (ECMD_ERR_ECMD | 0x2067) ///< Null pointer passed 
 #endif
 
 //--------------------------------------------------------------------
@@ -171,6 +171,20 @@ extern tracDesc_t g_etrc; /** Trace Descriptor **/
 #define ETRAC7(fmt, arg1, arg2, arg3, arg4, arg5, arg6, arg7) printf( "%s> ETRC: " fmt "\n", __FUNCTION__, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 #define ETRAC8(fmt, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) printf( "%s> ETRC: " fmt "\n", __FUNCTION__, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 #define ETRAC9(fmt, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) printf( "%s> ETRC: " fmt "\n", __FUNCTION__, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+#endif
+
+#ifdef FIPSODE
+#define  ECMD_NULL_PTR_CHECK(ptr) \
+  if ( ptr == NULL ) { \
+    ETRAC2("**** ERROR : %s : Argument %s is NULL", __PRETTY_FUNCTION__, #ptr); \
+    return ECMD_DBUF_NULL_POINTER; \
+  };
+#else
+#define  ECMD_NULL_PTR_CHECK(ptr) \
+  if ( ptr == NULL ) { \
+    ETRAC1("**** ERROR : Argument %s is NULL",#ptr); \
+    return ECMD_DBUF_NULL_POINTER; \
+  };
 #endif
 
 //----------------------------------------------------------------------

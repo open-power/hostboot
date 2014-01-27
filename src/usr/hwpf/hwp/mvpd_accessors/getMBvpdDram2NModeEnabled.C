@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdDram2NModeEnabled.C,v 1.2 2013/10/31 18:06:17 whs Exp $
+// $Id: getMBvpdDram2NModeEnabled.C,v 1.3 2014/02/12 22:11:39 mjjones Exp $
 /**
  *  @file getMBvpdDram2NModeEnabled.C
  *
@@ -69,6 +69,7 @@ fapi::ReturnCode getMBvpdDram2NModeEnabled(
                      l_dram2NMode[0],l_dram2NMode[1]);
             const uint32_t & PORT0 = l_dram2NMode[0];
             const uint32_t & PORT1 = l_dram2NMode[1];
+            const fapi::Target & MBA_TARGET = i_mbaTarget;
             FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_DRAM_2N_MODE_NOT_EQUAL);
             break;  //  break out with fapirc
         }

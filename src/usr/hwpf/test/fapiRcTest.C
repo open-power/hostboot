@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -605,7 +605,7 @@ uint32_t rcTest12()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
+    l_rc.setPlatError(NULL, FAPI_RC_PLAT_ERR_SEE_DATA);
 
     // Create fake targets
     uint32_t l_targetHandle = 3;
@@ -892,7 +892,7 @@ uint32_t rcTest13()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
+    l_rc.setPlatError(NULL, FAPI_RC_PLAT_ERR_SEE_DATA);
 
     // Create a DIMM target
     uint32_t l_targetHandle = 3;
@@ -982,7 +982,7 @@ uint32_t rcTest14()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
+    l_rc.setPlatError(NULL, FAPI_RC_PLAT_ERR_SEE_DATA);
 
     // Create a DIMM target
     uint32_t l_targetHandle = 3;
@@ -1073,7 +1073,7 @@ uint32_t rcTest15()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
+    l_rc.setPlatError(NULL, FAPI_RC_PLAT_ERR_SEE_DATA);
 
     // Create a DIMM target
     uint32_t l_targetHandle = 3;
@@ -1121,7 +1121,7 @@ uint32_t rcTest16()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);
+    l_rc.setPlatError(NULL, FAPI_RC_PLAT_ERR_SEE_DATA);
 
     // Create 2 targets
     uint32_t l_targetHandle = 3;

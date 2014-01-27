@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -268,9 +268,10 @@ mutex_t* Target::_getHbMutexAttr(
     void* l_pAttr = NULL;
     (void)_getAttrPtr(i_attribute,l_pAttr);
 
-    //@TODO Remove assert once release has stablized
-    TARG_ASSERT(l_pAttr,"TARGETING::Target::_getHbMutexAttr<%d>: _getAttrPtr "
-           "returned NULL",i_attribute);
+    if (unlikely(l_pAttr == NULL))
+    {
+        targAssert(GET_HB_MUTEX_ATTR, i_attribute);
+    }
 
     return static_cast<mutex_t*>(l_pAttr);
 
@@ -512,6 +513,41 @@ uint8_t Target::getAttrTankTargetUnitPos() const
     }
 
     return l_targetUnitPos;
+}
+
+//******************************************************************************
+// Target::targAssert()
+//******************************************************************************
+void Target::targAssert(TargAssertReason i_reason,
+                        uint32_t i_ffdc)
+{
+    switch (i_reason)
+    {
+    case SET_ATTR:
+        TARG_ASSERT(false,
+            "TARGETING::Target::setAttr<0x%7x>: trySetAttr returned false",
+            i_ffdc);
+        break;
+    case GET_ATTR:
+        TARG_ASSERT(false,
+            "TARGETING::Target::getAttr<0x%7x>: tryGetAttr returned false",
+            i_ffdc);
+        break;
+    case GET_ATTR_AS_STRING:
+        TARG_ASSERT(false,
+            "TARGETING::Target::getAttrAsString<0x%7x>: tryGetAttr returned false",
+            i_ffdc);
+        break;
+    case GET_HB_MUTEX_ATTR:
+        TARG_ASSERT(false,
+            "TARGETING::Target::_getHbMutexAttr<0x%7x>: _getAttrPtr returned NULL",
+            i_ffdc);
+        break;
+    default:
+        TARG_ASSERT(false,
+            "TARGETING function asserted for unknown reason (0x%x)",
+            i_ffdc);
+    }
 }
 
 //******************************************************************************

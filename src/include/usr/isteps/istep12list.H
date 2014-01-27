@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -62,83 +62,46 @@ const   TaskInfo    g_istep12[]  =   {
         {
                 "",                   // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,        // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(12,01,"host_collect_dimm_spd"),
                 MC_CONFIG::call_host_collect_dimm_spd,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(12,02,"mss_volt"),
                 MC_CONFIG::call_mss_volt,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(12,03,"mss_freq"),
                 MC_CONFIG::call_mss_freq,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(12,04,"mss_eff_config"),
                 MC_CONFIG::call_mss_eff_config,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(12,05,"mss_attr_update"),
                 MC_CONFIG::call_mss_attr_update,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-
-        //  END OF LIST!
 };
 
-const DepModInfo  g_istep12Dependancies = {
+const DepModInfo g_istep12Dependancies = {
     {
         DEP_LIB(libmc_config.so),
-        { 0 },
+        NULL
     }
 };
 
-
-
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep12TaskList    =   {
-        &(g_istep12[0]),
-        ( sizeof(g_istep12)/sizeof(TaskInfo) ),
-        &g_istep12Dependancies    //  later, depModules struct
+const ExtTaskInfo g_istep12TaskList = {
+    &(g_istep12[0]),
+    ( sizeof(g_istep12)/sizeof(TaskInfo) ),
+    &g_istep12Dependancies
 };
 
 };  // end namespace

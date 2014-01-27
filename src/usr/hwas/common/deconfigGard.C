@@ -40,24 +40,6 @@
 // Trace definition
 #define __COMP_TD__ g_trac_deconf
 
-// TODO The DeconfigGard code needs to trace a target. The current recommended
-// way is to get the Target's PHYS_PATH attribute and do a binary trace.
-// However, the size of a EntityPath is more than 16 bytes. This code
-// will trace only the first 16 bytes (which in most cases is enough) to avoid a
-// multi-line binary trace. This all seems a little convoluted. Is there a
-// better way to trace a Target
-#define DG_DBG_TARGET(string, pPath) \
-    HWAS_DBG_BIN(string, pPath, sizeof(EntityPath) - 1)
-#define DG_INF_TARGET(string, pPath) \
-    HWAS_INF_BIN(string, pPath, sizeof(EntityPath) - 1)
-#define DG_ERR_TARGET(string, pPath) \
-    HWAS_ERR_BIN(string, pPath, sizeof(EntityPath) - 1)
-
-// TODO There are a number of error logs created in this file. Most of them
-// should include the target identifier (PHYS_PATH). There is a plan in RTC
-// story 4110 to provide a way to easily add a target to an error log. When that
-// is done need to update the error logs
-
 namespace HWAS
 {
 
@@ -266,8 +248,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             {
                 // could be a platform specific target for the other
                 // ie, we are hostboot and this is an FSP target, or vice-versa
-                DG_INF_TARGET("Could not find Target for",
-                               &(l_gardRecord.iv_targetId));
+                // Binary trace the iv_targetId (EntityPath)
+                HWAS_INF_BIN("Could not find Target for:",
+                             &(l_gardRecord.iv_targetId),
+                             sizeof(l_gardRecord.iv_targetId));
                 continue;
             }
 
@@ -1343,7 +1327,7 @@ void DeconfigGard::_deconfigureTarget(Target & i_target,
 //******************************************************************************
 void DeconfigGard::_doDeconfigureActions(Target & i_target)
 {
-    // TODO
+    // Placeholder for any necessary deconfigure actions
 }
 
 //******************************************************************************

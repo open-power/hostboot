@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -72,7 +72,6 @@ FAPI_ATTR_SOURCES =          \
     dimm_attributes.xml      \
     unit_attributes.xml      \
     freq_attributes.xml      \
-    proc_mvpd_attributes.xml \
     ei_bus_attributes.xml    \
     dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml \
     dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml \

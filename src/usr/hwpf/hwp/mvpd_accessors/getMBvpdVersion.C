@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdVersion.C,v 1.1 2013/10/30 21:07:58 whs Exp $
+// $Id: getMBvpdVersion.C,v 1.2 2014/02/12 22:14:44 mjjones Exp $
 /**
  *  @file getMBvpdVersion.C
  *
@@ -81,6 +81,7 @@ fapi::ReturnCode getMBvpdVersion(
                        l_bufSize, sizeof(l_vpdVersion));
             const uint32_t & KEYWORD = sizeof(l_vpdVersion);
             const uint32_t & RETURNED_SIZE = l_bufSize;
+            const fapi::Target & CHIP_TARGET = l_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_INSUFFICIENT_VPD_RETURNED);
             break;  //  break out with fapirc
         }

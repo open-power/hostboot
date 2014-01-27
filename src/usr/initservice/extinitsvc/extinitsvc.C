@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -64,9 +64,6 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
 
     printk( "ExtInitSvc entry.\n" );
 
-    //  @todo detach from initservice
-    // task_detach();
-
     TRACFCOMP( g_trac_initsvc,
             "Extended Initialization Service is starting." );
 
@@ -105,25 +102,7 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
     //  die if we drop out with an error
     if ( l_errl )
     {
-
-#if 0
-        //  @todo   detach this task and just terminate task
-        //  Commit the errorlog here.
-        TRACFCOMP( g_trac_initsvc,
-                "ExtInitSvc ERROR: Committing errorlog %p & shutdown",
-                l_errl );
-        errlCommit( l_errl, INITSVC_COMP_ID );
-
-        //  Tell the kernel to shut down.  This will not actually
-        //  happen until the last thread has ended.
-        INITSERVICE::doShutdown(SHUTDOWN_STATUS_EXTINITSVC_FAILED);
-
-        //  end the task.
-        io_rtaskRetErrl=NULL;
-        return;
-#endif
-
-        //  end the task and pass the errorlog to initservice to be committed.
+        //  pass the errorlog to initservice to be committed.
         //  initservice should do the shutdown.
         TRACFCOMP( g_trac_initsvc,
                 "ExtInitSvc: ERROR: return to initsvc with errlog %p",

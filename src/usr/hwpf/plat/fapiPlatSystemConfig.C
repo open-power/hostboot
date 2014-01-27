@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -67,10 +67,12 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
          * @reasoncode   fapi::RC_EMBEDDED_NULL_TARGET_PTR
          * @devdesc      Target has embedded null target pointer
          */
+        const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
-                    fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+                    fapi::RC_EMBEDDED_NULL_TARGET_PTR,
+                    0, 0, hbSwError);
 
         // Attach the error log to the fapi::ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -90,14 +92,18 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
              * @moduleid     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
              * @reasoncode   fapi::RC_NO_SINGLE_MEMBUFF
              * @userdata1    Number of Memory Buffers
+             * @userdata2    MCS HUID
              * @devdesc      fapiGetOtherSideOfMemChannel could not find exactly
              *               one target on the other side of the correct state
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
                 fapi::RC_NO_SINGLE_MEMBUFF,
-                l_targetList.size());
+                l_targetList.size(),
+                TARGETING::get_huid(l_target),
+                hbSwError);
 
             // Attach the error log to the fapi::ReturnCode
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -109,7 +115,8 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
             o_target.set(reinterpret_cast<void *>(l_targetList[0]));
         }
 
-    } else if (i_target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)
+    }
+    else if (i_target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)
     {
         // find the MCS that is associated with this Centaur
         getParentAffinityTargets (l_targetList, l_target,
@@ -124,18 +131,21 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
              * @moduleid     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
              * @reasoncode   fapi::RC_NO_SINGLE_MCS
              * @userdata1    Number of MCSs
+             * @userdata2    Membuf HUID
              * @devdesc      fapiGetOtherSideOfMemChannel could not find exactly
              *               one target on the other side of the correct state
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
                 fapi::RC_NO_SINGLE_MCS,
-                l_targetList.size());
+                l_targetList.size(),
+                TARGETING::get_huid(l_target),
+                hbSwError);
 
             // Attach the error log to the fapi::ReturnCode
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
-
         }
         else
         {
@@ -143,8 +153,9 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
             o_target.set(reinterpret_cast<void *>(l_targetList[0]));
         }
 
-    } else {
-
+    }
+    else
+    {
       FAPI_ERR("fapiGetOtherSideOfMemChannel. target 0x%08x not supported",
                      i_target.getType());
         /*@
@@ -152,14 +163,18 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
          * @moduleid     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
          * @reasoncode   fapi::RC_UNSUPPORTED_REQUEST
          * @userdata1    Requested type
+         * @userdata2    Unsupported Target HUID
          * @devdesc      fapiGetOtherSideOfMemChannel request for unsupported
          *               or invalid target type
          */
+        const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
                 fapi::RC_UNSUPPORTED_REQUEST,
-                i_target.getType());
+                i_target.getType(),
+                TARGETING::get_huid(l_target),
+                hbSwError);
 
         // Attach the error log to the fapi::ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -179,14 +194,18 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
             * @moduleid     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
             * @reasoncode   fapi::RC_STATE_MISMATCH
             * @userdata1    Requested state
+            * @userdata2    Other Target HUID
             * @devdesc      fapiGetOtherSideOfMemChannel target not present or
             *               functional as requested
             */
+           const bool hbSwError = true;
            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
                 fapi::RC_STATE_MISMATCH,
-                i_state);
+                i_state,
+                TARGETING::get_huid(l_targetList[0]),
+                hbSwError);
 
            // Attach the error log to the fapi::ReturnCode
            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -215,6 +234,10 @@ fapi::ReturnCode fapiGetChildChiplets(
     fapi::ReturnCode l_rc;
     o_chiplets.clear();
 
+    // Extract the HostBoot Target pointer for the input chip
+    TARGETING::Target * l_pChip =
+        reinterpret_cast<TARGETING::Target*>(i_chip.get());
+
     // Check that the input target is a chip
     if (!i_chip.isChip())
     {
@@ -225,13 +248,17 @@ fapi::ReturnCode fapiGetChildChiplets(
          * @moduleid     fapi::MOD_FAPI_GET_CHILD_CHIPLETS
          * @reasoncode   fapi::RC_INVALID_REQUEST
          * @userdata1    Type of input target
+         * @userdata2    Input Target HUID
          * @devdesc      fapiGetChildChiplets request for non-chip
          */
+        const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             fapi::MOD_FAPI_GET_CHILD_CHIPLETS,
             fapi::RC_INVALID_REQUEST,
-            i_chip.getType());
+            i_chip.getType(),
+            TARGETING::get_huid(l_pChip),
+            hbSwError);
 
         // Attach the error log to the fapi::ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -264,7 +291,6 @@ fapi::ReturnCode fapiGetChildChiplets(
         {
             l_type = TARGETING::TYPE_L4;
         }
-        
         else
         {
             FAPI_ERR("fapiGetChildChiplets. Chiplet type 0x%08x not supported",
@@ -274,24 +300,24 @@ fapi::ReturnCode fapiGetChildChiplets(
              * @moduleid     fapi::MOD_FAPI_GET_CHILD_CHIPLETS
              * @reasoncode   fapi::RC_UNSUPPORTED_REQUEST
              * @userdata1    Type of requested chiplet
+             * @userdata2    Input Chip Target HUID
              * @devdesc      fapiGetChildChiplets request for unsupported
              *               or invalid chiplet type
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_FAPI_GET_CHILD_CHIPLETS,
                 fapi::RC_UNSUPPORTED_REQUEST,
-                i_chipletType);
+                i_chipletType,
+                TARGETING::get_huid(l_pChip),
+                hbSwError);
 
             // Attach the error log to the fapi::ReturnCode
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
         }
         if (!l_rc)
         {
-            // Extract the HostBoot Target pointer for the input chip
-            TARGETING::Target * l_pChip =
-                reinterpret_cast<TARGETING::Target*>(i_chip.get());
-
             if (l_pChip == NULL)
             {
                 FAPI_ERR("fapiGetChildChiplets. Embedded NULL target pointer");
@@ -301,10 +327,12 @@ fapi::ReturnCode fapiGetChildChiplets(
                  * @reasoncode   fapi::RC_EMBEDDED_NULL_TARGET_PTR
                  * @devdesc      Target has embedded null target pointer
                  */
+                const bool hbSwError = true;
                 errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                     fapi::MOD_FAPI_GET_CHILD_CHIPLETS,
-                    fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+                    fapi::RC_EMBEDDED_NULL_TARGET_PTR,
+                    0, 0, hbSwError);
 
                 // Attach the error log to the fapi::ReturnCode
                 l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -372,10 +400,12 @@ fapi::ReturnCode fapiGetAssociatedDimms(
          * @reasoncode   fapi::RC_EMBEDDED_NULL_TARGET_PTR
          * @devdesc      Target has embedded null target pointer
          */
+        const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_FAPI_GET_ASSOCIATE_DIMMS,
-                fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+                fapi::RC_EMBEDDED_NULL_TARGET_PTR,
+                0, 0, hbSwError);
 
         // Attach the error log to the fapi::ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -432,6 +462,10 @@ fapi::ReturnCode fapiGetParentChip(
 
     fapi::ReturnCode l_rc;
 
+    // Extract the HostBoot Target pointer for the input chiplet
+    TARGETING::Target * l_pChiplet =
+        reinterpret_cast<TARGETING::Target*>(i_chiplet.get());
+
     // Check that the input target is a chiplet
     if (!i_chiplet.isChiplet())
     {
@@ -443,23 +477,23 @@ fapi::ReturnCode fapiGetParentChip(
          * @moduleid     fapi::MOD_FAPI_GET_PARENT_CHIP
          * @reasoncode   fapi::RC_INVALID_REQUEST
          * @userdata1    Type of input target
+         * @userdata2    Input Target HUID
          * @devdesc      fapiGetParentChip request for non-chiplet
          */
+        const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             fapi::MOD_FAPI_GET_PARENT_CHIP,
             fapi::RC_INVALID_REQUEST,
-            i_chiplet.getType());
+            i_chiplet.getType(),
+            TARGETING::get_huid(l_pChiplet),
+            hbSwError);
 
         // Attach the error log to the fapi::ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
     else
     {
-        // Extract the HostBoot Target pointer for the input chiplet
-        TARGETING::Target * l_pChiplet =
-            reinterpret_cast<TARGETING::Target*>(i_chiplet.get());
-
         if (l_pChiplet == NULL)
         {
             /*@
@@ -468,10 +502,12 @@ fapi::ReturnCode fapiGetParentChip(
              * @reasoncode   fapi::RC_EMBEDDED_NULL_TARGET_PTR
              * @devdesc      Target has embedded null target pointer
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_FAPI_GET_PARENT_CHIP,
-                fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+                fapi::RC_EMBEDDED_NULL_TARGET_PTR,
+                0, 0, hbSwError);
 
             // Attach the error log to the fapi::ReturnCode
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -483,18 +519,21 @@ fapi::ReturnCode fapiGetParentChip(
 
             if (l_pChip == NULL)
             {
-                // One parent chip was not found
                 FAPI_ERR("fapiGetParentChip. Parent not found");
                 /*@
                  * @errortype
                  * @moduleid     fapi::MOD_FAPI_GET_PARENT_CHIP
                  * @reasoncode   fapi::RC_NO_SINGLE_PARENT
+                 * @userdata1    Input Chiplet Target HUID
                  * @devdesc      fapiGetParentChip did not find one parent
                  */
+                const bool hbSwError = true;
                 errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                     fapi::MOD_FAPI_GET_PARENT_CHIP,
-                    fapi::RC_NO_SINGLE_PARENT);
+                    fapi::RC_NO_SINGLE_PARENT,
+                    TARGETING::get_huid(l_pChiplet),
+                    0, hbSwError);
 
                 // Attach the error log to the fapi::ReturnCode
                 l_rc.setPlatError(reinterpret_cast<void *> (l_pError));

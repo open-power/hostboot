@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -57,84 +57,45 @@
 namespace   INITSERVICE
 {
     const   TaskInfo    g_istep16[]  =   {
-
         {
-
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,                              // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(16,01,"host_activate_master"),
                 CORE_ACTIVATE::call_host_activate_master,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP | MPIPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
-
-
         {
                 ISTEPNAME(16,02,"host_activate_slave_cores"),
                 CORE_ACTIVATE::call_host_activate_slave_cores,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP | MPIPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
-
-
         {
                 ISTEPNAME(16,03,"mss_scrub"),
                 CORE_ACTIVATE::call_mss_scrub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-
-
         {
                 ISTEPNAME(16,04,"host_ipl_complete"),
                 CORE_ACTIVATE::call_host_ipl_complete,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP | MPIPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
-
-
-        //  END OF LIST!
 };
 
-const DepModInfo  g_istep16Dependancies = {
+const DepModInfo g_istep16Dependancies = {
     {
         DEP_LIB(libcore_activate.so),
         DEP_LIB(libbuild_winkle_images.so),
-        { 0 },
+        NULL
     }
 };
 
-
-// make a struct from the above with the number of items included
 const   ExtTaskInfo g_istep16TaskList    =   {
-        &(g_istep16[0]),
-        ( sizeof(g_istep16)/sizeof(TaskInfo) ),
-        &g_istep16Dependancies    //  later, depModules struct
+    &(g_istep16[0]),
+    ( sizeof(g_istep16)/sizeof(TaskInfo) ),
+    &g_istep16Dependancies
 };
 
 };  // end namespace

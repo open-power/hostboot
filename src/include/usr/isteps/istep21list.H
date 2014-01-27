@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -55,52 +55,26 @@
 namespace   INITSERVICE
 {
     const   TaskInfo    g_istep21[]  =   {
-
         {
-
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,                              // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(21,01,"host_runtime_setup"),
                 START_PAYLOAD::call_host_runtime_setup,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        MPIPL_OP | NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(21,02,"host_verify_hdat"),
                 START_PAYLOAD::call_host_verify_hdat,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        MPIPL_OP | NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(21,03,"host_start_payload"),
                 START_PAYLOAD::call_host_start_payload,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        MPIPL_OP | NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
-
-
-        //  END OF LIST!
 };
 
 const DepModInfo  g_istep21Dependancies = {
@@ -115,16 +89,14 @@ const DepModInfo  g_istep21Dependancies = {
 
         DEP_LIB(libocc.so),
 */
-        { 0 },
+        NULL
     }
 };
 
-
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep21TaskList    =   {
-        &(g_istep21[0]),
-        ( sizeof(g_istep21)/sizeof(TaskInfo) ),
-        &g_istep21Dependancies    //  later, depModules struct
+const ExtTaskInfo g_istep21TaskList = {
+    &(g_istep21[0]),
+    ( sizeof(g_istep21)/sizeof(TaskInfo) ),
+    &g_istep21Dependancies
 };
 
 };  // end namespace

@@ -72,157 +72,85 @@
 namespace   INITSERVICE
 {
 const   TaskInfo    g_istep13[]  =   {
-
         {
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,                      // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(13,01,"host_disable_vddr"),
                 DRAM_TRAINING::call_host_disable_vddr,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,02,"mem_pll_initf"),
                 DRAM_TRAINING::call_mem_pll_initf,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,03,"mem_pll_setup"),
                 DRAM_TRAINING::call_mem_pll_setup,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,04,"mem_startclocks"),
                 DRAM_TRAINING::call_mem_startclocks,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,05,"host_enable_vddr"),
                 DRAM_TRAINING::call_host_enable_vddr,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,06,"mss_scominit"),
                 DRAM_TRAINING::call_mss_scominit,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,07,"mss_ddr_phy_reset"),
                 DRAM_TRAINING::call_mss_ddr_phy_reset,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,08,"mss_draminit"),
                 DRAM_TRAINING::call_mss_draminit,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,09,"mss_draminit_training"),
                 DRAM_TRAINING::call_mss_draminit_training,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,10,"mss_draminit_trainadv"),
                 DRAM_TRAINING::call_mss_draminit_trainadv,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,11,"mss_draminit_mc"),
                 DRAM_TRAINING::call_mss_draminit_mc,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(13,12,"mss_dimm_power_test"),
                 DRAM_TRAINING::call_mss_dimm_power_test,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-        //  END OF LIST!
 };
 
-const DepModInfo  g_istep13Dependancies = {
+const DepModInfo g_istep13Dependancies = {
     {
         DEP_LIB(libdram_training.so),
         DEP_LIB(libdram_initialization.so),
-        { 0 },
+        NULL
     }
 };
 
-
-
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep13TaskList    =   {
-        &(g_istep13[0]),
-        ( sizeof(g_istep13)/sizeof(TaskInfo) ),
-        &g_istep13Dependancies    //  later, depModules struct
+const ExtTaskInfo g_istep13TaskList = {
+    &(g_istep13[0]),
+    ( sizeof(g_istep13)/sizeof(TaskInfo) ),
+    &g_istep13Dependancies
 };
 
 };  // end namespace

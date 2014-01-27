@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -149,16 +149,11 @@ struct  TaskFlags
  *      - execution flags, see TaskFlags above
  *
  */
-/**
- * @todo    store a pointer to the taskname string here instead of allocating
- *          64 bytes for each entry?
- */
 struct  TaskInfo
 {
-    const   char        taskname[VFS_MODULE_NAME_MAX];
+    const char * const  taskname;
     void*               (*taskfn)(void *ptr);
     const   TaskFlags   taskflags;
-
 };
 
 
@@ -167,16 +162,11 @@ struct  TaskInfo
  *
  * Holds information on other modules that need to be loaded so that this
  * istep will run.
- *
- *  @todo   This is a placeholder right now
  */
 struct  DepModInfo
 {
-    const char  modulename[MAX_DEPENDENT_MODULES][VFS_MODULE_NAME_MAX];
-
+    const char * const modulename[MAX_DEPENDENT_MODULES];
 };
-
-
 
 
 /**

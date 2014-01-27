@@ -195,8 +195,6 @@ public:
 
             // Normal buffer sizes are 0x800 (2048), so passing
             // something bigger is not expected to be an error.
-            // TODO: maybe after story "user selectable trace buffer sizes"
-            // TRAC_DEFAULT_BUFFER_SIZE (0x800) will be publicly available.
             fOK = l_err->collectTrace(  "TARG" , 4003 );
             if( !fOK )
             {

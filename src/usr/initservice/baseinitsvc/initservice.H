@@ -133,22 +133,6 @@ public:
     errlHndl_t executeFn(   const TaskInfo  *i_ptask,
                             void            *i_pargs    ) const;
 
-
-    /**
-     * @brief   set progress code for task.
-     *          This is supposed to make a system call to post the error to
-     *          SP and will also write a SCOM reg
-     *
-     * @TODO need progress code categories defined.
-     *
-     * @param[in]  i_progresscode - 64-bit progress code.
-     *
-     * @return  nothing
-     *
-     */
-    void           setProgressCode( uint64_t  i_progresscode ) const;
-
-
     /**
      * @brief   dispatch Task depending on what type of task it is,
      *          etc.

@@ -4989,7 +4989,6 @@ sub generateTargetingImage {
     my($vmmConstsFile, $attributes, $Target_t) = @_;
 
     # 128 MB virtual memory offset between sections
-    #@TODO Need the final value after full host boot support is implemented.
     my $vmmSectionOffset = 128 * 1024 * 1024; # 128MB
 
     # Virtual memory addresses corresponding to the start of the targeting image

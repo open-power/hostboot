@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.C $  */
+/* $Source: src/usr/hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.C $         */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSensorMap.C,v 1.1 2013/11/20 22:37:38 whs Exp $
+// $Id: getMBvpdSensorMap.C,v 1.2 2014/02/12 22:11:52 mjjones Exp $
 
 /**
  * @file getMBvpdSensorMap.C
@@ -92,6 +92,7 @@ fapi::ReturnCode getMBvpdSensorMap(
                        l_MwBufsize, MW_KEYWORD_SIZE);
             const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_MW;
             const uint32_t & RETURNED_SIZE = l_MwBufsize;
+            const fapi::Target & CHIP_TARGET = i_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
             break;  //  break out with fapirc
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -66,7 +66,7 @@ ErrlPrvt::ErrlPrvt( compId_t  i_CreatorCompId ) :
     iv_plid = iv_eid = ERRORLOG::theErrlManager::instance().getUniqueErrId();
 
     // Set the time of creation.
-    // TODO The field iv_created and iv_committed expect an 8-byte
+    // TODO RTC 35258 The field iv_created and iv_committed expect an 8-byte
     // BCD-encoded timestamp.  However, the FSP errl tool does not complain
     // about displaying the timebase value. Perhaps we can apply a transform
     // on time base to get an approximation of real time.

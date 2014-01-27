@@ -221,8 +221,8 @@ static errlHndl_t verifyCfamAccessTarget(const fapi::Target& i_target,
 
         if( l_pMasterProcChip == l_pTarget )
         {
-            // Add the error log pointer as data to the ReturnCode
-            FAPI_ERR("verifyCfamAccessTarget: Attempt to access CFAM register %.8X on the master processor chip", i_address);
+            FAPI_ERR("verifyCfamAccessTarget: Attempt to access CFAM register %.8X on the master processor chip",
+                     i_address);
 
             /*@
              * @errortype
@@ -233,12 +233,13 @@ static errlHndl_t verifyCfamAccessTarget(const fapi::Target& i_target,
              * @devdesc      Attempt to access CFAM register on
              *               the master processor chip
              */
+            const bool hbSwError = true;
             l_err = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             fapi::MOD_VERIFY_CFAM_ACCESS_TARGET,
                             fapi::RC_CFAM_ACCESS_ON_PROC_ERR,
                             TARGETING::get_huid(l_pMasterProcChip),
-                            i_address);
+                            i_address, hbSwError);
         }
     }
 
@@ -290,13 +291,17 @@ static errlHndl_t getCfamChipTarget(const TARGETING::Target* i_target,
              * @moduleid     fapi::MOD_GET_CFAM_CHIP_TARGET
              * @reasoncode   fapi::RC_INVALID_NUM_PARENT_CHIP
              * @userdata1    Number of parent chip found
+             * @userdata2    Chiplet HUID
              * @devdesc      Invalid num of parent chip found for input CFAM target chiplet
              */
+            const bool hbSwError = true;
             l_err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                         fapi::MOD_GET_CFAM_CHIP_TARGET,
                         fapi::RC_INVALID_NUM_PARENT_CHIP,
-                        l_list.size());
+                        l_list.size(),
+                        TARGETING::get_huid(i_target),
+                        hbSwError);
         }
     }
     return l_err;

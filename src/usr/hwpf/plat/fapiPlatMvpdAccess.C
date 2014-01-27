@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -107,11 +107,12 @@ fapi::ReturnCode MvpdRecordXlate(const fapi::MvpdRecord i_fapiRecord,
          * @userdata1    Record enumerator
          * @devdesc      Attempt to read an MVPD field using an invalid record
          */
+        const bool hbSwError = true;
         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             fapi::MOD_MVPD_ACCESS,
             fapi::RC_INVALID_RECORD,
-            i_fapiRecord);
+            i_fapiRecord, 0, hbSwError);
         
         // Add the error log pointer as data to the ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_errl));
@@ -191,11 +192,12 @@ fapi::ReturnCode MvpdKeywordXlate(const fapi::MvpdKeyword i_fapiKeyword,
          * @userdata1    Keyword enumerator
          * @devdesc      Attempt to read an MVPD field using an invalid keyword
          */
+        const bool hbSwError = true;
         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             fapi::MOD_MVPD_ACCESS,
             fapi::RC_INVALID_KEYWORD,
-            i_fapiKeyword);
+            i_fapiKeyword, 0, hbSwError);
         
         // Add the error log pointer as data to the ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_errl));

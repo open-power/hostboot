@@ -52,183 +52,95 @@
 namespace   INITSERVICE
 {
     const   TaskInfo    g_istep18[]  =   {
-
         {
-
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,        // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(18,01,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(18,02,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(18,03,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
 
                 ISTEPNAME(18,04,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(18,05,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(18,06,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(18,07,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,08,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,09,"sys_proc_fab_iovalid"),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-
                 ISTEPNAME(18,10,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,11,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,12,""),
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(18,13,"proc_tod_setup"),
                 TOD::call_tod_setup,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(18,14,"proc_tod_init"),
                 TOD::call_tod_init,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        false,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
-
-        //  END OF LIST!
 };
 
-const DepModInfo  g_istep18Dependancies = {
+const DepModInfo g_istep18Dependancies = {
     {
         DEP_LIB(libtod_init.so),
-        { 0 },
+        NULL
     }
 };
 
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep18TaskList    =   {
-        &(g_istep18[0]),
-        ( sizeof(g_istep18)/sizeof(TaskInfo) ),
-        &g_istep18Dependancies    //  later, depModules struct
+const ExtTaskInfo g_istep18TaskList = {
+    &(g_istep18[0]),
+    ( sizeof(g_istep18)/sizeof(TaskInfo) ),
+    &g_istep18Dependancies
 };
 
 };  // end namespace

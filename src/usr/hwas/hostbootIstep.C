@@ -108,50 +108,30 @@ void* host_discover_targets( void *io_pArgs )
     // Check whether we're in MPIPL mode
     TARGETING::Target* l_pTopLevel = NULL;
     targetService().getTopLevelTarget( l_pTopLevel );
+    HWAS_ASSERT(l_pTopLevel, "HWAS host_discover_targets: no TopLevelTarget");
 
-    if( l_pTopLevel == NULL )
+    if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Top level handle was NULL" );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
 
-        /*@
-         * @errortype
-         * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid     HWAS::MOD_HOST_DISCOVER_TARGETS
-         * @reasoncode   HWAS::RC_TOP_LEVEL_TARGET_NULL
-         * @devdesc      Call to get top level targeting handle
-         *               returned NULL
-         */
-        errl =  hwasError( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           HWAS::MOD_HOST_DISCOVER_TARGETS,
-                           HWAS::RC_TOP_LEVEL_TARGET_NULL );
+        // Sync attributes from Fsp
+        errl = syncAllAttributesFromFsp();
     }
     else
     {
-        if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
+
+        errl = discoverTargets();
+
+        // also if SP doesn't support change detection, call
+        // function to do it here.
+        if (!errl &&
+            !l_pTopLevel->getAttr<ATTR_SP_FUNCTIONS>()
+                .hardwareChangeDetection)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
-
-            // Sync attributes from Fsp
-            errl = syncAllAttributesFromFsp();
-
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
-
-            errl = discoverTargets();
-
-            // also if SP doesn't support change detection, call
-            // function to do it here.
-            if (!errl &&
-                !l_pTopLevel->getAttr<ATTR_SP_FUNCTIONS>()
-                    .hardwareChangeDetection)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "calling hwasChangeDetection");
-                errl = hwasChangeDetection();
-            }
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "calling hwasChangeDetection");
+            errl = hwasChangeDetection();
         }
     }
 
@@ -173,47 +153,27 @@ void* host_gard( void *io_pArgs )
     // Check whether we're in MPIPL mode
     TARGETING::Target* l_pTopLevel = NULL;
     targetService().getTopLevelTarget( l_pTopLevel );
+    HWAS_ASSERT(l_pTopLevel, "HWAS host_gard: no TopLevelTarget");
 
-    if( l_pTopLevel == NULL )
+    if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Top level handle was NULL" );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
 
-        /*@
-         * @errortype
-         * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid     HWAS::MOD_HOST_GARD
-         * @reasoncode   HWAS::RC_TOP_LEVEL_TARGET_NULL
-         * @devdesc      Call to get top level targeting handle
-         *               returned NULL
-         */
-        errl =  hwasError( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           HWAS::MOD_HOST_GARD,
-                           HWAS::RC_TOP_LEVEL_TARGET_NULL );
+        // we only want EX units to be processed
+        TARGETING::PredicateCTM l_exFilter(TARGETING::CLASS_UNIT,
+                                           TARGETING::TYPE_EX);
+        errl = collectGard(&l_exFilter);
     }
     else
     {
-        if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
+
+        errl = collectGard();
+
+        if (errl == NULL)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
-
-            // we only want EX units to be processed
-            TARGETING::PredicateCTM l_exFilter(TARGETING::CLASS_UNIT,
-                                                TARGETING::TYPE_EX);
-            errl = collectGard(&l_exFilter);
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
-
-            errl = collectGard();
-
-            // if no error,
-            if (errl == NULL)
-            {
-                //  check and see if we still have enough hardware to continue
-                errl = checkMinimumHardware();
-            }
+            //  check and see if we still have enough hardware to continue
+            errl = checkMinimumHardware();
         }
         // If targets are deconfigured as a result of host_gard, they are
         // done so using the PLID as the reason for deconfiguration.  This

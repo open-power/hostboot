@@ -231,16 +231,9 @@ void    userConsoleComm( void *  io_msgQ )
         }   //  endif   gobit
 
         // sleep, and wait for user to give us something else to do.
-        /**
-         * @todo Need a common method of doing delays in HostBoot
-         * @VBU workaround
-         */
-        // Don't delay as long in VBU because it will take VERY long to
-        // run the simulator
         if( TARGETING::is_vpo() )
         {
-            // VBU delay per Patrick
-            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+            // In VPO/VBU, yield the task, any real delay takes too long
             task_yield();
         }
         else

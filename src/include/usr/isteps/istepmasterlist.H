@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -56,7 +56,7 @@
 #include    <initservice/initsvcstructs.H>
 
 // macro to expand library dependancies
-#define DEP_LIB(x)  { #x }
+#define DEP_LIB(x) #x
 
 //  -----   istep include files   -----
 

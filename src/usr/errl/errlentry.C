@@ -57,7 +57,6 @@ struct epubProcToSub_t
     epubSubSystem_t xSubSys;
 
 };
-
 // Procedure to subsystem table.
 static const epubProcToSub_t PROCEDURE_TO_SUBSYS_TABLE[] =
 {
@@ -100,6 +99,35 @@ static const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
     { TARGETING::TYPE_ABUS             , EPUB_PROCESSOR_SUBSYS     },
 };
 
+struct epubBusTypeToSub_t
+{
+    HWAS::busTypeEnum xType;
+    epubSubSystem_t   xSubSys;
+};
+// Bus type to subsystem table
+static const epubBusTypeToSub_t BUS_TO_SUBSYS_TABLE[] =
+{
+    { HWAS::FSI_BUS_TYPE               , EPUB_CEC_HDW_CHIP_INTF    },
+    { HWAS::DMI_BUS_TYPE               , EPUB_MEMORY_BUS           },
+    { HWAS::A_BUS_TYPE                 , EPUB_PROCESSOR_BUS_CTL    },
+    { HWAS::X_BUS_TYPE                 , EPUB_PROCESSOR_BUS_CTL    },
+    { HWAS::I2C_BUS_TYPE               , EPUB_CEC_HDW_I2C_DEVS     },
+    { HWAS::PSI_BUS_TYPE               , EPUB_CEC_HDW_SP_PHYP_INTF },
+};
+
+struct epubClockTypeToSub_t
+{
+    HWAS::clockTypeEnum xType;
+    epubSubSystem_t     xSubSys;
+};
+// Clock type to subsystem table
+static const epubClockTypeToSub_t CLOCK_TO_SUBSYS_TABLE[] =
+{
+    { HWAS::TODCLK_TYPE                , EPUB_CEC_HDW_TOD_HDW },
+    { HWAS::MEMCLK_TYPE                , EPUB_CEC_HDW_CLK_CTL },
+    { HWAS::OSCREFCLK_TYPE             , EPUB_CEC_HDW_CLK_CTL },
+    { HWAS::OSCPCICLK_TYPE             , EPUB_CEC_HDW_CLK_CTL },
+};
 
 namespace ERRORLOG
 {
@@ -484,8 +512,8 @@ void ErrlEntry::addHbBuildId()
 // for use by ErrlManager
 void ErrlEntry::commit( compId_t  i_committerComponent )
 {
-    // TODO need a better timepiece, or else apply a transform onto timebase
-    // for an approximation of real time.
+    // TODO RTC 35258 need a better timepiece, or else apply a transform onto
+    // timebase for an approximation of real time.
     iv_Private.iv_committed = getTB();
 
     // User header contains the component ID of the committer.
@@ -589,18 +617,36 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
                 iv_User.setSubSys( EPUB_PROCESSOR_SUBSYS );
             }
         }
-        else //  ( pData->type == HWAS::PROCEDURE_CALLOUT )
+        else if ( pData->type == HWAS::PROCEDURE_CALLOUT )
         {
             // for procedures, map the procedure to a subsystem
             TRACFCOMP(g_trac_errl, INFO_MRK
                     "mapping highest priority procedure 0x%x "
                     "callout to determine SSID",  pData->procedure);
-
             iv_User.setSubSys(getSubSystem( pData->procedure));
 
         }
-
-        // $TODO RTC72950 need to add support for HWAS::BUS_CALLOUT also
+        else if ( pData->type == HWAS::BUS_CALLOUT )
+        {
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                    "mapping highest priority bus 0x%x "
+                    "callout to determine SSID",  pData->busType);
+            iv_User.setSubSys(getSubSystem(pData->busType));
+        }
+        else if ( pData->type == HWAS::CLOCK_CALLOUT )
+        {
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                    "mapping highest priority clock 0x%x "
+                    "callout to determine SSID", pData->clockType);
+            iv_User.setSubSys(getSubSystem(pData->clockType));
+        }
+        else
+        {
+            TRACFCOMP(g_trac_errl, ERR_MRK
+                    "Unknown callout type 0x%x, setting subsys to unknown",
+                    pData->type);
+            iv_User.setSubSys(EPUB_UNKNOWN);
+        }
     }
     // add ssid to the SRC too, it is defined in the ErrlUH in FSP land
     // in hb code it has been defined in both places and is also used
@@ -640,7 +686,7 @@ bool ErrlEntry::isTerminateLog() const
 
 ///////////////////////////////////////////////////////////////////////////////
 // Map the target type to correct subsystem ID using a binary search
-epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_target )
+epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_target ) const
 {
 
     TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem()"
@@ -691,7 +737,7 @@ epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_target )
 
 ///////////////////////////////////////////////////////////////////////////////
 // Map the procedure type to correct subsystem ID using a binary search
-epubSubSystem_t ErrlEntry::getSubSystem( epubProcedureID i_procedure  )
+epubSubSystem_t ErrlEntry::getSubSystem( epubProcedureID i_procedure  ) const
 {
     TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem()"
                 " from procedure  0x%x", i_procedure );
@@ -738,7 +784,67 @@ epubSubSystem_t ErrlEntry::getSubSystem( epubProcedureID i_procedure  )
     return (subsystem);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Map a bus type to a subsystem ID
+epubSubSystem_t ErrlEntry::getSubSystem( HWAS::busTypeEnum i_busType ) const
+{
+    TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem() from bus type 0x%x",
+              i_busType);
 
+    epubSubSystem_t subsystem = EPUB_MISC_UNKNOWN;
+
+    const uint32_t BUS_TO_SUBSYS_TABLE_ENTRIES =
+        sizeof(BUS_TO_SUBSYS_TABLE)/sizeof(BUS_TO_SUBSYS_TABLE[0]);
+
+    for (uint32_t i = 0; i < BUS_TO_SUBSYS_TABLE_ENTRIES; i++)
+    {
+        if (BUS_TO_SUBSYS_TABLE[i].xType == i_busType)
+        {
+            subsystem = BUS_TO_SUBSYS_TABLE[i].xSubSys;
+            break;
+        }
+    }
+
+    if(subsystem == EPUB_MISC_UNKNOWN)
+    {
+        TRACFCOMP(g_trac_errl,"WRN>> Failed to find subsystem ID for bus type 0x%x",
+                  i_busType);
+    }
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem() ssid 0x%x", subsystem);
+    return subsystem;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Map a clock type to a subsystem ID
+epubSubSystem_t ErrlEntry::getSubSystem( HWAS::clockTypeEnum i_clockType ) const
+{
+    TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem() from clock type 0x%x",
+              i_clockType);
+
+    epubSubSystem_t subsystem = EPUB_MISC_UNKNOWN;
+
+    const uint32_t CLOCK_TO_SUBSYS_TABLE_ENTRIES =
+        sizeof(CLOCK_TO_SUBSYS_TABLE)/sizeof(CLOCK_TO_SUBSYS_TABLE[0]);
+
+    for (uint32_t i = 0; i < CLOCK_TO_SUBSYS_TABLE_ENTRIES; i++)
+    {
+        if (CLOCK_TO_SUBSYS_TABLE[i].xType == i_clockType)
+        {
+            subsystem = CLOCK_TO_SUBSYS_TABLE[i].xSubSys;
+            break;
+        }
+    }
+
+    if(subsystem == EPUB_MISC_UNKNOWN)
+    {
+        TRACFCOMP(g_trac_errl,"WRN>> Failed to find subsystem ID for clock type 0x%x",
+                  i_clockType);
+    }
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem() ssid 0x%x", subsystem);
+    return subsystem;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager

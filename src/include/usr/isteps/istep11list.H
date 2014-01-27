@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -73,171 +73,92 @@
 namespace   INITSERVICE
 {
 
-
 const   TaskInfo    g_istep11[]  =   {
-
         {
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,                              // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(11,01,"mss_getecid"),             // substep name
-                DMI_TRAINING::call_mss_getecid,             // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,01,"mss_getecid"),
+                DMI_TRAINING::call_mss_getecid,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,02,"dmi_attr_update"),       // substep name
-                DMI_TRAINING::call_dmi_attr_update,       // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
-        },
-
-        {
-                ISTEPNAME(11,03,"proc_dmi_scominit"),       // substep name
-                DMI_TRAINING::call_proc_dmi_scominit,       // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
-        },
-
-        {
-                ISTEPNAME(11,04,"dmi_scominit"),             // substep name
-                DMI_TRAINING::call_dmi_scominit,             // pointer to fn
-                {
-                        START_FN,                            // task type
-                        EXT_IMAGE,                           // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
-        },
-
-        {
-                ISTEPNAME(11,05,"dmi_erepair"),              // substep name
-                DMI_TRAINING::call_dmi_erepair,              // pointer to fn
-                {
-                        START_FN,                            // task type
-                        EXT_IMAGE,                           // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,02,"dmi_attr_update"),
+                DMI_TRAINING::call_dmi_attr_update,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,06,"dmi_io_dccal"),             // substep name
-                DMI_TRAINING::call_dmi_io_dccal,            // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,03,"proc_dmi_scominit"),
+                DMI_TRAINING::call_proc_dmi_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,07,"dmi_pre_trainadv"),        // substep name
-                DMI_TRAINING::call_dmi_pre_trainadv,        // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,04,"dmi_scominit"),
+                DMI_TRAINING::call_dmi_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,08,"dmi_io_run_training"),      // substep name
-                DMI_TRAINING::call_dmi_io_run_training,     // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,05,"dmi_erepair"),
+                DMI_TRAINING::call_dmi_erepair,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,09,"dmi_post_trainadv"),       // substep name
-                DMI_TRAINING::call_dmi_post_trainadv,       // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,06,"dmi_io_dccal"),
+                DMI_TRAINING::call_dmi_io_dccal,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,10,"proc_cen_framelock"),       // substep name
-                DMI_TRAINING::call_proc_cen_framelock,      // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,07,"dmi_pre_trainadv"),
+                DMI_TRAINING::call_dmi_pre_trainadv,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,11,"host_startprd_dmi"),        // substep name
-                DMI_TRAINING::call_host_startprd_dmi,       // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,08,"dmi_io_run_training"),
+                DMI_TRAINING::call_dmi_io_run_training,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,12,"host_attnlisten_cen"),      // substep name
-                DMI_TRAINING::call_host_attnlisten_cen,     // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,09,"dmi_post_trainadv"),
+                DMI_TRAINING::call_dmi_post_trainadv,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(11,13,"cen_set_inband_addr"),      // substep name
-                DMI_TRAINING::call_cen_set_inband_addr,      // pointer to fn
-                {
-                        START_FN,                           // task type
-                        EXT_IMAGE,                          // Extended Module
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                ISTEPNAME(11,10,"proc_cen_framelock"),
+                DMI_TRAINING::call_proc_cen_framelock,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-        //  END OF LIST!
+        {
+                ISTEPNAME(11,11,"host_startprd_dmi"),
+                DMI_TRAINING::call_host_startprd_dmi,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(11,12,"host_attnlisten_cen"),
+                DMI_TRAINING::call_host_attnlisten_cen,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(11,13,"cen_set_inband_addr"),
+                DMI_TRAINING::call_cen_set_inband_addr,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
 };
 
-const DepModInfo  g_istep11Dependancies = {
+const DepModInfo g_istep11Dependancies = {
     {
         DEP_LIB(libdmi_training.so),
         DEP_LIB(libedi_ei_initialization.so),
         DEP_LIB(libnest_chiplets.so),
-        { 0 },
+        NULL
     }
 };
 
-
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep11TaskList    =   {
-        &(g_istep11[0]),
-        ( sizeof(g_istep11)/sizeof(TaskInfo) ),
-        &g_istep11Dependancies
+const ExtTaskInfo g_istep11TaskList = {
+    &(g_istep11[0]),
+    ( sizeof(g_istep11)/sizeof(TaskInfo) ),
+    &g_istep11Dependancies
 };
 
 };  // end namespace

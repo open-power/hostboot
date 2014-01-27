@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -477,9 +477,9 @@ typedef struct peluserheadersection
   uint8_t    sev;    // severity
   uint8_t    etype;  // event type
   uint32_t   reserved0;  // for error log return code
-  uint8_t    domain;     // TODO not used in Hostboot
-  uint8_t    vector;     // TODO not used in Hostboot
-  uint16_t   actions;    // TODO not used in Hostboot
+  uint8_t    domain;     // not used in Hostboot
+  uint8_t    vector;     // not used in Hostboot
+  uint16_t   actions;    // TODO RTC 93631
   uint32_t   reserved1;
 } __attribute__((packed)) pelUserHeaderSection_t;
 

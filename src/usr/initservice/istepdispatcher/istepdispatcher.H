@@ -138,9 +138,7 @@ public:
      *
      * Sends a BREAKPOINT message to the FSP and waits for a response
      *
-     * @param[in] i_info - TODO - this needs to be decided yet.  But it seems
-     *      at least preliminarily that this will contain a unique breakpoint
-     *      numbering value.
+     * @param[in] i_info - Unique breakpoint numbering value.
      */
     void iStepBreakPoint(uint32_t i_info);
 

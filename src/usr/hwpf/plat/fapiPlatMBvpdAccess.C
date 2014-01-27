@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/plat/fapiPlatMBvpdAccess.C $                      */
+/* $Source: src/usr/hwpf/plat/fapiPlatMBvpdAccess.C $                     */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -78,11 +78,12 @@ fapi::ReturnCode MBvpdRecordXlate(const fapi::MBvpdRecord i_fapiRecord,
          * @userdata1    Record enumerator
          * @devdesc      Attempt to read an MVPD field using an invalid record
          */
+        const bool hbSwError = true;
         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             MOD_MBVPD_ACCESS,
             RC_INVALID_RECORD,
-            i_fapiRecord);
+            i_fapiRecord, 0, hbSwError);
 
         // Add the error log pointer as data to the ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_errl));
@@ -141,11 +142,12 @@ fapi::ReturnCode MBvpdKeywordXlate(const fapi::MBvpdKeyword i_fapiKeyword,
          * @userdata1    Keyword enumerator
          * @devdesc      Attempt to read an MVPD field using an invalid keyword
          */
+        const bool hbSwError = true;
         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             MOD_MBVPD_ACCESS,
             RC_INVALID_KEYWORD,
-            i_fapiKeyword);
+            i_fapiKeyword, 0, hbSwError);
 
         // Add the error log pointer as data to the ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_errl));

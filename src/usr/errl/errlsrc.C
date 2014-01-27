@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -125,9 +125,8 @@ uint64_t ErrlSrc::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         // psrc->flags    = 0;                  //
         psrc->wordcount   = ErrlSrc::WORDCOUNT; // 9;
 
-        // TODO FSP firmware puts zero here. Cheat and put reasonCode here.
-        // Makes for easier retrieval than teasing it out of the SRC
-        // ascii string.  (Am I missing something?)
+        // Use reserved1 word to stash the reason code for easy extract in
+        // unflatten rather than parsing srcString
         psrc->reserved1   = iv_reasonCode;
 
         CPPASSERT( ErrlSrc::SLEN == sizeof(pelSRCSection_t)-iv_header.flatSize());

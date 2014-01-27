@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -135,25 +135,23 @@ void fapiLogError(fapi::ReturnCode & io_rc,
     }
 }
 
-//****************************************************************************
-// platform-level implementation
-
+//******************************************************************************
+// platIsScanTraceEnabled
+//******************************************************************************
 bool platIsScanTraceEnabled()
 {
-  // TODO: Get the answer from g_fapiScanTd conditional trace buffer. Camvan
-  // has not pushed the code yet.
+  // SCAN trace can be dynamically turned on/off, always return true here
   return 1;
 }
 
-//****************************************************************************
-// platform-level implementation
-
-void platSetScanTrace(bool i_enable)
-{
-  // TODO: enable or disable scan trace via the SCAN trace buffer.  Camvan
-  // has not pushed the code yet.
-  return;
-}
+//******************************************************************************
+// platSetScanTrace
+// Implementation to be added if needed
+//******************************************************************************
+//void platSetScanTrace(bool i_enable)
+//{
+//
+//}
 
 //******************************************************************************
 // fapiLoadInitFile

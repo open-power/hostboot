@@ -23,7 +23,6 @@
 // $Id: fapiReturnCode.H,v 1.19 2013/11/11 19:33:31 mjjones Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiReturnCode.H,v $
 
-
 /**
  *  @file fapiReturnCode.H
  *
@@ -46,6 +45,7 @@
  *                          mjjones     02/22/2012  Allow user to add Target FFDC
  *                          mjjones     03/16/2012  Add type to FFDC data
  *                          mjjones     03/16/2012  Allow different PLAT errors
+ *                          mjjones     04/20/2012  Remove deprecated int assign
  *                          brianh      07/31/2012  performance/size optimizations
  *                          mjjones     08/14/2012  Created getCreateReturnCodeDataRef
  *                          mjjones     09/19/2012  Add FFDC ID to error info
@@ -173,21 +173,6 @@ public:
      * @return Reference to 'this' ReturnCode
      */
     ReturnCode & operator=(const ReturnCode & i_right);
-
-    /**
-     * @brief ***DEPRECATED*** Assignment Operator.
-     *
-     * TODO
-     * This function will be deleted to prevent invalid usage of ReturnCode
-     * Use setFapiError, setPlatError, setEcmdError or FAPI_SET_HWP_ERROR
-     *
-     * @param[in] i_rc rcValue to assign
-     *
-     * If FAPI_RC_SUCCESS (zero) is assigned then any associated data is deleted
-     *
-     * @return Reference to 'this' ReturnCode
-     */
-    ReturnCode & operator=(const uint32_t i_rcValue);
 
     /**
      * @brief Returns if the return code indicates success

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAddrMirrorData.C,v 1.2 2013/07/18 15:33:35 whs Exp $
+// $Id: getMBvpdAddrMirrorData.C,v 1.4 2014/02/12 22:11:32 mjjones Exp $
 /**
  *  @file getMBvpdAddrMirrorData.C
  *
@@ -116,6 +116,7 @@ fapi::ReturnCode getMBvpdAddrMirrorData(
                        l_MaBufsize, AM_KEYWORD_SIZE);
             const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_AM;
             const uint32_t & RETURNED_SIZE = l_MaBufsize;
+            const fapi::Target & CHIP_TARGET = l_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
             break;  //  break out with fapirc
         }

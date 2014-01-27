@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdPhaseRotatorData.C,v 1.7 2014/01/11 13:35:43 whs Exp $
+// $Id: getMBvpdPhaseRotatorData.C,v 1.8 2014/02/12 22:11:46 mjjones Exp $
 /**
  *  @file getMBvpdPhaseRotatorData.C
  *
@@ -163,6 +163,7 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
                        l_MrBufsize, MR_KEYWORD_SIZE);
             const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_MR;
             const uint32_t & RETURNED_SIZE = l_MrBufsize;
+            const fapi::Target & CHIP_TARGET = l_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
             break;  //  break out with fapirc
         }

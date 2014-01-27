@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -63,141 +63,71 @@
 namespace   INITSERVICE
 {
     const   TaskInfo    g_istep14[]  =   {
-
         {
-
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,                              // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
                 ISTEPNAME(14,01,"host_startprd_dram"),
                 DRAM_INITIALIZATION::call_host_startprd_dram,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(14,02,"mss_extent_setup"),
                 DRAM_INITIALIZATION::call_mss_extent_setup,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(14,03,"mss_memdiag"),
                 DRAM_INITIALIZATION::call_mss_memdiag,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-
         {
                 ISTEPNAME(14,04,"mss_thermal_init"),
                 DRAM_INITIALIZATION::call_mss_thermal_init,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-
         {
                 ISTEPNAME(14,05,"proc_pcie_config"),
                 DRAM_INITIALIZATION::call_proc_pcie_config,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
         {
                 ISTEPNAME(14,06,"mss_power_cleanup"),
                 DRAM_INITIALIZATION::call_mss_power_cleanup,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-
         {
                 ISTEPNAME(14,07,"proc_setup_bars"),
                 DRAM_INITIALIZATION::call_proc_setup_bars,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-
         {
                 ISTEPNAME(14,08,"proc_exit_cache_contained"),
                 DRAM_INITIALIZATION::call_proc_exit_cache_contained,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP | MPIPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
-
-
         {
                 ISTEPNAME(14,09,"host_mpipl_service"),
                 DRAM_INITIALIZATION::call_host_mpipl_service,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        MPIPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, MPIPL_OP, true }
         },
+    };
 
-
-        //  END OF LIST!
-};
-
-const DepModInfo  g_istep14Dependancies = {
+const DepModInfo g_istep14Dependancies = {
     {
         DEP_LIB(libdram_initialization.so),
         DEP_LIB(libdram_training.so),
         DEP_LIB(libdump.so),
-        { 0 },
+        NULL
     }
 };
 
-
-
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep14TaskList    =   {
-        &(g_istep14[0]),
-        ( sizeof(g_istep14)/sizeof(TaskInfo) ),
-        &g_istep14Dependancies    //  later, depModules struct
+const ExtTaskInfo g_istep14TaskList = {
+    &(g_istep14[0]),
+    ( sizeof(g_istep14)/sizeof(TaskInfo) ),
+    &g_istep14Dependancies
 };
 
 };  // end namespace

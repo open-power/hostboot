@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -74,165 +74,84 @@ namespace   INITSERVICE
 {
 
 const   TaskInfo    g_istep10[]  =   {
-
         {
                 "",         // dummy, index 0
                 NULL,
-                {
-                        NONE,
-                        EXT_IMAGE,
-                        IPL_NOOP,
-                        false,                          // true = check for attentions
-                }
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(10,01,"host_prd_hwreconfig"),
                 HWAS::host_prd_hwreconfig,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,02,"cen_sbe_tp_chiplet_init1"),
                 SBE_CENTAUR_INIT::call_sbe_centaur_init,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,03,"cen_sbe_pll_initf"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,04,"cen_sbe_pll_setup"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
         {
                 ISTEPNAME(10,05,"cen_sbe_tp_chiplet_init2"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,06,"cen_sbe_tp_arrayinit"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,07,"cen_sbe_tp_chiplet_init3"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,08,"cen_sbe_chiplet_init"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,09,"cen_sbe_tp_arrayinit"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,10,"cen_sbe_dts_init"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,11,"cen_sbe_initf"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,12,"cen_sbe_do_manual_inits"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(10,13,"cen_sbe_nest_startclocks"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-
                 ISTEPNAME(10,14,"cen_sbe_scominits"),
                 HWAS::host_stub,
-                {
-                        START_FN,
-                        EXT_IMAGE,
-                        NORMAL_IPL_OP,
-                        true,
-                }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
-
-        //  END OF LIST!
 };
 
-const DepModInfo  g_istep10Dependancies = {
+const DepModInfo g_istep10Dependancies = {
     {
         DEP_LIB(libsbe_centaur_init.so),
         DEP_LIB(libfapiporeve.so),
@@ -240,16 +159,14 @@ const DepModInfo  g_istep10Dependancies = {
         DEP_LIB(libbuild_winkle_images.so),
         DEP_LIB(libsbe.so),
         DEP_LIB(libproc_hwreconfig.so),
-        { 0 },
+        NULL
     }
 };
 
-
-// make a struct from the above with the number of items included
-const   ExtTaskInfo g_istep10TaskList    =   {
-        &(g_istep10[0]),
-        ( sizeof(g_istep10)/sizeof(TaskInfo) ),
-        &g_istep10Dependancies
+const ExtTaskInfo g_istep10TaskList = {
+    &(g_istep10[0]),
+    ( sizeof(g_istep10)/sizeof(TaskInfo) ),
+    &g_istep10Dependancies
 };
 
 };  // end namespace

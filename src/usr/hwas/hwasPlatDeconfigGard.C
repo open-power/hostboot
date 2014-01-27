@@ -213,12 +213,12 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
                 (static_cast<uint64_t>(get_huid(i_pTarget)) << 32) | i_errlEid;
             const uint64_t userdata2 =
                 (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
-            l_pErr = hwasError(
-                ERRL_SEV_UNRECOVERABLE,
+            const bool hbSwError = true;
+            l_pErr = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 HWAS::MOD_PLAT_DECONFIG_GARD,
                 HWAS::RC_TARGET_NOT_GARDABLE,
-                userdata1,
-                userdata2);
+                userdata1, userdata2, hbSwError);
             break;
         }
 
@@ -308,6 +308,13 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         {
             HWAS_ERR("GARD Record Repository full");
 
+            // TODO RTC 96397
+            // Hostboot will only write GARD Records to PNOR when it is the
+            // gardRecordMaster. An error will be logged if GARD Record storage
+            // exceeds 90% and the GARD Record will not be written if full. The
+            // error will have a new procedure callout requesting that the
+            // machine be serviced. Right now, this error log has no callouts.
+
             /*@
              * @errortype
              * @moduleid     HWAS::MOD_PLAT_DECONFIG_GARD
@@ -319,8 +326,8 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
             const uint64_t userdata1 =
                 (static_cast<uint64_t> (get_huid(i_pTarget)) << 32) |
                 i_errlEid;
-            l_pErr = hwasError(
-                ERRL_SEV_UNRECOVERABLE,
+            l_pErr = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 HWAS::MOD_PLAT_DECONFIG_GARD,
                 HWAS::RC_GARD_REPOSITORY_FULL,
                 userdata1);

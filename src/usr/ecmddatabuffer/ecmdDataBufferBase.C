@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,35 +20,6 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// IMPORTED FROM eCMD on 11/10/2011
-
-// Copyright ***********************************************************
-//                                                                      
-// File ecmdDataBufferBase.C                                   
-//                                                                      
-// IBM Confidential                                                     
-// OCO Source Materials                                                 
-// 9400 Licensed Internal Code                                          
-// (C) COPYRIGHT IBM CORP. 2002                                        
-//                                                                      
-// The source code for this program is not published or otherwise       
-// divested of its trade secrets, irrespective of what has been         
-// deposited with the U.S. Copyright Office.                            
-//                                                                      
-// End Copyright *******************************************************
-                               
-// Change Log *********************************************************
-//                                                                      
-//  Flag Reason   Vers Date     Coder     Description                       
-//  ---- -------- ---- -------- -----     -----------------------------
-//  @01  STG4466       03/10/05 Prahl     Fix up Beam errors
-// End Change Log *****************************************************
-
-// Get rid of some annoying lint errors that aren't real - cje
-//lint -e613 Possible use of null pointer, lint doesn't understand we use iv_NumBits to check length and pointer validity
-//lint -e668 Possible passing of a null pointer, same thing as above
-//lint -e527 Lint doesn't understand that iv_UserOwned is changed in shareBuffer
-
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
@@ -56,6 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+//#include <ecmdDefines.H>
 #include <ecmdDataBufferBase.H>
 #include <prdfCompressBuffer.H>
 
@@ -1090,6 +1062,9 @@ uint32_t ecmdDataBufferBase::applyInversionMask(const ecmdDataBufferBase & i_inv
 
 
 uint32_t ecmdDataBufferBase::applyInversionMask(const uint32_t * i_invMask, uint32_t i_invByteLen) {
+
+  ECMD_NULL_PTR_CHECK(i_invMask);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   /* Do the smaller of data provided or size of buffer */
@@ -1187,7 +1162,8 @@ uint32_t ecmdDataBufferBase::insert(const ecmdDataBufferBase &i_bufferIn, uint32
 }
 
 uint32_t ecmdDataBufferBase::insert(const uint32_t * i_data, uint32_t i_targetStart, uint32_t i_len, uint32_t i_sourceStart) {      
-
+  ECMD_NULL_PTR_CHECK(i_data);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
     
   if (i_targetStart+i_len > iv_NumBits) {
@@ -1228,6 +1204,9 @@ uint32_t ecmdDataBufferBase::insert(uint32_t i_data, uint32_t i_targetStart, uin
 }
 
 uint32_t ecmdDataBufferBase::insertFromRight(const uint32_t * i_data, uint32_t i_start, uint32_t i_len) {
+
+  ECMD_NULL_PTR_CHECK(i_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   int offset;
@@ -1274,6 +1253,7 @@ uint32_t ecmdDataBufferBase::insertFromRight(uint32_t i_data, uint32_t i_start, 
 }
 
 uint32_t ecmdDataBufferBase::insert(const uint16_t * i_data, uint32_t i_targetStart, uint32_t i_len, uint32_t i_sourceStart) {      
+  ECMD_NULL_PTR_CHECK(i_data);
 
   uint32_t rc = ECMD_DBUF_SUCCESS;
     
@@ -1323,6 +1303,9 @@ uint32_t ecmdDataBufferBase::insert(uint16_t i_data, uint32_t i_targetStart, uin
 }
 
 uint32_t ecmdDataBufferBase::insertFromRight(const uint16_t * i_data, uint32_t i_start, uint32_t i_len) {
+
+  ECMD_NULL_PTR_CHECK(i_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   if (i_start+i_len > iv_NumBits) {
@@ -1369,6 +1352,9 @@ uint32_t ecmdDataBufferBase::insertFromRight(uint16_t i_data, uint32_t i_start, 
 }
 
 uint32_t ecmdDataBufferBase::insert(const uint8_t *i_data, uint32_t i_targetStart, uint32_t i_len, uint32_t i_sourceStart) {
+
+  ECMD_NULL_PTR_CHECK(i_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   if (i_targetStart+i_len > iv_NumBits) {
@@ -1412,6 +1398,9 @@ uint32_t ecmdDataBufferBase::insert(uint8_t i_data, uint32_t i_targetStart, uint
 }
 
 uint32_t ecmdDataBufferBase::insertFromRight(const uint8_t *i_data, uint32_t i_start, uint32_t i_len) {
+
+  ECMD_NULL_PTR_CHECK(i_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   int offset;
@@ -1482,6 +1471,9 @@ uint32_t ecmdDataBufferBase::extract(ecmdDataBufferBase& o_bufferOut, uint32_t i
 }
 
 uint32_t ecmdDataBufferBase::extract(uint32_t *o_data, uint32_t i_start, uint32_t i_len) const {
+
+  ECMD_NULL_PTR_CHECK(o_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   // ecmdExtract can't make good input checks, so we have to do that here
@@ -1507,6 +1499,9 @@ uint32_t ecmdDataBufferBase::extract(uint32_t *o_data, uint32_t i_start, uint32_
 }
 
 uint32_t ecmdDataBufferBase::extract(uint16_t *o_data, uint32_t i_start, uint32_t i_len) const {
+
+  ECMD_NULL_PTR_CHECK(o_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   // ecmdExtract can't make good input checks, so we have to do that here
@@ -1541,6 +1536,9 @@ uint32_t ecmdDataBufferBase::extract(uint16_t *o_data, uint32_t i_start, uint32_
 }
 
 uint32_t ecmdDataBufferBase::extract(uint8_t * o_data, uint32_t i_start, uint32_t i_bitLen) const {
+
+  ECMD_NULL_PTR_CHECK(o_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   // Error checking
@@ -1713,6 +1711,9 @@ uint32_t ecmdDataBufferBase::extractToRight(ecmdDataBufferBase & o_bufferOut, ui
 }
 
 uint32_t ecmdDataBufferBase::extractToRight(uint32_t * o_data, uint32_t i_start, uint32_t i_len) const {
+
+  ECMD_NULL_PTR_CHECK(o_data);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   // input checks done in the extract function
@@ -1724,6 +1725,9 @@ uint32_t ecmdDataBufferBase::extractToRight(uint32_t * o_data, uint32_t i_start,
 }
 
 uint32_t ecmdDataBufferBase::extractToRight(uint16_t * o_data, uint32_t i_start, uint32_t i_len) const {
+
+  ECMD_NULL_PTR_CHECK(o_data);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   // input checks done in the extract function
@@ -1737,6 +1741,9 @@ uint32_t ecmdDataBufferBase::extractToRight(uint16_t * o_data, uint32_t i_start,
 }
 
 uint32_t ecmdDataBufferBase::extractToRight(uint8_t * o_data, uint32_t i_start, uint32_t i_len) const {
+
+  ECMD_NULL_PTR_CHECK(o_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
   // input checks done in the extract function
   rc = this->extract(o_data, i_start, i_len);
@@ -1782,6 +1789,9 @@ uint32_t ecmdDataBufferBase::setOr(const ecmdDataBufferBase& i_bufferIn, uint32_
 }
 
 uint32_t ecmdDataBufferBase::setOr(const uint32_t * i_data, uint32_t i_startBit, uint32_t i_len) {
+
+  ECMD_NULL_PTR_CHECK(i_data);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   if (i_startBit + i_len > iv_NumBits) {
@@ -1820,6 +1830,9 @@ uint32_t ecmdDataBufferBase::setXor(const ecmdDataBufferBase& i_bufferIn, uint32
 }
 
 uint32_t ecmdDataBufferBase::setXor(const uint32_t * i_data, uint32_t i_startBit, uint32_t i_len) {
+
+  ECMD_NULL_PTR_CHECK(i_data);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   if (i_startBit + i_len > iv_NumBits) {
@@ -1865,6 +1878,9 @@ uint32_t ecmdDataBufferBase::setAnd(const ecmdDataBufferBase& i_bufferIn, uint32
 }
 
 uint32_t ecmdDataBufferBase::setAnd(const uint32_t * i_data, uint32_t i_startBit, uint32_t i_len) {
+
+  ECMD_NULL_PTR_CHECK(i_data);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   if (i_startBit + i_len > iv_NumBits) {
@@ -2006,6 +2022,9 @@ ecmdDataBufferBase& ecmdDataBufferBase::operator=(const ecmdDataBufferBase & i_m
 
 
 uint32_t ecmdDataBufferBase::memCopyIn(const uint32_t* i_buf, uint32_t i_bytes) { /* Does a memcpy from supplied buffer into ecmdDataBufferBase */
+
+  ECMD_NULL_PTR_CHECK(i_buf);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   uint32_t cbytes = i_bytes < getByteLength() ? i_bytes : getByteLength();
@@ -2028,6 +2047,9 @@ uint32_t ecmdDataBufferBase::memCopyIn(const uint32_t* i_buf, uint32_t i_bytes) 
 }
 
 uint32_t ecmdDataBufferBase::memCopyOut(uint32_t* o_buf, uint32_t i_bytes) const { /* Does a memcpy from ecmdDataBufferBase into supplied buffer */
+
+  ECMD_NULL_PTR_CHECK(o_buf);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
   uint32_t cbytes = i_bytes < getByteLength() ? i_bytes : getByteLength();
   if (cbytes == 0) {
@@ -2041,6 +2063,9 @@ uint32_t ecmdDataBufferBase::memCopyOut(uint32_t* o_buf, uint32_t i_bytes) const
 }
 
 uint32_t ecmdDataBufferBase::memCopyIn(const uint16_t* i_buf, uint32_t i_bytes) { /* Does a memcpy from supplied buffer into ecmdDataBufferBase */
+
+  ECMD_NULL_PTR_CHECK(i_buf);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
   uint32_t cbytes = i_bytes < getByteLength() ? i_bytes : getByteLength();
   uint32_t numHalfWords = (cbytes + 1) / 2;
@@ -2057,6 +2082,9 @@ uint32_t ecmdDataBufferBase::memCopyIn(const uint16_t* i_buf, uint32_t i_bytes) 
 }
 
 uint32_t ecmdDataBufferBase::memCopyOut(uint16_t* o_buf, uint32_t i_bytes) const { /* Does a memcpy from ecmdDataBufferBase into supplied buffer */
+
+  ECMD_NULL_PTR_CHECK(o_buf);
+
   uint32_t rc = ECMD_DBUF_SUCCESS;
   uint32_t cbytes = i_bytes < getByteLength() ? i_bytes : getByteLength();
   uint32_t numHalfWords = (cbytes + 1) / 2;
@@ -2073,6 +2101,9 @@ uint32_t ecmdDataBufferBase::memCopyOut(uint16_t* o_buf, uint32_t i_bytes) const
 }
 
 uint32_t ecmdDataBufferBase::memCopyIn(const uint8_t* i_buf, uint32_t i_bytes) { /* Does a memcpy from supplied buffer into ecmdDataBufferBase */
+  
+  ECMD_NULL_PTR_CHECK(i_buf);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
   uint32_t cbytes = i_bytes < getByteLength() ? i_bytes : getByteLength();
   if (cbytes == 0) {
@@ -2088,6 +2119,9 @@ uint32_t ecmdDataBufferBase::memCopyIn(const uint8_t* i_buf, uint32_t i_bytes) {
 }
 
 uint32_t ecmdDataBufferBase::memCopyOut(uint8_t* o_buf, uint32_t i_bytes) const { /* Does a memcpy from supplied buffer into ecmdDataBufferBase */
+
+  ECMD_NULL_PTR_CHECK(o_buf);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
   uint32_t cbytes = i_bytes < getByteLength() ? i_bytes : getByteLength();
   if (cbytes == 0) {
@@ -2103,6 +2137,9 @@ uint32_t ecmdDataBufferBase::memCopyOut(uint8_t* o_buf, uint32_t i_bytes) const 
 }
 
 uint32_t ecmdDataBufferBase::flatten(uint8_t * o_data, uint32_t i_len) const {
+
+  ECMD_NULL_PTR_CHECK(o_data);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   uint32_t * o_ptr = (uint32_t *) o_data;
@@ -2124,6 +2161,9 @@ uint32_t ecmdDataBufferBase::flatten(uint8_t * o_data, uint32_t i_len) const {
 }
 
 uint32_t ecmdDataBufferBase::unflatten(const uint8_t * i_data, uint32_t i_len) {
+
+  ECMD_NULL_PTR_CHECK(i_data);
+  
   uint32_t rc = ECMD_DBUF_SUCCESS;
 
   uint32_t newCapacity;

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mvpdRingFuncs.C,v 1.8 2014/01/26 12:57:15 whs Exp $
+// $Id: mvpdRingFuncs.C,v 1.9 2014/02/12 22:14:51 mjjones Exp $
 /**
  *  @file mvpdRingFuncs.C
  *
@@ -268,6 +268,7 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
             {
                 const   uint8_t    & RING_MODIFIER =   i_ringId;
                 const   uint8_t    & CHIPLET_ID =   i_chipletId;
+                const fapi::Target & CHIP_TARGET = i_fapiTarget;
                 FAPI_SET_HWP_ERROR(l_fapirc, RC_REPAIR_RING_NOT_FOUND );
                 //  break out with fapirc
                 break;
@@ -422,6 +423,7 @@ fapi::ReturnCode mbvpdRingFunc( const mbvpdRingFuncOp i_mbvpdRingFuncOp,
             {
                 const uint8_t & RING_MODIFIER = i_ringId;
                 const uint8_t & CHIPLET_ID = i_chipletId;
+                const fapi::Target & CHIP_TARGET = i_fapiTarget;
                 FAPI_SET_HWP_ERROR(l_fapirc, RC_REPAIR_RING_NOT_FOUND );
                 //  break out with fapirc
                 break;
@@ -519,13 +521,6 @@ fapi::ReturnCode mvpdRingFuncFind( const uint8_t    i_chipletId,
                 FAPI_DBG("mvpdRingFuncFind:Header 0x%x offset 0x%x,end of list",
                             FAPI_BE32TOH(l_pScanData->iv_magic),
                             l_offset  );
-                //  TODO: RTC 51917 how to tell the end of the list? Assume that
-                // finding a header without RS4_MAGIC is the end.
-                // keep the following incase there is a different way to find
-                // the end.
-                // $$const   uint32_t    &MAGIC = l_pScanData->magic;
-                // $$FAPI_SET_HWP_ERROR(l_fapirc,RC_REPAIR_RING_INVALID_MAGIC );
-                // break out of scan loop, ring not found
                 break;
             }
             //  dump record info for debug

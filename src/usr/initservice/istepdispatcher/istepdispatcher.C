@@ -674,7 +674,7 @@ void IStepDispatcher::loadModules(uint32_t istepNumber) const
         uint32_t i = 0;
 
         while( ( l_errl == NULL ) &&
-                ( g_isteps[istepNumber].depModules->modulename[i][0] != 0) )
+                ( g_isteps[istepNumber].depModules->modulename[i] != NULL) )
         {
             TRACFCOMP( g_trac_initsvc,
                     "loading [%s]",
@@ -713,7 +713,7 @@ void IStepDispatcher::unLoadModules(uint32_t istepNumber) const
         uint32_t i = 0;
 
         while( ( l_errl == NULL ) &&
-                ( g_isteps[istepNumber].depModules->modulename[i][0] != 0) )
+                ( g_isteps[istepNumber].depModules->modulename[i] != NULL) )
         {
             TRACFCOMP( g_trac_initsvc,
                     "unloading [%s]",
@@ -947,11 +947,11 @@ errlHndl_t IStepDispatcher::sendIstepCompleteMsg()
          * @devdesc          Request to send Istep Complete msg to Fsp, but
          *                   no outstanding message from Fsp found.
          */
+        const bool hbSwError = true;
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        ISTEP_INITSVC_MOD_ID,
                                        NO_MSG_PRESENT,
-                                       curIStep,
-                                       curSubStep );
+                                       curIStep, curSubStep, hbSwError );
     }
 
     TRACFCOMP( g_trac_initsvc, EXIT_MRK"IStepDispatcher::sendIstepCompleteMsg");

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -112,8 +112,10 @@ private:
 
     ErrlSctnHdr	iv_header;    // section header for any/all sections
 
-    uint64_t    iv_created;   // TODO Expects BCD_time8_t, but using timebase
-    uint64_t    iv_committed; // TODO Expects BCD_time8_t, but using timebase
+    uint64_t    iv_created;   // TODO RTC 35258 Expects BCD_time8_t, but using
+                              // timebase
+    uint64_t    iv_committed; // TODO RTC 35258 Expects BCD_time8_t, but using
+                              // timebase
     uint8_t     iv_cid;       // Creator 'B' (enum errlCreator)
     uint8_t     iv_sctns;     // count of sections
     uint32_t    iv_plid;      // platform log id

@@ -228,16 +228,16 @@ namespace TARGETING
                  *              request that is invalid for the attribute
                  *              section containing the address.
                  */
+                const bool hbSwError = true;
                 errlHndl_t l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                                   TARG_MOD_ATTRRP,
                                                   TARG_RC_ATTR_MSG_FAIL,
                                                   vAddr,
                                                   TWO_UINT32_TO_UINT64(
                                                         msg->type,
-                                                        section)
-                                                  );
+                                                        section),
+                                                  hbSwError);
                 errlCommit(l_errl,TARG_COMP_ID);
-
             }
 
             // Respond to kernel request.
@@ -377,11 +377,13 @@ namespace TARGETING
                          *
                          *   @devdesc    Found unhandled attribute section type
                          */
-                    l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                           TARG_MOD_ATTRRP,
-                                           TARG_RC_UNHANDLED_ATTR_SEC_TYPE,
-                                           iv_sections[i].type);
-                    break;
+                        const bool hbSwError = true;
+                        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                               TARG_MOD_ATTRRP,
+                                               TARG_RC_UNHANDLED_ATTR_SEC_TYPE,
+                                               iv_sections[i].type,
+                                               0, hbSwError);
+                        break;
                 }
 
                 if(l_errl)
@@ -415,11 +417,12 @@ namespace TARGETING
                      *              memory block for an attribute section, the
                      *              kernel returned an error.
                      */
+                    const bool hbSwError = true;
                     l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                            TARG_MOD_ATTRRP,
                                            TARG_RC_MM_BLOCK_FAIL,
                                            iv_sections[i].vmmAddress,
-                                           rc);
+                                           rc, hbSwError);
                     break;
                 }
 
@@ -452,11 +455,13 @@ namespace TARGETING
                      *              a virtual memory block for an attribute
                      *              section, the kernel returned an error.
                      */
+                    const bool hbSwError = true;
                     l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                            TARG_MOD_ATTRRP,
                                            TARG_RC_MM_PERM_FAIL,
                                            iv_sections[i].vmmAddress,
-                                           TWO_UINT32_TO_UINT64(rc, l_perm));
+                                           TWO_UINT32_TO_UINT64(rc, l_perm),
+                                           hbSwError);
                     break;
                 }
 

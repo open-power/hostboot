@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -129,16 +129,7 @@ class Target
          *  @retval false Attribute not found; o_attValue not valid
          */
         template<const ATTRIBUTE_ID A>
-        inline bool tryGetAttr(
-            typename AttributeTraits<A>::Type& o_attrValue) const
-        {
-            // Note: the compiler optimizes the following check (which fails
-            // at compile time if the attribute is not readable) away
-            if(AttributeTraits<A>::readable) { }
-            if(AttributeTraits<A>::notHbMutex) { }
-            if(AttributeTraits<A>::notFspMutex) { }
-            return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
-        }
+        bool tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const;
 
         /**
          *  @brief Get the target's specified attribute value
@@ -201,15 +192,7 @@ class Target
          *  @retval false Attribute not updated
          */
         template<const ATTRIBUTE_ID A>
-        bool trySetAttr(
-            typename AttributeTraits<A>::Type const& i_attrValue)
-        {
-            // Note: the compiler optimizes the following check (which fails
-            // at compile time if the attribute is not writable) away
-            if(AttributeTraits<A>::writeable) { }
-            if(AttributeTraits<A>::notHbMutex) { }
-            return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
-        }
+        bool trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue);
 
         /**
          *  @brief Returns pointer to a mutex attribute associated with the
@@ -257,8 +240,7 @@ class Target
          *  @retval false Attribute was not found, o_pMutex was not updated
          */
         template<const ATTRIBUTE_ID A>
-        bool tryGetHbMutexAttr(
-            mutex_t*& o_pMutex) const;
+        bool tryGetHbMutexAttr(mutex_t*& o_pMutex) const;
 
         /**
          *  @brief Sets the target's specified attribute value
@@ -273,14 +255,7 @@ class Target
          *      routine asserts
          */
         template<const ATTRIBUTE_ID A>
-        void setAttr(
-            typename AttributeTraits<A>::Type const& i_attrValue)
-        {
-            bool l_wrote = trySetAttr<A>(i_attrValue);
-
-            //@TODO: Remove assert once release has stabilized
-            TARG_ASSERT(l_wrote,"TARGETING::Target::setAttr<0x%7x>: trySetAttr returned false",A);
-        }
+        void setAttr(typename AttributeTraits<A>::Type const& i_attrValue);
 
         /**
          *  @brief Perform FFDC for the target instance
@@ -518,6 +493,33 @@ class Target
          */
         uint8_t getAttrTankTargetUnitPos() const;
 
+        /**
+         *  @brief enumeration of assert reasons
+         */
+        enum TargAssertReason
+        {
+            SET_ATTR,
+            GET_ATTR,
+            GET_ATTR_AS_STRING,
+            GET_HB_MUTEX_ATTR,
+        };
+
+        /**
+         *  @brief Invokes a standard assert to end the task
+         *
+         *  This is called when a function does not want the code size overhead
+         *  of the assert macro expansion. This is especially useful for the
+         *  asserts performed by the inline attribute
+         *
+         *  @param[in] i_reason Reason for assertion
+         *  @param[in] i_ffdc   FDDC Data (usually the attribute id)
+         */
+#ifdef NO_RETURN
+        NO_RETURN
+#endif
+        static void targAssert(TargAssertReason i_reason,
+                               uint32_t i_ffdc);
+
     private: // Function pointer variable declaration
 
         static pCallbackFuncPtr cv_pCallbackFuncPtr;
@@ -590,14 +592,42 @@ class Target
 } PACKED;
 
 template<const ATTRIBUTE_ID A>
+bool Target::tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const
+{
+    if(AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::notFspMutex) { }
+    return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
+}
+
+template<const ATTRIBUTE_ID A>
+bool Target::trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue)
+{
+    if(AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::notHbMutex) { }
+    return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
+}
+
+template<const ATTRIBUTE_ID A>
 typename AttributeTraits<A>::Type Target::getAttr() const
 {
     typename AttributeTraits<A>::Type l_attrValue;
     bool l_read = tryGetAttr<A>(l_attrValue);
-
-    //@TODO Remove assert once release has stablized
-    TARG_ASSERT(l_read,"TARGETING::Target::getAttr<0x%7x>: tryGetAttr returned false",A);
+    if (unlikely(!l_read))
+    {
+        targAssert(GET_ATTR, A);
+    }
     return l_attrValue;
+}
+
+template<const ATTRIBUTE_ID A>
+void Target::setAttr(typename AttributeTraits<A>::Type const& i_attrValue)
+{
+    bool l_wrote = trySetAttr<A>(i_attrValue);
+    if (unlikely(!l_wrote))
+    {
+        targAssert(SET_ATTR, A);
+    }
 }
 
 template<const ATTRIBUTE_ID A>
@@ -637,9 +667,10 @@ const char* Target::getAttrAsString() const
     if(AttributeTraits<A>::hasStringConversion) { }
     typename AttributeTraits<A>::Type l_attrValue;
     bool l_read = tryGetAttr<A>(l_attrValue);
-
-    //@TODO Remove assert once release has stabilized
-    TARG_ASSERT(l_read,"TARGETING::Target::getAttrAsString<0x%7x>: tryGetAttr returned false",A);
+    if (unlikely(!l_read))
+    {
+        targAssert(GET_ATTR_AS_STRING, A);
+    }
     return attrToString<A>(l_attrValue);
 }
 

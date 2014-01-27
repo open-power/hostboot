@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdTermData.C,v 1.8 2014/02/10 19:57:04 whs Exp $
+// $Id: getMBvpdTermData.C,v 1.9 2014/02/12 22:14:37 mjjones Exp $
 /**
  *  @file getMBvpdTermData.C
  *
@@ -332,6 +332,7 @@ fapi::ReturnCode getMBvpdTermData(
                        l_MtBufsize, MT_KEYWORD_SIZE);
             const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_MT;
             const uint32_t & RETURNED_SIZE = l_MtBufsize;
+            const fapi::Target & CHIP_TARGET = l_mbTarget;
             FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
             break;  //  break out with fapirc
         }

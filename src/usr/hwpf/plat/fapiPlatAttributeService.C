@@ -102,10 +102,12 @@ fapi::ReturnCode getTargetingTarget(
          *  @reasoncode RC_EMBEDDED_NULL_TARGET_PTR
          *  @devdesc    NULL TARG Target passed to attribute access macro
          */
+        const bool hbSwError = true;
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_INFORMATIONAL,
             MOD_ATTR_GET_TARGETING_TARGET,
-            RC_EMBEDDED_NULL_TARGET_PTR);
+            RC_EMBEDDED_NULL_TARGET_PTR,
+            0, 0, hbSwError);
         l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
     else if (i_expectedType != TARGETING::TYPE_NA)
@@ -126,11 +128,12 @@ fapi::ReturnCode getTargetingTarget(
              *  @devdesc    Unexpected Target Type passed to attribute access
              *              macro
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
                 MOD_ATTR_GET_TARGETING_TARGET,
                 RC_UNEXPECTED_TARGET_TYPE,
-                l_type, i_expectedType);
+                l_type, i_expectedType, hbSwError);
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
         }
     }
@@ -178,13 +181,14 @@ fapi::ReturnCode getTargetingAttr(const fapi::Target * i_pFapiTarget,
              *          attribute not present on given target, target service
              *          not initialized
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
                 MOD_PLAT_ATTR_SVC_GET_TARG_ATTR,
                 RC_FAILED_TO_ACCESS_ATTRIBUTE,
                 i_targAttrId,
-                i_pFapiTarget ? i_pFapiTarget->getType(): NULL);
-
+                i_pFapiTarget ? i_pFapiTarget->getType(): NULL,
+                hbSwError);
             l_rc.setPlatError(reinterpret_cast<void *>(l_pError));
         }
     }
@@ -232,13 +236,14 @@ fapi::ReturnCode setTargetingAttr(const fapi::Target * i_pFapiTarget,
              *          attribute not present on given target, target service
              *          not initialized
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
                 MOD_PLAT_ATTR_SVC_SET_TARG_ATTR,
                 RC_FAILED_TO_ACCESS_ATTRIBUTE,
                 i_targAttrId,
-                i_pFapiTarget ? i_pFapiTarget->getType(): NULL);
-
+                i_pFapiTarget ? i_pFapiTarget->getType(): NULL,
+                hbSwError);
             l_rc.setPlatError(reinterpret_cast<void *>(l_pError));
         }
     }
@@ -417,13 +422,16 @@ fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pFapiTarget,
              *  @errortype
              *  @moduleid   MOD_ATTR_GET_TARGET_NAME
              *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-             *  @devdesc    Failed to get the Target name due to bad target
-             *              parameter.
+             *  @devdesc    Failed to get the FAPI Target name due to
+             *              unrecognized TARGETING Target model
+             *  @userdata1  TARGETING Target model
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
                 MOD_ATTR_GET_TARGET_NAME,
-                RC_ATTR_BAD_TARGET_PARAM);
+                RC_ATTR_BAD_TARGET_PARAM,
+                l_model, 0, hbSwError);
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
         }
     }
@@ -1065,14 +1073,18 @@ fapi::ReturnCode fapiPlatGetVpdVersion (
              * @moduleid     fapi::MOD_PLAT_ATTR_SVC_GET_VPD_VERSION
              * @reasoncode   fapi::RC_NO_SINGLE_MBA
              * @userdata1    Number of MBAs
+             * @userdata2    DIMM HUID
              * @devdesc      fapiPlatGetVpdVersion could not find the
              *               expected 1 mba from the passed dimm target
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_PLAT_ATTR_SVC_GET_VPD_VERSION,
                 fapi::RC_NO_SINGLE_MBA,
-                l_mbaList.size());
+                l_mbaList.size(),
+                TARGETING::get_huid(l_pTarget),
+                hbSwError);
 
             // Attach the error log to the fapi::ReturnCode
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -1229,14 +1241,18 @@ fapi::ReturnCode fapiPlatDimmGetBadDqBitmap (
              * @moduleid     fapi::MOD_PLAT_ATTR_SVC_GET_BADDQ_DATA
              * @reasoncode   fapi::RC_NO_SINGLE_MBA
              * @userdata1    Number of MBAs
+             * @userdata2    DIMM HUID
              * @devdesc      fapiPlatDimmGetBadDqBitmap could not find the
              *               expected 1 mba from the passed dimm target
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_PLAT_ATTR_SVC_GET_BADDQ_DATA,
                 fapi::RC_NO_SINGLE_MBA,
-                l_mbaList.size());
+                l_mbaList.size(),
+                TARGETING::get_huid(l_pTarget),
+                hbSwError);
 
             // Attach the error log to the fapi::ReturnCode
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
@@ -1305,14 +1321,18 @@ fapi::ReturnCode fapiPlatDimmSetBadDqBitmap (
              * @moduleid     fapi::MOD_PLAT_ATTR_SVC_SET_BADDQ_DATA
              * @reasoncode   fapi::RC_NO_SINGLE_MBA
              * @userdata1    Number of MBAs
+             * @userdata2    DIMM HUID
              * @devdesc      fapiPlatDimmSetBadDqBitmap could not find the
              *               expected 1 mba from the passed dimm target
              */
+            const bool hbSwError = true;
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 fapi::MOD_PLAT_ATTR_SVC_SET_BADDQ_DATA,
                 fapi::RC_NO_SINGLE_MBA,
-                l_mbaList.size());
+                l_mbaList.size(),
+                TARGETING::get_huid(l_pTarget),
+                hbSwError);
 
             // Attach the error log to the fapi::ReturnCode
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));

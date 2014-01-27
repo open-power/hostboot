@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.13 2013/11/22 22:14:37 whs Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.15 2014/02/12 22:26:52 mjjones Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -28,6 +28,10 @@
     <description>
         Invalid input parameter:  pointer to ringbuffer was NULL
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -35,14 +39,10 @@
     <description>
         Failed to allocate buffer space for repair ring data
     </description>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_REPAIR_RING_INVALID_MAGIC</rc>
-    <description>
-        Failed to allocate buffer space for repair ring data
-    </description>
-    <ffdc>MAGIC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -50,15 +50,27 @@
     <description>
         Invalid input parameter: buffer too small to copy repair ring data
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_REPAIR_RING_NOT_FOUND</rc>
     <description>
         The repair ring specified was not found.
+        Most likely reason is bad VPD
     </description>
     <ffdc>RING_MODIFIER</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -66,6 +78,10 @@
     <description>
         An invalid parameter was passed to a mvpd ring function.
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -73,6 +89,10 @@
     <description>
         Insufficient room in the record to set the requested ring.
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -81,6 +101,10 @@
         VPD Field size too small to contain the EX_L2_SINGLE_MEMBER_ENABLE data
     </description>
     <ffdc>FIELD_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -89,6 +113,10 @@
         Invalid attribute ID
     </description>
     <ffdc>ATTR_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -98,23 +126,47 @@
     </description>
     <ffdc>EXPECTED_SIZE</ffdc>
     <ffdc>PASSED_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MBVPD_INSUFFICIENT_VPD_RETURNED</rc>
     <description>
         VPD keyword record returned is smaller than expected.
+        Probably a firmware bug, but could be bad VPD
     </description>
     <ffdc>KEYWORD</ffdc>
     <ffdc>RETURNED_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MBVPD_SUPPLIER_ID_NOT_IN_MV_VPD</rc>
     <description>
         The Module ID in the #I keyword is not in the list of supplier provided entries in the MV keyword.
+        Bad C-DIMM VPD.
     </description>
     <ffdc>MODULE_ID</ffdc>
+    <callout>
+      <target>MEMBUF_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_TARGET</target>
+    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -122,6 +174,10 @@
     <description>
         An invalid parameter was passed to a mbvpd ring function.
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -131,15 +187,30 @@
     </description>
     <ffdc>ATTR_ID</ffdc>
     <ffdc>VPD_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MBVPD_DRAM_2N_MODE_NOT_EQUAL</rc>
     <description>
-        The 2 ports of DRAM 2N MODE should be equal.
+        The 2 ports of DRAM 2N MODE should be equal in VPD.
+        Bad C-DIMM VPD.
     </description>
     <ffdc>PORT0</ffdc>
     <ffdc>PORT1</ffdc>
+    <callout>
+      <target>MBA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MBA_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>MBA_TARGET</target>
+    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -148,13 +219,28 @@
         Mode must be Get or Set.
     </description>
     <ffdc>MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MBVPD_UNEXPECTED_MEM_TYPE</rc>
     <description>
         Memory type in VSPD keyword #I not DDR3 or DDR4
+        Unsupported C-DIMM VPD.
     </description>
     <ffdc>MEM_TYPE</ffdc>
+    <callout>
+      <target>MEMBUF_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MEMBUF_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>MEMBUF_TARGET</target>
+    </gard>
   </hwpError>
 </hwpErrors>
