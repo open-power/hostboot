@@ -1659,7 +1659,7 @@ errlHndl_t i2cSetupMasters ( void )
 
 
 // ------------------------------------------------------------------
-//  i2cSetClockVariables
+//  i2cSetBusVariables
 // ------------------------------------------------------------------
 errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
                                 i2c_bus_setting_mode_t i_mode,
@@ -1672,12 +1672,14 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
 
     do
     {
+        // @todo RTC:80614 - sync up reading attributes eventually,
+        // but for now, unless requested for 400KHz, default to 1MHz
+        if ( i_mode != SET_I2C_BUS_400KHZ )
+        {
+            i_mode = SET_I2C_BUS_1MHZ;
+        }
 
-        // @todo RTC:80614 - Read I2C bus speed attributes from I2C Master
-        // For now, hardcode to 400KHz
-        i_mode = SET_I2C_BUS_400KHZ;
-
-        if (i_mode == SET_I2C_BUS_400KHZ)
+        if ( i_mode == SET_I2C_BUS_400KHZ )
         {
 
             io_args.bus_speed = 400;
@@ -1686,8 +1688,16 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
                                            I2C_CLOCK_DIVISOR_400KHZ);
             io_args.timeout_count = I2C_TIMEOUT_COUNT(
                                         io_args.timeout_interval);
+        }
 
-
+        else if ( i_mode == SET_I2C_BUS_1MHZ )
+        {
+            io_args.bus_speed = 1024;
+            io_args.bit_rate_divisor = I2C_CLOCK_DIVISOR_1MHZ;
+            io_args.timeout_interval = I2C_TIMEOUT_INTERVAL(
+                                           I2C_CLOCK_DIVISOR_1MHZ);
+            io_args.timeout_count = I2C_TIMEOUT_COUNT(
+                                        io_args.timeout_interval);
         }
 
         /* @todo RTC:80614 - sync up reading attributes with MRW

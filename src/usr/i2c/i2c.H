@@ -57,10 +57,10 @@ namespace I2C
  * equation that was given in the I2C Master Spec.
  *
  */
-#define I2C_MAX_BUS_SPEED           400
-#define I2C_CLOCK_DIVISOR_100KHZ    1250    // 0x4E2
-#define I2C_CLOCK_DIVISOR_400KHZ    312     // 0x138
-
+#define I2C_MAX_BUS_SPEED           1024    // 1MHZ
+#define I2C_CLOCK_DIVISOR_100KHZ    312     // 0x138
+#define I2C_CLOCK_DIVISOR_400KHZ    78      // 0x4E
+#define I2C_CLOCK_DIVISOR_1MHZ      31      // 0x1F
 /**
  * @brief I2C Clock delay polling values
  *
@@ -76,7 +76,7 @@ namespace I2C
  *      @100KHz = 125
  *      @400KHz = 500
  */
-#define I2C_TIMEOUT_INTERVAL( i_clockSpeed ) ( i_clockSpeed / 37 )
+#define I2C_TIMEOUT_INTERVAL( i_clockSpeed ) ( (i_clockSpeed / 37) +1 )
 #define I2C_TIMEOUT_COUNT( i_interval ) ( 5000 / i_interval )
 
 /**
@@ -140,6 +140,7 @@ enum i2c_bus_setting_mode_t
 {
     READ_I2C_BUS_ATTRIBUTES,
     SET_I2C_BUS_400KHZ,
+    SET_I2C_BUS_1MHZ,
     LAST_BUS_SETTING_MODE_TYPE
 };
 
