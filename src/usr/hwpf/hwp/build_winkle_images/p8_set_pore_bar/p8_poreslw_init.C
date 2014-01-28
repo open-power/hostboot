@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poreslw_init.C,v 1.18 2013/10/30 17:13:11 stillgs Exp $
+// $Id: p8_poreslw_init.C,v 1.19 2014/01/19 19:19:42 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poreslw_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -28,6 +28,9 @@
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
+// *! BACKUP:     Mike Olsen         Email: cmolsen@us.ibm.com
+// *!
+// *! Build cmd:  buildfapiprcd -e "../../xml/error_info/p8_poreslw_errors.xml,../../xml/error_info/p8_slw_registers.xml" p8_poreslw_init.C
 // *!
 /// \file p8_poreslw_init.C
 /// \brief Configure or reset the SLW PORE and related functions to enable idle
@@ -659,14 +662,21 @@ poreslw_ex_setup(const Target& i_target)
 
             // --------------------------------------
             FAPI_INF("\tSet PMGP0(46) to deal with HW259509 - winkle Pstate stepping hang");
+
             // This is a spare bit in Murano and Venice DD1s but
             // is necessary to set in Murano and Venice DD2 to deal
             // the hang condition that is fixed.  As bit 46 is spare
             // in the previous levels, setting it on all levels is not
             // harmful.
+            // While setting bit46, also set the PM_disable bit0 to prevent the
+            // PMGP0-invalid-write-snitch bit PMErr_REG(12) to light up.
+            // Note, PM_Disable will get disabled by the PM_Disable check
+            // immediately after this code.
             address = EX_PMGP0_OR_0x100F0102 + (l_ex_number * 0x01000000);
+
             e_rc |= data.flushTo0();
             e_rc |= data.setBit(46);
+            e_rc |= data.setBit(0);
             if (e_rc)
             {
                 FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);

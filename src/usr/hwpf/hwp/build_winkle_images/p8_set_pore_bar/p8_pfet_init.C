@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_init.C,v 1.10 2013/10/11 23:01:57 stillgs Exp $
+// $Id: p8_pfet_init.C,v 1.13 2014/01/27 22:37:15 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -28,6 +28,8 @@
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
+// *!
+// *! Build cmd:  buildfapiprcd -e "../../xml/error_info/p8_pfet_init_errors.xml" p8_pfet_init.C
 // *!
 /// \file p8_pfet_init.C
 /// \brief Configure and initialize the EX PFET controllers based on
@@ -180,6 +182,9 @@ pfet_init(const Target& i_target, uint32_t i_mode)
     uint8_t                     eco_vret_voff_value;
 
     pfet_force_t                off_mode;
+    
+    // detect PCBS Error Reset capaiblity
+    uint8_t                     chipHasPcbsErrReset = 0;
 
     uint32_t                    attr_proc_refclk_frequency;
 
@@ -575,6 +580,16 @@ pfet_init(const Target& i_target, uint32_t i_mode)
                 break;
             }
 
+            // Make a note of PMGP0-invalid-write-snitch bit PMErr_REG(12).
+            address = EX_PMErr_REG_0x100F0109 + (l_ex_number * 0x01000000);
+            l_rc=fapiGetScom(i_target, address, data);
+            if (l_rc)
+            {
+                FAPI_ERR("GetScom error 0x%08llu", address);
+                break;
+            }
+            FAPI_DBG("PMErr_REG (before calling p8_pfet_control): 0x%016llx",data.getDoubleWord(0));
+            
             // Functional - run any work-arounds necessary
             if (l_functional)
             {
@@ -634,7 +649,63 @@ pfet_init(const Target& i_target, uint32_t i_mode)
             {
                 FAPI_INF("Simulation detected: Not disabling PFETs in deconfigured chiplets");
             }
+            
+            // Make a note of PMGP0-invalid-write-snitch bit PMErr_REG(12).
+            // And, if bit12 set, clear all of PMErr_REG.
+            // Note, even though we attempt below to only clear the PMErr_REG(12) bit,
+            // the mere write action to PMErr_REG will cause the whole register to clear.
+            
+            l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET,
+                                &i_target,
+                                chipHasPcbsErrReset);
+            if(l_rc)
+            {
+     		    FAPI_ERR("Error querying Chip EC feature: "
+                         "ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET");
+                break;
+            }
+                        
+            address = EX_PMErr_REG_0x100F0109 + (l_ex_number * 0x01000000);
+            l_rc=fapiGetScom(i_target, address, data);
+            if (l_rc)
+            {
+                FAPI_ERR("GetScom error 0x%08llu", address);
+                break;
+            }
+            FAPI_DBG("PMErr_REG (after returning from p8_pfet_control): 0x%016llx",data.getDoubleWord(0));
+            if (data.getBit(12))
+            {
+                e_rc |= data.clearBit(12);
+                if (e_rc)
+                {
+                    FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
+                    l_rc.setEcmdError(e_rc);
+                    break;
+                }
+                
+                FAPI_INF("PCBS Error Reset is %s being performed",
+                         (chipHasPcbsErrReset ? "" : "NOT"));      
+
+                if (chipHasPcbsErrReset)
+                {                         
+                    l_rc = fapiPutScom(i_target, address, data);
+                    if (l_rc)
+                    {
+                        FAPI_ERR("PutScom error 0x%08llu", address);
+                        break;
+                    }
+                    l_rc=fapiGetScom(i_target, address, data);
+                    if (l_rc)
+                    {
+                        FAPI_ERR("GetScom error 0x%08llu", address);
+                        break;
+                    }
+                    FAPI_DBG("PMErr_REG (after clearing it): 0x%016llx",data.getDoubleWord(0));
+                }
+            }
+
         } // chiplet loop
+
     } while(0);
 
     return l_rc;
