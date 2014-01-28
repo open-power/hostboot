@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -45,7 +45,12 @@ errlHndl_t getMbaDiagnosticMode(
 
     do
     {
-        if(MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
+        if(i_globals.simicsRunning)
+        {
+            o_mode = ONE_PATTERN;
+        }
+
+        else if(MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
            & i_globals.mfgPolicy)
         {
             o_mode = NINE_PATTERNS;
@@ -64,8 +69,9 @@ errlHndl_t getMbaDiagnosticMode(
         }
 
         // Only need to check hw changed state attributes
-        // when not already set to exhaustive
-        if( NINE_PATTERNS != o_mode )
+        // when not already set to exhaustive and not in simics
+        if(( NINE_PATTERNS != o_mode ) &&
+           ( ! i_globals.simicsRunning ))
         {
             if(isHWStateChanged(i_mba))
             {
@@ -75,8 +81,9 @@ errlHndl_t getMbaDiagnosticMode(
 
     } while(0);
 
-    MDIA_FAST("getMbaDiagnosticMode: mba: %x, o_mode: 0x%x",
-              get_huid(i_mba), o_mode);
+    MDIA_FAST("getMbaDiagnosticMode: mba: %x, o_mode: 0x%x, "
+              "simics: %d",
+              get_huid(i_mba), o_mode, i_globals.simicsRunning);
 
     return 0;
 }

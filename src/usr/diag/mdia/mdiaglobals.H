@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -48,6 +48,11 @@ struct Globals
      * @brief user interface policy
      */
     uint64_t userPolicy;
+
+    /**
+     * @brief flag to indicate running in simics env
+     */
+    bool simicsRunning;
 };
 }
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include "mdiasm.H"
 #include "mdiasmimpl.H"
 #include <util/singleton.H>
+#include <util/misc.H>
 #include <targeting/common/targetservice.H>
 
 using namespace TARGETING;
@@ -72,6 +73,8 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
             globals.mfgPolicy |=
               MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST;
         }
+
+        globals.simicsRunning = Util::isSimicsRunning();
     }
 
     // get the workflow for each target mba passed in.
