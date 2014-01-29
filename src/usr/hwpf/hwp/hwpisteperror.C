@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -64,23 +64,25 @@ void IStepError::addErrorDetails( const errlHndl_t i_err )
          *              for reason.
          *
          */
-
         iv_eHandle = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              ISTEP_REPORTING_ERROR,
                                              ISTEP_FAILURE,
                                              data1, data2);
+
+        // Set the PLID of this istep elog to match the first error
+        iv_eHandle->plid(i_err->plid());
     }
-    else  // just increment error count
+    else
     {
         // retrieve iStep and subStep
         uint32_t l_iStepSubStep = (iv_eHandle->getUserData2() & 0xFFFFFFFF);
         // update the error count and keep iStep/subStep in user data word 1
         uint64_t l_data2 = TWO_UINT32_TO_UINT64 (iv_errorCount,l_iStepSubStep);
         iv_eHandle->addUserData2(l_data2);
-    }
 
-    // set the plid of the input elog to match the istep elog
-    i_err->plid( iv_eHandle->plid() );
+        // set the plid of the input elog to match the first and istep elog
+        i_err->plid( iv_eHandle->plid() );
+    }
 
     // grab the istep's trace and add to the input elog
     i_err->collectTrace("ISTEPS_TRACE", 1024);
