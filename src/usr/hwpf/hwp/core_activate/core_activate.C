@@ -297,11 +297,8 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                 const fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
                         (const_cast<TARGETING::Target*> (*l_core)) );
 
-                // TODO: It's safe to send in NULL for i_good_halt_address for now
-                // Greg Still will work on storing this address by attribute and use
-                // within the procedure.
                 FAPI_INVOKE_HWP( l_errl, proc_check_slw_done,
-                                 l_fapi_ex_target, NULL);
+                                 l_fapi_ex_target);
                 if (l_errl)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

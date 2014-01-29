@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_check_slw_done.H,v 1.2 2013/12/06 13:26:18 stillgs Exp $
+// $Id: proc_check_slw_done.H,v 1.3 2014/01/24 19:41:18 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slw_done.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -45,8 +45,7 @@
 #include "p8_pm.H"
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*proc_check_slw_done_FP_t) (  const fapi::Target&,
-                                                        const uint64_t);
+typedef fapi::ReturnCode (*proc_check_slw_done_FP_t) (  const fapi::Target&);
 
 extern "C" {
 
@@ -68,14 +67,12 @@ extern "C" {
  * proc_check_slw_done
  *
  * @param[in] i_target EX target
- * @param[in] i_slw_image_address Memory Address SLW image
  *
  * @retval ECMD_SUCCESS
  * @retval ERROR 
  */
 fapi::ReturnCode
-proc_check_slw_done(const fapi::Target& i_ex_target, 
-                    const uint64_t      i_good_halt_address );
+proc_check_slw_done(const fapi::Target& i_ex_target);
 
 
 } // extern "C"

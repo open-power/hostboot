@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_check_slw_done.C,v 1.6 2013/12/06 13:26:17 stillgs Exp $
+// $Id: proc_check_slw_done.C,v 1.7 2014/01/24 19:41:07 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slw_done.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -34,7 +34,11 @@
 ///
 /// \verbatim
 ///
-///     parms:  i_ex_target, i_slw_image_address
+///     Dependency: ATTR_PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR has the 
+///                 XIP offset of the good value for Deep Winkle
+///                 For P8, this is set in p8_set_pore_bar.C
+///
+///     parms:  i_ex_target
 ///     {
 ///
 ///         Check that passed chiplet number is in the ETR chiplet vector
@@ -44,7 +48,9 @@
 ///
 ///         Check SLW is in clean state
 ///             - Control/Status register indicates stopped condition
-///             - if i_good_halt_address is not NULL,
+///             - read ATTR_PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR to get the 
+///                 the value of the good halt address
+///             - if good_halt_address is not NULL,
 ///                 - Compare PC (from Control/Status register) to the "good" address
 ///                 if miscompare,
 ///                     - put "good" address in FFDC data
@@ -137,17 +143,14 @@ using namespace fapi;
  * proc_check_slw_done
  *
  * @param[in] i_target EX target
- * @param[in] i_good_halt_address Memory Address SLW image
  *
  * @retval ECMD_SUCCESS
  * @retval ERROR
  */
 fapi::ReturnCode
-proc_check_slw_done(const fapi::Target& i_ex_target,
-                    const uint64_t      i_good_halt_address )
+proc_check_slw_done(const fapi::Target& i_ex_target)
 {
     fapi::ReturnCode    rc;
-    fapi::ReturnCode    l_rc;   //temporary until p8_pm.H is updated
     uint32_t            e_rc = 0;
 
     ecmdDataBufferBase  data(64);
@@ -162,6 +165,8 @@ proc_check_slw_done(const fapi::Target& i_ex_target,
     fapi::Target        l_parentTarget;
     uint64_t            address;
     uint64_t            ex_offset;
+    
+    uint32_t            good_halt_address = 0;
 
     uint32_t            idle_transition = 0;
     uint32_t            ex_vector = 0;
@@ -286,12 +291,19 @@ proc_check_slw_done(const fapi::Target& i_ex_target,
             FAPI_SET_HWP_ERROR(rc, RC_PMPROC_CHKSLW_INVALID_STATE);
             break;
         }
+        
+        // Get the good_halt_address
+        GETATTR(rc,
+                ATTR_PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR,
+                "ATTR_PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR",
+                NULL,
+                good_halt_address);
 
-        // if i_good_halt_address is not NULL, compare PC to the "good" address
-        if (i_good_halt_address)
+        // if good_halt_address is not NULL, compare PC to the "good" address
+        if (good_halt_address)
         {
-            FAPI_INF("Checking for good halt address: 0x%08llX", i_good_halt_address );
-            uint64_t good_halt_address_masked = i_good_halt_address & SLW_ADDRESS_MASK;
+            FAPI_INF("Checking for good halt address: 0x%08llX", (uint64_t)good_halt_address );
+            uint64_t good_halt_address_masked = good_halt_address & SLW_ADDRESS_MASK;
             uint64_t slw_address_masked = slw_address & SLW_ADDRESS_MASK;
             if ((good_halt_address_masked) != slw_address_masked)
             {
@@ -302,6 +314,7 @@ proc_check_slw_done(const fapi::Target& i_ex_target,
                 const uint64_t& PMGP0   = pmgp0.getDoubleWord(0);
                 const uint64_t& PMGP1   = pmgp1.getDoubleWord(0);
                 const uint64_t& PMERR   = pmerr.getDoubleWord(0);
+                const uint64_t& GOODHALTADDR = (uint64_t)good_halt_address;
                 const uint64_t& EX      = l_ex_number;
                 const fapi::Target& CHIP_IN_ERROR = l_parentTarget;
 
@@ -383,12 +396,6 @@ proc_check_slw_done(const fapi::Target& i_ex_target,
 
     } while(0);
     
-    //temporary until p8_pm.H is updated.  Will be removed when new verion is available.
-    if(!l_rc.ok())                                                  
-    {                                                               
-        rc = l_rc;
-    }     
-
     FAPI_INF("Exiting proc_check_slw_done...");
     return rc;
 }

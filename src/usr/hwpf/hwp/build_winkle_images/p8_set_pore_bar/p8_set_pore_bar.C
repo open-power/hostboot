@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_set_pore_bar.C,v 1.7 2013/10/04 19:30:36 stillgs Exp $
+// $Id: p8_set_pore_bar.C,v 1.8 2014/01/24 19:24:37 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_set_pore_bar.C,v $
 //-------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -174,6 +174,13 @@ p8_set_pore_bar(      const fapi::Target& i_target,
     
     SbeXipItem          slw_control_vector_info;
     uint32_t            slw_control_vector_offset;
+    
+    SbeXipItem          slw_deep_winkle_exit_good_halt_info;
+    uint32_t            slw_deep_winkle_exit_good_halt_offset;
+    
+    SbeXipItem          slw_deep_sleep_exit_good_halt_info;
+    uint32_t            slw_deep_sleep_exit_good_halt_offset;
+
 
 
     // -----------------------------------------------------------------
@@ -249,7 +256,7 @@ p8_set_pore_bar(      const fapi::Target& i_target,
         }
         
         slw_control_vector_offset = slw_control_vector_info.iv_address;
-        FAPI_DBG("slw_control_vector offset:   %16llX", (uint64_t)slw_control_vector_info.iv_address);
+        FAPI_DBG("slw_control_vector offset:  %16llX", (uint64_t)slw_control_vector_info.iv_address);
        
        
         SETATTR(rc,
@@ -258,15 +265,58 @@ p8_set_pore_bar(      const fapi::Target& i_target,
                 NULL,
                 slw_control_vector_offset);
 
-        // Initialize the ecmdDataBuffer
-        l_ecmdRc |= data.clear();
-        l_ecmdRc |= data.setBitLength(64);
-        if(l_ecmdRc)
+        
+        // Get the Deep Winkle Good Exit halt offset from the image to save in 
+        // at attribute for other HWP use.
+        l_ecmdRc = sbe_xip_find((void*)   i_image,
+                                          "slw_deep_winkle_exit_good_halt",
+                                          &slw_deep_winkle_exit_good_halt_info);
+        if (l_ecmdRc)
         {
-            FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", l_ecmdRc);
-            rc.setEcmdError(l_ecmdRc);
+            FAPI_ERR("XIP Find of slw_deep_winkle_exit_good_halt failed. rc = %x\n", l_ecmdRc);
+            const fapi::Target & CHIP = i_target;
+            const uint64_t     & IMAGEADDR = (uint64_t)i_image;
+            const uint32_t     & XIPRC = l_ecmdRc;
+            const uint64_t     & SLWDEEPWINKLEEXITHALT = (uint64_t)slw_deep_winkle_exit_good_halt_info.iv_address;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_IMAGE_SLW_DEEP_WINKLE_EXIT_HALT_ERROR);
             break;
         }
+        
+        slw_deep_winkle_exit_good_halt_offset = slw_deep_winkle_exit_good_halt_info.iv_address;
+        FAPI_DBG("slw_deep_winkle_exit_good_halt offset: %16llX", (uint64_t)slw_deep_winkle_exit_good_halt_info.iv_address);
+             
+        SETATTR(rc,
+                ATTR_PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR,
+                "ATTR_PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR",
+                NULL,
+                slw_deep_winkle_exit_good_halt_offset);
+        
+        // Get the Deep Sleep Good Exit halt offset from the image to save in 
+        // at attribute for other HWP use.
+        l_ecmdRc = sbe_xip_find((void*)   i_image,
+                                          "slw_deep_sleep_exit_good_halt",
+                                          &slw_deep_sleep_exit_good_halt_info);
+        if (l_ecmdRc)
+        {
+            FAPI_ERR("XIP Find of slw_deep_sleep_exit_good_halt failed. rc = %x\n", l_ecmdRc);
+            const fapi::Target & CHIP = i_target;
+            const uint64_t     & IMAGEADDR = (uint64_t)i_image;
+            const uint32_t     & XIPRC = l_ecmdRc;
+            const uint64_t     & SLWDEEPSLEEPEXITHALT = (uint64_t)slw_deep_sleep_exit_good_halt_info.iv_address;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_IMAGE_SLW_DEEP_SLEEP_EXIT_HALT_ERROR);
+            break;
+        }
+        
+        slw_deep_sleep_exit_good_halt_offset = slw_deep_sleep_exit_good_halt_info.iv_address;
+        FAPI_DBG("slw_deep_sleep_exit_good_halt offset:  %16llX", (uint64_t)slw_deep_sleep_exit_good_halt_info.iv_address);
+             
+        SETATTR(rc,
+                ATTR_PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR,
+                "ATTR_PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR",
+                NULL,
+                slw_deep_sleep_exit_good_halt_offset);
+
+               
 
         // Setup the the table base address register
         //

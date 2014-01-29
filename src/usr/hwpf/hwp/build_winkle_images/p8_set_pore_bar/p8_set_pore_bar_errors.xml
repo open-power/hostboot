@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_set_pore_bar_errors.xml,v 1.4 2013/10/04 19:28:12 stillgs Exp $ -->
+<!-- $Id: p8_set_pore_bar_errors.xml,v 1.5 2014/01/24 19:19:14 stillgs Exp $ -->
 <!-- Error definitions for p8_set_pore_bar procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -129,6 +129,32 @@
     <ffdc>IMAGEADDR</ffdc>
     <ffdc>XIPRC</ffdc>
      <ffdc>SLWCONTROLVECTOR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>      
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_POREBAR_IMAGE_SLW_DEEP_WINKLE_EXIT_HALT_ERROR</rc>
+    <description>XIP Find of slw_deep_winkle_exit_good_halt failed in p8_set_pore_bar</description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>IMAGEADDR</ffdc>
+    <ffdc>XIPRC</ffdc>
+     <ffdc>SLWDEEPWINKLEEXITHALT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>      
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_POREBAR_IMAGE_SLW_DEEP_SLEEP_EXIT_HALT_ERROR</rc>
+    <description>XIP Find of slw_deep_sleep_exit_good_halt failed in p8_set_pore_bar</description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>IMAGEADDR</ffdc>
+    <ffdc>XIPRC</ffdc>
+     <ffdc>SLWDEEPSLEEPEXITHALT</ffdc>
     <callout>
       <procedure>CODE</procedure>      
       <priority>HIGH</priority>
