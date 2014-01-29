@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.22 2014/01/15 16:22:54 sasethur Exp $
+// $Id: mss_access_delay_reg.C,v 1.24 2014/01/24 17:21:39 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -55,27 +55,21 @@
 //   1.17  | sauchadh |18-Jul-13| Added data bit disable registers
 //   1.19  | abhijsau |9-Oct-13 | Added mss_c4_phy() function 
 //   1.21  | abhijsau |16-Dec-13| Added function for fw
-//   1.22  |sauchadh  |10-Jan-14| changed dimmtype attribute to ATTR_EFF_CUSTOM_DIMM    
+//   1.22  |sauchadh  |10-Jan-14| changed dimmtype attribute to ATTR_EFF_CUSTOM_DIMM
+//   1.23  | mjjones  |17-Jan-14| Fixed layout and error handling for RAS Review
+//   1.24  |sauchadh  |24-Jan-14| Added check for unused DQS 
 
 //----------------------------------------------------------------------
 //  My Includes
 //----------------------------------------------------------------------
 #include <mss_access_delay_reg.H>
 
-
-
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
 #include <fapi.H>
 
-
-
-
-
 extern "C" {
-
-
 
 //******************************************************************************
 //Function name: mss_access_delay_reg()
@@ -87,9 +81,23 @@ extern "C" {
 //Input  : Target MBA=i_target_mba, i_access_type_e = READ or WRITE, i_port_u8=0 or 1, i_rank_u8=valid ranks,i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS or RAW_modes, i_input_index_u8=follow ISDIMMnet/C4 for non raw modes and supports raw modes, i_verbose-extra print statements   
 //Output : delay value=io_value_u32 if i_access_type_e = READ else if i_access_type_e = WRITE no return value
 //******************************************************************************
-
-fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose,uint32_t &io_value_u32)
+fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba,
+                                      access_type_t i_access_type_e,
+                                      uint8_t i_port_u8,
+                                      uint8_t i_rank_u8,
+                                      input_type_t i_input_type_e,
+                                      uint8_t i_input_index_u8,
+                                      uint8_t i_verbose,
+                                      uint32_t &io_value_u32)
 {
+   // Reference variables for Error FFDC
+   const fapi::Target & MBA_TARGET = i_target_mba;
+   const access_type_t & ACCESS_TYPE_PARAM = i_access_type_e;
+   const uint8_t & PORT_PARAM = i_port_u8;
+   const uint8_t & RANK_PARAM = i_rank_u8;
+   const input_type_t & TYPE_PARAM = i_input_type_e;
+   const uint8_t & INDEX_PARAM = i_input_index_u8;
+
    fapi::ReturnCode rc; 
     
    const uint8_t max_rp=8; 
@@ -156,13 +164,10 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    const uint8_t clk_lanep3[clk_max]={3,2,13,12,10,11,11,10};
    const uint8_t clk_adrp3[clk_max]={3,3,2,2,0,0,2,2};
    
-   //i_verbose=1;
    
    rc = mss_getrankpair(i_target_mba,i_port_u8,i_rank_u8,&l_rank_pair,l_rankpair_table);   if(rc) return rc;
    
    rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
-   
-   
    
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos);  if(rc) return rc;
@@ -172,13 +177,21 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       FAPI_INF("dimm type=%d",l_dimmtype);
       FAPI_INF("rank pair=%d",l_rank_pair);       
    }
-   if((i_port_u8 >1) || (l_mbapos>1))
+   if(i_port_u8 >1)
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong target or port specified rc = 0x%08X", uint32_t(rc));  
+      FAPI_ERR("Wrong port specified (%d)", i_port_u8);
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
       return rc;
    }
-   
+
+   if (l_mbapos>1)
+   {
+       FAPI_ERR("Bad position from ATTR_CHIP_UNIT_POS (%d)", l_mbapos);
+       const uint8_t & MBA_POS = l_mbapos;
+       FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_BAD_MBA_POS);
+       return rc;
+   }
+
    if((l_dram_width ==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) || (l_dram_width ==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8))   // Checking for dram width here so that checking can be skipped in called function
    {
       if(i_verbose==1)
@@ -186,49 +199,40 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          FAPI_INF("dram width=%d",l_dram_width);
       }
    }
-   
    else
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong dram width specified rc = 0x%08X", uint32_t(rc));
+      FAPI_ERR("Bad dram width from ATTR_EFF_DRAM_WIDTH (%d)", l_dram_width);
+      const uint8_t & DRAM_WIDTH = l_dram_width;
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_BAD_DRAM_WIDTH);
       return rc;
    }
    
    if(i_input_type_e==RD_DQ || i_input_type_e==WR_DQ) 
    {
-      
-      
-      
       if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
       {
          l_type=CDIMM_DQ;
-                  
+         
          if(i_input_index_u8>l_CDIMM_dqmax)    
          {
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-            FAPI_ERR("Wrong input index specified rc = 0x%08X" ,uint32_t(rc));
-           return rc;      
-         }
-            
-      }
-      else if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO) 
-      {
-         l_type=ISDIMM_DQ;
-         if(i_input_index_u8>l_ISDIMM_dqmax)
-         {
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-            FAPI_ERR("Wrong input index specified rc = 0x%08X", uint32_t(rc));
+            FAPI_ERR("CDIMM_DQ: Wrong input index specified (%d, max %d)" ,
+                     i_input_index_u8, l_CDIMM_dqmax);
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
             return rc;
          }
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong dimm type specified rc = 0x%08X", uint32_t(rc));
-         return rc;      
+         l_type=ISDIMM_DQ;
+         if(i_input_index_u8>l_ISDIMM_dqmax)
+         {
+            FAPI_ERR("ISDIMM_DQ: Wrong input index specified (%d, max %d)",
+                     i_input_index_u8, l_ISDIMM_dqmax);
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+            return rc;
+         }
       }
       
-         
       rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
       
       if(i_verbose==1)
@@ -277,9 +281,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       
       ip_type_t l_input=ADDRESS_t;
@@ -308,9 +312,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       
       ip_type_t l_input=DATA_DISABLE_t;
@@ -360,8 +364,8 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
          return rc;      
       }
       
@@ -412,8 +416,8 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
          return rc;      
       }
       
@@ -464,8 +468,8 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
          return rc;      
       }
       
@@ -495,17 +499,10 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       {
          l_type=CDIMM_DQS;
       }
-      else if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
+      else
       {
          l_type=ISDIMM_DQS;
       }
-      else
-      {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong dimm type specified rc = 0x%08X", uint32_t(rc));
-         return rc;      
-      }
-      
       
       rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
       if(i_verbose==1)
@@ -559,8 +556,8 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
          return rc;      
       }
      
@@ -613,9 +610,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_DQSCLK;
       if(i_verbose==1)
@@ -663,9 +660,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
      
       ip_type_t l_input=RAW_WR_DQ;
@@ -713,9 +710,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_RD_DQ;
       if(i_verbose==1)
@@ -762,9 +759,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       
       ip_type_t l_input=RAW_RD_DQS;
@@ -812,9 +809,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_DQS_ALIGN;
       if(i_verbose==1)
@@ -862,9 +859,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc; 
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_WR_DQS;
       if(i_verbose==1)
@@ -910,9 +907,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc; 
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_SYS_CLK;
       if(i_verbose==1)
@@ -939,9 +936,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc; 
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_SYS_ADDR_CLKS0S1;
       if(i_verbose==1)
@@ -988,9 +985,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc; 
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_WR_CLK;
       if(i_verbose==1)
@@ -1033,9 +1030,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc; 
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_ADDR;
       if(i_verbose==1)
@@ -1083,8 +1080,8 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
          return rc; 
       }
       ip_type_t l_input=RAW_DQS_GATE;
@@ -1106,9 +1103,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    
    else
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
-      return rc;      
+      FAPI_ERR("Wrong input type specified (%d)", i_input_type_e);
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+      return rc;
    } 
      
    if(i_access_type_e==READ)   
@@ -1157,9 +1154,9 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input type specified (%d)", i_input_type_e);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
       }
       if(i_verbose==1)
       {
@@ -1179,21 +1176,24 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    return rc;
 }
 
-   
-    
-    
 //******************************************************************************
 //Function name: cross_coupled()
 //Description:This function returns address,start bit and bit length for RD_DQ, WR_DQ, RD_DQS, WR_DQS
 //Input  : Target MBA=i_target_mba, i_port_u8=0 or 1, i_rank_pair=0 or 1 or 2 or 3, i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS,i_input_index_u8=0-79/0-71/0-8/0-19 , i_verbose-extra print statements  
 //Output : out (address,start bit and bit length)
 //******************************************************************************    
-        
-fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t i_input_index,uint8_t i_verbose,scom_location& out)
+fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,
+                               uint8_t i_port,
+                               uint8_t i_rank_pair,
+                               input_type_t i_input_type_e,
+                               uint8_t i_input_index,
+                               uint8_t i_verbose,
+                               scom_location& out)
 {    
    fapi::ReturnCode rc; 
    const uint8_t l_dqmax=80;
    const uint8_t l_dqsmax=20;
+   const uint8_t l_dqs=4;
    const uint8_t lane_dq_p0[l_dqmax]={4,6,5,7,2,1,3,0,13,15,12,14,8,9,11,10,13,15,12,14,9,8,11,10,13,15,12,14,11,9,10,8,11,8,9,10,12,13,14,15,7,6,5,4,1,3,2,0,5,6,4,7,3,1,2,0,7,4,5,6,2,0,3,1,3,0,1,2,6,5,4,7,11,8,9,10,15,13,12,14}; 
    const uint8_t lane_dq_p1[l_dqmax]={9,11,8,10,13,14,15,12,10,8,11,9,12,13,14,15,1,0,2,3,4,5,6,7,9,11,10,8,15,12,13,14,5,7,6,4,1,0,2,3,0,2,1,3,5,4,6,7,0,2,3,1,4,5,6,7,12,15,13,14,11,8,10,9,5,7,4,6,3,2,0,1,14,12,15,13,9,8,11,10}; 
    const uint8_t lane_dq_p2[l_dqmax]={13,15,12,14,11,9,10,8,13,12,14,15,10,9,11,8,5,6,7,4,2,3,0,1,10,9,8,11,13,12,15,14,15,12,13,14,11,10,9,8,7,6,4,5,1,0,3,2,0,2,1,3,5,6,4,7,5,7,6,4,1,0,2,3,1,2,3,0,7,6,5,4,9,10,8,11,12,15,14,13};
@@ -1210,9 +1210,13 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
    const uint8_t block_dqs_p1[l_dqsmax]={0,0,3,3,0,0,1,1,2,2,3,3,4,4,4,4,1,1,2,2};
    const uint8_t block_dqs_p2[l_dqsmax]={1,1,3,3,0,0,0,0,2,2,2,2,3,3,4,4,1,1,4,4};
    const uint8_t block_dqs_p3[l_dqsmax]={2,2,2,2,0,0,0,0,3,3,3,3,4,4,4,4,1,1,1,1};
+   const uint8_t dqslane[l_dqs]={16,18,20,22};
+   uint8_t l_j=0;
+   uint8_t l_flag=0; 
    uint8_t l_mbapos = 0;
    uint8_t l_dram_width=0;
    uint8_t l_lane=0;
+   const uint8_t & INVALID_DQS =l_lane;
    uint8_t l_block=0;
    uint8_t lane_dqs[4];
    uint8_t l_index=0;
@@ -1595,7 +1599,7 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
          {
             FAPI_INF("lane is=%d",l_lane);
          }   
-      }  
+      }
       
       if(i_input_type_e==WR_DQS)	  		  
       {
@@ -1605,6 +1609,24 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
       {
          l_input_type=DQS_ALIGN_t;
       }
+      
+      
+      for(l_j=0;l_j<4;l_j++)
+      {
+         if(l_lane==dqslane[l_j])
+         {
+            l_flag=1;
+            break;
+         }
+         
+      }
+      if(l_flag==0)
+      {
+        FAPI_ERR("Invalid DQS and DQS lane=%d",l_lane);
+        FAPI_SET_HWP_ERROR(rc, RC_CROSS_COUPLED_INVALID_DQS);
+        return rc; 
+      }
+      
       
       rc=get_address(i_target_mba,i_port,i_rank_pair,l_input_type,l_block,l_lane,l_scom_address_64,l_start_bit,l_len); if(rc) return rc; 		 
       out.scom_addr=l_scom_address_64;
@@ -1698,26 +1720,36 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
    
    else
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
-      return rc;      
+      FAPI_ERR("Wrong input type specified (%d)", i_input_type_e);
+      const input_type_t & TYPE_PARAM = i_input_type_e;
+      FAPI_SET_HWP_ERROR(rc, RC_CROSS_COUPLED_INVALID_INPUT);
+      return rc;
    }  
-      
-                
+
    return rc; 
-}     
- 
-     
+}
+
+
 //******************************************************************************
 //Function name: rosetta_map()
 //Description:This function returns C4 bit for the corresponding ISDIMM bit
 //Input  : Target MBA=i_target_mba, i_port_u8=0 or 1,i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS, i_input_index_u8=0-79/0-71/0-8/0-19, i_verbose-extra print statements    
 //Output : C4 bit=o_value
 //****************************************************************************** 
-   
-fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,input_type i_input_type_e,uint8_t i_input_index,uint8_t i_verbose,uint8_t &o_value) //This function is used by some other procedures
-{                                                                                                                                              // Boundary check is done again 
-   fapi::ReturnCode rc;
+fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
+                             uint8_t i_port,
+                             input_type i_input_type_e,
+                             uint8_t i_input_index,
+                             uint8_t i_verbose,
+                             uint8_t &o_value) //This function is used by some other procedures
+{  // Boundary check is done again
+    // Reference variables for Error FFDC
+    const fapi::Target & MBA_TARGET = i_target_mba;
+    const uint8_t & PORT_PARAM = i_port;
+    const input_type & TYPE_PARAM = i_input_type_e;
+    const uint8_t & INDEX_PARAM = i_input_index;
+
+    fapi::ReturnCode rc;
    
    const uint8_t l_ISDIMM_dqmax=71; 
    const uint8_t l_CDIMM_dqmax=79;
@@ -1741,7 +1773,7 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,in
    const uint8_t GL_DQS_p3[l_maxdqs]={0,2,4,16,8,10,12,14,6,1,3,5,17,9,11,13,15,7};
    
    rc = FAPI_ATTR_GET(ATTR_MSS_DQS_SWIZZLE_TYPE, &i_target_mba, l_swizzle); if(rc) return rc;
-   //FAPI_INF("input index in rosetta map=%d",i_input_index);
+   
    
    if(l_swizzle ==0 || l_swizzle ==1)
    {
@@ -1753,18 +1785,27 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,in
    
    else
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong swizzle value rc = 0x%08X ", uint32_t(rc));
+      FAPI_ERR("Wrong swizzle value (%d)", l_swizzle);
+      const uint8_t & SWIZZLE_TYPE = l_swizzle;
+      FAPI_SET_HWP_ERROR(rc, RC_ROSETTA_MAP_BAD_SWIZZLE_VALUE);
       return rc;
    }
    
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos); if(rc) return rc;
-     
-   if((i_port >1) || (l_mbapos>1))  // Checking it again since this function will be called by some other procedures
+
+   if(i_port >1)
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong target or port specified rc = 0x%08X ", uint32_t(rc));
+      FAPI_ERR("Wrong port specified (%d)", i_port);
+      FAPI_SET_HWP_ERROR(rc, RC_ROSETTA_MAP_INVALID_INPUT);
       return rc;
+   }
+
+   if (l_mbapos>1)
+   {
+       FAPI_ERR("Bad position from ATTR_CHIP_UNIT_POS (%d)", l_mbapos);
+       const uint8_t & MBA_POS = l_mbapos;
+       FAPI_SET_HWP_ERROR(rc, RC_ROSETTA_MAP_BAD_MBA_POS);
+       return rc;
    }
    
    rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
@@ -1773,30 +1814,20 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,in
    {
       if(i_input_index>l_CDIMM_dqmax)    
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_SET_HWP_ERROR(rc, RC_ROSETTA_MAP_INVALID_INPUT);
          FAPI_ERR("Wrong input index specified rc = 0x%08X" ,uint32_t(rc));
          return rc;      
       }
    }
-   
-   else if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
+   else
    {
       if(i_input_index>l_ISDIMM_dqmax)
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index);
+         FAPI_SET_HWP_ERROR(rc, RC_ROSETTA_MAP_INVALID_INPUT);
          return rc;
       }
    }
-   
-   else
-   {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong dimm type specified rc = 0x%08X", uint32_t(rc));
-      return rc;
-   }
-   
-   
     	
    if(i_input_type_e ==ISDIMM_DQ)
    {
@@ -1886,25 +1917,29 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,in
        
    else
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
+      FAPI_ERR("Wrong input type specified (%d)", i_input_type_e);
+      FAPI_SET_HWP_ERROR(rc, RC_ROSETTA_MAP_INVALID_INPUT);
       return rc;      
    }
-   
-   
    
    return rc;
 }
 
-    
 //******************************************************************************
 //Function name: get address()
 //Description:This function returns address,start bit and bit length for RD_DQ, WR_DQ, RD_DQS, WR_DQS
 //Input  : Target MBA=i_target_mba, i_port_u8=0 or 1, i_rank_pair=0 or 1 or 2 or 3, i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS, i_block=0 or 1 or 2 or 3 or 4, i_lane=0-15   
 //Output : scom address=o_scom_address_64, start bit=o_start_bit, bit length=o_len 
 //******************************************************************************    
-  
-fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,ip_type_t i_input_type_e,uint8_t i_block,uint8_t i_lane, uint64_t &o_scom_address_64,uint8_t &o_start_bit,uint8_t &o_len)
+fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
+                             uint8_t i_port,
+                             uint8_t i_rank_pair,
+                             ip_type_t i_input_type_e,
+                             uint8_t i_block,
+                             uint8_t i_lane,
+                             uint64_t &o_scom_address_64,
+                             uint8_t &o_start_bit,
+                             uint8_t &o_len)
 {
    fapi::ReturnCode rc;
    
@@ -2586,8 +2621,11 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, u
 //Input  : Target MBA=i_target_mba, i_port_u8=0 or 1, i_rank=valid ranks  
 //Output : rank pair=o_rank_pair, valid ranks=o_rankpair_table[] 
 //******************************************************************************
-
-fapi::ReturnCode mss_getrankpair(const fapi::Target & i_target_mba,uint8_t i_port,uint8_t i_rank,uint8_t *o_rank_pair,uint8_t o_rankpair_table[])
+fapi::ReturnCode mss_getrankpair(const fapi::Target & i_target_mba,
+                                 uint8_t i_port,
+                                 uint8_t i_rank,
+                                 uint8_t *o_rank_pair,
+                                 uint8_t o_rankpair_table[])
 {
    fapi::ReturnCode rc;
    uint8_t l_temp_rank[2]={0};
@@ -2690,17 +2728,23 @@ fapi::ReturnCode mss_getrankpair(const fapi::Target & i_target_mba,uint8_t i_por
 	
    return rc;
 } //end of mss_getrankpair
-    
 
 //******************************************************************************
 //Function name: mss_c4_phy()
 //Description:This function returns address,start bit and bit length for RD_DQ, WR_DQ, RD_DQS, WR_DQS
 //Input  : Target MBA=i_target_mba, i_port_u8=0 or 1, i_rank_pair=0 or 1 or 2 or 3, i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS,i_input_index_u8=0-79/0-71/0-8/0-19 , i_verbose-extra print statements  
 //Output : out (address,start bit and bit length)
-//******************************************************************************    
-        
-fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t &i_input_index,uint8_t i_verbose,uint8_t &phy_lane,uint8_t &phy_block,uint8_t flag)
-{    
+//******************************************************************************
+fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,
+                            uint8_t i_port,
+                            uint8_t i_rank_pair,
+                            input_type_t i_input_type_e,
+                            uint8_t &i_input_index,
+                            uint8_t i_verbose,
+                            uint8_t &phy_lane,
+                            uint8_t &phy_block,
+                            uint8_t flag)
+{
    fapi::ReturnCode rc; 
    const uint8_t l_dqmax=80;
    const uint8_t l_dqsmax=20;
@@ -3266,17 +3310,32 @@ fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, ui
       
    else
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
-      return rc;      
+      FAPI_ERR("Wrong input type specified (%d)", i_input_type_e);
+      const input_type_t & TYPE_PARAM = i_input_type_e;
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_C4_PHY_INVALID_INPUT);
+      return rc;
    }  
-      
-                
-   return rc; 
-}     
+
+   return rc;
+}
  
-fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose,uint16_t &io_value_u16)
+fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba,
+                                             access_type_t i_access_type_e,
+                                             uint8_t i_port_u8,
+                                             uint8_t i_rank_u8,
+                                             input_type_t i_input_type_e,
+                                             uint8_t i_input_index_u8,
+                                             uint8_t i_verbose,
+                                             uint16_t &io_value_u16)
 {
+   // Reference variables for Error FFDC
+   const fapi::Target & MBA_TARGET = i_target_mba;
+   const access_type_t & ACCESS_TYPE_PARAM = i_access_type_e;
+   const uint8_t & PORT_PARAM = i_port_u8;
+   const uint8_t & RANK_PARAM = i_rank_u8;
+   const input_type_t & TYPE_PARAM = i_input_type_e;
+   const uint8_t & INDEX_PARAM = i_input_index_u8;
+
    fapi::ReturnCode rc; 
     
    const uint8_t max_rp=8; 
@@ -3345,9 +3404,6 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
    const uint8_t clk_lanep3[clk_max]={3,2,13,12,10,11,11,10};
    const uint8_t clk_adrp3[clk_max]={3,3,2,2,0,0,2,2};
    
-   //FAPI_INF("input index in access delay=%d",i_input_index_u8);
-   
-  //i_verbose=1;
    
    rc = mss_getrankpair(i_target_mba,i_port_u8,i_rank_u8,&l_rank_pair,l_rankpair_table);   if(rc) return rc;
    
@@ -3361,13 +3417,20 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       FAPI_INF("dimm type=%d",l_dimmtype);
       FAPI_INF("rank pair=%d",l_rank_pair);       
    }
-   if((i_port_u8 >1) || (l_mbapos>1))
+   if(i_port_u8 >1)
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong target or port specified rc = 0x%08X", uint32_t(rc));  
+      FAPI_ERR("Wrong port specified (%d)", i_port_u8);
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
       return rc;
    }
    
+   if (l_mbapos>1)
+   {
+      FAPI_ERR("Bad position from ATTR_CHIP_UNIT_POS (%d)", l_mbapos);
+      const uint8_t & MBA_POS = l_mbapos;
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_BAD_MBA_POS);
+   }
+
    if((l_dram_width ==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) || (l_dram_width ==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8))   // Checking for dram width here so that checking can be skipped in called function
    {
       if(i_verbose==1)
@@ -3378,8 +3441,9 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
    
    else
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong dram width specified rc = 0x%08X", uint32_t(rc));
+      FAPI_ERR("Bad dram width from ATTR_EFF_DRAM_WIDTH (%d)", l_dram_width);
+      const uint8_t & DRAM_WIDTH = l_dram_width;
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_BAD_DRAM_WIDTH);
       return rc;
    }
    
@@ -3392,29 +3456,24 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
          
          if(i_input_index_u8>l_CDIMM_dqmax)    
          {
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-            FAPI_ERR("Wrong input index specified rc = 0x%08X" ,uint32_t(rc));
-           return rc;      
+            FAPI_ERR("CDIMM_DQ: Wrong input index specified (%d, max %d)" ,
+                     i_input_index_u8, l_CDIMM_dqmax);
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
+            return rc;
          }
             
       }
-      else if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
+      else
       {
          l_type=ISDIMM_DQ;
          if(i_input_index_u8>l_ISDIMM_dqmax)
          {
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-            FAPI_ERR("Wrong input index specified rc = 0x%08X", uint32_t(rc));
+            FAPI_ERR("ISDIMM_DQ: Wrong input index specified (%d, max %d)",
+                     i_input_index_u8, l_ISDIMM_dqmax);
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
             return rc;
          }
       }
-      else
-      {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong dimm type specified rc = 0x%08X", uint32_t(rc));
-         return rc;      
-      }
-      
          
       rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
       
@@ -3464,8 +3523,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
       
@@ -3495,8 +3554,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
       
@@ -3547,8 +3606,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
       
@@ -3599,8 +3658,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
       
@@ -3651,8 +3710,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
       
@@ -3678,21 +3737,14 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
    else if (i_input_type_e==RD_DQS || i_input_type_e==WR_DQS || i_input_type_e==DQS_ALIGN ||  i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
    {
      
-      if(l_dimmtype==fapi:: ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
+      if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
       {
          l_type=CDIMM_DQS;
       }
-      else if(l_dimmtype==fapi:: ENUM_ATTR_EFF_CUSTOM_DIMM_NO)
+      else
       {
          l_type=ISDIMM_DQS;
       }
-      else
-      {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong dimm type specified rc = 0x%08X", uint32_t(rc));
-         return rc;      
-      }
-      
       
       rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
       if(i_verbose==1)
@@ -3746,9 +3798,9 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
+         return rc;
       }
      
       ip_type_t l_input=RAW_RDCLK;
@@ -3800,8 +3852,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
       ip_type_t l_input=RAW_DQSCLK;
@@ -3850,8 +3902,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
      
@@ -3900,9 +3952,9 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_RD_DQ;
       if(i_verbose==1)
@@ -3949,8 +4001,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
       
@@ -3999,9 +4051,9 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
-         return rc;      
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
+         return rc;
       }
       ip_type_t l_input=RAW_DQS_ALIGN;
       if(i_verbose==1)
@@ -4049,8 +4101,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc; 
       }
       ip_type_t l_input=RAW_WR_DQS;
@@ -4097,8 +4149,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc; 
       }
       ip_type_t l_input=RAW_SYS_CLK;
@@ -4126,8 +4178,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc; 
       }
       ip_type_t l_input=RAW_SYS_ADDR_CLKS0S1;
@@ -4175,8 +4227,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc; 
       }
       ip_type_t l_input=RAW_WR_CLK;
@@ -4220,8 +4272,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc; 
       }
       ip_type_t l_input=RAW_ADDR;
@@ -4270,8 +4322,8 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
       }
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc; 
       }
       ip_type_t l_input=RAW_DQS_GATE;
@@ -4293,9 +4345,9 @@ fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, 
    
    else
    {
-      FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-      FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
-      return rc;      
+      FAPI_ERR("Wrong input index specified (%d)", i_input_index_u8);
+      FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
+      return rc;
    } 
      
    if(i_access_type_e==READ)   
@@ -4347,8 +4399,8 @@ io_value_u16=data_buffer_32.getHalfWord(1);
       
       else
       {
-         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
-         FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
+         FAPI_ERR("Wrong input type specified (%d)", i_input_type_e);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT);
          return rc;      
       }
       if(i_verbose==1)
@@ -4371,8 +4423,5 @@ io_value_u16=data_buffer_32.getHalfWord(1);
    }
    return rc;
 }
-
-   
-
 
 } // extern "C"

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_shmoo_common.H,v 1.18 2013/12/17 18:46:49 sasethur Exp $
+// $Id: mss_shmoo_common.H,v 1.19 2014/01/23 19:59:49 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM 
@@ -38,6 +38,7 @@
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
+// 1.18    |mjjones | 24/01/14| RAS Review Updates
 // 1.15    |abhijit |8/8/12  | Updated Review Comments
 // 1.9     |aditya  |12/6/12  | Updated Review Comments
 // 1.8     | abhijit| 15/11/12| made changes fw review comments 
@@ -47,12 +48,22 @@
 #ifndef MSS_SHMOO_COMMON_H
 #define MSS_SHMOO_COMMON_H
 
-enum shmoo_type_t { TEST_NONE=0,MCBIST=1,WR_EYE=2, WRT_DQS=8,RD_EYE=4,RD_GATE=16 };
+enum shmoo_type_t
+{
+    TEST_NONE = 0,
+    MCBIST    = 1,
+    WR_EYE    = 2,
+    WRT_DQS   = 8,
+    RD_EYE    = 4,
+    RD_GATE   = 16
+};
 
+enum shmoo_algorithm_t
+{
+    SEQ_LIN  // Parallel bytes/ranks here .. no parallel targets in HB
+};
 
-enum shmoo_algorithm_t { SEQ_LIN}; // Parallel bytes/ranks here .. no parallel targets in HB
 const uint8_t NINE = 9;
-//const uint8_t MAX_RPS=4;// 4 Rank pairs in this design
 const uint8_t MAX_SHMOO=1;
 const uint8_t MAX_RANK_DIMM=4;
 const uint8_t MAX_NIBBLES=2;
@@ -60,43 +71,32 @@ const uint8_t MAX_BITS=4;
 const uint8_t MAX_DQ=80;
 const uint8_t MAX_DQS=20;
 const uint8_t SCHMOO_NIBBLES=20;
-//const uint16_t read_counter_threshold=1000;
-//const uint16_t error_threshold_count=400;
 const uint8_t MAX_PORT = 2;
 const uint8_t MAX_BYTE = 10;
 const uint8_t MAX_RANK = 8;
-//const uint8_t MAX_CMDS = 1;
-//const uint8_t MAX_ADDR = 20;
-//const uint8_t MAX_CNTRL = 20;
-//const uint8_t MAX_CLK = 8;
-
-//const uint8_t MAX_NIBBLE = 1;
 
 //! Defines the structure of a knob ..Holds static info regarding a knob
-struct shmoo_knob_config_t{
-        //! These are const values that define a knob , will not change during
-        //! shmoo runtime 
-        uint16_t min_val; //Minimum value that can be taken by the knob
-        uint16_t max_val; //Maximum value that can be taken by the knob
-        
+struct shmoo_knob_config_t
+{
+    //! These are const values that define a knob , will not change during
+    //! shmoo runtime
+    uint16_t min_val; //Minimum value that can be taken by the knob
+    uint16_t max_val; //Maximum value that can be taken by the knob
 };
 
 //! Defines the structure of a knob ..Holds dynamic runtime info of a knob
-struct shmoo_knob_data_t{
+struct shmoo_knob_data_t
+{
     // placeholder for the datastructure that will hold all the shmoo
     // config data and results
-    //uint32_t curr_val[MAX_BLOCK][MAX_INSTANCE][MAX_RPS];
     bool done;
     uint16_t lb_regval[MAX_DQ]; // Left Bound register/Hex value
     uint16_t rb_regval[MAX_DQ];// Right Bound register/Hex value
-    //uint32_t total_margin[MAX_DQ][MAX_RPS]; //Left bound+ right bound value
     uint16_t nom_val[MAX_DQ]; // nominal value of this instance of the knob
-	 uint16_t last_pass[MAX_DQ];
-	 uint16_t last_fail[MAX_DQ];
-	 uint16_t curr_val[MAX_DQ];
-	// uint32_t curr_diff[MAX_DQ];
+    uint16_t last_pass[MAX_DQ];
+    uint16_t last_fail[MAX_DQ];
+    uint16_t curr_val[MAX_DQ];
     uint16_t right_margin_val[MAX_DQ];
     uint16_t left_margin_val[MAX_DQ];
-	
 };
 #endif

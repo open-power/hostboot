@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.H,v 1.41 2013/12/17 18:34:53 sasethur Exp $
+// $Id: mss_mcbist.H,v 1.42 2014/01/23 19:35:51 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,7 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.42  |mjjones |01/20/14 |RAS Review Updates
 //   1.41  |aditya  |12/17/13 |Updated mcb_error_map function parameters
 //   1.40  |rwheeler|10/29/13 |added W_ONLY_INFINITE_RAND test
 //   1.39  |aditya  |10/29/13 |Updated mcb_error_map function parameters
@@ -286,22 +287,64 @@ uint8_t l_fixed_addr_enable;
 };
 
 
-fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,uint8_t *o_mcb_status,struct Subtest_info l_sub_info[30],uint8_t i_flag);
-fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,uint8_t  o_error_map[][8][10][2],uint8_t i_CDarray0[80],uint8_t i_CDarray1[80],uint8_t count_bad_dq[2]);
-fapi::ReturnCode mcb_write_test_mem(const fapi::Target & i_target_mba,const uint64_t i_reg_addr,mcbist_oper_type i_operation_type,uint8_t i_cfg_test_123_cmd,mcbist_addr_mode i_addr_mode,mcbist_data_mode i_data_mode,uint8_t i_done,mcbist_data_select_mode i_data_select_mode, mcbist_add_select_mode i_addr_select_mode,uint8_t i_testnumber,uint8_t i_testnumber1,uint8_t i_total_no,struct Subtest_info l_sub_info[30]);
-fapi::ReturnCode cfg_mcb_test_mem(const fapi::Target & i_target_mba,mcbist_test_mem i_test_type,struct Subtest_info l_sub_info[30]);
+fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,
+                          uint8_t *o_mcb_status,
+                          struct Subtest_info l_sub_info[30],
+                          uint8_t i_flag);
+
+fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,
+                               uint8_t  o_error_map[][8][10][2],
+                               uint8_t i_CDarray0[80],
+                               uint8_t i_CDarray1[80],
+                               uint8_t count_bad_dq[2]);
+
+fapi::ReturnCode mcb_write_test_mem(const fapi::Target & i_target_mba,
+                                    const uint64_t i_reg_addr,
+                                    mcbist_oper_type i_operation_type,
+                                    uint8_t i_cfg_test_123_cmd,
+                                    mcbist_addr_mode i_addr_mode,
+                                    mcbist_data_mode i_data_mode,
+                                    uint8_t i_done,
+                                    mcbist_data_select_mode i_data_select_mode,
+                                    mcbist_add_select_mode i_addr_select_mode,
+                                    uint8_t i_testnumber,
+                                    uint8_t i_testnumber1,
+                                    uint8_t i_total_no,
+                                    struct Subtest_info l_sub_info[30]);
+
+fapi::ReturnCode cfg_mcb_test_mem(const fapi::Target & i_target_mba,
+                                  mcbist_test_mem i_test_type,
+                                  struct Subtest_info l_sub_info[30]);
+
 fapi::ReturnCode mcb_reset_trap(const fapi::Target & i_target_mba);
-fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen i_datamode,uint8_t i_mcbrotate);
+
+fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
+                              mcbist_data_gen i_datamode,
+                              uint8_t i_mcbrotate);
+
 fapi::ReturnCode cfg_byte_mask(const fapi::Target & i_target_mba);
+
 fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba);
-fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,struct Subtest_info l_sub_info[30]);
-//fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & i_mcb_fail_320,uint8_t i_port);
-//fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & l_mcb_fail_160,uint8_t i_port,uint8_t l_array[200],uint8_t l_number);
-fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,ecmdDataBufferBase & l_mcb_fail_160,uint8_t i_port,uint8_t l_array[80],uint8_t l_number,ecmdDataBufferBase l_data_buf_port,ecmdDataBufferBase l_data_buf_spare);
-fapi::ReturnCode mss_conversion_testtype(const fapi::Target & i_target_mba,uint8_t l_pattern,mcbist_test_mem &i_mcbtest );
-fapi::ReturnCode mss_conversion_data(const fapi::Target & i_target_mba,uint8_t l_pattern,mcbist_data_gen  &i_mcbpatt);
 
+fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
+                              mcbist_byte_mask i_mcbbytemask,
+                              uint8_t i_mcbrotate,
+                              struct Subtest_info l_sub_info[30]);
 
+fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,
+                                      ecmdDataBufferBase & l_mcb_fail_160,
+                                      uint8_t i_port,
+                                      uint8_t l_array[80],
+                                      uint8_t l_number,
+                                      ecmdDataBufferBase l_data_buf_port,
+                                      ecmdDataBufferBase l_data_buf_spare);
 
+fapi::ReturnCode mss_conversion_testtype(const fapi::Target & i_target_mba,
+                                         uint8_t l_pattern,
+                                         mcbist_test_mem &i_mcbtest);
+
+fapi::ReturnCode mss_conversion_data(const fapi::Target & i_target_mba,
+                                     uint8_t l_pattern,
+                                     mcbist_data_gen &i_mcbpatt);
 }
 #endif

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,9 +21,178 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_access_delay_reg.xml,v 1.1 2013/06/19 18:27:36 bellows Exp $ -->
+<!-- $Id: memory_mss_access_delay_reg.xml,v 1.2 2014/01/24 17:24:45 sasethur Exp $ -->
 <!-- For file ../../ipl/fapi/mss_access_delay_reg.C -->
 <!-- // *! OWNER NAME  : Saurabh Chadha     Email: sauchadh@in.ibm.com -->
 
+<hwpError>
+  <rc>RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT</rc>
+  <description>
+    The mss_access_delay_reg utility function received a bad parameter
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>ACCESS_TYPE_PARAM</ffdc>
+  <ffdc>PORT_PARAM</ffdc>
+  <ffdc>RANK_PARAM</ffdc>
+  <ffdc>TYPE_PARAM</ffdc>
+  <ffdc>INDEX_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_ACCESS_DELAY_REG_BAD_MBA_POS</rc>
+  <description>
+    The mss_access_delay_reg utility function received a bad MBA position
+    from the ATTR_CHIP_UNIT_POS attribute
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>MBA_POS</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_ACCESS_DELAY_REG_BAD_DRAM_WIDTH</rc>
+  <description>
+    The mss_access_delay_reg utility function received a bad DRAM width
+    from the ATTR_EFF_DRAM_WIDTH attribute
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>DRAM_WIDTH</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CROSS_COUPLED_INVALID_INPUT</rc>
+  <description>
+    The cross_coupled utility function received a bad input type parameter
+  </description>
+  <ffdc>TYPE_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+
+<hwpError>
+  <rc>RC_CROSS_COUPLED_INVALID_DQS</rc>
+  <description>
+    The cross_coupled utility function received a invalid DQS
+  </description>
+  <ffdc>INVALID_DQS</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+
+<hwpError>
+  <rc>RC_ROSETTA_MAP_INVALID_INPUT</rc>
+  <description>
+    The rosetta_map utility function received a bad parameter
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>PORT_PARAM</ffdc>
+  <ffdc>TYPE_PARAM</ffdc>
+  <ffdc>INDEX_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_ROSETTA_MAP_BAD_SWIZZLE_VALUE</rc>
+  <description>
+    The rosetta_map utility function received a bad swizzle value
+    from the ATTR_MSS_DQS_SWIZZLE_TYPE attribute
+  </description>
+  <ffdc>SWIZZLE_TYPE</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_ROSETTA_MAP_BAD_MBA_POS</rc>
+  <description>
+    The rosetta_map  utility function received a bad MBA position
+    from the ATTR_CHIP_UNIT_POS attribute
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>MBA_POS</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_C4_PHY_INVALID_INPUT</rc>
+  <description>
+    The mss_c4_phy utility function received a bad input type parameter
+  </description>
+  <ffdc>TYPE_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_ACCESS_DELAY_REG_SCHMOO_INVALID_INPUT</rc>
+  <description>
+    The mss_access_delay_reg_schmoo utility function received a bad parameter
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>ACCESS_TYPE_PARAM</ffdc>
+  <ffdc>PORT_PARAM</ffdc>
+  <ffdc>RANK_PARAM</ffdc>
+  <ffdc>TYPE_PARAM</ffdc>
+  <ffdc>INDEX_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_ACCESS_DELAY_REG_SCHMOO_BAD_MBA_POS</rc>
+  <description>
+    The mss_access_delay_reg utility function received a bad MBA position
+    from the ATTR_CHIP_UNIT_POS attribute
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>MBA_POS</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_ACCESS_DELAY_REG_SCHMOO_BAD_DRAM_WIDTH</rc>
+  <description>
+    The mss_access_delay_reg utility function received a bad DRAM width
+    from the ATTR_EFF_DRAM_WIDTH attribute
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>DRAM_WIDTH</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
 
 </hwpErrors>

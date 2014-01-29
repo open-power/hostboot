@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,10 +21,21 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_generic_shmoo.xml,v 1.1 2013/06/19 18:28:14 bellows Exp $ -->
+<!-- $Id: memory_mss_generic_shmoo.xml,v 1.2 2014/01/23 20:10:51 sasethur Exp $ -->
 <!-- For file ../../ipl/fapi/mss_generic_shmoo.C -->
 <!-- // *! OWNER  NAME          : Abhijit Saurabh          Email: abhijit.saurabh@in.ibm.com -->
 <!-- // *! BACKUP NAME          : Sidhartha Vijay      	  Email: sidvijay@in.ibm.com -->
 
+<hwpError>
+  <rc>RC_MSS_GENERIC_SHMOO_MCBIST_FAILED</rc>
+  <description>
+    The mss_generic_shmoo file found an MCBIST Failure
+  </description>
+  <ffdc>MCB_STATUS</ffdc>
+  <callout>
+    <target>MBA_CHIPLET</target>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
 
 </hwpErrors>

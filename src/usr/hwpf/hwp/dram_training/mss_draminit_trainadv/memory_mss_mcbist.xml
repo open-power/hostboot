@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,10 +21,33 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_mcbist.xml,v 1.1 2013/06/19 18:28:20 bellows Exp $ -->
+<!-- $Id: memory_mss_mcbist.xml,v 1.2 2014/01/23 19:24:34 sasethur Exp $ -->
 <!-- For file ../../ipl/fapi/mss_mcbist.C -->
 <!-- // *! OWNER  NAME          : Devashikamani, Aditya         Email: adityamd@in.ibm.com -->
 <!-- // *! BACKUP               : Sethuraman, Saravanan         Email: saravanans@in.ibm.com -->
 
+<hwpError>
+  <rc>RC_CFG_MCB_TEST_MEM_INVALID_INPUT</rc>
+  <description>
+    The cfg_mcb_test_mem function received a bad test type parameter
+  </description>
+  <ffdc>TEST_TYPE_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CFG_MCB_DGEN_INVALID_INPUT</rc>
+  <description>
+    The cfg_mcb_dgen function received a bad data mode parameter
+  </description>
+  <ffdc>DATA_MODE_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
 
 </hwpErrors>
