@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_read_seeprom.C,v 1.9 2012/11/16 23:44:55 szhong Exp $
+// $Id: proc_read_seeprom.C,v 1.11 2013/09/18 18:48:38 szhong Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_read_seeprom.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -79,10 +79,7 @@ extern "C"
 //              o_data => The data that is read is sent back to the user
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
-    
-
-
-    
+   
 
     fapi::ReturnCode check_status_register_errors(ecmdDataBufferBase is_ready)
     {
@@ -169,7 +166,6 @@ extern "C"
 		    FAPI_SET_HWP_ERROR(rc,RC_PROC_READ_SEEPROM_I2C_STOP_ERR_BIT_SET);
 		    break;
 		}
-	    //check if bits 54, 55 are errors.
 	    if(is_ready.isBitSet(56))
 		{
 		    FAPI_ERR("ERROR:I2C_STOP_ERR");
@@ -193,7 +189,7 @@ extern "C"
 		    break; 
 		}
 
-	    uint16_t e_41_43=(err32to47 & 0x0070)>>4;;
+	    uint16_t e_41_43=(err32to47 & 0x0070)>>4;
 	    if(e_41_43!=0)
 		{
 		    if(e_41_43==4)//0b100
@@ -257,39 +253,37 @@ extern "C"
 				       uint32_t & i_start_addr, uint32_t & i_length, bool & i_ecc_disable, uint64_t * return_data, bool & use_secondary)
     {
 	fapi::ReturnCode rc;
+	uint32_t rc_ecmd=0;
 	//----------------------------Buffers-----------------------------------------------
 	//The buffer that set 000A0006 which we need to do before anything else 
-	ecmdDataBufferBase beginning_buff = ecmdDataBufferBase (64);
+	ecmdDataBufferBase beginning_buff    = ecmdDataBufferBase (64);
 	//The buffer that will tell whether or not the data is ready to be read
-	ecmdDataBufferBase is_ready = ecmdDataBufferBase (64);
+	ecmdDataBufferBase is_ready          = ecmdDataBufferBase (64);
 	//The buffer that will hold the data to be returned
-	ecmdDataBufferBase data = ecmdDataBufferBase (64);
-	uint64_t clearallbits = 0x0000000000000000LLU;
-	data.setDoubleWord(0,clearallbits);
+	ecmdDataBufferBase data              = ecmdDataBufferBase (64);
 	//The buffer that contains the value of the first time we call the control register
 	ecmdDataBufferBase control_reg_buff1 = ecmdDataBufferBase (64);
-	//The buffer that contins the value of the second time we call the control register 
-	ecmdDataBufferBase control_reg_buff2 = ecmdDataBufferBase (64);
-	//The buffer that contains the value of continuing to get more than just 8 bytes of data
-	ecmdDataBufferBase control_reg_buff3 = ecmdDataBufferBase (64); 
 	//The device_id buffer
-	ecmdDataBufferBase device_id_buff = ecmdDataBufferBase (64);
+	ecmdDataBufferBase device_id_buff    = ecmdDataBufferBase (64);
 	//The port number buffer
-	ecmdDataBufferBase port_buff = ecmdDataBufferBase (64);
+	ecmdDataBufferBase port_buff         = ecmdDataBufferBase (64);
 	//The address buffer
-	ecmdDataBufferBase address_buff = ecmdDataBufferBase (64); 
+	ecmdDataBufferBase address_buff      = ecmdDataBufferBase (64); 
 	//ECC Buffer
-	ecmdDataBufferBase ecc_buff = ecmdDataBufferBase (64);
-	ecmdDataBufferBase   vital_reg_buff=ecmdDataBufferBase(64);
+	ecmdDataBufferBase ecc_buff          = ecmdDataBufferBase (64);
+	ecmdDataBufferBase vital_reg_buff    = ecmdDataBufferBase (64);
 
 
-
-
-
-	
+	uint64_t clearallbits = 0x0000000000000000LLU;
 	uint64_t ecc_value; 
-	//uint64_t fix_offset=0;//read from logic address of 2000
-	uint32_t rc_ecmd=0;
+	rc_ecmd|=data.setDoubleWord(0,clearallbits);
+	rc.setEcmdError(rc_ecmd);
+	if(!rc.ok())
+	    {
+		FAPI_ERR("proc_read_seeprom: Error 0x%x failed clearing data bits",rc_ecmd);
+		return rc;
+	    }
+
 	do 
 	{
 	    //Putting the value of the 000A0006 into the buffer 
@@ -305,51 +299,98 @@ extern "C"
 		ecc_value = 0x0000FFFF00001C78LLU; 
 		FAPI_DBG("ecc enabled\n");
 	    }
+	    
 	    //Put the ecc value into the ecc buffer
-	    ecc_buff.setDoubleWord(0, ecc_value); 
+	    rc_ecmd|=ecc_buff.setDoubleWord(0, ecc_value); 
+	    rc.setEcmdError(rc_ecmd);
+	    if(!rc.ok())
+		{
+		    FAPI_ERR("proc_read_seeprom: Error 0x%x failed clearing data bits",rc_ecmd);
+		    break;
+		}
 
 	    //Figure out how many times we will need to get data
 	    int num_times = i_length / 8 ; 
-
-	    //Put the value of the device_id into the device_id buffer
-	    uint64_t device_id = 86; //0b1010110 
-	    if(use_secondary)
+    
+            uint64_t device_id =0; //seeprom device id
+            uint8_t di[2]={0,0}; //device id array to be filled by attribute
+            uint8_t pi[2]={0,0}; //port id array to be filled by attribute
+            rc=FAPI_ATTR_GET (ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS,&i_target,di);
+            if(rc)
+                {
+                    FAPI_ERR ("Problem doing fapi_attr_get on ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS");
+                }
+            rc=FAPI_ATTR_GET (ATTR_SBE_SEEPROM_I2C_PORT,&i_target,pi);
+            if(rc)
+                {
+                    FAPI_ERR ("Problem doing fapi_attr_get on ATTR_SBE_SEEPROM_I2C_PORT");
+                }
+            device_id= di[0]; //seeprom 1
+            if(use_secondary)
+                {
+                    device_id=di[1]; //secondary
+                }
+            FAPI_DBG ("Device ID: %llu\n",device_id);
+            device_id = device_id << 49; 
+	    rc_ecmd|=device_id_buff.setDoubleWord(0, device_id);
+	    rc.setEcmdError(rc_ecmd);
+	    if(!rc.ok())
 		{
-		    device_id=87; //secondary seeprom id, test this.
+		    FAPI_ERR("proc_read_seeprom: Error 0x%x failed setting device_id_buff",rc_ecmd);
+		    break;
 		}
-	    
-	    device_id = device_id << 49; 
-	    device_id_buff.setDoubleWord(0, device_id);
- 
 	    //Put the value of the port number into the port buffer
-	    uint64_t port = 0; // 0b00000;
-	    port = port << 39;
-	    port_buff.setDoubleWord(0, port);
+	    uint64_t port = pi[0]; // default port id;
+            if(use_secondary)
+            {
+                port=pi[1];
+            }
+            
+            FAPI_DBG ("Port: %llu\n", port);
+            port = port << 41;//41 (bit 18 to 22 is the port number);
+	    rc_ecmd|=port_buff.setDoubleWord(0, port);
+	    rc.setEcmdError(rc_ecmd);
+	    if(!rc.ok())
+		{
+		    FAPI_ERR("proc_read_seeprom: Error 0x%x failed setting port_buff",rc_ecmd);
+		    break;
+		}
 
 	    //Put the value of the address into the address buffer
 	    FAPI_DBG("i_start_addr: %08x\n",i_start_addr);
 	    uint64_t start_addr = i_start_addr << 16;
-	    address_buff.setDoubleWord(0, start_addr); 
-
+	    rc_ecmd|=address_buff.setDoubleWord(0, start_addr); 
+	    rc.setEcmdError(rc_ecmd);
+	    if(!rc.ok())
+		{
+		    FAPI_ERR("proc_read_seeprom: Error 0x%x failed setting address_buff",rc_ecmd);
+		    break;
+		}
+	    
 	    //The base value of the first time that the control register is used 
 	    uint64_t control_reg_data1 = 0xD801008000000000LLU;
 	    //11011000<device ID>100<port number>010000000<register address> 
          
 	    //Put the initial value of the control registers
-	    control_reg_buff1.setDoubleWord (0, control_reg_data1);
-	    //control_reg_buff2.setDoubleWord (0, control_reg_data2);
-	
+	    rc_ecmd|=control_reg_buff1.setDoubleWord (0, control_reg_data1);
+
 	    //Include the device id in the control registers
-	    //control_reg_buff2.merge(device_id_buff);
-	    control_reg_buff1.merge(device_id_buff);
+	    rc_ecmd|=control_reg_buff1.merge(device_id_buff);
 
 	    //Include the port number in the control registers
-	    control_reg_buff1.merge(port_buff);
-	    //control_reg_buff2.merge(port_buff);
+	    rc_ecmd|=control_reg_buff1.merge(port_buff);
 	
 	    //Include the starting address in the control registers
-	    control_reg_buff1.merge(address_buff);
-	    //control_reg_buff2.merge(address_buff); 
+	    rc_ecmd|=control_reg_buff1.merge(address_buff);
+
+	    rc.setEcmdError(rc_ecmd);
+	    if(!rc.ok())
+		{
+		    FAPI_ERR("proc_read_seeprom: Error 0x%x failed setting merging control_reg_buff1",rc_ecmd);
+		    break;
+		}
+	    
+
 
 	    //Set the ECC write or no ECC write
 	    rc = fapiPutScom(i_target, 0x000C0004, ecc_buff);
@@ -366,14 +407,12 @@ extern "C"
 		FAPI_ERR("Failed to perform fapiPutScom on MODE_REGISTER_0 0x000A0006");
 		break;
 	    }
-	    //Write control registerclk
-	    
+    
             //Read Status Register
 	    int i = 0;
-	    rc_ecmd=0;
 	    for(i = 0; i < num_times; i++)
 		{
-		    if(i==0)
+		    if(i==0)//first read
 			{
 			    if(num_times==1)
 				{
@@ -393,7 +432,7 @@ extern "C"
 				    rc.setEcmdError(rc_ecmd);
 				    if(!rc.ok())
 					{
-					    FAPI_ERR("proc_read_seeprom: Error 0x%x failed setting/clearing bits",rc_ecmd);
+					    FAPI_ERR("proc_read_seeprom: Error 0x%x failed setting bit2/clearing bit3 of control_reg_buff1",rc_ecmd);
 					    break;
 					}
 				    FAPI_DBG("control: %016llx\n",control_reg_buff1.getDoubleWord(0));
@@ -429,7 +468,7 @@ extern "C"
 				    break;
 				}
 			}
-		    else
+		    else //other
 			{
 			    rc_ecmd|=control_reg_buff1.clearBit(0);
 			    rc_ecmd|=control_reg_buff1.clearBit(1);

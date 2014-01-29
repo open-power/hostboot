@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_shmoo.C,v 1.8 2013/09/02 08:33:13 sasethur Exp $
+// $Id: mss_eff_config_shmoo.C,v 1.10 2014/01/26 13:52:49 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_shmoo.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -47,7 +47,9 @@
 //   1.5   | sauchadh |15-May-13| Fixed FW comments
 //   1.6   | sauchadh |6-Jun-13 | Added some more attributes
 //   1.7   | bellows  |09-Aug-13| Set default pattern to 0, per Sarvanan Req
-//   1.8   | sauchadh |2- Sep-13| Added random seed attribute 
+//   1.8   | sauchadh |2- Sep-13| Added random seed attribute
+//   1.9   | sauchadh |20-Dec-13| change test type to 38 
+//   1.10  | bellows  |26-Jan-14| moved driver attribute setting from eff termination 
 
 //----------------------------------------------------------------------
 //  My Includes
@@ -74,7 +76,7 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target & i_target_mba) {
    FAPI_INF("*** Running %s on %s ... ***", PROCEDURE_NAME, i_target_mba.toEcmdString());
 
    uint32_t datapattern=0; // mdb - type 8 is not valid per Saravanan's Sametime
-   uint32_t testtype=1;
+   uint32_t testtype=37;  // SIMPLE_FIX_RF
    uint8_t addr_modes=1;
    uint8_t  rank=0;
    uint64_t start_addr=0;
@@ -120,8 +122,31 @@ fapi::ReturnCode mss_eff_config_shmoo(const fapi::Target & i_target_mba) {
    uint8_t shmoo_mul_setup_call=0;
    uint32_t rand_seed_val=0;
    uint8_t rand_seed_type=0x01;
+
+   // space for VPD attributes that need to be read from VPD and put into scratch pads
+   const uint8_t PORT_SIZE = 2;
+
+   uint32_t attr_eff_cen_rd_vref[PORT_SIZE];
+   uint32_t attr_eff_dram_wr_vref[PORT_SIZE];
+   uint8_t attr_eff_cen_rcv_imp_dq_dqs[PORT_SIZE];
+   uint8_t attr_eff_cen_drv_imp_dq_dqs[PORT_SIZE];
+   uint8_t attr_eff_cen_slew_rate_dq_dqs[PORT_SIZE];
    
-  
+
+   // get these attributes from the VPD but allow the code to override later
+   rc = FAPI_ATTR_GET(ATTR_VPD_CEN_RD_VREF, &i_target_mba, attr_eff_cen_rd_vref); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_WR_VREF, &i_target_mba, attr_eff_dram_wr_vref); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_VPD_CEN_RCV_IMP_DQ_DQS, &i_target_mba, attr_eff_cen_rcv_imp_dq_dqs); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_VPD_CEN_DRV_IMP_DQ_DQS, &i_target_mba, attr_eff_cen_drv_imp_dq_dqs); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_VPD_CEN_SLEW_RATE_DQ_DQS, &i_target_mba, attr_eff_cen_slew_rate_dq_dqs); if(rc) return rc;
+
+   // attriubtes that are needing to be copied from VPD into scratch pads
+   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_RD_VREF, &i_target_mba, attr_eff_cen_rd_vref); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_WR_VREF, &i_target_mba, attr_eff_dram_wr_vref); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_RCV_IMP_DQ_DQS, &i_target_mba, attr_eff_cen_rcv_imp_dq_dqs); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target_mba, attr_eff_cen_drv_imp_dq_dqs); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS, &i_target_mba, attr_eff_cen_slew_rate_dq_dqs); if(rc) return rc;
+
    
    rc = FAPI_ATTR_SET(ATTR_MCBIST_PRINTING_DISABLE, &i_target_mba, mcb_print_disable); if(rc) return rc; 
    rc = FAPI_ATTR_SET(ATTR_MCBIST_DATA_ENABLE, &i_target_mba, mcb_data_en); if(rc) return rc;

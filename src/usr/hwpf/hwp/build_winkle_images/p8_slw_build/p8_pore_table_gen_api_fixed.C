@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,23 +20,22 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api_fixed.C,v 1.10 2013/09/16 17:55:05 cmolsen Exp $
+// $Id: p8_pore_table_gen_api_fixed.C,v 1.12 2014/01/28 04:16:57 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
 /* *! *** IBM Confidential ***                                                  */
 /*------------------------------------------------------------------------------*/
-/* *! TITLE :       p8_pore_table_gen_api_fixed.C                                     */
+/* *! TITLE :       p8_pore_table_gen_api_fixed.C                               */
 /* *! DESCRIPTION : PORE SLW table generaion APIs                               */
 /* *! OWNER NAME :  Michael Olsen            Email: cmolsen@us.ibm.com          */
-/* *! USAGE :       To build for PHYP command-line -                            */
-//                  buildecmdprcd_cmo  -D "p8_pore_table_gen_api_fixed.C" -d "p8_pore_table_static_data.c,sbe_xip_image.c,pore_inline_assembler.c"  -u "SLW_COMMAND_LINE_RAM" p8_pore_table_gen_api_fixed_main.C
-//                  Other usages:
 //
-/* *! COMMENTS :    - Start file: p7p_pore_api.c                                */
-//                  - The DYNAMIC_RAM_TABLE_PPD was dropped in v1.12 of this 
-//                    code. See v1.12 for explanation and code implementation.
+/* *! USAGE :       To build for PHYP command-line -                            */
+/*                  buildecmdprcd   -C "p8_pore_table_gen_api_fixed.C"   -c "p8_pore_table_static_data.c,sbe_xip_image.c,pore_inline_assembler.c"  -u "SLW_COMMAND_LINE_RAM"  p8_pore_table_gen_api_fixed_main.C                                                    */
+//
+/* *! COMMENTS :    - The DYNAMIC_RAM_TABLE_PPD was dropped in v1.12 of this    */ 
+/*                    code. See v1.12 for explanation and code implementation.  */
 //
 /*------------------------------------------------------------------------------*/
 
@@ -67,8 +66,8 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
   void      *hostSlwSectionFixed;
   uint64_t  xipRamTableThis;
   void      *hostRamVector;
-  void      *hostRamTableThis;
-  void      *hostRamEntryThis, *hostRamEntryNext;
+  void      *hostRamTableThis=NULL;
+  void      *hostRamEntryThis=NULL, *hostRamEntryNext=NULL;
   uint8_t   bNewTable=0, bFound=0;
   uint8_t   bEntryEnd=1, headerType=0;
   SbeXipSection  xipSection;
@@ -211,64 +210,15 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Determine insertion point, hostRamEntryThis, of new RAM entry
-  //
-  if (bNewTable)  {
-    // Append to beginning of agreed upon static Ram table position for this coreId.
-    hostRamEntryThis = hostRamTableThis;
-    if (i_modeBuild==P8_SLW_MODEBUILD_SRAM)  {
-      // Update RAM vector (since it is currently NULL)
-      *((uint64_t*)hostRamVector + i_coreId) = 
-                           myRev64( xipSlwRamSection + 
-                                    SLW_RAM_TABLE_SPACE_PER_CORE*i_coreId );
-    }
-    bEntryEnd = 1;
-  }
-  else  {
-    // Insert at end of existing Ram table for this coreId.
-    hostRamEntryNext = hostRamTableThis;
-    ramEntryNext = (RamTableEntry*)hostRamEntryNext;
-    iCount = 1;
-    while ((myRev32(ramEntryNext->header) & RAM_HEADER_END_MASK_C)==0)  {
-      if (iCount>=SLW_MAX_CPUREGS_OPS)  {
-        MY_ERR("Bad table! Header end bit not found and RAM table full (=%i entries).\n",SLW_MAX_CPUREGS_OPS);
-        return IMGBUILD_ERR_RAM_TABLE_END_NOT_FOUND;
-      }
-      hostRamEntryNext = (void*)((uint8_t*)hostRamEntryNext + XIPSIZE_RAM_ENTRY);
-      ramEntryNext = (RamTableEntry*)hostRamEntryNext;
-      iCount++;
-    }
-    if (iCount<SLW_MAX_CPUREGS_OPS)  {
-      // ...zero out previous END bit in header
-      if ((myRev32(ramEntryNext->header) & RAM_HEADER_END_MASK_C))  {
-        ramEntryNext->header = ramEntryNext->header & myRev32(~RAM_HEADER_END_MASK_C);
-      }
-      else  {
-        MY_ERR("We should never get here. Check code. Dumping data:\n");
-        MY_ERR("myRev32(ramEntryNext->header) = 0x%08x\n",myRev32(ramEntryNext->header));
-        MY_ERR("RAM_HEADER_END_MASK_C         = 0x%08x\n",RAM_HEADER_END_MASK_C);
-        return IMGBUILD_ERR_RAM_CODE;
-      }
-    }
-    else  {
-      MY_ERR("RAM table is full. Max %i entries allowed.\n",SLW_MAX_CPUREGS_OPS);
-      return IMGBUILD_ERR_RAM_TABLE_FULL;
-    }
-    // ...this is the spot for the new entry
-    hostRamEntryThis = (void*)((uint8_t*)hostRamEntryNext + XIPSIZE_RAM_ENTRY);
-    bEntryEnd = 1;
-  }
 
-
-  // -------------------------------------------------------------------------
-  // Create, or modify, the RAM entry.
+	// -------------------------------------------------------------------------
+  // Create most of the RAM entry, so it can be used to find a potential existing entry to 
+	// replace. Postpone decision about bEntryEnd and assume its zero for now (not end). 
   //
   if (i_regName==P8_MSR_MSR)  {
     // ...make the MSR header
     headerType = 0x1; // MTMSRD header.
-    ramEntryThis.header = ( ((uint32_t)bEntryEnd)  << RAM_HEADER_END_START_C    & RAM_HEADER_END_MASK_C )    |
-                          ( ((uint32_t)headerType) << RAM_HEADER_TYPE_START_C   & RAM_HEADER_TYPE_MASK_C )   |
+    ramEntryThis.header = ( ((uint32_t)headerType) << RAM_HEADER_TYPE_START_C   & RAM_HEADER_TYPE_MASK_C )   |
                           (            i_threadId  << RAM_HEADER_THREAD_START_C & RAM_HEADER_THREAD_MASK_C );
     // ...make the MSR instr
     ramEntryThis.instr =  RAM_MTMSRD_INSTR_TEMPL_C;
@@ -276,8 +226,7 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
   else  {
     // ...make the SPR header
     headerType = 0x0; // MTSPR header.
-    ramEntryThis.header = ( ((uint32_t)bEntryEnd)  << RAM_HEADER_END_START_C    & RAM_HEADER_END_MASK_C )    |
-                          ( ((uint32_t)headerType) << RAM_HEADER_TYPE_START_C   & RAM_HEADER_TYPE_MASK_C )   |
+    ramEntryThis.header = ( ((uint32_t)headerType) << RAM_HEADER_TYPE_START_C   & RAM_HEADER_TYPE_MASK_C )   |
                           (            i_regName   << RAM_HEADER_SPRN_START_C   & RAM_HEADER_SPRN_MASK_C )   |
                           (            i_threadId  << RAM_HEADER_THREAD_START_C & RAM_HEADER_THREAD_MASK_C );
     // ...make the SPR instr 
@@ -292,7 +241,104 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
   }
   // ...make the data
   ramEntryThis.data  = i_regData;
-  // ...summarize new table entry data
+
+
+
+  // -------------------------------------------------------------------------
+  // Determine insertion point of new RAM entry, hostRamEntryThis.  The possibilities are:
+	// - New table => First entry
+	// - Existing Ram entry => Replace said entry
+	// - Existing table, new Ram entry => Last entry
+  //
+	uint8_t 	bReplaceEntry=0;
+	uint32_t	headerNext=0;
+	uint32_t	instrNext=0;
+	
+	bReplaceEntry = 0;
+  if (bNewTable)  {
+    // Append to beginning of agreed upon static Ram table position for this coreId.
+    bEntryEnd = 1;
+	  ramEntryThis.header = ( ((uint32_t)bEntryEnd)  << RAM_HEADER_END_START_C    & RAM_HEADER_END_MASK_C )    |
+														ramEntryThis.header;
+    hostRamEntryThis = hostRamTableThis;
+    if (i_modeBuild==P8_SLW_MODEBUILD_SRAM)  {
+      // Update RAM vector (since it is currently NULL)
+      *((uint64_t*)hostRamVector + i_coreId) = 
+                           myRev64( xipSlwRamSection + SLW_RAM_TABLE_SPACE_PER_CORE*i_coreId );
+    }
+  }
+  else  {
+		// Append at end of existing Ram table for this coreId
+		//   or
+    // Replace an existing Ram entry
+    hostRamEntryNext = hostRamTableThis;
+    ramEntryNext = (RamTableEntry*)hostRamEntryNext;
+		headerNext = myRev32(ramEntryNext->header);
+		instrNext = myRev32(ramEntryNext->instr);
+    iCount = 1;
+		// Examine all entries, except last entry.
+    while ((headerNext & RAM_HEADER_END_MASK_C)==0 && bReplaceEntry==0)  {
+      if (iCount>=SLW_MAX_CPUREGS_OPS)  {
+        MY_ERR("Bad table! Header end bit not found and RAM table full (=%i entries).\n",SLW_MAX_CPUREGS_OPS);
+        return IMGBUILD_ERR_RAM_TABLE_END_NOT_FOUND;
+      }
+			if (ramEntryThis.header==headerNext && ramEntryThis.instr==instrNext)  {
+				// Its a replacement. Stop searching. Go do the replacement.
+				bReplaceEntry = 1;
+		    hostRamEntryThis = hostRamEntryNext;
+			}
+			else  {
+      	hostRamEntryNext = (void*)((uint8_t*)hostRamEntryNext + XIPSIZE_RAM_ENTRY);
+      	ramEntryNext = (RamTableEntry*)hostRamEntryNext;
+				headerNext = myRev32(ramEntryNext->header);
+				instrNext = myRev32(ramEntryNext->instr);
+      	iCount++;
+			}
+    }
+		if (bReplaceEntry==0)  {
+			// Examine the last entry.
+   	 	if (headerNext & RAM_HEADER_END_MASK_C)  {
+	  		// Now we know for sure that our new Ram entry will also be the last, either as a 
+				// replace or append. So put the end bit into the new entry.
+				bEntryEnd = 1;
+			  ramEntryThis.header = ( ((uint32_t)bEntryEnd)  << RAM_HEADER_END_START_C    & RAM_HEADER_END_MASK_C )    |
+																ramEntryThis.header;
+				// Determine if to replace or append.
+				if (ramEntryThis.header==headerNext && ramEntryThis.instr==instrNext)  {
+					// Its a replacement. And it would be legal to replace the very last Ram in a completely full table.
+  	 	  	if (iCount<=SLW_MAX_CPUREGS_OPS)  {
+						bReplaceEntry = 1;
+				    hostRamEntryThis = hostRamEntryNext;
+   		  	}
+   	  		else  {
+   	    		MY_ERR("RAM table is full. Max %i entries allowed.\n",SLW_MAX_CPUREGS_OPS);
+   	    		return IMGBUILD_ERR_RAM_TABLE_FULL;
+	  	  	}
+				}
+				else  {
+					// Its an append. Make sure there's room for one more Ram entry.
+  	 	  	if (iCount<SLW_MAX_CPUREGS_OPS)  {
+						// Zero out the end bit in last entrys header (which will now be 2nd last).
+		     	  ramEntryNext->header = ramEntryNext->header & myRev32(~RAM_HEADER_END_MASK_C);
+				    hostRamEntryThis = (void*)((uint8_t*)hostRamEntryNext + XIPSIZE_RAM_ENTRY);
+   		  	}
+   	  		else  {
+   	    		MY_ERR("RAM table is full. Max %i entries allowed.\n",SLW_MAX_CPUREGS_OPS);
+   	    		return IMGBUILD_ERR_RAM_TABLE_FULL;
+	  	  	}
+ 	    	}
+			}
+ 	   	else  {
+ 	   	  MY_ERR("We should never get here. Check code. Dumping data:\n");
+ 	   	  MY_ERR("myRev32(ramEntryNext->header) = 0x%08x\n",myRev32(ramEntryNext->header));
+ 	   	  MY_ERR("RAM_HEADER_END_MASK_C         = 0x%08x\n",RAM_HEADER_END_MASK_C);
+ 	   	  return IMGBUILD_ERR_RAM_CODE;
+ 	   	}
+		}
+  }
+
+
+  // Summarize new table entry data
   MY_INF("New table entry data (host format):\n");
   MY_INF("\theader = 0x%08x\n",ramEntryThis.header);
   MY_INF("\tinstr  = 0x%08x\n",ramEntryThis.instr);
@@ -313,6 +359,7 @@ uint32_t p8_pore_gen_cpureg_fixed(  void      *io_image,
       rc = IMGBUILD_WARN_RAM_TABLE_CONTAMINATION;
     }
   }
+	// ..insert the new Ram entry.
   ramEntryNext->header = myRev32(ramEntryThis.header);
   ramEntryNext->instr  = myRev32(ramEntryThis.instr);
   ramEntryNext->data   = myRev64(ramEntryThis.data);

@@ -22,7 +22,24 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-  <!-- $Id: centaur_ec_attributes.xml,v 1.16 2013/12/19 17:12:52 pardeik Exp $ -->
+  <!-- $Id: centaur_ec_attributes.xml,v 1.17 2014/01/21 15:19:37 yctschan Exp $ -->
+  <attribute>
+    <id>ATTR_CENTAUR_EC_ENABLE_PAGE_MODE_FOR_RRQ</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.  If true, it allows super fast read to go faster. MBA_RRQ0Q(57) cfg_rrq_opp_page_mode_en RW DD2 is set.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <attribute>
     <id>ATTR_CENTAUR_EC_ENABLE_TRACE_LCL_CLK_GATE_CTRL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>

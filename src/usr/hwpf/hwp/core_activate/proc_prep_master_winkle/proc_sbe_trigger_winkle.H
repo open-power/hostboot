@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_sbe_trigger_winkle.H,v 1.6 2012/09/21 19:29:25 stillgs Exp $
+// $Id: proc_sbe_trigger_winkle.H,v 1.8 2013/10/18 17:23:48 jeshua Exp $
 
 /// Substep numbers for the proc_sbe_trigger_winkle procedure
 
@@ -30,6 +30,7 @@
 #include "fapi_sbe_common.H"
 #include "sbe_vital.H"
 
+//NOTE: The following values must stay constant as HB looks for them
 CONST_UINT8_T(SUBSTEP_PROC_ENTRY,                   ULL(0x0));
 CONST_UINT8_T(SUBSTEP_SBE_READY,                    ULL(0x1));
 CONST_UINT8_T(SUBSTEP_DEADMAN_START,                ULL(0x2));
@@ -38,5 +39,13 @@ CONST_UINT8_T(SUBSTEP_DEADMAN_WAITING_FOR_WAKEUP,   ULL(0x4));
 CONST_UINT8_T(SUBSTEP_DEADMAN_WAITING_FOR_HOSTBOOT, ULL(0x5));
 CONST_UINT8_T(SUBSTEP_HOSTBOOT_ALIVE_AGAIN,         ULL(0x6));
 
+#ifdef __ASSEMBLER__
+// The location in the proc_sbe_trigger_winkle_control
+// containing the mask of threads to start
+//WARNING: if thread_start_vector_start is changed from 16,
+//then the code needs to be updated to shift it to bit 16
+.set THREAD_START_VECTOR_START, 16
+.set THREAD_START_VECTOR_LENGTH, 8
+#endif
 
 #endif  // __PROC_SBE_TRIGGER_WINKLE_H

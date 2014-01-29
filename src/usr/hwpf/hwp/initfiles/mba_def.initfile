@@ -1,9 +1,11 @@
 
-#-- $Id: mba_def.initfile,v 1.55 2014/01/10 17:03:04 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.57 2014/01/24 16:03:14 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.57|tschang | 1/22/14| DD2 enhancement - Enable Page Mode for the Read Reorder Queue - MBA_RRQ0Q(57) = 1
+#--     1.56|baysah  | 1/16/14| Changed row hammer primary decrement interval from 64K DRAM clocks (3200 accesses) to 512 DRAM clocks (100K accesses) to  hash group.
 #--     1.55|tschang | 1/07/14| ATTR_EFF_DRAM_TFAW attribute used for TFAW timing register.
 #--     1.54|tschang |11/21/13| HW271989 - updated SCOM write to do a full 64 bit write instead of a RMW
 #--     1.53|tschang |11/12/13|EFF to VPD attribute update
@@ -1675,6 +1677,16 @@ define  def_mcb_addr_total22_max24  = (((ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] - ATT
 define  def_mcb_addr_total22_max25  = (((ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] - ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[0][0]) == 8) && (((ATTR_EFF_DRAM_COLS - 3) + (ATTR_EFF_DRAM_BANKS/4) + ATTR_EFF_DRAM_ROWS) == 22 ));
 
 #######################################
+# MBA01_MBA_RRQ0Q Base Address:  0x0301040E
+# MBA23_MBA_RRQ0Q Base Address:  0x03010C0E
+#######################################
+
+scom 0x0301040E     {
+    bits    ,   scom_data                                 ,       ATTR_FUNCTIONAL,     expr;
+    57      ,   0b1                                       ,            1            ,     (ATTR_CENTAUR_EC_ENABLE_PAGE_MODE_FOR_RRQ == 1);          # Enable Page Mode for the Read Reorder Queue	
+}
+
+#######################################
 #MBA01 MBASRQ Base Address:  0x03010416
 #MBA23 MBASRQ Base Address:  0x03010C16
 #######################################
@@ -1700,7 +1712,6 @@ scom 0x03010416     {
     31:44   ,   ATTR_MSS_MEM_THROTTLE_DENOMINATOR         ,            1            ,     any;          # cfg_nm_m	MSS_MEM_THROTTLE_DENOMINATOR
     45:47   ,   ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT      ,            1            ,     any;          # cfg_nm_ras_weight
     48:50   ,   ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT      ,            1            ,     any;          # cfg_nm_cas_weight
-#    51      ,   0b1                                       ,            1            ,     any;          # cfg_nm_per_slot_enabled	1
     51      ,   0b0                                       ,            1            ,     (ATTR_EFF_DIMM_TYPE == 0);          # cfg_nm_per_slot_enabled	Set to 0 for CDIMM, Set to 1 for everything else
     51      ,   0b1                                       ,            1            ,     ((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 2) || (ATTR_EFF_DIMM_TYPE == 3));          # cfg_nm_per_slot_enabled	Set to 0 for CDIMM, Set to 1 for everything else
     52      ,   0b0                                       ,            1            ,     (ATTR_EFF_DIMM_TYPE == 0);          # cfg_nm_count_other_mba_dis	Set to 0 for CDIMM, Set to 1 for everything else
@@ -1719,6 +1730,7 @@ scom 0x03010416     {
 #MBA_FARB4Q(4:9)		Reserved			000000		Don't Care
 #MBA_FARB4Q(10:11)		cfg_rhmr_decrement_weight	01		Decrement by 1 (minimum weight)
 #MBA_FARB4Q(12:18)		cfg_rhmr_primary_decr_intv	1111111	Slowest rate of decrements. Once ever 2^14 or 16K DRAM clocks*
+#MBA_FARB4Q(12:18)		cfg_rhmr_primary_decr_intv	0000011	 decrement every 512 DRAM clocks for 100K accesses to hash group
 #MBA_FARB4Q(19:25)		cfg_rhmr_secondary_decr_intv	0000000	Don't care
 #MBA_FARB4Q(26)		cfg_rhmr_sim_en		0		Disable sim mode
 #*I think this corresponds to protecting a row from being hammered 64K times.
@@ -1730,7 +1742,7 @@ scom 0x03010417     {
     3       ,   0b0                                       ,            1            ,    (ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE == 1);
     4:9     ,   0b000000                                  ,            1            ,    (ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE == 1);
     10:11   ,   0b01                                      ,            1            ,    (ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE == 1);
-    12:18   ,   0b1111111                                 ,            1            ,    (ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE == 1);
+    12:18   ,   0b0000011                                 ,            1            ,    (ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE == 1);
     19:25   ,   0b0000000                                 ,            1            ,    (ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE == 1);
     26      ,   0b0                                       ,            1            ,    (ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE == 1);
 }
@@ -2068,15 +2080,6 @@ scom 0x0301040C     {
     7:13    ,   0b0110011    ,          1            ,   (def_mba_tmr1q_cfg_twap51 == 1); # cfg_twap     17
     7:13    ,   0b0110101    ,          1            ,   (def_mba_tmr1q_cfg_twap53 == 1); # cfg_twap     17
     14:19   ,   ATTR_EFF_DRAM_TFAW,          1             ,   any; # cfg_tfaw    # uncomment when Anuwat has added in fix
-#    14:19   ,   0b010100    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly20 == 1); # cfg_tfaw     18
-#    14:19   ,   0b010110    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly22 == 1); # cfg_tfaw     18
-#    14:19   ,   0b010111    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly23 == 1); # cfg_tfaw     18
-#    14:19   ,   0b011000    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly24 == 1); # cfg_tfaw     18
-#    14:19   ,   0b011010    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly26 == 1); # cfg_tfaw     18
-#    14:19   ,   0b011011    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly27 == 1); # cfg_tfaw     18
-#    14:19   ,   0b011110    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly30 == 1); # cfg_tfaw     18
-#    14:19   ,   0b100000    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly32 == 1); # cfg_tfaw     18
-#    14:19   ,   0b100001    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly33 == 1); # cfg_tfaw     18
     20:23   ,   0b0000      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys0 == 1); # RRSBG_dly    19
     20:23   ,   0b0101      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys5 == 1); # RRSBG_dly    19
     20:23   ,   0b0110      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys6 == 1); # RRSBG_dly    19

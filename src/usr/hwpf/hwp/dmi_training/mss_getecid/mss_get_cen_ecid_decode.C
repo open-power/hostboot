@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid_decode.C,v 1.6 2013/10/07 11:42:06 bellows Exp $
+// $Id: mss_get_cen_ecid_decode.C,v 1.8 2013/10/14 16:22:30 bellows Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -39,6 +39,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.8   | bellows  |14-OCT-13| One more sprintf update to make this hostboot/cronus agnostic
+//   1.7   | bellows  |08-OCT-13| Made update so it compiles with cronus + hostboot
 //   1.6   | thi      |05-OCT-13| Fix compiler error
 //   1.5   | bellows  |02-OCT-13| Minor Review Comments addressed
 //   1.4   | bellows  |27-SEP-13| Removed std::string
@@ -131,9 +133,9 @@ extern "C" {
 
 
     if(!(i_user_info.i_user_defined & CSV)) {
-      sprintf(temp_string, "ECID(1:64)   0x%016lx\n", i_user_info.io_ecid[0]);
+      sprintf(temp_string, "ECID(1:64)   0x%016llx\n", static_cast<unsigned long long int>(i_user_info.io_ecid[0]));
       strcat(o_display_string, temp_string);
-      sprintf(temp_string, "ECID(65:128) 0x%016lx\n", i_user_info.io_ecid[1]);
+      sprintf(temp_string, "ECID(65:128) 0x%016llx\n", static_cast<unsigned long long int>(i_user_info.io_ecid[1]));
       strcat(o_display_string, temp_string);
       sprintf(temp_string, "  Wafer ID: %s\n", ECID);
       strcat(o_display_string, temp_string);

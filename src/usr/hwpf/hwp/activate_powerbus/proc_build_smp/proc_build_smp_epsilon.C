@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.C,v 1.8 2013/07/30 23:52:27 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.C,v 1.9 2013/11/13 01:46:55 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1151,7 +1151,6 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
                 io_smp.eps_cfg.r_f  = PROC_BUILD_SMP_EPSILON_R_F_HE[io_smp.core_floor_ratio];
                 io_smp.eps_cfg.w_t2 = PROC_BUILD_SMP_EPSILON_W_HE[io_smp.core_floor_ratio];
                 io_smp.eps_cfg.w_f  = PROC_BUILD_SMP_EPSILON_W_F_HE[io_smp.core_floor_ratio];
-                io_smp.eps_cfg.p    = PROC_BUILD_SMP_EPSILON_P_HE[io_smp.core_floor_ratio];
                 break;
             case PROC_FAB_SMP_EPSILON_TABLE_TYPE_LE:
                 if (io_smp.pump_mode == PROC_FAB_SMP_PUMP_MODE1)
@@ -1167,7 +1166,6 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
                 io_smp.eps_cfg.r_f  = PROC_BUILD_SMP_EPSILON_R_F_LE[io_smp.core_floor_ratio];
                 io_smp.eps_cfg.w_t2 = PROC_BUILD_SMP_EPSILON_W_LE[io_smp.core_floor_ratio];
                 io_smp.eps_cfg.w_f  = PROC_BUILD_SMP_EPSILON_W_F_LE[io_smp.core_floor_ratio];
-                io_smp.eps_cfg.p    = PROC_BUILD_SMP_EPSILON_P_LE[io_smp.core_floor_ratio];
                 break;
             case PROC_FAB_SMP_EPSILON_TABLE_TYPE_1S:
                 if (io_smp.pump_mode == PROC_FAB_SMP_PUMP_MODE1)
@@ -1183,7 +1181,6 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
                 io_smp.eps_cfg.r_f  = PROC_BUILD_SMP_EPSILON_R_F_1S[io_smp.core_floor_ratio];
                 io_smp.eps_cfg.w_t2 = PROC_BUILD_SMP_EPSILON_W_1S[io_smp.core_floor_ratio];
                 io_smp.eps_cfg.w_f  = PROC_BUILD_SMP_EPSILON_W_F_1S[io_smp.core_floor_ratio];
-                io_smp.eps_cfg.p    = PROC_BUILD_SMP_EPSILON_P_1S[io_smp.core_floor_ratio];
                 break;
             default:
                 FAPI_ERR("proc_build_smp_calc_epsilons: Invalid epsilon table type");
@@ -1203,9 +1200,44 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
         FAPI_DBG("proc_build_smp_calc_epsilons:   R_F = %d", io_smp.eps_cfg.r_f);
         FAPI_DBG("proc_build_smp_calc_epsilons:  W_T2 = %d", io_smp.eps_cfg.w_t2);
         FAPI_DBG("proc_build_smp_calc_epsilons:   W_F = %d", io_smp.eps_cfg.w_f);
-        FAPI_DBG("proc_build_smp_calc_epsilons:     P = %d", io_smp.eps_cfg.p);
 
-        // apply guardband to base epsilon values
+        // scale base epsilon values if core is running 2x nest frequency
+        if (io_smp.core_ceiling_ratio == PROC_BUILD_SMP_CORE_RATIO_8_8)
+        {
+            FAPI_DBG("proc_build_smp_calc_epsilons: Scaling based on ceiling frequency");
+            uint8_t scale_percentage =
+                100 *
+                io_smp.freq_core_ceiling /
+                (2 * io_smp.freq_pb);
+            scale_percentage -= 100;
+
+            proc_build_smp_guardband_epsilon(
+                io_smp.eps_cfg.gb_positive,
+                scale_percentage,
+                io_smp.eps_cfg.r_t0);
+            proc_build_smp_guardband_epsilon(
+                io_smp.eps_cfg.gb_positive,
+                scale_percentage,
+                io_smp.eps_cfg.r_t1);
+            proc_build_smp_guardband_epsilon(
+                io_smp.eps_cfg.gb_positive,
+                scale_percentage,
+                io_smp.eps_cfg.r_t2);
+            proc_build_smp_guardband_epsilon(
+                io_smp.eps_cfg.gb_positive,
+                scale_percentage,
+                io_smp.eps_cfg.r_f);
+            proc_build_smp_guardband_epsilon(
+                io_smp.eps_cfg.gb_positive,
+                scale_percentage,
+                io_smp.eps_cfg.w_t2);
+            proc_build_smp_guardband_epsilon(
+                io_smp.eps_cfg.gb_positive,
+                scale_percentage,
+                io_smp.eps_cfg.w_f);
+        }
+
+        // apply guardband to epsilon values
         proc_build_smp_guardband_epsilon(
             io_smp.eps_cfg.gb_positive,
             io_smp.eps_cfg.gb_percentage,
@@ -1230,10 +1262,9 @@ fapi::ReturnCode proc_build_smp_calc_epsilons(
             io_smp.eps_cfg.gb_positive,
             io_smp.eps_cfg.gb_percentage,
             io_smp.eps_cfg.w_f);
-        proc_build_smp_guardband_epsilon(
-            io_smp.eps_cfg.gb_positive,
-            io_smp.eps_cfg.gb_percentage,
-            io_smp.eps_cfg.p);
+
+        // max pre-epsilon counter
+        io_smp.eps_cfg.p = PROC_BUILD_SMP_EPSILON_MCD_MAX_VALUE_P-1;
 
         // dump scaled epsilon values
         FAPI_DBG("proc_build_smp_calc_epsilons: Scaled epsilon values based on %s%d%% guardband:",

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.H,v 1.6 2013/07/30 23:46:30 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.H,v 1.7 2013/11/13 01:49:53 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -62,7 +62,6 @@ const uint32_t PROC_BUILD_SMP_EPSILON_R_T2_HE[] = {  102,  104,  105,  108,  111
 const uint32_t PROC_BUILD_SMP_EPSILON_R_F_HE[]  = {   66,   67,   69,   71,   75,   93 };
 const uint32_t PROC_BUILD_SMP_EPSILON_W_HE[]    = {   46,   47,   47,   48,   50,   55 };
 const uint32_t PROC_BUILD_SMP_EPSILON_W_F_HE[]  = {   37,   38,   39,   40,   40,   46 };
-const uint32_t PROC_BUILD_SMP_EPSILON_P_HE[]    = {  771, 1338, 1338, 1338, 1338, 1338 };
 
 // LE epsilon (2 chips per-group)
 const uint32_t PROC_BUILD_SMP_EPSILON_R_T0_LE[] = {    6,    6,    7,    8,    9,   15 };
@@ -71,7 +70,6 @@ const uint32_t PROC_BUILD_SMP_EPSILON_R_T2_LE[] = {   93,   95,   96,   99,  102
 const uint32_t PROC_BUILD_SMP_EPSILON_R_F_LE[]  = {   66,   67,   69,   71,   75,   93 };
 const uint32_t PROC_BUILD_SMP_EPSILON_W_LE[]    = {   46,   47,   47,   48,   50,   55 };
 const uint32_t PROC_BUILD_SMP_EPSILON_W_F_LE[]  = {   37,   38,   39,   40,   40,   46 };
-const uint32_t PROC_BUILD_SMP_EPSILON_P_LE[]    = {  925, 1605, 1605, 1605, 1605, 1605 };
 
 // Stradale epsilon (1 chip per-group)
 const uint32_t PROC_BUILD_SMP_EPSILON_R_T0_1S[] = {    6,    6,    7,    8,    9,   15 };
@@ -80,7 +78,6 @@ const uint32_t PROC_BUILD_SMP_EPSILON_R_T2_1S[] = {   63,   64,   65,   68,   72
 const uint32_t PROC_BUILD_SMP_EPSILON_R_F_1S[]  = {   66,   67,   69,   71,   75,   93 };
 const uint32_t PROC_BUILD_SMP_EPSILON_W_1S[]    = {   14,   14,   15,   15,   16,   23 };
 const uint32_t PROC_BUILD_SMP_EPSILON_W_F_1S[]  = {   37,   38,   39,   40,   40,   46 };
-const uint32_t PROC_BUILD_SMP_EPSILON_P_1S[]    = {  925, 1605, 1605, 1605, 1605, 1605 };
 
 
 //
