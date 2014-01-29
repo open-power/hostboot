@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/vpd/vpdreasoncodes.H $                        */
+/* $Source: src/include/usr/sbe/sbereasoncodes.H $                        */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -52,6 +52,7 @@ enum sbeModuleId
     SBE_GET_SEEPROM_INFO                = 0x09,
     SBE_DECISION_TREE                   = 0x0A,
     SBE_CUSTOMIZE_IMG                   = 0x0B,
+    SBE_PERFORM_UPDATE_ACTIONS          = 0x0C,
 };
 
 /**
@@ -85,6 +86,7 @@ enum sbeReasonCode
     SBE_ECC_FAIL                        = SBE_COMP_ID | 0x0F,
     SBE_PERM_SIDE_DIRTY_BAD_PATH        = SBE_COMP_ID | 0x10,
     SBE_P8_XIP_CUSTOMIZE_UNSUCCESSFUL   = SBE_COMP_ID | 0x11,
+    SBE_INFO_LOG                        = SBE_COMP_ID | 0x12,
 };
 
 };  // end SBE

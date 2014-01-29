@@ -27,6 +27,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errlreasoncodes.H>
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/targetservice.H>
@@ -105,6 +106,23 @@ namespace SBE
 
         do{
 
+            /*****************************************************************/
+            /* Skip Update if in istep mode with a FSP present               */
+            /*****************************************************************/
+            // Get Target Service, and the system target.
+            TargetService& tS = targetService();
+            TARGETING::Target* sys = NULL;
+            (void) tS.getTopLevelTarget( sys );
+            assert(sys, "updateProcessorSbeSeeproms() system target is NULL");
+
+            if ( sys->getAttr<ATTR_ISTEP_MODE>() &&     // true => istep mode
+                 INITSERVICE::spBaseServicesEnabled() ) // true => FSP present
+            {
+                TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update skipped due to "
+                           "istep mode and FSP present");
+                break;
+            }
+
             //Make sure procedure constants keep within expected range.
             assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
                    "updateProcessorSbeSeeproms() FIXED_SEEPROM_WORK_SPACE "
@@ -156,7 +174,6 @@ namespace SBE
 
             // Get the Master Proc Chip Target for comparisons later
             TARGETING::Target* masterProcChipTargetHandle = NULL;
-            TARGETING::TargetService& tS = TARGETING::targetService();
             err = tS.queryMasterProcChipTargetHandle(
                                                 masterProcChipTargetHandle);
             if (err)
@@ -2350,7 +2367,8 @@ namespace SBE
                    TARGETING::get_huid(io_sbeState.target),
                    io_sbeState.update_actions);
 
-        errlHndl_t err = NULL;
+        errlHndl_t err      = NULL;
+        errlHndl_t err_info = NULL;
         uint32_t   l_actions = io_sbeState.update_actions;
 
         do{
@@ -2398,6 +2416,63 @@ namespace SBE
                 }
                 l_actions |= SBE_UPDATE_COMPLETE;
             }
+
+
+            /**************************************************************/
+            /*  3) Create Info Error Log of successful operation          */
+            /**************************************************************/
+            TRACFCOMP( g_trac_sbe,ERR_MRK"performUpdateActions(): Successful "
+                       "SBE Update of HUID=0x%.8X SEEPROM %d",
+                       TARGETING::get_huid(io_sbeState.target),
+                       io_sbeState.seeprom_side_to_update);
+
+            /*@
+             * @errortype
+             * @moduleid          SBE_PERFORM_UPDATE_ACTIONS
+             * @reasoncode        SBE_INFO_LOG
+             * @userdata1[0:31]   Update Actions Enum
+             * @userdata1[32:63]  Customized Data CRC
+             * @userdata2[0:31]   Original SEEPROM 0 CRC
+             * @userdata2[32:63]  Original SEEPROM 1 CRC
+             * @devdesc      Successful Update of SBE SEEPROM
+             *               SBE Verion Information
+             */
+            err_info = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                     SBE_PERFORM_UPDATE_ACTIONS,
+                                     SBE_INFO_LOG,
+                                     TWO_UINT32_TO_UINT64(
+                                         l_actions,
+                                         io_sbeState.customizedImage_crc),
+                                     TWO_UINT32_TO_UINT64(
+                                         io_sbeState.seeprom_0_ver.data_crc,
+                                         io_sbeState.seeprom_1_ver.data_crc));
+
+
+            // Add general data sections to capture MVPD SB Keyword and
+            // the new SBE SEEPROM Version structure
+            err_info->addFFDC( SBE_COMP_ID,
+                               &(io_sbeState.mvpdSbKeyword),
+                               sizeof(io_sbeState.mvpdSbKeyword),
+                               0,                   // Version
+                               ERRL_UDT_NOFORMAT,   // parser ignores data
+                               false );             // merge
+
+            err_info->addFFDC( SBE_COMP_ID,
+                               &(io_sbeState.new_seeprom_ver),
+                               sizeof(io_sbeState.new_seeprom_ver),
+                               0,                   // Version
+                               ERRL_UDT_NOFORMAT,   // parser ignores data
+                               false );             // merge
+
+
+            err_info->collectTrace(SBE_COMP_NAME, KILOBYTE);
+
+            ErrlUserDetailsTarget(io_sbeState.target, "SBE Target Updated")
+                                 .addToLog(err_info);
+
+            errlCommit( err_info, SBE_COMP_ID );
+
+            /**************************************************************/
 
 
         }while(0);
