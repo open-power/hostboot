@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,8 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pmc_firinit.C,v 1.15 2013/08/26 12:44:38 stillgs Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.C,v $
+
+// $Id: p8_pm_pmc_firinit.C,v 1.16 2014/01/14 17:13:31 stillgs Exp $
+// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -123,7 +124,7 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
             rc = fapiPutScom(i_target, PMC_LFIR_MASK_0x01010843, mask );
             if (rc)
             {
-	            FAPI_ERR("fapiPutScom(PMC_LFIR_MASK_0x01010843) failed.");
+                FAPI_ERR("fapiPutScom(PMC_LFIR_MASK_0x01010843) failed.");
                 break;
             }
         }
@@ -134,7 +135,7 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
             rc = fapiGetScom(i_target, PMC_LFIR_MASK_0x01010843, mask );
             if (rc)
             {
-	            FAPI_ERR("fapiGetScom(PMC_LFIR_MASK_0x01010843) failed.");
+                FAPI_ERR("fapiGetScom(PMC_LFIR_MASK_0x01010843) failed.");
                 break;
             }
                                            
@@ -156,7 +157,7 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
             rc = fapiPutScom(i_target, PMC_LFIR_MASK_0x01010843, mask );
             if (rc)
             {
-	            FAPI_ERR("fapiPutScom(PMC_LFIR_MASK_0x01010843) failed.");
+                FAPI_ERR("fapiPutScom(PMC_LFIR_MASK_0x01010843) failed.");
                 break;
             }
         }
@@ -172,45 +173,46 @@ p8_pm_pmc_firinit(const fapi::Target& i_target , uint32_t mode  )
                 break;
             }
 
-            SET_RECOV_INTR(PSTATE_OCI_MASTER_RDERR                 ); // pstate_oci_master_rderr
-            SET_RECOV_INTR(PSTATE_OCI_MASTER_RDDATA_PARITY_ERR     ); // pstate_oci_master_rddata_parity_err
-            SET_RECOV_INTR(PSTATE_GPST_CHECKBYTE_ERR               ); // pstate_gpst_checkbyte_err
-            SET_RECOV_INTR(PSTATE_GACK_TO_ERR                      ); // pstate_gack_to_err
-            SET_RECOV_INTR(PSTATE_PIB_MASTER_NONOFFLINE_ERR        ); // pstate_pib_master_nonoffline_err
-            SET_RECOV_INTR(PSTATE_PIB_MASTER_OFFLINE_ERR           ); // pstate_pib_master_offline_err
-            SET_RECOV_INTR(PSTATE_OCI_MASTER_TO_ERR                ); // pstate_oci_master_to_err
-            SET_RECOV_INTR(PSTATE_INTERCHIP_UE_ERR                 ); // pstate_interchip_ue_err
-            SET_RECOV_INTR(PSTATE_INTERCHIP_ERRORFRAME_ERR         ); // pstate_interchip_errorframe_err
-            SET_RECOV_INTR(PSTATE_MS_FSM_ERR                       ); // pstate_ms_fsm_err
-            SET_MALF_ALERT(MS_COMP_PARITY_ERR                      ); // ms_comp_parity_err
-            SET_MALF_ALERT(IDLE_PORESW_FATAL_ERR                   ); // idle_poresw_fatal_err
-            SET_MALF_ALERT(IDLE_PORESW_STATUS_RC_ERR               ); // idle_poresw_status_rc_err
-            SET_MALF_ALERT(IDLE_PORESW_STATUS_VALUE_ERR            ); // idle_poresw_status_value_err
-            SET_MALF_ALERT(IDLE_PORESW_WRITE_WHILE_INACTIVE_ERR    ); // idle_poresw_write_while_inactive_err
-            SET_MALF_ALERT(IDLE_PORESW_TIMEOUT_ERR                 ); // idle_poresw_timeout_err
-            SET_FIR_MASKED(IDLE_OCI_MASTER_WRITE_TIMEOUT_ERR       ); // idle_oci_master_write_timeout_err
-            SET_MALF_ALERT(IDLE_INTERNAL_ERR                       ); // idle_internal_err
-            SET_MALF_ALERT(INT_COMP_PARITY_ERR                     ); // int_comp_parity_err
-            SET_FIR_MASKED(PMC_OCC_HEARTBEAT_TIMEOUT               ); // pmc_occ_heartbeat_timeout
-            SET_FIR_MASKED(SPIVID_CRC_ERROR0                       ); // spivid_crc_error0
-            SET_FIR_MASKED(SPIVID_CRC_ERROR1                       ); // spivid_crc_error1
-            SET_FIR_MASKED(SPIVID_CRC_ERROR2                       ); // spivid_crc_error2
-            SET_FIR_MASKED(SPIVID_RETRY_TIMEOUT                    ); // spivid_retry_timeout
-            SET_FIR_MASKED(SPIVID_FSM_ERR                          ); // spivid_fsm_err
-            SET_FIR_MASKED(SPIVID_MAJORITY_DETECTED_A_MINORITY     ); // spivid_majority_detected_a_minority
-            SET_FIR_MASKED(O2S_CRC_ERROR0                          ); // o2s_crc_error0
-            SET_FIR_MASKED(O2S_CRC_ERROR1                          ); // o2s_crc_error1
-            SET_FIR_MASKED(O2S_CRC_ERROR2                          ); // o2s_crc_error2
-            SET_FIR_MASKED(O2S_RETRY_TIMEOUT                       ); // o2s_retry_timeout
-            SET_FIR_MASKED(O2S_WRITE_WHILE_BRIDGE_BUSY_ERR         ); // o2s_write_while_bridge_busy_err
-            SET_FIR_MASKED(O2S_FSM_ERR                             ); // o2s_fsm_err
-            SET_FIR_MASKED(O2S_MAJORITY_DETECTED_A_MINORITY        ); // o2s_majority_detected_a_minority
-            SET_FIR_MASKED(O2P_WRITE_WHILE_BRIDGE_BUSY_ERR         ); // o2p_write_while_bridge_busy_err
-            SET_FIR_MASKED(O2P_FSM_ERR                             ); // o2p_fsm_err
-            SET_FIR_MASKED(OCI_SLAVE_ERR                           ); // oci_slave_err
-            SET_MALF_ALERT(IF_COMP_PARITY_ERR                      ); // if_comp_parity_err 37:46   spare_fir
-            SET_RECOV_ATTN(FIR_PARITY_ERR_DUP                      ); // fir_parity_err_dup
-            SET_RECOV_ATTN(FIR_PARITY_ERR                          ); // fir_parity_err
+            SET_RECOV_INTR(PSTATE_OCI_MASTER_RDERR              ); //  0  pstate_oci_master_rderr
+            SET_RECOV_INTR(PSTATE_OCI_MASTER_RDDATA_PARITY_ERR  ); //  1  pstate_oci_master_rddata_parity_err
+            SET_RECOV_INTR(PSTATE_GPST_CHECKBYTE_ERR            ); //  2  pstate_gpst_checkbyte_err
+            SET_RECOV_INTR(PSTATE_GACK_TO_ERR                   ); //  3  pstate_gack_to_err
+            SET_RECOV_INTR(PSTATE_PIB_MASTER_NONOFFLINE_ERR     ); //  4  pstate_pib_master_nonoffline_err
+            SET_RECOV_INTR(PSTATE_PIB_MASTER_OFFLINE_ERR        ); //  5  pstate_pib_master_offline_err
+            SET_RECOV_INTR(PSTATE_OCI_MASTER_TO_ERR             ); //  6  pstate_oci_master_to_err
+            SET_RECOV_INTR(PSTATE_INTERCHIP_UE_ERR              ); //  7  pstate_interchip_ue_err
+            SET_RECOV_INTR(PSTATE_INTERCHIP_ERRORFRAME_ERR      ); //  8  pstate_interchip_errorframe_err
+            SET_RECOV_INTR(PSTATE_MS_FSM_ERR                    ); //  9  pstate_ms_fsm_err
+            SET_MALF_ALERT(MS_COMP_PARITY_ERR                   ); // 10  ms_comp_parity_err
+            SET_MALF_ALERT(IDLE_PORESW_FATAL_ERR                ); // 11  idle_poresw_fatal_err
+            SET_MALF_ALERT(IDLE_PORESW_STATUS_RC_ERR            ); // 12  idle_poresw_status_rc_err
+            SET_MALF_ALERT(IDLE_PORESW_STATUS_VALUE_ERR         ); // 13  idle_poresw_status_value_err
+            SET_MALF_ALERT(IDLE_PORESW_WRITE_WHILE_INACTIVE_ERR ); // 14  idle_poresw_write_while_inactive_err
+            SET_MALF_ALERT(IDLE_PORESW_TIMEOUT_ERR              ); // 15  idle_poresw_timeout_err
+            SET_FIR_MASKED(IDLE_OCI_MASTER_WRITE_TIMEOUT_ERR    ); // 16  idle_oci_master_write_timeout_err
+            SET_MALF_ALERT(IDLE_INTERNAL_ERR                    ); // 17  idle_internal_err
+            SET_MALF_ALERT(INT_COMP_PARITY_ERR                  ); // 18  int_comp_parity_err
+            SET_FIR_MASKED(PMC_OCC_HEARTBEAT_TIMEOUT            ); // 19  pmc_occ_heartbeat_timeout
+            SET_FIR_MASKED(SPIVID_CRC_ERROR0                    ); // 20  spivid_crc_error0
+            SET_FIR_MASKED(SPIVID_CRC_ERROR1                    ); // 21  spivid_crc_error1
+            SET_FIR_MASKED(SPIVID_CRC_ERROR2                    ); // 22  spivid_crc_error2
+            SET_FIR_MASKED(SPIVID_RETRY_TIMEOUT                 ); // 23  spivid_retry_timeout
+            SET_FIR_MASKED(SPIVID_FSM_ERR                       ); // 24  spivid_fsm_err
+            SET_FIR_MASKED(SPIVID_MAJORITY_DETECTED_A_MINORITY  ); // 25  spivid_majority_detected_a_minority
+            SET_FIR_MASKED(O2S_CRC_ERROR0                       ); // 26  o2s_crc_error0
+            SET_FIR_MASKED(O2S_CRC_ERROR1                       ); // 27  o2s_crc_error1
+            SET_FIR_MASKED(O2S_CRC_ERROR2                       ); // 28  o2s_crc_error2
+            SET_FIR_MASKED(O2S_RETRY_TIMEOUT                    ); // 29  o2s_retry_timeout
+            SET_FIR_MASKED(O2S_WRITE_WHILE_BRIDGE_BUSY_ERR      ); // 30  o2s_write_while_bridge_busy_err
+            SET_FIR_MASKED(O2S_FSM_ERR                          ); // 31  o2s_fsm_err
+            SET_FIR_MASKED(O2S_MAJORITY_DETECTED_A_MINORITY     ); // 32  o2s_majority_detected_a_minority
+            SET_FIR_MASKED(O2P_WRITE_WHILE_BRIDGE_BUSY_ERR      ); // 33  o2p_write_while_bridge_busy_err
+            SET_FIR_MASKED(O2P_FSM_ERR                          ); // 34  o2p_fsm_err
+            SET_FIR_MASKED(OCI_SLAVE_ERR                        ); // 35  oci_slave_err
+            SET_MALF_ALERT(IF_COMP_PARITY_ERR                   ); // 36  if_comp_parity_err
+            SET_RECOV_INTR(IDLE_RECOVERY_NOTIFY_PRD             ); // 37  idle_recovery_notify_prd
+            SET_FIR_MASKED(FIR_PARITY_ERR_DUP                   ); // 47  fir_parity_err_dup
+            SET_FIR_MASKED(FIR_PARITY_ERR                       ); // 48  fir_parity_err
 
             if (e_rc)
             {

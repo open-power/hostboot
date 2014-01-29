@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pcbs_init.C,v 1.23 2013/12/16 18:52:09 stillgs Exp $
+
+// $Id: p8_pcbs_init.C,v 1.26 2014/01/29 17:54:51 cswenson Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pcbs_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -310,7 +311,7 @@
 /// OLD-DOC - Restore to Deep Sleep and Deep Winkle upon reset
 /// OLD-DOC - PMCR default value adjustment (Hardware flush 0 -> restore to 0 for
 ///     reset case) SCAN0
-/// OLD-DOC     -For reset case, disable all “global_en” bits in PMCR and PMICR;
+/// OLD-DOC     -For reset case, disable all âglobal_enâ bits in PMCR and PMICR;
 ///                 this keeps Global Pstate Request from occuring to the PMC until
 ///                 it has been initialized.  OCCFW to be do this
 /// OLD-DOC - PMICR default value adjustment (Hardware flush 0 -> restore to 0 for
@@ -392,7 +393,7 @@ CONST_UINT64_T( PMGP0_REG_0x100F0100_scan0                              ,  ULL(0
 CONST_UINT64_T( PMGP1_REG_0x100F0103_scan0                              ,  ULL(0x6C00000000000000) );
 CONST_UINT64_T( EX_PFVddCntlStat_REG_0x100F0106_scan0                   ,  ULL(0x0A00000000000000) );
 CONST_UINT64_T( EX_PFVcsCntlStat_REG_0x100F010E_scan0                   ,  ULL(0xFFF0FFF080800000) );     //1000 0000 1000 000
-CONST_UINT64_T( EX_PMErrMask_REG_0x100F010A_scan0                       ,  ULL(0x00000000));
+CONST_UINT64_T( EX_PMErrMask_REG_0x100F010A_scan0                       ,  ULL(0xFFFFFFFFFFE00000));
 CONST_UINT64_T( EX_PMSpcWkupFSP_REG_0x100F010B_scan0                    ,  ULL(0x00000000));
 CONST_UINT64_T( EX_PMSpcWkupOCC_REG_0x100F010C_scan0                    ,  ULL(0x00000000));    // This is different than the hardware
 CONST_UINT64_T( EX_PMSpcWkupPHYP_REG_0x100F010D_scan0                   ,  ULL(0x00000000));
@@ -448,9 +449,15 @@ pcbs_init  (  const fapi::Target& i_target);
 fapi::ReturnCode
 pcbs_scan0(const Target &i_target, uint8_t i_ex_number);
 
+// FIR trace function
+fapi::ReturnCode
+glob_fir_trace  (   const fapi::Target& i_target,
+                    const char * i_msg);
+
 // ----------------------------------------------------------------------
 // Function definitions
 // ----------------------------------------------------------------------
+
 
 // ----------------------------------------------------------------------
 /**
@@ -741,7 +748,7 @@ pcbs_init(const Target& i_target)
                                chipHasPcbsErrReset);
             if(rc)
             {
-     		    FAPI_ERR("Error querying Chip EC feature: "
+                FAPI_ERR("Error querying Chip EC feature: "
                          "ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET");
                 break;
             }
@@ -806,7 +813,7 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
     const uint32_t              PMGP1_FORCE_SAFE_MODE_BIT = 12;
 
     // PMSR bits
-    const uint32_t              PMSR_PSAFE_MODE_ACTIVE_BIT = 33;
+//    const uint32_t              PMSR_PSAFE_MODE_ACTIVE_BIT = 33;
     const uint32_t              PMSR_ALL_FSMS_IN_SAFE_STATE_BIT = 36;
 
     // PMCR bits
@@ -830,6 +837,10 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
     const uint32_t              IVRMCS_IVRM_CORE_VCS_BYPASS_B_BIT = 6;
     const uint32_t              IVRMCS_IVRM_ECO_VDD_BYPASS_B_BIT = 8;
     const uint32_t              IVRMCS_IVRM_ECO_VCS_BYPASS_B_BIT = 10;
+    
+    // detect PCBS interrupt retry bug HW226980 that is fixed.  This is 
+    // only present only on Murano 1.3.
+    uint8_t                     chipHasPcbIntrFixed = 0;
 
     FAPI_INF("p8_pcbs_init_reset beginning for target %s ...", i_target.toEcmdString());
     do
@@ -845,6 +856,17 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
         }
 
         FAPI_DBG("Chiplet vector size => %u", l_exChiplets.size());
+        
+        // The attribute for the PCBS Reset bug fix applies to the PCB Interrupt
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET,
+                               &i_target,
+                               chipHasPcbIntrFixed);
+        if(rc)
+        {
+            FAPI_ERR("Error querying Chip EC feature: "
+                     "ATTR_CHIP_EC_FEATURE_PCBS_ERR_RESET");
+            break;
+        }
 
         // For each chiplet
         for (uint8_t c=0; c< l_exChiplets.size(); c++)
@@ -860,6 +882,21 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
             FAPI_DBG("\tCore number = %d", l_ex_number);
 
             ex_offset = l_ex_number * 0x01000000;
+            
+            address = EX_PCBS_OCC_Heartbeat_Reg_0x100F0164 + ex_offset;
+            GETSCOM(rc, i_target, address, data);
+            uint32_t psafe;
+            e_rc = data.extractToRight(&psafe, 17, 8);
+            E_RC_CHECK(e_rc, rc);
+                       
+            address = EX_PCBS_PMC_VF_CTRL_REG_0x100F015A + ex_offset;
+            GETSCOM(rc, i_target, address, data);
+            uint32_t gactual;
+            e_rc = data.extractToRight(&gactual, 0, 8);
+            E_RC_CHECK(e_rc, rc);
+            
+            FAPI_DBG("\tEX %d - Global Actual: 0x%02X, Psafe: 0x%02X", 
+                            l_ex_number, gactual, psafe);
 
             //  ******************************************************************
             //  Force safe mode if Pstates are enabled.
@@ -874,85 +911,118 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
 
             if (data.isBitSet(PCBSPMMODE_ENABLE_PSTATE_MODE_BIT))  // Pstates enabled
             {
-
-                FAPI_INF("Pstate enabled - Force safe mode");
-
-                // Using Write OR to just set bit12
-                // Clear buffer
-                e_rc = data.flushTo0();
-                E_RC_CHECK(e_rc, rc);
-
-                e_rc = data.setBit(PMGP1_FORCE_SAFE_MODE_BIT);  // force_safe_mode = 1
-                E_RC_CHECK(e_rc, rc);
-
-                address =  EX_PMGP1_OR_0x100F0105 + ex_offset;
-                PUTSCOM(rc, i_target, address, data);
-
-                FAPI_INF("Forced Safe Mode");
-
-                //  ******************************************************************
-                //  psafe Pstate achived AND FSM-stable ?
-                //  ******************************************************************
-                //  ******************************************************************
-                //  - PCBS_POWER_MANAGEMENT_STATUS_REG[33] safe_mode_active
-                //  - PCBS_POWER_MANAGEMENT_STATUS_REG[36] all_fsms_in_safe_state
-                //  ******************************************************************
-                FAPI_INF("Psafe Pstate and FSM-stable?");
-
-                loopcount = 0;
-
-                address =  EX_PCBS_POWER_MANAGEMENT_STATUS_REG_0x100F0153 + ex_offset;
-                // loop until  (safe_mode_active AND all_fsms_in_safe_state)
-                do
+                // if the part does not have HW226980 fixed, do not try to use the 
+                // hardware to enter safe mode in the PCBS.  BTW:  this function is
+                // somewhat redundant to the PMC Vsafe being successfully invoked as
+                // that establishes the Global Actual PState anyway
+                
+                FAPI_INF("PCBS Interrupt will %sbe performed",
+                     (chipHasPcbIntrFixed ? "" : "NOT "));
+                
+                if (chipHasPcbIntrFixed)
                 {
 
-                    // Read PMSR
-                    GETSCOM(rc, i_target, address, data);
+                    FAPI_INF("Pstate enabled - Force safe mode");
 
-                    FAPI_DBG("\t loopcount => %d ",loopcount  );
-                    // OR timeout .... set to 20 loops
-                    if( ++loopcount > pcbs_val_init.MAX_PSAFE_FSM_LOOPS )
+                    // Using Write OR to just set bit12
+                    // Clear buffer
+                    e_rc = data.flushTo0();
+                    E_RC_CHECK(e_rc, rc);
+
+                    e_rc = data.setBit(PMGP1_FORCE_SAFE_MODE_BIT);  // force_safe_mode = 1
+                    E_RC_CHECK(e_rc, rc);
+
+                    address =  EX_PMGP1_OR_0x100F0105 + ex_offset;
+                    //PUTSCOM(rc, i_target, address, data);
+
+
+                    rc = glob_fir_trace (i_target, "after setting force safe mode bit");
+                    if (!rc.ok()) 
                     {
-                        FAPI_ERR("Gave up waiting for Psafe Pstate and FSM-stable!" );
-                        const fapi::Target& PROC_CHIP = i_target;
-                        const uint64_t& LOOPCOUNT = (uint32_t)loopcount;
-                        const uint64_t& PMSR = data.getDoubleWord(0);
-                        
-                        address =  EX_PCBS_FSM_MONITOR1_REG_0x100F0170 + ex_offset;
-                        GETSCOM(rc, i_target, address, data);
-                        const uint64_t& PCBSPM_MON1 = data.getDoubleWord(0);
-                        
-                        address =  EX_PCBS_FSM_MONITOR2_REG_0x100F0171 + ex_offset;
-                        GETSCOM(rc, i_target, address, data);
-                        const uint64_t& PCBSPM_MON2 = data.getDoubleWord(0);                        
-                        
-                        FAPI_SET_HWP_ERROR(rc, RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT);
                         break;
                     }
 
-                    FAPI_DBG("Read of PCBS_POWER_MANAGEMENT_STATUS_REG_0x1*0F0153 content :  %016llX",
-                                    data.getDoubleWord(0));
+                    FAPI_INF("Forced Safe Mode");
 
-                    FAPI_DBG("Is Psafe Pstate and FSM-stable ? ");
-                    FAPI_DBG("\t Wait DELAY: %d  ", pcbs_val_init.MAX_DELAY);
-                    FAPI_DBG("\t Wait SimCycles: %d  ", pcbs_val_init.MAX_SIM_CYCLES);
+                    //  ******************************************************************
+                    //  psafe Pstate achived AND FSM-stable ?
+                    //  ******************************************************************
+                    //  ******************************************************************
+                    //  - PCBS_POWER_MANAGEMENT_STATUS_REG[33] safe_mode_active
+                    //  - PCBS_POWER_MANAGEMENT_STATUS_REG[36] all_fsms_in_safe_state
+                    //  ******************************************************************
+                    FAPI_INF("Psafe Pstate and FSM-stable?");
 
-                    rc =  fapiDelay(pcbs_val_init.MAX_DELAY, pcbs_val_init.MAX_SIM_CYCLES);
-                    if (rc)
+                    loopcount = 0;
+
+                    address =  EX_PCBS_POWER_MANAGEMENT_STATUS_REG_0x100F0153 + ex_offset;
+                    // loop until  (safe_mode_active AND all_fsms_in_safe_state)
+                    do
                     {
-                        FAPI_ERR("fapiDelay(MAX_DELAY, MAX_SIM_CYCLES) failed. With rc = 0x%x", (uint32_t)rc);
+
+                        // Read PMSR
+                        GETSCOM(rc, i_target, address, data);
+
+                        FAPI_DBG("\t loopcount => %d ",loopcount  );
+                        // OR timeout .... set to 20 loops
+                        if( ++loopcount > pcbs_val_init.MAX_PSAFE_FSM_LOOPS )
+                        {
+                            FAPI_ERR("Gave up waiting for Psafe Pstate and FSM-stable!" );
+                            const fapi::Target& PROC_CHIP = i_target;
+                            const uint64_t& LOOPCOUNT = (uint32_t)loopcount;
+                            const uint64_t& PMSR = data.getDoubleWord(0);
+
+                            address =  EX_PCBS_FSM_MONITOR1_REG_0x100F0170 + ex_offset;
+                            GETSCOM(rc, i_target, address, data);
+                            const uint64_t& PCBSPM_MON1 = data.getDoubleWord(0);
+
+                            address =  EX_PCBS_FSM_MONITOR2_REG_0x100F0171 + ex_offset;
+                            GETSCOM(rc, i_target, address, data);
+                            const uint64_t& PCBSPM_MON2 = data.getDoubleWord(0);                        
+
+                            FAPI_SET_HWP_ERROR(rc, RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT);
+                            break;
+                        }
+
+                        FAPI_DBG("Read of PCBS_POWER_MANAGEMENT_STATUS_REG_0x1*0F0153 content :  %016llX",
+                                        data.getDoubleWord(0));
+
+                        FAPI_DBG("Is Psafe Pstate and FSM-stable ? ");
+                        FAPI_DBG("\t Wait DELAY: %d  ", pcbs_val_init.MAX_DELAY);
+                        FAPI_DBG("\t Wait SimCycles: %d  ", pcbs_val_init.MAX_SIM_CYCLES);
+
+                        rc =  fapiDelay(pcbs_val_init.MAX_DELAY, pcbs_val_init.MAX_SIM_CYCLES);
+                        if (rc)
+                        {
+                            FAPI_ERR("fapiDelay(MAX_DELAY, MAX_SIM_CYCLES) failed. With rc = 0x%x", (uint32_t)rc);
+                            break;
+                        }
+
+                    //} while ( data.isBitClear(PMSR_PSAFE_MODE_ACTIVE_BIT) ||
+                    //          data.isBitClear(PMSR_ALL_FSMS_IN_SAFE_STATE_BIT));
+                    } while ( data.isBitClear(PMSR_ALL_FSMS_IN_SAFE_STATE_BIT));
+                    // if error, break the outer loop
+                    if (!rc.ok())
+                    {
                         break;
                     }
 
-                } while ( data.isBitClear(PMSR_PSAFE_MODE_ACTIVE_BIT) ||
-                          data.isBitClear(PMSR_ALL_FSMS_IN_SAFE_STATE_BIT));
-                // if error, break the outer loop
-                if (!rc.ok())
+                    FAPI_INF("Psafe Pstate and FSM-stable is reached ...");
+                } // PCBS Interrupt
+                else
                 {
-                    break;
+                    FAPI_INF("PCBS safe mode not used");
                 }
+            } // Pstates enabled
+            
+            //  ******************************************************************
+            //  Check for xstops and recoverables
+            //  ******************************************************************
 
-                FAPI_INF("Psafe Pstate and FSM-stable is reached ...");
+            rc = glob_fir_trace (i_target, "after force safe mode poll");
+            if (!rc.ok()) 
+            {
+                break;
             }
 
             //  ******************************************************************
@@ -986,6 +1056,15 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
             E_RC_CHECK(e_rc, rc);
 
             PUTSCOM(rc, i_target, address, data);
+            
+            //  ******************************************************************
+            //  Check for xstops and recoverables
+            //  ******************************************************************
+            rc = glob_fir_trace (i_target, "after FREQ_CTRL_REG");
+            if (!rc.ok()) 
+            {
+                break;
+            } 
 
             // Lock the DPLL in via the override mode.  Note:  this DOES
             // allow for continued CPM enablement
@@ -995,6 +1074,15 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
 
             address = EX_PMGP1_OR_0x100F0105 + ex_offset;
             PUTSCOM(rc, i_target, address, data);
+            
+            //  ******************************************************************
+            //  Check for xstops and recoverables
+            //  ******************************************************************
+            rc = glob_fir_trace (i_target, "after hold DPLL");
+            if (!rc.ok()) 
+            {
+                break;
+            }  
 
             //  ******************************************************************
             //  - Disable Pstate mode
@@ -1011,6 +1099,15 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
             E_RC_CHECK(e_rc, rc);
 
             PUTSCOM(rc, i_target, address, data );
+            
+            //  ******************************************************************
+            //  Check for xstops and recoverables
+            //  ******************************************************************
+            rc = glob_fir_trace (i_target, "after disable Pstates");
+            if (!rc.ok()) 
+            {
+                break;
+            }  
 
             FAPI_INF("Disabled Pstate mode");
 
@@ -1100,7 +1197,16 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
             PUTSCOM(rc, i_target, address, data);
 
             FAPI_INF ("Disabled RESCLK, set bit 22 of GP3_REG_0_RWXx1*0F0012 " );
-
+            
+            //  ******************************************************************
+            //  Check for xstops and recoverables
+            //  ******************************************************************
+            rc = glob_fir_trace (i_target, "after RESCLK");
+            if (!rc.ok()) 
+            {
+                break;
+            }  
+            
             //  ******************************************************************
             //  Disable OCC Heartbeat
             //  ******************************************************************
@@ -1147,6 +1253,15 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
 
                 FAPI_INF ("iVRMs disabled and in bypass-mode" );
             }
+            
+            //  ******************************************************************
+            //  Check for xstops and recoverables
+            //  ******************************************************************
+            rc = glob_fir_trace (i_target, "after IVRM Disable");
+            if (!rc.ok()) 
+            {
+                break;
+            }  
 
             //  ******************************************************************
             //  Disable undervolting
@@ -1194,6 +1309,16 @@ pcbs_reset(const Target &i_target, struct_pcbs_val_init_type &pcbs_val_init)
                 FAPI_ERR(" pcbs_scan0 failed. With rc = 0x%x", (uint32_t)rc);
                 break;
             }
+            
+            //  ******************************************************************
+            //  Check for xstops and recoverables
+            //  ******************************************************************
+            rc = glob_fir_trace (i_target, "after SCAN0");
+            if (!rc.ok()) 
+            {
+                break;
+            }  
+
 
         } // Chiplet loop
     } while(0);
@@ -1263,11 +1388,21 @@ pcbs_scan0(const Target &i_target, uint8_t i_ex_number)
         address =  EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165 + ex_offset;
         reset_doubleword = EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165_scan0;
         SETDWSCAN0(i_target, address, data, reset_doubleword );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_Resonant_Clock_Control_Reg0_0x100F0165");
+        if (!rc.ok()) { break; }  
 
         //----
         address =  EX_PMErrMask_REG_0x100F010A + ex_offset;
-        reset_word = EX_PMErrMask_REG_0x100F010A_scan0;
-        SETSCAN0(i_target, address, data, reset_word );
+        GETSCOM(rc, i_target, address, data);
+        FAPI_DBG("EX_PMErrMask_REG_0x100F010A value = 0x%016llX", data.getDoubleWord(0));
+        
+        reset_doubleword = EX_PMErrMask_REG_0x100F010A_scan0;
+        SETDWSCAN0(i_target, address, data, reset_doubleword );
+
+        rc = glob_fir_trace (i_target, "after scan0 EX_PMErrMask_REG_0x100F010A");
+        if (!rc.ok()) { break; }  
+
 
         // OCC does not mess with the PFET delays so these are left in tact.
 
@@ -1275,50 +1410,144 @@ pcbs_scan0(const Target &i_target, uint8_t i_ex_number)
         address =  EX_PCBS_iVRM_Control_Status_Reg_0x100F0154 + ex_offset;
         reset_word = EX_PCBS_iVRM_Control_Status_Reg_0x100F0154_scan0;
         SETSCAN0(i_target, address, data, reset_word );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_iVRM_Control_Status_Reg_0x100F0154");
+        if (!rc.ok()) { break; }  
 
         //----
         address =  EX_PCBS_iVRM_Value_Setting_Reg_0x100F0155 + ex_offset;
         reset_word = EX_PCBS_iVRM_Value_Setting_Reg_0x100F0155_scan0;
         SETSCAN0(i_target, address, data, reset_word );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_iVRM_Value_Setting_Reg_0x100F0155");
+        if (!rc.ok()) { break; }  
 
         //----
         address =  EX_PCBS_PMC_VF_CTRL_REG_0x100F015A + ex_offset;
         reset_word = EX_PCBS_PMC_VF_CTRL_REG_0x100F015A_scan0;
         SETSCAN0(i_target, address, data, reset_word );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_PMC_VF_CTRL_REG_0x100F015A");
+        if (!rc.ok()) { break; }  
 
         //----
         address =  EX_PCBS_Pstate_Index_Bound_Reg_0x100F015C + ex_offset;
         reset_word = EX_PCBS_Pstate_Index_Bound_Reg_0x100F015C_scan0;
         SETSCAN0(i_target, address, data, reset_word );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_Pstate_Index_Bound_Reg_0x100F015C");
+        if (!rc.ok()) { break; }  
 
         //----
         address =  EX_PCBS_PSTATE_TABLE_CTRL_REG_0x100F015E + ex_offset;
         reset_word = EX_PCBS_PSTATE_TABLE_CTRL_REG_0x100F015E_scan0;
         SETSCAN0(i_target, address, data, reset_word );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_PSTATE_TABLE_CTRL_REG_0x100F015E");
+        if (!rc.ok()) { break; }  
 
         //----
         address =  EX_PCBS_iVRM_VID_Control_Reg0_0x100F0162  + ex_offset;
         reset_word = EX_PCBS_iVRM_VID_Control_Reg0_0x100F0162_scan0;
         SETSCAN0(i_target, address, data, reset_word );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_iVRM_VID_Control_Reg0_0x100F0162");
+        if (!rc.ok()) { break; }  
 
         //----
         address =  EX_PCBS_iVRM_VID_Control_Reg1_0x100F0163 + ex_offset;
         reset_word = EX_PCBS_iVRM_VID_Control_Reg1_0x100F0163_scan0;
         SETSCAN0(i_target, address, data, reset_word );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_iVRM_VID_Control_Reg1_0x100F0163");
+        if (!rc.ok()) { break; }  
 
         //----
         address =  EX_PCBS_Resonant_Clock_Control_Reg1_0x100F0166 + ex_offset;
         reset_word = EX_PCBS_Resonant_Clock_Control_Reg1_0x100F0166_scan0;
         SETSCAN0(i_target, address, data, reset_word );
-
-        /// \todo  Regcheck error check at latest model
-        // address =  EX_PCBS_Local_Pstate_Frequency_Target_Control_Register_0x100F0168
-        //          + ex_offset;
-        // reset_word = EX_PCBS_Local_Pstate_Frequency_Target_Control_Register_0x100F0168_scan0;
-        // SETSCAN0(i_target, address, data, reset_word );
+        
+        rc = glob_fir_trace (i_target, "after scan0 EX_PCBS_Resonant_Clock_Control_Reg1_0x100F0166");
+        if (!rc.ok()) { break; }  
+     
     } while(0);
     return rc;
 }
+
+
+//------------------------------------------------------------------------------
+/**
+ * Trace a set of FIRs (Globals and select Locals)
+ *
+ * @param[in] i_target Chip target
+ * @param[in] i_msg    String to put out in the trace
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode
+glob_fir_trace  (   const fapi::Target& i_target,
+                    const char * i_msg)
+{
+    fapi::ReturnCode                rc;
+    ecmdDataBufferBase              data(64);
+    uint64_t                        address;
+    
+    CONST_UINT64_T( GLOB_XSTOP_FIR_0x01040000                                 , ULL(0x01040000) );
+    CONST_UINT64_T( GLOB_RECOV_FIR_0x01040001                                 , ULL(0x01040001) );
+    CONST_UINT64_T( TP_LFIR_0x0104000A                                        , ULL(0x0104000A) );
+
+    do
+    {
+        //  ******************************************************************
+        //  Check for xstops and recoverables and put in the trace
+        //  ******************************************************************
+        address =  READ_GLOBAL_XSTOP_FIR_0x570F001B;
+        GETSCOM(rc, i_target, address, data);
+        if (data.getNumBitsSet(0,64))
+        {
+            FAPI_INF("Xstop is **ACTIVE** %s", i_msg);
+        }           
+
+        address =  READ_GLOBAL_RECOV_FIR_0x570F001C;
+        GETSCOM(rc, i_target, address, data);
+        if (data.getNumBitsSet(0,64))
+        {
+            FAPI_INF("Recoverable attention is **ACTIVE** %s", i_msg);
+        }
+
+        address =  READ_GLOBAL_RECOV_FIR_0x570F001C;
+        GETSCOM(rc, i_target, address, data);
+        if (data.getNumBitsSet(0,64))
+        {
+            FAPI_INF("Recoverable attention is **ACTIVE** %s", i_msg);
+        }
+
+        address =  GLOB_XSTOP_FIR_0x01040000;
+        GETSCOM(rc, i_target, address, data);
+        if (data.getNumBitsSet(0,64))
+        {
+            FAPI_INF("Glob Xstop FIR is **ACTIVE** %s", i_msg);
+        }
+
+        address =  GLOB_RECOV_FIR_0x01040001;
+        GETSCOM(rc, i_target, address, data);
+        if (data.getNumBitsSet(0,64))
+        {
+            FAPI_INF("Glob Recov FIR is **ACTIVE** %s", i_msg);
+        }
+
+        address =  TP_LFIR_0x0104000A;
+        GETSCOM(rc, i_target, address, data);
+        if (data.getNumBitsSet(0,64))
+        {
+            FAPI_INF("TP LFIR is **ACTIVE** %s", i_msg);
+        }
+                        
+    } while(0);
+    return rc;
+}
+
 
 } //end extern C
 
@@ -1328,6 +1557,24 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pcbs_init.C,v $
+Revision 1.26  2014/01/29 17:54:51  cswenson
+changed char* to const char* in glob_fir_trace()
+
+Revision 1.25  2014/01/22 20:58:31  stillgs
+
+For SW238575, added an EC attribute check of an existing attribute to skip the forcing
+of PCBS Safe mode for Murano 1.x parts as these parts have a lost PCB interrupt issue
+(HW226980) that cannot be easily work-around in all cases.  For the case of the timeout
+in SW238575, the forcing is not necessary as the invocation of Pvsafe before this is
+sufficient.
+
+Revision 1.24  2014/01/13 21:15:37  stillgs
+
+- Fixed PMErrMask to properly default to "masked" vs "unmasked" to deal with
+PLL error upon OCC restart (SW237068)
+- Added passive global xstop and recoverable FIR tracing to aid in future
+debug.  Did not put these as specific checks -> FFDC at this time.
+
 Revision 1.23  2013/12/16 18:52:09  stillgs
 
 Added additional FFDC for SAFE FSM TIME check to add hardware FSM monitor

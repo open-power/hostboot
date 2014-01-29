@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,8 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pmc_firinit.H,v 1.6 2013/08/26 12:44:39 stillgs Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.H,v $
+
+// $Id: p8_pm_pmc_firinit.H,v 1.7 2014/01/14 17:13:34 stillgs Exp $
+// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -87,6 +88,7 @@ enum PMC_FIRS
     O2P_FSM_ERR                                 = 34,
     OCI_SLAVE_ERR                               = 35,
     IF_COMP_PARITY_ERR                          = 36,
+    IDLE_RECOVERY_NOTIFY_PRD                    = 37,
     FIR_PARITY_ERR_DUP                          = 47,
     FIR_PARITY_ERR                              = 48
 };
