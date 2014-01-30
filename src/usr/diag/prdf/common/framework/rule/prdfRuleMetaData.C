@@ -1018,14 +1018,12 @@ ExtensibleChipFunction *RuleMetaData::getExtensibleFunction(
                                                     const char * i_func,
                                                     bool i_expectNull )
 {
+    #define PRDF_FUNC "[RuleMetaData::getExtensibleFunction] "
     ExtensibleFunctionType * plugin =
         getPluginGlobalMap().getPlugins(cv_fileName)[i_func];
 
     if (NULL == plugin)
     {
-        static Plugin<ExtensibleChip> l_nullPlugin(NULL);
-        plugin = &l_nullPlugin;
-
         if (!i_expectNull)
         {
             errlHndl_t l_errl = NULL;
@@ -1054,11 +1052,27 @@ ExtensibleChipFunction *RuleMetaData::getExtensibleFunction(
                           ErrlString );
 
             PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+
+            // We can only reach here in two cases
+            // 1. PRD patch is not properly applied ( prf files are changed
+            //    but PRDF library is not updated )
+            // 2. Obvious miss by developer.
+            // In both these cases, we should catch these issues at very early
+            // stage during system Initialize and this scenario should fail
+            // basic validation.
+            // So aborting system at this point.
+            PRDF_ERR( PRDF_FUNC"NULL Function for plugin:%s chip %s",
+                      i_func, cv_fileName );
+
+            PRDF_ASSERT( NULL != plugin );
         }
+
+        static Plugin<ExtensibleChip> l_nullPlugin(NULL);
+        plugin = &l_nullPlugin;
 
     }
     return ( ExtensibleChipFunction * ) plugin;
-
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
