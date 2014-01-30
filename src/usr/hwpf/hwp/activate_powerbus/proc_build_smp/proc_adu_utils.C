@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.C,v 1.7 2013/09/26 17:56:54 jmcgill Exp $
+// $Id: proc_adu_utils.C,v 1.8 2014/01/19 17:35:55 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -32,7 +32,7 @@
 // *! DESCRIPTION : ADU library functions (FAPI)
 // *!
 // *! OWNER NAME  : Joe McGill    Email: jmcgill@us.ibm.com
-// *! BACKUP NAME : Jeshua Smith  Email: jeshua@us.ibm.com
+// *! BACKUP NAME : Kevin Reick   Email: reick@us.ibm.com
 // *!
 //------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_adu_utils.H"
+#include <proc_adu_utils.H>
 
 extern "C"
 {
@@ -60,7 +60,7 @@ fapi::ReturnCode proc_adu_utils_get_adu_lock_id(
     ecmdDataBufferBase data(64);
     uint8_t lock_id;
 
-    FAPI_DBG("proc_adu_utils_get_adu_lock_id: End");
+    FAPI_DBG("proc_adu_utils_get_adu_lock_id: Start");
 
     do
     {
@@ -69,7 +69,7 @@ fapi::ReturnCode proc_adu_utils_get_adu_lock_id(
         rc = fapiGetScom(i_target, ADU_COMMAND_0x02020001, data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_adu_utils_manage_adu_lock: fapiGetScom error (ADU_COMMAND_0x02020001)");
+            FAPI_ERR("proc_adu_utils_get_adu_lock_id: fapiGetScom error (ADU_COMMAND_0x02020001)");
             break;
         }
 
@@ -78,9 +78,9 @@ fapi::ReturnCode proc_adu_utils_get_adu_lock_id(
                                        ADU_COMMAND_LOCK_ID_START_BIT,
                                        (ADU_COMMAND_LOCK_ID_END_BIT-
                                         ADU_COMMAND_LOCK_ID_START_BIT)+1);
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
+        if (rc_ecmd)
         {
+            rc.setEcmdError(rc_ecmd);
             FAPI_ERR("proc_adu_utils_get_adu_lock_id: Error 0x%x extracting lock id from data buffer",
                      rc_ecmd);
             break;
@@ -116,9 +116,9 @@ fapi::ReturnCode proc_adu_utils_clear_adu_auto_inc(
 
         // clear auto-increment bit
         rc_ecmd |= data.clearBit(ADU_COMMAND_AUTO_INC_BIT);
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
+        if (rc_ecmd)
         {
+            rc.setEcmdError(rc_ecmd);
             FAPI_ERR("proc_adu_utils_clear_adu_auto_inc: Error 0x%x forming auto-increment clear data buffer",
                      rc_ecmd);
             break;
@@ -142,8 +142,8 @@ fapi::ReturnCode proc_adu_utils_clear_adu_auto_inc(
 
 fapi::ReturnCode proc_adu_utils_manage_adu_lock(
     const fapi::Target& i_target,
-    const proc_adu_utils_adu_lock_operation& i_lock_operation,
-    const uint32_t& i_num_attempts)
+    const proc_adu_utils_adu_lock_operation i_lock_operation,
+    const uint32_t i_num_attempts)
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
@@ -159,8 +159,9 @@ fapi::ReturnCode proc_adu_utils_manage_adu_lock(
         {
             FAPI_ERR("proc_adu_utils_manage_adu_lock: Invalid value %d for number of lock manipulation attempts",
                      i_num_attempts);
-            const uint64_t & ARGS = i_num_attempts;
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_ARGS);
+            const fapi::Target & TARGET = i_target;
+            const uint32_t & ATTEMPTS = i_num_attempts;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS);
             break;
         }
 
@@ -184,13 +185,14 @@ fapi::ReturnCode proc_adu_utils_manage_adu_lock(
         {
             FAPI_ERR("proc_adu_utils_manage_adu_lock: Internal error (unsupported lock operation enum value %d)",
                      i_lock_operation);
-            const uint64_t & ERR_DATA = i_lock_operation;
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INTERNAL_ERR);
+            const fapi::Target & TARGET = i_target;
+            const uint32_t & OPERATION = i_lock_operation;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION);
             break;
         }
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
+        if (rc_ecmd)
         {
+            rc.setEcmdError(rc_ecmd);
             FAPI_ERR("proc_adu_utils_manage_adu_lock: Error 0x%x setting up lock manipulation control data buffer",
                      rc_ecmd);
             break;
@@ -269,9 +271,9 @@ fapi::ReturnCode proc_adu_utils_reset_adu(
         rc_ecmd |= data.setBit(ADU_COMMAND_CLEAR_STATUS_BIT);
         rc_ecmd |= data.setBit(ADU_COMMAND_RESET_BIT);
         rc_ecmd |= data.setBit(ADU_COMMAND_LOCKED_BIT);
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
+        if (rc_ecmd)
         {
+   	    rc.setEcmdError(rc_ecmd);
             FAPI_ERR("proc_adu_utils_reset_adu: Error 0x%x setting up reset control data buffer",
                      rc_ecmd);
             break;
@@ -294,9 +296,9 @@ fapi::ReturnCode proc_adu_utils_reset_adu(
 
 fapi::ReturnCode proc_adu_utils_send_fbc_op(
     const fapi::Target& i_target,
-    const proc_adu_utils_fbc_op& i_adu_ctl,
-    const bool& i_use_hp,
-    const proc_adu_utils_fbc_op_hp_ctl& i_adu_hp_ctl)
+    const proc_adu_utils_fbc_op i_adu_ctl,
+    const bool i_use_hp,
+    const proc_adu_utils_fbc_op_hp_ctl i_adu_hp_ctl)
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
@@ -313,8 +315,12 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
         {
             FAPI_ERR("proc_adu_utils_send_fbc_op: Out-of-range value %016llX specified for fabric address argument",
                      i_adu_ctl.address);
-            const uint64_t & ARGS = i_adu_ctl.address;
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_ARGS);
+	    const fapi::Target & TARGET = i_target;
+            const uint64_t & ADDRESS = i_adu_ctl.address;
+            const bool & HP = i_use_hp;
+            const uint32_t & HP_QUIESCE_DLY = i_adu_hp_ctl.post_quiesce_delay;
+            const uint32_t & HP_INIT_DLY = i_adu_hp_ctl.pre_init_delay;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_FBC_OP);
             break;
         }
         if (i_use_hp &&
@@ -323,8 +329,12 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
         {
             FAPI_ERR("proc_adu_utils_send_fbc_op: Out-of-range value %d specified for hotplug post-quiesce delay argument",
                      i_adu_hp_ctl.post_quiesce_delay);
-            const uint64_t & ARGS = i_adu_hp_ctl.post_quiesce_delay;
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_ARGS);
+	    const fapi::Target & TARGET = i_target;
+            const uint64_t & ADDRESS = i_adu_ctl.address;
+            const bool & HP = i_use_hp;
+            const uint32_t & HP_QUIESCE_DLY = i_adu_hp_ctl.post_quiesce_delay;
+            const uint32_t & HP_INIT_DLY = i_adu_hp_ctl.pre_init_delay;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_FBC_OP);
             break;
         }
         if (i_use_hp &&
@@ -333,8 +343,12 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
         {
             FAPI_ERR("proc_adu_utils_send_fbc_op: Out-of-range value %d specified for hotplug pre-init delay argument",
                      i_adu_hp_ctl.pre_init_delay);
-            const uint64_t & ARGS = i_adu_hp_ctl.pre_init_delay;
-            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_ARGS);
+	    const fapi::Target & TARGET = i_target;
+            const uint64_t & ADDRESS = i_adu_ctl.address;
+            const bool & HP = i_use_hp;
+            const uint32_t & HP_QUIESCE_DLY = i_adu_hp_ctl.post_quiesce_delay;
+            const uint32_t & HP_INIT_DLY = i_adu_hp_ctl.pre_init_delay;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_ADU_UTILS_INVALID_FBC_OP);
             break;
         }
 
@@ -372,9 +386,9 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
             ADU_CONTROL_FBC_ADDRESS_SPLIT_BIT,
             (ADU_CONTROL_FBC_ADDRESS_END_BIT-
              ADU_CONTROL_FBC_ADDRESS_SPLIT_BIT+1));
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
+        if (rc_ecmd)
         {
+            rc.setEcmdError(rc_ecmd);
             FAPI_ERR("proc_adu_utils_send_fbc_op: Error 0x%x setting up ADU Control register data buffer",
                      rc_ecmd);
             break;
@@ -453,9 +467,9 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
                 (ADU_COMMAND_FBC_PRE_INIT_COUNT_END_BIT-
                  ADU_COMMAND_FBC_PRE_INIT_COUNT_START_BIT+1));
         }
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
+        if (rc_ecmd)
         {
+            rc.setEcmdError(rc_ecmd);
             FAPI_ERR("proc_adu_utils_send_fbc_op: Error 0x%x forming data buffer",
                      rc_ecmd);
             break;
@@ -465,7 +479,7 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
         rc = fapiPutScom(i_target, ADU_COMMAND_0x02020001, cmd_data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_adu_utils_send_fbc_op: fapiPutScom error (ADU_COMMAND_0x02020000)");
+            FAPI_ERR("proc_adu_utils_send_fbc_op: fapiPutScom error (ADU_COMMAND_0x02020001)");
             break;
         }
 
@@ -483,16 +497,16 @@ fapi::ReturnCode proc_adu_utils_get_adu_status(
     fapi::ReturnCode rc;
     ecmdDataBufferBase status_data(64);
 
-    FAPI_DBG("proc_adu_utils_check_adu_status: Start");
+    FAPI_DBG("proc_adu_utils_get_adu_status: Start");
 
     do
     {
         // read ADU Status register
-        FAPI_DBG("proc_adu_utils_check_adu_status: Reading ADU Status register");
+        FAPI_DBG("proc_adu_utils_get_adu_status: Reading ADU Status register");
         rc = fapiGetScom(i_target, ADU_STATUS_0x02020002, status_data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_adu_utils_check_adu_status: fapiGetScom error (ADU_STATUS_0x02020002)");
+            FAPI_ERR("proc_adu_utils_get_adu_status: fapiGetScom error (ADU_STATUS_0x02020002)");
             break;
         }
 
@@ -547,18 +561,18 @@ fapi::ReturnCode proc_adu_utils_get_adu_status(
             ADU_STATUS_BIT_CLEAR;
     } while(0);
 
-    FAPI_DBG("proc_adu_utils_check_adu_status: End");
+    FAPI_DBG("proc_adu_utils_get_adu_status: End");
     return rc;
 }
 
 
 fapi::ReturnCode proc_adu_utils_set_adu_data_registers(
     const fapi::Target& i_target,
-    const uint64_t& i_write_data,
-    const bool& i_override_itag,
-    const bool& i_write_itag,
-    const bool& i_override_ecc,
-    const uint8_t& i_write_ecc)
+    const uint64_t i_write_data,
+    const bool i_override_itag,
+    const bool i_write_itag,
+    const bool i_override_ecc,
+    const uint8_t i_write_ecc)
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
@@ -594,9 +608,9 @@ fapi::ReturnCode proc_adu_utils_set_adu_data_registers(
                     ADU_FORCE_ECC_DATA_TX_ECC_LO_END_BIT-
                     ADU_FORCE_ECC_DATA_TX_ECC_LO_START_BIT+1);
             }
-            rc.setEcmdError(rc_ecmd);
-            if (!rc.ok())
+            if (rc_ecmd)
             {
+                rc.setEcmdError(rc_ecmd);
                 FAPI_ERR("proc_adu_utils_set_adu_data_registers: Error 0x%x forming override ECC data buffer",
                          rc_ecmd);
                 break;
@@ -624,9 +638,9 @@ fapi::ReturnCode proc_adu_utils_set_adu_data_registers(
             ADU_DATA_SPLIT_BIT,
             (ADU_DATA_END_BIT-
              ADU_DATA_SPLIT_BIT+1));
-        rc.setEcmdError(rc_ecmd);
-        if (!rc.ok())
+        if (rc_ecmd)
         {
+            rc.setEcmdError(rc_ecmd);
             FAPI_ERR("proc_adu_utils_set_adu_data_registers: Error 0x%x forming data buffer",
                      rc_ecmd);
             break;
@@ -649,7 +663,7 @@ fapi::ReturnCode proc_adu_utils_set_adu_data_registers(
 
 fapi::ReturnCode proc_adu_utils_get_adu_data_registers(
     const fapi::Target& i_target,
-    const bool& i_get_itag,
+    const bool i_get_itag,
     uint64_t& o_read_data,
     bool& o_read_itag)
 {

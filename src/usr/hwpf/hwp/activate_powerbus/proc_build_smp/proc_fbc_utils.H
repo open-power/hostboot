@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fbc_utils.H,v 1.2 2012/04/27 06:49:15 jmcgill Exp $
+// $Id: proc_fbc_utils.H,v 1.3 2014/01/19 17:34:51 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_fbc_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -29,7 +29,7 @@
 // *! *** IBM Confidential ***
 // *|
 // *! TITLE       : proc_fbc_utils.H
-// *! DESCRIPTION : PBA library functions (FAPI)
+// *! DESCRIPTION : Fabric library functions (FAPI)
 // *!
 // *! OWNER NAME  : Joe McGill    Email: jmcgill@us.ibm.com
 // *!
@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
-#include "p8_scom_addresses.H"
+#include <p8_scom_addresses.H>
 
 extern "C" {
 
@@ -55,14 +55,6 @@ extern "C" {
 const uint64_t PROC_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 50)-1ULL);
 const uint64_t PROC_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
 const uint64_t PROC_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
-
-// PB Mode register field bit/definitions
-const uint32_t PB_MODE_FBC_INIT_BIT = 0;
-
-// ADU pMISC Mode register field/bit definitions
-const uint32_t ADU_PMISC_MODE_DISABLE_CHECKSTOP_BIT = 19;
-const uint32_t ADU_PMISC_MODE_MANUAL_CLEAR_FBC_STOP_BIT = 21;
-const uint32_t ADU_PMISC_MODE_FBC_STOP_BIT = 22;
 
 
 //------------------------------------------------------------------------------

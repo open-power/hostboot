@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,17 +20,44 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_adu_utils_errors.xml,v 1.4 2014/01/20 19:55:04 jmcgill Exp $ -->
 <!-- Error definitions for proc_adu_utils library -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_ADU_UTILS_INVALID_ARGS</rc>
-    <description>Invalid or out-of-range argument value(s) presented to proc_adu_utils library routine.</description>
-    <ffdc>ARGS</ffdc>
+    <rc>RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ATTEMPTS</ffdc>
+    <description>Invalid number of lock manipulation attempts presented to proc_adu_utils library routine.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_ADU_UTILS_INTERNAL_ERR</rc>
-    <description>Unexpected internal program logic error</description>
-    <ffdc>ERR_DATA</ffdc>
+    <rc>RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>OPERATION</ffdc>
+    <description>Invalid lock operation type presented to proc_adu_utils library routine.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_ADU_UTILS_INVALID_FBC_OP</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>HP</ffdc>
+    <ffdc>HP_QUIESCE_DLY</ffdc>
+    <ffdc>HP_INIT_DLY</ffdc>
+    <description>Invalid fabric op programming parameters presented to proc_adu_utils library routine.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

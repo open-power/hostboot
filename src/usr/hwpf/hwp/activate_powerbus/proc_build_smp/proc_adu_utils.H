@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.H,v 1.7 2013/11/11 22:34:59 jmcgill Exp $
+// $Id: proc_adu_utils.H,v 1.8 2014/01/19 17:35:55 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -32,7 +32,7 @@
 // *! DESCRIPTION : ADU library functions (FAPI)
 // *!
 // *! OWNER NAME  : Joe McGill    Email: jmcgill@us.ibm.com
-// *! BACKUP NAME : Jeshua Smith  Email: jeshua@us.ibm.com
+// *! BACKUP NAME : Kevin Reick   Email: reick@us.ibm.com
 // *!
 // *! ADDITIONAL COMMENTS :
 // *!
@@ -75,14 +75,6 @@
 // *!
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-//
-// TODO:
-//   o check if ADU data register read fails when locked?
-//     if not seems stray read operation can increment pointer?
-//
-//------------------------------------------------------------------------------
-
 #ifndef _PROC_ADU_UTILS_H_
 #define _PROC_ADU_UTILS_H_
 
@@ -91,8 +83,8 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
-#include "proc_fbc_utils.H"
-#include "p8_scom_addresses.H"
+#include <proc_fbc_utils.H>
+#include <p8_scom_addresses.H>
 
 extern "C" {
 
@@ -309,12 +301,12 @@ const uint32_t PROC_ADU_UTILS_ADU_HW_NS_DELAY = 10000;
 const uint32_t PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY = 10000;
 
 // field width definitions
-const uint32_t PROC_ADU_UTILS_ADU_MAX_POST_QUIESCE_DELAY = ((1ULL << 20)-1ULL);
-const uint32_t PROC_ADU_UTILS_ADU_MAX_PRE_INIT_DELAY = ((1ULL << 10)-1ULL);
+const uint32_t PROC_ADU_UTILS_ADU_MAX_POST_QUIESCE_DELAY = ((1 << 20)-1);
+const uint32_t PROC_ADU_UTILS_ADU_MAX_PRE_INIT_DELAY = ((1 << 10)-1);
 
 // auto-increment constant definitions
-const uint32_t PROC_ADU_UTILS_AUTO_INCREMENT_BOUNDARY_MASK = 0x7FFFFULL;
-const uint32_t PROC_ADU_UTILS_AUTO_INCREMENT_BOUNDARY = 0x7FFF8ULL;
+const uint32_t PROC_ADU_UTILS_AUTO_INCREMENT_BOUNDARY_MASK = 0x7FFFF;
+const uint32_t PROC_ADU_UTILS_AUTO_INCREMENT_BOUNDARY = 0x7FFF8;
 
 // Security Switch register field/bit definitions
 const uint32_t OTPC_M_SECURITY_SWITCH_TRUSTED_BOOT_BIT = 1;
@@ -329,7 +321,7 @@ const uint32_t ADU_CONTROL_FBC_ADDRESS_START_BIT = 14;
 const uint32_t ADU_CONTROL_FBC_ADDRESS_END_BIT = 63;
 
 const uint32_t ADU_CONTROL_FBC_ADDRESS_SPLIT_BIT = 32;
-const uint32_t ADU_CONTROL_FBC_ADDRESS_SPLIT_MASK = 0xFFFFFFFFULL;
+const uint32_t ADU_CONTROL_FBC_ADDRESS_SPLIT_MASK = 0xFFFFFFFF;
 
 // ADU Command register field/bit definitions
 const uint32_t ADU_COMMAND_START_OP_BIT = 2;
@@ -383,7 +375,7 @@ const uint32_t ADU_DATA_START_BIT = 0;
 const uint32_t ADU_DATA_END_BIT = 63;
 
 const uint32_t ADU_DATA_SPLIT_BIT = 32;
-const uint32_t ADU_DATA_SPLIT_MASK = 0xFFFFFFFFULL;
+const uint32_t ADU_DATA_SPLIT_MASK = 0xFFFFFFFF;
 
 
 //------------------------------------------------------------------------------
@@ -420,15 +412,15 @@ fapi::ReturnCode proc_adu_utils_clear_adu_auto_inc(
 // returns: FAPI_RC_SUCCESS if lock manipulation is successful,
 //          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
 //              ADU atomic lock,
-//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid number of attempts
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_OPERATION if an unsupported operation
 //              is specified,
-//          RC_PROC_ADU_UTILS_INTERNAL_ERR if an unexpected internal
-//              logic error occurs,
+//          RC_PROC_ADU_UTILS_INVALID_LOCK_ATTEMPTS if invalid number of attempts
+//              is specified,
 //          else error
 fapi::ReturnCode proc_adu_utils_manage_adu_lock(
     const fapi::Target& i_target,
-    const proc_adu_utils_adu_lock_operation& i_lock_operation,
-    const uint32_t& i_num_attempts);
+    const proc_adu_utils_adu_lock_operation i_lock_operation,
+    const uint32_t i_num_attempts);
 
 // function: write ADU Command register to clear the ADU Status register and
 //           reset the ADU state machine
@@ -454,14 +446,14 @@ fapi::ReturnCode proc_adu_utils_reset_adu(
 //              successful,
 //          FAPI_RC_PLAT_ERR_ADU_LOCKED if operation failed due to state of
 //              ADU atomic lock,
-//          RC_PROC_ADU_UTILS_INVALID_ARGS if invalid/out-of-range input
+//          RC_PROC_ADU_UTILS_INVALID_FBC_OP if invalid fabric operation
 //              parameters are specified,
 //          else error
 fapi::ReturnCode proc_adu_utils_send_fbc_op(
     const fapi::Target& i_target,
-    const proc_adu_utils_fbc_op& i_adu_ctl,
-    const bool& i_use_hp,
-    const proc_adu_utils_fbc_op_hp_ctl& i_adu_hp_ctl);
+    const proc_adu_utils_fbc_op i_adu_ctl,
+    const bool i_use_hp,
+    const proc_adu_utils_fbc_op_hp_ctl i_adu_hp_ctl);
 
 // function: read ADU Status register, return structure encapsulating
 //           error/status bits
@@ -491,11 +483,11 @@ fapi::ReturnCode proc_adu_utils_get_adu_status(
 //          else error
 fapi::ReturnCode proc_adu_utils_set_adu_data_registers(
     const fapi::Target& i_target,
-    const uint64_t& i_write_data,
-    const bool& i_override_itag,
-    const bool& i_write_itag,
-    const bool& i_override_ecc,
-    const uint8_t& i_write_ecc);
+    const uint64_t i_write_data,
+    const bool i_override_itag,
+    const bool i_write_itag,
+    const bool i_override_ecc,
+    const uint8_t i_write_ecc);
 
 // function: read ADU Data & Force ECC registers (to get inbound data
 //           delivered from the fabric)
@@ -511,7 +503,7 @@ fapi::ReturnCode proc_adu_utils_set_adu_data_registers(
 //          else error
 fapi::ReturnCode proc_adu_utils_get_adu_data_registers(
     const fapi::Target& i_target,
-    const bool& i_get_itag,
+    const bool i_get_itag,
     uint64_t& o_read_data,
     bool& o_read_itag);
 
