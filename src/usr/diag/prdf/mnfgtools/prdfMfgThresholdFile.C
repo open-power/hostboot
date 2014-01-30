@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2013              */
+/* COPYRIGHT International Business Machines Corp. 2009,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -24,7 +24,7 @@
 #include <prdfMfgThresholdFile.H>
 #include <prdfGlobal.H>
 #include <prdfAssert.h>
-#include <prdfMfgThresholdSync.H>
+#include <prdfMfgSync.H>
 #include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
@@ -50,9 +50,7 @@ void MfgThresholdFile::syncFromFsp()
             break;
         }
 
-        MfgThresholdSync l_syncer;
-
-        errlHndl_t l_err = l_syncer.syncMfgThresholdFromFsp();
+        errlHndl_t l_err = getMfgSync().syncMfgThresholdFromFsp();
         if (l_err)
         {
             PRDF_ERR(FUNC" failed to sync from the FSP");

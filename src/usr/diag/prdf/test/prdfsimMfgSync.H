@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/mnfgtools/prdfMfgThresholdSync.H $          */
+/* $Source: src/usr/diag/prdf/test/prdfsimMfgSync.H $                     */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,10 +21,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDF_MFGTHRESHOLDSYNC_H
-#define __PRDF_MFGTHRESHOLDSYNC_H
+#ifndef __PRDF_SimMfgSync_H
+#define __PRDF_SimMfgSync_H
 
-#include <prdfMfgThresholdFile.H>
+#include <prdfMfgSync.H>
 
 #include <mbox/mbox_queues.H>
 #include <mbox/mboxif.H>
@@ -34,19 +34,32 @@
 namespace PRDF
 {
 
-class MfgThresholdSync
+/**
+ * @brief Singleton to access the SimMfgSync
+ */
+class SimMfgSync;
+PRDF_DECLARE_SINGLETON(SimMfgSync, theSimMfgSync);
+
+/**
+ * @brief Returns a reference to the SimMfgSync singleton
+ *
+ * @return Reference to the SimMfgSync
+ */
+SimMfgSync& getSimMfgSync();
+
+class SimMfgSync : public MfgSync
 {
     public:
 
         /**
         *  @brief ctor
         */
-        MfgThresholdSync();
+        SimMfgSync();
 
         /**
         *  @brief dtor
         */
-        virtual ~MfgThresholdSync();
+        virtual ~SimMfgSync();
 
         /**
          *  @brief sync from FSP mfg thresholds
@@ -56,22 +69,26 @@ class MfgThresholdSync
         virtual errlHndl_t  syncMfgThresholdFromFsp();
 
         /**
-         *  @brief getter for mailbox enabled flag
+         *  @brief sync to FSP mfg trace data
          *
+         *  @param Error Signature
+         *  @param The PFA data struct
+         *
+         *  @return errlHndl_t
          */
-        inline bool isMailboxEnabled()
-        {
-            return iv_MailboxEnabled;
-        }
+        virtual errlHndl_t syncMfgTraceToFsp(ErrorSignature *i_esig,
+                                             const PfaData  &i_pfaData);
+        /**
+         * @brief getter for mailbox status
+         * @return TRUE if mailbox is enabled. FALSE, otherwise.
+         */
+        virtual bool isMailboxEnabled();
 
         /**
-         *  @brief setter for mailbox enabled flag
-         *
+         * @brief setter for mailbox status
+         * @return None 
          */
-        inline void setMailboxEnabled(bool i_flag)
-        {
-            iv_MailboxEnabled = i_flag;
-        }
+        void setMailBoxStatus (bool i_status);
 
     private:
 
@@ -82,20 +99,26 @@ class MfgThresholdSync
          *  @param[in/out] i_msg
          *                    This parameter is used as both input and an
          *                    output parameter. If the message is
-         *                    synchronus, the response will be populated
+         *                    synchronus the response will be populated
          *                    in an object pointed to by this pointer.
-         *                    If the message is asynchronus, the object
+         *                    If the message is asynchronus the object
          *                    pointed to by this parameter will be sent
          *                    to the fsp.
+         * @param[in] i_expectResponse
+         *                 This is a default parameter.
+         *                 If true, this function sends a synchronous message
+         *                 If false, this function sends an asynchronous message
          *
          *  @return     errlHndl_t
          */
-        virtual errlHndl_t  sendMboxMsg( msg_t * i_msg );
+         virtual errlHndl_t  sendMboxMsg( msg_t * i_msg,
+                                          bool i_expectResponse = true );
 
-    private:
+        // Disabled copy constructor and assignment operator
+        SimMfgSync(const SimMfgSync & right);
+        SimMfgSync & operator=(const SimMfgSync & right);
 
-        bool iv_MailboxEnabled;
-
+        bool iv_mailBoxStatus;
 };
 
 

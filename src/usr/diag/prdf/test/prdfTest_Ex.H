@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <prdfTrace.H>
 #include <prdfMain.H>
 #include "prdfsimMacros.H"
-#include "prdfsimMfgThresholdSync.H"
+#include "prdfsimMfgSync.H"
 #include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
 

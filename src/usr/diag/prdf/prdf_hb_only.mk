@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: ./prdf_hb_only.mk $
+# $Source: src/usr/diag/prdf/prdf_hb_only.mk $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -37,11 +37,12 @@ prd_config_HB = \
 
 prd_mnfgtools_HB = \
  prdfMfgThresholdFile.o \
- prdfMfgThresholdSync.o
+ prdfMfgSync.o
 
 prd_plat_HB = \
  prdfCenMbaIplCeStats.o \
  prdfDramRepairs.o \
+ prdfRasServices.o \
  prdfPlatCalloutUtil.o
 
 prd_object_files_HB = \

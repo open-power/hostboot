@@ -34,7 +34,8 @@ namespace PRDF
  * */
 enum MFG_THRES_SYNC_MSG_TYPE
 {
-    MFG_THRES_SYNC_FROM_FSP  = 0x1
+    MFG_THRES_SYNC_FROM_FSP  = 0x1,
+    MFG_TRACE_SYNC_TO_FSP    = 0x2
 };
 
 }; // end namespace PRDF

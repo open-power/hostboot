@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -26,9 +26,29 @@
  */
 
 #include <prdfRasServices.H>
+#include <prdfMfgSync.H>
+#include <prdfErrlUtil.H>
 
 namespace PRDF
 {
+
+void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
+                                const PfaData & i_pfaData )
+{
+    #define PRDF_FUNC "[ErrDataService::MnfgTrace] "
+    do
+    {
+        errlHndl_t errl = NULL;
+        errl = getMfgSync().syncMfgTraceToFsp(i_esig, i_pfaData);
+        if (errl)
+        {
+            PRDF_ERR(PRDF_FUNC "failed to sync to the FSP");
+            PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+            break;
+        }
+    }while(0);
+    #undef PRDF_FUNC
+}
 
 } // end namespace PRDF
 

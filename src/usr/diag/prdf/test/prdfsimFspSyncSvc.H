@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2013              */
+/* COPYRIGHT International Business Machines Corp. 2009,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -85,6 +85,16 @@ class SimFspSyncSvc
          */
         errlHndl_t sendMfgThresRespMsg(msg_t * i_msg) const;
 
+        /*
+         * @brief Process the Mnfg Trace data sent by Hostboot
+         *
+         * @param[in] i_msg, the request msg that was sent by HB
+         *
+         * @return Error log handle that will indicate if the Mnfg trace file
+         *         was updated, error otherwise.
+         *
+         */
+        errlHndl_t processMfgTrace(msg_t * i_msg) const;
 
         // Disabled copy constructor and assignment operator
         SimFspSyncSvc(const SimFspSyncSvc & right);

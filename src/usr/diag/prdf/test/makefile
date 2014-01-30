@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -66,11 +66,11 @@ OBJS = prdfsimHomRegisterAccess.o \
        prdfsimServices.o \
        prdsimSignatureParser.o \
        prdfsimUtil.o \
-       prdfsimMfgThresholdSync.o \
+       prdfsimMfgSync.o \
        prdfsimFspSyncSvc.o \
        prdfsimFspMfgThresholdFile.o
 
-TESTS = prdfTest_MfgThresSync.H \
+TESTS = prdfTest_MfgSync.H \
         prdfTest_ABus.H \
         prdfTest_Ex.H  \
         prdfTest.H  \

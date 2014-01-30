@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2013              */
+/* COPYRIGHT International Business Machines Corp. 2003,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -62,6 +62,7 @@ enum ModuleId
     PRDF_RESTORE_DRAM_REPAIR      = 0x0C,
     PRDF_MNFG_IPL_CE_ANALYSIS     = 0x0D,
     PRDF_START_SCRUB              = 0x0E,
+    PRDF_SYNC_SVC                 = 0x0F,
 };
 
 /******************************************************************************/

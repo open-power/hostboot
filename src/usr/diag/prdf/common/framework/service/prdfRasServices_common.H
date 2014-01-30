@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -133,6 +133,13 @@ class ErrDataService
         terminateOnCheckstop = setting;
     }
 
+    /**
+     * @brief Add trace data to file for Manufacturing.
+     * @param i_esig    Error signature.
+     * @param i_pfaData The PFA data.
+     */
+    void MnfgTrace( ErrorSignature * i_esig, const PfaData & i_pfaData );
+
   private:
 
     /**
@@ -175,13 +182,6 @@ class ErrDataService
     bool SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer);
 
     #endif // end if not __HOSTBOOT_MODULE
-
-    /**
-     * @brief Add trace data to file for Manufacturing.
-     * @param i_esig    Error signature.
-     * @param i_pfaData The PFA data.
-     */
-    void MnfgTrace( ErrorSignature * i_esig, const PfaData & i_pfaData );
 
     /**
      * @brief Initializes the PFA data.

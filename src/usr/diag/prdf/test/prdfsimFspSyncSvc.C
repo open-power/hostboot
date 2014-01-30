@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2013              */
+/* COPYRIGHT International Business Machines Corp. 2009,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <prdfAssert.h>
 #include <prdfEnums.H>
 #include <prdfErrlUtil.H>
+#include <prdfPfa5Data.h>
 
 namespace PRDF
 {
@@ -59,6 +60,16 @@ void SimFspSyncSvc::processRequestMsg(msg_t * i_msg)
                 PRDF_COMMIT_ERRL(pError, ERRL_ACTION_REPORT);
             }
             break;
+
+        case MFG_TRACE_SYNC_TO_FSP:
+            pError = processMfgTrace(i_msg);
+            if(NULL != pError)
+            {
+                PRDF_ERR(FUNC" processMfgTrace returned error");
+                PRDF_COMMIT_ERRL(pError, ERRL_ACTION_REPORT);
+            }
+            break;
+
         default:
             PRDF_ERR(FUNC" Invalid Message Type received from HB :"
                  "[0x%08X]", i_msg->type);
@@ -113,6 +124,65 @@ errlHndl_t SimFspSyncSvc::sendMfgThresRespMsg(msg_t * i_msg) const
     return l_errLog;
 
     #undef FUNC
+}
+
+errlHndl_t SimFspSyncSvc::processMfgTrace(msg_t *i_msg) const
+{
+    #define PRDF_FUNC "[SimFspSyncSvc::processMfgTrace]"
+    PRDF_ENTER(PRDF_FUNC);
+
+    errlHndl_t l_errLog = NULL;
+    uint8_t l_mruListCount = 0;
+    uint8_t  *l_extraData = NULL;
+
+    do
+    {
+        l_extraData = reinterpret_cast <uint8_t *> (i_msg->extra_data);
+
+        l_mruListCount = (i_msg->data[1] / sizeof(PfaMruListStruct));
+
+        if(l_mruListCount > MruListLIMIT)
+        {
+            PRDF_ERR(PRDF_FUNC "Invalid MRU count: %d received from Hostboot"
+                               " max expected count is: %d",
+                               l_mruListCount, MruListLIMIT);
+
+            /*@
+             * @errortype
+             * @refcode    LIC_REFCODE
+             * @subsys     EPUB_FIRMWARE_SP
+             * @reasoncode PRDF_INVALID_CONFIG
+             *
+             * @moduleid   PRDF_SYNC_SVC
+             * @userdata1  MRU List Count
+             * @userdata2  Max MRU Count
+             * @userdata3  Line number in file
+             * @devdesc    Received invalid MRU count in
+             *             MnfgTrace message from Hostboot
+             */
+            PRDF_CREATE_ERRL(l_errLog,
+                             ERRL_SEV_INFORMATIONAL,
+                             ERRL_ETYPE_NOT_APPLICABLE,
+                             SRCI_ERR_INFO,
+                             SRCI_NO_ATTR,
+                             PRDF_SYNC_SVC,
+                             LIC_REFCODE,
+                             PRDF_INVALID_CONFIG,
+                             l_mruListCount,
+                             MruListLIMIT,
+                             __LINE__, 0);
+            break;
+        }
+
+        if(NULL != l_extraData)
+        {
+            free(l_extraData);
+        }
+
+    }while(0);
+
+    return l_errLog;
+    #undef PRDF_FUNC
 }
 
 /****************************/
