@@ -1240,7 +1240,7 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[5]
      *  PB_CENT_CRESP_ADDR_ERROR
      */
-    (PbCentFir, bit(5)) ?  calloutProcAnalyzeMpIpl;
+    (PbCentFir, bit(5)) ? combinedResponseError;
 
     /** PBCENTFIR[6]
      *  PB_CENT_CRESP_ERROR
@@ -1265,7 +1265,7 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[10]
      *  PB_CENT_FORCE_MP_IPL
      */
-    (PbCentFir, bit(10)) ? calloutProcAnalyzeMpIpl;
+    (PbCentFir, bit(10)) ? forceMpIpl;
 
     /** PBCENTFIR[11]
      *  PB_CENT_FIR_SPARE_0
@@ -3150,8 +3150,16 @@ actionclass calloutNxThr5pHr
     threshold5phour;
 };
 
-actionclass calloutProcAnalyzeMpIpl
+actionclass combinedResponseError
+{
+    callout2ndLvlMedThr1;
+    funccall("combinedResponseCallout");
+    funccall("analyzeMpIPL");
+};
+
+actionclass forceMpIpl
 {
     calloutProcLevel2MedThr1;
     funccall("analyzeMpIPL");
 };
+

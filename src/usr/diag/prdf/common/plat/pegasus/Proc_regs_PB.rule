@@ -384,6 +384,15 @@
         capture     req nonzero("PBEASTFIR");
     };
 
+    # c_err_rpt for PBWESTFIR, PBCENTFIR, and PBEASTFIR
+    register PB_CENT_CR_ERROR
+    {
+        name        "EH.PB.MISC.PB_CENT_CR_ERROR";
+        scomaddr    0x02010c6c;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # PB Chiplet PBEXTFIR
     ############################################################################

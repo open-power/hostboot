@@ -582,6 +582,84 @@ PRDF_PLUGIN_DEFINE( Proc, calloutMasterCore );
 //------------------------------------------------------------------------------
 
 /**
+ * @brief   Calls out the EX chiplet (MRU_LOW), if possible. Otherwise, calls
+ *          out the PROC (MRU_LOW)
+ * @param   i_chip   P8 chip
+ * @param   io_sc    service data collector
+ * @returns SUCCESS
+ */
+int32_t combinedResponseCallout( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[Proc::combinedResponseCallout] "
+
+    int32_t l_rc = SUCCESS;
+
+    TargetHandle_t procTrgt = i_chip->GetChipHandle();
+
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister("PB_CENT_CR_ERROR");
+
+    do
+    {
+        l_rc = reg->Read();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Read() failed on PB_CENT_CR_ERROR" );
+            break;
+        }
+
+        uint32_t tmp = reg->GetBitFieldJustified(0,3);
+        if ( 0x02 != tmp ) // Must be 0b010 to continue
+        {
+            PRDF_ERR( PRDF_FUNC"Unsupported reason code: 0x%02x", tmp );
+            l_rc = FAIL; break;
+        }
+
+        tmp = reg->GetBitFieldJustified(38,5);
+        if ( 0x00 != tmp ) // Must be 0b00000 to continue
+        {
+            PRDF_ERR( PRDF_FUNC"Unsupported combined response encoding: 0x%02x",
+                      tmp );
+            l_rc = FAIL; break;
+        }
+
+        if ( reg->IsBitSet(22) ) // Must be 0b0 to continue
+        {
+            PRDF_ERR( PRDF_FUNC"Operation not sourced by an EX chiplet" );
+            l_rc = FAIL; break;
+        }
+
+        // Get the EX target
+        tmp = reg->GetBitFieldJustified(23,4);
+        TargetHandle_t exTrgt = getConnectedChild( procTrgt, TYPE_EX, tmp );
+        if ( NULL == exTrgt )
+        {
+            PRDF_ERR( PRDF_FUNC"No connected EX chiplet at position %d", tmp );
+            l_rc = FAIL; break;
+        }
+
+        // Callout the EX target
+        io_sc.service_data->SetCallout( exTrgt, MRU_LOW );
+
+    } while (0);
+
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Unable to isolate to an EX chiplet. Calling out "
+                  "PROC 0x%08x instead.", i_chip->GetId() );
+
+        io_sc.service_data->SetCallout( procTrgt, MRU_LOW );
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Proc, combinedResponseCallout );
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief   When not in MNFG mode, clear the service call flag so that
  *          thresholding will still be done, but no visible error log committed.
  * @param   i_chip P8 chip
