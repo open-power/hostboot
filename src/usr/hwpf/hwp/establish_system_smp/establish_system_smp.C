@@ -86,7 +86,7 @@ using   namespace   EDI_EI_INITIALIZATION;
 /******************************************************************************/
 const uint8_t HB_COALESCE_WAITING_FOR_MSG = 0x0;
 const uint8_t HB_COALESCE_MSG_DONE = 0x1;
-const uint8_t MAX_TIME_ALLOWED_MS = 10;
+const uint32_t MAX_TIME_ALLOWED_MS = 10000;
 const uint8_t NUMBER_OF_POSSIBLE_NODES = 8;
 const uint8_t CONTINUE_WAIT_FOR_MSGS = 0x2;
 const uint8_t TIME_EXPIRED=0x3;
@@ -101,7 +101,7 @@ void* host_coalese_timer(void* i_msgQPtr)
 
     msg_t* msg = msg_allocate();
     msg->type = HOST_COALESCE_TIMER_MSG;
-    uint8_t l_time_ms =0;
+    uint32_t l_time_ms =0;
 
     msg_q_t* msgQ = static_cast<msg_q_t*>(i_msgQPtr);
 

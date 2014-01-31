@@ -362,15 +362,16 @@ void IntrRp::msgHandler()
                     type = static_cast<ext_intr_t>(xirr & XISR_MASK);
 
                     TRACFCOMP(g_trac_intr,
-                              "External Interrupt recieved, Type=%x",
-                              type);
+                              "External Interrupt recieved. XIRR=%x, PIR=%x",
+                              xirr,pir);
 
                     // Acknowlege msg
                     msg->data[1] = 0;
                     msg_respond(iv_msgQ, msg);
 
                     Registry_t::iterator r = iv_registry.find(type);
-                    if(r != iv_registry.end())
+                    if(r != iv_registry.end() &&
+                       type != INTERPROC_XISR) //handle IPI after EOI, not here
                     {
                         msg_q_t msgQ = r->second.msgQ;
 
@@ -417,6 +418,9 @@ void IntrRp::msgHandler()
                         // Clear IPI request.
                         volatile uint8_t * mfrr =
                             reinterpret_cast<uint8_t*>(baseAddr + MFRR_OFFSET);
+
+                        TRACFCOMP( g_trac_intr,"mfrr = %x",*mfrr);
+
                         (*mfrr) = 0xff;
                         eieio();  // Force mfrr clear before xirr EIO.
 
@@ -452,11 +456,37 @@ void IntrRp::msgHandler()
 
                     // Writing the XIRR with the same value read earlier
                     // tells the interrupt presenter hardware to signal an EOI.
+                    xirr |= CPPR_MASK;  //set all CPPR bits - allow any INTR
                     *xirrAddress = xirr;
 
-                    // indicate IPC data area clear after EOI has been sent
+                    // Now handle any IPC messages
                     if (type == INTERPROC_XISR)
                     {
+                        // If something is registered for IPIs and
+                        // it has not already been handled then handle
+                        if(r != iv_registry.end() && 
+                           KernelIpc::ipc_data_area.msg_queue_id !=
+                           IPC_DATA_AREA_READ)
+                        {
+                            msg_q_t msgQ = r->second.msgQ;
+
+                            msg_t * rmsg = msg_allocate();
+                            rmsg->type = r->second.msgType;
+                            rmsg->data[0] = type;  // interrupt type
+                            rmsg->data[1] = 0;
+                            rmsg->extra_data = NULL;
+
+                            int rc = msg_sendrecv(msgQ,rmsg);
+                            if(rc)
+                            {
+                                TRACFCOMP(g_trac_intr,ERR_MRK
+                                          "IPI Interrupt recieved, but could "
+                                          "not send message to the registered "
+                                          "handler. Ignoring it. rc = %d",
+                                          rc);
+                            }
+                            msg_free(rmsg);
+                        }
                         if(KernelIpc::ipc_data_area.msg_queue_id ==
                            IPC_DATA_AREA_READ)
                         {
@@ -1205,16 +1235,8 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
     TRACDCOMP(g_trac_intr,"PIR 0x%x offset: 0x%lx",
               i_pir.word,
               cpuOffsetAddr(i_pir));
-    if(i_pir.word == iv_masterCpu.word)
-    {
-        *cppr = 0xff;      // Allow all interrupts on master.
-    }
-    else
-    {
-        *cppr = 0x01;      // Allow only priority 0 interrupts on non-masters.
-                           // We use priority 0 to deliver IPIs for waking up
-                           // a core.
-    }
+
+    *cppr = 0xff;          // Allow all interrupts
 
     // Links are intended to be set up in rings.  If an interrupt ends up
     // where it started, it gets rejected by hardware.
@@ -1285,7 +1307,7 @@ void IntrRp::sendIPI(const PIR_t i_pir) const
 
     eieio(); sync();
     MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
-    (*mfrr) = 0x00;
+    (*mfrr) = IPI_USR_PRIO;
 }
 
 

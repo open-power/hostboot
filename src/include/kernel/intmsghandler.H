@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -143,8 +143,11 @@ class InterruptMsgHdlr : public MessageHandler
          * Issue an IPI to the core.
          *
          * @param[in] i_pir - The PIR of the CPU to send IPI at.
+         * @param[in] i_favor - How favored the interrupt is; 0 = most favored
+         *                      254 = least favored, 255 = no interrupt
+         *                      Default 0x1 - IPI from kernel side (wakeup)
          */
-        static void sendIPI(uint64_t i_pir);
+        static void sendIPI(uint64_t i_pir, uint8_t i_favor = 0x1);
 
     private:
 

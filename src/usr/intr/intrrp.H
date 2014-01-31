@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -112,6 +112,7 @@ namespace INTR
                 LINKB_OFFSET = 20,             //!< offset to LINKB register
                 LINKC_OFFSET = 24,             //!< offset to LINKC register
                 XISR_MASK    = 0x00FFFFFF,     //!< XISR MASK in XIRR register
+                CPPR_MASK    = 0xFF000000,     //!< CPPR MASK in XIRR register
 
                 ICPBAR_EN    = 30,              //!< BAR enable bit pos
                 ICPBAR_SCOM_ADDR = 0x020109ca,  //!< ICP BAR scom address
@@ -153,6 +154,8 @@ namespace INTR
 
                 PSI_FSP_INT_ENABLE      = 0x1000000000000000ULL,
                 PSI_HBCR_AND_SCOM_ADDR  = 0x02010913,
+
+                IPI_USR_PRIO        = 0x2,   //<! IPI priority from USR space
             };
 
             enum INTR_ROUTING_t

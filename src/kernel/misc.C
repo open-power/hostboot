@@ -37,6 +37,7 @@
 #include <kernel/intmsghandler.H>
 #include <kernel/hbdescriptor.H>
 #include <kernel/ipc.H>
+#include <kernel/timemgr.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t,
@@ -224,7 +225,7 @@ namespace KernelMisc
 
         // Save away the current timebase.  All threads are in this object
         // now so they're not going to be using the time for anything else.
-        iv_timebase = getTB();
+        iv_timebase = getTB() + TimeManager::convertSecToTicks(1,0);
     }
 
     extern "C" void kernel_execute_winkle(task_t* t);
@@ -309,7 +310,7 @@ namespace KernelMisc
 
         // Save away the current timebase.  All threads are in this object
         // now so they're not going to be using the time for anything else.
-        iv_timebase = getTB();
+        iv_timebase = getTB() + TimeManager::convertSecToTicks(1,0);
     }
 
     void WinkleAll::activeMainWork()

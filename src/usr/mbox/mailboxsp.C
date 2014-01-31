@@ -1651,8 +1651,23 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
         {
             uint64_t q_handle = i_q_id;
             q_handle |= (((uint64_t)MSGQ_TYPE_IPC | (uint64_t)i_node) << 32);
+            TRACFCOMP(g_trac_mboxmsg,INFO_MRK
+                      "MBOXSP IPC SEND MSG: Dest node %d. msg_id: %lx",
+                      i_node,
+                      (uint32_t)i_q_id);
+
+            TRACFCOMP(g_trac_mboxmsg,INFO_MRK
+                      "MBOXSP IPC SEND MSG: 0x%08x 0x%016lx 0x%016lx %p",
+                      i_msg->type,
+                      i_msg->data[0],
+                      i_msg->data[1],
+                      i_msg->extra_data);
+
             int rc = msg_send(reinterpret_cast<msg_q_t>(q_handle),
                               i_msg);
+            TRACFCOMP(g_trac_mboxmsg,INFO_MRK"MBOXSP IPC SENT. This PIR 0x%x",
+                      KernelIpc::ipc_data_area.pir);
+
 
             if(rc)
             {

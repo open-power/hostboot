@@ -173,7 +173,7 @@ void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
     }
 }
 
-void InterruptMsgHdlr::sendIPI(uint64_t i_pir)
+void InterruptMsgHdlr::sendIPI(uint64_t i_pir, uint8_t i_favor)
 {
     uint64_t mfrrAddress = cv_ipc_base_address;
     mfrrAddress += mmio_offset(i_pir);
@@ -181,7 +181,7 @@ void InterruptMsgHdlr::sendIPI(uint64_t i_pir)
 
     mfrrAddress |= 0x8000000000000000ul;
 
-    register uint8_t data = 0;
+    register uint8_t data = i_favor;
 
     eieio(); sync();
     MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);

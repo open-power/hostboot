@@ -85,8 +85,8 @@ void KernelIpc::send(uint64_t i_q, msg_t * i_msg)
 
     printkd("IPC send from PIR %lx to PIR %x\n",getPIR(),p_dest->pir);
 
-    // send IPI
-    InterruptMsgHdlr::sendIPI(p_dest->pir);
+    // send IPI - use this_node + 10 as favor level of interrupt
+    InterruptMsgHdlr::sendIPI(p_dest->pir,this_node + 10);
 
     // The message allocation is freed here to make msg_send for IPC
     // messages behave the same as non-IPC msg_send; that is, the message
