@@ -197,7 +197,7 @@ struct node_data_t
     enum {
         MAX_PROCS_RSV = P8_MAX_PROCS*2, //leave space for double
         MAX_EX_RSV = MAX_PROCS_RSV*P8_MAX_EX_PER_PROC,
-        NUM_PROC_ATTRIBUTES = 200,
+        NUM_PROC_ATTRIBUTES = 225,
         NUM_EX_ATTRIBUTES = 20,
         MAX_ATTRIBUTES = MAX_PROCS_RSV*NUM_PROC_ATTRIBUTES +
                          MAX_EX_RSV*NUM_EX_ATTRIBUTES
