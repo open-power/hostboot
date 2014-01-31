@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2013              */
+/* COPYRIGHT International Business Machines Corp. 2003,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -427,7 +427,7 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
             snprintf(data, 64, temp);
 
             // Display DRAM spare information if spare DRAM is supported.
-            if ( !mbaData.header.isSpareDram )
+            if ( mbaData.header.isSpareDram )
             {
                 getDramRepairSymbolStr(rankEntry.port0Spare, symbolStr, 10);
                 snprintf(temp, 64, "%s Sp0: %s", data, symbolStr);

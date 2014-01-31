@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -285,48 +285,74 @@ void captureDramRepairsVpd( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
     static const size_t sz_rank  = sizeof(uint8_t);
     static const size_t sz_entry = PORT_SLCT_PER_MBA * DIMM_DQ_RANK_BITMAP_SIZE;
     static const size_t sz_word  = sizeof(CPU_WORD);
+    int32_t rc = SUCCESS;
 
-    // Get the maximum capture data size.
-    size_t sz_maxData = MASTER_RANKS_PER_MBA * (sz_rank + sz_entry);
-
-    // Adjust the size for endianess.
-    sz_maxData = ((sz_maxData + sz_word-1) / sz_word) * sz_word;
-
-    // Initialize to 0.
-    uint8_t capData[sz_maxData];
-    memset( capData, 0x00, sz_maxData );
-
-    // Get the data for each rank.
-    uint32_t idx = 0;
-    for ( uint8_t r = 0; r < MASTER_RANKS_PER_MBA; r++ )
+    do
     {
-        CenRank rank ( r );
-        CenDqBitmap bitmap;
-
-        if ( SUCCESS != getBadDqBitmap(i_mbaTrgt, rank, bitmap, true) )
+        std::vector<CenRank> masterRanks;
+        rc = getMasterRanks( i_mbaTrgt, masterRanks );
+        if ( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mbaTrgt), r );
-            continue; // skip this rank
+            PRDF_ERR( PRDF_FUNC"getMasterRanks() failed" );
+            break;
         }
 
-        if ( bitmap.badDqs() ) // make sure the data is non-zero
+        if( masterRanks.empty() )
         {
-            // Add the rank, then the entry data.
-            capData[idx] = r;                                  idx += sz_rank;
-            memcpy(&capData[idx], bitmap.getData(), sz_entry); idx += sz_entry;
+            PRDF_ERR( PRDF_FUNC"Master Rank list size is 0");
+            break;
         }
-    }
 
-    // Fix endianess issues with non PPC machines.
-    size_t sz_capData = idx;
-    sz_capData = ((sz_capData + sz_word-1) / sz_word) * sz_word;
-    for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
-        ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
+        // Get the maximum capture data size.
+        size_t sz_maxData = masterRanks.size() * (sz_rank + sz_entry);
 
-    // Add data to capture data.
-    BIT_STRING_ADDRESS_CLASS bs ( 0, sz_capData*8, (CPU_WORD *) &capData );
-    io_cd.Add( i_mbaTrgt, Util::hashString("DRAM_REPAIRS_VPD"), bs );
+        // Adjust the size for endianess.
+        sz_maxData = ((sz_maxData + sz_word-1) / sz_word) * sz_word;
+
+        // Initialize to 0.
+        uint8_t capData[sz_maxData];
+        memset( capData, 0x00, sz_maxData );
+
+        // Iterate all ranks to get VPD data
+        uint32_t idx = 0;
+        for ( std::vector<CenRank>::iterator it = masterRanks.begin();
+              it != masterRanks.end(); it++ )
+        {
+            CenDqBitmap bitmap;
+            uint8_t rank = it->getMaster();
+
+            if ( SUCCESS != getBadDqBitmap(i_mbaTrgt, *it, bitmap, true) )
+            {
+                PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x"
+                          " rank=%d", getHuid(i_mbaTrgt), rank );
+                continue; // skip this rank
+            }
+
+            if ( bitmap.badDqs() ) // make sure the data is non-zero
+            {
+                // Add the rank, then the entry data.
+                capData[idx] = rank;              idx += sz_rank;
+                memcpy(&capData[idx], bitmap.getData(), sz_entry);
+                idx += sz_entry;
+            }
+        }
+
+        if( 0 == idx ) break; // Nothing to capture
+
+        // Fix endianess issues with non PPC machines.
+        size_t sz_capData = idx;
+        sz_capData = ((sz_capData + sz_word-1) / sz_word) * sz_word;
+        for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
+            ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
+
+        // Add data to capture data.
+        BIT_STRING_ADDRESS_CLASS bs ( 0, sz_capData*8, (CPU_WORD *) &capData );
+        io_cd.Add( i_mbaTrgt, Util::hashString("DRAM_REPAIRS_VPD"), bs );
+
+    }while(0);
+
+    if( FAIL == rc )
+        PRDF_ERR( PRDF_FUNC"Failed for MBA 0x%08X", getHuid( i_mbaTrgt ) );
 
     #undef PRDF_FUNC
 }
