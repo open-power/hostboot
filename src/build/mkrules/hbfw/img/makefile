@@ -257,17 +257,17 @@ inject_ecc: build_sbe_partitions
 	dd if=${${VENICE_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${VENICE_TARG_IMG_ECC} --p8; \
 	# SBE partition
-	dd if=${MURANO_SBE_IMG} of=${TEMP_IMG} ibs=256k conv=sync; \
+	dd if=${${MURANO_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${MURANO_SBE_IMG_ECC} --p8; \
-	dd if=${VENICE_SBE_IMG} of=${TEMP_IMG} ibs=256k conv=sync; \
+	dd if=${${VENICE_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${VENICE_SBE_IMG_ECC} --p8; \
 	# SBEC partition
-	dd if=${SBEC_IMG} of=${TEMP_IMG} ibs=512k conv=sync; \
+	dd if=${${SBEC_IMG}:P} of=${TEMP_IMG} ibs=512k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${SBEC_IMG_ECC} --p8; \
 	# WINK partition
-	dd if=${MURANO_LOCAL_SLW_IMG} of=${TEMP_IMG} ibs=1024k conv=sync; \
+	dd if=${${MURANO_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${MURANO_LOCAL_SLW_IMG_ECC} --p8; \
-	dd if=${VENICE_LOCAL_SLW_IMG} of=${TEMP_IMG} ibs=1024k conv=sync; \
+	dd if=${${VENICE_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${VENICE_LOCAL_SLW_IMG_ECC} --p8; \
 	rm ${TEMP_IMG}
 
