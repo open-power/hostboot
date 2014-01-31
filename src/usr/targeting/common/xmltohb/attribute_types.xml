@@ -12982,4 +12982,20 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
+    <description>Used for Custom DIMMs to not enable the reading of the dimm temperature sensor on the master i2c bus</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute> 
+
 </attributes>

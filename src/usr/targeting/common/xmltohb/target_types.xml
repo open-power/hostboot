@@ -225,6 +225,7 @@
     <attribute><id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id></attribute>
     <attribute><id>PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR</id></attribute>
     <attribute><id>PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR</id></attribute>
+    <attribute><id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id></attribute>
 </targetType>
 
 <targetType>
