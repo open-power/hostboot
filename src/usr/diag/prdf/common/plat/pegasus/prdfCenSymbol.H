@@ -36,6 +36,7 @@
 #include <prdfCenConst.H>
 #include <prdfPlatServices.H>
 #include <prdfTargetFwdRef.H>
+#include <prdfParserEnums.H>
 
 //##############################################################################
 //                           class CenSymbol
@@ -49,22 +50,6 @@ namespace PRDF
  */
 class CenSymbol
 {
-  public: // constants, enums
-
-    enum WiringType
-    {
-        WIRING_INVALID =  0, // An invalid wiring type
-    };
-
-    /** Used as a 2-bit mask to display which of the DQs on this symbol are
-     *  failing. */
-    enum DqMask
-    {
-        NO_SYMBOL_DQS   = 0x0,
-        EVEN_SYMBOL_DQ  = 0x2,
-        ODD_SYMBOL_DQ   = 0x1,
-        BOTH_SYMBOL_DQS = EVEN_SYMBOL_DQ | ODD_SYMBOL_DQ,
-    };
 
   public: // constructor
 
@@ -72,9 +57,10 @@ class CenSymbol
      * @brief Default constructor
      */
     CenSymbol() :
-        iv_mbaTarget(NULL), iv_rank(), iv_wiringType(WIRING_INVALID),
-        iv_symbol(SYMBOLS_PER_RANK), iv_pins(NO_SYMBOL_DQS), iv_x4Dram(false),
-        iv_isDramSpared(false), iv_isEccSpared(false)
+        iv_mbaTarget(NULL), iv_rank(),
+        iv_wiringType( CEN_SYMBOL::WIRING_INVALID ),
+        iv_symbol( SYMBOLS_PER_RANK ), iv_pins( CEN_SYMBOL::NO_SYMBOL_DQS ),
+        iv_x4Dram(false),iv_isDramSpared(false), iv_isEccSpared(false)
     {}
 
   private: // constructor
@@ -83,8 +69,8 @@ class CenSymbol
      * @brief Constructor from components
      */
     CenSymbol( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-               WiringType i_wiringType, uint8_t i_symbol, uint8_t i_pins,
-               bool i_x4Dram ) :
+               CEN_SYMBOL::WiringType i_wiringType, uint8_t i_symbol,
+               uint8_t i_pins, bool i_x4Dram ) :
         iv_mbaTarget(i_mba), iv_rank(i_rank), iv_wiringType(i_wiringType),
         iv_symbol(i_symbol), iv_pins(i_pins), iv_x4Dram(i_x4Dram),
         iv_isDramSpared(false), iv_isEccSpared(false)
@@ -103,7 +89,7 @@ class CenSymbol
      */
     static CenSymbol fromSymbol( TARGETING::TargetHandle_t i_mba,
                                  const CenRank & i_rank, uint8_t i_symbol,
-                                 uint8_t i_pins = NO_SYMBOL_DQS );
+                                 uint8_t i_pins = CEN_SYMBOL::NO_SYMBOL_DQS );
 
     /**
      * @brief  Creates a CenSymbol from a DIMM DQ.
@@ -145,13 +131,13 @@ class CenSymbol
      */
     static int32_t getWiringType( TARGETING::TargetHandle_t i_mba,
                                   const CenRank & i_rank,
-                                  WiringType & o_wiringType );
+                                  CEN_SYMBOL::WiringType & o_wiringType );
 
     /** @return true if symbol is within the valid range, false otherwise. */
     bool isValid() const { return iv_symbol < SYMBOLS_PER_RANK; }
 
     /** @return This symbol's wiring type. */
-    WiringType getWiringType() const { return iv_wiringType; }
+    CEN_SYMBOL::WiringType getWiringType() const { return iv_wiringType; }
 
     /** @return This symbol's numerical value (0-71). */
     uint8_t getSymbol() const { return iv_symbol; }
@@ -258,7 +244,8 @@ class CenSymbol
      * @param  o_symbol      The returned symbol.
      * @return Non-SUCCESS if an invalid parameter is given, SUCCESS otherwise.
      */
-    static int32_t getSymbol( const CenRank & i_rank, WiringType i_wiringType,
+    static int32_t getSymbol( const CenRank & i_rank,
+                              CEN_SYMBOL::WiringType i_wiringType,
                               uint8_t i_dimmDq, uint8_t i_portSlct,
                               uint8_t & o_symbol );
 
@@ -266,7 +253,7 @@ class CenSymbol
 
     TARGETING::TargetHandle_t iv_mbaTarget; ///< MBA Target handle.
     CenRank iv_rank;                        ///< The rank this symbol is on.
-    WiringType iv_wiringType;               ///< This symbol's wiring type.
+    CEN_SYMBOL::WiringType iv_wiringType;   ///< This symbol's wiring type.
     uint8_t iv_symbol;                      ///< This symbol's numerical value.
     uint8_t iv_pins;                        ///< See enum DqMask.
     bool iv_x4Dram;                         ///< TRUE x4 DRAM, FALSE x8 DRAM.

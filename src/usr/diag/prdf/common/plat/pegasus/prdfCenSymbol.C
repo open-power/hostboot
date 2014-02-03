@@ -25,6 +25,7 @@
 
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
+#include <prdfCenMemUtils.H>
 
 using namespace TARGETING;
 
@@ -32,6 +33,7 @@ namespace PRDF
 {
 
 using namespace PlatServices;
+using namespace CEN_SYMBOL;
 
 static const uint8_t symbol2Galois[] =
 {
@@ -193,12 +195,40 @@ CenSymbol CenSymbol::fromGalois( TargetHandle_t i_mba, const CenRank & i_rank,
 int32_t CenSymbol::getWiringType( TargetHandle_t i_mba, const CenRank & i_rank,
                                   WiringType & o_type )
 {
-    int32_t o_rc = SUCCESS;
+    #define  PRDF_FUNC "CenSymbol::getWiringType "
 
-    // TODO: RTC 67376 Add support for wiring type.
+    int32_t o_rc = SUCCESS;
     o_type = WIRING_INVALID;
 
+    do
+    {
+        bool isCenDimm = false;
+        o_rc = isMembufOnDimm( i_mba, isCenDimm );
+
+        if( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC" isMembufOnDimm() Failed " );
+            break;
+        }
+
+        if( isCenDimm )
+        {
+            //It is a centaur DIMM. Let us find out card type
+            o_rc = MemUtils::getRawCardType( i_mba, o_type );
+
+            if( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"getRawCardType returned error" );
+                o_type = WIRING_INVALID;
+                break;
+            }
+        }
+        //else it is a IS DIMM
+    }while(0);
+
     return o_rc;
+
+    #undef  PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

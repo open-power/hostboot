@@ -126,13 +126,13 @@ class CenMbaCeTable
         uint8_t dram;               ///< The DRAM in which the CE was detected
         uint8_t dramPins;           ///< The failing pins of the DRAM
         uint8_t portSlct;           ///< The port select of the DRAM
-        CenSymbol::WiringType type; ///< The wiring type
+        CEN_SYMBOL::WiringType type; ///< The wiring type
         bool    isHard;             ///< TRUE if a hard CE was detected
 
         /** @brief Default constructor. */
         TableData() :
             active(false), count(0), addr(), dram(0), dramPins(0), portSlct(0),
-            type(CenSymbol::WIRING_INVALID), isHard(false)
+            type(CEN_SYMBOL::WIRING_INVALID), isHard(false)
         {}
 
         /**
@@ -143,7 +143,7 @@ class CenMbaCeTable
          * @param i_type     The wiring type (for DRAM site locations).
          */
         TableData( const CenAddr & i_addr, uint8_t i_dram, uint8_t i_dramPins,
-                   uint8_t i_portSlct, CenSymbol::WiringType i_type,
+                   uint8_t i_portSlct, CEN_SYMBOL::WiringType i_type,
                    bool i_isHard ) :
             active(true), count(1), addr(i_addr), dram(i_dram),
             dramPins(i_dramPins), portSlct(i_portSlct), type(i_type),

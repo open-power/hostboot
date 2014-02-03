@@ -27,6 +27,7 @@
 
 #include <prdfCalloutUtil.H>
 #include <prdfTrace.H>
+#include <prdfCenMemUtils.H>
 
 using namespace TARGETING;
 
@@ -35,6 +36,7 @@ namespace PRDF
 
 using namespace MemoryMruData;
 using namespace PlatServices;
+using namespace CEN_SYMBOL;
 
 MemoryMru::MemoryMru() :
     iv_mbaTarget(NULL), iv_rank(), iv_special(NO_SPECIAL_CALLOUT)
@@ -137,9 +139,9 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
             if ( iv_memMruMeld.s.eccSpared  ) iv_symbol.setEccSpared();
 
             // Validation checks
-            CenSymbol::WiringType type = iv_symbol.getWiringType();
+            CEN_SYMBOL::WiringType type = iv_symbol.getWiringType();
 
-            if ( type != CenSymbol::WiringType(iv_memMruMeld.s.wiringType) )
+            if ( type != CEN_SYMBOL::WiringType (iv_memMruMeld.s.wiringType))
             {
                 PRDF_ERR( PRDF_FUNC"Wiring Type does not match type:%u "
                                     "iv_memMruMeld.s.wiringType :%u",
@@ -207,7 +209,6 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
         iv_memMruMeld.s.dramSpared = iv_symbol.isDramSpared() ? 1 : 0;
         iv_memMruMeld.s.eccSpared  = iv_symbol.isEccSpared()  ? 1 : 0;
         iv_memMruMeld.s.wiringType = iv_symbol.getWiringType();
-
         // If the code gets to this point the MemoryMru is valid.
         iv_memMruMeld.s.valid = 1;
 

@@ -40,6 +40,7 @@ namespace MemUtils
 {
 
 using namespace PlatServices;
+using namespace CEN_SYMBOL;
 
 const uint8_t CE_REGS_PER_MBA = 9;
 const uint8_t SYMBOLS_PER_CE_REG = 8;
@@ -151,7 +152,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
 
                     SymbolData symData;
                     symData.symbol = CenSymbol::fromSymbol( mbaTrgt, i_rank,
-                                            sym, CenSymbol::BOTH_SYMBOL_DQS );
+                                            sym, CEN_SYMBOL::BOTH_SYMBOL_DQS );
                     if ( !symData.symbol.isValid() )
                     {
                         PRDF_ERR( PRDF_FUNC"CenSymbol() failed: symbol=%d",
@@ -447,6 +448,77 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
         }
     }while(0);
     return o_rc;
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t getRawCardType( TargetHandle_t i_mba, WiringType & o_type )
+{
+    #define PRDF_FUNC "[MemUtils::getRawCardType] "
+    int32_t o_rc = FAIL;
+    o_type = WIRING_INVALID;
+    uint32_t mbaPos = getTargetPosition( i_mba );
+    const char * reg_str = ( 0 == mbaPos )? "MBA0_MBAXCR" :"MBA1_MBAXCR";
+
+    do
+    {
+        if( TYPE_MBA != getTargetType( i_mba ) )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid Target type 0x%08x ",
+                      getTargetType( i_mba ) );
+            break;
+        }
+
+        SCAN_COMM_REGISTER_CLASS * addTransReg = NULL;
+        TargetHandle_t memBufTgt = getParentChip( i_mba );
+        ExtensibleChip * memBuf =
+                ( ExtensibleChip * ) systemPtr->GetChip( memBufTgt );
+
+        addTransReg = memBuf->getRegister( reg_str );
+
+        if( SUCCESS != addTransReg->Read() )
+        {
+            PRDF_ERR( PRDF_FUNC" Read failed: for %s , HUID: 0x%08x ",
+                      reg_str, getHuid( i_mba ) );
+            break;
+        }
+
+        //  card is of type RCA/RCB/RCD. Need to investigate card subtype.
+
+        if( 1 == addTransReg->GetBitFieldJustified( 0, 4 ) )
+        {
+            uint32_t l_cardSubType =
+                        addTransReg->GetBitFieldJustified( 4, 2 );
+            switch( l_cardSubType )
+            {
+                case 0x00:                              // card type RCA
+                    o_type = CEN_TYPE_A;    break;
+                case 0x01:                              // card type RCB
+                    o_type = CEN_TYPE_B;    break;
+                case 0x03:                              // card type RCD
+                    o_type = CEN_TYPE_D;    break;
+                default:
+                    PRDF_ERR( PRDF_FUNC" Invalid card sub type 0x%08x ",
+                              l_cardSubType );
+                    break;
+            }
+        }
+
+        if( WIRING_INVALID == o_type )
+        {
+            PRDF_ERR( PRDF_FUNC "Invalid card type HUID: 0x%08x, card type "
+                      "%d", getHuid( i_mba ),
+                      (uint8_t ) addTransReg->GetBitFieldJustified( 0, 4 ) );
+            break;
+        }
+
+        o_rc = SUCCESS; // only if we found valid card type and sub type
+
+    }while(0);
+
+    return o_rc;
+
     #undef PRDF_FUNC
 }
 

@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <prdfCenSymbol.H>
+#include <prdfParserEnums.H>
 
 namespace PRDF
 {
@@ -166,6 +167,15 @@ int32_t getDramSize( ExtensibleChip * i_mbaChip, uint8_t & o_size );
 int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
                        STEP_CODE_DATA_STRUCT & i_sc );
 
+/**
+ * @brief  determines the type of Centaur based raw card  associated with MBA.
+ * @param  i_mba    mba target
+ * @param  o_type   raw card type.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @note   Function is not intended for IS DIMM.
+ */
+int32_t getRawCardType( TARGETING::TargetHandle_t i_mba,
+                        CEN_SYMBOL::WiringType & o_type );
 } // end namespace MemUtils
 
 } // end namespace PRDF

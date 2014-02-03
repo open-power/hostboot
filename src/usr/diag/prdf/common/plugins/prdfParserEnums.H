@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -109,6 +109,34 @@ namespace DQ_BITMAP
     };
 
 } // namespace DQ_BITMAP
+
+namespace CEN_SYMBOL
+{
+
+    /** Used as a 2-bit mask to display which of the DQs on this symbol are
+     *  failing. */
+    enum DqMask
+    {
+        NO_SYMBOL_DQS   = 0x0,
+        ODD_SYMBOL_DQ   = 0x1,
+        EVEN_SYMBOL_DQ  = 0x2,
+        BOTH_SYMBOL_DQS = EVEN_SYMBOL_DQ | ODD_SYMBOL_DQ,
+    };
+
+    /** A four bit field in memory MRU. It describes the
+     *  card type in case of Centaur DIMM and wiring type
+     *  in case of ISDIMM */
+
+    enum WiringType
+    {
+        CEN_TYPE_A          = 0,
+        CEN_TYPE_B          = 1,
+        CEN_TYPE_D          = 2,
+        WIRING_INVALID      = 7, // An invalid card type
+    };
+
+}//namespace CEN_SYMBOL ends
+
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 } // end namespace HOSTBOOT
 #endif
