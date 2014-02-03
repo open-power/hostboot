@@ -187,6 +187,22 @@
         capture     req nonzero("PBFFIR");
     };
 
+    register PBFIR_IOF0_ERROR_REPORT
+    {
+        name        "ES.PBES_WRAP_TOP.PBES_TOP.IOF0.IOF.PCI_WRAP.PCI_BB.PB_IOF_ERR_STATUS";
+        scomaddr    0x0901083A;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PBFIR_IOF1_ERROR_REPORT
+    {
+        name        "ES.PBES_WRAP_TOP.PBES_TOP.IOF1.IOF.PCI_WRAP.PCI_BB.PB_IOF_ERR_STATUS";
+        scomaddr    0x0901083B;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # PCIE Chiplet IOPCIFIR_0
     ############################################################################

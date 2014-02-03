@@ -186,6 +186,395 @@ chip Ex
         capture     group default;
     };
 
+    ###########################################################################
+    # EX Chiplet COREFIR Error Report Registers
+    ###########################################################################
+
+    register PCNE_REG0_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NE.PCNE_REG0_HOLD_OUT";
+        scomaddr    0x1001300D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNE_REG1_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NE.PCNE_REG1_HOLD_OUT";
+        scomaddr    0x1001301D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNE_REG2_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NE.PCNE_REG2_HOLD_OUT";
+        scomaddr    0x1001302D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNE_REG3_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NE.PCNE_REG3_HOLD_OUT";
+        scomaddr    0x1001303D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNE_REG4_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NE.PCNE_REG4_HOLD_OUT";
+        scomaddr    0x1001304D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNE_REG5_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NE.PCNE_REG5_HOLD_OUT";
+        scomaddr    0x1001305D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNE_REG6_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NE.PCNE_REG6_HOLD_OUT";
+        scomaddr    0x1001306D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNE_REG7_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NE.PCNE_REG7_HOLD_OUT";
+        scomaddr    0x1001307D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNW_REG0_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NW.PCNW_REG0_HOLD_OUT";
+        scomaddr    0x100132A9;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCNW_REG1_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_NW.PCNW_REG1_HOLD_OUT";
+        scomaddr    0x100132AA;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCS_REG0_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_S.PCS_REG0_HOLD_OUT";
+        scomaddr    0x100132CB;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCS_REG1_HOLD_OUT
+    {
+        name        "EXP.EC.PC.PC_S.PCS_REG1_HOLD_OUT";
+        scomaddr    0x100132D5;
+        capture     req funccall("isMuranoVeniceNotDD1");
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register FXU_REG0_HOLD_OUT
+    {
+        name        "EXP.EC.FX.FXU_REG0_HOLD_OUT";
+        scomaddr    0x10013300;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register FXU_REG1_HOLD_OUT
+    {
+        name        "EXP.EC.FX.FXU_REG1_HOLD_OUT";
+        scomaddr    0x10013301;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register FXU_REG2_HOLD_OUT
+    {
+        name        "EXP.EC.FX.FXU_REG2_HOLD_OUT";
+        scomaddr    0x10013302;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register FXU_REG3_HOLD_OUT
+    {
+        name        "EXP.EC.FX.FXU_REG3_HOLD_OUT";
+        scomaddr    0x10013303;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register FXU_REG4_HOLD_OUT
+    {
+        name        "EXP.EC.FX.FXU_REG4_HOLD_OUT";
+        scomaddr    0x10013304;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG0_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG0_HOLD_OUT";
+        scomaddr    0x10013340;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG1_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG1_HOLD_OUT";
+        scomaddr    0x10013341;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG2_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG2_HOLD_OUT";
+        scomaddr    0x10013342;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG3_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG3_HOLD_OUT";
+        scomaddr    0x10013343;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG4_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG4_HOLD_OUT";
+        scomaddr    0x10013344;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG5_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG5_HOLD_OUT";
+        scomaddr    0x10013345;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG6_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG6_HOLD_OUT";
+        scomaddr    0x10013346;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG7_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG7_HOLD_OUT";
+        scomaddr    0x10013347;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG8_ISU_HOLD_OUT_ERRPT
+    {
+        name        "EXP.EC.SD.ISU_REG8_HOLD_OUT";
+        scomaddr    0x10013348;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register ISU_REG9_ISU_HOLD_OUT
+    {
+        name        "EXP.EC.SD.ISU_REG9_HOLD_OUT";
+        scomaddr    0x10013349;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register IFU_REG0_HOLD_OUT
+    {
+        name        "EXP.EC.IFU.IFU_REG0_HOLD_OUT";
+        scomaddr    0x10013381;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register IFU_REG1_HOLD_OUT
+    {
+        name        "EXP.EC.IFU.IFU_REG1_HOLD_OUT";
+        scomaddr    0x10013382;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register IFU_REG2_HOLD_OUT
+    {
+        name        "EXP.EC.IFU.IFU_REG2_HOLD_OUT";
+        scomaddr    0x10013383;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register IFU_REG3_HOLD_OUT
+    {
+        name        "EXP.EC.IFU.IFU_REG3_HOLD_OUT";
+        scomaddr    0x10013384;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register IFU_REG4_HOLD_OUT
+    {
+        name        "EXP.EC.IFU.IFU_REG4_HOLD_OUT";
+        scomaddr    0x10013385;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG0_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG0_HOLD_OUT";
+        scomaddr    0x100133C0;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG1_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG1_HOLD_OUT";
+        scomaddr    0x100133C1;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG2_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG2_HOLD_OUT";
+        scomaddr    0x100133C2;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG3_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG3_HOLD_OUT";
+        scomaddr    0x100133C3;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG4_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG4_HOLD_OUT";
+        scomaddr    0x100133C4;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG5_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG5_HOLD_OUT";
+        scomaddr    0x100133C5;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG6_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG6_HOLD_OUT";
+        scomaddr    0x100133C6;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG7_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG7_HOLD_OUT";
+        scomaddr    0x100133C7;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG8_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG8_HOLD_OUT";
+        scomaddr    0x100133C8;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG9_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG9_HOLD_OUT";
+        scomaddr    0x100133C9;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG10_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG10_HOLD_OUT";
+        scomaddr    0x100133CA;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG11_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG11_HOLD_OUT";
+        scomaddr    0x100133CB;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG12_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG12_HOLD_OUT";
+        scomaddr    0x100133CC;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG13_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG13_HOLD_OUT";
+        scomaddr    0x100133CD;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG14_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG14_HOLD_OUT";
+        scomaddr    0x100133CE;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register LSU_REG15_HOLD_OUT
+    {
+        name        "EXP.EC.LS.LSU_REG15_HOLD_OUT";
+        scomaddr    0x100133CF;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # EX Chiplet L2FIR
     ############################################################################
@@ -222,6 +611,22 @@ chip Ex
         capture     type secondary;
         capture     group default;
         capture     req nonzero("L2FIR");
+    };
+
+    register L2FIR_ERROR_REPORT_0
+    {
+        name        "EXP.L2.L2MISC.L2CERRS.ERR_RPT0";
+        scomaddr    0x10012815;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register L2FIR_ERROR_REPORT_1
+    {
+        name        "EXP.L2.L2MISC.L2CERRS.ERR_RPT1";
+        scomaddr    0x10012816;
+        capture     group default;
+        capture     group CerrRegs;
     };
 
     ############################################################################
@@ -262,6 +667,22 @@ chip Ex
         capture     req nonzero("L3FIR");
     };
 
+    register L3FIR_RD0_ERROR_REPORT
+    {
+        name        "EXP.L3.L3_MISC.L3CERRS.L3_CTL_CHECK_RD0_REG";
+        scomaddr    0x10010810;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register L3FIR_RD1_ERROR_REPORT
+    {
+        name        "EXP.L3.L3_MISC.L3CERRS.L3_CTL_CHECK_RD1_REG";
+        scomaddr    0x10010817;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # EX Chiplet NCUFIR
     ############################################################################
@@ -300,6 +721,14 @@ chip Ex
         capture     req nonzero("NCUFIR");
     };
 
+    register NCUFIR_ERROR_REPORT
+    {
+        name        "EXP.NC.NCMISC.NCSCOMS.ERR_RPT_REG";
+        scomaddr    0x10010C0C;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # EX Chiplet SPATTNs
     ############################################################################
@@ -312,6 +741,7 @@ chip Ex
         name        "EX00.EC.PC.PC_NE.TCTL0.SPATTN";
         scomaddr    0x10013007;
         capture     group default;
+        capture     group CerrRegs;
     };
 
     register SPATTN_1
@@ -319,6 +749,7 @@ chip Ex
         name        "EX00.EC.PC.PC_NE.TCTL1.SPATTN";
         scomaddr    0x10013017;
         capture     group default;
+        capture     group CerrRegs;
     };
 
     register SPATTN_2
@@ -326,12 +757,14 @@ chip Ex
         name        "EX00.EC.PC.PC_NE.TCTL2.SPATTN";
         scomaddr    0x10013027;
         capture     group default;
+        capture     group CerrRegs;
     };
     register SPATTN_3
     {
         name        "EX00.EC.PC.PC_NE.TCTL3.SPATTN";
         scomaddr    0x10013037;
         capture     group default;
+        capture     group CerrRegs;
     };
 
     register SPATTN_4
@@ -339,6 +772,7 @@ chip Ex
         name        "EX00.EC.PC.PC_NE.TCTL4.SPATTN";
         scomaddr    0x10013047;
         capture     group default;
+        capture     group CerrRegs;
     };
 
     register SPATTN_5
@@ -346,6 +780,7 @@ chip Ex
         name        "EX00.EC.PC.PC_NE.TCTL5.SPATTN";
         scomaddr    0x10013057;
         capture     group default;
+        capture     group CerrRegs;
     };
 
     register SPATTN_6
@@ -353,6 +788,7 @@ chip Ex
         name        "EX00.EC.PC.PC_NE.TCTL6.SPATTN";
         scomaddr    0x10013067;
         capture     group default;
+        capture     group CerrRegs;
     };
 
     register SPATTN_7
@@ -360,6 +796,7 @@ chip Ex
         name        "EX00.EC.PC.PC_NE.TCTL7.SPATTN";
         scomaddr    0x10013077;
         capture     group default;
+        capture     group CerrRegs;
     };
 
     ############################################################################

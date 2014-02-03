@@ -34,6 +34,9 @@
 #include <prdfMfgThresholdMgr.H>
 #include <prdfMfgThresholds.H>
 #include <prdfMfgThresholdFile_common.H>
+#include <prdfPlatServices.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -61,6 +64,32 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Ex, ClearServiceCallFlag );
+
+/**
+  * @brief  Checks if parent PROC is not Venice DD1.x and not Murano DD1.x.
+  * @param  i_ex             EX chip.
+  * @param  o_isMurVenNotDD1 TRUE parent PROC is not Venice DD1.x and not Murano
+  *         DD1.x, FALSE otherwise.
+  * @return SUCCESS
+  */
+int32_t isMuranoVeniceNotDD1( ExtensibleChip * i_ex, bool & o_isMurVenNotDD1 )
+{
+    o_isMurVenNotDD1 = true;
+
+    TargetHandle_t proc = getParentChip( i_ex->GetChipHandle() );
+    if ( NULL != proc )
+    {
+        if ( ( (MODEL_VENICE == getProcModel(proc)) ||
+               (MODEL_MURANO == getProcModel(proc)) ) &&
+             ( 0x20 > getChipLevel(proc) ) )
+        {
+            o_isMurVenNotDD1 = false;
+        }
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Ex, isMuranoVeniceNotDD1 );
 
 } // namespace Ex ends
 

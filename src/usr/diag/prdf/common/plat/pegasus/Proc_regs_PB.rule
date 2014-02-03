@@ -136,6 +136,22 @@
         capture     req nonzero("NXDMAENGFIR");
     };
 
+    register NXDMAENG_ERROR_REPORT_0
+    {
+        name        "EN.NX.DMA.SU_DMA_ERROR_REPORT_0";
+        scomaddr    0x02013057;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXDMAENG_ERROR_REPORT_1
+    {
+        name        "EN.NX.DMA.SU_DMA_ERROR_REPORT_1";
+        scomaddr    0x02013058;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # PB Chiplet NXCQFIR
     ############################################################################
@@ -174,6 +190,22 @@
         capture     req nonzero("NXCQFIR");
     };
 
+    register NXCQFIR_ERROR_REPORT_0
+    {
+        name        "EN.NX.PBI.CQ_WRAP.NXCQ_SCOM.NX_PB_ERR_RPT_0";
+        scomaddr    0x020130A2;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXCQFIR_ERROR_REPORT_1
+    {
+        name        "EN.NX.PBI.CQ_WRAP.NXCQ_SCOM.NX_PB_ERR_RPT_1";
+        scomaddr    0x020130A3;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # PB Chiplet NXASFIR
     ############################################################################
@@ -192,6 +224,43 @@
         name        "EN.NX.AS.FIR_MASK_REG";
         scomaddr    0x020130c3;
         capture     group default;
+    };
+
+    ############################################################################
+    # NXASFIR Error Report Registers
+    ############################################################################
+
+    register NXASFIR_IN_ERROR_HOLD_REPORT
+    {
+        name        "EN.NX.AS.AS_IN_ERROR_HOLD";
+        scomaddr    0x020130EB;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXASFIR_ERROR_HOLD_REPORT
+    {
+        name        "EN.NX.AS.AS_ERROR_HOLD";
+        scomaddr    0x020130FF;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXASFIR_EG_ERROR_HOLD_REPORT
+    {
+        name        "EN.NX.AS.AS_EG_RLM.AS_EG_ERROR_HOLD";
+        scomaddr    0x0201314E;
+        capture     req funccall("isMuranoDD1");
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXASFIR_CE_HOLD_REPORT
+    {
+        name        "EN.NX.AS.AS_EG_RLM.AS_EG_CE_HOLD";
+        scomaddr    0x0201314F;
+        capture     group default;
+        capture     group CerrRegs;
     };
 
     ############################################################################
@@ -232,6 +301,38 @@
         capture     req nonzero("NXCXAFIR");
     };
 
+    register NXCXAFIR_SNP_ERROR_REPORT
+    {
+        name        "EN.NX.CXA.CXA_SNPFE.SNP_REGS.CXA_SNP_ERROR_REPORT_REG";
+        scomaddr    0x0201300A;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXCXAFIR_APC1_ERROR_REPORT
+    {
+        name        "EN.NX.CXA.CXA_APC1.ERRRPT";
+        scomaddr    0x0201300B;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXCXAFIR_XPT_ERROR_REPORT
+    {
+        name        "EN.NX.CXA.XPT_ERROR_REPORT";
+        scomaddr    0x0201300C;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register NXCXAFIR_TLBI_ERROR_REPORT
+    {
+        name        "EN.NX.CXA.CXA_XPT.XPT_SCOMFIR.TLBI_ERROR_REPORT";
+        scomaddr    0x0201300D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # PB Chiplet MCDFIR
     ############################################################################
@@ -268,6 +369,14 @@
         capture     type secondary;
         capture     group default;
         capture     req nonzero("MCDFIR");
+    };
+
+    register MCDFIR_ERROR_REPORT
+    {
+        name        "EH.PB.MCD.MCDCTL.MCD_ERPT";
+        scomaddr    0x02013419;
+        capture     group default;
+        capture     group CerrRegs;
     };
 
     ############################################################################
@@ -525,6 +634,30 @@
         capture     req nonzero("PBAFIR");
     };
 
+    register PBAFIR_ERROR_REPORT_0
+    {
+        name        "EN.TPC.PBA.PBAERRRPT0";
+        scomaddr    0x0201084C;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PBAFIR_ERROR_REPORT_1
+    {
+        name        "EN.TPC.PBA.PBAERRRPT1";
+        scomaddr    0x0201084D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PBAFIR_ERROR_REPORT_2
+    {
+        name        "EN.TPC.PBA.PBAERRRPT2";
+        scomaddr    0x0201084E;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # PB Chiplet EHHCAFIR
     ############################################################################
@@ -639,6 +772,30 @@
         capture     req nonzero("PCINESTFIR_0");
     };
 
+    register PCINESTFIR0_ERROR_REPORT_0
+    {
+        name        "ES.PE_WRAP_TOP.PE0.PEPBCQ.PBCQ.CERR_RPT0_REG";
+        scomaddr    0x0201201C;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCINESTFIR0_ERROR_REPORT_1
+    {
+        name        "ES.PE_WRAP_TOP.PE0.PEPBCQ.PBCQ.CERR_RPT1_REG";
+        scomaddr    0x0201201D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCINESTFIR0_ERROR_REPORT_2
+    {
+        name        "ES.PE_WRAP_TOP.PE0.PEPBCQ.PBCQ.CERR_RPT2_REG";
+        scomaddr    0x0201201E;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # PB Chiplet PCINESTFIR_1
     ############################################################################
@@ -677,6 +834,30 @@
         capture     req nonzero("PCINESTFIR_1");
     };
 
+    register PCINESTFIR1_ERROR_REPORT_0
+    {
+        name        "ES.PE_WRAP_TOP.PE1.PEPBCQ.PBCQ.CERR_RPT0_REG";
+        scomaddr    0x0201241C;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCINESTFIR1_ERROR_REPORT_1
+    {
+        name        "ES.PE_WRAP_TOP.PE1.PEPBCQ.PBCQ.CERR_RPT1_REG";
+        scomaddr    0x0201241D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCINESTFIR1_ERROR_REPORT_2
+    {
+        name        "ES.PE_WRAP_TOP.PE1.PEPBCQ.PBCQ.CERR_RPT2_REG";
+        scomaddr    0x0201241E;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
     ############################################################################
     # PB Chiplet PCINESTFIR_2
     ############################################################################
@@ -713,6 +894,30 @@
         capture     type secondary;
         capture     group default;
         capture     req nonzero("PCINESTFIR_2");
+    };
+
+    register PCINESTFIR2_ERROR_REPORT_0
+    {
+        name        "ES.PE_WRAP_TOP.PE2.PEPBCQ.PBCQ.CERR_RPT0_REG";
+        scomaddr    0x0201281C;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCINESTFIR2_ERROR_REPORT_1
+    {
+        name        "ES.PE_WRAP_TOP.PE2.PEPBCQ.PBCQ.CERR_RPT1_REG";
+        scomaddr    0x0201281D;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register PCINESTFIR2_ERROR_REPORT_2
+    {
+        name        "ES.PE_WRAP_TOP.PE2.PEPBCQ.PBCQ.CERR_RPT2_REG";
+        scomaddr    0x0201281E;
+        capture     group default;
+        capture     group CerrRegs;
     };
 
     ############################################################################

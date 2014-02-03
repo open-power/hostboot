@@ -786,6 +786,23 @@ int32_t isVeniceProc( ExtensibleChip * i_chip, bool & o_isVenice )
 }
 PRDF_PLUGIN_DEFINE( Proc, isVeniceProc );
 
+/**
+  * @brief  checks if proc is Murano chip and is at DD1.x level.
+  * @param  i_chip P8 chip.
+  * @param  o_isMuranoDD1 TRUE if chip is murano DD1.x FALSE otherwise.
+  * @return SUCCESS
+  */
+int32_t isMuranoDD1( ExtensibleChip * i_chip, bool & o_isMuranoDD1 )
+{
+    o_isMuranoDD1 = false;
+    if( ( MODEL_MURANO == getProcModel( i_chip->GetChipHandle() ) ) &&
+        ( 0x20 > getChipLevel( i_chip->GetChipHandle() ) ) )
+        o_isMuranoDD1 = true;
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Proc, isMuranoDD1 );
+
 } // end namespace Proc
 
 } // end namespace PRDF
