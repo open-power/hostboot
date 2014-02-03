@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -53,7 +53,6 @@ enum istepModuleId
     ISTEP_PROC_SET_PORE_BAR                             = 0x05,
     ISTEP_HOST_ACTIVATE_MASTER                          = 0x06,
     ISTEP_SBE_CENTAUR_INIT                              = 0x07,
-    ISTEP_INITSVC_MOD_ID                                = 0x08,
 };
 
 /**

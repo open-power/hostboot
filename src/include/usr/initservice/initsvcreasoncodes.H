@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -62,6 +62,7 @@ enum    InitServiceReasonCode
     INITSVC_LOAD_MODULE_FAILED   =   INITSVC_COMP_ID | 0x07,
     NO_MSG_PRESENT               =   INITSVC_COMP_ID | 0x08,
     ISTEP_RECONFIG_LOOP_ENTERED  =   INITSVC_COMP_ID | 0x09,
+    //termination_rc
     ISTEP_FAILED_DUE_TO_DECONFIG =   INITSVC_COMP_ID | 0x0a,
     //termination_rc
     SHUTDOWN_REQUESTED_BY_FSP    =   INITSVC_COMP_ID | 0x0b,

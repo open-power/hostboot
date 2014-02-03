@@ -341,6 +341,17 @@ private:
      */
     static void * startMsgHndlrThread ( void * p);
 
+    /**
+     * @brief Create a common error log indicating a failure due to deconfig.
+     *
+     * @param[in] i_step - Current istep.
+     * @param[in] i_substep - Current substep.
+     * @param[in] i_dStep - Desired istep if we could do a reconfig.
+     * @param[in] i_dSubstep - Desired substep if we could do a reconfig.
+     */
+    static errlHndl_t failedDueToDeconfig(uint8_t i_step, uint8_t i_substep,
+                                          uint8_t i_dStep, uint8_t i_dSubstep);
+
     // Instance variables
 
     // Mutexes

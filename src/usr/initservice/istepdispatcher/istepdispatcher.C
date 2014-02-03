@@ -374,6 +374,12 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                               istep, substep);
                     continue;
                 }
+                else // We should reconfigure loop but can't.
+                     // Need to terminate and let the FSP reconfigure.
+                {
+                    err = failedDueToDeconfig(istep, substep,
+                                              newIstep, newSubstep);
+                }
             }
 
             if (err)
@@ -1128,36 +1134,14 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
         uint8_t newIstep = 0;
         uint8_t newSubstep = 0;
 
-        if (checkReconfig(istep, substep, newIstep, newSubstep))
-        {
-            // Within the Reconfig Loop. In non-istep-mode it would loop back
-            // to the start of the loop, this cannot be done here (this is
-            // istep-mode) so create an error.
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: IStep success and deconfigs, creating error");
+        // Even though we cannot do a reconfig in istep mode, call function
+        // to get FFDC on where we might have gone.
+        checkReconfig(istep, substep, newIstep, newSubstep);
 
-            /*@
-             * @errortype
-             * @reasoncode       ISTEP_FAILED_DUE_TO_DECONFIG
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         ISTEP_INITSVC_MOD_ID
-             * @userdata1        Istep that failed
-             * @userdata2        SubStep that failed
-             * @devdesc          IStep Mode. IStep reported success but HW
-             *                   deconfigured within Reconfig Loop.
-             */
-            err = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                ISTEP_INITSVC_MOD_ID,
-                ISTEP_FAILED_DUE_TO_DECONFIG,
-                istep, substep);
-            err->collectTrace("HWAS_I", 1024);
-        }
-        else
-        {
-            // Not within the Reconfig Loop. In non-istep-mode it is considered
-            // a success so it is the same here
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: IStep success and deconfigs, returning success");
-        }
+        // In istep mode we cannot do a reconfigure of any sort, so create
+        // an error.
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: IStep success and deconfigs, creating error");
+        err = failedDueToDeconfig(istep, substep, newIstep, newSubstep);
 
     }
 
@@ -1523,6 +1507,38 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
     }
 
     TRACFCOMP( g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleCoalesceHostMsg");
+
+    return err;
+}
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::failedDueToDeconfig()
+// ----------------------------------------------------------------------------
+errlHndl_t IStepDispatcher::failedDueToDeconfig(
+                                          uint8_t i_step, uint8_t i_substep,
+                                          uint8_t i_dStep, uint8_t i_dSubstep)
+{
+    errlHndl_t err = NULL;
+
+    /*@
+     * @errortype
+     * @reasoncode       ISTEP_FAILED_DUE_TO_DECONFIG
+     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+     * @moduleid         ISTEP_INITSVC_MOD_ID
+     * @userdata1[0:31]  Istep that failed
+     * @userdata1[32:63] SubStep that failed
+     * @userdata2[0:31]  Desired istep for reconfig loop.
+     * @userdata2[32:63] Desired substep for reconfig loop.
+     * @devdesc          Deconfigured occured during an istep and reconfig loop
+     *                   was not able to be performed by Hostboot.
+     */
+    err = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            ISTEP_INITSVC_MOD_ID,
+            ISTEP_FAILED_DUE_TO_DECONFIG,
+            TWO_UINT32_TO_UINT64(i_step, i_substep),
+            TWO_UINT32_TO_UINT64(i_dStep, i_dSubstep));
+    err->collectTrace("HWAS_I", 1024);
 
     return err;
 }
