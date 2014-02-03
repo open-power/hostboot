@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -271,7 +271,7 @@ int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
         {
             i_pins &= 0xf; // limit to 4 bits
 
-            if( ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE  == spareConfig )
+            if( ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE  == spareConfig )
             {
                 i_pins = i_pins << 4;
             }
@@ -349,11 +349,11 @@ int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
         if ( isDramWidthX4(iv_mba) )
         {
             // Check for DRAM spare
-            if( ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE  == spareConfig )
+            if( ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE  == spareConfig )
             {
                 o_available = ( 0 == ( spareDqBits & 0xf0 ) );
             }
-            else if( ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE  == spareConfig )
+            else if( ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE  == spareConfig )
             {
                 o_available = ( 0 == ( spareDqBits & 0x0f ) );
             }
