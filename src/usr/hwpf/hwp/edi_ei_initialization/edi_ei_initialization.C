@@ -863,6 +863,99 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+/*
+ *
+ * brief function to check if peer target is present.
+ *
+ * returns true if peer is present, else false
+ *
+ */
+bool isPeerPresent(TARGETING::TargetHandle_t i_targetPtr)
+{
+    bool l_flag = false;
+
+    do
+    {
+        if( NULL == i_targetPtr)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "isPeerPresent:ERR: Null input target");
+            break;
+        }
+
+        EntityPath l_peerPath;
+        bool l_exists = i_targetPtr->tryGetAttr<ATTR_PEER_PATH>(l_peerPath);
+
+        if( false == l_exists)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "isPeerPresent:ERR: Failed to get ATTR_PEER_PATH for "
+                      "target HUID:0x%08x", get_huid(i_targetPtr));
+            break;
+        }
+
+        EntityPath::PathElement l_pa = l_peerPath.pathElementOfType(TYPE_NODE);
+
+        if(l_pa.type == TYPE_NA)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "isPeerPresent:ERR: Cannot find Node into in peer path: "
+                      "[%s],target HUID:0x%08x", l_peerPath.toString(),
+                      get_huid(i_targetPtr));
+            break;
+        }
+
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
+            sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+        // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
+        // Currently set up in host_sys_fab_iovalid_processing() which only
+        // gets called if there are multiple physical nodes.   It eventually
+        // needs to be setup by a hb routine that snoops for multiple nodes.
+        if(hb_images == 0)
+        {
+            // Single node system
+            break;
+        }
+
+        // continue - multi-node
+        uint8_t node_map[8];
+        l_exists =
+        sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>(node_map);
+
+        if( false == l_exists )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "isPeerPresent:ERR: Failed to get "
+                      "ATTR_FABRIC_TO_PHYSICAL_NODE_MAP "
+                      "for system target. Input target HUID:0x%08x",
+                      get_huid(i_targetPtr));
+            break;
+        }
+
+        if(l_pa.instance < (sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8))
+        {
+            // set mask
+            TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+                      ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+
+            if( 0 != ((mask >> l_pa.instance) & hb_images ) )
+            {
+                l_flag = true;
+            }
+        }
+
+    }while(0);
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "isPeerPresent:[%d], HUID:0x%08x",l_flag,get_huid(i_targetPtr));
+
+    return l_flag;
+}
 //
 //  function to unfence inter-enclosure abus links
 //
@@ -899,21 +992,20 @@ errlHndl_t  smp_unfencing_inter_enclosure_abus_links()
 
         TARGETING::TargetHandleList l_abuses;
         getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
-
+        bool l_flag = false;
         for (TargetHandleList::const_iterator l_abus_iter = l_abuses.begin();
             l_abus_iter != l_abuses.end();
             ++l_abus_iter)
         {
             TARGETING::TargetHandle_t l_pAbusTarget = *l_abus_iter;
             ATTR_CHIP_UNIT_type l_srcID;
-            ATTR_IS_INTER_ENCLOSURE_BUS_type l_flag;
             l_srcID = l_pAbusTarget->getAttr<ATTR_CHIP_UNIT>();
-            l_flag = l_pAbusTarget->getAttr<ATTR_IS_INTER_ENCLOSURE_BUS>();
+            l_flag = isPeerPresent(l_pAbusTarget);
             switch (l_srcID)
             {
-                case 0: l_procEntry.a0 = l_flag ? true : false; break;
-                case 1: l_procEntry.a1 = l_flag ? true : false; break;
-                case 2: l_procEntry.a2 = l_flag ? true : false; break;
+                case 0: l_procEntry.a0 = l_flag; break;
+                case 1: l_procEntry.a1 = l_flag; break;
+                case 2: l_procEntry.a2 = l_flag; break;
                default: break;
             }
         }
