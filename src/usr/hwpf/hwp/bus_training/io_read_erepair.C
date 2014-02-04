@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_read_erepair.C,v 1.7 2013/10/22 11:46:38 varkeykv Exp $
+// $Id: io_read_erepair.C,v 1.9 2014/02/04 15:16:02 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -84,7 +84,7 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
   }
   else if(target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT ) {
     start_group=0;
-    end_group=3;
+    end_group=0;
     interface=CP_FABRIC_X0; // base scom for X bus
   }
   else if(target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET){
@@ -136,21 +136,36 @@ ReturnCode io_read_erepair(const Target& target,std::vector<uint8_t> &rx_lanes)
 
       // RX lane records 
       // Set the RX bad lanes in the RX vector
+      uint8_t status=0;
       
       // Get first bad lane
-      if(!data_one.isBitClear(0,7))
-      {
-        data_one.extract(&lane,0,7);
-        lane=lane>>1;
-        FAPI_DBG("First bad lane is %d",lane);
-        rx_lanes.push_back(lane); // 0 to 15 bad lanes
+      data_one.extract(&status,14,2);
+      status=status>>6;
+      FAPI_DBG("Bad lane status is %d",status);
+
+      if(status!=0){
+        if(status>=1){
+          if(!data_one.isBitClear(0,7))
+          {
+            data_one.extract(&lane,0,7);
+            lane=lane>>1;
+            FAPI_DBG("First bad lane is %d",lane);
+            rx_lanes.push_back(lane); // 0 to 15 bad lanes
+          }
+        }
+        // Get second bad lane if any
+        if(status>=2){
+          if(!data_one.isBitClear(7,7)){
+            data_one.extract(&lane,7,7);
+            lane=lane>>1;
+            FAPI_DBG("Second bad lane is %d",lane);
+            rx_lanes.push_back(lane); // 16 to 31 bad lanes 
+          }
+        }
       }
-      // Get second bad lane if any 
-      if(!data_one.isBitClear(7,7)){
-        data_one.extract(&lane,7,7);
-        lane=lane>>1;
-        FAPI_DBG("Second bad lane is %d",lane);
-        rx_lanes.push_back(lane); // 16 to 31 bad lanes 
+      else{
+        // No bad lanes to report
+         FAPI_DBG("No bad lane to report!!");
       }
 
 
