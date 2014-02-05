@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_initf.C,v 1.11 2014/01/15 03:34:28 jmcgill Exp $
+// $Id: cen_mem_pll_initf.C,v 1.12 2014/02/04 21:08:46 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -124,6 +124,7 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
         if (MASK_SCAN_COLLISION)
         {
             FAPI_DBG("Masking Pervasive LFIR scan collision bit ...");
+            rc_ecmd |= scom_data.flushTo0();
             rc_ecmd |= scom_data.setBit(PERV_LFIR_SCAN_COLLISION_BIT);
             if (rc_ecmd)
             {
@@ -273,13 +274,14 @@ fapi::ReturnCode cen_load_pll_ring_from_buffer(const fapi::Target & i_target,
                 break;
             }
 
-            FAPI_DBG("Unmasking Pervasive LFIR scan collision bit ...");
-            rc = fapiPutScom(i_target, TP_PERV_LFIR_MASK_AND_0x0104000E, scom_data);
-            if (!rc.ok())
-            {
-                FAPI_ERR("Error writing Pervasive LFIR Mask And Register.");
-                break;
-            }
+            // Change for SW245030. Leave this FIR masked.   Feb. 4 2014   M.Fredrickson
+            //FAPI_DBG("Unmasking Pervasive LFIR scan collision bit ...");
+            //rc = fapiPutScom(i_target, TP_PERV_LFIR_MASK_AND_0x0104000E, scom_data);
+            //if (!rc.ok())
+            //{
+            //    FAPI_ERR("Error writing Pervasive LFIR Mask And Register.");
+            //    break;
+            //}
         }
 
     } while(0);
@@ -540,6 +542,9 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_initf.C,v $
+Revision 1.12  2014/02/04 21:08:46  mfred
+Change to leave TP FIR bit 3 masked out.  SW245030.
+
 Revision 1.11  2014/01/15 03:34:28  jmcgill
 scan ring 3x to ensure toggle on MEM PLLCTR1(44), which will guarantee output frequency change
 
