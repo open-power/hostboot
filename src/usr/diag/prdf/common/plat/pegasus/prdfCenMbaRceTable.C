@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -48,20 +48,22 @@ bool CenMbaRceTable::addEntry( const CenRank & i_rank ,
     bool o_doTps = false;
 
     RceTable::iterator it = iv_table.find( i_rank );
-    if( iv_table.end() == it)
+    if ( iv_table.end() == it )
     {
-        // TODO via RTC 89386
-        // PrdfCacheCETable implementation is not quite efficient. Need to
-        // find better way.
+        // TODO via RTC 89386 PrdfCacheCETable implementation is not very
+        // efficient. Need to find a better way.
+
         PrdfCacheCETable entry( getRceThreshold() );
-        // Insert the element and get the iterator
-        it = iv_table.insert( std::make_pair( i_rank, entry)).first;
+
+        // Add a new rank entry to the table and get the iterator.
+        it = iv_table.insert( std::make_pair(i_rank, entry) ).first;
     }
-    for( uint32_t i = 0; i < i_count; i++ )
+
+    for ( uint32_t i = 0; i < i_count; i++ )
     {
         // Insert all entries even if threshold is crossed
         // for better FFDC.
-        o_doTps |= it->second.addAddress(0 , i_sc );
+        o_doTps |= it->second.addAddress( 0, i_sc );
     }
 
     return o_doTps;
@@ -72,7 +74,7 @@ bool CenMbaRceTable::addEntry( const CenRank & i_rank ,
 void CenMbaRceTable::flushEntry( const CenRank & i_rank )
 {
     RceTable::iterator it = iv_table.find( i_rank );
-    if( iv_table.end() != it)
+    if ( iv_table.end() != it )
         it->second.flushTable();
 }
 //------------------------------------------------------------------------------

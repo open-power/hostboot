@@ -30,6 +30,7 @@
 #include <prdfCalloutUtil.H>
 #include <prdfCenDqBitmap.H>
 #include <prdfCenMbaDataBundle.H>
+#include <prdfCenMbaThresholds.H>
 
 using namespace TARGETING;
 
@@ -74,6 +75,9 @@ int32_t CenMbaTdCtlrCommon::initialize()
             PRDF_ERR( PRDF_FUNC"iv_mbaPos=%d is invalid", iv_mbaPos );
             o_rc = FAIL; break;
         }
+
+        // Set iv_x4Dimm.
+        iv_x4Dimm = isDramWidthX4(iv_mbaTrgt);
 
     } while (0);
 
@@ -129,7 +133,7 @@ int32_t CenMbaTdCtlrCommon::cleanupPrevCmd()
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlrCommon::prepareNextCmd()
+int32_t CenMbaTdCtlrCommon::prepareNextCmd( bool i_clearStats )
 {
     #define PRDF_FUNC "[CenMbaTdCtlrCommon::prepareNextCmd] "
 
@@ -152,32 +156,38 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd()
         // Clear ECC counters
         //----------------------------------------------------------------------
 
-        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
-        SCAN_COMM_REGISTER_CLASS * mbstr = iv_membChip->getRegister( reg_str );
+        const char * reg_str = NULL;
 
-        // MBSTR's content could be modified from cleanupCmd()
-        // so we need to refresh
-        o_rc = mbstr->ForceRead();
-        if ( SUCCESS != o_rc )
+        if ( i_clearStats )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
-            break;
+            reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
+            SCAN_COMM_REGISTER_CLASS * mbstr =
+                                    iv_membChip->getRegister( reg_str );
+
+            // MBSTR's content could be modified from cleanupCmd()
+            // so we need to refresh
+            o_rc = mbstr->ForceRead();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"ForceRead() failed on %s", reg_str );
+                break;
+            }
+
+            mbstr->SetBit(53); // Setting this bit clears all counters.
+
+            o_rc = mbstr->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+                break;
+            }
+
+            // Hardware automatically clears bit 53, so flush this register out
+            // of the register cache to avoid clearing the counters again with
+            // a write from the out-of-date cached copy.
+            RegDataCache & cache = RegDataCache::getCachedRegisters();
+            cache.flush( iv_membChip, mbstr );
         }
-
-        mbstr->SetBit(53); // Setting this bit clears all counters.
-
-        o_rc = mbstr->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
-            break;
-        }
-
-        // Hardware automatically clears bit 53, so flush this register out of
-        // the register cache to avoid clearing the counters again with a write
-        // from the out-of-date cached copy.
-        RegDataCache & cache = RegDataCache::getCachedRegisters();
-        cache.flush( iv_membChip, mbstr );
 
         //----------------------------------------------------------------------
         // Clear ECC FIRs
@@ -188,7 +198,7 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd()
         SCAN_COMM_REGISTER_CLASS * firand = iv_membChip->getRegister( reg_str );
         firand->setAllBits();
 
-        // Clear all MPE bits.
+        // Clear all scrub MPE bits.
         // This will need to be done when starting a TD procedure or background
         // scrubbing. iv_rank may not be set when starting background scrubbing
         // and technically there should only be one of these MPE bits on at a
@@ -196,7 +206,7 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd()
         // clearing them all.
         firand->SetBitFieldJustified( 20, 8, 0 );
 
-        // Clear NCE, SCE, MCE, RCE, SUE, UE bits (36-41)
+        // Clear scrub NCE, SCE, MCE, RCE, SUE, UE bits (36-41)
         firand->SetBitFieldJustified( 36, 6, 0 );
 
         o_rc = firand->Write();
@@ -364,6 +374,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
     int32_t o_rc = SUCCESS;
 
     iv_isEccSteer = false;
+
     do
     {
         if ( VCM_PHASE_2 != iv_tdState )
@@ -388,8 +399,8 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
         if ( iv_mark.getCM().getDram() == iv_mark.getSM().getDram() )
         {
             iv_mark.clearSM();
-            bool junk;
-            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, junk );
+            bool blocked; // Won't be blocked because chip mark is in place.
+            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, blocked );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
@@ -428,16 +439,14 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
             break;
         }
-        bool isX4Dimm = isDramWidthX4( iv_mbaTrgt );
 
-        // Chaeck if DRAM spare is present.
-        // Also eccspare is available on all X4 DIMMS.
-        if ( ( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE != spareConfig ) || isX4Dimm )
+        // Check if DRAM spare is present. Also, ECC spares are available on all
+        // x4 DIMMS.
+        if ( ( ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE != spareConfig ) || iv_x4Dimm )
         {
-
             // It is possible that a Centaur DIMM does not have spare DRAMs.
-            // Check the VPD for available spares. Note that a x4 DIMM have
-            // DRAM spare and eccspare, so check for availability on both.
+            // Check the VPD for available spares. Note that a x4 DIMM has
+            // DRAM spares and ECC spares, so check for availability on both.
             bool dramSparePossible = false;
             o_rc = bitmap.isDramSpareAvailable( ps, dramSparePossible );
             if ( SUCCESS != o_rc )
@@ -457,9 +466,9 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                     break;
                 }
 
-               // If spare DRAM is bad, HW can not steer another DRAM even
-               // if it is available ( e.g. ecc Spare ). So if chip mark is on
-               // spare DRAM, update VPD and make predictive callout.
+                // If spare DRAM is bad, HW can not steer another DRAM even
+                // if it is available ( e.g. ECC spare ). So if chip mark is on
+                // spare DRAM, update VPD and make predictive callout.
                 if ( ( iv_mark.getCM().getDram() ==
                           (0 == ps ? sp0.getDram() : sp1.getDram()) )
                      || ( iv_mark.getCM().getDram() == ecc.getDram() ))
@@ -501,7 +510,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                     // A spare DRAM is available.
                     startDsdProcedure = true;
                 }
-                else if( isDramWidthX4 ( iv_mbaTrgt ) && !ecc.isValid() )
+                else if ( isDramWidthX4(iv_mbaTrgt) && !ecc.isValid() )
                 {
                     startDsdProcedure = true;
                     iv_isEccSteer = true;
@@ -643,30 +652,35 @@ int32_t CenMbaTdCtlrCommon::setRtEteThresholds()
         o_rc = mbstr->ForceRead();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
+            PRDF_ERR( PRDF_FUNC"ForceRead() failed on %s", reg_str );
             break;
         }
 
-        // TODO: RTC 88720 The soft and intermittent CE thresholds will be
-        //       calculated based on the per DRAM threshold similar to the IPL
-        //       CE analysis.
-        uint32_t softIntCe = 1;
+        uint16_t softIntCe = 0;
+        o_rc = getScrubCeThreshold( iv_mbaChip, iv_rank, softIntCe );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getScrubCeThreshold() failed." );
+            break;
+        }
 
         // Only care about retry CEs if there are a lot of them. So the
         // threshold will be high in the field. However, in MNFG the retry CEs
         // will be handled differently by putting every occurrence in the RCE
         // table and doing targeted diagnostics when needed.
-        uint32_t retryCe = mfgMode() ? 1 : 2047;
+        uint16_t retryCe = mfgMode() ? 1 : 2047;
 
-        uint32_t hardCe = 1; // Always stop on first occurrence.
+        uint16_t hardCe = 1; // Always stop on first occurrence.
 
         mbstr->SetBitFieldJustified(  4, 12, softIntCe );
         mbstr->SetBitFieldJustified( 16, 12, softIntCe );
         mbstr->SetBitFieldJustified( 28, 12, hardCe    );
         mbstr->SetBitFieldJustified( 40, 12, retryCe   );
 
-        // Set the per symbol counters to count soft, intermittent, and hard CEs
-        mbstr->SetBitFieldJustified( 55, 3, 0x7 );
+        // Set the per symbol counters to count hard CEs only. This is so that
+        // when the scrub stops on the first hard CE, we can use the per symbol
+        // counters to tell us which symbol reported the hard CE.
+        mbstr->SetBitFieldJustified( 55, 3, 0x1 );
 
         o_rc = mbstr->Write();
         if ( SUCCESS != o_rc )
@@ -727,7 +741,7 @@ void CenMbaTdCtlrCommon::setTdSignature( STEP_CODE_DATA_STRUCT & io_sc,
     HUID mbaId = iv_mbaChip->GetId();
     (io_sc.service_data->GetErrorSignature())->setChipId(mbaId);
     io_sc.service_data->SetErrorSig( i_sig );
-
 }
+
 } // end namespace PRDF
 

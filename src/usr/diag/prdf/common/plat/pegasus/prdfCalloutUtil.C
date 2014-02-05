@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -64,6 +64,34 @@ void calloutMark( TargetHandle_t i_mba, const CenRank & i_rank,
     {
         MemoryMru memmru ( i_mba, i_rank, i_mark.getSM() );
         io_sc.service_data->SetCallout( memmru, i_priority );
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void calloutSymbolData( TargetHandle_t i_mba, const CenRank & i_rank,
+                        const MemUtils::MaintSymbols & i_symData,
+                        STEP_CODE_DATA_STRUCT & io_sc, PRDpriority i_priority )
+{
+    bool dimmsBad[PORT_SLCT_PER_MBA] = { false, false };
+
+    for ( MemUtils::MaintSymbols::const_iterator it = i_symData.begin();
+          it != i_symData.end(); it++ )
+    {
+        dimmsBad[it->symbol.getPortSlct()] = true;
+    }
+
+    for ( uint32_t port = 0; port < PORT_SLCT_PER_MBA; port++ )
+    {
+        if ( dimmsBad[port] )
+        {
+            TargetHandleList list = getConnectedDimms( i_mba, i_rank, port );
+            for ( TargetHandleList::iterator it = list.begin();
+                  it != list.end(); it++ )
+            {
+                io_sc.service_data->SetCallout( *it, i_priority );
+            }
+        }
     }
 }
 

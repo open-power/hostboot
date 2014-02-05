@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -37,16 +37,14 @@ PRDR_ERROR_SIGNATURE(StartTpsPhase1,  0xffff0004, "", "Starting TPS phase 1");
 PRDR_ERROR_SIGNATURE(StartTpsPhase2,  0xffff0005, "", "Starting TPS phase 2");
 PRDR_ERROR_SIGNATURE(EndTpsPhase2,    0xffff0006, "", "TPS Phase 2 completed");
 PRDR_ERROR_SIGNATURE(StartRankScrub,  0xffff0007, "", "Starting rank scrub");
-PRDR_ERROR_SIGNATURE(EndRankScrub,    0xffff0008, "", "Rank scrub completed");
 
-PRDR_ERROR_SIGNATURE(MaintUE,         0xffff0010, "", "Maintenance UE");
-PRDR_ERROR_SIGNATURE(MaintMPE,        0xffff0011, "", "Maintenance MPE");
-PRDR_ERROR_SIGNATURE(MaintHARD_CTE,   0xffff0012, "", "Maintenance HARD CTE");
-PRDR_ERROR_SIGNATURE(MaintSOFT_CTE,   0xffff0013, "", "Maintenance SOFT CTE");
-PRDR_ERROR_SIGNATURE(MaintINTER_CTE,  0xffff0014, "", "Maintenance INTER CTE");
-PRDR_ERROR_SIGNATURE(MaintRETRY_CTE,  0xffff0015, "", "Maintenance RETRY CTE");
-PRDR_ERROR_SIGNATURE(MaintNCE_CTE,  0xffff0016, "",
-                     "Maintenance SOFT/HARD/INTER CTE");
+PRDR_ERROR_SIGNATURE(MaintUE,        0xffff0010, "", "Maintenance UE");
+PRDR_ERROR_SIGNATURE(MaintMPE,       0xffff0011, "", "Maintenance MPE");
+PRDR_ERROR_SIGNATURE(MaintHARD_CTE,  0xffff0012, "", "Maintenance HARD CTE");
+PRDR_ERROR_SIGNATURE(MaintSOFT_CTE,  0xffff0013, "", "Maintenance SOFT CTE");
+PRDR_ERROR_SIGNATURE(MaintINTER_CTE, 0xffff0014, "", "Maintenance INTER CTE");
+PRDR_ERROR_SIGNATURE(MaintRETRY_CTE, 0xffff0015, "", "Maintenance RETRY CTE");
+PRDR_ERROR_SIGNATURE(MaintNCE_CTE,   0xffff0016, "", "Maint SOFT/INTER CTE");
 
 PRDR_ERROR_SIGNATURE(VcmVerified,     0xffff0020, "", "VCM: verified");
 PRDR_ERROR_SIGNATURE(VcmFalseAlarm,   0xffff0021, "", "VCM: false alarm");
@@ -74,5 +72,13 @@ PRDR_ERROR_SIGNATURE(MnfgIplHardCE,  0xffff0051, "", "MNFG IPL hard CE");
 PRDR_ERROR_SIGNATURE(MnfgIplDramCTE, 0xffff0052, "", "MNFG IPL DRAM CTE");
 PRDR_ERROR_SIGNATURE(MnfgIplRankCTE, 0xffff0053, "", "MNFG IPL half-rank CTE");
 PRDR_ERROR_SIGNATURE(MnfgIplDsCTE,   0xffff0054, "", "MNFG IPL DIMM CTE");
+
+PRDR_ERROR_SIGNATURE(TpsFalseAlarm,         0xffff0061, "", "TPS: false alarm");
+PRDR_ERROR_SIGNATURE(TpsFalseAlarmExceeded, 0xffff0062, "",
+                     "TPS: false alarm threshold exceeded");
+PRDR_ERROR_SIGNATURE(TpsSymbolMark, 0xffff0063, "", "TPS: symbol mark placed");
+PRDR_ERROR_SIGNATURE(TpsChipMark,   0xffff0064, "", "TPS: chip mark placed");
+PRDR_ERROR_SIGNATURE(TpsMarksUnavail, 0xffff0065, "",
+                     "TPS: No more marks available");
 
 #endif // __prdfCenMbaExtraSig_H

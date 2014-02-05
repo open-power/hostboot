@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -42,26 +42,32 @@ namespace PRDF
 
 using namespace PlatServices;
 
-// MNFG RCE threshold
+// Non MNFG RCE threshold
 static uint32_t MBA_RCE_NON_MNFG_TH = 8;
 
-//-----------------------------------------------------------------------------
+// Non MNFG Scrub soft/intermittent CE threshold
+static uint32_t MBA_SCRUB_CE_NON_MNFG_TH = 80;
+
+//------------------------------------------------------------------------------
 
 ThresholdResolution::ThresholdPolicy getRceThreshold()
 {
     uint32_t th = MBA_RCE_NON_MNFG_TH;
+
     if ( mfgMode() )
     {
-        th =  MfgThresholdMgr::getInstance()->
-                    getThreshold( PRDF_CEN_MBA_RT_RCE_PER_RANK );
+        th = MfgThresholdMgr::getInstance()->
+                                getThreshold( PRDF_CEN_MBA_RT_RCE_PER_RANK );
 
         if( th > MBA_RCE_NON_MNFG_TH ) th = MBA_RCE_NON_MNFG_TH;
     }
+
     return ThresholdResolution::ThresholdPolicy( th,
-                                            ThresholdResolution::ONE_DAY);
+                                                 ThresholdResolution::ONE_DAY );
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
 int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
                         uint16_t & o_cePerDram, uint16_t & o_cePerHalfRank,
                         uint16_t & o_cePerDimm )
@@ -121,6 +127,32 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         o_cePerHalfRank = ((computeBase * (2 + 1)) + 8) / 16;
 
     } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t getScrubCeThreshold( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
+                             uint16_t & o_thr )
+{
+    #define PRDF_FUNC "[getScrubCeThreshold] "
+
+    int32_t o_rc = SUCCESS;
+
+    o_thr = MBA_SCRUB_CE_NON_MNFG_TH;
+
+    if ( mfgMode() )
+    {
+        uint16_t junk1 = 0;
+        uint16_t junk2 = 0;
+
+        o_rc = getMnfgMemCeTh( i_mbaChip, i_rank, o_thr, junk1, junk2 );
+        if ( SUCCESS != o_rc )
+            PRDF_ERR( PRDF_FUNC"getMnfgMemCeTh() failed" );
+    }
 
     return o_rc;
 

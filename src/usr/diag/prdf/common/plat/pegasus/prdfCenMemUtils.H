@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -77,15 +77,69 @@ struct SymbolData
 
 typedef std::vector<SymbolData> MaintSymbols;
 
+/** Functor for MaintSymbols to sort by count. */
+inline bool sortSymDataCount( const SymbolData & i, const SymbolData & j )
+{
+    return i.count < j.count;
+}
+
+/** Functor for MaintSymbols to match a DRAM. */
+class MatchSymDataDram
+{
+  public:
+    explicit MatchSymDataDram( const CenSymbol & i_d ) : iv_d(i_d.getDram()) {}
+
+    bool operator() ( const SymbolData & i_data ) const
+    { return ( iv_d == i_data.symbol.getDram() ); }
+
+  private:
+    uint8_t iv_d;
+};
+
+/** Functor for MaintSymbols to match a symbol. */
+class MatchSymDataSymbol
+{
+  public:
+    explicit MatchSymDataSymbol( const CenSymbol & i_s ) : iv_s(i_s) {}
+
+    bool operator() ( const SymbolData & i_data ) const
+    { return ( iv_s == i_data.symbol ); }
+
+  private:
+    CenSymbol iv_s;
+};
+
 /**
- * @brief  Checks CE stats on a MBA.
- * @param  i_mbaChip   MBA chip.
- * @param  o_maintStats Output vector. Contains symbols with CE count.
- * @param  i_rank Rank for which stat collection will be done.
+ * @brief  Queries the per symbol counters and returns a sorted list of symbols
+ *         with a count greater than or equal to the given threshold.
+ * @note   The returned list will be sorted from lowest count to highest count.
+ * @param  i_mbaChip     Target MBA chip.
+ * @param  i_rank        Target rank.
+ * @param  o_maintStats  Returns the list of symbols and counts.
+ * @param  o_highestDram Returns a symbol representing the DRAM with the highest
+ *                       total count. This includes counts from DRAM that are
+ *                       under the given threshold. This value is undefined if
+ *                       o_maintStats is empty.
+ * @param  i_thr         The count threshold. Each symbol count must be greater
+ *                       than or equal to this value to be added to the list.
+ *                       The default is 1, which means all non-zero counts will
+ *                       be added to the list. A value of 0 will result in a bad
+ *                       return code.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t collectCeStats( ExtensibleChip * i_mbaChip, MaintSymbols & o_maintStats,
-                        const CenRank & i_rank );
+int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
+                        MaintSymbols & o_maintStats, CenSymbol & o_highestDram,
+                        uint8_t i_thr = 1 );
+
+/**
+ * @brief  Clears the per symbol CE counters on a target MBA (via MEMBUF and MBA
+ *         position number).
+ * @param  i_membChip MEMBUF chip.
+ * @param  i_mbaPos   MBA positions number (0-1).
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t clearPerSymbolCounters( ExtensibleChip * i_membChip,
+                                uint32_t i_mbaPos );
 
 /**
  * @brief  Gets DRAM size for an MBA.

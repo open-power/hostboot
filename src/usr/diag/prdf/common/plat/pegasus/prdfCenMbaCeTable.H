@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -77,9 +77,11 @@ class CenMbaCeTable
      *
      * @param  i_addr   The address reporting the CE.
      * @param  i_symbol The symbol reporting the CE.
+     * @param  i_isHard TRUE if a hard CE was detected on this address/symbol.
      * @return TRUE if TPS is required, FALSE otherwise.
      */
-    bool addEntry( const CenAddr & i_addr, const CenSymbol & i_symbol );
+    bool addEntry( const CenAddr & i_addr, const CenSymbol & i_symbol,
+                   bool i_isHard = false );
 
     /**
      * @brief Deactivates all entries in the table.
@@ -125,11 +127,12 @@ class CenMbaCeTable
         uint8_t dramPins;           ///< The failing pins of the DRAM
         uint8_t portSlct;           ///< The port select of the DRAM
         CenSymbol::WiringType type; ///< The wiring type
+        bool    isHard;             ///< TRUE if a hard CE was detected
 
         /** @brief Default constructor. */
         TableData() :
             active(false), count(0), addr(), dram(0), dramPins(0), portSlct(0),
-            type(CenSymbol::WIRING_INVALID)
+            type(CenSymbol::WIRING_INVALID), isHard(false)
         {}
 
         /**
@@ -140,9 +143,11 @@ class CenMbaCeTable
          * @param i_type     The wiring type (for DRAM site locations).
          */
         TableData( const CenAddr & i_addr, uint8_t i_dram, uint8_t i_dramPins,
-                   uint8_t i_portSlct, CenSymbol::WiringType i_type ) :
+                   uint8_t i_portSlct, CenSymbol::WiringType i_type,
+                   bool i_isHard ) :
             active(true), count(1), addr(i_addr), dram(i_dram),
-            dramPins(i_dramPins), portSlct(i_portSlct), type(i_type)
+            dramPins(i_dramPins), portSlct(i_portSlct), type(i_type),
+            isHard(i_isHard)
         {}
 
         /** An entry is equivalent if the address and DRAM match. */

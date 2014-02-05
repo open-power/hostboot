@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -95,8 +95,8 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
     int32_t o_rc = SUCCESS;
     do
     {
-        MemUtils::MaintSymbols symData;
-        o_rc = MemUtils::collectCeStats( iv_mbaChip, symData, i_stopRank);
+        MemUtils::MaintSymbols symData; CenSymbol junk;
+        o_rc = MemUtils::collectCeStats( iv_mbaChip, i_stopRank, symData, junk);
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"MemUtils::collectCeStats() failed. MBA:0X%08X",
@@ -201,8 +201,8 @@ int32_t CenMbaIplCeStats::calloutHardCes( const CenRank & i_stopRank )
     int32_t o_rc = SUCCESS;
     do
     {
-        MemUtils::MaintSymbols symData;
-        o_rc = MemUtils::collectCeStats( iv_mbaChip, symData, i_stopRank);
+        MemUtils::MaintSymbols symData; CenSymbol junk;
+        o_rc = MemUtils::collectCeStats( iv_mbaChip, i_stopRank, symData, junk);
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC"MemUtils::collectCeStats() failed. MBA:0X%08X",

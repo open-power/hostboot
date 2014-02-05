@@ -391,17 +391,18 @@ PRDF_PLUGIN_DEFINE( Membuf, checkSpareBit );
 //##############################################################################
 
 /**
- * @brief  MBSECCFIR[0-7,20:27] - Fetch/Maintenance Mark Placed Event (MPE).
+ * @brief  MBSECCFIR[0:7] - Fetch Mark Placed Event (MPE).
  * @param  i_membChip A Centaur chip.
  * @param  i_sc       The step code data struct.
  * @param  i_mbaPos   The MBA position.
  * @param  i_rank     The target rank.
  * @return SUCCESS
  */
-int32_t AnalyzeMpe( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc,
-                    uint32_t i_mbaPos, uint8_t i_rank )
+int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
+                         STEP_CODE_DATA_STRUCT & i_sc,
+                         uint32_t i_mbaPos, uint8_t i_rank )
 {
-    #define PRDF_FUNC "[AnalyzeMpe] "
+    #define PRDF_FUNC "[AnalyzeFetchMpe] "
 
     int32_t l_rc = SUCCESS;
 
@@ -563,7 +564,9 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
             CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
             bool doTps = mbadb->iv_ceTable.addEntry( addr, symbol );
 
-            if ( mfgMode() )
+            // Check MNFG thresholds, if needed. No need to check if a TPS
+            // request is already needed.
+            if ( !doTps && mfgMode() )
             {
                 // Get the MNFG CE thresholds.
                 uint16_t dramTh, hrTh, dimmTh;
@@ -583,32 +586,38 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
 
                 if ( dramTh < dramCount )
                 {
-                    i_sc.service_data->SetErrorSig( PRDFSIG_MnfgDramCte );
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgDramCte );
-                    i_sc.service_data->SetServiceCall();
+                    doTps = true;
                 }
 
                 if ( hrTh < hrCount )
                 {
-                    i_sc.service_data->SetErrorSig( PRDFSIG_MnfgHrCte );
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgHrCte );
-                    i_sc.service_data->SetServiceCall();
+                    doTps = true;
                 }
 
                 if ( dimmTh < dimmCount )
                 {
-                    i_sc.service_data->SetErrorSig( PRDFSIG_MnfgDimmCte );
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgDimmCte );
-                    i_sc.service_data->SetServiceCall();
+                    doTps = true;
                 }
             }
 
             // Initiate a TPS procedure, if needed.
             if ( doTps )
             {
+                #ifdef __HOSTBOOT_MODULE
+                // Will not be able to do TPS during hostboot so make the error
+                // log predictive in MNFG mode. Note that we will still call
+                // handleTdEvent() so we can get the trace statement indicating
+                // TPS was requested during Hostboot.
+                if ( mfgMode() )
+                    i_sc.service_data->SetServiceCall();
+                #endif
+
                 l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
                                                 CenMbaTdCtlrCommon::TPS_EVENT );
                 if ( SUCCESS != l_rc )
@@ -643,14 +652,14 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
 /**
  * @brief  Fetch Retry CE / Prefetch UE Errors.
  * @param  i_membChip A Centaur chip.
- * @param  i_sc       The step code data struct.
- * @param  i_mbaPos   The MBA position.
- * @param  isRceError True for RCE error false otherwise.
+ * @param  i_sc         The step code data struct.
+ * @param  i_mbaPos     The MBA position.
+ * @param  i_isRceError True for RCE error false otherwise.
  * @return SUCCESS
  */
 int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
                             STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_mbaPos,
-                            bool isRceError )
+                            bool i_isRceError )
 {
     #define PRDF_FUNC "[AnalyzeFetchRcePue] "
 
@@ -671,7 +680,7 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
         CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
 
         CenAddr addr;
-        if( isRceError )
+        if ( i_isRceError )
             l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_RCE_ADDR, addr );
         else
             l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_UE_ADDR, addr );
@@ -681,17 +690,17 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
             PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
             break;
         }
-
         CenRank rank = addr.getRank();
-        // Callout the rank and the attached MBA.
+
+        // Callout the rank.
         MemoryMru memmru ( mbaChip->GetChipHandle(), rank,
                            MemoryMruData::CALLOUT_RANK );
         i_sc.service_data->SetCallout( memmru );
 
-        // Add the entry to rce table and take action as per rce table rules.
-        if ( mbadb->iv_rceTable.addEntry( rank , i_sc ))
+        // Add an entry to the RCE table.
+        if ( mbadb->iv_rceTable.addEntry(rank, i_sc) )
         {
-            // Tell TD controller to handle TPS event.
+            // Add a TPS request to the queue TD queue.
             l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
                                              CenMbaTdCtlrCommon::TPS_EVENT );
             if ( SUCCESS != l_rc )
@@ -700,6 +709,7 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
                 break;
             }
         }
+
     } while (0);
 
     // Add ECC capture data for FFDC.
@@ -708,8 +718,9 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
 
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_membChip=0x%08x i_mbaPos=%d",
-                  i_membChip->GetId(), i_mbaPos );
+        PRDF_ERR( PRDF_FUNC"Failed: i_membChip=0x%08x i_mbaPos=%d "
+                  "i_isRceError=%c", i_membChip->GetId(), i_mbaPos,
+                  i_isRceError ? 'T' : 'F' );
         CalloutUtil::defaultError( i_sc );
     }
 
@@ -769,9 +780,11 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
                            MemoryMruData::CALLOUT_RANK );
         i_sc.service_data->SetCallout( memmru );
 
-        // Add a TPS request to the TD queue.
+        // Add a TPS request to the TD queue and ban any further TPS requests
+        // for this rank.
         l_rc = mbadb->iv_tdCtlr.handleTdEvent( i_sc, rank,
-                                               CenMbaTdCtlrCommon::TPS_EVENT );
+                                               CenMbaTdCtlrCommon::TPS_EVENT,
+                                               true );
         if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"handleTdEvent() failed: rank=m%ds%d",
@@ -806,7 +819,6 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
  * @param  i_chip       The Centaur chip.
  * @param  i_sc         ServiceDataColector.
  * @return SUCCESS.
-
  */
 int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
                                STEP_CODE_DATA_STRUCT & i_sc  )
@@ -1090,7 +1102,7 @@ PLUGIN_FETCH_RCE_PREUE_ERROR( PreUe, 1, false )
 int32_t AnalyzeFetchMpe##MBA##_##RANK( ExtensibleChip * i_membChip, \
                                        STEP_CODE_DATA_STRUCT & i_sc ) \
 { \
-    return AnalyzeMpe( i_membChip, i_sc, MBA, RANK ); \
+    return AnalyzeFetchMpe( i_membChip, i_sc, MBA, RANK ); \
 } \
 PRDF_PLUGIN_DEFINE( Membuf, AnalyzeFetchMpe##MBA##_##RANK );
 

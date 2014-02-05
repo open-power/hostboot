@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <prdfPlatServices.H>
 
 #include <prdfCallouts.H>
+#include <prdfCenMemUtils.H>
 
 namespace PRDF
 {
@@ -62,6 +63,23 @@ void defaultError( STEP_CODE_DATA_STRUCT & i_sc );
 void calloutMark( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                   const CenMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc,
                   PRDpriority i_priority = MRU_MED );
+
+/**
+ * @brief Will add all DIMMs with symbols that exist in the given list to the
+ *        callout list.
+ * @note  We cannot just callout a MemoryMru for each symbol because there could
+ *        be a lot more symbols in the list than we have room for in the PFA
+ *        data section in the error log.
+ * @param i_mba      Target MBA.
+ * @param i_rank     Target rank.
+ * @param i_symData  The list of symbols.
+ * @param io_sc      The step code data struct.
+ * @param i_priority Callout priority (default MRU_MED).
+ */
+void calloutSymbolData( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
+                        const MemUtils::MaintSymbols & i_symData,
+                        STEP_CODE_DATA_STRUCT & io_sc,
+                        PRDpriority i_priority = MRU_MED );
 
 /**
  * @param  i_mba  The target MBA.

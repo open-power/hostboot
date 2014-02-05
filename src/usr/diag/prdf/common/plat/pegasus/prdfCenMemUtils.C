@@ -53,76 +53,181 @@ static const char *mbsCeStatReg[][ CE_REGS_PER_MBA ] = {
                          "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8" }
                           };
 
-int32_t collectCeStats( ExtensibleChip *i_mbaChip, MaintSymbols &o_maintStats,
-                      const CenRank & i_rank )
+//------------------------------------------------------------------------------
+
+int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
+                        MaintSymbols & o_maintStats, CenSymbol & o_highestDram,
+                        uint8_t i_thr )
 {
     #define PRDF_FUNC "[MemUtils::collectCeStats] "
+
     int32_t o_rc = SUCCESS;
+
     do
     {
+        if ( 0 == i_thr ) // Must be non-zero
+        {
+            PRDF_ERR( PRDF_FUNC"i_thr %d is invalid", i_thr );
+            o_rc = FAIL; break;
+        }
+
         TargetHandle_t mbaTrgt = i_mbaChip->GetChipHandle();
         CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
         ExtensibleChip * membufChip = mbadb->getMembChip();
         if ( NULL == membufChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed: MBA=0x%08x",
-                      getHuid(mbaTrgt) );
+            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
             o_rc = FAIL; break;
         }
+
         uint8_t mbaPos = getTargetPosition( mbaTrgt );
-
-        for( uint8_t regIdx = 0 ; regIdx < CE_REGS_PER_MBA; regIdx++)
+        if ( MAX_MBA_PER_MEMBUF <= mbaPos )
         {
-           SCAN_COMM_REGISTER_CLASS * ceReg = membufChip->getRegister(
-                                                mbsCeStatReg[mbaPos][regIdx] );
+            PRDF_ERR( PRDF_FUNC"mbaPos %d is invalid", mbaPos );
+            o_rc = FAIL; break;
+        }
 
-            if( NULL == ceReg )
-            {
-                PRDF_ERR( PRDF_FUNC"getRegister() Failed for register:%s",
-                          mbsCeStatReg[mbaPos][regIdx]);
-                break;
-            }
-            o_rc = ceReg->Read();
+        bool isX4 = isDramWidthX4(mbaTrgt);
+
+        // Use this map to keep track of the total counts per DRAM.
+        typedef std::map<uint32_t, uint32_t> DramCount;
+        DramCount dramCounts;
+
+        const char * reg_str = NULL;
+        SCAN_COMM_REGISTER_CLASS * reg = NULL;
+
+        for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_MBA; regIdx++ )
+        {
+            reg_str = mbsCeStatReg[mbaPos][regIdx];
+            reg     = membufChip->getRegister( reg_str );
+
+            o_rc = reg->Read();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"%s Read() failed. Target=0x%08x",
-                          mbsCeStatReg[mbaPos][regIdx], getHuid(mbaTrgt) );
+                PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
                 break;
             }
-            uint8_t baseSymbol = SYMBOLS_PER_CE_REG*regIdx;
-            for(uint8_t i = 0 ; i < SYMBOLS_PER_CE_REG; i++)
-            {
-                uint8_t synCount = ceReg->GetBitFieldJustified( (i*8), 8 );
 
-                if ( 0 == synCount)
-                {
-                    continue;
-                }
-                else
+            uint8_t baseSymbol = SYMBOLS_PER_CE_REG * regIdx;
+
+            for ( uint8_t i = 0; i < SYMBOLS_PER_CE_REG; i++ )
+            {
+                uint8_t count = reg->GetBitFieldJustified( (i*8), 8 );
+
+                if ( 0 == count ) continue; // nothing to do
+
+                uint8_t sym  = baseSymbol + i;
+                uint8_t dram = CenSymbol::symbol2Dram( sym, isX4 );
+
+                // Keep track of the total DRAM counts.
+                dramCounts[dram] += count;
+
+                // Add any symbols that have exceeded threshold to the list.
+                if ( i_thr <= count )
                 {
                     SymbolData symData;
                     symData.symbol = CenSymbol::fromSymbol( mbaTrgt, i_rank,
-                                   baseSymbol+i, CenSymbol::BOTH_SYMBOL_DQS );
+                                            sym, CenSymbol::BOTH_SYMBOL_DQS );
                     if ( !symData.symbol.isValid() )
                     {
-                        PRDF_ERR( PRDF_FUNC"CenSymbol() failed" );
+                        PRDF_ERR( PRDF_FUNC"CenSymbol() failed: symbol=%d",
+                                  sym );
                         o_rc = FAIL;
                         break;
                     }
                     else
                     {
-                        symData.count = synCount;
+                        symData.count = count;
                         o_maintStats.push_back( symData );
                     }
                 }
             }
-            if( FAIL == o_rc) break;
+            if ( SUCCESS != o_rc ) break;
         }
-        if( FAIL == o_rc) break;
-    }while(0);
+        if ( SUCCESS != o_rc ) break;
+
+        if ( o_maintStats.empty() ) break; // no need to continue
+
+        // Sort the list of symbols.
+        std::sort( o_maintStats.begin(), o_maintStats.end(), sortSymDataCount );
+
+        // Get the DRAM with the highest count.
+        DramCount::iterator highestEntry = dramCounts.begin();
+        DramCount::iterator it = highestEntry; ++it; // sets it to next entry
+        for ( ; it != dramCounts.end(); ++it )
+        {
+            if ( highestEntry->second < it->second )
+                highestEntry = it;
+        }
+
+        uint8_t sym = CenSymbol::dram2Symbol( highestEntry->first, isX4 );
+        o_highestDram = CenSymbol::fromSymbol( mbaTrgt, i_rank, sym );
+
+    } while(0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: i_mbaChip=0x%08x i_rank=m%ds%d i_thr=%d",
+                  i_mbaChip->GetId(), i_rank.getMaster(), i_rank.getSlave(),
+                  i_thr );
+    }
+
     return o_rc;
+
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
+
+int32_t clearPerSymbolCounters( ExtensibleChip * i_membChip, uint32_t i_mbaPos )
+{
+    #define PRDF_FUNC "[MemUtils::clearPerSymbolCounters] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( MAX_MBA_PER_MEMBUF <= i_mbaPos )
+        {
+            PRDF_ERR( PRDF_FUNC"i_mbaPos %d is invalid", i_mbaPos );
+            o_rc = FAIL;
+            break;
+        }
+
+        const char * reg_str = NULL;
+        SCAN_COMM_REGISTER_CLASS * reg = NULL;
+
+        for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_MBA; regIdx++ )
+        {
+            reg_str = mbsCeStatReg[i_mbaPos][regIdx];
+            reg     = i_membChip->getRegister( reg_str );
+
+            reg->clearAllBits();
+
+            o_rc = reg->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+                break;
+            }
+        }
+
+        if ( SUCCESS != o_rc ) break;
+
+    } while(0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed. i_membChip=0x%08x i_mbaPos=%d",
+                  i_membChip->GetId(), i_mbaPos );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 int32_t getDramSize( ExtensibleChip *i_mbaChip, uint8_t & o_size )
 {
@@ -233,7 +338,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
 
         SCAN_COMM_REGISTER_CLASS * iomcMask =
                                  procChip->getRegister( iomcFirMask);
-        if ( pos >=4 ) pos -= 4;
+        if ( pos >= 4 ) pos -= 4;
 
         // 8 bits are reserved for each Centaur in IOMCFIR.
         // There are total 4 ( for P system ) centaur supported

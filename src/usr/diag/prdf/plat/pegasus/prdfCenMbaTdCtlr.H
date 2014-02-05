@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -63,7 +63,8 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
 
     int32_t handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc );
     int32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
-                           const CenRank & i_rank, const TdType i_event );
+                           const CenRank & i_rank, const TdType i_event,
+                           bool i_banTps = false );
 
   private: // Overloaded functions
 

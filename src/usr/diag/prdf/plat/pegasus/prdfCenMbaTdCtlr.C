@@ -173,7 +173,8 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
 
 int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
                                      const CenRank & i_rank,
-                                     const CenMbaTdCtlrCommon::TdType i_event )
+                                     const CenMbaTdCtlrCommon::TdType i_event,
+                                     bool i_banTps )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::handleTdEvent] "
 
@@ -182,8 +183,9 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
     // request. Note that any VCM request will eventually be found during the
     // initialization of the runtime TD controller.
     PRDF_INF( PRDF_FUNC"TD request found during Hostboot: iv_mbaChip=0x%08x "
-              "i_rank=M%dS%d i_event=%d", iv_mbaChip->GetId(),
-              i_rank.getMaster(), i_rank.getSlave(), i_event );
+              "i_rank=M%dS%d i_event=%d i_banTps=%c", iv_mbaChip->GetId(),
+              i_rank.getMaster(), i_rank.getSlave(), i_event,
+              i_banTps ? 'T' : 'F' );
 
     return SUCCESS;
 
@@ -517,8 +519,8 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
             // Remove chip mark from hardware.
             iv_mark.clearCM();
-            bool junk;
-            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, junk );
+            bool blocked; // not possible during MDIA
+            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, blocked );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
@@ -647,8 +649,8 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
             // Remove chip mark from hardware.
             iv_mark.clearCM();
-            bool junk;
-            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, junk );
+            bool blocked; // not possible during MDIA
+            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, blocked );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
@@ -720,6 +722,10 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else
         {
+            // No error found so add rank to callout list, just in case.
+            MemoryMru memmru (iv_mbaTrgt, iv_rank, MemoryMruData::CALLOUT_RANK);
+            io_sc.service_data->SetCallout( memmru );
+
             // Start TPS Phase 2
             o_rc = startTpsPhase2( io_sc );
             if ( SUCCESS != o_rc )
@@ -791,6 +797,10 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else
         {
+            // No error found so add rank to callout list, just in case.
+            MemoryMru memmru (iv_mbaTrgt, iv_rank, MemoryMruData::CALLOUT_RANK);
+            io_sc.service_data->SetCallout( memmru );
+
             io_sc.service_data->AddSignatureList( iv_mbaTrgt,
                                                   PRDFSIG_EndTpsPhase2 );
             iv_tdState = NO_OP;

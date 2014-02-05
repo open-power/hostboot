@@ -231,10 +231,10 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     i_parser.PrintNumber( " MEM_CE_TABLE", "%d", entries );
 
-    const char * hh = "  A Count Type";
+    const char * hh = "  A H Count Type";
     const char * hd = "Rank Bank Row     Column DRAM Pins";
     i_parser.PrintString( hh, hd );
-    hh = "  - ----- -------------";
+    hh = "  - - ----- -------------";
     hd = "---- ---- ------- ------ ---- ----";
     i_parser.PrintString( hh, hd );
 
@@ -245,6 +245,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         uint32_t count = i_buffer[idx  ];                           //  8-bit
         uint32_t type  = i_buffer[idx+1] >> 4;                      //  4-bit
 
+        uint8_t  isHard = (i_buffer[idx+2] >> 7) & 0x1;             //  1-bit
         uint8_t  active = (i_buffer[idx+2] >> 6) & 0x1;             //  1-bit
         uint8_t  dram   =  i_buffer[idx+2]       & 0x3f;            //  6-bit
 
@@ -266,6 +267,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         uint32_t col     = (col0_3 << 8) | col4_11;                 // 12-bit
 
         char active_char = ( 1 == active ) ? 'Y':'N';
+        char isHard_char = ( 1 == isHard ) ? 'Y':'N';
 
         const char * type_str = "UNKNOWN      "; // 13 characters
         switch ( type )
@@ -287,8 +289,8 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         }
 
         char header[HEADER_SIZE] = { '\0' };
-        snprintf( header, HEADER_SIZE, "  %c  0x%02x %s", active_char,
-                  count, type_str );
+        snprintf( header, HEADER_SIZE, "  %c %c  0x%02x %s", active_char,
+                  isHard_char, count, type_str );
 
         char data[DATA_SIZE]     = { '\0' };
         snprintf( data, DATA_SIZE, "%s  0x%01x 0x%05x  0x%03x   %2d 0x%02x",

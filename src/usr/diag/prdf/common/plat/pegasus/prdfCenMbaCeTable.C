@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -42,12 +42,13 @@ using namespace CE_TABLE;
 //------------------------------------------------------------------------------
 
 bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
-                              const CenSymbol & i_symbol )
+                              const CenSymbol & i_symbol, bool i_isHard )
 {
     bool o_doTps = false;
 
     TableData data ( i_addr, i_symbol.getDram(), i_symbol.getDramPins(),
-                     i_symbol.getPortSlct(), i_symbol.getWiringType() );
+                     i_symbol.getPortSlct(), i_symbol.getWiringType(),
+                     i_isHard );
 
     // First, check if the entry already exists. If so, increment its count and
     // move it to the end of the queue.
@@ -59,6 +60,9 @@ bool CenMbaCeTable::addEntry( const CenAddr & i_addr,
 
         // Update the DRAM pins
         data.dramPins |= it->dramPins;
+
+        // Check the hard CE status
+        if ( it->isHard ) data.isHard = true;
 
         // Remove the old entry
         iv_table.erase( it );
@@ -206,10 +210,11 @@ void CenMbaCeTable::addCapData( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
         uint8_t col4_11 =  col & 0x0ff;
 
         uint8_t active = it->active ? 1 : 0;
+        uint8_t isHard = it->isHard ? 1 : 0;
 
         data[sz_actData  ] = it->count;
         data[sz_actData+1] = it->type << 4;                     // 4 spare bits
-        data[sz_actData+2] = (active << 6) | (it->dram & 0x3f); // 1 spare bit
+        data[sz_actData+2] = (isHard << 7) | (active << 6) | (it->dram & 0x3f);
         data[sz_actData+3] = it->dramPins;
         data[sz_actData+4] = (mrnk << 5) | (srnk << 2) | (svld << 1) | row0;
         data[sz_actData+5] = row1_8;

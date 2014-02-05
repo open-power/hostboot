@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -55,6 +55,16 @@ int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
  * @brief  Returns RCE threshold policy.
  */
 ThresholdResolution::ThresholdPolicy getRceThreshold();
+
+/**
+ * @brief  Returns scrub soft/intermittent CEs during runtime.
+ * @param  i_mbaChip MBA chip.
+ * @param  i_rank    The rank for which the threshold is needed.
+ * @param  o_thr     Scrub soft/intermittent CE threshold.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t getScrubCeThreshold( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
+                             uint16_t & o_thr );
 
 } // end namespace PRDF
 

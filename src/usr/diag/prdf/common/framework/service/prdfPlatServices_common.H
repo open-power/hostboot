@@ -234,7 +234,10 @@ int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mba,
  * @brief  Invokes the set mark store hardware procedure.
  * @param  i_mba               Target MBA.
  * @param  i_rank              Target rank.
- * @param  i_mark              The mark to write.
+ * @param  io_mark             The mark to write. If hardware blocks the write
+ *                             to markstore and the block is allowed, io_mark
+ *                             will be updated with the new chip mark set by
+ *                             hardware.
  * @param  o_writeBlocked      TRUE if a blocke write is allowed and hardware
  *                             blocked the write to markstore.
  * @param  i_allowWriteBlocked TRUE if a blocked write is allowed. This means
@@ -248,7 +251,7 @@ int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mba,
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
 int32_t mssSetMarkStore( TARGETING::TargetHandle_t i_mba,
-                         const CenRank & i_rank, const CenMark & i_mark,
+                         const CenRank & i_rank, CenMark & io_mark,
                          bool & o_writeBlocked,
                          bool i_allowWriteBlocked = false );
 
@@ -417,20 +420,26 @@ class mss_MaintCmdWrapper
 
 /**
  * @brief  Create a maintenance command object.
- * @param  i_cmdType  Maintenance command type which we want to create.
- * @param  i_mba      An MBA target.
- * @param  i_rank     The first rank to start with (see enum CtrlFlags for
- *                    more details).
- * @param  i_stopCond Bit mask for conditions in which to stop command.
- * @param  i_flags    See enum CtrlFlags for details.
+ * @param  i_cmdType       Maintenance command type which we want to create.
+ * @param  i_mba           An MBA target.
+ * @param  i_rank          The first rank to start with (see enum CtrlFlags for
+ *                         more details).
+ * @param  i_stopCond      Bit mask for conditions in which to stop command.
+ * @param  i_flags         See enum CtrlFlags for details.
+ * @param  i_sAddrOverride A non-NULL value indicates to use this start address
+ *                         and not the start address of i_rank.
  * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
  *         object. It is the caller's responsibilty to delete this object.
+ * @note   By default this maintenance command will operate on the address range
+ *         that contains i_rank, but the target address range can be modified
+ *         with i_flags and/or i_sAddrOverride.
  */
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                             TARGETING::TargetHandle_t i_mba,
                             const CenRank & i_rank, uint32_t i_stopCond,
-                            uint32_t i_flags = mss_MaintCmdWrapper::NO_FLAGS );
+                            uint32_t i_flags = mss_MaintCmdWrapper::NO_FLAGS,
+                            const CenAddr * i_sAddrOverride = NULL );
 
 } // end namespace PlatServices
 

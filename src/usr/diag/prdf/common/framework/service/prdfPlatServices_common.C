@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: ./common/framework/service/prdfPlatServices_common.C $        */
+/* $Source: src/usr/diag/prdf/common/framework/service/prdfPlatServices_common.C $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -439,7 +439,7 @@ int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 //------------------------------------------------------------------------------
 
 int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
-                         const CenMark & i_mark, bool & o_writeBlocked,
+                         CenMark & io_mark, bool & o_writeBlocked,
                          bool i_allowWriteBlocked )
 {
     #define PRDF_FUNC "[PlatServices::mssSetMarkStore] "
@@ -448,19 +448,31 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 
     errlHndl_t errl = NULL;
 
-    uint8_t symbolMark = i_mark.getSM().isValid() ? i_mark.getSM().getSymbol()
-                                                  : MSS_INVALID_SYMBOL;
-    uint8_t chipMark = i_mark.getCM().isValid() ? i_mark.getCM().getDramSymbol()
-                                                : MSS_INVALID_SYMBOL;
+    uint8_t sm = io_mark.getSM().isValid() ? io_mark.getSM().getSymbol()
+                                           : MSS_INVALID_SYMBOL;
+    uint8_t cm = io_mark.getCM().isValid() ? io_mark.getCM().getDramSymbol()
+                                           : MSS_INVALID_SYMBOL;
 
     fapi::ReturnCode l_rc = mss_put_mark_store( getFapiTarget(i_mba),
-                                                i_rank.getMaster(), symbolMark,
-                                                chipMark );
+                                                i_rank.getMaster(), sm, cm );
 
     if ( i_allowWriteBlocked &&
          fapi::RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED == l_rc )
     {
         o_writeBlocked = true;
+
+        // Read hardware and get the new chip mark.
+        CenMark hwMark;
+        o_rc = mssGetMarkStore( i_mba, i_rank, hwMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed." );
+        }
+        else
+        {
+            // Update io_mark with the new chip mark.
+            io_mark.setCM( hwMark.getCM() );
+        }
     }
     else
     {
@@ -469,7 +481,7 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
         {
             PRDF_ERR( PRDF_FUNC"mss_put_mark_store() failed. HUID: 0x%08x "
                       "rank: %d sm: %d cm: %d", getHuid(i_mba),
-                      i_rank.getMaster(), symbolMark, chipMark );
+                      i_rank.getMaster(), sm, cm );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL;
         }
@@ -749,7 +761,8 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                     TargetHandle_t i_mba,
                                     const CenRank & i_rank, uint32_t i_stopCond,
-                                    uint32_t i_flags )
+                                    uint32_t i_flags,
+                                    const CenAddr * i_sAddrOverride )
 {
     mss_MaintCmdWrapper * o_cmd = NULL;
 
@@ -767,6 +780,12 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
         l_rc = getMemAddrRange( i_mba, i_rank.getMaster(), sAddr, eAddr,
                                 i_rank.getSlave(), slaveOnly );
         if ( SUCCESS != l_rc ) break;
+
+        // Override the start address, if needed.
+        if ( NULL != i_sAddrOverride )
+        {
+            sAddr.setDoubleWord( 0, i_sAddrOverride->toReadAddr() );
+        }
 
         // Get the last address in memory, if needed.
         if ( allMemory )

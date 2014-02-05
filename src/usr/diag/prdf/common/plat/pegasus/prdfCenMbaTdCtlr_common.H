@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -156,16 +156,19 @@ class CenMbaTdCtlrCommon
      * log for the trigger will be committed and a trace statement will be made
      * indicating which rank and TD procedure was requested.
      *
-     * @param  io_sc   The step code data struct.
-     * @param  i_rank  The rank in which the event occurred.
-     * @param  i_event The event type (see enum TdType).
+     * @param  io_sc    The step code data struct.
+     * @param  i_rank   The rank in which the event occurred.
+     * @param  i_event  The event type (see enum TdType).
+     * @param  i_banTps TRUE to ban any future TPS requests for this rank,
+     *                  default FALSE.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      * @note   If no TD procedures are in progress, it will stop background
      *         scrub and start the next TD procedure.
      */
     virtual int32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
                                    const CenRank & i_rank,
-                                   const TdType i_event ) = 0;
+                                   const TdType i_event,
+                                   bool i_banTps = false ) = 0;
   protected: // functions
 
     /**
@@ -300,10 +303,14 @@ class CenMbaTdCtlrCommon
     /**
      * @brief  Preforms cleanup tasks that need to be done before starting the
      *         next maintenance command (i.e. clear scrub counter).
+     * @param  i_clearStats TRUE to clear all scrub statistics (default), FALSE
+     *                      otherwise. This is useful when we need to resume
+     *                      background scrubbing on the next address and we
+     *                      don't want to clear all of the scrub statistics.
      * @note   Will call cleanupPrevCmd() as part of the preparations.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual int32_t prepareNextCmd();
+    virtual int32_t prepareNextCmd( bool i_clearStats = true );
 
     /**
      * @brief  Clears FIR bits that may have been a side-effect of a chip mark
@@ -386,6 +393,9 @@ class CenMbaTdCtlrCommon
 
     /** The position number (0-1) relative to the connected MEMBUF. */
     uint32_t iv_mbaPos;
+
+    /** TRUE if DIMM has x4 DRAMs, FALSE if DIMM has x8 DRAMs. */
+    bool iv_x4Dimm;
 
     /** Indicates if TD controller is initialized. */
     bool iv_initialized;
