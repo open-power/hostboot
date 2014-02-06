@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//$Id: mss_access_delay_reg.H,v 1.11 2013/12/16 10:15:30 sasethur Exp $
+//$Id: mss_access_delay_reg.H,v 1.12 2014/01/24 17:22:16 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.12  | mjjones  |20-Jan-14| RAS Review Updates
 //   1.1   | sauchadh |15-Oct-12| First Draft.
 //------------------------------------------------------------------------------
 
@@ -179,29 +180,173 @@ struct scom_location {
    uint64_t scom_addr;
    uint8_t start_bit;
    uint8_t bit_length;
-};	
+};
 
 
-typedef fapi::ReturnCode (*mss_access_delay_reg_FP_t)(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose, uint32_t &io_value_u32);
-
-
+typedef fapi::ReturnCode (*mss_access_delay_reg_FP_t)(const fapi::Target &,
+                                                      access_type_t,
+                                                      uint8_t,
+                                                      uint8_t,
+                                                      input_type_t,
+                                                      uint8_t,
+                                                      uint8_t,
+                                                      uint32_t &);
 
 extern "C" {
 
-//------------------------------------------------------------------------------
-fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose, uint16_t &io_value_u32);
+/**
+ * @brief Reads or Writes delay values
+ *
+ * @param[in] i_target_mba     Reference to centaur.mba target
+ * @param[in] i_access_type_e  Access type (READ or WRITE)
+ * @param[in] i_port_u8        Port number
+ * @param[in] i_rank_u8        Rank number
+ * @param[in] i_input_type_e   Input type (from input_type_t)
+ * @param[in] i_input_index_u8 Input index
+ * @param[in] i_verbose        1 = Verbose tracing
+ * @param[io] io_value_u32     READ=input, WRITE=output
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode mss_access_delay_reg_schmoo(const fapi::Target & i_target_mba,
+                                             access_type_t i_access_type_e,
+                                             uint8_t i_port_u8,
+                                             uint8_t i_rank_u8,
+                                             input_type_t i_input_type_e,
+                                             uint8_t i_input_index_u8,
+                                             uint8_t i_verbose,
+                                             uint16_t &io_value_u32);
 
-fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose, uint32_t &io_value_u32);
+/**
+ * @brief Reads or Writes delay values
+ *
+ * @param[in] i_target_mba     Reference to centaur.mba target
+ * @param[in] i_access_type_e  Access type (READ or WRITE)
+ * @param[in] i_port_u8        Port number
+ * @param[in] i_rank_u8        Rank number
+ * @param[in] i_input_type_e   Input type (from input_type_t)
+ * @param[in] i_input_index_u8 Input index
+ * @param[in] i_verbose        1 = Verbose tracing
+ * @param[io] io_value_u32     READ=input, WRITE=output
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba,
+                                      access_type_t i_access_type_e,
+                                      uint8_t i_port_u8,
+                                      uint8_t i_rank_u8,
+                                      input_type_t i_input_type_e,
+                                      uint8_t i_input_index_u8,
+                                      uint8_t i_verbose,
+                                      uint32_t &io_value_u32);
 
-fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t i_input_index,uint8_t i_verbose,scom_location& out);
+/**
+ * @brief cross_coupled
+ *
+ * @param[in]  i_target_mba   Reference to centaur.mba target
+ * @param[in]  i_port         Port number
+ * @param[in]  i_rank_pair    Rank pair
+ * @param[in]  i_input_type_e Input type (from input_type_t)
+ * @param[in]  i_input_index  Input index
+ * @param[in]  i_verbose      1 = Verbose tracing
+ * @param[out] out            Output
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,
+                               uint8_t i_port,
+                               uint8_t i_rank_pair,
+                               input_type_t i_input_type_e,
+                               uint8_t i_input_index,
+                               uint8_t i_verbose,
+                               scom_location& out);
 
-fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t &dq_lane,uint8_t i_verbose,uint8_t &phy_lane,uint8_t &phy_block,uint8_t flag);
+/**
+ * @brief mss_c4_phy
+ *
+ * @param[in] i_target_mba   Reference to centaur.mba target
+ * @param[in] i_port         Port number
+ * @param[in] i_rank_pair    Rank pair
+ * @param[in] i_input_type_e Input type (from input_type_t)
+ * @param[in] i_input_index  Input index
+ * @param[in] i_verbose      1 = Verbose tracing
+ * @param[io] phy_lane       PHY Lane
+ * @param[io] phy_block      PHY Block
+ * @param[in] flag           Flag
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode mss_c4_phy(const fapi::Target & i_target_mba,
+                            uint8_t i_port,
+                            uint8_t i_rank_pair,
+                            input_type_t i_input_type_e,
+                            uint8_t &i_input_index,
+                            uint8_t i_verbose,
+                            uint8_t &phy_lane,
+                            uint8_t &phy_block,
+                            uint8_t flag);
 
-fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,ip_type_t i_input_type_e,uint8_t i_block,uint8_t i_lane,uint64_t &o_scom_address_64,uint8_t &o_start_bit,uint8_t &o_len);
+/**
+ * @brief get_address
+ *
+ * @param[in]  i_target_mba      Reference to centaur.mba target
+ * @param[in]  i_port            Port number
+ * @param[in]  i_rank_pair       Rank pair
+ * @param[in]  i_input_type_e    Input type (from input_type_t)
+ * @param[in]  i_block           Block
+ * @param[in]  i_lane            Lane
+ * @param[out] o_scom_address_64 Output scom address
+ * @param[out] o_start_bit       Output Start bit
+ * @param[out] o_len             Output length
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
+                             uint8_t i_port,
+                             uint8_t i_rank_pair,
+                             ip_type_t i_input_type_e,
+                             uint8_t i_block,
+                             uint8_t i_lane,
+                             uint64_t &o_scom_address_64,
+                             uint8_t &o_start_bit,
+                             uint8_t &o_len);
 
-fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port, input_type i_input_type_e ,uint8_t i_input_index,uint8_t i_verbose,uint8_t &o_value); 
+/**
+ * @brief Returns C4 bit for the corresponding ISDIMM bit
+ *
+ * @param[in]  i_target_mba   Reference to centaur.mba target
+ * @param[in]  i_port         Port number
+ * @param[in]  i_input_type_e Input type (from input_type_t)
+ * @param[in]  i_input_index  Input index
+ * @param[in]  i_verbose      1 = Verbose tracing
+ * @param[out] o_value        Output C4 bit
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
+                             uint8_t i_port,
+                             input_type i_input_type_e,
+                             uint8_t i_input_index,
+                             uint8_t i_verbose,
+                             uint8_t &o_value);
 
-fapi::ReturnCode mss_getrankpair(const fapi::Target & i_target_mba,uint8_t i_port,uint8_t i_rank,uint8_t *o_rank_pair,uint8_t o_rankpair_table[8]);
+/**
+ * @brief Gets the rank pair
+ *
+ * @param[in]  i_target_mba     Reference to centaur.mba target
+ * @param[in]  i_port           Port
+ * @param[in]  i_rank           Rank
+ * @param[out] o_rank_pair      Output rank pair
+ * @param[out] o_rankpair_table Output rank pair table
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode mss_getrankpair(const fapi::Target & i_target_mba,
+                                 uint8_t i_port,
+                                 uint8_t i_rank,
+                                 uint8_t *o_rank_pair,
+                                 uint8_t o_rankpair_table[]);
+
 } // extern "C"
 
 #endif // MSS_ACCESS_DELAY_REG_H

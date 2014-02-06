@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.23 2013/12/02 18:55:39 bellows Exp $
+// $Id: mss_termination_control.C,v 1.25 2014/01/22 15:39:18 mjjones Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.25   | mjjones  |22-Jan-14| Removed firmware header
+//  1.24   | abhijsau |21-Jan-14| mike and menlo fixed ras review comments
 //  1.23   | bellows  |02-Dec-13| VPD attribute update
 //  1.22   | mwuu     |20-Sep-13| Updated ADR DDR3 slew calibration table for 1 setting,
 //  							  1066 20ohms, 4V/ns, changed from 11 to 10.
@@ -112,7 +114,8 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
     if (i_port > 1)
     {
 	FAPI_ERR("Driver impedance port input(%u) out of bounds", i_port);
-	FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
+	const uint8_t & PORT_PARAM = i_port;
+	FAPI_SET_HWP_ERROR(rc, RC_CONFIG_DRV_IMP_INVALID_INPUT);
 	return rc;
     }
     for(i=0; i< MAX_DRV_IMP; i++)
@@ -251,7 +254,8 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
     if (i_port > 1)
     {
 	FAPI_ERR("Receiver impedance port input(%u) out of bounds", i_port);
-	FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
+	const uint8_t & PORT_PARAM = i_port;
+	FAPI_SET_HWP_ERROR(rc, RC_CONFIG_RCV_IMP_INVALID_INPUT);
 	return rc;
     }
 
@@ -416,10 +420,16 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
     uint8_t calibrated_slew_rate_table
 		[MAX_NUM_PORTS][MAX_NUM_IMP][MAX_NUM_CAL_SLEW_RATES]={{{0}}};
 
+    // FFDC for bad parameters
+    const uint8_t & PORT_PARAM = i_port;
+    const uint8_t & SLEW_TYPE_PARAM = i_slew_type;
+    const uint8_t & SLEW_IMP_PARAM = i_slew_imp;
+    const uint8_t & SLEW_RATE_PARAM = i_slew_rate;
+
     if (i_port >= MAX_NUM_PORTS)
     {
 		FAPI_ERR("Slew port input(%u) out of bounds", i_port);
-		FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
+		FAPI_SET_HWP_ERROR(rc, RC_CONFIG_SLEW_RATE_INVALID_INPUT);
 		return rc;
     }
 
@@ -427,7 +437,7 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
     {
 		FAPI_ERR("Slew type input(%u) out of bounds, (>= %u)",
 				i_slew_type, MAX_NUM_SLEW_TYPES);
-		FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
+		FAPI_SET_HWP_ERROR(rc, RC_CONFIG_SLEW_RATE_INVALID_INPUT);
 		return rc;
     }
 
@@ -451,7 +461,7 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			break;
 		default:
 			FAPI_ERR("Slew rate input(%u) out of bounds", i_slew_rate);
-			FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
+			FAPI_SET_HWP_ERROR(rc, RC_CONFIG_SLEW_RATE_INVALID_INPUT);
 			return rc;
     }
 
@@ -474,7 +484,7 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 		default:			// OHM15 || OHM20 not valid for data
 	    	FAPI_ERR("Slew impedance input(%u) invalid "
 			   "or out of bounds, index=%u", i_slew_imp, imp_idx);
-		    FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+		    FAPI_SET_HWP_ERROR(rc, RC_CONFIG_SLEW_RATE_INVALID_INPUT);
 	    	return rc;
 		}
 
@@ -571,7 +581,7 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			(imp_idx >= MAX_NUM_IMP))
 		{
 			FAPI_ERR("Slew impedance input(%u) out of bounds", i_slew_imp);
-			FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+			FAPI_SET_HWP_ERROR(rc, RC_CONFIG_SLEW_RATE_INVALID_INPUT);
 			return rc;
 		}
 
@@ -709,7 +719,8 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
     if (i_port > 1)
     {
 	FAPI_ERR("Write Vref port input(%u) out of bounds", i_port);
-	FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
+	const uint8_t & PORT_PARAM = i_port;
+	FAPI_SET_HWP_ERROR(rc, RC_CONFIG_WR_DRAM_VREF_INVALID_INPUT);
 	return rc;
     }
 	
@@ -837,7 +848,8 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
     if (i_port > 1)
     {
 	FAPI_ERR("Read vref port input(%u) out of bounds", i_port);
-	FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
+	const uint8_t & PORT_PARAM = i_port;
+	FAPI_SET_HWP_ERROR(rc, RC_CONFIG_RD_CEN_VREF_INVALID_INPUT);
 	return rc;
     }
     
@@ -1100,10 +1112,11 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 		ddr_idx = 1;
 	} else if (ddr_type == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3) { //type=1
 		ddr_idx = 0;
-	} else {	// EMPTY ?? how to handle?
+	} else {
 		FAPI_ERR("Invalid ATTR_DRAM_DRAM_GEN = %d, %s!", ddr_type,
 				i_target_mba.toEcmdString());
-		FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_DRAM_GEN);
+		const uint8_t & DRAM_GEN = ddr_type;
+		FAPI_SET_HWP_ERROR(rc, RC_MSS_SLEW_CAL_INVALID_DRAM_GEN);
 		return rc;
 	}
 
@@ -1115,7 +1128,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 	if (ddr_freq == 0) {
 		FAPI_ERR("Invalid ATTR_MSS_FREQ = %d on %s!", ddr_freq,
 				i_target_mba.toEcmdString());
-		FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FREQ);
+		FAPI_SET_HWP_ERROR(rc, RC_MSS_SLEW_CAL_INVALID_FREQ);
 		return rc;
 	}
 	// speed(4)		1066=0, 1333=1, 1600=2, 1866=3
@@ -1203,7 +1216,6 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 
 		if (poll_count == MAX_POLL_LOOPS) {
 			FAPI_INF("WARNING: Timeout on polling BB_Lock, continuing...");
-//			return rc;
 		}
 		else
 		{
@@ -1294,16 +1306,16 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 						}
 						else if (cal_status == 2)
 						{
-							FAPI_INF("WARNING: occurred during slew "
-								"calibration, imped=%i, slewrate=%i \n\t %s "
-								"\t\t\t [%i][%i][%i][%i][%i], input=0x%02X, "
-								"ctrl=0x%04X, status=0x%04X    continuing...",
-								(data_adr ? adr_imp_array[imp] : 
-								 drv_imp_array[(4-imp)]), (slew+3),
-								i_target_mba.toEcmdString(), ddr_idx, data_adr,
-								freq_idx, imp, slew, (cal_slew & 0x1F),
-								ctl_reg.getHalfWord(3), 
-								stat_reg.getHalfWord(3));
+                            FAPI_INF("WARNING: occurred during slew calibration"
+                                     ", imped=%i, slewrate=%i %s ddr_idx[%i]",
+                                     data_adr ? adr_imp_array[imp] :
+                                       drv_imp_array[(4-imp)], (slew+3),
+                                     i_target_mba.toEcmdString(), ddr_idx);
+                            FAPI_INF("data_adr[%i], freq_idx[%i], imp[%i], slew[%i]",
+                                     data_adr, freq_idx, imp, slew);
+                            FAPI_INF("input=0x%02X, ctrl=0x%04X, status=0x%04X",
+                                     (cal_slew & 0x1F), ctl_reg.getHalfWord(3),
+                                     stat_reg.getHalfWord(3));
 						}
 						cal_slew = cal_slew & 0x80;	// clear bits 6:0
 						rc_ecmd = stat_reg.extractPreserve(&cal_slew, 60, 4, 4);
@@ -1342,19 +1354,23 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 								FAPI_ERR("Slew calibration timed out, loop=%i",
 										poll_count);
 							}
-							FAPI_ERR("Slew calibration failed on %s slew: "
-								"imp_idx=%d(%i ohms), slew_idx=%d(%i V/ns), "
-								"slew_table=0x%02X,\n\t\t\t ctl_reg=0x%04X, "
-								"status=0x%04X on %s!",
-								(data_adr ? "ADR" : "DATA"), imp,
-								(data_adr ? adr_imp_array[imp] : 
-								 drv_imp_array[(4-imp)]), slew, (slew+3),
-								cal_slew, stat_reg.getHalfWord(3), 
-								ctl_reg.getHalfWord(3),
-								i_target_mba.toEcmdString());
+                            FAPI_ERR("Slew calibration failed on %s slew: "
+                                "imp_idx=%d(%i ohms)",
+                                (data_adr ? "ADR" : "DATA"), imp,
+                                (data_adr ? adr_imp_array[imp] :
+                                 drv_imp_array[(4-imp)]));
+                            FAPI_ERR("slew_idx=%d(%i V/ns), slew_table=0x%02X",
+                                     slew, (slew+3), cal_slew);
+                            FAPI_ERR("ctl_reg=0x%04X, status=0x%04X on %s!",
+                                     stat_reg.getHalfWord(3),
+                                     ctl_reg.getHalfWord(3),
+                                     i_target_mba.toEcmdString());
 
+                            const uint8_t & DATA_ADR = data_adr;
+                            const uint8_t & IMP = imp;
+                            const uint8_t & SLEW = slew;
+                            const fapi::Target & MBA_IN_ERROR = i_target_mba;
 							FAPI_SET_HWP_ERROR(rc, RC_MSS_SLEW_CAL_ERROR);
-							//return rc;
 							array_rcs[l_port]=rc;
 							continue;
 						}
@@ -1460,8 +1476,6 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 			default:
 				FAPI_INF("WARNING: EFF_CEN_DRV_IMP_DQ_DQS attribute "
 						"invalid, using value of 0");
-//				FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
-//				return rc;
 		}
 //		FAPI_DBG("switched imp to value of %u",
 //				slew_imp_val[SLEW_TYPE_DATA][IMP][j]);
@@ -1543,9 +1557,14 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 		FAPI_INF("Setting slew registers for port %i", l_port);
 		for (uint8_t slew_type=0; slew_type < MAX_NUM_SLEW_TYPES; slew_type++)
 		{
-			array_rcs[l_port]=config_slew_rate(i_target_mba, l_port, slew_type,
+		    fapi::ReturnCode config_rc =
+		        config_slew_rate(i_target_mba, l_port, slew_type,
 					slew_imp_val[slew_type][IMP][l_port],
 					slew_imp_val[slew_type][SLEW][l_port]);
+		    if (config_rc)
+		    {
+		        array_rcs[l_port] = config_rc;
+		    }
 		}
 	}
 

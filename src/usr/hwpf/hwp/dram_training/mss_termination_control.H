@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.H,v 1.10 2012/12/14 16:17:07 sasethur Exp $
+// $Id: mss_termination_control.H,v 1.12 2014/01/22 15:39:22 mjjones Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur Sept 28 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author:  |  Date:   | Comment:
 //---------|---------- |--------- |---------------------------------------------
+//  1.12   | 22-Jan-14 | mjjones  | Removed FW header
+//  1.11   | 21-Jan-14 | abhijsau | mike and menlo fixed ras review comments
 //  1.10   | 14-Dec-12 | sasethur | Updated for fw review comments
 //  1.9    | 07-Dec-12 | sasethur | Updated for fw review comments
 //  1.8	   | 16-Nov-12 | mwuu	  | Added typedef for external call of
@@ -105,7 +107,6 @@ const uint8_t adr_imp_array[] = {
 const uint8_t MAX_NUM_CAL_SLEW_RATES = 4 ;	// 3V/ns, 4V/ns, 5V/ns, 6V/n
 const uint8_t MAX_NUM_SLEW_RATES = 4;	// 3V/ns, 4V/ns, 5V/ns, 6V/n, MAX?
 const uint8_t slew_rate_array[] = {
-//    7,
 	6,
 	5,
 	4,
@@ -254,17 +255,88 @@ const uint8_t rcv_imp_array[] = {
     15
     };
 
-typedef fapi::ReturnCode (*mss_slew_cal_FP_t)(const fapi::Target & i_target_mba);
-
 extern "C"
 {
-fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t i_port, uint32_t l_wr_vref);
-fapi::ReturnCode config_rd_cen_vref(const fapi::Target & i_target_mba, uint8_t i_port, uint32_t l_rd_cen_vref);
-fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_port, uint8_t l_drv_imp_dq_dqs);
-fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_port, uint8_t l_rcv_imp_dq_dqs);
+/**
+ * @brief configures PC_VREF_DRV_CONTROL registers to vary the DRAM VREF
+ *
+ * @param[in] i_target_mba   Reference to centaur.mba target
+ * @param[in] i_port         MBA Port
+ * @param[in] i_wr_dram_vref DRAM VREF to set
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba,
+                                     uint8_t i_port,
+                                     uint32_t i_wr_dram_vref);
+
+/**
+ * @brief configures read vref registers to vary the CEN VREF
+ *
+ * @param[in] i_target_mba   Reference to centaur.mba target
+ * @param[in] i_port         MBA Port
+ * @param[in] i_rd_cen_vref  CEN VREF to set
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode config_rd_cen_vref(const fapi::Target & i_target_mba,
+                                    uint8_t i_port,
+                                    uint32_t i_rd_cen_vref);
+
+/**
+ * @brief configures the Driver impedance values to the registers
+ *
+ * @param[in] i_target_mba     Reference to centaur.mba target
+ * @param[in] i_port           MBA Port
+ * @param[in] i_drv_imp_dq_dqs Driver impedance values
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba,
+                                uint8_t i_port,
+                                uint8_t i_drv_imp_dq_dqs);
+
+/**
+ * @brief configures the Receiver impedance values to the registers
+ *
+ * @param[in] i_target_mba     Reference to centaur.mba target
+ * @param[in] i_port           MBA Port
+ * @param[in] i_rcv_imp_dq_dqs Receiver impedance values
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba,
+                                uint8_t i_port,
+                                uint8_t i_rcv_imp_dq_dqs);
+
+/**
+ * @brief configures the Slew rate values to the registers
+ *
+ * @param[in] i_target_mba Reference to centaur.mba target
+ * @param[in] i_port       MBA Port
+ * @param[in] i_slew_type  Slew Type
+ * @param[in] i_slew_imp   Slew Impedance
+ * @param[in] i_slew_rate  Slew Rate
+ *
+ * @return ReturnCode
+ */
 fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
-	const uint8_t i_port, const uint8_t i_slew_type, const uint8_t i_slew_imp,
-	const uint8_t i_slew_rate);
+	                              const uint8_t i_port,
+	                              const uint8_t i_slew_type,
+	                              const uint8_t i_slew_imp,
+	                              const uint8_t i_slew_rate);
+
+/**
+ * @brief runs the slew calibration engine
+ *
+ * Configures MSS_SLEW_DATA/ADR attributes and calls config_slew_rate to set
+ * the slew rate in the registers.
+ *
+ * @param[in] i_target_mba     Reference to centaur.mba target
+ *
+ * @return ReturnCode
+ */
 fapi::ReturnCode mss_slew_cal(const fapi::Target & i_target_mba);
+
 } // extern C
 #endif

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,10 +21,74 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_draminit_training_advanced.xml,v 1.1 2013/06/19 18:27:51 bellows Exp $ -->
+<!-- $Id: memory_mss_draminit_training_advanced.xml,v 1.2 2014/01/23 17:11:14 sasethur Exp $ -->
 <!-- For file ../../ipl/fapi/mss_draminit_training_advanced.C -->
 <!-- // *! OWNER NAME : Saravanan Sethuraman          email ID:saravanans@in.ibm.com -->
 <!-- // *! BACKUP NAME: Mark D Bellows	 			 email ID:bellows@us.ibm.com -->
 
+<hwpError>
+  <rc>RC_DRV_IMPED_SHMOO_INVALID_MARGIN_DATA</rc>
+  <description>
+    The drv_imped_shmoo utility function got bad margin data from the
+    find_best_margin function
+  </description>
+  <ffdc>COUNT_DATA</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_SLEW_RATE_SHMOO_INVALID_MARGIN_DATA</rc>
+  <description>
+    The slew_rate_shmoo utility function got bad margin data from the
+    find_best_margin function
+  </description>
+  <ffdc>COUNT_DATA</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_WR_VREF_SHMOO_INVALID_MARGIN_DATA</rc>
+  <description>
+    The wr_vref_shmoo utility function got bad margin data from the
+    find_best_margin function
+  </description>
+  <ffdc>COUNT_DATA</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_RD_VREF_SHMOO_INVALID_MARGIN_DATA</rc>
+  <description>
+    The rd_vref_shmoo utility function got bad margin data from the
+    find_best_margin function
+  </description>
+  <ffdc>COUNT_DATA</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_RCV_IMP_SHMOO_INVALID_MARGIN_DATA</rc>
+  <description>
+    The rcv_imp_shmoo utility function got bad margin data from the
+    find_best_margin function
+  </description>
+  <ffdc>COUNT_DATA</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
 
 </hwpErrors>

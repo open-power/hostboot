@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.29 2014/01/14 02:24:08 mwuu Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.30 2014/01/23 01:33:13 mwuu Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,7 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#		1.30|mwuu    |01/22/14|Changed DIMM_TYPE fix for DDR4 CDIMM
 #		1.29|mwuu    |01/14/14|Added VPD attributes for TSYS_ADR, TSYS_DP18,
 #			|        |        |changed DIMM_TYPE for obsolete CDIMM enum
 #		1.28|mwuu    |11/22/13|Update for VPD attributes
@@ -175,7 +176,7 @@ define def_not_ddr4	=	(ATTR_EFF_DRAM_GEN != ENUM_ATTR_EFF_DRAM_GEN_DDR4)	;	# not
 
 # shorter test for DIMM type
 define def_is_rdimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM)	;	# RDIMM = 1
-define def_is_udimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)	;	# UDIMM = 2
+#define def_is_udimm		=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)	;	# UDIMM = 2
 define def_is_lrdimm	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)	;	# LRDIMM = 3
 
 # shorter test for DRAM width
@@ -294,7 +295,7 @@ define def_cdi_spcke_ohm40_p1	=	(ATTR_VPD_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_VPD_
 define def_is_type1	=	((ATTR_MSS_DQS_SWIZZLE_TYPE == 1) && (ATTR_EFF_CUSTOM_DIMM != ENUM_ATTR_EFF_CUSTOM_DIMM_YES));
 
 # remove dimm_type == cdimm later
-define def_is_custom = ((ATTR_EFF_CUSTOM_DIMM == ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (def_is_udimm));
+define def_is_custom = (ATTR_EFF_CUSTOM_DIMM == ENUM_ATTR_EFF_CUSTOM_DIMM_YES);
 
 # define for 2 cycle addressing mode (2N)
 define def_2N_mode	= (ATTR_VPD_DRAM_2N_MODE_ENABLED == ENUM_ATTR_VPD_DRAM_2N_MODE_ENABLED_TRUE) ;
@@ -460,7 +461,7 @@ scom 0x8000C00D0301143F {
 # 	59:61	,	0b101		,	((def_is_rdimm) && (def_is_ddr4))	;	# DDR4 RDIMM
 # 	59:61	,	0b111		,	((def_is_lrdimm) && (def_is_ddr4))	;	# DDR4 LRDIMM
 #	62		,	0b1			,	any									;	# DDR4 Latency Chicken SW
-#	63		,	0b0			,	any									;	# Retain_Percal_SW
+#	63		,	0b0			,	any									;	# Retrain_Percal_SW
 }
 
 # DPHY01.DDRPHY_PC_CONFIG1_P1

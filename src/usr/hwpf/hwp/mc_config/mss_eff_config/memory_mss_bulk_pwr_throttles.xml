@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -21,16 +21,25 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.2 2013/11/14 17:29:18 pardeik Exp $ -->
+<!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.3 2014/01/24 21:56:55 pardeik Exp $ -->
 <!-- For file ../../ipl/fapi/mss_bulk_pwr_throttles.C -->
-<!-- // *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com -->
-<!-- // *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com -->
+<!-- // *! OWNER NAME  : Michael Pardeik   Email: pardeik@us.ibm.com -->
+<!-- // *! BACKUP NAME : Jacob Sloat       Email: jdsloat@us.ibm.com -->
 
 <!-- Original Source for RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER</rc>
     <description>Unable to find throttle setting that has DIMM power underneath the limit.  Callout Firmware.</description>
+  <ffdc>PAIR_POWER</ffdc>
+  <ffdc>PAIR_WATT_TARGET</ffdc>
+  <callout>
+    <target>MEMBUF_CHIP</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
-
 
 </hwpErrors>

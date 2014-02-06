@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.H,v 1.16 2013/08/08 14:54:08 sasethur Exp $
+// $Id: mss_draminit_training_advanced.H,v 1.17 2014/01/23 17:10:05 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur Sept 28 2011. */
 
 //------------------------------------------------------------------------------
@@ -54,6 +54,7 @@
 //  1.14   | 10-May-13 | sasethur | Added user input for test type, pattern from wrapper
 //  1.15   | 10-May-13 | sasethur | changed uint8_t to uint32_t for test type, pattern
 //  1.16   | 08-Aug-13 | sasethur | Removed Pattern and testype
+//  1.17   | 17-Jan-14 | mjjones  | RAS Review cleanup
 
 #ifndef _MSS_DRAMINIT_TRAINING_ADVANCED_H
 #define _MSS_DRAMINIT_TRAINING_ADVANCED_H
@@ -69,14 +70,12 @@ typedef fapi::ReturnCode (*mss_draminit_training_advanced_FP_t)(const fapi::Targ
 extern "C"
 {
 /**
-* @brief Draminit training advanced procedure shmoo's drv_impedance, slew, vref and receiver impedance and get the optimum value 
-*
-* @param[in] i_target Reference to target
-* i_pattern  To enable patterns for mcbist used in lab/debug mode - user option
-* i_test_type  To enable test types for mcbist used in lab/debug mode - user option
-* @return ReturnCode
-*/
-
+ * @brief Draminit training advanced procedure shmoo's drv_impedance, slew, vref and receiver impedance and get the optimum value
+ *
+ * @param[in] i_target Reference to MBA target
+ *
+ * @return ReturnCode
+ */
 fapi::ReturnCode mss_draminit_training_advanced(const fapi::Target & i_target_mba);
 
 } // extern C
