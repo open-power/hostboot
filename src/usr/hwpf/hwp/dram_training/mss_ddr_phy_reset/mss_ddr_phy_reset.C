@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr_phy_reset.C,v 1.27 2014/01/16 20:54:48 mfred Exp $
+
+// $Id: mss_ddr_phy_reset.C,v 1.28 2014/01/31 15:09:03 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -430,6 +431,7 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                     const uint16_t & EXPECTED_STATUS = DP18_PLL_EXP_LOCK_STATUS;
                     const uint16_t ACTUAL_STATUS = dp_p0_lock_data.getHalfWord(3);
                     const fapi::Target & MBA_IN_ERROR = i_target;
+                    const fapi::Target & MEMBUF_CHIP_IN_ERROR = l_centaurTarget;
                     FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_0_PLL_FAILED_TO_LOCK);
                     break;
                 }
@@ -453,6 +455,7 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                     const uint16_t & EXPECTED_STATUS = DP18_PLL_EXP_LOCK_STATUS;
                     const uint16_t ACTUAL_STATUS = dp_p1_lock_data.getHalfWord(3);
                     const fapi::Target & MBA_IN_ERROR = i_target;
+                    const fapi::Target & MEMBUF_CHIP_IN_ERROR = l_centaurTarget;
                     FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_1_PLL_FAILED_TO_LOCK);
                     break;
                 }
@@ -468,6 +471,7 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 const uint16_t & EXPECTED_STATUS = AD32S_PLL_EXP_LOCK_STATUS;
                 const uint16_t ACTUAL_STATUS = ad_p0_lock_data.getHalfWord(3);
                 const fapi::Target & MBA_IN_ERROR = i_target;
+                const fapi::Target & MEMBUF_CHIP_IN_ERROR = l_centaurTarget;
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_AD32S_0_PLL_FAILED_TO_LOCK);
                 break;
             }
@@ -479,6 +483,7 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 const uint16_t & EXPECTED_STATUS = AD32S_PLL_EXP_LOCK_STATUS;
                 const uint16_t ACTUAL_STATUS = ad_p1_lock_data.getHalfWord(3);
                 const fapi::Target & MBA_IN_ERROR = i_target;
+                const fapi::Target & MEMBUF_CHIP_IN_ERROR = l_centaurTarget;
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_AD32S_1_PLL_FAILED_TO_LOCK);
                 break;
             }
@@ -1174,6 +1179,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: mss_ddr_phy_reset.C,v $
+Revision 1.28  2014/01/31 15:09:03  mfred
+Mike Jones added statements to pass target into XML for callouts.
+
 Revision 1.27  2014/01/16 20:54:48  mfred
 Updates for passing more data to error handler.  From Mike Jones.
 

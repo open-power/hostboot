@@ -20,7 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.25 2014/01/22 15:39:18 mjjones Exp $
+
+// $Id: mss_termination_control.C,v 1.26 2014/01/31 13:41:28 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.26   | mjjones  |31-Jan-14| RAS Reviewed 
 //  1.25   | mjjones  |22-Jan-14| Removed firmware header
 //  1.24   | abhijsau |21-Jan-14| mike and menlo fixed ras review comments
 //  1.23   | bellows  |02-Dec-13| VPD attribute update
@@ -1344,16 +1346,6 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 						}
 						else
 						{
-							if (cal_status == 1)
-							{
-								FAPI_ERR("Error occurred during slew "
-										"calibration");
-							}
-							else
-							{
-								FAPI_ERR("Slew calibration timed out, loop=%i",
-										poll_count);
-							}
                             FAPI_ERR("Slew calibration failed on %s slew: "
                                 "imp_idx=%d(%i ohms)",
                                 (data_adr ? "ADR" : "DATA"), imp,
@@ -1370,7 +1362,41 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
                             const uint8_t & IMP = imp;
                             const uint8_t & SLEW = slew;
                             const fapi::Target & MBA_IN_ERROR = i_target_mba;
-							FAPI_SET_HWP_ERROR(rc, RC_MSS_SLEW_CAL_ERROR);
+                            const ecmdDataBufferBase & STAT_REG = stat_reg;
+
+                            if (cal_status == 1)
+                            {
+                                if (l_port == 0)
+                                {
+                                    FAPI_ERR("Error occurred during slew calibration on port 0");
+                                    FAPI_SET_HWP_ERROR(rc,
+                                        RC_MSS_SLEW_CAL_ERROR_PORT0);
+                                }
+                                else
+                                {
+                                    FAPI_ERR("Error occurred during slew calibration on port 1");
+                                    FAPI_SET_HWP_ERROR(rc,
+                                        RC_MSS_SLEW_CAL_ERROR_PORT1);
+                                }
+                            }
+                            else
+                            {
+                                if (l_port == 0)
+                                {
+                                    FAPI_ERR("Slew calibration timed out on port 0, loop=%i",
+                                        poll_count);
+                                    FAPI_SET_HWP_ERROR(rc,
+                                        RC_MSS_SLEW_CAL_TIMEOUT_PORT0);
+                                }
+                                else
+                                {
+                                    FAPI_ERR("Slew calibration timed out on port 1, loop=%i",
+                                        poll_count);
+                                    FAPI_SET_HWP_ERROR(rc,
+                                        RC_MSS_SLEW_CAL_TIMEOUT_PORT1);
+                                }
+                            }
+
 							array_rcs[l_port]=rc;
 							continue;
 						}
