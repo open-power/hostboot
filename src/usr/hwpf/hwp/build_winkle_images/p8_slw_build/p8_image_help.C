@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help.C,v 1.59 2013/12/03 05:44:12 cmolsen Exp $
+// $Id: p8_image_help.C,v 1.60 2014/01/25 05:28:39 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help.C                                                   */
@@ -59,7 +59,7 @@ int calc_ring_delta_state( const uint32_t  *i_init,
 													 uint32_t        *o_delta,
 													 const uint32_t  i_ringLen )
 {
-  int      i=0, count=0, bit=0, remainder=0, remainingBits=0;
+  int      i=0, count=0, remainder=0, remainingBits=0;
   uint32_t init, alter;
   uint32_t mask=0;
 
@@ -91,13 +91,9 @@ int calc_ring_delta_state( const uint32_t  *i_init,
     if (remainingBits>=32)
       remainingBits = remainingBits-32;
 	  else  {  //If remaining bits are less than 32 bits, mask unused bits
-	    mask = 0;
-	    for (bit=0; bit<(32-remainingBits); bit++)  {
-	      mask = mask << 1;
-	      mask = mask + 1;
-	    }
 		  MY_DBG("remainingBits=%i<32. Padding w/zeros. True bit length unaltered. (@word count=%i)\n",remainingBits,count);
-	    mask  = ~mask;
+      mask = BITS32(0,remainingBits); // BE mask
+      mask = myRev32(mask);           // Convert to LE if on LE machine
 	    init  = init & mask;
 	    alter = alter & mask;
 	    remainingBits = 0;
@@ -142,10 +138,8 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   uint64_t pore_imm64b=0;
   uint32_t maxWfInlineLenInWords;
   PoreInlineContext ctx;
-//#ifdef IMGBUILD_PPD_WF_POLLING_PROT
   uint32_t waitsScanPoll=0;
   uint32_t scanRing_baseAddr_long=0;
-//#endif
 
 	maxWfInlineLenInWords = *o_wfInlineLenInWords;
 
@@ -164,10 +158,8 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   scanRing_baseAddr = P8_PORE_SHIFT_REG;
   scanRing_poreAddr = scanRing_baseAddr;
 
-//#ifdef IMGBUILD_PPD_WF_POLLING_PROT
   // Long (poll): 0x00039000: port 3, addr bit 16 must be set to 1 and bit 19 to 1.
   scanRing_baseAddr_long = P8_PORE_SHIFT_REG | 0x00001000;
-//#endif
 
   // Header check word for checking ring write was successful
   scanRingCheckWord = P8_SCAN_CHECK_WORD;
@@ -233,8 +225,6 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 
   MY_DBG("count=%i  rem=%i  remBits=%i",count,remainder,remainingBits);
 
-  // Read and compare init and flush values 32 bits at a time.  Store delta in
-  // o_delta buffer.
   for (i=0; i<count; i++)  {
 
     if (i==(count-1))  {
@@ -242,7 +232,8 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
       MY_DBG("Clearing any dirty bits in last WF word:\n");
       MY_DBG("i_deltaRing[%i] (before)     = 0x%08x\n",i,i_deltaRing[i]);
       MY_DBG("remainingBits                = %i\n",remainingBits);
-      clear_excess_dirty_bits_mask = 0xffffffff>>(32-remainingBits);
+      clear_excess_dirty_bits_mask = BITS32(0,remainingBits); // BE mask
+      clear_excess_dirty_bits_mask = myRev32(clear_excess_dirty_bits_mask); // Convert to LE if on LE machine
       i_deltaRing[i] = i_deltaRing[i]&clear_excess_dirty_bits_mask;
       MY_DBG("clear_excess_dirty_bits_mask = 0x%08x\n",clear_excess_dirty_bits_mask);
       MY_DBG("i_deltaRing[%i] (after)      = 0x%08x\n",i,i_deltaRing[i]);
@@ -257,42 +248,37 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 
       if (rotateLen > 0)  {
 
-//#ifdef IMGBUILD_PPD_WF_POLLING_PROT
 				if (i_ddLevel>=0x20)  {   // Use polling protocol.
 
-        PoreInlineLocation  srcp1=0,tgtp1=0;
+          PoreInlineLocation  srcp1=0,tgtp1=0;
 
-        pore_imm64b = uint64_t(rotateLen)<<32;
-				pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
+          pore_imm64b = uint64_t(rotateLen)<<32;
+				  pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
 
-        waitsScanPoll = rotateLen/OVER_SAMPLING_POLL;
-        if (waitsScanPoll<WAITS_POLL_MIN)
-          waitsScanPoll = WAITS_POLL_MIN;
-				PORE_LOCATION(&ctx, tgtp1);
-				pore_WAITS(&ctx, waitsScanPoll);
-				//pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
-				//pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
-				pore_LDANDI(&ctx, D0, GENERIC_GP1_0x00000001, P1, P8_SCAN_POLL_MASK_BIT15);
-				PORE_LOCATION(&ctx, srcp1);
-				pore_BRAZ(&ctx, D0, tgtp1);
-				pore_inline_branch_fixup(&ctx, srcp1, tgtp1);
-        if (ctx.error > 0)  {
-          MY_ERR("***POLLING PROT(2) rc = %d", ctx.error);
-          return ctx.error;
-        }
-//#else
+          waitsScanPoll = rotateLen/OVER_SAMPLING_POLL;
+          if (waitsScanPoll<WAITS_POLL_MIN)
+            waitsScanPoll = WAITS_POLL_MIN;
+				  PORE_LOCATION(&ctx, tgtp1);
+				  pore_WAITS(&ctx, waitsScanPoll);
+				  pore_LDANDI(&ctx, D0, GENERIC_GP1_0x00000001, P1, P8_SCAN_POLL_MASK_BIT15);
+				  PORE_LOCATION(&ctx, srcp1);
+				  pore_BRAZ(&ctx, D0, tgtp1);
+				  pore_inline_branch_fixup(&ctx, srcp1, tgtp1);
+          if (ctx.error > 0)  {
+            MY_ERR("***POLLING PROT(2) rc = %d", ctx.error);
+            return ctx.error;
+          }
         }
         else  {                   // Do not use polling protocol.
 
-        scanRing_poreAddr = scanRing_baseAddr | rotateLen;
-        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-        if (ctx.error > 0)  {
-          MY_ERR("***LD D0 rc = %d", ctx.error);
-          return ctx.error;
-        }
+          scanRing_poreAddr = scanRing_baseAddr | rotateLen;
+          pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+          if (ctx.error > 0)  {
+            MY_ERR("***LD D0 rc = %d", ctx.error);
+            return ctx.error;
+          }
 
         }
-//#endif
 
       } // End of if (rotateLen>0)
 
@@ -371,56 +357,51 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
       else
         rotateLen = rotateLen + remainingBits;
 
-//#ifdef IMGBUILD_PPD_WF_POLLING_PROT
 			if (i_ddLevel>=0x20)  {    // Use polling protocol.
 
-      PoreInlineLocation  srcp2=0,tgtp2=0;
+        PoreInlineLocation  srcp2=0,tgtp2=0;
 
-      // Max rotate length is 2^20-1, i.e., data BITS(12-31)=>0x000FFFFF
-			if (rotateLen>=SCAN_MAX_ROTATE_LONG)  {
-			  MY_INF("Scanning should never be here since max possible ring length is\n");
-        MY_INF("480,000 bits but MAX_LONG_ROTATE=0x%0x and rotateLen=0x%0x\n",
-                 SCAN_MAX_ROTATE_LONG, rotateLen);
-        pore_imm64b = uint64_t(SCAN_MAX_ROTATE_LONG)<<32;
-				pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
-	      if (ctx.error > 0)  {
-	        MY_ERR("***POLLING PROT(3a) rc = %d", ctx.error);
-	        return ctx.error;
-	      }
-		  	waitsScanPoll = rotateLen/OVER_SAMPLING_POLL;
-        if (waitsScanPoll<WAITS_POLL_MIN)
-          waitsScanPoll = WAITS_POLL_MIN;
-			  PORE_LOCATION(&ctx, tgtp2);
-  			pore_WAITS(&ctx, waitsScanPoll);
-	  		//pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
-		  	//pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
-				pore_LDANDI(&ctx, D0, GENERIC_GP1_0x00000001, P1, P8_SCAN_POLL_MASK_BIT15);
-			 	PORE_LOCATION(&ctx, srcp2);
-			  pore_BRAZ(&ctx, D0, tgtp2);
-  			pore_inline_branch_fixup(&ctx, srcp2, tgtp2);
-	      if (ctx.error > 0)  {
-	        MY_ERR("***POLLING PROT(3) rc = %d", ctx.error);
-	        return ctx.error;
-	      }
-        rotateLen = rotateLen - SCAN_MAX_ROTATE_LONG;
-	  	}
+        // Max rotate length is 2^20-1, i.e., data BITS(12-31)=>0x000FFFFF
+  			if (rotateLen>=SCAN_MAX_ROTATE_LONG)  {
+			    MY_INF("Scanning should never be here since max possible ring length is\n");
+          MY_INF("480,000 bits but MAX_LONG_ROTATE=0x%0x and rotateLen=0x%0x\n",
+                   SCAN_MAX_ROTATE_LONG, rotateLen);
+          pore_imm64b = uint64_t(SCAN_MAX_ROTATE_LONG)<<32;
+				  pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
+	        if (ctx.error > 0)  {
+	          MY_ERR("***POLLING PROT(3a) rc = %d", ctx.error);
+	          return ctx.error;
+  	      }
+		  	  waitsScanPoll = rotateLen/OVER_SAMPLING_POLL;
+          if (waitsScanPoll<WAITS_POLL_MIN)
+            waitsScanPoll = WAITS_POLL_MIN;
+	  		  PORE_LOCATION(&ctx, tgtp2);
+    			pore_WAITS(&ctx, waitsScanPoll);
+				  pore_LDANDI(&ctx, D0, GENERIC_GP1_0x00000001, P1, P8_SCAN_POLL_MASK_BIT15);
+			   	PORE_LOCATION(&ctx, srcp2);
+		  	  pore_BRAZ(&ctx, D0, tgtp2);
+    			pore_inline_branch_fixup(&ctx, srcp2, tgtp2);
+  	      if (ctx.error > 0)  {
+	          MY_ERR("***POLLING PROT(3) rc = %d", ctx.error);
+	          return ctx.error;
+	        }
+          rotateLen = rotateLen - SCAN_MAX_ROTATE_LONG;
+      	}
 
       }
       else  {                   // Do not use polling protocol.
-//#else
 
-      if (rotateLen>i_scanMaxRotate)  {
-        scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
-        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-        if (ctx.error > 0)  {
-          MY_ERR("***LD D0 rc = %d", ctx.error);
-          return ctx.error;
+        if (rotateLen>i_scanMaxRotate)  {
+          scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
+          pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+          if (ctx.error > 0)  {
+            MY_ERR("***LD D0 rc = %d", ctx.error);
+            return ctx.error;
+          }
+          rotateLen = rotateLen - i_scanMaxRotate;
         }
-        rotateLen = rotateLen - i_scanMaxRotate;
-      }
 
       }
-//#endif
 
     } //end of else (i_deltaRing==0)
 
@@ -434,45 +415,40 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   // If the scan ring has not been rotated to the original position
   // shift the ring by remaining shift bit length.
   if (rotateLen>0)  {
-//#ifdef IMGBUILD_PPD_WF_POLLING_PROT
     if (i_ddLevel>=0x20)  {   // Use polling protocol.
 
-		PoreInlineLocation  srcp3=0,tgtp3=0;
+  		PoreInlineLocation  srcp3=0,tgtp3=0;
 
-    pore_imm64b = uint64_t(rotateLen)<<32;
-		pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
+      pore_imm64b = uint64_t(rotateLen)<<32;
+		  pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
 
-    waitsScanPoll = rotateLen/OVER_SAMPLING_POLL;
-    if (waitsScanPoll<WAITS_POLL_MIN)
-      waitsScanPoll = WAITS_POLL_MIN;
-    PORE_LOCATION(&ctx, tgtp3);
-	  pore_WAITS(&ctx, waitsScanPoll);
-  	//pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
-	 	//pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
-		pore_LDANDI(&ctx, D0, GENERIC_GP1_0x00000001, P1, P8_SCAN_POLL_MASK_BIT15);
-	 	PORE_LOCATION(&ctx, srcp3);
-	  pore_BRAZ(&ctx, D0, tgtp3);
-  	pore_inline_branch_fixup(&ctx, srcp3, tgtp3);
-    if (ctx.error > 0)  {
-      MY_ERR("***POLLING PROT(4) rc = %d", ctx.error);
-      return ctx.error;
-    }
-		rotateLen=0;
+      waitsScanPoll = rotateLen/OVER_SAMPLING_POLL;
+      if (waitsScanPoll<WAITS_POLL_MIN)
+        waitsScanPoll = WAITS_POLL_MIN;
+      PORE_LOCATION(&ctx, tgtp3);
+	    pore_WAITS(&ctx, waitsScanPoll);
+  		pore_LDANDI(&ctx, D0, GENERIC_GP1_0x00000001, P1, P8_SCAN_POLL_MASK_BIT15);
+	   	PORE_LOCATION(&ctx, srcp3);
+	    pore_BRAZ(&ctx, D0, tgtp3);
+    	pore_inline_branch_fixup(&ctx, srcp3, tgtp3);
+      if (ctx.error > 0)  {
+        MY_ERR("***POLLING PROT(4) rc = %d", ctx.error);
+        return ctx.error;
+      }
+	  	rotateLen=0;
 
     }
     else  {                   // Do not use polling protocol.
-//#else
 
-    scanRing_poreAddr=scanRing_baseAddr | rotateLen;
-    pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-    if (ctx.error > 0)  {
-      MY_ERR("***LD D0 rc = %d", ctx.error);
-      return ctx.error;
-    }
-    rotateLen=0;
+      scanRing_poreAddr=scanRing_baseAddr | rotateLen;
+      pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+      if (ctx.error > 0)  {
+        MY_ERR("***LD D0 rc = %d", ctx.error);
+        return ctx.error;
+      }
+      rotateLen=0;
 
     }
-//#endif
   }
 
   // Finally, check that our header check word went through in one piece.

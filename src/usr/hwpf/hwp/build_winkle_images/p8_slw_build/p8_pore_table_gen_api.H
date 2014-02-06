@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.23 2014/01/06 13:53:19 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.24 2014/01/25 05:29:19 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -167,7 +167,8 @@ CONST_UINT64_T( SCRATCH0_RESET_VALUE,           (0xABBA99EBBA33DADA) );
 //#include <pore_bitmanip.H>
 // Defining local versions of BITS and BIT
 // Create a multi-bit mask of \a n bits starting at bit \a b
-#define BITS(b, n) ((ULL(0xffffffffffffffff) << (64 - (n))) >> (b))
+#define BITS(b, n)  ((ULL(0xffffffffffffffff) << (64 - (n))) >> (b))
+#define BITS32(b,n) (uint32_t)((ULL(0xffffffff) << (32 - (n))) >> (b))
 // Create a single bit mask at bit \a b
 #define BIT(b) BITS((b), 1)
 

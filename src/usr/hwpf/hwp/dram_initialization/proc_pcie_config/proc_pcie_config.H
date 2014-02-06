@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.H,v 1.2 2014/01/13 18:21:59 jmcgill Exp $
+// $Id: proc_pcie_config.H,v 1.4 2014/02/03 15:58:53 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -45,7 +45,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi.H>
-#include "p8_scom_addresses.H"
+#include <p8_scom_addresses.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -92,8 +92,8 @@ const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[PROC_PCIE_CONFIG_NUM_PHB] =
     PCIE2_FIR_MASK_0x02012803
 };
 
-const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0_VAL = 0x5B8F819000000000ULL;
-const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1_VAL = 0x7F8F819000000000ULL;
+const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0_VAL = 0x5B0F819000000000ULL;
+const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1_VAL = 0x7F0F819000000000ULL;
 const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK_VAL = 0x0030006E00000000ULL;
 
 
