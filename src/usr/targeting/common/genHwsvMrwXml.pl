@@ -118,10 +118,6 @@ my $reqPol = $sysPolicy->{"required-policy-settings"};
 
 my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
 
-#@TODO RTC: 66365
-# Setting ALL_MCS_IN_INTERLEAVING_GROUP to zero. Need to replace with:
-# $reqPol->{'all_mcs_in_interleaving_group"}
-
 #No mirroring supported yet so the policy is just based on multi-node or not
 my $placement = 0x0; #NORMAL
 if ($sysname eq "brazos")
@@ -136,7 +132,6 @@ push @systemAttr,
     "FREQ_PROC_REFCLOCK_KHZ",
         $reqPol->{'processor-refclock-frequency-khz'}->{content},
     "FREQ_MEM_REFCLOCK", $reqPol->{'memory-refclock-frequency'}->{content},
-    "ALL_MCS_IN_INTERLEAVING_GROUP", "0",
     "BOOT_FREQ_MHZ", $reqPol->{'boot-frequency'}->{content},
     "FREQ_A", $reqPol->{'proc_a_frequency'}->{content},
     "FREQ_PB", $reqPol->{'proc_pb_frequency'}->{content},

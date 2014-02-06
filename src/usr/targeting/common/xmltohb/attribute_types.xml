@@ -1693,13 +1693,22 @@
     <description>
         System attribute.
         If all MCS chiplets are in an interleaving group (1=true, 0=false).
-        If true the SMP fabric is setup in normal mode.
-        If false the SMP fabric is setup in checkerboard mode.
+        - If true the SMP fabric is setup in normal mode and multiple MCSs
+          are grouped (disallowing systems with memory only under 1 MCS
+          (i.e. systems with a single C-DIMM))
+        - If false the SMP fabric is setup in checkerboard mode.
         Provided by the Machine Readable Workbook.
+        This attribute is based on Machine-Type-Model (MTM) and is setup by
+          the service processor.
     </description>
-    <simpleType><uint8_t></uint8_t></simpleType>
+    <simpleType>
+        <uint8_t>
+            <default>0x00</default>
+        </uint8_t>
+    </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_ALL_MCS_IN_INTERLEAVING_GROUP</id>
         <macro>DIRECT</macro>
@@ -8248,7 +8257,16 @@ firmware notes: Used as override attribute for pstate procedure
 
 <attribute>
     <id>MSS_INTERLEAVE_ENABLE</id>
-    <description>Used in the setting of groups.  It is a bit vector.  If the value  BITWISE_AND  1 = 1 then groups of 1 are enabled with special checkerboard modes needed, if the value  BITWISE_AND  2 = 2, then groups of 2 are possible; if value  BITWISE_AND  4, the groups of 4 are possible; if value  BITWISE_AND  8, the groups of 8 are possible.  If no groups can formed according to this input, then an error will be thrown.</description>
+    <description>
+        Used in the setting of MCS groups. It is a bitfield.
+        - If 0x01 is set then groups of 1 are enabled and the SMP fabric must
+          be set in checkerboard mode (see ALL_MCS_IN_INTERLEAVING_GROUP).
+        - If 0x02 is set then groups of 2 are possible.
+        - If 0x04 is set then groups of 4 are possible.
+        - If 0x08 is set then groups of 8 are possible.
+        This attribute is based on Machine-Type-Model (MTM) and is setup by
+          the service processor.
+    </description>
     <simpleType>
         <uint8_t>
             <default>0x07</default>
@@ -8256,6 +8274,7 @@ firmware notes: Used as override attribute for pstate procedure
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
         <macro>DIRECT</macro>
