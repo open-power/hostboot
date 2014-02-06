@@ -1380,6 +1380,8 @@ bool isMnfgFlagSet( uint32_t i_flag )
 
 //------------------------------------------------------------------------------
 
+// TODO: RTC 89378 remove "BIT_MNFG" and remove E from "CHECKING" once
+//       the attribute_types update is in the fsp build
 bool mfgMode()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_THRESHOLDS      ); }
 

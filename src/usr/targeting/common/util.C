@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -202,9 +202,8 @@ bool is_avp_load(void)
 
     TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags =
       sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-
-    return ((mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_AVP_ENABLE)
-       || (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE));
+    return ((mnfg_flags & TARGETING::MNFG_FLAG_AVP_ENABLE)
+       || (mnfg_flags & TARGETING::MNFG_FLAG_HDAT_AVP_ENABLE));
 }
 
 /**

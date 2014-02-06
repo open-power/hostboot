@@ -438,8 +438,8 @@ bool enableFastBgScrub();
 bool mnfgSpareDramDeploy();
 
 /**
- * @brief  Returns the state of the MNFG_IPL_MEMORY_CE_CHECKINGE policy flag.
- * @return TRUE if MNFG_IPL_MEMORY_CE_CHECKINGE is set, FALSE otherwise.
+ * @brief  Returns the state of the MNFG_IPL_MEMORY_CE_CHECKING policy flag.
+ * @return TRUE if MNFG_IPL_MEMORY_CE_CHECKING is set, FALSE otherwise.
  */
 bool isMfgCeCheckingEnabled();
 

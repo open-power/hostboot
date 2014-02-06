@@ -778,7 +778,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             break;
         }
 
-        if( TARGETING::MNFG_FLAG_BIT_MNFG_IPL_MEMORY_CE_CHECKINGE & mfgPolicy )
+        if( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING & mfgPolicy )
         {
             // For MNFG mode, check CE also
             stopCondition |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;

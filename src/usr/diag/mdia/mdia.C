@@ -71,7 +71,7 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
         if(maxMemPatterns)
         {
             globals.mfgPolicy |=
-              MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST;
+              MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST;
         }
 
         globals.simicsRunning = Util::isSimicsRunning();

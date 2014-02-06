@@ -50,19 +50,19 @@ errlHndl_t getMbaDiagnosticMode(
             o_mode = ONE_PATTERN;
         }
 
-        else if(MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
+        else if(MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST
            & i_globals.mfgPolicy)
         {
             o_mode = NINE_PATTERNS;
         }
 
-        else if(MNFG_FLAG_BIT_MNFG_ENABLE_STANDARD_PATTERN_TEST
+        else if(MNFG_FLAG_ENABLE_STANDARD_PATTERN_TEST
                 & i_globals.mfgPolicy)
         {
             o_mode = FOUR_PATTERNS;
         }
 
-        else if(MNFG_FLAG_BIT_MNFG_ENABLE_MINIMUM_PATTERN_TEST
+        else if(MNFG_FLAG_ENABLE_MINIMUM_PATTERN_TEST
                 & i_globals.mfgPolicy)
         {
             o_mode = ONE_PATTERN;
@@ -138,7 +138,7 @@ errlHndl_t getMbaWorkFlow(
             break;
     }
 
-    if(MNFG_FLAG_BIT_MNFG_IPL_MEMORY_CE_CHECKINGE
+    if(MNFG_FLAG_IPL_MEMORY_CE_CHECKING
             & i_globals.mfgPolicy)
     {
         o_wf.push_back(ANALYZE_IPL_MNFG_CE_STATS);

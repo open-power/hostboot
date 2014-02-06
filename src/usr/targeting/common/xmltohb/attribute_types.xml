@@ -2967,6 +2967,8 @@
     </hwpfToHbAttrMap>
 </attribute>
 
+<!-- TODO: RTC 89378 remove MNFG_FLAG_BIT once MNFG_FLAG makes it into the
+          fsp build and references in hwsvHostSvc.H are updated -->
 <enumerationType>
     <id>MNFG_FLAG_BIT</id>
     <description>Enumeration indicating the mnfg flags
@@ -3055,6 +3057,98 @@
     <enumerator>
         <!-- Forcibly run PSI diagnostics -->
         <name>MNFG_PSI_DIAGNOSTIC</name>
+        <value>0x00008000</value>
+    </enumerator>
+</enumerationType>
+
+<enumerationType>
+    <id>MNFG_FLAG</id>
+    <description>Enumeration indicating the mnfg flags
+        that are set by the user.  The values can be
+        combined using a bitwise 'OR'.  The values will
+        need to be kept in sync with the FAPI
+        enumerator values.  Also the enumeration type
+        is used by the ATTR_MNFG_FLAGS attribute.  Should
+        note that the MNFG_FLAG values are of type uint32_t
+    </description>
+    <enumerator>
+        <!-- Use default mfg error thresholds and reporting values -->
+        <name>THRESHOLDS</name>
+        <value>0x00000001</value>
+    </enumerator>
+    <enumerator>
+        <!-- Enable AVP execution -->
+        <name>AVP_ENABLE</name>
+        <value>0x00000002</value>
+    </enumerator>
+    <enumerator>
+        <!-- Enable HDAT AVPs** -->
+        <name>HDAT_AVP_ENABLE</name>
+        <value>0x00000004</value>
+    </enumerator>
+    <enumerator>
+        <!-- All SRCs are terminating (CEC hardware/procedural) -->
+        <name>SRC_TERM</name>
+        <value>0x00000008</value>
+    </enumerator>
+    <enumerator>
+        <!-- Enable IPL memory diagnostics to report memory CE -->
+        <name>IPL_MEMORY_CE_CHECKING</name>
+        <value>0x00000010</value>
+    </enumerator>
+    <enumerator>
+        <!-- Enable Fast Background Scrub -->
+        <name>FAST_BACKGROUND_SCRUB</name>
+        <value>0x00000020</value>
+    </enumerator>
+    <enumerator>
+        <!-- Test DRAM Repairs -->
+        <name>TEST_DRAM_REPAIRS</name>
+        <value>0x00000040</value>
+    </enumerator>
+    <enumerator>
+        <!-- Disable Dram Repairs -->
+        <name>DISABLE_DRAM_REPAIRS</name>
+        <value>0x00000080</value>
+    </enumerator>
+    <enumerator>
+        <!-- Enable exhaustive pattern test -->
+        <name>ENABLE_EXHAUSTIVE_PATTERN_TEST</name>
+        <value>0x00000100</value>
+    </enumerator>
+    <enumerator>
+        <!-- Enable standard pattern test -->
+        <name>ENABLE_STANDARD_PATTERN_TEST</name>
+        <value>0x00000200</value>
+    </enumerator>
+    <enumerator>
+        <!-- Enable minimum pattern test -->
+        <name>ENABLE_MINIMUM_PATTERN_TEST</name>
+        <value>0x00000400</value>
+    </enumerator>
+    <enumerator>
+        <!-- Disable Fabric eRepair -->
+        <name>DISABLE_FABRIC_eREPAIR</name>
+        <value>0x00000800</value>
+    </enumerator>
+    <enumerator>
+        <!-- Disable Memory eRepair -->
+        <name>DISABLE_MEMORY_eREPAIR</name>
+        <value>0x00001000</value>
+    </enumerator>
+    <enumerator>
+        <!-- Fabric deploy lane spares -->
+        <name>FABRIC_DEPLOY_LANE_SPARES</name>
+        <value>0x00002000</value>
+    </enumerator>
+    <enumerator>
+        <!-- DMI deploy lane spares -->
+        <name>DMI_DEPLOY_LANE_SPARES</name>
+        <value>0x00004000</value>
+    </enumerator>
+    <enumerator>
+        <!-- Forcibly run PSI diagnostics -->
+        <name>PSI_DIAGNOSTIC</name>
         <value>0x00008000</value>
     </enumerator>
 </enumerationType>
