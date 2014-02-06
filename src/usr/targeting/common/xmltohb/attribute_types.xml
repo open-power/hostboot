@@ -12359,6 +12359,93 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>MULTI_SCOM_BUFFER_MAX_SIZE</id>
+    <description>To represent different sizes of Multiscom Buffer.
+    It can take 11 different values
+    MULTI_SCOM_BUFFER_SIZE_1KB   = 0x0000000000000400,
+    MULTI_SCOM_BUFFER_SIZE_2KB   = 0x0000000000000800,
+    MULTI_SCOM_BUFFER_SIZE_4KB   = 0x0000000000001000,
+    MULTI_SCOM_BUFFER_SIZE_8KB   = 0x0000000000002000,
+    MULTI_SCOM_BUFFER_SIZE_16KB  = 0x0000000000004000,
+    MULTI_SCOM_BUFFER_SIZE_32KB  = 0x0000000000008000,
+    MULTI_SCOM_BUFFER_SIZE_64KB  = 0x0000000000010000,
+    MULTI_SCOM_BUFFER_SIZE_128KB = 0x0000000000020000,
+    MULTI_SCOM_BUFFER_SIZE_256KB = 0x0000000000040000,
+    MULTI_SCOM_BUFFER_SIZE_512KB = 0x0000000000080000,
+    MULTI_SCOM_BUFFER_SIZE_1MB   = 0x0000000000100000
+    </description>
+    <simpleType>
+      <uint64_t>
+            <default>0x0000000000001000</default>
+      </uint64_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MULTI_SCOM_BUFFER_MAX_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>MULTI_SCOM_BUFFER_MAX_SIZE_BIT</id>
+    <description>Enumeration indicating the multi scome
+        buffer size. The values can be combined using a
+        bitwise 'OR'.  The values will need to be kept
+        in sync with the FAPI enumerator values.  Also
+        the enumeration type is used by the
+        ATTR_MULTI_SCOM_BUFFER_MAX_SIZE.  Should
+        note that the MULTI_SCOM_BUFFER_MAX_SIZE values
+        are of type uint32_t
+    </description>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_1KB</name>
+        <value>0x00000400</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_2KB</name>
+        <value>0x00000800</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_4KB</name>
+        <value>0x00001000</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_8KB</name>
+        <value>0x00002000</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_16KB</name>
+        <value>0x00004000</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_32KB</name>
+        <value>0x00008000</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_64KB</name>
+        <value>0x00010000</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_128KB</name>
+        <value>0x00020000</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_256KB</name>
+        <value>0x00040000</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_512KB</name>
+        <value>0x00080000</value>
+    </enumerator>
+    <enumerator>
+        <name>MULTI_SCOM_BUFFER_SIZE_1MB</name>
+        <value>0x00100000</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
     <id>DMI_DFE_OVERRIDE</id>
     <description>
       Defines where to apply DMI bus DFE override settings for HW244323.
@@ -12984,7 +13071,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
-    <description>Used for Custom DIMMs to not enable the reading of the dimm temperature sensor on the master i2c bus</description>
+    <description>
+    Used for Custom DIMMs to not enable the reading of the dimm temperature 
+    sensor on the master i2c bus.
+    </description>
     <simpleType>
         <uint8_t>
             <default>0</default>
@@ -12996,6 +13086,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <id>ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-</attribute> 
+</attribute>
 
 </attributes>
