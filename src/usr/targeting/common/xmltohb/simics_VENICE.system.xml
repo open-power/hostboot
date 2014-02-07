@@ -407,10 +407,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE40200000,0x0003FFFE40300000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D00000000000,0x0003D01000000000,
             0x0003D02000000000,0x0003D03000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8000000000,0x0003FF8080000000,
+            0x0003FF8100000000,0x0003FF8180000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -1612,10 +1618,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE40600000,0x0003FFFE40700000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D04000000000,0x0003D05000000000,
             0x0003D06000000000,0x0003D07000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8200000000,0x0003FF8280000000,
+            0x0003FF8300000000,0x0003FF8380000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -2817,10 +2829,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE40A00000,0x0003FFFE40B00000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D08000000000,0x0003D09000000000,
             0x0003D0A000000000,0x0003D0B000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8400000000,0x0003FF8480000000,
+            0x0003FF8500000000,0x0003FF8580000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -4022,10 +4040,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE40E00000,0x0003FFFE40F00000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D0C000000000,0x0003D0D000000000,
             0x0003D0E000000000,0x0003D0F000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8600000000,0x0003FF8680000000,
+            0x0003FF8700000000,0x0003FF8780000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -5226,10 +5250,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE41200000,0x0003FFFE41300000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D10000000000,0x0003D11000000000,
             0x0003D12000000000,0x0003D13000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8800000000,0x0003FF8880000000,
+            0x0003FF8900000000,0x0003FF8980000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -6399,10 +6429,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE41600000,0x0003FFFE41700000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D14000000000,0x0003D15000000000,
             0x0003D16000000000,0x0003D17000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8A00000000,0x0003FF8A80000000,
+            0x0003FF8B00000000,0x0003FF8B80000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -7570,10 +7606,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE41A00000,0x0003FFFE41B00000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D18000000000,0x0003D19000000000,
             0x0003D1A000000000,0x0003D1B000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8C00000000,0x0003FF8C80000000,
+            0x0003FF8D00000000,0x0003FF8D80000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -8741,10 +8783,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE41E00000,0x0003FFFE41F00000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D1C000000000,0x0003D1D000000000,
             0x0003D1E000000000,0x0003D1F000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8E00000000,0x0003FF8E80000000,
+            0x0003FF8F00000000,0x0003FF8F80000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -17288,10 +17336,16 @@ po<!-- IBM_PROLOG_BEGIN_TAG                                                   --
             0x0003FFFE40200000,0x0003FFFE40300000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D00000000000,0x0003D01000000000,
             0x0003D02000000000,0x0003D03000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8000000000,0x0003FF8080000000,
+            0x0003FF8100000000,0x0003FF8180000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>

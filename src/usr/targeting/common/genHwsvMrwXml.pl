@@ -2057,8 +2057,20 @@ sub generate_proc
     printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
+    # Starts at 1024TB -0.5TB, 2GB per PHB (=8GB per proc)
+    printf( "    <attribute><id>PCI_BASE_ADDRS_32</id>\n" );
+    printf( "        <default>\n" );
+    printf( "            0x%016X,0x%016X,\n",
+       0x0003FF8000000000 + 0x800000000*$lognode + 0x200000000*$logid + 0x80000000*0,
+         0x0003FF8000000000 + 0x800000000*$lognode + 0x200000000*$logid + 0x80000000*1 );
+    printf( "            0x%016X,0x%016X\n",
+       0x0003FF8000000000 + 0x800000000*$lognode + 0x200000000*$logid + 0x80000000*2,
+         0x0003FF8000000000 + 0x800000000*$lognode + 0x200000000*$logid + 0x80000000*3 );
+    printf( "        </default>\n" );
+    printf( "    </attribute>\n" );
+
     # Starts at 976TB, 64GB per PHB (=256GB per proc)
-    printf( "    <attribute><id>PCI_BASE_ADDRS</id>\n" );
+    printf( "    <attribute><id>PCI_BASE_ADDRS_64</id>\n" );
     printf( "        <default>\n" );
     printf( "            0x%016X,0x%016X,\n",
        0x0003D00000000000 + 0x10000000000*$lognode + 0x4000000000*$logid + 0x1000000000*0,

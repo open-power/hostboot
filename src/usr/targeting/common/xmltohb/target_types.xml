@@ -467,7 +467,8 @@
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id></attribute>
     <attribute><id>INTP_BASE_ADDR</id></attribute>
     <attribute><id>PHB_BASE_ADDRS</id></attribute>
-    <attribute><id>PCI_BASE_ADDRS</id></attribute>
+    <attribute><id>PCI_BASE_ADDRS_64</id></attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id></attribute>
     <attribute><id>MEM_BASE</id></attribute>
     <attribute><id>MIRROR_BASE</id></attribute>
     <attribute><id>RNG_BASE_ADDR</id></attribute>

@@ -867,8 +867,8 @@ fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
             phyp_mode = true;
         }
 
-        //  BAR # 0 are the PCIE unit #'s
-        //  BAR # 1 is reserved, should be DISabled (per Joe McGill)
+        //  BAR # 0 are the PCIE Mem 64
+        //  BAR # 1 are the PCIE Mem 32
         //  BAR # 2 are the PHB REGS
         for( uint8_t u=0; u<3; u++ )
         {
@@ -881,7 +881,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
             else
             {
                 o_pcieBarEnable[u][0]   =   l_isEnabled ;
-                o_pcieBarEnable[u][1]   =   PROC_BARS_DISABLE ;
+                o_pcieBarEnable[u][1]   =   l_isEnabled ;
                 o_pcieBarEnable[u][2]   =   l_isEnabled ;
             }
 
@@ -923,20 +923,23 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
         else
         {
             // Pull the data out of the Hostboot attribute
-            uint64_t l_pciMem[4];
-            l_pProcTarget->tryGetAttr<TARGETING::ATTR_PCI_BASE_ADDRS>(
-                l_pciMem);
+            uint64_t l_pciMem32[4];
+            uint64_t l_pciMem64[4];
+            l_pProcTarget->tryGetAttr<TARGETING::ATTR_PCI_BASE_ADDRS_32>(
+                l_pciMem32);
+            l_pProcTarget->tryGetAttr<TARGETING::ATTR_PCI_BASE_ADDRS_64>(
+                l_pciMem64);
             uint64_t l_phbRegs[4];
             l_pProcTarget->tryGetAttr<TARGETING::ATTR_PHB_BASE_ADDRS>(
                 l_phbRegs);
 
-            //  BAR # 0 are the PCIE unit #'s
-            //  BAR # 1 is disabled, set to 0
+            //  BAR # 0 are the PCIE mem 64
+            //  BAR # 1 are the PCIE mem 32
             //  BAR # 2 are the PHB REGS
             for ( uint8_t u=0; u < 3; u++ )
             {
-               o_pcieBarBase[u][0]  =  l_pciMem[u];
-               o_pcieBarBase[u][1]  =  0;
+               o_pcieBarBase[u][0]  =  l_pciMem64[u];
+               o_pcieBarBase[u][1]  =  l_pciMem32[u];
                o_pcieBarBase[u][2]  =  l_phbRegs[u];
 
                FAPI_DBG( "fapiPlatGetProcPcieBarBaseAddr: Unit %d : %p %p %p",
@@ -967,12 +970,11 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
     else
     {
         //  NOTE: supported BAR0/1 sizes are from 64KB-1PB
-        //  NOTE: BAR1 is disabled, set to 0
         //  NOTE: only supported BAR2 size is 4KB
         for ( uint8_t u=0; u < 3; u++ )
         {
            o_pcieBarSize[u][0]  =   PCIE_BAR0_SIZE ;
-           o_pcieBarSize[u][1]  =   0 ;
+           o_pcieBarSize[u][1]  =   PCIE_BAR1_SIZE ;
            o_pcieBarSize[u][2]  =   PCIE_BAR2_SIZE;
 
            FAPI_DBG( "fapiPlatGetProcPcieBarSize: Unit %d : %p %p %p",

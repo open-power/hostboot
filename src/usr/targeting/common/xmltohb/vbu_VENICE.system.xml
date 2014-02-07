@@ -395,10 +395,16 @@
             0x0003FFFE40200000,0x0003FFFE40300000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D00000000000,0x0003D01000000000,
             0x0003D02000000000,0x0003D03000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8000000000,0x0003FF8080000000,
+            0x0003FF8100000000,0x0003FF8180000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
@@ -1490,10 +1496,16 @@
             0x0003FFFE40600000,0x0003FFFE40700000
         </default>
     </attribute>
-    <attribute><id>PCI_BASE_ADDRS</id>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
         <default>
             0x0003D04000000000,0x0003D05000000000,
             0x0003D06000000000,0x0003D07000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8200000000,0x0003FF8280000000,
+            0x0003FF8300000000,0x0003FF8380000000
         </default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>

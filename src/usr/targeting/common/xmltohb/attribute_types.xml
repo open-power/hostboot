@@ -2716,18 +2716,22 @@
 </attribute>
 
 <attribute>
-    <id>PCI_BASE_ADDRS</id>
-    <description>Base Address of PCI Memory Space</description>
+    <id>PCI_BASE_ADDRS_64</id>
+    <description>Base Address of PCI 64 bit Memory Space</description>
     <simpleType>
         <uint64_t>
-            <!-- Starts at 976TB, 64GB per PHB (=256GB per proc) -->
-            <!-- 0x0003D00000000000 + 0x4000000000*procnum + 0x1000000000*phbnum -->
-            <default>
-                0x0003D00000000000,
-                0x0003FFFE40100000,
-                0x0003FFFE40200000,
-                0x0003FFFE40300000
-            </default>
+        </uint64_t>
+        <array>4</array><!-- per PHB -->
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PCI_BASE_ADDRS_32</id>
+    <description>Base Address of PCI 32 bit Memory Space</description>
+    <simpleType>
+        <uint64_t>
         </uint64_t>
         <array>4</array><!-- per PHB -->
     </simpleType>
