@@ -145,7 +145,7 @@ int32_t CenDqBitmap::setSymbol( uint8_t i_symbol, uint8_t i_pins )
         uint8_t bitIdx  = evenDq % DQS_PER_BYTE;
 
         i_pins &= 0x3; // limit to 2 bits
-        uint32_t shift = (((DQS_PER_BYTE-1) - bitIdx) % 2) * 2; // 0,2,4,6
+        uint32_t shift = (((DQS_PER_BYTE-1) - bitIdx) / 2) * 2; // 0,2,4,6
         iv_data[portSlct][byteIdx] |= i_pins << shift;
 
     } while (0);
@@ -179,7 +179,7 @@ int32_t CenDqBitmap::setDram( uint8_t i_symbol, uint8_t i_pins )
         if ( isDramWidthX4(iv_mba) )
         {
             i_pins &= 0xf; // limit to 4 bits
-            uint32_t shift = (((DQS_PER_BYTE-1) - bitIdx) % 4) * 4; // 0,4
+            uint32_t shift = (((DQS_PER_BYTE-1) - bitIdx) / 4) * 4; // 0,4
             iv_data[portSlct][byteIdx] |= i_pins << shift;
         }
         else
@@ -223,7 +223,7 @@ int32_t CenDqBitmap::isChipMark( uint8_t i_symbol, bool & o_cm )
         if ( isDramWidthX4(iv_mba) )
         {
             pins = 0xf; // limit to 4 bits
-            uint8_t shift = (((DQS_PER_BYTE-1) - bitIdx) % 4) * 4; // 0,4
+            uint8_t shift = (((DQS_PER_BYTE-1) - bitIdx) / 4) * 4; // 0,4
             cmData = (cmData >> shift) & 0xf;
         }
 
