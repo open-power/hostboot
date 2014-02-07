@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdTermData.C,v 1.6 2013/10/31 18:03:28 whs Exp $
+// $Id: getMBvpdTermData.C,v 1.8 2014/02/10 19:57:04 whs Exp $
 /**
  *  @file getMBvpdTermData.C
  *
@@ -457,18 +457,23 @@ fapi::ReturnCode getMBvpdTermData(
                 }
                 break;
             }
-            // return the uint16_t [2] attributes from the MT keyword buffer
-            // return the uint32_t [2] attributes from the MT keyword buffer
+            // return the uint64_t attributes from the MT keyword buffer
             // need to consider endian since they are word fields
             case TERM_DATA_CKE_PWR_MAP:
             {
-                uint32_t (* l_pVal)[2] = (uint32_t (*)[2])o_pVal;
-                for (uint8_t l_port=0; l_port<2;l_port++)
-                {
-                    uint32_t * l_pWord =  (uint32_t *)&l_pMtBuffer->
-                        mb_mba[l_pos].mba_port[l_port].port_attr[l_attrOffset];
-                    (*l_pVal)[l_port] = FAPI_BE32TOH(*l_pWord);
-                }
+                uint64_t (* l_pVal) = (uint64_t (*))o_pVal;
+
+                uint32_t * l_pWord =  (uint32_t *)&l_pMtBuffer->
+                        mb_mba[l_pos].mba_port[0].port_attr[l_attrOffset];
+                uint32_t l_port0 = FAPI_BE32TOH(*l_pWord);
+
+                l_pWord =  (uint32_t *)&l_pMtBuffer->
+                        mb_mba[l_pos].mba_port[1].port_attr[l_attrOffset];
+                uint32_t l_port1 = FAPI_BE32TOH(*l_pWord);
+
+                (*l_pVal) = ( ((static_cast<uint64_t>(l_port0))<<32) |
+                               (static_cast<uint64_t>(l_port1)) );
+
                 break;
             }
             // return the uint16_t [2] attributes from the MT keyword buffer

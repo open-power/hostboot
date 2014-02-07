@@ -1474,7 +1474,7 @@ fapi::ReturnCode fapiPlatGetPciOscswitchConfig
         fapi::FAPI_RC_SUCCESS :\
     (checkTermDataType<fapi::TERM_DATA_CKE_PWR_MAP>(VAL), \
         fapi::platAttrSvc::fapiPlatGetTermData\
-           (PTARGET, fapi::TERM_DATA_CKE_PWR_MAP , VAL, sizeof(VAL)))
+           (PTARGET, fapi::TERM_DATA_CKE_PWR_MAP , &VAL, sizeof(VAL)))
 
 //------------------------------------------------------------------------------
 //  MACROS to support MBVPD Slope Intercept attributes

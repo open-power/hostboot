@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/mvpd_accessors/getMBvpdTermData.H $ */
+/* $Source: src/include/usr/hwpf/hwp/mvpd_accessors/getMBvpdTermData.H $  */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdTermData.H,v 1.3 2013/10/21 18:54:14 whs Exp $
+// $Id: getMBvpdTermData.H,v 1.5 2014/02/08 11:36:19 whs Exp $
 
 /**
  *  @file getMBvpdTermData.H
@@ -95,7 +95,9 @@ const uint8_t TERM_DATA_CHK60 = 0x40;  // check version for keyword to use
 // TERM_DATA_CKE_PRI_MAP is a uint16 in the vpd data. It is returned as
 // as a uint32. The offset is incremented by only 2 to get the next vpd value.
        TERM_DATA_CKE_PRI_MAP =             0x36,  //uint32_t [2]
-       TERM_DATA_CKE_PWR_MAP =             0x38,  //uint32_t [2]
+// TERM_DATA_CKE_PWR_MAP is a uint64_t composed of the uint32_t port 0 and
+// port 1 values at this offset. The offset is incremented by 4.
+       TERM_DATA_CKE_PWR_MAP =             0x38,  //uint64_t
        TERM_DATA_RLO = 0x3c|TERM_DATA_CHK60|TERM_DATA_LOW_NIBBLE,   //uint8_t[2]
        TERM_DATA_WLO = 0x3c|TERM_DATA_CHK60|TERM_DATA_HIGH_NIBBLE,  //uint8_t[2]
        TERM_DATA_GPO = 0x3d|TERM_DATA_CHK60,    //uint8_t[2]
@@ -150,7 +152,7 @@ template<>class MBvpdTermDataSize<fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE>
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_CKE_PRI_MAP>
     { public: typedef uint32_t Type[2]; };
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_CKE_PWR_MAP>
-    { public: typedef uint32_t Type[2]; };
+    { public: typedef uint64_t Type ; };
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_RLO>
     { public: typedef uint8_t Type[2]; };
 template<>class MBvpdTermDataSize<fapi::TERM_DATA_WLO>

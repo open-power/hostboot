@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/test/hwpmbvpdaccessortest.H $                    */
+/* $Source: src/usr/hwpf/test/hwpMBvpdAccessorTest.H $                    */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -773,22 +773,21 @@ public:
     {
         fapi::ReturnCode    l_fapirc;
         uint8_t val1[2][2] = {{0xFF,0xFF},{0xFF,0xFF}};
-#if HWPMBVPDACCESSORTEST_UT0
+#if HWPMBVPDACCESSORTEST_UT4
         uint8_t val2[2][2][4]={
                               {{0xFF,0xFF,0xFF,0xFF},{0xFF,0xFF,0xFF,0xFF}},
                               {{0xFF,0xFF,0xFF,0xFF},{0xFF,0xFF,0xFF,0xFF}}};
         uint8_t l_errorChk = 1; //do error checks just once
         uint8_t  val4[2] = {0xFF,0xFF};
-#endif
         uint32_t val3[2] = {0xFFFFFFFF,0xFFFFFFFF};
-#if HWPMBVPDACCESSORTEST_UT4
         uint8_t  val5[2] = {0xFF,0xFF};
 #endif
-#if HWPMBVPDACCESSORTEST_UT0
+        uint64_t val6    = 0xFFFFFFFFFFFFFFFF;
+
+#if HWPMBVPDACCESSORTEST_UT4
         getMBvpdTermData_FP_t (l_getMBvpdTermData)
                               = &getMBvpdTermData;
 #endif
-
         TS_TRACE( "testGetTermData entry" );
 
         TARGETING::TargetHandleList l_memBufList;
@@ -1069,7 +1068,7 @@ public:
                TS_TRACE( "testGetTermData attr "
                    "TERM_DATA_CEN_SLEW_RATE_SPCKE=0x%02x,0x%02x",
                    val4[0], val4[1]);
-#endif
+
            // TERM_DATA_CKE_PRI_MAP
                val3[0] = 0xFFFFFFFF;
                val3[1] = 0xFFFFFFFF;
@@ -1079,18 +1078,17 @@ public:
                TS_TRACE( "testGetTermData attr "
                    "TERM_DATA_CKE_PRI_MAP=0x%08x,0x%08x",
                    val3[0], val3[1]);
+#endif
 
-#if HWPMBVPDACCESSORTEST_UT4
            // TERM_DATA_CKE_PWR_MAP
-               val3[0] = 0xFFFFFFFF;
-               val3[1] = 0xFFFFFFFF;
+               val6 = 0xFFFFFFFFFFFFFFFF;
                l_fapirc = FAPI_ATTR_GET(ATTR_VPD_CKE_PWR_MAP,
-                   &l_fapi_mba_target, val3);
+                   &l_fapi_mba_target, val6);
                if (l_fapirc) break;
                TS_TRACE( "testGetTermData attr "
-                   "TERM_DATA_CKE_PWR_MAP=0x%08x,0x%08x",
-                   val3[0], val3[1]);
+                   "TERM_DATA_CKE_PWR_MAP=0x%016lx", val6);
 
+#if HWPMBVPDACCESSORTEST_UT4
            // TERM_DATA_RLO
                 l_fapirc = FAPI_ATTR_GET(ATTR_VPD_RLO,
                    &l_fapi_mba_target, val5);
