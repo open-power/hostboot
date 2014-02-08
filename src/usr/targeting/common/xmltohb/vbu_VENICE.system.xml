@@ -285,6 +285,10 @@
     <attribute><id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
+        <default>false</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

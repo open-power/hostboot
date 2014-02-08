@@ -191,6 +191,8 @@ push @systemAttr,
         $reqPol->{'mem_throttle_denominator'},
     "MRW_MAX_DRAM_DATABUS_UTIL",
         $reqPol->{'max_dram_databus_util'},
+    "MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE",
+        $reqPol->{'cdimm_master_i2c_temp_sensor_enable'},
     "PM_SYSTEM_IVRMS_ENABLED", $reqPol->{'pm_system_ivrms_enabled'},
     "PM_SYSTEM_IVRM_VPD_MIN_LEVEL", $reqPol->{'pm_system_ivrm_vpd_min_level'},
 ];

@@ -65,8 +65,6 @@
 //   1.2   | gollub   |05-SEP-12| Calling mss_unmask_fetch_errors after mss_thermal_init_cloned
 //   1.1   | joabhend |30-APR-12| First Draft
 
-
-
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
