@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_control.C,v 1.11 2013/10/29 21:53:32 stillgs Exp $
+// $Id: p8_pfet_control.C,v 1.12 2014/02/06 21:58:40 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_control.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -96,6 +96,7 @@
 // Includes
 // ----------------------------------------------------------------------
 #include "p8_pm.H"
+#include "p8_pm_utils.H"
 #include "p8_pfet_control.H"
 
 
@@ -203,6 +204,20 @@ p8_pfet_control(  const fapi::Target&   i_target,
 
     do
     {
+    
+        uint8_t ipl_mode = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_IS_MPIPL, NULL, ipl_mode);
+        if (!l_rc.ok())
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_IS_MPIPL rc = 0x%x", (uint32_t)l_rc);
+            break;
+        }    
+        FAPI_INF("IPL mode = %s", ipl_mode ? "MPIPL" : "NORMAL");    
+        
+        l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+                                "start of p8_pfet_control");
+        if (!l_rc.ok()) { break; }
+        
         // Check for valid operation parameter
         if ((i_op != VON) && (i_op != VOFF) && (i_op != VOFF_OVERRIDE) && (i_op != NONE))
         {
@@ -259,6 +274,10 @@ p8_pfet_control(  const fapi::Target&   i_target,
                 FAPI_ERR("PutScom error 0x%08llX", address);
                 break;
             }
+
+            l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+                                "after of PM enablement");
+            if (!l_rc.ok()) { break; }
 
             // Read to allow for Cronus 5.1 or 5.6 to look at the resultant setting
             address = EX_PMGP0_0x100F0100 + (0x01000000 * i_ex_number);
@@ -476,6 +495,10 @@ p8_pfet_control(  const fapi::Target&   i_target,
                     FAPI_ERR("PutScom error 0x%08llX", address);
                     break;
                 }
+                
+                l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+                                "after of GP3(0) handling");
+                if (!l_rc.ok()) { break; }
             }
         }
 
@@ -495,6 +518,10 @@ p8_pfet_control(  const fapi::Target&   i_target,
             FAPI_ERR("GetScom error 0x%08llX", address);
             break;
         }
+        
+        l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+                                "before transition choice");
+        if (!l_rc.ok()) { break; }
 
         // Off
         if (i_op == VOFF)
@@ -527,6 +554,11 @@ p8_pfet_control(  const fapi::Target&   i_target,
                             pfet_dom_names[i_domain]);
                 break;
             }
+            
+            l_rc = p8_pm_pcbs_fsm_trace (i_target, i_ex_number, 
+                                "after VON handling");
+            if (!l_rc.ok()) { break; }
+            
         }
         // Error
         else
@@ -616,16 +648,30 @@ p8_pfet_on( const fapi::Target& i_target,
             b_eco = true;
         }
 
-        l_rc = p8_pfet_ivrm_fsm_fix(i_target,
-                                    i_ex_number,
-                                    i_domain,
-                                    VON);
+        uint8_t  chipHasPFETPoweroffBug = 0; 
+        l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_PFET_POWEROFF_BUG,
+                             &i_target,
+                             chipHasPFETPoweroffBug);
         if(!l_rc.ok())
         {
-            FAPI_ERR("PFET IVMR fix error");
+     		FAPI_ERR("Error querying Chip EC feature: "
+                     "ATTR_CHIP_EC_PFET_POWEROFF_BUG");
             break;
         }
 
+        if (chipHasPFETPoweroffBug)
+        {
+            l_rc = p8_pfet_ivrm_fsm_fix(i_target,
+                                        i_ex_number,
+                                        i_domain,
+                                        VON);
+            if(!l_rc.ok())
+            {
+                FAPI_ERR("PFET IVMR fix error");
+                break;
+            }
+
+        }
         // VCS ---------------------
 
         FAPI_INF("Turning on VCS");
@@ -816,17 +862,30 @@ p8_pfet_off( const fapi::Target& i_target,
         {
             b_eco = true;
         }
-
-        l_rc = p8_pfet_ivrm_fsm_fix(i_target,
-                                    i_ex_number,
-                                    i_domain,
-                                    VOFF);
+        
+        uint8_t  chipHasPFETPoweroffBug = 0; 
+        l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_PFET_POWEROFF_BUG,
+                             &i_target,
+                             chipHasPFETPoweroffBug);
         if(!l_rc.ok())
         {
-            FAPI_ERR("PFET IVMR fix error");
+     		FAPI_ERR("Error querying Chip EC feature: "
+                     "ATTR_CHIP_EC_PFET_POWEROFF_BUG");
             break;
         }
 
+        if (chipHasPFETPoweroffBug)
+        {
+            l_rc = p8_pfet_ivrm_fsm_fix(i_target,
+                                        i_ex_number,
+                                        i_domain,
+                                        VOFF);
+            if(!l_rc.ok())
+            {
+                FAPI_ERR("PFET IVMR fix error");
+                break;
+            }
+        }
 
         // Check if iVRM Bypasses are active
         address = EX_PCBS_iVRM_Control_Status_Reg_0x100F0154 +
@@ -1119,14 +1178,28 @@ p8_pfet_off_override( const fapi::Target& i_target,
             b_eco = true;
         }
 
-        l_rc = p8_pfet_ivrm_fsm_fix(i_target,
-                                    i_ex_number,
-                                    i_domain,
-                                    VOFF);
+        uint8_t  chipHasPFETPoweroffBug = 0; 
+        l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_PFET_POWEROFF_BUG,
+                             &i_target,
+                             chipHasPFETPoweroffBug);
         if(!l_rc.ok())
         {
-            FAPI_ERR("PFET IVMR fix error");
+     		FAPI_ERR("Error querying Chip EC feature: "
+                     "ATTR_CHIP_EC_PFET_POWEROFF_BUG");
             break;
+        }
+
+        if (chipHasPFETPoweroffBug)
+        {
+            l_rc = p8_pfet_ivrm_fsm_fix(i_target,
+                                        i_ex_number,
+                                        i_domain,
+                                        VOFF);
+            if(!l_rc.ok())
+            {
+                FAPI_ERR("PFET IVMR fix error");
+                break;
+            }
         }
 
         // Check if iVRM Bypasses are active
@@ -1623,14 +1696,33 @@ p8_pfet_ivrm_fsm_fix(const fapi::Target& i_target,
 
     ecmdDataBufferBase          core_voff_vret(64);
     ecmdDataBufferBase          eco_voff_vret(64);
-
+    
+     
+    
 
     FAPI_INF("Beginning FET work-around for IVRM FSM");
     do
     {
 
-        // ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------  
+              
+        // Determine if Pstates have been previously enabled.  If so, the
+        // work-around was previously run and cannot be run again.
+        address = EX_PCBSPM_MODE_REG_0x100F0156 + 0x01000000*i_ex_number;
 
+        l_rc=fapiGetScom( i_target, address, pmgp0 );
+        if(!l_rc.ok())
+        {
+            FAPI_ERR("GetScom error 0x%08llX", address);
+            break;
+        }
+
+        if (gp3.isBitSet(0))
+        {
+            FAPI_INF("Skipping PFET work-around as Pstate have already been enabled");
+            break;
+        }     
+            
         address = EX_GP3_0x100F0012 + 0x01000000*i_ex_number;
 
         // Save the setting for later restoration

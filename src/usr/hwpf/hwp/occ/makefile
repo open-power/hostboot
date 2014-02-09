@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -64,7 +64,8 @@ OBJS =  occ.o \
         p8_pm_occ_firinit.o \
         p8_pm_pba_firinit.o \
         p8_pm_pmc_firinit.o \
-        p8_cpu_special_wakeup.o
+        p8_cpu_special_wakeup.o \
+        p8_pm_utils.o
 
 #These procedures are included per Stradale's request so
 #they can implement OCC Reset.
