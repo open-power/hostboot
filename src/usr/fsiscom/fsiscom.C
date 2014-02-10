@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -160,7 +160,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
              * @reasoncode   FSISCOM::RC_INVALID_ADDRESS
              * @userdata1    SCOM Address
-             * @userdata2    0
+             * @userdata2    Target HUID
              * @devdesc      fsiScomPerformOp> Address contains
              *               more than 31 bits.
              */
@@ -249,7 +249,8 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                  * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
                  * @reasoncode   FSISCOM::RC_WRITE_ERROR
                  * @userdata1    SCOM Addr
-                 * @userdata2    SCOM Status Reg
+                 * @userdata2[00:31]  Target HUID
+                 * @userdata2[32:63]  SCOM Status Reg
                  * @devdesc      fsiScomPerformOp> Error returned
                  *               from SCOM Engine after write
                  */
@@ -258,7 +259,9 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                                 FSISCOM::MOD_FSISCOM_PERFORMOP,
                                 FSISCOM::RC_WRITE_ERROR,
                                 l_scomAddr,
-                                TO_UINT64(l_status));
+                                TWO_UINT32_TO_UINT64(
+                                           TARGETING::get_huid(i_target),
+                                           l_status));
 
                 // call common error handler to do callouts and recovery
                 pib_error_handler( i_target, l_err, l_status );
@@ -335,14 +338,17 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                  * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
                  * @reasoncode   FSISCOM::RC_READ_ERROR
                  * @userdata1    SCOM Addr
-                 * @userdata2    SCOM Status Reg
+                 * @userdata2[00:31]  Target HUID
+                 * @userdata2[32:63]  SCOM Status Reg
                  * @devdesc      fsiScomPerformOp> Error returned from SCOM Engine after read.
                  */
                 l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                 FSISCOM::MOD_FSISCOM_PERFORMOP,
                                                 FSISCOM::RC_READ_ERROR,
                                                 l_scomAddr,
-                                                TO_UINT64(l_status));
+                                                TWO_UINT32_TO_UINT64(
+                                                 TARGETING::get_huid(i_target),
+                                                 l_status));
 
                 // call common error handler to do callouts and recovery
                 pib_error_handler( i_target, l_err, l_status );
