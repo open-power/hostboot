@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.53 2013/12/20 08:32:10 varkeykv Exp $
+// $Id: io_run_training.C,v 1.57 2014/02/10 16:15:52 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -369,29 +369,14 @@ ReturnCode clear_fir_mask_reg(const Target &i_target,fir_io_interface_t i_chip_i
             if (i_chip_interface == FIR_CP_IOMC0_P0)
             {
                 chip_unit = chip_unit % 4;
-                if (chip_unit == 0)
-                {
-                    chip_unit = 3;
-                }
-                else if (chip_unit == 1)
-                {
-                    chip_unit = 2;
-                }
-                else if (chip_unit == 2)
-                {
-                    chip_unit = 0;
-                }
-                else
-                {
-                    chip_unit = 1;
-                }
-                link_fir_unmask_data = 0x8F;
+                // BUS ID Remapped to linear by John Rell so commenting this out 
+                link_fir_unmask_data = 0x87; // as per Gary via SW245014
             }
             // adjust for ABUS number
             else
             {
                 chip_unit = chip_unit + 1;
-                link_fir_unmask_data = 0x87;
+                link_fir_unmask_data = 0x87;// as per Gary via SW245014, leave at this value 
             }
         }
 
@@ -402,11 +387,13 @@ ReturnCode clear_fir_mask_reg(const Target &i_target,fir_io_interface_t i_chip_i
             chip_unit = 0;
             if (i_chip_interface == FIR_CEN_DMI)
             {
-                link_fir_unmask_data = 0x8F;
+                //link_fir_unmask_data = 0x8F;
+                link_fir_unmask_data = 0x87; // as per Gary via SW245014
             }
             else
             {
-                link_fir_unmask_data = 0x87;
+               //link_fir_unmask_data = 0x87;
+               link_fir_unmask_data = 0x97; // as per Gary via SW245014
             }
     	}
 
@@ -431,6 +418,102 @@ ReturnCode clear_fir_mask_reg(const Target &i_target,fir_io_interface_t i_chip_i
                      fir_clear_mask_reg_addr[i_chip_interface]);
             break;
         }
+
+    } while(0);
+
+    return(rc);
+}
+
+// For clearing out spare deployed summary bit , in case of false HW triggers on known bad lanes
+// io_clear_firs only clear out lower level regs, not the summary FIR 
+ReturnCode clear_fir_summary_reg(const Target &i_target,fir_io_interface_t i_chip_interface){
+
+    ReturnCode rc;
+    uint32_t rc_ecmd = 0;
+    uint8_t chip_unit = 0;
+    ecmdDataBufferBase data(64);
+    uint64_t scom_address64=0;
+    ecmdDataBufferBase temp(64);
+    
+    FAPI_INF("io_run_training:In the Clear FIR MASK register function ");
+
+    do
+    {
+
+        // set FIR mask appropriately based on interface type / link being trained
+    	if ((i_chip_interface == FIR_CP_FABRIC_A0) ||
+            (i_chip_interface == FIR_CP_IOMC0_P0))
+        {
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
+                               &i_target,
+                               chip_unit);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error retreiving chiplet number!");
+                break;
+            }
+
+            // adjust for DMI number
+            if (i_chip_interface == FIR_CP_IOMC0_P0)
+            {
+                chip_unit = chip_unit % 4;
+               // BUS ID Remapped to linear by John Rell/Joe so removed remap logic 
+            }
+            // adjust for ABUS number
+            else
+            {
+                chip_unit = chip_unit + 1;
+            }
+        }
+
+        // SW228820 , for Xbus all data goes into BUS0 fields regardless of instance
+        else if ((i_chip_interface == FIR_CEN_DMI) ||
+                 (i_chip_interface == FIR_CP_FABRIC_X0))
+        {
+            chip_unit = 0;
+    	}
+
+
+
+        
+          rc_ecmd=temp.setDoubleWord(0,fir_rw_reg_addr[i_chip_interface]);
+          scom_address64=temp.getDoubleWord(0);
+          
+                  // check buffer manipulation return codes
+          if (rc_ecmd)
+          {
+              FAPI_ERR("Error 0x%X setting up FIR mask data buffer",
+                       rc_ecmd);
+              rc.setEcmdError(rc_ecmd);
+              break;
+          }
+          //read the 64 bit fir register
+          rc=fapiGetScom(i_target,scom_address64,data);
+          
+          if (!rc.ok())
+          {
+              FAPI_ERR("Problem in fapi get scom ");
+              break;
+          }
+          
+          FAPI_DBG("Clearing spare deployed bit at %d",(8*(chip_unit+1)+1));
+          rc_ecmd |= data.clearBit(8*(chip_unit+1)+1);
+
+                  // check buffer manipulation return codes
+          if (rc_ecmd)
+          {
+              FAPI_ERR("ECMD Error 0x%X setting up FIR data Buffer",
+                       rc_ecmd);
+              rc.setEcmdError(rc_ecmd);
+              break;
+          }
+          // Clear spare deployed bit on appropriate bits 
+          rc = fapiPutScom(i_target, scom_address64, data);
+          if (!rc.ok())
+          {
+              FAPI_ERR("Problem in put scom ");
+              break;
+          }
 
     } while(0);
 
@@ -494,7 +577,39 @@ ReturnCode fir_workaround_post_training(const Target& master_target,  io_interfa
      fir_io_interface_t fir_slave_interface=FIR_CEN_DMI;
      
      uint8_t max_group=1;
-	    
+     
+       	//Translate some enums in training header to fir enums 
+	if(master_interface==CP_FABRIC_X0){
+	    fir_master_interface=FIR_CP_FABRIC_X0;
+	}
+	else if(master_interface==CP_IOMC0_P0){
+	    fir_master_interface= FIR_CP_IOMC0_P0;
+	}
+	else if(master_interface== CEN_DMI){
+	    fir_master_interface=FIR_CEN_DMI;
+	}
+	else if(master_interface== CP_FABRIC_A0){
+	    fir_master_interface=FIR_CP_FABRIC_A0;
+	}
+	if(slave_interface==CP_FABRIC_X0){
+	    fir_slave_interface=FIR_CP_FABRIC_X0;
+	}
+	else if(slave_interface==CP_IOMC0_P0){
+	    fir_slave_interface= FIR_CP_IOMC0_P0;
+	}
+	else if(slave_interface== CEN_DMI){
+	    fir_slave_interface=FIR_CEN_DMI;
+	}
+	else if(slave_interface== CP_FABRIC_A0){
+	    fir_slave_interface=FIR_CP_FABRIC_A0;
+	}
+        else{
+          FAPI_DBG("This is not a possible state since checking of these parms is done in top layer and error code returned ");
+           FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_INVALID_INVOCATION_RC);
+           return(rc);          
+        }
+   
+        
      if(master_interface==CP_FABRIC_X0){
          max_group=4;
      }
@@ -537,6 +652,10 @@ ReturnCode fir_workaround_post_training(const Target& master_target,  io_interfa
 			 FAPI_DBG("io_run_training : Clear invalid FIRs on the slave side ");
 			// If all bad lane info is clear in new data then no need to clear ,this is a 0==0 case of both old and new empty vectors
 			    io_clear_firs(slave_target);
+                             clear_fir_summary_reg(slave_target,fir_slave_interface);
+                            if(rc) return rc;
+                            clear_fir_summary_reg(master_target,fir_master_interface);
+                            if(rc) return rc;
 		       }
 		   }
 		   if(master_data_one_new[current_group]==master_data_one_old[current_group] && master_data_two_new[current_group]==master_data_two_old[current_group]  ){
@@ -545,6 +664,10 @@ ReturnCode fir_workaround_post_training(const Target& master_target,  io_interfa
 			    FAPI_DBG("io_run_training : Clear invalid FIRs on the master side ");
 			// If all bad lane info is clear in new data then no need to clear ,this is a 0==0 case of both old and new empty vectors
 			    io_clear_firs(master_target);
+                             clear_fir_summary_reg(slave_target,fir_slave_interface);
+                            if(rc) return rc;
+                            clear_fir_summary_reg(master_target,fir_master_interface);
+                            if(rc) return rc;
 		       }
 		   }
 		}
@@ -557,6 +680,10 @@ ReturnCode fir_workaround_post_training(const Target& master_target,  io_interfa
 			     FAPI_DBG("io_run_training : Clear invalid FIRs on the slave side ");
 			// If all bad lane info is clear in new data then no need to clear ,this is a 0==0 case of both old and new empty vectors
 			    io_clear_firs(slave_target);
+                            clear_fir_summary_reg(slave_target,fir_slave_interface);
+                            if(rc) return rc;
+                            clear_fir_summary_reg(master_target,fir_master_interface);
+                            if(rc) return rc;
 		       }
 		   }
 		   if(master_data_one_new[0]==master_data_one_old[0] && master_data_two_new[0]==master_data_two_old[0]  ){
@@ -565,43 +692,25 @@ ReturnCode fir_workaround_post_training(const Target& master_target,  io_interfa
 			    FAPI_DBG("io_run_training : Clear invalid FIRs on the master side ");
 			// If all bad lane info is clear in new data then no need to clear ,this is a 0==0 case of both old and new empty vectors
 			    io_clear_firs(master_target);
+                            clear_fir_summary_reg(slave_target,fir_slave_interface);
+                            if(rc) return rc;
+                            clear_fir_summary_reg(master_target,fir_master_interface);
+                            if(rc) return rc;
 		       }
 		   }
 	    }
 
-	// END post training part of Workaround - HW205368 - procedure from Rob /Pete
-	
-	//Translate some enums in training header to fir enums 
-	if(master_interface==CP_FABRIC_X0){
-	    fir_master_interface=FIR_CP_FABRIC_X0;
-	}
-	else if(master_interface==CP_IOMC0_P0){
-	    fir_master_interface= FIR_CP_IOMC0_P0;
-	}
-	else if(master_interface== CEN_DMI){
-	    fir_master_interface=FIR_CEN_DMI;
-	}
-	else if(master_interface== CP_FABRIC_A0){
-	    fir_master_interface=FIR_CP_FABRIC_A0;
-	}
-	if(slave_interface==CP_FABRIC_X0){
-	    fir_slave_interface=FIR_CP_FABRIC_X0;
-	}
-	else if(slave_interface==CP_IOMC0_P0){
-	    fir_slave_interface= FIR_CP_IOMC0_P0;
-	}
-	else if(slave_interface== CEN_DMI){
-	    fir_slave_interface=FIR_CEN_DMI;
-	}
-	else if(slave_interface== CP_FABRIC_A0){
-	    fir_slave_interface=FIR_CP_FABRIC_A0;
-	}
-	FAPI_DBG("io_run_training : Clearing FIR masks now");
-	//Finally Unmask the LFIR to let PRD take action post training
-	rc=clear_fir_mask_reg(slave_target,fir_slave_interface);
-        if(rc) return rc;
-	rc=clear_fir_mask_reg(master_target,fir_master_interface);
-        return(rc);
+	    
+     FAPI_DBG("io_run_training : Clearing FIR masks now-- REORDER");
+     //Finally Unmask the LFIR to let PRD take action post training
+     rc=clear_fir_mask_reg(slave_target,fir_slave_interface);
+     if(rc) return rc;
+     rc=clear_fir_mask_reg(master_target,fir_master_interface);
+     // END post training part of Workaround - HW205368 - procedure from Rob /Pete
+
+    
+return rc;
+
 }
 
 // //HW249235 --For DLL workaround
@@ -1000,6 +1109,7 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
           //Now Run RF 
           rc=init2.run_training(master_target,master_interface,master_group,
                                 slave_target,slave_interface,slave_group);
+          if(rc) return rc;
           rc=fir_workaround_post_training(master_target,master_interface,
                                           master_group,slave_target,
                                           slave_interface,slave_group,
@@ -1099,6 +1209,7 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                          rc=init2.run_training(slave_target,slave_interface,
                                                slave_group,master_target,
                                                master_interface,master_group);
+                         if(rc) return rc;
                          rc=fir_workaround_post_training(slave_target,
                                                          slave_interface,
                                                          slave_group,
@@ -1165,6 +1276,7 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                               return rc;}
                          
                          rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                         if(rc) return rc;
                          rc=fir_workaround_post_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group,
                                                       master_data_one_old,master_data_two_old,slave_data_one_old,slave_data_two_old);
                          if(rc) return rc;
