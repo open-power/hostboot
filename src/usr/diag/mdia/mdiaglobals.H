@@ -54,7 +54,14 @@ struct Globals
      */
     bool simicsRunning;
 
-    Globals(): mfgPolicy(0), userPolicy(0) {}
+    /**
+     * @brief flag to disable scrubs after pattern test
+     */
+    bool disableScrubs;
+
+
+    Globals(): mfgPolicy(0), userPolicy(0),
+       simicsRunning(false), disableScrubs(false) {}
 
 };
 }

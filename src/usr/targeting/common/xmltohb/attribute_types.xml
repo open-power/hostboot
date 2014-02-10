@@ -13228,3 +13228,21 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 </attributes>
+
+<attribute>
+    <id>DISABLE_SCRUB_AFTER_PATTERN_TEST</id>
+    <description>
+        1 = disable scrub after memdiags pattern test. 0 = scrub after memdiags pattern test.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DISABLE_SCRUB_AFTER_PATTERN_TEST</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+

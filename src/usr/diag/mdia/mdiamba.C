@@ -131,7 +131,14 @@ errlHndl_t getMbaWorkFlow(
         case ONE_PATTERN:
 
             o_wf.push_back(START_PATTERN_0); // 0's pattern, must be last
-            o_wf.push_back(START_SCRUB);
+
+            // disable scrub for one pattern test if set, no need
+            // to do this for other pattern tests at this point
+            if( ! i_globals.disableScrubs )
+            {
+                o_wf.push_back(START_SCRUB);
+            }
+
             break;
 
         default:

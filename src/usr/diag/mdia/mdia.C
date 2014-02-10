@@ -74,6 +74,9 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
         }
 
         globals.simicsRunning = Util::isSimicsRunning();
+
+        globals.disableScrubs =
+         top->getAttr<ATTR_DISABLE_SCRUB_AFTER_PATTERN_TEST>();
     }
 
     // get the workflow for each target mba passed in.

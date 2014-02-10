@@ -228,6 +228,7 @@
     <attribute><id>PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR</id></attribute>
     <attribute><id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id></attribute>
     <attribute><id>MULTI_SCOM_BUFFER_MAX_SIZE</id></attribute>
+    <attribute><id>DISABLE_SCRUB_AFTER_PATTERN_TEST</id></attribute>
 </targetType>
 
 <targetType>
