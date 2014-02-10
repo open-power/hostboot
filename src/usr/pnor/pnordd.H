@@ -83,7 +83,7 @@ class PnorDD
     bool usingL3Cache( );
 
 
-        // Enumeration values must match those in debug framework.
+    // Enumeration values must match those in debug framework.
     enum PnorMode_t {
         MODEL_UNKNOWN,   /**< Invalid */
         MODEL_MEMCPY,    /**< No LPC logic, just do memcpy into cache area */
@@ -160,6 +160,7 @@ class PnorDD
         SFC_CMD_SPACE,    /**< Indicate accessing command reg */
         SFC_CMDBUF_SPACE, /**< Indicate accessing command buffer space */
         SFC_MMIO_SPACE,   /**< Indicate accessing MMIO based Direct Reads */
+        SFC_LPC_SPACE,    /**< Indicate LPC Slave Space  */
     };
 
     /**
@@ -182,6 +183,30 @@ class PnorDD
         SFC_REG_OADRNB  = 0x90, /**< OADRNB : Direct Access OBP Window Base Address */
         SFC_REG_OADRNS  = 0x94, /**< OADRNS : DIrect Access OPB Window Size */
         SFC_REG_CHIPIDCONF  = 0x9C, /**< CHIPIDCONF : config ChipId CMD */
+        SFC_REG_ERRCONF = 0x6C, /**< ERRCONF : Configures error counts that
+                                               cause interupts */
+        SFC_REG_ERRTAG  = 0x1C, /**< ERRTAG : Holds Control Info of Error */
+        SFC_REG_ERROFF  = 0x20, /**< ERROFF : Holds Address Info of Error */
+        SFC_REG_ERRSYN  = 0x24, /**< ERRSYN : Holds Syndrome That Caused Error*/
+        SFC_REG_ERRDATH = 0x28, /**< ERRDATH : Holds Most Signifcant Word of
+                                               Double Word That Caused Error */
+        SFC_REG_ERRDATL = 0x2C, /**< ERRDATL : Holds Least Signifcant Word of
+                                               Double Word That Caused Error */
+        SFC_REG_ERRCNT  = 0x30, /**< ERRCNT : Counts The Number Of Errors */
+        SFC_REG_CLRCNT  = 0x34, /**< CLRCNT : Which Bits To Clear In ERRCNT */
+        SFC_REG_ERRINJ  = 0x38, /**< ERRINJ : Force Errors Into Read Paths */
+        SFC_REG_PROTA   = 0x70, /**< PROTA : Write Protect Range Address Base */
+        SFC_REG_PROTM   = 0x74, /**< PROTM : Write Protect Range Size */
+        SFC_REG_ECCADDR = 0x78, /**< ECCADDR : ECC Disable Range Base Address */
+        SFC_REG_ECCRNG  = 0x7C, /**< ECCRNG : ECC Disable Range Size */
+        SFC_REG_ERRORS  = 0x00, /**< ERRORS : Collection of Error Status Bits */
+        SFC_REG_INTMSK  = 0x04, /**< INTMSK : Record of Events That Could Lead
+                                              To Interupt */
+        SFC_REG_INTENM  = 0x14, /**< INTENM : Controls Which Events Lead
+                                              To Interupts */
+        SFC_REG_CONF2   = 0x18, /**< CONF2 : SPI Configuration */
+        SFC_REG_CONF3   = 0x50, /**< CONF3 : SPI Recovery */
+
     };
 
     /**
@@ -201,6 +226,7 @@ class PnorDD
         SFC_OP_ABORT      = 0x6F, /**< Super-Abort */
         SFC_OP_START4BA   = 0x37, /**< Start 4BA */
         SFC_OP_END4BA     = 0x69, /**< End 4BA */
+        SFC_OP_INVALID    = 0x00, /**< Invalid - used for testing */
     };
 
 
@@ -213,6 +239,7 @@ class PnorDD
         SFC_POLL_INCR_NS = 10,     /**< minimum increment during poll */
 
     };
+
 
 
     /**
@@ -245,12 +272,76 @@ class PnorDD
         uint32_t data32;
         struct
         {
-            uint32_t unused    : 30; /**< 0:29 = Not Currently Used  */
-            uint32_t timeout   : 1;  /**< 30   = Timeout */
-            uint32_t done      : 1;  /**< 31   = Done */
+            uint32_t unused     : 20; /**< 0:19 = Not Currently Used  */
+            uint32_t eccerrcntr : 1;  /**< 20 Threshold for SRAM ECC errors */
+            uint32_t eccues     : 1;  /**< 21 SRAM cmd uncorrectable ECC error*/
+            uint32_t unused_22  : 3;  /**< 22:24 = Not Currently Used */
+            uint32_t cmdexe     : 1;  /**< 25 Previous cmd is in progress */
+            uint32_t cmdwait    : 1;  /**< 26 Previous cmd waiting to execute */
+            uint32_t illegal    : 1;  /**< 27 Previous op illegal */
+            uint32_t eccerrcntn : 1;  /**< 28 Threshold for Flash ECC errors */
+            uint32_t eccuen     : 1;  /**< 29 Flash cmd uncorrectable ECC err */
+            uint32_t timeout    : 1;  /**< 30 Timeout */
+            uint32_t done       : 1;  /**< 31 Done */
         };
         SfcStatReg_t() : data32(0) {};
     };
+
+
+    /**
+     * @brief LPC Slave Registers
+     *    These are offsets within the LPC Slave Register Space
+     */
+    enum LpcSlaveRegAddr {
+        LPC_SLAVE_REG_STATUS  = 0x14, /**< STATUS: read-only  */
+        LPC_SLAVE_REG_RESET   = 0x14, /**< RESET : write-only */
+    };
+
+    /**
+     * @brief  LPC Slave Status Register Layout
+     */
+    union LpcSlaveStatReg_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t lbusowner       : 2;   /**< 0:1 = Local Bus Owner */
+            uint32_t lbusparityerror : 1;   /**< 2   = Local Bus Parity Error */
+            uint32_t lbus2opberr     : 3;   /**< 3:5 = Errors From LBUS2OPB */
+            uint32_t unused          : 26;  /**< 6:21 = Not Currently Used */
+        };
+        LpcSlaveStatReg_t() : data32(0) {};
+    };
+
+    /**
+     * @brief  LPC Slave Reset Register Layout
+     */
+    union LpcSlaveResetReg_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t lpcslave     : 1;  /**< 0 Reset LPC Slave */
+            uint32_t lpcslaveerrs : 1;  /**< 1 Reset LPC Slave Errors */
+            uint32_t localbus     : 1;  /**< 2 Reset Local Bus */
+            uint32_t unused       : 29; /**< 4:31 = Not Currently Used */
+        };
+        LpcSlaveResetReg_t() : data32(0) {};
+    };
+
+
+    /**
+     * @brief LPC Slave LBUS2OPB Errors
+     *        Translation of LPC Slave Status Register Bits 3:5
+     */
+    enum LpcSlaveLbus2OpbErrors {
+        LBUS2OPB_ADDR_PARITY_ERR    = 0b010, /**< Address Parity Error */
+        LBUS2OPB_INVALID_SELECT_ERR = 0b001, /**< Invalid Select Error */
+        LBUS2OPB_DATA_PARITY_ERR    = 0b011, /**< Data Parity Error */
+        LBUS2OPB_MONITOR_ERR        = 0b100, /**< Monitor Error */
+        LBUS2OPB_TIMEOUT_ERR        = 0b101, /**< Timeout Error */
+    };
+
 
 
     /**
@@ -406,9 +497,10 @@ class PnorDD
 
         // Default Values to set for all operations
         // 1101.0100.0000.000x.0000.0001.0000.0000.<address>
-        LPC_CTL_REG_DEFAULT = 0xD400010000000000,
+        ECCB_LPC_CTL_REG_DEFAULT = 0xD400010000000000,
 
-        LPC_STAT_REG_ERROR_MASK = 0xFC0000000007F700, /**< Error Bits */
+        // Error bits: 41-43, 56  (52=cmd complete) (not 57: only non-fw use)
+        ECCB_LPC_STAT_REG_ERROR_MASK = 0x0000000000700080, /**< Error Bits */
 
         ERASE_COUNT_MAX = 64,  /**<Max number of tracked erase blocks */
         ERASESIZE_BYTES_DEFAULT = 4 * KILOBYTE, /**< Min Erase Block (bytes) */
@@ -531,6 +623,21 @@ class PnorDD
                           size_t i_size );
 
     /**
+     * @brief Check For Errors in Status Registers
+     *
+     * @return Error log if error found
+     */
+    errlHndl_t checkForErrors( void );
+
+    /**
+     * @brief Add FFDC Error Registers to an existing Error Log
+     *
+     * @parm io_errl    Error Log To Add FFDC To
+     *
+     */
+    void addFFDCRegisters(errlHndl_t & io_errl);
+
+    /**
      * @brief  ECCB Control Register Layout
      */
     union ControlReg_t
@@ -548,7 +655,7 @@ class PnorDD
             uint64_t address     : 32; /**< 32:63 = LPC Address */
         };
 
-        ControlReg_t() : data64(LPC_CTL_REG_DEFAULT) {};
+        ControlReg_t() : data64(ECCB_LPC_CTL_REG_DEFAULT) {};
     };
 
     /**
@@ -559,17 +666,21 @@ class PnorDD
         uint64_t data64;
         struct
         {
-            uint64_t pib_errors  : 6;  /**< 0:5  */
+            uint64_t unused      : 6;  /**< 0:5  */
             uint64_t read_data   : 32; /**< 6:37 */
-            uint64_t unused1     : 6;  /**< 38:43 */
+            uint64_t unused1     : 3;  /**< 38:40 */
+            uint64_t eccb_err    : 3;  /**< 41:43 = ECCB_Error_Info */
             uint64_t busy        : 1;  /**< 44 = Operation Busy */
-            uint64_t errors1     : 7;  /**< 45:51 */
-            uint64_t op_done     : 1;  /**< 52 */
-            uint64_t errors2     : 3;  /**< 53:55 */
-            uint64_t unused2     : 8;  /**< 56:63 */
+            uint64_t unused2     : 7;  /**< 45:51 */
+            uint64_t op_done     : 1;  /**< 52 = Command Complete */
+            uint64_t unused3     : 3;  /**< 53:55 */
+            uint64_t addr_parity_err : 1; /**< 56 = ECC Address Register
+                                                    Parity Error */
+            uint64_t unused4     : 7;  /**< 57:63 */
         };
         StatusReg_t() : data64(0) {};
     };
+
 
   private: // Variables
 
@@ -634,6 +745,12 @@ class PnorDD
      *
      */
     uint64_t iv_fakeSize;
+
+    /**
+     * @brief Indicates if class is currently collecting FFDC data
+     *
+     */
+    bool iv_ffdc_active;
 
     // Needed for testcases
     friend class PnorDdTest;

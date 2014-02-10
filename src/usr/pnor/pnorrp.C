@@ -141,7 +141,9 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
                                 PNOR::MOD_PNORRP_DIDSTARTUPFAIL,
                                 PNOR::RC_BAD_STARTUP_RC,
                                 rc,
-                                0   );
+                                0,
+                                true /*Add HB SW Callout*/ );
+
         l_errl->collectTrace(PNOR_COMP_NAME);
     }
 
@@ -261,8 +263,8 @@ void PnorRP::initDaemon()
 
     if( l_errhdl )
     {
-        errlCommit(l_errhdl,PNOR_COMP_ID);
         iv_startupRC = l_errhdl->reasonCode();
+        errlCommit(l_errhdl,PNOR_COMP_ID);
     }
 
     // call ErrlManager function - tell him that PNOR is ready!
@@ -1020,7 +1022,8 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
                                          PNOR::MOD_PNORRP_COMPUTESECTION,
                                          PNOR::RC_INVALID_ADDRESS,
                                          i_vaddr,
-                                         0);
+                                         0,
+                                         true /*Add HB SW Callout*/);
         errhdl->collectTrace(PNOR_COMP_NAME);
         return errhdl;
     }

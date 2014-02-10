@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -971,6 +971,132 @@ class PnorDdTest : public CxxTest::TestSuite
         TRACFCOMP(g_trac_pnor, "PnorDdTest::test_crossblock_modes> %d/%d fails", fails, total );
     }
 
+
+    /**
+     * @brief PNOR DD Force Fails testcase
+     */
+/****************************************************************************/
+/* NOTE:  TEST DISABLED!!!  remove "_" before test name to re-enable        */
+/****************************************************************************/
+    void _test_forceFails(void)
+    {
+        errlHndl_t l_err = NULL;
+        uint64_t fails = 0;
+        uint64_t total = 0;
+        PnorDD* pnordd = new PnorDD();
+        uint32_t l_poll = 0;
+        PnorDD::SfcCmdReg_t sfc_cmd;
+
+        do{
+            TRACFCOMP(g_trac_pnor, "PnorDdTest::test_forceFails> starting - expect to see errors");
+
+            /*******************************/
+            /*  Send in an invalid OP Code */
+            /*******************************/
+            sfc_cmd.opcode = PnorDD::SFC_OP_INVALID;
+            sfc_cmd.length = 0;
+
+            mutex_lock(&(pnordd->cv_mutex));
+            l_err = pnordd->writeRegSfc(PnorDD::SFC_CMD_SPACE,
+                                        PnorDD::SFC_REG_CMD,
+                                        sfc_cmd.data32);
+            total++;
+            if (l_err)
+            {
+                TS_FAIL("PnorDdTest::test_forceFails> Get Chip Id cmd failed! Error committed.");
+                fails++;
+
+                // Unlock mutex for Error Log to be commited
+                mutex_unlock(&(pnordd->cv_mutex));
+                errlCommit(l_err,PNOR_COMP_ID);
+
+                // Lock mutex for next operation
+                mutex_lock(&(pnordd->cv_mutex));
+            }
+
+            // Poll for complete status without waiting
+            l_err = pnordd->pollSfcOpComplete();
+            mutex_unlock(&(pnordd->cv_mutex));
+
+            total++;
+            if ( l_err == NULL )
+            {
+                TS_FAIL("PnorDdTest::test_forceFails> Failed to create illegal opcode error!");
+                fails++;
+            }
+            else
+            {
+                // error correctly created - delete it
+                delete l_err;
+            }
+
+            /*******************************************************/
+            /* Issue a cmd but poll for completion without waiting */
+            /*******************************************************/
+            //Issue Get Chip ID command
+            sfc_cmd.opcode = PnorDD::SFC_OP_CHIPID;
+            sfc_cmd.length = 0;
+
+            mutex_lock(&(pnordd->cv_mutex));
+            l_err = pnordd->writeRegSfc(PnorDD::SFC_CMD_SPACE,
+                                        PnorDD::SFC_REG_CMD,
+                                        sfc_cmd.data32);
+
+            total++;
+            if (l_err)
+            {
+                TS_FAIL("PnorDdTest::test_forceFails> Get Chip Id cmd failed! Error committed.");
+                fails++;
+
+                // Unlock mutex for Error Log to be commited
+                mutex_unlock(&(pnordd->cv_mutex));
+                errlCommit(l_err,PNOR_COMP_ID);
+
+                // Lock mutex for next operation
+                mutex_lock(&(pnordd->cv_mutex));
+            }
+
+            // Poll for complete status without waiting
+            l_err = pnordd->pollSfcOpComplete(l_poll);
+
+            total++;
+            if ( l_err == NULL )
+            {
+                TS_FAIL("PnorDdTest::test_forceFails> pollSfcOpCompletel(l_poll=0) Failed to create an error!");
+                fails++;
+            }
+            else
+            {
+                // error correctly created - delete it
+                delete l_err;
+            }
+
+            /*******************************************************/
+            /* Cleanup: poll to make sure last operation completes */
+            /*         before continuing                           */
+            /*******************************************************/
+            l_err = pnordd->pollSfcOpComplete();
+            mutex_unlock(&(pnordd->cv_mutex));
+
+            total++;
+            if (l_err)
+            {
+                TS_FAIL("PnorDdTest::test_forceFails> Cleanup polling failed! Error committed.");
+                errlCommit(l_err,PNOR_COMP_ID);
+                fails++;
+            }
+
+
+        }while(0);
+
+        if( pnordd )
+        {
+            delete pnordd;
+        }
+
+        TRACFCOMP(g_trac_pnor, "PnorDdTest::test_forceFails> %d/%d fails", fails, total );
+
+    }
 
 };
 

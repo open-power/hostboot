@@ -36,8 +36,9 @@
 #include <devicefw/driverif.H>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
-#include <targeting/common/targetservice.H>
 #include <errl/errlmanager.H>
+#include <errl/errludlogregister.H>
+#include <targeting/common/targetservice.H>
 #include "pnordd.H"
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
@@ -366,6 +367,7 @@ PnorDD::PnorDD( PnorMode_t i_mode,
                 uint64_t i_fakeStart,
                 uint64_t i_fakeSize )
 : iv_mode(i_mode)
+, iv_ffdc_active(false)
 {
     iv_erasesize_bytes = ERASESIZE_BYTES_DEFAULT;
 
@@ -545,8 +547,7 @@ void PnorDD::sfcInit( )
             }
             else
             {
-                TRACFCOMP( g_trac_pnor,  ERR_MRK
-                           "PnorDD::sfcInit> Unsupported NOR type detected : cv_nor_chipid=%.4X",
+                TRACFCOMP( g_trac_pnor,  ERR_MRK"PnorDD::sfcInit> Unsupported NOR type detected : cv_nor_chipid=%.4X. Calling doShutdown(PNOR::RC_UNSUPPORTED_HARDWARE)",
                            cv_nor_chipid );
 
                 //Shutdown if we detect unsupported Hardware
@@ -566,6 +567,8 @@ void PnorDD::sfcInit( )
 
     if( l_err )
     {
+        TRACFCOMP( g_trac_pnor,  ERR_MRK
+                   "PnorDD::sfcInit> Committing error log");
         errlCommit(l_err,PNOR_COMP_ID);
     }
 }
@@ -615,10 +618,14 @@ errlHndl_t PnorDD::writeRegSfc(SfcRange i_range,
             lpc_addr = LPC_SFC_CMDBUF_OFFSET | i_addr;
             break;
         }
+    case SFC_LPC_SPACE:
+        {
+            lpc_addr = LPCHC_FW_SPACE | i_addr;
+            break;
+        }
     default:
         {
-            TRACFCOMP(g_trac_pnor, ERR_MRK
-                      "PnorDD::writeRegSfc> Unsupported SFC Address Range: i_range=0x%.16X, i_addr=0x%.8X",
+            TRACFCOMP(g_trac_pnor, ERR_MRK"PnorDD::writeRegSfc> Unsupported SFC Address Range: i_range=0x%.16X, i_addr=0x%.8X. Calling doShutdown(PNOR::RC_UNSUPPORTED_SFCRANGE)",
                       i_range, i_addr);
 
             //Can't function without PNOR, initiate shutdown.
@@ -661,10 +668,14 @@ errlHndl_t PnorDD::readRegSfc(SfcRange i_range,
             lpc_addr = LPC_SFC_CMDBUF_OFFSET | i_addr;
             break;
         }
+    case SFC_LPC_SPACE:
+        {
+            lpc_addr = LPCHC_FW_SPACE | i_addr;
+            break;
+        }
     default:
         {
-            TRACFCOMP(g_trac_pnor, ERR_MRK
-                      "PnorDD::readRegSfc> Unsupported SFC Address Range: i_range=0x%.16X, i_addr=0x%.8X",
+            TRACFCOMP(g_trac_pnor, ERR_MRK"PnorDD::readRegSfc> Unsupported SFC Address Range: i_range=0x%.16X, i_addr=0x%.8X. Calling doShutdown(PNOR::RC_UNSUPPORTED_SFCRANGE)",
                       i_range, i_addr);
 
             //Can't function without PNOR, initiate shutdown.
@@ -702,7 +713,9 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
                                sfc_stat.data32);
             if(l_err) { break; }
 
-            if( sfc_stat.done == 1 )
+            if( ( sfc_stat.done == 1 ) ||
+                ( sfc_stat.timeout == 1 ) ||
+                ( sfc_stat.illegal == 1 ) )
             {
                 break;
             }
@@ -716,8 +729,12 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
         }
         if( l_err ) { break; }
 
-        // check for errors or timeout
-        // TODO: RTC:62718 What errors do we check?
+
+        l_err = checkForErrors();
+        if( l_err ) { break; }
+
+
+        // If no errors AND done bit not set, call out undefined error
         if( (sfc_stat.done == 0) )
         {
             TRACFCOMP(g_trac_pnor,
@@ -741,6 +758,14 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
                                                                  poll_time),
                                             TWO_UINT32_TO_UINT64(sfc_stat.data32,0));
 
+            // Limited in callout: no PNOR target, so calling out processor
+            l_err->addHwCallout(
+                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL );
+
+            addFFDCRegisters(l_err);
             l_err->collectTrace(PNOR_COMP_NAME);
             l_err->collectTrace(XSCOM_COMP_NAME);
             //@todo (RTC:37744) - Any cleanup or recovery needed?
@@ -755,9 +780,327 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
 }
 
 /**
+ * @brief Check For Errors in Status Registers
+ */
+errlHndl_t PnorDD::checkForErrors( void )
+{
+
+    errlHndl_t l_err = NULL;
+    bool errorFound = false;
+
+    // Default status values in case we fail in reading the registers
+    LpcSlaveStatReg_t lpc_slave_stat;
+    lpc_slave_stat.data32 = 0xDEADBEEF;
+    SfcStatReg_t sfc_stat;
+    sfc_stat.data32 = 0xDEADBEEF;
+
+
+    do {
+
+        // First Read LPC Slave Status Register
+        l_err = readRegSfc(SFC_LPC_SPACE,
+                           LPC_SLAVE_REG_STATUS,
+                           lpc_slave_stat.data32);
+
+        // If we can't read status register, exit out
+        if( l_err ) { break; }
+
+        TRACDCOMP( g_trac_pnor, INFO_MRK"PnorDD::checkForErrors> LPC Slave status reg: 0x%08llx",
+                   lpc_slave_stat.data32);
+
+        if( 1 == lpc_slave_stat.lbusparityerror )
+        {
+            errorFound = true;
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> LPC Slave Local Bus Parity Error: status reg: 0x%08llx",
+                       lpc_slave_stat.data32);
+        }
+
+        if( 0 != lpc_slave_stat.lbus2opberr )
+        {
+            errorFound = true;
+
+            if ( LBUS2OPB_ADDR_PARITY_ERR == lpc_slave_stat.lbus2opberr )
+            {
+                TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> LBUS2OPB Address Parity Error: LPC Slave status reg: 0x%08llx",
+                           lpc_slave_stat.data32);
+
+            }
+
+            else if ( LBUS2OPB_INVALID_SELECT_ERR == lpc_slave_stat.lbus2opberr)
+            {
+                TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> LBUS2OPB Invalid Select Error: LPC Slave status reg: 0x%08llx",
+                           lpc_slave_stat.data32);
+
+            }
+            else if ( LBUS2OPB_DATA_PARITY_ERR == lpc_slave_stat.lbus2opberr )
+            {
+                TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> LBUS2OPB Data Parity Error: LPC Slave status reg: 0x%08llx",
+                           lpc_slave_stat.data32);
+
+            }
+            else if ( LBUS2OPB_MONITOR_ERR == lpc_slave_stat.lbus2opberr )
+            {
+                TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> LBUS2OPB Monitor Error: LPC Slave status reg: 0x%08llx",
+                           lpc_slave_stat.data32);
+
+            }
+
+            else if ( LBUS2OPB_TIMEOUT_ERR == lpc_slave_stat.lbus2opberr )
+            {
+                TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> LBUS2OPB Timeout Error: LPC Slave status reg: 0x%08llx",
+                           lpc_slave_stat.data32);
+
+            }
+            else
+            {
+                TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> LBUS2OPB UNKNOWN Error: LPC Slave status reg: 0x%08llx",
+                           lpc_slave_stat.data32);
+            }
+
+        }
+
+        // Second Read SFC and check for error bits
+        l_err = readRegSfc(SFC_CMD_SPACE,
+                           SFC_REG_STATUS,
+                           sfc_stat.data32);
+
+        // If we can't read status register, exit out
+        if( l_err ) { break; }
+
+        TRACDCOMP( g_trac_pnor, INFO_MRK"PnorDD::checkForErrors> SFC status reg(0x%X): 0x%08llx",
+                   SFC_CMD_SPACE|SFC_REG_STATUS,sfc_stat.data32);
+
+        if( 1 == sfc_stat.eccerrcntr )
+        {
+            errorFound = true;
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> Threshold of SRAM ECC Errors Reached: SFC status reg: 0x%08llx",
+                       sfc_stat.data32);
+        }
+
+        if( 1 == sfc_stat.eccues )
+        {
+            errorFound = true;
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> SRAM Command Uncorrectable ECC Error: SFC status reg: 0x%08llx",
+                       sfc_stat.data32);
+        }
+
+        if( 1 == sfc_stat.illegal )
+        {
+            errorFound = true;
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> Previous Operation was Illegal: SFC status reg: 0x%08llx",
+                       sfc_stat.data32);
+        }
+
+        if( 1 == sfc_stat.eccerrcntn )
+        {
+            errorFound = true;
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> Threshold for Flash ECC Errors Reached: SFC status reg: 0x%08llx",
+                       sfc_stat.data32);
+        }
+
+        if( 1 == sfc_stat.eccuen )
+        {
+            errorFound = true;
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> Flash Command Uncorrectable ECC Error: SFC status reg: 0x%08llx",
+                       sfc_stat.data32);
+        }
+
+        if( 1 == sfc_stat.timeout )
+        {
+            errorFound = true;
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> Timeout: SFC status reg: 0x%08llx",
+                       sfc_stat.data32);
+        }
+
+    }while(0);
+
+
+    // If there is any error create an error log
+    if ( errorFound )
+    {
+        // If we failed on a register read above, but still found an error,
+        // delete register read error log and create an original error log
+        // for the found error
+        if ( l_err )
+        {
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorDD::checkForErrors> Deleting register read error. Returning error created for the found error");
+            delete l_err;
+        }
+
+
+        /*@
+         * @errortype
+         * @moduleid     PNOR::MOD_PNORDD_CHECKFORERRORS
+         * @reasoncode   PNOR::RC_ERROR_IN_STATUS_REG
+         * @userdata1[0:31]  SFC Status Register
+         * @userdata1[32:63] <unused>
+         * @userdata2[0:31]  LPC Slave Status Register
+         * @userdata2[32:63] <unused>
+         * @devdesc      PnorDD::checkForErrors> Error(s) found in SFC
+         *               and/or LPC Slave Status Registers
+         */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        PNOR::MOD_PNORDD_CHECKFORERRORS,
+                                        PNOR::RC_ERROR_IN_STATUS_REG,
+                                        TWO_UINT32_TO_UINT64(
+                                                   sfc_stat.data32,
+                                                   0),
+                                        TWO_UINT32_TO_UINT64(
+                                                   lpc_slave_stat.data32,
+                                                   0));
+
+        // Limited in callout: no PNOR target, so calling out processor
+        l_err->addHwCallout(
+                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        HWAS::SRCI_PRIORITY_HIGH,
+                        HWAS::NO_DECONFIG,
+                        HWAS::GARD_NULL );
+
+        addFFDCRegisters(l_err);
+        l_err->collectTrace(PNOR_COMP_NAME);
+    }
+
+    return l_err;
+
+}
+
+
+/**
+ * @brief Add Error Registers to an existing Error Log
+ */
+void PnorDD::addFFDCRegisters(errlHndl_t & io_errl)
+{
+
+    errlHndl_t tmp_err = NULL;
+    uint32_t data32 = 0;
+    uint64_t data64 = 0;
+    size_t size64 = sizeof(data64);
+    size_t size32 = sizeof(data32);
+
+    // check iv_ffdc_active to avoid infinite loops
+    if ( iv_ffdc_active == false )
+    {
+        iv_ffdc_active = true;
+
+        TRACFCOMP( g_trac_pnor, "PnorDD::addFFDCRegisters> adding FFDC to Error Log EID=0x%X, PLID=0x%X",
+                   io_errl->eid(), io_errl->plid() );
+
+        ERRORLOG::ErrlUserDetailsLogRegister
+                  l_eud(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+        do {
+
+            // Add ECCB Status Register
+            TARGETING::Target* scom_target =
+                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
+            tmp_err = deviceOp( DeviceFW::READ,
+                                scom_target,
+                                &(data64),
+                                size64,
+                                DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
+
+            if( tmp_err )
+            {
+                delete tmp_err;
+                TRACFCOMP( g_trac_pnor, "PnorDD::addFFDCRegisters> Fail reading ECCB_STAT_REG");
+            }
+            else
+            {
+                l_eud.addDataBuffer(&data64, size64,
+                                    DEVICE_SCOM_ADDRESS(ECCB_STAT_REG));
+            }
+
+            // Add LPC Slave Status Register
+            LpcSlaveStatReg_t lpc_slave_stat;
+
+            tmp_err = readRegSfc(SFC_LPC_SPACE,
+                                 LPC_SLAVE_REG_STATUS,
+                                 lpc_slave_stat.data32);
+
+            if ( tmp_err )
+            {
+                delete tmp_err;
+                TRACFCOMP( g_trac_pnor, "PnorDD::addFFDCRegisters> Fail reading LPC Slave Status Register");
+            }
+            else
+            {
+                l_eud.addDataBuffer(&lpc_slave_stat.data32, size32,
+                      DEVICE_SCOM_ADDRESS( LPCHC_FW_SPACE |
+                                           LPC_SLAVE_REG_STATUS));
+            }
+
+            // Add SFC Registers
+            uint32_t sfc_regs[] = {
+                SFC_REG_STATUS,
+                SFC_REG_CONF,
+                SFC_REG_CMD,
+                SFC_REG_ADR,
+                SFC_REG_ERASMS,
+                SFC_REG_ERASLGS,
+                SFC_REG_CONF4,
+                SFC_REG_CONF5,
+                SFC_REG_ADRCBF,
+                SFC_REG_ADRCMF,
+                SFC_REG_OADRNB,
+                SFC_REG_OADRNS,
+                SFC_REG_CHIPIDCONF,
+                SFC_REG_ERRCONF,
+                SFC_REG_ERRTAG,
+                SFC_REG_ERROFF,
+                SFC_REG_ERRSYN,
+                SFC_REG_ERRDATH,
+                SFC_REG_ERRDATL,
+                SFC_REG_ERRCNT,
+                SFC_REG_CLRCNT,
+                SFC_REG_ERRINJ,
+                SFC_REG_PROTA,
+                SFC_REG_PROTM,
+                SFC_REG_ECCADDR,
+                SFC_REG_ECCRNG,
+                SFC_REG_ERRORS,
+                SFC_REG_INTMSK,
+                SFC_REG_INTENM,
+                SFC_REG_CONF2,
+                SFC_REG_CONF3
+            };
+
+
+            for( size_t x=0; x<(sizeof(sfc_regs)/sizeof(sfc_regs[0])); x++ )
+            {
+                tmp_err = readRegSfc( SFC_CMD_SPACE,
+                                      sfc_regs[x],
+                                      data32 );
+
+                if( tmp_err )
+                {
+                    delete tmp_err;
+                }
+                else
+                {
+                    l_eud.addDataBuffer(&data32, size32,
+                          DEVICE_SCOM_ADDRESS(LPC_SFC_CMDREG_OFFSET
+                                              | sfc_regs[x]));
+                }
+            }
+
+        }while(0);
+
+
+        l_eud.addToLog(io_errl);
+
+        // reset FFDC active flag
+        iv_ffdc_active = false;
+    }
+
+    return;
+}
+
+
+/**
  * @brief Check flag status bit on Micron NOR chips
  *        The current version of Micron parts require the Flag
- *        Status register be read after a read or erase operation,
+ *        Status register be read after a write or erase operation,
  *        otherwise all future operations won't work..
  */
 errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
@@ -844,8 +1187,14 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
                                                                  poll_time),
                                             TWO_UINT32_TO_UINT64(opStatus,0));
 
-            l_err->collectTrace(PNOR_COMP_NAME);
-            l_err->collectTrace(XSCOM_COMP_NAME);
+            // Limited in callout: no PNOR target, so calling out processor
+            l_err->addHwCallout(
+                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL );
+
+            addFFDCRegisters(l_err);
 
             //Erase & Program error bits are sticky, so they need to be cleared.
 
@@ -859,9 +1208,9 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
             tmp_err = writeRegSfc(SFC_CMD_SPACE,
                                 SFC_REG_CHIPIDCONF,
                                 confData);
-            if(tmp_err) {
-                //commit this error and return the original
-                ERRORLOG::errlCommit(tmp_err,PNOR_COMP_ID);
+            if(tmp_err)
+            {
+                delete tmp_err;
             }
 
             //Issue Get Chip ID command (clearing flag status)
@@ -869,10 +1218,23 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
             sfc_cmd.opcode = SFC_OP_CHIPID;
             sfc_cmd.length = 0;
 
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_CMD,
-                                sfc_cmd.data32);
-            if(l_err) { break; }
+            tmp_err = writeRegSfc(SFC_CMD_SPACE,
+                                  SFC_REG_CMD,
+                                  sfc_cmd.data32);
+            if(tmp_err)
+            {
+                delete tmp_err;
+            }
+
+            //Poll for complete status
+            tmp_err = pollSfcOpComplete();
+            if(tmp_err)
+            {
+                delete tmp_err;
+            }
+
+            l_err->collectTrace(PNOR_COMP_NAME);
+            l_err->collectTrace(XSCOM_COMP_NAME);
 
             break;
         }
@@ -1141,8 +1503,7 @@ errlHndl_t PnorDD::bufferedSfcRead(uint32_t i_addr,
             }
         default:
             {
-                TRACFCOMP(g_trac_pnor, ERR_MRK
-                          "PnorDD::bufferedSfcRead> Unsupported mode: iv_mode=0x%.16X, i_addr=0x%.8X",
+                TRACFCOMP(g_trac_pnor, ERR_MRK"PnorDD::bufferedSfcRead> Unsupported mode: iv_mode=0x%.16X, i_addr=0x%.8X. Calling doShutdown(PNOR::RC_UNSUPPORTED_MODE)",
                           iv_mode, i_addr);
 
                 //Can't function without PNOR, initiate shutdown.
@@ -1215,8 +1576,7 @@ errlHndl_t PnorDD::bufferedSfcWrite(uint32_t i_addr,
             }
         default:
             {
-                TRACFCOMP(g_trac_pnor, ERR_MRK
-                          "PnorDD::bufferedSfcWrite> Unsupported mode: iv_mode=0x%.16X, i_addr=0x%.8X",
+                TRACFCOMP(g_trac_pnor, ERR_MRK"PnorDD::bufferedSfcWrite> Unsupported mode: iv_mode=0x%.16X, i_addr=0x%.8X. Calling doShutdown(PNOR::RC_UNSUPPORTED_MODE)",
                           iv_mode, i_addr);
 
                 //Can't function without PNOR, initiate shutdown.
@@ -1317,6 +1677,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
         StatusReg_t eccb_stat;
         uint64_t poll_time = 0;
         uint64_t loop = 0;
+
         while( poll_time < ECCB_POLL_TIME_NS )
         {
             l_err = deviceOp( DeviceFW::READ,
@@ -1341,7 +1702,7 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
         if( l_err ) { break; }
 
         // check for errors or timeout
-        if( (eccb_stat.data64 & LPC_STAT_REG_ERROR_MASK)
+        if( (eccb_stat.data64 & ECCB_LPC_STAT_REG_ERROR_MASK)
             || (eccb_stat.op_done == 0) )
         {
             TRACFCOMP(g_trac_pnor, "PnorDD::readLPC> Error or timeout from LPC Status Register : i_addr=0x%.8X, status=0x%.16X", i_addr, eccb_stat.data64 );
@@ -1361,6 +1722,15 @@ errlHndl_t PnorDD::readLPC(uint32_t i_addr,
                                             PNOR::RC_LPC_ERROR,
                                             TWO_UINT32_TO_UINT64(i_addr,poll_time),
                                             eccb_stat.data64);
+
+            // Limited in callout: no PNOR target, so calling out processor
+            l_err->addHwCallout(
+                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL );
+
+            addFFDCRegisters(l_err);
             l_err->collectTrace(PNOR_COMP_NAME);
             l_err->collectTrace(XSCOM_COMP_NAME);
             //@todo (RTC:37744) - Any cleanup or recovery needed?
@@ -1451,7 +1821,7 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
         if( l_err ) { break; }
 
         // check for errors
-        if( (eccb_stat.data64 & LPC_STAT_REG_ERROR_MASK)
+        if( (eccb_stat.data64 & ECCB_LPC_STAT_REG_ERROR_MASK)
             || (eccb_stat.op_done == 0) )
         {
             TRACFCOMP(g_trac_pnor, "PnorDD::writeLPC> Error or timeout from LPC Status Register : i_addr=0x%.8X, status=0x%.16X", i_addr, eccb_stat.data64 );
@@ -1470,6 +1840,14 @@ errlHndl_t PnorDD::writeLPC(uint32_t i_addr,
                                             PNOR::RC_LPC_ERROR,
                                             TWO_UINT32_TO_UINT64(0,i_addr),
                                             eccb_stat.data64);
+            // Limited in callout: no PNOR target, so calling out processor
+            l_err->addHwCallout(
+                            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL );
+
+            addFFDCRegisters(l_err);
             l_err->collectTrace(PNOR_COMP_NAME);
             l_err->collectTrace(XSCOM_COMP_NAME);
             //@todo (RTC:37744) - Any cleanup or recovery needed?
@@ -1555,6 +1933,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
                 l_err = bufferedSfcRead(i_blockStart,
                                         i_writeStart-i_blockStart,
                                         read_data);
+                if( l_err ) { break; }
             }
 
             //Get data after write section
@@ -1568,9 +1947,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
                 l_err =  bufferedSfcRead(i_writeStart+i_bytesToWrite,
                                            tail_length,
                                            tail_buffer);
-                if( l_err )
-                {
-                    break; }
+                if( l_err ) { break; }
             }
 
             // erase the flash
@@ -1588,6 +1965,7 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
                 l_err = bufferedSfcWrite(i_blockStart,
                                          i_writeStart-i_blockStart,
                                          read_data);
+                if( l_err ) { break; }
             }
 
             //Write data after new data to write
@@ -1667,7 +2045,9 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
                                             PNOR::MOD_PNORDD_ERASEFLASH,
                                             PNOR::RC_LPC_ERROR,
                                             TWO_UINT32_TO_UINT64(0,i_address),
-                                            findEraseBlock(i_address));
+                                            findEraseBlock(i_address),
+                                            true /*Add HB SW Callout*/ );
+            l_err->collectTrace(PNOR_COMP_NAME);
             break;
         }
 
@@ -1758,7 +2138,9 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
                                             PNOR::MOD_PNORDD_ERASEFLASH,
                                             PNOR::RC_UNSUPPORTED_OPERATION,
                                             static_cast<uint64_t>(cv_nor_chipid),
-                                            i_address);
+                                            i_address,
+                                            true /*Add HB SW Callout*/ );
+            l_err->collectTrace(PNOR_COMP_NAME);
         }
     } while(0);
 
