@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -259,7 +259,7 @@ sub verifyCommitMsg
             }
         }
 
-        if ($line =~ m/^\s*CQ: \s*[A-Z][A-Z][0-9]+(.*)/)
+        if ($line =~ m/^\s*CQ:\s*[A-Z][A-Z][0-9]+(.*)/)
         {
             if ("" ne $cqTag)
             {
