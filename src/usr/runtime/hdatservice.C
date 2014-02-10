@@ -52,7 +52,7 @@ namespace RUNTIME
 const hdatHeaderExp_t HSVC_NODE_DATA_HEADER = {
     0xD1F0,   // id
     "HS KID", // name
-    0x0010    //version
+    0x0020    //version
 };
 
 const hdatHeaderExp_t HSVC_DATA_HEADER = {
@@ -761,19 +761,18 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             hdatHDIFChildHdr_t* node_header =
               reinterpret_cast<hdatHDIFChildHdr_t*>
               (hsvc_header->hdatChildStrOffset + base_addr);
-            TRACUCOMP( g_trac_runtime, "node_headers=%p", node_header );
+            uint64_t first_node_header =
+              mm_virt_to_phys(reinterpret_cast<void*>(node_header));
+            TRACUCOMP( g_trac_runtime, "first node_header=%X->%p", first_node_header, node_header );
+
             // Make sure the Child Header is pointing somewhere valid
             errhdl = verify_hdat_address( node_header,
                                           sizeof(hdatHDIFChildHdr_t) );
             if( errhdl ) { break; }
 
-            hdatHDIF_t* node_data_headers =
+            hdatHDIF_t* node_data_header =
               reinterpret_cast<hdatHDIF_t*>
               (node_header->hdatOffset + base_addr);
-            // Make sure the headers are all in a valid range
-            errhdl = verify_hdat_address( node_data_headers,
-                             sizeof(hdatHDIF_t)*(node_header->hdatCnt) );
-            if( errhdl ) { break; }
 
             // Loop around all instances because the data
             //   could be sparsely populated
@@ -782,27 +781,39 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             uint32_t found_instances = 0;
             for( uint8_t index = 0; index < node_header->hdatCnt; index++ )
             {
-                TRACUCOMP( g_trac_runtime, "index=%d", index );
+                // Make sure the headers are all in a valid range
+                errhdl = verify_hdat_address( node_data_header,
+                                              sizeof(hdatHDIF_t) );
+                if( errhdl ) { break; }
+
+                uint64_t phys_addr =
+                  mm_virt_to_phys(reinterpret_cast<void*>(node_data_header));
+                TRACFCOMP( g_trac_runtime, "index=%d, header=%p->%X", index, node_data_header, phys_addr );
                 // Check the headers and version info
-                errhdl = check_header( &(node_data_headers[index]),
+                errhdl = check_header( node_data_header,
                                        HSVC_NODE_DATA_HEADER );
                 if( errhdl ) { break; }
 
-                uint64_t node_base_addr =
-                  reinterpret_cast<uint64_t>(&(node_data_headers[index]));
-
-                TRACUCOMP( g_trac_runtime, "%d> hdatInstance=%d", index, node_data_headers[index].hdatInstance );
-                if( node_data_headers[index].hdatInstance != i_instance )
+                TRACFCOMP( g_trac_runtime, "%d> hdatInstance=%d, hdatSize=%d", index, node_data_header->hdatInstance, node_data_header->hdatSize );
+                if( node_data_header->hdatInstance != i_instance )
                 {
                     found_instances |=
-                      (0x80000000 >> node_data_headers[index].hdatInstance);
+                      (0x80000000 >> node_data_header->hdatInstance);
+                    //increment to the next child section
+                    node_data_header =
+                      reinterpret_cast<hdatHDIF_t*>
+                      (reinterpret_cast<uint64_t>(node_data_header)
+                       + node_data_header->hdatSize);
                     continue;
                 }
                 foundit = true;
 
+                uint64_t node_base_addr =
+                  reinterpret_cast<uint64_t>(node_data_header);
+
                 hdatHDIFDataHdr_t* local_node_header =
                   reinterpret_cast<hdatHDIFDataHdr_t*>
-                  (node_data_headers[index].hdatDataPtrOffset + node_base_addr);
+                  (node_data_header->hdatDataPtrOffset + node_base_addr);
                 TRACUCOMP( g_trac_runtime, "local_node_header=%p", local_node_header );
                 // Make sure the header is pointing somewhere valid
                 errhdl = verify_hdat_address( local_node_header,
@@ -820,15 +831,12 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             if( !foundit )
             {
                 TRACFCOMP( g_trac_runtime, "getHostDataSection> HSVC_NODE_DATA instance %d of section %d is unallocated", i_instance, i_section );
-                // Go get the physical address we mapped in
-                uint64_t phys_addr =
-                  mm_virt_to_phys(reinterpret_cast<void*>(node_data_headers));
 
                 /*@
                  * @errortype
                  * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
                  * @reasoncode   RUNTIME::RC_NO_HSVC_NODE_DATA_FOUND
-                 * @userdata1    Mainstore address of node_data_headers
+                 * @userdata1    Mainstore address of first node_data_header
                  * @userdata2[0:31]    Requested Instance
                  * @userdata2[32:63]   Bitmask of discovered instances
                  * @devdesc      Requested instance of HSVC_NODE_DATA is
@@ -838,7 +846,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                   RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                                   RUNTIME::RC_NO_HSVC_NODE_DATA_FOUND,
-                                  phys_addr,
+                                  first_node_header,
                                   TWO_UINT32_TO_UINT64(i_instance,
                                                        found_instances));
                 errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,

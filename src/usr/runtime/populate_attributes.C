@@ -61,6 +61,11 @@ TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
     _cur_header->id = fapi::__fid; \
     _cur_header->sizeBytes = sizeof(fapi::__fid##_Type); \
     _cur_header->offset = (_output_ptr - _beginning); \
+    if( _output_ptr + sizeof(fapi::__fid##_Type) > _end_of_area ) { \
+        TRACFCOMP( g_trac_runtime, "Not enough space for 0x%X (%p + 0x%X > %p", fapi::__fid, _output_ptr, sizeof(fapi::__fid##_Type), _end_of_area ); \
+        _failed_attribute = fapi::__fid; \
+        break; \
+    } \
     memcpy( _output_ptr, &result_##__fid, sizeof(fapi::__fid##_Type) ); \
     _output_ptr += sizeof(fapi::__fid##_Type); \
     (*_num_attr)++;
@@ -81,6 +86,11 @@ TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
     _cur_header->id = fapi::__fid; \
     _cur_header->sizeBytes = sizeof(fapi::__fid##_Type); \
     _cur_header->offset = (_output_ptr - _beginning); \
+    if( _output_ptr + sizeof(fapi::__fid##_Type) > _end_of_area ) { \
+        TRACFCOMP( g_trac_runtime, "Not enough space for 0x%X (%p + 0x%X > %p", fapi::__fid, _output_ptr, sizeof(fapi::__fid##_Type), _end_of_area ); \
+        _failed_attribute = fapi::__fid; \
+        break; \
+    } \
     memcpy( _output_ptr, &result_##__fid, sizeof(fapi::__fid##_Type) ); \
     _output_ptr += sizeof(fapi::__fid##_Type); \
     (*_num_attr)++;
@@ -308,6 +318,8 @@ errlHndl_t populate_system_attributes( void )
         fapi::Target* _target = NULL; //target for FAPI_ATTR_GET
         hsvc_attr_header_t* _cur_header = NULL; //temp variable
         uint32_t _huid_temp = 0; //temp variable
+        void* _end_of_area = reinterpret_cast<void*>(sys_data_addr
+                                                     + sys_data_size);
 
         // Prepare the vars for the HSVC_LOAD_ATTR macros
         _beginning = reinterpret_cast<char*>(sys_data);
@@ -337,12 +349,13 @@ errlHndl_t populate_system_attributes( void )
         // Add an empty attribute header to signal the end
         EMPTY_ATTRIBUTE;
 
-        TRACFCOMP( g_trac_runtime, "populate_system_attributes> numAttr=%d", sys_data->hsvc.numAttr );
+        size_t total_bytes = _output_ptr - sys_data->attributes;
+        TRACFCOMP( g_trac_runtime, "populate_system_attributes> numAttr=%d, bytes=%d", sys_data->hsvc.numAttr, total_bytes );
 
         // Make sure we don't overrun our space
         assert( *_num_attr < system_data_t::MAX_ATTRIBUTES );
 
-        TRACFCOMP( g_trac_runtime, "Run: system_cmp0.memory_ln4->image.save attributes.sys.bin 0x%X %d", sys_data,  sizeof(system_data_t) );
+        TRACDCOMP( g_trac_runtime, "Run: system_cmp0.memory_ln4->image.save attributes.sys.bin 0x%X %d", sys_data, total_bytes );
     } while(0);
 
     // Handle any errors from FAPI_ATTR_GET
@@ -454,6 +467,8 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
         fapi::Target* _target = NULL; //target for FAPI_ATTR_GET
         hsvc_attr_header_t* _cur_header = NULL; //temp variable
         uint32_t _huid_temp = 0; //temp variable
+        void* _end_of_area = reinterpret_cast<void*>(node_data_addr
+                                                     + node_data_size);
 
         // Prepare the vars for the HSVC_LOAD_ATTR macros
         _beginning = reinterpret_cast<char*>(node_data);
@@ -587,6 +602,9 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             next_proc++;
         }
 
+        size_t total_bytes = _output_ptr - node_data->attributes;
+        TRACFCOMP( g_trac_runtime, "populate_node_attributes> Total bytes = %d", total_bytes );
+
         // Add an empty Proc marker at the end
         node_data->procs[next_proc].procid = hsvc_proc_header_t::NO_PROC;
         node_data->procs[next_proc].offset = 0;
@@ -598,7 +616,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
         node_data->ex[next_ex].chiplet = hsvc_ex_header_t::NO_CHIPLET;
         node_data->ex[next_ex].numAttr = 0;
 
-        TRACFCOMP( g_trac_runtime, "Run: system_cmp0.memory_ln4->image.save attributes.node.bin 0x%X %d", node_data,  sizeof(node_data_t) );
+        TRACDCOMP( g_trac_runtime, "Run: system_cmp0.memory_ln4->image.save attributes.node.bin 0x%X %d", node_data, total_bytes );
     } while(0);
 
     // Handle any errors from FAPI_ATTR_GET
