@@ -546,7 +546,7 @@
         scomaddr    0x02010906;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("PSIFIR");
+        capture     req nonzero("PSIHBFIR");
     };
 
     register PSIHBFIR_ACT1
@@ -555,7 +555,7 @@
         scomaddr    0x02010907;
         capture     type secondary;
         capture     group default;
-        capture     req nonzero("PSIFIR");
+        capture     req nonzero("PSIHBFIR");
     };
 
     ############################################################################
@@ -946,6 +946,7 @@
     {
         name        "IOMC0.BUSCTL.SCOM.FIR_MASK_REG OR";
         scomaddr    0x02011A05;
+        access      write_only;
         capture     group never;
     };
 
@@ -995,6 +996,7 @@
     {
         name        "IOMC1.BUSCTL.SCOM.FIR_MASK_REG OR";
         scomaddr    0x02011E05;
+        access      write_only;
         capture     group never;
     };
 
