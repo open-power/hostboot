@@ -187,6 +187,16 @@ namespace SBE
                  err = NULL;
             }
 
+            // If Master Processor is Venice skip SBE Update
+            // @todo RTC 97441 remove this check
+            if( (masterProcChipTargetHandle->getAttr<TARGETING::ATTR_MODEL>()
+                 == TARGETING::MODEL_VENICE) )
+            {
+                TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms() - "
+                           "masterProcChipTargetHandle is Venice: skipping "
+                           "SBE Update");
+                 break;
+            }
 
             for(uint32_t i=0; i<procList.size(); i++)
             {
