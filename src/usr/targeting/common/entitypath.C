@@ -364,6 +364,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "PCIClockEndPoint";
         case TYPE_PCIESWITCH:
              return "PCIESWITCH";
+        case TYPE_CAPP:
+            return "CAPP";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

@@ -1,4 +1,4 @@
-<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+po<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
 <!-- $Source: src/usr/targeting/common/xmltohb/simics_VENICE.system.xml $   -->
@@ -1484,6 +1484,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p0 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc0capp0</id>
+    <type>unit-capp-venice</type>
+    <attribute><id>HUID</id><default>0x00210000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p1 processor chip -->
 
 <targetInstance>
@@ -2661,6 +2681,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-1/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p1 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc1capp0</id>
+    <type>unit-capp-venice</type>
+    <attribute><id>HUID</id><default>0x00210001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/capp-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3853,6 +3893,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p2 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc2capp0</id>
+    <type>unit-capp-venice</type>
+    <attribute><id>HUID</id><default>0x00210002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p3 processor chip -->
 
 
@@ -5038,6 +5098,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p3 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc3capp0</id>
+    <type>unit-capp-venice</type>
+    <attribute><id>HUID</id><default>0x00210003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p4 processor chip -->
 
 <targetInstance>
@@ -6184,6 +6264,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-4/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p4 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc4capp0</id>
+    <type>unit-capp-venice</type>
+    <attribute><id>HUID</id><default>0x00210004</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-4/capp-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -7342,6 +7442,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p5 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc5capp0</id>
+    <type>unit-capp-venice</type>
+    <attribute><id>HUID</id><default>0x00210005</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-5/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p6 processor chip -->
 
 <targetInstance>
@@ -8493,6 +8613,26 @@
     </attribute>
 </targetInstance>
 
+<!-- venice n0p6 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc6capp0</id>
+    <type>unit-capp-venice</type>
+    <attribute><id>HUID</id><default>0x00210006</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-6/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Venice n0p7 processor chip -->
 
 <targetInstance>
@@ -9636,6 +9776,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-7/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- venice n0p7 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc7capp0</id>
+    <type>unit-capp-venice</type>
+    <attribute><id>HUID</id><default>0x00210007</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-7/capp-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>

@@ -1168,6 +1168,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             generate_ax_buses($proc, "X",$proc_ordinal_id);
             generate_nx($proc,$proc_ordinal_id,$node);
             generate_pore($proc,$proc_ordinal_id,$node);
+            generate_capp($proc,$proc_ordinal_id,$node);
         }
     }
 }
@@ -2736,6 +2737,54 @@ sub generate_pore
 
     # call to do any fsp per-pore attributes
     do_plugin('fsp_pore', $proc, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_capp
+{
+    my ($proc, $ordinalId, $node) = @_;
+    my $uidstr = sprintf("0x%02X21%04X",${node},$proc);
+
+    # TODO RTC: 97477
+    my $ipath = "";
+    my $mruData = "";
+
+    print "\n<!-- $SYSNAME n${node}p$proc capp units -->\n";
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}capp0</id>
+    <type>unit-capp-$CHIPNAME</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>";
+        # TODO RTC: 97477
+        print "
+        <default>TO_BE_ADDED</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/capp-0</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>";
+        # TODO RTC: 97477
+        print "
+        <default>instance:TO_BE_ADDED</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>";
+
+    # call to do any fsp per-capp attributes
+    do_plugin('fsp_capp', $proc, $ordinalId );
 
     print "
 </targetInstance>

@@ -1129,6 +1129,26 @@
     </attribute>
 </targetInstance>
 
+<!-- murano n0p0 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc0capp0</id>
+    <type>unit-capp-murano</type>
+    <attribute><id>HUID</id><default>0x00210000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Murano n0p1 processor chip -->
 
 <targetInstance>
@@ -1945,6 +1965,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-1/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- murano n0p1 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc1capp0</id>
+    <type>unit-capp-murano</type>
+    <attribute><id>HUID</id><default>0x00210001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/capp-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2777,6 +2817,26 @@
     </attribute>
 </targetInstance>
 
+<!-- murano n0p2 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc2capp0</id>
+    <type>unit-capp-murano</type>
+    <attribute><id>HUID</id><default>0x00210002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 <!-- Murano n0p3 processor chip -->
 
 <targetInstance>
@@ -3593,6 +3653,26 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-3/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- murano n0p3 CAPP unit -->
+
+<targetInstance>
+    <id>sys0node0proc3capp0</id>
+    <type>unit-capp-murano</type>
+    <attribute><id>HUID</id><default>0x00210003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/capp-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
