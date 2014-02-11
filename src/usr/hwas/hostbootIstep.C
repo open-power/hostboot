@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -215,6 +215,18 @@ void* host_gard( void *io_pArgs )
                 errl = checkMinimumHardware();
             }
         }
+        // If targets are deconfigured as a result of host_gard, they are
+        // done so using the PLID as the reason for deconfiguration.  This
+        // triggers the reconfigure loop attribute to be set, which causes
+        // undesirable behavior, so we need to reset it here:
+
+        // Read current value
+        TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+            l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+        // Turn off deconfigure bit
+        l_reconfigAttr &= ~TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
+        // Write back to attribute
+        l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
