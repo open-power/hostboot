@@ -76,6 +76,7 @@
 
 // mss_scrub support
 #include    <diag/prdf/prdfMain.H>
+#include <util/misc.H>
 
 namespace   CORE_ACTIVATE
 {
@@ -456,6 +457,14 @@ void * call_mss_scrub( void * io_pArgs )
     IStepError l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scrub entry" );
+
+    // There are performance issues and some functional deficiencies
+    //  that make runtime scrub problematic, so turning it off
+    if( Util::isSimicsRunning() )
+    {
+        TRACFCOMP(  ISTEPS_TRACE::g_trac_isteps_trace, "Skipping runtime scrub in Simics" );
+        return NULL;
+    }
 
     errlHndl_t l_errl = PRDF::startScrub();
     if ( NULL != l_errl )
