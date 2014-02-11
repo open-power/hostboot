@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -73,6 +73,7 @@ errlHndl_t ProcOps::resolveIpoll(
     errlHndl_t err = NULL;
     uint64_t on = 0;
     uint64_t observed = 0;
+    bool active = false;
     AttnData d;
 
     // very unlikely, but look for any
@@ -124,9 +125,17 @@ errlHndl_t ProcOps::resolveIpoll(
         d.attnType = static_cast<ATTENTION_VALUE_TYPE>(type);
         d.targetHndl = i_proc;
 
-        o_attentions.add(Attention(d, this));
-
-        break;
+        // to be sure, query corresponding GFIR
+        err = query(d, active);
+        if(err)
+        {
+            errlCommit(err, ATTN_COMP_ID);
+        }
+        else if(active)
+        {
+            o_attentions.add(Attention(d, this));
+            break;
+        }
     }
 
     return err;
