@@ -157,6 +157,8 @@ push @systemAttr,
     "MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP",
         $reqPol->{'safemode_mem_throttle_numerator_per_chip'},
     "MRW_THERMAL_MEMORY_POWER_LIMIT", $reqPol->{'thermal_memory_power_limit'},
+    "MSS_MBA_ADDR_INTERLEAVE_BIT", $reqPol->{'mss_mba_addr_interleave_bit'},
+    "MSS_MBA_CACHELINE_INTERLEAVE_MODE", $reqPol->{'mss_mba_cacheline_interleave_mode'},
     "PM_EXTERNAL_VRM_STEPSIZE", $reqPol->{'pm_external_vrm_stepsize'},
     "PM_EXTERNAL_VRM_STEPDELAY", $reqPol->{'pm_external_vrm_stepdelay'},
     "PM_SPIVID_FREQUENCY", $reqPol->{'pm_spivid_frequency'}->{content},
@@ -1635,23 +1637,6 @@ sub generate_sys
     <attribute>
         <id>PAYLOAD_KIND</id>
         <default>PHYP</default>
-    </attribute>
-    <!-- TODO. These must be from MRW. Hardcoded for now -->
-    <attribute>
-        <id>PAYLOAD_BASE</id>
-        <default>256</default>
-    </attribute>
-    <attribute>
-        <id>PAYLOAD_ENTRY</id>
-        <default>0x180</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
-        <default>24</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-        <default>1</default>
     </attribute>";
 
     generate_max_config();
