@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: gcr_funcs.C,v 1.9 2013/06/06 20:40:50 cswenson Exp $
+// $Id: gcr_funcs.C,v 1.10 2014/02/06 10:27:48 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -74,6 +74,7 @@ ReturnCode  GCR_write(const Target& chip_target, io_interface_t interface, GCR_s
    uint32_t rc_ecmd=0;
    ecmdDataBufferBase databuf_16bit(16);
    rc_ecmd|=databuf_16bit.flushTo0();
+   skipCheck=1; //forcing this argument to one as this is redundant.
    if(rc_ecmd){
       FAPI_ERR("Unexpected error in buffer manipulation\n");
       rc.setEcmdError(rc_ecmd);

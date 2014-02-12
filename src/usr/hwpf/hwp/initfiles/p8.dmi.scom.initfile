@@ -1,4 +1,4 @@
-#-- $Id: p8.dmi.scom.initfile,v 1.25 2013/12/04 17:25:28 jgrell Exp $ 
+#-- $Id: p8.dmi.scom.initfile,v 1.26 2014/02/04 19:06:24 jgrell Exp $ 
 
 
 ####################################################################
@@ -14,6 +14,7 @@
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jgr14020400| jgr     |02-04-14| Bus ID change for FIRs
  ## -- jgr13112600| jgr     |11-26-13| CYC rx_ds_timeout_sel setting changed to 111
  ## -- jgr13102800| jgr     |10-28-13| rx_ds_timeout_sel change (110 -> 111)
  ## -- jgr13082100| jgr     |08-21-13| Added tx_zcal inits so they can be removed from scan
@@ -71,15 +72,15 @@ include edi.io.define
                 
 
 
-#define def_bus_id3 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 7));
-#define def_bus_id2 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 6));
-#define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 1) || (ATTR_CHIP_UNIT_POS == 5));
-#define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 0) || (ATTR_CHIP_UNIT_POS == 4));
+define def_bus_id3 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 7));
+define def_bus_id2 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 6));
+define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 1) || (ATTR_CHIP_UNIT_POS == 5));
+define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 0) || (ATTR_CHIP_UNIT_POS == 4));
 
-define def_bus_id3 = ((ATTR_CHIP_UNIT_POS == 0) || (ATTR_CHIP_UNIT_POS == 4));
-define def_bus_id2 = ((ATTR_CHIP_UNIT_POS == 1) || (ATTR_CHIP_UNIT_POS == 5));
-define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 7));
-define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 6));
+#define def_bus_id3 = ((ATTR_CHIP_UNIT_POS == 0) || (ATTR_CHIP_UNIT_POS == 4));
+#define def_bus_id2 = ((ATTR_CHIP_UNIT_POS == 1) || (ATTR_CHIP_UNIT_POS == 5));
+#define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 7));
+#define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 6));
 
 
 

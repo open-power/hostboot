@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_funcs.C,v 1.18 2013/11/25 07:46:07 varkeykv Exp $
+// $Id: io_funcs.C,v 1.19 2014/02/11 05:46:59 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -203,8 +203,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
     ecmdDataBufferBase    status_data;
     rc_ecmd|=status_data.setBitLength(16);
     rc_ecmd|=status_data.flushTo0();
-
-
+    
     if(rc_ecmd)
     {
           FAPI_ERR("io_run_training: Failed buffer intialization in training_function_status\n");
@@ -214,10 +213,10 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
     {
         uint64_t  curr_cyc = 0;         // start time
         uint64_t end_cycle=max_poll_cycles ;
-
+	
 	uint64_t &FFDC_NUM_CYCLES=curr_cyc;
         int state,fail_bit;
-
+    
         while ( curr_cyc < end_cycle )
             {
                     // Reads Status Register for interface
@@ -320,6 +319,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     if (status_data.getHalfWord(0) & fail_bit)
                                     {
                                              FAPI_DBG("io_run_training: static repair encountered an error    \n");
+					      FAPI_SET_HWP_ERROR(rc,   IO_RUN_TRAINING_FAIL_REPAIR_RC);
                                              rx_wderf_failed[REPAIR]=true;
                                              repair_status =  FAILED ;
 					     break;
