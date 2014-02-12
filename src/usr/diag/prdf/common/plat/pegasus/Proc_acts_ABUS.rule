@@ -222,7 +222,7 @@ group gPbesFir filter singlebit
     (PbesFir, bit(13)) ? defaultMaskedError;
 
     /** PBESFIR[14]
-     *  NK_PSR_UNC_ERR
+     *  A2LINK_PSR_UNC_ERR
      */
     (PbesFir, bit(14)) ? calloutAbus2InterfaceTh1;
 
@@ -341,13 +341,29 @@ group gPbesFir filter singlebit
      */
     (PbesFir, bit(37)) ? defaultMaskedError;
 
+    # If bit 3 and 8 turn on simultaneously, action should be same as
+    # in case of bit 8.
+
+    /** PBESFIR[3,8]
+     *  A0LINK_PSR_UNC_ERR
+     */
+    (PbesFir, bit(3,8)) ? calloutAbus0InterfaceTh1;
+
     # If bit 4 and 11 turn on simultaneously, action should be same as
-    # incase of bit 11.
+    # in case of bit 11.
 
     /** PBESFIR[4,11]
      *  A1LINK_PSR_UNC_ERR
      */
     (PbesFir, bit(4,11)) ? calloutAbus1InterfaceTh1;
+
+    # If bit 5 and 14 turn on simultaneously, action should be same as
+    # in case of bit 14.
+
+    /** PBESFIR[5,14]
+     *  A2LINK_PSR_UNC_ERR
+     */
+    (PbesFir, bit(5,14)) ? calloutAbus2InterfaceTh1;
 };
 
 ################################################################################
