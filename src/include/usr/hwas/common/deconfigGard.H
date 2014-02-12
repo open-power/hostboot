@@ -119,6 +119,10 @@ public:
         // set for SPCN initiated deconfigure
         DECONFIGURED_BY_SPCN,                   // BASE | 0x08
 
+        // set by discoverTargets() when functional children
+        // are found connected to a non-functional Centaur
+        DECONFIGURED_BY_NO_PARENT_MEMBUF,       // BASE | 0x09
+
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
     };

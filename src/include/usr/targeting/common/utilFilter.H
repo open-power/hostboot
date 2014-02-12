@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,9 +43,11 @@ namespace TARGETING
      */
     enum ResourceState
     {
-        UTIL_FILTER_ALL,        // All targets
-        UTIL_FILTER_PRESENT,    // Present at minimum
-        UTIL_FILTER_FUNCTIONAL  // Functional targets only
+        UTIL_FILTER_ALL,                     // All targets
+        UTIL_FILTER_PRESENT,                 // Present at minimum
+        UTIL_FILTER_FUNCTIONAL,              // Functional targets only
+        UTIL_FILTER_PRESENT_NON_FUNCTIONAL,  //All present and non-fucntional
+        UTIL_FILTER_NON_FUNCTIONAL           //All non-fucntional
     };
 
 

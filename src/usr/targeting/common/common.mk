@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -37,7 +37,8 @@ PREDICATES_OBJS =           \
     predicatectm.o          \
     predicateisfunctional.o \
     predicatehwas.o         \
-    predicatehwaschanged.o
+    predicatehwaschanged.o  \
+    predicateisnonfunctional.o
 
 ITERATORS_OBJS =        \
     targetiterator.o    \

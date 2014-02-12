@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <targeting/common/predicates/predicatehwaschanged.H>
 #include <targeting/common/predicates/predicatepostfixexpr.H>
 #include <targeting/common/predicates/predicateattrval.H>
+#include <targeting/common/predicates/predicateisnonfunctional.H>
 
 // please keep up to date...
 

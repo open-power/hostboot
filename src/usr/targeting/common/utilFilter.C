@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <targeting/common/predicates/predicatepostfixexpr.H>
 #include <targeting/common/predicates/predicateattrval.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/predicates/predicateisnonfunctional.H>
 
 /**
  * Miscellaneous Filter Utility Functions
@@ -122,6 +123,51 @@ void _getChipOrChipletResources( TARGETING::TargetHandleList & o_vector,
             for ( ; l_funcTargetList; ++l_funcTargetList)
             {
                 o_vector.push_back(*l_funcTargetList);
+            }
+            break;
+        }
+        case UTIL_FILTER_NON_FUNCTIONAL:
+        {
+            // Get all non-functional chips or chiplets
+            // Non-functional predicate
+            TARGETING::PredicateIsNonFunctional l_isNonFunctional(false);
+            // Type predicate
+            TARGETING::PredicateCTM l_CtmFilter(i_class, i_type);
+            // Set up compound predicate
+            TARGETING::PredicatePostfixExpr l_nonFunctional;
+            l_nonFunctional.push(&l_CtmFilter).push(&l_isNonFunctional).And();
+            // Apply the filter through all targets
+            TARGETING::TargetRangeFilter l_nonFuncTargetList(
+                                    TARGETING::targetService().begin(),
+                                    TARGETING::targetService().end(),
+                                    &l_nonFunctional);
+            o_vector.clear();
+            for ( ; l_nonFuncTargetList; ++l_nonFuncTargetList)
+            {
+                o_vector.push_back(*l_nonFuncTargetList);
+            }
+            break;
+        }
+        case UTIL_FILTER_PRESENT_NON_FUNCTIONAL:
+        {
+            // Get all present and non-functional chips or chiplets
+            // Present and non-functional predicate
+            TARGETING::PredicateIsNonFunctional l_isPresNonFunctional;
+            // Type predicate
+            TARGETING::PredicateCTM l_CtmFilter(i_class, i_type);
+            // Set up compound predicate
+            TARGETING::PredicatePostfixExpr l_presNonFunctional;
+            l_presNonFunctional.push(&l_CtmFilter).
+                push(&l_isPresNonFunctional).And();
+            // Apply the filter through all targets
+            TARGETING::TargetRangeFilter l_presNonFuncTargetList(
+                                    TARGETING::targetService().begin(),
+                                    TARGETING::targetService().end(),
+                                    &l_presNonFunctional);
+            o_vector.clear();
+            for ( ; l_presNonFuncTargetList; ++l_presNonFuncTargetList)
+            {
+                o_vector.push_back(*l_presNonFuncTargetList);
             }
             break;
         }

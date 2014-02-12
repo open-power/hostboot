@@ -521,10 +521,68 @@ errlHndl_t discoverTargets()
             //non functional membuf or no membufs associated with this MCS
             enableHwasState(l_MCSTarget,true,false,
                           HWAS::DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF);
+
+
+
             HWAS_INF("discoverTargets: MCS %.8X mark as present, not functional",
                       l_MCSTarget->getAttr<ATTR_HUID>() );
         }
 
+        // Get list of non-functional Centaurs
+        TargetHandleList l_nonFuncCentaurs;
+        getChipResources(l_nonFuncCentaurs, TYPE_MEMBUF,
+                         UTIL_FILTER_NON_FUNCTIONAL);
+
+        // Some common variables used below
+        TargetHandleList pChildList;
+        PredicateIsFunctional isFunctional;
+
+        // Iterate through list of non-functional Centaurs, and
+        // set all children as non-functional
+        for (TargetHandleList::const_iterator
+                pCenTarget_it = l_nonFuncCentaurs.begin();
+                pCenTarget_it != l_nonFuncCentaurs.end();
+                ++pCenTarget_it)
+        {
+            // Cache current target
+            TargetHandle_t l_cenTarget = *pCenTarget_it;
+
+            // find all CHILD matches for this target and deconfigure them
+            targetService().getAssociated(pChildList, l_cenTarget,
+                TargetService::CHILD, TargetService::ALL, &isFunctional);
+            for (TargetHandleList::iterator pChild_it = pChildList.begin();
+                    pChild_it != pChildList.end();
+                    ++pChild_it)
+            {
+                TargetHandle_t l_childTarget = *pChild_it;
+                //non functional membuf or no membufs associated with this MCS
+                enableHwasState(l_childTarget,true,false,
+                         HWAS::DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEMBUF);
+                HWAS_INF("discoverTargets: Target %.8X mark as present"
+                         ", not functional due to non-functional parent"
+                         " Centaur",
+                         l_childTarget->getAttr<ATTR_HUID>() );
+            }
+
+            // find all CHILD_BY_AFFINITY matches for this target and
+            // deconfigure them
+            targetService().getAssociated(pChildList, l_cenTarget,
+                TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+                &isFunctional);
+            for (TargetHandleList::iterator pChild_it = pChildList.begin();
+                    pChild_it != pChildList.end();
+                    ++pChild_it)
+            {
+                TargetHandle_t l_affinityTarget = *pChild_it;
+                //non functional membuf or no membufs associated with this MCS
+                enableHwasState(l_affinityTarget,true,false,
+                         HWAS::DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEMBUF);
+                HWAS_INF("discoverTargets: Target %.8X mark as present"
+                         ", not functional due to non-functional parent"
+                         " Centaur",
+                         l_affinityTarget->getAttr<ATTR_HUID>() );
+            }
+        }
 
     } while (0);
 
