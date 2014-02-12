@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_slw_registers.xml,v 1.3 2013/12/05 21:22:27 stillgs Exp $ -->
+<!-- $Id: p8_slw_registers.xml,v 1.5 2014/02/10 04:46:50 stillgs Exp $ -->
 <!-- Definition of SLW registers to collect on some errors -->
 <hwpErrors>
   <registerFfdc>
@@ -75,5 +75,28 @@
     <scomRegister>PBA_BARMSK2_0x02013F06</scomRegister>
     <scomRegister>PBA_CONFIG_0x0201084B</scomRegister>
     <scomRegister>PBA_SLVCTL2_0x00064006</scomRegister>
+  </registerFfdc>
+  <registerFfdc>
+    <id>REG_FFDC_PROC_SLW_OHA_REGISTERS</id>
+    <scomRegister>EX_OHA_RO_STATUS_REG_0x1002000B</scomRegister>
+    <scomRegister>EX_OHA_MODE_REG_RWx1002000D</scomRegister>
+    <scomRegister>EX_OHA_ARCH_IDLE_STATE_REG_RWx10020011</scomRegister>
+    <scomRegister>EX_OHA_RO_STATUS_REG_0x1002000B</scomRegister>
+    <scomRegister>EX_OHA_AISS_IO_REG_0x10020014</scomRegister>   
+  </registerFfdc>
+  <registerFfdc>
+    <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
+    <scomRegister>EX_GP3_0x100F0012</scomRegister>
+    <scomRegister>EX_PMGP0_0x100F0100</scomRegister>
+    <scomRegister>EX_PMGP1_0x100F0103</scomRegister>
+    <scomRegister>EX_PFET_CTL_REG_0x100F0106</scomRegister>
+    <scomRegister>EX_PFET_STAT_REG_0x100F0107</scomRegister>
+    <scomRegister>EX_PFET_CTL_REG_0x100F010E</scomRegister>
+    <scomRegister>EX_PMSTATEHISTPERF_REG_0x100F0113</scomRegister>
+    <scomRegister>EX_PCBS_FSM_MONITOR1_REG_0x100F0170</scomRegister>
+    <scomRegister>EX_PCBS_FSM_MONITOR2_REG_0x100F0171</scomRegister>   
+    <scomRegister>EX_PMErr_REG_0x100F0109</scomRegister>   
+    <scomRegister>EX_PCBS_DPLL_STATUS_REG_100F0161</scomRegister>   
+    <scomRegister>EX_DPLL_CPM_PARM_REG_0x100F0152</scomRegister>        
   </registerFfdc>
 </hwpErrors>

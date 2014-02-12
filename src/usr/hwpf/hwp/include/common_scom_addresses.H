@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: common_scom_addresses.H,v 1.48 2013/11/04 14:31:08 kahnevan Exp $
+// $Id: common_scom_addresses.H,v 1.49 2014/01/30 16:19:26 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -373,6 +373,8 @@ CONST_UINT64_T( TP_CLK_REGION_0x01030006              , ULL(0x01030006) );
 
 CONST_UINT64_T( TP_CLK_SCANSEL_0x01030007             , ULL(0x01030007) );
 CONST_UINT64_T( TP_CLK_STATUS_0x01030008              , ULL(0x01030008) );
+CONST_UINT64_T( TP_CC_ERROR_STATUS_0x01030009         , ULL(0x01030009) );
+CONST_UINT64_T( TP_CC_PROTECT_MODE_0x010303FE         , ULL(0x010303FE) );
 
 //------------------------------------------------------------------------------
 //      TP FIR
@@ -456,6 +458,8 @@ CONST_UINT64_T( NEST_OPCG_CNTL3_0x02030005            , ULL(0x02030005) );
 CONST_UINT64_T( NEST_CLK_REGION_0x02030006            , ULL(0x02030006) );
 CONST_UINT64_T( NEST_CLK_SCANSEL_0x02030007           , ULL(0x02030007) );
 CONST_UINT64_T( NEST_CLK_STATUS_0x02030008            , ULL(0x02030008) );
+CONST_UINT64_T( NEST_CC_ERROR_STATUS_0x02030009       , ULL(0x02030009) );
+CONST_UINT64_T( NEST_CC_PROTECT_MODE_0x020303FE       , ULL(0x020303FE) );
 
 //------------------------------------------------------------------------------
 //      NEST FIR
@@ -638,6 +642,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.49  2014/01/30 16:19:26  mfred
+Add some clock control regs for FFDC.
+
 Revision 1.48  2013/11/04 14:31:08  kahnevan
 Added missing addresses used by proc_perv_registers.xml
 

@@ -1,4 +1,4 @@
-#-- $Id: p8.as.scom.initfile,v 1.5 2013/03/19 14:16:52 mikos Exp $
+#-- $Id: p8.as.scom.initfile,v 1.6 2014/01/29 23:19:32 kscarp Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2013
@@ -121,10 +121,10 @@ scom 0x020130C6                                 {
 #--- Action 1
 scom 0x020130C7                                  {
     scom_data        ;
-    0x0040000010800000             ;
+    0x0000000000000000             ;
     }
 #--- Mask
 scom 0x020130C3                                  {
     scom_data        ;
-    0x60BD600DEF600000             ;
+    0xFFFFFFFFFFE00000             ;
     }

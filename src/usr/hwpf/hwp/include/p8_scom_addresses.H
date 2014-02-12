@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.171 2014/01/20 22:17:37 jdavidso Exp $
+// $Id: p8_scom_addresses.H,v 1.173 2014/02/10 14:36:30 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1116,8 +1116,16 @@ CONST_UINT64_T( NX_AS_MMIO_BAR_0x0201309E             , ULL(0x0201309E) );
 CONST_UINT64_T( NX_CAPP_FIR_0x02013000                , ULL(0x02013000) );
 CONST_UINT64_T( NX_CAPP_FIR_AND_0x02013001            , ULL(0x02013001) );
 
+CONST_UINT64_T( NX_CAPP_DEBUG_CTRL_0x02013011         , ULL(0x02013011) );
+
+CONST_UINT64_T( NX_PB_DEBUG_0x02013090                , ULL(0x02013090) );
+CONST_UINT64_T( NX_DEBUG_SNAPSHOT0_0x020130A4         , ULL(0x020130A4) );
+CONST_UINT64_T( NX_DEBUG_SNAPSHOT1_0x020130A5         , ULL(0x020130A5) );
+
 CONST_UINT64_T( NX_DMA_ENG_FIR_0x02013100             , ULL(0x02013100) );
 CONST_UINT64_T( NX_DMA_ENG_FIR_AND_0x02013101         , ULL(0x02013101) );
+
+CONST_UINT64_T( NX_DEBUGMUX_CTRL_0x0201310A           , ULL(0x0201310A) );
 
 CONST_UINT64_T( NX_CQ_FIR_0x02013080                  , ULL(0x02013080) );
 CONST_UINT64_T( NX_CQ_FIR_AND_0x02013081              , ULL(0x02013081) );
@@ -1214,6 +1222,8 @@ CONST_UINT64_T( X_OPCG_CNTL3_0x04030005               , ULL(0x04030005) );
 CONST_UINT64_T( X_CLK_REGION_0x04030006               , ULL(0x04030006) );
 CONST_UINT64_T( X_CLK_SCANSEL_0x04030007              , ULL(0x04030007) );
 CONST_UINT64_T( X_CLK_STATUS_0x04030008               , ULL(0x04030008) );
+CONST_UINT64_T( X_CC_ERROR_STATUS_0x04030009          , ULL(0x04030009) );
+CONST_UINT64_T( X_CC_PROTECT_MODE_0x040303FE          , ULL(0x040303FE) );
 
 //------------------------------------------------------------------------------
 //      X-BUS FIR
@@ -1304,6 +1314,8 @@ CONST_UINT64_T( A_OPCG_CNTL3_0x08030005               , ULL(0x08030005) );
 CONST_UINT64_T( A_CLK_REGION_0x08030006               , ULL(0x08030006) );
 CONST_UINT64_T( A_CLK_SCANSEL_0x08030007              , ULL(0x08030007) );
 CONST_UINT64_T( A_CLK_STATUS_0x08030008               , ULL(0x08030008) );
+CONST_UINT64_T( A_CC_ERROR_STATUS_0x08030009          , ULL(0x08030009) );
+CONST_UINT64_T( A_CC_PROTECT_MODE_0x080303FE          , ULL(0x080303FE) );
 
 //------------------------------------------------------------------------------
 //      A-BUS FIR
@@ -1448,6 +1460,8 @@ CONST_UINT64_T( PCIE_OPCG_CNTL3_0x09030005            , ULL(0x09030005) );
 CONST_UINT64_T( PCIE_CLK_REGION_0x09030006            , ULL(0x09030006) );
 CONST_UINT64_T( PCIE_CLK_SCANSEL_0x09030007           , ULL(0x09030007) );
 CONST_UINT64_T( PCIE_CLK_STATUS_0x09030008            , ULL(0x09030008) );
+CONST_UINT64_T( PCIE_CC_ERROR_STATUS_0x09030009       , ULL(0x09030009) );
+CONST_UINT64_T( PCIE_CC_PROTECT_MODE_0x090303FE       , ULL(0x090303FE) );
 
 //------------------------------------------------------------------------------
 //      PCIE-BUS FIR
@@ -1762,6 +1776,8 @@ CONST_UINT64_T( EX_OPCG_CNTL3_0x10030005              , ULL(0x10030005) );
 CONST_UINT64_T( EX_CLK_REGION_0x10030006              , ULL(0x10030006) );
 CONST_UINT64_T( EX_CLK_SCANSEL_0x10030007             , ULL(0x10030007) );
 CONST_UINT64_T( EX_CLK_STATUS_0x10030008              , ULL(0x10030008) );
+CONST_UINT64_T( EX_CC_ERROR_STATUS_0x10030009         , ULL(0x10030009) );
+CONST_UINT64_T( EX_CC_PROTECT_MODE_0x100303FE         , ULL(0x100303FE) );
 
 //------------------------------------------------------------------------------
 //      EX FIR
@@ -2040,6 +2056,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.173  2014/02/10 14:36:30  jmcgill
+add NX addresses for debug bus/NXD trace collection
+
+Revision 1.172  2014/01/30 16:19:24  mfred
+Add some clock control regs for FFDC.
+
 Revision 1.171  2014/01/20 22:17:37  jdavidso
 Added additional pmc registers for SW239845.
 
