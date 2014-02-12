@@ -287,7 +287,7 @@ group gTpLFir filter singlebit
     /** TP_LFIR[24]
      *  Local errors from OTP
      */
-    (TpLFir, bit(24)) ? defaultMaskedError;
+    (TpLFir, bit(24)) ? SelfMedThr32PerDay;
 
     /** TP_LFIR[25]
      *  local error from Ext trigger
@@ -327,7 +327,7 @@ group gTpLFir filter singlebit
     /** TP_LFIR[35]
      *  OTP correctable error
      */
-    (TpLFir, bit(35)) ? threshold32pday;
+    (TpLFir, bit(35)) ? SelfMedThr1;
 
     /** TP_LFIR[36]
      *  Deadman Timer
