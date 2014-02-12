@@ -336,13 +336,48 @@ void MailboxSp::msgHandler()
 
                 break;
 
-            case MSG_IPC: // Interprocessor Messages
-                // Look for IPC message
-                // If not, just ignore
-                handleIPC();
-                msg->data[0] = 0;
-                msg->data[1] = 0;
-                msg_respond(iv_msgQ,msg);
+            case MSG_IPC: // Look for Interprocessor Messages
+                {
+
+                    uint64_t msg_q_id = KernelIpc::ipc_data_area.msg_queue_id;
+                    if(msg_q_id == IPC_DATA_AREA_LOCKED)
+                    {
+                        // msg is being written, but not yet ready to handle
+                        msg_q_id = IPC_DATA_AREA_CLEAR;
+                    }
+                    // desination message queue id is lower 32 bits
+                    msg_q_id &= 0x00000000FFFFFFFFull;
+
+                    if(IPC_DATA_AREA_CLEAR != msg_q_id)
+                    {
+                        // message is ready to handle
+                        msg_t * ipc_msg = msg_allocate();
+                        isync();
+                        *ipc_msg = KernelIpc::ipc_data_area.msg_payload;
+                        lwsync();
+                        // Signal message has been read, but keep area locked
+                        // until eoi has been sent
+                        KernelIpc::ipc_data_area.msg_queue_id =
+                            IPC_DATA_AREA_READ;
+                        handleIPC(static_cast<queue_id_t>(msg_q_id), ipc_msg);
+                    }
+
+                    msg->data[0] = 0;
+                    msg->data[1] = 0;
+                    msg_respond(iv_msgQ,msg);
+                }
+
+                break;
+
+            case MSG_LOCAL_IPC:
+                {
+                    queue_id_t q_id = static_cast<queue_id_t>(msg->data[0]);
+                    msg_t* ipc_msg = reinterpret_cast<msg_t*>(msg->extra_data);
+
+                    handleIPC(q_id, ipc_msg);
+
+                    msg_free(msg);
+                }
 
                 break;
 
@@ -1039,7 +1074,9 @@ void MailboxSp::handle_hbmbox_resp(mbox_msg_t & i_mbox_msg)
 /**
  * Send message to mailbox service to send a remote message
  */
-errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
+errlHndl_t MailboxSp::send(queue_id_t i_q_id,
+                           msg_t * io_msg,
+                           msgq_msg_t i_mbox_msg_type)
 {
     errlHndl_t err = NULL;
     int rc = 0;
@@ -1047,7 +1084,7 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
     msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
 
     msg_t* msg = msg_allocate();
-    msg->type = MBOX::MSG_SEND;
+    msg->type = i_mbox_msg_type;
     msg->data[0] = static_cast<uint64_t>(i_q_id);
     msg->extra_data = reinterpret_cast<void*>(io_msg); // Payload message
 
@@ -1395,125 +1432,101 @@ errlHndl_t MailboxSp::handleInterrupt()
     return err;
 }
 
-void MailboxSp::handleIPC()
+void MailboxSp::handleIPC(queue_id_t i_msg_q_id, msg_t * i_msg)
 {
-    // Check for IPC message. If no msg then ignore - could be other things
-    // All IPC messages are secure
-    uint64_t msg_q_id = KernelIpc::ipc_data_area.msg_queue_id;
 
-    // msg_q_id == IPC_DATA_AREA_CLEAR means no IPC message available
-    // msg_q_id == IPC_DATA_AREA_LOCKED means message incomming, but not ready
-    //             to be read and not associated with this interupt
-    if(msg_q_id == IPC_DATA_AREA_LOCKED)
+    TRACFCOMP(g_trac_mboxmsg,
+              "MBOXSP IPC RECV MSG: msg_id:0x%08x",
+              (uint32_t)i_msg_q_id);
+    TRACFCOMP(g_trac_mboxmsg,
+              "MBOXSP IPC RECV MSG: 0x%08x 0x%016lx 0x%016lx %p",
+              i_msg->type,
+              i_msg->data[0],
+              i_msg->data[1],
+              i_msg->extra_data);
+
+    registry_t::iterator r =
+        iv_registry.find(static_cast<queue_id_t>(i_msg_q_id));
+    if(r != iv_registry.end())
     {
-        msg_q_id = IPC_DATA_AREA_CLEAR;
-    }
+        // found queue
+        msg_q_t msgq = r->second;
 
-    // destination message queue id is lower 32 bits.
-    msg_q_id &= 0x00000000FFFFFFFFull;
-    if(IPC_DATA_AREA_CLEAR != msg_q_id)
-    {
-        msg_t * msg = msg_allocate();
-        isync();
-        *msg = KernelIpc::ipc_data_area.msg_payload;
-        lwsync();
+        // Only async message supported right now
+        // Interface already inforces this.
+        int rc = msg_send(msgq,i_msg);
 
-        // Signal message has been read, but keep locked/not ready for new msg
-        KernelIpc::ipc_data_area.msg_queue_id = IPC_DATA_AREA_READ;
-
-        TRACFCOMP(g_trac_mboxmsg,
-                  "MBOXSP IPC RECV MSG: msg_id:0x%08x",
-                  (uint32_t)msg_q_id);
-        TRACFCOMP(g_trac_mboxmsg,
-                  "MBOXSP IPC RECV MSG: 0x%08x 0x%016lx 0x%016lx %p",
-                  msg->type,
-                  msg->data[0],
-                  msg->data[1],
-                  msg->extra_data);
-        
-        registry_t::iterator r = 
-            iv_registry.find(static_cast<queue_id_t>(msg_q_id));
-        if(r != iv_registry.end())
+        if(rc)
         {
-            // found queue
-            msg_q_t msgq = r->second;
-
-            // Only async message supported right now
-            // Interface already inforces this.
-            int rc = msg_send(msgq,msg);
-
-            if(rc)
-            {
-                /*@ errorlog tag
-                 * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-                 * @moduleid        MBOX::MOD_MBOXSRV_IPC_MSG
-                 * @reasoncode      MBOX::RC_MSG_SEND_ERROR
-                 * @userdata1       rc from msg_send()
-                 * @userdata2       msg queue id
-                 * @devdesc         Invalid msg or msg queue
-                 *
-                 */
-                errlHndl_t err = new ERRORLOG::ErrlEntry
-                    (
-                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                     MBOX::MOD_MBOXSRV_IPC_MSG,
-                     MBOX::RC_MSG_SEND_ERROR,   //  reason Code
-                     rc,                        // rc from msg_send
-                     msg_q_id,
-                     true //Add HB Software Callout
-                    );
-
-                UserDetailsMboxMsg
-                    ffdc(reinterpret_cast<uint64_t*>(msg),
-                         sizeof(msg_t));
-
-                ffdc.addToLog(err);
-
-                err->collectTrace(MBOXMSG_TRACE_NAME);
-                errlCommit(err,MBOX_COMP_ID);
-
-                msg_free(msg);
-            }
-        }
-        else // not registered
-        {
-            // thow it away log error
-            TRACFCOMP(g_trac_mbox,
-                      ERR_MRK
-                      "MailboxSp::handleIPC: Unregistered msg queue id 0x%x"
-                      " message dropped.",
-                      msg_q_id);
-
             /*@ errorlog tag
-             * @errortype       ERRL_SEV_INFORMATIONAL
-             * @moduleid        MOD_MBOXSRV_IPC_MSG
-             * @reasoncode      RC_INVALID_QUEUE
-             * @userdata1       msg queue
-             * @userdata2       msg type
-             * @devdesc         Invalid message queue ID
+             * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+             * @moduleid        MBOX::MOD_MBOXSRV_IPC_MSG
+             * @reasoncode      MBOX::RC_MSG_SEND_ERROR
+             * @userdata1       rc from msg_send()
+             * @userdata2       msg queue id
+             * @devdesc         Invalid msg or msg queue
+             *
              */
             errlHndl_t err = new ERRORLOG::ErrlEntry
                 (
-                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                 ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                  MBOX::MOD_MBOXSRV_IPC_MSG,
-                 MBOX::RC_INVALID_QUEUE,
-                 msg_q_id,
-                 msg->type,
+                 MBOX::RC_MSG_SEND_ERROR,   //  reason Code
+                 rc,                        // rc from msg_send
+                 i_msg_q_id,
                  true //Add HB Software Callout
                 );
 
             UserDetailsMboxMsg
-                ffdc(reinterpret_cast<uint64_t*>(msg), sizeof(msg_t));
+                ffdc(reinterpret_cast<uint64_t*>(i_msg),
+                     sizeof(msg_t));
 
             ffdc.addToLog(err);
+
             err->collectTrace(MBOXMSG_TRACE_NAME);
             errlCommit(err,MBOX_COMP_ID);
 
-            msg_free(msg);
+            msg_free(i_msg);
         }
-        
+    }
+    else // not registered
+    {
+        // thow it away log error
+        TRACFCOMP(g_trac_mbox,
+                  ERR_MRK
+                  "MailboxSp::handleIPC: Unregistered msg queue id 0x%x"
+                  " message dropped.",
+                  i_msg_q_id);
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_INFORMATIONAL
+         * @moduleid        MOD_MBOXSRV_IPC_MSG
+         * @reasoncode      RC_INVALID_QUEUE
+         * @userdata1       msg queue
+         * @userdata2       msg type
+         * @devdesc         Invalid message queue ID
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+             MBOX::MOD_MBOXSRV_IPC_MSG,
+             MBOX::RC_INVALID_QUEUE,
+             i_msg_q_id,
+             i_msg->type,
+             true //Add HB Software Callout
+            );
+
+        UserDetailsMboxMsg
+            ffdc(reinterpret_cast<uint64_t*>(i_msg), sizeof(msg_t));
+
+        ffdc.addToLog(err);
+        err->collectTrace(MBOXMSG_TRACE_NAME);
+        errlCommit(err,MBOX_COMP_ID);
+
+        msg_free(i_msg);
     }
 }
+
 
 // Send a message to the FSP mailbox that a message it sent
 // had an invalid or undeliverable message
@@ -1643,7 +1656,7 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
 
     if(i_node == MBOX::MBOX_NODE_FSP)
     {
-        err = MailboxSp::send(i_q_id, i_msg);
+        err = MailboxSp::send(i_q_id, i_msg,MBOX::MSG_SEND);
     }
     else // IPC msg
     {
@@ -1663,35 +1676,47 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
                       i_msg->data[1],
                       i_msg->extra_data);
 
-            int rc = msg_send(reinterpret_cast<msg_q_t>(q_handle),
-                              i_msg);
-            TRACFCOMP(g_trac_mboxmsg,INFO_MRK"MBOXSP IPC SENT. This PIR 0x%x",
-                      KernelIpc::ipc_data_area.pir);
-
-
-            if(rc)
+            // node means Hb instance number in this context
+            INTR::PIR_t my_pir (KernelIpc::ipc_data_area.pir);
+            if(my_pir.nodeId == i_node)
             {
-                /*@ errorlog tag
-                 * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
-                 * @moduleid        MBOX::MOD_MBOX_SEND
-                 * @reasoncode      MBOX::RC_INVALID_QUEUE
-                 * @userdata1       returncode from msg_send()
-                 *
-                 * @devdesc         Invalid message or message queue
-                 *
-                 */
-                err = new ERRORLOG::ErrlEntry
-                    (
-                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,  //  severity
-                     MBOX::MOD_MBOX_SEND,                   //  moduleid
-                     MBOX::RC_INVALID_QUEUE,                //  reason Code
-                     rc,                                    //  msg_send errno
-                     q_handle,                              //  msg queue id
-                     true //Add HB Software Callout
-                    );
+                // Message is to this node - don't use IPC path
+                // MBOX sp can look up msgQ
+                err = MailboxSp::send(i_q_id, i_msg,MBOX::MSG_LOCAL_IPC);
+            }
+            else
+            {
+                int rc = msg_send(reinterpret_cast<msg_q_t>(q_handle),
+                                  i_msg);
+                TRACFCOMP(g_trac_mboxmsg,INFO_MRK
+                          "MBOXSP IPC SENT. This PIR 0x%x",
+                          KernelIpc::ipc_data_area.pir);
 
-                // This Trace has the msg
-                err->collectTrace(MBOXMSG_TRACE_NAME);
+
+                if(rc)
+                {
+                    /*@ errorlog tag
+                     * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+                     * @moduleid        MBOX::MOD_MBOX_SEND
+                     * @reasoncode      MBOX::RC_INVALID_QUEUE
+                     * @userdata1       returncode from msg_send()
+                     *
+                     * @devdesc         Invalid message or message queue
+                     *
+                     */
+                    err = new ERRORLOG::ErrlEntry
+                        (
+                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,  //  severity
+                         MBOX::MOD_MBOX_SEND,                //  moduleid
+                         MBOX::RC_INVALID_QUEUE,             // reason Code
+                         rc,                                 // msg_send errno
+                         q_handle,                           //  msg queue id
+                         true //Add HB Software Callout
+                        );
+
+                    // This Trace has the msg
+                    err->collectTrace(MBOXMSG_TRACE_NAME);
+                }
             }
         }
         else
@@ -1726,7 +1751,7 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
 errlHndl_t MBOX::sendrecv(queue_id_t i_q_id, msg_t * io_msg)
 {
     io_msg->__reserved__async = 1;
-    return MailboxSp::send(i_q_id, io_msg);
+    return MailboxSp::send(i_q_id, io_msg, MBOX::MSG_SEND);
 }
 
 // ---------------------------------------------------------------------------

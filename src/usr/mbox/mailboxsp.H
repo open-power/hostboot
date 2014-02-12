@@ -60,6 +60,7 @@ namespace MBOX
         MSG_MBOX_SUSPEND,
         MSG_MBOX_RESUME,
         MSG_IPC,
+        MSG_LOCAL_IPC,
     };
 
 
@@ -77,10 +78,13 @@ namespace MBOX
              * Send a message to the mailbox service
              * @param[in] i_q_id, the queue id
              * @param[in/out] io_msg the message to send and if async, the
+             * @param[in] i_mbox_msg_type - mailbox message type
              * message returned
              * @return errlHndl_t on error
              */
-            static errlHndl_t send(queue_id_t i_q_id, msg_t * io_msg);
+            static errlHndl_t send(queue_id_t i_q_id,
+                                   msg_t * io_msg,
+                                   msgq_msg_t i_mbox_msg_type);
 
         protected:
 
@@ -183,7 +187,7 @@ namespace MBOX
             /**
              * Handle potential IPC message
              */
-            void handleIPC();
+            void handleIPC(queue_id_t i_queue_id, msg_t * i_msg);
 
             /**
              * Trace the message to the "fast" trace buffer

@@ -464,7 +464,7 @@ void IntrRp::msgHandler()
                     {
                         // If something is registered for IPIs and
                         // it has not already been handled then handle
-                        if(r != iv_registry.end() && 
+                        if(r != iv_registry.end() &&
                            KernelIpc::ipc_data_area.msg_queue_id !=
                            IPC_DATA_AREA_READ)
                         {
@@ -1236,7 +1236,17 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
               i_pir.word,
               cpuOffsetAddr(i_pir));
 
-    *cppr = 0xff;          // Allow all interrupts
+    if(i_pir.word == iv_masterCpu.word)
+    {
+        *cppr = 0xff;          // Allow all interrupts
+    }
+    else
+    {
+        // Allow Wake-up IPIs only
+        // link regs route non-IPIs to iv_masterCPU) anyway
+        // IPC IPIs are only directed at iv_masterCpu
+        *cppr = IPI_USR_PRIO + 1;
+    }
 
     // Links are intended to be set up in rings.  If an interrupt ends up
     // where it started, it gets rejected by hardware.
