@@ -39,6 +39,7 @@
 #include <kernel/ipc.H>
 #include <kernel/timemgr.H>
 
+
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t,
                          uint64_t, uint64_t) NO_RETURN;
@@ -215,6 +216,12 @@ namespace KernelMisc
             // Got a nonzero status value indicating we had a shutdown request
             // with a PLID and there force need to do  TI.  The plid info was
             // written to the data area earlier in CpuManager::requestShutdown
+
+            // First indicate to the FSP that we're done by clearing out the
+            // "hostboot_done" register.  We need to do this since this is the
+            // power off path.
+            updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,0);
+
             terminateExecuteTI();
         }
     }
@@ -282,12 +289,10 @@ namespace KernelMisc
         updateScratchReg(MMIO_SCRATCH_MEMORY_STATE,
                          kernel_hbDescriptor.kernelMemoryState);
 
-        // @TODO: Remove this workaround with RTC 84029.
         // Set scratch register to indicate Hostboot is [still] active.
         const char * hostboot_string = "hostboot";
         updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
                          *reinterpret_cast<const uint64_t*>(hostboot_string));
-        // -- end workaround.
 
         // Restore caller of cpu_master_winkle().
         iv_caller->state = TASK_STATE_RUNNING;
@@ -384,6 +389,11 @@ namespace KernelMisc
         // Restore memory state register.
         updateScratchReg(MMIO_SCRATCH_MEMORY_STATE,
                          kernel_hbDescriptor.kernelMemoryState);
+
+        // Set scratch register to indicate Hostboot is [still] active.
+        const char * hostboot_string = "hostboot";
+        updateScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
+                         *reinterpret_cast<const uint64_t*>(hostboot_string));
 
         // Restore caller of cpu_all_winkle().
         iv_caller->state = TASK_STATE_RUNNING;

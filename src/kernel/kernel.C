@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -99,8 +99,8 @@ void Kernel::cppBootstrap()
     void(**ctors)() = &ctor_start_address;
     while(ctors != &ctor_end_address)
     {
-	(*ctors)();
-	ctors++;
+        (*ctors)();
+        ctors++;
     }
 }
 
