@@ -603,7 +603,6 @@ group gMbsFir filter singlebit
     /** MBSFIR[9]
      *  MBS_FIR_REG_CACHE_SRW_CE
      */
-    #TODO via RTC 22872 ( L4 Line Delete )
     (MbsFir, bit(9)) ? clearSecMbsBitsAndLineDelete;
 
     /** MBSFIR[10]
@@ -619,7 +618,6 @@ group gMbsFir filter singlebit
     /** MBSFIR[12]
      *  MBS_FIR_REG_CACHE_CO_CE
      */
-    #TODO via RTC 22872 ( L4 Line Delete )
     (MbsFir, bit(12)) ? clearSecMbaCalBitsAndLineDelete;
 
     /** MBSFIR[13]
@@ -1331,9 +1329,9 @@ actionclass analyzeFetchUe0
 /** Analyze a fetch UE on MBA1 */
 actionclass analyzeFetchUe1
 {
-     funccall("AnalyzeFetchUe1");
-     threshold1;
-     SUEGenerationPoint;
+    funccall("AnalyzeFetchUe1");
+    threshold1;
+    SUEGenerationPoint;
 };
 
 /** Clear MBS SecondaryBits and Line Delete*/
@@ -1359,6 +1357,7 @@ actionclass clearSecMbaCalBitsAndConnL4UE
 {
     funccall("ClearMbaCalSecondaryBits");
     calloutL4;
+    threshold1;
     SUEGenerationPoint;
 };
 
@@ -1367,6 +1366,7 @@ actionclass clearSecMbsBitsAndConnL4UE
 {
     funccall("ClearMbsSecondaryBits");
     calloutL4;
+    threshold1;
     SUEGenerationPoint;
 };
 
