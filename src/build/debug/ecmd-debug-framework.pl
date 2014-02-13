@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -32,6 +32,7 @@ use lib dirname (__FILE__);
 use Hostboot::_DebugFramework;
 
 use constant DEFAULT_HRMOR => 128*1024*1024; # 128 MB.
+use constant PER_NODE_OFFSET => 32*1024*1024*1024*1024; # 32 TB.
 
 my $filename = basename (__FILE__);
 my $self = ($0 =~ m/$filename/);
@@ -43,6 +44,8 @@ my $cfgHelp = 0;
 my $cfgMan = 0;
 my $toolHelp = 0;
 my $forceHRMOR = DEFAULT_HRMOR;
+my $node = 0;  # -nX parm to ecmd
+my $proc = 0;  # -pX parm to ecmd
 
 my $imgPath = "";
 my $hbDir = $ENV{'HB_IMGDIR'};
@@ -66,6 +69,8 @@ GetOptions("tool:s" => \$tool,
            "help" => \$cfgHelp,
            "toolhelp" => \$toolHelp,
            "force-hrmor:o" => \$forceHRMOR,
+           "node:i" => \$node,
+           "proc:i" => \$proc,
            "man" => \$cfgMan) || pod2usage(-verbose => 0);
 pod2usage(-verbose => 1) if $cfgHelp;
 pod2usage(-verbose => 2) if $cfgMan;
@@ -136,7 +141,7 @@ sub getEnv
 #
 sub getHRMOR
 {
-    return $forceHRMOR;
+    return $forceHRMOR + ($node * PER_NODE_OFFSET);
 }
 
 # @sub readData
@@ -157,7 +162,9 @@ sub readData
 
     my (undef, $debugfile) = tempfile(OPEN => 0);
     my (undef, $filename) = tempfile(OPEN => 0);
-    my $command = sprintf("cipgetmempba -fb %s %x %d -quiet > %s",
+    my $command = sprintf("cipgetmempba -n%d -p%d -fb %s %x %d -quiet > %s",
+                          $node,
+                          $proc,
                           $filename,
                           $addr,
                           $size,
@@ -201,7 +208,9 @@ sub writeData
     print $file $value;
     close $file;
 
-    my $command = sprintf("cipputmempba -cft -fb %s %x -quiet -mode inj > %s",
+    my $command = sprintf("cipputmempba -n%d -p%d -cft -fb %s %x -quiet -mode inj > %s",
+                          $node,
+                          $proc,
                           $filename,
                           $addr,
                           $debugfile);
@@ -231,8 +240,8 @@ sub readScom
     my $addr = shift;
     my $size = shift;
 
-    my $command = sprintf("getscom pu %x -quiet -ox",
-                          $addr);
+    my $command = sprintf("getscom pu -n%d -p%d %x -quiet -ox",
+                          $node, $proc, $addr);
     open OUTPUT, "$command |";
     my $result = <OUTPUT>;
     close OUTPUT;
@@ -257,8 +266,8 @@ sub writeScom
     my $size = shift;
     my $data = shift;
 
-    my $command = sprintf("putscom pu %x %x -quiet > /dev/null",
-                          $addr, $data);
+    my $command = sprintf("putscom pu -n%d -p%d %x %x -quiet > /dev/null",
+                          $node, $proc, $addr, $data);
 
     system($command);
 
