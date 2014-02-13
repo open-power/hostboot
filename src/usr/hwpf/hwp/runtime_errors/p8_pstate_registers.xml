@@ -1,0 +1,43 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_errors/p8_pstate_registers.xml $     -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: p8_pstate_registers.xml,v 1.1 2014/01/24 23:40:22 jdavidso Exp $ -->
+<!-- Definition of PMC registers to collect on some errors -->
+<hwpErrors>
+  <registerFfdc>
+    <id>REG_FFDC_PSTATE_REGISTERS</id>
+    <scomRegister>PMC_STATUS_REG_0x00062009</scomRegister>
+    <scomRegister>PMC_LFIR_0x01010840</scomRegister>
+    <scomRegister>PMC_LFIR_MASK_0x01010843</scomRegister>
+    <scomRegister>PMC_MODE_REG_0x00062000</scomRegister>
+    <scomRegister>PMC_PSTATE_MONITOR_AND_CTRL_REG_0x00062002</scomRegister>
+    <scomRegister>PMC_RAIL_BOUNDS_0x00062003</scomRegister>
+    <scomRegister>PMC_PARAMETER_REG0_0x00062005</scomRegister>
+    <scomRegister>PMC_PARAMETER_REG1_0x00062006</scomRegister>
+    <scomRegister>PMC_EFF_GLOBAL_ACTUAL_VOLTAGE_REG_0x00062007</scomRegister>
+    <scomRegister>PMC_INTCHP_CTRL_REG1_0x00062010</scomRegister>
+    <scomRegister>PMC_INTCHP_CTRL_REG4_0x00062012</scomRegister>
+    <scomRegister>PMC_INTCHP_STATUS_REG_0x00062013</scomRegister>
+    <scomRegister>PMC_INTCHP_PSTATE_REG_0x00062017</scomRegister>
+    <scomRegister>PMC_INTCHP_COMMAND_REG_0x00062014</scomRegister>
+  </registerFfdc>
+</hwpErrors>
