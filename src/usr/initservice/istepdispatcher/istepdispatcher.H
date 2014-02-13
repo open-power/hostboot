@@ -168,6 +168,14 @@ public:
      */
     bool isShutdownRequested();
 
+    /**
+     * @brief This function determines if a future shutdown request
+     *        has happened where the future istep has been reached
+
+     * @return bool - true if shutdown requested, false if not
+     */
+    bool isFutureShutdownRequested();
+
 protected:
 
     /**
@@ -378,6 +386,9 @@ private:
     timespec_t iv_lastProgressMsgTime; // Last time progress message sent
     bool iv_shutdown;                  // Shutdown request has been received
                                        // from the FSP
+    bool iv_futureShutdown;
+    uint8_t iv_istepToCompleteBeforeShutdown;
+    uint8_t iv_substepToCompleteBeforeShutdown;
 
     // Message Queue for receiving message from SP or SPless user console
     msg_q_t iv_msgQ;

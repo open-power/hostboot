@@ -98,7 +98,11 @@ IStepDispatcher::IStepDispatcher() :
     iv_curIStep(0),
     iv_curSubStep(0),
     iv_pIstepMsg(NULL),
-    iv_shutdown(false)
+    iv_shutdown(false),
+    iv_futureShutdown(false),
+    iv_istepToCompleteBeforeShutdown(0),
+    iv_substepToCompleteBeforeShutdown(0)
+
 {
     mutex_init(&iv_bkPtMutex);
     mutex_init(&iv_mutex);
@@ -454,16 +458,17 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             // Record current IStep, SubStep
             iv_curIStep = i_istep;
             iv_curSubStep = i_substep;
+            mutex_unlock(&iv_mutex);
 
             // If a shutdown request has been received
-            if (iv_shutdown)
+            if (isShutdownRequested())
             {
-                mutex_unlock(&iv_mutex);
                 // Do not begin new IStep and shutdown
                 shutdownDuringIpl();
             }
             else
             {
+                mutex_lock(&iv_mutex);
                 // Send Progress Code
                 err = this->sendProgressCode(false);
                 mutex_unlock(&iv_mutex);
@@ -1019,11 +1024,56 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 {
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleShutdownMsg");
 
-    // Set iv_shutdown and signal any IStep waiting for a sync point
-    mutex_lock(&iv_mutex);
-    iv_shutdown = true;
-    sync_cond_broadcast(&iv_cond);
-    mutex_unlock(&iv_mutex);
+    // find the step/substep. The step is in the top 32bits, the substep is in
+    // the bottom 32bits and is a byte
+    uint8_t istep = ((io_pMsg->data[0] & 0x000000FF00000000) >> 32);
+    uint8_t substep = (io_pMsg->data[0] & 0x00000000000000FF);
+
+    if (istep == 0 && substep == 0)
+    {
+        //Immediate shutdown - Set iv_shutdown and signal any IStep waiting for
+        //    a sync point
+        mutex_lock(&iv_mutex);
+        iv_shutdown = true;
+        sync_cond_broadcast(&iv_cond);
+        mutex_unlock(&iv_mutex);
+    }
+    else
+    {
+        mutex_lock(&iv_mutex);
+        if (iv_futureShutdown)
+        {
+            //Multiple shutdown messages have been received use the one that 
+            // will happen first
+            if ((istep < iv_istepToCompleteBeforeShutdown) ||
+                (istep == iv_istepToCompleteBeforeShutdown
+                     && substep < iv_substepToCompleteBeforeShutdown) )
+            {
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"handleShutdownMsg: Future " 
+                  "shutdown msg rcvd, updating future poweroff to istep"
+                  " [%d], substep [%d]", istep, substep);
+                iv_istepToCompleteBeforeShutdown = istep;
+                iv_substepToCompleteBeforeShutdown = substep;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"handleShutdownMsg: Future "
+                  "shutdown msg rcvd, but istep [%d], substep [%d] is after "
+                  "previous future shutdown request. This request will be "
+                  "ignored.", istep, substep);
+            }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_initsvc, INFO_MRK"handleShutdownMsg: Future"
+                          " Shutdown Message for istep [%d], substep [%d]",
+                          istep, substep);
+            iv_istepToCompleteBeforeShutdown = istep;
+            iv_substepToCompleteBeforeShutdown = substep;
+            iv_futureShutdown = true;
+        }
+        mutex_unlock(&iv_mutex);
+    }
 
     if (msg_is_async(io_pMsg))
     {
@@ -1040,6 +1090,7 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleShutdownMsg");
 }
+
 
 // ----------------------------------------------------------------------------
 // IStepDispatcher::shutdownDuringIpl()
@@ -1120,8 +1171,60 @@ bool IStepDispatcher::isShutdownRequested()
     bool isShutdownRequested = iv_shutdown;
     mutex_unlock(&iv_mutex);
 
+    if (!isShutdownRequested)
+    {
+        isShutdownRequested = isFutureShutdownRequested();
+    }
+
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::isShutdownRequested");
     return isShutdownRequested;
+}
+
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::isFutureShutdownRequested()
+// ----------------------------------------------------------------------------
+bool IStepDispatcher::isFutureShutdownRequested()
+{
+    TRACDCOMP(g_trac_initsvc,
+                  ENTER_MRK"IStepDispatcher::isFutureShutdownRequested");
+
+    bool isFutureShutdownRequested = false;
+    mutex_lock(&iv_mutex);
+
+    if (iv_futureShutdown)
+    {
+        if (iv_curIStep == iv_istepToCompleteBeforeShutdown)
+        {
+            if (iv_curSubStep > iv_substepToCompleteBeforeShutdown)
+            {
+                isFutureShutdownRequested = true;
+            }
+            else
+            {
+                isFutureShutdownRequested = false;
+            }
+        }
+        else if (iv_curIStep > iv_istepToCompleteBeforeShutdown)
+        {
+            isFutureShutdownRequested = true;
+        }
+        else
+        {
+            isFutureShutdownRequested = false;
+        }
+    }
+    else
+    {
+        //No Future shutdown set, always return false
+        isFutureShutdownRequested = false;
+    }
+    mutex_unlock(&iv_mutex);
+
+    TRACDCOMP(g_trac_initsvc,
+                  EXIT_MRK"IStepDispatcher::isFutureShutdownRequested");
+    return isFutureShutdownRequested;
 }
 
 // ----------------------------------------------------------------------------
