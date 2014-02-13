@@ -235,13 +235,6 @@ errlHndl_t IntrRp::_init()
                 err = NULL;
             }
         }
-        else
-        {
-            // The XIRR should be clean at this point, if not there is a
-            // serious problem. The routine will assert if an interrupt is
-            // found.
-            cleanCheck();
-        }
 
 
         // Set up the interrupt provider registers
@@ -2176,53 +2169,6 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
         }
     } while(0);
     return err;
-}
-
-
-void IntrRp::cleanCheck()
-{
-    TARGETING::TargetHandleList procCores;
-    getAllChiplets(procCores, TYPE_CORE);
-
-    for(TARGETING::TargetHandleList::iterator
-        core = procCores.begin();
-        core != procCores.end();
-        ++core)
-    {
-        const TARGETING::Target * proc = getParentChip(*core);
-
-        FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-        FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
-        CHIP_UNIT_ATTR coreId =
-            (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-        PIR_t pir(0);
-        pir.nodeId = node;
-        pir.chipId = chip;
-        pir.coreId = coreId;
-
-        size_t threads = cpu_thread_count();
-        for(size_t thread = 0; thread < threads; ++thread)
-        {
-            pir.threadId = thread;
-            uint64_t xirrAddr =
-                cpuOffsetAddr(pir) + iv_baseAddr + XIRR_RO_OFFSET;
-            uint32_t * xirrPtr = reinterpret_cast<uint32_t*>(xirrAddr);
-            uint32_t xirr = (*xirrPtr) & 0x00FFFFFF; // mask off CPPR
-
-            if(xirr != 0)
-            {
-                // mbox is not available at this point.
-                // errl is not functional at this point.
-                // This is probably a bug in SIMICS or FSP or HARDWARE
-                TRACFCOMP(g_trac_intr, ERR_MRK
-                          "Unexpected early interrupt on non-mpipl path."
-                          " xirr = %x",
-                          xirr);
-                assert(xirr == 0);
-            }
-        }
-    }
 }
 
 

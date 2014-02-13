@@ -534,11 +534,6 @@ namespace INTR
             void allowAllInterrupts(TARGETING::Target* i_core);
 
             /**
-             * cleanCheck - verify there are no active interrupts
-             */
-            void cleanCheck();
-
-            /**
              * Shutdown procedure
              */
             void shutDown();
