@@ -41,6 +41,7 @@
 #include <mbox/ipc_msg_types.H>
 #include <sys/task.h>
 #include <intr/interrupt.H>
+#include <errl/errlmanager.H>
 
 trace_desc_t *g_trac_runtime = NULL;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
@@ -227,10 +228,12 @@ struct node_data_t
 
 /**
  * @brief Populate system attributes for HostServices
+ * @param i_nodes  Bit-mask of present nodes
  */
-errlHndl_t populate_system_attributes( void )
+errlHndl_t populate_system_attributes( uint64_t i_nodes )
 {
     errlHndl_t errhdl = NULL;
+    TRACFCOMP( g_trac_runtime, "populate_system_attributes> i_nodes=%.16X", i_nodes );
 
     // These variables are used by the HSVC_LOAD_ATTR macros directly
     uint64_t _failed_attribute = 0; //attribute we failed on
@@ -336,7 +339,7 @@ errlHndl_t populate_system_attributes( void )
         sys_data->hsvc.offset =
           reinterpret_cast<uint64_t>(sys_data->attrHeaders)
           - reinterpret_cast<uint64_t>(sys_data);
-        sys_data->hsvc.nodePresent = 0x8000000000000000;
+        sys_data->hsvc.nodePresent = i_nodes;
         sys_data->hsvc.numAttr = 0;
 
         // Fill up the attributes
@@ -361,6 +364,8 @@ errlHndl_t populate_system_attributes( void )
     // Handle any errors from FAPI_ATTR_GET
     if( _rc )
     {
+        errlHndl_t rc_errhdl = NULL;
+
         /*@
          * @errortype
          * @reasoncode       RUNTIME::RC_ATTR_GET_FAIL
@@ -369,13 +374,24 @@ errlHndl_t populate_system_attributes( void )
          * @userdata2        FAPI Attribute Id that failed
          * @devdesc          Error retrieving FAPI attribute
          */
-        errhdl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          RUNTIME::MOD_RUNTIME_POP_SYS_ATTR,
-                                          RUNTIME::RC_ATTR_GET_FAIL,
-                                          _rc,
-                                          _failed_attribute,
-                                          true /*Add HB Software Callout*/);
-        errhdl->collectTrace(TARG_COMP_NAME,KILOBYTE/2);
+        rc_errhdl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             RUNTIME::MOD_RUNTIME_POP_SYS_ATTR,
+                                             RUNTIME::RC_ATTR_GET_FAIL,
+                                             _rc,
+                                             _failed_attribute,
+                                             true /*Add HB Software Callout*/);
+        rc_errhdl->collectTrace(TARG_COMP_NAME,KILOBYTE/2);
+
+        // Any previous error is probably more interesting so just commit
+        //  the rc error
+        if( errhdl )
+        {
+            errlCommit(rc_errhdl, RUNTIME_COMP_ID);
+        }
+        else
+        {
+            errhdl = rc_errhdl;
+        }
     }
 
     return errhdl;
@@ -622,6 +638,8 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
     // Handle any errors from FAPI_ATTR_GET
     if( _rc )
     {
+        errlHndl_t rc_errhdl = NULL;
+
         /*@
          * @errortype
          * @reasoncode       RUNTIME::RC_ATTR_GET_FAIL
@@ -630,13 +648,24 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
          * @userdata2        FAPI Attribute Id that failed
          * @devdesc          Error retrieving FAPI attribute
          */
-        errhdl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          RUNTIME::MOD_RUNTIME_POP_NODE_ATTR,
-                                          RUNTIME::RC_ATTR_GET_FAIL,
-                                          _rc,
-                                          _failed_attribute,
-                                          true /*Add HB Software Callout*/ );
-        errhdl->collectTrace(TARG_COMP_NAME,KILOBYTE/2);
+        rc_errhdl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             RUNTIME::MOD_RUNTIME_POP_NODE_ATTR,
+                                             RUNTIME::RC_ATTR_GET_FAIL,
+                                             _rc,
+                                             _failed_attribute,
+                                             true /*Add HB Software Callout*/ );
+        rc_errhdl->collectTrace(TARG_COMP_NAME,KILOBYTE/2);
+
+        // Any previous error is probably more interesting so just commit
+        //  the rc error
+        if( errhdl )
+        {
+            errlCommit(rc_errhdl, RUNTIME_COMP_ID);
+        }
+        else
+        {
+            errhdl = rc_errhdl;
+        }
     }
 
     return errhdl;
@@ -652,14 +681,6 @@ errlHndl_t populate_attributes( void )
     do {
         TRACFCOMP( g_trac_runtime, "Running populate_attributes" );
 
-        // Write the System-level Attributes
-        errhdl = populate_system_attributes();
-        if( errhdl )
-        {
-            TRACFCOMP( g_trac_runtime, "populate_attributes failed" );
-            break;
-        }
-
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
@@ -671,7 +692,35 @@ errlHndl_t populate_attributes( void )
         // Currently set up in host_sys_fab_iovalid_processing() which only
         // gets called if there are multiple physical nodes.   It eventually
         // needs to be setup by a hb routine that snoops for multiple nodes.
+        uint64_t present_nodes = hb_images;
         if(hb_images == 0)
+        {
+            // Figure out which node we are running on and set the
+            //  appropriate bit
+            TARGETING::Target* mproc = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle(mproc);
+            uint64_t nodeid = mproc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+            present_nodes = ((uint64_t)0x1
+                             << ((sizeof(present_nodes) * 8) - 1))
+                             >> nodeid;
+        }
+        else
+        {
+            // need to left-justify the uint8 into the uint64 we want
+            present_nodes = present_nodes <<
+              ((sizeof(present_nodes)-sizeof(hb_images))*8);
+        }
+
+        // Write the System-level Attributes
+        errhdl = populate_system_attributes(present_nodes);
+        if( errhdl )
+        {
+            TRACFCOMP( g_trac_runtime, "populate_attributes failed" );
+            break;
+        }
+
+        // Single or Multi-node?
+        if(hb_images == 0) //Single-node
         {
             // Single node system
             errhdl = populate_node_attributes(0);
