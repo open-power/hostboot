@@ -325,6 +325,15 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                         l_arySize = sizeof(P8_10_ATTR_PROC_AB_BNDY_PLL_DATA_array) /
                             l_arrayEntryLength;
                     }
+                    else if (l_attrDdLevel == 0x20)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>
+                            ( &P8_20_ATTR_PROC_AB_BNDY_PLL_DATA_array);
+                        l_arySize =
+                            sizeof(P8_20_ATTR_PROC_AB_BNDY_PLL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
                 }
                 break;
             case fapi::ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA:
@@ -368,6 +377,15 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
                             &P8_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
                         l_arySize = sizeof(P8_10_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
+                    else if (l_attrDdLevel == 0x20)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>
+                            (&P8_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array);
+                        l_arySize =
+                      sizeof(P8_20_ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA_array) /
                             l_arrayEntryLength;
                     }
                 }
@@ -415,6 +433,15 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                         l_arySize = sizeof(P8_10_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array) /
                             l_arrayEntryLength;
                     }
+                    else if (l_attrDdLevel == 0x20)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>
+                            ( &P8_20_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array);
+                        l_arySize =
+                            sizeof(P8_20_ATTR_PROC_PB_BNDY_DMIPLL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
                 }
                 break;
             case fapi::ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA:
@@ -458,6 +485,15 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
                             &P8_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
                         l_arySize = sizeof(P8_10_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
+                    else if (l_attrDdLevel == 0x20)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>
+                        ( &P8_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array);
+                        l_arySize =
+                   sizeof(P8_20_ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA_array) /
                             l_arrayEntryLength;
                     }
                 }
@@ -505,6 +541,15 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                         l_arySize = sizeof(P8_10_ATTR_PROC_PCI_BNDY_PLL_DATA_array) /
                             l_arrayEntryLength;
                     }
+                    else if (l_attrDdLevel == 0x20)
+                    {
+                        l_pllArrayPtr =
+                            reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>
+                            ( &P8_20_ATTR_PROC_PCI_BNDY_PLL_DATA_array);
+                        l_arySize =
+                            sizeof(P8_20_ATTR_PROC_PCI_BNDY_PLL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
                 }
                 break;
             case fapi::ATTR_PROC_PERV_BNDY_PLL_DATA:
@@ -548,6 +593,15 @@ fapi::ReturnCode getPllRingAttr( const fapi::AttributeId i_attrId,
                         l_pllArrayPtr = reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>(
                             &P8_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
                         l_arySize = sizeof(P8_10_ATTR_PROC_PERV_BNDY_PLL_DATA_array) /
+                            l_arrayEntryLength;
+                    }
+                    else if (l_attrDdLevel == 0x20)
+                    {
+                        l_pllArrayPtr =
+                             reinterpret_cast<const PLL_RING_ATTR_WITH_4_KEYS *>
+                             ( &P8_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array);
+                        l_arySize =
+                            sizeof(P8_20_ATTR_PROC_PERV_BNDY_PLL_DATA_array) /
                             l_arrayEntryLength;
                     }
                 }
