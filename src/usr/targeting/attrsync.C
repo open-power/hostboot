@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -578,6 +578,11 @@ namespace TARGETING
             MBOX::msgq_unregister(MBOX::HB_ATTR_SYNC_MSGQ);
 
         } while (0);
+
+        // Zero ATTR_RECONFIGURE_LOOP to avoid TI
+        TARGETING::Target* l_pTopLevel = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+        l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(0);
 
         TARG_INF( EXIT_MRK "syncAllAttributesFromFsp" );
         return  l_errl;
