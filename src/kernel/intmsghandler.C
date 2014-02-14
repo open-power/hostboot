@@ -100,10 +100,14 @@ void InterruptMsgHdlr::handleInterrupt()
         if(cv_instance)
         {
             cv_instance->iv_lock.lock();
+
+            //sendMessage needs a unique key, otherwise it
+            //drops messages.  PIR is not unique enough, make
+            //it (xirr<<32) | PIR
+            uint64_t l_data0 = pir | (static_cast<uint64_t>(xirr) <<32);
             cv_instance->sendMessage(MSG_INTR_EXTERN,
-                                     reinterpret_cast<void*>(pir),
-                                     reinterpret_cast<void*>(
-                                        static_cast<uint64_t>(xirr)),
+                                     reinterpret_cast<void*>(l_data0),
+                                     NULL,
                                      NULL);
             cv_instance->iv_lock.unlock();
         }

@@ -347,10 +347,11 @@ void IntrRp::msgHandler()
                     ext_intr_t type = NO_INTERRUPT;
 
                     // xirr was read by interrupt message handler.
-                    // Passed in as data[1]
-                    uint32_t xirr = static_cast<uint32_t>(msg->data[1]);
-                    // data[0] has the PIR
-                    PIR_t pir = static_cast<PIR_t>(msg->data[0]);
+                    // Passed in as upper word of data[0]
+                    uint32_t xirr = static_cast<uint32_t>(msg->data[0]>>32);
+                    // data[0] (lower word) has the PIR
+                    uint64_t l_data0 = (msg->data[0] & 0xFFFFFFFF);
+                    PIR_t pir = static_cast<PIR_t>(l_data0);
 
                     uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(pir);
                     uint32_t * xirrAddress =
