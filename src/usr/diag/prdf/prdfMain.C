@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: ./prdfMain.C $                                                */
+/* $Source: src/usr/diag/prdf/prdfMain.C $                                */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -117,6 +117,17 @@ errlHndl_t startScrub()
 
     do
     {
+        // Since the last refresh is in istep10 host_prd_hwreconfig,
+        // it may be good to call it again here at istep16 mss_scrub
+        // to remove any non-functional MBAs from PRD system model.
+        o_errl = refresh();
+        // This shouldn't return any error but if it does, break out
+        if(NULL != o_errl)
+        {
+            PRDF_ERR( PRDF_FUNC"refresh() failed" );
+            break;
+        }
+
         // This is run in Hostboot so there should only be one node.
         TargetHandleList list = getFunctionalTargetList( TYPE_NODE );
         if ( 1 != list.size() )
@@ -141,7 +152,7 @@ errlHndl_t startScrub()
 
     } while (0);
 
-    if ( SUCCESS != l_rc )
+    if (( SUCCESS != l_rc ) && (NULL == o_errl))
     {
         // Get user data
         uint64_t ud12 = PRDF_GET_UINT64_FROM_UINT32( nodeId, __LINE__ );
