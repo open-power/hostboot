@@ -44,6 +44,7 @@
 #include <pnor/pnor_reasoncodes.H>
 #include <sys/time.h>
 #include <initservice/initserviceif.H>
+#include <util/align.H>
 
 // Uncomment this to enable smart writing
 //#define SMART_WRITE
@@ -440,7 +441,7 @@ uint32_t PnorDD::cv_hw_workaround = 0;  //Hardware Workaround flags
  */
 void PnorDD::sfcInit( )
 {
-    TRACDCOMP(g_trac_pnor, "PnorDD::sfcInit> iv_mode=0x%.8x", iv_mode );
+    TRACFCOMP(g_trac_pnor, "PnorDD::sfcInit> iv_mode=0x%.8x", iv_mode );
     errlHndl_t  l_err  =   NULL;
 
     //Initial configuration settings for SFC:
@@ -467,9 +468,10 @@ void PnorDD::sfcInit( )
 
 
             l_err = readRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_ERASMS,
+                               SFC_REG_ERASMS,
                                iv_erasesize_bytes);
             if(l_err) { break; }
+            TRACFCOMP(g_trac_pnor,"iv_erasesize_bytes=%X",iv_erasesize_bytes);
 
             cv_sfcInitDone = true;
 
@@ -571,6 +573,8 @@ void PnorDD::sfcInit( )
                    "PnorDD::sfcInit> Committing error log");
         errlCommit(l_err,PNOR_COMP_ID);
     }
+
+    TRACFCOMP(g_trac_pnor, "< PnorDD::sfcInit" );
 }
 
 bool PnorDD::usingL3Cache( )
@@ -723,8 +727,8 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
             // want to start out incrementing by small numbers then get bigger
             //  to avoid a really tight loop in an error case so we'll increase
             //  the wait each time through
-            nanosleep( 0, SFC_POLL_INCR_NS*(++loop) );
             ++loop;
+            nanosleep( 0, SFC_POLL_INCR_NS*loop );
             poll_time += SFC_POLL_INCR_NS*loop;
         }
         if( l_err ) { break; }
@@ -1113,13 +1117,14 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
 
         //Configure Get "Chip ID" command in SFC to check special
         //Micron 'flag status' register
-        uint32_t confData = SPI_MICRON_FLAG_STAT << 24;
-        confData |= 0x00800001;  // 8-> read, 1->1 bytes
-        TRACDCOMP( g_trac_pnor, "PnorDD::micronFlagStatus> confData=0x%.8x",
-                   confData );
+        SfcCustomReg_t readflag_cmd;
+        readflag_cmd.data32 = 0;
+        readflag_cmd.opcode = SPI_MICRON_FLAG_STAT;
+        readflag_cmd.read = 1;
+        readflag_cmd.length = 1;
         l_err = writeRegSfc(SFC_CMD_SPACE,
                             SFC_REG_CHIPIDCONF,
-                            confData);
+                            readflag_cmd.data32);
         if(l_err) { break; }
 
 
@@ -1137,6 +1142,10 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
             l_err = writeRegSfc(SFC_CMD_SPACE,
                                 SFC_REG_CMD,
                                 sfc_cmd.data32);
+            if(l_err) { break; }
+
+            //Poll for complete status
+            l_err = pollSfcOpComplete();
             if(l_err) { break; }
 
             //Read the Status from the Command Buffer
@@ -1162,6 +1171,10 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
         }
         if( l_err ) { break; }
 
+        TRACDCOMP(g_trac_pnor,
+                  "PnorDD::micronFlagStatus> (0x%.8X)",
+                  opStatus);
+
         // check for ready and no errors
         // bit 0 = ready, bit 2=erase fail, bit 3=Program (Write) failure
         if( (opStatus & 0xB0000000) != 0x80000000)
@@ -1169,6 +1182,26 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
             TRACFCOMP(g_trac_pnor,
                       "PnorDD::micronFlagStatus> Error or timeout from Micron Flag Status Register (0x%.8X)",
                       opStatus);
+
+            //Read SFDP
+            uint32_t outdata[4];
+            SfcCustomReg_t new_cmd;
+            new_cmd.data32 = 0;
+            new_cmd.opcode = SPI_MICRON_READ_SFDP;
+            new_cmd.read = 1;
+            new_cmd.needaddr = 1;
+            new_cmd.clocks = 8;
+            new_cmd.length = 16;
+            l_err = readRegFlash( new_cmd,
+                                  outdata,
+                                  0 );
+            if(l_err) { break; }
+
+            //Loop around and grab all 16 bytes
+            for( size_t x=0; x<4; x++ )
+            {
+                TRACFCOMP( g_trac_pnor, "SFDP[%d]=%.8X", x, outdata[x] );
+            }
 
             /*@
              * @errortype
@@ -1206,24 +1239,29 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
                        confData );
             errlHndl_t tmp_err = NULL;
             tmp_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_CHIPIDCONF,
-                                confData);
+                                  SFC_REG_CHIPIDCONF,
+                                  confData);
             if(tmp_err)
             {
-                delete tmp_err;
+                //commit this error and return the original
+                tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                tmp_err->plid(l_err->plid());
+                ERRORLOG::errlCommit(tmp_err,PNOR_COMP_ID);
             }
 
             //Issue Get Chip ID command (clearing flag status)
             SfcCmdReg_t sfc_cmd;
             sfc_cmd.opcode = SFC_OP_CHIPID;
             sfc_cmd.length = 0;
-
             tmp_err = writeRegSfc(SFC_CMD_SPACE,
                                   SFC_REG_CMD,
                                   sfc_cmd.data32);
             if(tmp_err)
             {
-                delete tmp_err;
+                //commit this error and return the original
+                tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                tmp_err->plid(l_err->plid());
+                ERRORLOG::errlCommit(tmp_err,PNOR_COMP_ID);
             }
 
             //Poll for complete status
@@ -1253,7 +1291,7 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
                                 uint32_t i_spiOpcode)
 {
     errlHndl_t l_err = NULL;
-    TRACDCOMP( g_trac_pnor, "PnorDD::getNORChipId> i_spiOpcode=0x%.8x",
+    TRACFCOMP( g_trac_pnor, "PnorDD::getNORChipId> i_spiOpcode=0x%.8x",
                i_spiOpcode );
 
     do {
@@ -1296,42 +1334,30 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
         //so need to set a flag for later use
         //We can't read all 6 bytes above because not all MFG
         //support that operation.
-        if(o_chipId == MICRON_NOR_ID)
+        if( o_chipId == MICRON_NOR_ID )
         {
+            // Assume all Micron chips have this bug
+            cv_hw_workaround |= HWWK_MICRON_EXT_READ;
+
+            uint32_t outdata[4];
+
             //Change ChipID command to read back 6 bytes.
+            SfcCustomReg_t new_cmd;
+            new_cmd.opcode = SPI_GET_CHIPID_OP;
+            new_cmd.read = 1;
+            new_cmd.length = 6;
+            l_err = readRegFlash( new_cmd,
+                                  outdata );
+            if(l_err) { break; }
+
             //If bit 1 is set in 2nd word of cmd buffer data, then
             //We must do the workaround.
             //Ex: CCCCCCLL 40000000
             //    CCCCCC -> Industry Standard Chip ID
-            //    LL -> Lenght of Micron extended data
-            //    4 -> Bit to indicate we must to erase/write workaround
-            confData = i_spiOpcode << 24;
-            confData |= 0x00800006;  // 8-> read, 6->6 bytes
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_CHIPIDCONF,
-                                confData);
-            if(l_err) { break; }
-
-            //Issue Get Chip ID command
-            SfcCmdReg_t sfc_cmd;
-            sfc_cmd.opcode = SFC_OP_CHIPID;
-            sfc_cmd.length = 0;
-
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_CMD,
-                                sfc_cmd.data32);
-            if(l_err) { break; }
-
-            uint32_t extIdData = 0;
-
-            //Read the Extended from the Command Buffer
-            l_err = readRegSfc(SFC_CMDBUF_SPACE,
-                               4, //Offset into CMD BUFF space in bytes
-                               extIdData);
-            if(l_err) {
-                break;
-            }
-            if((extIdData & 0x40000000) == 0x00000000)
+            //    LL -> Length of Micron extended data
+            //    4 -> Bit to indicate we must do erase/write workaround
+            TRACFCOMP( g_trac_pnor, "PnorDD::getNORChipId> ExtId = %.8X %.8X", outdata[0], outdata[1] );
+            if((outdata[1] & 0x40000000) == 0x00000000)
             {
                 TRACFCOMP( g_trac_pnor,
                            "PnorDD::getNORChipId> Setting Micron workaround flag"
@@ -1340,6 +1366,28 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
                 cv_hw_workaround |= HWWK_MICRON_WRT_ERASE;
             }
 
+
+            //Read SFDP for FFDC
+            new_cmd.data32 = 0;
+            new_cmd.opcode = SPI_MICRON_READ_SFDP;
+            new_cmd.read = 1;
+            new_cmd.needaddr = 1;
+            new_cmd.clocks = 8;
+            new_cmd.length = 16;
+            l_err = readRegFlash( new_cmd,
+                                  outdata,
+                                  0 );
+            if(l_err) { break; }
+
+            //Loop around and grab all 16 bytes
+            for( size_t x=0; x<4; x++ )
+            {
+                TRACFCOMP( g_trac_pnor, "SFDP[%d]=%.8X", x, outdata[x] );
+            }
+
+            //Prove this works
+            l_err = micronFlagStatus();
+            if(l_err) { delete l_err; }
         }
 
 
@@ -1354,7 +1402,7 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
  * @brief Load SFC command buffer with data from PNOR
  */
 errlHndl_t PnorDD::loadSfcBuf(uint32_t i_addr,
-                          size_t i_size)
+                              size_t i_size)
 {
     errlHndl_t l_err = NULL;
     TRACDCOMP( g_trac_pnor, "PnorDD::loadSfcBuf> i_addr=0x%.8x, i_size=0x%.8x",
@@ -1602,7 +1650,7 @@ errlHndl_t PnorDD::readSfcBuffer(size_t i_size,
 
     // SFC Command Buffer is accessed 32-bits at a time
     uint32_t* word_ptr = static_cast<uint32_t*>(o_data);
-    uint32_t word_size = i_size/4;
+    uint32_t word_size = (ALIGN_4(i_size))/4;
     for( uint32_t words_read = 0;
          words_read < word_size;
          words_read ++ )
@@ -2147,6 +2195,63 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
     return l_err;
 }
 
+/**
+ * @brief Read a user-defined Flash Register
+ */
+errlHndl_t PnorDD::readRegFlash( SfcCustomReg_t i_cmd,
+                                 uint32_t* o_data,
+                                 uint32_t i_addr )
+{
+    errlHndl_t l_err = NULL;
+
+    do
+    {
+        //Do a read of flash address zero to workaround
+        // a micron bug with extended reads
+        if( (HWWK_MICRON_EXT_READ & cv_hw_workaround)
+            && (i_cmd.length > 4) )
+        {
+            l_err = loadSfcBuf( 0, 1 );
+            if(l_err) { break; }
+        }
+
+        //Change ChipID command
+        l_err = writeRegSfc(SFC_CMD_SPACE,
+                            SFC_REG_CHIPIDCONF,
+                            i_cmd.data32);
+        if(l_err) { break; }
+
+        //Setup the address (ADR) if needed
+        if( i_cmd.needaddr )
+        {
+            l_err = writeRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_ADR,
+                                i_addr);
+            if(l_err) { break; }
+        }
+
+        //Issue (new) Get Chip ID command
+        SfcCmdReg_t sfc_cmd;
+        sfc_cmd.opcode = SFC_OP_CHIPID;
+        sfc_cmd.length = i_cmd.length;
+        l_err = writeRegSfc(SFC_CMD_SPACE,
+                            SFC_REG_CMD,
+                            sfc_cmd.data32);
+        if(l_err) { break; }
+
+        //Poll for complete status
+        l_err = pollSfcOpComplete();
+        if(l_err) { break; }
+
+        //Go get the data
+        l_err = readSfcBuffer( i_cmd.length,
+                               o_data );
+        if(l_err) { break; }
+
+    } while(0);
+
+    return l_err;
+}
 
 
 /*

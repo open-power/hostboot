@@ -132,11 +132,13 @@ class PnorDD
         SPI_GET_CHIPID_OP   = 0x9F, /**< Default Op code for getting NOR ChipID */
         SPI_START4BA        = 0x37, /**< Enable Macronix 4-Byte addressing */
 
-        /*This command is only use on Micron NOR chips which require special
-         * procedure to check write & erase op complete
+        /*
+         * Micron Flash Commands
          */
-        SPI_MICRON_FLAG_STAT    = 0x70, /**< Check complete on Micron */
-        SPI_MICRON_CLRFLAG_STAT = 0x50, /**< Clear Micron Flag Status reg */
+        SPI_MICRON_FLAG_STAT    = 0x70, /**< Check write/erase complete */
+        SPI_MICRON_CLRFLAG_STAT = 0x50, /**< Clear write/erase Status reg */
+        SPI_MICRON_READ_SFDP    = 0x5A, /**< Read Serial Flash Disc Parms */
+        SPI_MICRON_CHIPID       = 0x9F, /**< Read ChipID */
 
         SPI_SIM_SM_ERASE_OP = 0x00000020, /**< Simics Op Code for Small Erase */
         SPI_SIM_SM_ERASE_SZ = 0x1000, /**< Simics Small Erase Size */
@@ -151,6 +153,7 @@ class PnorDD
         /* Note: Simics currently models Micron NOR  */
         MICRON_NOR_ID     = 0x20ba2000,  /**< Micron NOR chip ID */
         VPO_NOR_ID        = 0x20201800,  /**< VPO NOR chip ID */
+        MACRONIX_NOR_ID   = 0xC2201A00,  /**< Macronix NOR chip ID */
 
         ID_MASK           = 0xFFFFFF00,  /**< Only look at 3 bytes */
     };
@@ -246,7 +249,13 @@ class PnorDD
      * Flags used to trigger Hardware workarounds
      */
     enum {
-        HWWK_MICRON_WRT_ERASE = 0x00000001, /**< Micron Wrt/Erase workaround */
+        // Must perform 'read flag status' commands after
+        //  any write or erase
+        HWWK_MICRON_WRT_ERASE = 0x00000001,
+
+        // Must do a read of a low flash address before issuing read
+        //  commands that return more than 1 word of data
+        HWWK_MICRON_EXT_READ  = 0x00000002,
     };
 
     /**
@@ -289,6 +298,7 @@ class PnorDD
 
 
     /**
+<<<<<<< HEAD
      * @brief LPC Slave Registers
      *    These are offsets within the LPC Slave Register Space
      */
@@ -342,7 +352,24 @@ class PnorDD
         LBUS2OPB_TIMEOUT_ERR        = 0b101, /**< Timeout Error */
     };
 
-
+    /**
+     * @brief  SFC ConfId Register Layout
+     */
+    union SfcCustomReg_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t opcode    : 8;
+            uint32_t read      : 1;
+            uint32_t write     : 1;
+            uint32_t needaddr  : 1;
+            uint32_t clocks    : 5;
+            uint32_t reserved  : 8;
+            uint32_t length    : 8;
+        };
+        SfcCustomReg_t() : data32(0) {};
+    };
 
     /**
      * @brief Write a SFC Register
@@ -369,6 +396,20 @@ class PnorDD
     errlHndl_t readRegSfc(SfcRange i_range,
                           uint32_t i_addr,
                           uint32_t& o_data);
+
+    /**
+     * @brief Read a user-defined Flash Register
+     *
+     * @parm i_cmd   Custom command
+     * @parm o_data  Data being read
+     * @parm i_addr  Address to use with command
+     *
+     * @return Error from operation
+     */
+    errlHndl_t readRegFlash(SfcCustomReg_t i_cmd,
+                            uint32_t* o_data,
+                            uint32_t i_addr = 0);
+
 
     /**
      * @brief Poll for SFC Op Complete
