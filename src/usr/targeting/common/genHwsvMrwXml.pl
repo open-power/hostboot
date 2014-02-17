@@ -2912,7 +2912,8 @@ sub generate_centaur
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
+        <field><id>flipPort</id><value>0</value></field>
+        <field><id>reserved</id><value>0</value></field>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>$ctaur</default></attribute>
     <attribute>
