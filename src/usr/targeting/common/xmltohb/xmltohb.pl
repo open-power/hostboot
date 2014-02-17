@@ -320,6 +320,8 @@ use constant ATTRID => 0;
 use constant HUID   => 1;
 use constant DATA   => 2;
 use constant SECTION => 3;
+use constant TARGET => 4;
+use constant ATTRNAME => 5;
 my @attrDataforSM = ();
 if( !($cfgImgOutputDir =~ "none") )
 {
@@ -5320,9 +5322,24 @@ sub generateTargetingImage {
                 fatal("Attribute $attributeId is not found.");
             }
 
+            my $ifFspOnlyTargetWithCommonAttr = "false";
+            # Need to separate out the Fsp only target's common attributes
+            if( ($fspTarget) && (!exists $attributeDef->{fspOnly}) &&
+                (!exists $attributeDef->{hbOnly}))
+            {
+                if( $attributeDef->{persistency} eq "volatile-zeroed"  )
+                {
+                    $ifFspOnlyTargetWithCommonAttr = "true";
+                }
+                elsif( $attributeDef->{persistency} eq "volatile" )
+                {
+                    $ifFspOnlyTargetWithCommonAttr = "true";
+                }
+            }
+            
             my $section;
             # Split "fsp" into more sections later
-            if(   (exists $attributeDef->{fspOnly})
+            if( (exists $attributeDef->{fspOnly})
                || ($fspTarget))
             {
                 if( $attributeDef->{persistency} eq "volatile-zeroed"  )
@@ -5435,7 +5452,8 @@ sub generateTargetingImage {
                 #", $attrhash{$attributeId}->{default}," \n";
                 my $hex = unpack ("H*",$rwdata);
 
-                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
+                push @attrDataforSM, [$attrValue, $huidValue,
+                    $hex, $section, $targetInstance->{id}, $attributeId];
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($rwOffset % $alignment))
@@ -5458,7 +5476,8 @@ sub generateTargetingImage {
                         $attributeDef,$attrhash{$attributeId}->{default});
                 
                 my $hex = unpack ("H*",$heapZeroInitData);
-                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
+                push @attrDataforSM, [$attrValue, $huidValue,
+                    $hex, $section, $targetInstance->{id}, $attributeId];
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($heapZeroInitOffset
@@ -5481,7 +5500,8 @@ sub generateTargetingImage {
                         $attributeDef,$attrhash{$attributeId}->{default});
                 
                 my $hex = unpack ("H*",$heapPnorInitData);
-                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
+                push @attrDataforSM, [$attrValue, $huidValue,
+                    $hex, $section, $targetInstance->{id}, $attributeId];
                 # Align the data as necessary
                 my $pads = ($alignment - ($heapPnorInitOffset
                             % $alignment)) % $alignment;
@@ -5502,6 +5522,14 @@ sub generateTargetingImage {
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
 
+                if($ifFspOnlyTargetWithCommonAttr eq "true")
+                {
+                    my $hex = unpack ("H*",$fspP0ZeroData);
+                    push @attrDataforSM, [$attrValue, $huidValue,
+                         $hex, $section, $targetInstance->{id}, $attributeId];
+                    $ifFspOnlyTargetWithCommonAttr = "false";
+                }
+                
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP0DefaultedFromZeroOffset
                             % $alignment)) % $alignment;
@@ -5520,6 +5548,14 @@ sub generateTargetingImage {
                 my ($fspP0FlashData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
+
+                if($ifFspOnlyTargetWithCommonAttr eq "true")
+                {
+                    my $hex = unpack ("H*",$fspP0FlashData);
+                    push @attrDataforSM, [$attrValue, $huidValue,
+                         $hex, $section, $targetInstance->{id}, $attributeId];
+                    $ifFspOnlyTargetWithCommonAttr = "false";
+                }
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP0DefaultedFromP3Offset
@@ -5561,7 +5597,8 @@ sub generateTargetingImage {
 
                 my $hex = unpack ("H*",$fspP3RwData);
 
-                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
+                push @attrDataforSM, [$attrValue, $huidValue,
+                    $hex, $section, $targetInstance->{id}, $attributeId];
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP3RwOffset
@@ -5584,7 +5621,8 @@ sub generateTargetingImage {
 
                 my $hex = unpack ("H*",$fspP1ZeroData);
 
-                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
+                push @attrDataforSM, [$attrValue, $huidValue,
+                    $hex, $section, $targetInstance->{id}, $attributeId];
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP1DefaultedFromZeroOffset
@@ -5607,7 +5645,8 @@ sub generateTargetingImage {
 
                 my $hex = unpack ("H*",$fspP1FlashData);
 
-                push @attrDataforSM, [$attrValue, $huidValue, $hex, $section];
+                push @attrDataforSM, [$attrValue, $huidValue,
+                    $hex, $section, $targetInstance->{id}, $attributeId];
 
                 # Align the data as necessary
                 my $pads = ($alignment - ($fspP1DefaultedFromP3Offset
@@ -5900,7 +5939,9 @@ print SM_TARGET_FILE "
     <id>0x$attrDataforSM[$i][ATTRID]</id>
     <HUID>$attrDataforSM[$i][HUID]</HUID>
     <value>0x$attrDataforSM[$i][DATA]</value>
-    <section>$attrDataforSM[$i][SECTION]</section>";
+    <section>$attrDataforSM[$i][SECTION]</section>
+    <target>$attrDataforSM[$i][TARGET]</target>
+    <name>$attrDataforSM[$i][ATTRNAME]</name>";
 print SM_TARGET_FILE "\n</attribute>\n";
 
     }
