@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/futexmgr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/futexmgr.C $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file futexmgr.C
  * @brief Definition for kernel side futex management
@@ -94,7 +94,7 @@ uint64_t FutexManager::_wake(uint64_t * i_futex1, uint64_t i_count1,
     uint64_t started = 0;
 
     iv_lock.lock();
-    
+
     // First start up to i_count1 task(s)
     while(started < i_count1)
     {
@@ -123,8 +123,9 @@ uint64_t FutexManager::_wake(uint64_t * i_futex1, uint64_t i_count1,
         // Move up to i_count2 tasks to futex2
         while(moved < i_count2)
         {
-            // What if *i_futex2 got modified !!!! TODO
-            // Do we need a safety check here (another val param) ????
+            // Note: i_futex2 could be modified by this point due to tasks
+            //       released from i_count1.  Userspace has to handle this
+            //       appropriately (currently only in sync_cond_wait).
             _FutexWait_t * waiter = iv_list.find(i_futex1);
             if(waiter == NULL)
             {

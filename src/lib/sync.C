@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -213,9 +213,14 @@ int sync_cond_wait(sync_cond_t * i_cond, mutex_t * i_mutex)
 
 
     // Can't continue until i_mutex lock is obtained.
-    //mutex_lock(i_mutex);  <--- Does not work - Havn't figure out why
-    // but the followin code does work.
-    // this code locks the mutex and makes sure it's contended.
+    // Note:
+    //     mutex_lock(i_mutex);  <--- This does not work
+    // We have to mark the mutex as contended '2' because there is a race
+    // condition between this thread (eventually) calling mutex_unlock and
+    // the kernel moving tasks from the condition futex to the mutex futex
+    // during a sync_condition_broadcast.  By marking contended, we force the
+    // subsequent mutex_unlock to call to the kernel which will obtain a
+    // spinlock to ensure all tasks have been moved to the mutex_futex.
     while(0 != __sync_lock_test_and_set(&(i_mutex->iv_val), 2))
     {
         futex_wait(&(i_mutex->iv_val),2);

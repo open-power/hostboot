@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2010,2014
 #
 # p1
 #
@@ -172,13 +172,7 @@ STD_INTERRUPT_STUB(system_reset, 0x100)
 intvect_inst_start:
     b _start
 
-    /* TODO: Eventually we likely need specific code for machine check
-     *       interrupts because they can happen at any time, including
-     *       while we're already in an interrupt path.  (Don't want to
-     *       save kernel state over top of a user-space task structure).
-     */
 STD_INTERRUPT(machine_check, 0x200)
-
 STD_INTERRUPT(data_storage, 0x300)
 STD_INTERRUPT(data_segment, 0x380)
 STD_INTERRUPT(inst_storage, 0x400)
@@ -628,9 +622,22 @@ intvect_system_reset:
     beq+ intvect_system_reset_external
     ;// Check for HMI (bits = 101).
     cmpi cr0, r2, 0x5
-    beq+ 1f ;// TODO: need to handle HMIs?
-1:  ;// Unknown reason.
-    b 1b
+    beq+ 1f ;// Unable to handle HMI, jump to 'unknown reason'.
+
+1:  ;// Unknown reason, call as unhandled_exception.
+    sldi r1, r2, 32     ;// Save 42:44 of SRR1 and
+    ori r1, r1, 0x100   ;// SRESET address to
+    mtsprg2 r1          ;// SPRG2 for unhandled_exception.
+        ;/* Restore R2 and R1 */
+    mfsprg1 r2
+    mfsprg0 r1
+        ;/* Need to load unhandled_exception into SPRG0 for kernel_save_task */
+    mtsprg1 r1  ;/* Save off R1 again. */
+    lis r1, intvect_unhandled_finish_save@h
+    ori r1, r1, intvect_unhandled_finish_save@l
+    mtsprg0 r1;
+    mfsprg1 r1; /* Restore GPR1 */
+    b kernel_save_task ; /* Save current task, call unhandled_exception */
 
     ;// @fn intvect_system_reset_inactive
     ;// Handle SRESET on an inactive processor.

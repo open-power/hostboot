@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -174,7 +174,7 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
         }
         else
         {
-            return false; //TODO - Swap kernel base block pages for user pages
+            return false;
         }
     }
 

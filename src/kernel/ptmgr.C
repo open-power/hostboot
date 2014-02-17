@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -879,49 +879,49 @@ void PageTableManager::setAccessBits( PageTableEntry* o_pte,
 {
     o_pte->dword1 &= ~PTE_ACCESS_BITS;
 
-/*  Description of the WIMG bits.
-    W1,3 0 - not Write Through Required
-         1 - Write Through Required
-    I3   0 - not Caching Inhibited
-         1 - Caching Inhibited
-    M2   0 - not Memory Coherence Required
-         1 - Memory Coherence Required
-     G   0 - not Guarded
-         1 - Guarded
-*/
+    /*  Description of the WIMG bits.
+        W1,3 0 - not Write Through Required
+        1 - Write Through Required
+        I3   0 - not Caching Inhibited
+        1 - Caching Inhibited
+        M2   0 - not Memory Coherence Required
+        1 - Memory Coherence Required
+        G   0 - not Guarded
+        1 - Guarded
+        */
     if( SegmentManager::CI_ACCESS == i_accessType )
     {
-      o_pte->WIMG = 0b0101; // Cache Inhibited, Guarded
-      o_pte->pp1_2 = 0b10;  // PP=010
-      o_pte->N = 0b1;       // No Execute
+        o_pte->WIMG = 0b0101; // Cache Inhibited, Guarded
+        o_pte->pp1_2 = 0b10;  // PP=010
+        o_pte->N = 0b1;       // No Execute
     }
     else
     {
-      // Only setting that changes WIMG is CI_ACCESSS
-      // All others are set to 0b0010
-      o_pte->WIMG = 0b0010; // Memory Coherency Required
+        // Only setting that changes WIMG is CI_ACCESSS
+        // All others are set to 0b0010
+        o_pte->WIMG = 0b0010; // Memory Coherency Required
 
-	if (i_accessType & READ_ONLY)
-	{
-	  o_pte->pp1_2 = 0b01;  // PP=001
-	  o_pte->N = 0b1;       // No Execute
-	}
+        if (i_accessType & READ_ONLY)
+        {
+            o_pte->pp1_2 = 0b01;  // PP=001
+            o_pte->N = 0b1;       // No Execute
+        }
         // if writable (implied readable)
-	else if (i_accessType & WRITABLE)
-	{
-	  o_pte->pp1_2 = 0b10;  // PP=010
-	  o_pte->N = 0b1;       // No Execute
-	}
+        else if (i_accessType & WRITABLE)
+        {
+            o_pte->pp1_2 = 0b10;  // PP=010
+            o_pte->N = 0b1;       // No Execute
+        }
         // if executable (implied readable)
-	else if (i_accessType & EXECUTABLE)
-	{
-	  o_pte->pp1_2 = 0b01;  // PP=001
-	  o_pte->N = 0b0;       // Execute
-	}
-	else {
-	  //@fixme - add RO_EXE_ACCESS
-	    Eprintk( "** unrecognized access=%ld\n", i_accessType );
-	}
+        else if (i_accessType & EXECUTABLE)
+        {
+            o_pte->pp1_2 = 0b01;  // PP=001
+            o_pte->N = 0b0;       // Execute
+        }
+        else
+        {
+            Eprintk( "** unrecognized access=%ld\n", i_accessType );
+        }
     }
 }
 
