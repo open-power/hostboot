@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -56,7 +56,7 @@ namespace TRACE
         ComponentDesc* comp;    //< Component Descriptor for this Entry.
         Entry* next;            //< Linked-list 'next' ptr.
         Entry* prev;            //< Linked-list 'prev' ptr.
-        uint16_t committed;     //< Committed status.
+        volatile uint16_t committed;     //< Committed status.
         uint16_t size;          //< Size of data portion.
         char data[0];           //< Start of 'fsp-trace' style structure.
     };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -54,7 +54,7 @@ void VmmManager::init()
     SegmentManager::initSLB();
 
     v.initPTEs();
-    v.initSDR1(); /*no effect*/ // BEAM Fix.
+    v.initSDR1();
 
 };
 
@@ -63,7 +63,7 @@ void VmmManager::init_slb()
     VmmManager& v = Singleton<VmmManager>::instance();
     SegmentManager::initSLB();
 
-    v.initSDR1(); /*no effect*/ // BEAM Fix.
+    v.initSDR1();
 }
 
 bool VmmManager::pteMiss(task_t* t, uint64_t effAddr, bool store)

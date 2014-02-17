@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -31,8 +31,10 @@ BEAMCMD = $(HOST_PREFIX)jail $(BEAMPATH)/bin/beam_compile
 
 ifdef MODULE
 BEAMDIR = $(ROOTPATH)/obj/beam/$(MODULE)
+BEAMMODULE = $(MODULE)
 else
 BEAMDIR = $(ROOTPATH)/obj/beam/core
+BEAMMODULE = core
 endif
 
 ##	Set BEAM source files.
@@ -43,7 +45,12 @@ BEAMFLAGS += --beam::source=$(ROOTPATH)/src/build/beam/compiler_c_config.tcl
 BEAMFLAGS += --beam::source=$(ROOTPATH)/src/build/beam/compiler_cpp_config.tcl
 
 ##  point to a directory that BEAM can use for its' working files.
-BEAMFLAGS += --beam::data=${BEAMDIR}
+BEAMFLAGS += --beam::data=$(BEAMDIR)
+
+##  point BEAM to the potential innocent directory for a module.
+BEAM_INNOCENT = $(ROOTPATH)/src/build/beam/$(BEAMMODULE)
+BEAMFLAGS += $(if $(wildcard $(BEAM_INNOCENT)), \
+		  --beam::user_innocent=$(BEAM_INNOCENT))
 
 ## tell the "Edison" compiler to generate no warnings.
 BEAMFLAGS += --edg=--no_warnings

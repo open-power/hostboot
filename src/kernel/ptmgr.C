@@ -713,7 +713,7 @@ void PageTableManager::writePTE( PageTableEntry* i_pte,
         {
             // this should never happen because we should always go
             //   through the delEntry() path instead
-            printPTE( "Stealing", i_dest );  /*no effect*/ // BEAM Fix.
+            printPTE( "Stealing", i_dest );
             Eprintk( "**ERROR** PageTableManager::writePTE>"
                      " Trying to steal a PTE\n" );
             kassert(false);
@@ -841,7 +841,7 @@ void PageTableManager::_printPT( void )
     {
         if( pte->V == 1 )
         {
-            printPTE( NULL, pte );  /*no effect*/ // BEAM Fix.
+            printPTE( NULL, pte );
         }
 
         pte++;

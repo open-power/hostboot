@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -139,7 +139,7 @@ namespace TRACE
             memcpy(bin_output, i_td->iv_compName, compName_len);
             size_t output_pos = compName_len +
                                 sprintf(&bin_output[compName_len],
-                                        ":~[0x%04hx]", (int) pos);
+                                        ":~[0x%04hx]", (uint16_t) pos);
 
             for (int i = 0; i < 16; ++i)
             {

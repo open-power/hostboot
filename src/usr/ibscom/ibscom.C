@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -380,7 +380,7 @@ void err_cleanup(Target* i_target,
     //23=MBS_FIR_MASK_REG_HOST_INBAND_WRITE_ERROR
     mbs_fir &= 0xFFFFFCFFFFFFFFFF;
     op_size = sizeof(uint64_t);
-    l_err = deviceOp( DeviceFW::WRITE,
+    tmp_err = deviceOp( DeviceFW::WRITE,
                       i_target,
                       &mbs_fir,
                       op_size,
@@ -412,7 +412,7 @@ void err_cleanup(Target* i_target,
         l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
         errlCommit(l_err,IBSCOM_COMP_ID);
         l_err = NULL;
-    }    
+    }
 }
 
 
@@ -932,7 +932,7 @@ void enableInbandScoms( bool i_disable )
 
             mutex_unlock(l_mutex);
         }
-    }  
+    }
 }
 
 

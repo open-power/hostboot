@@ -446,7 +446,7 @@ void HeapManager::_coalesce()
         chunk = temp;
     }
     printkd("HeapMgr coalesced total %d\n",cv_coalesce_count);
-    test_pages(); /*no effect*/ // BEAM fix.
+    test_pages();
 }
 
 void HeapManager::stats()

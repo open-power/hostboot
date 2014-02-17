@@ -357,7 +357,7 @@ void IntrRp::msgHandler()
 
                     TRACFCOMP(g_trac_intr,
                               "External Interrupt recieved. XIRR=%x, PIR=%x",
-                              xirr,pir);
+                              xirr,pir.word);
 
                     // Acknowlege msg
                     msg->data[1] = 0;

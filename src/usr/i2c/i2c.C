@@ -1498,7 +1498,7 @@ errlHndl_t i2cSetupMasters ( void )
                 continue;
             }
 
-            for( uint32_t engine = 0;             /*loop doesn't iterate*/
+            for( uint32_t engine = 0;
                  engine < CENTAUR_MASTER_ENGINES;
                  engine++ )
             {

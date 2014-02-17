@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -95,7 +95,8 @@ namespace TRACE
 
 #ifndef __HOSTBOOT_RUNTIME  // TODO: RTC 79408
         // Check for special SCAN component to force enable debug trace on.
-        if (0 == memcmp(l_compName, "SCAN", 5))
+        if (l_rc && !l_rc->iv_debugEnabled &&
+            (0 == memcmp(l_compName, "SCAN", 5)))
         {
             TARGETING::Target* sys = NULL;
             TARGETING::targetService().getTopLevelTarget(sys);
