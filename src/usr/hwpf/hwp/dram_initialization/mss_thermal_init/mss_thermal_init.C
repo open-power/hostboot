@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_thermal_init.C,v 1.13 2014/01/30 22:00:51 pardeik Exp $
+// $Id: mss_thermal_init.C,v 1.14 2014/02/13 15:44:05 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_thermal_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -47,6 +47,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.14  | pardeik  |12-FEB-14| changed CONFIG_INTERVAL_TIMER from 5 to 15 to 
 //   1.13  | pardeik  |30-JAN-14| workaround for SW243504 (enable sensors on master
 //                              |   i2c bus if ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE=ON)
 //   1.12  | pardeik  |06-JAN-14| enable writing of safemode IPL throttles
@@ -64,6 +65,8 @@
 //   1.3   | joabhend |10-OCT-12| Added section for emergency throttle disable, removed FIR bit 33 handling
 //   1.2   | gollub   |05-SEP-12| Calling mss_unmask_fetch_errors after mss_thermal_init_cloned
 //   1.1   | joabhend |30-APR-12| First Draft
+
+
 
 //----------------------------------------------------------------------
 //  Includes
@@ -145,9 +148,9 @@ fapi::ReturnCode mss_thermal_init(const fapi::Target & i_target)
       const uint32_t ACT_MASK_UPPER_HALF = 0x00018000;
       const uint32_t ACT_MASK_LOWER_HALF = 0x00000000;
       const uint32_t SENSOR_ADDR_MAP_ISDIMM = 0x01234567;
-// OCC polls cacheline every 2 ms.
-// For I2C bus at 50kHz (9.6 ms max to read 8 sensors), use interval of 5 to prevent stall error
-      const uint32_t CONFIG_INTERVAL_TIMER = 5;
+// OCC polls cacheline every 2 ms (could vary from this, as seen on scope)
+// For I2C bus at 50kHz (9.6 ms max to read 8 sensors), use interval of 15 for margin and to prevent stall errors when 8 sensors are enabled to be read
+      const uint32_t CONFIG_INTERVAL_TIMER = 15;
       const uint32_t CONFIG_STALL_TIMER = 128;
       const uint8_t I2C_BUS_ENCODE_PRIMARY = 0;
       const uint8_t I2C_BUS_ENCODE_SECONDARY = 8;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_power_cleanup.C,v 1.4 2013/11/22 04:53:06 bellows Exp $
+// $Id: mss_power_cleanup.C,v 1.6 2014/02/17 19:21:37 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_power_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -49,6 +49,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.6   |bellows   |17-FEB-14| RAS review updates
+//   1.5   |bellows   |05-FEB-14| Making this procedure work on really non-functional centaurs
 //   1.4   |bellows   |21-Nov-13| Gerrit Review Updates - unused variable removed
 //   1.3   |bellows   |11-Nov-13| Gerrit Review Updates
 //   1.2   |bellows   |11-Nov-13| Update due to new istep location
@@ -100,24 +102,83 @@ extern "C"
 //------------------------------------------------------------------------------
   fapi::ReturnCode mss_power_cleanup(const fapi::Target & i_target_centaur, const fapi::Target & i_target_mba0, const fapi::Target & i_target_mba1)
   {
-    fapi::ReturnCode rc;
+    fapi::ReturnCode rc,rc0,rc1,rcf,rcc;
+    uint8_t centaur_functional=1, mba0_functional=1, mba1_functional=1;
+
 
     FAPI_INF("Running mss_power_cleanupon %s\n", i_target_centaur.toEcmdString());
 
     do {
-      rc = mss_power_cleanup_mba_part1(i_target_centaur, i_target_mba0);
-      if(rc) break;
-      rc = mss_power_cleanup_mba_part1(i_target_centaur, i_target_mba1);
-      if(rc) break;
+      rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &i_target_centaur, centaur_functional);
+      if(rc) { FAPI_ERR("ERROR: Cannot get ATTR_FUNCTIONAL"); break; }
 
-      rc = mss_power_cleanup_mba_fence(i_target_centaur, i_target_mba0, i_target_mba1);
-      if(rc) break;
+      rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &i_target_mba0, mba0_functional);
+      if(rc) { FAPI_ERR("ERROR: Cannot get ATTR_FUNCTIONAL"); break; }
 
-      rc = mss_power_cleanup_centaur(i_target_centaur);
-      if(rc) break;
+      rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &i_target_mba1, mba1_functional);
+      if(rc) { FAPI_ERR("ERROR: Cannot get ATTR_FUNCTIONAL"); break; }
+
+      rc0 = mss_power_cleanup_mba_part1(i_target_centaur, i_target_mba0);
+      rc1 = mss_power_cleanup_mba_part1(i_target_centaur, i_target_mba1);
+
+      rcf = mss_power_cleanup_mba_fence(i_target_centaur, i_target_mba0, i_target_mba1);
+
+      rcc = mss_power_cleanup_centaur(i_target_centaur);
 
 
-    /* need to add code that fences and centaur and powers off clocks */
+
+      if(rc0) {
+        if(mba0_functional) {
+          FAPI_ERR("mba0 was functional yet it got a bad return code");
+          const fapi::Target & MBA_CHIPLET = i_target_mba0;
+          FAPI_SET_HWP_ERROR(rc0, RC_MSS_POWER_CLEANUP_MBA0_UNEXPECTED_BAD_RC);
+          rc=rc0;
+          break;
+        }
+        else {
+          FAPI_INF("mba0 was not functional and it got a bad return code");
+        }
+      }
+
+      if(rc1) {
+        if(mba1_functional) {
+          FAPI_ERR("mba1 was functional yet it got a bad return code");
+          const fapi::Target & MBA_CHIPLET = i_target_mba1;
+          FAPI_SET_HWP_ERROR(rc1, RC_MSS_POWER_CLEANUP_MBA1_UNEXPECTED_BAD_RC);
+          rc=rc1;
+          break;
+        }
+        else {
+          FAPI_INF("mba1 was not functional and it got a bad return code");
+        }
+      }
+
+      if(rcf) {
+        if(centaur_functional) {
+          FAPI_ERR("centaur was functional yet it got a bad return code during fencing");
+          const fapi::Target & CENTAUR = i_target_centaur;
+          FAPI_SET_HWP_ERROR(rcf, RC_MSS_POWER_CLEANUP_FENCING_UNEXPECTED_BAD_RC);
+          rc=rcf;
+          break;
+        }
+        else {
+          FAPI_INF("centaur was not functional and it got a bad return code");
+        }
+      }
+
+      if(rcc) {
+        if(centaur_functional) {
+          FAPI_ERR("centaur was functional yet it got a bad return code during cleanup");
+          const fapi::Target & CENTAUR = i_target_centaur;
+          FAPI_SET_HWP_ERROR(rcc, RC_MSS_POWER_CLEANUP_CENTAUR_UNEXPECTED_BAD_RC);
+          rc=rcc;
+          break;
+        }
+        else {
+          FAPI_INF("centaur was not functional and it got a bad return code");
+        }
+      }
+
     } while(0); 
 
     return rc;
@@ -160,6 +221,7 @@ extern "C"
   fapi::ReturnCode mss_power_cleanup_mba_part1(const fapi::Target & i_target_centaur, const fapi::Target & i_target_mba) {
   // turn off functional vector
     fapi::ReturnCode rc;
+    uint8_t centaur_functional;
     uint8_t mba_functional;
     ecmdDataBufferBase data_buffer_64(64);
     uint32_t rc_num = 0;
@@ -170,12 +232,17 @@ extern "C"
     do
     {
       FAPI_INF("Starting mss_power_cleanup_mba_part1");
+
+      rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &i_target_centaur, centaur_functional);
+      if(rc) { FAPI_ERR("ERROR: Cannot get ATTR_FUNCTIONAL"); break; }
+      FAPI_INF("working on a centaur whose functional is %d", centaur_functional);
+
       rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &i_target_mba, mba_functional);
       if(rc) { FAPI_ERR("ERROR: Cannot get ATTR_FUNCTIONAL"); break; }
       FAPI_INF("working on an mba whose functional is %d", mba_functional);
 
 // But to clarify so there's no misconception, you can only turn off the clocks to the MEMS grid (Ports 2/3).  If you want to deconfigure Ports 0/1, there is no way to turn those clocks off. The best you can do there is shut down the PHY inside DDR (I think they have an ultra low power mode where you can turn off virtually everything including their PLLs, phase rotators, analogs , FIFOs, etc) plus of course you can disable their I/O. I think those steps should be done no matter which port you're deconfiguring, but in terms of the chip clock grid, you only get that additional power savings in the bad Port 2/3 case.
-      if(mba_functional == 0) {
+      if(centaur_functional == 1 && mba_functional == 0) {
         FAPI_INF("cleanup_part1 MBA not functional");
       // check that clocks are up to the DDR partition before turning it off
       // this case will only happen if we get memory up and later come back and want to

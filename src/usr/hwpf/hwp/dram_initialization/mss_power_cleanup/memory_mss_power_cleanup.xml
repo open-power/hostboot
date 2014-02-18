@@ -1,0 +1,89 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/dram_initialization/mss_power_cleanup/memory_mss_power_cleanup.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2014                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+<!-- $Id: memory_mss_power_cleanup.xml,v 1.1 2014/02/05 19:18:41 bellows Exp $ -->
+<!-- For file ../../ipl/fapi/mss_power_cleanup.C -->
+<!-- // *! OWNER NAME : bellows@us.ibm.com -->
+<!-- // *! BACKUP NAME : -->
+
+<hwpError>
+  <rc>RC_MSS_POWER_CLEANUP_MBA0_UNEXPECTED_BAD_RC</rc>
+  <description>Procedure got an unexpected fail in a cfam or scom access for mba0</description>
+  <callout>
+    <target>MBA_CHIPLET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_CHIPLET</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_CHIPLET</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_POWER_CLEANUP_MBA1_UNEXPECTED_BAD_RC</rc>
+  <description>Procedure got an unexpected fail in a cfam or scom access for mba1</description>
+  <callout>
+    <target>MBA_CHIPLET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MBA_CHIPLET</target>
+  </deconfigure>
+  <gard>
+    <target>MBA_CHIPLET</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_POWER_CLEANUP_FENCING_UNEXPECTED_BAD_RC</rc>
+  <description>Procedure got an unexpected fail in a cfam or scom access during fencing</description>
+  <callout>
+    <target>CENTAUR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>CENTAUR</target>
+  </deconfigure>
+  <gard>
+    <target>CENTAUR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_POWER_CLEANUP_CENTAUR_UNEXPECTED_BAD_RC</rc>
+  <description>Procedure got an unexpected fail in a cfam or scom access during centaur cleanup</description>
+  <callout>
+    <target>CENTAUR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>CENTAUR</target>
+  </deconfigure>
+  <gard>
+    <target>CENTAUR</target>
+  </gard>
+</hwpError>
+
+</hwpErrors>
