@@ -98,7 +98,7 @@ if ($outFile ne "")
 my $SYSNAME = uc($sysname);
 my $CHIPNAME = "";
 my $MAXNODE = 0;
-if ($sysname eq "brazos")
+if ($sysname =~ /brazos/)
 {
     $MAXNODE = 4;
 }
@@ -120,7 +120,7 @@ my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
 
 #No mirroring supported yet so the policy is just based on multi-node or not
 my $placement = 0x0; #NORMAL
-if ($sysname eq "brazos")
+if ($sysname =~ /brazos/)
 {
     $placement = 0x3; #DRAWER
 }
@@ -1646,7 +1646,7 @@ sub generate_sys
     # HostBoot Instance number (logical node) map
     # Index is the hdat drawer number, value is the HB instance number
     # Only the max drawer system needs to be represented.
-    if ($sysname eq "brazos")
+    if ($sysname =~ /brazos/)
     {
         print "
     <!-- correlate HDAT drawer number to Hostboot Instance number -->
@@ -1803,7 +1803,7 @@ sub generate_system_node
 
     # Brazos node4 is the fsp node and we'll let the fsp
     # MRW parser handle that.
-    if( !( ($sysname eq "brazos") && ($node == $MAXNODE) ) )
+    if( !( ($sysname =~ /brazos/) && ($node == $MAXNODE) ) )
     {
         print "
 <!-- $SYSNAME System node $node -->
