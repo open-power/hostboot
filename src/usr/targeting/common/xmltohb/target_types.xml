@@ -437,6 +437,8 @@
     <attribute><id>PROC_MEM_SIZES_ACK</id></attribute>
     <attribute><id>CPM_INFLECTION_POINTS</id></attribute>
     <attribute><id>PROC_SELECT_BOOT_SEEPROM_IMAGE</id></attribute>
+    <attribute><id>TOD_ROLE</id></attribute>
+
 </targetType>
 
 <targetType>

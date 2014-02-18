@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -90,6 +90,23 @@ errlHndl_t todSetupHwp(const proc_tod_setup_tod_sel i_topologyType)
                    l_pMDMT->getBusIn(), l_pMDMT->getBusOut());
           break;
         }
+
+        //Mark the MDMT role in ATTR.  Note the same chip
+        //can be both primary/secondary.  Attr is volatile
+        //init'ed to zero
+        TARGETING::Target * l_proc =
+                const_cast<TARGETING::Target*>(l_pMDMT->getTarget());
+        uint8_t l_role = l_proc->getAttr<TARGETING::ATTR_TOD_ROLE>();
+        if (TOD_PRIMARY == i_topologyType)
+        {
+            l_role |= TARGETING::TOD_ROLE_PRIMARY;
+        }
+        else //Secondary
+        {
+            l_role |= TARGETING::TOD_ROLE_SECONDARY;
+        }
+        l_proc->setAttr<TARGETING::ATTR_TOD_ROLE>(l_role);
+
     }while(0);
 
     TOD_EXIT("todSetupHwp. errHdl = %p", l_errHdl);

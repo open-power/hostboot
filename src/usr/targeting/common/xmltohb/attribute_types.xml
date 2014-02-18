@@ -13379,6 +13379,40 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+
+<enumerationType>
+    <id>TOD_ROLE</id>
+    <description>
+        Enumeration indicating what role this chip has in tod topology
+    </description>
+    <enumerator>
+        <name>NON_MASTER</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>PRIMARY</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>SECONDARY</name>
+        <value>2</value>
+    </enumerator>
+    <default>NON_MASTER</default>
+</enumerationType>
+
+<attribute>
+    <id>TOD_ROLE</id>
+    <description>
+        Bitmask indicating what role this chip has in tod topology
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>
 
 

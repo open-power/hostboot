@@ -51,6 +51,7 @@ $ */
 #include <sys/mm.h>
 #include <util/align.H>
 #include <vector>
+#include <vfs/vfs.H>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -155,9 +156,6 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     uint64_t xscom_prop[2] = { l_xscomAddr,  THIRTYTWO_GB};
     i_dt->addPropertyCells64(xscomNode, "reg", xscom_prop, 2);
 
-    /*MVPD -- TODO RTC 88002  add full MVPD here*/
-    //i_dt->addPropertyBytes(xscomNode, "ibm,module-vpd", ....);
-
     /*PSI Host Bridge*/
     uint32_t l_psiInfo = 0x2010900; /*PSI Host Bridge Scom addr*/
     dtOffset_t psiNode = i_dt->addNode(xscomNode, "psihb", l_psiInfo);
@@ -177,10 +175,19 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     uint32_t tod_prop[2] = { l_todInfo, 0x34 }; //# of scoms in range
     i_dt->addPropertyCells32(todNode, "reg", tod_prop, 2);
 
+    //Mark TOD pri/sec
+    uint8_t l_role = i_pProc->getAttr<ATTR_TOD_ROLE>();
+    if(l_role & TARGETING::TOD_ROLE_PRIMARY)
+    {
+        i_dt->addProperty(todNode, "primary");
+    }
+    if(l_role & TARGETING::TOD_ROLE_SECONDARY)
+    {
+        i_dt->addProperty(todNode, "secondary");
+    }
+
     if(i_chipid == 0x0) //Master chip
     {
-        i_dt->addProperty(todNode, "primary");  //TODO RTC 88002
-
         uint32_t l_lpcInfo = 0xB0020; /*ECCB FW addr*/
         dtOffset_t lpcNode = i_dt->addNode(xscomNode,"lpc",l_lpcInfo);
         i_dt->addPropertyString(lpcNode, "compatible", "ibm,power8-lpc");
@@ -361,8 +368,8 @@ uint32_t bld_cpu_node(devTree * i_dt, dtOffset_t & i_parentNode,
     i_dt->addPropertyCell32(cpuNode, "ibm,purr", 1);
     i_dt->addPropertyCell32(cpuNode, "ibm,spurr", 1);
 
-    //TODO RTC88002 -- move this to nominal once HB has nominal freq
-    uint64_t freq = sys->getAttr<TARGETING::ATTR_BOOT_FREQ_MHZ>();
+    //Set Nominal freq
+    uint64_t freq = sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
     freq *= MHZ;
 
     uint32_t ex_freq[2] = {static_cast<uint32_t>(freq >> 32),
