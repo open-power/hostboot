@@ -46,6 +46,13 @@ namespace TARGETING
 #define TARG_CLASS ""
 
 
+// Predicate function for sorting by HUID
+bool compareTargetHuid(TargetHandle_t t1, TargetHandle_t t2)
+{
+    return (t1->getAttr<ATTR_HUID>() < t2->getAttr<ATTR_HUID>());
+}
+
+
 /**
  * @brief Populate the o_vector with target object pointers based on the
  *        requested class, type, and functional state.
@@ -175,6 +182,13 @@ void _getChipOrChipletResources( TARGETING::TargetHandleList & o_vector,
             TARG_ASSERT(0, TARG_LOC "Invalid functional state used");
             break;
     }
+
+    // If target vector contains more than one element, sorty by HUID
+    if (o_vector.size() > 1)
+    {
+        std::sort(o_vector.begin(),o_vector.end(),compareTargetHuid);
+    }
+
     TARG_EXIT();
     #undef TARG_FN
 }
@@ -293,6 +307,11 @@ void getChildChiplets( TARGETING::TargetHandleList& o_vector,
                 &l_chipletFilter );
     }
 
+    // If chiplet vector contains more than one element, sorty by HUID
+    if (o_vector.size() > 1)
+    {
+        std::sort(o_vector.begin(),o_vector.end(),compareTargetHuid);
+    }
 }
 
 void getAffinityTargets ( TARGETING::TargetHandleList& o_vector,
@@ -529,7 +548,6 @@ void getPeerTargets(
     TARG_EXIT();
     #undef TARG_FN
 }
-
 
 #undef TARG_CLASS
 
