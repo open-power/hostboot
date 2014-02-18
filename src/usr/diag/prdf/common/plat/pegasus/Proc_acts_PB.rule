@@ -1345,12 +1345,12 @@ group gPsiHbFir filter singlebit
     /** PSIHBFIR[5]
      *  FSP_ECC_ERR_CE
      */
-    (PsiHbFir, bit(5)) ? defaultMaskedError;
+    (PsiHbFir, bit(5)) ? calloutPsiThr32;
 
     /** PSIHBFIR[6]
      *  FSP_ECC_ERR_UE
      */
-    (PsiHbFir, bit(6)) ? defaultMaskedError;
+    (PsiHbFir, bit(6)) ? calloutPsiThr1;
 
     /** PSIHBFIR[7]
      *  ERROR_STATE
@@ -3161,5 +3161,26 @@ actionclass forceMpIpl
 {
     calloutProcLevel2MedThr1;
     funccall("analyzeMpIPL");
+};
+
+/** callout both ends of PSI Link.Threshold is 32 events per day.
+ */
+actionclass calloutPsiThr32
+{
+    calloutPsiLink;
+    threshold32pday;
+};
+
+/** callout both ends of PSI Link on first instance.*/
+actionclass calloutPsiThr1
+{
+    calloutPsiLink;
+    threshold1;
+};
+
+/** callout both ends of PSI link */
+actionclass calloutPsiLink
+{
+    funccall("calloutPeerPsiBusTgt");
 };
 

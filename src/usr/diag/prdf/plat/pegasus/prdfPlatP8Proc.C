@@ -75,6 +75,24 @@ int32_t slwRecovery( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( Proc, slwRecovery );
 
+/**
+ * @brief   Callout Peer PSI connected to given Proc target
+ * @param   i_chip P8 chip
+ * @param   i_sc   The step code data struct
+ * @returns Failure or Success
+ * @note    A NOP version of plugin required by FSP PRDF
+ */
+int32_t calloutPeerPsiBusTgt( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc )
+{
+    PRDF_ERR( "[Proc::calloutPeerPsiBusTgt]  unexpected call: PSI target not "
+              "supported in hostboot PROC = 0x%08x", i_chip->GetId() );
+
+    CalloutUtil::defaultError( i_sc );
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Proc, calloutPeerPsiBusTgt );
+
 }//namespace Proc ends
 
 }//namespace PRDF ends

@@ -384,15 +384,16 @@ struct conn_t
             case TYPE_PORE:   order =  4; break;
             case TYPE_NX:     order =  5; break;
             case TYPE_OCC:    order =  6; break;
-            case TYPE_EX:     order =  7; break;
-            case TYPE_XBUS:   order =  8; break;
-            case TYPE_ABUS:   order =  9; break;
-            case TYPE_PCI:    order = 10; break;
-            case TYPE_MCS:    order = 11; break;
-            case TYPE_MEMBUF: order = 12; break;
-            case TYPE_L4:     order = 13; break;
-            case TYPE_MBA:    order = 14; break;
-            case TYPE_DIMM:   order = 15; break;
+            case TYPE_PSI:    order =  7; break;
+            case TYPE_EX:     order =  8; break;
+            case TYPE_XBUS:   order =  9; break;
+            case TYPE_ABUS:   order = 10; break;
+            case TYPE_PCI:    order = 11; break;
+            case TYPE_MCS:    order = 12; break;
+            case TYPE_MEMBUF: order = 13; break;
+            case TYPE_L4:     order = 14; break;
+            case TYPE_MBA:    order = 15; break;
+            case TYPE_DIMM:   order = 16; break;
             default: ;
         }
 
@@ -428,6 +429,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_NODE,   TYPE_OSC,    TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_PROC,   TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_OCC,    TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_PSI,    TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_EX,     TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_XBUS,   TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_ABUS,   TargetService::CHILD_BY_AFFINITY },
@@ -444,6 +446,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_PROC,   TYPE_PORE,   TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_NX,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_OCC,    TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_PSI,    TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_EX,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_XBUS,   TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_ABUS,   TargetService::CHILD_BY_AFFINITY  },
@@ -460,6 +463,9 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
 
         { TYPE_OCC,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY  },
         { TYPE_OCC,    TYPE_PROC,   TargetService::PARENT_BY_AFFINITY  },
+
+        { TYPE_PSI,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY  },
+        { TYPE_PSI,    TYPE_PROC,   TargetService::PARENT_BY_AFFINITY  },
 
         { TYPE_EX,     TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
         { TYPE_EX,     TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
@@ -711,6 +717,7 @@ TargetHandle_t getConnectedPeerTarget( TargetHandle_t i_target )
         {
             case TYPE_XBUS:
             case TYPE_ABUS:
+            case TYPE_PSI:
 
                 o_target = i_target->getAttr<ATTR_PEER_TARGET>();
                 break;
