@@ -562,6 +562,13 @@ namespace INTR
             errlHndl_t  addHbNodeToMpiplSyncArea(uint64_t i_hbNode);
 
             /**
+             * Extract node information stored away and restore into
+             * ATTR for MPIPL
+             * @return error log handle
+             */
+            errlHndl_t  extractHbNodeInfo(void);
+
+            /**
              * Calculate the adress offset for the given cpu
              * @param[in] i_pir PIR value for the presenter
              * @return the offset

@@ -454,6 +454,10 @@ void IntrRp::msgHandler()
                     xirr |= CPPR_MASK;  //set all CPPR bits - allow any INTR
                     *xirrAddress = xirr;
 
+                    TRACDCOMP(g_trac_intr,
+                              "EOI issued. XIRR=%x, PIR=%x",
+                              xirr,pir);
+
                     // Now handle any IPC messages
                     if (type == INTERPROC_XISR)
                     {
@@ -1713,7 +1717,7 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
                 pir.threadId = thread;
                 uint64_t xirrAddr = iv_baseAddr +
                   cpuOffsetAddr(pir);
-                uint32_t * xirrPtr =
+                 uint32_t * xirrPtr =
                   reinterpret_cast<uint32_t*>(xirrAddr + XIRR_OFFSET);
                 uint8_t * mfrrPtr = reinterpret_cast<uint8_t*>(
                                                  xirrAddr + MFRR_OFFSET);
@@ -1879,7 +1883,7 @@ errlHndl_t IntrRp::findProcs_Cores(TARGETING::TargetHandleList & o_procs,
                                    DEVICE_FSI_ADDRESS(l_addr));
                 if (err)
                 {
-                    TRACFCOMP(g_trac_intr,"Failed to read CFAM 2838 on %x",
+                    TRACFCOMP(g_trac_intr,"Failed to read CFAM 2839 on %x",
                               TARGETING::get_huid(*proc));
                     break;
                 }
@@ -2011,7 +2015,7 @@ void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
                 pir.threadId = thread;
                 uint64_t xirrAddr = iv_baseAddr +
                   cpuOffsetAddr(pir) + XIRR_RO_OFFSET;
-                uint32_t * xirrPtr =
+                volatile uint32_t * xirrPtr =
                   reinterpret_cast<uint32_t*>(xirrAddr);
                 uint32_t xirr = *xirrPtr & 0x00FFFFFF;
                 TRACDCOMP(g_trac_intr,"   xirrPtr[%p] xirr[%x]\n", xirrPtr, xirr);
@@ -2068,6 +2072,13 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
 
     do
     {
+        //extract the node layout for later
+        err = extractHbNodeInfo();
+        if(err)
+        {
+            break;
+        }
+
         //Get the procs/cores
         err = findProcs_Cores(funcProc, procCores);
         if(err)
@@ -2450,6 +2461,74 @@ errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
                                       true /*Add HB Software Callout*/);
 
     }
+    return err;
+}
+
+errlHndl_t  IntrRp::extractHbNodeInfo(void)
+{
+    errlHndl_t err = NULL;
+    uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
+    TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
+    void * node_info_ptr =
+        reinterpret_cast<void *>((iv_masterCpu.nodeId * hrmorBase) +
+                                 VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+
+    internode_info_t * this_node_info =
+        reinterpret_cast<internode_info_t *>
+        (mm_block_map(node_info_ptr,INTERNODE_INFO_SIZE));
+
+    if(this_node_info)
+    {
+        if(this_node_info->eye_catcher != NODE_INFO_EYE_CATCHER)
+        {
+            TRACFCOMP(g_trac_intr, INFO_MRK
+                      "MPIPL, but INTR node data sync area unintialized."
+                      " Assuming single HB Intance system");
+        }
+        else //multinode
+        {
+            TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+              (MAX_NODES_PER_SYS -1);
+
+            for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
+            {
+                //If comm area indicates node exists, add to map
+                if(this_node_info->exist[node])
+                {
+                    hb_existing_image |= (mask >> node);
+                }
+            }
+        }
+
+        mm_block_unmap(this_node_info);
+    }
+    else
+    {
+        TRACFCOMP( g_trac_intr, "Failure calling mm_block_map : phys_addr=%p",
+                   node_info_ptr);
+        /*@
+         * @errortype    ERRL_SEV_UNRECOVERABLE
+         * @moduleid     INTR::MOD_INTR_EXTRACTNODEINFO
+         * @reasoncode   INTR::RC_CANNOT_MAP_MEMORY
+         * @userdata1    physical address
+         * @userdata2    Size
+         * @devdesc      Error mapping in memory
+         */
+        err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      INTR::MOD_INTR_EXTRACTNODEINFO,
+                                      INTR::RC_CANNOT_MAP_MEMORY,
+                                      reinterpret_cast<uint64_t>(node_info_ptr),
+                                      INTERNODE_INFO_SIZE,
+                                      true /*Add HB Software Callout*/);
+
+    }
+
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    sys->setAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>(hb_existing_image);
+    TRACFCOMP( g_trac_intr, "extractHbNodeInfo found map: %x", hb_existing_image);
+
     return err;
 }
 

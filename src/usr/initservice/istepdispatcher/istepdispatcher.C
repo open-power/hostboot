@@ -1212,6 +1212,39 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
     errlHndl_t err = NULL;
     do
     {
+        //Intentionally fail this message on MPIPL
+        TARGETING::Target* l_pSys = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_pSys);
+        bool l_mpiplMode = l_pSys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
+        if(l_mpiplMode)
+        {
+            /*@
+             * @errortype
+             * @reasoncode       ISTEP_INVALID_ON_MPIPL
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         ISTEP_INITSVC_MOD_ID
+             * @userdata1[0:31]  MPIPL State
+             * @userdata1[32:63] N/A
+             * @userdata2[0:31]  N/A
+             * @userdata2[32:63] N/A.
+             * @devdesc          handleProcFabIovalidMsg called during MPIPL,
+                                 which is illegal.
+             */
+            err = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          ISTEP_INITSVC_MOD_ID,
+                                          ISTEP_INVALID_ON_MPIPL,
+                                          TWO_UINT32_TO_UINT64(l_mpiplMode,0x0),
+                                          0x0);
+
+            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Not a valid on MPIPL, PLID = 0x%x",
+                      err->plid());
+
+            io_pMsg->data[0] = err->plid();
+            errlCommit(err, INITSVC_COMP_ID);
+            break;
+        }
+
         // Ensure the libraries needed are loaded
         err = VFS::module_load("libestablish_system_smp.so");
         if (err)

@@ -41,6 +41,7 @@ namespace INTR
         MOD_INTR_SYNC_NODES          = 0x09, /**< intrrp.C : IntrRp::syncNodes() */
         MOD_INTR_SYNC_ADDNODE        = 0x0A, /**< intrrp.C : IntrRp::addHbNodeToMpiplSyncArea */
         MOD_INTR_ADDHBNODE           = 0x0B, /**< intrrp.C : INTR::addHbNode */
+        MOD_INTR_EXTRACTNODEINFO     = 0x0C, /**< intrrp.C : INTR::extractHbNodeInfo */
     };
 
     enum IntrReasonCode
