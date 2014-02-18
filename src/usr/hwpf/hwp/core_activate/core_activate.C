@@ -73,6 +73,7 @@
 #include    "cen_switch_rec_attn.H"
 #include    "proc_post_winkle.H"
 #include    "proc_check_slw_done.H"
+#include    "p8_block_wakeup_intr.H"
 
 // mss_scrub support
 #include    <diag/prdf/prdfMain.H>
@@ -152,6 +153,37 @@ void*    call_host_activate_master( void    *io_pArgs )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "proc_prep_master_winkle SUCCESS"  );
+        }
+
+
+        // Call p8_block_wakeup_intr to prevent stray interrupts from
+        // popping core out of winkle before SBE sees it.
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_activated_master: call p8_block_wakeup_intr(SET) "
+                   "Target HUID %.8x",
+                   TARGETING::get_huid(l_masterEx) );
+
+        FAPI_INVOKE_HWP( l_errl,
+                         p8_block_wakeup_intr,
+                         l_fapi_ex_target,
+                         BLKWKUP_SET );
+
+        if ( l_errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "p8_block_wakeup_intr ERROR : Returning errorlog, reason=0x%x",
+                l_errl->reasonCode() );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_masterEx).addToLog( l_errl );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "p8_block_wakeup_intr SUCCESS"  );
         }
 
 
