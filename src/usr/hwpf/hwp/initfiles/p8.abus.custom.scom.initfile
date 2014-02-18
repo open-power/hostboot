@@ -1,8 +1,9 @@
-#-- $Id: p8.abus.custom.scom.initfile,v 1.12 2013/12/04 17:25:28 jgrell Exp $
+#-- $Id: p8.abus.custom.scom.initfile,v 1.13 2014/02/12 20:04:14 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.13|jgrell  |02/12/14| Added rx_wt_lane_disabled=1 on lane 17 (SW244284)
 #--     1.12|jgrell  |12/03/13| Set rx_eo_ddc_timeout_sel to 110 for DD2
 #--     1.11|jgrell  |10/29/13| Changed rx_ds_timeout_sel setting to 111
 #--     1.9 |jgrell  |10/28/13| Re-enabled recal bits for DD2+ hw
@@ -324,6 +325,11 @@ tx_lane_pdwn,			0b1;
 scom 0x800.0b(rx_mode_pl)(rx_grp0)(lane_23).0x(abus_gcr_addr) {
 bits,                         	scom_data;
 rx_lane_pdwn,			0b1;
+}
+
+scom 0x800.0b(rx_wt_status_pl)(rx_grp0)(lane_23).0x(abus_gcr_addr) {
+bits,                         	scom_data;
+rx_wt_lane_disabled,		0b1;
 }
 
 #--**************************************************************************************************************

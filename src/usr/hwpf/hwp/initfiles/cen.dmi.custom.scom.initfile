@@ -1,8 +1,11 @@
-#-- $Id: cen.dmi.custom.scom.initfile,v 1.18 2013/12/04 17:43:34 jgrell Exp $
+#-- $Id: cen.dmi.custom.scom.initfile,v 1.19 2014/02/12 20:06:07 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+
+#--     1.19|jgrell  |02/12/14|Added FIR_ACTION1 setting and changed FIR_MASK setting for SW245013
+#--                           |Added rx_wt_lane_disabled=1 on lane 17 for SW244284
 #--     1.18|jgrell  |11/21/13|Added rx_trc_grp setting at the request of Yuen Tschang
 #--                           |Set rx_eo_ddc_timeout_sel to 110 for DD2
 #--     1.17|jgrell  |10/29/13|Changed rx_ds_timeout_sel setting to 111
@@ -313,9 +316,16 @@ rx_pb_fir_err_mask_gcr_buff2,    0b1;
 }
 
 # Mask off all rx and tx parity errors in the fir register
+# SCOM_FIR_MASK_PB: setting from SW245013
 scom 0x02010403 {
 scom_data;
-0xC000000000000000;
+0xDFFFFFFFFFFFC000;
+}
+
+# SCOM_FIR_ACTION1_PB: setting from SW245013
+scom 0x02010407 {
+scom_data;
+0xFFFFFFFFFFFFC000;
 }
 
 #--**************************************************************************************************************
@@ -390,13 +400,18 @@ scom 0x800.0b(rx_timeout_sel1_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
 
 #--**************************************************************************************************************
 #----------------------------------------------------------------------------------------------------------------
-# Power Down Unused Lanes
+# Power Down & Disable Unused Lanes
 #----------------------------------------------------------------------------------------------------------------
 #--**************************************************************************************************************
 
 scom 0x800.0b(rx_mode_pl)(rx_grp0)(lane_17).0x(cn_gcr_addr) {
 bits,                         	scom_data;
 rx_lane_pdwn,			0b1;
+}
+
+scom 0x800.0b(rx_wt_status_pl)(rx_grp0)(lane_17).0x(cn_gcr_addr) {
+bits,                         	scom_data;
+rx_wt_lane_disabled,		0b1;
 }
 
 ############################################################################################

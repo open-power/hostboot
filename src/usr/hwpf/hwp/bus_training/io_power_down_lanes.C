@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_power_down_lanes.C,v 1.10 2013/11/20 00:57:38 varkeykv Exp $
+// $Id: io_power_down_lanes.C,v 1.12 2014/02/14 09:04:48 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -160,8 +160,18 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
              }
         }
         //Power down this lane
+        rc = GCR_read( target,interface,tx_mode_pl, clock_group, lane,  data);
+        if(rc){return rc;}
+        FAPI_DBG("read out tx_mode_pl successfully for clock group%d lane %d",clock_group,lane);
+        rc_ecmd=data.setBit(0);
+         if(rc_ecmd)
+          {
+              rc.setEcmdError(rc_ecmd);
+              return(rc);
+          }
         rc = GCR_write( target, interface, tx_mode_pl, clock_group,  lane,  data,mask );
         if(rc){return rc;}
+        FAPI_DBG("Wrote tx_mode_pl successfullyfor clock group%d lane %d",clock_group,lane);
       }
 
       // Process RX lane powerdown 
@@ -178,9 +188,29 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
         else{
           clock_group=start_group;
         }
-        //Power down this lane 
+        //Power down this lane
+        rc = GCR_read( target,interface,rx_mode_pl, clock_group, lane,  data);
+        if(rc){return rc;}
+         rc_ecmd=data.setBit(0);
+         if(rc_ecmd)
+          {
+              rc.setEcmdError(rc_ecmd);
+              return(rc);
+          } 
         rc = GCR_write( target, interface, rx_mode_pl, clock_group,  lane,  data,mask );
         if(rc){return rc;}
+        FAPI_DBG("Read rx_mode_pl successfully for clock group%d lane %d",clock_group,lane);
+        // As per Gary/ Defect SW244284 , as per Design team inputs add rx_wt_lane_disabled 
+        rc = GCR_read( target,interface,  rx_wt_status_pl, clock_group, lane,  data);
+        if(rc){return rc;}
+        rc_ecmd=data.setBit(0);
+         if(rc_ecmd)
+          {
+              rc.setEcmdError(rc_ecmd);
+              return(rc);
+          }  
+        rc = GCR_write( target, interface,   rx_wt_status_pl, clock_group,  lane,  data,mask );
+        FAPI_DBG("Wrote rx_mode_pl successfully for clock group%d lane %d",clock_group,lane);
       }
   return rc;
 }

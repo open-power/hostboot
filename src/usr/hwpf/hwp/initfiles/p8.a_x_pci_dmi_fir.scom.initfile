@@ -1,4 +1,4 @@
-#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.5 2013/10/28 06:56:28 jmcgill Exp $
+#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.6 2014/02/11 23:26:33 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -46,13 +46,13 @@ scom 0x02011A06 {
 #-- IOMC0.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x02011A07 {
     bits, scom_data,          expr;
-    0:63, 0x207878787800C000, (mcl_enabled);
+    0:63, 0xFFFFFFFFFFFFC000, (mcl_enabled);
 }
 
 #-- IOMC0.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x02011A03 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFF0000, (mcl_enabled);
+    0:63, 0xDFFFFFFFFFFFC000, (mcl_enabled);
 }
 
 #-- IOMC1.BUSCTL.SCOM.FIR_ACTION0_REG
@@ -64,13 +64,13 @@ scom 0x02011E06 {
 #-- IOMC1.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x02011E07 {
     bits, scom_data,          expr;
-    0:63, 0x207878787800C000, (mcr_enabled);
+    0:63, 0xFFFFFFFFFFFFC000, (mcr_enabled);
 }
 
 #-- IOMC1.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x02011E03 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFF0000, (mcr_enabled);
+    0:63, 0xDFFFFFFFFFFFC000, (mcr_enabled);
 }
 
 
@@ -89,13 +89,13 @@ scom 0x04011006 {
 #-- XBUS01.X0.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x04011007 {
     bits, scom_data,          expr;
-    0:63, 0x207800000000C000, ((xbus_enabled) && (is_venice));
+    0:63, 0xFFFFFFFFFFFFC000, ((xbus_enabled) && (is_venice));
 }
 
 #-- XBUS01.X0.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x04011003 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFF0000, ((xbus_enabled) && (is_venice));
+    0:63, 0xDFFFFFFFFFFFC000, ((xbus_enabled) && (is_venice));
 }
 
 #-- X1
@@ -110,14 +110,14 @@ scom 0x04011406 {
 #-- XBUS01.X1.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x04011407 {
     bits, scom_data,          expr;
-    0:63, 0x207800000000C000, (xbus_enabled);
+    0:63, 0xFFFFFFFFFFFFC000, (xbus_enabled);
 }
 
 #-- XBUS1.BUSCTL.SCOM.FIR_MASK_REG
 #-- XBUS01.X1.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x04011403 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFF0000, (xbus_enabled);
+    0:63, 0xDFFFFFFFFFFFC000, (xbus_enabled);
 }
 
 #-- X3
@@ -130,13 +130,13 @@ scom 0x04011806 {
 #-- XBUS23.X0.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x04011807 {
     bits, scom_data,          expr;
-    0:63, 0x207800000000C000, ((xbus_enabled) && (is_venice));
+    0:63, 0xFFFFFFFFFFFFC000, ((xbus_enabled) && (is_venice));
 }
 
 #-- XBUS23.X0.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x04011803 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFF0000, ((xbus_enabled) && (is_venice));
+    0:63, 0xDFFFFFFFFFFFC000, ((xbus_enabled) && (is_venice));
 }
 
 #-- X2
@@ -149,13 +149,13 @@ scom 0x04011C06 {
 #-- XBUS23.X1.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x04011C07 {
     bits, scom_data,          expr;
-    0:63, 0x207800000000C000, ((xbus_enabled) && (is_venice));
+    0:63, 0xFFFFFFFFFFFFC000, ((xbus_enabled) && (is_venice));
 }
 
 #-- XBUS23.X1.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x04011C03 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFF0000, ((xbus_enabled) && (is_venice));
+    0:63, 0xDFFFFFFFFFFFC000, ((xbus_enabled) && (is_venice));
 }
 
 
@@ -230,13 +230,13 @@ scom 0x08010C06 {
 #-- ABUS.BUSCTL.SCOM.FIR_ACTION1_REG
 scom 0x08010C07 {
     bits, scom_data,          expr;
-    0:63, 0x207878787878C000, (abus_enabled);
+    0:63, 0xFFFFFFFFFFFFC000, (abus_enabled);
 }
 
 #-- ABUS.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x08010C03 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFF0000, (abus_enabled);
+    0:63, 0xDFFFFFFFFFFFC000, (abus_enabled);
 }
 
 #-- ABUS PB (PBES)
