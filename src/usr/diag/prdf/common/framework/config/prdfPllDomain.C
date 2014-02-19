@@ -37,6 +37,7 @@
 #include <prdfGlobal.H>
 #include <iipSystem.h>
 #include <UtilHash.H>
+#include <prdfP8ProcMbCommonExtraSig.H>
 
 using namespace TARGETING;
 
@@ -218,7 +219,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
     // Set Signature
     serviceData.service_data->GetErrorSignature()->setChipId(chip()[0]->GetId());
-    serviceData.service_data->GetErrorSignature()->setRegId(PRDF_PLL_ERROR);
+    serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
 
 #ifndef __HOSTBOOT_MODULE
     // Set dump flag dg09a

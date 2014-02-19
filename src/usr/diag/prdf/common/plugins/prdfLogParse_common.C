@@ -76,7 +76,11 @@ namespace FSP
 #define PRDF_COMPRESSBUFFER_UNCOMPRESS_FUNCTIONS
 #include <prdfCompressBuffer.H>
 
-// Default tables for undefined Chips
+// Default tables for undefined Chips.
+// These are special error codes and can be associated with any FIR.
+// So we will consider only last 16 bits. Staring 16 bits will be
+// discared and not used when comparing against signature generated
+// by PRD code.
 ErrorCodeDescription g_defaultErrorCodes[] =
 {
     {0xFFFFFFFF, "Undefined error code" },  //this must be first
@@ -101,7 +105,6 @@ ErrorCodeDescription g_defaultErrorCodes[] =
                  " Power Fault"},
     {0x0000DDFF, "Special return code indicating Not to reset or"
                  " mask FIR bits"},
-    {0x00ED0000, "PLL error"},
     {0,NULL} // this must exist and must be last
 };
 
@@ -190,6 +193,52 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
     }
 }
 
+/** @fn getSigDesc
+ *  @brief Given a chip ID and error signature this function will return
+ *         signature description.
+ *  @param i_chipId     the given chip's HUID
+ *  @param i_sig        Error signature.
+ *  @param i_len        Signature Description length.
+ *  @param o_sigDesc    Signature Description.
+ */
+void getSigDesc( HUID i_chipId, const uint32_t i_sig, const uint32_t i_len,
+                 char * o_sigDesc )
+{
+    using namespace TARGETING;
+
+    // Get the target type and chip name.
+    TARGETING::TYPE l_targetType = TARGETING::TYPE_NA;
+    char chipName[42];
+    getTargetInfo( i_chipId, l_targetType, &chipName[0], 42 );
+
+    std::string l_descString = GetErrorSigTable()[l_targetType][i_sig];
+    const char * l_description = NULL;
+
+    if (std::string() == l_descString)
+    {
+        for( uint32_t l_idx = 1;
+             g_defaultErrorCodes[l_idx].description != NULL; ++l_idx)
+        {
+            if ( (i_sig & 0x0000ffff ) ==
+                        g_defaultErrorCodes[l_idx].signature)
+            {
+                l_description = g_defaultErrorCodes[l_idx].description;
+                break;
+            }
+        }
+        if (l_description == NULL)
+        {
+            l_description = g_defaultErrorCodes[0].description;
+        }
+    }
+    else
+    {
+        l_description = l_descString.c_str();
+    }
+
+    snprintf(o_sigDesc, i_len, "%s %s", chipName, l_description);
+
+}
 //------------------------------------------------------------------------------
 
 void printUnknown( ErrlUsrParser & i_parser, errlver_t i_ver,
@@ -509,18 +558,14 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
             i_parser.PrintNumber( "Multi-Signature List", "%d",
                                   pfa.sigListCount );
 
-            TARGETING::TYPE trgtType = TARGETING::TYPE_NA;
             for ( uint32_t i = 0; i < pfa.sigListCount; ++i )
             {
-                char tmp1[256], tmp2[256];
+                char sigDesc[256];
 
-                getTargetInfo( pfa.sigList[i].chipId, trgtType, &tmp1[0], 256 );
+                getSigDesc( pfa.sigList[i].chipId, pfa.sigList[i].signature,
+                            256, sigDesc );
 
-                uint32_t sig = pfa.sigList[i].signature;
-                snprintf( tmp2, 256, "%s %s", tmp1,
-                          (GetErrorSigTable()[trgtType][sig]).c_str() );
-
-                i_parser.PrintString( "", tmp2 );
+                i_parser.PrintString( "", sigDesc );
             }
         }
     }
@@ -671,39 +716,11 @@ bool srcDataParse( ErrlUsrParser & i_parser, const SrciSrc & i_src )
         snprintf(l_tmpstr, 72, "0x%08X 0x%08X",l_chipId,l_signature );
         i_parser.PrintString("PRD Signature",l_tmpstr);
 
-        // Get the target type and chip name.
-        TARGETING::TYPE l_targetType = TARGETING::TYPE_NA;
-        char chipName[42];
-        getTargetInfo( l_chipId, l_targetType, &chipName[0], 42 );
+        char l_sigDesc[MAX_DESC_LEN];
+        // Get signature Description.
+        getSigDesc( l_chipId, l_signature, MAX_DESC_LEN, l_sigDesc );
 
-        std::string l_descString = GetErrorSigTable()[l_targetType][l_signature];
-        const char * l_description = NULL;
-
-        if (std::string() == l_descString)
-        {
-            for( uint32_t l_idx = 1;
-                 g_defaultErrorCodes[l_idx].description != NULL; ++l_idx)
-            {
-                if (l_signature == g_defaultErrorCodes[l_idx].signature)
-                {
-                    l_description = g_defaultErrorCodes[l_idx].description;
-                    break;
-                }
-            }
-            if (l_description == NULL)
-            {
-                l_description = g_defaultErrorCodes[0].description;
-            }
-        }
-        else
-        {
-            l_description = l_descString.c_str();
-        }
-
-        char l_tmp[MAX_DESC_LEN];  //@jl00 changed this from 100 to const 256.
-        //Changed sprintf to snprintf to stop buffer overruns with long desc.
-        snprintf(l_tmp, MAX_DESC_LEN , "%s %s", chipName, l_description);
-        i_parser.PrintString("Signature Description", l_tmp);
+        i_parser.PrintString("Signature Description", l_sigDesc);
     }
 
     return rc;

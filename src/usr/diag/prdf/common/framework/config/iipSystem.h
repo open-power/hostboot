@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2013              */
+/* COPYRIGHT International Business Machines Corp. 1996,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -282,8 +282,8 @@ class System
   //
   // End Function Specification ****************************************
 
-    virtual int Analyze(STEP_CODE_DATA_STRUCT & serviceData,
-      ATTENTION_TYPE attentionType);
+    virtual int32_t Analyze(STEP_CODE_DATA_STRUCT & serviceData,
+                            ATTENTION_TYPE attentionType);
   // Function Specification ********************************************
   //
   // Purpose:      Analyze domains for an error

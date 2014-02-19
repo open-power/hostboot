@@ -38,7 +38,7 @@
 #include <prdfCalloutUtil.H>
 #include <prdfCenMembufDataBundle.H>
 #include <prdfP8McsDataBundle.H>
-#include <prdfP8LaneRprExtraSig.H>
+#include <prdfP8ProcMbCommonExtraSig.H>
 
 using namespace TARGETING;
 

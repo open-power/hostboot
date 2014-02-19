@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfP8LaneRprExtraSig.H $ */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfP8ProcMbCommonExtraSig.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,13 +21,16 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP8LaneRprExtraSig_H
-#define __prdfP8LaneRprExtraSig_H
+#ifndef __prdfP8ProcMbCommonExtraSig_H
+#define __prdfP8ProcMbCommonExtraSig_H
 
 #include <prdrSignatures.H>
 
+/* ERepair Extra signatures */
 PRDR_ERROR_SIGNATURE( ERepair_ERROR, 0xffff0000, "","ERepair Internal error" );
 PRDR_ERROR_SIGNATURE( ERepair_FWThrExceeded, 0xffff0001, "",
                       "ERepair FW threshold exceeded" );
 
-#endif // __prdfP8LaneRprExtraSig_H
+/* PLL Extra signatures */
+PRDR_ERROR_SIGNATURE( PLL_ERROR, 0x00ed0000, "","PLL error" );
+#endif // __prdfP8ProcMbCommonExtraSig_H

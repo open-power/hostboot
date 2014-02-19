@@ -155,7 +155,7 @@ protected:
 private:  // functions
 private:  // Data
 
-  enum {CONTAINER_SIZE = 8, PRDF_PLL_ERROR = 0xed};
+  enum { CONTAINER_SIZE = 8 };
 
   Resolution & closeClockSource;
   Resolution & farClockSource;

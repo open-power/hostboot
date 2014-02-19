@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2013              */
+/* COPYRIGHT International Business Machines Corp. 1996,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -256,7 +256,7 @@ void System::Initialize(void)
 
 // -------------------------------------------------------------------
 
-int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
+int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                     ATTENTION_TYPE attentionType)
 {
     #define PRDF_FUNC "[System::Analyze] "
@@ -265,9 +265,9 @@ int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     ServiceDataCollector * l_saved_sdc = NULL;
     ServiceDataCollector * l_temp_sdc = NULL;
 
-    int rc = (prioritizedDomains.empty() ? NO_DOMAINS_IN_SYSTEM : SUCCESS);
-    int l_saved_rc = 0;
-
+    int32_t rc = (prioritizedDomains.empty() ? NO_DOMAINS_IN_SYSTEM : SUCCESS);
+    int32_t l_saved_rc = 0;
+    int32_t l_primaryRc = 0;
     if(rc == SUCCESS)
     {
         // IF machine check then check for recoverable errors first
@@ -336,6 +336,8 @@ int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                         // Set the outer for loop iteration variable atnType so
                         // that we analyze MACHINE XSTOP in next iteration.
                         atnType = MACHINE_CHECK + 1;
+                        // save primary rc.
+                        l_primaryRc = rc;
                         break;
                     }
 
@@ -376,6 +378,10 @@ int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                            *( serviceData.service_data->GetErrorSignature() ));
             *serviceData.service_data = *l_temp_sdc;
             delete l_temp_sdc;
+
+            // We will discard any error we get in ERROR ISOLATION ONLY PASS,
+            // and restore rc found in primary pass.
+            rc = l_primaryRc;
         }
 
         if(l_saved_sdc != NULL) delete l_saved_sdc; //dg05a
