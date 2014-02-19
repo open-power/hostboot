@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/hwpf/hwp/build_winkle_images/makefile $
+# $Source: src/usr/hwpf/hwp/occ/runtime/makefile $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# COPYRIGHT International Business Machines Corp. 2014
 #
 # p1
 #
@@ -20,18 +20,18 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../../..
 
-MODULE = build_winkle_images
+HOSTBOOT_RUNTIME = 1
 
-SUBDIRS = runtime.d
+ROOTPATH = ../../../../../..
+VPATH += ../
 
-# objects unique to HB IPL
-OBJS =  build_winkle_images.o
+MODULE = occ_rt
 
-# include objs common to HBRT and HB IPL
-include build_winkle_images.mk
+## Objects unique to HBRT
+OBJS =  rt_occ.o
 
+## Objects common to HBRT and HB IPL
+include ../occ.mk
 
 include ${ROOTPATH}/config.mk
-

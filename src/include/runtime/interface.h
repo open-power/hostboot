@@ -150,6 +150,51 @@ typedef struct runtimeInterfaces
      */
     void (*cxxtestExecute)(void*);
 
+    /** Get a list of lids numbers of the lids known to HostBoot
+     *
+     * @param[out] o_num - the number of lids in the list
+     * @return a pointer to the list
+     */
+    const uint32_t * (*get_lid_list)(size_t * o_num);
+
+    /** Load OCC Image and common data into mainstore, also setup OCC BARSs
+     *
+     * @param[in] i_homer_addr_phys - The physical mainstore address of the
+     *                                start of the HOMER image
+     * @param[in] i_homer_addr_va - Virtual memory address of the HOMER image
+     * @param[in] i_common_addr_phys - The physical mainstore address of the
+     *                                 OCC common area.
+     * @param[in] i_common_addr_va - Virtual memory address of the common area
+     * @param[in] i_proc_chip - The processor chip id
+     * @return 0 on success else return code
+     */
+    int(*loadOCC)(uint64_t i_homer_addr_phys,
+                  uint64_t i_homer_addr_va,
+                  uint64_t i_common_addr_phys,
+                  uint64_t i_common_addr_va,
+                  uint64_t i_proc_chip);
+
+    /** Start OCC on all chips, by module
+     *
+     *  @param[in] i_proc_chip - Array of functional processor chip ids
+     *  @Note The caller must include a complete modules worth of chips
+     *  @param[in] i_num_chips - Number of chips in the array
+     *  @return 0 on success else return code
+     */
+    int (*startOCCs)(uint64_t* i_proc_chip,
+                     size_t i_num_chips);
+
+    /** Stop OCC hold OCCs in reset
+     *
+     *  @param[in] i_proc_chip - Array of functional processor chip ids
+     *  @Note The caller must include a complete modules worth of chips
+     *  @param[in] i_num_chips - Number of chips in the array
+     *  @return 0 on success else return code
+     */
+    int (*stopOCCs)(uint64_t* i_proc_chip,
+                    size_t i_num_chips);
+
+
     // Reserve some space for future growth.
     void (*reserved[32])(void);
 

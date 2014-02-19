@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,6 +23,7 @@
 
 #include    <stdint.h>
 
+#include    <occ/occ.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 
@@ -62,26 +63,6 @@ extern trace_desc_t* g_fapiTd;
 
 using namespace TARGETING;
 
-const uint32_t g_OCCLIDID = 0x81e00430;
-const uint64_t OCC_IBSCOM_RANGE_IN_MB = 0x100000; /*128*1024*8*/
-
-///////////////////////////////////////////////////////////////////////////////
-// compareNodeId
-///////////////////////////////////////////////////////////////////////////////
-bool compareNodeId(  Target* t0,
-                     Target* t1)
-{
-    uint8_t nodeId0 = t0->getAttr<ATTR_FABRIC_NODE_ID>();
-    uint8_t nodeId1 = t1->getAttr<ATTR_FABRIC_NODE_ID>();
-
-    if (nodeId0 == nodeId1)
-    {
-        return t0 < t1;
-    }
-    return nodeId0 < nodeId1;
-}
-
-
 namespace HBOCC
 {
 
@@ -104,14 +85,14 @@ namespace HBOCC
         errlHndl_t  l_errl  =   NULL;
         size_t lidSize = 0;
         do {
-            UtilLidMgr lidMgr(g_OCCLIDID);
+            UtilLidMgr lidMgr(OCC_LIDID);
 
             l_errl = lidMgr.getLidSize(lidSize);
             if(l_errl)
             {
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadOCCImageToHomer: Error getting lid size.  lidId=0x%.8x",
-                           g_OCCLIDID);
+                           OCC_LIDID);
                 break;
             }
 
@@ -120,7 +101,7 @@ namespace HBOCC
             {
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadOCCImageToHomer: Error getting lid..  lidId=0x%.8x",
-                           g_OCCLIDID);
+                           OCC_LIDID);
                 break;
             }
 
@@ -149,18 +130,11 @@ namespace HBOCC
 
         errlHndl_t  l_errl  =   NULL;
 
-        struct occHostConfigDataArea_t
-        {
-            uint32_t version;
-            uint32_t nestFrequency;
-        };
-
-        enum { OccHostDataVersion = 1 };
-
         //Treat virtual address as starting pointer
         //for config struct
-        occHostConfigDataArea_t * config_data =
-          reinterpret_cast<occHostConfigDataArea_t *>(i_occHostDataVirtAddr);
+        HBOCC::occHostConfigDataArea_t * config_data =
+          reinterpret_cast<HBOCC::occHostConfigDataArea_t *>
+          (i_occHostDataVirtAddr);
 
         // Get top level system target
         TARGETING::TargetService & tS = TARGETING::targetService();
@@ -170,7 +144,7 @@ namespace HBOCC
 
         uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
 
-        config_data->version = OccHostDataVersion;
+        config_data->version = HBOCC::OccHostDataVersion;
         config_data->nestFrequency = nestFreq;
 
         TRACUCOMP( g_fapiTd,
@@ -271,7 +245,7 @@ namespace HBOCC
                              l_fapiTarg,
                              1,  //i_index
                              centaur_addr,  //i_pba_bar_addr
-                             OCC_IBSCOM_RANGE_IN_MB, //i_pba_bar_size
+                             (uint64_t)OCC_IBSCOM_RANGE_IN_MB, //i_pba_bar_size
                              PBA_CMD_SCOPE_NODAL ); //i_pba_cmd_scope
 
             if ( l_errl != NULL )
@@ -602,7 +576,9 @@ namespace HBOCC
                 TRACUCOMP( g_fapiTd,
                            INFO_MRK"loadnStartAllOccs: Following DCM Path");
 
-                std::sort(procChips.begin(), procChips.end(), compareNodeId);
+                std::sort(procChips.begin(),
+                          procChips.end(),
+                          orderByNodeAndPosition);
 
                 TRACUCOMP( g_fapiTd,
                            INFO_MRK"loadnStartAllOccs: procChips list sorted");

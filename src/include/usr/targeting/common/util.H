@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -146,6 +146,16 @@ bool is_avp_load(void);
  * @brief Utility function to obtain the highest known address in the system
  */
 uint64_t get_top_mem_addr(void);
+
+/**
+ * Order two processor targets by NODE_ID then CHIP_ID.
+ * @param[in] First processor target
+ * @param[in] Second processor target
+ * @return true if first target < second target
+ */
+bool orderByNodeAndPosition(  Target* i_firstProc,
+                              Target* i_secondProc);
+
 
 }
 

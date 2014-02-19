@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -128,6 +128,16 @@ class UtilLidMgr
      *                  return errl !=  NULL  -> failure
      */
     errlHndl_t getLid(void* i_dest, size_t i_destSize);
+
+#ifdef __HOSTBOOT_RUNTIME
+    /**
+     * @brief Get a list of LID numbers
+     * @param[out] number of entrees in the list
+     * @return pointer to the list
+     */
+    static
+        const uint32_t * getLidList(size_t * o_num);
+#endif
 
   protected:
 

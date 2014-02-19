@@ -241,8 +241,8 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             break;
         }
 
-        //Start OCC in AVP (or Sapphire mode for now)
-        if( is_avp_load() || is_sapphire_load() )
+        //Start OCC in AVP
+        if( is_avp_load() )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Starting OCC" );
 

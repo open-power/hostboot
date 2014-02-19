@@ -117,6 +117,7 @@ namespace fapi
         RC_HOST_TIMER_EXPIRED         = HWPF_COMP_ID | 0x2A,
         RC_HOST_TIMER_THREAD_FAIL     = HWPF_COMP_ID | 0x2B,
         RC_NULL_POINTER               = HWPF_COMP_ID | 0x2C,
+
         RC_RT_WAKEUP_FAILED           = HWPF_COMP_ID | 0x2D,
     };
 

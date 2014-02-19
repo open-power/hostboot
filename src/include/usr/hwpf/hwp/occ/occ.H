@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/occ.H $                              */
+/* $Source: src/include/usr/hwpf/hwp/occ/occ.H $                          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,7 +23,29 @@
 #ifndef OCC_H_
 #define OCC_H_
 
+#include <limits.h>
+#include <errl/errlentry.H>
+
 namespace HBOCC {
+
+    struct occHostConfigDataArea_t
+    {
+        uint32_t version;
+        uint32_t nestFrequency;
+    };
+
+    enum
+    {
+        OccHostDataVersion = 1,
+        OCC_LIDID = 0x81e00430,
+        OCC_IBSCOM_RANGE_IN_MB = MEGABYTE,
+    };
+
+    enum occAction_t
+    {
+        OCC_START,
+        OCC_STOP,
+    };
 
     /**
      * @brief Starts OCCs on all Processors in the node
@@ -32,7 +54,6 @@ namespace HBOCC {
      * @return errlHndl_t  Error log if OCC load failed
      */
     errlHndl_t loadnStartAllOccs();
-
 
 } //end OCC namespace
 

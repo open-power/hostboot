@@ -245,4 +245,19 @@ uint64_t get_top_mem_addr(void)
 }
 
 
+bool orderByNodeAndPosition(  Target* i_firstProc,
+                              Target* i_secondProc)
+{
+    uint8_t nodeId0 = i_firstProc->getAttr<ATTR_FABRIC_NODE_ID>();
+    uint8_t nodeId1 = i_secondProc->getAttr<ATTR_FABRIC_NODE_ID>();
+    uint8_t fabpos0 = i_firstProc->getAttr<ATTR_FABRIC_CHIP_ID>();
+    uint8_t fabpos1 = i_secondProc->getAttr<ATTR_FABRIC_CHIP_ID>();
+
+    if (nodeId0 == nodeId1)
+    {
+        return fabpos0 < fabpos1;
+    }
+    return nodeId0 < nodeId1;
+}
+
 }

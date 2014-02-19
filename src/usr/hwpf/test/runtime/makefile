@@ -27,7 +27,8 @@ MODULE = testhwpf_rt
 
 include ../hwpftest.mk
 
-TESTS = ../fapiattrtest.H ../fapitargettest.H ../fapirctest.H ../hwpftest.H
+TESTS = ../fapiattrtest.H ../fapitargettest.H ../fapirctest.H ../hwpftest.H \
+		rt_occtest.H
 #		../hwpMvpdAccessorTest.H ../hwpMBvpdAccessorTest.H
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013                   */
+/* COPYRIGHT International Business Machines Corp. 2013,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <errl/errlmanager.H>
 #include <vfs/vfs.H>
 #include <runtime/interface.h>
+#include <hwpf/hwp/occ/occ.H>
 
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
     iv_isPnor(false), iv_lidBuffer(NULL), iv_lidSize(0)
@@ -142,4 +143,15 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
 
     return;
+}
+
+const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
+{
+        static uint32_t lidlist[] =
+        {
+            HBOCC::OCC_LIDID
+                // add SLW lids if ever needed
+        };
+        *o_num = sizeof(lidlist)/sizeof(lidlist[0]);
+        return lidlist;
 }
