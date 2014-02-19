@@ -33,6 +33,7 @@
 #include <targeting/common/predicates/predicateattrval.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/predicates/predicateisnonfunctional.H>
+#include <algorithm>
 
 /**
  * Miscellaneous Filter Utility Functions
