@@ -43,18 +43,7 @@
 
 #include <errlplugins.H>
 #include <errlusrparser.H>
-
-#ifdef CONTEXT_x86_nfp
-
-// FIXME: RTC: 51689 will address this issue.
-// Need support for attributeenums.H in x86.nfp.
-#include "../../../../export/ppc/fips/include/attributeenums.H"
-
-#else
-
 #include <attributeenums.H> // For TARGETING::TYPE enum
-
-#endif
 
 #include <prdfCenLogParse.H>
 #include <prdfGardType.H>
@@ -138,8 +127,7 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
 {
     using namespace TARGETING;
 
-    // FIXME: RTC: 51689 will address this issue.
-    // This is a hack until we can get targeting support in x86.
+    // TODO: RTC 99942. Replace with HWSV API to get the target type
 
     o_targetType = static_cast<TYPE>((i_chipId >> 16) & 0xff);
 

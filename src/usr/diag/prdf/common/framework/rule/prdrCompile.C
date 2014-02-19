@@ -30,18 +30,7 @@
 // It is important to limit what is included here. We don't want to include
 // files that include external components such as the errl or targeting code.
 // Otherwise, we will pull in way too much code just to compile this on file.
-
-#ifdef CONTEXT_x86_nfp
-
-// FIXME: RTC: 51689 will address this issue.
-// Need support for attributeenums.H in x86.nfp.
-#include <../../../export/ppc/fips/include/attributeenums.H>
-
-#else
-
 #include <attributeenums.H> // For TARGETING::TYPE enum
-
-#endif
 
 // define needed to enable x86 rule parser code only
 #define __PRD_RULE_COMPILE

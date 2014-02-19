@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2013              */
+/* COPYRIGHT International Business Machines Corp. 2002,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,12 +33,7 @@
 /*  Includes                                                          */
 /*--------------------------------------------------------------------*/
 #include <prdf_types.h>
-
-// FIXME: RTC: 51689 will address this issue
-// Need these attribute header files in x86.nfp
-#ifndef CONTEXT_x86_nfp
-  #include <targeting/common/attributes.H>
-#endif
+#include <targeting/common/attributes.H>
 
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */
@@ -52,11 +47,7 @@
 
 namespace PRDF
 {
-    #ifndef CONTEXT_x86_nfp
     typedef TARGETING::ATTR_HUID_type HUID;
-    #else
-    typedef uint32_t HUID;
-    #endif
 
     // FIXME: RTC: 62867 will resolve this
     enum { INVALID_HUID = 0 };
