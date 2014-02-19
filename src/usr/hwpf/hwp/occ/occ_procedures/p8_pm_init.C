@@ -20,8 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_init.C,v 1.23 2013/12/03 19:42:40 stillgs Exp $
-// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_init.C,v $
+// $Id: p8_pm_init.C,v 1.24 2014/02/17 02:57:00 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -42,19 +42,16 @@
 // *! Procedure Prereq:
 // *!   o System clocks are running
 // *!
+// *| buildfapiprcd -C p8_pm_utils.C p8_pm_init.C
 //------------------------------------------------------------------------------
 ///
 /// \version -------------------------------------------------------------------
 /// \version 1.0 stillgs 2012/03/06 Initial Version
 /// \version -------------------------------------------------------------------
 ///
-///
-/// \todo   Review
-///
+/// \verbatim
 ///
 /// High-level procedure flow:
-///
-/// \verbatim
 ///     - call p8_pm_prep_for_reset to prepare and perform getting the PM function
 ///         able to be be (re)initialized
 ///
@@ -93,6 +90,7 @@
 // ----------------------------------------------------------------------
 
 #include "p8_pm.H"
+#include "p8_pm_utils.H"
 #include "p8_pm_init.H"
 #include "p8_pm_prep_for_reset.H"
 
@@ -112,14 +110,12 @@ using namespace fapi;
 // Function prototypes
 // ----------------------------------------------------------------------
 
-// ----------------------------------------------------------------------
-// Function definitions
-// ----------------------------------------------------------------------
 fapi::ReturnCode 
 pm_list(const Target& i_target, const Target& i_target2, uint32_t i_mode);
 
 fapi::ReturnCode
 clear_occ_special_wakeups (const fapi::Target &i_target);
+
   
 // ----------------------------------------------------------------------
 // p8_pm_init
@@ -585,7 +581,16 @@ pm_list(const Target& i_target, const Target& i_target2, uint32_t i_mode)
                     break;
                 }                  
             } 
+                        
         } // PM_INIT special stuff
+        
+        //  Check for xstops and recoverables
+        rc = p8_pm_glob_fir_trace (i_target, "end of p8_pm_init_list");
+        if (!rc.ok()) 
+        {
+            break;
+        }  
+
     } while(0);
 
     FAPI_INF("p8_pm_list end in mode %s", PM_MODE_NAME(i_mode));
@@ -660,3 +665,4 @@ clear_occ_special_wakeups (const fapi::Target &i_target)
 
 
 } //end extern C
+

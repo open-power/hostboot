@@ -229,6 +229,8 @@
     <attribute><id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id></attribute>
     <attribute><id>MULTI_SCOM_BUFFER_MAX_SIZE</id></attribute>
     <attribute><id>DISABLE_SCRUB_AFTER_PATTERN_TEST</id></attribute>
+    <attribute><id>PM_PCBS_FSM_TRACE_EN</id></attribute>
+    <attribute><id>PM_GLOBAL_FIR_TRACE_EN</id></attribute>
 </targetType>
 
 <targetType>

@@ -13227,8 +13227,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
-</attributes>
-
 <attribute>
     <id>DISABLE_SCRUB_AFTER_PATTERN_TEST</id>
     <description>
@@ -13245,4 +13243,41 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<attribute>
+    <id>PM_PCBS_FSM_TRACE_EN</id>
+    <description>
+    Overridable attribute to allow for PCBS FSM tracing by Power Management procedures
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_PCBS_FSM_TRACE_EN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_GLOBAL_FIR_TRACE_EN</id>
+    <description>
+    Overridable attribute to allow for Global checkstop and recoverable FIR tracing by Power Management procedures
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_GLOBAL_FIR_TRACE_EN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+</attributes>
+
 

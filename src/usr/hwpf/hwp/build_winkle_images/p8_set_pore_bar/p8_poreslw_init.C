@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poreslw_init.C,v 1.19 2014/01/19 19:19:42 cmolsen Exp $
+// $Id: p8_poreslw_init.C,v 1.21 2014/02/17 18:30:20 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poreslw_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -30,7 +30,7 @@
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
 // *! BACKUP:     Mike Olsen         Email: cmolsen@us.ibm.com
 // *!
-// *! Build cmd:  buildfapiprcd -e "../../xml/error_info/p8_poreslw_errors.xml,../../xml/error_info/p8_slw_registers.xml" p8_poreslw_init.C
+// *! Build cmd:  buildfapiprcd -e "../../xml/error_info/p8_poreslw_errors.xml,../../xml/error_info/p8_slw_registers.xml" -C p8_pm_utils.C p8_poreslw_init.C
 // *!
 /// \file p8_poreslw_init.C
 /// \brief Configure or reset the SLW PORE and related functions to enable idle
@@ -65,12 +65,12 @@
 // Includes
 // ----------------------------------------------------------------------
 #include "p8_pm.H"
+#include "p8_pm_utils.H"
 #include "p8_poreslw_init.H"
 #include "p8_pfet_init.H"
 #include "p8_pmc_deconfig_setup.H"
 #include "p8_cpu_special_wakeup.H"
 #include "p8_pcb_scom_errors.H"
-
 
 extern "C" {
 
@@ -88,9 +88,18 @@ using namespace fapi;
 // Function prototypes
 // ----------------------------------------------------------------------
 
-fapi::ReturnCode poreslw_init(const Target& i_target, uint32_t i_mode);
-fapi::ReturnCode poreslw_reset(const Target& i_target);
-fapi::ReturnCode poreslw_ex_setup(const Target& i_target);
+fapi::ReturnCode 
+poreslw_init(const Target& i_target, uint32_t i_mode);
+
+fapi::ReturnCode 
+poreslw_reset(const Target& i_target);
+
+fapi::ReturnCode 
+poreslw_ex_setup(const Target& i_target);
+
+fapi::ReturnCode
+p8_pm_pcbs_fsm_trace_chip(const fapi::Target& i_target,           
+                            const char *        i_msg);
 
 // ----------------------------------------------------------------------
 // Function definitions
@@ -175,6 +184,34 @@ poreslw_init(const Target& i_target, uint32_t i_mode)
 
     do
     {
+
+        uint8_t ipl_mode = 0;
+        rc = FAPI_ATTR_GET(ATTR_IS_MPIPL, NULL, ipl_mode);
+        if (!rc.ok())
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_IS_MPIPL rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+        
+        FAPI_INF("IPL mode = %s", ipl_mode ? "MPIPL" : "NORMAL");
+                
+        uint8_t trace_en_flag = 1;  
+        FAPI_INF("PM FAPI Global FIR Tracing set to ENABLED");    
+        SETATTR(rc,
+                ATTR_PM_GLOBAL_FIR_TRACE_EN,
+                "ATTR_PM_GLOBAL_FIR_TRACE_EN",
+                NULL,
+                trace_en_flag);
+        
+        FAPI_INF("PM FAPI PCBS FSM Tracing set to ENABLED");   
+        SETATTR(rc,
+                ATTR_PM_PCBS_FSM_TRACE_EN,
+                "ATTR_PM_PCBS_FSM_TRACE_EN",
+                NULL,
+                trace_en_flag);               
+
+        rc = p8_pm_pcbs_fsm_trace_chip(i_target, "poreslw_init at entry");
+        if (!rc.ok()) { break; }
 
         // Synchronize the PMC Deconfiguration Register with the currently
         // enabled EX chiplets.
@@ -376,6 +413,8 @@ poreslw_ex_setup(const Target& i_target)
     uint8_t                         pm_winkle_type  ;
     uint8_t                         pm_winkle_entry ;
     uint8_t                         pm_winkle_exit ;
+    
+
 
 
     // These enums must match the enum values in pm_hwp_attributes.xml
@@ -406,12 +445,15 @@ poreslw_ex_setup(const Target& i_target)
     {
 
         FAPI_INF("Executing poreslw_ex_setup...");
-
+        
         // --------------------------------------
         // Initialize the PFET controllers
         //   This HWP loops across the chiplet but uses chip level attributes so
         //   it is invoked prior to the chiplet loop below.
         FAPI_INF("\tInitialize the PFET controllers");
+        
+        rc = p8_pm_pcbs_fsm_trace_chip(i_target, "poreslw_init before PFET initialization");
+        if (!rc.ok()) { break; }
 
         FAPI_EXEC_HWP(rc,  p8_pfet_init, i_target, PM_INIT);
         if(rc)
@@ -419,6 +461,9 @@ poreslw_ex_setup(const Target& i_target)
             FAPI_ERR("PFET Controller Setup error");
             break;
         }
+        
+        rc = p8_pm_pcbs_fsm_trace_chip(i_target, "poreslw_init after PFET init");
+        if (!rc.ok()) { break; }
 
         // Read the attributes
 
@@ -701,7 +746,10 @@ poreslw_ex_setup(const Target& i_target)
             {
                 FAPI_ERR("Scom error reading PMGP0");
                 break;
-            }
+            }           
+
+            rc = p8_pm_pcbs_fsm_trace_chip(i_target, "poreslw_init before PM enablement check");
+            if (!rc.ok()) { break; }
 
             if (data.isBitSet(PM_DISABLE))
             {
@@ -717,7 +765,7 @@ poreslw_ex_setup(const Target& i_target)
                     rc.setEcmdError(e_rc);
                     break;
                 }
-
+                                
                 address = EX_PMGP0_AND_0x100F0101 + (l_ex_number * 0x01000000);
                 rc=fapiPutScom(i_target, address, data);
                 if(!rc.ok())
@@ -725,6 +773,10 @@ poreslw_ex_setup(const Target& i_target)
                     FAPI_ERR("Scom error writing EX_PMGP0_OR");
                     break;
                 }
+                
+                rc = p8_pm_pcbs_fsm_trace_chip(i_target, "poreslw_init after PM enablement");
+                if (!rc.ok()) { break; }
+
             }
 
             // --------------------------------------
@@ -736,6 +788,9 @@ poreslw_ex_setup(const Target& i_target)
                 FAPI_ERR("Scom error clearing EX_OCC_SPWKUP");
                 break;
             }
+
+            rc = p8_pm_pcbs_fsm_trace_chip(i_target, "poreslw_init before OCC clearing Special Wakeup check");
+            if (!rc.ok()) { break; }
 
             if (data.isBitSet(0))
             {
@@ -754,6 +809,9 @@ poreslw_ex_setup(const Target& i_target)
                     FAPI_ERR("Scom error clearing EX_OCC_SPWKUP");
                     break;
                 }
+                
+                rc = p8_pm_pcbs_fsm_trace_chip(i_target, "poreslw_init after OCC clearing Special Wakeup");
+                if (!rc.ok()) { break; }
             }
 
             // --------------------------------------
@@ -775,6 +833,7 @@ poreslw_ex_setup(const Target& i_target)
 
     return rc;
 }
+
 
 } //end extern
 

@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: pm_hwp_attributes.xml,v 1.10 2013/12/19 14:43:14 stillgs Exp $ -->
+<!-- $Id: pm_hwp_attributes.xml,v 1.11 2014/02/06 19:08:22 stillgs Exp $ -->
 <!--
     XML file specifying Power Management HWPF attributes.
     These attributes are initialized to zero by the platform and set to a
@@ -815,6 +815,26 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     This is value may used by FAPI code to check that the SLW engine achieved an expected state.
     </description>
     <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PCBS_FSM_TRACE_EN</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Overridable attribute to allow for PCBS FSM tracing by Power Management procedures
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_GLOBAL_FIR_TRACE_EN</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Overridable attribute to allow for Global checkstop and recoverable FIR tracing by Power Management procedures
+    </description>
+    <valueType>uint8</valueType>
     <writeable/>
 </attribute>
 

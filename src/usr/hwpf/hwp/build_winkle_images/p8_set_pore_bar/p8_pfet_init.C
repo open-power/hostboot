@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_init.C,v 1.13 2014/01/27 22:37:15 cmolsen Exp $
+// $Id: p8_pfet_init.C,v 1.14 2014/02/17 02:56:59 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -70,6 +70,7 @@
 // Includes
 // ----------------------------------------------------------------------
 #include "p8_pm.H"
+#include "p8_pm_utils.H"
 #include "p8_pfet_init.H"
 #include "p8_pfet_control.H"
 
@@ -593,6 +594,10 @@ pfet_init(const Target& i_target, uint32_t i_mode)
             // Functional - run any work-arounds necessary
             if (l_functional)
             {
+                l_rc = p8_pm_pcbs_fsm_trace (i_target, l_ex_number, 
+                                "before p8_pfet_control functional");
+                if (!l_rc.ok()) { break; }
+            
                 // \todo:  make DD1 relevent
                 FAPI_INF("Perform iVRM work-around on configured EX %d", l_ex_number);
 
@@ -605,6 +610,10 @@ pfet_init(const Target& i_target, uint32_t i_mode)
                     FAPI_ERR("iVRM / PFET Controller error");
                     break;
                 }
+                
+                l_rc = p8_pm_pcbs_fsm_trace (i_target, l_ex_number, 
+                                "after p8_pfet_control functional");
+                if (!l_rc.ok()) { break; }
 
             }
             // Not Functional - disable the PFETs
@@ -623,6 +632,11 @@ pfet_init(const Target& i_target, uint32_t i_mode)
             {
                 if (!l_functional )
                 {
+                
+                    l_rc = p8_pm_pcbs_fsm_trace (i_target, l_ex_number, 
+                                "before p8_pfet_control non-functional");
+                    if (!l_rc.ok()) { break; }
+                
                     FAPI_INF("Turn off PFETs on EX %d", l_ex_number);
                     off_mode = VOFF;
                     if (i_mode == PM_INIT_SPECIAL)
@@ -636,13 +650,15 @@ pfet_init(const Target& i_target, uint32_t i_mode)
                        BOTH,
                        off_mode);
 
-
-
                     if(l_rc)
                     {
                         FAPI_ERR("PFET Controller error");
                         break;
                     }
+                    
+                    l_rc = p8_pm_pcbs_fsm_trace (i_target, l_ex_number, 
+                                "after p8_pfet_control non-functional");
+                    if (!l_rc.ok()) { break; }
                 }
             }
             else

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_utils.C,v 1.2 2014/02/09 02:01:59 stillgs Exp $
+// $Id: p8_pm_utils.C,v 1.3 2014/02/17 02:53:07 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_utils.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -64,9 +64,10 @@ fapi::ReturnCode
 p8_pm_glob_fir_trace(const fapi::Target& i_target,
                     const char * i_msg)
 {
-    fapi::ReturnCode                rc;
-    ecmdDataBufferBase              data(64);
-    uint64_t                        address;
+    fapi::ReturnCode    rc;
+    ecmdDataBufferBase  data(64);
+    uint64_t            address;
+    uint8_t             trace_en_flag = false;
 
     CONST_UINT64_T( GLOB_XSTOP_FIR_0x01040000                                 , ULL(0x01040000) );
     CONST_UINT64_T( GLOB_RECOV_FIR_0x01040001                                 , ULL(0x01040001) );
@@ -77,6 +78,19 @@ p8_pm_glob_fir_trace(const fapi::Target& i_target,
 
         //  Note: i_msg is put on on each record to allow for trace "greps"
         //  so as to see the "big picture" across when
+
+        rc = FAPI_ATTR_GET(ATTR_PM_GLOBAL_FIR_TRACE_EN, NULL, trace_en_flag);
+        if (rc)
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_PM_GLOBAL_FIR_TRACE_EN with rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+
+        // If trace is not enabled, leave.
+        if (!trace_en_flag)
+        {
+            break;
+        }
 
         //  ******************************************************************
         //  Check for xstops and recoverables and put in the trace
@@ -144,16 +158,30 @@ p8_pm_pcbs_fsm_trace_chip(const fapi::Target& i_target,
 {
     fapi::ReturnCode                rc;
     ecmdDataBufferBase              data(64);
-    
+    uint8_t                         trace_en_flag = false;
+
     std::vector<fapi::Target>       l_exChiplets;
     uint8_t                         l_ex_number = 0;
 
     do
     {
-         rc = fapiGetChildChiplets(i_target,
-                                    fapi::TARGET_TYPE_EX_CHIPLET,
-                                    l_exChiplets,
-                                    TARGET_STATE_FUNCTIONAL);
+        rc = FAPI_ATTR_GET(ATTR_PM_PCBS_FSM_TRACE_EN, NULL, trace_en_flag);
+        if (rc)
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_PM_PCBS_FSM_TRACE_EN with rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+
+        // If trace is not enabled, leave.
+        if (!trace_en_flag)
+        {
+            break;
+        }
+
+        rc = fapiGetChildChiplets(i_target,
+                                  fapi::TARGET_TYPE_EX_CHIPLET,
+                                  l_exChiplets,
+                                  TARGET_STATE_FUNCTIONAL);
         if (rc)
         {
             FAPI_ERR("fapiGetChildChiplets with rc = 0x%x", (uint32_t)rc);
@@ -201,10 +229,24 @@ p8_pm_pcbs_fsm_trace  ( const fapi::Target& i_target,
     fapi::ReturnCode                rc;
     ecmdDataBufferBase              data(64);
     uint64_t                        address;
+    uint8_t                         trace_en_flag = false;
     uint64_t                        ex_offset;
 
     do
     {
+        rc = FAPI_ATTR_GET(ATTR_PM_PCBS_FSM_TRACE_EN, NULL, trace_en_flag);
+        if (rc)
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_PM_PCBS_FSM_TRACE_EN with rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+
+        // If trace is not enabled, leave.
+        if (!trace_en_flag)
+        {
+            break;
+        }
+    
         ex_offset = i_ex_number * 0x01000000;
 
         //  Note: i_msg is put on on each record to allow for trace "greps"
@@ -253,9 +295,6 @@ p8_pm_pcbs_fsm_trace  ( const fapi::Target& i_target,
     } while(0);
     return rc;
 }
-
-
-
 
 } //end extern
 
