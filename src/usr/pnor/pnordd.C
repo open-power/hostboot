@@ -456,14 +456,6 @@ void PnorDD::sfcInit( )
 #define PNORDD_FSPATTACHED
 #ifdef PNORDD_FSPATTACHED
 
-            //TODO: Remove with RTC: 64398.
-            //Delayed removing until FSP performs this setup.
-            l_err = writeRegSfc(SFC_CMD_SPACE,
-                                SFC_REG_CONF,
-                                conf_init);
-            if(l_err) { break; }
-            //END TODO: RTC: 64398
-
             //Determine NOR Flash type - triggers vendor specific workarounds
             //We also use the chipID in some FFDC situations.
             l_err = getNORChipId(cv_nor_chipid);
