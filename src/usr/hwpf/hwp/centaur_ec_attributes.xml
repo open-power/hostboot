@@ -22,7 +22,24 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-  <!-- $Id: centaur_ec_attributes.xml,v 1.20 2014/01/31 15:09:24 yctschan Exp $ -->
+  <!-- $Id: centaur_ec_attributes.xml,v 1.22 2014/02/17 16:13:57 yctschan Exp $ -->
+  <attribute>
+    <id>ATTR_CENTAUR_EC_ENABLE_SAFE_MODE_THROTTLE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.  If true, it sets Safe mode throttles using sys attributes  ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP and ATTR_MRW_MEM_THROTTLE_DENOMINATOR.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <attribute>
     <id>ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -356,6 +373,23 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
       </chip>
     </chipEcFeature>
   </attribute>
+
+  <attribute>
+      <id>ATTR_CENTAUR_EC_RDCLK_PR_UPDATE_HW236658_FIXED</id>
+      <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+      <description>
+         Set by the platform depending on DD2.x or newer (TRUE), otherwise FALSE.  If false, draminit_mc will execute a putscom to set bit 52 (PER_RDCLK_UPDATE_DISABLE) of DP18 Read Diag Cfg 5 on DD1.X parts.
+      </description>
+      <chipEcFeature>
+        <chip>
+          <name>ENUM_ATTR_NAME_CENTAUR</name>
+          <ec>
+            <value>0x20</value>
+            <test>GREATER_THAN_OR_EQUAL</test>
+          </ec>
+        </chip>
+       </chipEcFeature>
+   </attribute>
 
 
 

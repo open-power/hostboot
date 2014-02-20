@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_generic_shmoo.xml,v 1.2 2014/01/23 20:10:51 sasethur Exp $ -->
+<!-- $Id: memory_mss_generic_shmoo.xml,v 1.3 2014/02/07 16:56:32 sasethur Exp $ -->
 <!-- For file ../../ipl/fapi/mss_generic_shmoo.C -->
 <!-- // *! OWNER  NAME          : Abhijit Saurabh          Email: abhijit.saurabh@in.ibm.com -->
 <!-- // *! BACKUP NAME          : Sidhartha Vijay      	  Email: sidvijay@in.ibm.com -->
@@ -31,11 +31,22 @@
   <description>
     The mss_generic_shmoo file found an MCBIST Failure
   </description>
-  <ffdc>MCB_STATUS</ffdc>
   <callout>
-    <target>MBA_CHIPLET</target>
+    <childTargets>
+      <parent>MBA_CHIPLET</parent>
+      <childType>TARGET_TYPE_DIMM</childType>
+      <childPort>MBA_PORT_NUMBER</childPort>
+      <childNumber>MBA_DIMM_NUMBER</childNumber>
+    </childTargets>
     <priority>HIGH</priority>
   </callout>
+  <deconfigure>
+    <childTargets>
+      <parent>MBA_CHIPLET</parent>
+      <childType>TARGET_TYPE_DIMM</childType>
+      <childPort>MBA_PORT_NUMBER</childPort>
+      <childNumber>MBA_DIMM_NUMBER</childNumber>
+    </childTargets>
+  </deconfigure>
 </hwpError>
-
 </hwpErrors>

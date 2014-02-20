@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: mss_generic_shmoo.C,v 1.86 2014/01/24 17:18:50 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.87 2014/02/07 16:54:14 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.87  |abhijsau|7-Feb-14| added sanity check and error call out for schmoo's , removed printing of disconnected DQS. 
 //   1.86  |abhijsau|24-Jan-14| Fixed code as per changes in access delay error check
 //   1.85  |mjjones |24-Jan-14| Fixed layout and error handling for RAS Review
 //   1.84  |abhijit |16-JAN-14| Changed EFF_DIMM_TYPE attribute to   ATTR_EFF_CUSTOM_DIMM
@@ -336,6 +337,11 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,
         if (rc) return rc;
         rc = schmoo_setup_mcb(i_target);
         if (rc) return rc;
+		
+		//sanity check 
+		//rc = sanity_check(i_target); 
+			//if (rc) return rc;
+			
         //Find RIGHT BOUND OR SETUP BOUND
         rc = find_bound(i_target, RIGHT);
         if (rc) return rc;
@@ -379,6 +385,10 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,
         {
             rc = schmoo_setup_mcb(i_target);
             if (rc) return rc;
+			
+			rc = sanity_check(i_target); 
+			if (rc) return rc;
+        
         }
         rc = set_all_binary(i_target, RIGHT);
         if (rc) return rc;
@@ -482,6 +492,19 @@ fapi::ReturnCode generic_shmoo::sanity_check(const fapi::Target & i_target)
     uint8_t l_mcb_status = 0;
     uint8_t l_CDarray0[80] = { 0 };
     uint8_t l_CDarray1[80] = { 0 };
+	
+	uint8_t l_byte, l_rnk;
+    uint8_t l_nibble;
+    uint8_t l_n = 0;
+    uint8_t l_p = 0;
+    uint8_t i_rp = 0;
+    uint8_t rank = 0;
+	uint8_t l_faulted_rank = 255;
+	uint8_t l_faulted_port = 255;
+	uint8_t l_faulted_dimm = 255;
+	uint8_t l_memory_health = 0;
+    uint8_t l_max_byte = 10;
+    //uint8_t l_max_nibble = 20;
 
     struct Subtest_info l_sub_info[30];
 
@@ -501,12 +524,50 @@ fapi::ReturnCode generic_shmoo::sanity_check(const fapi::Target & i_target)
     rc = mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
                        count_bad_dq);
     if (rc) return rc;
-
-    if (l_mcb_status)
+	
+	for (l_p = 0; l_p < MAX_PORT; l_p++)
     {
-        FAPI_ERR("generic_shmoo:sanity_check failed !! MCBIST failed on intial run , memory is not in good state aborting shmoo");
-        const uint8_t & MCB_STATUS = l_mcb_status;
+        for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; ++l_rnk)
+        {// Byte loop
+            rc = mss_getrankpair(i_target, l_p, 0, &i_rp, valid_rank);
+            if (rc) return rc;
+            rank = valid_rank[l_rnk];
+
+            l_n = 0;
+            for (l_byte = 0; l_byte < l_max_byte; ++l_byte)
+            {
+                //Nibble loop
+                for (l_nibble = 0; l_nibble < MAX_NIBBLES; ++l_nibble)
+                {
+					if (mcbist_error_map[l_p][l_rnk][l_byte][l_nibble] == 1)
+                        {
+							l_memory_health = 1;
+							 l_faulted_rank = rank;
+							 l_faulted_port = l_p;
+							 if(rank>3){
+							 l_faulted_dimm = 1;
+							 }else{
+							 l_faulted_dimm = 0;
+							 }
+                           break; 
+                        }
+                        
+						l_n++;
+						
+				}
+			}
+		}
+	}	
+	
+	
+	//////////////// changed the check condition ... The error call out need to gard the dimm=l_faulted_dimm(0 or 1) //// port=l_faulted_port(0 or 1) target=i_target ...
+   if (l_memory_health)
+    {
+        FAPI_INF("generic_shmoo:sanity_check failed !! MCBIST failed on intial run , memory is not in good state needs investigation port=%d rank=%d dimm=%d",
+            l_faulted_port, l_faulted_rank, l_faulted_dimm);
         const fapi::Target & MBA_CHIPLET = i_target;
+        const uint8_t & MBA_PORT_NUMBER = l_faulted_port;
+        const uint8_t & MBA_DIMM_NUMBER = l_faulted_dimm;
         FAPI_SET_HWP_ERROR(rc, RC_MSS_GENERIC_SHMOO_MCBIST_FAILED);
         return rc;
     }
@@ -615,8 +676,7 @@ fapi::ReturnCode generic_shmoo::check_error_map(const fapi::Target & i_target,
     uint8_t l_byte_is;
     uint8_t l_nibble_is;
     uint8_t l_n = 0;
-	uint8_t l_i = 0;
-	uint8_t l_dq = 0;
+	
     pass = 1;
     uint8_t l_p = 0;
     input_type l_input_type_e = ISDIMM_DQ;
@@ -626,6 +686,8 @@ fapi::ReturnCode generic_shmoo::check_error_map(const fapi::Target & i_target,
     uint8_t rank = 0;
     uint8_t l_max_byte = 10;
     uint8_t l_max_nibble = 20;
+	uint8_t l_i = 0;
+	uint8_t l_dq = 0;
     uint8_t l_CDarray0[80] = { 0 };
     uint8_t l_CDarray1[80] = { 0 };
 
@@ -3428,7 +3490,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
     fapi::ReturnCode rc;
 
     uint8_t l_rnk, l_byte, l_nibble, l_bit;
-    uint8_t l_dq = 0;
+    //uint8_t l_dq = 0;
     uint8_t l_rp = 0;
     uint8_t l_p = 0;
     uint8_t i_rank = 0;
@@ -3439,9 +3501,23 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
     uint8_t l_attr_eff_num_drops_per_port_u8 = 0;
     uint8_t l_attr_eff_dram_width_u8 = 0;
     uint16_t l_total_margin = 0;
+	uint8_t l_i = 0;
+	uint8_t l_dq = 0;
+	uint8_t l_flag = 0;
+    uint8_t l_CDarray0[80] = { 0 };
+    uint8_t l_CDarray1[80] = { 0 };
+	
 
     char * l_pMike = new char[128];
     char * l_str = new char[128];
+	
+	rc = mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
+                       count_bad_dq);
+    if (rc)
+    {
+        FAPI_ERR("generic_shmoo::print report: mcb_error_map failed!!");
+        return rc;
+    }
 
     fapi::Target l_target_centaur;
 
@@ -3484,7 +3560,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
 
     //FAPI_INF("%s:num_drops_per_port = %d on %s.", l_attr_eff_num_drops_per_port_u8, i_target.toEcmdString());
     //FAPI_INF("%s:num_ranks  = %d on %s.", iv_MAX_RANKS,i_target.toEcmdString());
-    //FAPI_INF("%s:dram_width = %d on %s. \n\n", l_attr_eff_dram_width_u8, i_target.toEcmdString());
+    FAPI_INF("dram_width = %d  \n\n", l_attr_eff_dram_width_u8);
     FAPI_INF("%s:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++",
              i_target.toEcmdString());
     //// Based on schmoo param the print will change eventually
@@ -3514,7 +3590,37 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
             {
                 //Nibble loop
                 for (l_nibble = 0; l_nibble < MAX_NIBBLES; ++l_nibble)
-                {
+                {	
+				
+					l_dq=8 * l_byte + 4 * l_nibble;
+                    l_flag=0;        
+                            if (l_p == 0)
+                            {
+                                for (l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                {
+                                    if (l_CDarray0[l_i] == l_dq)
+                                    {
+                                        l_flag=1;
+                                        
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for (l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                {
+                                    if (l_CDarray1[l_i] == l_dq)
+                                    {
+                                        l_flag=1;
+                                        
+                                    }
+                                }
+                            }
+				
+					if(l_flag==1)
+					{
+						continue;
+					}	
                     for (l_bit = 0; l_bit < MAX_BITS; ++l_bit)
                     {
                         l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
@@ -3569,6 +3675,20 @@ fapi::ReturnCode generic_shmoo::print_report_dqs(const fapi::Target & i_target)
     uint8_t l_by8_dqs = 0;
     char * l_pMike = new char[128];
     char * l_str = new char[128];
+	
+	uint8_t l_i = 0;
+	uint8_t l_dq = 0;
+	uint8_t l_flag = 0;
+    uint8_t l_CDarray0[80] = { 0 };
+    uint8_t l_CDarray1[80] = { 0 };
+
+	rc = mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
+                       count_bad_dq);
+    if (rc)
+    {
+        FAPI_ERR("generic_shmoo::print report: mcb_error_map failed!!");
+        return rc;
+    }
 
     if (iv_dmm_type == 1)
     {
@@ -3658,7 +3778,36 @@ fapi::ReturnCode generic_shmoo::print_report_dqs(const fapi::Target & i_target)
                         l_nibble = l_nibble * 2;
                     }
                 }
-
+				l_dq=4* l_nibble;
+                    l_flag=0;        
+                            if (l_p == 0)
+                            {
+                                for (l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                {
+                                    if (l_CDarray0[l_i] == l_dq)
+                                    {
+                                        l_flag=1;
+                                        
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for (l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                {
+                                    if (l_CDarray1[l_i] == l_dq)
+                                    {
+                                        l_flag=1;
+                                        
+                                    }
+                                }
+                            }
+				
+					if(l_flag==1)
+					{
+						continue;
+					}	
+			
                 l_total_margin
                     = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rnk].K.left_margin_val[l_nibble]
                         + SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rnk].K.right_margin_val[l_nibble];
@@ -3942,11 +4091,7 @@ fapi::ReturnCode generic_shmoo::get_margin_dqs_by8(const fapi::Target & i_target
                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rnk].K.left_margin_val[l_nibble]
                     = ((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rnk].K.curr_val[l_nibble]
                         - SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rnk].K.lb_regval[l_nibble])
-                        * l_factor) / l_factor_ps;//((1/uint32_t_freq*1000000)/128);
-                //SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rnk].K.total_margin[l_nibble]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rnk].K.right_margin_val[l_nibble]+SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[l_rnk].K.left_margin_val[l_nibble];
-                // SHMOO[iv_shmoo_type].MBA.P[l_p].S[l_rnk].K.total_margin[l_nibble]=SHMOO[iv_shmoo_type].MBA.P[l_p].S[l_rnk].K.right_margin_val[l_nibble]+SHMOO[iv_shmoo_type].MBA.P[l_p].S[l_rnk].K.left_margin_val[l_nibble];
-                //FAPI_INF("\n Abhijit is here after %d  and port=%d \n",l_nibble,l_p);
-                //FAPI_INF("\n Abhijit is here after 2 %d \n",l_rnk);
+                        * l_factor) / l_factor_ps;
             }
         }
     }
@@ -3968,9 +4113,22 @@ fapi::ReturnCode generic_shmoo::get_min_margin(const fapi::Target & i_target,
     uint8_t l_rnk, l_byte, l_nibble, l_bit, i_rank;
     uint16_t l_temp_right = 4800;
     uint16_t l_temp_left = 4800;
-    uint8_t l_dq = 0;
+    //uint8_t l_dq = 0;
     uint8_t l_rp = 0;
     uint8_t l_p = 0;
+	uint8_t l_i = 0;
+	uint8_t l_dq = 0;
+	uint8_t l_flag = 0;
+    uint8_t l_CDarray0[80] = { 0 };
+    uint8_t l_CDarray1[80] = { 0 };
+	
+	rc = mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
+                       count_bad_dq);
+    if (rc)
+    {
+        FAPI_ERR("generic_shmoo::print report: mcb_error_map failed!!");
+        return rc;
+    }
 
     for (l_p = 0; l_p < MAX_PORT; l_p++)
     {
@@ -3985,7 +4143,37 @@ fapi::ReturnCode generic_shmoo::get_min_margin(const fapi::Target & i_target,
             {
                 //Nibble loop
                 for (l_nibble = 0; l_nibble < MAX_NIBBLES; ++l_nibble)
-                {
+                {	
+					l_dq=8 * l_byte + 4 * l_nibble;
+                    l_flag=0;        
+                            if (l_p == 0)
+                            {
+                                for (l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                {
+                                    if (l_CDarray0[l_i] == l_dq)
+                                    {
+                                        l_flag=1;
+                                        
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for (l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                {
+                                    if (l_CDarray1[l_i] == l_dq)
+                                    {
+                                        l_flag=1;
+                                        
+                                    }
+                                }
+                            }
+				
+					if(l_flag==1)
+					{
+						continue;
+					}	
+					
                     for (l_bit = 0; l_bit < MAX_BITS; ++l_bit)
                     {
                         l_dq = 8 * l_byte + 4 * l_nibble + l_bit;

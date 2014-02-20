@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.43 2013/10/28 15:10:24 dcadiga Exp $
+// $Id: mss_draminit_mc.C,v 1.45 2014/02/17 15:16:14 lapietra Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.45   | dcadiga  |14-FEB-14| Periodic Cal Fix for DD2
+//  1.44   | bellows  |12-FEB-14| Workaround for ENABLE_RCE_WITH_OTHER_ERRORS_HW246685
 //  1.43   | dcadiga  |28-OCT-13| Fixed code review comments for parent chip and typos
 //  1.42   | dcadiga  |16-OCT-13| Fixed Code Review Comments, added DD2.X EC check for parity on 32GB
 //  1.41   | dcadiga  |16-OCT-13| repeating Brent's test
@@ -353,35 +355,75 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
 
     if (memcal_iterval != 0)
     {
-        //Phase Select Fix for DD1.1
+
+
+
+        uint8_t attr_centaur_ec_rdclk_pr_update_hw236658_fixed; 
+        rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_RDCLK_PR_UPDATE_HW236658_FIXED, &i_target, attr_centaur_ec_rdclk_pr_update_hw236658_fixed);
+        if(rc) return rc;
+
+        if(!attr_centaur_ec_rdclk_pr_update_hw236658_fixed){
+	
+           //Check EC, Disable Phase Select Update for DD2 HW
+           //Phase Select Fix for DD1.1
+           rc_num = rc_num | data_buffer_64.flushTo0();
+           rc_num = rc_num | data_buffer_64.setBit(52);
+           if(rc_num)
+           {
+              rc.setEcmdError(rc_num);
+              return rc;
+           }
+	
+	
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_0_0x800000120301143F,data_buffer_64);
+           if(rc) return rc;
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_1_0x800004120301143F,data_buffer_64);
+           if(rc) return rc;
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_2_0x800008120301143F,data_buffer_64);
+           if(rc) return rc;
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_3_0x80000C120301143F,data_buffer_64);
+           if(rc) return rc;
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_4_0x800010120301143F,data_buffer_64);
+           if(rc) return rc;
+
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_0_0x800100120301143F,data_buffer_64);
+           if(rc) return rc;
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_1_0x800104120301143F,data_buffer_64);
+           if(rc) return rc;
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_2_0x800108120301143F,data_buffer_64);
+           if(rc) return rc;
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_3_0x80010C120301143F,data_buffer_64);
+           if(rc) return rc;
+           rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_4_0x800110120301143F,data_buffer_64);
+	
+	
+	}
+	
+	//Disable Periodic Read Centering for ALL HW
         rc_num = rc_num | data_buffer_64.flushTo0();
-        rc_num = rc_num | data_buffer_64.setBit(52);
-        if(rc_num)
+	if(rc_num)
         {
            rc.setEcmdError(rc_num);
            return rc;
         }
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_0_0x800000120301143F,data_buffer_64);
-        if(rc) return rc;
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_1_0x800004120301143F,data_buffer_64);
-        if(rc) return rc;
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_2_0x800008120301143F,data_buffer_64);
-        if(rc) return rc;
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_3_0x80000C120301143F,data_buffer_64);
-        if(rc) return rc;
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P0_4_0x800010120301143F,data_buffer_64);
+	rc = fapiGetScom(i_target,DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P0_0x8000C00B0301143F,data_buffer_64);
+        rc_num = rc_num | data_buffer_64.clearBit(54);
+	rc = fapiPutScom(i_target,DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P0_0x8000C00B0301143F,data_buffer_64);
+
+
+
+        rc_num = rc_num | data_buffer_64.flushTo0();
+	if(rc_num)
+        {
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+	rc = fapiGetScom(i_target,DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P1_0x8001C00B0301143F,data_buffer_64);
+        rc_num = rc_num | data_buffer_64.clearBit(54);
+	rc = fapiPutScom(i_target,DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P1_0x8001C00B0301143F,data_buffer_64);
+
         if(rc) return rc;
 
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_0_0x800100120301143F,data_buffer_64);
-        if(rc) return rc;
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_1_0x800104120301143F,data_buffer_64);
-        if(rc) return rc;
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_2_0x800108120301143F,data_buffer_64);
-        if(rc) return rc;
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_3_0x80010C120301143F,data_buffer_64);
-        if(rc) return rc;
-        rc = fapiPutScom(i_target,DPHY01_DDRPHY_DP18_RD_DIA_CONFIG5_P1_4_0x800110120301143F,data_buffer_64);
-        if(rc) return rc;
 
         //Mem Cal Enabled
         rc_num = rc_num | data_buffer_64.flushTo0();
@@ -483,6 +525,15 @@ ReturnCode mss_enable_control_bit_ecc (Target& i_target)
     rc_num = rc_num | ecc1_data_buffer_64.clearBit(0);
     rc_num = rc_num | ecc1_data_buffer_64.clearBit(1);
     rc_num = rc_num | ecc1_data_buffer_64.setBit(3);
+
+    uint8_t attr_centaur_ec_enable_rce_with_other_errors_hw246685; 
+    rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685, &i_target, attr_centaur_ec_enable_rce_with_other_errors_hw246685);
+    if(rc) return rc;
+
+    if(attr_centaur_ec_enable_rce_with_other_errors_hw246685) {
+      rc_num = rc_num | ecc0_data_buffer_64.setBit(16);
+      rc_num = rc_num | ecc1_data_buffer_64.setBit(16);
+    }
 
     if (rc_num)
     {

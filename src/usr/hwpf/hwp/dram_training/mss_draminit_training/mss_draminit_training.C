@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.70 2013/11/11 20:51:15 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.72 2014/02/15 00:25:56 mwuu Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,11 +28,16 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.72   | mwuu     |14-FEB-14| Fixed x4 spare case when mss_c4_phy returns bad
+//         |          |         | data with workaround
+//  1.71   | mwuu     |13-FEB-14| Updated get/setC4dq2reg, mss_set/get_bbm_regs FNs
+//         |          |         | to use access_delay_regs for dq/dqs pin mapping.
+//         |          |         | Added mss_get_dqs_lane helper FN.
 //  1.70   | jdsloat  | 11/11/13| Changed EFF attributes to VPD named attributes
 //  1.69   | jdsloat  |06-OCT-13| Removed Control Switch Attribute
 //  1.68   | bellows  |16-SEP-13| Hostboot compile update
 //  1.67   | kcook    |13-SEP-13| Updated define FAPI_LRDIMM token.
-//  1.66   | kcook    |27-AUG-13| Moved main LRDIMM sections into separate file. 
+//  1.66   | kcook    |27-AUG-13| Moved main LRDIMM sections into separate file.
 //         |          |         | Removed reference to ATTR_LAB_USE_JTAG_MODE.
 //         | mwuu     |         | Added ATTR_MSS_DISABLE1_REG_FIXED for bbm FN for DD2.
 //  1.65   | kcook    |16-AUG-13| Added LRDIMM support. Use with mss_funcs.C v1.32.
@@ -131,6 +136,7 @@
 //  1.2    | jdsloat  |14-Jul-11| Proper call name fix
 //  1.1    | jdsloat  |22-Apr-11| Initial draft
 
+
 //----------------------------------------------------------------------
 //  FAPI function Includes
 //----------------------------------------------------------------------
@@ -145,8 +151,7 @@
 #include <dimmBadDqBitmapFuncs.H>
 #include <mss_unmask_errors.H>
 #include <mss_lrdimm_funcs.H>
-
-
+#include "mss_access_delay_reg.H"
 
 
 #ifndef FAPI_LRDIMM
@@ -172,6 +177,7 @@ const uint8_t MRS1_BA = 1;
 const uint8_t MRS2_BA = 2;
 
 #define MAX_PORTS 2
+#define MAX_DIMMS 2
 #define MAX_PRI_RANKS 4
 #define TOTAL_BYTES 10
 #define BITS_PER_REG 16
@@ -204,10 +210,11 @@ ReturnCode mss_read_center_workaround(Target& i_target, uint8_t i_mbaPosition, u
 ReturnCode mss_read_center_second_workaround(Target& i_target);
 ReturnCode mss_reset_delay_values(Target& i_target);
 
-ReturnCode getC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg);
-ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg);
+ReturnCode getC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg, uint8_t &is_clean);
+ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, const ecmdDataBufferBase &i_reg);
 ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target);
 ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target);
+ReturnCode mss_get_dqs_lane (const fapi::Target & i_mba, const uint8_t i_port, const uint8_t i_block, const uint8_t i_quad, uint8_t &lane);
 
 
 ReturnCode mss_draminit_training(Target& i_target)
@@ -328,7 +335,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     if(rc) return rc;
 
     uint8_t dimm_type;
-    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type); 
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
     if(rc) return rc;
 
 
@@ -3085,7 +3092,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 {
     // Flash to registers.
-	// disable0=dq bits, disable1=dqs (need to use swizzle),
+	// disable0=dq bits, disable1=dqs(+,-)
 	// wrclk_en=dqs follows quad, same as disable0
 
 	const uint64_t disable_reg[MAX_PORTS][MAX_PRI_RANKS][DP18_INSTANCES] = {
@@ -3149,65 +3156,30 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 		ENUM_ATTR_EFF_PRIMARY_RANK_GROUP3_INVALID,
 	};
 
-	const uint8_t disable1_mask_lookup[4][DP18_INSTANCES][4] = { 	// for swizzle map
-    // port 0
-	//     q0   q1   q2   q3
-      { {0xC0,0x30,0x03,0x0C},  // DP18 block 0 instance
-        {0xC0,0x30,0x03,0x0C},  // ...  block 1
-        {0xC0,0x30,0x0C,0x03},  // ...  block 2
-        {0xC0,0x30,0x0C,0x03},  // ...  block 3
-        {0xC0,0x30,0x0C,0x03}	// ...  block 4
-      },
-    // port 1
-      { {0x30,0xC0,0x0C,0x03},	// 0xC0 = disable lanes 16,17
-        {0x30,0xC0,0x0C,0x03},	// 0x30 = disable lanes 18,19
-        {0xC0,0x30,0x0C,0x03},	// 0x0C = disable lanes 20,21
-        {0xC0,0x30,0x0C,0x03},	// 0x03 = disable lanes 22,23
-        {0xC0,0x30,0x03,0x0C}
-      },
-    // port 2
-      { {0xC0,0x30,0x0C,0x03},
-        {0xC0,0x30,0x03,0x0C},
-        {0xC0,0x30,0x0C,0x03},
-        {0xC0,0x30,0x0C,0x03},
-        {0xC0,0x30,0x0C,0x03}
-      },
-    // port 3
-      { {0xC0,0x30,0x0C,0x03},
-        {0xC0,0x30,0x0C,0x03},
-        {0xC0,0x30,0x03,0x0C},
-        {0x30,0xC0,0x0C,0x03},
-        {0xC0,0x30,0x0C,0x03}
-      }
-    };
-
 	const uint16_t wrclk_disable_mask[] = {		// by quads
 		0x8800, 0x4400, 0x2280, 0x1140
 	};
 
-	uint8_t l_dram_width, l_mbaPos, l_disable1_fixed;
+	uint8_t l_dram_width, l_disable1_fixed;
 	uint64_t l_addr;
-	// 0x8000007d0301143f
-	const uint64_t l_disable1_addr_offset = 0x0000000100000000ull;	// from disable0 register
-	// 0x800000050301143f
-	const uint64_t l_wrclk_en_addr_mask   = 0xFFFFFF07FFFFFFFFull;	// from disable1 register
+	// 0x8000007d0301143f	 from disable0 register
+	const uint64_t l_disable1_addr_offset = 0x0000000100000000ull;
+	// 0x800000050301143f	 from disable1 register
+	const uint64_t l_wrclk_en_addr_mask   = 0xFFFFFF07FFFFFFFFull;
 
 	ReturnCode rc;
 	ecmdDataBufferBase data_buffer(64);
 	ecmdDataBufferBase db_reg(BITS_PER_PORT);
 	uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
-	uint8_t prg[MAX_PRI_RANKS][MAX_PORTS];			// primary rank group values
+	uint8_t prg[MAX_PRI_RANKS][MAX_PORTS];		// primary rank group values
 
-	FAPI_INF("Running set bad bits FN:mss_set_bbm_regs,"
-			" input Target: %s", mba_target.toEcmdString());
+	FAPI_INF("Running flash->registers(set)");
 
 	std::vector<Target> mba_dimms;
 	fapiGetAssociatedDimms(mba_target, mba_dimms);	// functional dimms
 
-	FAPI_INF("***-------- Found %i functional DIMMS --------***",
-			mba_dimms.size());
-
-	//	ATTR_EFF_PRIMARY_RANK_GROUP0[port], GROUP1[port], GROUP2[port], GROUP3[port]
+	// ATTR_EFF_PRIMARY_RANK_GROUP0[port], GROUP1[port],
+	// 						 GROUP2[port], GROUP3[port]
 	rc=FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &mba_target, prg[0]);
 	if(rc) return rc;
 	rc=FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP1, &mba_target, prg[1]);
@@ -3215,9 +3187,6 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	rc=FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP2, &mba_target, prg[2]);
 	if(rc) return rc;
 	rc=FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &mba_target, prg[3]);
-	if(rc) return rc;
-
-	rc=FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &mba_target, l_mbaPos);
 	if(rc) return rc;
 
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &mba_target, l_dram_width);
@@ -3228,7 +3197,7 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
     if(rc) return rc;
 
 	rc = FAPI_ATTR_GET(ATTR_MSS_DISABLE1_REG_FIXED, &l_target_centaur, l_disable1_fixed);
-	if(rc) return rc;
+    if(rc) return rc;
 
 	switch (l_dram_width)
 	{
@@ -3261,23 +3230,22 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 	}
 	for (uint8_t port = 0; port < MAX_PORTS; port++ )	// [0:1]
 	{
-		uint8_t aport = (l_mbaPos*2) + port;
-
 		// loop through primary ranks [0:3]
 		for (uint8_t prank = 0; prank < MAX_PRI_RANKS; prank++ )
 		{
 			uint8_t dimm = prg[prank][port] >> 2;
 			uint8_t rank = prg[prank][port] & 0x03;
 			uint16_t l_data = 0;
+			uint8_t is_clean = 1;
 
 			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
 			{
-				FAPI_INF("Primary rank group %i is INVALID, continuing...",
+				FAPI_DBG("Primary rank group %i: INVALID, continuing...",
 						prank);
 				continue;
 			}
 
-			rc = getC4dq2reg(mba_target, port, dimm, rank, db_reg);
+			rc = getC4dq2reg(mba_target, port, dimm, rank, db_reg, is_clean);
 			if (rc)
 			{
 				FAPI_ERR("Error from getting register bitmap port=%i: "
@@ -3286,23 +3254,23 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 				return rc;
 			}
 			// quick test to move on to next rank if no bits need to be set
-			if (db_reg.getNumBitsSet(0, BITS_PER_PORT) == 0)
+			if (is_clean == 1)			// Note ignores spares that match attribute
 			{
-				FAPI_INF("No bad bits found for p%i:d%i:r%i(rg%i):cs%i",
-						port, dimm, rank, prank, prg[prank][port]);
+				FAPI_INF("Primary rank group %i: No bad bits found for "
+						"p%i:d%i:r%i:cs%i", prank, port, dimm, rank,
+						prg[prank][port]);
 				continue;
 			}
-
 			for ( uint8_t i=0; i < DP18_INSTANCES; i++ ) // dp18 [0:4]
 			{
-				uint16_t disable1_data = 0;
+				uint8_t disable1_data = 0;
 				uint16_t wrclk_mask = 0;
 
 				// check or not to check(always set register)?
 				l_data = db_reg.getHalfWord(i);
 				if (l_data == 0)
 				{
-					FAPI_INF("DP18_%i has no bad bits set, continuing...", i);
+					FAPI_DBG("\tDP18_%i has no bad bits set, continuing...", i);
 					continue;
 				}
 				// clear bits 48:63
@@ -3315,18 +3283,47 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 					 rc.setEcmdError(l_ecmdRc);
 					 return rc;
 				}
+				
+				for (uint8_t n=0; n < 4; n++)	// check each nibble
+				{
+					uint16_t nmask = 0xF000 >> (4*n);
+					if (l_dram_width == 4)
+					{
+					if ((nmask & l_data) > 0)		// bad bit(s) in nibble
+					{
+ //				For Marc Gollub, since repair for x4 DRAM is in nibble
+ //  			granularity.  Also due to higher chance of hitting dq0 of
+ //  			Micron causing write leveling to fail for entire x4 DRAM.
+ //  			Will also save a re-training loop.  Complement in get_bbm_regs.
 
-				if (l_dram_width == 4) {		// disable entire nibble if bad bit found
-					uint16_t mask = 0xF000;
-					for (uint8_t n=0; n < 4; n++) {	// check each nibble
-						uint16_t nmask = mask >> (4*n);
-						if ((nmask & l_data) > 0) {
-							l_data = l_data | nmask;
-							FAPI_INF("Disabling nibble %i",n);
+						l_data = l_data | nmask;		// set entire nibble
+						FAPI_INF("Disabling entire nibble %i",n);
+						rc = mss_get_dqs_lane(mba_target, port, i, n,
+								disable1_data);
+						if (rc) return rc;
+						wrclk_mask |= wrclk_disable_mask[n];
+					}
+					}  // end x4
+					else	// width == 8+?
+					{
+						if ((n % 2) == 0)
+						{
+							nmask = 0xFF00 >> (4*n);
+							if ((nmask & l_data) == nmask)	// entire byte bad
+							{
+								disable1_data |= (0xF0 >> (n*2));
+							}
+						}
+						if (((nmask & l_data)>>(4*(3-n))) == 0x0F)
+						{
+							wrclk_mask |= wrclk_disable_mask[n];
 						}
 					}
 				}
 
+				FAPI_DBG("\t\tdisable1_data=0x%04X", disable1_data);
+				
+				// set disable0(dq) reg
 				l_ecmdRc = data_buffer.setHalfWord(3, l_data);
 				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
 				{
@@ -3343,48 +3340,53 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 					"Rank%i \tdp18_%i addr=0x%llx, data=0x%04X", port,
 					dimm, prank, prg[prank][port], i, l_addr , l_data);
 
-//				rc = fapiPutScom(mba_target, l_addr, data_buffer);
-				rc = fapiPutScomUnderMask(mba_target, l_addr, data_buffer, data_buffer);
+				rc = fapiPutScomUnderMask(mba_target, l_addr, data_buffer,
+						data_buffer);
 				if (rc)
 				{
 					FAPI_ERR("Error from fapiPutScom writing disable0 reg");
 					return rc;
 				}
+					
+				// set address for disable1(dqs) register
+				l_addr += l_disable1_addr_offset;
+				if (disable1_data != 0)
+				{
+					l_ecmdRc = data_buffer.flushTo0();  // clear buffer
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+					FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
+							"- rc 0x%.8X", l_ecmdRc);
 
-				if (l_dram_width == 4) {
-					uint16_t bn_mask = 0xF000;
-					uint16_t mask;
-					for (uint8_t q=0; q < 4; q++) {
-						mask = bn_mask >> (4*q);
-						if ((l_data & mask) == mask) {
-							disable1_data |= disable1_mask_lookup[aport][i][q];
-							if ( !l_disable1_fixed ) {
-								wrclk_mask |= wrclk_disable_mask[q];
-							}
-	FAPI_DBG("x4 disable1_data=0x%04X, wrclk_mask=0x%04X",disable1_data,wrclk_mask);
-						}
+					rc.setEcmdError(l_ecmdRc);
+					return rc;
 					}
-				} else {
-					uint16_t bn_mask = 0xFF00;
-					uint16_t mask;
-					for (uint8_t q=0; q < 4; q=q+2) {
-						mask = bn_mask >> (4*q);
-						if ((l_data & mask) == mask) {
-							disable1_data |= disable1_mask_lookup[aport][i][q] |
-								disable1_mask_lookup[aport][i][q+1];
-							if ( !l_disable1_fixed ) {
-								wrclk_mask |= wrclk_disable_mask[q] | wrclk_disable_mask[q+1];
-							}
-	FAPI_DBG("x8 disable1_data=0x%04X, wrclk_mask=0x%04X",disable1_data,wrclk_mask);
-						}
+
+					l_ecmdRc = data_buffer.setByte(6, disable1_data);
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+					FAPI_ERR("Error from ecmdDataBuffer setByte() "
+							"- rc 0x%.8X", l_ecmdRc);
+
+					rc.setEcmdError(l_ecmdRc);
+					return rc;
 					}
-				}
 
-				if (disable1_data != 0) {
-					// shift over 8 bits since disable1_lookup is 8 bits, and reg is 16
-					disable1_data = disable1_data << 8;
-					l_addr += l_disable1_addr_offset;	// set address for disable1 reg
+					// write disable1(dqs) register
+					rc = fapiPutScomUnderMask(mba_target, l_addr,
+					data_buffer, data_buffer);
+					if (rc)
+					{
+					FAPI_ERR("Error from PutScom writing disable1 reg");
+					return rc;
+					}
+				} // end disable1_data != 0
 
+				// set address for wrclk_en register
+				l_addr &= l_wrclk_en_addr_mask;
+
+				if (wrclk_mask != 0)
+				{
 					l_ecmdRc = data_buffer.flushTo0();	// clear buffer
 					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
 					{
@@ -3394,60 +3396,47 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 						 rc.setEcmdError(l_ecmdRc);
 						 return rc;
 					}
-
-					l_ecmdRc = data_buffer.setHalfWord(3, disable1_data);
+					ecmdDataBufferBase put_mask(64);
+					l_ecmdRc = put_mask.setHalfWord(3, wrclk_mask);
 					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
 					{
-						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
-								 "- rc 0x%.8X", l_ecmdRc);
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord()"
+								 " for wrclk_mask - rc 0x%.8X", l_ecmdRc);
 
 						 rc.setEcmdError(l_ecmdRc);
 						 return rc;
 					}
 
-					// write disable1 register
-//					rc = fapiPutScom(mba_target, l_addr, data_buffer);
-					rc = fapiPutScomUnderMask(mba_target, l_addr, data_buffer, data_buffer);
-					if (rc)
+					if (!l_disable1_fixed)
 					{
-						FAPI_ERR("Error from fapiPutScom writing disable1 reg");
-						return rc;
-					}
-
-//  for DD1.X chips since disable1 register not fully working... can take out wrclk stuff for DD2+
-					if ( !l_disable1_fixed )
-					{
-						l_addr &= l_wrclk_en_addr_mask;		// set address for wrclk_en register
-
-						l_ecmdRc = data_buffer.flushTo0();	// clear buffer
-						if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-						{
-							 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
-									 "- rc 0x%.8X", l_ecmdRc);
-
-							 rc.setEcmdError(l_ecmdRc);
-							 return rc;
-						}
-
-						ecmdDataBufferBase put_mask(64);
-						l_ecmdRc = put_mask.setHalfWord(3, wrclk_mask);
-						if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-						{
-							 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() for wrclk_mask"
-									 "- rc 0x%.8X", l_ecmdRc);
-
-							 rc.setEcmdError(l_ecmdRc);
-							 return rc;
-						}
-						// clear(0) out the unused quads
-						rc = fapiPutScomUnderMask(mba_target, l_addr, data_buffer, put_mask);
+						// clear(0) out the unused quads for wrclk
+						rc = fapiPutScomUnderMask(mba_target, l_addr,
+								data_buffer, put_mask);
 						if (rc)
 						{
-							FAPI_ERR("Error from fapiPutScomUnderMask writing wrclk_en reg");
+							FAPI_ERR("Error from fapiPutScomUnderMask writing "
+									"wrclk_en reg");
 							return rc;
 						}
-					} // if not disable1_fixed 
-				} // if disable1 data != 0
+					}
+					else
+					{
+						uint64_t rdclk_addr =
+							disable_reg[port][prank][i] & 0xFFFFFF040FFFFFFFull;
+						// clear(0) out the unused quads for rdclk
+						rc = fapiPutScomUnderMask(mba_target, rdclk_addr,
+							data_buffer, put_mask);
+						if (rc)
+						{
+							FAPI_ERR("Error from fapiPutScomUnderMask writing "
+										"rdclk_en reg");
+							return rc;
+						}
+
+						FAPI_DBG("rdclk_addr=0x%llx, wrclk_addr=0x%llx, "
+							"wrclk_mask=0x%04X", rdclk_addr, l_addr, wrclk_mask);
+					}
+				} // end wrclk_mask != 0
 			} // end DP18 instance loop
 		} // end primary rank loop
 	} // end port loop
@@ -3455,6 +3444,56 @@ fapi::ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target)
 } // end mss_set_bbm_regs
 
 
+fapi::ReturnCode mss_get_dqs_lane (const fapi::Target & i_mba,
+		const uint8_t i_port, const uint8_t i_block, const uint8_t i_quad,
+	   	uint8_t &o_lane)
+{
+// input  = mba, port, dp18 block, quad
+// output = OR'd in lane of the dqs for the specified input
+
+	ReturnCode rc;
+	uint8_t dq, dqs;
+	uint8_t phy_lane = i_quad * 4;
+	uint8_t l_block = i_block;
+	// returns dq
+	rc=mss_c4_phy(i_mba,i_port,0,RD_DQ,dq,0,phy_lane,l_block,1);
+	if (rc) return rc;
+	dqs = dq / 4;
+	// returns phy_lane
+	rc=mss_c4_phy(i_mba,i_port,0,WR_DQS,dqs,0,phy_lane,l_block,0);
+	if (rc) return rc;
+	if (l_block != i_block)
+	{
+		FAPI_ERR("\t !!!  blocks don't match from c4 to phy i_block=%i,"
+			   " o_block=%i", i_block, l_block);
+	}
+
+	switch (phy_lane)
+	{
+		case 16:
+		case 17:
+			o_lane |= 0xC0;
+			break;
+		case 18:
+		case 19:
+			o_lane |= 0x30;
+			break;
+		case 20:
+		case 21:
+			o_lane |= 0x0C;
+			break;
+		case 22:
+		case 23:
+			o_lane |= 0x03;
+			break;
+		default:
+			FAPI_ERR("\t!!!  (Port%i, dp18_%i, q=%i)  phy_lane(%i)"
+				"returned from mss_c4_phy is invalid",
+				i_port, i_block, i_quad, phy_lane);
+//			FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+	}
+	return rc;
+} //end mss_get_dqs_lane
 
 fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 {
@@ -3527,21 +3566,17 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
     ecmdDataBufferBase data_buffer(64);
     ecmdDataBufferBase db_reg(BITS_PER_PORT);
 	uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
-	uint8_t prg[MAX_PRI_RANKS][MAX_PORTS];			// primary rank group values
+	uint8_t prg[MAX_PRI_RANKS][MAX_PORTS];		// primary rank group values
 	uint8_t l_dram_width;
 
-	FAPI_INF("Running set bad bits FN:mss_set_bbm_regs \n"
-			" input Target: %s", mba_target.toEcmdString());
+	FAPI_INF("Running (get)registers->flash");
 
 	std::vector<Target> mba_dimms;
 	fapiGetAssociatedDimms(mba_target, mba_dimms);	// functional dimms
 
-	FAPI_INF("***-------- Found %i functional DIMMS --------***",
-			mba_dimms.size());
-
 	// 4 dimms per MBA, 2 per port
-
-	//	ATTR_EFF_PRIMARY_RANK_GROUP0[port], GROUP1[port], GROUP2[port], GROUP3[port]
+	// ATTR_EFF_PRIMARY_RANK_GROUP0[port], GROUP1[port],
+	// 						 GROUP2[port], GROUP3[port]
 	rc=FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &mba_target, prg[0]);
 	if(rc) return rc;
 	rc=FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP1, &mba_target, prg[1]);
@@ -3591,17 +3626,29 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 			uint8_t dimm = prg[prank][port] >> 2;
 			uint8_t rank = prg[prank][port] & 0x03;
 			uint16_t l_data = 0;
+			uint8_t l_has_bad_bits = 0;
 
 			if (prg[prank][port] == rg_invalid[prank])	// invalid rank
 			{
-				FAPI_INF("Primary rank group %i is INVALID, continuing...",
+				FAPI_DBG("Primary rank group %i is INVALID, continuing...",
 						prank);
 				continue;
 			}
 
+			// create the db_reg (all the failed bits of the port)
+			l_ecmdRc = db_reg.flushTo0();
+			if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+			{
+				 FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
+						 "- rc 0x%.8X", l_ecmdRc);
+
+				 rc.setEcmdError(l_ecmdRc);
+				 return rc;
+			}
+
+			FAPI_DBG("Port%i, dimm=%i, prg%i rank=%i", port, dimm, prank, rank);
 			for ( uint8_t i=0; i < DP18_INSTANCES; i++ ) // dp18 [0:4]
 			{
-
 				// clear bits 48:63
 				l_ecmdRc = data_buffer.clearBit(48, BITS_PER_REG);
 				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
@@ -3622,238 +3669,310 @@ fapi::ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target)
 				}
 
 				l_data = data_buffer.getHalfWord(3);
-				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+
+				FAPI_DBG("dp18_%i  0x%llx = 0x%x", i,
+						disable_reg[port][prank][i], l_data);
+
+				if (l_data != 0)
 				{
-					 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
-							 "- rc 0x%.8X", l_ecmdRc);
-
-					 rc.setEcmdError(l_ecmdRc);
-					 return rc;
-				}
-
-				if (l_dram_width == 4) {		// disable entire nibble if bad bit found
-					uint16_t mask = 0xF000;
-					for (uint8_t n=0; n < 4; n++) {	// check each nibble
-						uint16_t nmask = mask >> (4*n);
-						if ((nmask & l_data) > 0) {
-							l_data = l_data | nmask;
-							FAPI_INF("Disabling nibble %i",n);
+					l_has_bad_bits = 1;
+					// to complement Marc Gollub's request in mss_set_bbm_regs
+					// and stay consistent for procedures following this one
+					// if x4 and any bit in a nibble is bad, mask entire nibble
+					if (l_dram_width == 4) {
+						uint16_t mask = 0xF000;
+						for (uint8_t n=0; n < 4; n++) {	// check each nibble
+							uint16_t nmask = mask >> (4*n);
+							if ((nmask & l_data) > 0) {
+								l_data = l_data | nmask;
+								FAPI_INF("Disabling entire nibble %i",n);
+							}
 						}
 					}
-				}
 
-				l_ecmdRc |= db_reg.setHalfWord(i, l_data);
-				if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-				{
-					 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
+					l_ecmdRc = db_reg.setHalfWord(i, l_data);
+					if (l_ecmdRc != ECMD_DBUF_SUCCESS)
+					{
+						 FAPI_ERR("Error from ecmdDataBuffer setHalfWord() "
 							 "- rc 0x%.8X", l_ecmdRc);
 
-					 rc.setEcmdError(l_ecmdRc);
-					 return rc;
+						 rc.setEcmdError(l_ecmdRc);
+						 return rc;
+					}
+
+					FAPI_INF("+++ Setting Bad Bit Mask p%i: DIMM%i PRG%i "
+						"Rank%i \tdp18_%i addr=0x%llx, data=0x%04X", port,
+						dimm, prank, prg[prank][port], i,
+						disable_reg[port][prank][i], l_data);
 				}
-
-				FAPI_INF("+++ Setting Bad Bit Mask p%i: DIMM%i PRG%i "
-					"Rank%i \tdp18_%i addr=0x%llx, data=0x%04X", port,
-					dimm, prank, prg[prank][port], i,
-					disable_reg[port][prank][i], l_data);
-
 			} // end DP18 instance loop
 
-			rc = setC4dq2reg(mba_target, port, dimm, rank, db_reg);
-			if (rc)
+			if (l_has_bad_bits)
 			{
-				FAPI_ERR("Error from setting register bitmap p%i: "
+				rc = setC4dq2reg(mba_target, port, dimm, rank, db_reg);
+				if (rc)
+				{
+					FAPI_ERR("Error from setting register bitmap p%i: "
 						"dimm=%i, rank=%i rc=%i", port, dimm, rank,
 						static_cast<uint32_t>(rc));
-				return rc;
+					return rc;
+				}
 			}
-
 		} // end primary rank loop
 	} // end port loop
     return rc;
 } // end mss_get_bbm_regs
 
 
-// output reg = in phy based order
-ReturnCode getC4dq2reg(const Target & i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg)
+ReturnCode getC4dq2reg(const Target & i_mba, const uint8_t i_port,
+		const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg, uint8_t &is_clean)
 {
-	// [port][bits per port]
-    const uint8_t lookup[4][BITS_PER_PORT] = {
-	// port 0
-	{65,66,67,64, 70,69,68,71, 21,20,23,22, 18,16,19,17,	// DP18 block 0
-	 61,63,60,62, 57,58,59,56, 73,74,75,72, 78,77,79,76,	// ...  block 1
-	  7, 5, 4, 6,  0, 2, 1, 3, 12,13,15,14, 10, 8,11, 9, 	// ...  block 2
-	 47,44,46,45, 43,42,41,40, 31,29,30,28, 26,24,27,25,	// ...  block 3
-	 55,53,54,52, 50,48,49,51, 33,34,35,32, 36,37,38,39},	// ...  block 4
-	// port 1
-	{17,16,18,19, 20,21,22,23,  2, 0, 3, 1,  7, 4, 5, 6,
-	 70,71,69,68, 66,64,67,65, 27,24,26,25, 29,30,31,28,
-	 37,36,38,39, 35,32,34,33, 77,76,79,78, 73,75,72,74,
-	 40,42,41,43, 45,44,46,47,  9,11, 8,10, 12,13,14,15,
-	 48,51,49,50, 52,53,54,55, 61,63,62,60, 56,58,59,57},
-	// port 2
-	{22,23,20,21, 19,16,17,18, 26,25,24,27, 29,28,31,30,
-	 67,64,65,66, 71,70,69,68,  7, 5, 6, 4,  2, 0, 3, 1,
-	 45,44,47,46, 42,43,41,40, 39,38,37,36, 33,34,35,32,
-	 48,50,49,51, 54,52,53,55, 15,13,12,14,  9, 8,10,11,
-	 61,60,62,63, 59,56,58,57, 74,72,73,75, 76,79,78,77},
-	// port 3
-	{25,26,27,24, 28,31,29,30, 17,19,16,18, 20,21,23,22,
-	 64,67,66,65, 71,69,68,70, 75,74,72,73, 76,77,79,78,
-	  4, 5, 7, 6,  0, 1, 2, 3, 12,13,14,15,  8, 9,11,10,
-	 47,45,46,44, 43,41,42,40, 35,32,33,34, 39,37,36,38,
-	 55,52,53,54, 51,48,49,50, 60,62,61,63, 57,59,56,58}
-    };
+// used by set_bbm(flash to registers)
+// calls dimmGetBadDqBitmap and converts the data to phy order in a databuffer
+// output reg = in phy based order(lanes)
 
     uint8_t l_bbm[TOTAL_BYTES] = {0};	// bad bitmap from dimmGetBadDqBitmap
-    ecmdDataBufferBase c4dqbmp(BITS_PER_PORT);	// databuffer of C4 dq bitmap
     ReturnCode rc;
-    uint8_t l_port = i_port;	// port # relative to Centaur
-    uint8_t mba_pos = 0;
     uint32_t ecmdrc = ECMD_DBUF_SUCCESS;
+ 	uint8_t dq;
+	uint8_t phy_lane, phy_block;
 
     ecmdrc = o_reg.flushTo0();		// clear output databuffer
     if (ecmdrc != ECMD_DBUF_SUCCESS)
     {
-	FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
-		 "- rc 0x%.8X", ecmdrc);
+		FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
+			 "- rc 0x%.8X", ecmdrc);
 
-	rc.setEcmdError(ecmdrc);
-	return rc;
-    }
-    rc=FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_mba, mba_pos);
-    if (rc)
-    {
-	FAPI_ERR("Error getting ATTR_CHIP_UNIT_POS for MBA");
-	return (rc);
+		rc.setEcmdError(ecmdrc);
+		return rc;
     }
 
     // get Centaur dq bitmap (C4 signal) order=[0:79], array of bytes
     rc = dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm);
     if (rc)
     {
-	FAPI_ERR("Error from dimmGetBadDqBitmap on MBA%ip%i: "
-		 "dimm=%i, rank=%i rc=%i", mba_pos, i_port, i_dimm, i_rank,
-		 static_cast<uint32_t>(rc));
-	return rc;
-    }
-
-    // create databuffer from C4 dq bitmap array
-    ecmdrc = c4dqbmp.insertFromRight(l_bbm, 0, BITS_PER_PORT);
-    if (ecmdrc != ECMD_DBUF_SUCCESS)
-    {
-        FAPI_ERR("Error from ecmdDataBuffer insertFromRight() "
-            "- rc 0x%.8X", ecmdrc);
-
-        rc.setEcmdError(ecmdrc);
-        return rc;
-    }
-
-    // quick check if there no bits on, we're done
-    if (c4dqbmp.getNumBitsSet(0, BITS_PER_PORT) == 0)
-    {
-	return rc;
-    }
-    l_port = i_port + (mba_pos * MAX_PORTS);	// relative to Centaur
-
-    for (uint8_t i=0; i < BITS_PER_PORT; i++)
-    {
-	if (c4dqbmp.isBitSet(lookup[l_port][i]))
-	{
-	    o_reg.setBit(i);
-	    FAPI_DBG("set bad bit C4_dq=%i,\t dp18_%i_lane%i\t (bit %i)",
-		     lookup[l_port][i], (i / 16), (i % 16), i);
-	}
-    }
-
-    return rc;
-}
-
-ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg)
-{
-
-	const uint8_t lookup[4][BITS_PER_PORT] = {
-	// port 0
-	{65,66,67,64,70,69,68,71,21,20,23,22,18,16,19,17,	// DP18 block 0
-	 61,63,60,62,57,58,59,56,73,74,75,72,78,77,79,76,	// ...  block 1
-	  7, 5, 4, 6, 0, 2, 1, 3,12,13,15,14,10, 8,11, 9, 	// ...  block 2
-	 47,44,46,45,43,42,41,40,31,29,30,28,26,24,27,25,	// ...  block 3
-	 55,53,54,52,50,48,49,51,33,34,35,32,36,37,38,39},	// ...  block 4
-	// port 1
-	{17,16,18,19,20,21,22,23, 2, 0, 3, 1, 7, 4, 5, 6,
-	 70,71,69,68,66,64,67,65,27,24,26,25,29,30,31,28,
-	 37,36,38,39,35,32,34,33,77,76,79,78,73,75,72,74,
-	 40,42,41,43,45,44,46,47, 9,11, 8,10,12,13,14,15,
-	 48,51,49,50,52,53,54,55,61,63,62,60,56,58,59,57},
-	// port 2
-	{22,23,20,21,19,16,17,18,26,25,24,27,29,28,31,30,
-	 67,64,65,66,71,70,69,68, 7, 5, 6, 4, 2, 0, 3, 1,
-	 45,44,47,46,42,43,41,40,39,38,37,36,33,34,35,32,
-	 48,50,49,51,54,52,53,55,15,13,12,14, 9, 8,10,11,
-	 61,60,62,63,59,56,58,57,74,72,73,75,76,79,78,77},
-	// port 3
-	{25,26,27,24,28,31,29,30,17,19,16,18,20,21,23,22,
-	 64,67,66,65,71,69,68,70,75,74,72,73,76,77,79,78,
-	  4, 5, 7, 6, 0, 1, 2, 3,12,13,14,15, 8, 9,11,10,
-	 47,45,46,44,43,41,42,40,35,32,33,34,39,37,36,38,
-	 55,52,53,54,51,48,49,50,60,62,61,63,57,59,56,58}
-	};
-	uint8_t l_bbm [TOTAL_BYTES] = {0};
-	ecmdDataBufferBase c4dqbmp(BITS_PER_PORT);
-	ReturnCode rc;
-	uint8_t l_port = i_port;
-	uint8_t mba_pos = 0;
-	uint32_t ecmdrc = ECMD_DBUF_SUCCESS;
-
-        // clear output databuffer
-	ecmdrc = c4dqbmp.flushTo0();
-	if (ecmdrc != ECMD_DBUF_SUCCESS)
-	{
-		FAPI_ERR("Error from ecmdDataBuffer flushTo0() "
-			"- rc 0x%.8X", ecmdrc);
-
-		rc.setEcmdError(ecmdrc);
+		FAPI_ERR("Error from dimmGetBadDqBitmap on port %i: "
+			 "dimm=%i, rank=%i rc=%i", i_port, i_dimm, i_rank,
+			 static_cast<uint32_t>(rc));
 		return rc;
-	}
+    }
 
-	// Set Port info
-	rc=FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_mba, mba_pos);
-	if (rc)
+	uint8_t dimm_spare[MAX_PORTS][MAX_DIMMS][MAX_PRI_RANKS];
+	rc = FAPI_ATTR_GET(ATTR_VPD_DIMM_SPARE, &i_mba, dimm_spare);
+	if(rc) return rc;
+
+	for (uint8_t byte=0; byte < TOTAL_BYTES; byte++)
 	{
-		FAPI_ERR("Error getting ATTR_CHIP_UNIT_POS for MBA");
-		return (rc);
-	}
-
-	l_port = i_port + (mba_pos * MAX_PORTS);
-
-	// translate c4 from input
-	for (uint8_t i=0; i < BITS_PER_PORT; i++)
-	{
-		if (o_reg.isBitSet(i))
+		if (l_bbm[byte] != 0)
 		{
-		    c4dqbmp.setBit(lookup[l_port][i]);
-		}
-	}
+			if (byte == (TOTAL_BYTES-1))		// spare byte
+			{
+				uint8_t spare_bitmap = 0;
 
-	// create array from databuffer
-	for (uint8_t b=0; b < TOTAL_BYTES; b++)
+				switch (dimm_spare[i_port][i_dimm][i_rank])
+    			{
+			        case ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE:
+			            spare_bitmap = 0;
+		            break;
+			        case ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE:
+			            spare_bitmap = 0x0F;
+		            break;
+			        case ENUM_ATTR_VPD_DIMM_SPARE_HIGH_NIBBLE:
+			            spare_bitmap = 0xF0;
+		            break;
+			        case ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE:
+			            spare_bitmap = 0xFF;
+		            break;
+					default:
+						FAPI_ERR("ATTR_VPD_DIMM_SPARE is invalid %u", 
+							dimm_spare[i_port][i_dimm][i_rank]);
+						FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+						return rc;
+				}
+
+				if (l_bbm[byte] == spare_bitmap)	// spare already set via initfile
+					continue;
+			}
+
+			uint8_t bs=0;
+			uint8_t be=8;
+			uint8_t loc=0;
+			is_clean = 0;
+
+			if ((l_bbm[byte] & 0xF0) == 0xF0)	// 0xF?
+			{
+				dq = (byte * 8);		// for first lane
+				// input=cen_c4_dq, output=phy block, lane
+				rc = mss_c4_phy(i_mba, i_port, 0, RD_DQ,dq,
+						0, phy_lane,phy_block, 0);
+				if (rc) return rc;
+
+				if (l_bbm[byte] == 0xFF)
+				{	// block lanes + 1st lane{0,8}
+					loc = (phy_block * 16) + (phy_lane & 0x08);
+					o_reg.setBit(loc, 8); 	// set dq byte
+					FAPI_DBG("0xFF  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
+						byte, l_bbm[byte], phy_block, phy_lane, dq, loc);
+					continue;
+				}
+				// block lanes + 1st lane{0,4,8,12}
+				loc = (phy_block * 16) + (phy_lane & 0x0C);
+				o_reg.setBit(loc, 4);		// set dq nibble0
+				FAPI_DBG("0xF0  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
+					byte, l_bbm[byte], phy_block, phy_lane, dq, loc);
+
+				if (l_bbm[byte] == 0xF0)			// done with byte
+					continue;
+				bs=4;		// processed the first 4 bits already
+			}
+			else if ((l_bbm[byte] & 0x0F) == 0x0F)	// 0x?F
+			{
+				dq = (byte * 8) + 4;		// for first lane of dq
+				rc = mss_c4_phy(i_mba, i_port, 0, RD_DQ,dq,
+						0, phy_lane, phy_block, 0);
+				if (rc) return rc;
+				// block lanes + 1st lane{0,4,8,12}
+				loc = (phy_block * 16) + (phy_lane & 0x0C);
+				FAPI_DBG("0x0F  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
+					byte, l_bbm[byte], phy_block, phy_lane, dq, loc);
+				o_reg.setBit(loc, 4);				// set dq nibble1
+				if (l_bbm[byte] == 0x0F)			// done with byte
+					continue;
+				be=4;		// processed the last 4 bits already
+			}
+			else if ((l_bbm[byte] >> 4) == 0)	// 0x0?
+				bs=4;
+			else if ((l_bbm[byte] & 0x0F) == 0)	// 0x?0
+				be=4;
+
+			for (uint8_t b=bs; b < be; b++)		// test each bit
+			{
+				if ((l_bbm[byte] & (0x80 >> b)) > 0)		// bit is set,
+				{
+					dq = (byte * 8) + b;
+					rc=mss_c4_phy(i_mba, i_port, 0, RD_DQ,dq,
+						   0, phy_lane, phy_block, 0);
+					if (rc) return rc;
+					loc = (phy_block * 16) + phy_lane;
+					o_reg.setBit(loc);
+					FAPI_DBG("b=%i  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i "
+						"loc=%i bs=%i be=%i", b, byte, l_bbm[byte],
+						phy_block, phy_lane, dq, loc, bs, be);
+				}
+			}
+		} // end if not clean
+	} // end byte
+	return rc;
+} // end getC4dq2reg
+
+
+ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port,
+   const uint8_t i_dimm, const uint8_t i_rank, const ecmdDataBufferBase &i_reg)
+{
+// used by get_bbm(registers to flash)
+// Converts the data from phy order (i_reg) to cen_c4_dq array
+// for dimmSetBadDqBitmap to write flash with
+
+	ReturnCode rc;
+	uint8_t l_bbm [TOTAL_BYTES] = {0};
+	uint8_t dq=0;
+	uint8_t phy_lane;
+	uint8_t phy_block;
+ 	uint8_t data;
+	
+    // get Centaur dq bitmap (C4 signal) order=[0:79], array of bytes
+    rc = dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm);
+    if (rc)
+    {
+		FAPI_ERR("Error from dimmGetBadDqBitmap on port %i: "
+			 "dimm=%i, rank=%i rc=%i", i_port, i_dimm, i_rank,
+			 static_cast<uint32_t>(rc));
+		return rc;
+    }
+
+	for (uint8_t byte=0; byte < TOTAL_BYTES; byte++)
 	{
-		l_bbm[b] = c4dqbmp.getByte(b);
-	}
+		data = i_reg.getByte(byte);
+		if (data != 0)				// need to check bits
+		{
+			uint8_t bs=0;
+			uint8_t be=8;
+
+			phy_block = (byte / 2);		// byte=[0..9], block=[0..4]
+			FAPI_DBG("\n\t\t\t\t\t\tbyte=%i, data=0x%02x  phy_block=%i  ",
+				byte, data, phy_block);
+			if ((data & 0xF0) == 0xF0)	// 0xF?
+			{
+				phy_lane = 8 * (byte % 2);	// lane=[0,8]
+				// input=block, lane  output=cen_dq
+				rc = mss_c4_phy(i_mba, i_port, 0, RD_DQ,dq,
+						0, phy_lane, phy_block, 1);
+				if (rc) return rc;
+
+				if (data == 0xFF)
+				{	// set 8 consecutive bits of the cen_c4_dq
+					l_bbm[(dq/8)] = 0xFF;
+					FAPI_DBG("0xFF dp%i_%i dq=%i, lbbm=0x%02x",
+						phy_block, phy_lane, dq, l_bbm[dq/8]);
+					continue;
+				}
+
+				l_bbm[(dq/8)] |= ((dq % 8) < 4) ? 0xF0 : 0x0F;
+				FAPI_DBG("0xF0 dp%i_%i dq=%i, lbbm=0x%02x",
+					phy_block, phy_lane, dq, l_bbm[dq/8]);
+
+				if (data == 0xF0)			// done with byte
+					continue;
+				bs=4;			// need to work on other bits
+			}
+			else if ((data & 0x0F) == 0x0F)	// 0x?F
+			{
+				phy_lane = (8 * (byte % 2)) + 4;	// lane=[4,12]
+				rc = mss_c4_phy(i_mba, i_port, 0, RD_DQ, dq,
+						0, phy_lane, phy_block, 1);
+				if (rc) return rc;
+
+				l_bbm[(dq/8)] |= ((dq % 8) < 4) ? 0xF0 : 0x0F;
+				FAPI_DBG("0x0F dp%i_%i dq=%i, lbbm=0x%02x",
+					   phy_block, phy_lane, dq, l_bbm[dq/8]);
+
+				if (data == 0x0F)			// done with byte
+					continue;
+				be=4;			// need to work on other bits
+			}
+			else if ((data >> 4) == 0)	// 0x0?
+				bs=4;
+			else if ((data & 0x0F) == 0)	// 0x?0
+				be=4;
+
+			for (uint8_t b=bs; b < be; b++)		// test each bit
+			{
+				if ((data & (0x80 >> b)) > 0)		// bit is set,
+				{
+					phy_lane = (8 * (byte % 2)) + b;
+					rc = mss_c4_phy(i_mba, i_port, 0, RD_DQ, dq,
+							0, phy_lane, phy_block, 1);
+					if (rc) return rc;
+					l_bbm[(dq/8)] |= (0x80 >> (dq % 8));
+					FAPI_DBG("b=%i dp%i_%i dq=%i, lbbm=0x%02x",
+						b, phy_block, phy_lane, dq, l_bbm[dq/8]);
+				}
+			}
+		} //end if not clean
+	} //end byte
 
 	// set Centaur dq bitmap (C4 signal) order=[0:79], array of bytes
 	rc = dimmSetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm);
 	if (rc)
 	{
-		FAPI_ERR("Error from dimmSetBadDqBitmap on MBA%ip%i: "
-				"dimm=%i, rank=%i rc=%i", mba_pos, i_port, i_dimm, i_rank,
-				static_cast<uint32_t>(rc));
+		FAPI_ERR("Error from dimmSetBadDqBitmap on port %i: "
+			"dimm=%i, rank=%i rc=%i", i_port, i_dimm, i_rank,
+			static_cast<uint32_t>(rc));
 		return rc;
 	}
 
 	return rc;
-}
+} //end setC4dq2reg
 
 
 } //end extern C
-

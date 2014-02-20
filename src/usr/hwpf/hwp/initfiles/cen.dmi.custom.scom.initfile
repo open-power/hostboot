@@ -1,9 +1,9 @@
-#-- $Id: cen.dmi.custom.scom.initfile,v 1.19 2014/02/12 20:06:07 jgrell Exp $
+#-- $Id: cen.dmi.custom.scom.initfile,v 1.20 2014/02/14 15:57:01 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
-
+#--     1.20|jgrell  |02/14/14|Corrected FIR_ACTION1 and FIR_MASK settings for SW245013
 #--     1.19|jgrell  |02/12/14|Added FIR_ACTION1 setting and changed FIR_MASK setting for SW245013
 #--                           |Added rx_wt_lane_disabled=1 on lane 17 for SW244284
 #--     1.18|jgrell  |11/21/13|Added rx_trc_grp setting at the request of Yuen Tschang
@@ -319,13 +319,13 @@ rx_pb_fir_err_mask_gcr_buff2,    0b1;
 # SCOM_FIR_MASK_PB: setting from SW245013
 scom 0x02010403 {
 scom_data;
-0xDFFFFFFFFFFFC000;
+0xDFFFFFFFFFFF0000;
 }
 
 # SCOM_FIR_ACTION1_PB: setting from SW245013
 scom 0x02010407 {
 scom_data;
-0xFFFFFFFFFFFFC000;
+0xFFDFFFFFFFFFC000;
 }
 
 #--**************************************************************************************************************
