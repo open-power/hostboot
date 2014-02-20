@@ -1029,7 +1029,7 @@ group gCoreFir filter singlebit
     /** COREFIR[1]
      *  IF_SETDELETE_ERR: set deleted
      */
-    (CoreFir, bit(1)) ? calloutExThr1;
+    (CoreFir, bit(1)) ? SelfHighThr1;
 
     /** COREFIR[2]
      *  IF_RFILE_REC_ERR: RegFile recoverable error
@@ -1039,7 +1039,7 @@ group gCoreFir filter singlebit
     /** COREFIR[3]
      *  IF_RFILE_CHKSTOP_ERR: RegFile core check stop
      */
-    (CoreFir, bit(3)) ? calloutExThr1;
+    (CoreFir, bit(3)) ? SelfHighThr1;
 
     /** COREFIR[4]
      *  IF_LOG_REC_ERR: logic recoverable error
@@ -1049,7 +1049,7 @@ group gCoreFir filter singlebit
     /** COREFIR[5]
      *  IF_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(5)) ? calloutExThr1;
+    (CoreFir, bit(5)) ? SelfHighThr1;
 
     /** COREFIR[6]
      *  IF_NOT_MT_REC_ERR: recoverable if not in MT window
@@ -1059,7 +1059,7 @@ group gCoreFir filter singlebit
     /** COREFIR[7]
      *  IF_CHKSTOP_ERR: system check stop
      */
-    (CoreFir, bit(7)) ? calloutExThr1;
+    (CoreFir, bit(7)) ? SelfHighThr1;
 
     /** COREFIR[8]
      *  RECOV_FIR_CHKSTOP_ERR: recovery core check stop
@@ -1074,7 +1074,7 @@ group gCoreFir filter singlebit
     /** COREFIR[10]
      *  SD_RFILE_CHKSTOP_ERR: RegFile core check stop (mapper error)
      */
-    (CoreFir, bit(10)) ? calloutExThr1;
+    (CoreFir, bit(10)) ? SelfHighThr1;
 
     /** COREFIR[11]
      *  SD_LOG_REC_ERR: logic recoverable error
@@ -1084,7 +1084,7 @@ group gCoreFir filter singlebit
     /** COREFIR[12]
      *  SD_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(12)) ? calloutExThr1;
+    (CoreFir, bit(12)) ? SelfHighThr1;
 
     /** COREFIR[13]
      *  SD_NOT_MT_REC_ERR: recoverable if not in MT window
@@ -1095,7 +1095,7 @@ group gCoreFir filter singlebit
      *  SD_MCHK_AND_ME_EQ_0: MCHK received while ME=0 non recoverable
      */
     # FIXME: RTC 85697: Make sure this is SUE-CS bit
-    (CoreFir, bit(14)) ? calloutExThr1Sue;
+    (CoreFir, bit(14)) ? calloutSelfHighSUE;
 
     /** COREFIR[15]
      *  SD_PC_L2_UE_ERR: UE from L2
@@ -1130,7 +1130,7 @@ group gCoreFir filter singlebit
     /** COREFIR[21]
      *  FX_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(21)) ? calloutExThr1;
+    (CoreFir, bit(21)) ? SelfHighThr1;
 
     /** COREFIR[22]
      *  FX_NOT_MT_REC_ERR: recoverable if not in MT window
@@ -1150,7 +1150,7 @@ group gCoreFir filter singlebit
     /** COREFIR[25]
      *  VS_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(25)) ? calloutExThr1;
+    (CoreFir, bit(25)) ? SelfHighThr1;
 
     /** COREFIR[26]
      *  RECOV_IN_MAINT_ERR: 26 = recov_in_maint
@@ -1175,7 +1175,7 @@ group gCoreFir filter singlebit
     /** COREFIR[30]
      *  LS_SETDELETE_ERR: set deleted
      */
-    (CoreFir, bit(30)) ? calloutExThr1;
+    (CoreFir, bit(30)) ? SelfHighThr1;
 
     /** COREFIR[31]
      *  LS_RFILE_REC_ERR: RegFile recoverable error
@@ -1185,7 +1185,7 @@ group gCoreFir filter singlebit
     /** COREFIR[32]
      *  LS_RFILE_CHKSTOP_ERR: RegFile core check stop
      */
-    (CoreFir, bit(32)) ? calloutExThr1;
+    (CoreFir, bit(32)) ? SelfHighThr1;
 
     /** COREFIR[33]
      *  LS_TLB_MULTIHIT_ERR: special recovery error TLB multi hit error occurred
@@ -1205,7 +1205,7 @@ group gCoreFir filter singlebit
     /** COREFIR[36]
      *  FORWARD_PROGRESS_ERR: forward progress error
      */
-    (CoreFir, bit(36)) ? calloutExThr1;
+    (CoreFir, bit(36)) ? SelfHighThr1;
 
     /** COREFIR[37]
      *  LS_LOG_REC_ERR: logic recoverable error
@@ -1215,7 +1215,7 @@ group gCoreFir filter singlebit
     /** COREFIR[38]
      *  LS_LOG_CHKSTOP_ERR: logic core check stop
      */
-    (CoreFir, bit(38)) ? calloutExThr1;
+    (CoreFir, bit(38)) ? SelfHighThr1;
 
     /** COREFIR[39]
      *  LS_NOT_MT_REC_ERR: recoverable if not in MT window
@@ -1230,7 +1230,7 @@ group gCoreFir filter singlebit
     /** COREFIR[41]
      *  LS_CHKSTOP_ERR: system check stop
      */
-    (CoreFir, bit(41)) ? calloutExThr1;
+    (CoreFir, bit(41)) ? SelfHighThr1;
 
     /** COREFIR[42]
      *  LS_GPR_RCV_CHKSTOP_ERR: UE from GPR/VRF recovery process
@@ -1250,7 +1250,7 @@ group gCoreFir filter singlebit
     /** COREFIR[45]
      *  PC_LOG_CHKSTOP_ERR: PC logic core check stop
      */
-    (CoreFir, bit(45)) ? calloutExThr1;
+    (CoreFir, bit(45)) ? SelfHighThr1;
 
     /** COREFIR[46]
      *  RESERVED
@@ -1265,7 +1265,7 @@ group gCoreFir filter singlebit
     /** COREFIR[48]
      *  SPRD_FIR_HYP_RES_P_ERR: Hypervisor Resource error - core check stop
      */
-    (CoreFir, bit(48)) ? calloutExThr1;
+    (CoreFir, bit(48)) ? SelfHighThr1;
 
     /** COREFIR[49]
      *  TFC_FIR_P_ERR: TFAC parity error
@@ -1285,7 +1285,7 @@ group gCoreFir filter singlebit
     /** COREFIR[52]
      *  CORE_HUNG: Hang recovery failed (core check stop)
      */
-    (CoreFir, bit(52)) ? calloutExThr1;
+    (CoreFir, bit(52)) ? SelfHighThr1;
 
     /** COREFIR[53]
      *  CORE_HANG_DETECT: Internal hang detected (core hang)
@@ -1331,7 +1331,7 @@ group gCoreFir filter singlebit
     /** COREFIR[63]
      *  SPRD_PHYP_ERR_INJ: Phyp Xstop via SPRC / SPRD
      */
-    (CoreFir, bit(63)) ? calloutProcLow2ndLvlMedThr1;
+    (CoreFir, bit(63)) ? calloutProcLow2ndLvlMedThr1dumpSh;
 };
 
 ################################################################################
@@ -2034,38 +2034,16 @@ actionclass calloutParentChipHighThr32
     threshold32pday;
 };
 
-/** Dump Core */
-actionclass dumpCore
-{
-    dump( DUMP_CONTENT_CORE );
-};
-
-/** callout core, threshold 5 per day, and initiate core dump*/
+/** callout core, threshold 5 per day */
 actionclass calloutExThr5pHr
 {
     SelfHighThr5PerHour;
-    dumpCore;
 };
 
-/** callout core, threshold 1 and initiate core dump*/
-actionclass calloutExThr1
-{
-    SelfHighThr1;
-    dumpCore;
-};
-
-/** callout core, threshold 32per day and initiate core dump*/
+/** callout core, threshold 32per day and initiate hw dump*/
 actionclass calloutExThr32pDay
 {
     SelfMedThr32PerDay;
-    dumpCore;
-};
-
-/** callout core, threshold 1, and initiate core dump*/
-actionclass calloutExThr1Sue
-{
-    calloutSelfHighSUE;
-    dumpCore;
 };
 
 /** callout Ex,Sec Level on first instance ,initiate software
@@ -2079,5 +2057,13 @@ actionclass calloutExAndSecLvlThr1
 actionclass calloutExLowSecLvlThr1MedDumpSh
 {
     SelfLowLevel2MedThr1;
+    dumpSH;
+};
+
+/** callouts Proc on first instance. Calls for second level support as well
+ *  Initiate an SH dump */
+actionclass calloutProcLow2ndLvlMedThr1dumpSh
+{
+    calloutProcLow2ndLvlMedThr1;
     dumpSH;
 };
