@@ -564,6 +564,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                   reinterpret_cast<void*>(iv_dmaBuffer.toPhysAddr(dma_buffer));
 
                 free(payload->extra_data);
+                payload->extra_data = NULL;
             }
             else  // DMA buffer request from FSP
             {
@@ -621,7 +622,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
                          MBOX::MOD_MBOXSRV_SENDMSG,
                          MBOX::RC_INVALID_DMA_LENGTH,      //  reason Code
-                         payload->data[1],                 // DMA data len
+                         dma_size,                         // DMA data len
                          iv_msg_to_send.msg_queue_id,      // MSG queueid
                          true //Add HB Software Callout
                         );

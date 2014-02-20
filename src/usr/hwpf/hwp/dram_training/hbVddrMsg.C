@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -151,10 +151,10 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
 
     TRACFCOMP(g_trac_volt, ENTER_MRK "hbVddrMsg::sendMsg msg_type =0x%08X",i_msgType);
 
-    do{
-        
+    do
+    {
         RequestContainer l_request;
-        
+
         if ( (i_msgType == HB_VDDR_ENABLE) || (i_msgType == HB_VDDR_DISABLE) )
         {
             createVddrData(l_request);
@@ -163,7 +163,6 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
         {
             TRACFCOMP(g_trac_volt, ERR_MRK "hbVddrMsg::send msg with non-"
                       "valid msg type%08X",i_msgType);
-            //generate errorLog;    
             /*@
              *   @errortype
              *   @moduleid      fapi::MOD_VDDR_SEND_MSG
@@ -179,63 +178,60 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
                          fapi::RC_INCORRECT_MSG_TYPE, i_msgType);
             break;
         }
-        
+
         size_t l_dataCount = l_request.size();
-        uint32_t l_msgSize = l_dataCount*sizeof(hwsvPowrVmemRequest_t);
 
-
-        //create the hb send msg.  the memory should be taken care of by mbox
-        msg_t* l_msg =NULL;
-        l_msg = msg_allocate();
-
-        l_msg->type = i_msgType;        
-
-
-        l_msg->data[0]=0;
-        l_msg->data[1] =l_msgSize;
-    
-        TRACFCOMP(g_trac_volt, INFO_MRK "hbVddrMsg::l_dataCount=%d,l_msgSize=%d",l_dataCount,l_msgSize);
-        void* l_data=NULL;
-        l_data = malloc(l_msgSize);
-       
-        hwsvPowrVmemRequest_t* l_ptr = reinterpret_cast<hwsvPowrVmemRequest_t*>(l_data);
-        
-        for (size_t j =0; j<l_dataCount; ++j)
+        // Only send a message if there is data to send
+        if (l_dataCount)
         {
-            l_ptr->VmemId=l_request.at(j).VmemId;
-            l_ptr->Voltage=l_request.at(j).Voltage;
+            uint32_t l_msgSize = l_dataCount*sizeof(hwsvPowrVmemRequest_t);
 
-            TRACFCOMP(g_trac_volt, ENTER_MRK "hbVddrMsg::sendMsg "
-                     "l_ptr->VmemId=0x%04X,l_ptr->Voltage=%d, j=%d",
-                      l_ptr->VmemId, l_ptr->Voltage,j);
+            // Create the message to send to HWSV
+            msg_t* l_msg = msg_allocate();
+            l_msg->type = i_msgType;
+            l_msg->data[0] = 0;
+            l_msg->data[1] = l_msgSize;
 
-            l_ptr++;
-        }
+            TRACFCOMP(g_trac_volt, INFO_MRK "hbVddrMsg::l_dataCount=%d,l_msgSize=%d",
+                      l_dataCount, l_msgSize);
+            void* l_data = malloc(l_msgSize);
 
-        l_msg->extra_data = l_data;
+            hwsvPowrVmemRequest_t* l_ptr =
+                reinterpret_cast<hwsvPowrVmemRequest_t*>(l_data);
 
-        TRACFBIN(g_trac_volt, "l_data", l_data, l_msgSize);
-        l_err = MBOX::sendrecv( MBOX::FSP_VDDR_MSGQ, l_msg );
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_volt, ERR_MRK "Failed sending VDDR message to FSP");
-    
-            if (l_msg->extra_data!=NULL)
+            for (size_t j =0; j<l_dataCount; ++j)
             {
-                free(l_msg->extra_data);
+                l_ptr->VmemId=l_request.at(j).VmemId;
+                l_ptr->Voltage=l_request.at(j).Voltage;
+
+                TRACFCOMP(g_trac_volt, ENTER_MRK "hbVddrMsg::sendMsg "
+                         "VmemId=0x%04X, Voltage=%d, index=%d",
+                          l_ptr->VmemId, l_ptr->Voltage,j);
+                l_ptr++;
             }
-            if (l_msg)
+
+            l_msg->extra_data = l_data;
+
+            TRACFBIN(g_trac_volt, "l_data", l_data, l_msgSize);
+            l_err = MBOX::sendrecv( MBOX::FSP_VDDR_MSGQ, l_msg );
+            if (l_err)
             {
-                msg_free(l_msg);
+                TRACFCOMP(g_trac_volt, ERR_MRK "Failed sending VDDR message to FSP");
             }
-        }
-        else
-        {
-            l_err=processMsg(l_msg);
-        }
+            else
+            {
+                l_err=processMsg(l_msg);
+            }
 
+            // If sendrecv returns error then it may not have freed the
+            // extra_data, else need to free the response message extra_data
+            free(l_msg->extra_data);
+            l_msg->extra_data = NULL;
 
-    }while(0);
+            msg_free(l_msg);
+            l_msg = NULL;
+        }
+    } while(0);
 
     TRACFCOMP(g_trac_volt, EXIT_MRK "hbEnableVddr::sendMsg");
     return l_err;
