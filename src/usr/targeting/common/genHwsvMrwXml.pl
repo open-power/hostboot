@@ -1976,8 +1976,10 @@ sub generate_proc
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
+        <default>
         <field><id>flipPort</id><value>0</value></field>
         <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>";
         #TODO RTC:35041 -- Parse out alternate FSI paths
         print "
@@ -2912,8 +2914,10 @@ sub generate_centaur
     </attribute>
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
+        <default>
         <field><id>flipPort</id><value>0</value></field>
         <field><id>reserved</id><value>0</value></field>
+        </default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>$ctaur</default></attribute>
     <attribute>
