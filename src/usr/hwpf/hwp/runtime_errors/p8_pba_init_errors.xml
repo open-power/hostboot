@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,19 +20,57 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_pba_init_errors.xml,v 1.4 2013/08/02 19:41:06 stillgs Exp $ -->
+<!-- $Id: p8_pba_init_errors.xml,v 1.5 2014/02/17 02:30:14 stillgs Exp $ -->
 <!-- Error definitions for p8_pba_init procedure -->
 <hwpErrors>
+  <registerFfdc>
+    <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+    <scomRegister>PBA_MODE_0x00064000</scomRegister>
+    <scomRegister>PBA_CONFIG_0x0201084B</scomRegister>
+    <scomRegister>PBA_SLVCTL2_0x00064006</scomRegister>
+    <scomRegister>PBA_SLVCTL0_0x00064004</scomRegister>
+    <scomRegister>PBA_SLVCTL1_0x00064005</scomRegister>
+    <scomRegister>PBA_SLVCTL2_0x00064006</scomRegister>
+    <scomRegister>PBA_SLVCTL3_0x00064007</scomRegister>
+    <scomRegister>PBA_FIR_0x02010840</scomRegister>
+    <scomRegister>PBA_ERR_RPT0_0x0201084C</scomRegister>
+    <scomRegister>PBA_ERR_RPT1_0x0201084D</scomRegister>
+    <scomRegister>PBA_ERR_RPT2_0x0201084E</scomRegister>
+    <scomRegister>PBA_BCDE_CTL_0x00064010</scomRegister>
+    <scomRegister>PBA_BCDE_SET_0x00064011</scomRegister>
+    <scomRegister>PBA_BCDE_STAT_0x00064012</scomRegister>
+    <scomRegister>PBA_BCDE_PBADR_0x00064013</scomRegister>
+    <scomRegister>PBA_BCDE_OCIBAR_0x00064014</scomRegister>
+    <scomRegister>PBA_BCUE_CTL_0x00064015</scomRegister>
+    <scomRegister>PBA_BCUE_SET_0x00064016</scomRegister>
+    <scomRegister>PBA_BCUE_STAT_0x00064017</scomRegister>
+    <scomRegister>PBA_BCUE_PBADR_0x00064018</scomRegister>
+    <scomRegister>PBA_BCUE_OCIBAR_0x00064019</scomRegister>
+    <scomRegister>PBA_PBOCR0_0x00064020</scomRegister>
+    <scomRegister>PBA_PBOCR1_0x00064021</scomRegister>
+    <scomRegister>PBA_PBOCR2_0x00064022</scomRegister>
+    <scomRegister>PBA_PBOCR3_0x00064023</scomRegister>
+    <scomRegister>PBA_PBOCR4_0x00064024</scomRegister>
+    <scomRegister>PBA_PBOCR5_0x00064025</scomRegister>
+    <scomRegister>PBA_BAR0_0x02013F00</scomRegister>
+    <scomRegister>PBA_BARMSK0_0x02013F04</scomRegister>
+    <scomRegister>PBA_BAR1_0x02013F01</scomRegister>
+    <scomRegister>PBA_BARMSK1_0x02013F05</scomRegister>
+    <scomRegister>PBA_BAR2_0x02013F02</scomRegister>
+    <scomRegister>PBA_BARMSK2_0x02013F06</scomRegister>
+    <scomRegister>PBA_BAR3_0x02013F03</scomRegister>
+    <scomRegister>PBA_BARMSK3_0x02013F07</scomRegister>
+    <scomRegister>PBA_TRUSTMODE_0x02013F08</scomRegister>
+  </registerFfdc>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PMPROC_PBA_INIT_INCORRECT_MODE</rc>
     <description>pba init procedure incorrect mode by calling function</description>
     <ffdc>PM_MODE</ffdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PMPROC_PBA_INIT_PUTSCOM_FAILED</rc>
-    <description>pba init putscom failed .</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -41,6 +79,14 @@
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>SLAVENUM</ffdc>
     <ffdc>PBASLVREG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -49,6 +95,14 @@
     <ffdc>POLLCOUNT</ffdc>
     <ffdc>SLAVENUM</ffdc>
     <ffdc>PBASLVREG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-  <!-- *********************************************************************** -->  
+  <!-- *********************************************************************** -->
 </hwpErrors>
