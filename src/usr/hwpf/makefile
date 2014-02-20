@@ -188,7 +188,8 @@ HWP_WINKLE_RING_FILES = hwp/winkle_ring_accessors/s1_10_winkle_ring.attributes \
                         hwp/winkle_ring_accessors/s1_13_winkle_ring.attributes \
                         hwp/winkle_ring_accessors/s1_20_winkle_ring.attributes \
                         hwp/winkle_ring_accessors/s1_21_winkle_ring.attributes \
-                        hwp/winkle_ring_accessors/p8_10_winkle_ring.attributes
+                        hwp/winkle_ring_accessors/p8_10_winkle_ring.attributes \
+                        hwp/winkle_ring_accessors/p8_20_winkle_ring.attributes
 
 #------------------------------------------------------------------------------
 # Initfiles
