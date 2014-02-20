@@ -26,6 +26,8 @@
 #include <kernel/task.H>
 #include <kernel/cpumgr.H>
 #include <util/misc.H>
+#include <kernel/misc.H>
+#include <sys/task.h>
 
 uint64_t TimeManager::iv_timebaseFreq = 0xFFFFFFFF;
 
@@ -154,6 +156,17 @@ bool TimeManager::simpleDelay(uint64_t i_sec, uint64_t i_nsec)
     uint64_t threshold = getTimeSliceCount()/YIELD_THRESHOLD_PER_SLICE;
     uint64_t delay = convertSecToTicks(i_sec, i_nsec);
 
+    bool isUserspace = !KernelMisc::in_kernel_mode();
+
+    // TB is not synchronized between cores, so if we're doing a poll we need
+    // to pin the task to the current cpu.  Otherwise the getTB can get a
+    // drifted answer after a task migration.
+    if (isUserspace)
+    {
+        task_affinity_pin();
+    }
+
+    // Do polling delay.
     if(delay < threshold)
     {
         uint64_t expire = getCurrentTimeBase() + delay;
@@ -163,6 +176,11 @@ bool TimeManager::simpleDelay(uint64_t i_sec, uint64_t i_nsec)
         }
         setThreadPriorityHigh();
         result = true;
+    }
+
+    if (isUserspace)
+    {
+        task_affinity_unpin();
     }
 
     return result;
