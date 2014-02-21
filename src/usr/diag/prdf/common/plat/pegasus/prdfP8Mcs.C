@@ -40,6 +40,8 @@
 #include <prdfP8McsDataBundle.H>
 #include <prdfCenMemUtils.H>
 
+#include <prdfP8McsExtraSig.H>
+
 //##############################################################################
 //
 //                             Special plugins
@@ -50,6 +52,7 @@ namespace PRDF
 {
 
 using namespace PlatServices;
+using namespace TARGETING;
 
 namespace Mcs
 {
@@ -274,6 +277,59 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Mcs, ClearServiceCallFlag );
+
+/**
+ * @brief   Checks if the parent proc chip is either a Murano at DD least 2.0
+ *          or a Venice. If neither, implements the DD1 actions
+ *          of MBSFIR for the specified bit.
+ * @param   i_mcsChip MCS chip
+ * @param   i_sc      Step code data struct
+ * @return  FAIL if MuranoDD2Plus or Venice, SUCCESS otherwise
+ */
+int32_t dd1mcifirBit(ExtensibleChip * i_mcsChip,
+                     STEP_CODE_DATA_STRUCT & i_sc,
+                     uint32_t i_bitNum )
+{
+    int32_t l_rc = SUCCESS;
+    bool isMuranoDD2Plus = false;
+    bool isVenice = false;
+    TargetHandle_t l_mcsTrgt = i_mcsChip->GetChipHandle();
+    TargetHandle_t l_proc  = getParentChip( l_mcsTrgt );
+    uint8_t l_chipLevel = getChipLevel(l_proc);
+    MODEL l_model = getProcModel(l_proc);
+
+    if( MODEL_VENICE == l_model )
+        isVenice = true;
+    else if( (0x20 <= l_chipLevel) && (MODEL_MURANO == l_model) )
+        isMuranoDD2Plus = true;
+
+    if(isMuranoDD2Plus || isVenice)
+    {
+        l_rc = FAIL;
+    }
+    else
+    {
+        i_sc.service_data->SetCallout(l_mcsTrgt, MRU_MED);
+        ClearServiceCallFlag(i_mcsChip, i_sc);
+        if(48 == i_bitNum)
+            i_sc.service_data->SetErrorSig( PRDFSIG_MciFir_48_DD1Signature );
+        else if(49 == i_bitNum)
+            i_sc.service_data->SetErrorSig( PRDFSIG_MciFir_49_DD1Signature );
+    }
+
+    return l_rc;
+}
+
+#define PLUGIN_MCIFIR_DD1_CHECK( BITNUM )                     \
+int32_t dd1mcifirBit##BITNUM (ExtensibleChip * i_mcsChip,     \
+                              STEP_CODE_DATA_STRUCT & i_sc )  \
+{                                                             \
+    return dd1mcifirBit( i_mcsChip, i_sc, BITNUM );           \
+}                                                             \
+PRDF_PLUGIN_DEFINE( Mcs, dd1mcifirBit##BITNUM );
+
+PLUGIN_MCIFIR_DD1_CHECK( 48 )
+PLUGIN_MCIFIR_DD1_CHECK( 49 )
 
 } // end namespace Mcs
 } // end namespace PRDF

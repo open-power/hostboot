@@ -210,7 +210,7 @@ group gDmiFir filter singlebit
     /** DMIFIR[12]
      *  Too Many Bus Errors
      */
-    (DmiFir, bit(12)) ? thresholdAndMask_dmiBus;
+    (DmiFir, bit(12)) ? calloutDmiBusTh1;
 
     /** DMIFIR[13:15]
      *  Reserved
@@ -514,7 +514,7 @@ group gMbiFir filter singlebit
     /** MBIFIR[18]
      *  MBIFIRQ_MULTIPLE_REPLAY
      */
-    (MbiFir, bit(18)) ? thresholdAndMask_dmiBus;
+    (MbiFir, bit(18)) ? defaultMaskedError;
 
     /** MBIFIR[19]
      *  MBIFIRQ_MBICFG_PARITY_SCOM_ERROR
@@ -526,10 +526,16 @@ group gMbiFir filter singlebit
      */
     (MbiFir, bit(20)) ? calloutDmiBusTh1UE;
 
-    /** MBIFIR[21:24]
+    # This is for DD2 only
+    /** MBIFIR[21]
+     *  MBIFIRQ_WAT_ERROR
+     */
+    (MbiFir, bit(21)) ? defaultMaskedError;
+
+    /** MBIFIR[22:24]
      *  Reserved
      */
-    (MbiFir, bit(21|22|23|24)) ? defaultMaskedError;
+    (MbiFir, bit(22|23|24)) ? defaultMaskedError;
 
     /** MBIFIR[25]
      *  MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE
@@ -701,14 +707,38 @@ group gMbsFir filter singlebit
     (MbsFir, bit(28)) ? defaultMaskedError;
 
     /** MBSFIR[29]
-     *  MBS_FIR_REG_INTERNAL_SCOM_ERROR
+     *  DD1: MBS_FIR_REG_INTERNAL_SCOM_ERROR
      */
-    (MbsFir, bit(29)) ? thresholdAndMask_self;
+    (MbsFir, bit(29)) ? thresholdAndMask_self; # DD1 action, masked for DD2+
 
     /** MBSFIR[30]
+     *  MBS_FIR_REG_PROXIMAL_CE_UE
+     */
+    (MbsFir, bit(30)) ? mbsfirBit30;
+
+    # This is for DD2 only
+    /** MBSFIR[31]
+     *  MBS_FIR_REG_SPARE_FIR31
+     */
+    (MbsFir, bit(31)) ? defaultMaskedError;
+
+    # This is for DD2 only
+    /** MBSFIR[32]
+     *  MBS_FIR_REG_SPARE_FIR32
+     */
+    (MbsFir, bit(32)) ? defaultMaskedError;
+
+    # This is for DD2 only
+    /** MBSFIR[33]
+     *  MBS_FIR_REG_INTERNAL_SCOM_ERROR
+     */
+    (MbsFir, bit(33)) ? thresholdAndMask_self;
+
+    # This is for DD2 only
+    /** MBSFIR[34]
      *  MBS_FIR_REG_INTERNAL_SCOM_ERROR_COPY
      */
-    (MbsFir, bit(30)) ? thresholdAndMask_self;
+    (MbsFir, bit(34)) ? thresholdAndMask_self;
 };
 
 ################################################################################
@@ -1089,22 +1119,46 @@ group gMcbistFir filter singlebit
     /** MBA0_MCBISTFIR[1]
      *  MBSFIRQ_MBX_PAR_ERRORS
      */
-    (Mba0_McbistFir, bit(1)) ? MBA0CalloutMedThr1UE;
+    (Mba0_McbistFir, bit(1)) ? MBA0CalloutMedThr1;
 
     /** MBA1_MCBISTFIR[1]
      *  MBSFIRQ_MBX_PAR_ERRORS
      */
-    (Mba1_McbistFir, bit(1)) ? MBA1CalloutMedThr1UE;
+    (Mba1_McbistFir, bit(1)) ? MBA1CalloutMedThr1;
 
-    /** MBA0_MCBISTFIR[2:14]
+    # This is for DD2 only
+    /** MBA0_MCBISTFIR[2]
+     *  MBSFIRQ_DRAM_EVENT_BIT0
+     */
+    (Mba0_McbistFir, bit(2)) ? defaultMaskedError;
+
+    # This is for DD2 only
+    /** MBA1_MCBISTFIR[2]
+     *  MBSFIRQ_DRAM_EVENT_BIT0
+     */
+    (Mba1_McbistFir, bit(2)) ? defaultMaskedError;
+
+    # This is for DD2 only
+    /** MBA0_MCBISTFIR[3]
+     *  MBSFIRQ_DRAM_EVENT_BIT1
+     */
+    (Mba0_McbistFir, bit(3)) ? defaultMaskedError;
+
+    # This is for DD2 only
+    /** MBA1_MCBISTFIR[3]
+     *  MBSFIRQ_DRAM_EVENT_BIT1
+     */
+    (Mba1_McbistFir, bit(3)) ? defaultMaskedError;
+
+    /** MBA0_MCBISTFIR[4:14]
      *  Reserved
      */
-    (Mba0_McbistFir, bit(2|3|4|5|6|7|8|9|10|11|12|13|14)) ? defaultMaskedError;
+    (Mba0_McbistFir, bit(4|5|6|7|8|9|10|11|12|13|14)) ? defaultMaskedError;
 
-    /** MBA1_MCBISTFIR[2:14]
+    /** MBA1_MCBISTFIR[4:14]
      *  Reserved
      */
-    (Mba1_McbistFir, bit(2|3|4|5|6|7|8|9|10|11|12|13|14)) ? defaultMaskedError;
+    (Mba1_McbistFir, bit(4|5|6|7|8|9|10|11|12|13|14)) ? defaultMaskedError;
 
     /** MBA0_MCBISTFIR[15]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR
@@ -1414,4 +1468,13 @@ actionclass MBA1CalloutMedThr1UE
 {
     MBA1CalloutMedThr1;
     SUEGenerationPoint;
+};
+
+/** The plugin checks if the membuf is at DD1.
+    If DD1, then callout thresholdAndMask_self and change signature
+    to DD1: MBS_FIR_REG_INTERNAL_SCOM_ERROR_COPY */
+actionclass mbsfirBit30
+{
+    threshold32pday;
+    try( funccall("mbsfirBit30_dd1"), L4CalloutMedThr1UE);
 };

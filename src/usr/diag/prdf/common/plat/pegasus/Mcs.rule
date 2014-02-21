@@ -50,6 +50,8 @@ chip Mcs
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+.include "prdfP8McsExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
@@ -330,7 +332,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[27]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
      */
-    (MciFir, bit(27)) ? callout2ndLvlDumpShNoGard;
+    (MciFir, bit(27)) ? calloutDmiBusAndLvl2Th1;
 
     /** MCIFIR[28]
      *  MCIFIRQ_MULTIPLE_RCMD_OR_CRESP_ACTIVE
@@ -415,10 +417,20 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
      */
     (MciFir, bit(43)) ? defaultMaskedError;
 
-    /** MCIFIR[44|45|46]
-     *  Reserved
+    /** MCIFIR[44]
+     *  MCIFIRQ_COMMAND_AND_LIST_TIMEOUT
      */
-    (MciFir, bit(44|45|46)) ? defaultMaskedError;
+    (MciFir, bit(44)) ? defaultMaskedError;
+
+    /** MCIFIR[45]
+     *  MCIFIRQ_MPIPL_OR_FLR_WRITE_SUE
+     */
+    (MciFir, bit(45)) ? defaultMaskedError;
+
+    /** MCIFIR[46]
+     *  MCIFIRQ_INVALID_CENTAUR_BYPASS
+     */
+    (MciFir, bit(46)) ? calloutDmiBusSelfLowConnHigh;
 
     /** MCIFIR[47]
      *  MCS WRITE DATAFLOW SUE
@@ -426,19 +438,34 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     (MciFir, bit(47)) ? defaultMaskedError;
 
     /** MCIFIR[48]
-     *  MCIFIRQ_INTERNAL_SCOM_ERROR
+     *  MCIFIRQ_BAD_MDI0_UPDATE
      */
-    (MciFir, bit(48)) ? thresholdAndMask_self;
+    (MciFir, bit(48)) ? mcifirBit48;
 
     /** MCIFIR[49]
-     *  MCIFIRQ_INTERNAL_SCOM_ERROR_CLONE
+     *  MCIFIRQ_INCONSISTENT_SF_STAT
      */
-    (MciFir, bit(49)) ? thresholdAndMask_self;
+    (MciFir, bit(49)) ? mcifirBit49;
 
-    /** MCIFIR[50:63]
+    /** MCIFIR[50:51]
      *  RESERVED
      */
-    (MciFir, bit( 50|51|52|53|54|55|56|57|58|59|
+    (MciFir, bit(50|51)) ? defaultMaskedError;
+
+    /** MCIFIR[52]
+     *  MCIFIRQ_INTERNAL_SCOM_ERROR
+     */
+    (MciFir, bit(52)) ? defaultMaskedError;
+
+    /** MCIFIR[53]
+     *  MCIFIRQ_INTERNAL_SCOM_ERROR_CLONE
+     */
+    (MciFir, bit(53)) ? defaultMaskedError;
+
+    /** MCIFIR[54:63]
+     *  RESERVED
+     */
+    (MciFir, bit( 54|55|56|57|58|59|
                   60|61|62|63 )) ? defaultMaskedError;
 
 };
@@ -510,4 +537,31 @@ actionclass CalloutDmiBusAndThr2pd
 actionclass analyzeSpareBitAndThr
 {
     try( funccall("checkSpareBit"), CalloutDmiBusAndThr2pd );
+};
+
+/** The plugin checks if the Proc is either Murano DD2 or Venice DD1.
+    If neither, then callout thresholdAndMask_self and change signature to
+    DD1: MCIFIRQ_INTERNAL_SCOM_ERROR. */
+actionclass mcifirBit48
+{
+    threshold32pday;
+    try( funccall("dd1mcifirBit48"), calloutDmiBusSelfLowConnHigh );
+};
+
+/** The plugin checks if the Proc is either Murano DD2 or Venice DD1.
+    If neither, then callout thresholdAndMask_self and change signature to
+    DD1: MCIFIRQ_INTERNAL_SCOM_ERROR_CLONE. */
+actionclass mcifirBit49
+{
+    threshold32pday;
+    try( funccall("dd1mcifirBit49"), calloutDmiBusSelfLowConnHigh );
+};
+
+/** Callout MCS Low and Centaur High */
+actionclass calloutDmiBusSelfLowConnHigh
+{
+    calloutSelfLow;
+    callout(connected(TYPE_MEMBUF), MRU_HIGH);
+    calloutDmiBusSymFru;
+    threshold1;
 };

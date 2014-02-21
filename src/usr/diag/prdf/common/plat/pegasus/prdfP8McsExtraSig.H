@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMembufExtraSig.H $ */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfP8McsExtraSig.H $   */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* COPYRIGHT International Business Machines Corp. 2014                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,16 +20,14 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-#ifndef __prdfCenMembufExtraSig_H
-#define __prdfCenMembufExtraSig_H
+#ifndef __prdfP8McsExtraSig_H
+#define __prdfP8McsExtraSig_H
 
 #include <prdrSignatures.H>
 
-PRDR_ERROR_SIGNATURE(MnfgDramCte,    0x44440000, "", "MNFG per DRAM CTE");
-PRDR_ERROR_SIGNATURE(MnfgHrCte,      0x44440001, "", "MNFG per half-rank CTE");
-PRDR_ERROR_SIGNATURE(MnfgDimmCte,    0x44440002, "", "MNFG per DIMM CTE");
-PRDR_ERROR_SIGNATURE(MbsFir_30_DD1Signature, 0x44440003, "MBSFIR[30]",
-                                   "DD1: MBS_FIR_REG_INTERNAL_SCOM_ERROR_COPY");
+PRDR_ERROR_SIGNATURE(MciFir_48_DD1Signature, 0x55550000, "MCIFIR[48]",
+                                            "DD1: MCIFIRQ_INTERNAL_SCOM_ERROR");
+PRDR_ERROR_SIGNATURE(MciFir_49_DD1Signature, 0x55550001, "MCIFIR[49]",
+                                      "DD1: MCIFIRQ_INTERNAL_SCOM_ERROR_CLONE");
 
-#endif // __prdfCenMembufExtraSig_H
+#endif // __prdfP8McsExtraSig_H

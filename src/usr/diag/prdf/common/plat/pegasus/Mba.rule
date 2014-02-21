@@ -491,17 +491,23 @@ group gMbaFir filter singlebit
     /** MBAFIR[6]
      *  MBAFIRQ_CHANNEL_CHKSTP_ERR
      */
-    (MbaFir, bit(6)) ? SelfMedThr1UE;
+    (MbaFir, bit(6)) ? SelfMedThr1;
 
     /** MBAFIR[7]
      *  MBAFIRQ_WRD_CAW2_DATA_CE_UE_ERR
      */
-    (MbaFir, bit(7)) ? SelfMedThr1UE;
+    (MbaFir, bit(7)) ? SelfMedThr1;
 
-    /** MBAFIR[8:14]
+    # This is for DD2 only
+    /** MBAFIR[8]
+     *  MBAFIRQ_MAINT_1HOT_ST_ERROR_DD2
+     */
+    (MbaFir, bit(8)) ? SelfMedThr1;
+
+    /** MBAFIR[9:14]
      *  Reserved
      */
-    (MbaFir, bit(8|9|10|11|12|13|14)) ? defaultMaskedError;
+    (MbaFir, bit(9|10|11|12|13|14)) ? defaultMaskedError;
 
     /** MBAFIR[15]
      *  MBAFIRQ_INTERNAL_SCOM_ERROR
@@ -530,32 +536,32 @@ group gMbaSecureFir filter singlebit
     /** MBASECUREFIR[0]
      *  MBASIRQ_INVALID_MBA_CAL0Q_ACCESS
      */
-    (MbaSecureFir, bit(0)) ? callout2ndLvlMedThr1UE_NoGard;
+    (MbaSecureFir, bit(0)) ? callout2ndLvlDumpShNoGard;
 
     /** MBASECUREFIR[1]
      *  MBASIRQ_INVALID_MBA_CAL1Q_ACCESS
      */
-    (MbaSecureFir, bit(1)) ? callout2ndLvlMedThr1UE_NoGard;
+    (MbaSecureFir, bit(1)) ? callout2ndLvlDumpShNoGard;
 
     /** MBASECUREFIR[2]
      *  MBASIRQ_INVALID_MBA_CAL2Q_ACCESS
      */
-    (MbaSecureFir, bit(2)) ? callout2ndLvlMedThr1UE_NoGard;
+    (MbaSecureFir, bit(2)) ? callout2ndLvlDumpShNoGard;
 
     /** MBASECUREFIR[3]
      *  MBASIRQ_INVALID_MBA_CAL3Q_ACCESS
      */
-    (MbaSecureFir, bit(3)) ? callout2ndLvlMedThr1UE_NoGard;
+    (MbaSecureFir, bit(3)) ? callout2ndLvlDumpShNoGard;
 
     /** MBASECUREFIR[4]
      *  MBASIRQ_INVALID_DDR_CONFIG_REG_ACCESS
      */
-    (MbaSecureFir, bit(4)) ? callout2ndLvlMedThr1UE_NoGard;
+    (MbaSecureFir, bit(4)) ? callout2ndLvlDumpShNoGard;
 
     /** MBASECUREFIR[5]
      *  MBASIRQ_INVALID_SIR_MASK_OR_ACTION_REGISTER_ACCESS
      */
-    (MbaSecureFir, bit(5)) ? callout2ndLvlMedThr1UE_NoGard;
+    (MbaSecureFir, bit(5)) ? callout2ndLvlDumpShNoGard;
 };
 
 ################################################################################
@@ -577,12 +583,12 @@ group gMbaDdrPhyFir filter singlebit
     /** MBADDRPHYFIR[48]
      *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_CKSTP
      */
-    (MbaDdrPhyFir, bit(48)) ? SelfMedThr1UE;
+    (MbaDdrPhyFir, bit(48)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[49]
      *  PHY01_DDRPHY_FIR_REG_DDR0_PARITY_CKSTP
      */
-    (MbaDdrPhyFir, bit(49)) ? SelfMedThr1UE;
+    (MbaDdrPhyFir, bit(49)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[50]
      *  PHY01_DDRPHY_FIR_REG_DDR0_CALIBRATION_ERROR
@@ -612,12 +618,12 @@ group gMbaDdrPhyFir filter singlebit
     /** MBADDRPHYFIR[56]
      *  PHY01_DDRPHY_FIR_REG_DDR1_FSM_CKSTP
      */
-    (MbaDdrPhyFir, bit(56)) ? SelfMedThr1UE;
+    (MbaDdrPhyFir, bit(56)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[57]
      *  PHY01_DDRPHY_FIR_REG_DDR1_PARITY_CKSTP
      */
-    (MbaDdrPhyFir, bit(57)) ? SelfMedThr1UE;
+    (MbaDdrPhyFir, bit(57)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[58]
      *  PHY01_DDRPHY_FIR_REG_DDR1_CALIBRATION_ERROR
@@ -657,7 +663,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[1]
      *  MBACALFIRQ_MBA_NONRECOVERABLE_ERROR
      */
-    (MbaCalFir, bit(1)) ? SelfMedThr1UE;
+    (MbaCalFir, bit(1)) ? SelfMedThr1;
 
     /** MBACALFIR[2]
      *  MBACALFIRQ_REFRESH_OVERRUN
@@ -692,12 +698,12 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[8]
      *  MBACALFIRQ_MBX_TO_MBA_PAR_ERROR
      */
-    (MbaCalFir, bit(8)) ? SelfMedThr1UE;
+    (MbaCalFir, bit(8)) ? SelfMedThr1;
 
     /** MBACALFIR[9]
      *  MBACALFIRQ_MBA_WRD_UE
      */
-    (MbaCalFir, bit(9)) ? SelfMedThr1UE;
+    (MbaCalFir, bit(9)) ? SelfMedThr1;
 
     /** MBACALFIR[10]
      *  MBACALFIRQ_MBA_WRD_CE
@@ -707,7 +713,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[11]
      *  MBACALFIRQ_MBA_MAINT_UE
      */
-    (MbaCalFir, bit(11)) ? SelfMedThr1UE;
+    (MbaCalFir, bit(11)) ? SelfMedThr1;
 
     /** MBACALFIR[12]
      *  MBACALFIRQ_MBA_MAINT_CE
@@ -717,7 +723,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[13]
      *  MBACALFIRQ_DDR_CAL_RESET_TIMEOUT
      */
-    (MbaCalFir, bit(13)) ? SelfMedThr1UE;
+    (MbaCalFir, bit(13)) ? SelfMedThr1;
 
     /** MBACALFIR[14]
      *  MBACALFIRQ_WRQ_DATA_CE
@@ -727,7 +733,7 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[15]
      *  MBACALFIRQ_WRQ_DATA_UE
      */
-    (MbaCalFir, bit(15)) ? SelfMedThr1UE;
+    (MbaCalFir, bit(15)) ? SelfMedThr1;
 
     /** MBACALFIR[16]
      *  MBACALFIRQ_WRQ_DATA_SUE
@@ -750,14 +756,38 @@ group gMbaCalFir filter singlebit
     (MbaCalFir, bit(19)) ? thresholdAndMask_self;
 
     /** MBACALFIR[20]
-     *  MBACALFIRQ_INTERNAL_SCOM_ERROR
+     *  DD1: MBACALFIRQ_INTERNAL_SCOM_ERROR
      */
-    (MbaCalFir, bit(20)) ? thresholdAndMask_self;
+    (MbaCalFir, bit(20)) ? thresholdAndMask_self; # DD1 action, masked for DD2+
 
     /** MBACALFIR[21]
+     *  DD1: MBACALFIRQ_INTERNAL_SCOM_ERROR_COPY
+     */
+    (MbaCalFir, bit(21)) ? thresholdAndMask_self; # DD1 action, masked for DD2+
+
+    # This is for DD2 only
+    /** MBACALFIR[22]
+     *  MBACALFIRQ_RHMR_SEC_ALREADY_FULL
+     */
+    (MbaCalFir, bit(22)) ? defaultMaskedError;
+
+    # This is for DD2 only
+    /** MBACALFIR[23]
+     *  Reserved
+     */
+    (MbaCalFir, bit(23)) ? defaultMaskedError;
+
+    # This is for DD2 only
+    /** MBACALFIR[24]
+     *  MBACALFIRQ_INTERNAL_SCOM_ERROR
+     */
+    (MbaCalFir, bit(24)) ? thresholdAndMask_self;
+
+    # This is for DD2 only
+    /** MBACALFIR[25]
      *  MBACALFIRQ_INTERNAL_SCOM_ERROR_COPY
      */
-    (MbaCalFir, bit(21)) ? thresholdAndMask_self;
+    (MbaCalFir, bit(25)) ? thresholdAndMask_self;
 };
 
 ###############################################################################

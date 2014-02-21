@@ -1080,6 +1080,32 @@ PRDF_PLUGIN_DEFINE( Membuf, ClearServiceCallFlag );
 
 //------------------------------------------------------------------------------
 
+/**
+ * @brief   Checks DD level. If DD1, implements the DD1 callout actions for
+ *          MBSFIR bit 30.
+ * @param   i_membChip Centaur chip
+ * @param   i_sc       Step code data struct
+ * @returns SUCCESS if DD1, FAIL otherwise
+ */
+int32_t mbsfirBit30_dd1( ExtensibleChip * i_membChip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = FAIL;
+    TargetHandle_t l_membTrgt = i_membChip->GetChipHandle();
+    if(0x20 > getChipLevel(l_membTrgt))
+    {
+        i_sc.service_data->SetCallout(l_membTrgt, MRU_MED);
+        ClearServiceCallFlag(i_membChip, i_sc);
+        i_sc.service_data->SetErrorSig( PRDFSIG_MbsFir_30_DD1Signature );
+        l_rc = SUCCESS;
+    }
+
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Membuf, mbsfirBit30_dd1 );
+
+//------------------------------------------------------------------------------
+
 // Define the plugins for memory ECC errors.
 #define PLUGIN_FETCH_ECC_ERROR( TYPE, MBA ) \
 int32_t AnalyzeFetch##TYPE##MBA( ExtensibleChip * i_membChip, \
