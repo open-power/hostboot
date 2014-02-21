@@ -1156,6 +1156,7 @@ actionclass analyzeMcs31
 actionclass PllError
 {
     capture(PllFIRs);
+    funccall("capturePllFfdc");
     threshold32pday;
 };
 

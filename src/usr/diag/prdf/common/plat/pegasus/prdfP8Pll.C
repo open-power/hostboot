@@ -36,6 +36,7 @@
 #include <iipSystem.h>
 #include <prdfGlobal_common.H>
 #include <prdfP8DataBundle.H>
+#include <UtilHash.H>
 
 using namespace TARGETING;
 
@@ -115,55 +116,6 @@ void GetProcPllErrRegList(ExtensibleChip * i_chip,
 }
 
 /**
-  * @brief Query the PLL chip for a PLL error on P8
-  * @param  i_chip P8 Pci chip
-  * @param o_result set to true in the presence of PLL error
-  * @returns Failure or Success of query.
-  * @note
-  */
-int32_t QueryPll( ExtensibleChip * i_chip,
-                        bool & o_result)
-{
-    #define PRDF_FUNC "[Proc::QueryPll] "
-
-    int32_t rc = SUCCESS;
-    o_result = false;
-
-    SCAN_COMM_REGISTER_CLASS * TP_LFIR =
-                i_chip->getRegister("TP_LFIR");
-    SCAN_COMM_REGISTER_CLASS * TP_LFIRmask =
-                i_chip->getRegister("TP_LFIR_MASK");
-
-    do
-    {
-        rc = TP_LFIR->Read();
-        if (rc != SUCCESS) break;
-
-        rc = TP_LFIRmask->Read();
-        if (rc != SUCCESS) break;
-
-        if(TP_LFIR->IsBitSet(PLL_DETECT_P8) &&
-           !TP_LFIRmask->IsBitSet(PLL_DETECT_P8))
-        {
-            o_result = true;
-        }
-
-    } while(0);
-
-    if( rc != SUCCESS )
-    {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
-                 i_chip->GetId());
-    }
-
-    return rc;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( Proc, QueryPll );
-
-
-/**
   * @brief Query the PLL chip for a Proc PLL error
   * @param  i_chip P8 chip
   * @param o_result set to true in the presence of PLL error
@@ -178,35 +130,18 @@ int32_t QueryProcPll( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
     o_result = false;
 
-    SCAN_COMM_REGISTER_CLASS * TP_LFIR =
-                     i_chip->getRegister("TP_LFIR");
-    SCAN_COMM_REGISTER_CLASS * TP_LFIRmask =
-                     i_chip->getRegister("TP_LFIR_MASK");
     MODEL procModel = getProcModel( i_chip->GetChipHandle() );
+
+    // Next check for the error reg bits in the chiplets
+    P8DataBundle * procdb = getDataBundle( i_chip );
+    P8DataBundle::ProcPllErrRegList & procPllErrRegList =
+        procdb->getProcPllErrRegList();
+
+    // Always get a list here since this is the entry point
+    GetProcPllErrRegList( i_chip, procPllErrRegList );
 
     do
     {
-        rc = TP_LFIR->Read();
-        if (rc != SUCCESS) break;
-
-        rc = TP_LFIRmask->Read();
-        if (rc != SUCCESS) break;
-
-        // First check for LFIR
-        if( !(TP_LFIR->IsBitSet(PLL_DETECT_P8) &&
-              !(TP_LFIRmask->IsBitSet(PLL_DETECT_P8))) )
-        {
-            break;
-        }
-
-        // Next check for the error reg bits in the chiplets
-        P8DataBundle * procdb = getDataBundle( i_chip );
-        P8DataBundle::ProcPllErrRegList & procPllErrRegList =
-                             procdb->getProcPllErrRegList();
-
-        // Always get a list here since this is the entry point
-        GetProcPllErrRegList( i_chip, procPllErrRegList );
-
         P8DataBundle::ProcPllErrRegListIter itr = procPllErrRegList.begin();
         for( ; itr != procPllErrRegList.end(); ++itr)
         {
@@ -238,6 +173,12 @@ int32_t QueryProcPll( ExtensibleChip * i_chip,
 
     } while(0);
 
+    // clear the PLL Err Reg list if no pll error was found
+    if(false == o_result)
+    {
+        procPllErrRegList.clear();
+    }
+
     if( rc != SUCCESS )
     {
         PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
@@ -264,10 +205,6 @@ int32_t QueryPciPll( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
     o_result = false;
 
-    SCAN_COMM_REGISTER_CLASS * TP_LFIR =
-                i_chip->getRegister("TP_LFIR");
-    SCAN_COMM_REGISTER_CLASS * TP_LFIRmask =
-                i_chip->getRegister("TP_LFIR_MASK");
     SCAN_COMM_REGISTER_CLASS * pciErrReg =
                 i_chip->getRegister("PCI_ERROR_REG");
     SCAN_COMM_REGISTER_CLASS * pciConfigReg =
@@ -275,21 +212,13 @@ int32_t QueryPciPll( ExtensibleChip * i_chip,
 
     do
     {
-        rc = TP_LFIR->Read();
-        if (rc != SUCCESS) break;
-
-        rc = TP_LFIRmask->Read();
-        if (rc != SUCCESS) break;
-
         rc = pciErrReg->Read();
         if (rc != SUCCESS) break;
 
         rc = pciConfigReg->Read();
         if (rc != SUCCESS) break;
 
-        if(TP_LFIR->IsBitSet(PLL_DETECT_P8) &&
-           !TP_LFIRmask->IsBitSet(PLL_DETECT_P8) &&
-           pciErrReg->IsBitSet(PLL_ERROR_BIT) &&
+        if(pciErrReg->IsBitSet(PLL_ERROR_BIT) &&
            !pciConfigReg->IsBitSet(PLL_ERROR_MASK))
         {
             o_result = true;
@@ -308,6 +237,61 @@ int32_t QueryPciPll( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Proc, QueryPciPll );
+
+/**
+  * @brief Query the PLL chip for a PLL error on P8
+  * @param  i_chip P8 Pci chip
+  * @param o_result set to true in the presence of PLL error
+  * @returns Failure or Success of query.
+  * @note
+  */
+int32_t QueryPll( ExtensibleChip * i_chip,
+                        bool & o_result)
+{
+    #define PRDF_FUNC "[Proc::QueryPll] "
+
+    int32_t rc = SUCCESS;
+    o_result = false;
+
+    SCAN_COMM_REGISTER_CLASS * TP_LFIR =
+                i_chip->getRegister("TP_LFIR");
+    SCAN_COMM_REGISTER_CLASS * TP_LFIRmask =
+                i_chip->getRegister("TP_LFIR_MASK");
+
+    do
+    {
+        rc = TP_LFIR->Read();
+        if (rc != SUCCESS) break;
+
+        rc = TP_LFIRmask->Read();
+        if (rc != SUCCESS) break;
+
+        if( ! (TP_LFIR->IsBitSet(PLL_DETECT_P8) &&
+               !TP_LFIRmask->IsBitSet(PLL_DETECT_P8)) )
+        {
+            // if global pll bit is not set, break out
+            break;
+        }
+
+        rc = QueryPciPll( i_chip, o_result );
+        if ((rc != SUCCESS) || (true == o_result)) break;
+
+        rc = QueryProcPll( i_chip, o_result );
+        if ((rc != SUCCESS) || (true == o_result)) break;
+
+    } while(0);
+
+    if( rc != SUCCESS )
+    {
+        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+                 i_chip->GetId());
+    }
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Proc, QueryPll );
 
 
 /**
@@ -490,6 +474,37 @@ int32_t PllPostAnalysis( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Proc, PllPostAnalysis );
+
+/**
+ * @brief   capture additional PLL FFDC
+ * @param   i_chip   P8 chip
+ * @param   i_sc     service data collector
+ * @returns Success
+ */
+int32_t capturePllFfdc( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[capturePllFfdc] "
+
+    TargetHandleList exList = getConnected(
+                        i_chip->GetChipHandle(), TYPE_EX);
+    ExtensibleChip * exChip;
+    TargetHandleList::iterator itr = exList.begin();
+    for( ; itr != exList.end(); ++itr)
+    {
+        exChip = (ExtensibleChip *)systemPtr->GetChip(*itr);
+        if( NULL == exChip ) continue;
+
+        exChip->CaptureErrorData(
+                io_sc.service_data->GetCaptureData(),
+                Util::hashString("PllFIRs"));
+    }
+
+    return SUCCESS;
+
+#undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Proc, capturePllFfdc );
 
 } // end namespace Proc
 

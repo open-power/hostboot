@@ -44,6 +44,8 @@ using namespace TARGETING;
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 //------------------------------------------------------------------------------
 
 int32_t PllDomain::Initialize(void)
@@ -163,6 +165,15 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             l_chip->CaptureErrorData(
                     serviceData.service_data->GetCaptureData(),
                     Util::hashString("PllFIRs"));
+
+            // Call this chip's capturePllFfdc plugin if it exists.
+            ExtensibleChipFunction * l_captureFfdc =
+                l_chip->getExtensibleFunction("capturePllFfdc", true);
+            if ( NULL != l_captureFfdc )
+            {
+                (*l_captureFfdc)( l_chip,
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
+            }
         }
         else if ( !PlatServices::isFunctional(l_chip->GetChipHandle()) )
         {
