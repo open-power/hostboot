@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -22,7 +22,7 @@
 # IBM_PROLOG_END_TAG
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/pll_accessors
 
-VPATH += pll_accessors
+VPATH += ${HWPPATH}/pll_accessors
 
 OBJS += getPllRingAttr.o
 OBJS += getPllRingInfoAttr.o

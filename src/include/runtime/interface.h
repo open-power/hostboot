@@ -116,6 +116,24 @@ typedef struct hostInterfaces
      **/
     uint64_t (*get_reserved_mem)(const char*);
 
+    /**
+     * @brief  Force a core to be awake, or clear the force
+     * @param[in] i_core  Core to wake (based on devtree defn)
+     * @param[in] i_mode  0=force awake
+     *                    1=clear force
+     *                    2=clear all previous forces
+     * @return rc non-zero on error
+     */
+    int (*wakeup)(uint32_t i_core, uint32_t i_mode );
+
+    /**
+     * @brief Delay/sleep for at least the time given
+     * @param[in] seconds
+     * @param[in] nano seconds
+     */
+    void (*nanosleep)(uint64_t i_seconds, uint64_t i_nano_seconds);
+
+
     // Reserve some space for future growth.
     void (*reserved[32])(void);
 

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -22,7 +22,7 @@
 # IBM_PROLOG_END_TAG
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/winkle_ring_accessors
 
-VPATH += winkle_ring_accessors
+VPATH += ${HWPPATH}/winkle_ring_accessors
 
 OBJS += getL3DeltaDataAttr.o
 

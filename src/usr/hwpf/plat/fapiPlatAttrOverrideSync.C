@@ -51,10 +51,12 @@ namespace fapi
 // Global Variables
 //******************************************************************************
 
+#ifndef __HOSTBOOT_RUNTIME
 // Set by a debug tool to directly apply an Attribute Override
 TARGETING::AttributeTank::AttributeHeader g_attrOverrideHeader;
 uint8_t g_attrOverride[AttrOverrideSync::MAX_DIRECT_OVERRIDE_ATTR_SIZE_BYTES];
 uint8_t g_attrOverrideFapiTank = 0;
+#endif
 
 //******************************************************************************
 // Apply a HWPF Attribute Override written directly into Hostboot memory from
@@ -62,6 +64,7 @@ uint8_t g_attrOverrideFapiTank = 0;
 //******************************************************************************
 void directOverride()
 {
+#ifndef __HOSTBOOT_RUNTIME
     // Apply the attribute override
     if (g_attrOverrideFapiTank)
     {
@@ -129,6 +132,7 @@ void directOverride()
             g_attrOverrideHeader.iv_valSize,
             &g_attrOverride);
     }
+#endif
 }
 
 //******************************************************************************
@@ -146,6 +150,7 @@ AttrOverrideSync::~AttrOverrideSync() {}
 //******************************************************************************
 void AttrOverrideSync::monitorForFspMessages()
 {
+#ifndef __HOSTBOOT_RUNTIME
     FAPI_IMP("monitorForFspMessages starting");
 
     // Register a message queue with the mailbox
@@ -253,6 +258,7 @@ void AttrOverrideSync::monitorForFspMessages()
             msg_free(l_pMsg);
         }
     }
+#endif
 }
 
 //******************************************************************************
@@ -264,6 +270,7 @@ errlHndl_t AttrOverrideSync::sendAttrsToFsp(
 {
     errlHndl_t l_pErr = NULL;
 
+#ifndef __HOSTBOOT_RUNTIME
     std::vector<TARGETING::AttributeTank::AttributeSerializedChunk>::iterator
         l_itr;
 
@@ -305,6 +312,7 @@ errlHndl_t AttrOverrideSync::sendAttrsToFsp(
         (*l_itr).iv_pAttributes = NULL;
     }
     io_attributes.clear();
+#endif
 
     return l_pErr;
 }
@@ -312,6 +320,7 @@ errlHndl_t AttrOverrideSync::sendAttrsToFsp(
 //******************************************************************************
 void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
 {
+#ifndef __HOSTBOOT_RUNTIME
     const uint32_t MAILBOX_CHUNK_SIZE = 4096;
 
     if (MBOX::mailbox_enabled())
@@ -430,11 +439,13 @@ void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
             }
         }
     }
+#endif
 }
 
 //******************************************************************************
 void AttrOverrideSync::getAttrOverridesFromFsp()
 {
+#ifndef __HOSTBOOT_RUNTIME
     FAPI_IMP("Requesting Attribute Overrides from the FSP");
 
     errlHndl_t l_pErr = NULL;
@@ -458,6 +469,7 @@ void AttrOverrideSync::getAttrOverridesFromFsp()
 
     msg_free(l_pMsg);
     l_pMsg = NULL;
+#endif
 }
 
 //******************************************************************************

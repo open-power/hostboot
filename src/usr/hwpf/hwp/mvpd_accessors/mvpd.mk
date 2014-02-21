@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -23,7 +23,7 @@
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/mvpd_accessors
 
-VPATH += mvpd_accessors
+VPATH += ${HWPPATH}/mvpd_accessors
 
 OBJS += getMvpdRing.o \
         getMBvpdRing.o \

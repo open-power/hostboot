@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -265,6 +265,7 @@ public:
      */
     void testHwpf5()
     {
+#ifndef __HOSTBOOT_RUNTIME
         typedef struct ifScom {
             uint64_t addr;
             uint64_t origData;
@@ -546,6 +547,7 @@ public:
             TS_TRACE("testHwpf5: Unit Test passed. "
                      "fapiHwpExecInitFile passed.");
         }
+#endif
     }
 
     /**
@@ -554,6 +556,7 @@ public:
      */
     void testHwpf6()
     {
+#ifndef __HOSTBOOT_RUNTIME
         fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
 
         // Get the sys target handle
@@ -640,6 +643,7 @@ public:
                 }
             }
         }
+#endif
     }
 
 //    // unit test breakpoint
@@ -698,6 +702,7 @@ public:
      */
     void testHwpf9()
     {
+#ifndef __HOSTBOOT_RUNTIME
         errlHndl_t l_err = NULL;
 
         // Look for functional DIMMs
@@ -749,6 +754,7 @@ public:
         {
             TS_TRACE("testHwpf9: No functional DIMMs found, skipping test");
         }
+#endif
     }
 
     /**

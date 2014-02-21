@@ -73,12 +73,12 @@ RUNTIME_OBJECTS = rt_start.o rt_main.o rt_console.o rt_stdlib.o rt_sync.o \
                   rt_assert.o rt_vfs.o rt_task.o
 
 RUNTIME_MODULES = trace_rt errl_rt targeting_rt util_rt devicefw_rt \
-		  xscom_rt scom_rt vpd_rt
+		  xscom_rt scom_rt vpd_rt ecmddatabuffer fapi_rt hwp_rt plat_rt
 
 RUNTIME_DATA_MODULES =
 RUNTIME_TESTCASE_MODULES = cxxtest_rt testsyslib_rt testtargeting_rt \
                            testxscom_rt testerrl_rt testdevicefw_rt \
-			               testscom_rt testutil_rt testvpd_rt
+			               testscom_rt testutil_rt testvpd_rt testhwpf_rt
 
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic

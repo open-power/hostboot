@@ -99,6 +99,9 @@ enum ReturnCodes
 
     // Operation to AlterDisplay unit failed because it is locked
     FAPI_RC_PLAT_ERR_ADU_LOCKED = FAPI_RC_PLAT_MASK | 0x02,
+
+    // Operation not supported by HB runtime
+    FAPI_RC_PLAT_NOT_SUPPORTED_AT_RUNTIME = FAPI_RC_PLAT_MASK | 0x03,
 };
 
 }

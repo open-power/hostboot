@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -23,21 +23,11 @@
 ROOTPATH = ../../../..
 MODULE = plat
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+# include common fapi OBJs between HB and HBRT
+include plat.mk
 
-OBJS = fapiPlatHwAccess.o \
-       fapiPlatHwpInvoker.o \
-       fapiPlatReturnCodeDataRef.o \
-       fapiPlatSystemConfig.o \
-       fapiPlatTarget.o \
-       fapiPlatUtil.o \
-       fapiPlatAttributeService.o \
-       fapiPlatMvpdAccess.o \
-       fapiPlatMBvpdAccess.o \
-       fapiPlatTask.o \
-       fapiPlatAttrOverrideSync.o
+OBJS += fapiPlatTask.o
+
+SUBDIRS = runtime.d
 
 include ${ROOTPATH}/config.mk

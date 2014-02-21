@@ -38,6 +38,10 @@
 #include <initservice/initsvcbreakpoint.H>
 #include <errl/errlentry.H>
 
+#ifdef __HOSTBOOT_RUNTIME
+#include <runtime/interface.h>
+#include <targeting/common/targetservice.H>
+#endif
 
 //******************************************************************************
 // Trace descriptors
@@ -84,7 +88,14 @@ void fapiAssert(bool i_expression)
 fapi::ReturnCode fapiDelay(uint64_t i_nanoSeconds, uint64_t i_simCycles)
 {
     FAPI_DBG( INFO_MRK "delay %lld nanosec", i_nanoSeconds );
+#ifndef __HOSTBOOT_RUNTIME
     nanosleep( 0, i_nanoSeconds );
+#else
+    if(g_hostInterfaces && g_hostInterfaces->nanosleep)
+    {
+        g_hostInterfaces->nanosleep(0, i_nanoSeconds);
+    }
+#endif
     return fapi::FAPI_RC_SUCCESS;
 }
 
@@ -159,6 +170,7 @@ bool platIsScanTraceEnabled()
 fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
     const char * i_file, const char *& o_addr, size_t & o_size)
 {
+#ifndef __HOSTBOOT_RUNTIME
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     errlHndl_t l_pError = NULL;
     o_size = 0;
@@ -190,6 +202,9 @@ fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
                       *(reinterpret_cast<const uint64_t*>(o_addr)));
         }
     }
+#else
+    fapi::ReturnCode l_rc = fapi::FAPI_RC_PLAT_NOT_SUPPORTED_AT_RUNTIME;
+#endif
 
     return l_rc;
 }
@@ -200,6 +215,7 @@ fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
 fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
     size_t & io_size)
 {
+#ifndef __HOSTBOOT_RUNTIME
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     errlHndl_t l_pError = NULL;
 
@@ -217,6 +233,9 @@ fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
         io_addr = NULL;
         io_size = 0;
     }
+#else
+    fapi::ReturnCode l_rc = fapi::FAPI_RC_PLAT_NOT_SUPPORTED_AT_RUNTIME;
+#endif
 
     return l_rc;
 }
@@ -226,7 +245,9 @@ fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
 //******************************************************************************
 void fapiBreakPoint( uint32_t i_info)
 {
+#ifndef __HOSTBOOT_RUNTIME
     INITSERVICE::iStepBreakPoint( i_info );
+#endif
 }
 
 //******************************************************************************
@@ -235,9 +256,34 @@ void fapiBreakPoint( uint32_t i_info)
 fapi::ReturnCode fapiSpecialWakeup(const fapi::Target & i_target,
                                    const bool i_enable)
 {
+    fapi::ReturnCode fapi_rc = fapi::FAPI_RC_SUCCESS;
+    FAPI_INF("fapiSpecialWakeup");
+#ifdef __HOSTBOOT_RUNTIME
+    if(g_hostInterfaces && g_hostInterfaces->wakeup)
+    {
+        // TODO Support wakeup RTC = 98665
+        // We need to merge all rt - sapphire tareting id stuff into a
+        // common runtime targeting util - right now some is in xscom and some
+        // is in RT_OCC.
+
+        //TARGETING::Target* target =
+        //    reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+        //uint64_t core_id = 0;
+        //int rc = g_hostInterfaces->wakeup(core_id,0);
+        //if(rc)
+        //{
+        //    FAPI_ERR("CPU core wakeup call to hypervisor returned rc = %d",
+        //             rc);
+
+            // Make error log
+
+        //}
+    }
+#endif
     // On Hostboot, processor cores cannot sleep so return success to the
     // fapiSpecialWakeup enable/disable calls
-    return fapi::FAPI_RC_SUCCESS;
+    return fapi_rc;
 }
 
 }

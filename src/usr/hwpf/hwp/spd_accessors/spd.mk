@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -23,7 +23,7 @@
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/spd_accessors
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/spd_accessors
 
-VPATH += spd_accessors
+VPATH += ${HWPPATH}/spd_accessors
 
 OBJS += getSpdAttrAccessor.o
 

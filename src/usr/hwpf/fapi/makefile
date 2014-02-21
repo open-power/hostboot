@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2011,2014
 #
 # p1
 #
@@ -23,22 +23,9 @@
 ROOTPATH = ../../../..
 MODULE = fapi
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
+SUBDIRS = runtime.d
 
-CFLAGS += -D_NO_SPY_ACCESS=1
-
-OBJS =  fapiReturnCode.o \
-        fapiReturnCodeDataRef.o \
-        fapiTarget.o \
-        fapiHwAccess.o \
-        fapiErrorInfo.o \
-        fapiAttributeService.o \
-        fapiChipEcFeature.o \
-        fapiCollectRegFfdc.o
+include fapi.mk
 
 include ${ROOTPATH}/config.mk
 

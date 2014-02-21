@@ -650,7 +650,7 @@ uint32_t rcTest12()
     l_entries[5].iv_type = fapi::ReturnCode::EI_TYPE_HW_CALLOUT;
     l_entries[5].hw_callout.iv_hw = fapi::HwCallouts::MEM_REF_CLOCK;
     l_entries[5].hw_callout.iv_calloutPriority = fapi::CalloutPriorities::LOW;
-
+    l_entries[5].hw_callout.iv_refObjIndex = 0xff;
     l_rc.addErrorInfo(l_objects, l_entries, 6);
 
     do

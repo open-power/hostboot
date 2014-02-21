@@ -21,41 +21,25 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
+HWPPATH = ./
 MODULE = hwp
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 
-#   CompressedScanData struct needed for getRepairRings()
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
+include hwp.mk
 
-OBJS = fapiTestHwp.o \
-       fapiTestHwpError.o \
-       fapiTestHwpFfdc.o \
-       fapiTestHwpConfig.o \
-       fapiTestHwpDq.o \
-       fapiHwpExecInitFile.o \
-       dimmBadDqBitmapFuncs.o \
-       dimmBadDqBitmapAccessHwp.o \
-       hwpisteperror.o  \
-       hwpistepud.o
+OBJS += fapiTestHwp.o \
+        fapiTestHwpDq.o \
+        fapiHwpExecInitFile.o \
+        hwpisteperror.o  \
+        hwpistepud.o
 
 SUBDIRS	=   dmi_training.d  sbe_centaur_init.d mc_config.d \
             dram_training.d activate_powerbus.d build_winkle_images.d \
             core_activate.d dram_initialization.d edi_ei_initialization.d \
             establish_system_smp.d bus_training.d occ.d tod_init.d \
             nest_chiplets.d start_payload.d thread_activate.d slave_sbe.d \
-            pstates.d proc_hwreconfig.d
+            pstates.d proc_hwreconfig.d runtime.d
 
-include mvpd_accessors/mvpd.mk
-include spd_accessors/spd.mk
-include pll_accessors/pll.mk
-include winkle_ring_accessors/winkle_ring.mk
-include utility_procedures/utils.mk
-include chip_accessors/chip.mk
 
 include ${ROOTPATH}/config.mk
