@@ -610,10 +610,15 @@ group gOccFir filter singlebit
      */
     (OccFir, bit(49)) ? callout2ndLvlMedThr1;
 
-    /** OCCFIR[50|51|52|53|54|55|56|57|58|59|60|61]
+    /** OCCFIR[50]
+     *  OCC initiated attention
+     */
+    (OccFir, bit(50)) ? SelfMedThr1NoGard;
+
+    /** OCCFIR[51|52|53|54|55|56|57|58|59|60|61]
      *  OCC_SCOM_OCCLFIR_SPARE_FIR
      */
-    (OccFir, bit(50|51|52|53|54|55|56|57|58|59|60|61)) ? defaultMaskedError;
+    (OccFir, bit(51|52|53|54|55|56|57|58|59|60|61)) ? defaultMaskedError;
 
     /** OCCFIR[62|63]
      *  OCC_SCOM_OCCFIR_FIR_PARITY_ERR_DUP
@@ -1354,3 +1359,9 @@ actionclass selfCapThr32TopReConfig
     funccall("requestTopologySwitch");
 };
 
+/** callouts Proc on first instance, but doesn't gard */
+actionclass SelfMedThr1NoGard
+{
+    SelfMedThr1;
+    gard(NoGard);
+};
