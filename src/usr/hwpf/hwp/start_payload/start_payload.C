@@ -232,14 +232,6 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             break;
         }
 
-        // Get the Payload kind -- various tasks rely on payload
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget( sys );
-        assert(sys != NULL);
-        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
-          = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
-
-
         //Start OCC in AVP (or Sapphire mode for now)
         if( is_avp_load() || is_sapphire_load() )
         {
@@ -334,7 +326,7 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             }
 
         }
-        else if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
+        else if( is_phyp_load() )
         {
             //If PHYP then clear out the PORE BARs
             l_err = clearPoreBars();
@@ -362,7 +354,7 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 break;
             }
         }
-        else if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
+        else if( !is_avp_load() )
         {
             // Write the HostServices attributes into mainstore
             //  for our testcases
