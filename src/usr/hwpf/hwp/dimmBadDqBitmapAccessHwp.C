@@ -20,8 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-// $Id: dimmBadDqBitmapAccessHwp.C,v 1.12 2014/01/14 22:01:08 mjjones Exp $
+// $Id: dimmBadDqBitmapAccessHwp.C,v 1.14 2014/02/24 22:17:22 whs Exp $
 /**
  *  @file dimmBadDqBitmapAccessHwp.C
  *
@@ -49,6 +48,8 @@
  *                                                  ATTR_VPD_DIMM_SPARE
  *                          smcprek     01/14/2014  Perform Reconfig Loop on
  *                                                  Bad DQ set
+ *                          whs         02/24/2014  Capture bad DQs as FFDC
+ *                                                  in mnfg error logs
  */
 
 #include <dimmBadDqBitmapAccessHwp.H>
@@ -332,6 +333,7 @@ fapi::ReturnCode dimmBadDqBitmapGet(
         if (i_allMnfgFlags &
             fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS)
         {
+
             // Flag to set if the discrepancies (described below)
             // are found
             bool mfgModeBadBitsPresent = false;
@@ -397,6 +399,22 @@ fapi::ReturnCode dimmBadDqBitmapGet(
                          " extra bad bits set for DIMM: %d",
                          l_dimmPos);
                 const fapi::Target & DIMM = i_dimm;
+                uint8_t (&CLEAN_BAD_DQ_BITMAP_RANK0)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = l_data[0];
+                uint8_t (&CLEAN_BAD_DQ_BITMAP_RANK1)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = l_data[1];
+                uint8_t (&CLEAN_BAD_DQ_BITMAP_RANK2)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = l_data[2];
+                uint8_t (&CLEAN_BAD_DQ_BITMAP_RANK3)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = l_data[3];
+                uint8_t (&CURRENT_BAD_DQ_BITMAP_RANK0)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = o_data[0];
+                uint8_t (&CURRENT_BAD_DQ_BITMAP_RANK1)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = o_data[1];
+                uint8_t (&CURRENT_BAD_DQ_BITMAP_RANK2)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = o_data[2];
+                uint8_t (&CURRENT_BAD_DQ_BITMAP_RANK3)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = o_data[3];
                 FAPI_SET_HWP_ERROR(l_rc,
                     RC_BAD_DQ_MFG_MODE_BITS_FOUND_DURING_GET);
                 fapiLogError(l_rc);
@@ -576,6 +594,30 @@ fapi::ReturnCode dimmBadDqBitmapSet(
                          " extra bad bits set for DIMM: %d",
                          l_dimmPos);
                 const fapi::Target & DIMM = i_dimm;
+                uint8_t (&CLEAN_BAD_DQ_BITMAP_RANK0)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = l_data[0];
+                uint8_t (&CLEAN_BAD_DQ_BITMAP_RANK1)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = l_data[1];
+                uint8_t (&CLEAN_BAD_DQ_BITMAP_RANK2)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = l_data[2];
+                uint8_t (&CLEAN_BAD_DQ_BITMAP_RANK3)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] = l_data[3];
+                uint8_t (&UPDATE_BAD_DQ_BITMAP_RANK0)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] =
+                       const_cast< uint8_t (&)
+                    [DIMM_DQ_RANK_BITMAP_SIZE]>(i_data[0]);
+                uint8_t (&UPDATE_BAD_DQ_BITMAP_RANK1)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] =
+                       const_cast< uint8_t (&)
+                    [DIMM_DQ_RANK_BITMAP_SIZE]>(i_data[1]);
+                uint8_t (&UPDATE_BAD_DQ_BITMAP_RANK2)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] =
+                       const_cast< uint8_t (&)
+                    [DIMM_DQ_RANK_BITMAP_SIZE]>(i_data[2]);
+                uint8_t (&UPDATE_BAD_DQ_BITMAP_RANK3)
+                    [DIMM_DQ_RANK_BITMAP_SIZE] =
+                       const_cast< uint8_t (&)
+                    [DIMM_DQ_RANK_BITMAP_SIZE]>(i_data[3]);
                 FAPI_SET_HWP_ERROR(l_rc,
                     RC_BAD_DQ_MFG_MODE_BITS_FOUND_DURING_SET);
                 fapiLogError(l_rc);
