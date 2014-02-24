@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -185,7 +185,7 @@ uint64_t PageManager::availPages()
 }
 
 PageManager::PageManager()
-    : iv_pagesAvail(0), iv_pagesTotal(0), iv_lock(0)
+    : iv_pagesAvail(0), iv_pagesTotal(0), iv_lock()
 {
     this->_initialize();
 }
@@ -295,7 +295,23 @@ void PageManager::_initialize()
 
 void* PageManager::_allocatePage(size_t n, bool userspace)
 {
+    // The allocator was designed to be lockless.  We have ran into a problem
+    // in Brazos where all threads (over 256) were trying to allocate a page
+    // at the same time.  This resulted in many of them trying to break a large
+    // page chunk into smaller fragments.  The later threads ended up seeing
+    // no chunks available and claimed we were out of memory.
+    //
+    // Simple solution is to just put a lock around the page allocation.  All
+    // calls to this function are guarenteed, by PageManager::allocatePage, to
+    // be from kernel space so we cannot run into any dead lock situations by
+    // using a spinlock here.
+    //
+    // RTC: 98271
+    iv_lock.lock();
+
     PageManagerCore::page_t* page = iv_heap.allocatePage(n);
+
+    iv_lock.unlock();
 
     // If the allocation came from kernel-space and normal allocation
     // was unsuccessful, pull a page off the reserve heap.

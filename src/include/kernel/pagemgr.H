@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/* COPYRIGHT International Business Machines Corp. 2010,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -219,7 +219,7 @@ class PageManager
 
         uint64_t iv_pagesAvail;         //!< free pages (for debug)
         uint64_t iv_pagesTotal;         //!< Total number o fpages
-        uint64_t iv_lock;               //!< lock for checking low heap
+        Spinlock iv_lock;               //!< lock for allocating
 
         PageManagerCore iv_heap;        //!< Main heap
         PageManagerCore iv_heapKernel;  //!< kernel heap for out-of-mem
