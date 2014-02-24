@@ -556,6 +556,15 @@ public:
      */
     errlHndl_t deconfigureAssocProc();
 
+    /**
+     *  @brief Sets iv_XABusEndpointDeconfigured
+     *
+     *  @param[in] deconfig Allows iv_XABusEndpointDeconfigured to be set
+     *                      to true/false
+     *
+     */
+    void setXABusEndpointDeconfigured(bool deconfig);
+
 private:
 
     // Mutex for thread safety

@@ -435,6 +435,30 @@ errlHndl_t discoverTargets()
 
         } // for pTarget_it
 
+        // Check for non-present Procs and if found, trigger
+        // DeconfigGard::_invokeDeconfigureAssocProc() to run by setting
+        // setXABusEndpointDeconfigured to true
+        PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
+        TargetHandleList l_procs;
+        targetService().getAssociated(l_procs,
+                                      pSys,
+                                      TargetService::CHILD,
+                                      TargetService::ALL,
+                                      &predProc);
+
+        for (TargetHandleList::const_iterator
+             l_procsIter = l_procs.begin();
+             l_procsIter != l_procs.end();
+             ++l_procsIter)
+        {
+            if ( !(*l_procsIter)->getAttr<ATTR_HWAS_STATE>().present )
+            {
+                HWAS_INF("discoverTargets: Proc not present HUID=0x%X",
+                (*l_procsIter)->getAttr<ATTR_HUID>());
+                HWAS::theDeconfigGard().setXABusEndpointDeconfigured(true);
+            }
+        }
+
         // PR keyword processing - potentially reduce the number of ex/core
         //  units that are functional based on what's in the PR keyword.
         //  call to restrict EX units, marking bad units as present=false;
@@ -583,6 +607,8 @@ errlHndl_t discoverTargets()
                          l_affinityTarget->getAttr<ATTR_HUID>() );
             }
         }
+
+
 
     } while (0);
 

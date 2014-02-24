@@ -753,13 +753,11 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
         // Clear flag as this function is called multiple times
         iv_XABusEndpointDeconfigured = false;
 
-        // Define and populate vector of present procs
+        // Define and populate vector of procs
         // Define predicate
         PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
         PredicateHwas predPres;
         predPres.present(true);
-        PredicatePostfixExpr presProc;
-        presProc.push(&predProc).push(&predPres).And();
 
         // Get top level target
         Target * l_pSys;
@@ -770,31 +768,34 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
         targetService().
             masterProcChipTargetHandle(l_pMasterProcTarget);
 
+
         // Populate vector
-        TargetHandleList l_presProcs;
-        targetService().getAssociated(l_presProcs,
+        TargetHandleList l_procs;
+        targetService().getAssociated(l_procs,
                                       l_pSys,
                                       TargetService::CHILD,
                                       TargetService::ALL,
-                                      &presProc);
+                                      &predProc);
+
         // Sort by HUID
-        std::sort(l_presProcs.begin(),
-                  l_presProcs.end(), compareTargetHuid);
+        std::sort(l_procs.begin(),
+                  l_procs.end(), compareTargetHuid);
 
         // General predicate to determine if target is functional
         PredicateIsFunctional isFunctional;
 
-        // Define and populate vector of present bus endpoint chiplets
+        // Define and populate vector of present A bus endpoint chiplets and
+        // all X bus endpoint chiplets
         PredicateCTM predXbus(CLASS_UNIT, TYPE_XBUS);
         PredicateCTM predAbus(CLASS_UNIT, TYPE_ABUS);
-        PredicatePostfixExpr busPres;
-        busPres.push(&predXbus).push(&predAbus).Or().push(&predPres).And();
+        PredicatePostfixExpr busses;
+        busses.push(&predAbus).push(&predPres).And().push(&predXbus).Or();
 
-        // Iterate through present procs and populate l_procInfo
+        // Iterate through procs and populate l_procInfo
         // vector with system information regarding procs
         for (TargetHandleList::const_iterator
-             l_procsIter = l_presProcs.begin();
-             l_procsIter != l_presProcs.end();
+             l_procsIter = l_procs.begin();
+             l_procsIter != l_procs.end();
              ++l_procsIter)
         {
             ProcInfo * l_ProcInfo = new ProcInfo();
@@ -833,23 +834,23 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
              ++l_procInfoIter)
         {
             // Populate vector of bus endpoints associated with this proc
-            TargetHandleList l_presentBusChiplets;
-            targetService().getAssociated(l_presentBusChiplets,
+            TargetHandleList l_busChiplets;
+            targetService().getAssociated(l_busChiplets,
                                          (*l_procInfoIter)->iv_pThisProc,
                                          TargetService::CHILD,
                                          TargetService::IMMEDIATE,
-                                         &busPres);
+                                         &busses);
             // Sort by HUID
-            std::sort(l_presentBusChiplets.begin(),
-                l_presentBusChiplets.end(), compareTargetHuid);
+            std::sort(l_busChiplets.begin(),
+                l_busChiplets.end(), compareTargetHuid);
             // iv_pA/XProcs[] and iv_A/XDeconfigured[] indexes
             uint8_t xBusIndex = 0;
             uint8_t aBusIndex = 0;
 
-            // Iterate through present bus endpoint chiplets
+            // Iterate through bus endpoint chiplets
             for (TargetHandleList::iterator
-                 l_busIter = l_presentBusChiplets.begin();
-                 l_busIter != l_presentBusChiplets.end();
+                 l_busIter = l_busChiplets.begin();
+                 l_busIter != l_busChiplets.end();
                  ++l_busIter)
             {
                 // Declare peer endpoint target
@@ -925,7 +926,8 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc()
              l_procInfoIter != l_procInfo.end();
              ++l_procInfoIter)
         {
-            if ((*l_procInfoIter)->iv_deconfigured)
+            if ((*l_procInfoIter)->iv_deconfigured &&
+                (isFunctional((*l_procInfoIter)->iv_pThisProc)))
             {
                 // Deconfigure marked procs
                 HWAS_INF("_invokeDeconfigureAssocProc is "
@@ -1961,6 +1963,14 @@ errlHndl_t DeconfigGard::_symmetryValidation(
         }// STEP 2
     }while(0);
     return l_errlHdl;
+}
+
+//******************************************************************************
+
+void DeconfigGard::setXABusEndpointDeconfigured(bool deconfig)
+{
+    HWAS_INF("Set iv_XABusEndpointDeconfigured");
+    iv_XABusEndpointDeconfigured = deconfig;
 }
 
 } // namespce HWAS
