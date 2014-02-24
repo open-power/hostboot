@@ -13278,6 +13278,24 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MSS_NEST_CAPABLE_FREQUENCIES</id>
+    <description>
+        The NEST frequencies the memory chip can run at computed by the mss_freq.  The possibilities are ORed together.  The platform uses these value and the MRW to determine what frequency to boot the fabric (nest) if it can. There are two values: 8G and 9.6G
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_NEST_CAPABLE_FREQUENCIES</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
 
 

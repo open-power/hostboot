@@ -1214,6 +1214,7 @@
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
     <attribute><id>DMI_DFE_OVERRIDE</id></attribute>
     <attribute><id>MSS_INIT_STATE</id></attribute>
+    <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->

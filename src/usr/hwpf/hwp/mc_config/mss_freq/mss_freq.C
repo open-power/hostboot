@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.22 2013/06/27 20:51:49 jdsloat Exp $
+// $Id: mss_freq.C,v 1.23 2014/02/06 00:08:38 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -62,7 +62,7 @@
 //  1.20   | jdsloat  | 02/12/13 | Added path for freq_override
 //  1.21   | jdsloat  | 02/12/13 | Added Debug messages
 //  1.22   | jdsloat  | 06/27/13 | Fixed overridng RC error that results in coredump on no centaur SPD info.
-
+//  1.23   | jdsloat  | 02/05/14 | Added support for DMI capable frequecies via ATTR_MSS_NEST_CAPABLE_FREQUENCIES
 //
 // This procedure takes CENTAUR as argument.  for each DIMM (under each MBA)
 // DIMM SPD attributes are read to determine optimal DRAM frequency
@@ -129,6 +129,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
   uint8_t num_ranks_total = 0;
   uint32_t  l_freq_override = 0;
   uint8_t l_override_path = 0;
+  uint8_t l_nest_capable_frequencies = 0; 
 
   // Get associated MBA's on this centaur                                                                                      
   l_rc=fapiGetChildChiplets(i_target_memb, fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
@@ -552,6 +553,22 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	  FAPI_ERR("Unsupported frequency:  DIMM Freq calculated > 2133 MHz: %d", l_dimm_freq_min);
 	  FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_FREQ_CALCULATED);
 	}
+  }
+
+  if (!l_rc)
+  {
+      // 0x03 = capable of both 8.0G/9.6G, 0x01 = capable of 8.0G, 0x02 = capable 9.6G
+      if ( l_selected_dimm_freq == 1066)
+      {
+	   l_nest_capable_frequencies = 0x01;
+           l_rc = FAPI_ATTR_SET(ATTR_MSS_NEST_CAPABLE_FREQUENCIES, &i_target_memb, l_nest_capable_frequencies);
+      }
+      else
+      {
+	   l_nest_capable_frequencies = 0x02;
+           l_rc = FAPI_ATTR_SET(ATTR_MSS_NEST_CAPABLE_FREQUENCIES, &i_target_memb, l_nest_capable_frequencies);
+      }
+
   }
 
   // set frequency in centaur attribute ATTR_MSS_FREQ
