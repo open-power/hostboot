@@ -213,5 +213,11 @@
 #define PRDF_HWUDUMP( i_errl, i_content, i_huid ) \
   SUCCESS
 
+/**
+ * @brief Interface to indicate errlog that hostboot need to do a
+ *        soft terminate.
+ */
+#define PRDF_SET_TERM_STATE( i_errl ) \
+  i_errl->setTermState( ERRORLOG::TERM_STATE_SOFT )
 
 #endif // __prdfErrlUtil_H

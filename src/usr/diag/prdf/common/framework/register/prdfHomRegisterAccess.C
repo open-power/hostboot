@@ -240,6 +240,8 @@ errlHndl_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
          * @userdata1  PRD Return code =  SCR_ACCESS_FAILED
          * @userdata2  The invalid ID causing the fail
          * @devdesc    Access SCOM failed due to NULL target handle
+         * @custDesc   An internal firmware fault, access failed on hardware
+         *             register.
          * @procedure  EPUB_PRC_SP_CODE
          */
 
@@ -339,7 +341,9 @@ uint32_t HomRegisterAccessScan::Access(BIT_STRING_CLASS & bs,
              * @userdata1  PRD Return code =  SCR_ACCESS_FAILED
              * @userdata2  The invalid ID causing the fail
              * @userdata3  Code location = 0x0001
-             * @devdesc Access Scan failed due to an invalid function unit
+             * @devdesc    Access Scan failed due to an invalid function unit
+             * @custDesc   An internal firmware fault, read failed on hardware
+             *             register.
              * @procedure EPUB_PRC_SP_CODE
              */
             // create an error log
@@ -372,7 +376,9 @@ uint32_t HomRegisterAccessScan::Access(BIT_STRING_CLASS & bs,
          * @userdata1  PRD Return code =  SCR_ACCESS_FAILED
          * @userdata2  The ID for the scan
          * @userdata3  Code location = 0x0002
-         * @devdesc Access Scan failed. PRD does not ever expect to write scan rings.
+         * @devdesc    Access Scan failed. PRD does not ever expect to write scan rings.
+         * @custDesc   An internal firmware fault, write failed on hardware
+         *             register.
          * @procedure EPUB_PRC_SP_CODE
          */
         // create an error log

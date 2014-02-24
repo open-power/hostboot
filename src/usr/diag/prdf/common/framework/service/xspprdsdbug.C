@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2000,2013              */
+/* COPYRIGHT International Business Machines Corp. 2000,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -111,8 +111,10 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
              * @userdata2  0
              * @userdata3  0
              * @userdata4  0
-             * @devdesc input AttnList is empty.
-             * @procedure EPUB_PRC_SP_CODE
+             * @devdesc    input AttnList is empty.
+             * @custDesc   Chip diagnosis did not find any chip with an
+             *             attention.
+             * @procedure  EPUB_PRC_SP_CODE
              */
             PRDF_CREATE_ERRL( g_prd_errlHndl,
                               ERRL_SEV_UNRECOVERABLE, // error on diagnostic

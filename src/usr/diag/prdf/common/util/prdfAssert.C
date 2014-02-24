@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -67,6 +67,7 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
      * @userdata3  0
      * @userdata4  PRD Return code
      * @devdesc    PRD assert
+     * @custDesc   An internal firmware fault.
      * @procedure  EPUB_PRC_SP_CODE
      */
     PRDF_CREATE_ERRL(errl,
@@ -85,6 +86,7 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
     PRDF_ADD_PROCEDURE_CALLOUT(errl, SRCI_PRIORITY_MED, EPUB_PRC_SP_CODE);
     PRDF_SET_RC(errl, PRD_ASSERT);
     PRDF_COLLECT_TRACE(errl, 256);
+    PRDF_SET_TERM_STATE( errl );
     PRDF_COMMIT_ERRL(errl, ERRL_ACTION_SA);
 
     #ifdef  __HOSTBOOT_MODULE

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2004,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -112,6 +112,8 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
              * @userdata2  0x43484950 ("CHIP")
              * @devdesc    Attempted to load chip rule file that lacked
              *             the proper header "PRDRCHIP".
+             * @custDesc   An Internal firmware fault, chip  diagnosis failed to
+             *             initialize.
              */
             PRDF_CREATE_ERRL(l_errl,
                              ERRL_SEV_UNRECOVERABLE,
