@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2013              */
+/* COPYRIGHT International Business Machines Corp. 2003,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -364,6 +364,25 @@ CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
 }
 
 // <-- dg08a
+
+void CaptureData::mergeData(CaptureData & i_cd)
+{
+    DataContainerType l_data = *(i_cd.getData());
+
+    // Remove duplicate entries from secondary capture data
+    for (ConstDataIterator i = data.begin(); i != data.end(); i++)
+    {
+        l_data.remove_if(
+            prdfCompareCaptureDataEntry(i->chipHandle,
+                                          i->address) );
+    }
+
+    // Add secondary capture data to primary one
+    data.insert( data.end(),
+                 l_data.begin(),
+                 l_data.end() );
+}
+
 
 // copy ctor for Data class
 CaptureData::Data::Data(const Data & d):

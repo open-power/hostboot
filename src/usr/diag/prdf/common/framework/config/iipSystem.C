@@ -376,6 +376,11 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
             l_temp_sdc->AddSignatureList(
                            *( serviceData.service_data->GetErrorSignature() ));
+
+            // merge debug scom data from the two analysis
+            l_temp_sdc->GetCaptureData().mergeData(
+                            serviceData.service_data->GetCaptureData());
+
             *serviceData.service_data = *l_temp_sdc;
             delete l_temp_sdc;
 

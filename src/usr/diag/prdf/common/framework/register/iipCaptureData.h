@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2013              */
+/* COPYRIGHT International Business Machines Corp. 1996,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -358,6 +358,45 @@ private:
       RegType __private_storage;
     //Constructor allows a value to be passed in to compare against.
   };
+
+  // Predicate for deciding whether to delete an
+  // element of data from a Capture Data list.
+  class prdfCompareCaptureDataEntry :
+      public std::unary_function<Data &, bool>
+  {
+    public:
+      prdfCompareCaptureDataEntry(
+                    TARGETING::TargetHandle_t chipHandle,
+                    uint16_t address) :
+                    __chipHandle(chipHandle),
+                    __address(address) {};
+      bool operator() (Data &i)
+      {
+        return ((i.chipHandle == __chipHandle) &&
+                (i.address    == __address));
+      };
+
+    private:
+      TARGETING::TargetHandle_t  __chipHandle;
+      uint16_t __address;
+  };
+
+public:
+
+  /**
+   * @brief   Merge scom register data from two captures
+   * @param   i_cd  secondary capture data to merge
+   */
+  void mergeData(CaptureData & i_cd);
+
+  /**
+   * @brief   Get the Scom data pointer
+   * @return  the Scom data pointer
+   */
+  DataContainerType * getData() { return &data; }
+
+
+
 };
 
 } // end namespace PRDF
