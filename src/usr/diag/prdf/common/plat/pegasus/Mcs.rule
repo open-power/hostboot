@@ -287,7 +287,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     (MciFir, bit(20)) ? SelfHighThr1;
 
     /** MCIFIR[21]
-     *  SCOM Register parity Error
+     *  MCIFIRQ_MULTIPLE_REPLAY
      */
     (MciFir, bit(21)) ? defaultMaskedError;
 
@@ -297,7 +297,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     (MciFir, bit(22)) ? calloutConnCenTh1;
 
     /** MCIFIR[23]
-     *  SCOM Register parity Error
+     *  MCIFIRQ_REPLAY_BUFFER_OVERRUN
      */
     (MciFir, bit(23)) ? calloutDmiBusTh1;
 
