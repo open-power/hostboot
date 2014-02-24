@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.62 2014/01/23 19:36:18 sasethur Exp $
+// $Id: mss_mcbist_common.C,v 1.63 2014/02/07 17:17:46 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.63  |adityamd|02/07/14|RAS Review Updates
 //   1.62  |mjjones |01/17/14|RAS Review Updates
 //   1.61  |aditya  |01/15/14|Updated attr ATTR_EFF_CUSTOM_DIMM
 //   1.60  |aditya  |12/20/13|Updated max timeout for Mcbist Polling
@@ -879,10 +880,10 @@ fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,
     {
         FAPI_ERR("poll_mcb:MCBIST failed");
         const fapi::Target & MBA_CHIPLET = i_target_mba;
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_MCBIST_FAILED);
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_MCBIST_TIMEOUT_ERROR);//We decided to use TIMEOUT ERROR INSTEAD Of RC_MSS_MCBIST_FAILED
+        //FAPI_SET_HWP_ERROR(rc, RC_MSS_MCBIST_FAILED);
         return rc;
     }
-
     return rc;
 }
 fapi::ReturnCode mcb_error_map_print(const fapi::Target & i_target_mba,
@@ -894,7 +895,7 @@ fapi::ReturnCode mcb_error_map_print(const fapi::Target & i_target_mba,
                                      ecmdDataBufferBase i_data_buf_spare)
 {
     ReturnCode rc;
-    uint32_t rc_num;
+    uint32_t rc_num=0;
     uint8_t l_num_ranks_per_dimm[MAX_PORT][MAX_PORT];
     uint8_t l_rankpair_table[MAX_RANK];
     uint8_t l_cur_rank = 0;
@@ -997,7 +998,14 @@ fapi::ReturnCode mcb_error_map_print(const fapi::Target & i_target_mba,
     ecmdDataBufferBase l_data_buffer1_64(64), l_data_buffer3_64(64);
 
     rc_num |= l_data_buffer1_64.flushTo0();
-    FAPI_ERR("Buffer error in function mcb_error_map_print");
+    //FAPI_ERR("Buffer error in function mcb_error_map_print");
+
+    if (rc_num) //The check for if bad rc_num was misplaced
+    {
+        FAPI_ERR("Error in function  mcb_error_map_print:");
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
 
     uint8_t l_num, io_num, l_inter, l_num2, l_index2;
     l_num = 0;

@@ -21,7 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_mcbist_common.xml,v 1.4 2014/01/23 19:26:29 sasethur Exp $ -->
+<!-- $Id: memory_mss_mcbist_common.xml,v 1.5 2014/02/07 17:23:02 sasethur Exp $ -->
 <!-- For file ../../ipl/fapi/mss_mcbist_common.C -->
 <!-- // *! OWNER  NAME          : Devashikamani, Aditya         Email: adityamd@in.ibm.com -->
 <!-- // *! BACKUP               : Sethuraman, Saravanan         Email: saravanans@in.ibm.com -->
@@ -41,20 +41,4 @@
     <target>MBA_CHIPLET</target>
   </gard>
 </hwpError>
-
-<hwpError>
-  <rc>RC_MSS_MCBIST_FAILED</rc>
-  <description>MCBIST failed</description>
-  <callout>
-    <target>MBA_CHIPLET</target>
-    <priority>HIGH</priority>
-  </callout>
-  <deconfigure>
-    <target>MBA_CHIPLET</target>
-  </deconfigure>
-  <gard>
-    <target>MBA_CHIPLET</target>
-  </gard>
-</hwpError>
-
 </hwpErrors>
