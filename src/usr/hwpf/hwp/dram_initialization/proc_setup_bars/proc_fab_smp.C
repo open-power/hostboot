@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fab_smp.C,v 1.8 2013/09/23 22:01:31 jmcgill Exp $
+// $Id: proc_fab_smp.C,v 1.9 2014/01/27 05:22:07 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -39,7 +39,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_fab_smp.H"
+#include <proc_fab_smp.H>
 
 extern "C" {
 
@@ -52,7 +52,7 @@ extern "C" {
 //------------------------------------------------------------------------------
 // function: utility function to read & return fabric node ID attribute
 // parameters: i_target  => pointer to chip/chiplet target
-//             o_node_id => structure encapsulating node ID value
+//             o_node_id => node ID value
 // returns: FAPI_RC_SUCCESS if attribute read is successful & value is valid,
 //          RC_PROC_FAB_SMP_FABRIC_NODE_ID_ATTR_ERR if attribute value is
 //              invalid,
@@ -134,6 +134,7 @@ fapi::ReturnCode proc_fab_smp_get_node_id_attr(
             default:
                 FAPI_ERR("proc_fab_smp_get_node_id_attr: Invalid fabric node ID attribute value 0x%02X",
                          node_id_attr);
+                const fapi::Target & TARGET = *i_target;
                 const uint8_t& ATTR_DATA = node_id_attr;
                 FAPI_SET_HWP_ERROR(rc,
                     RC_PROC_FAB_SMP_FABRIC_NODE_ID_ATTR_ERR);
@@ -150,7 +151,7 @@ fapi::ReturnCode proc_fab_smp_get_node_id_attr(
 //------------------------------------------------------------------------------
 // function: utility function to read & return fabric chip ID attribute
 // parameters: i_target  => pointer to chip/chiplet target
-//             o_chip_id => structure encapsulating chip ID value
+//             o_chip_id => chip ID value
 // returns: FAPI_RC_SUCCESS if attribute read is successful & value is valid,
 //          RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR if attribute value is
 //              invalid,
@@ -232,6 +233,7 @@ fapi::ReturnCode proc_fab_smp_get_chip_id_attr(
             default:
                 FAPI_ERR("proc_fab_smp_get_chip_id_attr: Invalid fabric chip ID attribute value 0x%02X",
                          chip_id_attr);
+                const fapi::Target & TARGET = *i_target;
                 const uint8_t& ATTR_DATA = chip_id_attr;
                 FAPI_SET_HWP_ERROR(rc,
                     RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR);
@@ -302,6 +304,7 @@ fapi::ReturnCode proc_fab_smp_get_pcie_dsmp_mux_attrs(
                 default:
                     FAPI_ERR("proc_fab_smp_get_pcie_dsmp_mux_attrs: Invalid PCIe/DSMP mux attribute value 0x%02X",
                              pcie_not_f_link_attr[l]);
+                    const fapi::Target & TARGET = *i_target;
                     const uint8_t& ATTR_DATA = pcie_not_f_link_attr[l];
                     FAPI_SET_HWP_ERROR(rc,
                         RC_PROC_FAB_SMP_PCIE_NOT_F_LINK_ATTR_ERR);

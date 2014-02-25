@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.C,v 1.6 2014/01/14 19:25:02 jmcgill Exp $
+// $Id: proc_pcie_config.C,v 1.7 2014/01/27 05:22:15 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,7 +39,7 @@
 //  Includes
 //------------------------------------------------------------------------------
 #include <fapiHwpExecInitFile.H>
-#include "proc_pcie_config.H"
+#include <proc_pcie_config.H>
 
 extern "C" {
 
@@ -225,6 +225,7 @@ fapi::ReturnCode proc_pcie_config(
         if (i_target.getType() != fapi::TARGET_TYPE_PROC_CHIP)
         {
             FAPI_ERR("proc_pcie_config: Unsupported target type");
+            const fapi::Target & TARGET = i_target;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_PCIE_CONFIG_INVALID_TARGET);
             break;
         }
@@ -259,7 +260,7 @@ fapi::ReturnCode proc_pcie_config(
         }
         else
         {
-            FAPI_DBG("proc_pcie_scominit: Skipping initialization (partial good)");
+            FAPI_DBG("proc_pcie_config: Skipping initialization (partial good)");
         }
 
     } while(0);

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -35,7 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_s
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
-OBJS =  gcr_funcs.o io_funcs.o io_run_training.o pbusLinkSvc.o proc_fab_smp.o \
+OBJS =  gcr_funcs.o io_funcs.o io_run_training.o pbusLinkSvc.o \
         io_dccal.o \
         io_power_down_lanes.o   \
         io_read_erepair.o   \

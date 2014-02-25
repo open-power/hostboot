@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.H,v 1.13 2013/10/11 14:58:57 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.15 2014/02/03 18:46:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -46,15 +46,17 @@
 // *!                 proc_fab_smp_get_node_id_attr()
 // *!                 proc_fab_smp_get_chip_id_attr()
 // *!                 proc_setup_bars_get_bar_attrs()
-// *!                     proc_setup_bars_memory_get_non_mirrored_attrs()
-// *!                     proc_setup_bars_memory_get_mirrored_attrs()
-// *!                     proc_setup_bars_memory_get_foreign_near_attrs()
-// *!                     proc_setup_bars_memory_get_foreign_far_attrs()
-// *!                     proc_setup_bars_psi_get_bar_attrs()
-// *!                     proc_setup_bars_fsp_get_bar_attrs()
-// *!                     proc_setup_bars_fsp_get_mmio_mask_attrs()
-// *!                     proc_setup_bars_intp_get_bar_attrs()
-// *!                     proc_setup_bars_pcie_get_bar_attrs()
+// *!                     proc_setup_bars_get_memory_range_attrs (non-mirrored)
+// *!                     proc_setup_bars_get_memory_range_attrs (mirrored)
+// *!                     proc_setup_bars_get_range_attrs (foreign, near)
+// *!                     proc_setup_bars_get_range_attrs (foreign, far)
+// *!                     proc_setup_bars_get_range_attrs (psi)
+// *!                     proc_setup_bars_get_range_attrs (fsp)
+// *!                     proc_setup_bars_get_range_attrs (fsp mmio mask)
+// *!                     proc_setup_bars_get_range_attrs (intp)
+// *!                     proc_setup_bars_get_range_attrs (nx)
+// *!                     proc_setup_bars_get_range_attrs (as)
+// *!                     proc_setup_bars_get_range_attrs (pcie)
 // *!             proc_setup_bars_insert_chip()
 // *!         proc_setup_bars_write_bars()
 // *!             proc_setup_bars_write_local_chip_region_bars()
@@ -178,7 +180,7 @@ struct proc_setup_bars_proc_chip
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode
 (*proc_setup_bars_FP_t)(std::vector<proc_setup_bars_proc_chip>&,
-                        const bool&);
+                        const bool);
 
 // structure to represent range of FBC real address space
 struct proc_setup_bars_addr_range
@@ -348,9 +350,7 @@ struct proc_setup_bars_smp_node
     // real address ranges covered for mirrored & non-mirrored regions
     // (considering all chips in node)
     proc_setup_bars_addr_range non_mirrored_range;
-    std::vector<proc_setup_bars_addr_range*> non_mirrored_ranges;
     proc_setup_bars_addr_range mirrored_range;
-    std::vector<proc_setup_bars_addr_range*> mirrored_ranges;
 };
 
 // structure to represent collection of nodes in SMP topology
@@ -608,6 +608,30 @@ enum proc_setup_bars_shift_base
     PROC_SETUP_BARS_SHIFT_NONE
 };
 
+// set of BAR/range attribute identifiers
+enum proc_setup_bars_attr_id
+{
+    PROC_SETUP_BARS_ATTR_ID_NM = 0,
+    PROC_SETUP_BARS_ATTR_ID_M = 1,
+    PROC_SETUP_BARS_ATTR_ID_FN = 2,
+    PROC_SETUP_BARS_ATTR_ID_FF = 3,
+    PROC_SETUP_BARS_ATTR_ID_PSI = 4,
+    PROC_SETUP_BARS_ATTR_ID_FSP = 5,
+    PROC_SETUP_BARS_ATTR_ID_FSP_MMIO = 6,
+    PROC_SETUP_BARS_ATTR_ID_INTP = 7,
+    PROC_SETUP_BARS_ATTR_ID_NX = 8,
+    PROC_SETUP_BARS_ATTR_ID_AS = 9,
+    PROC_SETUP_BARS_ATTR_ID_PCIE = 10
+};
+
+// encoding for RC_PROC_SETUP_BARS_ATTR_LOOKUP_ERR types
+enum proc_setup_bars_attr_lookup_err_type
+{
+    PROC_SETUP_BARS_BASE_ADDR_ATTR_LOOKUP_ERR = 0,
+    PROC_SETUP_BARS_ENABLE_ATTR_LOOKUP_ERR = 1,
+    PROC_SETUP_BARS_SIZE_ATTR_LOOKUP_ERR = 2
+};
+
 // structure to represent physical HW BAR register programming
 struct proc_setup_bars_bar_reg_def
 {
@@ -635,6 +659,7 @@ struct proc_setup_bars_bar_reg_def
 // Constant definitions
 //------------------------------------------------------------------------------
 
+// non-mirrored range constants
 const proc_setup_bars_bar_def non_mirrored_range_def =
 {
     0xFFFC0000FFFFFFFFULL,         // base: RA 14:63
@@ -643,6 +668,7 @@ const proc_setup_bars_bar_def non_mirrored_range_def =
     false
 };
 
+// mirrored range constants
 const proc_setup_bars_bar_def mirrored_range_def =
 {
     0xFFFC0000FFFFFFFFULL,         // base: RA 14:63
@@ -678,6 +704,12 @@ const proc_setup_bars_bar_reg_def common_nf_scope_bar_reg_def =
 };
 
 // shared foreign BAR design (near/far regions) constants
+const fapi::AttributeId f_near_range_base_addr_attr = fapi::ATTR_PROC_FOREIGN_NEAR_BASE;
+const fapi::AttributeId f_near_range_size_attr = fapi::ATTR_PROC_FOREIGN_NEAR_SIZE;
+
+const fapi::AttributeId f_far_range_base_addr_attr = fapi::ATTR_PROC_FOREIGN_FAR_BASE;
+const fapi::AttributeId f_far_range_size_attr = fapi::ATTR_PROC_FOREIGN_FAR_SIZE;
+
 const proc_setup_bars_bar_def common_f_scope_bar_def =
 {
     0xFFFC000000FFFFFFULL,         // base: RA 14:39
@@ -704,6 +736,9 @@ const proc_setup_bars_bar_reg_def common_f_scope_bar_reg_def =
 };
 
 // PSI BAR constants
+const fapi::AttributeId psi_bridge_bar_base_addr_attr = fapi::ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR;
+const fapi::AttributeId psi_bridge_bar_en_attr = fapi::ATTR_PROC_PSI_BRIDGE_BAR_ENABLE;
+
 const proc_setup_bars_bar_def psi_bridge_bar_def =
 {
     0xFFFC0000000FFFFFULL,         // base: RA 14:43
@@ -730,6 +765,10 @@ const proc_setup_bars_bar_reg_def psi_bridge_bar_reg_def =
 };
 
 // FSP BAR constants
+const fapi::AttributeId fsp_bar_base_addr_attr = fapi::ATTR_PROC_FSP_BAR_BASE_ADDR;
+const fapi::AttributeId fsp_bar_en_attr = fapi::ATTR_PROC_FSP_BAR_ENABLE;
+const fapi::AttributeId fsp_bar_size_attr = fapi::ATTR_PROC_FSP_BAR_SIZE;
+
 const proc_setup_bars_bar_def fsp_bar_def =
 {
     0xFFFC0000000FFFFFULL,         // base: RA 14:43
@@ -790,6 +829,8 @@ const proc_setup_bars_bar_reg_def fsp_bar_en_reg_def =
 };
 
 // FSP MMIO mask constants
+const fapi::AttributeId fsp_mmio_mask_size_attr = fapi::ATTR_PROC_FSP_MMIO_MASK_SIZE;
+
 const proc_setup_bars_bar_def fsp_mmio_mask_def =
 {
     0xFFFFFFFFFFFFFFFFULL,         // base: unused
@@ -816,6 +857,9 @@ const proc_setup_bars_bar_reg_def fsp_mmio_mask_reg_def =
 };
 
 // INTP BAR constants
+const fapi::AttributeId intp_bar_base_addr_attr = fapi::ATTR_PROC_INTP_BAR_BASE_ADDR;
+const fapi::AttributeId intp_bar_en_attr = fapi::ATTR_PROC_INTP_BAR_ENABLE;
+
 const proc_setup_bars_bar_def intp_bar_def =
 {
     0xFFFC0000000FFFFFULL,         // base: RA 14:43
@@ -857,6 +901,10 @@ const uint32_t L3_BAR_GROUP_MASK_MIRROR_MASK_END_BIT = 33;
 const uint32_t L3_BAR_GROUP_MASK_MIRROR_ENABLE_BIT = 34;
 
 // NX MMIO BAR constants
+const fapi::AttributeId nx_mmio_bar_base_addr_attr = fapi::ATTR_PROC_NX_MMIO_BAR_BASE_ADDR;
+const fapi::AttributeId nx_mmio_bar_en_attr = fapi::ATTR_PROC_NX_MMIO_BAR_ENABLE;
+const fapi::AttributeId nx_mmio_bar_size_attr = fapi::ATTR_PROC_NX_MMIO_BAR_SIZE;
+
 const proc_setup_bars_bar_def nx_mmio_bar_def =
 {
     0xFFFC000000000FFFULL,         // base: RA 14:51
@@ -883,6 +931,10 @@ const proc_setup_bars_bar_reg_def nx_mmio_bar_reg_def =
 };
 
 // AS MMIO BAR constants
+const fapi::AttributeId as_mmio_bar_base_addr_attr = fapi::ATTR_PROC_AS_MMIO_BAR_BASE_ADDR;
+const fapi::AttributeId as_mmio_bar_en_attr = fapi::ATTR_PROC_AS_MMIO_BAR_ENABLE;
+const fapi::AttributeId as_mmio_bar_size_attr = fapi::ATTR_PROC_AS_MMIO_BAR_SIZE;
+
 const proc_setup_bars_bar_def as_mmio_bar_def =
 {
     0xFFFC000000000FFFULL,         // base: RA 14:51
@@ -997,8 +1049,7 @@ const proc_setup_bars_bar_reg_def mcd_f1_bar_reg_def =
 };
 
 // MCD FIR Register constants
-const uint64_t MCD_FIR_MASK_RUNTIME_VAL_MCD_HANG_POLL_BUG    = 0x2F00000000000000ULL;
-const uint64_t MCD_FIR_MASK_RUNTIME_VAL_NO_MCD_HANG_POLL_BUG = 0x2700000000000000ULL;
+const uint64_t MCD_FIR_MASK_RUNTIME_VAL = 0x2FC0000000000000ULL;
 
 // MCD Evn/Odd Recovery Control Register field/bit definitions
 const uint8_t PROC_SETUP_BARS_NUM_MCD_CFG = 4;
@@ -1077,6 +1128,10 @@ const uint8_t PROC_SETUP_BARS_PCIE_RANGE_TYPE_MMIO[PROC_SETUP_BARS_PCIE_RANGES_P
     true,   // BAR 1 = MMIO (backup/failover)
     false,  // BAR 2 = PHB
 };
+
+const fapi::AttributeId pcie_mmio_bar_base_addr_attr = fapi::ATTR_PROC_PCIE_BAR_BASE_ADDR;
+const fapi::AttributeId pcie_mmio_bar_en_attr = fapi::ATTR_PROC_PCIE_BAR_ENABLE;
+const fapi::AttributeId pcie_mmio_bar_size_attr = fapi::ATTR_PROC_PCIE_BAR_SIZE;
 
 const proc_setup_bars_bar_def pcie_mmio_bar_def =
 {
@@ -1234,56 +1289,30 @@ extern "C"
 //                                             of BARs tied to local chip/local
 //                                             node regions
 // returns: FAPI_RC_SUCCESS if all register writes are successful,
-//          RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ATTR_ERR if chip non-mirrored
-//              attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_OVERLAP_ATTR_ERR if chip
-//              non-mirrored range attributes specify overlapping ranges,
-//          RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ERR if chip non-mirrored
-//              processed range content violates expected behavior,
-//          RC_PROC_SETUP_BARS_MIRRORED_RANGE_ATTR_ERR if individual chip
-//              mirrored range attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_MIRRORED_RANGE_OVERLAP_ATTR_ERR if chip mirrored
-//              range attributes specify overlapping ranges,
-//          RC_PROC_SETUP_BARS_MIRRORED_RANGE_ERR if chip mirrored processed
-//              range content violates expected behavior,
-//          RC_PROC_SETUP_BARS_FOREIGN_NEAR_RANGE_ATTR_ERR if individual chip
-//              foriegn near range attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_FOREIGN_FAR_RANGE_ATTR_ERR if individual chip
-//              foreign far range attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_PSI_BAR_ATTR_ERR if chip PSI range
-//              attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_FSP_BAR_ATTR_ERR if chip FSP range
-//              attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_FSP_MMIO_MASK_ATTR_ERR if chip MMIO mask
-//              attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_INTP_BAR_ATTR_ERR if chip INTP range
-//              attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_NX_MMIO_BAR_ATTR_ERR if chip NX MMIO range
-//              attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_NX_MMIO_BAR_ATTR_ERR if chip AS MMIO range
-//              attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_PCIE_BAR_ATTR_ERR if individual chip PCIe IO
-//              range attribute content violates expected behavior,
+//          RC_PROC_SETUP_BARS_ATTR_LOOKUP_ERR if no rule is found to set
+//              BAR/range address, enable, or size,
+//          RC_PROC_SETUP_BARS_ATTR_CONTENT_ERR if BAR/range attribute content
+//              violates expected behavior,
+//          RC_PROC_SETUP_BARS_CHIP_MEMORY_RANGE_ATTR_OVERLAP_ERR if chip
+//              memory range attributes specify overlapping address ranges,
+//          RC_PROC_SETUP_BARS_CHIP_MEMORY_RANGE_ERR if merged
+//              chip memory address range is invalid,
 //          RC_PROC_SETUP_BARS_NODE_ADD_INTERNAL_ERR if node map insert fails,
 //          RC_PROC_SETUP_BARS_NODE_FIND_INTERNAL_ERR if node map lookup is
 //              unsuccessful,
 //          RC_PROC_SETUP_BARS_DUPLICATE_FABRIC_ID_ERR if chips with duplicate
 //              fabric node/chip IDs are detected,
-//          RC_PROC_SETUP_BARS_NODE_NON_MIRRORED_RANGE_OVERLAP_ERR if overlap
-//              is detected between existing node non-mirrored range
-//              and that of new chip being processed,
-//          RC_PROC_SETUP_BARS_NODE_MIRRORED_RANGE_OVERLAP_ERR if overlap
-//              is detected between existing node mirrored range
-//              and that of new chip being processed,
 //          RC_PROC_SETUP_BARS_INVALID_BAR_REG_DEF if BAR register definition
 //              structure is invalid,
-//          RC_PROC_SETUP_BARS_SIZE_XLATE_ERR if logical->physical size
+//          RC_PROC_SETUP_BARS_SIZE_XLATE_ERR if BAR logical->physical size
 //              translation is unsuccessful,
+//          RC_PROC_SETUP_BARS_SYSTEM_RANGE_OVERLAP_ERR if any overapping
+//              ranges are detected, considering all ranges in system,
 //          else failing return code
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars(
     std::vector<proc_setup_bars_proc_chip>& i_proc_chips,
-    const bool& i_init_local_chip_local_node);
+    const bool i_init_local_chip_local_node);
 
 } // extern "C"
 

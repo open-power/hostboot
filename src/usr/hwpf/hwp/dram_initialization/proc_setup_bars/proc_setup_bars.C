@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.19 2013/10/11 14:58:56 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.23 2014/02/24 17:47:37 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -39,7 +39,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "proc_setup_bars.H"
+#include <proc_setup_bars.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -146,108 +146,459 @@ bool proc_setup_bars_common_check_bar(
 
 
 //------------------------------------------------------------------------------
-// function: utility function to check for overlapping address ranges
-// parameters: i_ranges => vector of pointers to address range structures that
-//                         should be checked
-// returns: true if any ranges overlap, false otherwise
+// function: retrieve attribute (with optional indices) using FAPI AttributeId
+// parameters: i_attr           => attribute ID to query
+//             i_attr_id        => enum identifying attribute function
+//             i_target         => pointer to chip target
+//             i_attr_idx1      => attribute array index1
+//             i_attr_idx2      => attribute array index1
+//             o_val            => output value
+// returns: FAPI_RC_SUCCESS if attribute read is successful & output value
+//              is valid,
+//          RC_PROC_SETUP_BARS_ATTR_QUERY_ERR if FAPI attribute ID is
+//              unsupported,
+//          else FAPI_ATTR_GET return code
 //------------------------------------------------------------------------------
-bool proc_setup_bars_common_do_ranges_overlap(
-    const std::vector<proc_setup_bars_addr_range*> i_ranges)
+fapi::ReturnCode proc_setup_bars_query_attr(
+    const fapi::AttributeId i_attr,
+    const proc_setup_bars_attr_id i_attr_id,
+    const fapi::Target* i_target,
+    const uint32_t i_attr_idx1,
+    const uint32_t i_attr_idx2,
+    uint64_t& o_val)
 {
-    bool overlap = false;
-    FAPI_DBG("proc_setup_bars_common_do_ranges_overlap: Start");
+    fapi::ReturnCode rc;
 
-    // check that ranges are non-overlapping
-    if (i_ranges.size() > 1)
+    FAPI_DBG("proc_setup_bars_query_attr: Start");
+
+    // ATTR_PROC_MEM_BASES_ACK
+    if (i_attr == fapi::ATTR_PROC_MEM_BASES_ACK)
     {
-        for (size_t r = 0; (r < i_ranges.size()-1) && !overlap; r++)
-        {
-            for (size_t x = r+1; x < i_ranges.size(); x++)
-            {
-                if (i_ranges[r]->overlaps(*(i_ranges[x])))
-                {
-                    overlap = true;
-                    break;
-                }
-            }
-        }
+        fapi::ATTR_PROC_MEM_BASES_ACK_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASES_ACK, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1];
+    }
+    // ATTR_PROC_MEM_SIZES_ACK
+    else if (i_attr == fapi::ATTR_PROC_MEM_SIZES_ACK)
+    {
+        fapi::ATTR_PROC_MEM_SIZES_ACK_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_SIZES_ACK, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1];
+    }
+    // ATTR_PROC_MIRROR_BASES_ACK
+    else if (i_attr == fapi::ATTR_PROC_MIRROR_BASES_ACK)
+    {
+        fapi::ATTR_PROC_MIRROR_BASES_ACK_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASES_ACK, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1];
+    }
+    // ATTR_PROC_MIRROR_SIZES_ACK
+    else if (i_attr == fapi::ATTR_PROC_MIRROR_SIZES_ACK)
+    {
+        fapi::ATTR_PROC_MIRROR_SIZES_ACK_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_SIZES_ACK, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1];
+    }
+    // ATTR_PROC_FOREIGN_NEAR_BASE
+    else if (i_attr == fapi::ATTR_PROC_FOREIGN_NEAR_BASE)
+    {
+        fapi::ATTR_PROC_FOREIGN_NEAR_BASE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_FOREIGN_NEAR_BASE, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1];
+    }
+    // ATTR_PROC_FOREIGN_NEAR_SIZE
+    else if (i_attr == fapi::ATTR_PROC_FOREIGN_NEAR_SIZE)
+    {
+        fapi::ATTR_PROC_FOREIGN_NEAR_SIZE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_FOREIGN_NEAR_SIZE, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1];
+    }
+    // ATTR_PROC_FOREIGN_FAR_BASE
+    else if (i_attr == fapi::ATTR_PROC_FOREIGN_FAR_BASE)
+    {
+        fapi::ATTR_PROC_FOREIGN_FAR_BASE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_FOREIGN_FAR_BASE, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1];
+    }
+    // ATTR_PROC_FOREIGN_FAR_SIZE
+    else if (i_attr == fapi::ATTR_PROC_FOREIGN_FAR_SIZE)
+    {
+        fapi::ATTR_PROC_FOREIGN_FAR_SIZE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_FOREIGN_FAR_SIZE, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1];
+    }
+    // ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR
+    else if (i_attr == fapi::ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR)
+    {
+        fapi::ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_PSI_BRIDGE_BAR_ENABLE
+    else if (i_attr == fapi::ATTR_PROC_PSI_BRIDGE_BAR_ENABLE)
+    {
+        fapi::ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_PSI_BRIDGE_BAR_ENABLE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_FSP_BAR_BASE_ADDR
+    else if (i_attr == fapi::ATTR_PROC_FSP_BAR_BASE_ADDR)
+    {
+        fapi::ATTR_PROC_FSP_BAR_BASE_ADDR_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_FSP_BAR_BASE_ADDR, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_FSP_BAR_ENABLE
+    else if (i_attr == fapi::ATTR_PROC_FSP_BAR_ENABLE)
+    {
+        fapi::ATTR_PROC_FSP_BAR_ENABLE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_FSP_BAR_ENABLE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_FSP_BAR_SIZE
+    else if (i_attr == fapi::ATTR_PROC_FSP_BAR_SIZE)
+    {
+        fapi::ATTR_PROC_FSP_BAR_SIZE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_FSP_BAR_SIZE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_FSP_MMIO_MASK_SIZE
+    else if (i_attr == fapi::ATTR_PROC_FSP_MMIO_MASK_SIZE)
+    {
+        fapi::ATTR_PROC_FSP_MMIO_MASK_SIZE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_FSP_MMIO_MASK_SIZE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_INTP_BAR_BASE_ADDR
+    else if (i_attr == fapi::ATTR_PROC_INTP_BAR_BASE_ADDR)
+    {
+        fapi::ATTR_PROC_INTP_BAR_BASE_ADDR_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_INTP_BAR_BASE_ADDR, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_INTP_BAR_ENABLE
+    else if (i_attr == fapi::ATTR_PROC_INTP_BAR_ENABLE)
+    {
+        fapi::ATTR_PROC_INTP_BAR_ENABLE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_INTP_BAR_ENABLE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_NX_MMIO_BAR_BASE_ADDR
+    else if (i_attr == fapi::ATTR_PROC_NX_MMIO_BAR_BASE_ADDR)
+    {
+        fapi::ATTR_PROC_NX_MMIO_BAR_BASE_ADDR_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_NX_MMIO_BAR_BASE_ADDR, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_NX_MMIO_BAR_ENABLE
+    else if (i_attr == fapi::ATTR_PROC_NX_MMIO_BAR_ENABLE)
+    {
+        fapi::ATTR_PROC_NX_MMIO_BAR_ENABLE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_NX_MMIO_BAR_ENABLE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_NX_MMIO_BAR_SIZE
+    else if (i_attr == fapi::ATTR_PROC_NX_MMIO_BAR_SIZE)
+    {
+        fapi::ATTR_PROC_NX_MMIO_BAR_SIZE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_NX_MMIO_BAR_SIZE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_AS_MMIO_BAR_BASE_ADDR
+    else if (i_attr == fapi::ATTR_PROC_AS_MMIO_BAR_BASE_ADDR)
+    {
+        fapi::ATTR_PROC_AS_MMIO_BAR_BASE_ADDR_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_BASE_ADDR, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_AS_MMIO_BAR_ENABLE
+    else if (i_attr == fapi::ATTR_PROC_AS_MMIO_BAR_ENABLE)
+    {
+        fapi::ATTR_PROC_AS_MMIO_BAR_ENABLE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_ENABLE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_AS_MMIO_BAR_SIZE
+    else if (i_attr == fapi::ATTR_PROC_AS_MMIO_BAR_SIZE)
+    {
+        fapi::ATTR_PROC_AS_MMIO_BAR_SIZE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_SIZE, i_target, attr_data);
+        o_val = attr_data;
+    }
+    // ATTR_PROC_PCIE_BAR_BASE_ADDR
+    else if (i_attr == fapi::ATTR_PROC_PCIE_BAR_BASE_ADDR)
+    {
+        fapi::ATTR_PROC_PCIE_BAR_BASE_ADDR_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_BAR_BASE_ADDR, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1][i_attr_idx2];
+    }
+    // ATTR_PROC_PCIE_BAR_ENABLE
+    else if (i_attr == fapi::ATTR_PROC_PCIE_BAR_ENABLE)
+    {
+        fapi::ATTR_PROC_PCIE_BAR_ENABLE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_BAR_ENABLE, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1][i_attr_idx2];
+    }
+    // ATTR_PROC_PCIE_BAR_SIZE
+    else if (i_attr == fapi::ATTR_PROC_PCIE_BAR_SIZE)
+    {
+        fapi::ATTR_PROC_PCIE_BAR_SIZE_Type attr_data;
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_BAR_SIZE, i_target, attr_data);
+        o_val = attr_data[i_attr_idx1][i_attr_idx2];
+    }
+    else
+    {
+        FAPI_ERR("proc_setup_bars_query_attr: Unsupported FAPI Attribute ID");
+        const fapi::Target & TARGET = *i_target;
+        const fapi::AttributeId & FAPI_ATTR_ID = i_attr;
+        const proc_setup_bars_attr_id & ATTR_ID = i_attr_id;
+        const uint32_t & ATTR_IDX1 = i_attr_idx1;
+        const uint32_t & ATTR_IDX2 = i_attr_idx2;
+        FAPI_SET_HWP_ERROR(rc,
+            RC_PROC_SETUP_BARS_ATTR_QUERY_ERR);
     }
 
-    FAPI_DBG("proc_setup_bars_common_do_ranges_overlap: End");
-    return overlap;
+    FAPI_DBG("proc_setup_bars_query_attr: End");
+    return rc;
 }
 
 
 //------------------------------------------------------------------------------
-// function: retrieve attributes defining non-mirrored memory range
-// parameters: i_target      => pointer to chip target
-//             io_addr_range => address range structure encapsulating attribute
-//                              values (size will be rounded up to nearest
-//                              power of two)
+// function: retrieve attributes defining unit BAR/range programming
+// parameters: i_target         => pointer to chip target
+//             i_attr_id        => enum identifying BAR/range function
+//             i_base_addr_attr => pointer to attribute ID associated with
+//                                 BAR/range base address
+//             i_enable_attr    => pointer to attribute ID associated with
+//                                 BAR/range enable
+//             i_size_attr      => pointer to attribute ID associated with
+//                                 BAR/range size
+//             i_attr_idx1      => attribute array index1
+//             i_attr_idx2      => attribute array index2
+//             i_bar_def        => structure encapsulating BAR/range
+//                                 properties
+//             io_addr_range    => address range structure encapsulating
+//                                 attribute values
 // returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
 //              are valid,
-//          RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ATTR_ERR if chip non-mirrored
+//          RC_PROC_SETUP_BARS_ATTR_LOOKUP_ERR if no rule is
+//              provided to set BAR/range address/enable/size,
+//          RC_PROC_SETUP_BARS_ATTR_CONTENT_ERR if BAR/range
 //              attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_OVERLAP_ATTR_ERR if chip
-//              non-mirrored range attributes specify overlapping ranges,
-//          RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ERR if chip non-mirrored
-//              processed range content violates expected behavior,
 //          else FAPI_ATTR_GET return code
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_memory_get_non_mirrored_attrs(
+fapi::ReturnCode proc_setup_bars_get_range_attrs(
     const fapi::Target* i_target,
+    const proc_setup_bars_attr_id i_attr_id,
+    const fapi::AttributeId* i_base_addr_attr,
+    const fapi::AttributeId* i_enable_attr,
+    const fapi::AttributeId* i_size_attr,
+    const uint32_t i_attr_idx1,
+    const uint32_t i_attr_idx2,
+    const proc_setup_bars_bar_def& i_bar_def,
     proc_setup_bars_addr_range& io_addr_range)
 {
     // return code
     fapi::ReturnCode rc;
-    // temporary attribute storage used to build procedure data structures
-    uint64_t mem_bases_ack[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
-    uint64_t mem_sizes_ack[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
-    proc_setup_bars_addr_range non_mirrored_ranges[PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES];
+    uint64_t bar_enabled;
+
+    FAPI_DBG("proc_setup_bars_get_range_attrs: Start");
+    do
+    {
+        // BAR base address
+        if ((i_attr_id == PROC_SETUP_BARS_ATTR_ID_FSP_MMIO) && !i_attr_idx1 && !i_attr_idx2)
+        {
+            io_addr_range.base_addr = 0x0;
+        }
+        else if (i_base_addr_attr)
+        {
+    	    rc = proc_setup_bars_query_attr(
+                *i_base_addr_attr,
+                i_attr_id,
+                i_target,
+                i_attr_idx1, i_attr_idx2,
+                io_addr_range.base_addr);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_get_range_attrs: Error querying BAR base address attribute (Unit/Range ID = 0x%X, FAPI Attribute ID = %08X)",
+                         i_attr_id, *i_base_addr_attr);
+                break;
+            }
+        }
+        else
+        {
+            FAPI_ERR("proc_setup_bars_get_range_attrs: No rule to set range base address");
+            const fapi::Target & TARGET = *i_target;
+            const proc_setup_bars_attr_id & ATTR_ID = i_attr_id;
+            const uint32_t & ATTR_IDX1 = i_attr_idx1;
+            const uint32_t & ATTR_IDX2 = i_attr_idx2;
+            const proc_setup_bars_attr_lookup_err_type & ERR_TYPE = PROC_SETUP_BARS_BASE_ADDR_ATTR_LOOKUP_ERR;
+            FAPI_SET_HWP_ERROR(rc,
+                RC_PROC_SETUP_BARS_ATTR_LOOKUP_ERR);
+            break;
+        }
+
+        // BAR size
+        if (((i_attr_id == PROC_SETUP_BARS_ATTR_ID_PSI) ||
+             (i_attr_id == PROC_SETUP_BARS_ATTR_ID_INTP)) &&
+            !i_attr_idx1 && !i_attr_idx2)
+        {
+            io_addr_range.size = PROC_SETUP_BARS_SIZE_1_MB;
+        }
+        else if (i_size_attr)
+        {
+            rc = proc_setup_bars_query_attr(
+                *i_size_attr,
+                i_attr_id,
+                i_target,
+                i_attr_idx1, i_attr_idx2,
+                io_addr_range.size);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_get_range_attrs: Error querying BAR size attribute (Unit/Range ID = 0x%X, FAPI Attribute ID = 0x%08X)",
+                         i_attr_id, *i_size_attr);
+                break;
+            }
+        }
+        else
+        {
+            FAPI_ERR("proc_setup_bars_get_range_attrs: No rule to set range size");
+            const fapi::Target & TARGET = *i_target;
+            const proc_setup_bars_attr_id & ATTR_ID = i_attr_id;
+            const uint32_t & ATTR_IDX1 = i_attr_idx1;
+            const uint32_t & ATTR_IDX2 = i_attr_idx2;
+            const proc_setup_bars_attr_lookup_err_type & ERR_TYPE = PROC_SETUP_BARS_SIZE_ATTR_LOOKUP_ERR;
+            FAPI_SET_HWP_ERROR(rc,
+                RC_PROC_SETUP_BARS_ATTR_LOOKUP_ERR);
+            break;
+        }
+
+        // BAR enable
+        if ((i_attr_id == PROC_SETUP_BARS_ATTR_ID_FSP_MMIO) && !i_attr_idx1 && !i_attr_idx2)
+        {
+            io_addr_range.enabled = true;
+        }
+
+        else if (((i_attr_id == PROC_SETUP_BARS_ATTR_ID_NM) && (i_attr_idx1 < PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES) && !i_attr_idx2) ||
+                 ((i_attr_id == PROC_SETUP_BARS_ATTR_ID_M)  && (i_attr_idx1 < PROC_SETUP_BARS_NUM_MIRRORED_RANGES) && !i_attr_idx2) ||
+                 ((i_attr_id == PROC_SETUP_BARS_ATTR_ID_FN) && (i_attr_idx1 < PROC_FAB_SMP_NUM_F_LINKS) && !i_attr_idx2) ||
+                 ((i_attr_id == PROC_SETUP_BARS_ATTR_ID_FF) && (i_attr_idx1 < PROC_FAB_SMP_NUM_F_LINKS) && !i_attr_idx2))
+        {
+            io_addr_range.enabled = (io_addr_range.size != 0);
+        }
+        else if (i_enable_attr)
+        {
+    	    rc = proc_setup_bars_query_attr(
+                *i_enable_attr,
+                i_attr_id,
+                i_target,
+                i_attr_idx1, i_attr_idx2,
+                bar_enabled);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_get_range_attrs: Error querying BAR enable attribute (Unit/Range ID = 0x%X, FAPI Attribute ID = 0x%08X)",
+                         i_attr_id, *i_enable_attr);
+                break;
+            }
+            io_addr_range.enabled = (bar_enabled == 0x1ULL);
+        }
+        else
+        {
+            FAPI_ERR("proc_setup_bars_get_range_attrs: No rule to set range enable");
+            const fapi::Target & TARGET = *i_target;
+            const proc_setup_bars_attr_id & ATTR_ID = i_attr_id;
+            const uint32_t & ATTR_IDX1 = i_attr_idx1;
+            const uint32_t & ATTR_IDX2 = i_attr_idx2;
+            const proc_setup_bars_attr_lookup_err_type & ERR_TYPE = PROC_SETUP_BARS_ENABLE_ATTR_LOOKUP_ERR;
+            FAPI_SET_HWP_ERROR(rc,
+                RC_PROC_SETUP_BARS_ATTR_LOOKUP_ERR);
+            break;
+        }
+
+        // check BAR attribute content
+        if (proc_setup_bars_common_check_bar(
+                i_bar_def,
+                io_addr_range) != false)
+        {
+            FAPI_ERR("proc_setup_bars_get_range_attrs: Error from proc_setup_bars_common_check_bar");
+            const fapi::Target & TARGET = *i_target;
+            const proc_setup_bars_attr_id & ATTR_ID = i_attr_id;
+            const uint32_t & ATTR_IDX1 = i_attr_idx1;
+            const uint32_t & ATTR_IDX2 = i_attr_idx2;
+            const uint64_t & BASE_ADDR = io_addr_range.base_addr;
+            const bool & ENABLED = io_addr_range.enabled;
+            const uint64_t & SIZE = io_addr_range.size;
+            FAPI_SET_HWP_ERROR(rc,
+                RC_PROC_SETUP_BARS_ATTR_CONTENT_ERR);
+            break;
+        }
+    } while(0);
+
+    FAPI_DBG("proc_setup_bars_get_range_attrs: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
+// function: retrieve attributes defining non-mirrored/mirrored memory ranges
+// parameters: i_target         => pointer to chip target
+//             i_range_id       => enum identifying range function
+//             i_base_addr_attr => pointer to attribute ID associated with
+//                                 ange base addresses
+//             i_size_attr      => pointer to attribute ID associated with
+//                                 range sizes
+//             i_num_ranges     => number of ranges (attribute dimension)
+//             i_range_def      => structure encapsulating range
+//                                 properties
+//             io_addr_range    => address range structure encapsulating
+//                                 attribute
+//                                 values (size will be rounded up to nearest
+//                                 power of two)
+// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
+//              are valid,
+//          RC_PROC_SETUP_BARS_CHIP_MEMORY_RANGE_ATTR_OVERLAP_ERR if chip
+//              memory range attributes specify overlapping address ranges,
+//          RC_PROC_SETUP_BARS_CHIP_MEMORY_RANGE_ERR if merged chip 
+//              memory address range is invalid,
+//          RC_PROC_SETUP_BARS_ATTR_CONTENT_ERR if BAR/range
+//              attribute content violates expected behavior,
+//          else proc_setup_bars_get_range_attrs failing return code
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_setup_bars_get_memory_range_attrs(
+    const fapi::Target* i_target,
+    const proc_setup_bars_attr_id i_range_id,
+    const fapi::AttributeId i_base_addr_attr,
+    const fapi::AttributeId i_size_attr,
+    const uint8_t i_num_ranges,
+    const proc_setup_bars_bar_def& i_range_def,
+    proc_setup_bars_addr_range& io_addr_range)
+{
+    // return code
+    fapi::ReturnCode rc;
+    // set of ranges, to be checked/merged into single range
+    std::vector<proc_setup_bars_addr_range> ranges(i_num_ranges);
 
     // mark function entry
-    FAPI_DBG("proc_setup_bars_memory_get_non_mirrored_attrs: Start");
+    FAPI_DBG("proc_setup_bars_get_memory_range_attrs: Start");
 
     do
     {
-        // retrieve non-mirrored memory base address/size ack attributes
-        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASES_ACK,
-                           i_target,
-                           mem_bases_ack);
-        if (!rc.ok())
+        // build individual ranges
+        for (uint8_t r = 0; r < i_num_ranges; r++)
         {
-            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error querying ATTR_PROC_MEM_BASES_ACK");
-            break;
-        }
-
-        rc = FAPI_ATTR_GET(ATTR_PROC_MEM_SIZES_ACK,
-                           i_target,
-                           mem_sizes_ack);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error querying ATTR_PROC_MEM_SIZES_ACK");
-            break;
-        }
-
-        // process attributes into range structures
-        for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES; r++)
-        {
-            // build range content
-            non_mirrored_ranges[r].base_addr = mem_bases_ack[r];
-            non_mirrored_ranges[r].size = mem_sizes_ack[r];
-            // consider range enabled if size is non-zero
-            non_mirrored_ranges[r].enabled = (non_mirrored_ranges[r].size != 0x0);
-            // check attribute content
-            FAPI_DBG("proc_setup_bars_memory_get_non_mirrored_attrs: Range %d", r);
-            if (proc_setup_bars_common_check_bar(
-                    non_mirrored_range_def,
-                    non_mirrored_ranges[r]) != false)
+            rc = proc_setup_bars_get_range_attrs(
+                i_target,
+                i_range_id,
+                &i_base_addr_attr,
+                NULL,
+                &i_size_attr,
+                r, 0,
+                i_range_def,
+                ranges[r]);
+            if (!rc.ok())
             {
-                FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error from proc_setup_bars_common_check_bar");
-                const uint64_t& BASE_ADDR = non_mirrored_ranges[r].base_addr;
-                const uint64_t& SIZE = non_mirrored_ranges[r].size;
-                FAPI_SET_HWP_ERROR(rc,
-                   RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ATTR_ERR);
+                FAPI_ERR("proc_setup_bars_get_memory_range_attrs: Error from proc_setup_bars_get_range_attrs (Range ID = 0x%X, Range index = %d)",
+                         i_range_id, r);
                 break;
             }
         }
@@ -257,820 +608,70 @@ fapi::ReturnCode proc_setup_bars_memory_get_non_mirrored_attrs(
         }
 
         // check that ranges are non-overlapping
-        std::vector<proc_setup_bars_addr_range*> check_ranges;
-        for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES; r++)
+        if (i_num_ranges > 1)
         {
-            check_ranges.push_back(&non_mirrored_ranges[r]);
-        }
-        if (proc_setup_bars_common_do_ranges_overlap(check_ranges))
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Non-mirrored range attributes specify overlapping address regions");
-            FAPI_SET_HWP_ERROR(rc,
-                RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_OVERLAP_ATTR_ERR);
-            break;
-        }
-
-        // ranges are non-overlapping, merge to single range
-        for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES; r++)
-        {
-            // merge to build single range
-            io_addr_range.merge(non_mirrored_ranges[r]);
-        }
-
-        // ensure range is power of 2 aligned
-        if (io_addr_range.enabled && !io_addr_range.is_power_of_2())
-        {
-            io_addr_range.round_next_power_of_2();
-        }
-
-        // check final range content
-        if (proc_setup_bars_common_check_bar(
-                non_mirrored_range_def,
-                io_addr_range) != false)
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_non_mirrored_attrs: Error from proc_setup_bars_common_check_bar");
-            const uint64_t& BASE_ADDR = io_addr_range.base_addr;
-            const uint64_t& SIZE = io_addr_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-               RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ERR);
-            break;
-        }
-    } while(0);
-
-    // mark function exit
-    FAPI_DBG("proc_setup_bars_memory_get_non_mirrored_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining mirrored memory range
-// parameters: i_target      => pointer to chip target
-//             io_addr_range => address range structure encapsulating attribute
-//                              values (ranges will be merged and size rounded
-//                              up to the nearest power of two)
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_MIRRORED_RANGE_ATTR_ERR if individual chip
-//              mirrored range attribute content violates expected behavior,
-//          RC_PROC_SETUP_BARS_MIRRORED_RANGE_OVERLAP_ATTR_ERR if chip mirrored
-//              range attributes specify overlapping ranges,
-//          RC_PROC_SETUP_BARS_MIRRORED_RANGE_ERR if chip mirrored processed
-//              range content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_memory_get_mirrored_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range& io_addr_range)
-{
-    // return code
-    fapi::ReturnCode rc;
-    // temporary attribute storage used to build procedure data structures
-    uint64_t mirror_bases_ack[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
-    uint64_t mirror_sizes_ack[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
-    proc_setup_bars_addr_range mirrored_ranges[PROC_SETUP_BARS_NUM_MIRRORED_RANGES];
-
-    // mark function entry
-    FAPI_DBG("proc_setup_bars_memory_get_mirrored_attrs: Start");
-
-    do
-    {
-        // retrieve mirrored memory base address/size ack attributes
-        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASES_ACK,
-                           i_target,
-                           mirror_bases_ack);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error querying ATTR_PROC_MIRROR_BASES_ACK");
-            break;
-        }
-
-        rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_SIZES_ACK,
-                           i_target,
-                           mirror_sizes_ack);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error querying ATTR_PROC_MIRROR_SIZES_ACK");
-            break;
-        }
-
-        // process attributes into range structures
-        for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_MIRRORED_RANGES; r++)
-        {
-            // build range content
-            mirrored_ranges[r].base_addr = mirror_bases_ack[r];
-            mirrored_ranges[r].size = mirror_sizes_ack[r];
-            // consider range enabled if size is non-zero
-            mirrored_ranges[r].enabled = (mirrored_ranges[r].size != 0x0);
-            // check attribute content
-            FAPI_DBG("proc_setup_bars_memory_get_mirrored_attrs: Range %d", r);
-            if (proc_setup_bars_common_check_bar(
-                    mirrored_range_def,
-                    mirrored_ranges[r]) != false)
+            for (uint8_t r = 0; (r < i_num_ranges-1) && rc.ok(); r++)
             {
-                FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error from proc_setup_bars_common_check_bar");
-                const uint64_t& BASE_ADDR = mirrored_ranges[r].base_addr;
-                const uint64_t& SIZE = mirrored_ranges[r].size;
-                FAPI_SET_HWP_ERROR(rc,
-                   RC_PROC_SETUP_BARS_MIRRORED_RANGE_ATTR_ERR);
-                break;
-            }
-        }
-        if (!rc.ok())
-        {
-            break;
-        }
-
-        // check that ranges are non-overlapping
-        std::vector<proc_setup_bars_addr_range*> check_ranges;
-        for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_MIRRORED_RANGES; r++)
-        {
-            check_ranges.push_back(&mirrored_ranges[r]);
-        }
-        if (proc_setup_bars_common_do_ranges_overlap(check_ranges))
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Mirrored range attributes specify overlapping address regions");
-            FAPI_SET_HWP_ERROR(rc,
-                RC_PROC_SETUP_BARS_MIRRORED_RANGE_OVERLAP_ATTR_ERR);
-            break;
-        }
-
-        // ranges are non-overlapping, merge to single range
-        for (uint8_t r = 0; r < PROC_SETUP_BARS_NUM_MIRRORED_RANGES; r++)
-        {
-            // merge to build single range
-            io_addr_range.merge(mirrored_ranges[r]);
-        }
-
-        // ensure range is power of 2 aligned
-        if (io_addr_range.enabled && !io_addr_range.is_power_of_2())
-        {
-            io_addr_range.round_next_power_of_2();
-        }
-
-        // check final range content
-        if (proc_setup_bars_common_check_bar(
-                mirrored_range_def,
-                io_addr_range) != false)
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_mirrored_attrs: Error from proc_setup_bars_common_check_bar");
-            const uint64_t& BASE_ADDR = io_addr_range.base_addr;
-            const uint64_t& SIZE = io_addr_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-               RC_PROC_SETUP_BARS_MIRRORED_RANGE_ERR);
-            break;
-        }
-    } while(0);
-
-    // mark function exit
-    FAPI_DBG("proc_setup_bars_memory_get_mirrored_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining foreign near memory range
-// parameters: i_target       => pointer to chip target
-//             io_addr_ranges => array of address range structures
-//                               encapsulating attribute values
-//                               (one per foreign link)
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_FOREIGN_NEAR_RANGE_ATTR_ERR if individual chip
-//              foriegn near range attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_memory_get_foreign_near_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range io_addr_ranges[PROC_FAB_SMP_NUM_F_LINKS])
-{
-    // return code
-    fapi::ReturnCode rc;
-    // temporary attribute storage used to build procedure data structures
-    uint64_t foreign_near_base_attr[PROC_FAB_SMP_NUM_F_LINKS];
-    uint64_t foreign_near_size_attr[PROC_FAB_SMP_NUM_F_LINKS];
-
-    // mark function entry
-    FAPI_DBG("proc_setup_bars_memory_get_foreign_near_attrs: Start");
-
-    do
-    {
-        // retrieve foreign near base address/size attributes
-        rc = FAPI_ATTR_GET(ATTR_PROC_FOREIGN_NEAR_BASE,
-                           i_target,
-                           foreign_near_base_attr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_foreign_near_attrs: Error querying ATTR_PROC_FOREIGN_NEAR_BASE");
-            break;
-        }
-        rc = FAPI_ATTR_GET(ATTR_PROC_FOREIGN_NEAR_SIZE,
-                           i_target,
-                           foreign_near_size_attr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_foreign_near_attrs: Error querying ATTR_PROC_FOREIGN_NEAR_SIZE");
-            break;
-        }
-
-        // process attributes into range structures
-        for (uint8_t r = 0; r < PROC_FAB_SMP_NUM_F_LINKS; r++)
-        {
-            // build range content
-            io_addr_ranges[r].base_addr = foreign_near_base_attr[r];
-            io_addr_ranges[r].size = foreign_near_size_attr[r];
-            io_addr_ranges[r].enabled = (foreign_near_size_attr[r] != 0x0);
-
-            // check attribute content
-            FAPI_DBG("proc_setup_bars_memory_get_foreign_near_attrs: Link %d", r);
-            if (proc_setup_bars_common_check_bar(
-                    common_f_scope_bar_def,
-                    io_addr_ranges[r]) != false)
-            {
-                FAPI_ERR("proc_setup_bars_memory_get_foreign_near_attrs: Error from proc_setup_bars_common_check_bar");
-                const uint64_t& BASE_ADDR = io_addr_ranges[r].base_addr;
-                const uint64_t& SIZE = io_addr_ranges[r].size;
-                FAPI_SET_HWP_ERROR(rc,
-                    RC_PROC_SETUP_BARS_FOREIGN_NEAR_RANGE_ATTR_ERR);
-                break;
-            }
-        }
-    } while(0);
-    // mark function entry
-    FAPI_DBG("proc_setup_bars_memory_get_foreign_near_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining foreign far memory range
-// parameters: i_target       => pointer to chip target
-//             io_addr_ranges => array of address range structures
-//                               encapsulating attribute values
-//                               (one per foreign link)
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_FOREIGN_FAR_RANGE_ATTR_ERR if individual chip
-//              foreign far range attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_memory_get_foreign_far_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range io_addr_ranges[PROC_FAB_SMP_NUM_F_LINKS])
-{
-    // return code
-    fapi::ReturnCode rc;
-    // temporary attribute storage used to build procedure data structures
-    uint64_t foreign_far_base_attr[PROC_FAB_SMP_NUM_F_LINKS];
-    uint64_t foreign_far_size_attr[PROC_FAB_SMP_NUM_F_LINKS];
-
-    // mark function entry
-    FAPI_DBG("proc_setup_bars_memory_get_foreign_far_attrs: Start");
-
-    do
-    {
-        // retrieve foreign far base address/size attributes
-        rc = FAPI_ATTR_GET(ATTR_PROC_FOREIGN_FAR_BASE,
-                           i_target,
-                           foreign_far_base_attr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_foreign_far_attrs: Error querying ATTR_PROC_FOREIGN_FAR_BASE");
-            break;
-        }
-        rc = FAPI_ATTR_GET(ATTR_PROC_FOREIGN_FAR_SIZE,
-                           i_target,
-                           foreign_far_size_attr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_memory_get_foreign_far_attrs: Error querying ATTR_PROC_FOREIGN_FAR_SIZE");
-            break;
-        }
-
-        // process attributes into range structures
-        for (uint8_t r = 0; r < PROC_FAB_SMP_NUM_F_LINKS; r++)
-        {
-            // build range content
-            io_addr_ranges[r].base_addr = foreign_far_base_attr[r];
-            io_addr_ranges[r].size = foreign_far_size_attr[r];
-            io_addr_ranges[r].enabled = (foreign_far_size_attr[r] != 0x0);
-
-            // check attribute content
-            FAPI_DBG("proc_setup_bars_memory_get_foreign_far_attrs: Link %d", r);
-            if (proc_setup_bars_common_check_bar(
-                    common_f_scope_bar_def,
-                    io_addr_ranges[r]) != false)
-            {
-                FAPI_ERR("proc_setup_bars_memory_get_foreign_far_attrs: Error from proc_setup_bars_common_check_bar");
-                const uint64_t& BASE_ADDR = io_addr_ranges[r].base_addr;
-                const uint64_t& SIZE = io_addr_ranges[r].size;
-                FAPI_SET_HWP_ERROR(rc,
-                    RC_PROC_SETUP_BARS_FOREIGN_FAR_RANGE_ATTR_ERR);
-                break;
-            }
-        }
-    } while(0);
-
-    // mark function exit
-    FAPI_DBG("proc_setup_bars_memory_get_foreign_far_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining PSI BAR programming
-// parameters: i_target      => pointer to chip target
-//             io_addr_range => address range structure encapsulating
-//                              attribute values
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_PSI_BAR_ATTR_ERR if chip PSI range
-//              attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_psi_get_bar_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range& io_addr_range)
-{
-    // return code
-    fapi::ReturnCode rc;
-    uint8_t bar_enabled;
-
-    FAPI_DBG("proc_setup_bars_psi_get_bar_attrs: Start");
-    do
-    {
-        // BAR base address
-        rc = FAPI_ATTR_GET(ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR,
-                           i_target,
-                           io_addr_range.base_addr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_psi_get_bar_attrs: Error querying ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR");
-            break;
-        }
-
-        // BAR enable
-        rc = FAPI_ATTR_GET(ATTR_PROC_PSI_BRIDGE_BAR_ENABLE,
-                           i_target,
-                           bar_enabled);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_psi_get_bar_attrs: Error querying ATTR_PROC_PSI_BRIDGE_BAR_ENABLE");
-            break;
-        }
-        io_addr_range.enabled = (bar_enabled == 0x1);
-
-        // BAR size (implied to be 1MB)
-        io_addr_range.size = PROC_SETUP_BARS_SIZE_1_MB;
-
-        // check BAR attribute content
-        if (proc_setup_bars_common_check_bar(
-                psi_bridge_bar_def,
-                io_addr_range) != false)
-        {
-            FAPI_ERR("proc_setup_bars_psi_get_bar_attrs: Error from proc_setup_bars_common_check_bar");
-            const uint64_t& BASE_ADDR = io_addr_range.base_addr;
-            const uint64_t& SIZE = io_addr_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-               RC_PROC_SETUP_BARS_PSI_BAR_ATTR_ERR);
-            break;
-        }
-    } while(0);
-
-    FAPI_DBG("proc_setup_bars_psi_get_bar_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining FSP BAR programming
-// parameters: i_target      => pointer to chip target
-//             io_addr_range => address range structure encapsulating
-//                              attribute values
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_FSP_BAR_ATTR_ERR if chip FSP range
-//              attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_fsp_get_bar_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range& io_addr_range)
-{
-    // return code
-    fapi::ReturnCode rc;
-    uint8_t bar_enabled;
-
-    FAPI_DBG("proc_setup_bars_fsp_get_bar_attrs: Start");
-    do
-    {
-        // BAR base address
-        rc = FAPI_ATTR_GET(ATTR_PROC_FSP_BAR_BASE_ADDR,
-                           i_target,
-                           io_addr_range.base_addr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_fsp_get_bar_attrs: Error querying ATTR_PROC_FSP_BAR_BASE_ADDR");
-            break;
-        }
-
-        // BAR enable
-        rc = FAPI_ATTR_GET(ATTR_PROC_FSP_BAR_ENABLE,
-                           i_target,
-                           bar_enabled);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_fsp_get_bar_attrs: Error querying ATTR_PROC_FSP_BAR_ENABLE");
-            break;
-        }
-        io_addr_range.enabled = (bar_enabled == 0x1);
-
-        // BAR size
-        rc = FAPI_ATTR_GET(ATTR_PROC_FSP_BAR_SIZE,
-                           i_target,
-                           io_addr_range.size);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_fsp_get_bar_attrs: Error querying ATTR_PROC_FSP_BAR_SIZE");
-            break;
-        }
-
-        // check BAR attribute content
-        if (proc_setup_bars_common_check_bar(
-                fsp_bar_def,
-                io_addr_range) != false)
-        {
-            FAPI_ERR("proc_setup_bars_fsp_get_bar_attrs: Error from proc_setup_bars_common_check_bar");
-            const uint64_t& BASE_ADDR = io_addr_range.base_addr;
-            const uint64_t& SIZE = io_addr_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-               RC_PROC_SETUP_BARS_FSP_BAR_ATTR_ERR);
-            break;
-        }
-    } while(0);
-
-    FAPI_DBG("proc_setup_bars_fsp_get_bar_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining FSP MMIO mask programming
-// parameters: i_target      => pointer to chip target
-//             io_addr_range => address range structure encapsulating
-//                              attribute values
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_FSP_MMIO_MASK_ATTR_ERR if chip MMIO mask
-//              attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_fsp_get_mmio_mask_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range& io_addr_range)
-{
-    // return code
-    fapi::ReturnCode rc;
-
-    FAPI_DBG("proc_setup_bars_fsp_get_mmio_mask_attrs: Start");
-    do
-    {
-        // BAR base address (unused)
-        io_addr_range.base_addr = 0x0ULL;
-
-        // BAR enable (unused)
-        io_addr_range.enabled = true;
-
-        // BAR size
-        rc = FAPI_ATTR_GET(ATTR_PROC_FSP_MMIO_MASK_SIZE,
-                           i_target,
-                           io_addr_range.size);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_fsp_get_mmio_mask_attrs: Error querying ATTR_PROC_FSP_MMIO_MASK_SIZE");
-            break;
-        }
-
-        // check BAR attribute content
-        if (proc_setup_bars_common_check_bar(
-                fsp_mmio_mask_def,
-                io_addr_range) != false)
-        {
-            FAPI_ERR("proc_setup_bars_fsp_get_mmio_mask_attrs: Error from proc_setup_bars_common_check_bar");
-            const uint64_t& SIZE = io_addr_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-               RC_PROC_SETUP_BARS_FSP_MMIO_MASK_ATTR_ERR);
-            break;
-        }
-    } while(0);
-
-    FAPI_DBG("proc_setup_bars_fsp_get_mmio_mask_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining INTP BAR programming
-// parameters: i_target      => pointer to chip target
-//             io_addr_range => address range structure encapsulating
-//                              attribute values
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_INTP_BAR_ATTR_ERR if chip INTP range
-//              attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_intp_get_bar_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range& io_addr_range)
-{
-    // return code
-    fapi::ReturnCode rc;
-    uint8_t bar_enabled;
-
-    FAPI_DBG("proc_setup_bars_intp_get_bar_attrs: Start");
-    do
-    {
-        // BAR base address
-        rc = FAPI_ATTR_GET(ATTR_PROC_INTP_BAR_BASE_ADDR,
-                           i_target,
-                           io_addr_range.base_addr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_intp_get_bar_attrs: Error querying ATTR_PROC_INTP_BAR_BASE_ADDR");
-            break;
-        }
-
-        // BAR enable
-        rc = FAPI_ATTR_GET(ATTR_PROC_INTP_BAR_ENABLE,
-                           i_target,
-                           bar_enabled);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_intp_get_bar_attrs: Error querying ATTR_PROC_INTP_BAR_ENABLE");
-            break;
-        }
-        io_addr_range.enabled = (bar_enabled == 0x1);
-
-        // BAR size (implied to be 1MB)
-        io_addr_range.size = PROC_SETUP_BARS_SIZE_1_MB;
-
-        // check BAR attribute content
-        if (proc_setup_bars_common_check_bar(
-                intp_bar_def,
-                io_addr_range) != false)
-        {
-            FAPI_ERR("proc_setup_bars_intp_get_bar_attrs: Error from proc_setup_bars_common_check_bar");
-            const uint64_t& BASE_ADDR = io_addr_range.base_addr;
-            const uint64_t& SIZE = io_addr_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-               RC_PROC_SETUP_BARS_INTP_BAR_ATTR_ERR);
-            break;
-        }
-    } while(0);
-
-    FAPI_DBG("proc_setup_bars_intp_get_bar_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining NX MMIO BAR programming
-// parameters: i_target      => pointer to chip target
-//             io_addr_range => address range structure encapsulating
-//                              attribute values
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_NX_MMIO_BAR_ATTR_ERR if chip NX MMIO range
-//              attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_nx_get_mmio_bar_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range& io_addr_range)
-{
-    // return code
-    fapi::ReturnCode rc;
-    uint8_t bar_enabled;
-
-    FAPI_DBG("proc_setup_bars_nx_get_mmio_bar_attrs: Start");
-    do
-    {
-        // BAR base address
-        rc = FAPI_ATTR_GET(ATTR_PROC_NX_MMIO_BAR_BASE_ADDR,
-                           i_target,
-                           io_addr_range.base_addr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_nx_get_mmio_bar_attrs: Error querying ATTR_PROC_NX_MMIO_BAR_BASE_ADDR");
-            break;
-        }
-
-        // BAR enable
-        rc = FAPI_ATTR_GET(ATTR_PROC_NX_MMIO_BAR_ENABLE,
-                           i_target,
-                           bar_enabled);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_nx_get_mmio_bar_attrs: Error querying ATTR_PROC_NX_MMIO_BAR_ENABLE");
-            break;
-        }
-        io_addr_range.enabled = (bar_enabled == 0x1);
-
-        // BAR size
-        rc = FAPI_ATTR_GET(ATTR_PROC_NX_MMIO_BAR_SIZE,
-                           i_target,
-                           io_addr_range.size);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_nx_get_mmio_bar_attrs: Error querying ATTR_PROC_NX_MMIO_BAR_SIZE");
-            break;
-        }
-
-        // check BAR attribute content
-        if (proc_setup_bars_common_check_bar(
-                nx_mmio_bar_def,
-                io_addr_range) != false)
-        {
-            FAPI_ERR("proc_setup_bars_nx_get_mmio_bar_attrs: Error from proc_setup_bars_common_check_bar");
-            const uint64_t& BASE_ADDR = io_addr_range.base_addr;
-            const uint64_t& SIZE = io_addr_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-               RC_PROC_SETUP_BARS_NX_MMIO_BAR_ATTR_ERR);
-            break;
-        }
-    } while(0);
-
-    FAPI_DBG("proc_setup_bars_nx_get_mmio_bar_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining AS MMIO BAR programming
-// parameters: i_target      => pointer to chip target
-//             io_addr_range => address range structure encapsulating
-//                              attribute values
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_AS_MMIO_BAR_ATTR_ERR if chip AS MMIO range
-//              attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_as_get_mmio_bar_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range& io_addr_range)
-{
-    // return code
-    fapi::ReturnCode rc;
-    uint8_t bar_enabled;
-
-    FAPI_DBG("proc_setup_bars_as_get_mmio_bar_attrs: Start");
-    do
-    {
-        // BAR base address
-        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_BASE_ADDR,
-                           i_target,
-                           io_addr_range.base_addr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_as_get_mmio_bar_attrs: Error querying ATTR_PROC_AS_MMIO_BAR_BASE_ADDR");
-            break;
-        }
-
-        // BAR enable
-        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_ENABLE,
-                           i_target,
-                           bar_enabled);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_as_get_mmio_bar_attrs: Error querying ATTR_PROC_AS_MMIO_BAR_ENABLE");
-            break;
-        }
-        io_addr_range.enabled = (bar_enabled == 0x1);
-
-        // BAR size
-        rc = FAPI_ATTR_GET(ATTR_PROC_AS_MMIO_BAR_SIZE,
-                           i_target,
-                           io_addr_range.size);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_as_get_mmio_bar_attrs: Error querying ATTR_PROC_AS_MMIO_BAR_SIZE");
-            break;
-        }
-
-        // check BAR attribute content
-        if (proc_setup_bars_common_check_bar(
-                as_mmio_bar_def,
-                io_addr_range) != false)
-        {
-            FAPI_ERR("proc_setup_bars_as_get_mmio_bar_attrs: Error from proc_setup_bars_common_check_bar");
-            const uint64_t& BASE_ADDR = io_addr_range.base_addr;
-            const uint64_t& SIZE = io_addr_range.size;
-            FAPI_SET_HWP_ERROR(rc,
-               RC_PROC_SETUP_BARS_AS_MMIO_BAR_ATTR_ERR);
-            break;
-        }
-    } while(0);
-
-    FAPI_DBG("proc_setup_bars_as_get_mmio_bar_attrs: End");
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: retrieve attributes defining PCIe IO BAR programming
-// parameters: i_target       => pointer to chip target
-//             io_addr_ranges => 2D array of address range structures
-//                               encapsulating attribute values
-//                               (first dimension = unit, second dimension =
-//                                links per unit)
-// returns: FAPI_RC_SUCCESS if all attribute reads are successful & values
-//              are valid,
-//          RC_PROC_SETUP_BARS_PCIE_BAR_ATTR_ERR if individual chip PCIe IO
-//              range attribute content violates expected behavior,
-//          else FAPI_ATTR_GET return code
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_setup_bars_pcie_get_bar_attrs(
-    const fapi::Target* i_target,
-    proc_setup_bars_addr_range io_addr_ranges[PROC_SETUP_BARS_PCIE_NUM_UNITS][PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT])
-{
-    // return code
-    fapi::ReturnCode rc;
-    // temporary attribute storage used to build procedure data structures
-    uint64_t pcie_bar_addr[PROC_SETUP_BARS_PCIE_NUM_UNITS][PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT];
-    uint64_t pcie_bar_size[PROC_SETUP_BARS_PCIE_NUM_UNITS][PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT];
-    uint8_t pcie_bar_en[PROC_SETUP_BARS_PCIE_NUM_UNITS][PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT];
-
-    FAPI_DBG("proc_setup_bars_pcie_get_bar_attrs: Start");
-    do
-    {
-        // IO BAR base addresses
-        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_BAR_BASE_ADDR,
-                           i_target,
-                           pcie_bar_addr);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_pcie_get_bar_attrs: Error querying ATTR_PROC_PCIE_BAR_BASE_ADDR");
-            break;
-        }
-
-        // IO BAR enable
-        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_BAR_ENABLE,
-                           i_target,
-                           pcie_bar_en);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_pcie_get_bar_attrs: Error querying ATTR_PROC_PCIE_BAR_ENABLE");
-            break;
-        }
-
-        // IO BAR sizes
-        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_BAR_SIZE,
-                           i_target,
-                           pcie_bar_size);
-        if (!rc.ok())
-        {
-            FAPI_ERR("proc_setup_bars_pcie_get_bar_attrs: Error querying ATTR_PROC_PCIE_BAR_SIZE");
-            break;
-        }
-
-        // loop over all units
-        for (uint8_t u = 0;
-             (u < PROC_SETUP_BARS_PCIE_NUM_UNITS) && (rc.ok());
-             u++)
-        {
-            for (uint8_t r = 0;
-                 r < PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT;
-                 r++)
-            {
-                // fill chip range structures
-                io_addr_ranges[u][r].base_addr = pcie_bar_addr[u][r];
-                io_addr_ranges[u][r].size = pcie_bar_size[u][r];
-                io_addr_ranges[u][r].enabled = pcie_bar_en[u][r];
-                // check BAR attribute content
-                FAPI_DBG("proc_setup_bars_pcie_get_bar_attrs: Unit %d Range %d",
-                         u, r);
-                if (proc_setup_bars_common_check_bar(
-                       ((PROC_SETUP_BARS_PCIE_RANGE_TYPE_MMIO[r])?
-                        (pcie_mmio_bar_def):
-                        (pcie_phb_bar_def)),
-                       io_addr_ranges[u][r]) != false)
+                for (uint8_t x = r+1; x < i_num_ranges; x++)
                 {
-                    FAPI_ERR("proc_setup_bars_pcie_get_bar_attrs: Error from proc_setup_bars_common_check_bar");
-                    const uint8_t& UNIT = u;
-                    const uint8_t& RANGE = r;
-                    const uint64_t& BASE_ADDR = io_addr_ranges[u][r].base_addr;
-                    const uint64_t& SIZE = io_addr_ranges[u][r].size;
-                    FAPI_SET_HWP_ERROR(rc,
-                        RC_PROC_SETUP_BARS_PCIE_BAR_ATTR_ERR);
-                    break;
+                    if (ranges[r].overlaps(ranges[x]))
+                    {
+                        FAPI_ERR("proc_setup_bars_get_memory_range_attrs: Memory range attributes specify overlapping address regions (Range ID = 0x%X, Range index1 = %d, Range index2 = %d)",
+                                 i_range_id, r, x);
+                        const fapi::Target & TARGET = *i_target;
+                        const proc_setup_bars_attr_id & RANGE_ID = i_range_id;
+                        const uint32_t & ATTR_IDX1 = r;
+                        const uint64_t & BASE_ADDR1 = ranges[r].base_addr;
+                        const uint64_t & END_ADDR1 = ranges[r].end_addr();
+                        const bool & ENABLED1 = ranges[r].enabled;
+                        const uint32_t & ATTR_IDX2 = x;
+                        const uint64_t & BASE_ADDR2 = ranges[x].base_addr;
+                        const uint64_t & END_ADDR2 = ranges[x].end_addr();
+                        const bool & ENABLED2 = ranges[x].enabled;
+                        FAPI_SET_HWP_ERROR(rc,
+                            RC_PROC_SETUP_BARS_CHIP_MEMORY_RANGE_ATTR_OVERLAP_ERR);
+                        break;
+                    }
                 }
             }
+            if (!rc.ok())
+            {
+                break;
+            }
+        }
+
+        // ranges are non-overlapping, merge to single range
+        for (uint8_t r = 0; r < i_num_ranges; r++)
+        {
+            // merge to build single range
+            io_addr_range.merge(ranges[r]);
+        }
+
+        // ensure range is power of 2 aligned
+        if (io_addr_range.enabled && !io_addr_range.is_power_of_2())
+        {
+            io_addr_range.round_next_power_of_2();
+        }
+
+        // check final range content
+        if (proc_setup_bars_common_check_bar(
+                i_range_def,
+                io_addr_range) != false)
+        {
+            FAPI_ERR("proc_setup_bars_get_memory_range_attrs: Error from proc_setup_bars_common_check_bar");
+            const fapi::Target & TARGET = *i_target;
+            const proc_setup_bars_attr_id & RANGE_ID = i_range_id;
+            const uint64_t & BASE_ADDR = io_addr_range.base_addr;
+            const uint64_t & END_ADDR = io_addr_range.end_addr();
+            const bool & ENABLED = io_addr_range.enabled;
+            FAPI_SET_HWP_ERROR(rc,
+                RC_PROC_SETUP_BARS_CHIP_MEMORY_RANGE_ERR);
+            break;
         }
     } while(0);
 
-    FAPI_DBG("proc_setup_bars_pcie_get_bar_attrs: End");
+    // mark function exit
+    FAPI_DBG("proc_setup_bars_get_memory_range_attrs: End");
     return rc;
 }
 
@@ -1096,114 +697,215 @@ fapi::ReturnCode proc_setup_bars_get_bar_attrs(
     do
     {
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for non-mirrored memory range");
-        rc = proc_setup_bars_memory_get_non_mirrored_attrs(
+        rc = proc_setup_bars_get_memory_range_attrs(
             &(io_smp_chip.chip->this_chip),
+            PROC_SETUP_BARS_ATTR_ID_NM,
+            fapi::ATTR_PROC_MEM_BASES_ACK,
+            fapi::ATTR_PROC_MEM_SIZES_ACK,
+            PROC_SETUP_BARS_NUM_NON_MIRRORED_RANGES,
+            non_mirrored_range_def,
             io_smp_chip.non_mirrored_range);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_memory_get_non_mirrored_attrs");
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_memory_range_attrs (non-mirrored)");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for mirrored memory range");
-        rc = proc_setup_bars_memory_get_mirrored_attrs(
+        rc = proc_setup_bars_get_memory_range_attrs(
             &(io_smp_chip.chip->this_chip),
+            PROC_SETUP_BARS_ATTR_ID_M,
+            fapi::ATTR_PROC_MIRROR_BASES_ACK,
+            fapi::ATTR_PROC_MIRROR_SIZES_ACK,
+            PROC_SETUP_BARS_NUM_MIRRORED_RANGES,
+            mirrored_range_def,
             io_smp_chip.mirrored_range);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_memory_get_mirrored_attrs");
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_memory_range_attrs (mirrored)");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for foreign near memory ranges");
-        rc = proc_setup_bars_memory_get_foreign_near_attrs(
-            &(io_smp_chip.chip->this_chip),
-            io_smp_chip.foreign_near_ranges);
+        for (uint8_t l = 0; l < PROC_FAB_SMP_NUM_F_LINKS; l++)
+        {
+            rc = proc_setup_bars_get_range_attrs(
+                &(io_smp_chip.chip->this_chip),
+                PROC_SETUP_BARS_ATTR_ID_FN,
+                &f_near_range_base_addr_attr,
+                NULL,
+                &f_near_range_size_attr,
+                l, 0,
+                common_f_scope_bar_def,
+                io_smp_chip.foreign_near_ranges[l]);
+
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_attrs (foreign near, link = %d)",
+                         l);
+                break;
+            }
+        }
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_memory_get_foreign_near_attrs");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for foreign far memory ranges");
-        rc = proc_setup_bars_memory_get_foreign_far_attrs(
-            &(io_smp_chip.chip->this_chip),
-            io_smp_chip.foreign_far_ranges);
+        for (uint8_t l = 0; l < PROC_FAB_SMP_NUM_F_LINKS; l++)
+        {
+            rc = proc_setup_bars_get_range_attrs(
+                &(io_smp_chip.chip->this_chip),
+                PROC_SETUP_BARS_ATTR_ID_FF,
+                &f_far_range_base_addr_attr,
+                NULL,
+                &f_far_range_size_attr,
+                l, 0,
+                common_f_scope_bar_def,
+                io_smp_chip.foreign_far_ranges[l]);
+
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_attrs (foreign far, link = %d)",
+                         l);
+                break;
+            }
+        }
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_memory_get_foreign_far_attrs");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for PSI address range");
-        rc = proc_setup_bars_psi_get_bar_attrs(
+        rc = proc_setup_bars_get_range_attrs(
             &(io_smp_chip.chip->this_chip),
+            PROC_SETUP_BARS_ATTR_ID_PSI,
+            &psi_bridge_bar_base_addr_attr,
+            &psi_bridge_bar_en_attr,
+            NULL,
+            0, 0,
+            psi_bridge_bar_def,
             io_smp_chip.psi_range);
+
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_psi_get_bar_attrs");
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_attrs (PSI)");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for FSP address range");
-        rc = proc_setup_bars_fsp_get_bar_attrs(
+        rc = proc_setup_bars_get_range_attrs(
             &(io_smp_chip.chip->this_chip),
+            PROC_SETUP_BARS_ATTR_ID_FSP,
+            &fsp_bar_base_addr_attr,
+            &fsp_bar_en_attr,
+            &fsp_bar_size_attr,
+            0, 0,
+            fsp_bar_def,
             io_smp_chip.fsp_range);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_fsp_get_bar_attrs");
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_attrs (FSP)");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for FSP MMIO mask");
-        rc = proc_setup_bars_fsp_get_mmio_mask_attrs(
+        rc = proc_setup_bars_get_range_attrs(
             &(io_smp_chip.chip->this_chip),
+            PROC_SETUP_BARS_ATTR_ID_FSP_MMIO,
+            NULL,
+            NULL,
+            &fsp_mmio_mask_size_attr,
+            0, 0,
+            fsp_mmio_mask_def,
             io_smp_chip.fsp_mmio_mask_range);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_fsp_get_mmio_mask_attrs");
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_addrs (FSP MMIO)");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for INTP address range");
-        rc = proc_setup_bars_intp_get_bar_attrs(
+        rc = proc_setup_bars_get_range_attrs(
             &(io_smp_chip.chip->this_chip),
+            PROC_SETUP_BARS_ATTR_ID_INTP,
+            &intp_bar_base_addr_attr,
+            &intp_bar_en_attr,
+            NULL,
+            0, 0,
+            intp_bar_def,
             io_smp_chip.intp_range);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_intp_get_bar_attrs");
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_attrs (INTP)");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for NX MMIO address range");
-        rc = proc_setup_bars_nx_get_mmio_bar_attrs(
+        rc = proc_setup_bars_get_range_attrs(
             &(io_smp_chip.chip->this_chip),
+            PROC_SETUP_BARS_ATTR_ID_NX,
+            &nx_mmio_bar_base_addr_attr,
+            &nx_mmio_bar_en_attr,
+            &nx_mmio_bar_size_attr,
+            0, 0,
+            nx_mmio_bar_def,
             io_smp_chip.nx_mmio_range);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_intp_get_bar_attrs");
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_attrs (NX)");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for AS MMIO address range");
-        rc = proc_setup_bars_as_get_mmio_bar_attrs(
+        rc = proc_setup_bars_get_range_attrs(
             &(io_smp_chip.chip->this_chip),
+            PROC_SETUP_BARS_ATTR_ID_AS,
+            &as_mmio_bar_base_addr_attr,
+            &as_mmio_bar_en_attr,
+            &as_mmio_bar_size_attr,
+            0, 0,
+            as_mmio_bar_def,
             io_smp_chip.as_mmio_range);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_intp_get_bar_attrs");
+            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_attrs (AS)");
             break;
         }
 
         FAPI_DBG("proc_setup_bars_get_bar_attrs: Querying base address/size attributes for PCIe address ranges");
-        rc = proc_setup_bars_pcie_get_bar_attrs(
-            &(io_smp_chip.chip->this_chip),
-            io_smp_chip.pcie_ranges);
+        for (uint8_t u = 0;
+             (u < PROC_SETUP_BARS_PCIE_NUM_UNITS) && (rc.ok());
+             u++)
+        {
+            for (uint8_t r = 0;
+                 r < PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT;
+                 r++)
+            {
+                rc = proc_setup_bars_get_range_attrs(
+                    &(io_smp_chip.chip->this_chip),
+                    PROC_SETUP_BARS_ATTR_ID_PCIE,
+                    &pcie_mmio_bar_base_addr_attr,
+                    &pcie_mmio_bar_en_attr,
+                    &pcie_mmio_bar_size_attr,
+                    u, r,
+                    ((PROC_SETUP_BARS_PCIE_RANGE_TYPE_MMIO[r])?
+                     (pcie_mmio_bar_def):
+                     (pcie_phb_bar_def)),
+                    io_smp_chip.pcie_ranges[u][r]);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_get_range_attrs (PCIE, unit = %d, range=%d)",
+                             u, r);
+                    break;
+                }
+            }
+        }
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_get_bar_attrs: Error from proc_setup_bars_pcie_get_bar_attrs");
             break;
         }
+
     } while(0);
 
     // mark function exit
@@ -1303,7 +1005,7 @@ fapi::ReturnCode proc_setup_bars_process_chip(
         rc = proc_setup_bars_get_bar_attrs(io_smp_chip);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_process_chip: Error from proc_fab_smp_get_mem_attrs");
+            FAPI_ERR("proc_setup_bars_process_chip: Error from proc_setup_bars_get_bar_attrs");
             break;
         }
     } while(0);
@@ -1325,13 +1027,7 @@ fapi::ReturnCode proc_setup_bars_process_chip(
 //              are valid,
 //          RC_PROC_SETUP_BARS_NODE_ADD_INTERNAL_ERR if node map insert fails,
 //          RC_PROC_SETUP_BARS_DUPLICATE_FABRIC_ID_ERR if chips with duplicate
-//              fabric node/chip IDs are detected,
-//          RC_PROC_SETUP_BARS_NODE_NON_MIRRORED_RANGE_OVERLAP_ERR if overlap
-//              is detected between existing node non-mirrored range
-//              and that of new chip being processed,
-//          RC_PROC_SETUP_BARS_NODE_MIRRORED_RANGE_OVERLAP_ERR if overlap
-//              is detected between existing node mirrored range
-//              and that of new chip being processed
+//              fabric node/chip IDs are detected
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars_insert_chip(
     proc_setup_bars_smp_chip& i_smp_chip,
@@ -1370,7 +1066,9 @@ fapi::ReturnCode proc_setup_bars_insert_chip(
             n_iter = ret.first;
             if (!ret.second)
             {
-                FAPI_ERR("proc_setup_bars_insert_chip: Error encountered adding node to SMP");
+                FAPI_ERR("proc_setup_bars_insert_chip: Error encountered adding node to SMP map");
+                const fapi::Target & TARGET = i_smp_chip.chip->this_chip;
+                const proc_fab_smp_node_id & NODE_ID = node_id;
                 FAPI_SET_HWP_ERROR(rc,
                     RC_PROC_SETUP_BARS_NODE_ADD_INTERNAL_ERR);
                 break;
@@ -1386,8 +1084,10 @@ fapi::ReturnCode proc_setup_bars_insert_chip(
         if (p_iter != io_smp.nodes[node_id].chips.end())
         {
             FAPI_ERR("proc_setup_bars_insert_chip: Duplicate fabric node ID / chip ID found");
-            const uint8_t& NODE_ID = node_id;
-            const uint8_t& CHIP_ID = chip_id;
+            const fapi::Target & TARGET1 = i_smp_chip.chip->this_chip;
+            const fapi::Target & TARGET2 = p_iter->second.chip->this_chip;
+            const proc_fab_smp_node_id & NODE_ID = node_id;
+            const proc_fab_smp_chip_id & CHIP_ID = chip_id;
             FAPI_SET_HWP_ERROR(rc,
                 RC_PROC_SETUP_BARS_DUPLICATE_FABRIC_ID_ERR);
             break;
@@ -1396,12 +1096,15 @@ fapi::ReturnCode proc_setup_bars_insert_chip(
         io_smp.nodes[node_id].chips[chip_id] = i_smp_chip;
 
         // update node address regions
-        io_smp.nodes[node_id].non_mirrored_ranges.push_back(&(io_smp.nodes[node_id].chips[chip_id].non_mirrored_range));
         i_smp_chip.non_mirrored_range.print();
+        io_smp.nodes[node_id].non_mirrored_range.print();
+        io_smp.nodes[node_id].non_mirrored_range.merge(io_smp.nodes[node_id].chips[chip_id].non_mirrored_range);
+        io_smp.nodes[node_id].non_mirrored_range.print();
 
-        io_smp.nodes[node_id].mirrored_ranges.push_back(&(io_smp.nodes[node_id].chips[chip_id].mirrored_range));
         i_smp_chip.mirrored_range.print();
-
+        io_smp.nodes[node_id].mirrored_range.print();
+        io_smp.nodes[node_id].mirrored_range.merge(io_smp.nodes[node_id].chips[chip_id].mirrored_range);
+        io_smp.nodes[node_id].mirrored_range.print();
     } while(0);
 
     // mark function exit
@@ -1472,48 +1175,12 @@ fapi::ReturnCode proc_setup_bars_process_chips(
         {
             FAPI_DBG("Performing final adjustment on n%d", n_iter->first);
 
-            // merge into single range
-            for (uint8_t r = 0; r < n_iter->second.non_mirrored_ranges.size(); r++)
-            {
-                n_iter->second.non_mirrored_ranges[r]->print();
-            }
-
-            // before merging, check that non-mirrored & mirrored ranges are non-overlapping
-            if (proc_setup_bars_common_do_ranges_overlap(n_iter->second.non_mirrored_ranges))
-            {
-                FAPI_ERR("proc_setup_bars_process_chips: Existing node non-mirrored range overlaps chip non-mirrored range");
-                const uint8_t& NODE_ID = n_iter->first;
-                FAPI_SET_HWP_ERROR(rc,
-                    RC_PROC_SETUP_BARS_NODE_NON_MIRRORED_RANGE_OVERLAP_ERR);
-                break;
-            }
-
-            if (proc_setup_bars_common_do_ranges_overlap(n_iter->second.mirrored_ranges))
-            {
-                FAPI_ERR("proc_setup_bars_process_chips: Existing node mirrored range overlaps chip mirrored range");
-                const uint8_t& NODE_ID = n_iter->first;
-                FAPI_SET_HWP_ERROR(rc,
-                    RC_PROC_SETUP_BARS_NODE_MIRRORED_RANGE_OVERLAP_ERR);
-                break;
-            }
-
-            // merge into single range
-            for (uint8_t r = 0; r < n_iter->second.non_mirrored_ranges.size(); r++)
-            {
-                n_iter->second.non_mirrored_range.merge(*(n_iter->second.non_mirrored_ranges[r]));
-            }
-
-            for (uint8_t r = 0; r < n_iter->second.mirrored_ranges.size(); r++)
-            {
-                n_iter->second.mirrored_range.merge(*(n_iter->second.mirrored_ranges[r]));
-            }
-
             // update node address ranges (non-mirrored & mirrored)
             FAPI_DBG("proc_setup_bars_process_chips: Ranges after merging:");
             n_iter->second.non_mirrored_range.print();
             n_iter->second.mirrored_range.print();
 
-            // update node address ranges (non-mirrored & mirrored) t
+            // update node address ranges (non-mirrored & mirrored) to
             // ensure ranges are power of 2 aligned
             FAPI_DBG("proc_setup_bars_process_chips: Node %d ranges after power of two alignment:",
                      n_iter->first);
@@ -1595,9 +1262,12 @@ fapi::ReturnCode proc_setup_bars_common_write_bar_reg(
             else if (i_bar_reg_def.base_shift != PROC_SETUP_BARS_SHIFT_NONE)
             {
                 FAPI_ERR("proc_setup_bars_common_write_bar_reg: Invalid base shift value in register definition");
-                FAPI_SET_HWP_ERROR(
-                    rc,
-                    RC_PROC_SETUP_BARS_INVALID_BAR_REG_DEF);
+                const fapi::Target & TARGET = i_target;
+                const uint32_t & SCOM_ADDR = i_scom_addr;
+                const uint64_t & BASE_ADDR = i_addr_range.base_addr;
+                const bool & ENABLED = i_addr_range.enabled;
+                const uint64_t & SIZE = i_addr_range.size;
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_SETUP_BARS_INVALID_BAR_REG_DEF);
                 break;
             }
             // set mask
@@ -1626,7 +1296,11 @@ fapi::ReturnCode proc_setup_bars_common_write_bar_reg(
             {
                 FAPI_ERR("proc_setup_bars_common_write_bar_reg: Unsupported BAR size 0x%016llX",
                          i_addr_range.size);
-                const uint64_t& SIZE = i_addr_range.size;
+                const fapi::Target & TARGET = i_target;
+                const uint32_t & SCOM_ADDR = i_scom_addr;
+                const uint64_t & BASE_ADDR = i_addr_range.base_addr;
+                const bool & ENABLED = i_addr_range.enabled;
+                const uint64_t & SIZE = i_addr_range.size;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_SETUP_BARS_SIZE_XLATE_ERR);
                 break;
             }
@@ -1667,7 +1341,7 @@ fapi::ReturnCode proc_setup_bars_common_write_bar_reg(
                                   bar_data_mask);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_common_f_scope_write_bar_reg: fapiPutScomUnderMask error (%08X)",
+            FAPI_ERR("proc_setup_bars_common_write_bar_reg: fapiPutScomUnderMask error (%08X)",
                      i_scom_addr);
             break;
         }
@@ -1694,7 +1368,7 @@ fapi::ReturnCode proc_setup_bars_common_write_bar_reg(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars_l3_write_local_chip_memory_bar_attr(
     const fapi::Target* i_target,
-    const bool& i_is_non_mirrored_range,
+    const bool i_is_non_mirrored_range,
     const proc_setup_bars_addr_range& i_addr_range)
 {
     // return code
@@ -1721,7 +1395,11 @@ fapi::ReturnCode proc_setup_bars_l3_write_local_chip_memory_bar_attr(
         {
             FAPI_ERR("proc_setup_bars_l3_write_local_chip_memory_bar_attr: Unsupported BAR size 0x%016llX",
                      i_addr_range.size);
-            const uint64_t& SIZE = i_addr_range.size;
+            const fapi::Target & TARGET = *i_target;
+            const uint32_t & SCOM_ADDR = EX_L3_BAR1_REG_0x1001080B;
+            const uint64_t & BASE_ADDR = i_addr_range.base_addr;
+            const bool & ENABLED = i_addr_range.enabled;
+            const uint64_t & SIZE = i_addr_range.size;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_SETUP_BARS_SIZE_XLATE_ERR);
             break;
         }
@@ -1862,7 +1540,7 @@ fapi::ReturnCode proc_setup_bars_pcie_write_local_chip_memory_bars(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars_l3_write_local_node_memory_bar_attr(
     const fapi::Target* i_target,
-    const bool& i_is_non_mirrored_range,
+    const bool i_is_non_mirrored_range,
     const proc_setup_bars_addr_range& i_node_addr_range,
     const proc_setup_bars_addr_range& i_chip_addr_range)
 {
@@ -3330,7 +3008,9 @@ proc_setup_bars_find_node(
         // no match node found, exit
         if (n_iter == i_smp.nodes.end())
         {
-            FAPI_ERR("proc_setup_bars_find_node: insert_chip: Error encountered finding node in SMP");
+            FAPI_ERR("proc_setup_bars_find_node: insert_chip: Error encountered finding node in SMP map");
+            const fapi::Target & TARGET = i_target;
+            const proc_fab_smp_node_id & NODE_ID = node_id;
             FAPI_SET_HWP_ERROR(rc,
                 RC_PROC_SETUP_BARS_NODE_FIND_INTERNAL_ERR);
             break;
@@ -3339,6 +3019,122 @@ proc_setup_bars_find_node(
     } while(0);
 
     FAPI_DBG("proc_setup_bars_find_node: End");
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+// function: check that all address ranges are non-overlapping
+// parameters: i_smp => structure encapsulating fully
+//                      specified SMP topology
+// returns: FAPI_RC_SUCCESS if all ranges are non-overlapping
+//          else RC_PROC_SETUP_BARS_SYSTEM_RANGE_OVERLAP_ERR
+//------------------------------------------------------------------------------
+fapi::ReturnCode
+proc_setup_bars_check_bars(
+    proc_setup_bars_smp_system& i_smp)
+{
+    // return code
+    fapi::ReturnCode rc;
+    std::map<proc_fab_smp_node_id, proc_setup_bars_smp_node>::iterator n_iter;
+    std::map<proc_fab_smp_chip_id, proc_setup_bars_smp_chip>::iterator p_iter;
+
+    std::vector<proc_setup_bars_addr_range*> sys_ranges;
+    std::vector<fapi::Target*> targets;
+
+    // fsp_mmio_mask_range specifically excluded, as this range by itself
+    // does not represent an active portion of real address space
+    const uint32_t ranges_per_chip = 7 +
+        (2* PROC_FAB_SMP_NUM_F_LINKS) +
+        (PROC_SETUP_BARS_PCIE_NUM_UNITS * PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT);
+
+    FAPI_DBG("proc_setup_bars_check_bars: Start");
+
+    do
+    {
+        for (n_iter = i_smp.nodes.begin();
+             n_iter != i_smp.nodes.end();
+             n_iter++)
+        {
+            for (p_iter = n_iter->second.chips.begin();
+                 p_iter != n_iter->second.chips.end();
+                 p_iter++)
+            {
+                targets.push_back(&(p_iter->second.chip->this_chip));
+
+                sys_ranges.push_back(&(p_iter->second.non_mirrored_range));
+                sys_ranges.push_back(&(p_iter->second.mirrored_range));
+                for (uint8_t l = 0; l < PROC_FAB_SMP_NUM_F_LINKS; l++)
+                {
+                    sys_ranges.push_back(&(p_iter->second.foreign_near_ranges[l]));
+                }
+                for (uint8_t l = 0; l < PROC_FAB_SMP_NUM_F_LINKS; l++)
+                {
+                    sys_ranges.push_back(&(p_iter->second.foreign_far_ranges[l]));
+                }
+                sys_ranges.push_back(&(p_iter->second.psi_range));
+                sys_ranges.push_back(&(p_iter->second.fsp_range));
+                sys_ranges.push_back(&(p_iter->second.intp_range));
+                sys_ranges.push_back(&(p_iter->second.nx_mmio_range));
+                sys_ranges.push_back(&(p_iter->second.as_mmio_range));
+                for (uint8_t u = 0; u < PROC_SETUP_BARS_PCIE_NUM_UNITS; u++)
+                {
+                    for (uint8_t r = 0; r < PROC_SETUP_BARS_PCIE_RANGES_PER_UNIT; r++)
+                    {
+                        sys_ranges.push_back(&(p_iter->second.pcie_ranges[u][r]));
+                    }
+                }
+            }
+        }
+
+        // check that ranges are non-overlapping
+        if (sys_ranges.size() > 1)
+        {
+            for (uint32_t r = 0; (r < sys_ranges.size()-1) && rc.ok(); r++)
+            {
+                for (uint32_t x = r+1; x < sys_ranges.size(); x++)
+                {
+                    if (sys_ranges[r]->overlaps(*(sys_ranges[x])))
+                    {
+                        uint32_t target_r = r / ranges_per_chip;
+                        uint32_t range_r = r % ranges_per_chip;
+                        uint32_t target_x = x / ranges_per_chip;
+                        uint32_t range_x = x % ranges_per_chip;
+
+                        FAPI_ERR("proc_setup_bars_check_bars: Overlapping address regions detected");
+                        FAPI_ERR("  target: %s, Range index = %d",
+                                 targets[target_r]->toEcmdString(), range_r);
+                        sys_ranges[r]->print();
+                        FAPI_ERR("  target: %s, Range index = %d",
+                                 targets[target_x]->toEcmdString(), range_x);
+                        sys_ranges[x]->print();
+
+                        const fapi::Target & TARGET1 = *(targets[target_r]);
+                        const uint32_t RANGE_ID1 = range_r;
+                        const uint64_t & BASE_ADDR1 = sys_ranges[r]->base_addr;
+                        const uint64_t & END_ADDR1 = sys_ranges[r]->end_addr();
+                        const bool & ENABLED1 = sys_ranges[r]->enabled;
+
+                        const fapi::Target & TARGET2 = *(targets[target_x]);
+                        const uint32_t RANGE_ID2 = range_x;
+                        const uint64_t & BASE_ADDR2 = sys_ranges[x]->base_addr;
+                        const uint64_t & END_ADDR2 = sys_ranges[x]->end_addr();
+                        const bool & ENABLED2 = sys_ranges[x]->enabled;
+
+                        FAPI_SET_HWP_ERROR(rc,
+                            RC_PROC_SETUP_BARS_SYSTEM_RANGE_OVERLAP_ERR);
+                        break;
+                    }
+                }
+            }
+            if (!rc.ok())
+            {
+                break;
+            }
+        }
+
+    } while(0);
+
+    FAPI_DBG("proc_setup_bars_check_bars: End");
     return rc;
 }
 
@@ -3357,7 +3153,7 @@ proc_setup_bars_find_node(
 fapi::ReturnCode
 proc_setup_bars_write_bars(
     proc_setup_bars_smp_system& i_smp,
-    const bool& i_init_local_chip_local_node)
+    const bool i_init_local_chip_local_node)
 {
     // return code
     fapi::ReturnCode rc;
@@ -3479,7 +3275,7 @@ proc_setup_bars_write_bars(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars_config_mcd(
     proc_setup_bars_smp_system& i_smp,
-    const bool& i_init_local_chip_local_node)
+    const bool i_init_local_chip_local_node)
 {
     // return code
     fapi::ReturnCode rc;
@@ -3488,8 +3284,8 @@ fapi::ReturnCode proc_setup_bars_config_mcd(
     ecmdDataBufferBase mcd_fir_mask_data(64);
     ecmdDataBufferBase mcd_recov_data(64);
     ecmdDataBufferBase mcd_recov_mask(64);
-    std::map<proc_fab_smp_node_id, proc_setup_bars_smp_node>::iterator n_iter;
-    std::map<proc_fab_smp_chip_id, proc_setup_bars_smp_chip>::iterator p_iter;
+    std::map<proc_fab_smp_node_id, proc_setup_bars_smp_node>::const_iterator n_iter;
+    std::map<proc_fab_smp_chip_id, proc_setup_bars_smp_chip>::const_iterator p_iter;
 
     FAPI_DBG("proc_setup_bars_config_mcd: Start");
 
@@ -3543,24 +3339,7 @@ fapi::ReturnCode proc_setup_bars_config_mcd(
 
                 if (config_mcd)
                 {
-                    uint64_t mcd_fir_mask;
-                    uint8_t mcd_hang_poll_bug;
-                    rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG,
-                                       &(p_iter->second.chip->this_chip),
-                                       mcd_hang_poll_bug);
-                    if (!rc.ok())
-                    {
-                        FAPI_ERR("proc_setup_bars_config_mcd: Error querying ATTR_CHIP_EC_FEATURE_MCD_HANG_RECOVERY_BUG");
-                    }
-
-                    if (mcd_hang_poll_bug != 0)
-                    {
-                        mcd_fir_mask = MCD_FIR_MASK_RUNTIME_VAL_MCD_HANG_POLL_BUG;
-                    }
-                    else
-                    {
-                        mcd_fir_mask = MCD_FIR_MASK_RUNTIME_VAL_NO_MCD_HANG_POLL_BUG;
-                    }
+                    uint64_t mcd_fir_mask = MCD_FIR_MASK_RUNTIME_VAL;
 
                     // unmask MCD FIR
                     rc_ecmd |= mcd_fir_mask_data.setDoubleWord(
@@ -3644,7 +3423,7 @@ fapi::ReturnCode proc_setup_bars_config_mcd(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_setup_bars(
     std::vector<proc_setup_bars_proc_chip>& i_proc_chips,
-    const bool& i_init_local_chip_local_node)
+    const bool i_init_local_chip_local_node)
 {
     // return code
     fapi::ReturnCode rc;
@@ -3667,7 +3446,13 @@ fapi::ReturnCode proc_setup_bars(
             break;
         }
 
-        // TODO: add more extensive range checking
+        // check that all ranges are non-overlapping
+        rc = proc_setup_bars_check_bars(smp);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars: Error from proc_setup_bars_check_bars");
+            break;
+        }
 
         // write BAR registers
         rc = proc_setup_bars_write_bars(smp,
@@ -3680,7 +3465,7 @@ fapi::ReturnCode proc_setup_bars(
 
         // configure MCD resources
         rc = proc_setup_bars_config_mcd(smp,
-                                         i_init_local_chip_local_node);
+                                        i_init_local_chip_local_node);
         if (!rc.ok())
         {
             FAPI_ERR("proc_setup_bars: Error from proc_setup_bars_config_mcd");

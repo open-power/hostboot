@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,128 +20,167 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_setup_bars_errors.xml,v 1.5 2013/08/12 22:16:32 jmcgill Exp $ -->
+<!-- $Id: proc_setup_bars_errors.xml,v 1.7 2014/02/24 17:53:13 jmcgill Exp $ -->
 <!-- Error definitions for proc_setup_bars -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ATTR_ERR</rc>
-    <description>Invalid definition for non-mirrored address range (from platform attributes).</description>
+    <rc>RC_PROC_SETUP_BARS_ATTR_QUERY_ERR</rc>
+    <description>Unsupported attribute query</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>FAPI_ATTR_ID</ffdc>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>ATTR_IDX1</ffdc>
+    <ffdc>ATTR_IDX2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_ATTR_LOOKUP_ERR</rc>
+    <description>No rule provided to set BAR/range address, enable, or size.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>ATTR_IDX1</ffdc>
+    <ffdc>ATTR_IDX2</ffdc>
+    <ffdc>ERR_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SETUP_BARS_ATTR_CONTENT_ERR</rc>
+    <description>BAR attribute content violates expected behavior.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>ATTR_IDX1</ffdc>
+    <ffdc>ATTR_IDX2</ffdc>
     <ffdc>BASE_ADDR</ffdc>
+    <ffdc>ENABLED</ffdc>
     <ffdc>SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_OVERLAP_ATTR_ERR</rc>
-    <description>Invalid definition for non-mirrored address ranges (from platform attributes), two or more ranges on this chip overlap.</description>
+    <rc>RC_PROC_SETUP_BARS_CHIP_MEMORY_RANGE_ATTR_OVERLAP_ERR</rc>
+    <description>Chip memory range attributes specify overlapping address ranges.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANGE_ID</ffdc>
+    <ffdc>ATTR_IDX1</ffdc>
+    <ffdc>BASE_ADDR1</ffdc>
+    <ffdc>END_ADDR1</ffdc>
+    <ffdc>ENABLED1</ffdc>
+    <ffdc>ATTR_IDX2</ffdc>
+    <ffdc>BASE_ADDR2</ffdc>
+    <ffdc>END_ADDR2</ffdc>
+    <ffdc>ENABLED2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_SETUP_BARS_NON_MIRRORED_RANGE_ERR</rc>
-    <description>Invalid definition for non-mirrored address range.</description>
+    <rc>RC_PROC_SETUP_BARS_CHIP_MEMORY_RANGE_ERR</rc>
+    <description>Invalid definition for merged chip memory address range.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANGE_ID</ffdc>
     <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
+    <ffdc>END_ADDR</ffdc>
+    <ffdc>ENABLED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_MIRRORED_RANGE_ATTR_ERR</rc>
-    <description>Invalid definition for mirrored address range (from platform attributes).</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_MIRRORED_RANGE_OVERLAP_ATTR_ERR</rc>
-    <description>Invalid definition for mirrored address ranges (from platform attributes), two or more ranges on this chip overlap.</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_MIRRORED_RANGE_ERR</rc>
-    <description>Invalid definition for mirrored address range.</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_FOREIGN_NEAR_RANGE_ATTR_ERR</rc>
-    <description>Invalid definition for foreign near address range (from platform attributes).</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_FOREIGN_FAR_RANGE_ATTR_ERR</rc>
-    <description>Invalid definition for foreign far address range (from platform attributes).</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_PSI_BAR_ATTR_ERR</rc>
-    <description>Invalid definition for PSI Bridge BAR address range (from platform attributes).</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_FSP_BAR_ATTR_ERR</rc>
-    <description>Invalid definition for FSP BAR address range (from platform attributes).</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_FSP_MMIO_MASK_ATTR_ERR</rc>
-    <description>Invalid definition for FSP MMIO Mask address range (from platform attributes).</description>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_INTP_BAR_ATTR_ERR</rc>
-    <description>Invalid definition for INTP BAR address range (from platform attributes).</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_NX_MMIO_BAR_ATTR_ERR</rc>
-    <description>Invalid definition for NX MMIO BAR address range (from platform attributes).</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_AS_MMIO_BAR_ATTR_ERR</rc>
-    <description>Invalid definition for AS MMIO BAR address range (from platform attributes).</description>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_PCIE_BAR_ATTR_ERR</rc>
-    <description>Invalid definition for PCIe BAR address range (from platform attributes).</description>
-    <ffdc>UNIT</ffdc>
-    <ffdc>RANGE</ffdc>
-    <ffdc>BASE_ADDR</ffdc>
-    <ffdc>SIZE</ffdc>
-  </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SETUP_BARS_NODE_ADD_INTERNAL_ERR</rc>
-    <description>Internal Error.  Error encountered adding node to SMP structure.</description>
+    <description>Internal Error.  Error encountered adding node to SMP map structure.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NODE_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SETUP_BARS_NODE_FIND_INTERNAL_ERR</rc>
     <description>Internal Error.  Error encountered attempting to find node in SMP structure.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NODE_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SETUP_BARS_DUPLICATE_FABRIC_ID_ERR</rc>
-    <description>Multiple chips found with identifcal fabric node/chip ID attribute values.</description>
+    <description>Multiple chips found with identical fabric node/chip ID attribute values.</description>
+    <ffdc>TARGET1</ffdc>
+    <ffdc>TARGET2</ffdc>
     <ffdc>NODE_ID</ffdc>
     <ffdc>CHIP_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_SETUP_BARS_NODE_NON_MIRRORED_RANGE_OVERLAP_ERR</rc>
-    <description>Existing node non-mirrored range overlaps chip non-mirrored range.</description>
-    <ffdc>NODE_ID</ffdc>
+    <rc>RC_PROC_SETUP_BARS_SYSTEM_RANGE_OVERLAP_ERR</rc>
+    <description>Overlapping memory/MMIO address ranges detected.</description>
+    <ffdc>TARGET1</ffdc>
+    <ffdc>RANGE_ID1</ffdc>
+    <ffdc>BASE_ADDR1</ffdc>
+    <ffdc>END_ADDR1</ffdc>
+    <ffdc>ENABLED1</ffdc>
+    <ffdc>TARGET2</ffdc>
+    <ffdc>RANGE_ID2</ffdc>
+    <ffdc>BASE_ADDR2</ffdc>
+    <ffdc>END_ADDR2</ffdc>
+    <ffdc>ENABLED2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-  <hwpError>
-    <rc>RC_PROC_SETUP_BARS_NODE_MIRRORED_RANGE_OVERLAP_ERR</rc>
-    <description>Existing node mirrored range overlaps chip mirrored range.</description>
-    <ffdc>NODE_ID</ffdc>
-  </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SETUP_BARS_INVALID_BAR_REG_DEF</rc>
     <description>Internal error. Invalid proc_setup_bars_bar_reg_def structure content.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>SCOM_ADDR</ffdc>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>ENABLED</ffdc>
+    <ffdc>SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SETUP_BARS_SIZE_XLATE_ERR</rc>
     <description>Internal error. Unsupported size translation for proc_setup_bars_bar_reg_def structure.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>SCOM_ADDR</ffdc>
+    <ffdc>BASE_ADDR</ffdc>
+    <ffdc>ENABLED</ffdc>
     <ffdc>SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

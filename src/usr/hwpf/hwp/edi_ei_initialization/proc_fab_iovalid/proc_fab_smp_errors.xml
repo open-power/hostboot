@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,24 +20,39 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_fab_smp_errors.xml,v 1.5 2013/06/25 15:38:27 cswenson Exp $ -->
+<!-- $Id: proc_fab_smp_errors.xml,v 1.6 2014/01/27 05:23:01 jmcgill Exp $ -->
 <!-- Error definitions for proc_fab_smp -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_FAB_SMP_PCIE_NOT_F_LINK_ATTR_ERR</rc>
     <description>Invalid definition for PCIe/DSMP mux attribute value.</description>
+    <ffdc>TARGET</ffdc>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_FAB_SMP_FABRIC_NODE_ID_ATTR_ERR</rc>
     <description>Invalid definition for fabric node ID attribute value.</description>
+    <ffdc>TARGET</ffdc>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR</rc>
     <description>Invalid definition for fabric chip ID attribute value.</description>
+    <ffdc>TARGET</ffdc>
     <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <hwpError>
     <rc>RC_PROC_FAB_SMP_EPSILON_TABLE_TYPE_ATTR_ERR</rc>
