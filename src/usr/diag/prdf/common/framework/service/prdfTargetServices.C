@@ -1380,25 +1380,23 @@ bool isMnfgFlagSet( uint32_t i_flag )
 
 //------------------------------------------------------------------------------
 
-// TODO: RTC 89378 remove "BIT_MNFG" and remove E from "CHECKING" once
-//       the attribute_types update is in the fsp build
 bool mfgMode()
-{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_THRESHOLDS      ); }
+{ return isMnfgFlagSet( MNFG_FLAG_THRESHOLDS      ); }
 
 bool mnfgTerminate()
-{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_SRC_TERM        ); }
+{ return isMnfgFlagSet( MNFG_FLAG_SRC_TERM        ); }
 
 bool areDramRepairsDisabled()
-{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_DISABLE_DRAM_REPAIRS ); }
+{ return isMnfgFlagSet( MNFG_FLAG_DISABLE_DRAM_REPAIRS ); }
 
 bool enableFastBgScrub()
-{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_FAST_BACKGROUND_SCRUB ); }
+{ return isMnfgFlagSet( MNFG_FLAG_FAST_BACKGROUND_SCRUB ); }
 
 bool mnfgSpareDramDeploy()
-{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_TEST_DRAM_REPAIRS ); }
+{ return isMnfgFlagSet( MNFG_FLAG_TEST_DRAM_REPAIRS ); }
 
 bool isMfgCeCheckingEnabled()
-{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_IPL_MEMORY_CE_CHECKINGE ); }
+{ return isMnfgFlagSet( MNFG_FLAG_IPL_MEMORY_CE_CHECKING ); }
 
 } // end namespace PlatServices
 

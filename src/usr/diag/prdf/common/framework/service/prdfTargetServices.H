@@ -432,7 +432,7 @@ bool enableFastBgScrub();
 
 /**
  * @brief  Returns the state of the
- *         MNFG_FLAG_BIT_MNFG_TEST_DRAM_REPAIRS policy flag.
+ *         MNFG_FLAG_TEST_DRAM_REPAIRS policy flag.
  * @return TRUE if flag is set, FALSE otherwise.
  */
 bool mnfgSpareDramDeploy();
