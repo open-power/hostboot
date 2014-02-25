@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiTarget.H,v 1.8 2013/10/15 13:13:43 dcrowell Exp $
+// $Id: fapiTarget.H,v 1.9 2014/02/26 14:51:05 mjjones Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiTarget.H,v $
 
 /**
@@ -42,6 +42,8 @@
  *                          mjjones     02/07/2012  Remove MBS_CHIPLET
  *                                                  Add XBUS_ENDPOINT ABUS_ENDPOINT
  *                          mjjones     02/21/2012  Add high performance toEcmdString
+ *                          mjjones     02/24/2014  Add isChip/Chiplet using types
+ *                                                  Add isPhysParentChild 
  */
 
 #ifndef FAPITARGET_H_
@@ -199,11 +201,32 @@ public:
     void setType(const TargetType i_type) { iv_type = i_type; }
 
     /**
+     * @brief Returns if a target type is a chip
+     *
+     * @param[in] i_type Target Type
+     *
+     * @return boolean. true if chip else false
+     */
+    static bool isChip(const TargetType i_type);
+
+    /**
      * @brief Returns if the target is a chip
      *
-     * @return boolean. true if chip else fase
+     * @return boolean. true if chip else false
      */
-    bool isChip() const;
+    bool isChip() const
+    {
+        return isChip(iv_type);
+    }
+
+    /**
+     * @brief Returns if a target type is a chiplet
+     *
+     * @param[in] i_type Target Type
+     *
+     * @return boolean. true if chip else false
+     */
+    static bool isChiplet(const TargetType i_type);
 
     /**
      * @brief Returns if the target is a chiplet
@@ -212,7 +235,24 @@ public:
      *
      * @return boolean. true if chiplet else false
      */
-    bool isChiplet() const;
+    bool isChiplet() const
+    {
+        return isChiplet(iv_type);
+    }
+
+    /**
+     * @brief Returns if a pair of target types is a physical parent/child
+     *
+     * This is true if the parent type is a chip and the child type is a
+     * chiplet that belongs to the chip (e.g. PROC_CHIP->EX_CHIPLET)
+     *
+     * @param[in] i_parentType Parent Target Type
+     * @param[in] i_childType  Child Target Type
+     *
+     * @return boolean.
+     */
+    static bool isPhysParentChild(const TargetType i_parentType,
+                                  const TargetType i_childType);
 
     /**
      * @brief Convert a target to an ecmd-format target string

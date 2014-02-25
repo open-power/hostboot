@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiErrorInfo.H,v 1.11 2013/11/11 19:33:43 mjjones Exp $
+// $Id: fapiErrorInfo.H,v 1.12 2014/02/26 14:50:39 mjjones Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiErrorInfo.H,v $
 
 /**
@@ -332,9 +332,7 @@ struct ErrorInfoBusCallout
     // The callout priority
     CalloutPriorities::CalloutPriority iv_calloutPriority;
 };
-// defines used with MBA dimm callouts
-#define FAPI_ALL_MBA_PORTS 0xFF
-#define FAPI_ALL_MBA_DIMMS 0xFF
+
 /**
  * @struct ErrorInfoCDG
  *
@@ -393,6 +391,17 @@ struct ErrorInfoCDG
  * @struct ErrorInfoChildrenCDG
  *
  * This struct contains children targets to callout/deconfigure/GARD
+ *
+ * Children by containment can be CDG (chiplets belonging to a parent chip) e.g.
+ * - PROC_CHIP -> EX_CHIPLET
+ * - MEMBUF_CHIP -> MBA_CHIPLET
+ * Children by affinity can be CDG.
+ *   Any from PROC_CHIP->MCS_CHIPLET->MEMBUF_CHIP->MBA_CHIPLET->DIMM e.g.
+ *   - PROC_CHIP->MEMBUF_CHIP
+ *   - MEMBUF_CHIP->DIMM
+ *   - MBA_CHIPLET->DIMM
+ * Port and Number criteria can be applied to the child target as
+ * detailed in the constructor
  */
 struct ErrorInfoChildrenCDG
 {
@@ -405,12 +414,12 @@ struct ErrorInfoChildrenCDG
      * @param[in] i_deconfigure True if Target should be deconfigured
      * @param[in] i_gard        True if Target should be GARDed
      * @param[in] i_priority    The priority of any callout
-     * @param[in] i_childPort   Parent port number where child is
-     *                          connected
-     * @param[in] i_childNum    Chip number of child target
-     *
-     * @note i_childPort and i_childNum are valid only for MBA/DIMM
-     *       parent/child combination
+     * @param[in] i_childPort   Child Port
+     *                            For DIMM children, the MBA port number
+     * @param[in] i_childNum    Child Number
+     *                            For DIMM children, the dimm socket number
+     *                            For Chip children, the chip position
+     *                            For Chiplet children, the chiplet unit pos
      */
     ErrorInfoChildrenCDG(const Target & i_parentChip,
                          const TargetType i_childType,
@@ -454,10 +463,12 @@ struct ErrorInfoChildrenCDG
     // GARD Information
     bool iv_gard;
 
-    // For MBA/DIMM parent/child, the MBA port
+    // Child Port
+    static const uint8_t ALL_CHILD_PORTS = 0xff;
     uint8_t iv_childPort;
 
-    // For MBA/DIMM parent/child, the MBA dimm number
+    // Child Number
+    static const uint8_t ALL_CHILD_NUMBERS = 0xff;
     uint8_t iv_childNumber;
 };
 

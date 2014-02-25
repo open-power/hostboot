@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -122,6 +122,28 @@
             <childTargets>
                 <parent>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</parent>
                 <childType>TARGET_TYPE_EX_CHIPLET</childType>
+            </childTargets>
+            <priority>MEDIUM</priority>
+        </callout>
+    -->
+    <!-- Callout MASTER_CHIP's EX4 chiplet MEDIUM -->
+    <!-- Commented out to avoid actually calling out chiplets in UT
+        <callout>
+            <childTargets>
+                <parent>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</parent>
+                <childType>TARGET_TYPE_EX_CHIPLET</childType>
+                <childNumber>4</childNumber>
+            </childTargets>
+            <priority>MEDIUM</priority>
+        </callout>
+    -->
+    <!-- Callout MASTER_CHIP's associated Centaur4 chip MEDIUM -->
+    <!-- Commented out to avoid actually calling out chips in UT
+        <callout>
+            <childTargets>
+                <parent>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</parent>
+                <childType>TARGET_TYPE_MEMBUF_CHIP</childType>
+                <childNumber>4</childNumber>
             </childTargets>
             <priority>MEDIUM</priority>
         </callout>

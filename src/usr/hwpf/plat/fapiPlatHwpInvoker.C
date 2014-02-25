@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -133,61 +133,64 @@ HWAS::epubProcedureID xlateProcedureCallout(
 
     return l_proc;
 }
-void getChildTargetsForCDG(
-        TARGETING::Target * i_pParent, TARGETING::TYPE i_childType,
-        TARGETING::TargetHandleList & o_childTargets, uint8_t i_childPort,
-        uint8_t i_childNumber);
 
 /**
  * @brief Translates a FAPI target type to a Targeting target type
  *
  * @param[i] i_targetType FAPI target type
- *
- * @return TARGETING type
+ * @param[o] o_class      Targeting class
+ * @param[o] o_type       Targeting type
  */
-TARGETING::TYPE xlateTargetType(
-    const fapi::TargetType i_targetType)
+void xlateTargetType(const fapi::TargetType i_targetType,
+                     TARGETING::CLASS & o_class,
+                     TARGETING::TYPE & o_type)
 {
-    TARGETING::TYPE l_type = TARGETING::TYPE_NA;
-
     switch (i_targetType)
     {
     case fapi::TARGET_TYPE_SYSTEM:
-        l_type = TARGETING::TYPE_SYS;
+        o_class = TARGETING::CLASS_SYS;
+        o_type = TARGETING::TYPE_SYS;
         break;
     case fapi::TARGET_TYPE_DIMM:
-        l_type = TARGETING::TYPE_DIMM;
+        o_class = TARGETING::CLASS_LOGICAL_CARD;
+        o_type = TARGETING::TYPE_DIMM;
         break;
     case fapi::TARGET_TYPE_PROC_CHIP:
-        l_type = TARGETING::TYPE_PROC;
+        o_class = TARGETING::CLASS_CHIP;
+        o_type = TARGETING::TYPE_PROC;
         break;
     case fapi::TARGET_TYPE_MEMBUF_CHIP:
-        l_type = TARGETING::TYPE_MEMBUF;
+        o_class = TARGETING::CLASS_CHIP;
+        o_type = TARGETING::TYPE_MEMBUF;
         break;
     case fapi::TARGET_TYPE_EX_CHIPLET:
-        l_type = TARGETING::TYPE_EX;
+        o_class = TARGETING::CLASS_UNIT;
+        o_type = TARGETING::TYPE_EX;
         break;
     case fapi::TARGET_TYPE_MBA_CHIPLET:
-        l_type = TARGETING::TYPE_MBA;
+        o_class = TARGETING::CLASS_UNIT;
+        o_type = TARGETING::TYPE_MBA;
         break;
     case fapi::TARGET_TYPE_MCS_CHIPLET:
-        l_type = TARGETING::TYPE_MCS;
+        o_class = TARGETING::CLASS_UNIT;
+        o_type = TARGETING::TYPE_MCS;
         break;
     case fapi::TARGET_TYPE_XBUS_ENDPOINT:
-        l_type = TARGETING::TYPE_XBUS;
+        o_class = TARGETING::CLASS_UNIT;
+        o_type = TARGETING::TYPE_XBUS;
         break;
     case fapi::TARGET_TYPE_ABUS_ENDPOINT:
-        l_type = TARGETING::TYPE_ABUS;
+        o_class = TARGETING::CLASS_UNIT;
+        o_type = TARGETING::TYPE_ABUS;
         break;
     case fapi::TARGET_TYPE_L4:
-        l_type = TARGETING::TYPE_L4;
+        o_class = TARGETING::CLASS_UNIT;
+        o_type = TARGETING::TYPE_L4;
         break;
     default:
-        l_type = TARGETING::TYPE_NA;
-        break;
+        o_class = TARGETING::CLASS_NA;
+        o_type = TARGETING::TYPE_NA;
     }
-
-    return l_type;
 }
 
 /**
@@ -388,10 +391,145 @@ void processEICDGs(const ErrorInfo & i_errInfo,
             l_gard = HWAS::GARD_Unrecoverable;
         }
 
-        FAPI_ERR("processEICDGs: Calling out target (pri:%d, deconf:%d, gard:%d)",
-                 l_priority, l_deconfig, l_gard);
+        FAPI_ERR("processEICDGs: Calling out target (huid:%.8x, pri:%d, deconf:%d, gard:%d)",
+                 TARGETING::get_huid(l_pTarget), l_priority, l_deconfig,
+                 l_gard);
         io_pError->addHwCallout(l_pTarget, l_priority, l_deconfig, l_gard);
     }
+}
+
+/**
+ * @brief Returns child targets to Callout/Deconfigure/GARD
+ *
+ * @param[i] i_parentTarget FAPI Parent Target
+ * @param[i] i_childType    FAPI Child Type
+ * @param[i] i_childPort    Child Port Number
+ *                            For DIMMs: MBA Port Number
+ *                            Else unused
+ * @param[i] i_childNum     Child Number
+ *                            For DIMMs: DIMM Socket Number
+ *                            For Chips: Chip Position
+ *                            For Chiplets: Chiplet Position
+ */
+void getChildTargetsForCDG(const fapi::Target & i_parentTarget,
+                           const fapi::TargetType i_childType,
+                           const uint8_t i_childPort,
+                           const uint8_t i_childNum,
+                           TARGETING::TargetHandleList & o_childTargets)
+{
+    o_childTargets.clear();
+
+    do
+    {
+        // Get the parent TARGETING::Target
+        TARGETING::Target * l_pTargParent =
+            reinterpret_cast<TARGETING::Target *>(i_parentTarget.get());
+
+        if (l_pTargParent == NULL)
+        {
+            FAPI_ERR("getChildTargetsForCDG: NULL Target pointer");
+            break;
+        }
+
+        // Find if the child target type is a dimm, chip or chiplet
+        bool l_childIsDimm = false;
+        bool l_childIsChip = false;
+        bool l_childIsChiplet = false;
+
+        if (i_childType == fapi::TARGET_TYPE_DIMM)
+        {
+            l_childIsDimm = true;
+        }
+        else
+        {
+            l_childIsChip = fapi::Target::isChip(i_childType);
+
+            if (!l_childIsChip)
+            {
+                l_childIsChiplet = fapi::Target::isChiplet(i_childType);
+            }
+        }
+
+        // Translate the FAPI child target type into TARGETING Class/Type
+        TARGETING::CLASS l_targChildClass = TARGETING::CLASS_NA;
+        TARGETING::TYPE l_targChildType = TARGETING::TYPE_NA;
+        xlateTargetType(i_childType, l_targChildClass, l_targChildType);
+
+        if (l_targChildType == TARGETING::TYPE_NA)
+        {
+            FAPI_ERR("getChildTargetsForCDG: Could not xlate child type (0x%08x)",
+                     i_childType);
+            break;
+        }
+
+        // Get the child targets
+        TARGETING::TargetHandleList l_targChildList;
+
+        if (fapi::Target::isPhysParentChild(i_parentTarget.getType(),
+                                            i_childType))
+        {
+            // Child by containment
+            TARGETING::getChildChiplets(l_targChildList, l_pTargParent,
+                                        l_targChildType);
+            FAPI_ERR("getChildTargetsForCDG: Got %d candidate children by containment",
+                     l_targChildList.size());
+        }
+        else
+        {
+            // Assumption is child by affinity
+            TARGETING::getChildAffinityTargets(l_targChildList, l_pTargParent,
+                                               l_targChildClass,
+                                               l_targChildType);
+            FAPI_ERR("getChildTargetsForCDG: Got %d candidate children by affinity",
+                     l_targChildList.size());
+        }
+
+        // Filter out child targets based on type and input port/number
+        for (TARGETING::TargetHandleList::const_iterator
+                l_itr = l_targChildList.begin();
+             l_itr != l_targChildList.end(); ++l_itr)
+        {
+            if (l_childIsDimm)
+            {
+                // Match i_childPort and i_childNum
+                if ( ((i_childPort == ErrorInfoChildrenCDG::ALL_CHILD_PORTS) ||
+                      (i_childPort ==
+                           (*l_itr)->getAttr<TARGETING::ATTR_MBA_PORT>()))
+                &&
+                     ((i_childNum == ErrorInfoChildrenCDG::ALL_CHILD_NUMBERS) ||
+                      (i_childNum ==
+                           (*l_itr)->getAttr<TARGETING::ATTR_MBA_DIMM>())) )
+                {
+                    o_childTargets.push_back(*l_itr);
+                }
+            }
+            else if (l_childIsChip)
+            {
+                // Match i_childNum
+                if ((i_childNum == ErrorInfoChildrenCDG::ALL_CHILD_NUMBERS) ||
+                    (i_childNum ==
+                         (*l_itr)->getAttr<TARGETING::ATTR_POSITION>()))
+                {
+                    o_childTargets.push_back(*l_itr);
+                }
+            }
+            else if (l_childIsChiplet)
+            {
+                // Match i_childNum
+                if ((i_childNum == ErrorInfoChildrenCDG::ALL_CHILD_NUMBERS) ||
+                    (i_childNum ==
+                         (*l_itr)->getAttr<TARGETING::ATTR_CHIP_UNIT>()))
+                {
+                    o_childTargets.push_back(*l_itr);
+                }
+            }
+            else
+            {
+                // Do not match on anything
+                o_childTargets.push_back(*l_itr);
+            }
+        }
+    } while(0);
 }
 
 /**
@@ -409,130 +547,40 @@ void processEIChildrenCDGs(const ErrorInfo & i_errInfo,
              i_errInfo.iv_childrenCDGs.begin();
          l_itr != i_errInfo.iv_childrenCDGs.end(); ++l_itr)
     {
+        HWAS::callOutPriority l_priority =
+            xlateCalloutPriority((*l_itr)->iv_calloutPriority);
 
-        uint8_t l_childNumber = (*l_itr)->iv_childNumber;
-        uint8_t l_childPort = (*l_itr)->iv_childPort;
-
-        TARGETING::TYPE l_childType =
-            xlateTargetType((*l_itr)->iv_childType);
-
-        if (l_childType == TARGETING::TYPE_NA)
+        HWAS::DeconfigEnum l_deconfig = HWAS::NO_DECONFIG;
+        if ((*l_itr)->iv_deconfigure)
         {
-            FAPI_ERR("processEIChildrenCDGs: Could not xlate child type (0x%08x)",
-                     (*l_itr)->iv_childType);
+            l_deconfig = HWAS::DELAYED_DECONFIG;
         }
-        else
+
+        HWAS::GARD_ErrorType l_gard = HWAS::GARD_NULL;
+        if ((*l_itr)->iv_gard)
         {
-            TARGETING::Target * l_pParent =
-                reinterpret_cast<TARGETING::Target *>
-                ((*l_itr)->iv_parent.get());
-
-            HWAS::callOutPriority l_priority =
-                xlateCalloutPriority((*l_itr)->iv_calloutPriority);
-
-            HWAS::DeconfigEnum l_deconfig = HWAS::NO_DECONFIG;
-            if ((*l_itr)->iv_deconfigure)
-            {
-                l_deconfig = HWAS::DELAYED_DECONFIG;
-            }
-
-            HWAS::GARD_ErrorType l_gard = HWAS::GARD_NULL;
-            if ((*l_itr)->iv_gard)
-            {
-                l_gard = HWAS::GARD_Unrecoverable;
-            }
-
-            // Get a list of functional children
-            TARGETING::TargetHandleList l_children;
-
-            getChildTargetsForCDG( l_pParent, l_childType, l_children,
-                                   l_childPort, l_childNumber );
-
-            // Callout/Deconfigure/GARD each child as appropriate
-            for (TARGETING::TargetHandleList::const_iterator
-                    l_itr = l_children.begin();
-                    l_itr != l_children.end(); ++l_itr)
-            {
-
-                FAPI_ERR("processEIChildrenCDGs: Calling out target"
-                         " (type: 0x%02x, pri:%d, deconf:%d, gard:%d)",
-                         l_childType, l_priority, l_deconfig, l_gard);
-                io_pError->addHwCallout(*l_itr, l_priority, l_deconfig, l_gard);
-            }
+            l_gard = HWAS::GARD_Unrecoverable;
         }
-    }
-}
 
-void getChildTargetsForCDG(
-        TARGETING::Target * i_pParent, TARGETING::TYPE i_childType,
-        TARGETING::TargetHandleList & o_childTargets, uint8_t i_childPort,
-        uint8_t i_childNumber )
-{
-    o_childTargets.clear();
-    bool l_functional = true;
+        // Get a list of children to callout
+        TARGETING::TargetHandleList l_children;
+        getChildTargetsForCDG((*l_itr)->iv_parent,
+                              (*l_itr)->iv_childType,
+                              (*l_itr)->iv_childPort,
+                              (*l_itr)->iv_childNumber,
+                              l_children);
 
-    // dimms are not considered as a chiplet but
-    // a logical card so we need special processing here
-    if( i_childType == TARGETING::TYPE_DIMM )
-    {
-        TARGETING::TargetHandleList l_dimmList;
-
-        TARGETING:: getChildAffinityTargets( l_dimmList, i_pParent,
-                TARGETING::CLASS_LOGICAL_CARD,
-                TARGETING::TYPE_DIMM, l_functional);
-
+        // Callout/Deconfigure/GARD each child as appropriate
         for (TARGETING::TargetHandleList::const_iterator
-                l_itr = l_dimmList.begin();
-                l_itr != l_dimmList.end();
-                ++l_itr)
+                l_itr = l_children.begin();
+                l_itr != l_children.end(); ++l_itr)
         {
-
-            uint8_t l_mbaPort =
-                (*l_itr)->getAttr<TARGETING::ATTR_MBA_PORT>();
-
-            uint8_t l_mbaDimm =
-                (*l_itr)->getAttr<TARGETING::ATTR_MBA_DIMM>();
-
-            // if childPort was not set in the callout
-            // the caller is trying to callout either all dimms
-            // connected to this MBA or a specific dimm number on both
-            // ports
-            if( i_childPort == FAPI_ALL_MBA_PORTS )
-            {
-                // if the caller reqested all children on all ports
-                // or if this dimm matches the requested dimm on
-                // either port then add it
-                if( ( i_childNumber == FAPI_ALL_MBA_DIMMS ) ||
-                        ( i_childNumber == l_mbaDimm ))
-                {
-                    FAPI_DBG("adding callout for i_childNumber=%d "
-                            "and i_childPort %d ",
-                            i_childNumber, i_childPort );
-
-                    o_childTargets.push_back( *l_itr );
-                }
-            }
-            else
-            {
-                // if caller requested all dimms on a specific port or if this
-                // child is the one requested then add it
-                if((( i_childNumber == FAPI_ALL_MBA_DIMMS ) ||
-                            ( i_childNumber == l_mbaDimm )) &&
-                            ( i_childPort == l_mbaPort ))
-                {
-                    FAPI_DBG("adding callout for i_childNumber=%d "
-                            " and i_childPort %d",
-                            i_childNumber, i_childPort );
-
-                    o_childTargets.push_back( *l_itr );
-                }
-            }
+            FAPI_ERR("processEIChildrenCDGs: Calling out target (huid:%.8x, pri:%d, deconf:%d, gard:%d)",
+                     TARGETING::get_huid(*l_itr), l_priority, l_deconfig,
+                     l_gard);
+            io_pError->addHwCallout(*l_itr, l_priority, l_deconfig, l_gard);
         }
     }
-    else
-    {
-        TARGETING::getChildChiplets(o_childTargets, i_pParent, i_childType);
-   }
 }
 
 //******************************************************************************

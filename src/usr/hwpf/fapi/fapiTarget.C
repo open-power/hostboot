@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiTarget.C,v 1.9 2013/10/15 13:13:42 dcrowell Exp $
+// $Id: fapiTarget.C,v 1.10 2014/02/26 14:51:07 mjjones Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiTarget.C,v $
 
 /**
@@ -40,6 +40,8 @@
  *                                                  Add XBUS_ENDPOINT ABUS_ENDPOINT
  *                          mjjones     02/21/2012  Add high performance toEcmdString
  *                          mjjones     07/11/2012  Clear iv_pEcmdString on set
+ *                          mjjones     02/24/2014  Add isChip/Chiplet using types
+ *                                                  Add isPhysParentChild
  */
 
 #include <fapiTarget.H>
@@ -136,24 +138,54 @@ void Target::set(void * i_pHandle)
 }
 
 //******************************************************************************
-// Is the target a chip?
+// Is a target type a chip?
 //******************************************************************************
-bool Target::isChip() const
+bool Target::isChip(const TargetType i_type)
 {
-    return ((iv_type & (TARGET_TYPE_PROC_CHIP | TARGET_TYPE_MEMBUF_CHIP)) != 0);
+    return ((i_type & (TARGET_TYPE_PROC_CHIP | TARGET_TYPE_MEMBUF_CHIP)) != 0);
 }
 
 //******************************************************************************
-// Is the target a chiplet?
+// Is a target type a chiplet?
 //******************************************************************************
-bool Target::isChiplet() const
+bool Target::isChiplet(const TargetType i_type)
 {
-    return ((iv_type & (TARGET_TYPE_EX_CHIPLET |
-                        TARGET_TYPE_MBA_CHIPLET |
-                        TARGET_TYPE_MCS_CHIPLET |
-                        TARGET_TYPE_XBUS_ENDPOINT |
-                        TARGET_TYPE_ABUS_ENDPOINT |
-                        TARGET_TYPE_L4 )) != 0);
+    return ((i_type & (TARGET_TYPE_EX_CHIPLET |
+                       TARGET_TYPE_MBA_CHIPLET |
+                       TARGET_TYPE_MCS_CHIPLET |
+                       TARGET_TYPE_XBUS_ENDPOINT |
+                       TARGET_TYPE_ABUS_ENDPOINT |
+                       TARGET_TYPE_L4 )) != 0);
+}
+
+//******************************************************************************
+// Is a target type pair a physical parent/child?
+//******************************************************************************
+bool Target::isPhysParentChild(const TargetType i_parentType,
+                               const TargetType i_childType)
+{
+    bool l_result = false;
+
+    if (i_parentType == TARGET_TYPE_PROC_CHIP)
+    {
+        if ((i_childType == TARGET_TYPE_EX_CHIPLET) ||
+            (i_childType == TARGET_TYPE_MCS_CHIPLET) ||
+            (i_childType == TARGET_TYPE_XBUS_ENDPOINT) ||
+            (i_childType == TARGET_TYPE_ABUS_ENDPOINT))
+        {
+            l_result = true;
+        }
+    }
+    else if (i_parentType == TARGET_TYPE_MEMBUF_CHIP)
+    {
+        if ((i_childType == TARGET_TYPE_MBA_CHIPLET) ||
+            (i_childType == TARGET_TYPE_L4))
+        {
+            l_result = true;
+        }
+    }
+
+    return l_result;
 }
 
 }
