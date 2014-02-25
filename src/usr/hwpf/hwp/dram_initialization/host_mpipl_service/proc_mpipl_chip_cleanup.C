@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,8 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_chip_cleanup.C,v 1.5 2013/11/19 19:36:48 jmcgill Exp $
-// $Source: /afs/awd.austin.ibm.com/proj/p9/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_chip_cleanup.C,v $
+// $Id: proc_mpipl_chip_cleanup.C,v 1.7 2014/02/20 23:18:01 belldi Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_chip_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -136,6 +136,8 @@ extern "C"
       //Check whether bit 0 is 0, meaning MCD recovery is disabled as expected
       if( fsi_data.getBit(MCD_RECOVERY_CTRL_REG_BIT_POS0) ) {
         FAPI_ERR("%s: MCD %s Recovery not disabled as expected", procedureName, ARY_MCD_DIR_STRS[counter]);
+        const fapi::Target & CHIP_TARGET = i_target;
+        ecmdDataBufferBase & DATA_BUFFER = fsi_data;
         FAPI_SET_HWP_ERROR(rc, RC_MCD_RECOVERY_NOT_DISABLED_RC);
         return rc;
       }

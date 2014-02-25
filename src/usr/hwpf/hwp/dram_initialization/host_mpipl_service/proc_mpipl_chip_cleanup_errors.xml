@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,11 +20,21 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_mpipl_chip_cleanup_errors.xml,v 1.4 2014/02/19 23:36:03 belldi Exp $ -->
 <!-- Error codes for proc_mpipl_chip_cleanup -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_MCD_RECOVERY_NOT_DISABLED_RC</rc>
     <description>MCD recovery is not disabled as expected</description>
+    <!-- Add target chip -->
+    <ffdc>CHIP_TARGET</ffdc>
+    <!-- Add data buffer -->
+    <ffdc>DATA_BUFFER</ffdc>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>
