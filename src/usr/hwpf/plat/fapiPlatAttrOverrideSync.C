@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <mbox/mboxif.H>
 #include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 #include <hwpf/plat/fapiPlatTrace.H>
+#include <hwpf/hwpf_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributeTank.H>
 
@@ -171,7 +172,30 @@ void AttrOverrideSync::monitorForFspMessages()
             l_chunk.iv_size = l_pMsg->data[1];
             l_chunk.iv_pAttributes = static_cast<uint8_t *>(l_pMsg->extra_data);
 
-            if (l_tank == TARGETING::AttributeTank::TANK_LAYER_FAPI)
+            if (l_chunk.iv_pAttributes == NULL)
+            {
+                FAPI_ERR("monitorForFspMessages: tank %d, size %d, NULL data pointer",
+                         l_tank, l_chunk.iv_size);
+                /*@
+                 * @errortype
+                 * @moduleid     fapi::MOD_ATTR_OVERRIDE
+                 * @reasoncode   fapi::RC_NULL_POINTER
+                 * @userdata1    Attribute Tank (FAPI/TARG)
+                 * @userdata2    Size of attribute overrides
+                 * @devdesc      Override message received from HWSV
+                 *               contains NULL data pointer
+                 */
+                 const bool hbSwError = false;
+                 errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    fapi::MOD_ATTR_OVERRIDE,
+                    fapi::RC_NULL_POINTER,
+                    l_tank, l_chunk.iv_size, hbSwError);
+                 l_pError->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                               HWAS::SRCI_PRIORITY_HIGH);
+                 errlCommit(l_pError, HWPF_COMP_ID);
+            }
+            else if (l_tank == TARGETING::AttributeTank::TANK_LAYER_FAPI)
             {
                 FAPI_INF(
                     "monitorForFspMessages: MSG_SET_OVERRIDES FAPI (size %lld)",
@@ -224,6 +248,9 @@ void AttrOverrideSync::monitorForFspMessages()
         {
             FAPI_ERR("monitorForFspMessages: Unrecognized message 0x%x",
                      l_pMsg->type);
+            free(l_pMsg->extra_data);
+            l_pMsg->extra_data = NULL;
+            msg_free(l_pMsg);
         }
     }
 }
