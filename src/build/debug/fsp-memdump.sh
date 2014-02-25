@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2013
+# COPYRIGHT International Business Machines Corp. 2013,2014
 #
 # p1
 #
@@ -27,11 +27,12 @@
 # Print usage statement.
 usage()
 {
-    echo "fsp-memdump.sh <filename> [STATE|discover|limit]"
+    echo "fsp-memdump.sh <filename> [STATE|discover|limit] [Node #]"
     echo
     echo "    STATE should be a two nibble hex value corresponding to the"
     echo "    MemSize enumeration in <kernel/memstate.H> or the ASCII strings"
     echo "    'discover', 'limit'."
+    echo "    Node # (0,1,2,3) "
     exit 0
 }
 
@@ -93,6 +94,7 @@ limit_memory()
 # Read filename and state.
 FILE=$1
 STATE=$2
+NODE=$3
 if [[ -z ${FILE} ]]; then
     usage
 fi
@@ -101,8 +103,17 @@ if [[ -z ${STATE} ]]; then
     STATE=discover
 fi
 
+if [[ -z ${NODE} ]]; then
+    NODE=0
+fi
+
+HB_OFFSET=`expr 128 \* 1024 \* 1024`
+#(32TB - 0x200000000000 OR 35184372088832)
+HB_BASE_HRMOR=`expr 32 \* 1024 \* 1024 \* 1024 \* 1024`
+
 # Calculate HRMOR (in decimal).
-HRMOR=`expr 128 \* 1024 \* 1024`
+HRMOR=`expr ${HB_BASE_HRMOR} \* ${NODE} + ${HB_OFFSET}`
+echo "NODE: ${NODE} - HRMOR is: ${HRMOR}"
 
 # Using initial STATE, iterate through all the included states dumping each's
 # appropriate memory sections.
