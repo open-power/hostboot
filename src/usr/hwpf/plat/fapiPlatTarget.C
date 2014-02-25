@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2011,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -107,7 +107,7 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
     }
     else
     {
-        // TODO. RTC 47493
+        // TODO. RTC 98421
         // This is a temporary function that constructs the ECMD String from the
         // target's physical path attribute, eventually, the ECMD String will be
         // its own attribute (sourced from the MRW) and this function will be
