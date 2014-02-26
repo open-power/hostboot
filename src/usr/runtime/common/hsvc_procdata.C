@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Fri Jan 31 12:06:02 CST 2014 by cswenson from
+// Generated on Wed Feb 26 16:39:28 CST 2014 by cswenson from
 //  ./create_hsvc_data.pl -w ../../xml/attribute_info/chip_attributes.xml ../../xml/attribute_info/common_attributes.xml ../../xml/attribute_info/freq_attributes.xml ../../xml/attribute_info/L2_L3_attributes.xml ../../xml/attribute_info/p8_xip_customize_attributes.xml ../../xml/attribute_info/pm_hwp_attributes.xml ../../xml/attribute_info/pm_plat_attributes.xml ../../xml/attribute_info/poreve_memory_attributes.xml ../../xml/attribute_info/proc_chip_ec_feature.xml ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml ../../xml/attribute_info/proc_pll_ring_attributes.xml ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml ../../xml/attribute_info/scratch_attributes.xml ../../xml/attribute_info/system_attributes.xml ../../xml/attribute_info/unit_attributes.xml
 // -- Input: ../../xml/attribute_info/chip_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_CHIP_HAS_SBE );
@@ -169,6 +169,7 @@ HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C10_VER2 );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C8_VER2 );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_C8_VER3 );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_SERIAL_SCOM_WE5_VER2 );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_FBC_UX_SCOPE_ARB_RR );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HCA_SPLIT_HANG_CONTROL );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HW_BUG_PIBSLVRESET );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_HW_BUG_PLLINIT );
@@ -191,11 +192,14 @@ HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_TRACE_CONTROL_ON_SCOM );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_VENICE_SPECIFIC );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_XBUS_DLL_SLOW_MURANO );
 HSVC_LOAD_ATTR( ATTR_CHIP_EC_FEATURE_ZCAL_OVERRIDE );
+HSVC_LOAD_ATTR( ATTR_CHIP_EC_PFET_POWEROFF_BUG );
 HSVC_LOAD_ATTR( ATTR_DCCAL_PLL_WORKAROUND );
 HSVC_LOAD_ATTR( ATTR_IO_TRAINING_DLL_WORKAROUND );
 HSVC_LOAD_ATTR( ATTR_IO_TRAINING_SLS_WORKAROUND );
 HSVC_LOAD_ATTR( ATTR_PROC_EC_CORE_HANG_PULSE_BUG );
 HSVC_LOAD_ATTR( ATTR_PROC_EC_MSS_RECONFIG_POSSIBLE );
+HSVC_LOAD_ATTR( ATTR_PROC_EC_OHA_L3_PURGE_ABORT_ENABLE );
+HSVC_LOAD_ATTR( ATTR_PROC_EC_PBA_PREFETCH_ENABLE );
 // -- Input: ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_PROC_PCIE_NOT_F_LINK );
 // -- Input: ../../xml/attribute_info/proc_pll_ring_attributes.xml --
@@ -206,8 +210,6 @@ HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_DATA );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FLUSH );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_LENGTH );
-//HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FOR_RUNTIME_DATA );
-//HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_FOR_RUNTIME_LENGTH );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_LENGTH );
 HSVC_LOAD_ATTR( ATTR_PROC_AB_BNDY_PLL_SCAN_SELECT );
 HSVC_LOAD_ATTR( ATTR_PROC_DMI_CUPLL_PFD360_OFFSET );
@@ -217,8 +219,6 @@ HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_DATA );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FLUSH );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_LENGTH );
-//HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FOR_RUNTIME_DATA );
-//HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_FOR_RUNTIME_LENGTH );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_LENGTH );
 HSVC_LOAD_ATTR( ATTR_PROC_PB_BNDY_DMIPLL_SCAN_SELECT );
 HSVC_LOAD_ATTR( ATTR_PROC_PCI_BNDY_PLL_CHIPLET_ID );

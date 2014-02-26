@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Fri Jan 31 12:06:02 CST 2014 by cswenson from
+// Generated on Wed Feb 26 16:39:28 CST 2014 by cswenson from
 //  ./create_hsvc_data.pl -w ../../xml/attribute_info/chip_attributes.xml ../../xml/attribute_info/common_attributes.xml ../../xml/attribute_info/freq_attributes.xml ../../xml/attribute_info/L2_L3_attributes.xml ../../xml/attribute_info/p8_xip_customize_attributes.xml ../../xml/attribute_info/pm_hwp_attributes.xml ../../xml/attribute_info/pm_plat_attributes.xml ../../xml/attribute_info/poreve_memory_attributes.xml ../../xml/attribute_info/proc_chip_ec_feature.xml ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml ../../xml/attribute_info/proc_pll_ring_attributes.xml ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml ../../xml/attribute_info/scratch_attributes.xml ../../xml/attribute_info/system_attributes.xml ../../xml/attribute_info/unit_attributes.xml
 
 // -- Input: ../../xml/attribute_info/chip_attributes.xml --
@@ -50,7 +50,11 @@ HSVC_LOAD_ATTR( ATTR_L3_W_EPS );
 // -- Input: ../../xml/attribute_info/p8_xip_customize_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_SBE_IMAGE_MINIMUM_VALID_EXS );
 // -- Input: ../../xml/attribute_info/pm_hwp_attributes.xml --
+HSVC_LOAD_ATTR( ATTR_PM_GLOBAL_FIR_TRACE_EN );
+HSVC_LOAD_ATTR( ATTR_PM_PCBS_FSM_TRACE_EN );
 HSVC_LOAD_ATTR( ATTR_PM_SLW_CONTROL_VECTOR_OFFSET );
+HSVC_LOAD_ATTR( ATTR_PM_SLW_DEEP_SLEEP_EXIT_GOOD_HALT_ADDR );
+HSVC_LOAD_ATTR( ATTR_PM_SLW_DEEP_WINKLE_EXIT_GOOD_HALT_ADDR );
 // -- Input: ../../xml/attribute_info/pm_plat_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_CPM_TURBO_BOOST_PERCENT );
 HSVC_LOAD_ATTR( ATTR_FREQ_CORE_MAX );

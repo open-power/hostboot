@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Fri Jan 31 12:06:02 CST 2014 by cswenson from
+// Generated on Wed Feb 26 16:39:28 CST 2014 by cswenson from
 //  ./create_hsvc_data.pl -w ../../xml/attribute_info/chip_attributes.xml ../../xml/attribute_info/common_attributes.xml ../../xml/attribute_info/freq_attributes.xml ../../xml/attribute_info/L2_L3_attributes.xml ../../xml/attribute_info/p8_xip_customize_attributes.xml ../../xml/attribute_info/pm_hwp_attributes.xml ../../xml/attribute_info/pm_plat_attributes.xml ../../xml/attribute_info/poreve_memory_attributes.xml ../../xml/attribute_info/proc_chip_ec_feature.xml ../../xml/attribute_info/proc_fab_smp_fabric_attributes.xml ../../xml/attribute_info/proc_pll_ring_attributes.xml ../../xml/attribute_info/proc_setup_bars_l3_attributes.xml ../../xml/attribute_info/proc_winkle_scan_override_attributes.xml ../../xml/attribute_info/scratch_attributes.xml ../../xml/attribute_info/system_attributes.xml ../../xml/attribute_info/unit_attributes.xml
 // -- Input: ../../xml/attribute_info/chip_attributes.xml --
 // No attributes found
