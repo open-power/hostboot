@@ -270,32 +270,44 @@ errlHndl_t IStepDispatcher::executeAllISteps()
         {
             err = doIstep(istep, substep, l_doReconfig);
 
-            // Something occurred that requires a reconfig loop
             if (l_doReconfig)
             {
-                TRACFCOMP(g_trac_initsvc,
-                    ERR_MRK"executeAllISteps: Deconfigure(s) during IStep %d:%d",
+                // Something occurred that requires a reconfig loop
+                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: Reconfig required after IStep %d:%d",
                           istep, substep);
 
-                // we had deconfigures lets see if we do the reconfigure loop
+                // Find out if in manufacturing mode
+                bool l_manufacturingMode = false;
+                TARGETING::Target* l_pTopLevel = NULL;
+                TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+                TARGETING::ATTR_MNFG_FLAGS_type l_mnfgFlags =
+                    l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+                if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
+                {
+                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: In manufacturing mode");
+                    l_manufacturingMode = true;
+                }
+
                 uint8_t newIstep = 0;
                 uint8_t newSubstep = 0;
 
                 if ((checkReconfig(istep, substep, newIstep, newSubstep)) &&
-                    (numReconfigs < MAX_NUM_RECONFIG_ATTEMPTS))
+                    (numReconfigs < MAX_NUM_RECONFIG_ATTEMPTS) &&
+                    (!l_manufacturingMode))
                 {
                     // Within the Reconfig Loop, going to loop back
                     // first, check to make sure we still have a bootable system
                     errlHndl_t l_errl = HWAS::checkMinimumHardware();
                     if (l_errl)
                     {
-                        // non-bootable system - we want to return our error.
+                        // non-bootable system - we want to return this error.
                         TRACFCOMP(g_trac_initsvc,
                             ERR_MRK"Error from checkMinimumHardware");
 
                         if (err == NULL)
                         {
-                            err = l_errl;   // use this error
+                            err = l_errl;
+                            l_errl = NULL;
                         }
                         else
                         {
@@ -308,10 +320,8 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             // errors
                             const uint32_t l_plid = err->plid();
                             delete err;
-
-                            // use this error instead
                             err = l_errl;
-                            // and use the same plid as the IStep error
+                            l_errl = NULL;
                             err->plid(l_plid);
                         }
 
@@ -374,11 +384,18 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                               istep, substep);
                     continue;
                 }
-                else // We should reconfigure loop but can't.
-                     // Need to terminate and let the FSP reconfigure.
+                else
                 {
-                    err = failedDueToDeconfig(istep, substep,
-                                              newIstep, newSubstep);
+                    // Reconfig loop required, but the istep is either outside
+                    // of the reconfig loop or too many reconfigs have been
+                    // attempted or in manufacturing mode, return an error to
+                    // cause termination
+                    if (!err)
+                    {
+                        err = failedDueToDeconfig(istep, substep,
+                                                  newIstep, newSubstep);
+                    }
+                    // else return the error from doIstep
                 }
             }
 
@@ -1529,8 +1546,11 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      * @userdata1[32:63] SubStep that failed
      * @userdata2[0:31]  Desired istep for reconfig loop.
      * @userdata2[32:63] Desired substep for reconfig loop.
-     * @devdesc          Deconfigured occured during an istep and reconfig loop
-     *                   was not able to be performed by Hostboot.
+     * @devdesc          Deconfigured occured during an istep. The reconfig loop
+     *                   was not performed by Hostboot because either the Istep
+     *                   is outside the reconfig loop (desired steps 0), too
+     *                   many reconfig loops were attempted, in manufacturing
+     *                   mode or in istep mode.
      */
     err = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1539,7 +1559,9 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
             TWO_UINT32_TO_UINT64(i_step, i_substep),
             TWO_UINT32_TO_UINT64(i_dStep, i_dSubstep));
     err->collectTrace("HWAS_I", 1024);
-
+    err->collectTrace("INITSVC", 1024);
+    err->addProcedureCallout(HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
+                             HWAS::SRCI_PRIORITY_HIGH);
     return err;
 }
 
