@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.11 2013/11/05 22:08:23 jeshua Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.13 2014/02/19 02:31:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -32,7 +32,7 @@
 // *! TITLE       : proc_check_slave_sbe_seeprom_complete.C
 // *! DESCRIPTION : Check if a slave has completed the seeprom code
 // *!
-// *! OWNER NAME  : Jeshua Smith            Email: jeshua@us.ibm.com
+// *! OWNER NAME  : Joe McGill              Email: jmcgill@us.ibm.com
 // *!
 // *! Overview:
 // *!    Check if the SBE is still running
@@ -49,6 +49,7 @@
 #include <proc_sbe_check_master.H>
 #include <proc_sbe_enable_pnor.H>
 #include <proc_extract_sbe_rc.H>
+#include <proc_reset_i2cm_bus_fence.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -227,6 +228,9 @@ extern "C"
         uint32_t rc_ecmd = 0;
         fapi::ReturnCode rc;
 
+        // track if procedure has cleared I2C master bus fence
+        bool i2cm_bus_fence_cleared = false;
+
         // mark function entry
         FAPI_INF("Entry");
 
@@ -238,7 +242,7 @@ extern "C"
                 i_target,
                 still_running );
             if( rc )
-            {
+            {      
                 break;
             }
 
@@ -271,6 +275,7 @@ extern "C"
                         "SBE still running after waiting (%lldns, %lld cycles)",
                         NS_TO_FINISH,
                         SIM_CYCLES_TO_FINISH );
+
                     const fapi::Target & CHIP_IN_ERROR = i_target;
                     FAPI_SET_HWP_ERROR(rc,
                         RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_STILL_RUNNING);
@@ -279,10 +284,19 @@ extern "C"
             } //end if(still_running)
 
             //SBE is stopped. Let's see where
-
             uint8_t  halt_code = 0;
             uint16_t istep_num = 0;
             uint8_t  substep_num = 0;
+
+            // before analysis proceeds, make sure that I2C master bus fence is cleared
+            FAPI_EXEC_HWP(rc, proc_reset_i2cm_bus_fence, i_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error from proc_reset_i2cm_bus_fence");
+                break;
+            }
+            // mark that fence has been cleared
+            i2cm_bus_fence_cleared = true;
 
             //Get current location from SBE VITAL
             rc = proc_check_slave_sbe_seeprom_complete_get_location(
@@ -366,6 +380,15 @@ extern "C"
                 break;
             }
         } while (0);
+
+        // if an error occurred prior to the I2C master bus fence
+        // being cleared, attempt to clear it prior to exit
+        if (!rc.ok() && !i2cm_bus_fence_cleared)
+        {
+            // discard rc, return that of original fail
+            fapi::ReturnCode rc_unused;
+            FAPI_EXEC_HWP(rc_unused, proc_reset_i2cm_bus_fence, i_target);
+        }
 
         // mark function exit
         FAPI_INF("Exit");

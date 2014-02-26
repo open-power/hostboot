@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2012,2014              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_extract_sbe_rc.C,v 1.9 2013/11/05 22:16:08 jeshua Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.12 2014/02/19 02:31:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -32,7 +32,7 @@
 // *! TITLE       : proc_extract_sbe_rc.C
 // *! DESCRIPTION : Create a return code for an SBE error
 // *!
-// *! OWNER NAME  : Jeshua Smith            Email: jeshua@us.ibm.com
+// *! OWNER NAME  : Johannes Koesters       Email: koesters@de.ibm.com
 // *!
 // *! Overview:
 // *!    - Check that it was a halt at magic instruction
@@ -51,6 +51,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <proc_extract_sbe_rc.H>
+#include <proc_reset_i2cm_bus_fence.H>
 #include <p8_scom_addresses.H>
 
 
@@ -108,19 +109,16 @@ extern "C"
                 const fapi::Target & CHIP_IN_ERROR = i_target;
                 const uint32_t & ADDRESS = i_address;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_IMAGE_POINTER_NULL);
+                break;
             }
-            else
-            {
-                uint8_t * p_errorCode = (uint8_t *)i_pSEEPROM + (i_address & ALIGN_FOUR_BYTE);
+            uint8_t * p_errorCode = (uint8_t *)i_pSEEPROM + (i_address & ALIGN_FOUR_BYTE);
 
-                //Copy the data out of the image pointer
-                o_data =
-                    (p_errorCode[0] << 3*8) |
-                    (p_errorCode[1] << 2*8) |
-                    (p_errorCode[2] << 1*8) |
-                    (p_errorCode[3]);
-                rc = fapi::FAPI_RC_SUCCESS;
-            }
+            //Copy the data out of the image pointer
+            o_data =
+                (p_errorCode[0] << 3*8) |
+                (p_errorCode[1] << 2*8) |
+                (p_errorCode[2] << 1*8) |
+                (p_errorCode[3]);
         } while(0);
         return rc;
     }
@@ -203,7 +201,9 @@ extern "C"
         {
             rc = proc_extract_sbe_rc_get_pc(i_target,i_engine,address_64);
             if (rc)
+            {
                 break;
+            }
 
             uint32_t error_code = 0;
             //Add 4 because address_64 is pointing at the halt instruction
@@ -263,7 +263,8 @@ extern "C"
             //Look up that error code
             //////////////////////////////////////////
             FAPI_ERR("SBE got error code 0x%06X", error_code);
-            const fapi::Target & CHIP_IN_ERROR = i_target;
+            const fapi::Target CHIP_IN_ERROR = i_target;
+            const fapi::Target CHIP = i_target;
             FAPI_SET_SBE_ERROR(rc, error_code);
         } while(0);
 
@@ -309,10 +310,23 @@ extern "C"
             if ((i_engine != SBE) &&
                 (i_engine != SLW))
             {
-                FAPI_ERR("Unknow engine type %i", i_engine);
+                FAPI_ERR("Unknown engine type %i", i_engine);
                 const por_engine_t ENGINE = i_engine;
+                const fapi::Target & CHIP_IN_ERROR = i_target;
                 FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_UNKNOWN_ENGINE);
                 break;
+            }
+
+            // if analyzing SBE engine failure, make sure I2C master bus fence is
+            // released before proceeding
+            if (i_engine == SBE)
+            {
+                FAPI_EXEC_HWP(rc, proc_reset_i2cm_bus_fence, i_target);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_reset_i2cm_bus_fence");
+                    break;
+                }
             }
 
             //JDS TODO - split out the generic error into more granular errors?
@@ -479,7 +493,9 @@ extern "C"
             uint64_t pc = 0;
             rc = proc_extract_sbe_rc_get_pc(i_target, i_engine, pc);
             if (rc)
+            {
                 break;
+            }
 
             if ((pc & ADDR_TYPE_MASK) == OTPROM_ADDR_TYPE)
             {

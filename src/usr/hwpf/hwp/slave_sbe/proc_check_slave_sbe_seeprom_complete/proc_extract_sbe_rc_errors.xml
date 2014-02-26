@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.7 2013/09/19 19:29:07 jeshua Exp $ -->
+<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.8 2014/02/10 02:55:29 stillgs Exp $ -->
 <!-- Error definitions for proc_extract_sbe_rc procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -37,6 +37,12 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -51,6 +57,9 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -65,6 +74,16 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -79,6 +98,12 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -93,50 +118,12 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_SCOM_ERROR</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Got a scom error when trying to extract the SBE error
-    </description>
-    <ffdc>ADDRESS</ffdc>
-    <ffdc>ERROR</ffdc>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_MODEL_ERROR_GETTING_SCOM</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Got a model error when trying to extract the SBE error
-    </description>
-    <ffdc>ADDRESS</ffdc>
-    <ffdc>ERROR</ffdc>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_MODEL_ERRROR_SETTING_SEEPROM_ADDR</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Got a model error when trying to set the SEEPROM address to extract
-    </description>
-    <ffdc>ADDRESS</ffdc>
-    <ffdc>ERROR</ffdc>
-    <ffdc>CHIP_IN_ERROR</ffdc>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_EXTRACT_SBE_RC_MODEL_ERRROR_READING_SEEPROM</rc>
-    <description>
-      Procedure: proc_extract_sbe_rc
-      Got a model error when trying to read the SEEPROM address containing the RC
-    </description>
-    <ffdc>ADDRESS</ffdc>
-    <ffdc>ERROR</ffdc>
-    <ffdc>CHIP_IN_ERROR</ffdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -146,6 +133,17 @@
       Tried to extract error from unknown engine type
     </description>
     <ffdc>ENGINE</ffdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -160,6 +158,12 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -173,6 +177,9 @@
       <id>REG_FFDC_PROC_SLW_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -187,6 +194,17 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -200,6 +218,14 @@
       <id>REG_FFDC_PROC_SLW_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -214,6 +240,17 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <callout>
+      <target>CHIP_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -227,6 +264,9 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -240,6 +280,9 @@
       <id>REG_FFDC_PROC_SLW_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <gard>
+      <target>CHIP_IN_ERROR</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -253,6 +296,13 @@
       <id>REG_FFDC_PROC_SBE_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_IN_ERROR</target>
+    </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -268,16 +318,9 @@
       <id>REG_FFDC_PROC_FIRST_OTPROM_INSTRUCTIONS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
     <deconfigure>
       <target>CHIP_IN_ERROR</target>
     </deconfigure>
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -291,13 +334,6 @@
       <id>REG_FFDC_PROC_SLW_REGISTERS</id>
       <target>CHIP_IN_ERROR</target>
     </collectRegisterFfdc>
-    <callout>
-      <target>CHIP_IN_ERROR</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
     <gard>
       <target>CHIP_IN_ERROR</target>
     </gard>

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012,2013
+# COPYRIGHT International Business Machines Corp. 2012,2014
 #
 # p1
 #
@@ -52,7 +52,8 @@ OBJS =  slave_sbe.o \
         proc_read_seeprom.o \
         proc_getecid.o \
         proc_cen_ref_clk_enable.o \
-        proc_spless_sbe_startWA.o
+        proc_spless_sbe_startWA.o \
+        proc_reset_i2cm_bus_fence.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
