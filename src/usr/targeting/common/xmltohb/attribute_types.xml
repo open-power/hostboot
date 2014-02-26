@@ -3123,6 +3123,11 @@
         <name>PSI_DIAGNOSTIC</name>
         <value>0x00008000</value>
     </enumerator>
+    <enumerator>
+        <!-- Brazos Wrap Config -->
+        <name>BRAZOS_WRAP_CONFIG</name>
+        <value>0x00010000</value>
+    </enumerator>
 </enumerationType>
 
 <!-- Support for pm_hwp_attributes.xml -->
